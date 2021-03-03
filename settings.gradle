@@ -1,0 +1,9 @@
+rootProject.name = 'mp'
+gradle.ext.version = '0.0.1'
+gradle.ext.submodules = [
+    'core',
+    'scene',
+]
+gradle.ext.submodules.each {
+    include(it)
+}

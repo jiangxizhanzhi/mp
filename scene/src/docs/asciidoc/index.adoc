@@ -1,0 +1,5 @@
+.请求
+include::{snippets}/home/http-request.adoc[]
+
+.响应
+include::{snippets}/home/http-response.adoc[]

@@ -1,0 +1,78 @@
+plugins {
+    id 'org.springframework.boot' version '2.4.3'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'java'
+    id 'application'
+    id 'org.asciidoctor.convert' version '1.5.9'
+}
+
+group = 'cn.cyberpeace.mp'
+version = gradle.ext.version
+sourceCompatibility = '15'
+mainClassName = 'cn.cyberpeace.mp.Application'
+
+bootJar {
+    enabled = true
+}
+
+dependencies {
+    gradle.ext.submodules.each {
+        implementation project(":${it}")
+    }
+}
+
+subprojects {
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'java'
+    apply plugin: 'application'
+    apply plugin: 'org.asciidoctor.convert'
+
+    group = 'cn.cyberpeace.mp'
+    version = gradle.ext.version
+    sourceCompatibility = '15'
+    mainClassName = 'cn.cyberpeace.mp.Application'
+
+//    [compileJava,compileTestJava,javadoc]*.options*.encoding ='UTF-8'
+
+    configurations {
+        compileOnly {
+            extendsFrom annotationProcessor
+        }
+    }
+
+    bootJar {
+        enabled = true
+    }
+
+    jar {
+        enabled = true
+    }
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+        implementation 'org.springframework.boot:spring-boot-starter-web'
+        implementation 'org.springframework.boot:spring-boot-starter-websocket'
+        implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.1.4'
+        implementation 'org.flywaydb:flyway-core'
+
+        runtimeOnly 'mysql:mysql-connector-java'
+
+        compileOnly 'org.projectlombok:lombok'
+        developmentOnly 'org.springframework.boot:spring-boot-devtools'
+        annotationProcessor 'org.projectlombok:lombok'
+
+        asciidoctor 'org.springframework.restdocs:spring-restdocs-asciidoctor'
+
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+        testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+}

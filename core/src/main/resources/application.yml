@@ -1,0 +1,22 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    name: mp
+    url: jdbc:mysql://localhost:3306/mp?createDatabaseIfNotExist=true
+    username: mp
+    password: mp
+  flyway:
+    clean-disabled: true
+  messages:
+    basename: i18n/messages
+
+logging:
+  file:
+    name: log/log.log
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
