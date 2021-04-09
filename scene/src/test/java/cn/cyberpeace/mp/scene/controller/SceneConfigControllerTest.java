@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.scene.controller;
 
 import cn.cyberpeace.mp.scene.service.SceneConfigService;
+import cn.cyberpeace.mp.scene.websocket.SceneConfigWebSocket;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
@@ -24,6 +25,9 @@ public class SceneConfigControllerTest {
 
     @MockBean
     private SceneConfigService sceneConfigService;
+
+    @MockBean
+    private SceneConfigWebSocket sceneConfigWebSocket;
 
     @Test
     public void test() throws Exception {

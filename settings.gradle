@@ -1,9 +1,13 @@
+pluginManagement {
+    repositories {
+        maven { url 'https://repo.spring.io/release' }
+        gradlePluginPortal()
+    }
+}
+
+apply from: 'config.gradle'
 rootProject.name = 'mp'
-gradle.ext.version = '0.0.1'
-gradle.ext.submodules = [
-    'core',
-    'scene',
-]
+
 gradle.ext.submodules.each {
     include(it)
 }
