@@ -5,8 +5,9 @@ spring:
   datasource:
     name: mp
     url: jdbc:mysql://localhost:3306/mp?createDatabaseIfNotExist=true
-    username: mp
-    password: mp
+    username: root
+    password: root
+    driver-class-name: org.mariadb.jdbc.Driver
   flyway:
     clean-disabled: true
   messages:

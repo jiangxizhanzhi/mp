@@ -1,0 +1,13 @@
+gradle.ext {
+    version = '0.0.1'
+    appmodules = [
+        'mp-auth',
+        'mp-scene',
+    ]
+
+    flyway = [
+        url: 'jdbc:mysql://localhost:3306/mp?createDatabaseIfNotExist=true',
+        user: 'root',
+        password: 'root',
+    ]
+}

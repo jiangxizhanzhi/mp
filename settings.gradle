@@ -5,9 +5,11 @@ pluginManagement {
     }
 }
 
-apply from: 'config.gradle'
+apply from: 'mp/config.gradle'
 rootProject.name = 'mp'
 
-gradle.ext.submodules.each {
+include('mp-base')
+gradle.ext.appmodules.each {
     include(it)
 }
+include('mp')

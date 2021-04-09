@@ -4,23 +4,10 @@ plugins {
     id 'org.asciidoctor.convert' version '1.5.8'
     id 'java'
     id 'application'
+    id 'org.flywaydb.flyway' version '7.7.3'
 }
 
-apply from: 'config.gradle'
-group = 'cn.cyberpeace.mp'
-version = gradle.ext.version
-sourceCompatibility = '15'
-mainClassName = 'cn.cyberpeace.mp.Application'
-
-bootJar {
-    enabled = true
-}
-
-dependencies {
-    gradle.ext.submodules.each {
-        implementation project(":${it}")
-    }
-}
+apply from: 'mp/config.gradle'
 
 subprojects {
     apply plugin: 'org.springframework.boot'
@@ -28,6 +15,7 @@ subprojects {
     apply plugin: 'org.asciidoctor.convert'
     apply plugin: 'java'
     apply plugin: 'application'
+    apply plugin: 'org.flywaydb.flyway'
 
     group = 'cn.cyberpeace.mp'
     version = gradle.ext.version
@@ -76,7 +64,7 @@ subprojects {
     }
 
     bootJar {
-        enabled = true
+        enabled = false
     }
 
     jar {
