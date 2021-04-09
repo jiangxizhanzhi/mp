@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.core.config.websocket;
+package cn.cyberpeace.mp.base.config.websocket;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
