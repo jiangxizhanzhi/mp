@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.cyberpeace.mp.auth.repository.TenantMapper">
+    <select id="queryList" resultType="cn.cyberpeace.mp.auth.model.TenantModel">
+        SELECT
+            id,
+            identifier,
+            name,
+            create_time,
+            update_time
+        FROM mp_auth_tenant
+    </select>
+    <select id="get" resultType="cn.cyberpeace.mp.auth.model.TenantModel">
+        SELECT
+            id,
+            identifier,
+            name,
+            create_time,
+            update_time
+        FROM mp_auth_tenant
+        where id = #{id}
+    </select>
+    <insert id="create">
+        INSERT INTO mp_auth_tenant
+            (
+                id,
+                identifier,
+                name,
+                create_time,
+                update_time
+            )
+        VALUES
+               (
+                   #{id},
+                   #{identifier},
+                   #{name},
+                   #{createTime},
+                   #{updateTime}
+               )
+    </insert>
+    <update id="update">
+        UPDATE mp_auth_tenant
+        SET
+            identifier=#{identifier},
+            name=#{name},
+            update_time=#{updateTime}
+        WHERE
+            id = #{id}
+    </update>
+    <delete id="delete">
+        DELETE FROM mp_auth_tenant WHERE id = #{id}
+    </delete>
+</mapper>

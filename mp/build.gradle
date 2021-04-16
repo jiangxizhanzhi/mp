@@ -15,4 +15,5 @@ flyway {
     user = gradle.ext.flyway.user
     password = gradle.ext.flyway.password
     cleanDisabled = true
+    locations = ['classpath:db/migration']
 }
