@@ -5,7 +5,9 @@ import cn.cyberpeace.mp.base.util.ClassUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Data
@@ -16,6 +18,14 @@ public abstract class BaseResult {
     public Object objToResult(Object obj, DynamicFields fields) {
         if (fields == null) {
             return obj;
+        }
+
+        if (obj instanceof List<?>) {
+            List<Object> resultList = new ArrayList<>();
+            ((List<?>) obj).forEach(objItem -> {
+                resultList.add(objToResult(objItem, fields));
+            });
+            return resultList;
         }
 
         Map<String, Object> resultMap = new HashMap<>();
