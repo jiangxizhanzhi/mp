@@ -3,11 +3,13 @@ package cn.cyberpeace.mp.auth.model;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class UserModel extends BaseModel {
     private String tenant;
     private String identifier;

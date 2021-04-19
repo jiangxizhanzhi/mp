@@ -1,0 +1,34 @@
+package cn.cyberpeace.mp.base.service.result;
+
+import cn.cyberpeace.mp.base.model.DynamicFields;
+import cn.cyberpeace.mp.base.util.ClassUtils;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Data;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@Data
+public abstract class BaseResult {
+    @JsonIgnore
+    private DynamicFields fields = null;
+
+    public Object objToResult(Object obj, DynamicFields fields) {
+        if (fields == null) {
+            return obj;
+        }
+
+        Map<String, Object> resultMap = new HashMap<>();
+
+        fields.getFieldsMap().forEach((fieldName, fieldFlag) -> {
+            Object fieldValue = ClassUtils.getBeanObjFieldValue(obj, fieldName);
+            if (fieldFlag instanceof Boolean && (Boolean) fieldFlag) {
+                resultMap.put(fieldName, fieldValue);
+            } else if (fieldFlag instanceof DynamicFields) {
+                resultMap.put(fieldName, objToResult(obj, (DynamicFields) fieldFlag));
+            }
+        });
+
+        return resultMap;
+    }
+}

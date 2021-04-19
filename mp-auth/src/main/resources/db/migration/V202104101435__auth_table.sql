@@ -23,7 +23,7 @@ CREATE TABLE mp_auth_org (
     `update_time` datetime(6) NOT NULL COMMENT '更新时间',
     PRIMARY KEY (`pk`),
     UNIQUE (`id`),
-    UNIQUE (`identifier`)
+    UNIQUE (`tenant`, `identifier`)
 );
 
 # 角色表
@@ -39,7 +39,7 @@ CREATE TABLE mp_auth_role (
     `update_time` datetime(6) NOT NULL COMMENT '更新时间',
     PRIMARY KEY (`pk`),
     UNIQUE (`id`),
-    UNIQUE (`identifier`)
+    UNIQUE (`tenant`, `identifier`)
 );
 
 # 用户表
@@ -96,6 +96,19 @@ CREATE TABLE mp_auth_user_role (
     PRIMARY KEY (`pk`),
     UNIQUE (`id`),
     UNIQUE (`tenant`, `user`, `role`)
+);
+
+# 资源目标表(有哪些资源)
+CREATE TABLE mp_auth_target (
+   `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
+   `id` varchar(64)  NOT NULL COMMENT 'id',
+   `identifier` varchar(64)  NOT NULL COMMENT '编号',
+   `name` varchar(64) NOT NULL COMMENT '名称',
+   `create_time` datetime(6) NOT NULL COMMENT '创建时间',
+   `update_time` datetime(6) NOT NULL COMMENT '更新时间',
+   PRIMARY KEY (`pk`),
+   UNIQUE (`id`),
+   UNIQUE (`identifier`)
 );
 
 # 组织资源权限表

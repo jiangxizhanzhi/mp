@@ -2,6 +2,8 @@ package cn.cyberpeace.mp.base.controller;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.service.BaseModelService;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
+import cn.cyberpeace.mp.base.service.result.ObjResult;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -14,25 +16,27 @@ public abstract class BaseModelController<Model extends BaseModel, ModelService 
 
     private ModelService modelService;
 
-    @GetMapping()
-    public List<Model> queryList(@RequestParam Integer page, @RequestParam Integer pageSize) {
-        return modelService.queryList(page, pageSize);
+    @GetMapping
+    public ListObjResult<Model> list(@RequestParam(required = false) Integer page,
+                                     @RequestParam(required = false) Integer pageSize,
+                                     @RequestParam(required = false) List<String> fields) {
+        return modelService.list(page, pageSize, fields).asResult();
     }
 
     @GetMapping("/{id}")
-    public Model update(@PathVariable String id) {
-        return modelService.get(id);
+    public Object get(@PathVariable String id, @RequestParam(required = false) List<String> fields) {
+        return modelService.get(id, fields).asResult();
     }
 
-    @PostMapping()
-    public Model create(@RequestBody Model obj) {
-        return modelService.create(obj);
+    @PostMapping
+    public Object create(@RequestBody Model obj, @RequestParam(required = false) List<String> fields) {
+        return modelService.create(obj, fields).asResult();
     }
 
     @PatchMapping("/{id}")
-    public Model update(@PathVariable String id, @RequestBody Model obj) {
-        obj.setId(id);
-        return modelService.update(obj);
+    public Object update(@PathVariable String id, @RequestBody Model obj,
+                         @RequestParam(required = false) List<String> fields) {
+        return modelService.update(id, obj, fields).asResult();
     }
 
     @DeleteMapping("/{id}")

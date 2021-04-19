@@ -3,9 +3,10 @@ package cn.cyberpeace.mp.base.repository;
 import java.util.List;
 
 public interface BaseModelMapper<Model> {
-    List<Model> queryList(Integer offset, Integer limit);
-    Model get(String id);
-    Boolean create(Model model);
-    Boolean update(Model model);
+    List<Model> list(Integer limit, Integer offset, List<String> selectFields);
+    Integer total();
+    Model get(String id, List<String> selectFields);
+    Boolean create(Model obj, List<String> createFields);
+    Boolean update(String id, Model obj, List<String> updateFields);
     Boolean delete(String id);
 }

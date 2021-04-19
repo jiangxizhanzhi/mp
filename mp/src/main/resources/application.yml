@@ -18,6 +18,6 @@ logging:
     name: log/log.log
 
 mybatis:
-  mapper-locations: classpath:mapper/*.xml
+  mapper-locations: classpath:mapper/BaseMapper.xml,classpath:mapper/*.xml
   configuration:
     map-underscore-to-camel-case: true

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.cyberpeace.mp.base">
+    <sql id="selectFields">
+        <if test="selectFields != null">
+            <foreach item="field" index="index" collection="selectFields"
+                     open="" separator="," close="">${field}</foreach>
+        </if>
+        <if test="selectFields == null">*</if>
+    </sql>
+    <sql id="createFields">
+        <if test="createFields != null">
+            <foreach item="field" index="index" collection="createFields"
+                     open="(" separator="," close=")">${field}</foreach>
+        </if>
+    </sql>
+    <sql id="totalField"><if test="true">count(*)</if></sql>
+    <sql id="pagination">
+        <if test="limit != null">LIMIT #{limit}</if>
+        <if test="offset != null">OFFSET #{offset}</if>
+    </sql>
+    <sql id="idFilter">
+        <if test="true">id = #{id}</if>
+    </sql>
+</mapper>
