@@ -5,15 +5,27 @@ import lombok.extern.slf4j.Slf4j;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 public class ClassUtils {
-    public static Field getField(Class<?> clazz, String fieldName) {
+
+    public static Field getField(Class<?> clazz, String fieldName, Boolean findSuper, Boolean ignoreNotFound) {
         Field field;
         try {
             field = clazz.getDeclaredField(fieldName);
         } catch (NoSuchFieldException e) {
-            log.error("Get field `{}` on {} failed: {}", fieldName, clazz, e.getMessage());
+            Class<?> superClass = clazz.getSuperclass();
+            if (findSuper && superClass != null) {
+                return getField(superClass, fieldName, true, ignoreNotFound);
+            } else {
+                if (!ignoreNotFound) {
+                    log.error("Get field `{}` on {} failed: {}", fieldName, clazz, e.getMessage());
+                }
+            }
             return null;
         }
         return field;
@@ -74,7 +86,7 @@ public class ClassUtils {
     }
 
     public static Object getFieldValue(Class<?> clazz, String fieldName, Object obj) {
-        Field field = getField(clazz, fieldName);
+        Field field = getField(clazz, fieldName, true, false);
         if (field == null) {
             return null;
         }
@@ -106,10 +118,10 @@ public class ClassUtils {
         return getFieldValue(obj.getClass(), fieldName, obj, expectedFieldType);
     }
 
-    public static Method getMethod(Class<?> clazz, String methodName) {
+    public static Method getMethod(Class<?> clazz, String methodName, Class<?>... parameterTypes) {
         Method method;
         try {
-            method = clazz.getMethod(methodName);
+            method = clazz.getMethod(methodName, parameterTypes);
         } catch (NoSuchMethodException e) {
             log.error("Get method `{}` on {} failed: {}", methodName, clazz, e.getMessage());
             return null;
@@ -175,12 +187,65 @@ public class ClassUtils {
     }
 
     public static Boolean setBeanObjFieldValue(Object obj, String fieldName, Object value) {
+        Field field = getField(obj.getClass(), fieldName, true, false);
+        if (field == null) {
+            return false;
+        }
+
         String methodName = "set" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
-        Method method = getMethod(obj.getClass(), methodName);
+        Method method = getMethod(obj.getClass(), methodName, field.getType());
         if (method == null) {
             return false;
         }
 
         return setBeanObjFieldValue(method, obj, value);
+    }
+
+    public static String[] getBeanClassFields(Class<?> clazz) {
+        Method[] methods = clazz.getMethods();
+        Map<String, Boolean[]> fieldFlagMap = new HashMap<>();
+        for (Method method: methods) {
+            String methodName = method.getName();
+            if (methodName.startsWith("get")) {
+                String fieldName = methodName.substring(3, 4).toLowerCase() + methodName.substring(4);
+                Field field = getField(clazz, fieldName, true, true);
+                if (field == null) {
+                    continue;
+                }
+
+                Class<?>[] parameterTypes = method.getParameterTypes();
+                if (parameterTypes.length != 0) {
+                    continue;
+                }
+
+                Boolean[] fieldFlag = fieldFlagMap.getOrDefault(fieldName, new Boolean[]{ false, false });
+                fieldFlag[0] = true;
+                fieldFlagMap.put(fieldName, fieldFlag);
+            } else if (methodName.startsWith("set")) {
+                String fieldName = methodName.substring(3, 4).toLowerCase() + methodName.substring(4);
+                Field field = getField(clazz, fieldName, true, true);
+                if (field == null) {
+                    continue;
+                }
+
+                Class<?>[] parameterTypes = method.getParameterTypes();
+                if (parameterTypes.length != 1 || parameterTypes[0] != field.getType()) {
+                    continue;
+                }
+
+                Boolean[] fieldFlag = fieldFlagMap.getOrDefault(fieldName, new Boolean[]{ false, false });
+                fieldFlag[1] = true;
+                fieldFlagMap.put(fieldName, fieldFlag);
+            }
+        }
+
+        List<String> fields = new ArrayList<>();
+        fieldFlagMap.forEach((fieldName, fieldFlag) -> {
+            if (fieldFlag[0] && fieldFlag[1]) {
+                fields.add(fieldName);
+            }
+        });
+
+        return fields.toArray(new String[0]);
     }
 }

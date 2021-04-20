@@ -21,6 +21,11 @@ public class ListObjResult<T> extends BaseResult {
     @JsonIgnore
     private List<T> objs = new ArrayList<>();
 
+    public ListObjResult(List<T> objs, Integer total) {
+        setObjs(objs);
+        setTotal(total);
+    }
+
     public ListObjResult(List<T> objs, Integer total, DynamicFields fields) {
         setObjs(objs);
         setTotal(total);

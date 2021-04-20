@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.base.service.fields.BaseModelFields;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.util.ClassUtils;
+import cn.cyberpeace.mp.base.util.TextUtils;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -23,10 +24,28 @@ public abstract class BaseModelServiceImpl<Model extends BaseModel,
     private DynamicFields getAllModelFields() {
         DynamicFields allModelFields = null;
         if (modelFieldsClass != null) {
-            allModelFields = ClassUtils.getStaticFieldValue(modelFieldsClass, "fields",
+            allModelFields = ClassUtils.getStaticFieldValue(modelFieldsClass, "allFields",
                     DynamicFields.class);
         }
         return allModelFields;
+    }
+
+    private DynamicFields getAvailableModelFields() {
+        DynamicFields availableFields = null;
+        if (modelFieldsClass != null) {
+            availableFields = ClassUtils.getStaticFieldValue(modelFieldsClass, "fields",
+                    DynamicFields.class);
+        }
+        return availableFields;
+    }
+
+    private DynamicFields getHiddenModelFields() {
+        DynamicFields hiddenFields = null;
+        if (modelFieldsClass != null) {
+            hiddenFields = ClassUtils.getStaticFieldValue(modelFieldsClass, "hiddenFields",
+                    DynamicFields.class);
+        }
+        return hiddenFields;
     }
 
     private DynamicFields getReadonlyModelFields() {
@@ -38,12 +57,12 @@ public abstract class BaseModelServiceImpl<Model extends BaseModel,
         return readonlyModelFields;
     }
 
-    private DynamicFields getValidModelFields(List<String> fields) {
+    private DynamicFields getValidModelFields(String[] fields) {
         DynamicFields validModelFields = null;
         if (modelFieldsClass != null && fields != null) {
-            DynamicFields allModelFields = getAllModelFields();
-            if (allModelFields != null) {
-                validModelFields = allModelFields.intersect(fields);
+            DynamicFields availableFields = getAvailableModelFields();
+            if (availableFields != null) {
+                validModelFields = availableFields.intersect(fields);
                 if (!validModelFields.hasValidFields()) {
                     validModelFields = null;
                 }
@@ -51,6 +70,22 @@ public abstract class BaseModelServiceImpl<Model extends BaseModel,
         }
 
         return validModelFields;
+    }
+
+    private void clearNotWritableFields(Model obj) {
+        DynamicFields hiddenModelFields = getHiddenModelFields();
+        if (hiddenModelFields != null) {
+            for (String fieldName: hiddenModelFields.getFields()) {
+                ClassUtils.setBeanObjFieldValue(obj, fieldName, null);
+            }
+        }
+
+        DynamicFields readonlyModelFields = getReadonlyModelFields();
+        if (readonlyModelFields != null) {
+            for (String fieldName: readonlyModelFields.getFields()) {
+                ClassUtils.setBeanObjFieldValue(obj, fieldName, null);
+            }
+        }
     }
 
     private Integer[] getLimitOffset(Integer page, Integer pageSize) {
@@ -74,14 +109,14 @@ public abstract class BaseModelServiceImpl<Model extends BaseModel,
     }
 
     @Override
-    public ListObjResult<Model> list(Integer page, Integer pageSize, List<String> fields) {
+    public ListObjResult<Model> list(Integer page, Integer pageSize, String[] fields) {
         Integer[] limitOffset = getLimitOffset(page, pageSize);
         if (limitOffset == null) {
             return new ListObjResult<>();
         }
 
         DynamicFields validModelFields = getValidModelFields(fields);
-        List<String> selectFields = validModelFields == null ? null : validModelFields.getFields();
+        String[] selectFields = validModelFields == null ? null : validModelFields.getFields();
         List<Model> data = new ArrayList<>(modelMapper.list(limitOffset[0], limitOffset[1], selectFields));
         Integer total = modelMapper.total();
 
@@ -89,41 +124,65 @@ public abstract class BaseModelServiceImpl<Model extends BaseModel,
     }
 
     @Override
-    public ObjResult<Model> get(String id, List<String> fields) {
+    public ObjResult<Model> get(String id, String[] fields) {
         DynamicFields validModelFields = getValidModelFields(fields);
-        List<String> selectFields = validModelFields == null ? null : validModelFields.getFields();
+        String[] selectFields = validModelFields == null ? null : validModelFields.getFields();
         Model obj = modelMapper.get(id, selectFields);
         return new ObjResult<>(obj, validModelFields);
     }
 
     @Override
-    public ObjResult<Model> create(Model obj, List<String> fields) {
-        DynamicFields readonlyModelFields = getReadonlyModelFields();
-        readonlyModelFields.getFields().forEach(fieldName -> {
-            ClassUtils.setBeanObjFieldValue(obj, fieldName, null);
-        });
+    public ObjResult<Model> create(Model obj, String[] fields) {
+        clearNotWritableFields(obj);
         obj.initDefault();
 
         DynamicFields allModelFields = getAllModelFields();
-        List<String> createFields = allModelFields == null ? null : allModelFields.getFields();
+        if (allModelFields == null) {
+            allModelFields = new DynamicFields(ClassUtils.getBeanClassFields(obj.getClass()));
+        }
+        String[] createFields = allModelFields.getFields();
+        String[] createColumnFields = new String[createFields.length];
+        Object[] createFieldValues = new Object[createFields.length];
+        for (int i = 0; i < createFields.length; i++) {
+            createColumnFields[i] = TextUtils.humpToLine(createFields[i]);
+            createFieldValues[i] = ClassUtils.getObjFieldValue(obj, createFields[i]);
+        }
 
-        modelMapper.create(obj, createFields);
+        modelMapper.create(obj, createColumnFields, createFieldValues);
 
         DynamicFields validModelFields = getValidModelFields(fields);
         return new ObjResult<>(obj, validModelFields);
     }
 
     @Override
-    public ObjResult<Model> update(String id, Model obj, List<String> fields) {
-        DynamicFields readonlyModelFields = getReadonlyModelFields();
-        readonlyModelFields.getFields().forEach(fieldName -> {
-            ClassUtils.setBeanObjFieldValue(obj, fieldName, null);
-        });
+    public ObjResult<Model> update(String id, Model obj, String[] fields) {
+        clearNotWritableFields(obj);
         obj.initDefaultUpdateTime();
 
+        DynamicFields availableModelFields = getAvailableModelFields();
+        if (availableModelFields == null) {
+            availableModelFields = new DynamicFields(ClassUtils.getBeanClassFields(obj.getClass()));
+        }
+        List<String> updateFields = new ArrayList<>();
+        List<String> updateColumnFields = new ArrayList<>();
+        List<Object> updateFieldValues = new ArrayList<>();
+        for (String fieldName: availableModelFields.getFields()) {
+            Object fieldValue = ClassUtils.getObjFieldValue(obj, fieldName);
+            if (fieldValue != null) {
+                updateFields.add(fieldName);
+                updateColumnFields.add(TextUtils.humpToLine(fieldName));
+                updateFieldValues.add(fieldValue);
+            }
+        }
+
+        modelMapper.update(id, obj, updateColumnFields.toArray(new String[0]), updateFieldValues.toArray());
+
         DynamicFields validModelFields = getValidModelFields(fields);
-        List<String> updateFields = validModelFields == null ? null : validModelFields.getFields();
-        modelMapper.update(id, obj, updateFields);
+        if (validModelFields == null) {
+            validModelFields = new DynamicFields(updateFields);
+        } else {
+            validModelFields = validModelFields.intersect(updateFields);
+        }
 
         return new ObjResult<>(obj, validModelFields);
     }

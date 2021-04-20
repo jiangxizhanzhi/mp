@@ -8,12 +8,6 @@
         </if>
         <if test="selectFields == null">*</if>
     </sql>
-    <sql id="createFields">
-        <if test="createFields != null">
-            <foreach item="field" index="index" collection="createFields"
-                     open="(" separator="," close=")">${field}</foreach>
-        </if>
-    </sql>
     <sql id="totalField"><if test="true">count(*)</if></sql>
     <sql id="pagination">
         <if test="limit != null">LIMIT #{limit}</if>
@@ -21,5 +15,23 @@
     </sql>
     <sql id="idFilter">
         <if test="true">id = #{id}</if>
+    </sql>
+    <sql id="createFields">
+        <if test="createFields != null">
+            <foreach item="field" index="index" collection="createFields"
+                     open="(" separator="," close=")">${field}</foreach>
+        </if>
+    </sql>
+    <sql id="createFieldValues">
+        <if test="createFieldValues != null">
+        <foreach item="fieldValue" index="index" collection="createFieldValues"
+                 open="(" separator="," close=")">#{fieldValue}</foreach>
+        </if>
+    </sql>
+    <sql id="updateFields">
+        <if test="updateFields != null and updateFieldValues != null">
+            <foreach item="field" index="index" collection="updateFields"
+                     open="" separator="," close="">${field} = #{updateFieldValues[${index}]}</foreach>
+        </if>
     </sql>
 </mapper>

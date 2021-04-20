@@ -19,23 +19,23 @@ public abstract class BaseModelController<Model extends BaseModel, ModelService 
     @GetMapping
     public ListObjResult<Model> list(@RequestParam(required = false) Integer page,
                                      @RequestParam(required = false) Integer pageSize,
-                                     @RequestParam(required = false) List<String> fields) {
+                                     @RequestParam(required = false) String[] fields) {
         return modelService.list(page, pageSize, fields).asResult();
     }
 
     @GetMapping("/{id}")
-    public Object get(@PathVariable String id, @RequestParam(required = false) List<String> fields) {
+    public Object get(@PathVariable String id, @RequestParam(required = false) String[] fields) {
         return modelService.get(id, fields).asResult();
     }
 
     @PostMapping
-    public Object create(@RequestBody Model obj, @RequestParam(required = false) List<String> fields) {
+    public Object create(@RequestBody Model obj, @RequestParam(required = false) String[] fields) {
         return modelService.create(obj, fields).asResult();
     }
 
     @PatchMapping("/{id}")
     public Object update(@PathVariable String id, @RequestBody Model obj,
-                         @RequestParam(required = false) List<String> fields) {
+                         @RequestParam(required = false) String[] fields) {
         return modelService.update(id, obj, fields).asResult();
     }
 

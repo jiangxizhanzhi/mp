@@ -17,21 +17,11 @@
     </select>
     <insert id="create">
         INSERT INTO mp_auth_tenant <include refid="cn.cyberpeace.mp.base.createFields" />
-        VALUES
-               (
-                   #{id},
-                   #{identifier},
-                   #{name},
-                   #{createTime},
-                   #{updateTime}
-               )
+        VALUES <include refid="cn.cyberpeace.mp.base.createFieldValues" />
     </insert>
     <update id="update">
         UPDATE mp_auth_tenant
-        SET
-            identifier=#{identifier},
-            name=#{name},
-            update_time=#{updateTime}
+        SET <include refid="cn.cyberpeace.mp.base.updateFields" />
         WHERE <include refid="cn.cyberpeace.mp.base.idFilter" />
     </update>
     <delete id="delete">

@@ -13,8 +13,7 @@ public class DynamicFields {
     }
 
     public DynamicFields(String[] fields) {
-        List<String> listFields = Arrays.asList(fields);
-        setFields(listFields);
+        setFields(fields);
     }
 
     public DynamicFields(List<String> fields) {
@@ -29,14 +28,19 @@ public class DynamicFields {
         setFieldsMap(dynamicFields.getFieldsMap());
     }
 
-    public List<String> getFields() {
+    public String[] getFields() {
         List<String> fields = new ArrayList<>();
         fieldsMap.forEach((field, value) -> {
             if ((Boolean) value) {
                 fields.add(field);
             }
         });
-        return fields;
+        return fields.toArray(new String[0]);
+    }
+
+    public void setFields(String[] fields) {
+        this.resetFieldsMap();
+        this.merge(fields);
     }
 
     public void setFields(List<String> fields) {
@@ -77,6 +81,15 @@ public class DynamicFields {
         this.fieldsMap.put(field, value);
     }
 
+    public void merge(String field, String[] value) {
+        Object originSubFields = this.fieldsMap.getOrDefault(field, null);
+        if (originSubFields instanceof DynamicFields) {
+            ((DynamicFields) originSubFields).merge(value);
+        } else {
+            this.fieldsMap.put(field, new DynamicFields(value));
+        }
+    }
+
     public void merge(String field, List<String> value) {
         Object originSubFields = this.fieldsMap.getOrDefault(field, null);
         if (originSubFields instanceof DynamicFields) {
@@ -107,6 +120,8 @@ public class DynamicFields {
     public void merge(String field, Object value) {
         if (value instanceof Boolean) {
             merge(field, (Boolean) value);
+        } else if (value instanceof String[]) {
+            merge(field, (String[]) value);
         } else if (value instanceof List<?>) {
             List<String> subFields = CastUtils.castList(value, String.class);
             if (subFields != null) {
@@ -120,6 +135,13 @@ public class DynamicFields {
         } else if (value instanceof DynamicFields) {
             merge(field, (DynamicFields) value);
         }
+    }
+
+    public DynamicFields merge(String[] targetFields) {
+        for (String field: targetFields) {
+            merge(field, true);
+        }
+        return this;
     }
 
     public DynamicFields merge(List<String> targetFields) {
@@ -139,14 +161,105 @@ public class DynamicFields {
         return this;
     }
 
+    public Object intersect(String field, Boolean value) {
+        if (!value) {
+            return null;
+        }
+
+        Object originValue = this.fieldsMap.getOrDefault(field, false);
+        if (originValue instanceof Boolean && (Boolean) originValue) {
+            return true;
+        } else if (originValue instanceof DynamicFields) {
+            return originValue;
+        }
+
+        return null;
+    }
+
+    public Object intersect(String field, String[] value) {
+        Object originValue = this.fieldsMap.getOrDefault(field, false);
+        if (originValue instanceof Boolean && (Boolean) originValue) {
+            return value;
+        } else if (originValue instanceof DynamicFields) {
+            return ((DynamicFields) originValue).intersect(value);
+        }
+
+        return null;
+    }
+
+    public Object intersect(String field, List<String> value) {
+        Object originValue = this.fieldsMap.getOrDefault(field, false);
+        if (originValue instanceof Boolean && (Boolean) originValue) {
+            return value;
+        } else if (originValue instanceof DynamicFields) {
+            return ((DynamicFields) originValue).intersect(value);
+        }
+
+        return null;
+    }
+
+    public Object intersect(String field, Map<String, Object> value) {
+        Object originValue = this.fieldsMap.getOrDefault(field, false);
+        if (originValue instanceof Boolean && (Boolean) originValue) {
+            return value;
+        } else if (originValue instanceof DynamicFields) {
+            return ((DynamicFields) originValue).intersect(value);
+        }
+
+        return null;
+    }
+
+    public Object intersect(String field, DynamicFields value) {
+        Object originValue = this.fieldsMap.getOrDefault(field, false);
+        if (originValue instanceof Boolean && (Boolean) originValue) {
+            return value;
+        } else if (originValue instanceof DynamicFields) {
+            return ((DynamicFields) originValue).intersect(value);
+        }
+
+        return null;
+    }
+
+    public Object intersect(String field, Object value) {
+        if (value instanceof Boolean) {
+            return intersect(field, (Boolean) value);
+        } else if (value instanceof String[]) {
+            return intersect(field, (String[]) value);
+        } else if (value instanceof List<?>) {
+            List<String> subFields = CastUtils.castList(value, String.class);
+            if (subFields != null) {
+                return intersect(field, subFields);
+            }
+        } else if (value instanceof Map<?, ?>) {
+            Map<String, Object> subFieldsMap = CastUtils.castMap(value, String.class, Object.class);
+            if (subFieldsMap != null) {
+                return intersect(field, subFieldsMap);
+            }
+        } else if (value instanceof DynamicFields) {
+            return intersect(field, (DynamicFields) value);
+        }
+
+        return null;
+    }
+
+    public DynamicFields intersect(String[] targetFields) {
+        DynamicFields intersectFields = new DynamicFields();
+        for (String field: targetFields) {
+            Object intersectionValue = intersect(field, true);
+            if (intersectionValue != null) {
+                intersectFields.merge(field, intersectionValue);
+            }
+        }
+
+        return intersectFields;
+    }
+
     public DynamicFields intersect(List<String> targetFields) {
         DynamicFields intersectFields = new DynamicFields();
         targetFields.forEach((field) -> {
-            Object originValue = this.fieldsMap.getOrDefault(field, false);
-            if (originValue instanceof Boolean && (Boolean) originValue) {
-                intersectFields.merge(field, true);
-            } else if (originValue instanceof DynamicFields) {
-                intersectFields.merge(field, (DynamicFields) originValue);
+            Object intersectionValue = intersect(field, true);
+            if (intersectionValue != null) {
+                intersectFields.merge(field, intersectionValue);
             }
         });
 
@@ -156,39 +269,9 @@ public class DynamicFields {
     public DynamicFields intersect(Map<String, Object> targetFieldsMap) {
         DynamicFields intersectFields = new DynamicFields();
         targetFieldsMap.forEach((field, value) -> {
-            Object originValue = this.fieldsMap.getOrDefault(field, false);
-            if (originValue instanceof Boolean && (Boolean) originValue) {
-                if (value instanceof Boolean && (Boolean) value) {
-                    intersectFields.merge(field, true);
-                } else if (value instanceof List<?>) {
-                    List<String> subFields = CastUtils.castList(value, String.class);
-                    if (subFields != null) {
-                        intersectFields.merge(field, subFields);
-                    }
-                } else if (value instanceof Map<?, ?>) {
-                    Map<String, Object> subFieldsMap = CastUtils.castMap(value, String.class, Object.class);
-                    if (subFieldsMap != null) {
-                        intersectFields.merge(field, subFieldsMap);
-                    }
-                } else if (value instanceof DynamicFields) {
-                    intersectFields.merge(field, (DynamicFields) value);
-                }
-            } else if (originValue instanceof DynamicFields) {
-                if (value instanceof Boolean && (Boolean) value) {
-                    intersectFields.merge(field, (DynamicFields) originValue);
-                } else if (value instanceof List<?>) {
-                    List<String> subFields = CastUtils.castList(value, String.class);
-                    if (subFields != null) {
-                        intersectFields.merge(field, ((DynamicFields) originValue).intersect(subFields));
-                    }
-                } else if (value instanceof Map<?, ?>) {
-                    Map<String, Object> subFieldsMap = CastUtils.castMap(value, String.class, Object.class);
-                    if (subFieldsMap != null) {
-                        intersectFields.merge(field, ((DynamicFields) originValue).intersect(subFieldsMap));
-                    }
-                } else if (value instanceof DynamicFields) {
-                    intersectFields.merge(field, ((DynamicFields) originValue).intersect((DynamicFields) value));
-                }
+            Object intersectionValue = intersect(field, value);
+            if (intersectionValue != null) {
+                intersectFields.merge(field, intersectionValue);
             }
         });
 
@@ -197,5 +280,135 @@ public class DynamicFields {
 
     public DynamicFields intersect(DynamicFields targetDynamicFields) {
         return intersect(targetDynamicFields.getFieldsMap());
+    }
+
+    public Object subtract(String field, Boolean value) {
+        if (value) {
+            return false;
+        }
+
+        return null;
+    }
+
+    public Object subtract(String field, String[] value) {
+        if (value.length == 0) {
+            return null;
+        }
+
+        Object originValue = this.fieldsMap.getOrDefault(field, false);
+        if (originValue instanceof Boolean && (Boolean) originValue) {
+            return false;
+        } else if (originValue instanceof DynamicFields) {
+            return ((DynamicFields) originValue).subtract(value);
+        }
+
+        return null;
+    }
+
+    public Object subtract(String field, List<String> value) {
+        if (value.size() == 0) {
+            return null;
+        }
+
+        Object originValue = this.fieldsMap.getOrDefault(field, false);
+        if (originValue instanceof Boolean && (Boolean) originValue) {
+            return false;
+        } else if (originValue instanceof DynamicFields) {
+            return ((DynamicFields) originValue).subtract(value);
+        }
+
+        return null;
+    }
+
+    public Object subtract(String field, Map<String, Object> value) {
+        if (value.size() == 0) {
+            return null;
+        }
+
+        Object originValue = this.fieldsMap.getOrDefault(field, false);
+        if (originValue instanceof Boolean && (Boolean) originValue) {
+            return false;
+        } else if (originValue instanceof DynamicFields) {
+            return ((DynamicFields) originValue).subtract(value);
+        }
+
+        return null;
+    }
+
+    public Object subtract(String field, DynamicFields value) {
+        if (!value.hasValidFields()) {
+            return null;
+        }
+
+        Object originValue = this.fieldsMap.getOrDefault(field, false);
+        if (originValue instanceof Boolean && (Boolean) originValue) {
+            return false;
+        } else if (originValue instanceof DynamicFields) {
+            return ((DynamicFields) originValue).subtract(value);
+        }
+
+        return null;
+    }
+
+    public Object subtract(String field, Object value) {
+        if (value instanceof Boolean) {
+            return subtract(field, (Boolean) value);
+        } else if (value instanceof String[]) {
+            return subtract(field, (String[]) value);
+        } else if (value instanceof List<?>) {
+            List<String> subFields = CastUtils.castList(value, String.class);
+            if (subFields != null) {
+                return subtract(field, subFields);
+            }
+        } else if (value instanceof Map<?, ?>) {
+            Map<String, Object> subFieldsMap = CastUtils.castMap(value, String.class, Object.class);
+            if (subFieldsMap != null) {
+                return subtract(field, subFieldsMap);
+            }
+        } else if (value instanceof DynamicFields) {
+            return subtract(field, (DynamicFields) value);
+        }
+
+        return null;
+    }
+
+    public DynamicFields subtract(String[] targetFields) {
+        DynamicFields subtractionFields = new DynamicFields(this);
+        for (String field: targetFields) {
+            Object subtractionValue = subtract(field, true);
+            if (subtractionValue != null) {
+                subtractionFields.merge(field, subtractionValue);
+            }
+        }
+
+        return subtractionFields;
+    }
+
+    public DynamicFields subtract(List<String> targetFields) {
+        DynamicFields subtractionFields = new DynamicFields(this);
+        targetFields.forEach((field) -> {
+            Object subtractionValue = subtract(field, true);
+            if (subtractionValue != null) {
+                subtractionFields.merge(field, subtractionValue);
+            }
+        });
+
+        return subtractionFields;
+    }
+
+    public DynamicFields subtract(Map<String, Object> targetFieldsMap) {
+        DynamicFields subtractionFields = new DynamicFields();
+        targetFieldsMap.forEach((field, value) -> {
+            Object subtractionValue = subtract(field, value);
+            if (subtractionValue != null) {
+                subtractionFields.merge(field, subtractionValue);
+            }
+        });
+
+        return subtractionFields;
+    }
+
+    public DynamicFields subtract(DynamicFields targetDynamicFields) {
+        return subtract(targetDynamicFields.getFieldsMap());
     }
 }
