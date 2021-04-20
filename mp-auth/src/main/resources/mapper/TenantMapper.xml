@@ -2,29 +2,48 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="cn.cyberpeace.mp.auth.repository.TenantMapper">
     <select id="list" resultType="cn.cyberpeace.mp.auth.model.TenantModel">
-        SELECT <include refid="cn.cyberpeace.mp.base.selectFields" />
-        FROM mp_auth_tenant
-        <include refid="cn.cyberpeace.mp.base.pagination" />
+        <include refid="cn.cyberpeace.mp.base.listTemplate">
+            <property name="table" value="mp_auth_tenant"/>
+        </include>
     </select>
     <select id="total" resultType="java.lang.Integer">
-        SELECT <include refid="cn.cyberpeace.mp.base.totalField" />
-        FROM mp_auth_tenant
+        <include refid="cn.cyberpeace.mp.base.totalTemplate">
+            <property name="table" value="mp_auth_tenant"/>
+        </include>
     </select>
     <select id="get" resultType="cn.cyberpeace.mp.auth.model.TenantModel">
-        SELECT <include refid="cn.cyberpeace.mp.base.selectFields" />
-        FROM mp_auth_tenant
-        WHERE <include refid="cn.cyberpeace.mp.base.idFilter" />
+        <include refid="cn.cyberpeace.mp.base.getTemplate">
+            <property name="table" value="mp_auth_tenant"/>
+        </include>
     </select>
     <insert id="create">
-        INSERT INTO mp_auth_tenant <include refid="cn.cyberpeace.mp.base.createFields" />
-        VALUES <include refid="cn.cyberpeace.mp.base.createFieldValues" />
+        <include refid="cn.cyberpeace.mp.base.createTemplate">
+            <property name="table" value="mp_auth_tenant"/>
+        </include>
     </insert>
     <update id="update">
-        UPDATE mp_auth_tenant
-        SET <include refid="cn.cyberpeace.mp.base.updateFields" />
-        WHERE <include refid="cn.cyberpeace.mp.base.idFilter" />
+        <include refid="cn.cyberpeace.mp.base.updateTemplate">
+            <property name="table" value="mp_auth_tenant"/>
+        </include>
     </update>
     <delete id="delete">
-        DELETE FROM mp_auth_tenant WHERE <include refid="cn.cyberpeace.mp.base.idFilter" />
+        <include refid="cn.cyberpeace.mp.base.deleteTemplate">
+            <property name="table" value="mp_auth_tenant"/>
+        </include>
+    </delete>
+    <insert id="bulkCreate">
+        <include refid="cn.cyberpeace.mp.base.bulkCreateTemplate">
+            <property name="table" value="mp_auth_tenant"/>
+        </include>
+    </insert>
+    <update id="bulkUpdate">
+        <include refid="cn.cyberpeace.mp.base.bulkUpdateTemplate">
+            <property name="table" value="mp_auth_tenant"/>
+        </include>
+    </update>
+    <delete id="bulkDelete">
+        <include refid="cn.cyberpeace.mp.base.bulkDeleteTemplate">
+            <property name="table" value="mp_auth_tenant"/>
+        </include>
     </delete>
 </mapper>

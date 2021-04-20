@@ -1,27 +1,38 @@
 package cn.cyberpeace.mp.base.service;
 
-import cn.cyberpeace.mp.base.service.result.ListObjResult;
-import cn.cyberpeace.mp.base.service.result.ObjResult;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 
 public interface BaseModelService<Model> {
 
-    default ListObjResult<Model> list(Integer page, Integer pageSize, String[] fields) {
-        return new ListObjResult<>();
+    default ServiceResult list(Integer page, Integer pageSize, String[] fields) {
+        return new ServiceResult();
     }
 
-    default ObjResult<Model> get(String id, String[] fields) {
-        return null;
+    default ServiceResult get(String id, String[] fields) {
+        return new ServiceResult();
     }
 
-    default ObjResult<Model> create(Model model, String[] fields) {
-        return null;
+    default ServiceResult create(Model obj, String[] fields) {
+        return new ServiceResult();
     }
 
-    default ObjResult<Model> update(String id, Model model, String[] fields) {
-        return null;
+    default ServiceResult update(String id, Model obj, String[] fields) {
+        return new ServiceResult();
     }
 
-    default Boolean delete(String id) {
-        return false;
+    default ServiceResult delete(String id) {
+        return new ServiceResult();
+    }
+
+    default ServiceResult bulkCreate(Model[] objs) {
+        return new ServiceResult();
+    }
+
+    default ServiceResult bulkUpdate(Model[] objs) {
+        return new ServiceResult();
+    }
+
+    default ServiceResult bulkDelete(String[] ids) {
+        return new ServiceResult();
     }
 }

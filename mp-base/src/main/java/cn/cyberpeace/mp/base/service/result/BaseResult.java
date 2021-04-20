@@ -20,6 +20,14 @@ public abstract class BaseResult {
             return obj;
         }
 
+        if (obj instanceof Object[]) {
+            List<Object> resultList = new ArrayList<>();
+            for (Object objItem: (Object[]) obj) {
+                resultList.add(objToResult(objItem, fields));
+            }
+            return resultList;
+        }
+
         if (obj instanceof List<?>) {
             List<Object> resultList = new ArrayList<>();
             ((List<?>) obj).forEach(objItem -> {
@@ -35,10 +43,12 @@ public abstract class BaseResult {
             if (fieldFlag instanceof Boolean && (Boolean) fieldFlag) {
                 resultMap.put(fieldName, fieldValue);
             } else if (fieldFlag instanceof DynamicFields) {
-                resultMap.put(fieldName, objToResult(obj, (DynamicFields) fieldFlag));
+                resultMap.put(fieldName, objToResult(fieldValue, (DynamicFields) fieldFlag));
             }
         });
 
         return resultMap;
     }
+
+    public abstract Object asResult();
 }

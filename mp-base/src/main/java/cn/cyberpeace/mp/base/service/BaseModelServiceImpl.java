@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.service.fields.BaseModelFields;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ObjResult;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.ClassUtils;
 import cn.cyberpeace.mp.base.util.TextUtils;
 import lombok.Data;
@@ -72,7 +73,7 @@ public abstract class BaseModelServiceImpl<Model extends BaseModel,
         return validModelFields;
     }
 
-    private void clearNotWritableFields(Model obj) {
+    private void clearNotWritableFields(BaseModel obj) {
         DynamicFields hiddenModelFields = getHiddenModelFields();
         if (hiddenModelFields != null) {
             for (String fieldName: hiddenModelFields.getFields()) {
@@ -86,6 +87,77 @@ public abstract class BaseModelServiceImpl<Model extends BaseModel,
                 ClassUtils.setBeanObjFieldValue(obj, fieldName, null);
             }
         }
+    }
+
+    private Object[] convertCreateParams(BaseModel[] objs) {
+        DynamicFields allModelFields = getAllModelFields();
+        if (allModelFields == null) {
+            allModelFields = new DynamicFields(ClassUtils.getBeanClassFields(objs[0].getClass()));
+        }
+        String[] createFields = allModelFields.getFields();
+        String[] createColumnFields = new String[createFields.length];
+        for (int i = 0; i < createFields.length; i++) {
+            createColumnFields[i] = TextUtils.humpToLine(createFields[i]);
+        }
+
+        Object[][] createFieldValuesList = new Object[createFields.length][objs.length];
+        for (int i = 0; i < objs.length; i++) {
+            BaseModel obj = objs[i];
+            clearNotWritableFields(obj);
+            obj.initDefault();
+
+            Object[] createFieldValues = new Object[createFields.length];
+            for (int j = 0; j < createFields.length; j++) {
+                createFieldValues[j] = ClassUtils.getObjFieldValue(obj, createFields[j]);
+            }
+            createFieldValuesList[i] = createFieldValues;
+        }
+
+        return new Object[]{ createColumnFields, createFieldValuesList };
+    }
+
+    private Object[] convertUpdateParams(BaseModel[] objs) {
+        String[] ids = new String[objs.length];
+        for (int i = 0; i < objs.length; i++) {
+            ids[i] = objs[i].getId();
+        }
+
+        BaseModel sampleObj = objs[0];
+        clearNotWritableFields(sampleObj);
+        sampleObj.initDefaultUpdateTime();
+        sampleObj.setId(ids[0]);
+
+        DynamicFields availableModelFields = getAvailableModelFields();
+        if (availableModelFields == null) {
+            availableModelFields = new DynamicFields(ClassUtils.getBeanClassFields(sampleObj.getClass()));
+        }
+
+        List<String> updateFields = new ArrayList<>();
+        List<String> updateColumnFields = new ArrayList<>();
+        for (String fieldName: availableModelFields.getFields()) {
+            Object fieldValue = ClassUtils.getObjFieldValue(sampleObj, fieldName);
+            if (fieldValue != null) {
+                updateFields.add(fieldName);
+                updateColumnFields.add(TextUtils.humpToLine(fieldName));
+            }
+        }
+
+        Object[][] updateFieldValuesList = new Object[updateFields.size()][objs.length];
+        for (int i = 0; i < objs.length; i++) {
+            BaseModel obj = objs[i];
+            clearNotWritableFields(obj);
+            obj.initDefaultUpdateTime();
+            obj.setId(ids[i]);
+
+            Object[] updateFieldValues = new Object[updateFields.size()];
+            for (int j = 0; j < updateFields.size(); j++) {
+                updateFieldValues[j] = ClassUtils.getObjFieldValue(obj, updateFields.get(j));
+            }
+            updateFieldValuesList[i] = updateFieldValues;
+        }
+
+        return new Object[]{ updateColumnFields.toArray(new String[0]), updateFieldValuesList,
+                updateFields.toArray(new String[0]) };
     }
 
     private Integer[] getLimitOffset(Integer page, Integer pageSize) {
@@ -109,10 +181,10 @@ public abstract class BaseModelServiceImpl<Model extends BaseModel,
     }
 
     @Override
-    public ListObjResult<Model> list(Integer page, Integer pageSize, String[] fields) {
+    public ServiceResult list(Integer page, Integer pageSize, String[] fields) {
         Integer[] limitOffset = getLimitOffset(page, pageSize);
         if (limitOffset == null) {
-            return new ListObjResult<>();
+            return new ServiceResult(new ListObjResult<>());
         }
 
         DynamicFields validModelFields = getValidModelFields(fields);
@@ -120,75 +192,80 @@ public abstract class BaseModelServiceImpl<Model extends BaseModel,
         List<Model> data = new ArrayList<>(modelMapper.list(limitOffset[0], limitOffset[1], selectFields));
         Integer total = modelMapper.total();
 
-        return new ListObjResult<>(data, total, validModelFields);
+        return new ServiceResult(new ListObjResult<>(data, total, validModelFields));
     }
 
     @Override
-    public ObjResult<Model> get(String id, String[] fields) {
+    public ServiceResult get(String id, String[] fields) {
         DynamicFields validModelFields = getValidModelFields(fields);
         String[] selectFields = validModelFields == null ? null : validModelFields.getFields();
         Model obj = modelMapper.get(id, selectFields);
-        return new ObjResult<>(obj, validModelFields);
+        return new ServiceResult(new ObjResult<>(obj, validModelFields));
     }
 
     @Override
-    public ObjResult<Model> create(Model obj, String[] fields) {
-        clearNotWritableFields(obj);
-        obj.initDefault();
+    public ServiceResult create(Model obj, String[] fields) {
+        Object[] createParams = convertCreateParams(new BaseModel[]{obj});
+        Boolean result = modelMapper.create((String[]) createParams[0], ((Object[][]) createParams[1])[0]);
 
-        DynamicFields allModelFields = getAllModelFields();
-        if (allModelFields == null) {
-            allModelFields = new DynamicFields(ClassUtils.getBeanClassFields(obj.getClass()));
+        if (result) {
+            DynamicFields validModelFields = getValidModelFields(fields);
+            return new ServiceResult(new ObjResult<>(obj, validModelFields));
+        } else {
+            return new ServiceResult(false);
         }
-        String[] createFields = allModelFields.getFields();
-        String[] createColumnFields = new String[createFields.length];
-        Object[] createFieldValues = new Object[createFields.length];
-        for (int i = 0; i < createFields.length; i++) {
-            createColumnFields[i] = TextUtils.humpToLine(createFields[i]);
-            createFieldValues[i] = ClassUtils.getObjFieldValue(obj, createFields[i]);
-        }
-
-        modelMapper.create(obj, createColumnFields, createFieldValues);
-
-        DynamicFields validModelFields = getValidModelFields(fields);
-        return new ObjResult<>(obj, validModelFields);
     }
 
     @Override
-    public ObjResult<Model> update(String id, Model obj, String[] fields) {
-        clearNotWritableFields(obj);
-        obj.initDefaultUpdateTime();
-
-        DynamicFields availableModelFields = getAvailableModelFields();
-        if (availableModelFields == null) {
-            availableModelFields = new DynamicFields(ClassUtils.getBeanClassFields(obj.getClass()));
-        }
-        List<String> updateFields = new ArrayList<>();
-        List<String> updateColumnFields = new ArrayList<>();
-        List<Object> updateFieldValues = new ArrayList<>();
-        for (String fieldName: availableModelFields.getFields()) {
-            Object fieldValue = ClassUtils.getObjFieldValue(obj, fieldName);
-            if (fieldValue != null) {
-                updateFields.add(fieldName);
-                updateColumnFields.add(TextUtils.humpToLine(fieldName));
-                updateFieldValues.add(fieldValue);
-            }
-        }
-
-        modelMapper.update(id, obj, updateColumnFields.toArray(new String[0]), updateFieldValues.toArray());
+    public ServiceResult update(String id, Model obj, String[] fields) {
+        Object[] updateParams = convertUpdateParams(new BaseModel[]{obj});
+        Boolean result = modelMapper.update(id, (String[]) updateParams[0], ((Object[][]) updateParams[1])[0]);
 
         DynamicFields validModelFields = getValidModelFields(fields);
         if (validModelFields == null) {
-            validModelFields = new DynamicFields(updateFields);
+            validModelFields = new DynamicFields((String[]) updateParams[2]);
         } else {
-            validModelFields = validModelFields.intersect(updateFields);
+            validModelFields = validModelFields.intersect((String[]) updateParams[2]);
         }
 
-        return new ObjResult<>(obj, validModelFields);
+        if (result) {
+            return new ServiceResult(new ObjResult<>(obj, validModelFields));
+        } else {
+            return new ServiceResult(false);
+        }
     }
 
     @Override
-    public Boolean delete(String id) {
-        return modelMapper.delete(id);
+    public ServiceResult delete(String id) {
+        return new ServiceResult(modelMapper.delete(id));
+    }
+
+    @Override
+    public ServiceResult bulkCreate(Model[] objs) {
+        if (objs.length == 0) {
+            return new ServiceResult(0);
+        }
+
+        Object[] createParams = convertCreateParams(objs);
+        Integer result = modelMapper.bulkCreate((String[]) createParams[0], (Object[][]) createParams[1]);
+
+        return new ServiceResult(result);
+    }
+
+    @Override
+    public ServiceResult bulkUpdate(Model[] objs) {
+        if (objs.length == 0) {
+            return new ServiceResult(0);
+        }
+
+        Object[] updateParams = convertUpdateParams(objs);
+        Integer result = modelMapper.bulkUpdate((String[]) updateParams[0], (Object[][]) updateParams[1]);
+
+        return new ServiceResult(result);
+    }
+
+    @Override
+    public ServiceResult bulkDelete(String[] ids) {
+        return new ServiceResult(modelMapper.bulkDelete(ids));
     }
 }

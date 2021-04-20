@@ -16,6 +16,12 @@
     <sql id="idFilter">
         <if test="true">id = #{id}</if>
     </sql>
+    <sql id="idsFilter">
+        <if test="ids != null">id IN
+            <foreach item="id" index="index" collection="ids"
+                     open="(" separator="," close=")">#{id}</foreach>
+        </if>
+    </sql>
     <sql id="createFields">
         <if test="createFields != null">
             <foreach item="field" index="index" collection="createFields"
@@ -23,15 +29,71 @@
         </if>
     </sql>
     <sql id="createFieldValues">
-        <if test="createFieldValues != null">
         <foreach item="fieldValue" index="index" collection="createFieldValues"
                  open="(" separator="," close=")">#{fieldValue}</foreach>
-        </if>
     </sql>
     <sql id="updateFields">
-        <if test="updateFields != null and updateFieldValues != null">
-            <foreach item="field" index="index" collection="updateFields"
-                     open="" separator="," close="">${field} = #{updateFieldValues[${index}]}</foreach>
-        </if>
+        <foreach item="field" index="index" collection="updateFields"
+                 open="" separator="," close="">
+            <if test="field != 'id'">
+                ${field} = #{updateFieldValues[${index}]}
+            </if>
+        </foreach>
+    </sql>
+
+    <sql id="listTemplate">
+        SELECT <include refid="cn.cyberpeace.mp.base.selectFields" />
+        FROM ${table}
+        <include refid="cn.cyberpeace.mp.base.pagination" />
+    </sql>
+    <sql id="totalTemplate">
+        SELECT <include refid="cn.cyberpeace.mp.base.totalField" />
+        FROM ${table}
+    </sql>
+    <sql id="getTemplate">
+        SELECT <include refid="cn.cyberpeace.mp.base.selectFields" />
+        FROM ${table}
+        WHERE <include refid="cn.cyberpeace.mp.base.idFilter" />
+    </sql>
+    <sql id="createTemplate">
+        INSERT INTO ${table} <include refid="cn.cyberpeace.mp.base.createFields" />
+        VALUES <include refid="cn.cyberpeace.mp.base.createFieldValues" />
+    </sql>
+    <sql id="updateTemplate">
+        UPDATE ${table}
+        SET <include refid="cn.cyberpeace.mp.base.updateFields" />
+        WHERE <include refid="cn.cyberpeace.mp.base.idFilter" />
+    </sql>
+    <sql id="deleteTemplate">
+        DELETE FROM ${table} WHERE <include refid="cn.cyberpeace.mp.base.idFilter" />
+    </sql>
+    <sql id="bulkCreateTemplate">
+        INSERT INTO ${table} <include refid="cn.cyberpeace.mp.base.createFields" />
+        VALUES
+        <foreach item="createFieldValues" index="index" collection="createFieldValuesList"
+                 open="" separator="," close="">
+            <include refid="cn.cyberpeace.mp.base.createFieldValues">
+                <property name="createFieldValues" value="createFieldValues"/>
+            </include>
+        </foreach>
+    </sql>
+    <sql id="bulkUpdateTemplate">
+        UPDATE ${table} JOIN
+        (<foreach item="updateFieldValues" index="rowIndex" collection="updateFieldValuesList"
+                 open="" separator="UNION" close="">
+            SELECT
+            <foreach item="updateFieldValue" index="fieldIndex" collection="updateFieldValues"
+                 open="" separator="," close="">
+                #{updateFieldValue} AS ${updateFields[${fieldIndex}]}
+            </foreach>
+        </foreach>) a USING(id)
+        SET
+        <foreach item="field" index="index" collection="updateFields"
+                 open="" separator="," close="">
+            <if test="field != 'id'">${table}.${field} = a.${field}</if>
+        </foreach>
+    </sql>
+    <sql id="bulkDeleteTemplate">
+        DELETE FROM ${table} WHERE <include refid="cn.cyberpeace.mp.base.idsFilter" />
     </sql>
 </mapper>

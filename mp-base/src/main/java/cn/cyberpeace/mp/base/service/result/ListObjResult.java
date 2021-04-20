@@ -32,6 +32,7 @@ public class ListObjResult<T> extends BaseResult {
         setFields(fields);
     }
 
+    @Override
     public ListObjResult<T> asResult() {
         data.clear();
         objs.forEach(obj -> data.add(objToResult(obj, getFields())));

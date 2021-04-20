@@ -21,6 +21,7 @@ public class ObjResult<T> extends BaseResult {
         setFields(fields);
     }
 
+    @Override
     public Object asResult() {
         if (obj == null) {
             return null;
