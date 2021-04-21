@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Slf4j
 @Data
 public abstract class BaseModelController<Model extends BaseModel, ModelService extends BaseModelService<Model>> {
@@ -32,8 +34,9 @@ public abstract class BaseModelController<Model extends BaseModel, ModelService 
 
     @PatchMapping("/{id}")
     public ServiceResult update(@PathVariable String id, @RequestBody Model obj,
-                         @RequestParam(required = false) String[] fields) {
-        return modelService.update(id, obj, fields).asResult();
+                                @RequestParam(required = false) String[] fields) {
+        obj.setId(id);
+        return modelService.update(obj, fields).asResult();
     }
 
     @DeleteMapping("/{id}")
@@ -42,12 +45,12 @@ public abstract class BaseModelController<Model extends BaseModel, ModelService 
     }
 
     @PostMapping("/bulk_create")
-    public ServiceResult bulkCreate(@RequestBody Model[] objs) {
+    public ServiceResult bulkCreate(@RequestBody List<Model> objs) {
         return modelService.bulkCreate(objs).asResult();
     }
 
     @PatchMapping("/bulk_update")
-    public ServiceResult bulkUpdate(@RequestBody Model[] objs) {
+    public ServiceResult bulkUpdate(@RequestBody List<Model> objs) {
         return modelService.bulkUpdate(objs).asResult();
     }
 

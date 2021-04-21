@@ -84,7 +84,7 @@
             SELECT
             <foreach item="updateFieldValue" index="fieldIndex" collection="updateFieldValues"
                  open="" separator="," close="">
-                #{updateFieldValue} AS ${updateFields[${fieldIndex}]}
+                #{updateFieldValue} AS #{updateFields[${fieldIndex}]}
             </foreach>
         </foreach>) a USING(id)
         SET

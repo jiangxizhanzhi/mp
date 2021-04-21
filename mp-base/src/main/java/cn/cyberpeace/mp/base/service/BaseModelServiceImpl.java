@@ -73,7 +73,7 @@ public abstract class BaseModelServiceImpl<Model extends BaseModel,
         return validModelFields;
     }
 
-    private void clearNotWritableFields(BaseModel obj) {
+    private void clearNotWritableFields(Model obj) {
         DynamicFields hiddenModelFields = getHiddenModelFields();
         if (hiddenModelFields != null) {
             for (String fieldName: hiddenModelFields.getFields()) {
@@ -89,10 +89,10 @@ public abstract class BaseModelServiceImpl<Model extends BaseModel,
         }
     }
 
-    private Object[] convertCreateParams(BaseModel[] objs) {
+    private Object[] convertCreateParams(List<Model> objs) {
         DynamicFields allModelFields = getAllModelFields();
         if (allModelFields == null) {
-            allModelFields = new DynamicFields(ClassUtils.getBeanClassFields(objs[0].getClass()));
+            allModelFields = new DynamicFields(ClassUtils.getBeanClassFields(objs.get(0).getClass()));
         }
         String[] createFields = allModelFields.getFields();
         String[] createColumnFields = new String[createFields.length];
@@ -100,15 +100,19 @@ public abstract class BaseModelServiceImpl<Model extends BaseModel,
             createColumnFields[i] = TextUtils.humpToLine(createFields[i]);
         }
 
-        Object[][] createFieldValuesList = new Object[createFields.length][objs.length];
-        for (int i = 0; i < objs.length; i++) {
-            BaseModel obj = objs[i];
+        Object[][] createFieldValuesList = new Object[objs.size()][createFields.length];
+        for (int i = 0; i < objs.size(); i++) {
+            Model obj = objs.get(i);
             clearNotWritableFields(obj);
             obj.initDefault();
 
             Object[] createFieldValues = new Object[createFields.length];
             for (int j = 0; j < createFields.length; j++) {
-                createFieldValues[j] = ClassUtils.getObjFieldValue(obj, createFields[j]);
+                Object fieldValue = ClassUtils.getObjFieldValue(obj, createFields[j]);
+                if (fieldValue == null) {
+                    return null;
+                }
+                createFieldValues[j] = fieldValue;
             }
             createFieldValuesList[i] = createFieldValues;
         }
@@ -116,13 +120,17 @@ public abstract class BaseModelServiceImpl<Model extends BaseModel,
         return new Object[]{ createColumnFields, createFieldValuesList };
     }
 
-    private Object[] convertUpdateParams(BaseModel[] objs) {
-        String[] ids = new String[objs.length];
-        for (int i = 0; i < objs.length; i++) {
-            ids[i] = objs[i].getId();
+    private Object[] convertUpdateParams(List<Model> objs) {
+        String[] ids = new String[objs.size()];
+        for (int i = 0; i < objs.size(); i++) {
+            String id = objs.get(i).getId();
+            if (id == null) {
+                return null;
+            }
+            ids[i] = id;
         }
 
-        BaseModel sampleObj = objs[0];
+        Model sampleObj = objs.get(0);
         clearNotWritableFields(sampleObj);
         sampleObj.initDefaultUpdateTime();
         sampleObj.setId(ids[0]);
@@ -142,16 +150,20 @@ public abstract class BaseModelServiceImpl<Model extends BaseModel,
             }
         }
 
-        Object[][] updateFieldValuesList = new Object[updateFields.size()][objs.length];
-        for (int i = 0; i < objs.length; i++) {
-            BaseModel obj = objs[i];
+        Object[][] updateFieldValuesList = new Object[objs.size()][updateFields.size()];
+        for (int i = 0; i < objs.size(); i++) {
+            Model obj = objs.get(i);
             clearNotWritableFields(obj);
             obj.initDefaultUpdateTime();
             obj.setId(ids[i]);
 
             Object[] updateFieldValues = new Object[updateFields.size()];
             for (int j = 0; j < updateFields.size(); j++) {
-                updateFieldValues[j] = ClassUtils.getObjFieldValue(obj, updateFields.get(j));
+                Object fieldValue = ClassUtils.getObjFieldValue(obj, updateFields.get(j));
+                if (fieldValue == null) {
+                    return null;
+                }
+                updateFieldValues[j] = fieldValue;
             }
             updateFieldValuesList[i] = updateFieldValues;
         }
@@ -205,7 +217,11 @@ public abstract class BaseModelServiceImpl<Model extends BaseModel,
 
     @Override
     public ServiceResult create(Model obj, String[] fields) {
-        Object[] createParams = convertCreateParams(new BaseModel[]{obj});
+        Object[] createParams = convertCreateParams(new ArrayList<>(){{ add(obj); }});
+        if (createParams == null) {
+            return new ServiceResult(false);
+        }
+
         Boolean result = modelMapper.create((String[]) createParams[0], ((Object[][]) createParams[1])[0]);
 
         if (result) {
@@ -217,9 +233,13 @@ public abstract class BaseModelServiceImpl<Model extends BaseModel,
     }
 
     @Override
-    public ServiceResult update(String id, Model obj, String[] fields) {
-        Object[] updateParams = convertUpdateParams(new BaseModel[]{obj});
-        Boolean result = modelMapper.update(id, (String[]) updateParams[0], ((Object[][]) updateParams[1])[0]);
+    public ServiceResult update(Model obj, String[] fields) {
+        Object[] updateParams = convertUpdateParams(new ArrayList<>(){{ add(obj); }});
+        if (updateParams == null) {
+            return new ServiceResult(false);
+        }
+
+        Boolean result = modelMapper.update(obj.getId(), (String[]) updateParams[0], ((Object[][]) updateParams[1])[0]);
 
         DynamicFields validModelFields = getValidModelFields(fields);
         if (validModelFields == null) {
@@ -241,24 +261,30 @@ public abstract class BaseModelServiceImpl<Model extends BaseModel,
     }
 
     @Override
-    public ServiceResult bulkCreate(Model[] objs) {
-        if (objs.length == 0) {
+    public ServiceResult bulkCreate(List<Model> objs) {
+        if (objs.size() == 0) {
             return new ServiceResult(0);
         }
 
         Object[] createParams = convertCreateParams(objs);
+        if (createParams == null) {
+            return new ServiceResult(0);
+        }
         Integer result = modelMapper.bulkCreate((String[]) createParams[0], (Object[][]) createParams[1]);
 
         return new ServiceResult(result);
     }
 
     @Override
-    public ServiceResult bulkUpdate(Model[] objs) {
-        if (objs.length == 0) {
+    public ServiceResult bulkUpdate(List<Model> objs) {
+        if (objs.size() == 0) {
             return new ServiceResult(0);
         }
 
         Object[] updateParams = convertUpdateParams(objs);
+        if (updateParams == null) {
+            return new ServiceResult(0);
+        }
         Integer result = modelMapper.bulkUpdate((String[]) updateParams[0], (Object[][]) updateParams[1]);
 
         return new ServiceResult(result);

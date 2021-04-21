@@ -1,5 +1,8 @@
 package cn.cyberpeace.mp.base.service.result;
 
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.service.code.ServiceCode;
+import cn.cyberpeace.mp.base.util.MessageUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,6 +19,11 @@ public class ServiceResult {
 
     private String message = null;
 
+    private String detail = null;
+
+    @JsonIgnore
+    private ServiceCode serviceCode = BaseErrorCode.SUCCESS;
+
     @JsonIgnore
     private BaseResult dataResult = null;
 
@@ -23,27 +31,45 @@ public class ServiceResult {
         setData(data);
     }
 
-    public ServiceResult(Object data, String code, String message) {
+    public ServiceResult(Object data, ServiceCode code) {
         setData(data);
-        setCode(code);
-        setMessage(message);
+        setServiceCode(code);
     }
+
+    public ServiceResult(Object data, ServiceCode code, String detail) {
+        setData(data);
+        setServiceCode(code);
+        setDetail(detail);
+    }
+
 
     public ServiceResult(BaseResult dataResult) {
         setDataResult(dataResult);
     }
 
-    public ServiceResult(BaseResult dataResult, String code, String message) {
+    public ServiceResult(BaseResult dataResult, ServiceCode code) {
         setDataResult(dataResult);
-        setCode(code);
-        setMessage(message);
+        setServiceCode(code);
+    }
+
+    public ServiceResult(BaseResult dataResult, ServiceCode code, String detail) {
+        setDataResult(dataResult);
+        setServiceCode(code);
+        setDetail(detail);
     }
 
     public ServiceResult asResult() {
         if (dataResult != null) {
             data = dataResult.asResult();
         }
-
+        if (serviceCode != null) {
+            setCode(serviceCode.getCode());
+            setMessage(serviceCode.getMessage());
+        }
         return this;
+    }
+
+    public void setMessage(String message) {
+        this.message = MessageUtils.get(message);;
     }
 }

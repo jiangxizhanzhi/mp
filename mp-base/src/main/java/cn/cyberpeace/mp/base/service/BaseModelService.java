@@ -2,6 +2,8 @@ package cn.cyberpeace.mp.base.service;
 
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 
+import java.util.List;
+
 public interface BaseModelService<Model> {
 
     default ServiceResult list(Integer page, Integer pageSize, String[] fields) {
@@ -16,7 +18,7 @@ public interface BaseModelService<Model> {
         return new ServiceResult();
     }
 
-    default ServiceResult update(String id, Model obj, String[] fields) {
+    default ServiceResult update(Model obj, String[] fields) {
         return new ServiceResult();
     }
 
@@ -24,11 +26,11 @@ public interface BaseModelService<Model> {
         return new ServiceResult();
     }
 
-    default ServiceResult bulkCreate(Model[] objs) {
+    default ServiceResult bulkCreate(List<Model> objs) {
         return new ServiceResult();
     }
 
-    default ServiceResult bulkUpdate(Model[] objs) {
+    default ServiceResult bulkUpdate(List<Model> objs) {
         return new ServiceResult();
     }
 
