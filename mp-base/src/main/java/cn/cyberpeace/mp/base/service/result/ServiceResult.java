@@ -70,6 +70,6 @@ public class ServiceResult {
     }
 
     public void setMessage(String message) {
-        this.message = MessageUtils.get(message);;
+        this.message = MessageUtils.get(message);
     }
 }

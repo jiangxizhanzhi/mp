@@ -1,0 +1,33 @@
+package cn.cyberpeace.mp.base.util;
+
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.*;
+
+public class ModuleUtils {
+
+    public static final String groupName = "cn.cyberpeace.mp";
+
+    public static List<String> findPackageNamesStartingWith(String prefix) {
+        List<String> packageNames = new ArrayList<>();
+        for (Package pkg: Package.getPackages()) {
+            String packageName = pkg.getName();
+            if (packageName.startsWith(prefix)) {
+                packageNames.add(packageName);
+            }
+        }
+        return packageNames;
+    }
+
+    public static String[] getModuleNames() {
+        Set<String> moduleNames = new LinkedHashSet<>();
+        for (String packageName: findPackageNamesStartingWith(groupName)) {
+            String name = packageName.substring(groupName.length());
+            if (!StringUtils.isEmpty(name)) {
+                moduleNames.add(name.split("\\.")[1]);
+            }
+        }
+        return moduleNames.toArray(new String[0]);
+    }
+
+}

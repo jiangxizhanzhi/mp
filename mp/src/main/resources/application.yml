@@ -10,8 +10,6 @@ spring:
     driver-class-name: org.mariadb.jdbc.Driver
   flyway:
     clean-disabled: true
-  messages:
-    basename: i18n/messages
 
 logging:
   file:
