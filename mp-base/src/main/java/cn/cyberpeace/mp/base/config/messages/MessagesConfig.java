@@ -17,7 +17,7 @@ public class MessagesConfig {
         ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
         List<String> basenames = new ArrayList<>();
         for (String moduleName: ModuleConfig.moduleNames) {
-            basenames.add("classpath:i18n/messages_" + moduleName);
+            basenames.add("classpath:i18n/" + moduleName);
         }
         messageSource.setBasenames(basenames.toArray(new String[0]));
         messageSource.setDefaultEncoding("UTF-8");
