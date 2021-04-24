@@ -24,6 +24,14 @@ public class TextUtils {
         return sb.toString();
     }
 
+    public static String[] lineToHump(String[] strs) {
+        String[] result = new String[strs.length];
+        for (int i = 0; i < strs.length; i++) {
+            result[i] = lineToHump(strs[i]);
+        }
+        return result;
+    }
+
     public static String humpToLine(String str) {
         StringBuilder sb = new StringBuilder();
         Matcher matcher = humpPattern.matcher(str);
@@ -32,6 +40,14 @@ public class TextUtils {
         }
         matcher.appendTail(sb);
         return sb.toString();
+    }
+
+    public static String[] humpToLine(String[] strs) {
+        String[] result = new String[strs.length];
+        for (int i = 0; i < strs.length; i++) {
+            result[i] = humpToLine(strs[i]);
+        }
+        return result;
     }
 }
 

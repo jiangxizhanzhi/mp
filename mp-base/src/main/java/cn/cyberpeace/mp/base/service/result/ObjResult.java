@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.base.service.result;
 
-import cn.cyberpeace.mp.base.model.DynamicFields;
+import cn.cyberpeace.mp.base.service.fields.DynamicFields;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 public class ObjResult<T> extends BaseResult {
 
     @JsonIgnore
-    private T obj = null;
+    private T obj;
 
     public ObjResult(T obj) {
         setObj(obj);

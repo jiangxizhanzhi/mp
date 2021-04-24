@@ -8,10 +8,26 @@
         </if>
         <if test="selectFields == null">*</if>
     </sql>
-    <sql id="totalField"><if test="true">count(*)</if></sql>
+    <sql id="totalField">count(*)</sql>
+    <sql id="search">
+        <if test="condition.search != null and !condition.search.isEmpty()">
+            <foreach item="field" index="index" collection="condition.search.searchFields"
+                     open="" separator="OR" close="">
+                ${field} LIKE #{condition.search.searchPattern}
+            </foreach>
+        </if>
+    </sql>
+    <sql id="order">
+        <if test="condition.order != null and !condition.order.isEmpty()">
+            ORDER BY <foreach item="order" index="index" collection="condition.order.orders"
+                     open="" separator="," close="">${order}</foreach>
+        </if>
+    </sql>
     <sql id="pagination">
-        <if test="limit != null">LIMIT #{limit}</if>
-        <if test="offset != null">OFFSET #{offset}</if>
+        <if test="condition.pagination != null">
+            <if test="condition.pagination.limit != null">LIMIT #{condition.pagination.limit}</if>
+            <if test="condition.pagination.offset != null">OFFSET #{condition.pagination.offset}</if>
+        </if>
     </sql>
     <sql id="idFilter">
         <if test="true">id = #{id}</if>
@@ -42,17 +58,13 @@
     </sql>
 
     <sql id="listTemplate">
-        SELECT <include refid="cn.cyberpeace.mp.base.selectFields" />
-        FROM ${table}
-        <include refid="cn.cyberpeace.mp.base.pagination" />
+        SELECT <include refid="cn.cyberpeace.mp.base.selectFields" /> FROM ${table}
     </sql>
     <sql id="totalTemplate">
-        SELECT <include refid="cn.cyberpeace.mp.base.totalField" />
-        FROM ${table}
+        SELECT <include refid="cn.cyberpeace.mp.base.totalField" /> FROM ${table}
     </sql>
     <sql id="getTemplate">
-        SELECT <include refid="cn.cyberpeace.mp.base.selectFields" />
-        FROM ${table}
+        SELECT <include refid="cn.cyberpeace.mp.base.selectFields" /> FROM ${table}
         WHERE <include refid="cn.cyberpeace.mp.base.idFilter" />
     </sql>
     <sql id="createTemplate">

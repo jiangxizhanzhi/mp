@@ -3,10 +3,12 @@ package cn.cyberpeace.mp.base.service;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 
 import java.util.List;
+import java.util.Map;
 
 public interface BaseModelService<Model> {
 
-    default ServiceResult list(Integer page, Integer pageSize, String[] fields) {
+    default ServiceResult list(Map<String, Object> params, String search, String[] searchFields, String[] orders,
+                               Integer page, Integer pageSize, String[] fields) {
         return new ServiceResult();
     }
 

@@ -1,67 +1,48 @@
 package cn.cyberpeace.mp.base.service;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
-import cn.cyberpeace.mp.base.model.DynamicFields;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
+import cn.cyberpeace.mp.base.repository.condition.*;
 import cn.cyberpeace.mp.base.service.fields.BaseModelFields;
+import cn.cyberpeace.mp.base.service.fields.DynamicFields;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.ClassUtils;
 import cn.cyberpeace.mp.base.util.TextUtils;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
+@Slf4j
 @Data
 public abstract class BaseModelServiceImpl<Model extends BaseModel,
         ModelMapper extends BaseModelMapper<Model>> implements BaseModelService<Model> {
 
-    private Class<? extends BaseModelFields> modelFieldsClass;
+    public static final Class<? extends BaseModelFields> modelFieldsClass = null;
 
     private ModelMapper modelMapper;
 
-    private DynamicFields getAllModelFields() {
-        DynamicFields allModelFields = null;
+    private DynamicFields getSpecModelFields(String fieldName) {
+        DynamicFields modelFields = null;
+        Class<?> modelFieldsClass = ClassUtils.getStaticFieldValue(getClass(), "modelFieldsClass",
+                Class.class);
         if (modelFieldsClass != null) {
-            allModelFields = ClassUtils.getStaticFieldValue(modelFieldsClass, "allFields",
-                    DynamicFields.class);
+            modelFields = ClassUtils.getStaticFieldValue(modelFieldsClass, fieldName, DynamicFields.class);
         }
-        return allModelFields;
-    }
-
-    private DynamicFields getAvailableModelFields() {
-        DynamicFields availableFields = null;
-        if (modelFieldsClass != null) {
-            availableFields = ClassUtils.getStaticFieldValue(modelFieldsClass, "fields",
-                    DynamicFields.class);
-        }
-        return availableFields;
-    }
-
-    private DynamicFields getHiddenModelFields() {
-        DynamicFields hiddenFields = null;
-        if (modelFieldsClass != null) {
-            hiddenFields = ClassUtils.getStaticFieldValue(modelFieldsClass, "hiddenFields",
-                    DynamicFields.class);
-        }
-        return hiddenFields;
-    }
-
-    private DynamicFields getReadonlyModelFields() {
-        DynamicFields readonlyModelFields = null;
-        if (modelFieldsClass != null) {
-            readonlyModelFields = ClassUtils.getStaticFieldValue(modelFieldsClass, "readonlyFields",
-                    DynamicFields.class);
-        }
-        return readonlyModelFields;
+        return modelFields;
     }
 
     private DynamicFields getValidModelFields(String[] fields) {
         DynamicFields validModelFields = null;
+        Class<?> modelFieldsClass = ClassUtils.getStaticFieldValue(getClass(), "modelFieldsClass",
+                Class.class);
         if (modelFieldsClass != null && fields != null) {
-            DynamicFields availableFields = getAvailableModelFields();
+            DynamicFields availableFields = getSpecModelFields("fields");
             if (availableFields != null) {
                 validModelFields = availableFields.intersect(fields);
                 if (!validModelFields.hasValidFields()) {
@@ -74,14 +55,14 @@ public abstract class BaseModelServiceImpl<Model extends BaseModel,
     }
 
     private void clearNotWritableFields(Model obj) {
-        DynamicFields hiddenModelFields = getHiddenModelFields();
+        DynamicFields hiddenModelFields = getSpecModelFields("hiddenFields");
         if (hiddenModelFields != null) {
             for (String fieldName: hiddenModelFields.getFields()) {
                 ClassUtils.setBeanObjFieldValue(obj, fieldName, null);
             }
         }
 
-        DynamicFields readonlyModelFields = getReadonlyModelFields();
+        DynamicFields readonlyModelFields = getSpecModelFields("readonlyFields");
         if (readonlyModelFields != null) {
             for (String fieldName: readonlyModelFields.getFields()) {
                 ClassUtils.setBeanObjFieldValue(obj, fieldName, null);
@@ -90,7 +71,7 @@ public abstract class BaseModelServiceImpl<Model extends BaseModel,
     }
 
     private Object[] convertCreateParams(List<Model> objs) {
-        DynamicFields allModelFields = getAllModelFields();
+        DynamicFields allModelFields = getSpecModelFields("allFields");
         if (allModelFields == null) {
             allModelFields = new DynamicFields(ClassUtils.getBeanClassFields(objs.get(0).getClass()));
         }
@@ -135,7 +116,7 @@ public abstract class BaseModelServiceImpl<Model extends BaseModel,
         sampleObj.initDefaultUpdateTime();
         sampleObj.setId(ids[0]);
 
-        DynamicFields availableModelFields = getAvailableModelFields();
+        DynamicFields availableModelFields = getSpecModelFields("fields");
         if (availableModelFields == null) {
             availableModelFields = new DynamicFields(ClassUtils.getBeanClassFields(sampleObj.getClass()));
         }
@@ -172,37 +153,67 @@ public abstract class BaseModelServiceImpl<Model extends BaseModel,
                 updateFields.toArray(new String[0]) };
     }
 
-    private Integer[] getLimitOffset(Integer page, Integer pageSize) {
-        Integer limit = null;
-        if (pageSize != null && pageSize.compareTo(0) >= 0) {
-            limit = pageSize;
-        }
-        if (limit != null && limit.compareTo(0) == 0) {
-            return null;
-        }
+    private Condition getCondition(Map<String, Object> params, String search, String[] searchFields, String[] orders,
+                                   Integer page, Integer pageSize) {
+        Condition condition = new Condition();
+        condition.setPagination(new PaginationCondition().loadFromPageParams(page, pageSize));
 
-        Integer offset = null;
-        if (page != null && page.compareTo(0) > 0) {
-            offset = page - 1;
+        DynamicFields availableSearchFields = getSpecModelFields("searchFields");
+        String[] lastSearchFields = null;
+        if (availableSearchFields != null) {
+            if (searchFields != null && searchFields.length > 0) {
+                DynamicFields validSearchFields = availableSearchFields.intersect(searchFields);
+                if (validSearchFields.hasValidFields()) {
+                    lastSearchFields = validSearchFields.getFields();
+                } else {
+                    lastSearchFields = availableSearchFields.getFields();
+                }
+            } else {
+                lastSearchFields = availableSearchFields.getFields();
+            }
+            lastSearchFields = TextUtils.humpToLine(lastSearchFields);
         }
-        if (limit == null && page != null) {
-            return null;
-        }
+        condition.setSearch(new SearchCondition(search, lastSearchFields));
 
-        return new Integer[]{ limit, offset };
+        DynamicFields availableOrderFields = getSpecModelFields("orderFields");
+        String[] lastOrders = null;
+        if (availableOrderFields != null && orders != null && orders.length > 0) {
+            Map<String, String> fieldNameOrderMap = new LinkedHashMap<>();
+            for (String order: orders) {
+                if (order.startsWith("-")) {
+                    fieldNameOrderMap.put(order.substring(1), order);
+                } else {
+                    fieldNameOrderMap.put(order, order);
+                }
+            }
+            DynamicFields validOrderFields = availableOrderFields.intersect(
+                    fieldNameOrderMap.keySet().toArray(new String[0]));
+            List<String> lastOrderList = new ArrayList<>();
+            fieldNameOrderMap.forEach((fieldName, order) -> {
+                if (validOrderFields.hasField(fieldName)) {
+                    lastOrderList.add(order);
+                }
+            });
+            lastOrders = TextUtils.humpToLine(lastOrderList.toArray(new String[0]));
+        }
+        condition.setOrder(new OrderCondition(lastOrders));
+
+        condition.setCustom(getCustomCondition(params));
+        return condition;
+    }
+
+    public CustomCondition getCustomCondition(Map<String, Object> params) {
+        return new CustomCondition().loadFromParams(params);
     }
 
     @Override
-    public ServiceResult list(Integer page, Integer pageSize, String[] fields) {
-        Integer[] limitOffset = getLimitOffset(page, pageSize);
-        if (limitOffset == null) {
-            return new ServiceResult(new ListObjResult<>());
-        }
-
+    public ServiceResult list(Map<String, Object> params, String search, String[] searchFields, String[] orders,
+                              Integer page, Integer pageSize, String[] fields) {
+        Condition condition = getCondition(params, search, searchFields, orders, page, pageSize);
         DynamicFields validModelFields = getValidModelFields(fields);
-        String[] selectFields = validModelFields == null ? null : validModelFields.getFields();
-        List<Model> data = new ArrayList<>(modelMapper.list(limitOffset[0], limitOffset[1], selectFields));
-        Integer total = modelMapper.total();
+        String[] selectFields = validModelFields == null ? null : TextUtils.humpToLine(validModelFields.getFields());
+        List<Model> data = new ArrayList<>(modelMapper.list(condition, selectFields));
+        Integer total = modelMapper.total(condition);
 
         return new ServiceResult(new ListObjResult<>(data, total, validModelFields));
     }
@@ -210,7 +221,7 @@ public abstract class BaseModelServiceImpl<Model extends BaseModel,
     @Override
     public ServiceResult get(String id, String[] fields) {
         DynamicFields validModelFields = getValidModelFields(fields);
-        String[] selectFields = validModelFields == null ? null : validModelFields.getFields();
+        String[] selectFields = validModelFields == null ? null : TextUtils.humpToLine(validModelFields.getFields());
         Model obj = modelMapper.get(id, selectFields);
         return new ServiceResult(new ObjResult<>(obj, validModelFields));
     }

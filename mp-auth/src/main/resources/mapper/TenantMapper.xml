@@ -1,8 +1,29 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="cn.cyberpeace.mp.auth.repository.TenantMapper">
+    <sql id="listCondition">
+        <trim prefix="WHERE" suffixOverrides="AND">
+            <if test="condition.custom != null and !condition.custom.isEmpty()">
+                <if test="condition.custom.name != null">
+                    name = #{condition.custom.name} AND
+                </if>
+                <if test="condition.custom.identifier != null">
+                    identifier = #{condition.custom.identifier} AND
+                </if>
+            </if>
+            <include refid="cn.cyberpeace.mp.base.search" />
+        </trim>
+    </sql>
     <select id="list" resultType="cn.cyberpeace.mp.auth.model.TenantModel">
         <include refid="cn.cyberpeace.mp.base.listTemplate">
+            <property name="table" value="mp_auth_tenant"/>
+        </include>
+        <include refid="listCondition" />
+        <include refid="cn.cyberpeace.mp.base.order" />
+        <include refid="cn.cyberpeace.mp.base.pagination" />
+    </select>
+    <select id="get" resultType="cn.cyberpeace.mp.auth.model.TenantModel">
+        <include refid="cn.cyberpeace.mp.base.getTemplate">
             <property name="table" value="mp_auth_tenant"/>
         </include>
     </select>
@@ -10,11 +31,7 @@
         <include refid="cn.cyberpeace.mp.base.totalTemplate">
             <property name="table" value="mp_auth_tenant"/>
         </include>
-    </select>
-    <select id="get" resultType="cn.cyberpeace.mp.auth.model.TenantModel">
-        <include refid="cn.cyberpeace.mp.base.getTemplate">
-            <property name="table" value="mp_auth_tenant"/>
-        </include>
+        <include refid="listCondition" />
     </select>
     <insert id="create">
         <include refid="cn.cyberpeace.mp.base.createTemplate">

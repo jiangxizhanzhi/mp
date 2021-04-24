@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.base.service.result;
 
-import cn.cyberpeace.mp.base.model.DynamicFields;
+import cn.cyberpeace.mp.base.service.fields.DynamicFields;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;

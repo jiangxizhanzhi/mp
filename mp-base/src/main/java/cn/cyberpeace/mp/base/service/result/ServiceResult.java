@@ -13,19 +13,19 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ServiceResult {
 
-    private Object data = null;
+    private Object data;
 
-    private String code = null;
+    private String code;
 
-    private String message = null;
+    private String message;
 
-    private String detail = null;
+    private String detail;
 
     @JsonIgnore
     private ServiceCode serviceCode = BaseErrorCode.SUCCESS;
 
     @JsonIgnore
-    private BaseResult dataResult = null;
+    private BaseResult dataResult;
 
     public ServiceResult(Object data) {
         setData(data);

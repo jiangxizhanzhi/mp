@@ -1,8 +1,11 @@
-package cn.cyberpeace.mp.base.model;
+package cn.cyberpeace.mp.base.service.fields;
 
 import cn.cyberpeace.mp.base.util.CastUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class DynamicFields {
 
@@ -26,6 +29,10 @@ public class DynamicFields {
 
     public DynamicFields(DynamicFields dynamicFields) {
         setFieldsMap(dynamicFields.getFieldsMap());
+    }
+
+    public Boolean hasField(String fieldName) {
+        return (Boolean) fieldsMap.getOrDefault(fieldName, false);
     }
 
     public String[] getFields() {

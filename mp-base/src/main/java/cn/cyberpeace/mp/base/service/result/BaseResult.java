@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.base.service.result;
 
-import cn.cyberpeace.mp.base.model.DynamicFields;
+import cn.cyberpeace.mp.base.service.fields.DynamicFields;
 import cn.cyberpeace.mp.base.util.ClassUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
@@ -13,7 +13,7 @@ import java.util.Map;
 @Data
 public abstract class BaseResult {
     @JsonIgnore
-    private DynamicFields fields = null;
+    private DynamicFields fields;
 
     public Object objToResult(Object obj, DynamicFields fields) {
         if (fields == null) {
