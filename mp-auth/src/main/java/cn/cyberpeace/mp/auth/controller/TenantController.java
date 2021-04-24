@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/tenants")
 public class TenantController extends BaseModelController<TenantModel, TenantService> {
 
-    public static final String[] listParamNames = new String[]{"name"};
+    public static final String[] listParamNames = new String[]{};
 
     @Autowired
     public TenantController(TenantService modelService) {

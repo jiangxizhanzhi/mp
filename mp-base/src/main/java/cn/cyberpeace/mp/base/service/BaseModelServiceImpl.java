@@ -25,6 +25,8 @@ public abstract class BaseModelServiceImpl<Model extends BaseModel,
 
     public static final Class<? extends BaseModelFields> modelFieldsClass = null;
 
+    public static final Class<? extends CustomCondition> customConditionClass = null;
+
     private ModelMapper modelMapper;
 
     private DynamicFields getSpecModelFields(String fieldName) {
@@ -203,7 +205,21 @@ public abstract class BaseModelServiceImpl<Model extends BaseModel,
     }
 
     public CustomCondition getCustomCondition(Map<String, Object> params) {
-        return new CustomCondition().loadFromParams(params);
+        Class<?> customConditionClass = ClassUtils.getStaticFieldValue(getClass(),
+                "customConditionClass", Class.class);
+        if (customConditionClass == null) {
+            customConditionClass = CustomCondition.class;
+        }
+
+        CustomCondition customCondition;
+        try {
+            customCondition = (CustomCondition) customConditionClass.getDeclaredConstructor().newInstance();
+        } catch (Exception e) {
+            log.error("Create custom condition by {} failed: {}", customConditionClass, e);
+            customCondition = new CustomCondition();
+        }
+
+        return customCondition.loadFromParams(params);
     }
 
     @Override

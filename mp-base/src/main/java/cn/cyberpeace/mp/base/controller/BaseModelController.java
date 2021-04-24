@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
@@ -20,8 +21,8 @@ public abstract class BaseModelController<Model extends BaseModel, ModelService 
     public static final String[] listParamNames = new String[0];
 
     @GetMapping
-    public ServiceResult list(@RequestParam Map<String, Object> params,
-                              @RequestParam Map<String, String[]> listParams,
+    public ServiceResult list(HttpServletRequest request,
+                              @RequestParam Map<String, Object> params,
                               @RequestParam(required = false) String search,
                               @RequestParam(required = false) String[] searchFields,
                               @RequestParam(required = false) String[] orders,
@@ -30,6 +31,7 @@ public abstract class BaseModelController<Model extends BaseModel, ModelService 
                               @RequestParam(required = false) String[] fields) {
         String[] listParamNames = ClassUtils.getStaticFieldValue(this.getClass(), "listParamNames",
                 String[].class);
+        Map<String, String[]> listParams = request.getParameterMap();
         for (String listParamName: listParamNames) {
             if (listParams.containsKey(listParamName)) {
                 params.put(listParamName, listParams.get(listParamName));
