@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.base.service;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
+import cn.cyberpeace.mp.base.repository.CommonModelMapper;
 import cn.cyberpeace.mp.base.repository.condition.*;
 import cn.cyberpeace.mp.base.service.fields.BaseModelFields;
 import cn.cyberpeace.mp.base.service.fields.DynamicFields;
@@ -9,9 +10,12 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.ClassUtils;
+import cn.cyberpeace.mp.base.util.ModelUtils;
 import cn.cyberpeace.mp.base.util.TextUtils;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -23,11 +27,33 @@ import java.util.Map;
 public abstract class BaseModelServiceImpl<Model extends BaseModel,
         ModelMapper extends BaseModelMapper<Model>> implements BaseModelService<Model> {
 
+    public static final Class<? extends BaseModel> modeClass = null;
+
     public static final Class<? extends BaseModelFields> modelFieldsClass = null;
 
     public static final Class<? extends CustomCondition> customConditionClass = null;
 
     private ModelMapper modelMapper;
+
+    @Autowired
+    private CommonModelMapper commonModelMapper;
+
+    private String getTableName() {
+        Class<?> modeClass = ClassUtils.getStaticFieldValue(getClass(), "modelClass",
+                Class.class);
+        if (modeClass == null) {
+            return null;
+        }
+        return ModelUtils.getTableName(modeClass);
+    }
+
+    private String getTableName(Model obj) {
+        String tableName = ModelUtils.getTableName(obj.getClass());
+        if (StringUtils.isEmpty(tableName)) {
+            tableName = getTableName();
+        }
+        return tableName;
+    }
 
     private DynamicFields getSpecModelFields(String fieldName) {
         DynamicFields modelFields = null;
@@ -244,47 +270,76 @@ public abstract class BaseModelServiceImpl<Model extends BaseModel,
 
     @Override
     public ServiceResult create(Model obj, String[] fields) {
-        Object[] createParams = convertCreateParams(new ArrayList<>(){{ add(obj); }});
-        if (createParams == null) {
+        String tableName = getTableName(obj);
+        if (StringUtils.isEmpty(tableName)) {
+            log.error("Service create {} with no table name found", obj);
             return new ServiceResult(false);
         }
 
-        Boolean result = modelMapper.create((String[]) createParams[0], ((Object[][]) createParams[1])[0]);
+        Object[] createParams = convertCreateParams(new ArrayList<>(){{ add(obj); }});
+        if (createParams == null) {
+            log.error("Service create {} has empty field", obj);
+            return new ServiceResult(false);
+        }
+
+        Boolean result = commonModelMapper.create(tableName, (String[]) createParams[0],
+                ((Object[][]) createParams[1])[0]);
 
         if (result) {
             DynamicFields validModelFields = getValidModelFields(fields);
             return new ServiceResult(new ObjResult<>(obj, validModelFields));
         } else {
+            log.error("Service create {} failed", obj);
             return new ServiceResult(false);
         }
     }
 
     @Override
     public ServiceResult update(Model obj, String[] fields) {
-        Object[] updateParams = convertUpdateParams(new ArrayList<>(){{ add(obj); }});
-        if (updateParams == null) {
+        String tableName = getTableName(obj);
+        if (StringUtils.isEmpty(tableName)) {
+            log.error("Service update {} with no table name found", obj);
             return new ServiceResult(false);
         }
 
-        Boolean result = modelMapper.update(obj.getId(), (String[]) updateParams[0], ((Object[][]) updateParams[1])[0]);
-
-        DynamicFields validModelFields = getValidModelFields(fields);
-        if (validModelFields == null) {
-            validModelFields = new DynamicFields((String[]) updateParams[2]);
-        } else {
-            validModelFields = validModelFields.intersect((String[]) updateParams[2]);
+        Object[] updateParams = convertUpdateParams(new ArrayList<>(){{ add(obj); }});
+        if (updateParams == null) {
+            log.error("Service update {} has empty field", obj);
+            return new ServiceResult(false);
         }
 
+        Boolean result = commonModelMapper.update(tableName, obj.getId(), (String[]) updateParams[0],
+                ((Object[][]) updateParams[1])[0]);
+
         if (result) {
+            DynamicFields validModelFields = getValidModelFields(fields);
+            if (validModelFields == null) {
+                validModelFields = new DynamicFields((String[]) updateParams[2]);
+            } else {
+                validModelFields = validModelFields.intersect((String[]) updateParams[2]);
+            }
             return new ServiceResult(new ObjResult<>(obj, validModelFields));
         } else {
+            log.error("Service update {} failed", obj);
             return new ServiceResult(false);
         }
     }
 
     @Override
     public ServiceResult delete(String id) {
-        return new ServiceResult(modelMapper.delete(id));
+        String tableName = getTableName();
+        if (StringUtils.isEmpty(tableName)) {
+            log.error("Service delete {} with no table name found", id);
+            return new ServiceResult(false);
+        }
+
+        Boolean result = commonModelMapper.delete(tableName, id);
+
+        if (!result) {
+            log.error("Service delete {} failed", id);
+        }
+
+        return new ServiceResult(result);
     }
 
     @Override
@@ -293,11 +348,24 @@ public abstract class BaseModelServiceImpl<Model extends BaseModel,
             return new ServiceResult(0);
         }
 
-        Object[] createParams = convertCreateParams(objs);
-        if (createParams == null) {
+        String tableName = getTableName(objs.get(0));
+        if (StringUtils.isEmpty(tableName)) {
+            log.error("Service bulk create {} with no table name found", objs);
             return new ServiceResult(0);
         }
-        Integer result = modelMapper.bulkCreate((String[]) createParams[0], (Object[][]) createParams[1]);
+
+        Object[] createParams = convertCreateParams(objs);
+        if (createParams == null) {
+            log.error("Service bulk create {} has empty field", objs);
+            return new ServiceResult(0);
+        }
+
+        Integer result = commonModelMapper.bulkCreate(tableName, (String[]) createParams[0],
+                (Object[][]) createParams[1]);
+
+        if (result < objs.size()) {
+            log.error("Service bulk create {} with some failed", objs);
+        }
 
         return new ServiceResult(result);
     }
@@ -308,17 +376,42 @@ public abstract class BaseModelServiceImpl<Model extends BaseModel,
             return new ServiceResult(0);
         }
 
-        Object[] updateParams = convertUpdateParams(objs);
-        if (updateParams == null) {
+        String tableName = getTableName(objs.get(0));
+        if (StringUtils.isEmpty(tableName)) {
+            log.error("Service bulk update {} with no table name found", objs);
             return new ServiceResult(0);
         }
-        Integer result = modelMapper.bulkUpdate((String[]) updateParams[0], (Object[][]) updateParams[1]);
+
+        Object[] updateParams = convertUpdateParams(objs);
+        if (updateParams == null) {
+            log.error("Service bulk update {} has empty field", objs);
+            return new ServiceResult(0);
+        }
+
+        Integer result = commonModelMapper.bulkUpdate(tableName, (String[]) updateParams[0],
+                (Object[][]) updateParams[1]);
+
+        if (result < objs.size()) {
+            log.error("Service bulk update {} with some failed", objs);
+        }
 
         return new ServiceResult(result);
     }
 
     @Override
     public ServiceResult bulkDelete(String[] ids) {
-        return new ServiceResult(modelMapper.bulkDelete(ids));
+        String tableName = getTableName();
+        if (StringUtils.isEmpty(tableName)) {
+            log.error("Service bulk delete {} with no table name found", ids);
+            return new ServiceResult(0);
+        }
+
+        Integer result = commonModelMapper.bulkDelete(tableName, ids);
+
+        if (result < ids.length) {
+            log.error("Service bulk delete {} with some failed", ids);
+        }
+
+        return new ServiceResult(result);
     }
 }

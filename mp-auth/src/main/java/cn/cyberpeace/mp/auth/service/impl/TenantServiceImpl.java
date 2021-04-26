@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class TenantServiceImpl extends BaseModelServiceImpl<TenantModel, TenantMapper> implements TenantService {
 
+    public static final Class<TenantModel> modelClass = TenantModel.class;
+
     public static final Class<TenantFields> modelFieldsClass = TenantFields.class;
 
     public static final Class<TenantCondition> customConditionClass = TenantCondition.class;
