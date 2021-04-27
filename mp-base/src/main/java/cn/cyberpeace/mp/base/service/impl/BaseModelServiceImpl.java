@@ -1,10 +1,11 @@
-package cn.cyberpeace.mp.base.service;
+package cn.cyberpeace.mp.base.service.impl;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.condition.CustomCondition;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.repository.fields.DynamicFields;
+import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.fields.BaseModelFields;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ObjResult;
@@ -34,7 +35,7 @@ public abstract class BaseModelServiceImpl<Model extends BaseModel,
                                              String[] orders, Integer page, Integer pageSize) {
         HumanCondition humanCondition = new HumanCondition();
         humanCondition.setPage(page);
-        humanCondition.setPage(pageSize);
+        humanCondition.setPageSize(pageSize);
 
         humanCondition.setSearch(search);
         String[] lastSearchFields = null;

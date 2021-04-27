@@ -22,11 +22,6 @@
         <include refid="cn.cyberpeace.mp.base.order" />
         <include refid="cn.cyberpeace.mp.base.pagination" />
     </select>
-    <select id="get" resultType="cn.cyberpeace.mp.auth.model.TenantModel">
-        <include refid="cn.cyberpeace.mp.base.getTemplate">
-            <property name="table" value="mp_auth_tenant"/>
-        </include>
-    </select>
     <select id="total" resultType="java.lang.Integer">
         <include refid="cn.cyberpeace.mp.base.totalTemplate">
             <property name="table" value="mp_auth_tenant"/>

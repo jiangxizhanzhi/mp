@@ -5,7 +5,7 @@ import cn.cyberpeace.mp.auth.repository.TenantMapper;
 import cn.cyberpeace.mp.auth.repository.condition.TenantCondition;
 import cn.cyberpeace.mp.auth.service.TenantService;
 import cn.cyberpeace.mp.auth.service.fields.TenantFields;
-import cn.cyberpeace.mp.base.service.BaseModelServiceImpl;
+import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

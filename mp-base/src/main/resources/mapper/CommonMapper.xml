@@ -1,6 +1,30 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="cn.cyberpeace.mp.base.repository.CommonMapper">
+    <sql id="listCondition">
+        <trim prefix="WHERE" suffixOverrides="AND">
+            <include refid="cn.cyberpeace.mp.base.search" />
+        </trim>
+    </sql>
+    <select id="list" resultType="map">
+        <include refid="cn.cyberpeace.mp.base.listTemplate">
+            <property name="table" value="${table}"/>
+        </include>
+        <include refid="listCondition" />
+        <include refid="cn.cyberpeace.mp.base.order" />
+        <include refid="cn.cyberpeace.mp.base.pagination" />
+    </select>
+    <select id="total" resultType="java.lang.Integer">
+        <include refid="cn.cyberpeace.mp.base.totalTemplate">
+            <property name="table" value="${table}"/>
+        </include>
+        <include refid="listCondition" />
+    </select>
+    <select id="get" resultType="map">
+        <include refid="cn.cyberpeace.mp.base.getTemplate">
+            <property name="table" value="${table}"/>
+        </include>
+    </select>
     <insert id="create">
         <include refid="cn.cyberpeace.mp.base.createTemplate">
             <property name="table" value="${table}"/>

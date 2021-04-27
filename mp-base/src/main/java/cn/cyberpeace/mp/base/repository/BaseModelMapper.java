@@ -9,12 +9,15 @@ import cn.cyberpeace.mp.base.util.ClassUtils;
 import cn.cyberpeace.mp.base.util.ModelUtils;
 import cn.cyberpeace.mp.base.util.TextUtils;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.mapping.MappedStatement;
+import org.apache.ibatis.session.SqlSessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public interface BaseModelMapper<Model extends BaseModel> {
 
@@ -22,12 +25,14 @@ public interface BaseModelMapper<Model extends BaseModel> {
 
     Class<?> modelClass = null;
 
-    private Class<?> getModelClass() {
-        Class<?> mapperInterface = ClassUtils.getObjFieldValue(Proxy.getInvocationHandler(this),
+    private Class<?> getMapperInterface() {
+        return ClassUtils.getObjFieldValue(Proxy.getInvocationHandler(this),
                 "mapperInterface", Class.class);
-        Class<?> modelClass = ClassUtils.getStaticFieldValue(mapperInterface, "modelClass",
+    }
+
+    private Class<?> getModelClass() {
+        return ClassUtils.getStaticFieldValue(getMapperInterface(), "modelClass",
                 Class.class);
-        return modelClass;
     }
 
     private String getTableName() {
@@ -36,6 +41,50 @@ public interface BaseModelMapper<Model extends BaseModel> {
 
     private CommonMapper getCommonMapper() {
         return BeanUtils.getBean(CommonMapper.class);
+    }
+
+    private SqlSessionFactory getSqlSessionFactory() {
+        return BeanUtils.getBean(SqlSessionFactory.class);
+    }
+
+    private MappedStatement getMappedStatement(String humanName) {
+        String mapperId = getMapperInterface().getName() + "." + humanName;
+        MappedStatement mappedStatement;
+        try {
+            mappedStatement = getSqlSessionFactory().getConfiguration().getMappedStatement(mapperId);
+        } catch (Exception e) {
+            return null;
+        }
+        return mappedStatement;
+    }
+
+    private Model mapToObj(Map<String, Object> map) {
+        if (map == null) {
+            return null;
+        }
+
+        Class<?> modelClass = getModelClass();
+        if (modelClass == null) {
+            return null;
+        }
+
+        Model obj;
+        try {
+            obj = (Model) modelClass.getDeclaredConstructor().newInstance();
+        } catch (Exception e) {
+            log.error("Convert {} to {} instance failed: {}", map, modelClass, e);
+            return null;
+        }
+
+        String[] fieldNames = ClassUtils.getBeanClassFields(modelClass);
+        for (String fieldName: fieldNames) {
+            String columnName = TextUtils.humpToLine(fieldName);
+            if (map.containsKey(columnName)) {
+                ClassUtils.setBeanObjFieldValue(obj, fieldName, map.get(columnName));
+            }
+        }
+
+        return obj;
     }
 
     private Object[] convertCreateParams(List<Model> objs) {
@@ -111,15 +160,23 @@ public interface BaseModelMapper<Model extends BaseModel> {
     }
 
     default List<Model> list(HumanCondition humanCondition, String[] selectFields) {
-        return list(humanCondition.toCondition(), selectFields);
+        if (getMappedStatement("list") == null) {
+            return commonlist(humanCondition.toCondition(), selectFields);
+        } else {
+            return list(humanCondition.toCondition(), selectFields);
+        }
     }
 
     default Integer total(HumanCondition humanCondition) {
-        return total(humanCondition.toCondition());
+        if (getMappedStatement("total") == null) {
+            return commonTotal(humanCondition.toCondition());
+        } else {
+            return total(humanCondition.toCondition());
+        }
     }
 
     default Boolean create(Model obj) {
-        Object[] createParams = convertCreateParams(new ArrayList<>(){{ add(obj); }});
+        Object[] createParams = convertCreateParams(List.of(obj));
         if (createParams == null) {
             log.error("Create {} has empty field", obj);
             return false;
@@ -129,7 +186,7 @@ public interface BaseModelMapper<Model extends BaseModel> {
     }
 
     default Boolean update(Model obj) {
-        Object[] updateParams = convertUpdateParams(new ArrayList<>(){{ add(obj); }});
+        Object[] updateParams = convertUpdateParams(List.of(obj));
         if (updateParams == null) {
             log.error("Update {} has empty field", obj);
             return false;
@@ -167,8 +224,29 @@ public interface BaseModelMapper<Model extends BaseModel> {
     }
 
     List<Model> list(@Param("condition") Condition condition, String[] selectFields);
+
     Integer total(@Param("condition") Condition condition);
-    Model get(String id, String[] selectFields);
+
+    default List<Model> commonlist(@Param("condition") Condition condition, String[] selectFields) {
+        List<Map<String, Object>> mapList = getCommonMapper().list(getTableName(), condition, selectFields);
+        List<Model> objs = new ArrayList<>();
+        mapList.forEach(map -> {
+            Model obj = mapToObj(map);
+            if (obj != null) {
+                objs.add(obj);
+            }
+        });
+        return objs;
+    }
+
+    default Integer commonTotal(@Param("condition") Condition condition) {
+        return getCommonMapper().total(getTableName(), condition);
+    }
+
+    default Model get(String id, String[] selectFields) {
+        Map<String, Object> map = getCommonMapper().get(getTableName(), id, selectFields);
+        return mapToObj(map);
+    }
 
     default Boolean create(String[] createFields, Object[] createFieldValues) {
         return getCommonMapper().create(getTableName(), createFields, createFieldValues);

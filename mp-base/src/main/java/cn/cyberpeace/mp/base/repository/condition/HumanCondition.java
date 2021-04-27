@@ -19,12 +19,8 @@ public class HumanCondition {
     public Condition toCondition() {
         Condition condition = new Condition();
         condition.setPagination(new PaginationCondition().loadFromPageParams(page, pageSize));
-        String[] lineSearchFields = null;
-        if (searchFields != null) {
-            lineSearchFields = TextUtils.humpToLine(searchFields);
-        }
-        condition.setSearch(new SearchCondition(search, lineSearchFields));
-        condition.setOrder(new OrderCondition(orders));
+        condition.setSearch(new SearchCondition(search, TextUtils.humpToLine(searchFields)));
+        condition.setOrder(new OrderCondition(TextUtils.humpToLine(orders)));
         condition.setCustom(customCondition);
         return condition;
     }
