@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.base.service.fields;
+package cn.cyberpeace.mp.base.repository.fields;
 
 import cn.cyberpeace.mp.base.util.CastUtils;
 
@@ -28,7 +28,9 @@ public class DynamicFields {
     }
 
     public DynamicFields(DynamicFields dynamicFields) {
-        setFieldsMap(dynamicFields.getFieldsMap());
+        if (dynamicFields != null) {
+            setFieldsMap(dynamicFields.getFieldsMap());
+        }
     }
 
     public Boolean hasField(String fieldName) {
@@ -145,6 +147,10 @@ public class DynamicFields {
     }
 
     public DynamicFields merge(String[] targetFields) {
+        if (targetFields == null) {
+            return this;
+        }
+
         for (String field: targetFields) {
             merge(field, true);
         }
@@ -152,6 +158,10 @@ public class DynamicFields {
     }
 
     public DynamicFields merge(List<String> targetFields) {
+        if (targetFields == null) {
+            return this;
+        }
+
         targetFields.forEach((field) -> {
             merge(field, true);
         });
@@ -159,11 +169,19 @@ public class DynamicFields {
     }
 
     public DynamicFields merge(Map<String, Object> targetFieldsMap) {
+        if (targetFieldsMap == null) {
+            return this;
+        }
+
         targetFieldsMap.forEach(this::merge);
         return this;
     }
 
     public DynamicFields merge(DynamicFields targetDynamicFields) {
+        if (targetDynamicFields == null) {
+            return this;
+        }
+
         merge(targetDynamicFields.getFieldsMap());
         return this;
     }
@@ -250,6 +268,10 @@ public class DynamicFields {
     }
 
     public DynamicFields intersect(String[] targetFields) {
+        if (targetFields == null) {
+            return null;
+        }
+
         DynamicFields intersectFields = new DynamicFields();
         for (String field: targetFields) {
             Object intersectionValue = intersect(field, true);
@@ -262,6 +284,10 @@ public class DynamicFields {
     }
 
     public DynamicFields intersect(List<String> targetFields) {
+        if (targetFields == null) {
+            return null;
+        }
+
         DynamicFields intersectFields = new DynamicFields();
         targetFields.forEach((field) -> {
             Object intersectionValue = intersect(field, true);
@@ -274,6 +300,10 @@ public class DynamicFields {
     }
 
     public DynamicFields intersect(Map<String, Object> targetFieldsMap) {
+        if (targetFieldsMap == null) {
+            return null;
+        }
+
         DynamicFields intersectFields = new DynamicFields();
         targetFieldsMap.forEach((field, value) -> {
             Object intersectionValue = intersect(field, value);
@@ -286,6 +316,10 @@ public class DynamicFields {
     }
 
     public DynamicFields intersect(DynamicFields targetDynamicFields) {
+        if (targetDynamicFields == null) {
+            return null;
+        }
+
         return intersect(targetDynamicFields.getFieldsMap());
     }
 
@@ -381,6 +415,10 @@ public class DynamicFields {
 
     public DynamicFields subtract(String[] targetFields) {
         DynamicFields subtractionFields = new DynamicFields(this);
+        if (targetFields == null) {
+            return subtractionFields;
+        }
+
         for (String field: targetFields) {
             Object subtractionValue = subtract(field, true);
             if (subtractionValue != null) {
@@ -393,6 +431,10 @@ public class DynamicFields {
 
     public DynamicFields subtract(List<String> targetFields) {
         DynamicFields subtractionFields = new DynamicFields(this);
+        if (targetFields == null) {
+            return subtractionFields;
+        }
+
         targetFields.forEach((field) -> {
             Object subtractionValue = subtract(field, true);
             if (subtractionValue != null) {
@@ -404,7 +446,11 @@ public class DynamicFields {
     }
 
     public DynamicFields subtract(Map<String, Object> targetFieldsMap) {
-        DynamicFields subtractionFields = new DynamicFields();
+        DynamicFields subtractionFields = new DynamicFields(this);
+        if (targetFieldsMap == null) {
+            return subtractionFields;
+        }
+
         targetFieldsMap.forEach((field, value) -> {
             Object subtractionValue = subtract(field, value);
             if (subtractionValue != null) {
@@ -416,6 +462,10 @@ public class DynamicFields {
     }
 
     public DynamicFields subtract(DynamicFields targetDynamicFields) {
+        if (targetDynamicFields == null) {
+            return new DynamicFields(this);
+        }
+
         return subtract(targetDynamicFields.getFieldsMap());
     }
 }

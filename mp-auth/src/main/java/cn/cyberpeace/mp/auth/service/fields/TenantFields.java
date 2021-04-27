@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.auth.service.fields;
 
 import cn.cyberpeace.mp.auth.model.TenantModel;
+import cn.cyberpeace.mp.base.repository.fields.DynamicFields;
 import cn.cyberpeace.mp.base.service.fields.BaseModelFields;
-import cn.cyberpeace.mp.base.service.fields.DynamicFields;
 import cn.cyberpeace.mp.base.util.ClassUtils;
 import org.springframework.stereotype.Component;
 
@@ -10,11 +10,11 @@ import org.springframework.stereotype.Component;
 public class TenantFields extends BaseModelFields {
     public static final DynamicFields allFields = new DynamicFields(ClassUtils.getBeanClassFields(TenantModel.class));
 
-    public static final DynamicFields fields = new DynamicFields(new String[]{
+    public static final DynamicFields availableFields = new DynamicFields(new String[]{
             "identifier", "name"
-    }).merge(BaseModelFields.fields);
+    }).merge(BaseModelFields.availableFields);
 
-    public static final DynamicFields hiddenFields = allFields.subtract(fields);
+    public static final DynamicFields hiddenFields = allFields.subtract(availableFields);
 
     public static final DynamicFields readonlyFields = new DynamicFields(new String[]{
     }).merge(BaseModelFields.readonlyFields);

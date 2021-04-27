@@ -10,17 +10,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class TenantServiceImpl extends BaseModelServiceImpl<TenantModel, TenantMapper> implements TenantService {
-
-    public static final Class<TenantModel> modelClass = TenantModel.class;
-
-    public static final Class<TenantFields> modelFieldsClass = TenantFields.class;
+public class TenantServiceImpl extends BaseModelServiceImpl<TenantModel, TenantMapper, TenantFields>
+        implements TenantService {
 
     public static final Class<TenantCondition> customConditionClass = TenantCondition.class;
 
     @Autowired
-    public TenantServiceImpl(TenantMapper modelMapper) {
+    public TenantServiceImpl(TenantMapper modelMapper, TenantFields modelFields) {
         setModelMapper(modelMapper);
+        setModelFields(modelFields);
     }
 
 }

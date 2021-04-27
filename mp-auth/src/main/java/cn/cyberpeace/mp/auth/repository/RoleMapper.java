@@ -8,4 +8,5 @@ import org.springframework.stereotype.Repository;
 @Mapper
 @Repository
 public interface RoleMapper extends BaseModelMapper<RoleModel> {
+    Class<?> modelClass = RoleModel.class;
 }

@@ -5,7 +5,7 @@ import org.springframework.stereotype.Repository;
 
 @Mapper
 @Repository
-public interface CommonModelMapper {
+public interface CommonMapper {
     Boolean create(String table, String[] createFields, Object[] createFieldValues);
     Boolean update(String table, String id, String[] updateFields, Object[] updateFieldValues);
     Boolean delete(String table, String id);

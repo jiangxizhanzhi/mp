@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
 @Mapper
 @Repository
 public interface TargetMapper extends BaseModelMapper<TargetModel> {
-
+    Class<?> modelClass = TargetModel.class;
 }
