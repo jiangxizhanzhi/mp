@@ -13,6 +13,7 @@ import java.util.Map;
 public interface CommonMapper {
     List<Map<String, Object>> list(String table, @Param("condition") Condition condition, String[] selectFields);
     Integer total(String table, @Param("condition") Condition condition);
+    Boolean exist(String table, @Param("condition") Condition condition);
     Map<String, Object> get(String table, String id, String[] selectFields);
     Boolean create(String table, String[] createFields, Object[] createFieldValues);
     Boolean update(String table, String id, String[] updateFields, Object[] updateFieldValues);

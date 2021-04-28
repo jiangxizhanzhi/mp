@@ -86,7 +86,6 @@ public abstract class BaseModelServiceImpl<Model extends BaseModel,
         String[] selectFields = validModelFields != null ? TextUtils.humpToLine(validModelFields.getFields()) : null;
         List<Model> data = new ArrayList<>(modelMapper.list(humanCondition, selectFields));
         Integer total = modelMapper.total(humanCondition);
-
         return new ServiceResult(new ListObjResult<>(data, total, validModelFields));
     }
 

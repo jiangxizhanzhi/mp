@@ -163,7 +163,7 @@ public interface BaseModelMapper<Model extends BaseModel> {
         if (getMappedStatement("list") == null) {
             return commonlist(humanCondition.toCondition(), selectFields);
         } else {
-            return list(humanCondition.toCondition(), selectFields);
+            return list(getTableName(), humanCondition.toCondition(), selectFields);
         }
     }
 
@@ -171,7 +171,15 @@ public interface BaseModelMapper<Model extends BaseModel> {
         if (getMappedStatement("total") == null) {
             return commonTotal(humanCondition.toCondition());
         } else {
-            return total(humanCondition.toCondition());
+            return total(getTableName(), humanCondition.toCondition());
+        }
+    }
+
+    default Boolean exist(HumanCondition humanCondition) {
+        if (getMappedStatement("exist") == null) {
+            return commonExist(humanCondition.toCondition());
+        } else {
+            return exist(getTableName(), humanCondition.toCondition());
         }
     }
 
@@ -227,6 +235,8 @@ public interface BaseModelMapper<Model extends BaseModel> {
 
     Integer total(@Param("condition") Condition condition);
 
+    Boolean exist(@Param("condition") Condition condition);
+
     default List<Model> commonlist(@Param("condition") Condition condition, String[] selectFields) {
         List<Map<String, Object>> mapList = getCommonMapper().list(getTableName(), condition, selectFields);
         List<Model> objs = new ArrayList<>();
@@ -241,6 +251,10 @@ public interface BaseModelMapper<Model extends BaseModel> {
 
     default Integer commonTotal(@Param("condition") Condition condition) {
         return getCommonMapper().total(getTableName(), condition);
+    }
+
+    default Boolean commonExist(@Param("condition") Condition condition) {
+        return getCommonMapper().exist(getTableName(), condition);
     }
 
     default Model get(String id, String[] selectFields) {
@@ -272,4 +286,14 @@ public interface BaseModelMapper<Model extends BaseModel> {
         return getCommonMapper().bulkDelete(getTableName(), ids);
     }
 
+    List<Model> list(String table, @Param("condition") Condition condition, String[] selectFields);
+    Integer total(String table, @Param("condition") Condition condition);
+    Boolean exist(String table, @Param("condition") Condition condition);
+    Model get(String table, String id, String[] selectFields);
+    Boolean create(String table, String[] createFields, Object[] createFieldValues);
+    Boolean update(String table, String id, String[] updateFields, Object[] updateFieldValues);
+    Boolean delete(String table, String id);
+    Integer bulkCreate(String table, String[] createFields, Object[][] createFieldValuesList);
+    Integer bulkUpdate(String table, String[] updateFields, Object[][] updateFieldValuesList);
+    Integer bulkDelete(String table, String[] ids);
 }

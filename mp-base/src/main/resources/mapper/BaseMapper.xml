@@ -8,13 +8,23 @@
         </if>
         <if test="selectFields == null">*</if>
     </sql>
-    <sql id="totalField">count(*)</sql>
+    <sql id="countField">
+        <if test="countField != null">count(${countField})</if>
+        <if test="countField == null">count(*)</if>
+    </sql>
+    <sql id="countPk"><if test="true">count(pk)</if></sql>
     <sql id="search">
         <if test="condition.search != null and !condition.search.isEmpty()">
             <foreach item="field" index="index" collection="condition.search.searchFields"
                      open="" separator="OR" close="">
                 ${field} LIKE #{condition.search.searchPattern}
             </foreach>
+        </if>
+    </sql>
+    <sql id="group">
+        <if test="condition.group != null and !condition.group.isEmpty()">
+            GROUP BY <foreach item="groupField" index="index" collection="condition.group.groupFields"
+                              open="" separator="," close="">${groupField}</foreach>
         </if>
     </sql>
     <sql id="order">
@@ -61,7 +71,7 @@
         SELECT <include refid="cn.cyberpeace.mp.base.selectFields" /> FROM ${table}
     </sql>
     <sql id="totalTemplate">
-        SELECT <include refid="cn.cyberpeace.mp.base.totalField" /> FROM ${table}
+        SELECT <include refid="cn.cyberpeace.mp.base.countPk" /> FROM ${table}
     </sql>
     <sql id="getTemplate">
         SELECT <include refid="cn.cyberpeace.mp.base.selectFields" /> FROM ${table}

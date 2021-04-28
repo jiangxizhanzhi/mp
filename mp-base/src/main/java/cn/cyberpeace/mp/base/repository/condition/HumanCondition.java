@@ -13,6 +13,7 @@ public class HumanCondition {
     private Integer pageSize;
     private String search;
     private String[] searchFields;
+    private String[] groupFields;
     private String[] orders;
     private CustomCondition customCondition;
 
@@ -20,6 +21,7 @@ public class HumanCondition {
         Condition condition = new Condition();
         condition.setPagination(new PaginationCondition().loadFromPageParams(page, pageSize));
         condition.setSearch(new SearchCondition(search, TextUtils.humpToLine(searchFields)));
+        condition.setGroup(new GroupCondition(TextUtils.humpToLine(groupFields)));
         condition.setOrder(new OrderCondition(TextUtils.humpToLine(orders)));
         condition.setCustom(customCondition);
         return condition;

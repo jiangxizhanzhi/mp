@@ -13,6 +13,8 @@ public class Condition extends BaseCondition {
 
     public SearchCondition search;
 
+    public GroupCondition group;
+
     public OrderCondition order;
 
     public PaginationCondition pagination;
@@ -35,6 +37,9 @@ public class Condition extends BaseCondition {
     @Override
     public Boolean isEmpty() {
         if (!isWhereEmpty()) {
+            return false;
+        }
+        if (group != null && !group.isEmpty()) {
             return false;
         }
         if (order != null && !order.isEmpty()) {

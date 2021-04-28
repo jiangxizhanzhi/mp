@@ -1,58 +1,44 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="cn.cyberpeace.mp.base.repository.CommonMapper">
-    <sql id="listCondition">
+    <sql id="filterCondition">
         <trim prefix="WHERE" suffixOverrides="AND">
             <include refid="cn.cyberpeace.mp.base.search" />
         </trim>
     </sql>
     <select id="list" resultType="map">
-        <include refid="cn.cyberpeace.mp.base.listTemplate">
-            <property name="table" value="${table}"/>
-        </include>
-        <include refid="listCondition" />
+        <include refid="cn.cyberpeace.mp.base.listTemplate" />
+        <include refid="filterCondition" />
+        <include refid="cn.cyberpeace.mp.base.group" />
         <include refid="cn.cyberpeace.mp.base.order" />
         <include refid="cn.cyberpeace.mp.base.pagination" />
     </select>
-    <select id="total" resultType="java.lang.Integer">
-        <include refid="cn.cyberpeace.mp.base.totalTemplate">
-            <property name="table" value="${table}"/>
-        </include>
-        <include refid="listCondition" />
+    <select id="total" resultType="int">
+        <include refid="cn.cyberpeace.mp.base.totalTemplate" />
+        <include refid="filterCondition" />
+    </select>
+    <select id="exist" resultType="boolean">
+        SELECT EXISTS(SELECT 1 FROM ${table} <include refid="filterCondition" /> LIMIT 1)
     </select>
     <select id="get" resultType="map">
-        <include refid="cn.cyberpeace.mp.base.getTemplate">
-            <property name="table" value="${table}"/>
-        </include>
+        <include refid="cn.cyberpeace.mp.base.getTemplate" />
     </select>
     <insert id="create">
-        <include refid="cn.cyberpeace.mp.base.createTemplate">
-            <property name="table" value="${table}"/>
-        </include>
+        <include refid="cn.cyberpeace.mp.base.createTemplate" />
     </insert>
     <update id="update">
-        <include refid="cn.cyberpeace.mp.base.updateTemplate">
-            <property name="table" value="${table}"/>
-        </include>
+        <include refid="cn.cyberpeace.mp.base.updateTemplate" />
     </update>
     <delete id="delete">
-        <include refid="cn.cyberpeace.mp.base.deleteTemplate">
-            <property name="table" value="${table}"/>
-        </include>
+        <include refid="cn.cyberpeace.mp.base.deleteTemplate" />
     </delete>
     <insert id="bulkCreate">
-        <include refid="cn.cyberpeace.mp.base.bulkCreateTemplate">
-            <property name="table" value="${table}"/>
-        </include>
+        <include refid="cn.cyberpeace.mp.base.bulkCreateTemplate" />
     </insert>
     <update id="bulkUpdate">
-        <include refid="cn.cyberpeace.mp.base.bulkUpdateTemplate">
-            <property name="table" value="${table}"/>
-        </include>
+        <include refid="cn.cyberpeace.mp.base.bulkUpdateTemplate" />
     </update>
     <delete id="bulkDelete">
-        <include refid="cn.cyberpeace.mp.base.bulkDeleteTemplate">
-            <property name="table" value="${table}"/>
-        </include>
+        <include refid="cn.cyberpeace.mp.base.bulkDeleteTemplate" />
     </delete>
 </mapper>

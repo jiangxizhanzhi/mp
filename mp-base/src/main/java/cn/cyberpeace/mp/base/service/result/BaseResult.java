@@ -3,8 +3,10 @@ package cn.cyberpeace.mp.base.service.result;
 import cn.cyberpeace.mp.base.repository.fields.DynamicFields;
 import cn.cyberpeace.mp.base.util.ClassUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,10 +38,9 @@ public abstract class BaseResult {
             return resultList;
         }
 
-        Map<String, Object> resultMap = new HashMap<>();
-
+        Map<Object, Object> resultMap = new HashMap<>();
         fields.getFieldsMap().forEach((fieldName, fieldFlag) -> {
-            Object fieldValue = ClassUtils.getBeanObjFieldValue(obj, fieldName);
+            Object fieldValue = getObjFieldValue(obj, fieldName);
             if (fieldFlag instanceof Boolean && (Boolean) fieldFlag) {
                 resultMap.put(fieldName, fieldValue);
             } else if (fieldFlag instanceof DynamicFields) {
@@ -48,6 +49,29 @@ public abstract class BaseResult {
         });
 
         return resultMap;
+    }
+
+    public Object getObjField(Object obj, String fieldName) {
+        if (obj instanceof Map) {
+            return fieldName;
+        }
+
+        Field field = ClassUtils.getField(obj.getClass(), fieldName, true, true);
+        if (field == null) {
+            return fieldName;
+        }
+        return field;
+    }
+
+    public Object getObjFieldValue(Object obj, String fieldName) {
+        Object fieldValue;
+        if (obj instanceof Map) {
+            fieldValue = ((Map<?, ?>) obj).getOrDefault(fieldName, null);
+        } else {
+            // 未注入jackson注解
+            fieldValue = ClassUtils.getBeanObjFieldValue(obj, fieldName);
+        }
+        return fieldValue;
     }
 
     public abstract Object asResult();

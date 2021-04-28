@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="cn.cyberpeace.mp.auth.repository.TenantMapper">
-    <sql id="listCondition">
+    <sql id="filterCondition">
         <trim prefix="WHERE" suffixOverrides="AND">
             <if test="condition.custom != null and !condition.custom.isEmpty()">
                 <if test="condition.custom.name != null">
@@ -15,17 +15,17 @@
         </trim>
     </sql>
     <select id="list" resultType="cn.cyberpeace.mp.auth.model.TenantModel">
-        <include refid="cn.cyberpeace.mp.base.listTemplate">
-            <property name="table" value="mp_auth_tenant"/>
-        </include>
-        <include refid="listCondition" />
+        <include refid="cn.cyberpeace.mp.base.listTemplate" />
+        <include refid="filterCondition" />
+        <include refid="cn.cyberpeace.mp.base.group" />
         <include refid="cn.cyberpeace.mp.base.order" />
         <include refid="cn.cyberpeace.mp.base.pagination" />
     </select>
-    <select id="total" resultType="java.lang.Integer">
-        <include refid="cn.cyberpeace.mp.base.totalTemplate">
-            <property name="table" value="mp_auth_tenant"/>
-        </include>
-        <include refid="listCondition" />
+    <select id="total" resultType="int">
+        <include refid="cn.cyberpeace.mp.base.totalTemplate" />
+        <include refid="filterCondition" />
+    </select>
+    <select id="exist" resultType="boolean">
+        SELECT EXISTS(SELECT 1 FROM ${table} <include refid="filterCondition" /> LIMIT 1)
     </select>
 </mapper>
