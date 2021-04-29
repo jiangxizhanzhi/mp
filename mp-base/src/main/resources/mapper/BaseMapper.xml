@@ -3,8 +3,7 @@
 <mapper namespace="cn.cyberpeace.mp.base">
     <sql id="selectFields">
         <if test="selectFields != null">
-            <foreach item="field" index="index" collection="selectFields"
-                     open="" separator="," close="">${field}</foreach>
+            <foreach item="field" index="index" collection="selectFields" open="" separator="," close="">${field}</foreach>
         </if>
         <if test="selectFields == null">*</if>
     </sql>
@@ -13,10 +12,28 @@
         <if test="countField == null">count(*)</if>
     </sql>
     <sql id="countPk"><if test="true">count(pk)</if></sql>
+    <sql id="and">
+        <if test="condition.andi != null and !condition.andi.isEmpty()">
+            <foreach item="cond" index="index" collection="condition.andi.conds" open="(" separator=" AND " close=")">
+                <if test="cond.name == 'cond'">
+                    ${cond.fieldName} ${cond.connector} #{cond.fieldValue}
+                </if>
+                <if test="cond.name == 'or'">
+                    <foreach item="orCond" index="index" collection="cond.conds" open="(" separator=" OR " close=")">
+                        ${orCond.fieldName} ${orCond.connector} #{orCond.fieldValue}
+                    </foreach>
+                </if>
+                <if test="cond.name == 'and'">
+                    <foreach item="andCond" index="index" collection="cond.conds" open="(" separator=" AND " close=")">
+                        ${condandCond.fieldName} ${andCond.connector} #{andCond.fieldValue}
+                    </foreach>
+                </if>
+            </foreach>
+        </if>
+    </sql>
     <sql id="search">
         <if test="condition.search != null and !condition.search.isEmpty()">
-            <foreach item="field" index="index" collection="condition.search.searchFields"
-                     open="" separator="OR" close="">
+            <foreach item="field" index="index" collection="condition.search.searchFields" open="(" separator=" OR " close=")">
                 ${field} LIKE #{condition.search.searchPattern}
             </foreach>
         </if>
@@ -30,7 +47,7 @@
     <sql id="order">
         <if test="condition.order != null and !condition.order.isEmpty()">
             ORDER BY <foreach item="order" index="index" collection="condition.order.orders"
-                     open="" separator="," close="">${order}</foreach>
+                              open="" separator="," close="">${order}</foreach>
         </if>
     </sql>
     <sql id="pagination">
@@ -102,13 +119,13 @@
     <sql id="bulkUpdateTemplate">
         UPDATE ${table} JOIN
         (<foreach item="updateFieldValues" index="rowIndex" collection="updateFieldValuesList"
-                 open="" separator="UNION" close="">
-            SELECT
-            <foreach item="updateFieldValue" index="fieldIndex" collection="updateFieldValues"
+                  open="" separator=" UNION " close="">
+        SELECT
+        <foreach item="updateFieldValue" index="fieldIndex" collection="updateFieldValues"
                  open="" separator="," close="">
-                #{updateFieldValue} AS #{updateFields[${fieldIndex}]}
-            </foreach>
-        </foreach>) a USING(id)
+            #{updateFieldValue} AS #{updateFields[${fieldIndex}]}
+        </foreach>
+    </foreach>) a USING(id)
         SET
         <foreach item="field" index="index" collection="updateFields"
                  open="" separator="," close="">

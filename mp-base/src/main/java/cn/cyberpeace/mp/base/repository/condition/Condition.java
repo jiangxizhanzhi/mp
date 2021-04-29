@@ -11,6 +11,8 @@ public class Condition extends BaseCondition {
 
     public CustomCondition custom;
 
+    public AndCondition andi;
+
     public SearchCondition search;
 
     public GroupCondition group;
@@ -20,13 +22,19 @@ public class Condition extends BaseCondition {
     public PaginationCondition pagination;
 
     public Boolean isWhereFull() {
-        return custom != null && !custom.isEmpty() && search != null && !search.isEmpty();
+        return custom != null && !custom.isEmpty() && andi != null && andi.isEmpty() &&
+                search != null && !search.isEmpty();
     }
 
     public Boolean isWhereEmpty() {
         if (custom != null && !custom.isEmpty()) {
             return false;
         }
+
+        if (andi != null && !andi.isEmpty()) {
+            return false;
+        }
+
         if (search != null && !search.isEmpty()) {
             return false;
         }

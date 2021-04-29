@@ -2,7 +2,10 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="cn.cyberpeace.mp.base.repository.CommonMapper">
     <sql id="filterCondition">
-        <trim prefix="WHERE" suffixOverrides="AND">
+        <trim prefix="WHERE" prefixOverrides="AND" suffixOverrides="AND">
+            <if test="condition.andi != null and !condition.andi.isEmpty()">
+                <include refid="cn.cyberpeace.mp.base.and" /> AND
+            </if>
             <include refid="cn.cyberpeace.mp.base.search" />
         </trim>
     </sql>

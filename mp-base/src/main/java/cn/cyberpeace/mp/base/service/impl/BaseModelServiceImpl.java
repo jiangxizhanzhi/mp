@@ -56,9 +56,12 @@ public abstract class BaseModelServiceImpl<Model extends BaseModel,
         }
         humanCondition.setOrders(lastOrders);
 
+        loadFilterCondition(humanCondition, params);
         humanCondition.setCustomCondition(getCustomCondition(params));
         return humanCondition;
     }
+
+    public void loadFilterCondition(HumanCondition humanCondition, Map<String, Object> params) {}
 
     public CustomCondition getCustomCondition(Map<String, Object> params) {
         Class<?> customConditionClass = ClassUtils.getStaticFieldValue(getClass(),

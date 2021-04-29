@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.base.repository;
 
+import cn.cyberpeace.mp.base.annotation.Recommendation;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.Condition;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
@@ -25,9 +26,17 @@ public interface BaseModelMapper<Model extends BaseModel> {
 
     Class<?> modelClass = null;
 
-    private Class<?> getMapperInterface() {
-        return ClassUtils.getObjFieldValue(Proxy.getInvocationHandler(this),
+    private static CommonMapper getCommonMapper() {
+        return BeanUtils.getBean(CommonMapper.class);
+    }
+
+    private static Class<?> getMapperInterface(Proxy proxy) {
+        return ClassUtils.getObjFieldValue(Proxy.getInvocationHandler(proxy),
                 "mapperInterface", Class.class);
+    }
+
+    private Class<?> getMapperInterface() {
+        return getMapperInterface((Proxy) this);
     }
 
     private Class<?> getModelClass() {
@@ -39,22 +48,15 @@ public interface BaseModelMapper<Model extends BaseModel> {
         return ModelUtils.getTableName(getModelClass());
     }
 
-    private CommonMapper getCommonMapper() {
-        return BeanUtils.getBean(CommonMapper.class);
-    }
-
-    private SqlSessionFactory getSqlSessionFactory() {
-        return BeanUtils.getBean(SqlSessionFactory.class);
-    }
-
     private MappedStatement getMappedStatement(String humanName) {
         String mapperId = getMapperInterface().getName() + "." + humanName;
-        MappedStatement mappedStatement;
+        MappedStatement mappedStatement = null;
         try {
-            mappedStatement = getSqlSessionFactory().getConfiguration().getMappedStatement(mapperId);
-        } catch (Exception e) {
-            return null;
+            mappedStatement = BeanUtils.getBean(SqlSessionFactory.class).getConfiguration().getMappedStatement(
+                    mapperId);
+        } catch (Exception ignored) {
         }
+
         return mappedStatement;
     }
 
@@ -159,14 +161,16 @@ public interface BaseModelMapper<Model extends BaseModel> {
         return new Object[]{ updateColumnFields.toArray(new String[0]), updateFieldValuesList };
     }
 
+    @Recommendation
     default List<Model> list(HumanCondition humanCondition, String[] selectFields) {
         if (getMappedStatement("list") == null) {
-            return commonlist(humanCondition.toCondition(), selectFields);
+            return commonList(humanCondition.toCondition(), selectFields);
         } else {
             return list(getTableName(), humanCondition.toCondition(), selectFields);
         }
     }
 
+    @Recommendation
     default Integer total(HumanCondition humanCondition) {
         if (getMappedStatement("total") == null) {
             return commonTotal(humanCondition.toCondition());
@@ -175,6 +179,7 @@ public interface BaseModelMapper<Model extends BaseModel> {
         }
     }
 
+    @Recommendation
     default Boolean exist(HumanCondition humanCondition) {
         if (getMappedStatement("exist") == null) {
             return commonExist(humanCondition.toCondition());
@@ -183,6 +188,7 @@ public interface BaseModelMapper<Model extends BaseModel> {
         }
     }
 
+    @Recommendation
     default Boolean create(Model obj) {
         Object[] createParams = convertCreateParams(List.of(obj));
         if (createParams == null) {
@@ -193,6 +199,7 @@ public interface BaseModelMapper<Model extends BaseModel> {
         return create((String[]) createParams[0], ((Object[][]) createParams[1])[0]);
     }
 
+    @Recommendation
     default Boolean update(Model obj) {
         Object[] updateParams = convertUpdateParams(List.of(obj));
         if (updateParams == null) {
@@ -203,6 +210,7 @@ public interface BaseModelMapper<Model extends BaseModel> {
         return update(obj.getId(), (String[]) updateParams[0], ((Object[][]) updateParams[1])[0]);
     }
 
+    @Recommendation
     default Integer bulkCreate(List<Model> objs) {
         if (objs.size() == 0) {
             return 0;
@@ -217,6 +225,7 @@ public interface BaseModelMapper<Model extends BaseModel> {
         return bulkCreate((String[]) createParams[0], (Object[][]) createParams[1]);
     }
 
+    @Recommendation
     default Integer bulkUpdate(List<Model> objs) {
         if (objs.size() == 0) {
             return 0;
@@ -231,13 +240,7 @@ public interface BaseModelMapper<Model extends BaseModel> {
         return bulkUpdate((String[]) updateParams[0], (Object[][]) updateParams[1]);
     }
 
-    List<Model> list(@Param("condition") Condition condition, String[] selectFields);
-
-    Integer total(@Param("condition") Condition condition);
-
-    Boolean exist(@Param("condition") Condition condition);
-
-    default List<Model> commonlist(@Param("condition") Condition condition, String[] selectFields) {
+    default List<Model> commonList(@Param("condition") Condition condition, String[] selectFields) {
         List<Map<String, Object>> mapList = getCommonMapper().list(getTableName(), condition, selectFields);
         List<Model> objs = new ArrayList<>();
         mapList.forEach(map -> {
@@ -257,6 +260,11 @@ public interface BaseModelMapper<Model extends BaseModel> {
         return getCommonMapper().exist(getTableName(), condition);
     }
 
+    List<Model> list(@Param("condition") Condition condition, String[] selectFields);
+    Integer total(@Param("condition") Condition condition);
+    Boolean exist(@Param("condition") Condition condition);
+
+    @Recommendation
     default Model get(String id, String[] selectFields) {
         Map<String, Object> map = getCommonMapper().get(getTableName(), id, selectFields);
         return mapToObj(map);
@@ -270,6 +278,7 @@ public interface BaseModelMapper<Model extends BaseModel> {
         return getCommonMapper().update(getTableName(), id, updateFields, updateFieldValues);
     }
 
+    @Recommendation
     default Boolean delete(String id) {
         return getCommonMapper().delete(getTableName(), id);
     }
@@ -282,6 +291,7 @@ public interface BaseModelMapper<Model extends BaseModel> {
         return getCommonMapper().bulkUpdate(getTableName(), updateFields, updateFieldValuesList);
     }
 
+    @Recommendation
     default Integer bulkDelete(String[] ids) {
         return getCommonMapper().bulkDelete(getTableName(), ids);
     }
