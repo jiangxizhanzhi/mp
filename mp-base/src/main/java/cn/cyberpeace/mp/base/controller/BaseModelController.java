@@ -65,7 +65,7 @@ public abstract class BaseModelController<Model extends BaseModel, ModelService 
 
     @DeleteMapping("/{id}")
     public ServiceResult delete(@PathVariable String id) {
-        return modelService.delete(id);
+        return modelService.delete(id).asResult();
     }
 
     @PostMapping("/bulk_create")
@@ -80,6 +80,6 @@ public abstract class BaseModelController<Model extends BaseModel, ModelService 
 
     @DeleteMapping("/bulk_delete")
     public ServiceResult bulkDelete(@RequestBody String[] ids) {
-        return modelService.bulkDelete(ids);
+        return modelService.bulkDelete(ids).asResult();
     }
 }
