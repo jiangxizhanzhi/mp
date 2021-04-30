@@ -4,11 +4,11 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 public class TextUtils {
-    private TextUtils() {}
-
     private static final Pattern linePattern = Pattern.compile("_([a-z])");
 
     private static final Pattern humpPattern = Pattern.compile("\\B(\\p{Upper})(\\p{Lower}*)");
+
+    private TextUtils() {}
 
     public static String uuid() {
         return UUID.randomUUID().toString().replace("-","").toLowerCase();

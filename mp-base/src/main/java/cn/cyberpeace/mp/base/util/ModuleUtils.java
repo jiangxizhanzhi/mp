@@ -8,9 +8,10 @@ import java.util.List;
 import java.util.Set;
 
 public class ModuleUtils {
-    private ModuleUtils() {}
 
     public static final String GROUP_NAME = "cn.cyberpeace.mp";
+
+    private ModuleUtils() {}
 
     public static List<String> findPackageNamesStartingWith(String prefix) {
         List<String> packageNames = new ArrayList<>();
