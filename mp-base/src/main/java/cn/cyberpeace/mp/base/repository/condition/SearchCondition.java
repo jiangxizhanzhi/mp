@@ -8,7 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class SearchCondition extends BaseCondition {
+public class SearchCondition implements BaseCondition {
 
     private String search;
 
@@ -19,7 +19,7 @@ public class SearchCondition extends BaseCondition {
     }
 
     @Override
-    public Boolean isEmpty() {
+    public boolean isEmpty() {
         return StringUtils.isEmpty(search) || (searchFields == null || searchFields.length == 0);
     }
 }

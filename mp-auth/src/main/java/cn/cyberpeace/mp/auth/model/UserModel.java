@@ -23,10 +23,10 @@ public class UserModel extends BaseModel {
     private String birthday;
     private String email;
     private String mobile;
-    private String id_card;
+    private String idCard;
     private String address;
     private String status;
-    private Date date_joined;
-    private Date expired_time;
-    private Date last_login;
+    private Date dateJoined;
+    private Date expiredTime;
+    private Date lastLogin;
 }

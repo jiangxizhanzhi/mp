@@ -3,12 +3,12 @@ package cn.cyberpeace.mp.base.repository.condition;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BaseConnectorCondition extends BaseCondition {
+public class BaseConnectorCondition implements BaseCondition {
 
     private final List<Object> conds = new ArrayList<>();
 
     public BaseConnectorCondition addCondition(String fieldName, Connector connector, Object fieldValue) {
-        ConnectorCond cond = new ConnectorCond(fieldName, connector.getOperator(), fieldValue);
+        var cond = new ConnectorCond(fieldName, connector.getOperator(), fieldValue);
         conds.add(cond);
         return this;
     }
@@ -43,7 +43,7 @@ public class BaseConnectorCondition extends BaseCondition {
     }
 
     @Override
-    public Boolean isEmpty() {
+    public boolean isEmpty() {
         return conds.isEmpty();
     }
 

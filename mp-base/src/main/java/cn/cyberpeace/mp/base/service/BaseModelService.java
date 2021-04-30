@@ -5,10 +5,10 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import java.util.List;
 import java.util.Map;
 
-public interface BaseModelService<Model> {
+public interface BaseModelService<M> {
 
     default ServiceResult list(Map<String, Object> params, String search, String[] searchFields, String[] orders,
-                               Integer page, Integer pageSize, String[] fields) {
+                               int page, int pageSize, String[] fields) {
         return new ServiceResult();
     }
 
@@ -16,11 +16,11 @@ public interface BaseModelService<Model> {
         return new ServiceResult();
     }
 
-    default ServiceResult create(Model obj, String[] fields) {
+    default ServiceResult create(M obj, String[] fields) {
         return new ServiceResult();
     }
 
-    default ServiceResult update(Model obj, String[] fields) {
+    default ServiceResult update(M obj, String[] fields) {
         return new ServiceResult();
     }
 
@@ -28,11 +28,11 @@ public interface BaseModelService<Model> {
         return new ServiceResult();
     }
 
-    default ServiceResult bulkCreate(List<Model> objs) {
+    default ServiceResult bulkCreate(List<M> objs) {
         return new ServiceResult();
     }
 
-    default ServiceResult bulkUpdate(List<Model> objs) {
+    default ServiceResult bulkUpdate(List<M> objs) {
         return new ServiceResult();
     }
 

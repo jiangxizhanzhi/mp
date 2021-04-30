@@ -7,26 +7,26 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Condition extends BaseCondition {
+public class Condition implements BaseCondition {
 
-    public CustomCondition custom;
+    private CustomCondition custom;
 
-    public AndCondition andi;
+    private AndCondition andi;
 
-    public SearchCondition search;
+    private SearchCondition search;
 
-    public GroupCondition group;
+    private GroupCondition group;
 
-    public OrderCondition order;
+    private OrderCondition order;
 
-    public PaginationCondition pagination;
+    private PaginationCondition pagination;
 
-    public Boolean isWhereFull() {
+    public boolean isWhereFull() {
         return custom != null && !custom.isEmpty() && andi != null && andi.isEmpty() &&
                 search != null && !search.isEmpty();
     }
 
-    public Boolean isWhereEmpty() {
+    public boolean isWhereEmpty() {
         if (custom != null && !custom.isEmpty()) {
             return false;
         }
@@ -35,15 +35,11 @@ public class Condition extends BaseCondition {
             return false;
         }
 
-        if (search != null && !search.isEmpty()) {
-            return false;
-        }
-
-        return true;
+        return search == null || search.isEmpty();
     }
 
     @Override
-    public Boolean isEmpty() {
+    public boolean isEmpty() {
         if (!isWhereEmpty()) {
             return false;
         }
@@ -53,10 +49,6 @@ public class Condition extends BaseCondition {
         if (order != null && !order.isEmpty()) {
             return false;
         }
-        if (pagination != null && !pagination.isEmpty()) {
-            return false;
-        }
-
-        return true;
+        return pagination == null || pagination.isEmpty();
     }
 }

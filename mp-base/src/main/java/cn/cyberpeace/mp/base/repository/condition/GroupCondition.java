@@ -7,12 +7,12 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class GroupCondition extends BaseCondition {
+public class GroupCondition implements BaseCondition {
 
     private String[] groupFields;
 
     @Override
-    public Boolean isEmpty() {
+    public boolean isEmpty() {
         return groupFields == null || groupFields.length == 0;
     }
 }

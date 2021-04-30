@@ -24,9 +24,9 @@ public abstract class BaseFields {
     private DynamicFields getIntersectionFields(String fieldName, String[] uncertainFields) {
         DynamicFields intersectionFields = null;
         if (uncertainFields != null) {
-            DynamicFields availableFields = getDefinedFields(fieldName);
-            if (availableFields != null) {
-                intersectionFields = availableFields.intersect(uncertainFields);
+            DynamicFields actualAvailableFields = getDefinedFields(fieldName);
+            if (actualAvailableFields != null) {
+                intersectionFields = actualAvailableFields.intersect(uncertainFields);
                 if (!intersectionFields.hasValidFields()) {
                     intersectionFields = null;
                 }
@@ -83,8 +83,8 @@ public abstract class BaseFields {
                     fieldNameOrderMap.put(order, order);
                 }
             }
-            String[] orderFields = fieldNameOrderMap.keySet().toArray(new String[0]);
-            DynamicFields validOrderFields = getValidOrderFields(orderFields);
+            String[] uncertainOrderFields = fieldNameOrderMap.keySet().toArray(new String[0]);
+            DynamicFields validOrderFields = getValidOrderFields(uncertainOrderFields);
             if (validOrderFields != null) {
                 List<String> validOrderList = new ArrayList<>();
                 fieldNameOrderMap.forEach((fieldName, order) -> {
@@ -101,18 +101,18 @@ public abstract class BaseFields {
     }
 
     public void clearNotWritableFields(Object obj) {
-        DynamicFields hiddenFields = ClassUtils.getStaticFieldValue(getClass(), "hiddenFields",
+        DynamicFields actualHiddenFields = ClassUtils.getStaticFieldValue(getClass(), "hiddenFields",
                 DynamicFields.class);
-        if (hiddenFields != null) {
-            for (String fieldName: hiddenFields.getFields()) {
+        if (actualHiddenFields != null) {
+            for (String fieldName: actualHiddenFields.getFields()) {
                 ClassUtils.setBeanObjFieldValue(obj, fieldName, null);
             }
         }
 
-        DynamicFields readonlyFields = ClassUtils.getStaticFieldValue(getClass(), "readonlyFields",
+        DynamicFields actualReadonlyFields = ClassUtils.getStaticFieldValue(getClass(), "readonlyFields",
                 DynamicFields.class);
-        if (readonlyFields != null) {
-            for (String fieldName: readonlyFields.getFields()) {
+        if (actualReadonlyFields != null) {
+            for (String fieldName: actualReadonlyFields.getFields()) {
                 ClassUtils.setBeanObjFieldValue(obj, fieldName, null);
             }
         }

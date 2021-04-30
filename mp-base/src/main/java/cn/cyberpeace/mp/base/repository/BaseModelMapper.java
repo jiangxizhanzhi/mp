@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.Condition;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.repository.fields.DynamicFields;
+import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.base.util.ClassUtils;
 import cn.cyberpeace.mp.base.util.ModelUtils;
@@ -20,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public interface BaseModelMapper<Model extends BaseModel> {
+public interface BaseModelMapper<M extends BaseModel> {
 
     Logger log = LoggerFactory.getLogger(BaseModelMapper.class);
 
@@ -40,8 +41,13 @@ public interface BaseModelMapper<Model extends BaseModel> {
     }
 
     private Class<?> getModelClass() {
-        return ClassUtils.getStaticFieldValue(getMapperInterface(), "modelClass",
-                Class.class);
+        Class<?> mapperInterface = getMapperInterface();
+        var modelClassAnnotation = mapperInterface.getAnnotation(ModelClass.class);
+        if (modelClassAnnotation != null) {
+            return modelClassAnnotation.value();
+        }
+
+        return ClassUtils.getStaticFieldValue(mapperInterface, "modelClass", Class.class);
     }
 
     private String getTableName() {
@@ -50,35 +56,36 @@ public interface BaseModelMapper<Model extends BaseModel> {
 
     private MappedStatement getMappedStatement(String humanName) {
         String mapperId = getMapperInterface().getName() + "." + humanName;
-        MappedStatement mappedStatement = null;
+        MappedStatement mappedStatement;
         try {
             mappedStatement = BeanUtils.getBean(SqlSessionFactory.class).getConfiguration().getMappedStatement(
                     mapperId);
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            return null;
         }
 
         return mappedStatement;
     }
 
-    private Model mapToObj(Map<String, Object> map) {
+    private M mapToObj(Map<String, Object> map) {
         if (map == null) {
             return null;
         }
 
-        Class<?> modelClass = getModelClass();
-        if (modelClass == null) {
+        Class<?> actualModelClass = getModelClass();
+        if (actualModelClass == null) {
             return null;
         }
 
-        Model obj;
+        M obj;
         try {
-            obj = (Model) modelClass.getDeclaredConstructor().newInstance();
+            obj = (M) actualModelClass.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
-            log.error("Convert {} to {} instance failed: {}", map, modelClass, e);
+            log.error("Convert {} to {} instance failed: {}", map, actualModelClass, e);
             return null;
         }
 
-        String[] fieldNames = ClassUtils.getBeanClassFields(modelClass);
+        String[] fieldNames = ClassUtils.getBeanClassFields(actualModelClass);
         for (String fieldName: fieldNames) {
             String columnName = TextUtils.humpToLine(fieldName);
             if (map.containsKey(columnName)) {
@@ -89,24 +96,24 @@ public interface BaseModelMapper<Model extends BaseModel> {
         return obj;
     }
 
-    private Object[] convertCreateParams(List<Model> objs) {
-        DynamicFields allModelFields = new DynamicFields(ClassUtils.getBeanClassFields(getModelClass()));
+    private Object[] convertCreateParams(List<M> objs) {
+        var allModelFields = new DynamicFields(ClassUtils.getBeanClassFields(getModelClass()));
         String[] createFields = allModelFields.getFields();
-        String[] createColumnFields = new String[createFields.length];
-        for (int i = 0; i < createFields.length; i++) {
+        var createColumnFields = new String[createFields.length];
+        for (var i = 0; i < createFields.length; i++) {
             createColumnFields[i] = TextUtils.humpToLine(createFields[i]);
         }
 
-        Object[][] createFieldValuesList = new Object[objs.size()][createFields.length];
-        for (int i = 0; i < objs.size(); i++) {
-            Model obj = objs.get(i);
+        var createFieldValuesList = new Object[objs.size()][createFields.length];
+        for (var i = 0; i < objs.size(); i++) {
+            M obj = objs.get(i);
             obj.initDefault();
 
-            Object[] createFieldValues = new Object[createFields.length];
-            for (int j = 0; j < createFields.length; j++) {
+            var createFieldValues = new Object[createFields.length];
+            for (var j = 0; j < createFields.length; j++) {
                 Object fieldValue = ClassUtils.getObjFieldValue(obj, createFields[j]);
                 if (fieldValue == null) {
-                    return null;
+                    return new Object[0];
                 }
                 createFieldValues[j] = fieldValue;
             }
@@ -116,21 +123,12 @@ public interface BaseModelMapper<Model extends BaseModel> {
         return new Object[]{ createColumnFields, createFieldValuesList };
     }
 
-    private Object[] convertUpdateParams(List<Model> objs) {
-        String[] ids = new String[objs.size()];
-        for (int i = 0; i < objs.size(); i++) {
-            String id = objs.get(i).getId();
-            if (id == null) {
-                return null;
-            }
-            ids[i] = id;
-        }
-
-        Model sampleObj = objs.get(0);
+    private Object[] convertUpdateParams(List<M> objs) {
+        var sampleObj = objs.get(0);
         sampleObj.setUpdateTime(null);
         sampleObj.initDefaultUpdateTime();
 
-        DynamicFields allModelFields = new DynamicFields(ClassUtils.getBeanClassFields(getModelClass()));
+        var allModelFields = new DynamicFields(ClassUtils.getBeanClassFields(getModelClass()));
         List<String> updateFields = new ArrayList<>();
         List<String> updateColumnFields = new ArrayList<>();
         for (String fieldName: allModelFields.getFields()) {
@@ -141,17 +139,17 @@ public interface BaseModelMapper<Model extends BaseModel> {
             }
         }
 
-        Object[][] updateFieldValuesList = new Object[objs.size()][updateFields.size()];
-        for (int i = 0; i < objs.size(); i++) {
-            Model obj = objs.get(i);
+        var updateFieldValuesList = new Object[objs.size()][updateFields.size()];
+        for (var i = 0; i < objs.size(); i++) {
+            M obj = objs.get(i);
             sampleObj.setUpdateTime(null);
             obj.initDefaultUpdateTime();
 
-            Object[] updateFieldValues = new Object[updateFields.size()];
-            for (int j = 0; j < updateFields.size(); j++) {
+            var updateFieldValues = new Object[updateFields.size()];
+            for (var j = 0; j < updateFields.size(); j++) {
                 Object fieldValue = ClassUtils.getObjFieldValue(obj, updateFields.get(j));
                 if (fieldValue == null) {
-                    return null;
+                    return new Object[0];
                 }
                 updateFieldValues[j] = fieldValue;
             }
@@ -162,7 +160,7 @@ public interface BaseModelMapper<Model extends BaseModel> {
     }
 
     @Recommendation
-    default List<Model> list(HumanCondition humanCondition, String[] selectFields) {
+    default List<M> list(HumanCondition humanCondition, String[] selectFields) {
         if (getMappedStatement("list") == null) {
             return commonList(humanCondition.toCondition(), selectFields);
         } else {
@@ -171,7 +169,7 @@ public interface BaseModelMapper<Model extends BaseModel> {
     }
 
     @Recommendation
-    default Integer total(HumanCondition humanCondition) {
+    default int total(HumanCondition humanCondition) {
         if (getMappedStatement("total") == null) {
             return commonTotal(humanCondition.toCondition());
         } else {
@@ -180,7 +178,7 @@ public interface BaseModelMapper<Model extends BaseModel> {
     }
 
     @Recommendation
-    default Boolean exist(HumanCondition humanCondition) {
+    default boolean exist(HumanCondition humanCondition) {
         if (getMappedStatement("exist") == null) {
             return commonExist(humanCondition.toCondition());
         } else {
@@ -189,9 +187,9 @@ public interface BaseModelMapper<Model extends BaseModel> {
     }
 
     @Recommendation
-    default Boolean create(Model obj) {
+    default boolean create(M obj) {
         Object[] createParams = convertCreateParams(List.of(obj));
-        if (createParams == null) {
+        if (createParams.length == 0) {
             log.error("Create {} has empty field", obj);
             return false;
         }
@@ -200,9 +198,9 @@ public interface BaseModelMapper<Model extends BaseModel> {
     }
 
     @Recommendation
-    default Boolean update(Model obj) {
+    default boolean update(M obj) {
         Object[] updateParams = convertUpdateParams(List.of(obj));
-        if (updateParams == null) {
+        if (updateParams.length == 0) {
             log.error("Update {} has empty field", obj);
             return false;
         }
@@ -211,13 +209,13 @@ public interface BaseModelMapper<Model extends BaseModel> {
     }
 
     @Recommendation
-    default Integer bulkCreate(List<Model> objs) {
-        if (objs.size() == 0) {
+    default int bulkCreate(List<M> objs) {
+        if (objs.isEmpty()) {
             return 0;
         }
 
         Object[] createParams = convertCreateParams(objs);
-        if (createParams == null) {
+        if (createParams.length == 0) {
             log.error("Bulk create {} has empty field", objs);
             return 0;
         }
@@ -226,13 +224,13 @@ public interface BaseModelMapper<Model extends BaseModel> {
     }
 
     @Recommendation
-    default Integer bulkUpdate(List<Model> objs) {
-        if (objs.size() == 0) {
+    default int bulkUpdate(List<M> objs) {
+        if (objs.isEmpty()) {
             return 0;
         }
 
         Object[] updateParams = convertUpdateParams(objs);
-        if (updateParams == null) {
+        if (updateParams.length == 0) {
             log.error("Service bulk update {} has empty field", objs);
             return 0;
         }
@@ -240,11 +238,11 @@ public interface BaseModelMapper<Model extends BaseModel> {
         return bulkUpdate((String[]) updateParams[0], (Object[][]) updateParams[1]);
     }
 
-    default List<Model> commonList(@Param("condition") Condition condition, String[] selectFields) {
+    default List<M> commonList(@Param("condition") Condition condition, String[] selectFields) {
         List<Map<String, Object>> mapList = getCommonMapper().list(getTableName(), condition, selectFields);
-        List<Model> objs = new ArrayList<>();
+        List<M> objs = new ArrayList<>();
         mapList.forEach(map -> {
-            Model obj = mapToObj(map);
+            var obj = mapToObj(map);
             if (obj != null) {
                 objs.add(obj);
             }
@@ -252,58 +250,58 @@ public interface BaseModelMapper<Model extends BaseModel> {
         return objs;
     }
 
-    default Integer commonTotal(@Param("condition") Condition condition) {
+    default int commonTotal(@Param("condition") Condition condition) {
         return getCommonMapper().total(getTableName(), condition);
     }
 
-    default Boolean commonExist(@Param("condition") Condition condition) {
+    default boolean commonExist(@Param("condition") Condition condition) {
         return getCommonMapper().exist(getTableName(), condition);
     }
 
-    List<Model> list(@Param("condition") Condition condition, String[] selectFields);
-    Integer total(@Param("condition") Condition condition);
-    Boolean exist(@Param("condition") Condition condition);
+    List<M> list(@Param("condition") Condition condition, String[] selectFields);
+    int total(@Param("condition") Condition condition);
+    boolean exist(@Param("condition") Condition condition);
 
     @Recommendation
-    default Model get(String id, String[] selectFields) {
+    default M get(String id, String[] selectFields) {
         Map<String, Object> map = getCommonMapper().get(getTableName(), id, selectFields);
         return mapToObj(map);
     }
 
-    default Boolean create(String[] createFields, Object[] createFieldValues) {
+    default boolean create(String[] createFields, Object[] createFieldValues) {
         return getCommonMapper().create(getTableName(), createFields, createFieldValues);
     }
 
-    default Boolean update(String id, String[] updateFields, Object[] updateFieldValues) {
+    default boolean update(String id, String[] updateFields, Object[] updateFieldValues) {
         return getCommonMapper().update(getTableName(), id, updateFields, updateFieldValues);
     }
 
     @Recommendation
-    default Boolean delete(String id) {
+    default boolean delete(String id) {
         return getCommonMapper().delete(getTableName(), id);
     }
 
-    default Integer bulkCreate(String[] createFields, Object[][] createFieldValuesList) {
+    default int bulkCreate(String[] createFields, Object[][] createFieldValuesList) {
         return getCommonMapper().bulkCreate(getTableName(), createFields, createFieldValuesList);
     }
 
-    default Integer bulkUpdate(String[] updateFields, Object[][] updateFieldValuesList) {
+    default int bulkUpdate(String[] updateFields, Object[][] updateFieldValuesList) {
         return getCommonMapper().bulkUpdate(getTableName(), updateFields, updateFieldValuesList);
     }
 
     @Recommendation
-    default Integer bulkDelete(String[] ids) {
+    default int bulkDelete(String[] ids) {
         return getCommonMapper().bulkDelete(getTableName(), ids);
     }
 
-    List<Model> list(String table, @Param("condition") Condition condition, String[] selectFields);
-    Integer total(String table, @Param("condition") Condition condition);
-    Boolean exist(String table, @Param("condition") Condition condition);
-    Model get(String table, String id, String[] selectFields);
-    Boolean create(String table, String[] createFields, Object[] createFieldValues);
-    Boolean update(String table, String id, String[] updateFields, Object[] updateFieldValues);
-    Boolean delete(String table, String id);
-    Integer bulkCreate(String table, String[] createFields, Object[][] createFieldValuesList);
-    Integer bulkUpdate(String table, String[] updateFields, Object[][] updateFieldValuesList);
-    Integer bulkDelete(String table, String[] ids);
+    List<M> list(String table, @Param("condition") Condition condition, String[] selectFields);
+    int total(String table, @Param("condition") Condition condition);
+    boolean exist(String table, @Param("condition") Condition condition);
+    M get(String table, String id, String[] selectFields);
+    boolean create(String table, String[] createFields, Object[] createFieldValues);
+    boolean update(String table, String id, String[] updateFields, Object[] updateFieldValues);
+    boolean delete(String table, String id);
+    int bulkCreate(String table, String[] createFields, Object[][] createFieldValuesList);
+    int bulkUpdate(String table, String[] updateFields, Object[][] updateFieldValuesList);
+    int bulkDelete(String table, String[] ids);
 }

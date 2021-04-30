@@ -19,7 +19,7 @@ public class HumanCondition {
     private CustomCondition customCondition;
 
     public Condition toCondition() {
-        Condition condition = new Condition();
+        var condition = new Condition();
         condition.setPagination(new PaginationCondition().loadFromPageParams(page, pageSize));
         condition.setSearch(new SearchCondition(search, TextUtils.humpToLine(searchFields)));
         condition.setGroup(new GroupCondition(TextUtils.humpToLine(groupFields)));

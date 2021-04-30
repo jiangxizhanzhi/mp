@@ -12,13 +12,13 @@ import java.util.Map;
 @Repository
 public interface CommonMapper {
     List<Map<String, Object>> list(String table, @Param("condition") Condition condition, String[] selectFields);
-    Integer total(String table, @Param("condition") Condition condition);
-    Boolean exist(String table, @Param("condition") Condition condition);
+    int total(String table, @Param("condition") Condition condition);
+    boolean exist(String table, @Param("condition") Condition condition);
     Map<String, Object> get(String table, String id, String[] selectFields);
-    Boolean create(String table, String[] createFields, Object[] createFieldValues);
-    Boolean update(String table, String id, String[] updateFields, Object[] updateFieldValues);
-    Boolean delete(String table, String id);
-    Integer bulkCreate(String table, String[] createFields, Object[][] createFieldValuesList);
-    Integer bulkUpdate(String table, String[] updateFields, Object[][] updateFieldValuesList);
-    Integer bulkDelete(String table, String[] ids);
+    boolean create(String table, String[] createFields, Object[] createFieldValues);
+    boolean update(String table, String id, String[] updateFields, Object[] updateFieldValues);
+    boolean delete(String table, String id);
+    int bulkCreate(String table, String[] createFields, Object[][] createFieldValuesList);
+    int bulkUpdate(String table, String[] updateFields, Object[][] updateFieldValuesList);
+    int bulkDelete(String table, String[] ids);
 }

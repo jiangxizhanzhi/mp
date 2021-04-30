@@ -12,8 +12,9 @@ import java.util.Map;
 
 @Slf4j
 public class ClassUtils {
+    private ClassUtils() {}
 
-    public static Field getField(Class<?> clazz, String fieldName, Boolean findSuper, Boolean ignoreNotFound) {
+    public static Field getField(Class<?> clazz, String fieldName, boolean findSuper, boolean ignoreNotFound) {
         Field field;
         try {
             field = clazz.getDeclaredField(fieldName);
@@ -31,6 +32,7 @@ public class ClassUtils {
         return field;
     }
 
+    @SuppressWarnings("java:S3011")
     public static Object getFieldValue(Field field, Object obj) {
         boolean canAccess = field.canAccess(obj);
         if (!canAccess) {
@@ -52,7 +54,8 @@ public class ClassUtils {
         return value;
     }
 
-    public static Boolean setFieldValue(Field field, Object obj, Object value) {
+    @SuppressWarnings("java:S3011")
+    public static boolean setFieldValue(Field field, Object obj, Object value) {
         boolean canAccess = field.canAccess(obj);
         if (!canAccess) {
             field.setAccessible(true);
@@ -72,8 +75,8 @@ public class ClassUtils {
         return true;
     }
 
-    public static <FieldType> FieldType castFieldType(Object value, Class<FieldType> expectedFieldType) {
-        FieldType fieldValue = null;
+    public static <T> T castFieldType(Object value, Class<T> expectedFieldType) {
+        T fieldValue = null;
         if (value != null) {
             try {
                 fieldValue = expectedFieldType.cast(value);
@@ -86,7 +89,7 @@ public class ClassUtils {
     }
 
     public static Object getFieldValue(Class<?> clazz, String fieldName, Object obj) {
-        Field field = getField(clazz, fieldName, true, false);
+        var field = getField(clazz, fieldName, true, false);
         if (field == null) {
             return null;
         }
@@ -94,8 +97,7 @@ public class ClassUtils {
         return getFieldValue(field, obj);
     }
 
-    public static <FieldType> FieldType getFieldValue(Class<?> clazz, String fieldName, Object obj,
-                                                      Class<FieldType> expectedFieldType) {
+    public static <T> T getFieldValue(Class<?> clazz, String fieldName, Object obj, Class<T> expectedFieldType) {
         Object value = getFieldValue(clazz, fieldName, obj);
         return castFieldType(value, expectedFieldType);
     }
@@ -104,8 +106,7 @@ public class ClassUtils {
         return getFieldValue(clazz, fieldName, null);
     }
 
-    public static <FieldType> FieldType getStaticFieldValue(Class<?> clazz, String fieldName,
-                                                            Class<FieldType> expectedFieldType) {
+    public static <T> T getStaticFieldValue(Class<?> clazz, String fieldName, Class<T> expectedFieldType) {
         return getFieldValue(clazz, fieldName, null, expectedFieldType);
     }
 
@@ -113,8 +114,7 @@ public class ClassUtils {
         return getFieldValue(obj.getClass(), fieldName, obj);
     }
 
-    public static <FieldType> FieldType getObjFieldValue(Object obj, String fieldName,
-                                                         Class<FieldType> expectedFieldType) {
+    public static <T> T getObjFieldValue(Object obj, String fieldName, Class<T> expectedFieldType) {
         return getFieldValue(obj.getClass(), fieldName, obj, expectedFieldType);
     }
 
@@ -129,6 +129,7 @@ public class ClassUtils {
         return method;
     }
 
+    @SuppressWarnings("java:S3011")
     public static Object getBeanObjFieldValue(Method method, Object obj) {
         boolean canAccess = method.canAccess(obj);
         if (!canAccess) {
@@ -150,7 +151,8 @@ public class ClassUtils {
         return value;
     }
 
-    public static Boolean setBeanObjFieldValue(Method method, Object obj, Object value) {
+    @SuppressWarnings("java:S3011")
+    public static boolean setBeanObjFieldValue(Method method, Object obj, Object value) {
         boolean canAccess = method.canAccess(obj);
         if (!canAccess) {
             method.setAccessible(true);
@@ -172,7 +174,7 @@ public class ClassUtils {
 
     public static Object getBeanObjFieldValue(Object obj, String fieldName) {
         String methodName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
-        Method method = getMethod(obj.getClass(), methodName);
+        var method = getMethod(obj.getClass(), methodName);
         if (method == null) {
             return null;
         }
@@ -180,20 +182,19 @@ public class ClassUtils {
         return getBeanObjFieldValue(method, obj);
     }
 
-    public static <FieldType> FieldType getBeanObjFieldValue(Object obj, String fieldName,
-                                                             Class<FieldType> expectedFieldType) {
+    public static <T> T getBeanObjFieldValue(Object obj, String fieldName, Class<T> expectedFieldType) {
         Object value = getBeanObjFieldValue(obj, fieldName);
         return castFieldType(value, expectedFieldType);
     }
 
-    public static Boolean setBeanObjFieldValue(Object obj, String fieldName, Object value) {
-        Field field = getField(obj.getClass(), fieldName, true, false);
+    public static boolean setBeanObjFieldValue(Object obj, String fieldName, Object value) {
+        var field = getField(obj.getClass(), fieldName, true, false);
         if (field == null) {
             return false;
         }
 
         String methodName = "set" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
-        Method method = getMethod(obj.getClass(), methodName, field.getType());
+        var method = getMethod(obj.getClass(), methodName, field.getType());
         if (method == null) {
             return false;
         }
@@ -201,41 +202,63 @@ public class ClassUtils {
         return setBeanObjFieldValue(method, obj, value);
     }
 
+    public static String getBeanGetterRefFieldName(Class<?> clazz, Method getter) {
+        String methodName = getter.getName();
+        if (!methodName.startsWith("get")) {
+            return null;
+        }
+
+        String fieldName = methodName.substring(3, 4).toLowerCase() + methodName.substring(4);
+        var field = getField(clazz, fieldName, true, true);
+        if (field == null) {
+            return null;
+        }
+
+        Class<?>[] parameterTypes = getter.getParameterTypes();
+        if (parameterTypes.length != 0) {
+            return null;
+        }
+
+        return fieldName;
+    }
+
+    public static String getBeanSetterRefFieldName(Class<?> clazz, Method setter) {
+        String methodName = setter.getName();
+        if (!methodName.startsWith("set")) {
+            return null;
+        }
+
+        String fieldName = methodName.substring(3, 4).toLowerCase() + methodName.substring(4);
+        var field = getField(clazz, fieldName, true, true);
+        if (field == null) {
+            return null;
+        }
+
+        Class<?>[] parameterTypes = setter.getParameterTypes();
+        if (parameterTypes.length != 1 || parameterTypes[0] != field.getType()) {
+            return null;
+        }
+
+        return fieldName;
+    }
+
     public static String[] getBeanClassFields(Class<?> clazz) {
         Method[] methods = clazz.getMethods();
-        Map<String, Boolean[]> fieldFlagMap = new HashMap<>();
+        Map<String, boolean[]> fieldFlagMap = new HashMap<>();
         for (Method method: methods) {
-            String methodName = method.getName();
-            if (methodName.startsWith("get")) {
-                String fieldName = methodName.substring(3, 4).toLowerCase() + methodName.substring(4);
-                Field field = getField(clazz, fieldName, true, true);
-                if (field == null) {
-                    continue;
-                }
-
-                Class<?>[] parameterTypes = method.getParameterTypes();
-                if (parameterTypes.length != 0) {
-                    continue;
-                }
-
-                Boolean[] fieldFlag = fieldFlagMap.getOrDefault(fieldName, new Boolean[]{ false, false });
+            String getterFieldName = getBeanGetterRefFieldName(clazz, method);
+            if (getterFieldName != null) {
+                boolean[] fieldFlag = fieldFlagMap.getOrDefault(getterFieldName, new boolean[]{ false, false });
                 fieldFlag[0] = true;
-                fieldFlagMap.put(fieldName, fieldFlag);
-            } else if (methodName.startsWith("set")) {
-                String fieldName = methodName.substring(3, 4).toLowerCase() + methodName.substring(4);
-                Field field = getField(clazz, fieldName, true, true);
-                if (field == null) {
-                    continue;
-                }
+                fieldFlagMap.put(getterFieldName, fieldFlag);
+                continue;
+            }
 
-                Class<?>[] parameterTypes = method.getParameterTypes();
-                if (parameterTypes.length != 1 || parameterTypes[0] != field.getType()) {
-                    continue;
-                }
-
-                Boolean[] fieldFlag = fieldFlagMap.getOrDefault(fieldName, new Boolean[]{ false, false });
+            String setterFieldName = getBeanSetterRefFieldName(clazz, method);
+            if (setterFieldName != null) {
+                boolean[] fieldFlag = fieldFlagMap.getOrDefault(setterFieldName, new boolean[]{ false, false });
                 fieldFlag[1] = true;
-                fieldFlagMap.put(fieldName, fieldFlag);
+                fieldFlagMap.put(setterFieldName, fieldFlag);
             }
         }
 
@@ -248,4 +271,5 @@ public class ClassUtils {
 
         return fields.toArray(new String[0]);
     }
+
 }

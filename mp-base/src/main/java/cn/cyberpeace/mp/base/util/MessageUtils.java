@@ -11,7 +11,8 @@ public class MessageUtils {
 
     private static MessageSource messageSource;
 
-    public MessageUtils(MessageSource messageSource) {
+    @SuppressWarnings({"java:S1144", "java:S3010"})
+    private MessageUtils(MessageSource messageSource) {
         MessageUtils.messageSource = messageSource;
     }
 

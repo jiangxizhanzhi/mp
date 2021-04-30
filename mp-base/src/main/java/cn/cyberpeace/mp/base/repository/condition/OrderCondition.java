@@ -7,12 +7,12 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrderCondition extends BaseCondition {
+public class OrderCondition implements BaseCondition {
 
     private String[] orders;
 
     @Override
-    public Boolean isEmpty() {
+    public boolean isEmpty() {
         return orders == null || orders.length == 0;
     }
 }

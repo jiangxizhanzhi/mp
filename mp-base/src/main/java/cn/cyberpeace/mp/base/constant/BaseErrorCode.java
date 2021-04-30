@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.base.constant;
 
-import cn.cyberpeace.mp.base.service.code.ServiceCode;
+import cn.cyberpeace.mp.base.service.code.ErrorCode;
 
-public enum BaseErrorCode implements ServiceCode {
+public enum BaseErrorCode implements ErrorCode {
     SUCCESS("COMMON-0000", "success"),
     ERROR("COMMON-0001", "error"),
     DATA_EXISTS("DATA-0001", "data_exists"),

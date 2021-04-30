@@ -8,8 +8,9 @@ import java.util.List;
 import java.util.Set;
 
 public class ModuleUtils {
+    private ModuleUtils() {}
 
-    public static final String groupName = "cn.cyberpeace.mp";
+    public static final String GROUP_NAME = "cn.cyberpeace.mp";
 
     public static List<String> findPackageNamesStartingWith(String prefix) {
         List<String> packageNames = new ArrayList<>();
@@ -24,8 +25,8 @@ public class ModuleUtils {
 
     public static String[] getModuleNames() {
         Set<String> moduleNames = new LinkedHashSet<>();
-        for (String packageName: findPackageNamesStartingWith(groupName)) {
-            String name = packageName.substring(groupName.length());
+        for (String packageName: findPackageNamesStartingWith(GROUP_NAME)) {
+            var name = packageName.substring(GROUP_NAME.length());
             if (!StringUtils.isEmpty(name)) {
                 moduleNames.add(name.split("\\.")[1]);
             }

@@ -10,19 +10,20 @@ import java.util.Map;
 
 @Data
 @AllArgsConstructor
-public class CustomCondition extends BaseCondition {
+public class CustomCondition implements BaseCondition {
 
     public CustomCondition loadFromParams(Map<String, Object> params) {
         String[] fieldNames = ClassUtils.getBeanClassFields(this.getClass());
         for (String fieldName: fieldNames) {
+            Field field = null;
             Object fieldValue = params.getOrDefault(fieldName, null);
-            if (fieldValue == null) {
-                continue;
+            if (fieldValue != null) {
+                field = ClassUtils.getField(this.getClass(), fieldName, true, false);
             }
-            Field field = ClassUtils.getField(this.getClass(), fieldName, true, false);
             if (field == null) {
                 continue;
             }
+
             Class<?> fieldType = field.getType();
             Class<?> fieldValueType = fieldValue.getClass();
             if (fieldType == fieldValueType) {
@@ -34,18 +35,16 @@ public class CustomCondition extends BaseCondition {
     }
 
     @Override
-    public Boolean isEmpty() {
+    public boolean isEmpty() {
         String[] fieldNames = ClassUtils.getBeanClassFields(this.getClass());
         for (String fieldName: fieldNames) {
             Object fieldValue = ClassUtils.getBeanObjFieldValue(this, fieldName);
             if (fieldValue == null) {
                 continue;
             }
-            if (fieldValue instanceof String) {
-                return false;
-            } else if (fieldValue instanceof List<?> && !((List<?>) fieldValue).isEmpty()) {
-                return false;
-            } else if (fieldValue instanceof String[] && ((String[]) fieldValue).length > 0) {
+            if ((fieldValue instanceof String)
+                    || (fieldValue instanceof List<?> && !((List<?>) fieldValue).isEmpty())
+                    || (fieldValue instanceof String[] && ((String[]) fieldValue).length > 0)) {
                 return false;
             }
         }

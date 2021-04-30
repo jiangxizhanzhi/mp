@@ -5,7 +5,6 @@ import cn.cyberpeace.mp.base.util.ClassUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,16 +30,14 @@ public abstract class BaseResult {
 
         if (obj instanceof List<?>) {
             List<Object> resultList = new ArrayList<>();
-            ((List<?>) obj).forEach(objItem -> {
-                resultList.add(objToResult(objItem, fields));
-            });
+            ((List<?>) obj).forEach(objItem -> resultList.add(objToResult(objItem, fields)));
             return resultList;
         }
 
         Map<Object, Object> resultMap = new HashMap<>();
         fields.getFieldsMap().forEach((fieldName, fieldFlag) -> {
             Object fieldValue = getObjFieldValue(obj, fieldName);
-            if (fieldFlag instanceof Boolean && (Boolean) fieldFlag) {
+            if (fieldFlag instanceof Boolean && (boolean) fieldFlag) {
                 resultMap.put(fieldName, fieldValue);
             } else if (fieldFlag instanceof DynamicFields) {
                 resultMap.put(fieldName, objToResult(fieldValue, (DynamicFields) fieldFlag));
@@ -55,7 +52,7 @@ public abstract class BaseResult {
             return fieldName;
         }
 
-        Field field = ClassUtils.getField(obj.getClass(), fieldName, true, true);
+        var field = ClassUtils.getField(obj.getClass(), fieldName, true, true);
         if (field == null) {
             return fieldName;
         }

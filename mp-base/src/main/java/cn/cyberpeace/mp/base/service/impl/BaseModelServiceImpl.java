@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.base.service.fields.BaseModelFields;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.service.stereotype.CustomConditionClass;
 import cn.cyberpeace.mp.base.util.ClassUtils;
 import cn.cyberpeace.mp.base.util.TextUtils;
 import lombok.Data;
@@ -23,18 +24,18 @@ import java.util.Map;
 
 @Slf4j
 @Data
-public abstract class BaseModelServiceImpl<Model extends BaseModel,
-        ModelMapper extends BaseModelMapper<Model>, ModelFields extends BaseModelFields> implements BaseModelService<Model> {
+public abstract class BaseModelServiceImpl<M extends BaseModel,
+        P extends BaseModelMapper<M>, F extends BaseModelFields> implements BaseModelService<M> {
 
     public static final Class<? extends CustomCondition> customConditionClass = null;
 
-    private ModelMapper modelMapper;
+    private P modelMapper;
 
-    private ModelFields modelFields;
+    private F modelFields;
 
     private HumanCondition getHumanCondition(Map<String, Object> params, String search, String[] searchFields,
-                                             String[] orders, Integer page, Integer pageSize) {
-        HumanCondition humanCondition = new HumanCondition();
+                                             String[] orders, int page, int pageSize) {
+        var humanCondition = new HumanCondition();
         humanCondition.setPage(page);
         humanCondition.setPageSize(pageSize);
 
@@ -65,17 +66,24 @@ public abstract class BaseModelServiceImpl<Model extends BaseModel,
     public void loadFilterCondition(HumanCondition humanCondition, Map<String, Object> params) {}
 
     public CustomCondition getCustomCondition(Map<String, Object> params) {
-        Class<?> customConditionClass = ClassUtils.getStaticFieldValue(getClass(),
-                "customConditionClass", Class.class);
-        if (customConditionClass == null) {
-            customConditionClass = CustomCondition.class;
+        Class<?> actualCustomConditionClass;
+        var customConditionClassAnnotation = getClass().getAnnotation(CustomConditionClass.class);
+        if (customConditionClassAnnotation != null) {
+            actualCustomConditionClass = customConditionClassAnnotation.value();
+        } else {
+            actualCustomConditionClass = ClassUtils.getStaticFieldValue(getClass(),
+                    "customConditionClass", Class.class);
+        }
+
+        if (actualCustomConditionClass == null) {
+            actualCustomConditionClass = CustomCondition.class;
         }
 
         CustomCondition customCondition;
         try {
-            customCondition = (CustomCondition) customConditionClass.getDeclaredConstructor().newInstance();
+            customCondition = (CustomCondition) actualCustomConditionClass.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
-            log.error("Create custom condition by {} failed: {}", customConditionClass, e);
+            log.error("Create custom condition by {} failed: {}", actualCustomConditionClass, e);
             customCondition = new CustomCondition();
         }
 
@@ -84,12 +92,12 @@ public abstract class BaseModelServiceImpl<Model extends BaseModel,
 
     @Override
     public ServiceResult list(Map<String, Object> params, String search, String[] searchFields, String[] orders,
-                              Integer page, Integer pageSize, String[] fields) {
-        HumanCondition humanCondition = getHumanCondition(params, search, searchFields, orders, page, pageSize);
+                              int page, int pageSize, String[] fields) {
+        var humanCondition = getHumanCondition(params, search, searchFields, orders, page, pageSize);
         DynamicFields validModelFields = modelFields != null ? modelFields.getValidFields(fields) : null;
         String[] selectFields = validModelFields != null ? TextUtils.humpToLine(validModelFields.getFields()) : null;
-        List<Model> data;
-        Integer total;
+        List<M> data;
+        int total;
         try {
             data = modelMapper.list(humanCondition, selectFields);
             total = modelMapper.total(humanCondition);
@@ -105,7 +113,7 @@ public abstract class BaseModelServiceImpl<Model extends BaseModel,
     public ServiceResult get(String id, String[] fields) {
         DynamicFields validModelFields = modelFields != null ? modelFields.getValidFields(fields) : null;
         String[] selectFields = validModelFields != null ? TextUtils.humpToLine(validModelFields.getFields()) : null;
-        Model obj;
+        M obj;
         try {
             obj = modelMapper.get(id, selectFields);
         } catch (Exception e) {
@@ -120,12 +128,12 @@ public abstract class BaseModelServiceImpl<Model extends BaseModel,
     }
 
     @Override
-    public ServiceResult create(Model obj, String[] fields) {
+    public ServiceResult create(M obj, String[] fields) {
         if (modelFields != null) {
             modelFields.clearNotWritableFields(obj);
         }
 
-        Boolean result;
+        boolean result;
         try {
             result = modelMapper.create(obj);
         } catch (DuplicateKeyException e) {
@@ -146,12 +154,12 @@ public abstract class BaseModelServiceImpl<Model extends BaseModel,
     }
 
     @Override
-    public ServiceResult update(Model obj, String[] fields) {
+    public ServiceResult update(M obj, String[] fields) {
         if (modelFields != null) {
             modelFields.clearNotWritableFields(obj, true);
         }
 
-        Boolean result;
+        boolean result;
         try {
             result = modelMapper.update(obj);
         } catch (DuplicateKeyException e) {
@@ -173,7 +181,7 @@ public abstract class BaseModelServiceImpl<Model extends BaseModel,
 
     @Override
     public ServiceResult delete(String id) {
-        Boolean result;
+        boolean result;
         try {
             result = modelMapper.delete(id);
         } catch (Exception e) {
@@ -190,14 +198,12 @@ public abstract class BaseModelServiceImpl<Model extends BaseModel,
     }
 
     @Override
-    public ServiceResult bulkCreate(List<Model> objs) {
+    public ServiceResult bulkCreate(List<M> objs) {
         if (modelFields != null) {
-            objs.forEach(obj -> {
-                modelFields.clearNotWritableFields(obj);
-            });
+            objs.forEach(obj -> modelFields.clearNotWritableFields(obj));
         }
 
-        Integer result;
+        int result;
         try {
             result = modelMapper.bulkCreate(objs);
         } catch (DuplicateKeyException e) {
@@ -217,14 +223,12 @@ public abstract class BaseModelServiceImpl<Model extends BaseModel,
     }
 
     @Override
-    public ServiceResult bulkUpdate(List<Model> objs) {
+    public ServiceResult bulkUpdate(List<M> objs) {
         if (modelFields != null) {
-            objs.forEach(obj -> {
-                modelFields.clearNotWritableFields(obj, true);
-            });
+            objs.forEach(obj -> modelFields.clearNotWritableFields(obj, true));
         }
 
-        Integer result;
+        int result;
         try {
             result = modelMapper.bulkUpdate(objs);
         } catch (DuplicateKeyException e) {
@@ -245,7 +249,7 @@ public abstract class BaseModelServiceImpl<Model extends BaseModel,
 
     @Override
     public ServiceResult bulkDelete(String[] ids) {
-        Integer result;
+        int result;
         try {
             result = modelMapper.bulkDelete(ids);
         } catch (Exception e) {

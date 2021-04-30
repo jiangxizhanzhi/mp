@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.base.controller;
 
+import cn.cyberpeace.mp.base.controller.stereotype.ListParamNames;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -14,11 +15,11 @@ import java.util.Map;
 
 @Slf4j
 @Data
-public abstract class BaseModelController<Model extends BaseModel, ModelService extends BaseModelService<Model>> {
+public abstract class BaseModelController<M extends BaseModel, S extends BaseModelService<M>> {
 
-    private ModelService modelService;
+    private S modelService;
 
-    public static final String[] listParamNames = new String[0];
+    public static final String[] listParamNames = {};
 
     @GetMapping
     public ServiceResult list(HttpServletRequest request,
@@ -29,10 +30,16 @@ public abstract class BaseModelController<Model extends BaseModel, ModelService 
                               @RequestParam(required = false) Integer page,
                               @RequestParam(required = false) Integer pageSize,
                               @RequestParam(required = false) String[] fields) {
-        String[] listParamNames = ClassUtils.getStaticFieldValue(this.getClass(), "listParamNames",
-                String[].class);
+        String[] actualListParamNames;
+        var listParamNamesAnnotation = getClass().getAnnotation(ListParamNames.class);
+        if (listParamNamesAnnotation != null) {
+            actualListParamNames = listParamNamesAnnotation.value();
+        } else {
+            actualListParamNames = ClassUtils.getStaticFieldValue(this.getClass(), "listParamNames",
+                    String[].class);
+        }
         Map<String, String[]> listParams = request.getParameterMap();
-        for (String listParamName: listParamNames) {
+        for (String listParamName: actualListParamNames) {
             if (listParams.containsKey(listParamName)) {
                 params.put(listParamName, listParams.get(listParamName));
             }
@@ -43,7 +50,8 @@ public abstract class BaseModelController<Model extends BaseModel, ModelService 
         params.remove("page");
         params.remove("pageSize");
         params.remove("fields");
-        return modelService.list(params, search, searchFields, orders, page, pageSize, fields).asResult();
+        return modelService.list(params, search, searchFields, orders, page == null ? 0 : page,
+                pageSize == null ? 0 : pageSize, fields).asResult();
     }
 
     @GetMapping("/{id}")
@@ -52,12 +60,12 @@ public abstract class BaseModelController<Model extends BaseModel, ModelService 
     }
 
     @PostMapping
-    public ServiceResult create(@RequestBody Model obj, @RequestParam(required = false) String[] fields) {
+    public ServiceResult create(@RequestBody M obj, @RequestParam(required = false) String[] fields) {
         return modelService.create(obj, fields).asResult();
     }
 
     @PatchMapping("/{id}")
-    public ServiceResult update(@PathVariable String id, @RequestBody Model obj,
+    public ServiceResult update(@PathVariable String id, @RequestBody M obj,
                                 @RequestParam(required = false) String[] fields) {
         obj.setId(id);
         return modelService.update(obj, fields).asResult();
@@ -69,12 +77,12 @@ public abstract class BaseModelController<Model extends BaseModel, ModelService 
     }
 
     @PostMapping("/bulk_create")
-    public ServiceResult bulkCreate(@RequestBody List<Model> objs) {
+    public ServiceResult bulkCreate(@RequestBody List<M> objs) {
         return modelService.bulkCreate(objs).asResult();
     }
 
     @PatchMapping("/bulk_update")
-    public ServiceResult bulkUpdate(@RequestBody List<Model> objs) {
+    public ServiceResult bulkUpdate(@RequestBody List<M> objs) {
         return modelService.bulkUpdate(objs).asResult();
     }
 

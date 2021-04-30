@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ConnectorCond {
+    @SuppressWarnings("java:S1170")
     public final String name = "cond";
 
     private String fieldName;
