@@ -22,7 +22,7 @@ public class TenantServiceImpl extends BaseModelServiceImpl<TenantModel, TenantM
     }
 
     @Override
-    public void loadFilterCondition(HumanCondition humanCondition, Map<String, Object> params) {
+    public void loadListFilterCondition(HumanCondition humanCondition, Map<String, Object> params) {
         Object name = params.getOrDefault("name", null);
         if (name != null) {
             humanCondition.filterEqual("name", name);

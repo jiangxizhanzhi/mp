@@ -12,7 +12,6 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.service.stereotype.CustomConditionClass;
-import cn.cyberpeace.mp.base.util.ClassUtils;
 import cn.cyberpeace.mp.base.util.TextUtils;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -27,14 +26,12 @@ import java.util.Map;
 public abstract class BaseModelServiceImpl<M extends BaseModel,
         P extends BaseModelMapper<M>, F extends BaseModelFields> implements BaseModelService<M> {
 
-    public static final Class<? extends CustomCondition> customConditionClass = null;
-
     private P modelMapper;
 
     private F modelFields;
 
-    private HumanCondition getHumanCondition(Map<String, Object> params, String search, String[] searchFields,
-                                             String[] orders, int page, int pageSize) {
+    private HumanCondition getHumanCondition(String search, String[] searchFields, String[] orders,
+                                             int page, int pageSize) {
         var humanCondition = new HumanCondition();
         humanCondition.setPage(page);
         humanCondition.setPageSize(pageSize);
@@ -58,24 +55,18 @@ public abstract class BaseModelServiceImpl<M extends BaseModel,
         }
         humanCondition.setOrders(lastOrders);
 
-        loadFilterCondition(humanCondition, params);
-        humanCondition.setCustomCondition(getCustomCondition(params));
         return humanCondition;
     }
 
-    public void loadFilterCondition(HumanCondition humanCondition, Map<String, Object> params) {}
+    public void loadListFilterCondition(HumanCondition humanCondition, Map<String, Object> params) {}
 
-    public CustomCondition getCustomCondition(Map<String, Object> params) {
+    private CustomCondition getCustomCondition(Map<String, Object> params,
+                                               Class<? extends CustomConditionClass> customConditionClass) {
         Class<?> actualCustomConditionClass;
-        var customConditionClassAnnotation = getClass().getAnnotation(CustomConditionClass.class);
+        CustomConditionClass customConditionClassAnnotation = getClass().getAnnotation(customConditionClass);
         if (customConditionClassAnnotation != null) {
             actualCustomConditionClass = customConditionClassAnnotation.value();
         } else {
-            actualCustomConditionClass = ClassUtils.getStaticFieldValue(getClass(),
-                    "customConditionClass", Class.class);
-        }
-
-        if (actualCustomConditionClass == null) {
             actualCustomConditionClass = CustomCondition.class;
         }
 
@@ -93,7 +84,10 @@ public abstract class BaseModelServiceImpl<M extends BaseModel,
     @Override
     public ServiceResult list(Map<String, Object> params, String search, String[] searchFields, String[] orders,
                               int page, int pageSize, String[] fields) {
-        var humanCondition = getHumanCondition(params, search, searchFields, orders, page, pageSize);
+        var humanCondition = getHumanCondition(search, searchFields, orders, page, pageSize);
+        loadListFilterCondition(humanCondition, params);
+        humanCondition.setCustomCondition(getCustomCondition(params, CustomConditionClass.class));
+
         DynamicFields validModelFields = modelFields != null ? modelFields.getValidFields(fields) : null;
         String[] selectFields = validModelFields != null ? TextUtils.humpToLine(validModelFields.getFields()) : null;
         List<M> data;
