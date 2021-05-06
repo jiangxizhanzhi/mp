@@ -58,8 +58,6 @@ public abstract class BaseModelServiceImpl<M extends BaseModel,
         return humanCondition;
     }
 
-    public void loadListFilterCondition(HumanCondition humanCondition, Map<String, Object> params) {}
-
     private CustomCondition getCustomCondition(Map<String, Object> params,
                                                Class<? extends CustomConditionClass> customConditionClass) {
         Class<?> actualCustomConditionClass;
@@ -80,6 +78,8 @@ public abstract class BaseModelServiceImpl<M extends BaseModel,
 
         return customCondition.loadFromParams(params);
     }
+
+    public void loadListFilterCondition(HumanCondition humanCondition, Map<String, Object> params) {}
 
     @Override
     public ServiceResult list(Map<String, Object> params, String search, String[] searchFields, String[] orders,
@@ -142,7 +142,7 @@ public abstract class BaseModelServiceImpl<M extends BaseModel,
             DynamicFields validModelFields = modelFields != null ? modelFields.getValidFields(fields) : null;
             return new ServiceResult(new ObjResult<>(obj, validModelFields));
         } else {
-            log.error("Service create {} failed, so strange", obj);
+            log.error("Service create {} failed", obj);
             return new ServiceResult(false, BaseErrorCode.ERROR);
         }
     }

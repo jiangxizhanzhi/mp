@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.model.stereotype.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Date;
 
@@ -25,8 +26,94 @@ public class UserModel extends BaseModel {
     private String mobile;
     private String idCard;
     private String address;
-    private String status;
+    private Integer status;
     private Date dateJoined;
     private Date expiredTime;
     private Date lastLogin;
+
+    public enum Status {
+        NORMAL(1),
+        DISABLE(2),
+        PENDING(3);
+
+        private final Integer value;
+        Status(int value) {
+            this.value = value;
+        }
+        public int getValue() {
+            return value;
+        }
+    }
+
+    public void initDefaultName() {
+        if (StringUtils.isEmpty(name)) {
+            name = StringUtils.EMPTY;
+        }
+    }
+
+    public void initDefaultNickname() {
+        if (StringUtils.isEmpty(nickname)) {
+            nickname = StringUtils.EMPTY;
+        }
+    }
+
+    public void initDefaultAvatar() {
+        if (StringUtils.isEmpty(avatar)) {
+            avatar = StringUtils.EMPTY;
+        }
+    }
+
+    public void initDefaultBirthday() {
+        if (StringUtils.isEmpty(birthday)) {
+            birthday = StringUtils.EMPTY;
+        }
+    }
+
+    public void initDefaultEmail() {
+        if (StringUtils.isEmpty(email)) {
+            email = StringUtils.EMPTY;
+        }
+    }
+
+    public void initDefaultMobile() {
+        if (StringUtils.isEmpty(mobile)) {
+            mobile = StringUtils.EMPTY;
+        }
+    }
+
+    public void initDefaultIdCard() {
+        if (StringUtils.isEmpty(idCard)) {
+            idCard = StringUtils.EMPTY;
+        }
+    }
+
+    public void initDefaultAddress() {
+        if (StringUtils.isEmpty(address)) {
+            address = StringUtils.EMPTY;
+        }
+    }
+
+    public void initDefaultStatus() {
+        if (status == null) {
+            status = Status.PENDING.getValue();
+        }
+    }
+
+    public void initDefaultDateJoined() {
+        if (dateJoined == null) {
+            dateJoined = new Date();
+        }
+    }
+
+    public void initDefaultExpiredTime() {
+        if (expiredTime == null) {
+            expiredTime = new Date(new Date().getTime() + 99L * 365 * 24 * 3600 * 1000);
+        }
+    }
+
+    public void initDefaultLastLogin() {
+        if (lastLogin == null) {
+            lastLogin = new Date();
+        }
+    }
 }

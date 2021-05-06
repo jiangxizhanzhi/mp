@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.auth.service.fields;
 
-import cn.cyberpeace.mp.auth.model.TenantModel;
+import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.base.repository.fields.DynamicFields;
 import cn.cyberpeace.mp.base.service.fields.BaseModelFields;
 import cn.cyberpeace.mp.base.util.ClassUtils;
@@ -8,10 +8,11 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class UserFields extends BaseModelFields {
-    public static final DynamicFields allFields = new DynamicFields(ClassUtils.getBeanClassFields(TenantModel.class));
+    public static final DynamicFields allFields = new DynamicFields(ClassUtils.getBeanClassFields(UserModel.class));
 
     public static final DynamicFields availableFields = new DynamicFields(new String[]{
-            "identifier", "name"
+            "tenant", "identifier", "username", "name", "nickname", "avatar", "birthday", "email", "mobile", "idCard",
+            "address", "status", "dateJoined", "expiredTime", "lastLogin"
     }).merge(BaseModelFields.availableFields);
 
     public static final DynamicFields hiddenFields = allFields.subtract(availableFields);
@@ -20,7 +21,7 @@ public class UserFields extends BaseModelFields {
     }).merge(BaseModelFields.readonlyFields);
 
     public static final DynamicFields searchFields = new DynamicFields(new String[]{
-            "identifier", "name",
+            "identifier", "username", "name", "nickname", "email", "mobile", "idCard"
     });
 
     public static final DynamicFields orderFields = new DynamicFields(new String[]{

@@ -12,6 +12,9 @@ import java.util.Map;
 
 @Slf4j
 public class ClassUtils {
+
+    private static final Map<Class<?>, String[]> beanClassFieldsCache = new HashMap<>();
+
     private ClassUtils() {}
 
     public static Field getField(Class<?> clazz, String fieldName, boolean findSuper, boolean ignoreNotFound) {
@@ -140,7 +143,7 @@ public class ClassUtils {
         try {
             value = method.invoke(obj);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            log.error("Invoke method `{}` value on instance {} failed: {}", method, obj, e.getMessage());
+            log.error("Invoke method `{}` on instance {} failed: {}", method, obj, e.getMessage());
             return null;
         } finally {
             if (!canAccess) {
@@ -161,7 +164,7 @@ public class ClassUtils {
         try {
             method.invoke(obj, value);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            log.error("Invoke method `{}` value on instance {} failed: {}", method, obj, e.getMessage());
+            log.error("Invoke method `{}` on instance {} failed: {}", method, obj, e.getMessage());
             return false;
         } finally {
             if (!canAccess) {
@@ -243,6 +246,11 @@ public class ClassUtils {
     }
 
     public static String[] getBeanClassFields(Class<?> clazz) {
+        String[] fields = beanClassFieldsCache.getOrDefault(clazz, null);
+        if (fields != null) {
+            return fields;
+        }
+
         Method[] methods = clazz.getMethods();
         Map<String, boolean[]> fieldFlagMap = new HashMap<>();
         for (Method method: methods) {
@@ -262,14 +270,16 @@ public class ClassUtils {
             }
         }
 
-        List<String> fields = new ArrayList<>();
+        List<String> fieldList = new ArrayList<>();
         fieldFlagMap.forEach((fieldName, fieldFlag) -> {
             if (fieldFlag[0] && fieldFlag[1]) {
-                fields.add(fieldName);
+                fieldList.add(fieldName);
             }
         });
 
-        return fields.toArray(new String[0]);
-    }
+        fields = fieldList.toArray(new String[0]);
+        beanClassFieldsCache.put(clazz, fields);
 
+        return fields;
+    }
 }

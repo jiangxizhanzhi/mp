@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.base.util;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -11,7 +13,7 @@ public class TextUtils {
     private TextUtils() {}
 
     public static String uuid() {
-        return UUID.randomUUID().toString().replace("-","").toLowerCase();
+        return UUID.randomUUID().toString().replace("-", StringUtils.EMPTY).toLowerCase();
     }
 
     public static String lineToHump(String str) {

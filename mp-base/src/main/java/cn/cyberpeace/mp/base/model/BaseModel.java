@@ -1,11 +1,16 @@
 package cn.cyberpeace.mp.base.model;
 
+import cn.cyberpeace.mp.base.util.ModelUtils;
 import cn.cyberpeace.mp.base.util.TextUtils;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Date;
 
+@Slf4j
 @Data
 public abstract class BaseModel {
     private String id;
@@ -15,9 +20,14 @@ public abstract class BaseModel {
     private Date updateTime;
 
     public void initDefault() {
-        initDefaultId();
-        initDefaultCreateTime();
-        initDefaultUpdateTime();
+        Method[] initDefaultMethods = ModelUtils.getInitDefaultMethods(getClass());
+        try {
+            for (Method initDefaultMethod: initDefaultMethods) {
+                initDefaultMethod.invoke(this);
+            }
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            log.error("Invoke initDefaultMethod on instance {} failed: {}", this, e.getMessage());
+        }
     }
 
     public void initDefaultId() {
