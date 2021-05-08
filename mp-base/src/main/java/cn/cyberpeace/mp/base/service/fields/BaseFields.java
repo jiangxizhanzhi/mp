@@ -101,14 +101,6 @@ public abstract class BaseFields {
     }
 
     public void clearNotWritableFields(Object obj) {
-        DynamicFields actualHiddenFields = ClassUtils.getStaticFieldValue(getClass(), "hiddenFields",
-                DynamicFields.class);
-        if (actualHiddenFields != null) {
-            for (String fieldName: actualHiddenFields.getFields()) {
-                ClassUtils.setBeanObjFieldValue(obj, fieldName, null);
-            }
-        }
-
         DynamicFields actualReadonlyFields = ClassUtils.getStaticFieldValue(getClass(), "readonlyFields",
                 DynamicFields.class);
         if (actualReadonlyFields != null) {

@@ -1,27 +1,31 @@
 package cn.cyberpeace.mp.auth.model;
 
+import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
+import cn.cyberpeace.mp.base.util.TextUtils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.Serializable;
 import java.util.Date;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Table("mp_auth_user")
-public class UserModel extends BaseModel {
+public class UserModel extends BaseModel implements Serializable {
     private String tenant;
     private String identifier;
     private String username;
     private String password;
+    private String tokenSecret;
     private String name;
     private String nickname;
     private String avatar;
-    private String birthday;
+    private Date birthday;
     private String email;
     private String mobile;
     private String idCard;
@@ -45,6 +49,30 @@ public class UserModel extends BaseModel {
         }
     }
 
+    public void encodePassword() {
+        if (!StringUtils.isEmpty(password)) {
+            password = PasswordUtils.encode(password);
+        }
+    }
+
+    public void initDefaultTenant() {
+        if (StringUtils.isEmpty(tenant)) {
+            tenant = StringUtils.EMPTY;
+        }
+    }
+
+    public void initDefaultIdentifier() {
+        if (StringUtils.isEmpty(identifier) && !StringUtils.isEmpty(username)) {
+            identifier = username;
+        }
+    }
+
+    public void initDefaultTokenSecret() {
+        if (StringUtils.isEmpty(tokenSecret)) {
+            tokenSecret = TextUtils.uuid();
+        }
+    }
+
     public void initDefaultName() {
         if (StringUtils.isEmpty(name)) {
             name = StringUtils.EMPTY;
@@ -64,8 +92,8 @@ public class UserModel extends BaseModel {
     }
 
     public void initDefaultBirthday() {
-        if (StringUtils.isEmpty(birthday)) {
-            birthday = StringUtils.EMPTY;
+        if (birthday == null) {
+            birthday = new Date();
         }
     }
 

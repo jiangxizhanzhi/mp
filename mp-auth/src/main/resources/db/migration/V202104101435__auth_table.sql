@@ -50,6 +50,7 @@ CREATE TABLE mp_auth_user (
     `identifier` varchar(64)  NOT NULL COMMENT '编号',
     `username` varchar(64) NOT NULL COMMENT '用户名',
     `password` varchar(128) NOT NULL COMMENT '密码',
+    `token_secret` varchar(128) NOT NULL COMMENT 'token密钥',
     `name` varchar(128) NOT NULL COMMENT '姓名',
     `nickname` varchar(128) NOT NULL COMMENT '昵称',
     `avatar` varchar(2048) NOT NULL COMMENT '头像',

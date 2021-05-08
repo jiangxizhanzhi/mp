@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class ObjResult<T> extends BaseResult {
+public class ObjResult<T> extends BaseObjResult {
 
     @JsonIgnore
     private T obj;

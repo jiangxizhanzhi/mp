@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 @Data
-public abstract class BaseResult {
+public abstract class BaseObjResult {
     @JsonIgnore
     private DynamicFields fields;
 

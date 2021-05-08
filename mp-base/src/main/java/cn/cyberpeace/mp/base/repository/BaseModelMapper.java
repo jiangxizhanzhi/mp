@@ -169,12 +169,33 @@ public interface BaseModelMapper<M extends BaseModel> {
     }
 
     @Recommendation
+    default List<M> list(HumanCondition humanCondition) {
+        return list(humanCondition, null);
+    }
+
+    @Recommendation
     default int total(HumanCondition humanCondition) {
         if (getMappedStatement("total") == null) {
             return commonTotal(humanCondition.toCondition());
         } else {
             return total(getTableName(), humanCondition.toCondition());
         }
+    }
+
+    @Recommendation
+    default M first(HumanCondition humanCondition, String[] selectFields) {
+        humanCondition.setPageSize(1);
+        List<M> objs = list(humanCondition, selectFields);
+        if (objs.isEmpty()) {
+            return null;
+        } else {
+            return objs.get(0);
+        }
+    }
+
+    @Recommendation
+    default M first(HumanCondition humanCondition) {
+        return first(humanCondition, null);
     }
 
     @Recommendation
@@ -266,6 +287,11 @@ public interface BaseModelMapper<M extends BaseModel> {
     default M get(String id, String[] selectFields) {
         Map<String, Object> map = getCommonMapper().get(getTableName(), id, selectFields);
         return mapToObj(map);
+    }
+
+    @Recommendation
+    default M get(String id) {
+        return get(id, null);
     }
 
     default boolean create(String[] createFields, Object[] createFieldValues) {

@@ -8,9 +8,7 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.repository.fields.DynamicFields;
 import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.fields.BaseModelFields;
-import cn.cyberpeace.mp.base.service.result.ListObjResult;
-import cn.cyberpeace.mp.base.service.result.ObjResult;
-import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.service.result.*;
 import cn.cyberpeace.mp.base.service.stereotype.CustomConditionClass;
 import cn.cyberpeace.mp.base.util.TextUtils;
 import lombok.Data;
@@ -30,8 +28,8 @@ public abstract class BaseModelServiceImpl<M extends BaseModel,
 
     private F modelFields;
 
-    private HumanCondition getHumanCondition(String search, String[] searchFields, String[] orders,
-                                             int page, int pageSize) {
+    public HumanCondition getHumanCondition(String search, String[] searchFields, String[] orders,
+                                            int page, int pageSize) {
         var humanCondition = new HumanCondition();
         humanCondition.setPage(page);
         humanCondition.setPageSize(pageSize);
@@ -58,8 +56,8 @@ public abstract class BaseModelServiceImpl<M extends BaseModel,
         return humanCondition;
     }
 
-    private CustomCondition getCustomCondition(Map<String, Object> params,
-                                               Class<? extends CustomConditionClass> customConditionClass) {
+    public CustomCondition getCustomCondition(Map<String, Object> params,
+                                              Class<? extends CustomConditionClass> customConditionClass) {
         Class<?> actualCustomConditionClass;
         CustomConditionClass customConditionClassAnnotation = getClass().getAnnotation(customConditionClass);
         if (customConditionClassAnnotation != null) {
@@ -82,8 +80,8 @@ public abstract class BaseModelServiceImpl<M extends BaseModel,
     public void loadListFilterCondition(HumanCondition humanCondition, Map<String, Object> params) {}
 
     @Override
-    public ServiceResult list(Map<String, Object> params, String search, String[] searchFields, String[] orders,
-                              int page, int pageSize, String[] fields) {
+    public ListObjServiceResult<M> list(Map<String, Object> params, String search, String[] searchFields,
+                                        String[] orders, int page, int pageSize, String[] fields) {
         var humanCondition = getHumanCondition(search, searchFields, orders, page, pageSize);
         loadListFilterCondition(humanCondition, params);
         humanCondition.setCustomCondition(getCustomCondition(params, CustomConditionClass.class));
@@ -97,14 +95,16 @@ public abstract class BaseModelServiceImpl<M extends BaseModel,
             total = modelMapper.total(humanCondition);
         } catch (Exception e) {
             log.error("Service list error: {}", e.getMessage());
-            return new ServiceResult(false, BaseErrorCode.ERROR, e.getMessage());
+            return new ListObjServiceResult<>(null, BaseErrorCode.ERROR, e.getMessage());
         }
 
-        return new ServiceResult(new ListObjResult<>(data, total, validModelFields));
+        DynamicFields resultFields = (validModelFields == null && modelFields != null) ?
+                modelFields.getAvailableFields() : validModelFields;
+        return new ListObjServiceResult<>(new ListObjResult<>(data, total, resultFields));
     }
 
     @Override
-    public ServiceResult get(String id, String[] fields) {
+    public ObjServiceResult<M> get(String id, String[] fields) {
         DynamicFields validModelFields = modelFields != null ? modelFields.getValidFields(fields) : null;
         String[] selectFields = validModelFields != null ? TextUtils.humpToLine(validModelFields.getFields()) : null;
         M obj;
@@ -112,17 +112,19 @@ public abstract class BaseModelServiceImpl<M extends BaseModel,
             obj = modelMapper.get(id, selectFields);
         } catch (Exception e) {
             log.error("Service get {} error: {}", id, e.getMessage());
-            return new ServiceResult(false, BaseErrorCode.ERROR, e.getMessage());
+            return new ObjServiceResult<>(null, BaseErrorCode.ERROR, e.getMessage());
         }
         if (obj == null) {
-            return new ServiceResult(null, BaseErrorCode.DATA_NOT_EXIST);
+            return new ObjServiceResult<>(null, BaseErrorCode.DATA_NOT_EXIST);
         }
 
-        return new ServiceResult(new ObjResult<>(obj, validModelFields));
+        DynamicFields resultFields = (validModelFields == null && modelFields != null) ?
+                modelFields.getAvailableFields() : validModelFields;
+        return new ObjServiceResult<>(new ObjResult<>(obj, resultFields));
     }
 
     @Override
-    public ServiceResult create(M obj, String[] fields) {
+    public ObjServiceResult<M> create(M obj, String[] fields) {
         if (modelFields != null) {
             modelFields.clearNotWritableFields(obj);
         }
@@ -132,23 +134,25 @@ public abstract class BaseModelServiceImpl<M extends BaseModel,
             result = modelMapper.create(obj);
         } catch (DuplicateKeyException e) {
             log.error("Service create {} failed: {}", obj, e.getMessage());
-            return new ServiceResult(false, BaseErrorCode.DATA_EXISTS);
+            return new ObjServiceResult<>(null, BaseErrorCode.DATA_EXISTS);
         } catch (Exception e) {
             log.error("Service create {} error: {}", obj, e.getMessage());
-            return new ServiceResult(false, BaseErrorCode.ERROR, e.getMessage());
+            return new ObjServiceResult<>(null, BaseErrorCode.ERROR, e.getMessage());
         }
 
         if (result) {
             DynamicFields validModelFields = modelFields != null ? modelFields.getValidFields(fields) : null;
-            return new ServiceResult(new ObjResult<>(obj, validModelFields));
+            DynamicFields resultFields = (validModelFields == null && modelFields != null) ?
+                    modelFields.getAvailableFields() : validModelFields;
+            return new ObjServiceResult<>(new ObjResult<>(obj, resultFields));
         } else {
             log.error("Service create {} failed", obj);
-            return new ServiceResult(false, BaseErrorCode.ERROR);
+            return new ObjServiceResult<>(null, BaseErrorCode.ERROR);
         }
     }
 
     @Override
-    public ServiceResult update(M obj, String[] fields) {
+    public ObjServiceResult<M> update(M obj, String[] fields) {
         if (modelFields != null) {
             modelFields.clearNotWritableFields(obj, true);
         }
@@ -158,41 +162,43 @@ public abstract class BaseModelServiceImpl<M extends BaseModel,
             result = modelMapper.update(obj);
         } catch (DuplicateKeyException e) {
             log.error("Service update {} failed: {}", obj, e.getMessage());
-            return new ServiceResult(false, BaseErrorCode.DATA_EXISTS);
+            return new ObjServiceResult<>(null, BaseErrorCode.DATA_EXISTS);
         } catch (Exception e) {
             log.error("Service update {} error: {}", obj, e.getMessage());
-            return new ServiceResult(false, BaseErrorCode.ERROR, e.getMessage());
+            return new ObjServiceResult<>(null, BaseErrorCode.ERROR, e.getMessage());
         }
 
         if (result) {
             DynamicFields validModelFields = modelFields != null ? modelFields.getValidFields(fields) : null;
-            return new ServiceResult(new ObjResult<>(obj, validModelFields));
+            DynamicFields resultFields = (validModelFields == null && modelFields != null) ?
+                    modelFields.getAvailableFields() : validModelFields;
+            return new ObjServiceResult<>(new ObjResult<>(obj, resultFields));
         } else {
             log.error("Service update {} failed, maybe not exist", obj);
-            return new ServiceResult(false, BaseErrorCode.DATA_NOT_EXIST);
+            return new ObjServiceResult<>(null, BaseErrorCode.DATA_NOT_EXIST);
         }
     }
 
     @Override
-    public ServiceResult delete(String id) {
+    public ServiceResult<Boolean> delete(String id) {
         boolean result;
         try {
             result = modelMapper.delete(id);
         } catch (Exception e) {
             log.error("Service delete {} error: {}", id, e.getMessage());
-            return new ServiceResult(false, BaseErrorCode.ERROR, e.getMessage());
+            return new ServiceResult<>(false, BaseErrorCode.ERROR, e.getMessage());
         }
 
         if (result) {
-            return new ServiceResult(true);
+            return new ServiceResult<>(true);
         } else {
             log.error("Service delete {} failed, maybe not exist", id);
-            return new ServiceResult(false, BaseErrorCode.DATA_NOT_EXIST);
+            return new ServiceResult<>(false, BaseErrorCode.DATA_NOT_EXIST);
         }
     }
 
     @Override
-    public ServiceResult bulkCreate(List<M> objs) {
+    public ServiceResult<Integer> bulkCreate(List<M> objs) {
         if (modelFields != null) {
             objs.forEach(obj -> modelFields.clearNotWritableFields(obj));
         }
@@ -202,22 +208,22 @@ public abstract class BaseModelServiceImpl<M extends BaseModel,
             result = modelMapper.bulkCreate(objs);
         } catch (DuplicateKeyException e) {
             log.error("Service bulk create {} failed: {}", objs, e.getMessage());
-            return new ServiceResult(false, BaseErrorCode.DATA_EXISTS);
+            return new ServiceResult<>(0, BaseErrorCode.DATA_EXISTS);
         } catch (Exception e) {
             log.error("Service bulk create {} error: {}", objs, e.getMessage());
-            return new ServiceResult(false, BaseErrorCode.ERROR, e.getMessage());
+            return new ServiceResult<>(0, BaseErrorCode.ERROR, e.getMessage());
         }
 
         if (result < objs.size()) {
             log.error("Service bulk create {} with some failed, maybe some not exist", objs);
-            return new ServiceResult(result, BaseErrorCode.DATA_PARTIAL_SUCCESS);
+            return new ServiceResult<>(result, BaseErrorCode.DATA_PARTIAL_SUCCESS);
         } else {
-            return new ServiceResult(result);
+            return new ServiceResult<>(result);
         }
     }
 
     @Override
-    public ServiceResult bulkUpdate(List<M> objs) {
+    public ServiceResult<Integer> bulkUpdate(List<M> objs) {
         if (modelFields != null) {
             objs.forEach(obj -> modelFields.clearNotWritableFields(obj, true));
         }
@@ -227,35 +233,35 @@ public abstract class BaseModelServiceImpl<M extends BaseModel,
             result = modelMapper.bulkUpdate(objs);
         } catch (DuplicateKeyException e) {
             log.error("Service bulk update {} failed: {}", objs, e.getMessage());
-            return new ServiceResult(false, BaseErrorCode.DATA_EXISTS);
+            return new ServiceResult<>(0, BaseErrorCode.DATA_EXISTS);
         } catch (Exception e) {
             log.error("Service bulk update {} error: {}", objs, e.getMessage());
-            return new ServiceResult(false, BaseErrorCode.ERROR, e.getMessage());
+            return new ServiceResult<>(0, BaseErrorCode.ERROR, e.getMessage());
         }
 
         if (result < objs.size()) {
             log.error("Service bulk update {} with some failed, maybe some not exist", objs);
-            return new ServiceResult(result, BaseErrorCode.DATA_PARTIAL_SUCCESS);
+            return new ServiceResult<>(result, BaseErrorCode.DATA_PARTIAL_SUCCESS);
         } else {
-            return new ServiceResult(result);
+            return new ServiceResult<>(result);
         }
     }
 
     @Override
-    public ServiceResult bulkDelete(String[] ids) {
+    public ServiceResult<Integer> bulkDelete(String[] ids) {
         int result;
         try {
             result = modelMapper.bulkDelete(ids);
         } catch (Exception e) {
             log.error("Service bulk delete {} error: {}", ids, e.getMessage());
-            return new ServiceResult(false, BaseErrorCode.ERROR, e.getMessage());
+            return new ServiceResult<>(0, BaseErrorCode.ERROR, e.getMessage());
         }
 
         if (result < ids.length) {
             log.error("Service bulk delete {} with some failed", Arrays.toString(ids));
-            return new ServiceResult(result, BaseErrorCode.DATA_PARTIAL_SUCCESS);
+            return new ServiceResult<>(result, BaseErrorCode.DATA_PARTIAL_SUCCESS);
         } else {
-            return new ServiceResult(result);
+            return new ServiceResult<>(result);
         }
     }
 }

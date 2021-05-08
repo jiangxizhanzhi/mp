@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ServiceResult {
+public class ServiceResult<T> {
 
     private Object data;
 
@@ -25,47 +25,35 @@ public class ServiceResult {
     private ServiceCode serviceCode = BaseErrorCode.SUCCESS;
 
     @JsonIgnore
-    private BaseResult dataResult;
+    private T source;
 
-    public ServiceResult(Object data) {
-        setData(data);
+    public ServiceResult(T source) {
+        setSource(source);
     }
 
-    public ServiceResult(Object data, ServiceCode code) {
-        setData(data);
+    public ServiceResult(T source, ServiceCode code) {
+        setSource(source);
         setServiceCode(code);
     }
 
-    public ServiceResult(Object data, ServiceCode code, String detail) {
-        setData(data);
-        setServiceCode(code);
-        setDetail(detail);
-    }
-
-
-    public ServiceResult(BaseResult dataResult) {
-        setDataResult(dataResult);
-    }
-
-    public ServiceResult(BaseResult dataResult, ServiceCode code) {
-        setDataResult(dataResult);
-        setServiceCode(code);
-    }
-
-    public ServiceResult(BaseResult dataResult, ServiceCode code, String detail) {
-        setDataResult(dataResult);
+    public ServiceResult(T source, ServiceCode code, String detail) {
+        setSource(source);
         setServiceCode(code);
         setDetail(detail);
     }
 
-    public ServiceResult asResult() {
-        if (dataResult != null) {
-            data = dataResult.asResult();
+    public ServiceResult<T> asResult() {
+        if (source instanceof BaseObjResult) {
+            data = ((BaseObjResult) source).asResult();
+        } else {
+            data = source;
         }
+
         if (serviceCode != null) {
             setCode(serviceCode.getCode());
             setMessage(serviceCode.getMessage());
         }
+
         return this;
     }
 

@@ -12,7 +12,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ListObjResult<T> extends BaseResult {
+public class ListObjResult<T> extends BaseObjResult {
 
     private List<Object> data = new ArrayList<>();
 

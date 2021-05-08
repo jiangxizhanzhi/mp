@@ -6,6 +6,8 @@ import cn.cyberpeace.mp.base.controller.stereotype.ListParamNames;
 import cn.cyberpeace.mp.base.controller.stereotype.UnlimitPagination;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.service.BaseModelService;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -31,10 +33,10 @@ public abstract class BaseModelController<M extends BaseModel, S extends BaseMod
         return Arrays.asList(unlimitPaginationAnnotation.value()).contains(listFuncName);
     }
 
-    private void handleQueryParams(String listFuncName,
-                                   Class<? extends ListParamNames> listParamNamesAnnotationClass,
-                                   HttpServletRequest request,
-                                   QueryParams queryParams) {
+    public void handleQueryParams(String listFuncName,
+                                  Class<? extends ListParamNames> listParamNamesAnnotationClass,
+                                  HttpServletRequest request,
+                                  QueryParams queryParams) {
         String[] actualListParamNames;
         ListParamNames listParamNamesAnnotation = getClass().getAnnotation(listParamNamesAnnotationClass);
         if (listParamNamesAnnotation != null) {
@@ -68,14 +70,14 @@ public abstract class BaseModelController<M extends BaseModel, S extends BaseMod
     }
 
     @GetMapping
-    public ServiceResult list(HttpServletRequest request,
-                              @RequestParam Map<String, Object> params,
-                              @RequestParam(required = false) String search,
-                              @RequestParam(required = false) String[] searchFields,
-                              @RequestParam(required = false) String[] orders,
-                              @RequestParam(required = false) Integer page,
-                              @RequestParam(required = false) Integer pageSize,
-                              @RequestParam(required = false) String[] fields) {
+    public ListObjServiceResult<M> list(HttpServletRequest request,
+                                        @RequestParam Map<String, Object> params,
+                                        @RequestParam(required = false) String search,
+                                        @RequestParam(required = false) String[] searchFields,
+                                        @RequestParam(required = false) String[] orders,
+                                        @RequestParam(required = false) Integer page,
+                                        @RequestParam(required = false) Integer pageSize,
+                                        @RequestParam(required = false) String[] fields) {
         var queryParams = new QueryParams(params, search, searchFields, orders, page, pageSize, fields);
         handleQueryParams("list", ListParamNames.class, request, queryParams);
         return modelService.list(queryParams.getParams(), queryParams.getSearch(), queryParams.getSearchFields(),
@@ -84,39 +86,39 @@ public abstract class BaseModelController<M extends BaseModel, S extends BaseMod
     }
 
     @GetMapping("/{id}")
-    public ServiceResult get(@PathVariable String id, @RequestParam(required = false) String[] fields) {
+    public ObjServiceResult<M> get(@PathVariable String id, @RequestParam(required = false) String[] fields) {
         return modelService.get(id, fields).asResult();
     }
 
     @PostMapping
-    public ServiceResult create(@RequestBody M obj, @RequestParam(required = false) String[] fields) {
+    public ObjServiceResult<M> create(@RequestBody M obj, @RequestParam(required = false) String[] fields) {
         return modelService.create(obj, fields).asResult();
     }
 
     @PatchMapping("/{id}")
-    public ServiceResult update(@PathVariable String id, @RequestBody M obj,
-                                @RequestParam(required = false) String[] fields) {
+    public ObjServiceResult<M> update(@PathVariable String id, @RequestBody M obj,
+                                      @RequestParam(required = false) String[] fields) {
         obj.setId(id);
         return modelService.update(obj, fields).asResult();
     }
 
     @DeleteMapping("/{id}")
-    public ServiceResult delete(@PathVariable String id) {
+    public ServiceResult<Boolean> delete(@PathVariable String id) {
         return modelService.delete(id).asResult();
     }
 
     @PostMapping("/bulk_create")
-    public ServiceResult bulkCreate(@RequestBody List<M> objs) {
+    public ServiceResult<Integer> bulkCreate(@RequestBody List<M> objs) {
         return modelService.bulkCreate(objs).asResult();
     }
 
     @PatchMapping("/bulk_update")
-    public ServiceResult bulkUpdate(@RequestBody List<M> objs) {
+    public ServiceResult<Integer> bulkUpdate(@RequestBody List<M> objs) {
         return modelService.bulkUpdate(objs).asResult();
     }
 
     @DeleteMapping("/bulk_delete")
-    public ServiceResult bulkDelete(@RequestBody String[] ids) {
+    public ServiceResult<Integer> bulkDelete(@RequestBody String[] ids) {
         return modelService.bulkDelete(ids).asResult();
     }
 }
