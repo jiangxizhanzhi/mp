@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.base.repository.condition;
 
 public enum Connector {
+    IN("in"),
     EQUAL("="),
     NOT_EQUAL("<>"),
     GREATER_THAN(">"),

@@ -16,16 +16,31 @@
         <if test="condition.andi != null and !condition.andi.isEmpty()">
             <foreach item="cond" index="index" collection="condition.andi.conds" open="(" separator=" AND " close=")">
                 <if test="cond.name == 'cond'">
-                    ${cond.fieldName} ${cond.connector} #{cond.fieldValue}
+                    <choose>
+                        <when test="cond.connector == 'in'">${cond.fieldName} ${cond.connector} <foreach
+                                item="value" index="index" collection="cond.fieldValue"
+                                open="(" separator="," close=")">#{value}</foreach></when>
+                        <otherwise>${cond.fieldName} ${cond.connector} #{cond.fieldValue}</otherwise>
+                    </choose>
                 </if>
                 <if test="cond.name == 'or'">
                     <foreach item="orCond" index="index" collection="cond.conds" open="(" separator=" OR " close=")">
-                        ${orCond.fieldName} ${orCond.connector} #{orCond.fieldValue}
+                        <choose>
+                            <when test="orCond.connector == 'in'">${orCond.fieldName} ${orCond.connector} <foreach
+                                    item="value" index="index" collection="orCond.fieldValue"
+                                    open="(" separator="," close=")">#{value}</foreach></when>
+                            <otherwise>${orCond.fieldName} ${orCond.connector} #{orCond.fieldValue}</otherwise>
+                        </choose>
                     </foreach>
                 </if>
                 <if test="cond.name == 'and'">
                     <foreach item="andCond" index="index" collection="cond.conds" open="(" separator=" AND " close=")">
-                        ${condandCond.fieldName} ${andCond.connector} #{andCond.fieldValue}
+                        <choose>
+                            <when test="andCond.connector == 'in'">${andCond.fieldName} ${andCond.connector} <foreach
+                                    item="value" index="index" collection="andCond.fieldValue"
+                                    open="(" separator="," close=")">#{value}</foreach></when>
+                            <otherwise>${andCond.fieldName} ${andCond.connector} #{andCond.fieldValue}</otherwise>
+                        </choose>
                     </foreach>
                 </if>
             </foreach>

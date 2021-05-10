@@ -30,6 +30,11 @@ public class HumanCondition {
         return condition;
     }
 
+    public HumanCondition filterIn(String fieldName, Object[] fieldValue) {
+        andCondition.addIn(TextUtils.humpToLine(fieldName), fieldValue);
+        return this;
+    }
+
     public HumanCondition filterEqual(String fieldName, Object fieldValue) {
         andCondition.addEqual(TextUtils.humpToLine(fieldName), fieldValue);
         return this;
@@ -68,6 +73,11 @@ public class HumanCondition {
         private HumanCondition humanCondition;
 
         private final OrCondition orCondition = new OrCondition();
+
+        public OrConditionPoxy orIn(String fieldName, Object[] fieldValue) {
+            orCondition.addIn(TextUtils.humpToLine(fieldName), fieldValue);
+            return this;
+        }
 
         public OrConditionPoxy orEqual(String fieldName, Object fieldValue) {
             orCondition.addEqual(TextUtils.humpToLine(fieldName), fieldValue);

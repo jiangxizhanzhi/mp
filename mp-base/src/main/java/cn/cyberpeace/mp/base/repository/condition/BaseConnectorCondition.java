@@ -18,6 +18,10 @@ public class BaseConnectorCondition implements BaseCondition {
         return this;
     }
 
+    public BaseConnectorCondition addIn(String fieldName, Object[] fieldValue) {
+        return addCondition(fieldName, Connector.IN, fieldValue);
+    }
+
     public BaseConnectorCondition addEqual(String fieldName, Object fieldValue) {
         return addCondition(fieldName, Connector.EQUAL, fieldValue);
     }
