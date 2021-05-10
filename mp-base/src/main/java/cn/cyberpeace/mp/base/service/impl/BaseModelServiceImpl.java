@@ -31,10 +31,9 @@ public abstract class BaseModelServiceImpl<M extends BaseModel,
     public HumanCondition getHumanCondition(String search, String[] searchFields, String[] orders,
                                             int page, int pageSize) {
         var humanCondition = new HumanCondition();
-        humanCondition.setPage(page);
-        humanCondition.setPageSize(pageSize);
+        humanCondition.pagination(page, pageSize);
 
-        humanCondition.setSearch(search);
+        humanCondition.search(search);
         String[] lastSearchFields = null;
         if (modelFields != null) {
             DynamicFields validSearchFields = modelFields.getValidSearchFields(searchFields);
@@ -45,13 +44,14 @@ public abstract class BaseModelServiceImpl<M extends BaseModel,
                 lastSearchFields = availableSearchFields != null ? availableSearchFields.getFields() : null;
             }
         }
-        humanCondition.setSearchFields(lastSearchFields);
+        humanCondition.addSearchFields(lastSearchFields);
 
-        String[] lastOrders = null;
         if (modelFields != null) {
-            lastOrders = modelFields.getValidOrders(orders);
+            String[] lastOrders = modelFields.getValidOrders(orders);
+            if (lastOrders != null) {
+                humanCondition.orderBy(lastOrders);
+            }
         }
-        humanCondition.setOrders(lastOrders);
 
         return humanCondition;
     }

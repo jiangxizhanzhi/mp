@@ -5,29 +5,91 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class HumanCondition {
-    private Integer page;
-    private Integer pageSize;
+    private Integer limit;
+    private Integer offset;
     private String search;
-    private String[] searchFields;
-    private String[] groupFields;
-    private String[] orders;
+    private final List<String> searchFields = new ArrayList<>();
+    private final List<String> groupFields = new ArrayList<>();
+    private final List<String> orders = new ArrayList<>();
     private final AndCondition andCondition = new AndCondition();
     private CustomCondition customCondition;
 
     public Condition toCondition() {
         var condition = new Condition();
-        condition.setPagination(new PaginationCondition().loadFromPageParams(page == null ? 0 : page,
-                pageSize == null ? 0 : pageSize));
-        condition.setSearch(new SearchCondition(search, TextUtils.humpToLine(searchFields)));
-        condition.setGroup(new GroupCondition(TextUtils.humpToLine(groupFields)));
-        condition.setOrder(new OrderCondition(TextUtils.humpToLine(orders)));
+        condition.setPagination(new PaginationCondition(limit, offset));
+        condition.setSearch(new SearchCondition(search, TextUtils.humpToLine(searchFields.toArray(new String[0]))));
+        condition.setGroup(new GroupCondition(TextUtils.humpToLine(groupFields.toArray(new String[0]))));
+        condition.setOrder(new OrderCondition(TextUtils.humpToLine(orders.toArray(new String[0]))));
         condition.setAndi(andCondition);
         condition.setCustom(customCondition);
         return condition;
+    }
+
+    public HumanCondition search(String search) {
+        this.search = search;
+        return this;
+    }
+
+    public HumanCondition addSearchField(String fieldName) {
+        searchFields.add(fieldName);
+        return this;
+    }
+
+    public HumanCondition addSearchFields(String[] fieldNames) {
+        searchFields.addAll(Arrays.asList(fieldNames));
+        return this;
+    }
+
+    public HumanCondition pagination(int page, int pageSize) {
+        if (pageSize >= 0) {
+            limit = pageSize;
+        } else {
+            limit = null;
+            offset = null;
+            return this;
+        }
+
+        if (page > 0) {
+            offset = (page - 1) * limit;
+        } else {
+            offset = null;
+        }
+
+        return this;
+    }
+
+    public HumanCondition slice(int startIndex, int endIndex) {
+        offset = Math.max(startIndex, 0);
+        limit = Math.max(endIndex - offset, 0);
+        return this;
+    }
+
+    public HumanCondition groupBy(String fieldName) {
+        groupFields.add(fieldName);
+        return this;
+    }
+
+    public HumanCondition groupBy(String[] fieldNames) {
+        groupFields.addAll(Arrays.asList(fieldNames));
+        return this;
+    }
+
+    public HumanCondition orderBy(String order) {
+        orders.add(order);
+        return this;
+    }
+
+    public HumanCondition orderBy(String[] orders) {
+        this.orders.addAll(Arrays.asList(orders));
+        return this;
     }
 
     public HumanCondition filterIn(String fieldName, Object[] fieldValue) {

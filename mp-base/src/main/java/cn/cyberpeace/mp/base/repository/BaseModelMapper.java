@@ -161,6 +161,10 @@ public interface BaseModelMapper<M extends BaseModel> {
 
     @Recommendation
     default List<M> list(HumanCondition humanCondition, String[] selectFields) {
+        if (humanCondition.getLimit() == 0) {
+            return new ArrayList<>();
+        }
+
         if (getMappedStatement("list") == null) {
             return commonList(humanCondition.toCondition(), selectFields);
         } else {
@@ -184,7 +188,7 @@ public interface BaseModelMapper<M extends BaseModel> {
 
     @Recommendation
     default M first(HumanCondition humanCondition, String[] selectFields) {
-        humanCondition.setPageSize(1);
+        humanCondition.slice(0, 1);
         List<M> objs = list(humanCondition, selectFields);
         if (objs.isEmpty()) {
             return null;
