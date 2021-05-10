@@ -15,8 +15,6 @@ import java.util.List;
 public class HumanCondition {
     private Integer limit;
     private Integer offset;
-    private String search;
-    private final List<String> searchFields = new ArrayList<>();
     private final List<String> groupFields = new ArrayList<>();
     private final List<String> orders = new ArrayList<>();
     private final AndCondition andCondition = new AndCondition();
@@ -25,27 +23,11 @@ public class HumanCondition {
     public Condition toCondition() {
         var condition = new Condition();
         condition.setPagination(new PaginationCondition(limit, offset));
-        condition.setSearch(new SearchCondition(search, TextUtils.humpToLine(searchFields.toArray(new String[0]))));
         condition.setGroup(new GroupCondition(TextUtils.humpToLine(groupFields.toArray(new String[0]))));
         condition.setOrder(new OrderCondition(TextUtils.humpToLine(orders.toArray(new String[0]))));
         condition.setAndi(andCondition);
         condition.setCustom(customCondition);
         return condition;
-    }
-
-    public HumanCondition search(String search) {
-        this.search = search;
-        return this;
-    }
-
-    public HumanCondition addSearchField(String fieldName) {
-        searchFields.add(fieldName);
-        return this;
-    }
-
-    public HumanCondition addSearchFields(String[] fieldNames) {
-        searchFields.addAll(Arrays.asList(fieldNames));
-        return this;
     }
 
     public HumanCondition pagination(int page, int pageSize) {

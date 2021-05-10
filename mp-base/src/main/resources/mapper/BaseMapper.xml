@@ -64,13 +64,6 @@
             </foreach>
         </if>
     </sql>
-    <sql id="search">
-        <if test="condition.search != null and !condition.search.isEmpty()">
-            <foreach item="field" index="index" collection="condition.search.searchFields" open="(" separator=" OR " close=")">
-                ${field} LIKE #{condition.search.searchPattern}
-            </foreach>
-        </if>
-    </sql>
     <sql id="group">
         <if test="condition.group != null and !condition.group.isEmpty()">
             GROUP BY <foreach item="groupField" index="index" collection="condition.group.groupFields"

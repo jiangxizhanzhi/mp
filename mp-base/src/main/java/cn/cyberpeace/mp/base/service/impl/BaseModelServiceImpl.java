@@ -13,6 +13,7 @@ import cn.cyberpeace.mp.base.service.stereotype.CustomConditionClass;
 import cn.cyberpeace.mp.base.util.TextUtils;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.DuplicateKeyException;
 
 import java.util.Arrays;
@@ -28,23 +29,35 @@ public abstract class BaseModelServiceImpl<M extends BaseModel,
 
     private F modelFields;
 
+    private void handleSearchCondition(HumanCondition humanCondition, String search, String[] searchFields) {
+        if (StringUtils.isEmpty(search) || modelFields == null) {
+            return;
+        }
+
+        String[] lastSearchFields;
+        DynamicFields validSearchFields = modelFields.getValidSearchFields(searchFields);
+        if (validSearchFields != null && validSearchFields.hasValidFields()) {
+            lastSearchFields = validSearchFields.getFields();
+        } else {
+            DynamicFields availableSearchFields = modelFields.getSearchFields();
+            lastSearchFields = availableSearchFields != null ? availableSearchFields.getFields() : null;
+        }
+
+        if (lastSearchFields != null) {
+            var orCondition = humanCondition.filterOrStart();
+            for (var searchField: lastSearchFields) {
+                orCondition.orIContains(searchField, search);
+            }
+            orCondition.filterOrEnd();
+        }
+    }
+
     public HumanCondition getHumanCondition(String search, String[] searchFields, String[] orders,
                                             int page, int pageSize) {
         var humanCondition = new HumanCondition();
         humanCondition.pagination(page, pageSize);
 
-        humanCondition.search(search);
-        String[] lastSearchFields = null;
-        if (modelFields != null) {
-            DynamicFields validSearchFields = modelFields.getValidSearchFields(searchFields);
-            if (validSearchFields != null && validSearchFields.hasValidFields()) {
-                lastSearchFields = validSearchFields.getFields();
-            } else {
-                DynamicFields availableSearchFields = modelFields.getSearchFields();
-                lastSearchFields = availableSearchFields != null ? availableSearchFields.getFields() : null;
-            }
-        }
-        humanCondition.addSearchFields(lastSearchFields);
+        handleSearchCondition(humanCondition, search, searchFields);
 
         if (modelFields != null) {
             String[] lastOrders = modelFields.getValidOrders(orders);

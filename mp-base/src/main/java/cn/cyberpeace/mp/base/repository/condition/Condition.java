@@ -13,8 +13,6 @@ public class Condition implements BaseCondition {
 
     private AndCondition andi;
 
-    private SearchCondition search;
-
     private GroupCondition group;
 
     private OrderCondition order;
@@ -22,8 +20,7 @@ public class Condition implements BaseCondition {
     private PaginationCondition pagination;
 
     public boolean isWhereFull() {
-        return custom != null && !custom.isEmpty() && andi != null && andi.isEmpty() &&
-                search != null && !search.isEmpty();
+        return custom != null && !custom.isEmpty() && andi != null && andi.isEmpty();
     }
 
     public boolean isWhereEmpty() {
@@ -31,11 +28,7 @@ public class Condition implements BaseCondition {
             return false;
         }
 
-        if (andi != null && !andi.isEmpty()) {
-            return false;
-        }
-
-        return search == null || search.isEmpty();
+        return andi == null || andi.isEmpty();
     }
 
     @Override

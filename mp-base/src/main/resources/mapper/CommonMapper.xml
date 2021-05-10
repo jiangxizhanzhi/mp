@@ -4,9 +4,8 @@
     <sql id="filterCondition">
         <trim prefix="WHERE" prefixOverrides="AND" suffixOverrides="AND">
             <if test="condition.andi != null and !condition.andi.isEmpty()">
-                <include refid="cn.cyberpeace.mp.base.and" /> AND
+                <include refid="cn.cyberpeace.mp.base.and" />
             </if>
-            <include refid="cn.cyberpeace.mp.base.search" />
         </trim>
     </sql>
     <select id="list" resultType="map">
