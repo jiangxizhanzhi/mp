@@ -7,7 +7,13 @@ public enum Connector {
     GREATER_THAN(">"),
     GREATER_THAN_OR_EQUAL(">="),
     LESS_THAN("<"),
-    LESS_THAN_OR_EQUAL("<=");
+    LESS_THAN_OR_EQUAL("<="),
+    CONTAINS("contains"),
+    I_CONTAINS("iContains"),
+    STARTS_WITH("startsWith"),
+    I_STARTS_WITH("iStartsWith"),
+    ENDS_WITH("endsWith"),
+    I_ENDS_WITH("iEndsWith");
 
     private final String operator;
 

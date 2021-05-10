@@ -127,6 +127,36 @@ public class HumanCondition {
         return this;
     }
 
+    public HumanCondition filterContains(String fieldName, Object fieldValue) {
+        andCondition.addContains(TextUtils.humpToLine(fieldName), fieldValue);
+        return this;
+    }
+
+    public HumanCondition filterIContains(String fieldName, Object fieldValue) {
+        andCondition.addIContains(TextUtils.humpToLine(fieldName), fieldValue);
+        return this;
+    }
+
+    public HumanCondition filterStartsWith(String fieldName, Object fieldValue) {
+        andCondition.addStartsWith(TextUtils.humpToLine(fieldName), fieldValue);
+        return this;
+    }
+
+    public HumanCondition filterIStartsWith(String fieldName, Object fieldValue) {
+        andCondition.addIStartsWith(TextUtils.humpToLine(fieldName), fieldValue);
+        return this;
+    }
+
+    public HumanCondition filterEndsWith(String fieldName, Object fieldValue) {
+        andCondition.addEndsWith(TextUtils.humpToLine(fieldName), fieldValue);
+        return this;
+    }
+
+    public HumanCondition filterIEndsWith(String fieldName, Object fieldValue) {
+        andCondition.addIEndsWith(TextUtils.humpToLine(fieldName), fieldValue);
+        return this;
+    }
+
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
@@ -168,6 +198,36 @@ public class HumanCondition {
 
         public OrConditionPoxy orLessThanOrEqual(String fieldName, Object fieldValue) {
             orCondition.addLessThanOrEqual(TextUtils.humpToLine(fieldName), fieldValue);
+            return this;
+        }
+
+        public OrConditionPoxy orContains(String fieldName, Object fieldValue) {
+            orCondition.addContains(TextUtils.humpToLine(fieldName), fieldValue);
+            return this;
+        }
+
+        public OrConditionPoxy orIContains(String fieldName, Object fieldValue) {
+            orCondition.addIContains(TextUtils.humpToLine(fieldName), fieldValue);
+            return this;
+        }
+
+        public OrConditionPoxy orStartsWith(String fieldName, Object fieldValue) {
+            orCondition.addStartsWith(TextUtils.humpToLine(fieldName), fieldValue);
+            return this;
+        }
+
+        public OrConditionPoxy orIStartsWith(String fieldName, Object fieldValue) {
+            orCondition.addIStartsWith(TextUtils.humpToLine(fieldName), fieldValue);
+            return this;
+        }
+
+        public OrConditionPoxy orEndsWith(String fieldName, Object fieldValue) {
+            orCondition.addEndsWith(TextUtils.humpToLine(fieldName), fieldValue);
+            return this;
+        }
+
+        public OrConditionPoxy orIEndsWith(String fieldName, Object fieldValue) {
+            orCondition.addIEndsWith(TextUtils.humpToLine(fieldName), fieldValue);
             return this;
         }
 

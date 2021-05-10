@@ -46,6 +46,30 @@ public class BaseConnectorCondition implements BaseCondition {
         return addCondition(fieldName, Connector.LESS_THAN_OR_EQUAL, fieldValue);
     }
 
+    public BaseConnectorCondition addContains(String fieldName, Object fieldValue) {
+        return addCondition(fieldName, Connector.CONTAINS, fieldValue);
+    }
+
+    public BaseConnectorCondition addIContains(String fieldName, Object fieldValue) {
+        return addCondition(fieldName, Connector.I_CONTAINS, fieldValue);
+    }
+
+    public BaseConnectorCondition addStartsWith(String fieldName, Object fieldValue) {
+        return addCondition(fieldName, Connector.STARTS_WITH, fieldValue);
+    }
+
+    public BaseConnectorCondition addIStartsWith(String fieldName, Object fieldValue) {
+        return addCondition(fieldName, Connector.I_STARTS_WITH, fieldValue);
+    }
+
+    public BaseConnectorCondition addEndsWith(String fieldName, Object fieldValue) {
+        return addCondition(fieldName, Connector.ENDS_WITH, fieldValue);
+    }
+
+    public BaseConnectorCondition addIEndsWith(String fieldName, Object fieldValue) {
+        return addCondition(fieldName, Connector.I_ENDS_WITH, fieldValue);
+    }
+
     @Override
     public boolean isEmpty() {
         return conds.isEmpty();
