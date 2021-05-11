@@ -10,7 +10,6 @@ import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.fields.BaseModelFields;
 import cn.cyberpeace.mp.base.service.result.*;
 import cn.cyberpeace.mp.base.service.stereotype.CustomConditionClass;
-import cn.cyberpeace.mp.base.util.TextUtils;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -52,20 +51,26 @@ public abstract class BaseModelServiceImpl<M extends BaseModel,
         }
     }
 
-    public HumanCondition getHumanCondition(String search, String[] searchFields, String[] orders,
-                                            int page, int pageSize) {
+    public HumanCondition getHumanCondition(String[] selectFields) {
         var humanCondition = new HumanCondition();
+        if (selectFields != null) {
+            humanCondition.select(selectFields);
+        }
+        return humanCondition;
+    }
+
+
+    public HumanCondition getHumanCondition(String[] selectFields, String search, String[] searchFields,
+                                            String[] orders, int page, int pageSize) {
+        var humanCondition = getHumanCondition(selectFields);
         humanCondition.pagination(page, pageSize);
-
         handleSearchCondition(humanCondition, search, searchFields);
-
         if (modelFields != null) {
             String[] lastOrders = modelFields.getValidOrders(orders);
             if (lastOrders != null) {
                 humanCondition.orderBy(lastOrders);
             }
         }
-
         return humanCondition;
     }
 
@@ -95,16 +100,16 @@ public abstract class BaseModelServiceImpl<M extends BaseModel,
     @Override
     public ListObjServiceResult<M> list(Map<String, Object> params, String search, String[] searchFields,
                                         String[] orders, int page, int pageSize, String[] fields) {
-        var humanCondition = getHumanCondition(search, searchFields, orders, page, pageSize);
+        DynamicFields validModelFields = modelFields != null ? modelFields.getValidFields(fields) : null;
+        String[] selectFields = validModelFields != null ? validModelFields.getFields() : null;
+        var humanCondition = getHumanCondition(selectFields, search, searchFields, orders, page, pageSize);
         loadListFilterCondition(humanCondition, params);
         humanCondition.setCustomCondition(getCustomCondition(params, CustomConditionClass.class));
 
-        DynamicFields validModelFields = modelFields != null ? modelFields.getValidFields(fields) : null;
-        String[] selectFields = validModelFields != null ? TextUtils.humpToLine(validModelFields.getFields()) : null;
         List<M> data;
         int total;
         try {
-            data = modelMapper.list(humanCondition, selectFields);
+            data = modelMapper.list(humanCondition);
             total = modelMapper.total(humanCondition);
         } catch (Exception e) {
             log.error("Service list error: {}", e.getMessage());
@@ -119,10 +124,11 @@ public abstract class BaseModelServiceImpl<M extends BaseModel,
     @Override
     public ObjServiceResult<M> get(String id, String[] fields) {
         DynamicFields validModelFields = modelFields != null ? modelFields.getValidFields(fields) : null;
-        String[] selectFields = validModelFields != null ? TextUtils.humpToLine(validModelFields.getFields()) : null;
+        String[] selectFields = validModelFields != null ? validModelFields.getFields() : null;
+        var humanCondition = getHumanCondition(selectFields);
         M obj;
         try {
-            obj = modelMapper.get(id, selectFields);
+            obj = modelMapper.get(id, humanCondition);
         } catch (Exception e) {
             log.error("Service get {} error: {}", id, e.getMessage());
             return new ObjServiceResult<>(null, BaseErrorCode.ERROR, e.getMessage());

@@ -174,7 +174,11 @@ public interface BaseModelMapper<M extends BaseModel> {
 
     @Recommendation
     default List<M> list(HumanCondition humanCondition) {
-        return list(humanCondition, null);
+        String[] selectFields = humanCondition.toSelectFields();
+        if (selectFields.length == 0) {
+            selectFields = null;
+        }
+        return list(humanCondition, selectFields);
     }
 
     @Recommendation
@@ -199,7 +203,11 @@ public interface BaseModelMapper<M extends BaseModel> {
 
     @Recommendation
     default M first(HumanCondition humanCondition) {
-        return first(humanCondition, null);
+        String[] selectFields = humanCondition.toSelectFields();
+        if (selectFields.length == 0) {
+            selectFields = null;
+        }
+        return first(humanCondition, selectFields);
     }
 
     @Recommendation
@@ -209,6 +217,15 @@ public interface BaseModelMapper<M extends BaseModel> {
         } else {
             return exist(getTableName(), humanCondition.toCondition());
         }
+    }
+
+    @Recommendation
+    default M get(String id, HumanCondition humanSelectCondition) {
+        String[] selectFields = humanSelectCondition.toSelectFields();
+        if (selectFields.length == 0) {
+            selectFields = null;
+        }
+        return get(id, selectFields);
     }
 
     @Recommendation
@@ -295,7 +312,7 @@ public interface BaseModelMapper<M extends BaseModel> {
 
     @Recommendation
     default M get(String id) {
-        return get(id, null);
+        return get(id, (String[]) null);
     }
 
     default boolean create(String[] createFields, Object[] createFieldValues) {

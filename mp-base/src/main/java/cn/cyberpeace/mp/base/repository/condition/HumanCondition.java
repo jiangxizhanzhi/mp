@@ -13,12 +13,17 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class HumanCondition {
+    private final List<String> selectFields = new ArrayList<>();
     private Integer limit;
     private Integer offset;
     private final List<String> groupFields = new ArrayList<>();
     private final List<String> orders = new ArrayList<>();
     private final AndCondition andCondition = new AndCondition();
     private CustomCondition customCondition;
+
+    public String[] toSelectFields() {
+        return TextUtils.humpToLine(selectFields.toArray(new String[0]));
+    }
 
     public Condition toCondition() {
         var condition = new Condition();
@@ -28,6 +33,16 @@ public class HumanCondition {
         condition.setAndi(andCondition);
         condition.setCustom(customCondition);
         return condition;
+    }
+
+    public HumanCondition select(String fieldName) {
+        selectFields.add(fieldName);
+        return this;
+    }
+
+    public HumanCondition select(String[] fieldNames) {
+        selectFields.addAll(Arrays.asList(fieldNames));
+        return this;
     }
 
     public HumanCondition pagination(int page, int pageSize) {
