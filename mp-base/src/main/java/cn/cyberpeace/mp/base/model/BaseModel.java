@@ -47,4 +47,8 @@ public abstract class BaseModel {
             updateTime = new Date();
         }
     }
+
+    public boolean prepareDeleteFlag() {
+        return false;
+    }
 }

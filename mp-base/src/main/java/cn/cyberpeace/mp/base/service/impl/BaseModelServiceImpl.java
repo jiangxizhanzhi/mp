@@ -202,7 +202,7 @@ public abstract class BaseModelServiceImpl<M extends BaseModel,
     public ServiceResult<Boolean> delete(String id) {
         boolean result;
         try {
-            result = modelMapper.delete(id);
+            result = modelMapper.logicDelete(id);
         } catch (Exception e) {
             log.error("Service delete {} error: {}", id, e.getMessage());
             return new ServiceResult<>(false, BaseErrorCode.ERROR, e.getMessage());
@@ -270,7 +270,7 @@ public abstract class BaseModelServiceImpl<M extends BaseModel,
     public ServiceResult<Integer> bulkDelete(String[] ids) {
         int result;
         try {
-            result = modelMapper.bulkDelete(ids);
+            result = modelMapper.bulkLogicDelete(ids);
         } catch (Exception e) {
             log.error("Service bulk delete {} error: {}", ids, e.getMessage());
             return new ServiceResult<>(0, BaseErrorCode.ERROR, e.getMessage());

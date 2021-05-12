@@ -40,18 +40,31 @@ public interface BaseModelMapper<M extends BaseModel> {
         return getMapperInterface((Proxy) this);
     }
 
-    private Class<?> getModelClass() {
+    private Class<M> getModelClass() {
+        Class<?> actualModelClassSource;
         Class<?> mapperInterface = getMapperInterface();
         var modelClassAnnotation = mapperInterface.getAnnotation(ModelClass.class);
         if (modelClassAnnotation != null) {
-            return modelClassAnnotation.value();
+            actualModelClassSource = modelClassAnnotation.value();
+        } else {
+            actualModelClassSource = ClassUtils.getStaticFieldValue(mapperInterface, "modelClass",
+                    Class.class);
         }
 
-        return ClassUtils.getStaticFieldValue(mapperInterface, "modelClass", Class.class);
+        Class<M> actualModelClass;
+        try {
+            actualModelClass = (Class<M>) actualModelClassSource;
+        } catch (Exception e) {
+            log.error("Invalid model class[{}] for {}", actualModelClassSource, getClass());
+            return null;
+        }
+
+        return actualModelClass;
     }
 
     private String getTableName() {
-        return ModelUtils.getTableName(getModelClass());
+        Class<M> actualModelClass = getModelClass();
+        return actualModelClass != null ? ModelUtils.getTableName(actualModelClass) : null;
     }
 
     private MappedStatement getMappedStatement(String humanName) {
@@ -72,14 +85,14 @@ public interface BaseModelMapper<M extends BaseModel> {
             return null;
         }
 
-        Class<?> actualModelClass = getModelClass();
+        Class<M> actualModelClass = getModelClass();
         if (actualModelClass == null) {
             return null;
         }
 
         M obj;
         try {
-            obj = (M) actualModelClass.getDeclaredConstructor().newInstance();
+            obj = actualModelClass.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
             log.error("Convert {} to {} instance failed: {}", map, actualModelClass, e);
             return null;
@@ -328,6 +341,28 @@ public interface BaseModelMapper<M extends BaseModel> {
         return getCommonMapper().delete(getTableName(), id);
     }
 
+    @Recommendation
+    default boolean logicDelete(String id) {
+        Class<M> actualModelClass = getModelClass();
+        if (actualModelClass == null) {
+            return false;
+        }
+
+        M obj;
+        try {
+            obj = actualModelClass.getDeclaredConstructor().newInstance();
+        } catch (Exception e) {
+            log.error("Create model obj by {} failed: {}", actualModelClass, e);
+            return false;
+        }
+        obj.setId(id);
+        if (obj.prepareDeleteFlag()) {
+            return update(obj);
+        } else {
+            return delete(id);
+        }
+    }
+
     default int bulkCreate(String[] createFields, Object[][] createFieldValuesList) {
         return getCommonMapper().bulkCreate(getTableName(), createFields, createFieldValuesList);
     }
@@ -339,6 +374,41 @@ public interface BaseModelMapper<M extends BaseModel> {
     @Recommendation
     default int bulkDelete(String[] ids) {
         return getCommonMapper().bulkDelete(getTableName(), ids);
+    }
+
+    @Recommendation
+    default int bulkLogicDelete(String[] ids) {
+        Class<M> actualModelClass = getModelClass();
+        if (actualModelClass == null) {
+            return 0;
+        }
+
+        List<M> logicObjs = new ArrayList<>();
+        List<String> rawIds = new ArrayList<>();
+        try {
+            for (var id: ids) {
+                M obj = actualModelClass.getDeclaredConstructor().newInstance();
+                obj.setId(id);
+                if (obj.prepareDeleteFlag()) {
+                    logicObjs.add(obj);
+                } else {
+                    rawIds.add(id);
+                }
+            }
+        } catch (Exception e) {
+            log.error("Bulk logic delete {} on model {} failed: {}", ids, actualModelClass, e);
+            return 0;
+        }
+
+        var successCount = 0;
+        if (!logicObjs.isEmpty()) {
+            successCount += bulkUpdate(logicObjs);
+        }
+        if (!rawIds.isEmpty()) {
+            successCount += bulkDelete(rawIds.toArray(new String[0]));
+        }
+
+        return successCount;
     }
 
     List<M> list(String table, @Param("condition") Condition condition, String[] selectFields);
