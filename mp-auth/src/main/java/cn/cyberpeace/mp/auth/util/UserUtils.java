@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.auth.util;
 
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.base.service.result.ObjResult;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -16,7 +17,8 @@ public class UserUtils {
     public static UserModel getUser(String id) {
         UserModel user;
         // TODO 缓存获取
-        user = userService.get(id).getSource().getObj();
+        ObjResult<UserModel> result = userService.get(id).getSource();
+        user = result != null ? result.getObj() : null;
         return user;
     }
 }
