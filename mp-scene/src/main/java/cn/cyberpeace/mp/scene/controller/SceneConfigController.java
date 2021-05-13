@@ -1,41 +1,22 @@
 package cn.cyberpeace.mp.scene.controller;
 
+import cn.cyberpeace.mp.base.controller.BaseModelController;
+import cn.cyberpeace.mp.scene.constant.ControllerConstant;
+import cn.cyberpeace.mp.scene.model.SceneConfigModel;
 import cn.cyberpeace.mp.scene.service.SceneConfigService;
-import cn.cyberpeace.mp.scene.vo.SceneConfigVO;
-import cn.cyberpeace.mp.scene.websocket.SceneConfigWebSocket;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @Slf4j
 @RestController
-@RequestMapping("/api")
-public class SceneConfigController {
+@RequestMapping(ControllerConstant.BASE_API_PATH + "/scene_configs")
+public class SceneConfigController extends BaseModelController<SceneConfigModel, SceneConfigService> {
 
     @Autowired
-    private SceneConfigService sceneConfigService;
-
-    @Autowired
-    private MessageSource messageSource;
-
-    @Autowired
-    private SceneConfigWebSocket sceneConfigWebSocket;
-
-    @GetMapping("/scene")
-    public List<SceneConfigVO> findAll() {
-        return sceneConfigService.findAll();
+    public SceneConfigController(SceneConfigService modelService) {
+        setModelService(modelService);
     }
 
-    @GetMapping("/test")
-    public String test() {
-        log.info("Test");
-        sceneConfigWebSocket.sendInfo("1", "te");
-        return messageSource.getMessage("te", null, LocaleContextHolder.getLocale());
-    }
 }

@@ -1,7 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="cn.cyberpeace.mp.scene.repository.SceneConfigMapper">
-    <select id="findAll" resultType="cn.cyberpeace.mp.scene.domain.SceneConfigDO">
-        SELECT * FROM scene_config
-    </select>
 </mapper>

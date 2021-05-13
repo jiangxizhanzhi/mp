@@ -1,9 +1,7 @@
 package cn.cyberpeace.mp.scene.service;
 
-import cn.cyberpeace.mp.scene.vo.SceneConfigVO;
+import cn.cyberpeace.mp.base.service.BaseModelService;
+import cn.cyberpeace.mp.scene.model.SceneConfigModel;
 
-import java.util.List;
-
-public interface SceneConfigService {
-    List<SceneConfigVO> findAll();
+public interface SceneConfigService extends BaseModelService<SceneConfigModel> {
 }

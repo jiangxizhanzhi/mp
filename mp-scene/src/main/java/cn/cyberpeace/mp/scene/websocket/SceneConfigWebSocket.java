@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+// TODO: 样例，待修改集成
 @ServerEndpoint("/scene/{sid}")
 @Component
 public class SceneConfigWebSocket {
