@@ -52,6 +52,6 @@ public class AuthUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return UserModel.Status.NORMAL.getValue() == user.getStatus();
+        return UserModel.Status.NORMAL.equals(user.getStatus());
     }
 }

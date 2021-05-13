@@ -2,8 +2,12 @@ package cn.cyberpeace.mp.auth.model;
 
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.base.model.BaseModel;
+import cn.cyberpeace.mp.base.model.generator.DateGenerator;
+import cn.cyberpeace.mp.base.model.generator.UuidGenerator;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultGen;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
-import cn.cyberpeace.mp.base.util.TextUtils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,47 +21,48 @@ import java.util.Date;
 @NoArgsConstructor
 @Table("mp_auth_user")
 public class UserModel extends BaseModel implements Serializable {
+    @DefaultStr
     private String tenant;
     private String identifier;
     private String username;
     private String password;
+    @DefaultGen(UuidGenerator.class)
     private String tokenSecret;
+    @DefaultStr
     private String name;
+    @DefaultStr
     private String nickname;
+    @DefaultStr
     private String avatar;
+    @DefaultGen(DateGenerator.class)
     private Date birthday;
+    @DefaultStr
     private String email;
+    @DefaultStr
     private String mobile;
+    @DefaultStr
     private String idCard;
+    @DefaultStr
     private String address;
+    @DefaultInt(3)
     private Integer status;
+    @DefaultGen(DateGenerator.class)
     private Date dateJoined;
     private Date expiredTime;
+    @DefaultGen(DateGenerator.class)
     private Date lastLogin;
 
-    public enum Status {
-        NORMAL(1),
-        DISABLE(2),
-        PENDING(3);
+    public static class Status {
+        public static final Integer NORMAL = 1;
+        public static final Integer DISABLE = 2;
+        public static final Integer PENDING = 3;
 
-        private final Integer value;
-        Status(int value) {
-            this.value = value;
-        }
-        public int getValue() {
-            return value;
-        }
+        private Status() {}
     }
 
     public void encodePassword() {
         if (!StringUtils.isEmpty(password)) {
             password = PasswordUtils.encode(password);
-        }
-    }
-
-    public void initDefaultTenant() {
-        if (StringUtils.isEmpty(tenant)) {
-            tenant = StringUtils.EMPTY;
         }
     }
 
@@ -67,81 +72,9 @@ public class UserModel extends BaseModel implements Serializable {
         }
     }
 
-    public void initDefaultTokenSecret() {
-        if (StringUtils.isEmpty(tokenSecret)) {
-            tokenSecret = TextUtils.uuid();
-        }
-    }
-
-    public void initDefaultName() {
-        if (StringUtils.isEmpty(name)) {
-            name = StringUtils.EMPTY;
-        }
-    }
-
-    public void initDefaultNickname() {
-        if (StringUtils.isEmpty(nickname)) {
-            nickname = StringUtils.EMPTY;
-        }
-    }
-
-    public void initDefaultAvatar() {
-        if (StringUtils.isEmpty(avatar)) {
-            avatar = StringUtils.EMPTY;
-        }
-    }
-
-    public void initDefaultBirthday() {
-        if (birthday == null) {
-            birthday = new Date();
-        }
-    }
-
-    public void initDefaultEmail() {
-        if (StringUtils.isEmpty(email)) {
-            email = StringUtils.EMPTY;
-        }
-    }
-
-    public void initDefaultMobile() {
-        if (StringUtils.isEmpty(mobile)) {
-            mobile = StringUtils.EMPTY;
-        }
-    }
-
-    public void initDefaultIdCard() {
-        if (StringUtils.isEmpty(idCard)) {
-            idCard = StringUtils.EMPTY;
-        }
-    }
-
-    public void initDefaultAddress() {
-        if (StringUtils.isEmpty(address)) {
-            address = StringUtils.EMPTY;
-        }
-    }
-
-    public void initDefaultStatus() {
-        if (status == null) {
-            status = Status.PENDING.getValue();
-        }
-    }
-
-    public void initDefaultDateJoined() {
-        if (dateJoined == null) {
-            dateJoined = new Date();
-        }
-    }
-
     public void initDefaultExpiredTime() {
         if (expiredTime == null) {
             expiredTime = new Date(new Date().getTime() + 99L * 365 * 24 * 3600 * 1000);
-        }
-    }
-
-    public void initDefaultLastLogin() {
-        if (lastLogin == null) {
-            lastLogin = new Date();
         }
     }
 }

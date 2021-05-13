@@ -1,47 +1,72 @@
 package cn.cyberpeace.mp.base.util;
 
+import cn.cyberpeace.mp.base.model.stereotype.DefaultGen;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
+import java.lang.reflect.Field;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class ModelUtils {
 
-    private static final Map<Class<?>, Method[]> initDefaultMethodsCache = new HashMap<>();
+    private static final Map<Class<?>, Map<String, Object[]>> initDefaultFieldsCache = new HashMap<>();
 
     private ModelUtils() {}
+
+    private static Object parseDefaultValue(Class<?> clazz, Field field) {
+        String fieldName = field.getName();
+        String methodName = "initDefault" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+        Object defaultValue = null;
+        try {
+            defaultValue = clazz.getMethod(methodName);
+        } catch (NoSuchMethodException e) {
+            var defaultIntAnnotation = field.getAnnotation(DefaultInt.class);
+            if (defaultIntAnnotation != null) {
+                defaultValue = defaultIntAnnotation.value();
+            }
+
+            var defaultStrAnnotation = field.getAnnotation(DefaultStr.class);
+            if (defaultStrAnnotation != null) {
+                defaultValue = defaultStrAnnotation.value();
+            }
+
+            var defaultGenAnnotation = field.getAnnotation(DefaultGen.class);
+            if (defaultGenAnnotation != null) {
+                var generatorClass = defaultGenAnnotation.value();
+                defaultValue = BeanUtils.getBean(generatorClass);
+            }
+        }
+
+        return defaultValue;
+    }
 
     public static <M> String getTableName(Class<M> clazz) {
         var table = clazz.getAnnotation(Table.class);
         return table != null ? table.value() : null;
     }
 
-    public static <M> Method[] getInitDefaultMethods(Class<M> clazz) {
-        Method[] methods = initDefaultMethodsCache.getOrDefault(clazz, null);
-        if (methods != null) {
-            return methods;
+    public static <M> Map<String, Object[]> getInitDefaultFields(Class<M> clazz) {
+        Map<String, Object[]> fieldValues = initDefaultFieldsCache.getOrDefault(clazz, null);
+        if (fieldValues != null) {
+            return fieldValues;
         }
 
-        String[] fields = ClassUtils.getBeanClassFields(clazz);
-        List<Method> methodList = new ArrayList<>();
-        for (String fieldName: fields) {
-            String methodName = "initDefault" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
-            Method method;
-            try {
-                method = clazz.getMethod(methodName);
-            } catch (NoSuchMethodException e) {
-                continue;
+        fieldValues = new HashMap<>();
+        String[] fieldNames = ClassUtils.getBeanClassFields(clazz);
+        for (String fieldName: fieldNames) {
+            Object defaultValue = null;
+            var field = ClassUtils.getField(clazz, fieldName, true, false);
+            if (field != null) {
+                defaultValue = parseDefaultValue(clazz, field);
             }
-
-            methodList.add(method);
+            if (defaultValue != null) {
+                fieldValues.put(fieldName, new Object[]{ field, defaultValue });
+            }
         }
 
-        methods = methodList.toArray(new Method[0]);
-        initDefaultMethodsCache.put(clazz, methods);
-
-        return methods;
+        initDefaultFieldsCache.put(clazz, fieldValues);
+        return fieldValues;
     }
 }

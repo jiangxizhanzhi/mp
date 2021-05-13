@@ -35,7 +35,7 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
         if (user != null) {
             var updateUser = new UserModel();
             updateUser.setId(user.getId());
-            updateUser.initDefaultTokenSecret();
+            updateUser.initDefault("tokenSecret");
             userService.update(updateUser);
         }
 
