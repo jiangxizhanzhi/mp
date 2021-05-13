@@ -1,9 +1,6 @@
 package cn.cyberpeace.mp.base.util;
 
-import cn.cyberpeace.mp.base.model.stereotype.DefaultGen;
-import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
-import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
-import cn.cyberpeace.mp.base.model.stereotype.Table;
+import cn.cyberpeace.mp.base.model.stereotype.*;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -22,6 +19,11 @@ public class ModelUtils {
         try {
             defaultValue = clazz.getMethod(methodName);
         } catch (NoSuchMethodException e) {
+            var defaultBoolAnnotation = field.getAnnotation(DefaultBool.class);
+            if (defaultBoolAnnotation != null) {
+                defaultValue = defaultBoolAnnotation.value();
+            }
+
             var defaultIntAnnotation = field.getAnnotation(DefaultInt.class);
             if (defaultIntAnnotation != null) {
                 defaultValue = defaultIntAnnotation.value();
