@@ -109,7 +109,7 @@ CREATE TABLE mp_scene_scene_config_element_plugin (
     `update_time` datetime(6) NOT NULL COMMENT '更新时间',
     PRIMARY KEY (`pk`),
     UNIQUE (`id`),
-    UNIQUE (`scene_element`)
+    UNIQUE (`scene_element`, `plugin_key`)
 );
 
 
@@ -246,5 +246,5 @@ CREATE TABLE mp_scene_scene_element_plugin (
     `update_time` datetime(6) NOT NULL COMMENT '更新时间',
     PRIMARY KEY (`pk`),
     UNIQUE (`id`),
-    UNIQUE (`scene_element`)
+    UNIQUE (`scene_element`, `plugin_key`)
 );
