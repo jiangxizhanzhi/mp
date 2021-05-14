@@ -11,6 +11,9 @@ public class ModuleUtils {
 
     public static final String GROUP_NAME = "cn.cyberpeace.mp";
 
+    @SuppressWarnings("java:S2386")
+    public static final String[] MODULE_NAMES = getModuleNames();
+
     private ModuleUtils() {}
 
     public static List<String> findPackageNamesStartingWith(String prefix) {

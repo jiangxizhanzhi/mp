@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.base.config.messages;
 
-import cn.cyberpeace.mp.base.config.ModuleConfig;
+import cn.cyberpeace.mp.base.util.ModuleUtils;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,7 +16,7 @@ public class MessagesConfig {
     public MessageSource messageSource() {
         var messageSource = new ReloadableResourceBundleMessageSource();
         List<String> basenames = new ArrayList<>();
-        for (String moduleName: ModuleConfig.moduleNames) {
+        for (String moduleName: ModuleUtils.MODULE_NAMES) {
             basenames.add("classpath:i18n/" + moduleName);
         }
         messageSource.setBasenames(basenames.toArray(new String[0]));

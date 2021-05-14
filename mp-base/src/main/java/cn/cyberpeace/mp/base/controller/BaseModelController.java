@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.base.controller;
 
-import cn.cyberpeace.mp.base.constant.BaseControllerConstant;
+import cn.cyberpeace.mp.base.constant.BaseSingleton;
 import cn.cyberpeace.mp.base.controller.param.QueryParams;
 import cn.cyberpeace.mp.base.controller.stereotype.ListParamNames;
 import cn.cyberpeace.mp.base.controller.stereotype.UnlimitPagination;
@@ -61,9 +61,9 @@ public abstract class BaseModelController<M extends BaseModel, S extends BaseMod
         int page = queryParams.getPage() == null ? 0 : queryParams.getPage();
         int pageSize = queryParams.getPageSize() == null ? 0 : queryParams.getPageSize();
         if (pageSize <= 0) {
-            pageSize = BaseControllerConstant.DEFAULT_PAGE_SIZE;
-        } else if (pageSize > BaseControllerConstant.MAX_PAGE_SIZE && !isUnlimitPagination(listFuncName)) {
-            pageSize = BaseControllerConstant.MAX_PAGE_SIZE;
+            pageSize = BaseSingleton.baseAppConfig.getDefaultPageSize();
+        } else if (pageSize > BaseSingleton.baseAppConfig.getMaxPageSize() && !isUnlimitPagination(listFuncName)) {
+            pageSize = BaseSingleton.baseAppConfig.getMaxPageSize();
         }
         queryParams.setPage(page);
         queryParams.setPageSize(pageSize);
