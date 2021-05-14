@@ -16,6 +16,8 @@ import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
@@ -100,10 +102,11 @@ public interface BaseModelMapper<M extends BaseModel> {
         }
 
         String[] fieldNames = ClassUtils.getBeanClassFields(actualModelClass);
+        final BeanWrapper objWrapper = new BeanWrapperImpl(obj);
         for (String fieldName: fieldNames) {
             String columnName = TextUtils.humpToLine(fieldName);
             if (map.containsKey(columnName)) {
-                ClassUtils.setBeanObjFieldValue(obj, fieldName, map.get(columnName));
+                objWrapper.setPropertyValue(fieldName, map.get(columnName));
             }
         }
 

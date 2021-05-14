@@ -4,6 +4,8 @@ import cn.cyberpeace.mp.base.repository.fields.DynamicFields;
 import cn.cyberpeace.mp.base.util.ClassUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -65,7 +67,8 @@ public abstract class BaseObjResult {
             fieldValue = ((Map<?, ?>) obj).getOrDefault(fieldName, null);
         } else {
             // 未注入jackson注解
-            fieldValue = ClassUtils.getBeanObjFieldValue(obj, fieldName);
+            final BeanWrapper objWrapper = new BeanWrapperImpl(obj);
+            fieldValue = objWrapper.getPropertyValue(fieldName);
         }
         return fieldValue;
     }

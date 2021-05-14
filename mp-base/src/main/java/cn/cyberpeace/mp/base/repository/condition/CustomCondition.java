@@ -3,6 +3,8 @@ package cn.cyberpeace.mp.base.repository.condition;
 import cn.cyberpeace.mp.base.util.ClassUtils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -14,6 +16,7 @@ public class CustomCondition implements BaseCondition {
 
     public CustomCondition loadFromParams(Map<String, Object> params) {
         String[] fieldNames = ClassUtils.getBeanClassFields(this.getClass());
+        final BeanWrapper objWrapper = new BeanWrapperImpl(this);
         for (String fieldName: fieldNames) {
             Field field = null;
             Object fieldValue = params.getOrDefault(fieldName, null);
@@ -27,7 +30,7 @@ public class CustomCondition implements BaseCondition {
             Class<?> fieldType = field.getType();
             Class<?> fieldValueType = fieldValue.getClass();
             if (fieldType == fieldValueType) {
-                ClassUtils.setBeanObjFieldValue(this, fieldName, fieldValue);
+                objWrapper.setPropertyValue(fieldName, fieldValue);
             }
         }
 
@@ -37,8 +40,9 @@ public class CustomCondition implements BaseCondition {
     @Override
     public boolean isEmpty() {
         String[] fieldNames = ClassUtils.getBeanClassFields(this.getClass());
+        final BeanWrapper objWrapper = new BeanWrapperImpl(this);
         for (String fieldName: fieldNames) {
-            Object fieldValue = ClassUtils.getBeanObjFieldValue(this, fieldName);
+            Object fieldValue = objWrapper.getPropertyValue(fieldName);
             if (fieldValue == null) {
                 continue;
             }

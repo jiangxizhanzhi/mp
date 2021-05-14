@@ -2,6 +2,8 @@ package cn.cyberpeace.mp.base.service.fields;
 
 import cn.cyberpeace.mp.base.repository.fields.DynamicFields;
 import cn.cyberpeace.mp.base.util.ClassUtils;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -104,8 +106,9 @@ public abstract class BaseFields {
         DynamicFields actualReadonlyFields = ClassUtils.getStaticFieldValue(getClass(), "readonlyFields",
                 DynamicFields.class);
         if (actualReadonlyFields != null) {
+            final BeanWrapper objWrapper = new BeanWrapperImpl(obj);
             for (String fieldName: actualReadonlyFields.getFields()) {
-                ClassUtils.setBeanObjFieldValue(obj, fieldName, null);
+                objWrapper.setPropertyValue(fieldName, null);
             }
         }
     }

@@ -1,9 +1,11 @@
 package cn.cyberpeace.mp.base.util;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -132,152 +134,23 @@ public class ClassUtils {
         return method;
     }
 
-    @SuppressWarnings("java:S3011")
-    public static Object getBeanObjFieldValue(Method method, Object obj) {
-        boolean canAccess = method.canAccess(obj);
-        if (!canAccess) {
-            method.setAccessible(true);
-        }
-
-        Object value;
-        try {
-            value = method.invoke(obj);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            log.error("Invoke method `{}` on instance {} failed: {}", method, obj, e.getMessage());
-            return null;
-        } finally {
-            if (!canAccess) {
-                method.setAccessible(false);
-            }
-        }
-
-        return value;
-    }
-
-    @SuppressWarnings("java:S3011")
-    public static boolean setBeanObjFieldValue(Method method, Object obj, Object value) {
-        boolean canAccess = method.canAccess(obj);
-        if (!canAccess) {
-            method.setAccessible(true);
-        }
-
-        try {
-            method.invoke(obj, value);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            log.error("Invoke method `{}` on instance {} failed: {}", method, obj, e.getMessage());
-            return false;
-        } finally {
-            if (!canAccess) {
-                method.setAccessible(false);
-            }
-        }
-
-        return true;
-    }
-
-    public static Object getBeanObjFieldValue(Object obj, String fieldName) {
-        String methodName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
-        var method = getMethod(obj.getClass(), methodName);
-        if (method == null) {
-            return null;
-        }
-
-        return getBeanObjFieldValue(method, obj);
-    }
-
-    public static <T> T getBeanObjFieldValue(Object obj, String fieldName, Class<T> expectedFieldType) {
-        Object value = getBeanObjFieldValue(obj, fieldName);
-        return castFieldType(value, expectedFieldType);
-    }
-
-    public static boolean setBeanObjFieldValue(Object obj, String fieldName, Object value) {
-        var field = getField(obj.getClass(), fieldName, true, false);
-        if (field == null) {
-            return false;
-        }
-
-        String methodName = "set" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
-        var method = getMethod(obj.getClass(), methodName, field.getType());
-        if (method == null) {
-            return false;
-        }
-
-        return setBeanObjFieldValue(method, obj, value);
-    }
-
-    public static String getBeanGetterRefFieldName(Class<?> clazz, Method getter) {
-        String methodName = getter.getName();
-        if (!methodName.startsWith("get")) {
-            return null;
-        }
-
-        String fieldName = methodName.substring(3, 4).toLowerCase() + methodName.substring(4);
-        var field = getField(clazz, fieldName, true, true);
-        if (field == null) {
-            return null;
-        }
-
-        Class<?>[] parameterTypes = getter.getParameterTypes();
-        if (parameterTypes.length != 0) {
-            return null;
-        }
-
-        return fieldName;
-    }
-
-    public static String getBeanSetterRefFieldName(Class<?> clazz, Method setter) {
-        String methodName = setter.getName();
-        if (!methodName.startsWith("set")) {
-            return null;
-        }
-
-        String fieldName = methodName.substring(3, 4).toLowerCase() + methodName.substring(4);
-        var field = getField(clazz, fieldName, true, true);
-        if (field == null) {
-            return null;
-        }
-
-        Class<?>[] parameterTypes = setter.getParameterTypes();
-        if (parameterTypes.length != 1 || parameterTypes[0] != field.getType()) {
-            return null;
-        }
-
-        return fieldName;
-    }
-
     public static String[] getBeanClassFields(Class<?> clazz) {
         String[] fields = beanClassFieldsCache.getOrDefault(clazz, null);
         if (fields != null) {
             return fields;
         }
 
-        Method[] methods = clazz.getMethods();
-        Map<String, boolean[]> fieldFlagMap = new HashMap<>();
-        for (Method method: methods) {
-            String getterFieldName = getBeanGetterRefFieldName(clazz, method);
-            if (getterFieldName != null) {
-                boolean[] fieldFlag = fieldFlagMap.getOrDefault(getterFieldName, new boolean[]{ false, false });
-                fieldFlag[0] = true;
-                fieldFlagMap.put(getterFieldName, fieldFlag);
-                continue;
-            }
-
-            String setterFieldName = getBeanSetterRefFieldName(clazz, method);
-            if (setterFieldName != null) {
-                boolean[] fieldFlag = fieldFlagMap.getOrDefault(setterFieldName, new boolean[]{ false, false });
-                fieldFlag[1] = true;
-                fieldFlagMap.put(setterFieldName, fieldFlag);
-            }
-        }
-
+        final BeanWrapper clazzWrapper = new BeanWrapperImpl(clazz);
+        var propertyDescriptors = clazzWrapper.getPropertyDescriptors();
         List<String> fieldList = new ArrayList<>();
-        fieldFlagMap.forEach((fieldName, fieldFlag) -> {
-            if (fieldFlag[0] && fieldFlag[1]) {
+        for (java.beans.PropertyDescriptor propertyDescriptor : propertyDescriptors) {
+            String fieldName = propertyDescriptor.getName();
+            if (!StringUtils.equals("class", fieldName)) {
                 fieldList.add(fieldName);
             }
-        });
-
+        }
         fields = fieldList.toArray(new String[0]);
+
         beanClassFieldsCache.put(clazz, fields);
 
         return fields;

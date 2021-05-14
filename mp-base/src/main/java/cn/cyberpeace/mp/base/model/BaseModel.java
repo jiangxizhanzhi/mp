@@ -17,7 +17,7 @@ import java.util.Map;
 
 @Slf4j
 @Data
-public abstract class BaseModel {
+public class BaseModel {
     @DefaultGen(UuidGenerator.class)
     private String id;
 
