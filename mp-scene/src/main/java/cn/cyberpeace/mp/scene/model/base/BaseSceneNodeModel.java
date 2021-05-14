@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.scene.model.base;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
-import cn.cyberpeace.mp.base.model.stereotype.DefaultBool;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import lombok.Data;
 
