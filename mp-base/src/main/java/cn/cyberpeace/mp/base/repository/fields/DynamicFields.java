@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.base.repository.fields;
 
 import cn.cyberpeace.mp.base.util.CastUtils;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,6 +35,45 @@ public class DynamicFields {
         } else {
             this.resetFieldsMap();
         }
+    }
+
+    public Object apply(Object obj) {
+        if (obj == null || fieldsMap == null) {
+            return obj;
+        }
+
+        if (obj instanceof Object[]) {
+            List<Object> resultList = new ArrayList<>();
+            for (Object objItem: (Object[]) obj) {
+                resultList.add(apply(objItem));
+            }
+            return resultList;
+        }
+
+        if (obj instanceof List<?>) {
+            List<Object> resultList = new ArrayList<>();
+            ((List<?>) obj).forEach(objItem -> resultList.add(apply(objItem)));
+            return resultList;
+        }
+
+        Map<Object, Object> resultMap = new HashMap<>();
+        fieldsMap.forEach((fieldName, fieldFlag) -> {
+            Object fieldValue;
+            if (obj instanceof Map) {
+                fieldValue = ((Map<?, ?>) obj).getOrDefault(fieldName, null);
+            } else {
+                // 未注入jackson注解
+                final BeanWrapper objWrapper = new BeanWrapperImpl(obj);
+                fieldValue = objWrapper.getPropertyValue(fieldName);
+            }
+            if (fieldFlag instanceof Boolean && (boolean) fieldFlag) {
+                resultMap.put(fieldName, fieldValue);
+            } else if (fieldFlag instanceof DynamicFields) {
+                resultMap.put(fieldName, ((DynamicFields) fieldFlag).apply(fieldValue));
+            }
+        });
+
+        return resultMap;
     }
 
     public boolean hasField(String fieldName) {
