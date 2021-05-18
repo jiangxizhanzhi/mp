@@ -30,4 +30,11 @@ public class HttpUtilsTest {
         String res = HttpUtils.sendPost(url, content);
         Assert.isTrue(JSONValidator.from(res).validate(), "post request is valid");
     }
+
+    @Test
+    public void testDelete() throws IOException{
+        String url = "http://10.100.7.50:5079/v1/scenes/sfsd";
+        String res = HttpUtils.sendDelete(url);
+        Assert.isTrue(JSONValidator.from(res).validate(), "delete request is valid");
+    }
 }

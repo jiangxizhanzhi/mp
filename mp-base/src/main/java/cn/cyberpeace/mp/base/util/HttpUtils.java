@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -65,5 +66,20 @@ public class HttpUtils {
             log.error("HttpUtils-sendPost is error.request url is {},error is",url,e);
             throw e;
         }
+    }
+
+    /**
+     * 删除请求
+     * @param url
+     * @return
+     * @throws IOException
+     */
+    public static String sendDelete(String url) throws IOException{
+        HttpClient client = HttpClientBuilder.create().build();
+        HttpDelete httpDelete = new HttpDelete(url);
+        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
+        HttpResponse response= client.execute(httpDelete);
+        httpDelete.setConfig(requestConfig);
+        return EntityUtils.toString(response.getEntity(),"UTF-8");
     }
 }
