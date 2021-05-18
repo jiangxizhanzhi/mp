@@ -16,7 +16,7 @@ CREATE TABLE mp_auth_org (
     `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
     `id` varchar(64)  NOT NULL COMMENT 'id',
     `tenant` varchar(64)  NOT NULL COMMENT '所属租户' default '',
-    `parent` varchar(64)  NOT NULL COMMENT '父组织' default '',
+    `parent` varchar(64)  NappOT NULL COMMENT '父组织' default '',
     `identifier` varchar(64)  NOT NULL COMMENT '编号',
     `name` varchar(64) NOT NULL COMMENT '名称',
     `create_time` datetime(6) NOT NULL COMMENT '创建时间',
