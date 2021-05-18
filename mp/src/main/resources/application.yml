@@ -24,3 +24,8 @@ mybatis:
   mapper-locations: classpath*:mapper/*.xml
   configuration:
     map-underscore-to-camel-case: true
+
+mp:
+  data:
+    sandTable:
+      sceneBaseUrl: http://10.100.7.50:5079/v1/scenes
