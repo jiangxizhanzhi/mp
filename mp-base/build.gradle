@@ -1,2 +1,5 @@
 dependencies {
+
+    implementation 'junit:junit:4.13.1'
+    implementation('org.apache.httpcomponents:httpclient:4.4.1')
 }

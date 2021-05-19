@@ -5,12 +5,14 @@ import cn.cyberpeace.mp.base.service.code.ServiceCode;
 import cn.cyberpeace.mp.base.util.MessageUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class ServiceResult<T> {
 
     private Object data;

@@ -17,6 +17,7 @@ subprojects {
     apply plugin: 'application'
     apply plugin: 'org.flywaydb.flyway'
 
+
     group = 'cn.cyberpeace.mp'
     version = gradle.ext.version
     sourceCompatibility = '11'
@@ -52,6 +53,7 @@ subprojects {
         asciidoctor 'org.springframework.restdocs:spring-restdocs-asciidoctor'
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
         testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
+
     }
 
     test {

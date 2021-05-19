@@ -3,6 +3,7 @@ gradle.ext {
     appmodules = [
         'mp-auth',
         'mp-scene',
+        'mp-data-sandtable',
     ]
 
     flyway = [
