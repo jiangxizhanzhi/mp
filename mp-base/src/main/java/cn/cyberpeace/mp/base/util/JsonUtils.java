@@ -10,6 +10,10 @@ import java.io.IOException;
  */
 public class JsonUtils {
 
+    private JsonUtils() {
+        throw new IllegalStateException("Utility class");
+    }
+
     /**
      * @param json
      * @return

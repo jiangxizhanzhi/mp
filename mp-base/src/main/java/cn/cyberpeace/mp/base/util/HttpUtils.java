@@ -17,6 +17,11 @@ import org.apache.http.util.EntityUtils;
  */
 @Slf4j
 public class HttpUtils {
+
+    private HttpUtils() {
+        throw new IllegalStateException("Utility class");
+    }
+
     /**
      * 发送一个Post请求
      * @param url
@@ -30,7 +35,6 @@ public class HttpUtils {
             HttpPost httpPost = new HttpPost(url);
             // 解决中文乱码问题
             StringEntity entity = new StringEntity(content,"utf-8");
-            entity.setContentEncoding("UTF-8");
             entity.setContentType("application/json");
             httpPost.setEntity(entity);
 
