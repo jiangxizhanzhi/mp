@@ -6,7 +6,7 @@ server:
 spring:
   datasource:
     name: mp
-    url: jdbc:mysql://192.168.5.118:3306/mp?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&createDatabaseIfNotExist=true
+    url: jdbc:mysql://10.100.9.150:3306/mp?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&createDatabaseIfNotExist=true
     username: root
     password: root
     driver-class-name: org.mariadb.jdbc.Driver
@@ -27,5 +27,6 @@ mybatis:
 
 mp:
   scene:
-    sandTable:
-      groupUrl: http://10.100.7.50:5079/v1/scenes
+    data:
+      sandTable:
+        groupUrl: http://10.100.7.50:5079/v1/scenes

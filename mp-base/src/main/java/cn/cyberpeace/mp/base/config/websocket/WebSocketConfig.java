@@ -9,6 +9,7 @@ public class WebSocketConfig {
 
     @Bean
     public ServerEndpointExporter serverEndpointExporter() {
-        return new ServerEndpointExporter();
+//        return new ServerEndpointExporter();
+        return null;
     }
 }

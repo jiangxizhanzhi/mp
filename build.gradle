@@ -45,6 +45,7 @@ subprojects {
         implementation 'org.flywaydb:flyway-core'
         implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.1.4'
         implementation 'org.apache.commons:commons-lang3:3.11'
+        implementation 'com.alibaba:fastjson:1.2.76'
         compileOnly 'org.projectlombok:lombok'
         developmentOnly 'org.springframework.boot:spring-boot-devtools'
         runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
