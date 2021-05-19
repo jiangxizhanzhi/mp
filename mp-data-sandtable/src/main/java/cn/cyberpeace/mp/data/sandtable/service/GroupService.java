@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * 流量依赖的组的CRUD
@@ -81,5 +82,40 @@ public class GroupService {
         }
         List<String> macIds = macIdJsonArray.stream().map(String.class::cast).collect(Collectors.toList());
         return GroupModel.builder().groupId(groupIdRes).macIds(macIds).build();
+    }
+
+    /**
+     * 删除分组
+     * @param groupId
+     */
+    public void deleteByGroupId(String groupId) {
+        try {
+            String requestUri = sandTableConfig.getGroupUrl() + "/" + groupId;
+            HttpUtils.sendDelete(requestUri);
+        } catch (IOException e) {
+            log.error("删除分组失败:"+ e);
+            throw new MqRuntimeException("删除分组失败:"+ e);
+        }
+    }
+
+
+    /**
+     * 新增分组
+     * @param groupModel
+     */
+    public void addGroup(GroupModel groupModel) {
+        JSONObject jsonObject = new JSONObject();
+        if (ObjectUtils.isEmpty(groupModel.getGroupId()) || CollectionUtils.isEmpty(groupModel.getMacIds())) {
+            log.error("新增分组参数为空");
+            throw new MqRuntimeException("新增分组参数为空:");
+        }
+        jsonObject.put("scene_id", groupModel.getGroupId());
+        jsonObject.put("macs", groupModel.getMacIds());
+        try {
+            HttpUtils.sendPost(sandTableConfig.getGroupUrl(), jsonObject.toJSONString());
+        } catch (IOException e) {
+            log.error("删除分组失败:"+ e);
+            throw new MqRuntimeException("删除分组失败:"+ e);
+        }
     }
 }
