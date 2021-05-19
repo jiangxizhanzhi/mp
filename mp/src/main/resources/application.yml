@@ -26,6 +26,6 @@ mybatis:
     map-underscore-to-camel-case: true
 
 mp:
-  data:
+  scene:
     sandTable:
-      sceneBaseUrl: http://10.100.7.50:5079/v1/scenes
+      groupUrl: http://10.100.7.50:5079/v1/scenes
