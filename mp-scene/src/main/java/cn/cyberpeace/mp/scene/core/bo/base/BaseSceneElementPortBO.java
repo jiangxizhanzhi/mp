@@ -20,14 +20,14 @@ public abstract class BaseSceneElementPortBO<M extends BaseSceneElementPortModel
     private Integer loss;
 
     @Override
-    public void fromModel(M obj) {
-        super.fromModel(obj);
+    public void fromModel(M obj, String... ignoreFields) {
+        super.fromModel(obj, ignoreFields);
         setId(obj.getPortId());
     }
 
     @Override
-    public M toModel() {
-        var obj = super.toModel();
+    public M toModel(String... ignoreFields) {
+        var obj = super.toModel(ignoreFields);
         obj.setPortId(id);
         obj.setId(null);
         return obj;

@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.scene.core.bo;
 
+import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneDataBO;
 import lombok.Data;
 
 @Data
-public class SceneConfigDataBO {
-    private SceneConfigTopologyBO topology;
+public class SceneConfigDataBO extends BaseSceneDataBO<SceneConfigTopologyBO> {
 }

@@ -15,14 +15,14 @@ public abstract class BaseSceneNodeBO<M extends BaseSceneNodeModel> extends EidB
     private String description;
 
     @Override
-    public void fromModel(M obj) {
-        super.fromModel(obj);
-        setId(obj.getNodeId());
+    public void fromModel(M obj, String... ignoreFields) {
+        super.fromModel(obj, ignoreFields);
+        id = obj.getNodeId();
     }
 
     @Override
-    public M toModel() {
-        var obj = super.toModel();
+    public M toModel(String... ignoreFields) {
+        var obj = super.toModel(ignoreFields);
         obj.setNodeId(id);
         obj.setId(null);
         return obj;
