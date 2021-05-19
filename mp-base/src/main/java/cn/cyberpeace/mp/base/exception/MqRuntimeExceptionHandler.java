@@ -1,5 +1,8 @@
 package cn.cyberpeace.mp.base.exception;
 
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import javax.naming.directory.SearchResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
@@ -21,24 +24,24 @@ public class MqRuntimeExceptionHandler {
     @ExceptionHandler(MqRuntimeException.class)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public BaseResponse b2bRuntimeExceptionHandler(MqRuntimeException ex) {
+    public ServiceResult<?> b2bRuntimeExceptionHandler(MqRuntimeException ex) {
         log.error(LOGGER_FORMAT, ex.getMessage(), ex);
-        return new BaseResponse(ex.getMessage());
+        return ServiceResult.builder().message(ex.getMessage()).serviceCode(BaseErrorCode.ERROR).build();
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    public BaseResponse validationExceptionHandle(MethodArgumentNotValidException ex) {
+    public ServiceResult<?> validationExceptionHandle(MethodArgumentNotValidException ex) {
         log.error(ex.getMessage());
-        return BaseResponse.error(StringUtils.isEmpty(ex.getMessage())? "请求参数错误": ex.getMessage());
+        return ServiceResult.builder().message("参数异常" + ex.getMessage()).serviceCode(BaseErrorCode.PARAMS_INVALID).build();
     }
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ResponseBody
-    public BaseResponse handleException(Exception ex){
+    public ServiceResult<?> handleException(Exception ex){
         log.error(LOGGER_FORMAT, ex.getMessage(), ex);
-        return BaseResponse.error(StringUtils.isEmpty(ex.getMessage())? "系统异常": ex.getMessage());
+        return ServiceResult.builder().message("系统异常" + ex.getMessage()).serviceCode(BaseErrorCode.PARAMS_INVALID).build();
     }
 }
