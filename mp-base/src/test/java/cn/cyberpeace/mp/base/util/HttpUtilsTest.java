@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.base.util;
 
-import com.alibaba.fastjson.JSONValidator;
 import java.io.IOException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,7 +13,7 @@ public class HttpUtilsTest {
     public void testGetRequest() throws IOException {
         String url = "http://10.100.7.50:5079/v1/scenes";
         String res = HttpUtils.sendGet(url);
-        Assert.isTrue(JSONValidator.from(res).validate(), "get request is valid");
+        Assert.isTrue(JsonUtils.isValidJSON(res), "get request is not valid");
     }
 
     @Test
@@ -28,13 +27,13 @@ public class HttpUtilsTest {
             "  ]\n" +
             "}";
         String res = HttpUtils.sendPost(url, content);
-        Assert.isTrue(JSONValidator.from(res).validate(), "post request is valid");
+        Assert.isTrue(JsonUtils.isValidJSON(res), "post request is valid");
     }
 
     @Test
     public void testDelete() throws IOException{
         String url = "http://10.100.7.50:5079/v1/scenes/sfsd";
         String res = HttpUtils.sendDelete(url);
-        Assert.isTrue(JSONValidator.from(res).validate(), "delete request is valid");
+        Assert.isTrue(JsonUtils.isValidJSON(res), "delete request is valid");
     }
 }
