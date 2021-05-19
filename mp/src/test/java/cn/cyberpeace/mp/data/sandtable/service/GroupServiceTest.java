@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.data.sandtable.service;
 
 import cn.cyberpeace.mp.Application;
-import cn.cyberpeace.mp.base.config.websocket.WebSocketConfig;
 import cn.cyberpeace.mp.data.sandtable.model.GroupModel;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,8 +8,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
 
