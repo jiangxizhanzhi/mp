@@ -24,24 +24,24 @@ public class MqRuntimeExceptionHandler {
     @ExceptionHandler(MqRuntimeException.class)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public ServiceResult<?> b2bRuntimeExceptionHandler(MqRuntimeException ex) {
+    public ServiceResult<String> b2bRuntimeExceptionHandler(MqRuntimeException ex) {
         log.error(LOGGER_FORMAT, ex.getMessage(), ex);
-        return ServiceResult.builder().message(ex.getMessage()).serviceCode(BaseErrorCode.ERROR).build();
+        return ServiceResult.<String>builder().message(ex.getMessage()).serviceCode(BaseErrorCode.ERROR).build();
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    public ServiceResult<?> validationExceptionHandle(MethodArgumentNotValidException ex) {
+    public ServiceResult<String> validationExceptionHandle(MethodArgumentNotValidException ex) {
         log.error(ex.getMessage());
-        return ServiceResult.builder().message("参数异常" + ex.getMessage()).serviceCode(BaseErrorCode.PARAMS_INVALID).build();
+        return ServiceResult.<String>builder().message("参数异常" + ex.getMessage()).serviceCode(BaseErrorCode.PARAMS_INVALID).build();
     }
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ResponseBody
-    public ServiceResult<?> handleException(Exception ex){
+    public ServiceResult<String> handleException(Exception ex){
         log.error(LOGGER_FORMAT, ex.getMessage(), ex);
-        return ServiceResult.builder().message("系统异常" + ex.getMessage()).serviceCode(BaseErrorCode.PARAMS_INVALID).build();
+        return ServiceResult.<String>builder().message("系统异常" + ex.getMessage()).serviceCode(BaseErrorCode.PARAMS_INVALID).build();
     }
 }
