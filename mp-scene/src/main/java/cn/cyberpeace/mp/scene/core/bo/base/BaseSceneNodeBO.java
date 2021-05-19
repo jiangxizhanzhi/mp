@@ -1,10 +1,10 @@
-package cn.cyberpeace.mp.scene.core.vo.base;
+package cn.cyberpeace.mp.scene.core.bo.base;
 
 import cn.cyberpeace.mp.scene.model.base.BaseSceneNodeModel;
 import lombok.Data;
 
 @Data
-public abstract class BaseSceneNodeVO<M extends BaseSceneNodeModel> extends EidVO<M> {
+public abstract class BaseSceneNodeBO<M extends BaseSceneNodeModel> extends EidBO<M> {
     private String id;
     private String area;
     private String icon2;

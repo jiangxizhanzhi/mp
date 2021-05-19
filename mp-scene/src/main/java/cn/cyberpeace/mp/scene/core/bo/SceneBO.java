@@ -1,11 +1,11 @@
-package cn.cyberpeace.mp.scene.core.vo;
+package cn.cyberpeace.mp.scene.core.bo;
 
-import cn.cyberpeace.mp.scene.core.vo.base.BaseSceneVO;
+import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneBO;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import lombok.Data;
 
 @Data
-public class SceneVO extends BaseSceneVO<SceneModel> {
+public class SceneBO extends BaseSceneBO<SceneModel> {
     private Integer event;
     private Integer eventStatus;
     private Integer process;

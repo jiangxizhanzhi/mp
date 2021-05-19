@@ -1,11 +1,11 @@
-package cn.cyberpeace.mp.scene.core.vo;
+package cn.cyberpeace.mp.scene.core.bo;
 
-import cn.cyberpeace.mp.scene.core.vo.base.BaseSceneElementPortVO;
+import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementPortBO;
 import cn.cyberpeace.mp.scene.model.SceneConfigElementPortModel;
 import lombok.Data;
 
 @Data
-public class SceneConfigElementPortVO extends BaseSceneElementPortVO<SceneConfigElementPortModel> {
+public class SceneConfigElementPortBO extends BaseSceneElementPortBO<SceneConfigElementPortModel> {
 
     @Override
     public SceneConfigElementPortModel createModel() {

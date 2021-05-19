@@ -1,16 +1,18 @@
-package cn.cyberpeace.mp.scene.core.vo.base;
+package cn.cyberpeace.mp.scene.core.bo.base;
 
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
-public abstract class BaseSceneElementVO<M extends BaseSceneElementModel> extends BaseSceneNodeVO<M> {
+public abstract class BaseSceneElementBO<M extends BaseSceneElementModel> extends BaseSceneNodeBO<M> {
     private Integer type;
     private String file;
     private String systemType;
     private String systemArchitecture;
     private String systemLanguage;
     private String flavor;
-    private String accessModes;
-    private String initCommands;
+    private List<AccessMode> accessModes;
+    private List<String> initCommands;
 }

@@ -20,7 +20,7 @@ subprojects {
 
     group = 'cn.cyberpeace.mp'
     version = gradle.ext.version
-    sourceCompatibility = '15'
+    sourceCompatibility = '11'
     mainClassName = 'cn.cyberpeace.mp.Application'
 
     configurations {
