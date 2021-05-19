@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.base.util;
 
 import cn.cyberpeace.mp.base.exception.MqRuntimeException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +26,17 @@ public class JsonUtils {
         T obj;
         try {
             obj = objectMapper.readValue(content, valueType);
+        } catch (JsonProcessingException e) {
+            throw new MqRuntimeException("Parse json text error: " + e.getMessage());
+        }
+
+        return obj;
+    }
+
+    public static <T> T parse(String content, TypeReference<T> valueTypeRef) {
+        T obj;
+        try {
+            obj = objectMapper.readValue(content, valueTypeRef);
         } catch (JsonProcessingException e) {
             throw new MqRuntimeException("Parse json text error: " + e.getMessage());
         }
