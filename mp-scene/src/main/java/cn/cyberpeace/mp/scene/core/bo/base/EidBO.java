@@ -1,10 +1,10 @@
-package cn.cyberpeace.mp.scene.core.vo.base;
+package cn.cyberpeace.mp.scene.core.bo.base;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
 import lombok.Data;
 
 @Data
-public abstract class EidVO<M extends BaseModel> extends ModelVO<M> {
+public abstract class EidBO<M extends BaseModel> extends ModelBO<M> {
     private String eid;
 
     @Override

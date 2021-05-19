@@ -1,11 +1,11 @@
-package cn.cyberpeace.mp.scene.core.vo;
+package cn.cyberpeace.mp.scene.core.bo;
 
-import cn.cyberpeace.mp.scene.core.vo.base.BaseSceneVO;
+import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneBO;
 import cn.cyberpeace.mp.scene.model.SceneConfigModel;
 import lombok.Data;
 
 @Data
-public class SceneConfigVO extends BaseSceneVO<SceneConfigModel> {
+public class SceneConfigBO extends BaseSceneBO<SceneConfigModel> {
 
     @Override
     public SceneConfigModel createModel() {

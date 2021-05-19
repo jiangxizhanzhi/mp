@@ -1,10 +1,10 @@
-package cn.cyberpeace.mp.scene.core.vo.base;
+package cn.cyberpeace.mp.scene.core.bo.base;
 
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementPortModel;
 import lombok.Data;
 
 @Data
-public abstract class BaseSceneElementPortVO<M extends BaseSceneElementPortModel> extends EidVO<M> {
+public abstract class BaseSceneElementPortBO<M extends BaseSceneElementPortModel> extends EidBO<M> {
     private String id;
     private String name;
     private Integer type;
