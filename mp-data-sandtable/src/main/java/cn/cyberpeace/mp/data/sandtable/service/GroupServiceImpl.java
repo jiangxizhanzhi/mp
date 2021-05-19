@@ -3,7 +3,9 @@ package cn.cyberpeace.mp.data.sandtable.service;
 import cn.cyberpeace.mp.base.exception.MqRuntimeException;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.data.sandtable.config.SandTableConfig;
+import cn.cyberpeace.mp.data.sandtable.model.Group;
 import java.io.IOException;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,7 +25,7 @@ public class GroupServiceImpl {
      * 查询底层所有场景数据
      * @return≠
      */
-    public String queryAllScene(){
+    public List<Group> queryAllScene(){
         if (ObjectUtils.isEmpty(sandTableConfig.getGroupUrl())) {
             throw new MqRuntimeException("底层场景服务url不存在，请配置");
         }
@@ -35,6 +37,6 @@ public class GroupServiceImpl {
             throw new MqRuntimeException("查询场景错误:"+ e);
         }
 
-        return sceneListString;
+        return null;
     }
 }
