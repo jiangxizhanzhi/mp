@@ -15,7 +15,11 @@ spring:
     time-zone: GMT+8
   flyway:
     clean-disabled: true
-
+    #我们es版本7.7.1使用当前版本为deprecated
+  data:
+    elasticsearch:
+      name: elasticsearch
+      clusters: 10.100.7.50:9300
 logging:
   file:
     name: log/log.log
@@ -25,6 +29,7 @@ mybatis:
   configuration:
     map-underscore-to-camel-case: true
 
+# 请求云平台组信息的url配置，必需填写
 mp:
   scene:
     data:

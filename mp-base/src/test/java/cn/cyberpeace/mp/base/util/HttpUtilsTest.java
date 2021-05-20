@@ -1,6 +1,13 @@
 package cn.cyberpeace.mp.base.util;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -35,5 +42,20 @@ public class HttpUtilsTest {
         String url = "http://10.100.7.50:5079/v1/scenes/sfsd";
         String res = HttpUtils.sendDelete(url);
         Assert.isTrue(JsonUtils.isValidJSON(res), "delete request is valid");
+    }
+
+    @Test
+    public void dateTest() {
+        LocalDateTime start = LocalDateTime.of(2021, 5, 01, 12, 12);
+        LocalDateTime end = LocalDateTime.now();
+        long betweenDay = ChronoUnit.DAYS.between(start, end);
+        Integer days = Integer.valueOf((int) betweenDay);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+
+        List<LocalDateTime> localDateTimeList = IntStream.range(0, days + 1).boxed().map(start::plusDays).collect(Collectors.toList());
+        for (LocalDateTime time : localDateTimeList) {
+            System.out.println("中间的时间" + time.format(formatter));
+        }
     }
 }

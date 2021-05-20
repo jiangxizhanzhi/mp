@@ -1,0 +1,23 @@
+package cn.cyberpeace.mp.data.sandtable.model;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+/**
+ * es真是的bean
+ */
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class SessionModel {
+    private String srcIp;
+
+    private String srcMac;
+
+    private String dstIp;
+
+    private String dstMac;
+
+    private String protocol;
+}
