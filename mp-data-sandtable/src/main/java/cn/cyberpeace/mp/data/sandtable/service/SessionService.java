@@ -10,6 +10,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -53,7 +54,7 @@ public class SessionService {
      */
     public List<SessionResult> querySessionAllList(SessionQuery sessionQuery) {
         NativeSearchQueryBuilder builder=new NativeSearchQueryBuilder();
-        builder.withIndicesBoost(indexBoostsBuilder(sessionQuery));
+        builder.withIndicesBoost(indexListBuilder(sessionQuery));
         return null;
     }
 
@@ -61,15 +62,18 @@ public class SessionService {
      * 构造查询需要的索引
      * @return List<IndexBoost>
      */
-    private List<IndexBoost> indexBoostsBuilder(SessionQuery sessionQuery) {
+    private List<String> indexListBuilder(SessionQuery sessionQuery) {
         List<String> groupList = sessionQuery.getGroupList();
         if (!CollectionUtils.isEmpty(groupList)) {
-//            localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-//            return sessionQuery.getGroupList().stream().map(groupId-> new IndexBoost(groupId+"default_sessions2", groupList.indexOf(groupId))).collect(Collectors.toList());
-
-            return null;
+            List<String> dateStringList = fetchFormatterTime(sessionQuery.getStartTime(), sessionQuery.getEndTime());
+            return sessionQuery.getGroupList()
+                .stream().map(groupId-> dateStringList.stream().map(dateString -> groupId + "_sessions2-" + dateString)
+                .collect(Collectors.toList()))
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
         }else {
-            return Lists.newArrayList(new IndexBoost(sessionQuery.getGroupId()+"default_sessions2*", 1));
+            //todo 处理一个的情况
+            return Lists.newArrayList();
         }
     }
 
