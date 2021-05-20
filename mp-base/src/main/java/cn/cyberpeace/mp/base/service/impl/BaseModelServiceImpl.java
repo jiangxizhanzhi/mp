@@ -29,16 +29,17 @@ public abstract class BaseModelServiceImpl<M extends BaseModel,
     private F modelFields;
 
     private void handleSearchCondition(HumanCondition humanCondition, String search, String[] searchFields) {
-        if (StringUtils.isEmpty(search) || modelFields == null) {
+        F actualModelFields = getModelFields();
+        if (StringUtils.isEmpty(search) || actualModelFields == null) {
             return;
         }
 
         String[] lastSearchFields;
-        DynamicFields validSearchFields = modelFields.getValidSearchFields(searchFields);
+        DynamicFields validSearchFields = actualModelFields.getValidSearchFields(searchFields);
         if (validSearchFields != null && validSearchFields.hasValidFields()) {
             lastSearchFields = validSearchFields.getFields();
         } else {
-            DynamicFields availableSearchFields = modelFields.getSearchFields();
+            DynamicFields availableSearchFields = actualModelFields.getSearchFields();
             lastSearchFields = availableSearchFields != null ? availableSearchFields.getFields() : null;
         }
 
@@ -65,8 +66,9 @@ public abstract class BaseModelServiceImpl<M extends BaseModel,
         var humanCondition = getHumanCondition(selectFields);
         humanCondition.pagination(page, pageSize);
         handleSearchCondition(humanCondition, search, searchFields);
-        if (modelFields != null) {
-            String[] lastOrders = modelFields.getValidOrders(orders);
+        F actualModelFields = getModelFields();
+        if (actualModelFields != null) {
+            String[] lastOrders = actualModelFields.getValidOrders(orders);
             if (lastOrders != null) {
                 humanCondition.orderBy(lastOrders);
             }
@@ -100,7 +102,8 @@ public abstract class BaseModelServiceImpl<M extends BaseModel,
     @Override
     public ListObjServiceResult<M> list(Map<String, Object> params, String search, String[] searchFields,
                                         String[] orders, int page, int pageSize, String[] fields) {
-        DynamicFields validModelFields = modelFields != null ? modelFields.getValidFields(fields) : null;
+        F actualModelFields = getModelFields();
+        DynamicFields validModelFields = actualModelFields != null ? actualModelFields.getValidFields(fields) : null;
         String[] selectFields = validModelFields != null ? validModelFields.getFields() : null;
         var humanCondition = getHumanCondition(selectFields, search, searchFields, orders, page, pageSize);
         loadListFilterCondition(humanCondition, params);
@@ -109,26 +112,27 @@ public abstract class BaseModelServiceImpl<M extends BaseModel,
         List<M> data;
         int total;
         try {
-            data = modelMapper.list(humanCondition);
-            total = modelMapper.total(humanCondition);
+            data = getModelMapper().list(humanCondition);
+            total = getModelMapper().total(humanCondition);
         } catch (Exception e) {
             log.error("Service list error: {}", e.getMessage());
             return new ListObjServiceResult<>(null, BaseErrorCode.ERROR, e.getMessage());
         }
 
-        DynamicFields resultFields = (validModelFields == null && modelFields != null) ?
-                modelFields.getAvailableFields() : validModelFields;
+        DynamicFields resultFields = (validModelFields == null && actualModelFields != null) ?
+                actualModelFields.getAvailableFields() : validModelFields;
         return new ListObjServiceResult<>(new ListObjResult<>(data, total, resultFields));
     }
 
     @Override
     public ObjServiceResult<M> get(String id, String[] fields) {
-        DynamicFields validModelFields = modelFields != null ? modelFields.getValidFields(fields) : null;
+        F actualModelFields = getModelFields();
+        DynamicFields validModelFields = actualModelFields != null ? actualModelFields.getValidFields(fields) : null;
         String[] selectFields = validModelFields != null ? validModelFields.getFields() : null;
         var humanCondition = getHumanCondition(selectFields);
         M obj;
         try {
-            obj = modelMapper.get(id, humanCondition);
+            obj = getModelMapper().get(id, humanCondition);
         } catch (Exception e) {
             log.error("Service get {} error: {}", id, e.getMessage());
             return new ObjServiceResult<>(null, BaseErrorCode.ERROR, e.getMessage());
@@ -137,20 +141,21 @@ public abstract class BaseModelServiceImpl<M extends BaseModel,
             return new ObjServiceResult<>(null, BaseErrorCode.DATA_NOT_EXIST);
         }
 
-        DynamicFields resultFields = (validModelFields == null && modelFields != null) ?
-                modelFields.getAvailableFields() : validModelFields;
+        DynamicFields resultFields = (validModelFields == null && actualModelFields != null) ?
+                actualModelFields.getAvailableFields() : validModelFields;
         return new ObjServiceResult<>(new ObjResult<>(obj, resultFields));
     }
 
     @Override
     public ObjServiceResult<M> create(M obj, String[] fields) {
-        if (modelFields != null) {
-            modelFields.clearNotWritableFields(obj);
+        F actualModelFields = getModelFields();
+        if (actualModelFields != null) {
+            actualModelFields.clearNotWritableFields(obj);
         }
 
         boolean result;
         try {
-            result = modelMapper.create(obj);
+            result = getModelMapper().create(obj);
         } catch (DuplicateKeyException e) {
             log.error("Service create {} failed: {}", obj, e.getMessage());
             return new ObjServiceResult<>(null, BaseErrorCode.DATA_EXISTS);
@@ -160,9 +165,9 @@ public abstract class BaseModelServiceImpl<M extends BaseModel,
         }
 
         if (result) {
-            DynamicFields validModelFields = modelFields != null ? modelFields.getValidFields(fields) : null;
-            DynamicFields resultFields = (validModelFields == null && modelFields != null) ?
-                    modelFields.getAvailableFields() : validModelFields;
+            DynamicFields validModelFields = actualModelFields != null ? actualModelFields.getValidFields(fields) : null;
+            DynamicFields resultFields = (validModelFields == null && actualModelFields != null) ?
+                    actualModelFields.getAvailableFields() : validModelFields;
             return new ObjServiceResult<>(new ObjResult<>(obj, resultFields));
         } else {
             log.error("Service create {} failed", obj);
@@ -172,13 +177,14 @@ public abstract class BaseModelServiceImpl<M extends BaseModel,
 
     @Override
     public ObjServiceResult<M> update(M obj, String[] fields) {
-        if (modelFields != null) {
-            modelFields.clearNotWritableFields(obj, true);
+        F actualModelFields = getModelFields();
+        if (actualModelFields != null) {
+            actualModelFields.clearNotWritableFields(obj, true);
         }
 
         boolean result;
         try {
-            result = modelMapper.update(obj);
+            result = getModelMapper().update(obj);
         } catch (DuplicateKeyException e) {
             log.error("Service update {} failed: {}", obj, e.getMessage());
             return new ObjServiceResult<>(null, BaseErrorCode.DATA_EXISTS);
@@ -188,9 +194,9 @@ public abstract class BaseModelServiceImpl<M extends BaseModel,
         }
 
         if (result) {
-            DynamicFields validModelFields = modelFields != null ? modelFields.getValidFields(fields) : null;
-            DynamicFields resultFields = (validModelFields == null && modelFields != null) ?
-                    modelFields.getAvailableFields() : validModelFields;
+            DynamicFields validModelFields = actualModelFields != null ? actualModelFields.getValidFields(fields) : null;
+            DynamicFields resultFields = (validModelFields == null && actualModelFields != null) ?
+                    actualModelFields.getAvailableFields() : validModelFields;
             return new ObjServiceResult<>(new ObjResult<>(obj, resultFields));
         } else {
             log.error("Service update {} failed, maybe not exist", obj);
@@ -202,7 +208,7 @@ public abstract class BaseModelServiceImpl<M extends BaseModel,
     public ServiceResult<Boolean> delete(String id) {
         boolean result;
         try {
-            result = modelMapper.logicDelete(id);
+            result = getModelMapper().logicDelete(id);
         } catch (Exception e) {
             log.error("Service delete {} error: {}", id, e.getMessage());
             return new ServiceResult<>(false, BaseErrorCode.ERROR, e.getMessage());
@@ -218,13 +224,14 @@ public abstract class BaseModelServiceImpl<M extends BaseModel,
 
     @Override
     public ServiceResult<Integer> bulkCreate(List<M> objs) {
-        if (modelFields != null) {
-            objs.forEach(obj -> modelFields.clearNotWritableFields(obj));
+        F actualModelFields = getModelFields();
+        if (actualModelFields != null) {
+            objs.forEach(obj -> actualModelFields.clearNotWritableFields(obj));
         }
 
         int result;
         try {
-            result = modelMapper.bulkCreate(objs);
+            result = getModelMapper().bulkCreate(objs);
         } catch (DuplicateKeyException e) {
             log.error("Service bulk create {} failed: {}", objs, e.getMessage());
             return new ServiceResult<>(0, BaseErrorCode.DATA_EXISTS);
@@ -243,13 +250,14 @@ public abstract class BaseModelServiceImpl<M extends BaseModel,
 
     @Override
     public ServiceResult<Integer> bulkUpdate(List<M> objs) {
-        if (modelFields != null) {
-            objs.forEach(obj -> modelFields.clearNotWritableFields(obj, true));
+        F actualModelFields = getModelFields();
+        if (actualModelFields != null) {
+            objs.forEach(obj -> actualModelFields.clearNotWritableFields(obj, true));
         }
 
         int result;
         try {
-            result = modelMapper.bulkUpdate(objs);
+            result = getModelMapper().bulkUpdate(objs);
         } catch (DuplicateKeyException e) {
             log.error("Service bulk update {} failed: {}", objs, e.getMessage());
             return new ServiceResult<>(0, BaseErrorCode.DATA_EXISTS);
@@ -270,7 +278,7 @@ public abstract class BaseModelServiceImpl<M extends BaseModel,
     public ServiceResult<Integer> bulkDelete(String[] ids) {
         int result;
         try {
-            result = modelMapper.bulkLogicDelete(ids);
+            result = getModelMapper().bulkLogicDelete(ids);
         } catch (Exception e) {
             log.error("Service bulk delete {} error: {}", ids, e.getMessage());
             return new ServiceResult<>(0, BaseErrorCode.ERROR, e.getMessage());

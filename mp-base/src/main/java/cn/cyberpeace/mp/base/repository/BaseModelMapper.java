@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.base.util.ClassUtils;
 import cn.cyberpeace.mp.base.util.ModelUtils;
 import cn.cyberpeace.mp.base.util.TextUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -265,6 +266,15 @@ public interface BaseModelMapper<M extends BaseModel> {
         }
 
         return update(obj.getId(), (String[]) updateParams[0], ((Object[][]) updateParams[1])[0]);
+    }
+
+    @Recommendation
+    default boolean save(M obj) {
+        if (StringUtils.isEmpty(obj.getId())) {
+            return create(obj);
+        } else {
+            return update(obj);
+        }
     }
 
     @Recommendation

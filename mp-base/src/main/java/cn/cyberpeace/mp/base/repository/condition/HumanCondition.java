@@ -35,12 +35,7 @@ public class HumanCondition {
         return condition;
     }
 
-    public HumanCondition select(String fieldName) {
-        selectFields.add(fieldName);
-        return this;
-    }
-
-    public HumanCondition select(String[] fieldNames) {
+    public HumanCondition select(String... fieldNames) {
         selectFields.addAll(Arrays.asList(fieldNames));
         return this;
     }
