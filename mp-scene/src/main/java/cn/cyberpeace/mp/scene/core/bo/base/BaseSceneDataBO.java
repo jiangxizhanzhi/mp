@@ -3,6 +3,6 @@ package cn.cyberpeace.mp.scene.core.bo.base;
 import lombok.Data;
 
 @Data
-public class BaseSceneDataBO<T> {
+public abstract class BaseSceneDataBO<T> {
     private T topology;
 }

@@ -8,6 +8,7 @@ import lombok.Data;
 
 @Data
 public class BaseSceneElementPortModel extends BaseModel {
+    private String scene;
     private String sceneElement;
     private String portId;
     @DefaultStr

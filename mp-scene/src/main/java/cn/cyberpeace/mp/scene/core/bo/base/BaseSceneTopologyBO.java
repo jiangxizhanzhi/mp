@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class BaseSceneTopologyBO<
+public abstract class BaseSceneTopologyBO<
         S0 extends BaseSceneModel,
         A0 extends BaseSceneAreaModel,
         E0 extends BaseSceneElementModel,

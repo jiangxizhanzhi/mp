@@ -35,8 +35,12 @@ public abstract class BaseSceneElementBO<M extends BaseSceneElementModel, P exte
     @Override
     public M toModel(String... ignoreFields) {
         var obj = super.toModel(ArrayUtils.addAll(ignoreFields, "accessModes", "initCommands"));
-        obj.setAccessModes(JsonUtils.toJsonString(accessModes));
-        obj.setInitCommands(JsonUtils.toJsonString(initCommands));
+        if (accessModes != null) {
+            obj.setAccessModes(JsonUtils.toJsonString(accessModes));
+        }
+        if (initCommands != null) {
+            obj.setInitCommands(JsonUtils.toJsonString(initCommands));
+        }
         return obj;
     }
 }

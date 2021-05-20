@@ -1,8 +1,9 @@
 package cn.cyberpeace.mp.scene.controller;
 
 import cn.cyberpeace.mp.base.controller.BaseModelController;
-import cn.cyberpeace.mp.base.util.JsonUtils;
 import cn.cyberpeace.mp.scene.constant.ControllerConstant;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
+import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
 import cn.cyberpeace.mp.scene.model.SceneConfigModel;
 import cn.cyberpeace.mp.scene.service.SceneConfigService;
 import lombok.extern.slf4j.Slf4j;
@@ -11,8 +12,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Map;
 
 @Slf4j
 @RestController
@@ -25,9 +24,10 @@ public class SceneConfigController extends BaseModelController<SceneConfigModel,
     }
 
     @PostMapping("/test")
-    public Object test(@RequestBody Map<String, String> data) {
-        String val = data.getOrDefault("test", "");
-        return JsonUtils.parse(val, Object.class);
+    public Object test(@RequestBody SceneConfigDataBO sceneConfigDataBO) {
+        var sceneConfigHandler = new SceneConfigHandler(sceneConfigDataBO);
+        sceneConfigHandler.save();
+        return "test";
     }
 
 }
