@@ -226,7 +226,7 @@ public abstract class BaseModelServiceImpl<M extends BaseModel,
     public ServiceResult<Integer> bulkCreate(List<M> objs) {
         F actualModelFields = getModelFields();
         if (actualModelFields != null) {
-            objs.forEach(obj -> actualModelFields.clearNotWritableFields(obj));
+            objs.forEach(actualModelFields::clearNotWritableFields);
         }
 
         int result;
