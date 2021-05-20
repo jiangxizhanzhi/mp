@@ -179,7 +179,7 @@ public interface BaseModelMapper<M extends BaseModel> {
 
     @Recommendation
     default List<M> list(HumanCondition humanCondition, String[] selectFields) {
-        if (humanCondition.getLimit() == 0) {
+        if (humanCondition.getLimit() != null && humanCondition.getLimit() == 0) {
             return new ArrayList<>();
         }
 
