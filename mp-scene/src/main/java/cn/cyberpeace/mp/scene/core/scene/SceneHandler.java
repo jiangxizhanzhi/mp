@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.scene.core.scene;
 
 import cn.cyberpeace.mp.base.annotation.BeanFieldClasses;
-import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.scene.core.base.BaseSceneHandler;
 import cn.cyberpeace.mp.scene.core.bo.*;
 import cn.cyberpeace.mp.scene.model.*;
@@ -34,8 +33,20 @@ public class SceneHandler extends BaseSceneHandler<
         SceneElementPortConnectionMapper> {
 
     public SceneHandler(SceneDataBO sceneDataBO) {
-        BeanUtils.loadBeanFields(this);
-        initFromSceneDataBO(sceneDataBO);
+        init(sceneDataBO, false);
     }
 
+    public SceneHandler(SceneDataBO sceneDataBO, boolean isAreaMode) {
+        init(sceneDataBO, isAreaMode);
+    }
+
+    @Override
+    public SceneDataBO buildDataBO() {
+        return new SceneDataBO();
+    }
+
+    @Override
+    public SceneTopologyBO buildTopologyBO() {
+        return new SceneTopologyBO();
+    }
 }

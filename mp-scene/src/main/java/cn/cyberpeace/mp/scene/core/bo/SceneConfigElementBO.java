@@ -4,8 +4,6 @@ import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementBO;
 import cn.cyberpeace.mp.scene.model.SceneConfigElementModel;
 import lombok.Data;
 
-import java.util.List;
-
 @Data
 public class SceneConfigElementBO extends BaseSceneElementBO<SceneConfigElementModel, SceneConfigElementPortBO> {
 

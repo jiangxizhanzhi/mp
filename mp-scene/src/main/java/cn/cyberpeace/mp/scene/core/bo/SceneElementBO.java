@@ -4,8 +4,6 @@ import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementBO;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import lombok.Data;
 
-import java.util.List;
-
 @Data
 public class SceneElementBO extends BaseSceneElementBO<SceneElementModel, SceneElementPortBO> {
     private Integer event;

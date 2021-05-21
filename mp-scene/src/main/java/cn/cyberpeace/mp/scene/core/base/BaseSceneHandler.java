@@ -4,6 +4,8 @@ import cn.cyberpeace.mp.base.annotation.BeanFieldNames;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.util.BeanUtils;
+import cn.cyberpeace.mp.base.util.ListTreeNode;
 import cn.cyberpeace.mp.scene.core.bo.base.*;
 import cn.cyberpeace.mp.scene.model.base.*;
 import cn.cyberpeace.mp.scene.repository.base.*;
@@ -11,10 +13,7 @@ import lombok.Getter;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @BeanFieldNames({
         "sceneMapper",
@@ -42,6 +41,7 @@ public abstract class BaseSceneHandler<
         M4 extends BaseSceneElementPortMapper<P0>,
         M5 extends BaseSceneElementPortConnectionMapper<C0>> {
 
+    private Boolean isAreaMode;
     @Getter
     private S scene;
     @Getter
@@ -56,6 +56,8 @@ public abstract class BaseSceneHandler<
     private final Map<String, E> elementPortIdElementMap = new HashMap<>();
     @Getter
     private final Map<String, C> elementPortConnectionMap = new HashMap<>();
+    @Getter
+    private final Set<String> outerConnectionPortIds = new HashSet<>();
 
     private M1 sceneMapper;
     private M2 sceneAreaMapper;
@@ -63,8 +65,65 @@ public abstract class BaseSceneHandler<
     private M4 sceneElementPortMapper;
     private M5 sceneElementPortConnectionMapper;
 
-    private HumanCondition areaCondition(String sceneId, String areaId) {
-        return new HumanCondition().filterEqual("scene", sceneId).filterEqual("area", areaId);
+    public boolean isAreaMode() {
+        return Boolean.TRUE.equals(isAreaMode);
+    }
+
+    private void filterAreaData() {
+        ListTreeNode<A> areaNodeTree = new ListTreeNode<>();
+        Map<String, ListTreeNode<A>> areaNodeMap = new HashMap<>();
+        if (StringUtils.isEmpty(areaId)) {
+            areaNodeMap.put(null, areaNodeTree);
+            areaNodeMap.put(StringUtils.EMPTY, areaNodeTree);
+        } else {
+            areaNodeMap.put(areaId, areaNodeTree);
+        }
+
+        areaMap.forEach((areaNodeId, area) -> areaNodeMap.put(areaNodeId, new ListTreeNode<>(area)));
+        areaNodeMap.forEach((areaNodeId, areaNode) -> {
+            var area = areaNode.get();
+            if (area == null) {
+                return;
+            }
+            ListTreeNode<A> parentAreaNode = areaNodeMap.getOrDefault(area.getArea(), null);
+            if (parentAreaNode == null) {
+                return;
+            }
+            parentAreaNode.addChild(areaNode);
+        });
+
+        areaMap.clear();
+        filterAreaTree(areaNodeTree, areaMap);
+    }
+
+    private void filterAreaTree(ListTreeNode<A> areaNode, Map<String, A> targetAreaMap) {
+        var area = areaNode.get();
+        if (area != null) {
+            targetAreaMap.put(area.getId(), area);
+            if (!Boolean.TRUE.equals(area.getOpen())) {
+                return;
+            }
+        }
+
+        areaNode.getChildren().forEach(areaChildNode -> filterAreaTree(areaChildNode, targetAreaMap));
+    }
+
+    private boolean isValidAreaElement(E element) {
+        if (!isAreaMode()) {
+            return true;
+        }
+
+        String elementArea = element.getArea();
+        if (StringUtils.isEmpty(areaId) && StringUtils.isEmpty(elementArea)) {
+            return true;
+        }
+
+        if (StringUtils.equals(areaId, elementArea)) {
+            return true;
+        }
+
+        var parentArea = areaMap.getOrDefault(elementArea, null);
+        return parentArea != null && parentArea.getOpen();
     }
 
     private String elementPortConnectionKey(C0 elementPortConnection) {
@@ -77,11 +136,102 @@ public abstract class BaseSceneHandler<
                 elementPortConnection.getTarget());
     }
 
+    private void loadAreaBOs(List<A> areas) {
+        if (areas == null) {
+            return;
+        }
+
+        areas.forEach(area -> areaMap.put(area.getId(), area));
+        if (isAreaMode()) {
+            filterAreaData();
+        }
+    }
+
+    private void loadElementBOs(List<E> elements) {
+        if (elements == null) {
+            return;
+        }
+
+        elements.forEach(element -> {
+            if (!isValidAreaElement(element)) {
+                return;
+            }
+
+            elementMap.put(element.getId(), element);
+
+            List<P> elementPorts = element.getPorts();
+            if (elementPorts == null) {
+                return;
+            }
+            elementPorts.forEach(elementPort -> {
+                elementPortMap.put(elementPort.getId(), elementPort);
+                elementPortIdElementMap.put(elementPort.getId(), element);
+            });
+        });
+    }
+
+    private void loadConnectionBOs(List<C> connections) {
+        if (connections == null) {
+            return;
+        }
+
+        connections.forEach(connection -> {
+            String sourcePortId = connection.getSource();
+            String targetPortId = connection.getTarget();
+            if (!elementPortMap.containsKey(sourcePortId)
+                    && !elementPortMap.containsKey(targetPortId)) {
+                return;
+            }
+
+            if (!elementPortMap.containsKey(sourcePortId)) {
+                outerConnectionPortIds.add(sourcePortId);
+            }
+            if (!elementPortMap.containsKey(targetPortId)) {
+                outerConnectionPortIds.add(targetPortId);
+            }
+
+            elementPortConnectionMap.put(elementPortConnectionKey(connection), connection);
+        });
+    }
+
+    private void fromData(D sceneDataBO) {
+        var topology = sceneDataBO.getTopology();
+        scene = topology.getScene();
+        areaId = topology.getAreaId();
+        loadAreaBOs(topology.getAreas());
+        loadElementBOs(topology.getElements());
+        loadConnectionBOs(topology.getConnections());
+    }
+
+    private HumanCondition areaCondition(String sceneId, String... areaIds) {
+        var humanCondition = new HumanCondition().filterEqual("scene", sceneId);
+        var orCondition = humanCondition.filterOrStart();
+        for (String filterAreaId: areaIds) {
+            orCondition.orEqual("area", filterAreaId);
+        }
+        return orCondition.filterOrEnd();
+    }
+
+    private List<A0> listSceneAreas(String sceneId, String... areaIds) {
+        List<A0> sceneAreas = sceneAreaMapper.list(areaCondition(sceneId, areaIds));
+        String[] openSceneAreaIds = sceneAreas.stream()
+                .filter(area -> Boolean.TRUE.equals(area.getOpen()))
+                .map(BaseSceneNodeModel::getNodeId)
+                .toArray(String[]::new);
+        if (openSceneAreaIds.length > 0) {
+            sceneAreas.addAll(listSceneAreas(sceneId, openSceneAreaIds));
+        }
+        return sceneAreas;
+    }
+
+    private List<E0> listSceneElements(String sceneId, String... areaIds) {
+        return sceneElementMapper.list(areaCondition(sceneId, areaIds));
+    }
+
     private <M extends BaseSceneNodeModel, N extends BaseSceneNodeBO<M>,
-            O extends BaseModelMapper<M>> DiffTargets<M> saveSceneNodes(O modelMapper, Map<String, N> nodeBOMap) {
+            O extends BaseModelMapper<M>> DiffTargets<M> saveSceneNodes(O modelMapper, Map<String, N> nodeBOMap,
+                                                                        List<M> existNodes) {
         String sceneId = scene.getEid();
-        String filterAreaId = StringUtils.isEmpty(this.areaId) ? StringUtils.EMPTY : this.areaId;
-        List<M> existNodes = modelMapper.list(areaCondition(sceneId, filterAreaId));
         Map <String, M> existNodeMap = new HashMap<>();
         existNodes.forEach(node -> existNodeMap.put(node.getNodeId(), node));
 
@@ -90,13 +240,15 @@ public abstract class BaseSceneHandler<
         nodeBOMap.forEach((nodeId, nodeBO) -> {
             var node = nodeBO.toModel();
             node.setScene(sceneId);
-
             nodeMap.put(nodeId, node);
-            if (existNodeMap.containsKey(nodeId)) {
-                existNodeMap.remove(nodeId);
-                diff.getUpdatingTargets().add(node);
-            } else {
+
+            var existNode = existNodeMap.getOrDefault(nodeId, null);
+            if (existNode == null) {
                 diff.getAddingTargets().add(node);
+            } else {
+                existNodeMap.remove(nodeId);
+                node.setId(existNode.getId());
+                diff.getUpdatingTargets().add(node);
             }
         });
 
@@ -122,11 +274,30 @@ public abstract class BaseSceneHandler<
     }
 
     private DiffTargets<A0> saveSceneAreas() {
-        return saveSceneNodes(sceneAreaMapper, areaMap);
+        List<A0> existSceneAreas;
+        if (isAreaMode()) {
+            String filterAreaId = StringUtils.isEmpty(areaId) ? StringUtils.EMPTY : areaId;
+            existSceneAreas = listSceneAreas(scene.getEid(), filterAreaId);
+        } else {
+            existSceneAreas = listSceneAreas(scene.getEid());
+        }
+        return saveSceneNodes(sceneAreaMapper, areaMap, existSceneAreas);
     }
 
     private DiffTargets<E0> saveSceneElements() {
-        return saveSceneNodes(sceneElementMapper, elementMap);
+        List<E0> existSceneElements;
+        if (isAreaMode()) {
+            String mainAreaId = StringUtils.isEmpty(areaId) ? StringUtils.EMPTY : areaId;
+            String[] openAreaIds = areaMap.values().stream()
+                    .filter(area -> Boolean.TRUE.equals(area.getOpen()))
+                    .map(BaseSceneNodeBO::getId)
+                    .toArray(String[]::new);
+            existSceneElements = listSceneElements(scene.getEid(),
+                    ArrayUtils.addAll(new String[]{mainAreaId}, openAreaIds));
+        } else {
+            existSceneElements = listSceneElements(scene.getEid());
+        }
+        return saveSceneNodes(sceneElementMapper, elementMap, existSceneElements);
     }
 
     private DiffTargets<P0> saveSceneElementPorts(DiffTargets<E0> diffElements) {
@@ -137,9 +308,8 @@ public abstract class BaseSceneHandler<
         if (originElementIds.length > 0) {
             sceneElementPortMapper.list(new HumanCondition()
                     .select("id", "scene", "port_id")
-                    .filterIn("scene_element", originElementIds)).forEach(elementPort -> {
-                existElementPortMap.put(elementPort.getPortId(), elementPort);
-            });
+                    .filterIn("scene_element", originElementIds))
+                    .forEach(elementPort -> existElementPortMap.put(elementPort.getPortId(), elementPort));
         }
 
         String sceneId = scene.getEid();
@@ -151,11 +321,14 @@ public abstract class BaseSceneHandler<
             elementPort.setScene(sceneId);
             elementPort.setSceneElement(sceneElementId);
             elementPortObjMap.put(portId, elementPort);
-            if (existElementPortMap.containsKey(portId)) {
-                existElementPortMap.remove(portId);
-                diffElementPorts.getUpdatingTargets().add(elementPort);
-            } else {
+
+            var existElementPort = existElementPortMap.getOrDefault(portId, null);
+            if (existElementPort == null) {
                 diffElementPorts.getAddingTargets().add(elementPort);
+            } else {
+                existElementPortMap.remove(portId);
+                elementPort.setId(existElementPort.getId());
+                diffElementPorts.getUpdatingTargets().add(elementPort);
             }
         });
 
@@ -190,20 +363,50 @@ public abstract class BaseSceneHandler<
                             elementPortConnectionKey(elementPortConnection), elementPortConnection));
         }
 
+        Map<String, P0> outerElementPortMap = new HashMap<>();
+        if (!outerConnectionPortIds.isEmpty()) {
+            sceneElementPortMapper.list(new HumanCondition()
+                    .select("id", "port_id")
+                    .filterIn("port_id", outerConnectionPortIds.toArray(new String[0])))
+                    .forEach(elementPort -> outerElementPortMap.put(elementPort.getPortId(), elementPort));
+        }
+
         String sceneId = scene.getEid();
         DiffTargets<C0> diffElementPortConnections = new DiffTargets<>();
         Map<String, C0> elementPortConnectionObjMap = new HashMap<>();
         this.elementPortConnectionMap.forEach((connectionKey, elementPortConnectionBO) -> {
             C0 elementPortConnection = elementPortConnectionBO.toModel();
             elementPortConnection.setScene(sceneId);
-            elementPortConnection.setSourcePort(elementPortMap.get(elementPortConnection.getSourcePortId()).getEid());
-            elementPortConnection.setTargetPort(elementPortMap.get(elementPortConnection.getTargetPortId()).getEid());
-            elementPortConnectionObjMap.put(connectionKey, elementPortConnection);
-            if (existElementPortConnectionMap.containsKey(connectionKey)) {
-                existElementPortConnectionMap.remove(connectionKey);
-                diffElementPortConnections.getUpdatingTargets().add(elementPortConnection);
+            var sourcePortBO = elementPortMap.getOrDefault(elementPortConnection.getSourcePortId(), null);
+            String sourcePortId;
+            if (sourcePortBO == null) {
+                P0 sourcePort = outerElementPortMap.getOrDefault(elementPortConnection.getSourcePortId(), null);
+                sourcePortId = sourcePort == null ? null : sourcePort.getId();
             } else {
+                sourcePortId = sourcePortBO.getEid();
+            }
+            var targetPortBO = elementPortMap.getOrDefault(elementPortConnection.getTargetPortId(), null);
+            String targetPortId;
+            if (targetPortBO == null) {
+                P0 targetPort = outerElementPortMap.getOrDefault(elementPortConnection.getTargetPortId(), null);
+                targetPortId = targetPort == null ? null : targetPort.getId();
+            } else {
+                targetPortId = targetPortBO.getEid();
+            }
+            if (sourcePortId == null || targetPortId == null) {
+                return;
+            }
+            elementPortConnection.setSourcePort(sourcePortId);
+            elementPortConnection.setTargetPort(targetPortId);
+            elementPortConnectionObjMap.put(connectionKey, elementPortConnection);
+
+            var existElementPortConnection = existElementPortConnectionMap.getOrDefault(connectionKey, null);
+            if (existElementPortConnection == null) {
                 diffElementPortConnections.getAddingTargets().add(elementPortConnection);
+            } else {
+                existElementPortConnectionMap.remove(connectionKey);
+                elementPortConnection.setId(existElementPortConnection.getId());
+                diffElementPortConnections.getUpdatingTargets().add(elementPortConnection);
             }
         });
 
@@ -223,32 +426,27 @@ public abstract class BaseSceneHandler<
         return diffElementPortConnections;
     }
 
-    public void initFromSceneDataBO(D sceneDataBO) {
-        var topology = sceneDataBO.getTopology();
-        scene = topology.getScene();
-        areaId = topology.getAreaId();
-        List<A> areas = topology.getAreas();
-        if (areas != null) {
-            areas.forEach(area -> areaMap.put(area.getId(), area));
-        }
-        List<E> elements = topology.getElements();
-        if (elements != null) {
-            elements.forEach(element -> {
-                elementMap.put(element.getId(), element);
-                List<P> elementPorts = element.getPorts();
-                if (elementPorts == null) {
-                    return;
-                }
-                elementPorts.forEach(elementPort -> {
-                    elementPortMap.put(elementPort.getId(), elementPort);
-                    elementPortIdElementMap.put(elementPort.getId(), element);
-                });
-            });
-        }
-        List<C> connections = topology.getConnections();
-        if (connections != null) {
-            connections.forEach(connection -> elementPortConnectionMap.put(elementPortConnectionKey(connection), connection));
-        }
+    public abstract D buildDataBO();
+
+    public abstract T buildTopologyBO();
+
+    public void init(D sceneDataBO, boolean isAreaMode) {
+        this.isAreaMode = isAreaMode;
+        BeanUtils.loadBeanFields(this);
+        fromData(sceneDataBO);
+    }
+
+    public D toData() {
+        var topologyBO = buildTopologyBO();
+        topologyBO.setScene(scene);
+        topologyBO.setAreaId(areaId);
+        topologyBO.setAreas(new ArrayList<>(areaMap.values()));
+        topologyBO.setElements(new ArrayList<>(elementMap.values()));
+        topologyBO.setConnections(new ArrayList<>(elementPortConnectionMap.values()));
+
+        var dataBO = buildDataBO();
+        dataBO.setTopology(topologyBO);
+        return dataBO;
     }
 
     public void save() {

@@ -24,10 +24,10 @@ public class SceneConfigController extends BaseModelController<SceneConfigModel,
     }
 
     @PostMapping("/test")
-    public Object test(@RequestBody SceneConfigDataBO sceneConfigDataBO) {
-        var sceneConfigHandler = new SceneConfigHandler(sceneConfigDataBO);
+    public SceneConfigDataBO test(@RequestBody SceneConfigDataBO sceneConfigDataBO) {
+        var sceneConfigHandler = new SceneConfigHandler(sceneConfigDataBO, true);
         sceneConfigHandler.save();
-        return "test";
+        return sceneConfigHandler.toData();
     }
 
 }
