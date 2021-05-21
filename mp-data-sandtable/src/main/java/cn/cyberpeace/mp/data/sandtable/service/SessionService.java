@@ -1,10 +1,12 @@
 package cn.cyberpeace.mp.data.sandtable.service;
 
+import cn.cyberpeace.mp.base.exception.MqRuntimeException;
 import cn.cyberpeace.mp.data.sandtable.model.SessionModel;
 import cn.cyberpeace.mp.data.sandtable.model.SessionQuery;
 import cn.cyberpeace.mp.data.sandtable.model.SessionResult;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -39,9 +41,12 @@ public class SessionService {
      * @return List<SessionResult>
      */
     public List<SessionResult> querySessionListWithGroup(SessionQuery sessionQuery) {
+        List<SessionResult> sessionResults = Lists.newArrayList();
+
         List<String> indexList = indexListBuilder(sessionQuery);
-        String[] indexArray = new String[indexList.size()];
+        var indexArray = new String[indexList.size()];
         indexList.toArray(indexArray);
+
         var searchRequest = new SearchRequest(indexArray);
         // 1.创建并设置SearchSourceBuilder对象
         var sourceBuilder = new SearchSourceBuilder();
@@ -54,22 +59,29 @@ public class SessionService {
         searchRequest.source(sourceBuilder.query(boolQueryBuilder.must(rangeQueryBuilder)));
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
-            List<SessionModel> sessionModelList = Arrays.stream(response.getHits().getHits()).map(hit -> JSONObject.parseObject(hit.getSourceAsString(), SessionModel.class)).collect(Collectors.toList());
-            List<SessionResult> sessionResults = sessionModelList.stream().map(this::convertSession).collect(Collectors.toList());
+            List<SessionModel> sessionModelList = Arrays.stream(response.getHits().getHits()).map(hit -> {
+                var sessionModel = JSONObject.parseObject(hit.getSourceAsString(), SessionModel.class);
+                sessionModel.setIndex(hit.getIndex());
+                return sessionModel;
+            }).collect(Collectors.toList());
+            sessionResults = sessionModelList.stream().map(this::convertSession).collect(Collectors.toList());
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return null;
+        return sessionResults;
     }
 
     /**
      * 查询所有集群
      *
-     * @param sessionQuery
+     * @param sessionQuery 这个查询方法 groupList毕传
      * @return
      */
     public List<SessionResult> querySessionAllList(SessionQuery sessionQuery) {
-        return null;
+        if (CollectionUtils.isEmpty(sessionQuery.getGroupList())) {
+            throw new MqRuntimeException("分组id列表必须传");
+        }
+        return querySessionListWithGroup(sessionQuery);
     }
 
     /**
@@ -80,21 +92,14 @@ public class SessionService {
      */
     private SessionResult convertSession(SessionModel model) {
         return SessionResult.builder()
-            //convert todo groupId
-            .groupId(model.getIndex())
+            .groupId(model.getIndex().substring(0, model.getIndex().indexOf("_sessions2")))
             .sourceIp(model.getSrcIp())
             .targetIp(model.getDstIp())
+            .sourceMac(model.getSrcMac())
+            .targetMac(model.getDstMac())
             .protocalType(model.getProtocol())
             .build();
     }
-
-    private String getGoupIdFromIndex(String index) {
-        return null;
-//        index.indexOf("session")
-    }
-
-
-
 
     /**
      * 构造查询需要的索引

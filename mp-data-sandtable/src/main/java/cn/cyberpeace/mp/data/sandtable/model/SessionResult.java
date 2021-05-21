@@ -17,6 +17,10 @@ public class SessionResult {
 
     private String targetIp;
 
+    private String sourceMac;
+
+    private String targetMac;
+
     /**
      * 协议类型
      */

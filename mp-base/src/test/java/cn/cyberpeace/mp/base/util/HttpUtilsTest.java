@@ -46,6 +46,8 @@ public class HttpUtilsTest {
 
     @Test
     public void dateTest() {
-
+        var index = "default_sessions2-210521";
+        int end = index.indexOf("_sessions2");
+        System.out.println(index.substring(0, end));
     }
 }
