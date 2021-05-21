@@ -11,6 +11,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SessionModel {
+
+    /**
+     * 物理索引
+     */
+    private String index;
+
     private String srcIp;
 
     private String srcMac;

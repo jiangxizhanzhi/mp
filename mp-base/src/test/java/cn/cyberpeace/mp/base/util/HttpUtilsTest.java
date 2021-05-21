@@ -46,16 +46,6 @@ public class HttpUtilsTest {
 
     @Test
     public void dateTest() {
-        LocalDateTime start = LocalDateTime.of(2021, 5, 01, 12, 12);
-        LocalDateTime end = LocalDateTime.now();
-        long betweenDay = ChronoUnit.DAYS.between(start, end);
-        Integer days = Integer.valueOf((int) betweenDay);
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
-
-        List<LocalDateTime> localDateTimeList = IntStream.range(0, days + 1).boxed().map(start::plusDays).collect(Collectors.toList());
-        for (LocalDateTime time : localDateTimeList) {
-            System.out.println("中间的时间" + time.format(formatter));
-        }
     }
 }

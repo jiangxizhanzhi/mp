@@ -3,10 +3,13 @@ package cn.cyberpeace.mp.data.sandtable.service;
 import cn.cyberpeace.mp.data.sandtable.model.SessionModel;
 import cn.cyberpeace.mp.data.sandtable.model.SessionQuery;
 import cn.cyberpeace.mp.data.sandtable.model.SessionResult;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,6 +34,7 @@ public class SessionService {
 
     /**
      * 分组维度查询流量
+     *
      * @param sessionQuery
      * @return List<SessionResult>
      */
@@ -38,19 +42,20 @@ public class SessionService {
         List<String> indexList = indexListBuilder(sessionQuery);
         String[] indexArray = new String[indexList.size()];
         indexList.toArray(indexArray);
-        SearchRequest searchRequest = new SearchRequest(indexArray);
+        var searchRequest = new SearchRequest(indexArray);
         // 1.创建并设置SearchSourceBuilder对象
-        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+        var sourceBuilder = new SearchSourceBuilder();
+        sourceBuilder.size(100);
+        var boolQueryBuilder = QueryBuilders.boolQuery();
+        //时间查询
+        var rangeQueryBuilder = QueryBuilders.rangeQuery("timestamp")
+            .from(sessionQuery.getStartTime().toString()).to(sessionQuery.getEndTime().toString());
 
-        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
-        RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery("timestamp").gte(sessionQuery.getStartTime().toString()).lte(sessionQuery.getEndTime().toString());
-        boolQueryBuilder.must(rangeQueryBuilder);
-        sourceBuilder.query(boolQueryBuilder);
-
-        searchRequest.source(sourceBuilder);
+        searchRequest.source(sourceBuilder.query(boolQueryBuilder.must(rangeQueryBuilder)));
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
-            response.getHits();
+            List<SessionModel> sessionModelList = Arrays.stream(response.getHits().getHits()).map(hit -> JSONObject.parseObject(hit.getSourceAsString(), SessionModel.class)).collect(Collectors.toList());
+            List<SessionResult> sessionResults = sessionModelList.stream().map(this::convertSession).collect(Collectors.toList());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -59,6 +64,7 @@ public class SessionService {
 
     /**
      * 查询所有集群
+     *
      * @param sessionQuery
      * @return
      */
@@ -66,9 +72,33 @@ public class SessionService {
         return null;
     }
 
+    /**
+     * es bean 到中台bean的转换
+     *
+     * @param model
+     * @return
+     */
+    private SessionResult convertSession(SessionModel model) {
+        return SessionResult.builder()
+            //convert todo groupId
+            .groupId(model.getIndex())
+            .sourceIp(model.getSrcIp())
+            .targetIp(model.getDstIp())
+            .protocalType(model.getProtocol())
+            .build();
+    }
+
+    private String getGoupIdFromIndex(String index) {
+        return null;
+//        index.indexOf("session")
+    }
+
+
+
 
     /**
      * 构造查询需要的索引
+     *
      * @return List<IndexBoost>
      */
     private List<String> indexListBuilder(SessionQuery sessionQuery) {
@@ -76,20 +106,20 @@ public class SessionService {
         List<String> dateStringList = fetchFormatterTime(sessionQuery.getStartTime(), sessionQuery.getEndTime());
         if (!CollectionUtils.isEmpty(groupList)) {
             return sessionQuery.getGroupList()
-                .stream().map(groupId-> dateStringList.stream().map(dateString -> sessionIndexFormatter(groupId, dateString))
-                .collect(Collectors.toList()))
+                .stream().map(groupId -> dateStringList.stream().map(dateString -> sessionIndexFormatter(groupId, dateString))
+                    .collect(Collectors.toList()))
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
-        }else {
+        } else {
             return dateStringList.stream().map(dateString ->
                 sessionIndexFormatter(sessionQuery.getGroupId(), dateString)).collect(Collectors.toList());
         }
     }
 
-
     /**
      * 获取比如2021-05-01 到2021-05-20.所有的日期，方便构建所有的时间字符串210501,210502,....
-     * @param startTime  startTime
+     *
+     * @param startTime startTime
      * @param endTime endTime
      * @return List<String>
      */
@@ -97,14 +127,14 @@ public class SessionService {
         var formatter = DateTimeFormatter.ofPattern("yyMMdd");
         long betweenDay = ChronoUnit.DAYS.between(startTime, endTime);
         int days = (int) betweenDay;
-        return IntStream.range(0, days + 1).boxed().map(startTime::plusDays).map((time) ->time.format(formatter))
+        return IntStream.range(0, days + 1).boxed().map(startTime::plusDays).map((time) -> time.format(formatter))
             .collect(Collectors.toList());
     }
 
-
     /**
      * 构造流量索引
-     * @param groupId  groupId
+     *
+     * @param groupId groupId
      * @param dateString dateString
      * @return indexString
      */
