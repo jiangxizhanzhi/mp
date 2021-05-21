@@ -18,8 +18,8 @@ spring:
     #我们es版本7.7.1使用当前版本为deprecated
   data:
     elasticsearch:
-      name: elasticsearch
-      clusters: 10.100.7.50:9300
+#      cluster-name: elasticsearch
+#      cluster-nodes: 10.100.7.50:9300
 logging:
   file:
     name: log/log.log

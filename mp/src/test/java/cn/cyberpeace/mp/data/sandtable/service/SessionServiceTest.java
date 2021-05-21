@@ -19,8 +19,8 @@ public class SessionServiceTest {
     @Test
     public void testQuerySessionByGroup(){
         SessionQuery sessionQuery = new SessionQuery();
+        sessionQuery.setStartTime(LocalDateTime.of(2021, 5, 21, 1, 0));
         sessionQuery.setEndTime(LocalDateTime.now());
-        sessionQuery.setStartTime(LocalDateTime.of(2020, 12, 21, 12, 12));
         sessionQuery.setGroupId("default");
         service.querySessionListWithGroup(sessionQuery);
     };
