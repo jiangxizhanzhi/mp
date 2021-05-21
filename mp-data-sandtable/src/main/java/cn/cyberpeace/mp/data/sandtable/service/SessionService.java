@@ -2,9 +2,8 @@ package cn.cyberpeace.mp.data.sandtable.service;
 
 import cn.cyberpeace.mp.base.exception.MqRuntimeException;
 import cn.cyberpeace.mp.data.sandtable.model.SessionModel;
-import cn.cyberpeace.mp.data.sandtable.model.SessionQuery;
+import cn.cyberpeace.mp.data.sandtable.model.SessionRequest;
 import cn.cyberpeace.mp.data.sandtable.model.SessionResult;
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import java.io.IOException;
@@ -20,9 +19,7 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,13 +34,13 @@ public class SessionService {
     /**
      * 分组维度查询流量
      *
-     * @param sessionQuery
+     * @param sessionRequest
      * @return List<SessionResult>
      */
-    public List<SessionResult> querySessionListWithGroup(SessionQuery sessionQuery) {
+    public List<SessionResult> querySessionListWithGroup(SessionRequest sessionRequest) {
         List<SessionResult> sessionResults = Lists.newArrayList();
 
-        List<String> indexList = indexListBuilder(sessionQuery);
+        List<String> indexList = indexListBuilder(sessionRequest);
         var indexArray = new String[indexList.size()];
         indexList.toArray(indexArray);
 
@@ -54,7 +51,7 @@ public class SessionService {
         var boolQueryBuilder = QueryBuilders.boolQuery();
         //时间查询
         var rangeQueryBuilder = QueryBuilders.rangeQuery("timestamp")
-            .from(sessionQuery.getStartTime().toString()).to(sessionQuery.getEndTime().toString());
+            .from(sessionRequest.getStartTime().toString()).to(sessionRequest.getEndTime().toString());
 
         searchRequest.source(sourceBuilder.query(boolQueryBuilder.must(rangeQueryBuilder)));
         try {
@@ -74,14 +71,14 @@ public class SessionService {
     /**
      * 查询所有集群
      *
-     * @param sessionQuery 这个查询方法 groupList毕传
+     * @param sessionRequest 这个查询方法 groupList毕传
      * @return
      */
-    public List<SessionResult> querySessionAllList(SessionQuery sessionQuery) {
-        if (CollectionUtils.isEmpty(sessionQuery.getGroupList())) {
+    public List<SessionResult> querySessionAllList(SessionRequest sessionRequest) {
+        if (CollectionUtils.isEmpty(sessionRequest.getGroupList())) {
             throw new MqRuntimeException("分组id列表必须传");
         }
-        return querySessionListWithGroup(sessionQuery);
+        return querySessionListWithGroup(sessionRequest);
     }
 
     /**
@@ -106,18 +103,18 @@ public class SessionService {
      *
      * @return List<IndexBoost>
      */
-    private List<String> indexListBuilder(SessionQuery sessionQuery) {
-        List<String> groupList = sessionQuery.getGroupList();
-        List<String> dateStringList = fetchFormatterTime(sessionQuery.getStartTime(), sessionQuery.getEndTime());
+    private List<String> indexListBuilder(SessionRequest sessionRequest) {
+        List<String> groupList = sessionRequest.getGroupList();
+        List<String> dateStringList = fetchFormatterTime(sessionRequest.getStartTime(), sessionRequest.getEndTime());
         if (!CollectionUtils.isEmpty(groupList)) {
-            return sessionQuery.getGroupList()
+            return sessionRequest.getGroupList()
                 .stream().map(groupId -> dateStringList.stream().map(dateString -> sessionIndexFormatter(groupId, dateString))
                     .collect(Collectors.toList()))
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
         } else {
             return dateStringList.stream().map(dateString ->
-                sessionIndexFormatter(sessionQuery.getGroupId(), dateString)).collect(Collectors.toList());
+                sessionIndexFormatter(sessionRequest.getGroupId(), dateString)).collect(Collectors.toList());
         }
     }
 

@@ -7,7 +7,7 @@ import lombok.*;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class SessionQuery {
+public class SessionRequest {
 
     /**
      * 查询开始时间

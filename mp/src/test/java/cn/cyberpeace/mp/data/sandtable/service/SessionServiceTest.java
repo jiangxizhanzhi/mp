@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.data.sandtable.service;
 
 import cn.cyberpeace.mp.Application;
-import cn.cyberpeace.mp.data.sandtable.model.SessionQuery;
+import cn.cyberpeace.mp.data.sandtable.model.SessionRequest;
 import java.time.LocalDateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,10 +18,10 @@ public class SessionServiceTest {
 
     @Test
     public void testQuerySessionByGroup(){
-        SessionQuery sessionQuery = new SessionQuery();
-        sessionQuery.setStartTime(LocalDateTime.of(2021, 5, 21, 0, 0));
-        sessionQuery.setEndTime(LocalDateTime.now());
-        sessionQuery.setGroupId("default");
-        service.querySessionListWithGroup(sessionQuery);
+        SessionRequest sessionRequest = new SessionRequest();
+        sessionRequest.setStartTime(LocalDateTime.of(2021, 5, 21, 0, 0));
+        sessionRequest.setEndTime(LocalDateTime.now());
+        sessionRequest.setGroupId("default");
+        service.querySessionListWithGroup(sessionRequest);
     };
 }
