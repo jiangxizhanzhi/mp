@@ -19,8 +19,6 @@ public class SessionRequest {
      */
     private LocalDateTime endTime;
 
-    private String groupId;
-
     /**
      * 查询条件需要的分组
      */

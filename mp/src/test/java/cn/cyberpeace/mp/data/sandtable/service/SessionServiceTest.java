@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.data.sandtable.service;
 import cn.cyberpeace.mp.Application;
 import cn.cyberpeace.mp.data.sandtable.model.SessionRequest;
 import java.time.LocalDateTime;
+import org.assertj.core.util.Lists;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,17 @@ public class SessionServiceTest {
         SessionRequest sessionRequest = new SessionRequest();
         sessionRequest.setStartTime(LocalDateTime.of(2021, 5, 21, 0, 0));
         sessionRequest.setEndTime(LocalDateTime.now());
-        sessionRequest.setGroupId("default");
+        sessionRequest.setGroupList(Lists.newArrayList("default"));
+        service.querySessionListWithGroup(sessionRequest);
+    };
+
+    @Test
+    public void testQuerySessionBySourceIp(){
+        SessionRequest sessionRequest = new SessionRequest();
+        sessionRequest.setStartTime(LocalDateTime.of(2021, 5, 21, 0, 0));
+        sessionRequest.setEndTime(LocalDateTime.now());
+        sessionRequest.setGroupList(Lists.newArrayList("default"));
+        sessionRequest.setSourceIp("10.0.1.253");
         service.querySessionListWithGroup(sessionRequest);
     };
 }

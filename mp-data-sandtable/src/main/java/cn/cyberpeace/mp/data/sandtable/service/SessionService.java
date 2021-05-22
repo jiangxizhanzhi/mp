@@ -15,17 +15,22 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
 @Service
+@Slf4j
 public class SessionService {
 
     @Autowired
@@ -47,13 +52,16 @@ public class SessionService {
         var searchRequest = new SearchRequest(indexArray);
         // 1.创建并设置SearchSourceBuilder对象
         var sourceBuilder = new SearchSourceBuilder();
-        sourceBuilder.size(100);
+        sourceBuilder.size(sessionRequest.getLimitSize());
         var boolQueryBuilder = QueryBuilders.boolQuery();
         //时间查询
         var rangeQueryBuilder = QueryBuilders.rangeQuery("timestamp")
             .from(sessionRequest.getStartTime().toString()).to(sessionRequest.getEndTime().toString());
 
+        //构造动态条件查询
+        buildDynamicQuery(sessionRequest, boolQueryBuilder);
         searchRequest.source(sourceBuilder.query(boolQueryBuilder.must(rangeQueryBuilder)));
+        log.info("Search JSON query: {}", searchRequest.source().toString());
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             List<SessionModel> sessionModelList = Arrays.stream(response.getHits().getHits()).map(hit -> {
@@ -65,7 +73,24 @@ public class SessionService {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
         return sessionResults;
+    }
+
+
+    /**
+     * 构造动态条件查询
+     * @param sessionRequest sessionRequest
+     * @param boolQueryBuilder boolQueryBuilder
+     */
+    private void buildDynamicQuery(SessionRequest sessionRequest,
+        BoolQueryBuilder boolQueryBuilder) {
+        if (!ObjectUtils.isEmpty(sessionRequest.getSourceIp())) {
+            boolQueryBuilder.must(QueryBuilders.termQuery("srcIp", sessionRequest.getSourceIp()));
+        }
+        if (!ObjectUtils.isEmpty(sessionRequest.getTargetIp())) {
+            boolQueryBuilder.must(QueryBuilders.termQuery("dstIp", sessionRequest.getTargetIp()));
+        }
     }
 
     /**
@@ -105,17 +130,17 @@ public class SessionService {
      */
     private List<String> indexListBuilder(SessionRequest sessionRequest) {
         List<String> groupList = sessionRequest.getGroupList();
+
         List<String> dateStringList = fetchFormatterTime(sessionRequest.getStartTime(), sessionRequest.getEndTime());
-        if (!CollectionUtils.isEmpty(groupList)) {
-            return sessionRequest.getGroupList()
-                .stream().map(groupId -> dateStringList.stream().map(dateString -> sessionIndexFormatter(groupId, dateString))
-                    .collect(Collectors.toList()))
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList());
-        } else {
-            return dateStringList.stream().map(dateString ->
-                sessionIndexFormatter(sessionRequest.getGroupId(), dateString)).collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(groupList)) {
+            return Lists.newArrayList();
         }
+
+        return sessionRequest.getGroupList()
+            .stream().map(groupId -> dateStringList.stream().map(dateString -> sessionIndexFormatter(groupId, dateString))
+                .collect(Collectors.toList()))
+            .flatMap(Collection::stream)
+            .collect(Collectors.toList());
     }
 
     /**
