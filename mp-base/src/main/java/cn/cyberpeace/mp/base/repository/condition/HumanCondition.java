@@ -13,7 +13,7 @@ import java.util.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class HumanCondition {
-    private final List<String> selectFields = new ArrayList<>();
+    private final Map<String, String> selectFields = new HashMap<>();
     private Integer limit;
     private Integer offset;
     private final List<String> groupFields = new ArrayList<>();
@@ -46,7 +46,15 @@ public class HumanCondition {
     }
 
     public String[] toSelectFields() {
-        return TextUtils.humpToLine(selectFields.toArray(new String[0]));
+        List<String> selectFieldTexts = new ArrayList<>();
+        selectFields.forEach((fieldName, outputFieldName) -> {
+            if (StringUtils.isEmpty(outputFieldName)) {
+                selectFieldTexts.add(TextUtils.humpToLine(fieldName));
+            } else {
+                selectFieldTexts.add(StringUtils.joinWith(" ", TextUtils.humpToLine(fieldName), outputFieldName));
+            }
+        });
+        return selectFieldTexts.toArray(new String[0]);
     }
 
     public Condition toCondition() {
@@ -95,13 +103,13 @@ public class HumanCondition {
     }
 
     public HumanCondition selectAs(String fieldName, String outputFieldName) {
-        selectFields.add(StringUtils.joinWith(" ", currentFieldName(fieldName), outputFieldName));
+        selectFields.put(currentFieldName(fieldName), outputFieldName);
         return this;
     }
 
     public HumanCondition select(String... fieldNames) {
         for (String fieldName: fieldNames) {
-            selectFields.add(currentFieldName(fieldName));
+            selectFields.put(currentFieldName(fieldName), null);
         }
         return this;
     }
