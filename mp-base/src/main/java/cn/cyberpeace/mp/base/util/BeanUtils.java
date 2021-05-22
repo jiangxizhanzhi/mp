@@ -9,7 +9,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
-import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -68,11 +67,11 @@ public class BeanUtils implements ApplicationContextAware {
 
     public static void loadBeanFields(Object obj) {
         Class<?> clazz = obj.getClass();
-        BeanFieldNames beanFieldNamesAnnotation = clazz.getAnnotation(BeanFieldNames.class);
+        var beanFieldNamesAnnotation = clazz.getAnnotation(BeanFieldNames.class);
         if (beanFieldNamesAnnotation == null) {
             return;
         }
-        BeanFieldClasses beanFieldClassesAnnotation = clazz.getAnnotation(BeanFieldClasses.class);
+        var beanFieldClassesAnnotation = clazz.getAnnotation(BeanFieldClasses.class);
         if (beanFieldClassesAnnotation == null) {
             return;
         }

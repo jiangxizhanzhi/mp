@@ -71,6 +71,14 @@ public interface BaseModelMapper<M extends BaseModel> {
         return actualModelClass != null ? ModelUtils.getTableName(actualModelClass) : null;
     }
 
+    private String getTableName(HumanCondition humanCondition) {
+        String tableName = humanCondition.toTableName();
+        if (tableName == null) {
+            tableName = getTableName();
+        }
+        return tableName;
+    }
+
     private MappedStatement getMappedStatement(String humanName) {
         String mapperId = getMapperInterface().getName() + "." + humanName;
         MappedStatement mappedStatement;
@@ -184,9 +192,9 @@ public interface BaseModelMapper<M extends BaseModel> {
         }
 
         if (getMappedStatement("list") == null) {
-            return commonList(humanCondition.toCondition(), selectFields);
+            return commonList(getTableName(humanCondition), humanCondition.toCondition(), selectFields);
         } else {
-            return list(getTableName(), humanCondition.toCondition(), selectFields);
+            return list(getTableName(humanCondition), humanCondition.toCondition(), selectFields);
         }
     }
 
@@ -200,11 +208,25 @@ public interface BaseModelMapper<M extends BaseModel> {
     }
 
     @Recommendation
+    default List<Map<String, Object>> originList(HumanCondition humanCondition) {
+        String[] selectFields = humanCondition.toSelectFields();
+        if (selectFields.length == 0) {
+            selectFields = null;
+        }
+
+        if (humanCondition.getLimit() != null && humanCondition.getLimit() == 0) {
+            return new ArrayList<>();
+        }
+
+        return getCommonMapper().list(getTableName(humanCondition), humanCondition.toCondition(), selectFields);
+    }
+
+    @Recommendation
     default int total(HumanCondition humanCondition) {
         if (getMappedStatement("total") == null) {
-            return commonTotal(humanCondition.toCondition());
+            return commonTotal(getTableName(humanCondition), humanCondition.toCondition());
         } else {
-            return total(getTableName(), humanCondition.toCondition());
+            return total(getTableName(humanCondition), humanCondition.toCondition());
         }
     }
 
@@ -229,11 +251,22 @@ public interface BaseModelMapper<M extends BaseModel> {
     }
 
     @Recommendation
+    default Map<String, Object> originFirst(HumanCondition humanCondition) {
+        humanCondition.slice(0, 1);
+        List<Map<String, Object>> objs = originList(humanCondition);
+        if (objs.isEmpty()) {
+            return null;
+        } else {
+            return objs.get(0);
+        }
+    }
+
+    @Recommendation
     default boolean exist(HumanCondition humanCondition) {
         if (getMappedStatement("exist") == null) {
-            return commonExist(humanCondition.toCondition());
+            return commonExist(getTableName(humanCondition), humanCondition.toCondition());
         } else {
-            return exist(getTableName(), humanCondition.toCondition());
+            return exist(getTableName(humanCondition), humanCondition.toCondition());
         }
     }
 
@@ -307,8 +340,8 @@ public interface BaseModelMapper<M extends BaseModel> {
         return bulkUpdate((String[]) updateParams[0], (Object[][]) updateParams[1]);
     }
 
-    default List<M> commonList(@Param("condition") Condition condition, String[] selectFields) {
-        List<Map<String, Object>> mapList = getCommonMapper().list(getTableName(), condition, selectFields);
+    default List<M> commonList(String tableName, @Param("condition") Condition condition, String[] selectFields) {
+        List<Map<String, Object>> mapList = getCommonMapper().list(tableName, condition, selectFields);
         List<M> objs = new ArrayList<>();
         mapList.forEach(map -> {
             var obj = mapToObj(map);
@@ -319,12 +352,12 @@ public interface BaseModelMapper<M extends BaseModel> {
         return objs;
     }
 
-    default int commonTotal(@Param("condition") Condition condition) {
-        return getCommonMapper().total(getTableName(), condition);
+    default int commonTotal(String tableName, @Param("condition") Condition condition) {
+        return getCommonMapper().total(tableName, condition);
     }
 
-    default boolean commonExist(@Param("condition") Condition condition) {
-        return getCommonMapper().exist(getTableName(), condition);
+    default boolean commonExist(String tableName, @Param("condition") Condition condition) {
+        return getCommonMapper().exist(tableName, condition);
     }
 
     List<M> list(@Param("condition") Condition condition, String[] selectFields);
