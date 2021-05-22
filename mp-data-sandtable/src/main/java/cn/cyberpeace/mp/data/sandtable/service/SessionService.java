@@ -22,7 +22,6 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -114,6 +113,7 @@ public class SessionService {
      */
     private SessionResult convertSession(SessionModel model) {
         return SessionResult.builder()
+            //从索引字段获取groupId字段
             .groupId(model.getIndex().substring(0, model.getIndex().indexOf("_sessions2")))
             .sourceIp(model.getSrcIp())
             .targetIp(model.getDstIp())
