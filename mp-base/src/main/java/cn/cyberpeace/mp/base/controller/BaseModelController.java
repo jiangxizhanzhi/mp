@@ -80,45 +80,45 @@ public abstract class BaseModelController<M extends BaseModel, S extends BaseMod
                                         @RequestParam(required = false) String[] fields) {
         var queryParams = new QueryParams(params, search, searchFields, orders, page, pageSize, fields);
         handleQueryParams("list", ListParamNames.class, request, queryParams);
-        return modelService.list(queryParams.getParams(), queryParams.getSearch(), queryParams.getSearchFields(),
+        return getModelService().list(queryParams.getParams(), queryParams.getSearch(), queryParams.getSearchFields(),
                 queryParams.getOrders(), queryParams.getPage(), queryParams.getPageSize(),
                 queryParams.getFields()).asResult();
     }
 
     @GetMapping("/{id}")
     public ObjServiceResult<M> get(@PathVariable String id, @RequestParam(required = false) String[] fields) {
-        return modelService.get(id, fields).asResult();
+        return getModelService().get(id, fields).asResult();
     }
 
     @PostMapping
     public ObjServiceResult<M> create(@RequestBody M obj, @RequestParam(required = false) String[] fields) {
-        return modelService.create(obj, fields).asResult();
+        return getModelService().create(obj, fields).asResult();
     }
 
     @PatchMapping("/{id}")
     public ObjServiceResult<M> update(@PathVariable String id, @RequestBody M obj,
                                       @RequestParam(required = false) String[] fields) {
         obj.setId(id);
-        return modelService.update(obj, fields).asResult();
+        return getModelService().update(obj, fields).asResult();
     }
 
     @DeleteMapping("/{id}")
     public ServiceResult<Boolean> delete(@PathVariable String id) {
-        return modelService.delete(id).asResult();
+        return getModelService().delete(id).asResult();
     }
 
     @PostMapping("/bulk_create")
     public ServiceResult<Integer> bulkCreate(@RequestBody List<M> objs) {
-        return modelService.bulkCreate(objs).asResult();
+        return getModelService().bulkCreate(objs).asResult();
     }
 
     @PatchMapping("/bulk_update")
     public ServiceResult<Integer> bulkUpdate(@RequestBody List<M> objs) {
-        return modelService.bulkUpdate(objs).asResult();
+        return getModelService().bulkUpdate(objs).asResult();
     }
 
     @DeleteMapping("/bulk_delete")
     public ServiceResult<Integer> bulkDelete(@RequestBody String[] ids) {
-        return modelService.bulkDelete(ids).asResult();
+        return getModelService().bulkDelete(ids).asResult();
     }
 }

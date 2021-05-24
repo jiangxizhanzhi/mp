@@ -1,13 +1,13 @@
 package cn.cyberpeace.mp.scene.repository;
 
-import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
-import cn.cyberpeace.mp.scene.model.SceneElementPortModel;
+import cn.cyberpeace.mp.scene.model.SceneElementPluginModel;
+import cn.cyberpeace.mp.scene.repository.base.BaseSceneElementPluginMapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
 @Mapper
 @Repository
-@ModelClass(SceneElementPortModel.class)
-public interface SceneElementPluginMapper extends BaseModelMapper<SceneElementPortModel> {
+@ModelClass(SceneElementPluginModel.class)
+public interface SceneElementPluginMapper extends BaseSceneElementPluginMapper<SceneElementPluginModel> {
 }

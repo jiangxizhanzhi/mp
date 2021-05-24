@@ -13,6 +13,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,9 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.core.CountRequest;
+import org.elasticsearch.client.core.CountResponse;
+import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -64,6 +68,15 @@ public class SessionService {
         //构造动态条件查询
         buildDynamicQuery(sessionRequest, boolQueryBuilder);
         searchRequest.source(sourceBuilder.query(boolQueryBuilder.must(rangeQueryBuilder)));
+
+        CountRequest countRequest = new CountRequest(indexArray);
+        countRequest.query(boolQueryBuilder);
+        try {
+            CountResponse totalsize = restHighLevelClient.count(countRequest, RequestOptions.DEFAULT);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         log.info("Search JSON query: {}", searchRequest.source().toString());
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
@@ -78,6 +91,24 @@ public class SessionService {
         }
 
         return sessionResults;
+    }
+
+
+    /**
+     *
+     * @param totalElementsInt totalElementsInt
+     * @param pageNumberInt pageNumberInt
+     * @param sourceBuilder sourceBuilder
+     * @param searchRequest searchRequest
+     * @return SearchRequest
+     */
+    private SearchRequest generateSearchRequest(Integer totalElementsInt, Integer pageNumberInt,
+        SearchSourceBuilder sourceBuilder, SearchRequest searchRequest) {
+        int  offset = pageNumberInt *totalElementsInt;
+        sourceBuilder.from(offset);
+        sourceBuilder.size(totalElementsInt);
+        sourceBuilder.timeout(new TimeValue(60, TimeUnit.SECONDS));
+        return searchRequest;
     }
 
 

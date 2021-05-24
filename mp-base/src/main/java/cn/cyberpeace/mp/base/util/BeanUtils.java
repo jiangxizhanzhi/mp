@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.base.util;
 
+import cn.cyberpeace.mp.base.annotation.BeanFieldClasses;
+import cn.cyberpeace.mp.base.annotation.BeanFieldNames;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
@@ -63,4 +65,31 @@ public class BeanUtils implements ApplicationContextAware {
         org.springframework.beans.BeanUtils.copyProperties(source, target, ignorePropertyNames.toArray(new String[0]));
     }
 
+    public static void loadBeanFields(Object obj) {
+        Class<?> clazz = obj.getClass();
+        var beanFieldNamesAnnotation = clazz.getAnnotation(BeanFieldNames.class);
+        if (beanFieldNamesAnnotation == null) {
+            return;
+        }
+        var beanFieldClassesAnnotation = clazz.getAnnotation(BeanFieldClasses.class);
+        if (beanFieldClassesAnnotation == null) {
+            return;
+        }
+
+        String[] fieldNames = beanFieldNamesAnnotation.value();
+        Class<?>[] fieldClasses = beanFieldClassesAnnotation.value();
+        if (fieldNames.length != fieldClasses.length) {
+            return;
+        }
+
+        for (var i = 0; i < fieldNames.length; i++) {
+            String fieldName = fieldNames[i];
+            var field = ClassUtils.getField(clazz, fieldName, true, false);
+            if (field == null) {
+                continue;
+            }
+
+            ClassUtils.setFieldValue(field, obj, getBean(fieldClasses[i]));
+        }
+    }
 }

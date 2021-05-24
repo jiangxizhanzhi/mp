@@ -18,8 +18,16 @@ public class BaseConnectorCondition implements BaseCondition {
         return this;
     }
 
+    public BaseConnectorCondition addLink(String fieldName, String targetFieldName) {
+        return addCondition(fieldName, Connector.LINK, targetFieldName);
+    }
+
     public BaseConnectorCondition addIn(String fieldName, Object[] fieldValue) {
         return addCondition(fieldName, Connector.IN, fieldValue);
+    }
+
+    public BaseConnectorCondition addNotIn(String fieldName, Object[] fieldValue) {
+        return addCondition(fieldName, Connector.NOT_IN, fieldValue);
     }
 
     public BaseConnectorCondition addEqual(String fieldName, Object fieldValue) {
@@ -68,6 +76,30 @@ public class BaseConnectorCondition implements BaseCondition {
 
     public BaseConnectorCondition addIEndsWith(String fieldName, Object fieldValue) {
         return addCondition(fieldName, Connector.I_ENDS_WITH, fieldValue);
+    }
+
+    public BaseConnectorCondition addNotContains(String fieldName, Object fieldValue) {
+        return addCondition(fieldName, Connector.NOT_CONTAINS, fieldValue);
+    }
+
+    public BaseConnectorCondition addNotIContains(String fieldName, Object fieldValue) {
+        return addCondition(fieldName, Connector.NOT_I_CONTAINS, fieldValue);
+    }
+
+    public BaseConnectorCondition addNotStartsWith(String fieldName, Object fieldValue) {
+        return addCondition(fieldName, Connector.NOT_STARTS_WITH, fieldValue);
+    }
+
+    public BaseConnectorCondition addNotIStartsWith(String fieldName, Object fieldValue) {
+        return addCondition(fieldName, Connector.NOT_I_STARTS_WITH, fieldValue);
+    }
+
+    public BaseConnectorCondition addNotEndsWith(String fieldName, Object fieldValue) {
+        return addCondition(fieldName, Connector.NOT_ENDS_WITH, fieldValue);
+    }
+
+    public BaseConnectorCondition addNotIEndsWith(String fieldName, Object fieldValue) {
+        return addCondition(fieldName, Connector.NOT_I_ENDS_WITH, fieldValue);
     }
 
     @Override

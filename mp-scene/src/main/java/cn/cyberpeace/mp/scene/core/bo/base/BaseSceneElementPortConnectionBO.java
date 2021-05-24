@@ -11,15 +11,15 @@ public abstract class BaseSceneElementPortConnectionBO<M extends BaseSceneElemen
     private Boolean unidirectional;
 
     @Override
-    public void fromModel(M obj) {
-        super.fromModel(obj);
+    public void fromModel(M obj, String... ignoreFields) {
+        super.fromModel(obj, ignoreFields);
         setSource(obj.getSourcePortId());
         setTarget(obj.getTargetPortId());
     }
 
     @Override
-    public M toModel() {
-        var obj = super.toModel();
+    public M toModel(String... ignoreFields) {
+        var obj = super.toModel(ignoreFields);
         obj.setSourcePortId(source);
         obj.setTargetPortId(target);
         return obj;

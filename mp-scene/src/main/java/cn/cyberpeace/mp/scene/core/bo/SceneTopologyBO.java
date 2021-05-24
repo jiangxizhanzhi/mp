@@ -1,13 +1,19 @@
 package cn.cyberpeace.mp.scene.core.bo;
 
+import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneTopologyBO;
+import cn.cyberpeace.mp.scene.model.*;
 import lombok.Data;
 
-import java.util.List;
-
 @Data
-public class SceneTopologyBO {
-    private SceneBO scene;
-    private List<SceneAreaBO> areas;
-    private List<SceneElementBO> elements;
-    private List<SceneElementPortConnectionBO> connections;
+public class SceneTopologyBO extends BaseSceneTopologyBO<
+        SceneModel,
+        SceneAreaModel,
+        SceneElementModel,
+        SceneElementPortModel,
+        SceneElementPortConnectionModel,
+        SceneBO,
+        SceneAreaBO,
+        SceneElementPortBO,
+        SceneElementBO,
+        SceneElementPortConnectionBO> {
 }

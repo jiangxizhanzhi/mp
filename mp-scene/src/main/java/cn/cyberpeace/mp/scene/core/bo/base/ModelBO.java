@@ -8,15 +8,15 @@ import lombok.Data;
 @Data
 public abstract class ModelBO<M extends BaseModel> {
 
-    public void fromModel(M obj) {
-        BeanUtils.copyPropertiesIgnoreNull(obj, this);
+    public void fromModel(M obj, String... ignoreFields) {
+        BeanUtils.copyPropertiesIgnoreNull(obj, this, ignoreFields);
     }
 
     public abstract M createModel();
 
-    public M toModel() {
+    public M toModel(String... ignoreFields) {
         var obj = createModel();
-        BeanUtils.copyPropertiesIgnoreNull(this, obj);
+        BeanUtils.copyPropertiesIgnoreNull(this, obj, ignoreFields);
         return obj;
     }
 
