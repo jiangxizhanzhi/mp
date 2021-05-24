@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.base.service.result;
 import cn.cyberpeace.mp.base.repository.fields.DynamicFields;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,6 +13,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class ListObjResult<T> extends BaseObjResult {
 
     private List<Object> data = new ArrayList<>();
