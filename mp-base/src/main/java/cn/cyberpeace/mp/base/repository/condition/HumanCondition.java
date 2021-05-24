@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.base.repository.condition;
 
+import cn.cyberpeace.mp.base.repository.condition.aggregation.Aggregation;
 import cn.cyberpeace.mp.base.util.ModelUtils;
 import cn.cyberpeace.mp.base.util.TextUtils;
 import lombok.AllArgsConstructor;
@@ -110,6 +111,20 @@ public class HumanCondition {
     public HumanCondition select(String... fieldNames) {
         for (String fieldName: fieldNames) {
             selectFields.put(currentFieldName(fieldName), null);
+        }
+        return this;
+    }
+
+    public HumanCondition selectAs(Aggregation aggregation, String outputFieldName) {
+        selectFields.put(aggregation.toSqlField(currentFieldName(aggregation.getFieldName())), outputFieldName);
+        return this;
+    }
+
+    public HumanCondition select(Aggregation... aggregations) {
+        for (Aggregation aggregation: aggregations) {
+            String fieldName = aggregation.getFieldName();
+            var outputFieldName = StringUtils.join(fieldName, "Count");
+            selectFields.put(aggregation.toSqlField(currentFieldName(fieldName)), outputFieldName);
         }
         return this;
     }
