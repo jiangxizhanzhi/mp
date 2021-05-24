@@ -1,7 +1,5 @@
 package cn.cyberpeace.mp.base.config.elasticsearch;
 
-import com.google.common.collect.Lists;
-import java.util.List;
 import org.apache.http.HttpHost;
 import org.apache.http.util.Asserts;
 import org.elasticsearch.client.RestClient;
@@ -10,7 +8,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 
 @Configuration
 public class ElasticsearchConfig {

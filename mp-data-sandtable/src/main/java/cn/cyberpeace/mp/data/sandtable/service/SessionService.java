@@ -28,12 +28,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
+/**
+ * @author zhangjin
+ */
 @Service
 @Slf4j
 public class SessionService {
 
     @Autowired
     private RestHighLevelClient restHighLevelClient;
+
 
     /**
      * 分组维度查询流量
@@ -160,7 +164,7 @@ public class SessionService {
 
     /**
      * 构造流量索引
-     *
+     *LocaleResolver
      * @param groupId groupId
      * @param dateString dateString
      * @return indexString
