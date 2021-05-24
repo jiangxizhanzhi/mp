@@ -31,5 +31,10 @@ public class SessionRequest {
     /**
      * 查询条数默认限制
      */
-    private Integer limitSize = 100;
+    private Integer pageSize = 100;
+
+    /**
+     * 分页页码
+     */
+    private Integer pageNum = 1;
 }

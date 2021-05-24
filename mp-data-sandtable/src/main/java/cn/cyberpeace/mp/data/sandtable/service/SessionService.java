@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.data.sandtable.service;
 
 import cn.cyberpeace.mp.base.exception.MqRuntimeException;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.data.sandtable.model.SessionModel;
 import cn.cyberpeace.mp.data.sandtable.model.SessionRequest;
 import cn.cyberpeace.mp.data.sandtable.model.SessionResult;
@@ -59,7 +60,7 @@ public class SessionService {
         var searchRequest = new SearchRequest(indexArray);
         // 1.创建并设置SearchSourceBuilder对象
         var sourceBuilder = new SearchSourceBuilder();
-        sourceBuilder.size(sessionRequest.getLimitSize());
+        sourceBuilder.size(sessionRequest.getPageSize());
         var boolQueryBuilder = QueryBuilders.boolQuery();
         //时间查询
         var rangeQueryBuilder = QueryBuilders.rangeQuery("timestamp")
@@ -71,11 +72,6 @@ public class SessionService {
 
         CountRequest countRequest = new CountRequest(indexArray);
         countRequest.query(boolQueryBuilder);
-        try {
-            CountResponse totalsize = restHighLevelClient.count(countRequest, RequestOptions.DEFAULT);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
         log.info("Search JSON query: {}", searchRequest.source().toString());
         try {
@@ -93,21 +89,78 @@ public class SessionService {
         return sessionResults;
     }
 
+    
+    /**
+     * 支持分页查询
+     * @param sessionRequest sessionRequest
+     * @return ListObjResult<SessionResult>
+     */
+    public ListObjResult<SessionResult> querySessionWithPage(SessionRequest sessionRequest) {
+        List<SessionResult> sessionResults = Lists.newArrayList();
+
+        List<String> indexList = indexListBuilder(sessionRequest);
+        var indexArray = new String[indexList.size()];
+        indexList.toArray(indexArray);
+
+        var searchRequest = new SearchRequest(indexArray);
+        // 1.创建并设置SearchSourceBuilder对象
+        var sourceBuilder = new SearchSourceBuilder();
+        sourceBuilder.size(sessionRequest.getPageSize());
+        var boolQueryBuilder = QueryBuilders.boolQuery();
+        //时间查询
+        var rangeQueryBuilder = QueryBuilders.rangeQuery("timestamp")
+            .from(sessionRequest.getStartTime().toString()).to(sessionRequest.getEndTime().toString());
+
+        //构造动态条件查询
+        buildDynamicQuery(sessionRequest, boolQueryBuilder);
+        searchRequest.source(sourceBuilder.query(boolQueryBuilder.must(rangeQueryBuilder)));
+
+        //处理分页
+        int  offset = (sessionRequest.getPageNum() -1) * (sessionRequest.getPageSize());
+        sourceBuilder.from(offset);
+        sourceBuilder.size(sessionRequest.getPageSize());
+
+        log.info("Search JSON query: {}", searchRequest.source().toString());
+        try {
+            SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            List<SessionModel> sessionModelList = Arrays.stream(response.getHits().getHits()).map(hit -> {
+                var sessionModel = JSONObject.parseObject(hit.getSourceAsString(), SessionModel.class);
+                sessionModel.setIndex(hit.getIndex());
+                return sessionModel;
+            }).collect(Collectors.toList());
+            sessionResults = sessionModelList.stream().map(this::convertSession).collect(Collectors.toList());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        var countRequest = new CountRequest(indexArray);
+        countRequest.query(boolQueryBuilder);
+
+        var total = 0;
+
+        try {
+            CountResponse totalSize = restHighLevelClient.count(countRequest, RequestOptions.DEFAULT);
+            total = (int) totalSize.getCount();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return new ListObjResult<>(sessionResults, total);
+    }
+
 
     /**
      *
-     * @param totalElementsInt totalElementsInt
-     * @param pageNumberInt pageNumberInt
+     * @param pageNum pageNum
      * @param sourceBuilder sourceBuilder
      * @param searchRequest searchRequest
      * @return SearchRequest
      */
-    private SearchRequest generateSearchRequest(Integer totalElementsInt, Integer pageNumberInt,
-        SearchSourceBuilder sourceBuilder, SearchRequest searchRequest) {
-        int  offset = pageNumberInt *totalElementsInt;
-        sourceBuilder.from(offset);
-        sourceBuilder.size(totalElementsInt);
-        sourceBuilder.timeout(new TimeValue(60, TimeUnit.SECONDS));
+    private SearchRequest generateSearchRequest(Integer pageNum,
+        SearchSourceBuilder sourceBuilder, SearchRequest searchRequest,
+        BoolQueryBuilder boolQueryBuilder, String[] indexArray, SessionRequest sessionRequest) {
+
+
         return searchRequest;
     }
 
