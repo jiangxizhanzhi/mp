@@ -92,6 +92,18 @@ public interface BaseModelMapper<M extends BaseModel> {
         return mappedStatement;
     }
 
+    private String[] getSelectFields(HumanCondition humanCondition) {
+        String[] selectFields = humanCondition.toSelectFields();
+        if (selectFields.length == 0) {
+            selectFields = humanCondition.toDefaultSelectFields(getModelClass());
+            if (selectFields.length == 0) {
+                selectFields = null;
+            }
+        }
+
+        return selectFields;
+    }
+
     private M mapToObj(Map<String, Object> map) {
         if (map == null) {
             return null;
@@ -200,25 +212,17 @@ public interface BaseModelMapper<M extends BaseModel> {
 
     @Recommendation
     default List<M> list(HumanCondition humanCondition) {
-        String[] selectFields = humanCondition.toSelectFields();
-        if (selectFields.length == 0) {
-            selectFields = null;
-        }
-        return list(humanCondition, selectFields);
+        return list(humanCondition, getSelectFields(humanCondition));
     }
 
     @Recommendation
     default List<Map<String, Object>> originList(HumanCondition humanCondition) {
-        String[] selectFields = humanCondition.toSelectFields();
-        if (selectFields.length == 0) {
-            selectFields = null;
-        }
-
         if (humanCondition.getLimit() != null && humanCondition.getLimit() == 0) {
             return new ArrayList<>();
         }
 
-        return getCommonMapper().list(getTableName(humanCondition), humanCondition.toCondition(), selectFields);
+        return getCommonMapper().list(getTableName(humanCondition), humanCondition.toCondition(),
+                getSelectFields(humanCondition));
     }
 
     @Recommendation
@@ -243,11 +247,7 @@ public interface BaseModelMapper<M extends BaseModel> {
 
     @Recommendation
     default M first(HumanCondition humanCondition) {
-        String[] selectFields = humanCondition.toSelectFields();
-        if (selectFields.length == 0) {
-            selectFields = null;
-        }
-        return first(humanCondition, selectFields);
+        return first(humanCondition, getSelectFields(humanCondition));
     }
 
     @Recommendation
@@ -272,11 +272,7 @@ public interface BaseModelMapper<M extends BaseModel> {
 
     @Recommendation
     default M get(String id, HumanCondition humanSelectCondition) {
-        String[] selectFields = humanSelectCondition.toSelectFields();
-        if (selectFields.length == 0) {
-            selectFields = null;
-        }
-        return get(id, selectFields);
+        return get(id, getSelectFields(humanSelectCondition));
     }
 
     @Recommendation

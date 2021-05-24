@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.base.repository.condition;
 
 import cn.cyberpeace.mp.base.repository.condition.aggregation.Aggregation;
+import cn.cyberpeace.mp.base.util.ClassUtils;
 import cn.cyberpeace.mp.base.util.ModelUtils;
 import cn.cyberpeace.mp.base.util.TextUtils;
 import lombok.AllArgsConstructor;
@@ -25,11 +26,11 @@ public class HumanCondition {
     private final Map<Class<?>, String> linkedModelNames = new LinkedHashMap<>();
     private String currentLinkName;
 
-    private String genLinkFieldName(String targetName, String fieldName) {
-        return StringUtils.joinWith(".", targetName, fieldName);
+    public String genLinkFieldName(String linkName, String fieldName) {
+        return StringUtils.joinWith(".",linkName, fieldName);
     }
 
-    private String genLinkFieldName(Class<?> model, String fieldName) {
+    public String genLinkFieldName(Class<?> model, String fieldName) {
         String linkName = linkedModelNames.get(model);
         return genLinkFieldName(linkName, fieldName);
     }
@@ -56,6 +57,21 @@ public class HumanCondition {
             }
         });
         return selectFieldTexts.toArray(new String[0]);
+    }
+
+    public String[] toDefaultSelectFields(Class<?> model) {
+        String linkName = linkedModelNames.getOrDefault(model, null);
+        if (linkName == null) {
+            return new String[0];
+        }
+
+        String[] fieldNames = ClassUtils.getBeanClassFields(model);
+        var selectFieldNames = new String[fieldNames.length];
+        for (var i = 0; i < fieldNames.length; i++) {
+            selectFieldNames[i] = TextUtils.humpToLine(genLinkFieldName(linkName, fieldNames[i]));
+        }
+
+        return selectFieldNames;
     }
 
     public Condition toCondition() {
@@ -170,12 +186,6 @@ public class HumanCondition {
             }
             this.orders.add(linkedOrder);
         }
-        return this;
-    }
-
-    public HumanCondition filterLink(String fieldName, Class<?> targetModel, String targetFieldName) {
-        andCondition.addLink(currentColumnName(fieldName),
-                genLinkFieldName(targetModel, TextUtils.humpToLine(targetFieldName)));
         return this;
     }
 
@@ -301,6 +311,20 @@ public class HumanCondition {
         private HumanCondition humanCondition;
 
         private final OrCondition orCondition = new OrCondition();
+
+        public OrConditionPoxy orLink(Class<?> sourceModel, String sourceFieldName,
+                                      Class<?> targetModel, String targetFieldName) {
+            orCondition.addLink(humanCondition.genLinkFieldName(sourceModel, TextUtils.humpToLine(sourceFieldName)),
+                    humanCondition.genLinkFieldName(targetModel, TextUtils.humpToLine(targetFieldName)));
+            return this;
+        }
+
+        public OrConditionPoxy orLink(String sourceLinkName, String sourceFieldName,
+                                      String targetLinkName, String targetFieldName) {
+            orCondition.addLink(humanCondition.genLinkFieldName(sourceLinkName, TextUtils.humpToLine(sourceFieldName)),
+                    humanCondition.genLinkFieldName(targetLinkName, TextUtils.humpToLine(targetFieldName)));
+            return this;
+        }
 
         public OrConditionPoxy orIn(String fieldName, Object[] fieldValue) {
             orCondition.addIn(humanCondition.currentColumnName(fieldName), fieldValue);
