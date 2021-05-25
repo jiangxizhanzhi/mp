@@ -16,11 +16,14 @@ import java.util.List;
 @Builder
 public class ListObjResult<T> extends BaseObjResult {
 
+    @Builder.Default
     private List<Object> data = new ArrayList<>();
 
+    @Builder.Default
     private Integer total = 0;
 
     @JsonIgnore
+    @Builder.Default
     private List<T> objs = new ArrayList<>();
 
     public ListObjResult(List<T> objs, int total) {

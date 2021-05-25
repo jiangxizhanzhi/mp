@@ -24,6 +24,7 @@ public class ServiceResult<T> {
     private String detail;
 
     @JsonIgnore
+    @Builder.Default
     private ServiceCode serviceCode = BaseErrorCode.SUCCESS;
 
     @JsonIgnore
