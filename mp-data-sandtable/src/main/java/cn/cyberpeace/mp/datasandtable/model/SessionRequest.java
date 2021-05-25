@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.data.sandtable.model;
+package cn.cyberpeace.mp.datasandtable.model;
 
 import java.time.LocalDateTime;
 import java.util.List;

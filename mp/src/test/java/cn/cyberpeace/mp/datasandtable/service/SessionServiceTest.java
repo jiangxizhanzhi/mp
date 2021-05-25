@@ -1,7 +1,7 @@
-package cn.cyberpeace.mp.data.sandtable.service;
+package cn.cyberpeace.mp.datasandtable.service;
 
 import cn.cyberpeace.mp.Application;
-import cn.cyberpeace.mp.data.sandtable.model.SessionRequest;
+import cn.cyberpeace.mp.datasandtable.model.SessionRequest;
 import java.time.LocalDateTime;
 import org.assertj.core.util.Lists;
 import org.junit.Test;

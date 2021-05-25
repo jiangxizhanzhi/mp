@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.data.sandtable.model;
+package cn.cyberpeace.mp.datasandtable.model;
 
 import lombok.*;
 
