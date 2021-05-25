@@ -8,6 +8,6 @@ import org.springframework.context.annotation.Configuration;
 @Data
 public class SandTableConfig {
 
-    @Value("${mp.scene.data.sandTable.groupUrl}")
+    @Value("${mp.data.sandtable.group-url}")
     private String groupUrl;
 }

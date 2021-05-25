@@ -30,7 +30,6 @@ mybatis:
 
 # 请求云平台组信息的url配置，必需填写
 mp:
-  scene:
-    data:
-      sandTable:
-        groupUrl: http://10.100.7.50:5079/v1/scenes
+  data:
+      sandtable:
+        group-url: http://10.100.7.50:5079/v1/scenes
