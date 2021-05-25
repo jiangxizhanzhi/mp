@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.data.sandtable.config;
+package cn.cyberpeace.mp.datasandtable.config;
 
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
@@ -8,6 +8,6 @@ import org.springframework.context.annotation.Configuration;
 @Data
 public class SandTableConfig {
 
-    @Value("${mp.scene.data.sandTable.groupUrl}")
+    @Value("${mp.datasandtable.group-url}")
     private String groupUrl;
 }

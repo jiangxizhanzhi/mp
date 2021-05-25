@@ -1,7 +1,7 @@
-package cn.cyberpeace.mp.data.sandtable.service;
+package cn.cyberpeace.mp.datasandtable.service;
 
 import cn.cyberpeace.mp.Application;
-import cn.cyberpeace.mp.data.sandtable.model.GroupModel;
+import cn.cyberpeace.mp.datasandtable.model.GroupModel;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Test;

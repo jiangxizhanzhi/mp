@@ -1,9 +1,9 @@
-package cn.cyberpeace.mp.data.sandtable.service;
+package cn.cyberpeace.mp.datasandtable.service;
 
 import cn.cyberpeace.mp.base.exception.MqRuntimeException;
 import cn.cyberpeace.mp.base.util.HttpUtils;
-import cn.cyberpeace.mp.data.sandtable.config.SandTableConfig;
-import cn.cyberpeace.mp.data.sandtable.model.GroupModel;
+import cn.cyberpeace.mp.datasandtable.config.SandTableConfig;
+import cn.cyberpeace.mp.datasandtable.model.GroupModel;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * 流量依赖的组的CRUD
