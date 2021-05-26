@@ -67,7 +67,7 @@ public class BaseModel {
         initDefault(fieldName, initDefaultFields);
     }
 
-    public boolean isDeleted() {
+    public boolean hasDeleted() {
         return false;
     }
 
