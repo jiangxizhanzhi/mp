@@ -148,22 +148,6 @@ public class SessionService {
 
 
     /**
-     *
-     * @param pageNum pageNum
-     * @param sourceBuilder sourceBuilder
-     * @param searchRequest searchRequest
-     * @return SearchRequest
-     */
-    private SearchRequest generateSearchRequest(Integer pageNum,
-        SearchSourceBuilder sourceBuilder, SearchRequest searchRequest,
-        BoolQueryBuilder boolQueryBuilder, String[] indexArray, SessionRequest sessionRequest) {
-
-
-        return searchRequest;
-    }
-
-
-    /**
      * 构造动态条件查询
      * @param sessionRequest sessionRequest
      * @param boolQueryBuilder boolQueryBuilder

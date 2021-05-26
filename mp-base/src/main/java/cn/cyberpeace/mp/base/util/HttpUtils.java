@@ -3,13 +3,21 @@ package cn.cyberpeace.mp.base.util;
 import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.Credentials;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
 /**
@@ -24,6 +32,7 @@ public class HttpUtils {
 
     /**
      * 发送一个Post请求
+     *
      * @param url
      * @param content
      * @return
@@ -34,7 +43,7 @@ public class HttpUtils {
             HttpClient client = HttpClientBuilder.create().build();
             HttpPost httpPost = new HttpPost(url);
             // 解决中文乱码问题
-            StringEntity entity = new StringEntity(content,"utf-8");
+            StringEntity entity = new StringEntity(content, "utf-8");
             entity.setContentType("application/json");
             httpPost.setEntity(entity);
 
@@ -43,15 +52,16 @@ public class HttpUtils {
             RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
             httpPost.setConfig(requestConfig);
             // 获得返回值
-            return EntityUtils.toString(resp.getEntity(),"UTF-8");
+            return EntityUtils.toString(resp.getEntity(), "UTF-8");
         } catch (Exception e) {
-            log.error("HttpUtils-sendPost is error.request url is {},content is {},error is",url,content,e);
+            log.error("HttpUtils-sendPost is error.request url is {},content is {},error is", url, content, e);
             throw e;
         }
     }
 
     /**
      * get请求
+     *
      * @param url
      * @return
      * @throws IOException
@@ -65,25 +75,40 @@ public class HttpUtils {
             RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
             httpget.setConfig(requestConfig);
             // 获得返回值
-            return EntityUtils.toString(resp.getEntity(),"UTF-8");
+            return EntityUtils.toString(resp.getEntity(), "UTF-8");
         } catch (Exception e) {
-            log.error("HttpUtils-sendPost is error.request url is {},error is",url,e);
+            log.error("HttpUtils-sendPost is error.request url is {},error is", url, e);
             throw e;
         }
     }
 
     /**
      * 删除请求
+     *
      * @param url
      * @return
      * @throws IOException
      */
-    public static String sendDelete(String url) throws IOException{
+    public static String sendDelete(String url) throws IOException {
         HttpClient client = HttpClientBuilder.create().build();
         HttpDelete httpDelete = new HttpDelete(url);
         RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
-        HttpResponse response= client.execute(httpDelete);
+        HttpResponse response = client.execute(httpDelete);
         httpDelete.setConfig(requestConfig);
-        return EntityUtils.toString(response.getEntity(),"UTF-8");
+        return EntityUtils.toString(response.getEntity(), "UTF-8");
+    }
+
+
+    /**
+     * get请求下载文件
+     * @param url
+     * @return HttpResponse
+     * @throws IOException
+     */
+    public static HttpResponse sendGetDownLoadWithDigestAuth(String url, String authorization) throws IOException {
+        HttpClient client = HttpClientBuilder.create().build();
+        var httpGet = new HttpGet(url);
+        httpGet.setHeader("Authorization", authorization);
+        return client.execute(httpGet);
     }
 }

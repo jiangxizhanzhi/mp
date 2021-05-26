@@ -15,10 +15,7 @@ spring:
     time-zone: GMT+8
   flyway:
     clean-disabled: true
-    #我们es版本7.7.1使用当前版本为deprecated
-  data:
-    elasticsearch:
-      nodes: 10.100.7.50:9200
+
 logging:
   file:
     name: log/log.log
@@ -32,3 +29,5 @@ mybatis:
 mp:
  datasandtable:
         group-url: http://10.100.7.50:5079/v1/scenes
+        authorization : 'Digest username="admin", realm="Moloch", nonce="2e8nMFfSeweTGE9nFBB6gL8142WA8Npl", algorithm="MD5", response="9835465782ab204c5f5be4a7412a58a5"'
+        es-nodes : 10.100.7.50:9200
