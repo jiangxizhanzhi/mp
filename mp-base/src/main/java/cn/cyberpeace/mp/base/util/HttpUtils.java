@@ -3,12 +3,17 @@ package cn.cyberpeace.mp.base.util;
 import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 
@@ -97,10 +102,15 @@ public class HttpUtils {
      * @return HttpResponse
      * @throws IOException
      */
-    public static HttpResponse sendGetDownLoadWithDigestAuth(String url, String authorization) throws IOException {
-        HttpClient client = HttpClientBuilder.create().build();
+    public static HttpResponse sendGetDownLoadWithDigestAuth(String url) throws IOException {
+        var credentialsProvider = new BasicCredentialsProvider();
+        var usernamePasswordCredentials = new UsernamePasswordCredentials("api", "api");
+        credentialsProvider.setCredentials(AuthScope.ANY, usernamePasswordCredentials);
+        CloseableHttpClient client = HttpClientBuilder.create().setDefaultCredentialsProvider(credentialsProvider).build();
         var httpGet = new HttpGet(url);
-        httpGet.setHeader("Authorization", authorization);
+
+        httpGet.setHeader("Accept-Encoding", "gzip, deflate");
+        httpGet.setHeader("Accept", "*/*");
         return client.execute(httpGet);
     }
 }

@@ -12,6 +12,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.apache.http.HttpResponse;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -61,12 +69,23 @@ public class HttpUtilsTest {
      */
     @Test
     public void testSendGetDownLoadWithDigestAuth() throws IOException{
-        String url = "http://10.100.7.50:8005/sessions.pcap?ids=210526-yzSb7yN3qfVJL6dyX375K9ie";
-        String authorization = "Digest username=\"admin\", realm=\"Moloch\", nonce=\"2e8nMFfSeweTGE9nFBB6gL8142WA8Npl\", uri=\"/sessions.pcap?ids=210526-yzSb7yN3qfVJL6dyX375K9ie\", algorithm=\"MD5\", response=\"9835465782ab204c5f5be4a7412a58a5\"";
-        HttpResponse httpResponse =  HttpUtils.sendGetDownLoadWithDigestAuth(url, authorization);
+        String url = "http://10.100.7.50:8005/sessions.pcap?ids=210526-yzQZpKtkxjBCep8gY6Avw44q";
+
+        CredentialsProvider credsProvider = new BasicCredentialsProvider();
+        UsernamePasswordCredentials usernamePasswordCredentials = new UsernamePasswordCredentials("api", "api");
+        credsProvider.setCredentials(AuthScope.ANY, usernamePasswordCredentials);
+        CloseableHttpClient client = HttpClientBuilder.create().setDefaultCredentialsProvider(credsProvider).build();
+        var httpGet = new HttpGet(url);
+
+        httpGet.setHeader("Accept-Encoding", "gzip, deflate");
+        httpGet.setHeader("Accept", "*/*");
+
+        var httpResponse = client.execute(httpGet);
+
         InputStream inputStream = httpResponse.getEntity().getContent();
+
         String result = new BufferedReader(new InputStreamReader(inputStream))
             .lines().collect(Collectors.joining(System.lineSeparator()));
-        System.out.println(result);
+        System.out.println("result: " + result);
     }
 }

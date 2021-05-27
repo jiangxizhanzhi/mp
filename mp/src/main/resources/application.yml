@@ -27,7 +27,8 @@ mybatis:
 
 # 请求云平台组信息的url配置，必需填写
 mp:
- datasandtable:
-        group-url: http://10.100.7.50:5079/v1/scenes
-        authorization : 'Digest username="admin", realm="Moloch", nonce="2e8nMFfSeweTGE9nFBB6gL8142WA8Npl", algorithm="MD5", response="9835465782ab204c5f5be4a7412a58a5"'
-        es-nodes : 10.100.7.50:9200
+  datasandtable:
+    group-url: http://10.100.7.50:5079/v1/scenes
+    moloch:
+      authorization: 'Digest username="api", realm="Moloch", nonce="2e8nMFfSeweTGE9nFBB6gL8142WA8Npl"'
+    es-nodes: 10.100.7.50:9200
