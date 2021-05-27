@@ -30,5 +30,6 @@ mp:
   datasandtable:
     group-url: http://10.100.7.50:5079/v1/scenes
     moloch:
-      authorization: 'Digest username="api", realm="Moloch", nonce="2e8nMFfSeweTGE9nFBB6gL8142WA8Npl"'
+      username: api
+      password: api
     es-nodes: 10.100.7.50:9200

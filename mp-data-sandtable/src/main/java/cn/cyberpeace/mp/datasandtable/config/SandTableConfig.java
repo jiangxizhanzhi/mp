@@ -10,4 +10,10 @@ public class SandTableConfig {
 
     @Value("${mp.datasandtable.group-url}")
     private String groupUrl;
+
+    @Value("${mp.datasandtable.moloch.username}")
+    private String userName;
+
+    @Value("${mp.datasandtable.moloch.password}")
+    private String password;
 }

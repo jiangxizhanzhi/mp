@@ -168,10 +168,12 @@ public class SessionService {
             throw new MqRuntimeException("查询缓存异常 groupId: "+ groupId);
         }
 
-        molochUrl = molochUrl + "/sessions.pcap?ids=" + sessionId;
+        //todo 为了调试
+        molochUrl = "http://10.100.7.50:8005" + "/sessions.pcap?ids=" + sessionId;
 
         try {
-            httpResponse =  HttpUtils.sendGetDownLoadWithDigestAuth(molochUrl);
+            httpResponse =  HttpUtils.sendGetDownLoadWithDigestAuth(molochUrl,
+                sandTableConfig.getUserName(), sandTableConfig.getPassword());
         } catch (IOException e) {
             log.error("查询缓存异常 groupId {}" + e, groupId);
             throw new MqRuntimeException("查询缓存异常 groupId: "+ groupId);

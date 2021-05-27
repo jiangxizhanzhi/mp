@@ -102,7 +102,7 @@ public class HttpUtils {
      * @return HttpResponse
      * @throws IOException
      */
-    public static HttpResponse sendGetDownLoadWithDigestAuth(String url) throws IOException {
+    public static HttpResponse sendGetDownLoadWithDigestAuth(String url, String userName, String password) throws IOException {
         var credentialsProvider = new BasicCredentialsProvider();
         var usernamePasswordCredentials = new UsernamePasswordCredentials("api", "api");
         credentialsProvider.setCredentials(AuthScope.ANY, usernamePasswordCredentials);
