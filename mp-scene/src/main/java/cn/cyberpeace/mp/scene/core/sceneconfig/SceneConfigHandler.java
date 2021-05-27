@@ -1,11 +1,27 @@
 package cn.cyberpeace.mp.scene.core.sceneconfig;
 
 import cn.cyberpeace.mp.base.annotation.BeanFieldClasses;
+import cn.cyberpeace.mp.base.annotation.ClassFieldClasses;
 import cn.cyberpeace.mp.scene.core.base.BaseSceneHandler;
 import cn.cyberpeace.mp.scene.core.bo.*;
+import cn.cyberpeace.mp.scene.core.exception.SceneNotExistException;
 import cn.cyberpeace.mp.scene.model.*;
 import cn.cyberpeace.mp.scene.repository.*;
 
+@ClassFieldClasses({
+        SceneConfigDataBO.class,
+        SceneConfigTopologyBO.class,
+        SceneConfigBO.class,
+        SceneConfigAreaBO.class,
+        SceneConfigElementBO.class,
+        SceneConfigElementPortBO.class,
+        SceneConfigElementPortConnectionBO.class,
+        SceneConfigModel.class,
+        SceneConfigAreaModel.class,
+        SceneConfigElementModel.class,
+        SceneConfigElementPortModel.class,
+        SceneConfigElementPortConnectionModel.class,
+})
 @BeanFieldClasses({
         SceneConfigMapper.class,
         SceneConfigAreaMapper.class,
@@ -32,21 +48,20 @@ public class SceneConfigHandler extends BaseSceneHandler<
         SceneConfigElementPortMapper,
         SceneConfigElementPortConnectionMapper> {
 
-    public SceneConfigHandler(SceneConfigDataBO sceneConfigDataBO) {
+    public SceneConfigHandler(SceneConfigDataBO sceneConfigDataBO) throws SceneNotExistException {
         init(sceneConfigDataBO, false);
     }
 
-    public SceneConfigHandler(SceneConfigDataBO sceneConfigDataBO, boolean isAreaMode) {
+    public SceneConfigHandler(SceneConfigDataBO sceneConfigDataBO, boolean isAreaMode) throws SceneNotExistException {
         init(sceneConfigDataBO, isAreaMode);
     }
 
-    @Override
-    public SceneConfigDataBO buildDataBO() {
-        return new SceneConfigDataBO();
+    public SceneConfigHandler(String sceneId, String areaId) throws SceneNotExistException {
+        init(sceneId, areaId, false);
     }
 
-    @Override
-    public SceneConfigTopologyBO buildTopologyBO() {
-        return new SceneConfigTopologyBO();
+    public SceneConfigHandler(String sceneId, String areaId, boolean isAreaMode) throws SceneNotExistException {
+        init(sceneId, areaId, isAreaMode);
     }
+
 }

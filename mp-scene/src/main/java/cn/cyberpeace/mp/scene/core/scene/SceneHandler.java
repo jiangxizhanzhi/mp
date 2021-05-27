@@ -1,11 +1,27 @@
 package cn.cyberpeace.mp.scene.core.scene;
 
 import cn.cyberpeace.mp.base.annotation.BeanFieldClasses;
+import cn.cyberpeace.mp.base.annotation.ClassFieldClasses;
 import cn.cyberpeace.mp.scene.core.base.BaseSceneHandler;
 import cn.cyberpeace.mp.scene.core.bo.*;
+import cn.cyberpeace.mp.scene.core.exception.SceneNotExistException;
 import cn.cyberpeace.mp.scene.model.*;
 import cn.cyberpeace.mp.scene.repository.*;
 
+@ClassFieldClasses({
+        SceneDataBO.class,
+        SceneTopologyBO.class,
+        SceneBO.class,
+        SceneAreaBO.class,
+        SceneElementBO.class,
+        SceneElementPortBO.class,
+        SceneElementPortConnectionBO.class,
+        SceneModel.class,
+        SceneAreaModel.class,
+        SceneElementModel.class,
+        SceneElementPortModel.class,
+        SceneElementPortConnectionModel.class,
+})
 @BeanFieldClasses({
         SceneMapper.class,
         SceneAreaMapper.class,
@@ -32,21 +48,20 @@ public class SceneHandler extends BaseSceneHandler<
         SceneElementPortMapper,
         SceneElementPortConnectionMapper> {
 
-    public SceneHandler(SceneDataBO sceneDataBO) {
+    public SceneHandler(SceneDataBO sceneDataBO) throws SceneNotExistException {
         init(sceneDataBO, false);
     }
 
-    public SceneHandler(SceneDataBO sceneDataBO, boolean isAreaMode) {
+    public SceneHandler(SceneDataBO sceneDataBO, boolean isAreaMode) throws SceneNotExistException {
         init(sceneDataBO, isAreaMode);
     }
 
-    @Override
-    public SceneDataBO buildDataBO() {
-        return new SceneDataBO();
+    public SceneHandler(String sceneId, String areaId) throws SceneNotExistException {
+        init(sceneId, areaId, false);
     }
 
-    @Override
-    public SceneTopologyBO buildTopologyBO() {
-        return new SceneTopologyBO();
+    public SceneHandler(String sceneId, String areaId, boolean isAreaMode) throws SceneNotExistException {
+        init(sceneId, areaId, isAreaMode);
     }
+
 }

@@ -19,6 +19,11 @@ public class BaseSceneModel extends BaseModel {
     private Boolean deleted;
 
     @Override
+    public boolean hasDeleted() {
+        return getDeleted();
+    }
+
+    @Override
     public boolean prepareDeleteFlag() {
         setDeleted(true);
         return true;
