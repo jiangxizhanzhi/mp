@@ -92,6 +92,18 @@ public interface BaseModelMapper<M extends BaseModel> {
         return mappedStatement;
     }
 
+    private String[] getSelectFields(HumanCondition humanCondition) {
+        String[] selectFields = humanCondition.toSelectFields();
+        if (selectFields.length == 0) {
+            selectFields = humanCondition.toDefaultSelectFields(getModelClass());
+            if (selectFields.length == 0) {
+                selectFields = null;
+            }
+        }
+
+        return selectFields;
+    }
+
     private M mapToObj(Map<String, Object> map) {
         if (map == null) {
             return null;
@@ -186,39 +198,26 @@ public interface BaseModelMapper<M extends BaseModel> {
     }
 
     @Recommendation
-    default List<M> list(HumanCondition humanCondition, String[] selectFields) {
+    default List<M> list(HumanCondition humanCondition) {
         if (humanCondition.getLimit() != null && humanCondition.getLimit() == 0) {
             return new ArrayList<>();
         }
 
         if (getMappedStatement("list") == null) {
-            return commonList(getTableName(humanCondition), humanCondition.toCondition(), selectFields);
+            return commonList(getTableName(humanCondition), humanCondition.toCondition(), getSelectFields(humanCondition));
         } else {
-            return list(getTableName(humanCondition), humanCondition.toCondition(), selectFields);
+            return list(getTableName(humanCondition), humanCondition.toCondition(), getSelectFields(humanCondition));
         }
-    }
-
-    @Recommendation
-    default List<M> list(HumanCondition humanCondition) {
-        String[] selectFields = humanCondition.toSelectFields();
-        if (selectFields.length == 0) {
-            selectFields = null;
-        }
-        return list(humanCondition, selectFields);
     }
 
     @Recommendation
     default List<Map<String, Object>> originList(HumanCondition humanCondition) {
-        String[] selectFields = humanCondition.toSelectFields();
-        if (selectFields.length == 0) {
-            selectFields = null;
-        }
-
         if (humanCondition.getLimit() != null && humanCondition.getLimit() == 0) {
             return new ArrayList<>();
         }
 
-        return getCommonMapper().list(getTableName(humanCondition), humanCondition.toCondition(), selectFields);
+        return getCommonMapper().list(getTableName(humanCondition), humanCondition.toCondition(),
+                getSelectFields(humanCondition));
     }
 
     @Recommendation
@@ -231,23 +230,14 @@ public interface BaseModelMapper<M extends BaseModel> {
     }
 
     @Recommendation
-    default M first(HumanCondition humanCondition, String[] selectFields) {
+    default M first(HumanCondition humanCondition) {
         humanCondition.slice(0, 1);
-        List<M> objs = list(humanCondition, selectFields);
+        List<M> objs = list(humanCondition);
         if (objs.isEmpty()) {
             return null;
         } else {
             return objs.get(0);
         }
-    }
-
-    @Recommendation
-    default M first(HumanCondition humanCondition) {
-        String[] selectFields = humanCondition.toSelectFields();
-        if (selectFields.length == 0) {
-            selectFields = null;
-        }
-        return first(humanCondition, selectFields);
     }
 
     @Recommendation
@@ -272,11 +262,8 @@ public interface BaseModelMapper<M extends BaseModel> {
 
     @Recommendation
     default M get(String id, HumanCondition humanSelectCondition) {
-        String[] selectFields = humanSelectCondition.toSelectFields();
-        if (selectFields.length == 0) {
-            selectFields = null;
-        }
-        return get(id, selectFields);
+        Map<String, Object> map = getCommonMapper().get(getTableName(), id, getSelectFields(humanSelectCondition));
+        return mapToObj(map);
     }
 
     @Recommendation
@@ -365,14 +352,14 @@ public interface BaseModelMapper<M extends BaseModel> {
     boolean exist(@Param("condition") Condition condition);
 
     @Recommendation
-    default M get(String id, String[] selectFields) {
-        Map<String, Object> map = getCommonMapper().get(getTableName(), id, selectFields);
-        return mapToObj(map);
+    default M get(String id) {
+        return get(id, new HumanCondition());
     }
 
     @Recommendation
-    default M get(String id) {
-        return get(id, (String[]) null);
+    default M logicGet(String id) {
+        var obj = get(id);
+        return (obj != null && obj.hasDeleted()) ? null : obj;
     }
 
     default boolean create(String[] createFields, Object[] createFieldValues) {
@@ -458,6 +445,18 @@ public interface BaseModelMapper<M extends BaseModel> {
         return successCount;
     }
 
+    @Recommendation
+    default int filterUpdate(M obj, HumanCondition humanCondition) {
+        Object[] updateParams = convertUpdateParams(List.of(obj));
+        return getCommonMapper().filterUpdate(getTableName(humanCondition), (String[]) updateParams[0],
+                ((Object[][]) updateParams[1])[0], humanCondition.toCondition());
+    }
+
+    @Recommendation
+    default int filterDelete(HumanCondition humanCondition) {
+        return getCommonMapper().filterDelete(getTableName(humanCondition), humanCondition.toCondition());
+    }
+
     List<M> list(String table, @Param("condition") Condition condition, String[] selectFields);
     int total(String table, @Param("condition") Condition condition);
     boolean exist(String table, @Param("condition") Condition condition);
@@ -468,4 +467,7 @@ public interface BaseModelMapper<M extends BaseModel> {
     int bulkCreate(String table, String[] createFields, Object[][] createFieldValuesList);
     int bulkUpdate(String table, String[] updateFields, Object[][] updateFieldValuesList);
     int bulkDelete(String table, String[] ids);
+    int filterUpdate(String table, String[] updateFields, Object[] updateFieldValues,
+                     @Param("condition") Condition condition);
+    int filterDelete(String table, @Param("condition") Condition condition);
 }

@@ -21,4 +21,7 @@ public interface CommonMapper {
     int bulkCreate(String table, String[] createFields, Object[][] createFieldValuesList);
     int bulkUpdate(String table, String[] updateFields, Object[][] updateFieldValuesList);
     int bulkDelete(String table, String[] ids);
+    int filterUpdate(String table, String[] updateFields, Object[] updateFieldValues,
+                     @Param("condition") Condition condition);
+    int filterDelete(String table, @Param("condition") Condition condition);
 }
