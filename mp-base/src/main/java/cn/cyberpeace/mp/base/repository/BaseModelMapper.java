@@ -44,6 +44,7 @@ public interface BaseModelMapper<M extends BaseModel> {
         return getMapperInterface((Proxy) this);
     }
 
+    @SuppressWarnings("unchecked")
     private Class<M> getModelClass() {
         Class<?> actualModelClassSource;
         Class<?> mapperInterface = getMapperInterface();

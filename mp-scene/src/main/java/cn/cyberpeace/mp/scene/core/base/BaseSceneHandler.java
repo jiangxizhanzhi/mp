@@ -2,12 +2,14 @@ package cn.cyberpeace.mp.scene.core.base;
 
 import cn.cyberpeace.mp.base.annotation.BeanFieldNames;
 import cn.cyberpeace.mp.base.annotation.ClassFieldNames;
+import cn.cyberpeace.mp.base.exception.MqRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.base.util.ClassUtils;
 import cn.cyberpeace.mp.base.util.ListTreeNode;
+import cn.cyberpeace.mp.scene.core.base.stereotype.PluginKey;
 import cn.cyberpeace.mp.scene.core.bo.base.*;
 import cn.cyberpeace.mp.scene.core.exception.SceneNotExistException;
 import cn.cyberpeace.mp.scene.model.base.*;
@@ -33,6 +35,7 @@ import java.util.stream.Collectors;
         "sceneElementModelClass",
         "sceneElementPortModelClass",
         "sceneElementPortConnectionModelClass",
+        "scenePluginHandlerInterface",
 })
 @BeanFieldNames({
         "sceneMapper",
@@ -59,7 +62,8 @@ public abstract class BaseSceneHandler<
         M2 extends BaseSceneAreaMapper<A0>,
         M3 extends BaseSceneElementMapper<E0>,
         M4 extends BaseSceneElementPortMapper<P0>,
-        M5 extends BaseSceneElementPortConnectionMapper<C0>> {
+        M5 extends BaseSceneElementPortConnectionMapper<C0>,
+        P1 extends BaseScenePluginHandler> {
 
     private boolean isAreaMode;
     private S scene;
@@ -90,6 +94,24 @@ public abstract class BaseSceneHandler<
     private M3 sceneElementMapper;
     private M4 sceneElementPortMapper;
     private M5 sceneElementPortConnectionMapper;
+
+    private Class<P1> scenePluginHandlerInterface;
+
+    private Map<String, P1> pluginMap;
+
+    @SuppressWarnings("unchecked")
+    private void initPluginMap() {
+        Map<String, P1> pluginKeyMap = new HashMap<>();
+        BeanUtils.getBeanType(scenePluginHandlerInterface).forEach((name, pluginInstance) -> {
+            Class<?> pluginClass = pluginInstance.getClass();
+            var pluginKeyAnnotation = pluginClass.getAnnotation(PluginKey.class);
+            if (pluginKeyAnnotation == null) {
+                return;
+            }
+            pluginKeyMap.put(pluginKeyAnnotation.value(), (P1) ClassUtils.createInstance(pluginClass));
+        });
+        pluginMap = pluginKeyMap;
+    }
 
     private void filterAreaData() {
         ListTreeNode<A> areaNodeTree = new ListTreeNode<>();
@@ -502,6 +524,7 @@ public abstract class BaseSceneHandler<
         if (!StringUtils.isEmpty(sceneId) && readScene(sceneId) == null) {
             throw new SceneNotExistException("Scene " + sceneId + " not exist");
         }
+        initPluginMap();
     }
 
     public void init(String sceneId, String areaId, boolean isAreaMode) throws SceneNotExistException {
@@ -517,6 +540,7 @@ public abstract class BaseSceneHandler<
         this.areaId = areaId;
         this.isAreaMode = isAreaMode;
         reload();
+        initPluginMap();
     }
 
     public D toData() {
