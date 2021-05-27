@@ -19,4 +19,9 @@ public class GroupModel {
      * 物理机地址
      */
     private List<String> macIds;
+
+    /**
+     * 组的请求地址
+     */
+    private String url;
 }

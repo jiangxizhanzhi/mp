@@ -12,7 +12,7 @@ import org.springframework.util.ObjectUtils;
 @Configuration
 public class ElasticsearchConfig {
 
-    @Value("${spring.data.elasticsearch.nodes}")
+    @Value("${mp.datasandtable.es-nodes}")
     private String elasticsearchNodes;
 
     @Bean

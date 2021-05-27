@@ -2,6 +2,9 @@ package cn.cyberpeace.mp.datasandtable.service;
 
 import cn.cyberpeace.mp.base.exception.MqRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
+import cn.cyberpeace.mp.base.util.HttpUtils;
+import cn.cyberpeace.mp.datasandtable.config.SandTableConfig;
+import cn.cyberpeace.mp.datasandtable.constant.DataSandtableConstant;
 import cn.cyberpeace.mp.datasandtable.model.SessionModel;
 import cn.cyberpeace.mp.datasandtable.model.SessionRequest;
 import cn.cyberpeace.mp.datasandtable.model.SessionResult;
@@ -14,9 +17,11 @@ import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
@@ -40,6 +45,9 @@ public class SessionService {
 
     @Autowired
     private RestHighLevelClient restHighLevelClient;
+
+    @Autowired
+    private SandTableConfig sandTableConfig;
 
 
     /**
@@ -148,18 +156,29 @@ public class SessionService {
 
 
     /**
-     *
-     * @param pageNum pageNum
-     * @param sourceBuilder sourceBuilder
-     * @param searchRequest searchRequest
-     * @return SearchRequest
+     * 根据分组id下载流量包
      */
-    private SearchRequest generateSearchRequest(Integer pageNum,
-        SearchSourceBuilder sourceBuilder, SearchRequest searchRequest,
-        BoolQueryBuilder boolQueryBuilder, String[] indexArray, SessionRequest sessionRequest) {
+    public HttpResponse queryPcapFileByGroupId(String groupId, String sessionId) {
+        HttpResponse httpResponse = null;
+        String molochUrl;
+        try {
+            molochUrl = DataSandtableConstant.groupIdSessionUrlCache.get(groupId);
+        } catch (ExecutionException e) {
+            log.error("查询缓存异常 groupId {}" + e, groupId);
+            throw new MqRuntimeException("查询缓存异常 groupId: "+ groupId);
+        }
 
+        //todo 为了调试
+        molochUrl = "http://10.100.7.50:8005" + "/sessions.pcap?ids=" + sessionId;
 
-        return searchRequest;
+        try {
+            httpResponse =  HttpUtils.sendGetDownLoadWithDigestAuth(molochUrl,
+                sandTableConfig.getUserName(), sandTableConfig.getPassword());
+        } catch (IOException e) {
+            log.error("查询缓存异常 groupId {}" + e, groupId);
+            throw new MqRuntimeException("查询缓存异常 groupId: "+ groupId);
+        }
+        return httpResponse;
     }
 
 

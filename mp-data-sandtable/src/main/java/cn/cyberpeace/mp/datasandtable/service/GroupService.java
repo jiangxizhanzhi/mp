@@ -75,12 +75,9 @@ public class GroupService {
 
         String groupIdRes = (String) JSONPath.eval(jsonObject, "$.scene.id");
         JSONArray  macIdJsonArray= (JSONArray) JSONPath.eval(jsonObject, "$.scene.macs");
-        if (ObjectUtils.isEmpty(macIdJsonArray)) {
-            log.error("groupId: {}", groupId);
-            throw new MqRuntimeException("查询分组失败");
-        }
+        String  url= (String) JSONPath.eval(jsonObject, "$.scene.viewer_url");
         List<String> macIds = macIdJsonArray.stream().map(String.class::cast).collect(Collectors.toList());
-        return GroupModel.builder().groupId(groupIdRes).macIds(macIds).build();
+        return GroupModel.builder().groupId(groupIdRes).macIds(macIds).url(url).build();
     }
 
     /**

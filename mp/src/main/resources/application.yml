@@ -15,10 +15,7 @@ spring:
     time-zone: GMT+8
   flyway:
     clean-disabled: true
-    #我们es版本7.7.1使用当前版本为deprecated
-  data:
-    elasticsearch:
-      nodes: 10.100.7.50:9200
+
 logging:
   file:
     name: log/log.log
@@ -30,5 +27,9 @@ mybatis:
 
 # 请求云平台组信息的url配置，必需填写
 mp:
- datasandtable:
-        group-url: http://10.100.7.50:5079/v1/scenes
+  datasandtable:
+    group-url: http://10.100.7.50:5079/v1/scenes
+    moloch:
+      username: api
+      password: api
+    es-nodes: 10.100.7.50:9200
