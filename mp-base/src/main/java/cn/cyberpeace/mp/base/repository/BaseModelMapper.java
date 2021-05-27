@@ -359,7 +359,7 @@ public interface BaseModelMapper<M extends BaseModel> {
     @Recommendation
     default M logicGet(String id) {
         var obj = get(id);
-        return obj.hasDeleted() ? null : obj;
+        return (obj != null && obj.hasDeleted()) ? null : obj;
     }
 
     default boolean create(String[] createFields, Object[] createFieldValues) {

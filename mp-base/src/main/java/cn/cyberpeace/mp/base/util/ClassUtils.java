@@ -1,5 +1,8 @@
 package cn.cyberpeace.mp.base.util;
 
+import cn.cyberpeace.mp.base.annotation.ClassFieldClasses;
+import cn.cyberpeace.mp.base.annotation.ClassFieldNames;
+import cn.cyberpeace.mp.base.exception.MqRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanWrapper;
@@ -154,5 +157,41 @@ public class ClassUtils {
         beanClassFieldsCache.put(clazz, fields);
 
         return fields;
+    }
+
+    public static <T> T createInstance(Class<T> clazz) {
+        try {
+            return clazz.getDeclaredConstructor().newInstance();
+        } catch (Exception e) {
+            throw new MqRuntimeException(clazz.getName() + " create simple instance failed: " + e.getMessage());
+        }
+    }
+
+    public static void loadClassFields(Object obj) {
+        Class<?> clazz = obj.getClass();
+        var classFieldNamesAnnotation = clazz.getAnnotation(ClassFieldNames.class);
+        if (classFieldNamesAnnotation == null) {
+            return;
+        }
+        var classFieldClassesAnnotation = clazz.getAnnotation(ClassFieldClasses.class);
+        if (classFieldClassesAnnotation == null) {
+            return;
+        }
+
+        String[] fieldNames = classFieldNamesAnnotation.value();
+        Class<?>[] fieldClasses = classFieldClassesAnnotation.value();
+        if (fieldNames.length != fieldClasses.length) {
+            return;
+        }
+
+        for (var i = 0; i < fieldNames.length; i++) {
+            String fieldName = fieldNames[i];
+            var field = ClassUtils.getField(clazz, fieldName, true, false);
+            if (field == null) {
+                continue;
+            }
+
+            ClassUtils.setFieldValue(field, obj, fieldClasses[i]);
+        }
     }
 }
