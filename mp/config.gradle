@@ -2,6 +2,7 @@ gradle.ext {
     version = '0.0.1'
     appmodules = [
         'mp-auth',
+        'mp-devops-cluster',
         'mp-scene',
         'mp-scene-plugin-cloud',
         'mp-scene-plugin-collection',

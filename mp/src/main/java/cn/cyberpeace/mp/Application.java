@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Bean;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @Slf4j
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"cn.cyberpeace.mp"})
 @EnableSwagger2
 public class Application {
 

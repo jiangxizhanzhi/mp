@@ -14,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Map;
 
 @Slf4j
@@ -24,10 +24,10 @@ public class BaseModel {
     private String id;
 
     @DefaultGen(DateGenerator.class)
-    private Date createTime;
+    private LocalDateTime createTime;
 
     @DefaultGen(DateGenerator.class)
-    private Date updateTime;
+    private LocalDateTime updateTime;
 
     private void initDefault(String fieldName, Map<String, Object[]> initDefaultFields) {
         Object[] value = initDefaultFields.getOrDefault(fieldName, null);

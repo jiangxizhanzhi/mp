@@ -9,13 +9,12 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 
 import java.lang.invoke.SerializedLambda;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class ClassUtils {
@@ -159,6 +158,17 @@ public class ClassUtils {
         beanClassFieldsCache.put(clazz, fields);
 
         return fields;
+    }
+
+    /**
+     * 获取指定注解的字段名称集合
+     * @param clazz
+     * @param annotation
+     * @return
+     */
+    public static List<String> getBeanClassFields(Class<?> clazz, Class<? extends Annotation> annotation) {
+        Field[] fields = clazz.getDeclaredFields();
+        return Arrays.asList(fields).stream().filter(field -> field.isAnnotationPresent(annotation)).map(Field::getName).collect(Collectors.toList());
     }
 
     public static <T> T createInstance(Class<T> clazz) {
