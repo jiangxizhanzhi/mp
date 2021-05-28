@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.scene.core.base;
 
 import cn.cyberpeace.mp.base.annotation.BeanFieldNames;
 import cn.cyberpeace.mp.base.annotation.ClassFieldNames;
-import cn.cyberpeace.mp.base.exception.MqRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
