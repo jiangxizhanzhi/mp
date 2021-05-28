@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.base.repository.condition.aggregation;
 
+import cn.cyberpeace.mp.base.util.BeanUtils;
+import cn.cyberpeace.mp.base.util.SerializableFunction;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -9,6 +11,11 @@ public class Min extends Aggregation {
         var aggregation = new Min();
         aggregation.setFieldName(fieldName);
         return aggregation;
+    }
+
+    public static <T> Min f(SerializableFunction<T> getter) {
+        String fieldName = BeanUtils.getBeanGetterFieldName(getter);
+        return f(fieldName);
     }
 
     @Override

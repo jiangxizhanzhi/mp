@@ -8,7 +8,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 
+import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -193,5 +195,30 @@ public class ClassUtils {
 
             ClassUtils.setFieldValue(field, obj, fieldClasses[i]);
         }
+    }
+
+    @SuppressWarnings("java:S3011")
+    public static <T> String getFuncName(SerializableFunction<T> func) {
+        SerializedLambda serializedLambda = null;
+        for (Class<?> cl = func.getClass(); cl != null; cl = cl.getSuperclass()) {
+            try {
+                var method = cl.getDeclaredMethod("writeReplace");
+                method.setAccessible(true);
+                Object replacement = method.invoke(func);
+                if (replacement instanceof SerializedLambda) {
+                    serializedLambda = (SerializedLambda) replacement;
+                    break;
+                }
+            } catch (NoSuchMethodException ignored) {
+            } catch (IllegalAccessException | InvocationTargetException | SecurityException e) {
+                throw new MqRuntimeException(e.getMessage());
+            }
+        }
+
+        if (serializedLambda == null) {
+            return null;
+        }
+
+        return serializedLambda.getImplMethodName();
     }
 }

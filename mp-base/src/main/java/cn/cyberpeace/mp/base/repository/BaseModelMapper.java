@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.base.repository;
 
 import cn.cyberpeace.mp.base.annotation.Recommendation;
-import cn.cyberpeace.mp.base.constant.BaseFieldName;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.Condition;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
@@ -165,7 +164,7 @@ public interface BaseModelMapper<M extends BaseModel> {
     private Object[] convertUpdateParams(List<M> objs) {
         var sampleObj = objs.get(0);
         sampleObj.setUpdateTime(null);
-        sampleObj.initDefault(BaseFieldName.UPDATE_TIME);
+        sampleObj.initDefault(BaseModel::getUpdateTime);
 
         var allModelFields = new DynamicFields(ClassUtils.getBeanClassFields(getModelClass()));
         List<String> updateFields = new ArrayList<>();
@@ -182,7 +181,7 @@ public interface BaseModelMapper<M extends BaseModel> {
         for (var i = 0; i < objs.size(); i++) {
             M obj = objs.get(i);
             sampleObj.setUpdateTime(null);
-            obj.initDefault(BaseFieldName.UPDATE_TIME);
+            obj.initDefault(BaseModel::getUpdateTime);
 
             var updateFieldValues = new Object[updateFields.size()];
             for (var j = 0; j < updateFields.size(); j++) {

@@ -1,9 +1,7 @@
 package cn.cyberpeace.mp.base.repository.condition;
 
 import cn.cyberpeace.mp.base.repository.condition.aggregation.Aggregation;
-import cn.cyberpeace.mp.base.util.ClassUtils;
-import cn.cyberpeace.mp.base.util.ModelUtils;
-import cn.cyberpeace.mp.base.util.TextUtils;
+import cn.cyberpeace.mp.base.util.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -124,11 +122,19 @@ public class HumanCondition {
         return this;
     }
 
+    public <T> HumanCondition selectAs(SerializableFunction<T> fieldGetter, String outputFieldName) {
+        return selectAs(BeanUtils.getBeanGetterFieldName(fieldGetter), outputFieldName);
+    }
+
     public HumanCondition select(String... fieldNames) {
         for (String fieldName: fieldNames) {
             selectFields.put(currentFieldName(fieldName), null);
         }
         return this;
+    }
+
+    public <T> HumanCondition select(SerializableFunction<T>... fieldGetters) {
+        return select(Arrays.stream(fieldGetters).map(BeanUtils::getBeanGetterFieldName).toArray(String[]::new));
     }
 
     public HumanCondition selectAs(Aggregation aggregation, String outputFieldName) {
@@ -139,7 +145,9 @@ public class HumanCondition {
     public HumanCondition select(Aggregation... aggregations) {
         for (Aggregation aggregation: aggregations) {
             String fieldName = aggregation.getFieldName();
-            var outputFieldName = StringUtils.join(fieldName, "Count");
+            String funcName = aggregation.getFuncName();
+            String outputFieldNameSuffix = funcName.substring(0, 1).toUpperCase() + funcName.substring(1);
+            var outputFieldName = StringUtils.join(fieldName, outputFieldNameSuffix);
             selectFields.put(aggregation.toSqlField(currentFieldName(fieldName)), outputFieldName);
         }
         return this;
@@ -176,6 +184,10 @@ public class HumanCondition {
         return this;
     }
 
+    public <T> HumanCondition groupBy(SerializableFunction<T>... fieldGetters) {
+        return groupBy(Arrays.stream(fieldGetters).map(BeanUtils::getBeanGetterFieldName).toArray(String[]::new));
+    }
+
     public HumanCondition orderBy(String... orders) {
         for (String order: orders) {
             String linkedOrder;
@@ -189,11 +201,30 @@ public class HumanCondition {
         return this;
     }
 
+    public <T> HumanCondition orderBy(SerializableFunction<T> fieldGetter, boolean reverse) {
+        String fieldName = BeanUtils.getBeanGetterFieldName(fieldGetter);
+        return orderBy(reverse ? ("-" + fieldName) : fieldName);
+    }
+
+    public <T> HumanCondition orderBy(SerializableFunction<T> fieldGetter) {
+        return orderBy(fieldGetter, false);
+    }
+
+    public <T> HumanCondition reverseOrderBy(SerializableFunction<T> fieldGetter) {
+        return orderBy(fieldGetter, true);
+    }
+
     public HumanCondition filterLink(Class<?> sourceModel, String sourceFieldName,
                                      Class<?> targetModel, String targetFieldName) {
         andCondition.addLink(genLinkFieldName(sourceModel, TextUtils.humpToLine(sourceFieldName)),
                 genLinkFieldName(targetModel, TextUtils.humpToLine(targetFieldName)));
         return this;
+    }
+
+    public <S, T> HumanCondition filterLink(Class<?> sourceModel, SerializableFunction<S> sourceFieldGetter,
+                                         Class<?> targetModel, SerializableFunction<T> targetFieldGetter) {
+        return filterLink(sourceModel, BeanUtils.getBeanGetterFieldName(sourceFieldGetter),
+                targetModel, BeanUtils.getBeanGetterFieldName(targetFieldGetter));
     }
 
     public HumanCondition filterLink(String sourceLinkName, String sourceFieldName,
@@ -203,9 +234,19 @@ public class HumanCondition {
         return this;
     }
 
+    public <S, T> HumanCondition filterLink(String sourceLinkName, SerializableFunction<S> sourceFieldGetter,
+                                         String targetLinkName, SerializableFunction<T> targetFieldGetter) {
+        return filterLink(sourceLinkName, BeanUtils.getBeanGetterFieldName(sourceFieldGetter),
+                targetLinkName, BeanUtils.getBeanGetterFieldName(targetFieldGetter));
+    }
+
     public HumanCondition filterIn(String fieldName, Object[] fieldValue) {
         andCondition.addIn(currentColumnName(fieldName), fieldValue);
         return this;
+    }
+
+    public <T> HumanCondition filterIn(SerializableFunction<T> fieldGetter, Object[] fieldValue) {
+        return filterIn(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
     }
 
     public HumanCondition filterNotIn(String fieldName, Object[] fieldValue) {
@@ -213,9 +254,17 @@ public class HumanCondition {
         return this;
     }
 
+    public <T> HumanCondition filterNotIn(SerializableFunction<T> fieldGetter, Object[] fieldValue) {
+        return filterNotIn(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+    }
+
     public HumanCondition filterEqual(String fieldName, Object fieldValue) {
         andCondition.addEqual(currentColumnName(fieldName), fieldValue);
         return this;
+    }
+
+    public <T> HumanCondition filterEqual(SerializableFunction<T> fieldGetter, Object fieldValue) {
+        return filterEqual(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
     }
 
     public HumanCondition filterNotEqual(String fieldName, Object fieldValue) {
@@ -223,9 +272,17 @@ public class HumanCondition {
         return this;
     }
 
+    public <T> HumanCondition filterNotEqual(SerializableFunction<T> fieldGetter, Object fieldValue) {
+        return filterNotEqual(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+    }
+
     public HumanCondition filterGreaterThan(String fieldName, Object fieldValue) {
         andCondition.addGreaterThan(currentColumnName(fieldName), fieldValue);
         return this;
+    }
+
+    public <T> HumanCondition filterGreaterThan(SerializableFunction<T> fieldGetter, Object fieldValue) {
+        return filterGreaterThan(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
     }
 
     public HumanCondition filterGreaterThanOrEqual(String fieldName, Object fieldValue) {
@@ -233,9 +290,17 @@ public class HumanCondition {
         return this;
     }
 
+    public <T> HumanCondition filterGreaterThanOrEqual(SerializableFunction<T> fieldGetter, Object fieldValue) {
+        return filterGreaterThanOrEqual(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+    }
+
     public HumanCondition filterLessThan(String fieldName, Object fieldValue) {
         andCondition.addLessThan(currentColumnName(fieldName), fieldValue);
         return this;
+    }
+
+    public <T> HumanCondition filterLessThan(SerializableFunction<T> fieldGetter, Object fieldValue) {
+        return filterLessThan(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
     }
 
     public HumanCondition filterLessThanOrEqual(String fieldName, Object fieldValue) {
@@ -243,9 +308,17 @@ public class HumanCondition {
         return this;
     }
 
+    public <T> HumanCondition filterLessThanOrEqual(SerializableFunction<T> fieldGetter, Object fieldValue) {
+        return filterLessThanOrEqual(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+    }
+
     public HumanCondition filterContains(String fieldName, Object fieldValue) {
         andCondition.addContains(currentColumnName(fieldName), fieldValue);
         return this;
+    }
+
+    public <T> HumanCondition filterContains(SerializableFunction<T> fieldGetter, Object fieldValue) {
+        return filterContains(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
     }
 
     public HumanCondition filterIContains(String fieldName, Object fieldValue) {
@@ -253,9 +326,17 @@ public class HumanCondition {
         return this;
     }
 
+    public <T> HumanCondition filterIContains(SerializableFunction<T> fieldGetter, Object fieldValue) {
+        return filterIContains(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+    }
+
     public HumanCondition filterStartsWith(String fieldName, Object fieldValue) {
         andCondition.addStartsWith(currentColumnName(fieldName), fieldValue);
         return this;
+    }
+
+    public <T> HumanCondition filterStartsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
+        return filterStartsWith(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
     }
 
     public HumanCondition filterIStartsWith(String fieldName, Object fieldValue) {
@@ -263,9 +344,17 @@ public class HumanCondition {
         return this;
     }
 
+    public <T> HumanCondition filterIStartsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
+        return filterIStartsWith(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+    }
+
     public HumanCondition filterEndsWith(String fieldName, Object fieldValue) {
         andCondition.addEndsWith(currentColumnName(fieldName), fieldValue);
         return this;
+    }
+
+    public <T> HumanCondition filterEndsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
+        return filterEndsWith(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
     }
 
     public HumanCondition filterIEndsWith(String fieldName, Object fieldValue) {
@@ -273,9 +362,17 @@ public class HumanCondition {
         return this;
     }
 
+    public <T> HumanCondition filterIEndsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
+        return filterIEndsWith(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+    }
+
     public HumanCondition filterNotContains(String fieldName, Object fieldValue) {
         andCondition.addNotContains(currentColumnName(fieldName), fieldValue);
         return this;
+    }
+
+    public <T> HumanCondition filterNotContains(SerializableFunction<T> fieldGetter, Object fieldValue) {
+        return filterNotContains(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
     }
 
     public HumanCondition filterNotIContains(String fieldName, Object fieldValue) {
@@ -283,9 +380,17 @@ public class HumanCondition {
         return this;
     }
 
+    public <T> HumanCondition filterNotIContains(SerializableFunction<T> fieldGetter, Object fieldValue) {
+        return filterNotIContains(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+    }
+
     public HumanCondition filterNotStartsWith(String fieldName, Object fieldValue) {
         andCondition.addNotStartsWith(currentColumnName(fieldName), fieldValue);
         return this;
+    }
+
+    public <T> HumanCondition filterNotStartsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
+        return filterNotStartsWith(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
     }
 
     public HumanCondition filterNotIStartsWith(String fieldName, Object fieldValue) {
@@ -293,14 +398,26 @@ public class HumanCondition {
         return this;
     }
 
+    public <T> HumanCondition filterNotIStartsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
+        return filterNotIStartsWith(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+    }
+
     public HumanCondition filterNotEndsWith(String fieldName, Object fieldValue) {
         andCondition.addNotEndsWith(currentColumnName(fieldName), fieldValue);
         return this;
     }
 
+    public <T> HumanCondition filterNotEndsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
+        return filterNotEndsWith(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+    }
+
     public HumanCondition filterNotIEndsWith(String fieldName, Object fieldValue) {
         andCondition.addNotIEndsWith(currentColumnName(fieldName), fieldValue);
         return this;
+    }
+
+    public <T> HumanCondition filterNotIEndsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
+        return filterNotIEndsWith(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
     }
 
     @Data
@@ -319,6 +436,12 @@ public class HumanCondition {
             return this;
         }
 
+        public <S, T> OrConditionPoxy orLink(Class<?> sourceModel, SerializableFunction<S> sourceFieldGetter,
+                                          Class<?> targetModel, SerializableFunction<T> targetFieldGetter) {
+            return orLink(sourceModel, BeanUtils.getBeanGetterFieldName(sourceFieldGetter),
+                    targetModel, BeanUtils.getBeanGetterFieldName(targetFieldGetter));
+        }
+
         public OrConditionPoxy orLink(String sourceLinkName, String sourceFieldName,
                                       String targetLinkName, String targetFieldName) {
             orCondition.addLink(humanCondition.genLinkFieldName(sourceLinkName, TextUtils.humpToLine(sourceFieldName)),
@@ -326,9 +449,19 @@ public class HumanCondition {
             return this;
         }
 
+        public <S, T> OrConditionPoxy orLink(String sourceLinkName, SerializableFunction<S> sourceFieldGetter,
+                                          String targetLinkName, SerializableFunction<T> targetFieldGetter) {
+            return orLink(sourceLinkName, BeanUtils.getBeanGetterFieldName(sourceFieldGetter),
+                    targetLinkName, BeanUtils.getBeanGetterFieldName(targetFieldGetter));
+        }
+
         public OrConditionPoxy orIn(String fieldName, Object[] fieldValue) {
             orCondition.addIn(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
+        }
+
+        public <T> OrConditionPoxy orIn(SerializableFunction<T> fieldGetter, Object[] fieldValue) {
+            return orIn(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
         }
 
         public OrConditionPoxy orNotIn(String fieldName, Object[] fieldValue) {
@@ -336,9 +469,17 @@ public class HumanCondition {
             return this;
         }
 
+        public <T> OrConditionPoxy orNotIn(SerializableFunction<T> fieldGetter, Object[] fieldValue) {
+            return orNotIn(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+        }
+
         public OrConditionPoxy orEqual(String fieldName, Object fieldValue) {
             orCondition.addEqual(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
+        }
+
+        public <T> OrConditionPoxy orEqual(SerializableFunction<T> fieldGetter, Object fieldValue) {
+            return orEqual(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
         }
 
         public OrConditionPoxy orNotEqual(String fieldName, Object fieldValue) {
@@ -346,9 +487,17 @@ public class HumanCondition {
             return this;
         }
 
+        public <T> OrConditionPoxy orNotEqual(SerializableFunction<T> fieldGetter, Object fieldValue) {
+            return orNotEqual(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+        }
+
         public OrConditionPoxy orGreaterThan(String fieldName, Object fieldValue) {
             orCondition.addGreaterThan(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
+        }
+
+        public <T> OrConditionPoxy orGreaterThan(SerializableFunction<T> fieldGetter, Object fieldValue) {
+            return orGreaterThan(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
         }
 
         public OrConditionPoxy orGreaterThanOrEqual(String fieldName, Object fieldValue) {
@@ -356,9 +505,17 @@ public class HumanCondition {
             return this;
         }
 
+        public <T> OrConditionPoxy orGreaterThanOrEqual(SerializableFunction<T> fieldGetter, Object fieldValue) {
+            return orGreaterThanOrEqual(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+        }
+
         public OrConditionPoxy orLessThan(String fieldName, Object fieldValue) {
             orCondition.addLessThan(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
+        }
+
+        public <T> OrConditionPoxy orLessThan(SerializableFunction<T> fieldGetter, Object fieldValue) {
+            return orLessThan(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
         }
 
         public OrConditionPoxy orLessThanOrEqual(String fieldName, Object fieldValue) {
@@ -366,9 +523,17 @@ public class HumanCondition {
             return this;
         }
 
+        public <T> OrConditionPoxy orLessThanOrEqual(SerializableFunction<T> fieldGetter, Object fieldValue) {
+            return orLessThanOrEqual(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+        }
+
         public OrConditionPoxy orContains(String fieldName, Object fieldValue) {
             orCondition.addContains(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
+        }
+
+        public <T> OrConditionPoxy orContains(SerializableFunction<T> fieldGetter, Object fieldValue) {
+            return orContains(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
         }
 
         public OrConditionPoxy orIContains(String fieldName, Object fieldValue) {
@@ -376,9 +541,17 @@ public class HumanCondition {
             return this;
         }
 
+        public <T> OrConditionPoxy orIContains(SerializableFunction<T> fieldGetter, Object fieldValue) {
+            return orIContains(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+        }
+
         public OrConditionPoxy orStartsWith(String fieldName, Object fieldValue) {
             orCondition.addStartsWith(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
+        }
+
+        public <T> OrConditionPoxy orStartsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
+            return orStartsWith(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
         }
 
         public OrConditionPoxy orIStartsWith(String fieldName, Object fieldValue) {
@@ -386,9 +559,17 @@ public class HumanCondition {
             return this;
         }
 
+        public <T> OrConditionPoxy orIStartsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
+            return orIStartsWith(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+        }
+
         public OrConditionPoxy orEndsWith(String fieldName, Object fieldValue) {
             orCondition.addEndsWith(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
+        }
+
+        public <T> OrConditionPoxy orEndsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
+            return orEndsWith(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
         }
 
         public OrConditionPoxy orIEndsWith(String fieldName, Object fieldValue) {
@@ -396,9 +577,17 @@ public class HumanCondition {
             return this;
         }
 
+        public <T> OrConditionPoxy orIEndsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
+            return orIEndsWith(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+        }
+
         public OrConditionPoxy orNotContains(String fieldName, Object fieldValue) {
             orCondition.addNotContains(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
+        }
+
+        public <T> OrConditionPoxy orNotContains(SerializableFunction<T> fieldGetter, Object fieldValue) {
+            return orNotContains(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
         }
 
         public OrConditionPoxy orNotIContains(String fieldName, Object fieldValue) {
@@ -406,9 +595,17 @@ public class HumanCondition {
             return this;
         }
 
+        public <T> OrConditionPoxy orNotIContains(SerializableFunction<T> fieldGetter, Object fieldValue) {
+            return orNotIContains(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+        }
+
         public OrConditionPoxy orNotStartsWith(String fieldName, Object fieldValue) {
             orCondition.addNotStartsWith(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
+        }
+
+        public <T> OrConditionPoxy orNotStartsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
+            return orNotStartsWith(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
         }
 
         public OrConditionPoxy orNotIStartsWith(String fieldName, Object fieldValue) {
@@ -416,14 +613,26 @@ public class HumanCondition {
             return this;
         }
 
+        public <T> OrConditionPoxy orNotIStartsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
+            return orNotIStartsWith(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+        }
+
         public OrConditionPoxy orNotEndsWith(String fieldName, Object fieldValue) {
             orCondition.addNotEndsWith(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
         }
 
+        public <T> OrConditionPoxy orNotEndsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
+            return orNotEndsWith(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+        }
+
         public OrConditionPoxy orNotIEndsWith(String fieldName, Object fieldValue) {
             orCondition.addNotIEndsWith(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
+        }
+
+        public <T> OrConditionPoxy orNotIEndsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
+            return orNotIEndsWith(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
         }
 
         public HumanCondition filterOrEnd() {

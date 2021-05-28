@@ -10,19 +10,16 @@ import org.springframework.stereotype.Component;
 public class TenantFields extends BaseModelFields {
     public static final DynamicFields allFields = new DynamicFields(ClassUtils.getBeanClassFields(TenantModel.class));
 
-    public static final DynamicFields availableFields = new DynamicFields(new String[]{
-            "identifier", "name"
-    }).merge(BaseModelFields.availableFields);
+    public static final DynamicFields availableFields = new DynamicFields(TenantModel::getIdentifier,
+            TenantModel::getName
+    ).merge(BaseModelFields.availableFields);
 
     public static final DynamicFields hiddenFields = allFields.subtract(availableFields);
 
-    public static final DynamicFields readonlyFields = new DynamicFields(new String[]{
-    }).merge(BaseModelFields.readonlyFields);
+    public static final DynamicFields readonlyFields = new DynamicFields().merge(BaseModelFields.readonlyFields);
 
-    public static final DynamicFields searchFields = new DynamicFields(new String[]{
-            "identifier", "name",
-    });
+    public static final DynamicFields searchFields = new DynamicFields(TenantModel::getIdentifier,
+            TenantModel::getName);
 
-    public static final DynamicFields orderFields = new DynamicFields(new String[]{
-    }).merge(BaseModelFields.readonlyFields);
+    public static final DynamicFields orderFields = new DynamicFields().merge(BaseModelFields.readonlyFields);
 }

@@ -4,9 +4,10 @@ import cn.cyberpeace.mp.base.model.generator.DateGenerator;
 import cn.cyberpeace.mp.base.model.generator.Generator;
 import cn.cyberpeace.mp.base.model.generator.UuidGenerator;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultGen;
-import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.base.util.ClassUtils;
 import cn.cyberpeace.mp.base.util.ModelUtils;
+import cn.cyberpeace.mp.base.util.SerializableFunction;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -65,6 +66,10 @@ public class BaseModel {
     public void initDefault(String fieldName) {
         Map<String, Object[]> initDefaultFields = ModelUtils.getInitDefaultFields(getClass());
         initDefault(fieldName, initDefaultFields);
+    }
+
+    public <T> void initDefault(SerializableFunction<T> fieldGetter) {
+        initDefault(BeanUtils.getBeanGetterFieldName(fieldGetter));
     }
 
     public boolean hasDeleted() {
