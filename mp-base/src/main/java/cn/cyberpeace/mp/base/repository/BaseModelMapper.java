@@ -226,6 +226,9 @@ public interface BaseModelMapper<M extends BaseModel> {
         }
     }
 
+    /**
+     * 返回原始map数据，适用于关联查询跨表结果
+     */
     @Recommendation
     default List<Map<String, Object>> originList(HumanCondition humanCondition) {
         if (humanCondition.getLimit() != null && humanCondition.getLimit() == 0) {
@@ -256,6 +259,9 @@ public interface BaseModelMapper<M extends BaseModel> {
         }
     }
 
+    /**
+     * 返回原始map数据，适用于关联查询跨表结果
+     */
     @Recommendation
     default Map<String, Object> originFirst(HumanCondition humanCondition) {
         humanCondition.slice(0, 1);
@@ -293,6 +299,9 @@ public interface BaseModelMapper<M extends BaseModel> {
         return create((String[]) createParams[0], ((Object[][]) createParams[1])[0]);
     }
 
+    /**
+     * 更新，obj必须要有id
+     */
     @Recommendation
     default boolean update(M obj) {
         Object[] updateParams = convertUpdateParams(List.of(obj));
@@ -304,6 +313,9 @@ public interface BaseModelMapper<M extends BaseModel> {
         return update(obj.getId(), (String[]) updateParams[0], ((Object[][]) updateParams[1])[0]);
     }
 
+    /**
+     * 保存，obj没有id则创建，有id则更新
+     */
     @Recommendation
     default boolean save(M obj) {
         if (StringUtils.isEmpty(obj.getId())) {
@@ -328,6 +340,9 @@ public interface BaseModelMapper<M extends BaseModel> {
         return bulkCreate((String[]) createParams[0], (Object[][]) createParams[1]);
     }
 
+    /**
+     * 批量更新，所有objs必须要有id, 更新数据字段必须一致
+     */
     @Recommendation
     default int bulkUpdate(List<M> objs) {
         if (objs.isEmpty()) {
@@ -461,6 +476,12 @@ public interface BaseModelMapper<M extends BaseModel> {
         return successCount;
     }
 
+    /**
+     * 条件更新
+     * @param obj 需要更新的数据
+     * @param humanCondition 更新条件
+     * @return 更新数量
+     */
     @Recommendation
     default int filterUpdate(M obj, HumanCondition humanCondition) {
         Object[] updateParams = convertUpdateParams(List.of(obj));
@@ -468,6 +489,11 @@ public interface BaseModelMapper<M extends BaseModel> {
                 ((Object[][]) updateParams[1])[0], humanCondition.toCondition());
     }
 
+    /**
+     * 条件删除
+     * @param humanCondition 删除条件
+     * @return 删除数量
+     */
     @Recommendation
     default int filterDelete(HumanCondition humanCondition) {
         return getCommonMapper().filterDelete(getTableName(humanCondition), humanCondition.toCondition());

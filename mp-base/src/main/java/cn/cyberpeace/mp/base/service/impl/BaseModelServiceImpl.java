@@ -19,6 +19,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 单表通用服务实现类，包含通用的增删改查能力
+ * @param <M> 数据model
+ * @param <P> 数据mapper接口
+ * @param <F> 业务处理字段
+ */
 @Slf4j
 @Data
 public abstract class BaseModelServiceImpl<M extends BaseModel,
