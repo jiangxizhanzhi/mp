@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.datasandtable.controller;
 
 import cn.cyberpeace.mp.base.exception.MqRuntimeException;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.datasandtable.model.SessionRequest;
 import cn.cyberpeace.mp.datasandtable.model.SessionResult;
@@ -52,4 +53,16 @@ public class SessionController {
     public ServiceResult<List<SessionResult>> querySessionListWithGroup(@RequestBody SessionRequest sessionRequest) {
         return ServiceResult.<List<SessionResult>>builder().data(sessionService.querySessionListWithGroup(sessionRequest)).build();
     }
+
+
+    /**
+     * 分局分组id查询流量分页信息接口
+     * @param sessionRequest
+     * @return ServiceResult<ListObjResult<SessionResult>>
+     */
+    @PostMapping("pageable")
+    public ServiceResult<ListObjResult<SessionResult>> querySessionListWithGroupWithPage(@RequestBody SessionRequest sessionRequest){
+        return ServiceResult.<ListObjResult<SessionResult>>builder().data(sessionService.querySessionWithPage(sessionRequest)).build();
+    }
+
 }

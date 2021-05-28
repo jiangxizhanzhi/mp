@@ -1,5 +1,11 @@
 package cn.cyberpeace.mp.datasandtable.model;
 
+import cn.cyberpeace.mp.base.serializer.CustomLocalDateTimeDeserializer;
+import cn.cyberpeace.mp.base.serializer.CustomLocalDateTimeSerializer;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+import io.swagger.annotations.ApiModelProperty;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.*;
@@ -12,11 +18,17 @@ public class SessionRequest {
     /**
      * 查询开始时间
      */
+    @JsonSerialize(using = CustomLocalDateTimeSerializer.class)
+    @JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)
+    @ApiModelProperty("开始时间-yyyy-MM-dd HH:mm:ss")
     private LocalDateTime startTime;
 
     /**
      * 查询
      */
+    @JsonSerialize(using = CustomLocalDateTimeSerializer.class)
+    @JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)
+    @ApiModelProperty("结束时间-yyyy-MM-dd HH:mm:ss")
     private LocalDateTime endTime;
 
     /**
