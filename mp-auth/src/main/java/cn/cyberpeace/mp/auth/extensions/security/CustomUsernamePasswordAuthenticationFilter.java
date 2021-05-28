@@ -19,6 +19,7 @@ import java.util.Map;
 public class CustomUsernamePasswordAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     @Override
+    @SuppressWarnings("unchecked")
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException {
         if (request.getContentType().equals(MediaType.APPLICATION_JSON_VALUE)) {

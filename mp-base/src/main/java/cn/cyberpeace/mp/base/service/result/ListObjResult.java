@@ -27,11 +27,13 @@ public class ListObjResult<T> extends BaseObjResult {
     private List<T> objs = new ArrayList<>();
 
     public ListObjResult(List<T> objs, int total) {
+        this();
         setObjs(objs);
         setTotal(total);
     }
 
     public ListObjResult(List<T> objs, int total, DynamicFields fields) {
+        this();
         setObjs(objs);
         setTotal(total);
         setFields(fields);

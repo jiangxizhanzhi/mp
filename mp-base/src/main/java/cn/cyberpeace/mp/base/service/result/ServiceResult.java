@@ -31,15 +31,18 @@ public class ServiceResult<T> {
     private T source;
 
     public ServiceResult(T source) {
+        this();
         setSource(source);
     }
 
     public ServiceResult(T source, ServiceCode code) {
+        this();
         setSource(source);
         setServiceCode(code);
     }
 
     public ServiceResult(T source, ServiceCode code, String detail) {
+        this();
         setSource(source);
         setServiceCode(code);
         setDetail(detail);

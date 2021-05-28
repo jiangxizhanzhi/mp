@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 @Component
@@ -30,6 +31,10 @@ public class BeanUtils implements ApplicationContextAware {
 
     public static <T> T getBean(Class<T> beanClass) {
         return context.getBean(beanClass);
+    }
+
+    public static <T> Map<String, T> getBeanType(Class<T> clazz) {
+        return context.getBeansOfType(clazz);
     }
 
     public static String[] getNullPropertyNames(Object obj) {

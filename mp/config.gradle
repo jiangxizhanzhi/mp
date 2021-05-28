@@ -1,8 +1,11 @@
 gradle.ext {
     version = '0.0.1'
     appmodules = [
-//        'mp-auth',
+        'mp-auth',
         'mp-scene',
+        'mp-scene-plugin-cloud',
+        'mp-scene-plugin-collection',
+        'mp-scene-plugin-flow',
         'mp-data-sandtable',
     ]
 
