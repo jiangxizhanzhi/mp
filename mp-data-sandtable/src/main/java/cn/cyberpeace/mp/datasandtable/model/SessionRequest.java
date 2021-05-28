@@ -38,6 +38,8 @@ public class SessionRequest {
 
     private String sourceIp;
 
+    private String srcPort;
+
     private String targetIp;
 
     /**

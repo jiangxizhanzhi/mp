@@ -26,4 +26,6 @@ public class SessionModel {
     private String dstMac;
 
     private String protocol;
+
+    private String srcPort;
 }

@@ -21,6 +21,8 @@ public class SessionResult {
 
     private String targetMac;
 
+    private String srcPort;
+
     /**
      * 协议类型
      */
