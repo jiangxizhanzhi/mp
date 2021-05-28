@@ -1,8 +1,12 @@
 package cn.cyberpeace.mp.datasandtable.controller;
 
 import cn.cyberpeace.mp.base.exception.MqRuntimeException;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.datasandtable.model.SessionRequest;
+import cn.cyberpeace.mp.datasandtable.model.SessionResult;
 import cn.cyberpeace.mp.datasandtable.service.SessionService;
 import java.io.IOException;
+import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.HttpResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,10 +15,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/sessions")
@@ -40,5 +41,15 @@ public class SessionController {
         httpServletResponse.setHeader("Content-Disposition", "attachment; filename=" + groupId + ".pcap");
         return ResponseEntity.ok().headers(httpHeaders)
             .contentType(MediaType.parseMediaType("application/octet-stream")).body(resource);
+    }
+
+    /**
+     * 按照groupId查询流量信息
+     * @param sessionRequest sessionRequest
+     * @return ServiceResult<List<SessionResult>>
+     */
+    @PostMapping
+    public ServiceResult<List<SessionResult>> querySessionListWithGroup(@RequestBody SessionRequest sessionRequest) {
+        return ServiceResult.<List<SessionResult>>builder().data(sessionService.querySessionListWithGroup(sessionRequest)).build();
     }
 }
