@@ -228,6 +228,7 @@ public class SessionService {
             .targetMac(model.getDstMac())
             .protocalType(model.getProtocol())
             .srcPort(model.getSrcPort())
+            .dstPort(model.getDstPort())
             .build();
     }
 

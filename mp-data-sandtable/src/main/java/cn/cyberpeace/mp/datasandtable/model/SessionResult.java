@@ -23,6 +23,8 @@ public class SessionResult {
 
     private String srcPort;
 
+    private String dstPort;
+
     /**
      * 协议类型
      */

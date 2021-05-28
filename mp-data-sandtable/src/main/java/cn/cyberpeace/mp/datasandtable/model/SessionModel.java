@@ -28,4 +28,6 @@ public class SessionModel {
     private String protocol;
 
     private String srcPort;
+
+    private String dstPort;
 }

@@ -42,6 +42,8 @@ public class SessionRequest {
 
     private String targetIp;
 
+    private String dstPort;
+
     /**
      * 查询条数默认限制
      */
