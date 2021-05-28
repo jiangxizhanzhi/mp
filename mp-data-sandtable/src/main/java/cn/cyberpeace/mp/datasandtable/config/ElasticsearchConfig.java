@@ -20,7 +20,7 @@ public class ElasticsearchConfig {
         return new RestHighLevelClient(RestClient.builder(this.createHttpHost()));
     }
 
-    /**
+    /**cn.cyberpeace.mp.datasandtable
      * 创建 HttpHost 对象
      *
      * @return 返回 HttpHost 对象数组

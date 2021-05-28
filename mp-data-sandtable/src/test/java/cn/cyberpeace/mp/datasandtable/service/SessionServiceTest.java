@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.datasandtable.service;
 
-import cn.cyberpeace.mp.Application;
+import cn.cyberpeace.mp.datasandtable.TestDatasandtableApplciation;
 import cn.cyberpeace.mp.datasandtable.model.SessionRequest;
 import java.time.LocalDateTime;
 import org.assertj.core.util.Lists;
@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-@SpringBootTest(classes = Application.class)
+@SpringBootTest(classes = TestDatasandtableApplciation.class)
 @RunWith(SpringRunner.class)
 public class SessionServiceTest {
 
