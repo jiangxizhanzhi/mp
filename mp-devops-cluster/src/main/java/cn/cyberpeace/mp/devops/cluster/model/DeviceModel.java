@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.devops.cluster.model;
 
-import cn.cyberpeace.mp.base.annotation.AvailableFields;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 import lombok.AllArgsConstructor;
@@ -33,19 +32,16 @@ public class DeviceModel extends BaseModel implements Serializable {
     /**
      * 设备编号
      */
-    @AvailableFields
     private String identifier;
 
     /**
      * 设备名称
      */
-    @AvailableFields
     private String name;
 
     /**
      * 设备类型
      */
-    @AvailableFields
     private Integer type;
 
     /**
