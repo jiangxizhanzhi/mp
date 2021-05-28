@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.auth.model;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.model.generator.DateGenerator;
+import cn.cyberpeace.mp.base.model.generator.DateTimeGenerator;
 import cn.cyberpeace.mp.base.model.generator.UuidGenerator;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultGen;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
@@ -14,7 +15,8 @@ import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
@@ -35,7 +37,7 @@ public class UserModel extends BaseModel implements Serializable {
     @DefaultStr
     private String avatar;
     @DefaultGen(DateGenerator.class)
-    private Date birthday;
+    private LocalDate birthday;
     @DefaultStr
     private String email;
     @DefaultStr
@@ -46,11 +48,11 @@ public class UserModel extends BaseModel implements Serializable {
     private String address;
     @DefaultInt(3)
     private Integer status;
-    @DefaultGen(DateGenerator.class)
-    private Date dateJoined;
-    private Date expiredTime;
-    @DefaultGen(DateGenerator.class)
-    private Date lastLogin;
+    @DefaultGen(DateTimeGenerator.class)
+    private LocalDateTime dateJoined;
+    private LocalDateTime expiredTime;
+    @DefaultGen(DateTimeGenerator.class)
+    private LocalDateTime lastLogin;
 
     public static class Status {
         public static final Integer NORMAL = 1;
@@ -74,7 +76,7 @@ public class UserModel extends BaseModel implements Serializable {
 
     public void initDefaultExpiredTime() {
         if (expiredTime == null) {
-            expiredTime = new Date(new Date().getTime() + 99L * 365 * 24 * 3600 * 1000);
+            expiredTime =  LocalDateTime.now().plusYears(99L);
         }
     }
 }

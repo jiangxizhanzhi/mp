@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.base.model;
 
-import cn.cyberpeace.mp.base.model.generator.DateGenerator;
+import cn.cyberpeace.mp.base.model.generator.DateTimeGenerator;
 import cn.cyberpeace.mp.base.model.generator.Generator;
 import cn.cyberpeace.mp.base.model.generator.UuidGenerator;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultGen;
@@ -14,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Map;
 
 @Slf4j
@@ -23,11 +23,11 @@ public class BaseModel {
     @DefaultGen(UuidGenerator.class)
     private String id;
 
-    @DefaultGen(DateGenerator.class)
-    private Date createTime;
+    @DefaultGen(DateTimeGenerator.class)
+    private LocalDateTime createTime;
 
-    @DefaultGen(DateGenerator.class)
-    private Date updateTime;
+    @DefaultGen(DateTimeGenerator.class)
+    private LocalDateTime updateTime;
 
     private void initDefault(String fieldName, Map<String, Object[]> initDefaultFields) {
         Object[] value = initDefaultFields.getOrDefault(fieldName, null);

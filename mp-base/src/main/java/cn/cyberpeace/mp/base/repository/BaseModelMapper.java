@@ -20,6 +20,9 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 
 import java.lang.reflect.Proxy;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -104,6 +107,18 @@ public interface BaseModelMapper<M extends BaseModel> {
         return selectFields;
     }
 
+    private Object handleRawFieldValue(Class<?> fieldType, Object fieldValue) {
+        if (fieldType == LocalDateTime.class && fieldValue instanceof java.sql.Timestamp) {
+            return ((java.sql.Timestamp) fieldValue).toLocalDateTime();
+        } else if (fieldType == LocalDate.class && fieldValue instanceof java.sql.Date) {
+            return ((java.sql.Date) fieldValue).toLocalDate();
+        } else if (fieldType == LocalTime.class && fieldValue instanceof java.sql.Time) {
+            return ((java.sql.Time) fieldValue).toLocalTime();
+        } else {
+            return fieldValue;
+        }
+    }
+
     private M mapToObj(Map<String, Object> map) {
         if (map == null) {
             return null;
@@ -122,14 +137,15 @@ public interface BaseModelMapper<M extends BaseModel> {
             return null;
         }
 
-        String[] fieldNames = ClassUtils.getBeanClassFields(actualModelClass);
+        Map<String, Class<?>> fieldTypes = ClassUtils.getBeanClassFieldTypes(actualModelClass);
         final BeanWrapper objWrapper = new BeanWrapperImpl(obj);
-        for (String fieldName: fieldNames) {
+        fieldTypes.forEach((fieldName, fieldType) -> {
             String columnName = TextUtils.humpToLine(fieldName);
             if (map.containsKey(columnName)) {
-                objWrapper.setPropertyValue(fieldName, map.get(columnName));
+                Object fieldValue = handleRawFieldValue(fieldType, map.get(columnName));
+                objWrapper.setPropertyValue(fieldName, fieldValue);
             }
-        }
+        });
 
         return obj;
     }

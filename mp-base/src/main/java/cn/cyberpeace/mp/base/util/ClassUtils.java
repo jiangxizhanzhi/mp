@@ -22,6 +22,8 @@ public class ClassUtils {
 
     private static final Map<Class<?>, String[]> beanClassFieldsCache = new HashMap<>();
 
+    private static final Map<Class<?>, Map<String, Class<?>>> beanClassFieldTypesCache = new HashMap<>();
+
     private ClassUtils() {}
 
     public static Field getField(Class<?> clazz, String fieldName, boolean findSuper, boolean ignoreNotFound) {
@@ -159,6 +161,27 @@ public class ClassUtils {
         beanClassFieldsCache.put(clazz, fields);
 
         return fields;
+    }
+
+    public static Map<String, Class<?>> getBeanClassFieldTypes(Class<?> clazz) {
+        Map<String, Class<?>> fieldTypes = beanClassFieldTypesCache.getOrDefault(clazz, null);
+        if (fieldTypes != null) {
+            return fieldTypes;
+        }
+
+        final BeanWrapper clazzWrapper = new BeanWrapperImpl(clazz);
+        var propertyDescriptors = clazzWrapper.getPropertyDescriptors();
+        fieldTypes = new HashMap<>();
+        for (java.beans.PropertyDescriptor propertyDescriptor : propertyDescriptors) {
+            String fieldName = propertyDescriptor.getName();
+            if (!StringUtils.equals("class", fieldName)) {
+                fieldTypes.put(fieldName, propertyDescriptor.getPropertyType());
+            }
+        }
+
+        beanClassFieldTypesCache.put(clazz, fieldTypes);
+
+        return fieldTypes;
     }
 
     public static <T> T createInstance(Class<T> clazz) {
