@@ -4,10 +4,8 @@ import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceModel;
 import cn.cyberpeace.mp.devops.cluster.service.DeviceService;
-import cn.cyberpeace.mp.devops.cluster.service.fields.DeviceFields;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,10 +24,5 @@ public class DeviceController extends BaseModelController<DeviceModel, DeviceSer
     public DeviceController(DeviceService modelService) {
         setModelService(modelService);
         this.deviceService = getModelService();
-    }
-
-    @GetMapping("/test")
-    public void s(){
-        System.out.println(DeviceFields.availableFields);
     }
 }
