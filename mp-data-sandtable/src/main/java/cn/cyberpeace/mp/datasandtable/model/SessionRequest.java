@@ -4,10 +4,10 @@ import cn.cyberpeace.mp.base.serializer.CustomLocalDateTimeDeserializer;
 import cn.cyberpeace.mp.base.serializer.CustomLocalDateTimeSerializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import io.swagger.annotations.ApiModelProperty;
 import java.time.LocalDateTime;
 import java.util.List;
+import javax.validation.constraints.NotNull;
 import lombok.*;
 
 @Data
@@ -21,6 +21,7 @@ public class SessionRequest {
     @JsonSerialize(using = CustomLocalDateTimeSerializer.class)
     @JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)
     @ApiModelProperty("开始时间-yyyy-MM-dd HH:mm:ss")
+    @NotNull(message = "开始时间不能为空")
     private LocalDateTime startTime;
 
     /**
@@ -29,11 +30,13 @@ public class SessionRequest {
     @JsonSerialize(using = CustomLocalDateTimeSerializer.class)
     @JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)
     @ApiModelProperty("结束时间-yyyy-MM-dd HH:mm:ss")
+    @NotNull(message = "结束时间不能为空")
     private LocalDateTime endTime;
 
     /**
      * 查询条件需要的分组
      */
+    @NotNull(message = "分组id列表不能为空")
     private List<String> groupList;
 
     private String sourceIp;
@@ -47,6 +50,7 @@ public class SessionRequest {
     /**
      * 查询条数默认限制
      */
+    @ApiModelProperty("不走分页场景的时候默认返回100条数据")
     private Integer pageSize = 100;
 
     /**
