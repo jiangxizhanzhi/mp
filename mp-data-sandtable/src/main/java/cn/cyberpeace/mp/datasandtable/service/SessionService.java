@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import javax.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
 import org.elasticsearch.action.search.SearchRequest;
@@ -43,7 +44,7 @@ import org.springframework.util.ObjectUtils;
 @Slf4j
 public class SessionService {
 
-    @Autowired
+    @Resource(name = "datasandtableRestHighLevelClient")
     private RestHighLevelClient restHighLevelClient;
 
     @Autowired
@@ -170,6 +171,7 @@ public class SessionService {
 
         //todo 为了调试
         molochUrl = "http://10.100.7.50:8005" + "/sessions.pcap?ids=" + sessionId;
+//        molochUrl = molochUrl + "/sessions.pcap?ids=" + sessionId;
 
         try {
             httpResponse =  HttpUtils.sendGetDownLoadWithDigestAuth(molochUrl,

@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.base.config.elasticsearch;
+package cn.cyberpeace.mp.datasandtable.config;
 
 import org.apache.http.HttpHost;
 import org.apache.http.util.Asserts;
@@ -15,7 +15,7 @@ public class ElasticsearchConfig {
     @Value("${mp.datasandtable.es-nodes}")
     private String elasticsearchNodes;
 
-    @Bean
+    @Bean(name="datasandtableRestHighLevelClient")
     public RestHighLevelClient restHighLevelClient() {
         return new RestHighLevelClient(RestClient.builder(this.createHttpHost()));
     }
