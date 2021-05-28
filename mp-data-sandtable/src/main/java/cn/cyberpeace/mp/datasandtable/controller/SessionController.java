@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import org.apache.http.HttpResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
@@ -28,10 +27,10 @@ public class SessionController {
     @Autowired
     private SessionService sessionService;
 
-    @RequestMapping(value = "/pcap/{groupId}/{sessionId}", method = RequestMethod.GET)
+    @GetMapping("/pcap/{groupId}/{sessionId}")
     public ResponseEntity<Resource> downloadPcapFile(HttpServletResponse httpServletResponse,
         @PathVariable("sessionId") String sessionId, @PathVariable("groupId") String groupId) {
-        HttpResponse httpResponse = sessionService.queryPcapFileByGroupId(groupId, sessionId);
+        var httpResponse = sessionService.queryPcapFileByGroupId(groupId, sessionId);
         InputStreamResource resource = null;
         try {
             resource = new InputStreamResource(httpResponse.getEntity().getContent());
