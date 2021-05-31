@@ -229,6 +229,7 @@ public class SessionService {
             .protocalType(model.getProtocol())
             .srcPort(model.getSrcPort())
             .dstPort(model.getDstPort())
+            .timestamp(model.getTimestamp().toString())
             .build();
     }
 
