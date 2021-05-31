@@ -1,0 +1,35 @@
+server:
+  servlet:
+    context-path: /api
+  port: 8080
+
+spring:
+  datasource:
+    name: mp
+    url: jdbc:mysql://10.100.9.150:3306/mp?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&createDatabaseIfNotExist=true
+    username: root
+    password: root
+    driver-class-name: org.mariadb.jdbc.Driver
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+  flyway:
+    clean-disabled: true
+
+logging:
+  file:
+    name: log/log.log
+
+mybatis:
+  mapper-locations: classpath*:mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+
+# 请求云平台组信息的url配置，必需填写
+mp:
+  datasandtable:
+    group-url: http://10.100.7.50:5079/v1/scenes
+    moloch:
+      username: api
+      password: api
+    es-nodes: 10.100.7.50:9200

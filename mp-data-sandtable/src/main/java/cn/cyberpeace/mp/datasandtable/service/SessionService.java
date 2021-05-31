@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import javax.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
 import org.elasticsearch.action.search.SearchRequest;
@@ -43,7 +44,7 @@ import org.springframework.util.ObjectUtils;
 @Slf4j
 public class SessionService {
 
-    @Autowired
+    @Resource(name = "datasandtableRestHighLevelClient")
     private RestHighLevelClient restHighLevelClient;
 
     @Autowired
@@ -170,6 +171,7 @@ public class SessionService {
 
         //todo 为了调试
         molochUrl = "http://10.100.7.50:8005" + "/sessions.pcap?ids=" + sessionId;
+//        molochUrl = molochUrl + "/sessions.pcap?ids=" + sessionId;
 
         try {
             httpResponse =  HttpUtils.sendGetDownLoadWithDigestAuth(molochUrl,
@@ -194,6 +196,9 @@ public class SessionService {
         }
         if (!ObjectUtils.isEmpty(sessionRequest.getTargetIp())) {
             boolQueryBuilder.must(QueryBuilders.termQuery("dstIp", sessionRequest.getTargetIp()));
+        }
+        if (!ObjectUtils.isEmpty(sessionRequest.getProtocal())) {
+            boolQueryBuilder.must(QueryBuilders.wildcardQuery("protocol","*" +sessionRequest.getProtocal() + "*"));
         }
     }
 
@@ -225,6 +230,9 @@ public class SessionService {
             .sourceMac(model.getSrcMac())
             .targetMac(model.getDstMac())
             .protocalType(model.getProtocol())
+            .srcPort(model.getSrcPort())
+            .dstPort(model.getDstPort())
+            .timestamp(model.getTimestamp().toString())
             .build();
     }
 
