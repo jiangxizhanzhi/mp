@@ -8,7 +8,8 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.base.util.ClassUtils;
 import cn.cyberpeace.mp.base.util.ListTreeNode;
-import cn.cyberpeace.mp.scene.core.base.stereotype.PluginKey;
+import cn.cyberpeace.mp.scene.core.plugin.base.BaseScenePluginHandler;
+import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
 import cn.cyberpeace.mp.scene.core.bo.base.*;
 import cn.cyberpeace.mp.scene.core.exception.SceneNotExistException;
 import cn.cyberpeace.mp.scene.model.base.*;
@@ -42,6 +43,7 @@ import java.util.stream.Collectors;
         "sceneElementMapper",
         "sceneElementPortMapper",
         "sceneElementPortConnectionMapper",
+        "sceneElementPluginMapper",
 })
 @Getter
 public abstract class BaseSceneHandler<
@@ -50,6 +52,7 @@ public abstract class BaseSceneHandler<
         E0 extends BaseSceneElementModel,
         P0 extends BaseSceneElementPortModel,
         C0 extends BaseSceneElementPortConnectionModel,
+        P1 extends BaseSceneElementPluginModel,
         S extends BaseSceneBO<S0>,
         A extends BaseSceneAreaBO<A0>,
         P extends BaseSceneElementPortBO<P0>,
@@ -62,7 +65,8 @@ public abstract class BaseSceneHandler<
         M3 extends BaseSceneElementMapper<E0>,
         M4 extends BaseSceneElementPortMapper<P0>,
         M5 extends BaseSceneElementPortConnectionMapper<C0>,
-        P1 extends BaseScenePluginHandler> {
+        M6 extends BaseSceneElementPluginMapper<P1>,
+        P2 extends BaseScenePluginHandler<?, ?>> {
 
     private boolean isAreaMode;
     private S scene;
@@ -70,9 +74,9 @@ public abstract class BaseSceneHandler<
     private final Map<String, A> areaMap = new HashMap<>();
     private final Map<String, E> elementMap = new HashMap<>();
     private final Map<String, P> elementPortMap = new HashMap<>();
-    private final Map<String, E> elementPortIdElementMap = new HashMap<>();
     private final Map<String, C> elementPortConnectionMap = new HashMap<>();
     private final Set<String> outerConnectionPortIds = new HashSet<>();
+    private final Map<String, ScenePluginDataBO> scenePluginData = new HashMap<>();
 
     private Class<D> sceneDataBOClass;
     private Class<T> sceneTopologyBOClass;
@@ -87,27 +91,30 @@ public abstract class BaseSceneHandler<
     private Class<E0> sceneElementModelClass;
     private Class<P0> sceneElementPortModelClass;
     private Class<C0> sceneElementPortConnectionModelClass;
+    private Class<P1> sceneElementPluginModelClass;
 
     private M1 sceneMapper;
     private M2 sceneAreaMapper;
     private M3 sceneElementMapper;
     private M4 sceneElementPortMapper;
     private M5 sceneElementPortConnectionMapper;
+    private M6 sceneElementPluginMapper;
 
-    private Class<P1> scenePluginHandlerInterface;
+    private Class<P2> scenePluginHandlerInterface;
+    private Map<String, P2> pluginMap;
 
-    private Map<String, P1> pluginMap;
+    private Map<String, List<P1>> elementIdPluginsMap;
 
     @SuppressWarnings("unchecked")
     private void initPluginMap() {
-        Map<String, P1> pluginKeyMap = new HashMap<>();
+        Map<String, P2> pluginKeyMap = new HashMap<>();
         BeanUtils.getBeanType(scenePluginHandlerInterface).forEach((name, pluginInstance) -> {
             Class<?> pluginClass = pluginInstance.getClass();
             var pluginKeyAnnotation = pluginClass.getAnnotation(PluginKey.class);
             if (pluginKeyAnnotation == null) {
                 return;
             }
-            pluginKeyMap.put(pluginKeyAnnotation.value(), (P1) ClassUtils.createInstance(pluginClass));
+            pluginKeyMap.put(pluginKeyAnnotation.value(), (P2) ClassUtils.createInstance(pluginClass));
         });
         pluginMap = pluginKeyMap;
     }
@@ -179,6 +186,11 @@ public abstract class BaseSceneHandler<
                 elementPortConnection.getTarget());
     }
 
+    private String elementPluginKey(P1 elementPlugin) {
+        return StringUtils.joinWith(":", elementPlugin.getSceneElement(),
+                elementPlugin.getPluginKey());
+    }
+
     private void loadAreaBOs(List<A> areas) {
         if (areas == null) {
             return;
@@ -208,7 +220,6 @@ public abstract class BaseSceneHandler<
             }
             elementPorts.forEach(elementPort -> {
                 elementPortMap.put(elementPort.getId(), elementPort);
-                elementPortIdElementMap.put(elementPort.getId(), element);
             });
         });
     }
@@ -235,6 +246,13 @@ public abstract class BaseSceneHandler<
 
             elementPortConnectionMap.put(elementPortConnectionKey(connection), connection);
         });
+    }
+
+    private void loadScenePluginData(Map<String, ScenePluginDataBO> scenePluginData) {
+        if (scenePluginData == null) {
+            return;
+        }
+        scenePluginData.forEach(this.scenePluginData::put);
     }
 
     private void loadAreas(List<A0> areas) {
@@ -273,7 +291,6 @@ public abstract class BaseSceneHandler<
             var elementPortBO = ClassUtils.createInstance(sceneElementPortBOClass);
             elementPortBO.fromModel(elementPort);
             elementPortMap.put(elementPortBO.getId(), elementPortBO);
-            elementPortIdElementMap.put(elementPortBO.getId(), elementBO);
         });
     }
 
@@ -300,6 +317,15 @@ public abstract class BaseSceneHandler<
             var elementPortConnectionBO = ClassUtils.createInstance(sceneElementPortConnectionBOClass);
             elementPortConnectionBO.fromModel(connection);
             elementPortConnectionMap.put(elementPortConnectionKey(elementPortConnectionBO), elementPortConnectionBO);
+        });
+    }
+
+    private void loadElementPlugin(List<P1> elementPlugins) {
+        elementPlugins.forEach(elementPlugin -> {
+            String elementId = elementPlugin.getSceneElement();
+            List<P1> plugins = elementIdPluginsMap.getOrDefault(elementId, new ArrayList<>());
+            plugins.add(elementPlugin);
+            elementIdPluginsMap.put(elementId, plugins);
         });
     }
 
@@ -370,6 +396,15 @@ public abstract class BaseSceneHandler<
                     .filterIn(BaseSceneElementModel::getArea, areaIds);
         }
         return sceneElementPortConnectionMapper.list(condition);
+    }
+
+    private List<P1> readElementPlugins(String... elementIds) {
+        var condition = new HumanCondition()
+                .filterEqual(BaseSceneElementPluginModel::getScene, scene.getEid());
+        if (elementIds.length > 0) {
+            condition.filterIn(BaseSceneElementPluginModel::getSceneElement, elementIds);
+        }
+        return sceneElementPluginMapper.list(condition);
     }
 
     private <M extends BaseModel> DiffTargets<M> diffTargets(Map<String, M> targetMap,
@@ -506,6 +541,35 @@ public abstract class BaseSceneHandler<
         return diff;
     }
 
+    private DiffTargets<P1> saveElementPlugins(Map<String, P1> existElementPluginMap) {
+        Map<String, P1> savingElementPluginMap = new HashMap<>();
+        String sceneId = scene.getEid();
+        scenePluginData.forEach((pluginKey, pluginData) -> {
+            Map<String, Map<String, Object>> pluginElements = pluginData.getElements();
+            if (pluginElements == null) {
+                return;
+            }
+
+            pluginElements.forEach((nodeId, nodePluginData) -> {
+                var element = elementMap.getOrDefault(nodeId, null);
+                if (element == null) {
+                    return;
+                }
+
+                P1 elementPlugin = ClassUtils.createInstance(sceneElementPluginModelClass);
+                elementPlugin.setScene(sceneId);
+                elementPlugin.setSceneElement(element.getEid());
+                elementPlugin.setPluginKey(pluginKey);
+                savingElementPluginMap.put(elementPluginKey(elementPlugin), elementPlugin);
+            });
+        });
+
+        DiffTargets<P1> diff = diffTargets(savingElementPluginMap, existElementPluginMap);
+        saveDiff(sceneElementPluginMapper, diff);
+        loadElementPlugin(ListUtils.union(diff.getAddingTargets(), diff.getUpdatingTargets()));
+        return diff;
+    }
+
     private void fromData(D sceneDataBO) {
         var topology = sceneDataBO.getTopology();
         scene = topology.getScene();
@@ -513,6 +577,7 @@ public abstract class BaseSceneHandler<
         loadAreaBOs(topology.getAreas());
         loadElementBOs(topology.getElements());
         loadConnectionBOs(topology.getConnections());
+        loadScenePluginData(sceneDataBO.getPlugins());
     }
 
     public void init(D sceneDataBO, boolean isAreaMode) throws SceneNotExistException {
@@ -560,7 +625,6 @@ public abstract class BaseSceneHandler<
         areaMap.clear();
         elementMap.clear();
         elementPortMap.clear();
-        elementPortIdElementMap.clear();
         elementPortConnectionMap.clear();
 
         loadAreas(readAreas());
@@ -569,9 +633,11 @@ public abstract class BaseSceneHandler<
             String currentAreaId = areaId == null ? StringUtils.EMPTY : areaId;
             filterAreaIds = ArrayUtils.addAll(areaMap.keySet().toArray(new String[0]), currentAreaId);
         }
-        loadElements(readElements(filterAreaIds));
+        var elements = readElements(filterAreaIds);
+        loadElements(elements);
         loadElementPorts(readElementPorts(filterAreaIds));
         loadConnections(readElementPortConnections(filterAreaIds));
+        loadElementPlugin(readElementPlugins(elements.stream().map(BaseModel::getId).toArray(String[]::new)));
     }
 
     public void save() {
@@ -579,6 +645,7 @@ public abstract class BaseSceneHandler<
         Map<String, E0> existElementMap;
         Map<String, P0> existElementPortMap;
         Map<String, C0> existElementPortConnectionMap;
+        Map<String, P1> existElementPluginMap;
 
         if (!StringUtils.isEmpty(scene.getEid())) {
             existAreaMap = readAreas().stream()
@@ -594,11 +661,15 @@ public abstract class BaseSceneHandler<
                     .collect(Collectors.toMap(BaseSceneElementPortModel::getPortId, x -> x));
             existElementPortConnectionMap = readElementPortConnections(filterAreaIds).stream()
                     .collect(Collectors.toMap(this::elementPortConnectionKey, x -> x));
+            existElementPluginMap = readElementPlugins(existElementMap.values().stream()
+                    .map(BaseModel::getId).toArray(String[]::new)).stream()
+                    .collect(Collectors.toMap(this::elementPluginKey, x -> x));
         } else {
             existAreaMap = new HashMap<>();
             existElementMap = new HashMap<>();
             existElementPortMap = new HashMap<>();
             existElementPortConnectionMap = new HashMap<>();
+            existElementPluginMap = new HashMap<>();
         }
 
         saveScene();
@@ -606,6 +677,8 @@ public abstract class BaseSceneHandler<
         DiffTargets<E0> diffElements = saveElements(existElementMap);
         DiffTargets<P0> diffElementPorts = saveElementPorts(existElementPortMap);
         DiffTargets<C0> diffElementPortConnections = saveElementPortConnections(existElementPortConnectionMap);
+        // elementPlugin 由于通过服务端id映射，在拓扑保存后才能获取
+        DiffTargets<P1> diffElementPlugins = saveElementPlugins(existElementPluginMap);
     }
 
     public void delete() {
@@ -617,7 +690,7 @@ public abstract class BaseSceneHandler<
         if (isAreaMode) {
             String currentAreaId = areaId == null ? StringUtils.EMPTY : areaId;
             filterAreaIds = ArrayUtils.addAll(areas.stream()
-                    .map(area -> area.getNodeId()).toArray(String[]::new), currentAreaId);
+                    .map(BaseSceneNodeModel::getNodeId).toArray(String[]::new), currentAreaId);
         }
         List<E0> elements = readElements(filterAreaIds);
         List<P0> elementPorts = readElementPorts(filterAreaIds);

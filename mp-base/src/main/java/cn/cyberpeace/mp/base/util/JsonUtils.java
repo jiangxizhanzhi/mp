@@ -8,6 +8,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
+
 /**
  * jackson utils
  */
@@ -76,5 +78,13 @@ public class JsonUtils {
         } catch (JsonProcessingException jpe) {
             return false;
         }
+    }
+
+    public static <T> T mapToBean(Map<String, Object> map, Class<T> beanClass) {
+        return parse(toJsonString(map), beanClass);
+    }
+
+    public static <T> Map<String, Object> beanToMap(T obj) {
+        return parse(toJsonString(obj), new TypeReference<Map<String, Object>>() {});
     }
 }
