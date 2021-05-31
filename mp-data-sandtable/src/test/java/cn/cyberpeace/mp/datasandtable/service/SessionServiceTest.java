@@ -33,6 +33,7 @@ public class SessionServiceTest {
         sessionRequest.setEndTime(LocalDateTime.now());
         sessionRequest.setGroupList(Lists.newArrayList("default"));
         sessionRequest.setSourceIp("10.0.1.253");
+        sessionRequest.setProtocal("dns");
         service.querySessionListWithGroup(sessionRequest);
     };
 }

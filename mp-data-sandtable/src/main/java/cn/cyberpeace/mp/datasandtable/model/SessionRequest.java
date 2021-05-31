@@ -57,4 +57,10 @@ public class SessionRequest {
      * 分页页码
      */
     private Integer pageNum = 1;
+
+    /**
+     * 协议
+     */
+    @ApiModelProperty("协议 模糊查询字段")
+    private String protocal;
 }

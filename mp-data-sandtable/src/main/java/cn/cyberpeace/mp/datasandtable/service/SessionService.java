@@ -197,6 +197,9 @@ public class SessionService {
         if (!ObjectUtils.isEmpty(sessionRequest.getTargetIp())) {
             boolQueryBuilder.must(QueryBuilders.termQuery("dstIp", sessionRequest.getTargetIp()));
         }
+        if (!ObjectUtils.isEmpty(sessionRequest.getProtocal())) {
+            boolQueryBuilder.must(QueryBuilders.wildcardQuery("protocol","*" +sessionRequest.getProtocal() + "*"));
+        }
     }
 
     /**
