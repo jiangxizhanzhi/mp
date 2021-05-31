@@ -10,18 +10,16 @@ import org.springframework.stereotype.Component;
 public class UserPermissionFields extends BaseModelFields {
     public static final DynamicFields allFields = new DynamicFields(ClassUtils.getBeanClassFields(UserPermissionModel.class));
 
-    public static final DynamicFields availableFields = new DynamicFields(new String[]{
-            "tenant", "owner", "target", "canRead", "canCreate", "canUpdate", "canDelete"
-    }).merge(BaseModelFields.availableFields);
+    public static final DynamicFields availableFields = new DynamicFields(UserPermissionModel::getTenant,
+            UserPermissionModel::getOwner, UserPermissionModel::getTarget, UserPermissionModel::getCanRead,
+            UserPermissionModel::getCanCreate, UserPermissionModel::getCanUpdate, UserPermissionModel::getCanDelete
+    ).merge(BaseModelFields.availableFields);
 
     public static final DynamicFields hiddenFields = allFields.subtract(availableFields);
 
-    public static final DynamicFields readonlyFields = new DynamicFields(new String[]{
-    }).merge(BaseModelFields.readonlyFields);
+    public static final DynamicFields readonlyFields = new DynamicFields().merge(BaseModelFields.readonlyFields);
 
-    public static final DynamicFields searchFields = new DynamicFields(new String[]{
-    });
+    public static final DynamicFields searchFields = new DynamicFields();
 
-    public static final DynamicFields orderFields = new DynamicFields(new String[]{
-    }).merge(BaseModelFields.readonlyFields);
+    public static final DynamicFields orderFields = new DynamicFields().merge(BaseModelFields.readonlyFields);
 }

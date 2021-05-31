@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.scene.core.base;
 
 import cn.cyberpeace.mp.base.annotation.BeanFieldNames;
 import cn.cyberpeace.mp.base.annotation.ClassFieldNames;
-import cn.cyberpeace.mp.base.exception.MqRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
@@ -309,9 +308,9 @@ public abstract class BaseSceneHandler<
     }
 
     private List<A0> readAreas(String... areaIds) {
-        var condition = new HumanCondition().filterEqual("scene", scene.getEid());
+        var condition = new HumanCondition().filterEqual(BaseSceneAreaModel::getScene, scene.getEid());
         if (areaIds.length > 0) {
-            condition.filterIn("area", areaIds);
+            condition.filterIn(BaseSceneAreaModel::getArea, areaIds);
         }
         List<A0> areas = sceneAreaMapper.list(condition);
 
@@ -330,9 +329,10 @@ public abstract class BaseSceneHandler<
 
     private List<E0> readElements(String... areaIds) {
         List<E0> elements;
-        var condition = new HumanCondition().filterEqual("scene", scene.getEid());
+        var condition = new HumanCondition()
+                .filterEqual(BaseSceneElementModel::getScene, scene.getEid());
         if (areaIds.length > 0) {
-            condition.filterIn("area", areaIds);
+            condition.filterIn(BaseSceneElementModel::getArea, areaIds);
         }
         elements = sceneElementMapper.list(condition);
         return elements;
@@ -341,13 +341,13 @@ public abstract class BaseSceneHandler<
     private List<P0> readElementPorts(String... areaIds) {
         var condition = new HumanCondition()
                 .link(sceneElementPortModelClass, sceneElementModelClass)
-                .filterLink(sceneElementPortModelClass, "sceneElement",
-                        sceneElementModelClass, "id")
+                .filterLink(sceneElementPortModelClass, BaseSceneElementPortModel::getSceneElement,
+                        sceneElementModelClass, BaseSceneElementModel::getId)
                 .currentLink(sceneElementModelClass)
-                .filterEqual("scene", scene.getEid());
+                .filterEqual(BaseSceneElementModel::getScene, scene.getEid());
         if (areaIds.length > 0) {
             condition.currentLink(sceneElementModelClass)
-                    .filterIn("area", areaIds);
+                    .filterIn(BaseSceneElementModel::getArea, areaIds);
         }
         return sceneElementPortMapper.list(condition);
     }
@@ -356,18 +356,18 @@ public abstract class BaseSceneHandler<
         var condition = new HumanCondition()
                 .link(sceneElementPortConnectionModelClass, sceneElementPortModelClass, sceneElementModelClass)
                 .filterOrStart()
-                .orLink(sceneElementPortConnectionModelClass, "sourcePort",
-                        sceneElementPortModelClass, "id")
-                .orLink(sceneElementPortConnectionModelClass, "targetPort",
-                        sceneElementPortModelClass, "id")
+                .orLink(sceneElementPortConnectionModelClass, BaseSceneElementPortConnectionModel::getSourcePort,
+                        sceneElementPortModelClass, BaseSceneElementPortModel::getId)
+                .orLink(sceneElementPortConnectionModelClass, BaseSceneElementPortConnectionModel::getTargetPort,
+                        sceneElementPortModelClass, BaseSceneElementPortModel::getId)
                 .filterOrEnd()
-                .filterLink(sceneElementPortModelClass, "sceneElement",
-                        sceneElementModelClass, "id")
+                .filterLink(sceneElementPortModelClass, BaseSceneElementPortModel::getSceneElement,
+                        sceneElementModelClass, BaseSceneElementModel::getId)
                 .currentLink(sceneElementPortConnectionModelClass)
-                .filterEqual("scene", scene.getEid());
+                .filterEqual(BaseSceneElementPortConnectionModel::getScene, scene.getEid());
         if (areaIds.length > 0) {
             condition.currentLink(sceneElementModelClass)
-                    .filterIn("area", areaIds);
+                    .filterIn(BaseSceneElementModel::getArea, areaIds);
         }
         return sceneElementPortConnectionMapper.list(condition);
     }

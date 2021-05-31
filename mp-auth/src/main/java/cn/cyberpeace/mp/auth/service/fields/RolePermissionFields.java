@@ -11,18 +11,16 @@ public class RolePermissionFields extends BaseModelFields {
     public static final DynamicFields allFields = new DynamicFields(ClassUtils.getBeanClassFields(
             RolePermissionModel.class));
 
-    public static final DynamicFields availableFields = new DynamicFields(new String[]{
-            "tenant", "owner", "target", "canRead", "canCreate", "canUpdate", "canDelete"
-    }).merge(BaseModelFields.availableFields);
+    public static final DynamicFields availableFields = new DynamicFields(RolePermissionModel::getTenant,
+            RolePermissionModel::getOwner, RolePermissionModel::getTarget, RolePermissionModel::getCanRead,
+            RolePermissionModel::getCanCreate, RolePermissionModel::getCanUpdate, RolePermissionModel::getCanDelete
+    ).merge(BaseModelFields.availableFields);
 
     public static final DynamicFields hiddenFields = allFields.subtract(availableFields);
 
-    public static final DynamicFields readonlyFields = new DynamicFields(new String[]{
-    }).merge(BaseModelFields.readonlyFields);
+    public static final DynamicFields readonlyFields = new DynamicFields().merge(BaseModelFields.readonlyFields);
 
-    public static final DynamicFields searchFields = new DynamicFields(new String[]{
-    });
+    public static final DynamicFields searchFields = new DynamicFields();
 
-    public static final DynamicFields orderFields = new DynamicFields(new String[]{
-    }).merge(BaseModelFields.readonlyFields);
+    public static final DynamicFields orderFields = new DynamicFields().merge(BaseModelFields.readonlyFields);
 }

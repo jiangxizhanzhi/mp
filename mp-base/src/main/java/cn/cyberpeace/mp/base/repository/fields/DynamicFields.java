@@ -1,13 +1,12 @@
 package cn.cyberpeace.mp.base.repository.fields;
 
+import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.base.util.CastUtils;
+import cn.cyberpeace.mp.base.util.SerializableFunction;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class DynamicFields {
 
@@ -17,8 +16,13 @@ public class DynamicFields {
         this.resetFieldsMap();
     }
 
-    public DynamicFields(String[] fields) {
+    public DynamicFields(String... fields) {
         setFields(fields);
+    }
+
+    @SafeVarargs
+    public <T> DynamicFields(SerializableFunction<T>... fieldGetters) {
+        this(Arrays.stream(fieldGetters).map(BeanUtils::getBeanGetterFieldName).toArray(String[]::new));
     }
 
     public DynamicFields(List<String> fields) {

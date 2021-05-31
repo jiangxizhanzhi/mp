@@ -3,6 +3,10 @@ package cn.cyberpeace.mp.base.service.code;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * 错误码接口，定义服务错误码枚举实现本接口
+ * 通过构造函数setCode
+ */
 public interface ErrorCode extends ServiceCode {
 
     @SuppressWarnings("java:S2386")

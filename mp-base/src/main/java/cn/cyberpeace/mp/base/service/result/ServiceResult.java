@@ -9,6 +9,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * 统一服务返回结果
+ * @param <T> 返回结果数据源对象类型
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -48,6 +52,10 @@ public class ServiceResult<T> {
         setDetail(detail);
     }
 
+    /**
+     * 从数据源加载最终序列化数据
+     * @return this
+     */
     public ServiceResult<T> asResult() {
         if (source instanceof BaseObjResult) {
             data = ((BaseObjResult) source).asResult();

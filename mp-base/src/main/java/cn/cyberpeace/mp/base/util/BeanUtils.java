@@ -37,6 +37,15 @@ public class BeanUtils implements ApplicationContextAware {
         return context.getBeansOfType(clazz);
     }
 
+    public static <T> String getBeanGetterFieldName(SerializableFunction<T> func) {
+        String funcName = ClassUtils.getFuncName(func);
+        if (funcName == null) {
+            return null;
+        }
+
+        return funcName.substring(3, 4).toLowerCase() + funcName.substring(4);
+    }
+
     public static String[] getNullPropertyNames(Object obj) {
         final BeanWrapper objWrapper = new BeanWrapperImpl(obj);
         java.beans.PropertyDescriptor[] pds = objWrapper.getPropertyDescriptors();

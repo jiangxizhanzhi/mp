@@ -10,20 +10,21 @@ import org.springframework.stereotype.Component;
 public class UserFields extends BaseModelFields {
     public static final DynamicFields allFields = new DynamicFields(ClassUtils.getBeanClassFields(UserModel.class));
 
-    public static final DynamicFields availableFields = new DynamicFields(new String[]{
-            "tenant", "identifier", "username", "name", "nickname", "avatar", "birthday", "email", "mobile", "idCard",
-            "address", "status", "dateJoined", "expiredTime", "lastLogin"
-    }).merge(BaseModelFields.availableFields);
+    public static final DynamicFields availableFields = new DynamicFields(UserModel::getTenant,
+            UserModel::getIdentifier, UserModel::getUsername, UserModel::getName, UserModel::getNickname,
+            UserModel::getAvatar, UserModel::getBirthday, UserModel::getEmail, UserModel::getMobile,
+            UserModel::getIdCard, UserModel::getAddress, UserModel::getStatus, UserModel::getDateJoined,
+            UserModel::getExpiredTime, UserModel::getLastLogin
+    ).merge(BaseModelFields.availableFields);
 
     public static final DynamicFields hiddenFields = allFields.subtract(availableFields);
 
-    public static final DynamicFields readonlyFields = new DynamicFields(new String[]{
-    }).merge(BaseModelFields.readonlyFields);
+    public static final DynamicFields readonlyFields = new DynamicFields().merge(BaseModelFields.readonlyFields);
 
-    public static final DynamicFields searchFields = new DynamicFields(new String[]{
-            "identifier", "username", "name", "nickname", "email", "mobile", "idCard"
-    });
+    public static final DynamicFields searchFields = new DynamicFields(UserModel::getIdentifier,
+            UserModel::getUsername, UserModel::getName, UserModel::getNickname, UserModel::getEmail,
+            UserModel::getMobile, UserModel::getIdCard
+    );
 
-    public static final DynamicFields orderFields = new DynamicFields(new String[]{
-    }).merge(BaseModelFields.readonlyFields);
+    public static final DynamicFields orderFields = new DynamicFields().merge(BaseModelFields.readonlyFields);
 }

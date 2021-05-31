@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.base.repository;
 
 import cn.cyberpeace.mp.base.annotation.Recommendation;
-import cn.cyberpeace.mp.base.constant.BaseFieldName;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.Condition;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
@@ -21,6 +20,9 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 
 import java.lang.reflect.Proxy;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -105,6 +107,18 @@ public interface BaseModelMapper<M extends BaseModel> {
         return selectFields;
     }
 
+    private Object handleRawFieldValue(Class<?> fieldType, Object fieldValue) {
+        if (fieldType == LocalDateTime.class && fieldValue instanceof java.sql.Timestamp) {
+            return ((java.sql.Timestamp) fieldValue).toLocalDateTime();
+        } else if (fieldType == LocalDate.class && fieldValue instanceof java.sql.Date) {
+            return ((java.sql.Date) fieldValue).toLocalDate();
+        } else if (fieldType == LocalTime.class && fieldValue instanceof java.sql.Time) {
+            return ((java.sql.Time) fieldValue).toLocalTime();
+        } else {
+            return fieldValue;
+        }
+    }
+
     private M mapToObj(Map<String, Object> map) {
         if (map == null) {
             return null;
@@ -123,14 +137,15 @@ public interface BaseModelMapper<M extends BaseModel> {
             return null;
         }
 
-        String[] fieldNames = ClassUtils.getBeanClassFields(actualModelClass);
+        Map<String, Class<?>> fieldTypes = ClassUtils.getBeanClassFieldTypes(actualModelClass);
         final BeanWrapper objWrapper = new BeanWrapperImpl(obj);
-        for (String fieldName: fieldNames) {
+        fieldTypes.forEach((fieldName, fieldType) -> {
             String columnName = TextUtils.humpToLine(fieldName);
             if (map.containsKey(columnName)) {
-                objWrapper.setPropertyValue(fieldName, map.get(columnName));
+                Object fieldValue = handleRawFieldValue(fieldType, map.get(columnName));
+                objWrapper.setPropertyValue(fieldName, fieldValue);
             }
-        }
+        });
 
         return obj;
     }
@@ -165,7 +180,7 @@ public interface BaseModelMapper<M extends BaseModel> {
     private Object[] convertUpdateParams(List<M> objs) {
         var sampleObj = objs.get(0);
         sampleObj.setUpdateTime(null);
-        sampleObj.initDefault(BaseFieldName.UPDATE_TIME);
+        sampleObj.initDefault(BaseModel::getUpdateTime);
 
         var allModelFields = new DynamicFields(ClassUtils.getBeanClassFields(getModelClass()));
         List<String> updateFields = new ArrayList<>();
@@ -182,7 +197,7 @@ public interface BaseModelMapper<M extends BaseModel> {
         for (var i = 0; i < objs.size(); i++) {
             M obj = objs.get(i);
             sampleObj.setUpdateTime(null);
-            obj.initDefault(BaseFieldName.UPDATE_TIME);
+            obj.initDefault(BaseModel::getUpdateTime);
 
             var updateFieldValues = new Object[updateFields.size()];
             for (var j = 0; j < updateFields.size(); j++) {
@@ -211,6 +226,9 @@ public interface BaseModelMapper<M extends BaseModel> {
         }
     }
 
+    /**
+     * 返回原始map数据，适用于关联查询跨表结果
+     */
     @Recommendation
     default List<Map<String, Object>> originList(HumanCondition humanCondition) {
         if (humanCondition.getLimit() != null && humanCondition.getLimit() == 0) {
@@ -241,6 +259,9 @@ public interface BaseModelMapper<M extends BaseModel> {
         }
     }
 
+    /**
+     * 返回原始map数据，适用于关联查询跨表结果
+     */
     @Recommendation
     default Map<String, Object> originFirst(HumanCondition humanCondition) {
         humanCondition.slice(0, 1);
@@ -278,6 +299,9 @@ public interface BaseModelMapper<M extends BaseModel> {
         return create((String[]) createParams[0], ((Object[][]) createParams[1])[0]);
     }
 
+    /**
+     * 更新，obj必须要有id
+     */
     @Recommendation
     default boolean update(M obj) {
         Object[] updateParams = convertUpdateParams(List.of(obj));
@@ -289,6 +313,9 @@ public interface BaseModelMapper<M extends BaseModel> {
         return update(obj.getId(), (String[]) updateParams[0], ((Object[][]) updateParams[1])[0]);
     }
 
+    /**
+     * 保存，obj没有id则创建，有id则更新
+     */
     @Recommendation
     default boolean save(M obj) {
         if (StringUtils.isEmpty(obj.getId())) {
@@ -313,6 +340,9 @@ public interface BaseModelMapper<M extends BaseModel> {
         return bulkCreate((String[]) createParams[0], (Object[][]) createParams[1]);
     }
 
+    /**
+     * 批量更新，所有objs必须要有id, 更新数据字段必须一致
+     */
     @Recommendation
     default int bulkUpdate(List<M> objs) {
         if (objs.isEmpty()) {
@@ -446,6 +476,12 @@ public interface BaseModelMapper<M extends BaseModel> {
         return successCount;
     }
 
+    /**
+     * 条件更新
+     * @param obj 需要更新的数据
+     * @param humanCondition 更新条件
+     * @return 更新数量
+     */
     @Recommendation
     default int filterUpdate(M obj, HumanCondition humanCondition) {
         Object[] updateParams = convertUpdateParams(List.of(obj));
@@ -453,6 +489,11 @@ public interface BaseModelMapper<M extends BaseModel> {
                 ((Object[][]) updateParams[1])[0], humanCondition.toCondition());
     }
 
+    /**
+     * 条件删除
+     * @param humanCondition 删除条件
+     * @return 删除数量
+     */
     @Recommendation
     default int filterDelete(HumanCondition humanCondition) {
         return getCommonMapper().filterDelete(getTableName(humanCondition), humanCondition.toCondition());
