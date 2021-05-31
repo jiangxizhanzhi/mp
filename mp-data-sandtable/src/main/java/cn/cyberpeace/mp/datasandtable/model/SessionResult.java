@@ -1,5 +1,10 @@
 package cn.cyberpeace.mp.datasandtable.model;
 
+import cn.cyberpeace.mp.base.serializer.CustomLocalDateTimeDeserializer;
+import cn.cyberpeace.mp.base.serializer.CustomLocalDateTimeSerializer;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import java.time.LocalDateTime;
 import lombok.*;
 
 @Data
@@ -21,8 +26,14 @@ public class SessionResult {
 
     private String targetMac;
 
+    private String srcPort;
+
+    private String dstPort;
+
     /**
      * 协议类型
      */
     private String protocalType;
+
+    private String timestamp;
 }

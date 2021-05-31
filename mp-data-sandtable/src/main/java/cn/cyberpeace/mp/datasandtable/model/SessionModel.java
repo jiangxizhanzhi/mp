@@ -1,5 +1,10 @@
 package cn.cyberpeace.mp.datasandtable.model;
 
+import cn.cyberpeace.mp.base.serializer.CustomLocalDateTimeDeserializer;
+import cn.cyberpeace.mp.base.serializer.CustomLocalDateTimeSerializer;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,4 +31,10 @@ public class SessionModel {
     private String dstMac;
 
     private String protocol;
+
+    private String srcPort;
+
+    private String dstPort;
+
+    private LocalDateTime timestamp;
 }

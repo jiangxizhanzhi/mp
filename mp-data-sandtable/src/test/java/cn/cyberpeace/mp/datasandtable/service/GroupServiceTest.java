@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.datasandtable.service;
 
-import cn.cyberpeace.mp.Application;
+import cn.cyberpeace.mp.datasandtable.TestDatasandtableApplciation;
 import cn.cyberpeace.mp.datasandtable.model.GroupModel;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
 
-@SpringBootTest(classes = Application.class)
+@SpringBootTest(classes = TestDatasandtableApplciation.class)
 @RunWith(SpringRunner.class)
 public class GroupServiceTest {
     @Autowired
