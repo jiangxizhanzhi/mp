@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.base.util;
 
 import cn.cyberpeace.mp.base.annotation.ClassFieldClasses;
 import cn.cyberpeace.mp.base.annotation.ClassFieldNames;
-import cn.cyberpeace.mp.base.exception.MqRuntimeException;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanWrapper;
@@ -189,7 +189,7 @@ public class ClassUtils {
         try {
             return clazz.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
-            throw new MqRuntimeException(clazz.getName() + " create simple instance failed: " + e.getMessage());
+            throw new MpRuntimeException(clazz.getName() + " create simple instance failed: " + e.getMessage());
         }
     }
 
@@ -235,7 +235,7 @@ public class ClassUtils {
                 }
             } catch (NoSuchMethodException ignored) {
             } catch (IllegalAccessException | InvocationTargetException | SecurityException e) {
-                throw new MqRuntimeException(e.getMessage());
+                throw new MpRuntimeException(e.getMessage());
             }
         }
 

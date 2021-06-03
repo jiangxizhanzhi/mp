@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.base.util;
 
-import cn.cyberpeace.mp.base.exception.MqRuntimeException;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -27,7 +27,7 @@ public class JsonUtils {
         try {
             obj = objectMapper.readValue(content, valueType);
         } catch (JsonProcessingException e) {
-            throw new MqRuntimeException("Parse json text error: " + e.getMessage());
+            throw new MpRuntimeException("Parse json text error: " + e.getMessage());
         }
 
         return obj;
@@ -38,7 +38,7 @@ public class JsonUtils {
         try {
             obj = objectMapper.readValue(content, valueTypeRef);
         } catch (JsonProcessingException e) {
-            throw new MqRuntimeException("Parse json text error: " + e.getMessage());
+            throw new MpRuntimeException("Parse json text error: " + e.getMessage());
         }
 
         return obj;
@@ -49,7 +49,7 @@ public class JsonUtils {
         try {
             obj = objectMapper.readTree(content);
         } catch (JsonProcessingException e) {
-            throw new MqRuntimeException("Parse json text error: " + e.getMessage());
+            throw new MpRuntimeException("Parse json text error: " + e.getMessage());
         }
         return obj;
     }
@@ -59,7 +59,7 @@ public class JsonUtils {
         try {
             result = objectMapper.writeValueAsString(obj);
         } catch (JsonProcessingException e) {
-            throw new MqRuntimeException("Stringify obj error: " + e.getMessage());
+            throw new MpRuntimeException("Stringify obj error: " + e.getMessage());
         }
 
         return result;

@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.datasandtable.service;
 
-import cn.cyberpeace.mp.base.exception.MqRuntimeException;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.datasandtable.config.SandTableConfig;
@@ -166,7 +166,7 @@ public class SessionService {
             molochUrl = DataSandtableConstant.groupIdSessionUrlCache.get(groupId);
         } catch (ExecutionException e) {
             log.error("查询缓存异常 groupId {}" + e, groupId);
-            throw new MqRuntimeException("查询缓存异常 groupId: "+ groupId);
+            throw new MpRuntimeException("查询缓存异常 groupId: "+ groupId);
         }
 
         //todo 为了调试
@@ -178,7 +178,7 @@ public class SessionService {
                 sandTableConfig.getUserName(), sandTableConfig.getPassword());
         } catch (IOException e) {
             log.error("查询缓存异常 groupId {}" + e, groupId);
-            throw new MqRuntimeException("查询缓存异常 groupId: "+ groupId);
+            throw new MpRuntimeException("查询缓存异常 groupId: "+ groupId);
         }
         return httpResponse;
     }
@@ -210,7 +210,7 @@ public class SessionService {
      */
     public List<SessionResult> querySessionAllList(SessionRequest sessionRequest) {
         if (CollectionUtils.isEmpty(sessionRequest.getGroupList())) {
-            throw new MqRuntimeException("分组id列表必须传");
+            throw new MpRuntimeException("分组id列表必须传");
         }
         return querySessionListWithGroup(sessionRequest);
     }

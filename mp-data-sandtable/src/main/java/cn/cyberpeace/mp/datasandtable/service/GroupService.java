@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.datasandtable.service;
 
-import cn.cyberpeace.mp.base.exception.MqRuntimeException;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.datasandtable.config.SandTableConfig;
 import cn.cyberpeace.mp.datasandtable.model.GroupModel;
@@ -33,14 +33,14 @@ public class GroupService {
      */
     public List<GroupModel> queryAllGroups(){
         if (ObjectUtils.isEmpty(sandTableConfig.getGroupUrl())) {
-            throw new MqRuntimeException("底层分组服务url不存在，请配置");
+            throw new MpRuntimeException("底层分组服务url不存在，请配置");
         }
         String sceneListString;
         try {
             sceneListString = HttpUtils.sendGet(sandTableConfig.getGroupUrl());
         } catch (IOException e) {
             log.error("查询所有分组错误:"+ e);
-            throw new MqRuntimeException("查询分组错误:"+ e);
+            throw new MpRuntimeException("查询分组错误:"+ e);
         }
         JSONObject jsonObject = JSONObject.parseObject(sceneListString);
         JSONArray groupList= jsonObject.getJSONArray("scenes");
@@ -59,7 +59,7 @@ public class GroupService {
      */
     public GroupModel queryGroupById(String groupId) {
         if (ObjectUtils.isEmpty(groupId)) {
-            throw new MqRuntimeException("groupId 不为空");
+            throw new MpRuntimeException("groupId 不为空");
         }
 
         String requestUri = sandTableConfig.getGroupUrl() + "/" + groupId;
@@ -69,7 +69,7 @@ public class GroupService {
             res = HttpUtils.sendGet(requestUri);
         } catch (IOException e) {
             log.error("查询所有分组错误:"+ e);
-            throw new MqRuntimeException("查询分组错误:"+ e);
+            throw new MpRuntimeException("查询分组错误:"+ e);
         }
         JSONObject jsonObject = JSONObject.parseObject(res);
 
@@ -90,7 +90,7 @@ public class GroupService {
             HttpUtils.sendDelete(requestUri);
         } catch (IOException e) {
             log.error("删除分组失败:"+ e);
-            throw new MqRuntimeException("删除分组失败:"+ e);
+            throw new MpRuntimeException("删除分组失败:"+ e);
         }
     }
 
@@ -103,7 +103,7 @@ public class GroupService {
         JSONObject jsonObject = new JSONObject();
         if (ObjectUtils.isEmpty(groupModel.getGroupId()) || CollectionUtils.isEmpty(groupModel.getMacIds())) {
             log.error("新增分组参数为空");
-            throw new MqRuntimeException("新增分组参数为空:");
+            throw new MpRuntimeException("新增分组参数为空:");
         }
         jsonObject.put("scene_id", groupModel.getGroupId());
         jsonObject.put("macs", groupModel.getMacIds());
@@ -111,7 +111,7 @@ public class GroupService {
             HttpUtils.sendPost(sandTableConfig.getGroupUrl(), jsonObject.toJSONString());
         } catch (IOException e) {
             log.error("删除分组失败:"+ e);
-            throw new MqRuntimeException("删除分组失败:"+ e);
+            throw new MpRuntimeException("删除分组失败:"+ e);
         }
     }
 }

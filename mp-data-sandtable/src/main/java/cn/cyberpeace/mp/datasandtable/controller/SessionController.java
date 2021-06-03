@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.datasandtable.controller;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
-import cn.cyberpeace.mp.base.exception.MqRuntimeException;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.datasandtable.model.SessionRequest;
@@ -35,7 +35,7 @@ public class SessionController {
         try {
             resource = new InputStreamResource(httpResponse.getEntity().getContent());
         } catch (IOException e) {
-            throw new MqRuntimeException("获取文件流失败");
+            throw new MpRuntimeException("获取文件流失败");
         }
 
         var httpHeaders = new HttpHeaders();
