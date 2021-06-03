@@ -15,14 +15,14 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  */
 @ControllerAdvice
 @Slf4j
-public class MqRuntimeExceptionHandler {
+public class MpRuntimeExceptionHandler {
 
     private static final String LOGGER_FORMAT = "操作执行异常:,异常信息：{},堆栈信息：{}";
 
-    @ExceptionHandler(MqRuntimeException.class)
+    @ExceptionHandler(MpRuntimeException.class)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public ServiceResult<String> b2bRuntimeExceptionHandler(MqRuntimeException ex) {
+    public ServiceResult<String> b2bRuntimeExceptionHandler(MpRuntimeException ex) {
         log.error(LOGGER_FORMAT, ex.getMessage(), ex);
         return ServiceResult.<String>builder().message(ex.getMessage()).serviceCode(BaseErrorCode.ERROR).build();
     }
