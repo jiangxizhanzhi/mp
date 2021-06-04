@@ -1,12 +1,13 @@
 package cn.cyberpeace.mp.datasandtable.controller;
 
-import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.datasandtable.model.SPIViewRequest;
 import cn.cyberpeace.mp.datasandtable.model.SessionRequest;
 import cn.cyberpeace.mp.datasandtable.model.SessionResult;
 import cn.cyberpeace.mp.datasandtable.service.SessionService;
+import com.alibaba.fastjson.JSONObject;
 import java.io.IOException;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
@@ -55,11 +56,7 @@ public class SessionController {
     @PostMapping
     public ServiceResult<List<SessionResult>> querySessionListWithGroup(
         @RequestBody @Valid SessionRequest sessionRequest, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            return ServiceResult.<List<SessionResult>>builder()
-                .code(BaseErrorCode.PARAMS_INVALID.getCode()).message(bindingResult.getAllErrors().get(0).getDefaultMessage()).build();
-        }
-
+        handleValidMessage(bindingResult);
         return ServiceResult.<List<SessionResult>>builder().data(sessionService.querySessionListWithGroup(sessionRequest)).build();
     }
 
@@ -72,11 +69,25 @@ public class SessionController {
     @PostMapping("pageable")
     public ServiceResult<ListObjResult<SessionResult>> querySessionListWithGroupWithPage(
         @RequestBody @Valid SessionRequest sessionRequest, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            return ServiceResult.<ListObjResult<SessionResult>>builder()
-                .code(BaseErrorCode.PARAMS_INVALID.getCode()).message(bindingResult.getAllErrors().get(0).getDefaultMessage()).build();
-        }
+        handleValidMessage(bindingResult);
+
         return ServiceResult.<ListObjResult<SessionResult>>builder().data(sessionService.querySessionWithPage(sessionRequest)).build();
     }
 
+    @PostMapping("spiview")
+    public ServiceResult<JSONObject> querySessionSpiView(@RequestBody @Valid SPIViewRequest spiViewRequest, BindingResult bindingResult) {
+        handleValidMessage(bindingResult);
+        var spiView = sessionService.querySPIView(spiViewRequest);
+        return ServiceResult.<JSONObject>builder().data(JSONObject.parse(spiView)).build();
+    }
+
+    /**
+     * 处理参数异常
+     * @param bindingResult
+     */
+    private void handleValidMessage(BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            throw new MpRuntimeException(bindingResult.getAllErrors().get(0).getDefaultMessage());
+        }
+    }
 }
