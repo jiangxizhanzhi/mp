@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.datasandtable.config.SandTableConfig;
 import cn.cyberpeace.mp.datasandtable.constant.DataSandtableConstant;
+import cn.cyberpeace.mp.datasandtable.model.SPIViewRequest;
 import cn.cyberpeace.mp.datasandtable.model.SessionModel;
 import cn.cyberpeace.mp.datasandtable.model.SessionRequest;
 import cn.cyberpeace.mp.datasandtable.model.SessionResult;
@@ -182,6 +183,41 @@ public class SessionService {
         }
         return httpResponse;
     }
+
+    /**
+     * 查询spiView数据
+     * @param spiViewRequest spiViewRequest
+     * @return String
+     */
+    public String querySPIView(SPIViewRequest spiViewRequest) {
+        HttpResponse httpResponse = null;
+        String molochUrl;
+        try {
+            molochUrl = DataSandtableConstant.groupIdSessionUrlCache.get(spiViewRequest.getGroupId());
+        } catch (ExecutionException e) {
+            log.error("查询缓存异常 groupId {}" + e, spiViewRequest.getGroupId());
+            throw new MpRuntimeException("查询缓存异常 groupId: "+ spiViewRequest.getGroupId());
+        }
+
+        //todo 为了调试
+        var spiMolochUrl = "http://10.100.7.50:8005" + "/spiview.json";
+//        spiMolochUrl = molochUrl + "/spiview.json";
+        var spiMolochUrlBuilder = new StringBuilder();
+        spiMolochUrlBuilder.append(spiMolochUrl)
+            .append("?facets=").append(1)
+            .append("&spi=").append("srcIp,dstIp,ipProtocol")
+            .append("&startTime=").append(spiViewRequest.getStartTime())
+            .append("&stopTime=").append(spiViewRequest.getStopTime())
+            .append("&interval").append("auto")
+        ;
+        try {
+           return HttpUtils.sendGet(spiMolochUrlBuilder.toString(), sandTableConfig.getUserName(), sandTableConfig.getPassword());
+        } catch (Exception e) {
+            log.error("查询spi视图异常 groupId {}" + e, spiViewRequest.getGroupId());
+            throw new MpRuntimeException("查询spi视图异常 groupId: " + spiViewRequest.getGroupId());
+        }
+    }
+
 
 
     /**
