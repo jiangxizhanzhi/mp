@@ -38,3 +38,12 @@ mp:
       username: api
       password: api
     es-nodes: 10.100.7.50:9200
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, mappings
+
+

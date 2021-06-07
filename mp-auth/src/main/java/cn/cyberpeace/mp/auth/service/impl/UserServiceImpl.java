@@ -4,15 +4,19 @@ import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.UserFields;
+import cn.cyberpeace.mp.auth.util.PasswordUtils;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@Slf4j
 public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper, UserFields>
         implements UserService {
 
@@ -46,4 +50,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return super.bulkUpdate(objs);
     }
 
+    @Override
+    public UserModel getByUserName(String userName) {
+        log.info("userName:{}", userName);
+        return getModelMapper().first(new HumanCondition().filterEqual("username", userName));
+    }
 }

@@ -15,6 +15,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Map;
 
 @Slf4j
@@ -24,10 +25,10 @@ public class BaseModel {
     private String id;
 
     @DefaultGen(DateGenerator.class)
-    private LocalDateTime createTime;
+    private Date createTime;
 
     @DefaultGen(DateGenerator.class)
-    private LocalDateTime updateTime;
+    private Date updateTime;
 
     private void initDefault(String fieldName, Map<String, Object[]> initDefaultFields) {
         Object[] value = initDefaultFields.getOrDefault(fieldName, null);

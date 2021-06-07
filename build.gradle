@@ -42,6 +42,7 @@ subprojects {
         implementation 'org.springframework.boot:spring-boot-starter-jdbc'
         implementation 'org.springframework.boot:spring-boot-starter-web'
         implementation 'org.springframework.boot:spring-boot-starter-websocket'
+        implementation 'org.springframework.boot:spring-boot-starter-actuator'
         implementation 'org.springframework.boot:spring-boot-starter-validation:2.5.0'
         implementation 'org.elasticsearch.client:elasticsearch-rest-high-level-client:7.7.1'
         implementation 'com.google.guava:guava:30.1.1-jre'
