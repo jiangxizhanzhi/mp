@@ -1,7 +1,7 @@
 server:
   servlet:
     context-path: /api
-  port: 8080
+  port: 8090
 
 spring:
   datasource:
@@ -15,10 +15,15 @@ spring:
     time-zone: GMT+8
   flyway:
     clean-disabled: true
+  application:
+    name: mp
 
 logging:
+  config: classpath:logback-spring.xml
+  level:
+    root: INFO
   file:
-    name: log/log.log
+    path: ${user.home}/logs
 
 mybatis:
   mapper-locations: classpath*:mapper/*.xml

@@ -2,28 +2,24 @@ package cn.cyberpeace.mp.base.util;
 
 import cn.cyberpeace.mp.base.annotation.ClassFieldClasses;
 import cn.cyberpeace.mp.base.annotation.ClassFieldNames;
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.exception.MqRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 
 import java.lang.invoke.SerializedLambda;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class ClassUtils {
 
-    private static final Map<Class<?>, String[]> beanClassFieldsCache = new ConcurrentHashMap<>();
-
-    private static final Map<Class<?>, Map<String, Class<?>>> beanClassFieldTypesCache = new ConcurrentHashMap<>();
+    private static final Map<Class<?>, String[]> beanClassFieldsCache = new HashMap<>();
 
     private ClassUtils() {}
 
@@ -164,32 +160,22 @@ public class ClassUtils {
         return fields;
     }
 
-    public static Map<String, Class<?>> getBeanClassFieldTypes(Class<?> clazz) {
-        Map<String, Class<?>> fieldTypes = beanClassFieldTypesCache.getOrDefault(clazz, null);
-        if (fieldTypes != null) {
-            return fieldTypes;
-        }
-
-        final BeanWrapper clazzWrapper = new BeanWrapperImpl(clazz);
-        var propertyDescriptors = clazzWrapper.getPropertyDescriptors();
-        fieldTypes = new HashMap<>();
-        for (java.beans.PropertyDescriptor propertyDescriptor : propertyDescriptors) {
-            String fieldName = propertyDescriptor.getName();
-            if (!StringUtils.equals("class", fieldName)) {
-                fieldTypes.put(fieldName, propertyDescriptor.getPropertyType());
-            }
-        }
-
-        beanClassFieldTypesCache.put(clazz, fieldTypes);
-
-        return fieldTypes;
+    /**
+     * 获取指定注解的字段名称集合
+     * @param clazz
+     * @param annotation
+     * @return
+     */
+    public static List<String> getBeanClassFields(Class<?> clazz, Class<? extends Annotation> annotation) {
+        Field[] fields = clazz.getDeclaredFields();
+        return Arrays.asList(fields).stream().filter(field -> field.isAnnotationPresent(annotation)).map(Field::getName).collect(Collectors.toList());
     }
 
     public static <T> T createInstance(Class<T> clazz) {
         try {
             return clazz.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
-            throw new MpRuntimeException(clazz.getName() + " create simple instance failed: " + e.getMessage());
+            throw new MqRuntimeException(clazz.getName() + " create simple instance failed: " + e.getMessage());
         }
     }
 
@@ -235,7 +221,7 @@ public class ClassUtils {
                 }
             } catch (NoSuchMethodException ignored) {
             } catch (IllegalAccessException | InvocationTargetException | SecurityException e) {
-                throw new MpRuntimeException(e.getMessage());
+                throw new MqRuntimeException(e.getMessage());
             }
         }
 
