@@ -28,12 +28,8 @@ public class JwtUtils {
 
     private JwtUtils() {}
 
-    private static String generateJwtSecret(UserInfo user) {
-        String secret = user.getLatestTokenSecret();
-        if (secret == null) {
-            secret = AuthConstant.JWT_SECRET;
-        }
-
+    private static String generateJwtSecret() {
+        String secret = AuthConstant.JWT_SECRET;
         var algorithm = "HmacSHA256";
         final Mac mac;
         try {
@@ -72,13 +68,12 @@ public class JwtUtils {
     }
 
     public static String generateToken(UserInfo user) {
-        String jwtSecret = generateJwtSecret(user);
+        String jwtSecret = generateJwtSecret();
         var expireDate = new Date(System.currentTimeMillis() + JWT_EXPIRATION);
         try {
             var algorithm = Algorithm.HMAC256(jwtSecret);
             return JWT.create().withExpiresAt(expireDate).withClaim("id", user.getId())
-                    .withClaim("username", user.getUsername())
-                    .withClaim("key", user.getTokenSecret()).sign(algorithm);
+                    .withClaim("username", user.getUsername()).sign(algorithm);
         } catch (JWTCreationException e) {
             log.error("Create jwt token error: {}", e.getMessage());
             return null;
@@ -91,7 +86,7 @@ public class JwtUtils {
             return null;
         }
 
-        String jwtSecret = generateJwtSecret(user);
+        String jwtSecret = generateJwtSecret();
         try {
             var algorithm = Algorithm.HMAC256(jwtSecret);
             JWTVerifier verifier = JWT.require(algorithm).build();
