@@ -48,23 +48,25 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-//                .anyRequest().authenticated()
+//                .antMatchers("/login", "/logout").permitAll()  // login logout
+//                .antMatchers("/doc.html", "/webjars/**").permitAll()  // swagger
+                .antMatchers("/auth/**").authenticated()
                 .anyRequest().permitAll()
                 .and()
-                .csrf().disable()
-                .sessionManagement().disable()
-                .cors()
+                    .csrf().disable()
+                    .sessionManagement().disable()
+                    .cors()
                 .and()
-                .formLogin().disable()
+                    .formLogin().disable()
                 .exceptionHandling()
-                .authenticationEntryPoint(authenticationEntryPoint)
+                    .authenticationEntryPoint(authenticationEntryPoint)
                 .and()
-                .logout()
-                .permitAll()
-                .logoutUrl(LOGOUT_PATH)
-                .logoutSuccessHandler(logoutSuccessHandler)
+                    .logout()
+                    .permitAll()
+                    .logoutUrl(LOGOUT_PATH)
+                    .logoutSuccessHandler(logoutSuccessHandler)
                 .and()
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                    .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         var customUsernamePasswordAuthenticationFilter = new CustomUsernamePasswordAuthenticationFilter();
         customUsernamePasswordAuthenticationFilter.setAuthenticationSuccessHandler(authenticationSuccessHandler);

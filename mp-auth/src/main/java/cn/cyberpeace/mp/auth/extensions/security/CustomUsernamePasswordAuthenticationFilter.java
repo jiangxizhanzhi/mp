@@ -34,6 +34,7 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
             username = username.trim();
             var authRequest = new UsernamePasswordAuthenticationToken(username, password);
             setDetails(request, authRequest);
+            // 认证
             return getAuthenticationManager().authenticate(authRequest);
         } else {
             return super.attemptAuthentication(request, response);
