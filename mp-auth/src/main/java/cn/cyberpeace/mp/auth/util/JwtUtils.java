@@ -14,9 +14,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import javax.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -50,21 +52,7 @@ public class JwtUtils {
     public static class UserInfo {
         private String id;
         private String username;
-        private String tokenSecret;
 
-        public String getLatestTokenSecret() {
-            String latestTokenSecret;
-            UserModel user = UserUtils.getUser(id);
-            if (user != null) {
-                latestTokenSecret = user.getTokenSecret();
-            } else {
-                latestTokenSecret = getTokenSecret();
-            }
-
-            setTokenSecret(latestTokenSecret);
-
-            return latestTokenSecret;
-        }
     }
 
     public static String generateToken(UserInfo user) {
@@ -78,6 +66,22 @@ public class JwtUtils {
             log.error("Create jwt token error: {}", e.getMessage());
             return null;
         }
+    }
+
+
+    public static boolean addResponseHeaderWithJWT(HttpServletResponse response, UserModel user) {
+        if (user == null) {
+            return false;
+        }
+
+        String jwt = JwtUtils.generateToken(new JwtUtils.UserInfo(user.getId(), user.getUsername()));
+
+        if (StringUtils.isBlank(jwt)) {
+            return false;
+        }
+
+        response.setHeader(AuthConstant.JWT_HEADER_KEY, AuthConstant.JWT_PREFIX + jwt);
+        return true;
     }
 
     public static UserInfo validateToken(String token) throws TokenExpiredException {
@@ -113,8 +117,10 @@ public class JwtUtils {
         var user = new UserInfo();
         user.setId(jwt.getClaim("id").asString());
         user.setUsername(jwt.getClaim("username").asString());
-        user.setTokenSecret(jwt.getClaim("key").asString());
+//        user.setTokenSecret(jwt.getClaim("key").asString());
         return user;
     }
+
+
 
 }

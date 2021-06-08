@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -54,5 +55,29 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public UserModel getByUserName(String userName) {
         log.info("userName:{}", userName);
         return getModelMapper().first(new HumanCondition().filterEqual("username", userName));
+    }
+
+
+    @Override
+    public void loadListFilterCondition(HumanCondition humanCondition, Map<String, Object> params) {
+        Object tenant = params.getOrDefault("tenant", null);
+        if (tenant != null) {
+            humanCondition.filterEqual("tenant", tenant);
+        }
+
+        Object username = params.getOrDefault("username", null);
+        if (username != null) {
+            humanCondition.filterContains("username", username);
+        }
+
+        Object name = params.getOrDefault("name", null);
+        if (name != null) {
+            humanCondition.filterContains("name", name);
+        }
+
+        Object status = params.getOrDefault("status", 1);
+        if (status != null) {
+            humanCondition.filterEqual("status", status);
+        }
     }
 }

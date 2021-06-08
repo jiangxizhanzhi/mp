@@ -21,9 +21,8 @@ public class UserFields extends BaseModelFields {
 
     public static final DynamicFields readonlyFields = new DynamicFields().merge(BaseModelFields.readonlyFields);
 
-    public static final DynamicFields searchFields = new DynamicFields(UserModel::getIdentifier,
-            UserModel::getUsername, UserModel::getName, UserModel::getNickname, UserModel::getEmail,
-            UserModel::getMobile, UserModel::getIdCard
+    public static final DynamicFields searchFields = new DynamicFields(UserModel::getUsername, UserModel::getName,
+            UserModel::getNickname, UserModel::getEmail,UserModel::getMobile
     );
 
     public static final DynamicFields orderFields = new DynamicFields().merge(BaseModelFields.readonlyFields);

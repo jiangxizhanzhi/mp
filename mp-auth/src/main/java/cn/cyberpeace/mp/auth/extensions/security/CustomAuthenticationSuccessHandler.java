@@ -37,19 +37,15 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
         response.setContentType("application/json;charset=UTF-8");
 
         UserModel user = null;
-        String jwt = null;
         ObjServiceResult<UserModel> result;
 
         Object principal = authentication.getPrincipal();
         if (principal instanceof AuthUserDetails) {
             user = ((AuthUserDetails) principal).getUser();
-            jwt = JwtUtils.generateToken(
-                    new JwtUtils.UserInfo(user.getId(), user.getUsername(), user.getTokenSecret()));
         }
 
-        if (jwt != null) {
+        if(JwtUtils.addResponseHeaderWithJWT(response, user)) {
             response.setStatus(HttpServletResponse.SC_OK);
-            response.setHeader(AuthConstant.JWT_HEADER_KEY, AuthConstant.JWT_PREFIX + jwt);
             result = new ObjServiceResult<>(new ObjResult<>(user, new UserFields().getAvailableFields()));
         } else {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

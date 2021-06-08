@@ -25,10 +25,10 @@ public class BaseModel {
     private String id;
 
     @DefaultGen(DateGenerator.class)
-    private Date createTime;
+    private LocalDateTime createTime;
 
     @DefaultGen(DateGenerator.class)
-    private Date updateTime;
+    private LocalDateTime updateTime;
 
     private void initDefault(String fieldName, Map<String, Object[]> initDefaultFields) {
         Object[] value = initDefaultFields.getOrDefault(fieldName, null);
