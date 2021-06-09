@@ -27,7 +27,7 @@
 
     <property name="LOG_HOME" value="${LOG_FILE_PATH}/${APP_NAME}"/>
     <property name="LOG_LEVEL" value="${LOG_LEVEL_ROOT}"/>
-    <property name="LOG_FILE_MAX_SIZE" value="100MB"/>
+    <property name="LOG_FILE_MAX_SIZE" value="300MB"/>
     <property name="LOG_FILE_MAX_HISTORY" value="15"/>
 
     <!-- 控制台日志输出 -->
@@ -40,11 +40,11 @@
 
     <!-- 时间滚动输出日志 -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOG_HOME}/catalina.log</file>
+        <file>${LOG_HOME}/mp.log</file>
         <!-- 日志记录器的滚动策略，按日期，按大小记录 -->
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- 日志归档 -->
-            <fileNamePattern>${LOG_HOME}/%d{yyyy-MM-dd}/catalina-%d{HHmmss.SSS}.%i.log.zip</fileNamePattern>
+            <fileNamePattern>${LOG_HOME}/%d{yyyy-MM-dd}/mp-%d{HHmmss.SSS}.%i.log</fileNamePattern>
             <!--日志文件保留天数-->
             <maxHistory>${LOG_FILE_MAX_HISTORY}</maxHistory>
             <TimeBasedFileNamingAndTriggeringPolicy

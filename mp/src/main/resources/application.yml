@@ -23,7 +23,8 @@ logging:
   level:
     root: INFO
   file:
-    path: ${user.home}/logs
+#    path: ${user.home}/logs
+    path: /home/mp/logs
 
 mybatis:
   mapper-locations: classpath*:mapper/*.xml
