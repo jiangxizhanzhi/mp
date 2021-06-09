@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.base.model;
 
 import cn.cyberpeace.mp.base.model.generator.DateGenerator;
+import cn.cyberpeace.mp.base.model.generator.DateTimeGenerator;
 import cn.cyberpeace.mp.base.model.generator.Generator;
 import cn.cyberpeace.mp.base.model.generator.UuidGenerator;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultGen;
@@ -24,10 +25,10 @@ public class BaseModel {
     @DefaultGen(UuidGenerator.class)
     private String id;
 
-    @DefaultGen(DateGenerator.class)
+    @DefaultGen(DateTimeGenerator.class)
     private LocalDateTime createTime;
 
-    @DefaultGen(DateGenerator.class)
+    @DefaultGen(DateTimeGenerator.class)
     private LocalDateTime updateTime;
 
     private void initDefault(String fieldName, Map<String, Object[]> initDefaultFields) {

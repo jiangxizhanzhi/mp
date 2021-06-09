@@ -3,11 +3,18 @@ package cn.cyberpeace.mp.auth.controller.register;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.register.RegisterReq;
+import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.RegisterService;
+import cn.cyberpeace.mp.auth.util.JwtUtils;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.service.result.ObjResult;
+import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,20 +35,27 @@ public class RegisterController {
 
     @ApiOperation(value = "获取注册短信", notes = "")
     @GetMapping("/sms")
-    public void register(@RequestParam String mobile) {
+    public ServiceResult sms(@RequestParam String mobile) {
         log.info("mobile:{}", mobile);
 
-
+        return ServiceResult.builder().message("OK").data("no sms support!").serviceCode(BaseErrorCode.SUCCESS).build();
 
     }
 
     @ApiOperation(value = "注册接口", notes = "")
     @PostMapping
-    public void register(@RequestBody RegisterReq registerReq) {
+    public ServiceResult register(@RequestBody @Validated RegisterReq registerReq) {
         log.info("registerReq:{}", registerReq);
 
-        registerService.register(registerReq);
+        ObjServiceResult<UserModel> result = registerService.register(registerReq);
 
+        if (result.getSource() != null) {
+            UserModel userModel = result.getSource().getObj();
+            JwtUtils.addResponseHeaderWithJWT(userModel);
+            return ServiceResult.builder().source(result.getSource()).build().asResult();
+        }
+
+        return ServiceResult.builder().serviceCode(BaseErrorCode.ERROR).build().asResult();
     }
 
 }

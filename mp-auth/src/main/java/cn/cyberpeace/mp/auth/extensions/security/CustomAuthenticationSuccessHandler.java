@@ -44,8 +44,8 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
             user = ((AuthUserDetails) principal).getUser();
         }
 
-        if(JwtUtils.addResponseHeaderWithJWT(response, user)) {
-            response.setStatus(HttpServletResponse.SC_OK);
+        if(JwtUtils.addResponseHeaderWithJWT(user)) {
+//            response.setStatus(HttpServletResponse.SC_OK);
             result = new ObjServiceResult<>(new ObjResult<>(user, new UserFields().getAvailableFields()));
         } else {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

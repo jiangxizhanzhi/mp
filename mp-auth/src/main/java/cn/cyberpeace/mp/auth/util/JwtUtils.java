@@ -15,9 +15,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
@@ -69,10 +73,14 @@ public class JwtUtils {
     }
 
 
-    public static boolean addResponseHeaderWithJWT(HttpServletResponse response, UserModel user) {
+    public static boolean addResponseHeaderWithJWT(UserModel user) {
         if (user == null) {
             return false;
         }
+
+        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+        ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) requestAttributes;
+        HttpServletResponse response = servletRequestAttributes.getResponse();
 
         String jwt = JwtUtils.generateToken(new JwtUtils.UserInfo(user.getId(), user.getUsername()));
 
