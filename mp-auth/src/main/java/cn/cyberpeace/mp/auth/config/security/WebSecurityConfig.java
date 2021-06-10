@@ -2,6 +2,8 @@ package cn.cyberpeace.mp.auth.config.security;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.extensions.security.*;
+import cn.cyberpeace.mp.auth.extensions.security.mobile.MobilePasswordAuthenticationFilter;
+import cn.cyberpeace.mp.auth.extensions.security.mobile.MobilePasswordAuthenticationProvider;
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetailsService;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private static final String LOGIN_PATH = ControllerConstant.BASE_API_PATH + "/login";
+    private static final String LOGIN_MOBILE_PATH = ControllerConstant.BASE_API_PATH + "/login/mobile";
     private static final String LOGOUT_PATH = ControllerConstant.BASE_API_PATH + "/logout";
 
     private AuthUserDetailsService userDetailsService;
@@ -68,11 +71,25 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                     .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
+        // usernamePassword
         var customUsernamePasswordAuthenticationFilter = new CustomUsernamePasswordAuthenticationFilter();
         customUsernamePasswordAuthenticationFilter.setAuthenticationSuccessHandler(authenticationSuccessHandler);
         customUsernamePasswordAuthenticationFilter.setAuthenticationFailureHandler(authenticationFailureHandler);
         customUsernamePasswordAuthenticationFilter.setAuthenticationManager(authenticationManagerBean());
         customUsernamePasswordAuthenticationFilter.setFilterProcessesUrl(LOGIN_PATH);
         http.addFilterAt(customUsernamePasswordAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
+
+        // mobilePassword
+        var mobilePasswordAuthenticationFilter = new MobilePasswordAuthenticationFilter();
+        mobilePasswordAuthenticationFilter.setAuthenticationSuccessHandler(authenticationSuccessHandler);
+        mobilePasswordAuthenticationFilter.setAuthenticationFailureHandler(authenticationFailureHandler);
+        mobilePasswordAuthenticationFilter.setAuthenticationManager(authenticationManagerBean());
+        mobilePasswordAuthenticationFilter.setFilterProcessesUrl(LOGIN_MOBILE_PATH);
+        var mobilePasswordAuthenticationProvider = new MobilePasswordAuthenticationProvider();
+        mobilePasswordAuthenticationProvider.setUserDetailsService(userDetailsService);
+
+        http.authenticationProvider(mobilePasswordAuthenticationProvider).addFilterAt(mobilePasswordAuthenticationFilter, CustomUsernamePasswordAuthenticationFilter.class);
+
     }
 }

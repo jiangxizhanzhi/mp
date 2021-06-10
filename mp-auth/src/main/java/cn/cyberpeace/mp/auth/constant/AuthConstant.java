@@ -11,5 +11,7 @@ public class AuthConstant {
 
     public static final String JWT_HEADER_KEY = "Authorization";
 
+    public static final String ERROR_CODE_PREFIX = "auth.error_code.";
+
     private AuthConstant() {}
 }

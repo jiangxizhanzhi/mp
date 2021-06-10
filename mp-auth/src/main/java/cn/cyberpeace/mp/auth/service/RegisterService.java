@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.service;
 
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.dto.register.RegisterReq;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
@@ -8,14 +9,10 @@ import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.PhoneUtil;
-import cn.hutool.extra.mail.Mail;
-import cn.hutool.extra.mail.MailUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import javax.validation.constraints.AssertTrue;
 
 @Service
 @Slf4j
@@ -46,16 +43,16 @@ public class RegisterService {
 //        Assert.notBlank(registerReq.getPassword(), "password不能为空!");
 
         // 密码是否合法
-        Assert.isFalse(PasswordUtils.isPasswordStrengthLowLevel(user.getPassword()), "auth.error_code.password_strength_invalid");
+        Assert.isFalse(PasswordUtils.isPasswordStrengthLowLevel(user.getPassword()), AuthConstant.ERROR_CODE_PREFIX + "password_strength_invalid");
 
         // 邮箱是否合法
         if (StringUtils.isNotBlank(user.getEmail())) {
-            Assert.isTrue(Validator.isEmail(user.getEmail()), "auth.error_code.email_invalid");
+            Assert.isTrue(Validator.isEmail(user.getEmail()), AuthConstant.ERROR_CODE_PREFIX + "email_invalid");
         }
 
         // 手机号是否合法
         if (StringUtils.isNotBlank(user.getMobile())) {
-            Assert.isTrue(PhoneUtil.isMobile(user.getMobile()), "auth.error_code.mobile_invalid");
+            Assert.isTrue(PhoneUtil.isMobile(user.getMobile()), AuthConstant.ERROR_CODE_PREFIX + "mobile_invalid");
             if (userService.getByMobile(user.getMobile()) != null) {
                 throw new MpRuntimeException("mobile已存在！" + user.getMobile());
             }

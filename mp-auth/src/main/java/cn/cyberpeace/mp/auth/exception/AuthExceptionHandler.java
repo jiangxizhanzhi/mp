@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AccountStatusException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -24,6 +25,17 @@ public class AuthExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     public ServiceResult<String> illegalArgumentExceptionHandle(IllegalArgumentException ex) {
+        String errorMsg = ex.getMessage();
+        log.error(errorMsg);
+        CustomAuthErrorCode customAuthErrorCode = new CustomAuthErrorCode();
+        customAuthErrorCode.setCode(BaseErrorCode.PARAMS_INVALID.getCode(), errorMsg);
+        return ServiceResult.<String>builder().serviceCode(customAuthErrorCode).build().asResult();
+    }
+
+    @ExceptionHandler(AccountStatusException.class)
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public ServiceResult<String> accountStatusExceptionHandle(AccountStatusException ex) {
         String errorMsg = ex.getMessage();
         log.error(errorMsg);
         CustomAuthErrorCode customAuthErrorCode = new CustomAuthErrorCode();

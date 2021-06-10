@@ -25,6 +25,7 @@ public class AuthUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        log.info("username:{}", username);
         if (StringUtils.isEmpty(username)) {
             throw new UsernameNotFoundException(StringUtils.EMPTY);
         }
@@ -43,4 +44,28 @@ public class AuthUserDetailsService implements UserDetailsService {
 
         return new AuthUserDetails(user);
     }
+
+
+    public UserDetails loadUserByMobile(String mobile) {
+        log.info("mobile:{}", mobile);
+        if (StringUtils.isEmpty(mobile)) {
+            throw new UsernameNotFoundException(StringUtils.EMPTY);
+        }
+
+        UserModel user;
+        try {
+            user = userService.getByMobile(mobile);
+            // todo 查询权限信息
+        } catch (Exception e) {
+            log.error("Get user by mobile[{}] error: {}", mobile, e.getMessage());
+            throw new UsernameNotFoundException(e.getMessage());
+        }
+        if (user == null) {
+            throw new UsernameNotFoundException(StringUtils.EMPTY);
+        }
+
+        return new AuthUserDetails(user);
+    }
+
+
 }
