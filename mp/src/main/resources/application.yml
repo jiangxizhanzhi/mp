@@ -5,7 +5,6 @@ server:
 
 spring:
   datasource:
-    name: mp
     url: jdbc:mysql://10.100.9.150:3306/mp?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&createDatabaseIfNotExist=true
     username: root
     password: root
@@ -23,8 +22,8 @@ logging:
   level:
     root: INFO
   file:
-#    path: ${user.home}/logs
-    path: /home/mp/logs
+    path: ${user.home}/logs
+#    path: /home/mp/logs
 
 mybatis:
   mapper-locations: classpath*:mapper/*.xml

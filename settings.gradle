@@ -13,5 +13,4 @@ gradle.ext.appmodules.each {
     include(it)
 }
 include('mp')
-include('mp-devops-cluster')
 

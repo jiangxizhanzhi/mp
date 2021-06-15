@@ -19,7 +19,7 @@
     <property name="CONSOLE_LOG_PATTERN" value="${CONSOLE_LOG_PATTERN:-%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}}"/>
 
     <!--应用名称-->
-    <springProperty scope="context" name="APP_NAME" source="spring.application.name" defaultValue="springBoot"/>
+    <springProperty scope="context" name="APP_NAME" source="spring.application.name" defaultValue="mp"/>
     <!--日志路径-->
     <springProperty scope="context" name="LOG_FILE_PATH" source="logging.file.path" defaultValue="/logs"/>
     <!--日志级别-->
