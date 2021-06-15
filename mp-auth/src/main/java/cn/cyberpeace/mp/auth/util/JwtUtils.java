@@ -34,8 +34,11 @@ public class JwtUtils {
 
     private JwtUtils() {}
 
-    private static String generateJwtSecret() {
-        String secret = AuthConstant.JWT_SECRET;
+    private static String generateJwtSecret(UserInfo user) {
+        String secret = user.getLatestTokenSecret();
+        if (secret == null) {
+            secret = AuthConstant.JWT_SECRET;
+        }
         var algorithm = "HmacSHA256";
         final Mac mac;
         try {
@@ -56,16 +59,30 @@ public class JwtUtils {
     public static class UserInfo {
         private String id;
         private String username;
+        private String tokenSecret;
 
+        public String getLatestTokenSecret() {
+            String latestTokenSecret;
+            UserModel user = UserUtils.getUser(id);
+            if (user != null) {
+                latestTokenSecret = user.getTokenSecret();
+            } else {
+                latestTokenSecret = getTokenSecret();
+            }
+
+            setTokenSecret(latestTokenSecret);
+
+            return latestTokenSecret;
+        }
     }
 
     public static String generateToken(UserInfo user) {
-        String jwtSecret = generateJwtSecret();
+        String jwtSecret = generateJwtSecret(user);
         var expireDate = new Date(System.currentTimeMillis() + JWT_EXPIRATION);
         try {
             var algorithm = Algorithm.HMAC256(jwtSecret);
             return JWT.create().withExpiresAt(expireDate).withClaim("id", user.getId())
-                    .withClaim("username", user.getUsername()).sign(algorithm);
+                    .withClaim("username", user.getUsername()).withClaim("key", user.getTokenSecret()).sign(algorithm);
         } catch (JWTCreationException e) {
             log.error("Create jwt token error: {}", e.getMessage());
             return null;
@@ -82,7 +99,7 @@ public class JwtUtils {
         ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) requestAttributes;
         HttpServletResponse response = servletRequestAttributes.getResponse();
 
-        String jwt = JwtUtils.generateToken(new JwtUtils.UserInfo(user.getId(), user.getUsername()));
+        String jwt = JwtUtils.generateToken(new JwtUtils.UserInfo(user.getId(), user.getUsername(), user.getTokenSecret()));
 
         if (StringUtils.isBlank(jwt)) {
             return false;
@@ -98,7 +115,7 @@ public class JwtUtils {
             return null;
         }
 
-        String jwtSecret = generateJwtSecret();
+        String jwtSecret = generateJwtSecret(user);
         try {
             var algorithm = Algorithm.HMAC256(jwtSecret);
             JWTVerifier verifier = JWT.require(algorithm).build();
@@ -125,7 +142,7 @@ public class JwtUtils {
         var user = new UserInfo();
         user.setId(jwt.getClaim("id").asString());
         user.setUsername(jwt.getClaim("username").asString());
-//        user.setTokenSecret(jwt.getClaim("key").asString());
+        user.setTokenSecret(jwt.getClaim("key").asString());
         return user;
     }
 
