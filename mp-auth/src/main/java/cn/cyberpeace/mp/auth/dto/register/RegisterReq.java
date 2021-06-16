@@ -16,6 +16,7 @@ public class RegisterReq {
     private String username;
 
     @ApiModelProperty(value = "密码", example = "")
+    @NotBlank
     private String password;
 
     @ApiModelProperty(value = "姓名", example = "")

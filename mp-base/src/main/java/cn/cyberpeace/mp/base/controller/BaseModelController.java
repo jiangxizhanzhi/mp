@@ -123,6 +123,7 @@ public abstract class BaseModelController<M extends BaseModel, S extends BaseMod
      */
     @GetMapping("/{id}")
     public ObjServiceResult<M> get(@PathVariable String id, @RequestParam(required = false) String[] fields) {
+        log.info("id:{}, fields:{}", id, fields);
         return getModelService().get(id, fields).asResult();
     }
 
@@ -134,6 +135,7 @@ public abstract class BaseModelController<M extends BaseModel, S extends BaseMod
      */
     @PostMapping
     public ObjServiceResult<M> create(@RequestBody M obj, @RequestParam(required = false) String[] fields) {
+        log.info("obj:{}, fields:{}", obj, fields);
         return getModelService().create(obj, fields).asResult();
     }
 
@@ -147,6 +149,7 @@ public abstract class BaseModelController<M extends BaseModel, S extends BaseMod
     @PatchMapping("/{id}")
     public ObjServiceResult<M> update(@PathVariable String id, @RequestBody M obj,
                                       @RequestParam(required = false) String[] fields) {
+        log.info("id:{}, obj:{}, fields:{}", id, obj, fields);
         obj.setId(id);
         return getModelService().update(obj, fields).asResult();
     }
@@ -158,6 +161,7 @@ public abstract class BaseModelController<M extends BaseModel, S extends BaseMod
      */
     @DeleteMapping("/{id}")
     public ServiceResult<Boolean> delete(@PathVariable String id) {
+        log.info("id:{}", id);
         return getModelService().delete(id).asResult();
     }
 

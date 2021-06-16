@@ -11,7 +11,7 @@ public class TargetFields extends BaseModelFields {
     public static final DynamicFields allFields = new DynamicFields(ClassUtils.getBeanClassFields(TargetModel.class));
 
     public static final DynamicFields availableFields = new DynamicFields(TargetModel::getIdentifier,
-            TargetModel::getName
+            TargetModel::getName, TargetModel::getType
     ).merge(BaseModelFields.availableFields);
 
     public static final DynamicFields hiddenFields = allFields.subtract(availableFields);

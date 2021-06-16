@@ -21,4 +21,6 @@ public class UserController extends BaseModelController<UserModel, UserService> 
         setModelService(modelService);
     }
 
+
+
 }

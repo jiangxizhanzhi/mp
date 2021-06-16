@@ -104,7 +104,9 @@ CREATE TABLE mp_auth_target (
    `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
    `id` varchar(64)  NOT NULL COMMENT 'id',
    `identifier` varchar(64)  NOT NULL COMMENT '编号',
+   ``
    `name` varchar(64) NOT NULL COMMENT '名称',
+   `type` int NOT NULL COMMENT '资源类型 1:菜单, 2:API, 3:数据',
    `create_time` datetime(6) NOT NULL COMMENT '创建时间',
    `update_time` datetime(6) NOT NULL COMMENT '更新时间',
    PRIMARY KEY (`pk`),
