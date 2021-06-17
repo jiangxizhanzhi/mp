@@ -1,0 +1,25 @@
+package cn.cyberpeace.mp.auth.service.impl;
+
+import cn.cyberpeace.mp.auth.model.OrgModel;
+import cn.cyberpeace.mp.auth.model.SysConfigModel;
+import cn.cyberpeace.mp.auth.repository.OrgMapper;
+import cn.cyberpeace.mp.auth.repository.SysConfigMapper;
+import cn.cyberpeace.mp.auth.service.OrgService;
+import cn.cyberpeace.mp.auth.service.SysConfigService;
+import cn.cyberpeace.mp.auth.service.fields.OrgFields;
+import cn.cyberpeace.mp.auth.service.fields.SysConfigFields;
+import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, SysConfigMapper, SysConfigFields>
+        implements SysConfigService {
+
+    @Autowired
+    public SysConfigServiceImpl(SysConfigMapper modelMapper, SysConfigFields modelFields) {
+        setModelMapper(modelMapper);
+        setModelFields(modelFields);
+    }
+
+}

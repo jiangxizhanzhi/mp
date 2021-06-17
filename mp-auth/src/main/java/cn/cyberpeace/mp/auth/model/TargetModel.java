@@ -17,6 +17,7 @@ import javax.validation.constraints.NotNull;
 public class TargetModel extends BaseModel {
     @NotBlank(groups = AddGroup.class)
     private String identifier;
+    private String tenant;
     @NotBlank(groups = AddGroup.class)
     private String name;
     @NotNull(groups = AddGroup.class)

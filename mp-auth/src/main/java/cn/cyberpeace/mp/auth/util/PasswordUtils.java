@@ -59,9 +59,13 @@ public class PasswordUtils {
 
     public static void main(String[] args) {
         String context = "Ab123#";
+        String strB64 = DES.encryptBase64(context);
         String encryptHex = DES.encryptHex(context);
+        String encryptHexUtf8 = DES.encryptHex(context, "UTF-8");
         String decrypt = DES.decryptStr(encryptHex);
+        System.out.println(strB64);
         System.out.println(encryptHex);
+        System.out.println(encryptHexUtf8);
         System.out.println(decrypt);
     }
 
