@@ -48,6 +48,8 @@ public class UserModel extends BaseModel implements Serializable {
     private String address;
     @DefaultInt(3)
     private Integer status;
+    private Integer initCheck;
+    private String desc;
     @DefaultGen(DateTimeGenerator.class)
     private LocalDateTime dateJoined;
     private LocalDateTime expiredTime;
@@ -58,7 +60,6 @@ public class UserModel extends BaseModel implements Serializable {
         public static final Integer NORMAL = 1;
         public static final Integer DISABLE = 2;
         public static final Integer PENDING = 3;
-
         private Status() {}
     }
 
