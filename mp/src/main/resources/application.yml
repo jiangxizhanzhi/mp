@@ -23,7 +23,6 @@ logging:
     root: INFO
   file:
     path: ${user.home}/logs
-#    path: /home/mp/logs
 
 mybatis:
   mapper-locations: classpath*:mapper/*.xml
@@ -50,4 +49,20 @@ management:
       exposure:
         include: health, info, mappings
 
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+logging:
+  file:
+    path: ${user.home}/logs
 
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+logging:
+  file:
+    path: /home/mp/logs

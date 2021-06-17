@@ -15,8 +15,10 @@
     <conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter" />
     <conversionRule conversionWord="wex" converterClass="org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter" />
     <conversionRule conversionWord="wEx" converterClass="org.springframework.boot.logging.logback.ExtendedWhitespaceThrowableProxyConverter" />
-    <!-- 彩色日志格式 -->
-    <property name="CONSOLE_LOG_PATTERN" value="${CONSOLE_LOG_PATTERN:-%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}}"/>
+    <!-- 控制台日志格式 -->
+    <property name="CONSOLE_LOG_PATTERN" value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%thread]){faint} %clr(%-40.40logger{39}){cyan} %L %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
+    <!-- 文件日志格式 -->
+    <property name="FILE_LOG_PATTERN" value="%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}} ${LOG_LEVEL_PATTERN:-%5p} ${PID:- } --- [%t] %-40.40logger{39} %L : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
 
     <!--应用名称-->
     <springProperty scope="context" name="APP_NAME" source="spring.application.name" defaultValue="mp"/>
@@ -58,12 +60,28 @@
         </encoder>
     </appender>
 
+    <!--异步打印日志,任务放在阻塞队列中，如果队列达到80%，将会丢弃TRACE,DEBUG,INFO级别的日志任务，对性能要求不是太高的话不用启用-->
+    <appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+        <!--队列的深度，该值会影响性能，默认256-->
+        <queueSize>512</queueSize>
+        <!--设为0表示队列达到80%，也不丢弃任务-->
+        <discardingThreshold>0</discardingThreshold>
+        <!--日志上下文关闭后，AsyncAppender继续执行写任务的时间，单位毫秒-->
+        <maxFlushTime>1000</maxFlushTime>
+        <!--队列满了直接丢弃要写的消息-->
+        <neverBlock>true</neverBlock>
+        <!--是否包含调用方的信息，false则无法打印类名方法名行号等-->
+        <includeCallerData>true</includeCallerData>
+        <!--One and only one appender may be attached to AsyncAppender，添加多个的话后面的会被忽略-->
+        <appender-ref ref="FILE"/>
+    </appender>
+
     <!--日志输出级别-->
     <root level="${LOG_LEVEL}">
         <!-- 控制台输出 -->
         <appender-ref ref="CONSOLE"/>
         <!-- 文件输出 -->
-        <appender-ref ref="FILE"/>
+        <appender-ref ref="ASYNC"/>
     </root>
 
 </configuration>
