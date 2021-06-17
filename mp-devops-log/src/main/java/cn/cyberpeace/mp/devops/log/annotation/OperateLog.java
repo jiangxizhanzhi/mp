@@ -18,7 +18,7 @@ public @interface OperateLog {
     String module() default "";
 
     /**
-     * 操作类型，例如：新增、修改、更新、删除
+     * 操作类型，例如：查询、新增、更新、删除、登录登出
      * @return
      */
     String type() default "";
