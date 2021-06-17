@@ -18,7 +18,7 @@ public interface OperateLogService {
      * 创建日志
      * @param operationLogModel
      */
-    void create(OperationLogModel operationLogModel);
+    Object create(OperationLogModel operationLogModel);
 
     /**
      * 查询日志

@@ -19,9 +19,9 @@ import java.util.Map;
 public class MpOperateLogServiceImpl extends BasEsLogService implements OperateLogService {
 
     @Override
-    public void create(OperationLogModel operationLogModel) {
+    public String create(OperationLogModel operationLogModel) {
         Map<String,Object> source = JSON.parseObject(JSON.toJSONString(operationLogModel), Map.class);
-        super.create("mp_operate_log",source);
+        return super.create("mp_operate_log",source);
     }
 
 

@@ -5,10 +5,8 @@ import cn.cyberpeace.mp.devops.log.enums.SiteTypeEnums;
 import cn.cyberpeace.mp.devops.log.model.OperationLogModel;
 import cn.cyberpeace.mp.devops.log.service.OperateLogServiceFactory;
 import cn.cyberpeace.mp.devops.log.utils.SnUtils;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
@@ -26,16 +24,15 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 /**
@@ -121,7 +118,7 @@ public class RequestLogAspect {
                 }
                 result = joinPoint.proceed();
                 if (log.isInfoEnabled()) {
-                    log.info("【返回增强】>> 请求地址URL: {},  方法名称method: {}, 结果: {}, 耗费时长: {},状态码: {}", uri, methodName, truncString(result.toString(), maxResultLength), System.currentTimeMillis() - startTime, response.getStatus());
+                    log.info("【返回增强】>> 请求地址URL: {},  方法名称method: {}, 结果: {}, 耗费时长: {},状态码: {}", uri, methodName,Objects.isNull(result) ? null : truncString(result.toString(), maxResultLength), System.currentTimeMillis() - startTime, response.getStatus());
                 }
             } catch (Throwable e) {
                 String exMsg = SnUtils.getExceptionMessage(e);
@@ -228,43 +225,6 @@ public class RequestLogAspect {
     }
 
     /**
-     * 获取请求body
-     * @param request
-     * @return
-     */
-    private String getRequestBody(HttpServletRequest request) {
-        try {
-            if (request.getContentType() != null
-                    && request.getContentType().contains("multipart/form-data")) {
-
-                // 过滤掉文件上传
-                return "multipart/form-data, contentLength is: " + request.getContentLength();
-            }
-
-            ServletInputStream servletInputStream = request.getInputStream();
-            byte[] bytes;
-            if (servletInputStream.isFinished()) { // 判断request流是否读取过
-                bytes = request.getInputStream().readAllBytes();
-            } else {
-                bytes = convertInputStreamToBytes(servletInputStream);
-            }
-
-            bytes = bytes == null ? new byte[0] : bytes;
-
-            String charset = request.getCharacterEncoding();
-            if (charset != null) {
-                return new String(bytes, charset);
-            } else {
-                return new String(bytes);
-            }
-        } catch (Exception ex) {
-            log.warn("http接口日志参数体封装失败", ex);
-        }
-
-        return "";
-    }
-
-    /**
      * 判断是否为排除的uri
      * @param requestUri 需判定的uri
      */
@@ -295,113 +255,5 @@ public class RequestLogAspect {
         }
 
         return Boolean.FALSE;
-    }
-
-
-    /**
-     * 密码字段处理, 字符串加水印
-     */
-    private String blurPasswordField(String json) {
-        if (StringUtils.isBlank(json)) {
-            return json;
-        }
-
-        try {
-            Map<Object, Object> jsonMap = objectMapper.readValue(json, new TypeReference<>() {});
-            return objectMapper.writeValueAsString(blurPasswordField(jsonMap));
-        } catch (IOException e) {
-            return json;
-        }
-    }
-
-    /**
-     * 密码字段处理, 字符串加水印
-     */
-    @SuppressWarnings("unchecked")
-    public Map<Object, Object> blurPasswordField(Map<Object, Object> jsonMap) {
-        Map<Object, Object> resultMap = new LinkedHashMap<>();
-
-        for (Map.Entry<Object, Object> entry : jsonMap.entrySet()) {
-            String key = String.valueOf(entry.getKey());
-
-            Object value = entry.getValue();
-
-            if (passwordPattern.matcher(key).matches()) {
-                String originPwd = value == null ? null : String.valueOf(value);
-                resultMap.put(entry.getKey(), blurString(originPwd));
-            } else {
-                if (value instanceof Map) {
-                    Map<Object, Object> tmpResultMap = blurPasswordField((Map<Object, Object>) value);
-                    resultMap.put(entry.getKey(), tmpResultMap);
-                } else if (value instanceof List) {
-                    List<Object> tmpList = new ArrayList<>();
-                    for (Object item : (List) value) {
-                        if (item instanceof Map) {
-                            Map<Object, Object> tmpResultMap = blurPasswordField((Map<Object, Object>) item);
-                            tmpList.add(tmpResultMap);
-                        } else {
-                            tmpList.add(item);
-                        }
-                    }
-                    resultMap.put(entry.getKey(), tmpList);
-                } else {
-                    resultMap.put(entry.getKey(), value);
-                }
-            }
-        }
-
-        return resultMap;
-    }
-
-    /**
-     * 字符串加水印处理
-     *
-     * <pre>
-     *     长度在9位以下的字符串,处理成首字母加*号的方式(*号个数等于字符串长度-1);
-     * 长度在9位及以上的字符串, 将最后8位替换成*号。
-     * 譬如:
-     * 123处理后1**
-     * 123456789处理后1********
-     * 1234567890处理后12********
-     * </pre>
-     *
-     * @param source 原始字符串
-     */
-    private static String blurString(String source) {
-        if (StringUtils.isBlank(source)) {
-            return source;
-        }
-
-        if (source.length() < 9) {
-            return source.substring(0, 1) + repeat('*', source.length() - 1);
-        } else {
-            return source.substring(0, source.length() - 8) + repeat('*', 8);
-        }
-    }
-
-    @SuppressWarnings("SameParameterValue")
-    private static String repeat(char ch, int repeat) {
-        char[] buf = new char[repeat];
-        for (int i = repeat - 1; i >= 0; i--) {
-            buf[i] = ch;
-        }
-        return new String(buf);
-    }
-
-    private byte[] convertInputStreamToBytes(InputStream input) {
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024];
-        int n;
-
-        try {
-            while (-1 != (n = input.read(buffer))) {
-                output.write(buffer, 0, n);
-            }
-        } catch (IOException e) {
-            if (log.isDebugEnabled()) {
-                log.info("convertInputStreamToBytes failed.", e);
-            }
-        }
-        return output.toByteArray();
     }
 }

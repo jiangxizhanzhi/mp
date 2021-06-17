@@ -36,8 +36,8 @@ public class OperateLogServiceFactory {
      * 创建操作日志
      * @param operationLogModel
      */
-    public void create(OperationLogModel operationLogModel){
-        operateLogServiceMap.get(operationLogModel.getSiteType()).create(operationLogModel);
+    public Object create(OperationLogModel operationLogModel){
+       return operateLogServiceMap.get(operationLogModel.getSiteType()).create(operationLogModel);
     }
 
     public void search(SiteTypeEnums siteTypeEnums){

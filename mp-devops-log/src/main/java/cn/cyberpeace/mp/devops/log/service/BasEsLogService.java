@@ -26,17 +26,17 @@ public abstract class BasEsLogService {
      * @param source
      * @return
      */
-    protected Boolean create(String index, Map<String,Object> source) {
+    protected String create(String index, Map<String,Object> source) {
         IndexRequest indexRequest = new IndexRequest(index).source(source);
         try {
             IndexResponse response = restHighLevelClient.index(indexRequest, RequestOptions.DEFAULT);
             if (response.status() == RestStatus.CREATED) {
-                return Boolean.TRUE;
+                return response.toString();
             }
         } catch (IOException e) {
             throw new MpRuntimeException("restHighLevelClient.create.error");
         }
-        return Boolean.FALSE;
+        return null;
     }
 
 
