@@ -1,9 +1,9 @@
 package cn.cyberpeace.mp.datasandtable.dao;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.util.HttpsUtils;
 import cn.cyberpeace.mp.datasandtable.constant.DataSandtableConstant;
 import cn.cyberpeace.mp.datasandtable.model.WazuhRamRoot;
+import cn.cyberpeace.mp.datasandtable.utils.WazuhHttpsUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import java.io.IOException;
@@ -34,7 +34,7 @@ public class WazuhDao {
      */
     public String queryWazuhToken() throws IOException {
         var requestUrl = wazuhUrl + "/security/user/authenticate?raw=true";
-        return HttpsUtils.sendGetWithAuth(requestUrl, wazuhUsername, wazuhPassword);
+        return WazuhHttpsUtils.sendGetWithAuth(requestUrl, wazuhUsername, wazuhPassword);
     }
 
 
@@ -48,17 +48,10 @@ public class WazuhDao {
         var requestUrl = wazuhUrl + "/syscollector/" + agentId + "/hardware";
         String res = null;
         try {
-            res = HttpsUtils.sendGetWithAuthToken(requestUrl, DataSandtableConstant.wazuhToken.get("wazuhToken"));
+            res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
         } catch (Exception e) {
-            log.error("第一次查询ram信息失败:");
-            log.info("重试查询");
-            DataSandtableConstant.wazuhToken.invalidate("wazuhToken");
-            try {
-                res = HttpsUtils.sendGetWithAuthToken(requestUrl, DataSandtableConstant.wazuhToken.get("wazuhToken"));
-            }catch (Exception ex){
-                log.error("重试查询ram信息失败:" + ex);
-                throw new MpRuntimeException("查询ram信息失败");
-            }
+            log.error("查询ram信息失败:" + e);
+            throw new MpRuntimeException("查询ram信息失败");
         }
         return JSONObject.toJavaObject(JSON.parseObject(res), WazuhRamRoot.class);
     }

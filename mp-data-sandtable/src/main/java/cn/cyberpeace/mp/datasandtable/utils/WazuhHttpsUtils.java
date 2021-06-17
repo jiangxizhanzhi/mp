@@ -1,6 +1,7 @@
-package cn.cyberpeace.mp.base.util;
+package cn.cyberpeace.mp.datasandtable.utils;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.datasandtable.constant.DataSandtableConstant;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.CertificateException;
@@ -9,6 +10,7 @@ import java.util.Base64;
 import javax.net.ssl.SSLContext;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -21,7 +23,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
 
-public class HttpsUtils {
+public class WazuhHttpsUtils {
 
 
     public static CloseableHttpClient createIgnoreSSLHttpClient() {
@@ -48,15 +50,21 @@ public class HttpsUtils {
      * @return
      * @throws IOException
      */
-    public static String sendGetWithAuthToken(String url, String token) throws IOException {
+    public static String sendGetWithAuthToken(String url) throws IOException {
         CloseableHttpResponse response = null;
         CloseableHttpClient httpClient = null;
         try {
             httpClient = createIgnoreSSLHttpClient();
 
             HttpGet httpGet = new HttpGet(url);
-            httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
+            httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + DataSandtableConstant.wazuhToken.get("wazuhToken"));
             response = httpClient.execute(httpGet);
+            StatusLine sl = response.getStatusLine();
+            if (sl.getStatusCode() == 401) {
+                DataSandtableConstant.wazuhToken.invalidate("wazuhToken");
+                httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + DataSandtableConstant.wazuhToken.get("wazuhToken"));
+                response = httpClient.execute(httpGet);
+            }
             return EntityUtils.toString(response.getEntity(), "UTF-8");
         } catch (Exception e) {
             e.printStackTrace();
