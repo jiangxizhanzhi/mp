@@ -1,10 +1,13 @@
 package cn.cyberpeace.mp.datasandtable.listener;
 
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.datasandtable.constant.DataSandtableConstant;
+import cn.cyberpeace.mp.datasandtable.dao.WazuhDao;
 import cn.cyberpeace.mp.datasandtable.model.GroupModel;
 import cn.cyberpeace.mp.datasandtable.service.GroupService;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +27,9 @@ public class DataSandtableInitListener implements ApplicationListener<Applicatio
     @Autowired
     private GroupService service;
 
+    @Autowired
+    private WazuhDao wazuhDao;
+
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
         log.info("prepare init actions for mp system");
@@ -36,6 +42,23 @@ public class DataSandtableInitListener implements ApplicationListener<Applicatio
                 @Override public String load(String key)  {
                     GroupModel groupModel = service.queryGroupById(key);
                     return groupModel.getUrl();
+                }
+            });
+
+        //定时更新token初始化
+        DataSandtableConstant.wazuhToken = CacheBuilder.newBuilder()
+            .maximumSize(1)
+            .expireAfterWrite(30, TimeUnit.DAYS)
+            .build(new CacheLoader<String, String>() {
+                @Override public String load(String key)  {
+                    String token;
+                    try {
+                        token = wazuhDao.queryWazuhToken();
+                    } catch (IOException e) {
+                        log.error("查询wazuhToken失败 : " + e);
+                        throw new MpRuntimeException("查询wazuhToken失败");
+                    }
+                    return token;
                 }
             });
     }
