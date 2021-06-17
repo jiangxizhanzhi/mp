@@ -39,6 +39,9 @@ mp:
       username: api
       password: api
     es-nodes: 10.100.7.50:9200
+  log:
+    exclude-uri: /login
+    exclude-method: OPTIONS
 
 
 management:
