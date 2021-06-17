@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.auth.dto.register.RegisterReq;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.RegisterService;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
+import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
@@ -47,6 +48,8 @@ public class RegisterController {
     public ServiceResult register(@RequestBody @Validated RegisterReq registerReq) {
         log.info("registerReq:{}", registerReq);
 
+        String decryptedPwd = registerReq.getPassword();
+        registerReq.setPassword(PasswordUtils.desDecrypt(decryptedPwd));
         ObjServiceResult<UserModel> result = registerService.register(registerReq);
 
         if (result.getSource() != null) {

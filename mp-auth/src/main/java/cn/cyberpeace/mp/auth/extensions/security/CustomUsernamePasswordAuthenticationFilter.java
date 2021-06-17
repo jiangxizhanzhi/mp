@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.extensions.security;
 
+import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -36,9 +37,11 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
                 log.error("Parse login data from request error: {}", e.getMessage());
             }
             String username = loginData.getOrDefault(getUsernameParameter(), StringUtils.EMPTY);
-            String password = loginData.getOrDefault(getPasswordParameter(), StringUtils.EMPTY);
+            String decryptedPwd = loginData.getOrDefault(getPasswordParameter(), StringUtils.EMPTY);
+            String originPwd = PasswordUtils.desDecrypt(decryptedPwd);
+
             username = username.trim();
-            var authRequest = new UsernamePasswordAuthenticationToken(username, password);
+            var authRequest = new UsernamePasswordAuthenticationToken(username, originPwd);
             setDetails(request, authRequest);
             // 认证
             return getAuthenticationManager().authenticate(authRequest);

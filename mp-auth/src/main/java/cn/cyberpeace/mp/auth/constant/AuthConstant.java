@@ -3,6 +3,8 @@ package cn.cyberpeace.mp.auth.constant;
 public class AuthConstant {
     public static final String PASSWORD_SECRET = "99bdfe0886604c49be29c977635572d5";
 
+    public static final String PASSWORD_DES_KEY = "B13H089Y";
+
     public static final String JWT_SECRET = PASSWORD_SECRET;
 
     public static final String JWT_SECRET_KEY = JWT_SECRET;
@@ -12,6 +14,8 @@ public class AuthConstant {
     public static final String JWT_HEADER_KEY = "Authorization";
 
     public static final String ERROR_CODE_PREFIX = "auth.error_code.";
+
+    public static final String TENANT_COLUMN_ID = "tenant";
 
     private AuthConstant() {}
 }

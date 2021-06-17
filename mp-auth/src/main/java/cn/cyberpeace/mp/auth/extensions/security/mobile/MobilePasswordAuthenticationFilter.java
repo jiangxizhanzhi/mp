@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.extensions.security.mobile;
 
+import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -66,8 +67,9 @@ public class MobilePasswordAuthenticationFilter extends AbstractAuthenticationPr
                 log.error("Parse login data from request error: {}", e.getMessage());
             }
             String mobile = loginData.getOrDefault(getMobileParameter(), StringUtils.EMPTY);
-            String password = loginData.getOrDefault(getPasswordParameter(), StringUtils.EMPTY);
-            var authRequest = new MobilePasswordAuthenticationToken(mobile, password);
+            String decryptedPwd = loginData.getOrDefault(getPasswordParameter(), StringUtils.EMPTY);
+            String originPwd = PasswordUtils.desDecrypt(decryptedPwd);
+            var authRequest = new MobilePasswordAuthenticationToken(mobile, originPwd);
             setDetails(request, authRequest);
             // 认证
             return getAuthenticationManager().authenticate(authRequest);
