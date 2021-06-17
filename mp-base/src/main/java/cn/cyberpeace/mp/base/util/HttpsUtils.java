@@ -48,6 +48,45 @@ public class HttpsUtils {
      * @return
      * @throws IOException
      */
+    public static String sendGetWithAuthToken(String url, String token) throws IOException {
+        CloseableHttpResponse response = null;
+        CloseableHttpClient httpClient = null;
+        try {
+            httpClient = createIgnoreSSLHttpClient();
+
+            HttpGet httpGet = new HttpGet(url);
+            httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
+            response = httpClient.execute(httpGet);
+            return EntityUtils.toString(response.getEntity(), "UTF-8");
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (response != null) {
+                try {
+                    response.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (httpClient != null) {
+                try {
+                    httpClient.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        throw new MpRuntimeException("sendGetWithAuth 失败");
+    }
+
+    /**
+     * get请求
+     *
+     * @param url
+     * @return
+     * @throws IOException
+     */
     public static String sendGetWithAuth(String url, String userName, String password) throws IOException {
         CloseableHttpResponse response = null;
         CloseableHttpClient httpClient = null;
