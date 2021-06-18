@@ -9,9 +9,13 @@ import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
@@ -99,9 +103,18 @@ public abstract class BaseModelController<M extends BaseModel, S extends BaseMod
      * @param fields 返回数据字段
      * @return 列表查询结果
      */
+    @ApiOperation("获取分页数据")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="search", value="搜索关键词"),
+            @ApiImplicitParam(name="searchFields", value="搜索字段"),
+            @ApiImplicitParam(name="orders",value="排序字段", paramType="query"),
+            @ApiImplicitParam(name="page", value="页码", dataType="Integer"),
+            @ApiImplicitParam(name="pageSize", value="每页数量", dataType="Integer"),
+            @ApiImplicitParam(name="fields", value="需要返回的字段"),
+    })
     @GetMapping
     public ListObjServiceResult<M> list(HttpServletRequest request,
-                                        @RequestParam Map<String, Object> params,
+                                        @ApiIgnore @RequestParam Map<String, Object> params,
                                         @RequestParam(required = false) String search,
                                         @RequestParam(required = false) String[] searchFields,
                                         @RequestParam(required = false) String[] orders,
@@ -121,6 +134,11 @@ public abstract class BaseModelController<M extends BaseModel, S extends BaseMod
      * @param fields 返回数据字段
      * @return 单条数据结果
      */
+    @ApiOperation("获取指定id数据")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="id", paramType="path", value="数据id"),
+            @ApiImplicitParam(name="fields", value="需要返回的字段"),
+    })
     @GetMapping("/{id}")
     public ObjServiceResult<M> get(@PathVariable String id, @RequestParam(required = false) String[] fields) {
         log.info("id:{}, fields:{}", id, fields);
@@ -133,6 +151,10 @@ public abstract class BaseModelController<M extends BaseModel, S extends BaseMod
      * @param fields 返回数据字段
      * @return 单条数据结果
      */
+    @ApiOperation("创建数据")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="fields", value="需要返回的字段"),
+    })
     @PostMapping
     public ObjServiceResult<M> create(@RequestBody M obj, @RequestParam(required = false) String[] fields) {
         log.info("obj:{}, fields:{}", obj, fields);
@@ -146,6 +168,11 @@ public abstract class BaseModelController<M extends BaseModel, S extends BaseMod
      * @param fields 返回数据字段，只涉及更新字段
      * @return 单条数据结果
      */
+    @ApiOperation("更新指定id数据")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="id", paramType="path", value="数据id"),
+            @ApiImplicitParam(name="fields", value="需要返回的字段"),
+    })
     @PatchMapping("/{id}")
     public ObjServiceResult<M> update(@PathVariable String id, @RequestBody M obj,
                                       @RequestParam(required = false) String[] fields) {
@@ -159,6 +186,10 @@ public abstract class BaseModelController<M extends BaseModel, S extends BaseMod
      * @param id 数据id
      * @return 是否删除成功
      */
+    @ApiOperation("删除指定id数据")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="id", paramType="path", value="数据id"),
+    })
     @DeleteMapping("/{id}")
     public ServiceResult<Boolean> delete(@PathVariable String id) {
         log.info("id:{}", id);
@@ -170,6 +201,7 @@ public abstract class BaseModelController<M extends BaseModel, S extends BaseMod
      * @param objs 创建对象集
      * @return 成功数量
      */
+    @ApiOperation("批量创建数据")
     @PostMapping("/bulk_create")
     public ServiceResult<Integer> bulkCreate(@RequestBody List<M> objs) {
         return getModelService().bulkCreate(objs).asResult();
@@ -180,6 +212,7 @@ public abstract class BaseModelController<M extends BaseModel, S extends BaseMod
      * @param objs 更新对象集，需要更新的字段必须一致
      * @return 成功数量
      */
+    @ApiOperation("批量更新数据")
     @PatchMapping("/bulk_update")
     public ServiceResult<Integer> bulkUpdate(@RequestBody List<M> objs) {
         return getModelService().bulkUpdate(objs).asResult();
@@ -190,6 +223,7 @@ public abstract class BaseModelController<M extends BaseModel, S extends BaseMod
      * @param ids 数据id集
      * @return 成功数量
      */
+    @ApiOperation("批量删除数据")
     @DeleteMapping("/bulk_delete")
     public ServiceResult<Integer> bulkDelete(@RequestBody String[] ids) {
         return getModelService().bulkDelete(ids).asResult();

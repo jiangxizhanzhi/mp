@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.base.model;
 
-import cn.cyberpeace.mp.base.model.generator.DateGenerator;
 import cn.cyberpeace.mp.base.model.generator.DateTimeGenerator;
 import cn.cyberpeace.mp.base.model.generator.Generator;
 import cn.cyberpeace.mp.base.model.generator.UuidGenerator;
@@ -9,6 +8,8 @@ import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.base.util.ClassUtils;
 import cn.cyberpeace.mp.base.util.ModelUtils;
 import cn.cyberpeace.mp.base.util.SerializableFunction;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -16,18 +17,22 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.Map;
 
+@ApiModel(value = "object", description = "数据对象")
 @Slf4j
 @Data
 public class BaseModel {
+
+    @ApiModelProperty(value = "ID")
     @DefaultGen(UuidGenerator.class)
     private String id;
 
+    @ApiModelProperty(value = "创建时间")
     @DefaultGen(DateTimeGenerator.class)
     private LocalDateTime createTime;
 
+    @ApiModelProperty(value = "更新时间")
     @DefaultGen(DateTimeGenerator.class)
     private LocalDateTime updateTime;
 
