@@ -4,6 +4,8 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.code.ServiceCode;
 import cn.cyberpeace.mp.base.util.MessageUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,18 +15,23 @@ import lombok.NoArgsConstructor;
  * 统一服务返回结果
  * @param <T> 返回结果数据源对象类型
  */
+@ApiModel(value = "object", description = "响应结果")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class ServiceResult<T> {
 
+    @ApiModelProperty(value = "响应数据")
     private Object data;
 
+    @ApiModelProperty(value = "错误码")
     private String code;
 
+    @ApiModelProperty(value = "错误说明")
     private String message;
 
+    @ApiModelProperty(value = "错误详细说明")
     private String detail;
 
     @JsonIgnore
