@@ -1,16 +1,20 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.UserFields;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
+import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.hutool.core.lang.Assert;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -63,6 +67,36 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return getModelMapper().first(new HumanCondition().filterEqual("mobile", mobile));
     }
 
+    @Override
+    public boolean resetSelfPwd(String newPwd) {
+        // 密码是否合法
+        Assert.isFalse(PasswordUtils.isPasswordStrengthLowLevel(newPwd), AuthConstant.ERROR_CODE_PREFIX + "password_strength_invalid");
+
+        var currentUser = UserUtils.getLoginUser();
+        Assert.notNull(currentUser, AuthConstant.ERROR_CODE_PREFIX + "account_not_login");
+
+        UserModel userUpdate = new UserModel();
+        userUpdate.setId(currentUser.getId());
+        userUpdate.setPassword(newPwd);
+        update(userUpdate);
+        return true;
+    }
+
+    @Override
+    public boolean resetPwd(String userId, String newPwd) {
+        // 密码是否合法
+        Assert.isFalse(PasswordUtils.isPasswordStrengthLowLevel(newPwd), AuthConstant.ERROR_CODE_PREFIX + "password_strength_invalid");
+
+        var source = get(userId).getSource();
+        UserModel user = source == null ? null : source.getObj();
+        Assert.notNull(user, AuthConstant.ERROR_CODE_PREFIX + "account_not_existed");
+
+        UserModel userUpdate = new UserModel();
+        userUpdate.setId(user.getId());
+        userUpdate.setPassword(newPwd);
+        update(userUpdate);
+        return true;
+    }
 
     @Override
     public void loadListFilterCondition(HumanCondition humanCondition, Map<String, Object> params) {
