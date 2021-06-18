@@ -15,7 +15,7 @@ public class RegisterReq {
     @NotBlank(message = "username不能为空!")
     private String username;
 
-    @ApiModelProperty(value = "密码", example = "")
+    @ApiModelProperty(value = "密码 密码必须是DES加密后的密文", example = "")
     @NotBlank
     private String password;
 

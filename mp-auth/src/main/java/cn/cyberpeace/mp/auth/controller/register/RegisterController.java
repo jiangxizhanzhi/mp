@@ -48,8 +48,8 @@ public class RegisterController {
     public ServiceResult register(@RequestBody @Validated RegisterReq registerReq) {
         log.info("registerReq:{}", registerReq);
 
-        String decryptedPwd = registerReq.getPassword();
-        registerReq.setPassword(PasswordUtils.desDecrypt(decryptedPwd));
+        String encryptedPwd = registerReq.getPassword();
+        registerReq.setPassword(PasswordUtils.desDecrypt(encryptedPwd));
         ObjServiceResult<UserModel> result = registerService.register(registerReq);
 
         if (result.getSource() != null) {
