@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.auth.extensions.security;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
+import cn.cyberpeace.mp.auth.dto.login.LoginResp;
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetails;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.fields.UserFields;
@@ -8,6 +10,8 @@ import cn.cyberpeace.mp.auth.util.JwtUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,19 +41,24 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
         response.setContentType("application/json;charset=UTF-8");
 
         UserModel user = null;
-        ObjServiceResult<UserModel> result;
+        ServiceResult<Object> result;
 
         Object principal = authentication.getPrincipal();
         if (principal instanceof AuthUserDetails) {
             user = ((AuthUserDetails) principal).getUser();
         }
 
-        if(JwtUtils.addResponseHeaderWithJWT(user)) {
-//            response.setStatus(HttpServletResponse.SC_OK);
-            result = new ObjServiceResult<>(new ObjResult<>(user, new UserFields().getAvailableFields()));
+
+        if (user != null) {
+            String jwt = JwtUtils.generateToken(new JwtUtils.UserInfo(user.getId(), user.getUsername(), user.getTokenSecret()));
+            ObjResult<UserModel> userResult = new ObjResult(user, new UserFields().getAvailableFields());
+            LoginResp loginResp = new LoginResp();
+            loginResp.setUser(userResult.asResult());
+            loginResp.setToken(jwt);
+            result = ServiceResult.builder().source(loginResp).build();
         } else {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            result = new ObjServiceResult<>(null, BaseErrorCode.ERROR);
+            result = new ServiceResult<>(null, BaseErrorCode.ERROR);
         }
 
         PrintWriter writer = response.getWriter();

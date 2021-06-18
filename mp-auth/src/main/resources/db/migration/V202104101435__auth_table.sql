@@ -61,7 +61,7 @@ CREATE TABLE mp_auth_user (
     `address` varchar(255) NOT NULL COMMENT '地址',
     `status` int(10) NOT NULL COMMENT '账号状态',
     `init_check` int NOT NULL DEFAULT 0 COMMENT '是否首次登陆需要强制修改密码 0:否，1:是',
-    `desc` varchar(1024) NULL COMMENT '描述',
+    `description` varchar(1024) NULL COMMENT '描述',
     `date_joined` datetime(6) NOT NULL COMMENT '加入时间',
     `expired_time` datetime(6) NOT NULL COMMENT '过期时间',
     `last_login` datetime(6) NOT NULL COMMENT '最后登录时间',
