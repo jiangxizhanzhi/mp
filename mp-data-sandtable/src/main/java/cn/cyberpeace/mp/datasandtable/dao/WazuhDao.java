@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.datasandtable.dao;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.datasandtable.constant.DataSandtableConstant;
+import cn.cyberpeace.mp.datasandtable.model.WazuhFileRoot;
 import cn.cyberpeace.mp.datasandtable.model.WazuhRamRoot;
 import cn.cyberpeace.mp.datasandtable.utils.WazuhHttpsUtils;
 import com.alibaba.fastjson.JSON;
@@ -46,7 +47,7 @@ public class WazuhDao {
      */
     public WazuhRamRoot queryRamByAgentId(String agentId) {
         var requestUrl = wazuhUrl + "/syscollector/" + agentId + "/hardware";
-        String res = null;
+        String res;
         try {
             res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
         } catch (Exception e) {
@@ -54,6 +55,24 @@ public class WazuhDao {
             throw new MpRuntimeException("查询ram信息失败");
         }
         return JSONObject.toJavaObject(JSON.parseObject(res), WazuhRamRoot.class);
+    }
+
+
+    /**
+     * 查询文件监控
+     * @param requestUri requestUri
+     * @return WazuhFileRoot
+     */
+    public WazuhFileRoot queryFileEvents(String requestUri){
+        var requestUrl = wazuhUrl + requestUri;
+        String res;
+        try {
+            res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
+        } catch (Exception e) {
+            log.error("查询文件预警是失败 requestUri {}: stack: {}" , requestUri, e);
+            throw new MpRuntimeException("查询文件预警是失败 requestUri : " + requestUri);
+        }
+        return JSONObject.toJavaObject(JSON.parseObject(res), WazuhFileRoot.class);
     }
 
 }

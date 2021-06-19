@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.datasandtable.dao;
 
 import cn.cyberpeace.mp.datasandtable.TestDatasandtableApplciation;
 import cn.cyberpeace.mp.datasandtable.constant.DataSandtableConstant;
+import cn.cyberpeace.mp.datasandtable.model.WazuhFileRoot;
 import cn.cyberpeace.mp.datasandtable.model.WazuhRamRoot;
 import java.io.IOException;
 import java.util.Objects;
@@ -36,5 +37,11 @@ public class WazuhDaoTest {
     public void testWazuhRamRoot() throws IOException{
         WazuhRamRoot wazuhRamRoot = wazuhDao.queryRamByAgentId("006");
         Assert.isTrue(Objects.nonNull(wazuhRamRoot.getData()), "error");
+    }
+
+    @Test
+    public void testQueryFileEventsByAgentId() throws IOException{
+        WazuhFileRoot wazuhFileRoot = wazuhDao.queryFileEventsByAgentId("001");
+        Assert.isTrue(Objects.nonNull(wazuhFileRoot.getData()), "error");
     }
 }
