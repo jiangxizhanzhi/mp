@@ -15,7 +15,7 @@ import java.util.Objects;
  * 统一返回结果风格，例如：驼峰命名字段转换成蛇形命名
  */
 @Configuration
-public class WebMvcConfig  {
+public class RequestMappingHandlerAdapterConfig {
 
     private final RequestMappingHandlerAdapter requestMappingHandlerAdapter;
 
@@ -29,8 +29,8 @@ public class WebMvcConfig  {
      * @param requestMappingHandlerAdapter
      * @param customRequestResponseBodyMethodProcessor
      */
-    public WebMvcConfig(RequestMappingHandlerAdapter requestMappingHandlerAdapter,
-                        CustomRequestResponseBodyMethodProcessor customRequestResponseBodyMethodProcessor) {
+    public RequestMappingHandlerAdapterConfig(RequestMappingHandlerAdapter requestMappingHandlerAdapter,
+                                              CustomRequestResponseBodyMethodProcessor customRequestResponseBodyMethodProcessor) {
         this.requestMappingHandlerAdapter = requestMappingHandlerAdapter;
         this.customRequestResponseBodyMethodProcessor = customRequestResponseBodyMethodProcessor;
     }
