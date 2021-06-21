@@ -73,6 +73,7 @@ public abstract class BaseModelController<M extends BaseModel, S extends BaseMod
                 params.put(listParamName, listParams.get(listParamName));
             }
         }
+        params.remove("ids");
         params.remove("search");
         params.remove("searchFields");
         params.remove("orders");
@@ -115,17 +116,18 @@ public abstract class BaseModelController<M extends BaseModel, S extends BaseMod
     @GetMapping
     public ListObjServiceResult<M> list(HttpServletRequest request,
                                         @ApiIgnore @RequestParam Map<String, Object> params,
+                                        @RequestParam(required = false) String[] ids,
                                         @RequestParam(required = false) String search,
                                         @RequestParam(required = false) String[] searchFields,
                                         @RequestParam(required = false) String[] orders,
                                         @RequestParam(required = false) Integer page,
                                         @RequestParam(required = false) Integer pageSize,
                                         @RequestParam(required = false) String[] fields) {
-        var queryParams = new QueryParams(params, search, searchFields, orders, page, pageSize, fields);
+        var queryParams = new QueryParams(params, ids, search, searchFields, orders, page, pageSize, fields);
         handleQueryParams("list", ListParamNames.class, request, queryParams);
-        return getModelService().list(queryParams.getParams(), queryParams.getSearch(), queryParams.getSearchFields(),
-                queryParams.getOrders(), queryParams.getPage(), queryParams.getPageSize(),
-                queryParams.getFields()).asResult();
+        return getModelService().list(queryParams.getParams(), queryParams.getIds(), queryParams.getSearch(),
+                queryParams.getSearchFields(), queryParams.getOrders(), queryParams.getPage(),
+                queryParams.getPageSize(), queryParams.getFields()).asResult();
     }
 
     /**

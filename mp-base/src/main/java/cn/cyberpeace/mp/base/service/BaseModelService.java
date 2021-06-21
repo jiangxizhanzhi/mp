@@ -9,7 +9,7 @@ import java.util.Map;
 
 public interface BaseModelService<M> {
 
-    default ListObjServiceResult<M> list(Map<String, Object> params, String search, String[] searchFields,
+    default ListObjServiceResult<M> list(Map<String, Object> params, String[] ids, String search, String[] searchFields,
                                          String[] orders, int page, int pageSize, String[] fields) {
         return new ListObjServiceResult<>();
     }
@@ -42,9 +42,9 @@ public interface BaseModelService<M> {
         return new ServiceResult<>();
     }
 
-    default ListObjServiceResult<M> list(Map<String, Object> params, String search, String[] searchFields,
+    default ListObjServiceResult<M> list(Map<String, Object> params, String[] ids, String search, String[] searchFields,
                                          String[] orders, int page, int pageSize) {
-        return list(params, search, searchFields, orders, page, pageSize, null);
+        return list(params, ids, search, searchFields, orders, page, pageSize, null);
     }
 
     default ObjServiceResult<M> get(String id) {

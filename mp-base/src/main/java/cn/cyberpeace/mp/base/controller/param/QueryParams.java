@@ -15,6 +15,8 @@ import java.util.Map;
 public class QueryParams {
     /** 具体业务参数 */
     private Map<String, Object> params;
+    /** id列表 */
+    private String[] ids;
     /** 搜索关键词 */
     private String search;
     /** 搜索字段 */
