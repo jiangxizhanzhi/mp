@@ -12,6 +12,7 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
@@ -72,16 +73,20 @@ public class CustomRequestResponseBodyMethodProcessor extends RequestResponseBod
 
         if (returnValue instanceof ListObjServiceResult){
             List<Object> data =  ((ListObjResult) ((ListObjServiceResult) returnValue).getData()).getData();
-            List<Object> resultList = Lists.newArrayList();
-            data.stream().forEach(map -> {
-                resultList.add(toUnderlineCase((Map<String, Object>) map));
-            });
-            ((ListObjResult) ((ListObjServiceResult) returnValue).getData()).setData(resultList);
+            if (!CollectionUtils.isEmpty(data)) {
+                List<Object> resultList = Lists.newArrayList();
+                data.stream().forEach(map -> {
+                    resultList.add(toUnderlineCase((Map<String, Object>) map));
+                });
+                ((ListObjResult) ((ListObjServiceResult) returnValue).getData()).setData(resultList);
+            }
         }
 
         if (returnValue instanceof ObjServiceResult){
             Map<String,Object> map = (Map<String, Object>) ((ObjServiceResult<?>) returnValue).getData();
-            ((ObjServiceResult<?>) returnValue).setData(toUnderlineCase(map));
+            if(!CollectionUtils.isEmpty(map)) {
+                ((ObjServiceResult<?>) returnValue).setData(toUnderlineCase(map));
+            }
         }
         super.handleReturnValue(returnValue, returnType, mavContainer, webRequest);
     }
@@ -93,6 +98,9 @@ public class CustomRequestResponseBodyMethodProcessor extends RequestResponseBod
      */
     private Map<String,Object> toUnderlineCase(Map<String,Object> map){
         Map<String, Object> resultMap = new HashMap<>();
+        if (CollectionUtils.isEmpty(map)){
+            return resultMap;
+        }
         map.forEach((k,v) -> resultMap.put(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, k), v));
         return resultMap;
     }
