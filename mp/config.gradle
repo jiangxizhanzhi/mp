@@ -9,7 +9,8 @@ gradle.ext {
         'mp-scene-plugin-flow',
         'mp-data-sandtable',
         'mp-devops-log',
-        'mp-flow'
+        'mp-flow',
+        'mp-system-operation'
     ]
 
     flyway = [
