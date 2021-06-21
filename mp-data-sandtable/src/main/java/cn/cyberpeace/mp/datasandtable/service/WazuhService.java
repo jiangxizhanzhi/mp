@@ -1,11 +1,13 @@
 package cn.cyberpeace.mp.datasandtable.service;
 
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
+import cn.cyberpeace.mp.base.util.LocalDateTimeUtils;
 import cn.cyberpeace.mp.datasandtable.dao.WazuhDao;
 import cn.cyberpeace.mp.datasandtable.model.FileEventModel;
 import cn.cyberpeace.mp.datasandtable.model.WazuhFileEventRequest;
 import cn.cyberpeace.mp.datasandtable.model.WazuhFileRoot;
-import cn.cyberpeace.mp.datasandtable.model.WindowsEventModel;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,21 +23,37 @@ public class WazuhService {
     /**
      * 查询文件事件分页
      * @param wazuhFileEventRequest
-     * @return
+     * @return ListObjResult<FileEventModel>
      */
     public ListObjResult<FileEventModel> queryFileEvents(WazuhFileEventRequest wazuhFileEventRequest){
-        String requestUri = "";
+        String requestUri = "/syscheck" + wazuhFileEventRequest.getAgentId() + "?";
+        requestUri = buildFileRequest(wazuhFileEventRequest, requestUri);
         WazuhFileRoot wazuhFileRoot = wazuhDao.queryFileEvents(requestUri);
-        return ListObjResult.<FileEventModel>builder().total(wazuhFileRoot.getData().getTotalAffectedItems()).build();
+        List<FileEventModel> fileEventModels = wazuhFileRoot.getData().getAffectedItems().stream().map(fileItem ->
+            FileEventModel.builder().
+                build()).collect(Collectors.toList());
+        return ListObjResult.<FileEventModel>builder().total(wazuhFileRoot.getData().getTotalAffectedItems()).
+            objs(fileEventModels).build();
     }
 
     /**
-     * 查询windows注册表事件分页
-     * @return
+     * 构造wazuh请求参数
+     * @param wazuhFileEventRequest wazuhFileEventRequest
+     * @param requestUri requestUri
+     * @return String
      */
-    public ListObjResult<WindowsEventModel> queryWindowsRegistryEvents(){
-        String requestUri = "";
-        WazuhFileRoot wazuhFileRoot = wazuhDao.queryFileEvents(requestUri);
-        return ListObjResult.<WindowsEventModel>builder().build();
+    private String buildFileRequest(WazuhFileEventRequest wazuhFileEventRequest, String requestUri) {
+        StringBuilder resUri = new StringBuilder(requestUri);
+        //类型
+        resUri.append("type=").append(wazuhFileEventRequest.getType())
+            //分页参数
+            .append("&limit=").append(wazuhFileEventRequest.getPageSize()).append("&offset=").append(wazuhFileEventRequest.getPageNum() * wazuhFileEventRequest.getPageSize())
+            //构造时间范围查询
+            .append("q=").append("date<").append(LocalDateTimeUtils.localDateTimeToString(wazuhFileEventRequest.getEndTime(), LocalDateTimeUtils.dateTimeFormatter1))
+            .append("date>").append(LocalDateTimeUtils.localDateTimeToString(wazuhFileEventRequest.getStartTime(), LocalDateTimeUtils.dateTimeFormatter1))
+
+        ;
+
+        return resUri.toString();
     }
 }

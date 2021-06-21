@@ -77,7 +77,7 @@ public class WazuhFileRoot {
      * 文件内容的实体
      */
     @lombok.Data
-    static class FileItem {
+    public static class FileItem {
         private String arch;
         private Date gid;
         private String uname;
