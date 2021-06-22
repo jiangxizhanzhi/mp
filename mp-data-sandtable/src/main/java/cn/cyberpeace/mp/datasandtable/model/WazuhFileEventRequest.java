@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.swagger.annotations.ApiModelProperty;
 import java.time.LocalDateTime;
+import java.util.List;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -45,7 +46,7 @@ public class WazuhFileEventRequest {
     /**
      * wazuh agentId
      */
-    private String agentId;
+    private List<String> agentIdList;
 
     /**
      * file 、registry

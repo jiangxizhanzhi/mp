@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.datasandtable.TestDatasandtableApplciation;
 import cn.cyberpeace.mp.datasandtable.model.FileEventModel;
 import cn.cyberpeace.mp.datasandtable.model.WazuhFileEventRequest;
 import cn.cyberpeace.mp.datasandtable.model.emum.FileEventType;
+import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -35,7 +36,7 @@ public class WazuhServiceTest {
     @Test
     public void testQueryFileEvents() {
         WazuhFileEventRequest wazuhFileEventRequest = new WazuhFileEventRequest();
-        wazuhFileEventRequest.setAgentId("004");
+        wazuhFileEventRequest.setAgentIdList(Lists.newArrayList("001", "004"));
         wazuhFileEventRequest.setStartTime(LocalDateTime.now().minusDays(7));
         wazuhFileEventRequest.setEndTime(LocalDateTime.now());
         wazuhFileEventRequest.setPageNum(1);

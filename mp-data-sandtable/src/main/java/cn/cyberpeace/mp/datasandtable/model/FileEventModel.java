@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.datasandtable.model;
 
+import cn.cyberpeace.mp.datasandtable.model.emum.FileEventType;
 import java.time.LocalDateTime;
 import lombok.*;
 
@@ -25,4 +26,9 @@ public class FileEventModel {
      * 文件事件类型
      */
     private String action;
+
+    /**
+     * 文件事件类型
+     */
+    private FileEventType fileEventType;
 }

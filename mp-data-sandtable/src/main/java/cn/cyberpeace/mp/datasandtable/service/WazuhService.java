@@ -68,8 +68,9 @@ public class WazuhService {
         var sourceBuilder = new SearchSourceBuilder();
 
         //构造查询条件
-        boolQueryBuilder.must(QueryBuilders.termQuery("rule.groups", wazuhFileEventRequest.getFileEventType().equals(FileEventType.REGISTRY)? "syscheck_registry": "syscheck"))
-        .must(QueryBuilders.termQuery("agent.id", wazuhFileEventRequest.getAgentId()));
+        boolQueryBuilder.must(QueryBuilders.termQuery("rule.groups", "syscheck"));
+
+        buildAgentIdQuery(wazuhFileEventRequest, boolQueryBuilder);
 
         searchRequest.source(sourceBuilder.query(boolQueryBuilder.must(rangeQueryBuilder)));
         //配置索引为空
@@ -79,7 +80,6 @@ public class WazuhService {
         int  offset = (wazuhFileEventRequest.getPageNum() -1) * (wazuhFileEventRequest.getPageSize());
         sourceBuilder.from(offset);
         sourceBuilder.size(wazuhFileEventRequest.getPageSize());
-
         int total = queryTotalCount(indexArray, boolQueryBuilder);
 
         try {
@@ -97,6 +97,20 @@ public class WazuhService {
             log.error("es 查询失败 {}", e);
             throw new MpRuntimeException(BaseErrorCode.ERROR, e.toString());
         }
+    }
+
+
+    /**
+     * 构造agentIdQuery
+     * @param wazuhFileEventRequest wazuhFileEventRequest
+     * @param boolQueryBuilder boolQueryBuilder
+     */
+    private void buildAgentIdQuery(WazuhFileEventRequest wazuhFileEventRequest, BoolQueryBuilder boolQueryBuilder) {
+        var agentIdBoolQuery = QueryBuilders.boolQuery();
+        wazuhFileEventRequest.getAgentIdList().forEach(agentId -> {
+            agentIdBoolQuery.must(QueryBuilders.termQuery("rule.id", agentId));
+        });
+        boolQueryBuilder.should(agentIdBoolQuery);
     }
 
     /**
