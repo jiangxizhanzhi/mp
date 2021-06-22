@@ -24,9 +24,9 @@ import java.time.LocalDateTime;
 @Table("mp_auth_user")
 public class UserModel extends BaseModel implements Serializable {
 
-    private static final int INT_CHECK_NO = 0;
+    public static final int INT_CHECK_NO = 0;
 
-    private static final int INT_CHECK_YES = 1;
+    public static final int INT_CHECK_YES = 1;
 
     @DefaultStr
     private String tenant;
@@ -51,7 +51,7 @@ public class UserModel extends BaseModel implements Serializable {
     private String idCard;
     @DefaultStr
     private String address;
-    @DefaultInt(3)
+    @DefaultInt(1)
     private Integer status;
     @DefaultInt(INT_CHECK_NO)
     private Integer initCheck;

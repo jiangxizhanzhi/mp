@@ -33,3 +33,7 @@ mp:
       username: api
       password: api
     es-nodes: 10.100.7.50:9200
+    wazuh:
+      base-url: https://192.168.5.125:55000
+      username: wazuh
+      password: wazuh

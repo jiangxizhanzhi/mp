@@ -1,3 +1,4 @@
 dependencies {
     implementation project(':mp-base')
+    implementation 'io.github.hakky54:sslcontext-kickstart:6.6.0'
 }

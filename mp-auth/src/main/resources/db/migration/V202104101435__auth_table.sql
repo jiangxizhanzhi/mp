@@ -172,6 +172,38 @@ CREATE TABLE mp_auth_user_permission (
 
 
 
+# 组织-用户关系表
+CREATE TABLE mp_auth_org_user (
+     `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
+     `id` varchar(64)  NOT NULL COMMENT 'id',
+     `tenant` varchar(64)  NOT NULL COMMENT '所属租户' default '',
+     `org` varchar(64)  NOT NULL COMMENT '组织id',
+     `user` varchar(64)  NOT NULL COMMENT '账号id',
+     `create_time` datetime(6) NOT NULL COMMENT '创建时间',
+     `update_time` datetime(6) NOT NULL COMMENT '更新时间',
+     PRIMARY KEY (`pk`),
+     UNIQUE (`id`)
+);
+
+
+create table mp_auth_client_details (
+    `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
+    client_id VARCHAR(256),
+    resource_ids VARCHAR(256),
+    client_secret VARCHAR(256),
+    type int not null default 1 comment '类型 1:Oauth2渠道 2:免认证渠道',
+    scope VARCHAR(256),
+    authorized_grant_types VARCHAR(256),
+    web_server_redirect_uri VARCHAR(256),
+    authorities VARCHAR(256),
+    access_token_validity INTEGER,
+    refresh_token_validity INTEGER,
+    additional_information VARCHAR(4096),
+    autoapprove VARCHAR(256),
+    PRIMARY KEY (`pk`),
+    UNIQUE (`client_id`)
+) COMMENT '渠道认证配置表';
+
 
 # 系统配置信息表
 CREATE TABLE mp_sys_config (
@@ -185,3 +217,5 @@ CREATE TABLE mp_sys_config (
          PRIMARY KEY (`pk`),
          UNIQUE (`id`)
 ) COMMENT '其他配置信息表';
+
+

@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.util.ObjectUtils;
 
 @Configuration
-public class ElasticsearchConfig {
+public class MolochElasticsearchConfig {
 
     @Value("${mp.datasandtable.es-nodes}")
     private String elasticsearchNodes;

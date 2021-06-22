@@ -14,5 +14,5 @@ public class DataSandtableConstant {
     /**
      * 分组id
      */
-    public static LoadingCache<String, String> groupIdPortCache;
+    public static LoadingCache<String, String> wazuhToken;
 }
