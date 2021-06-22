@@ -72,7 +72,12 @@ logging:
     path: /home/mp/logs
 
 ---
-# 文件服务器地址
-file_server_addr: http://192.168.5.68:80
-# 最大连接数 并发量较大的话可加大该连接数
-max_storage_connection: 8
+# fastdfs配置
+fastdfs:
+  fileServerAddr: http://192.168.5.68:80  # 文件服务器地址
+  maxStorageConnection: 8 # 最大连接数
+  connectTimeoutInSeconds: 10
+  networkTimeoutInSeconds: 30
+  charset: UTF-8
+  httpTrackerHttpPort: 80
+  trackerServers: 192.168.5.68:22122
