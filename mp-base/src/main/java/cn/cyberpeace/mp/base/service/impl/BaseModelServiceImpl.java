@@ -67,9 +67,12 @@ public abstract class BaseModelServiceImpl<M extends BaseModel,
     }
 
 
-    public HumanCondition getHumanCondition(String[] selectFields, String search, String[] searchFields,
+    public HumanCondition getHumanCondition(String[] selectFields, String[] ids, String search, String[] searchFields,
                                             String[] orders, int page, int pageSize) {
         var humanCondition = getHumanCondition(selectFields);
+        if (ids != null && ids.length > 0) {
+            humanCondition.filterIn(BaseModel::getId, ids);
+        }
         humanCondition.pagination(page, pageSize);
         handleSearchCondition(humanCondition, search, searchFields);
         F actualModelFields = getModelFields();
@@ -106,12 +109,13 @@ public abstract class BaseModelServiceImpl<M extends BaseModel,
     public void loadListFilterCondition(HumanCondition humanCondition, Map<String, Object> params) {}
 
     @Override
-    public ListObjServiceResult<M> list(Map<String, Object> params, String search, String[] searchFields,
+    public ListObjServiceResult<M> list(Map<String, Object> params, String[] ids, String search, String[] searchFields,
                                         String[] orders, int page, int pageSize, String[] fields) {
         F actualModelFields = getModelFields();
         DynamicFields validModelFields = actualModelFields != null ? actualModelFields.getValidFields(fields) : null;
         String[] selectFields = validModelFields != null ? validModelFields.getFields() : null;
-        var humanCondition = getHumanCondition(selectFields, search, searchFields, orders, page, pageSize);
+        var humanCondition = getHumanCondition(selectFields, ids, search, searchFields, orders, page,
+                pageSize);
         loadListFilterCondition(humanCondition, params);
         humanCondition.setCustomCondition(getCustomCondition(params, CustomConditionClass.class));
 

@@ -42,6 +42,8 @@ subprojects {
         implementation 'org.springframework.boot:spring-boot-starter-jdbc'
         implementation 'org.springframework.boot:spring-boot-starter-web'
         implementation 'org.springframework.boot:spring-boot-starter-websocket'
+        implementation 'org.springframework.boot:spring-boot-starter-actuator'
+        implementation 'org.springframework.boot:spring-boot-starter-aop'
         implementation 'org.springframework.boot:spring-boot-starter-validation:2.5.0'
         implementation 'org.elasticsearch.client:elasticsearch-rest-high-level-client:7.7.1'
         implementation 'com.google.guava:guava:30.1.1-jre'
@@ -51,8 +53,8 @@ subprojects {
         implementation 'org.apache.commons:commons-collections4:4.1'
         implementation 'io.springfox:springfox-swagger2:3.0.0'
         implementation 'com.github.xiaoymin:knife4j-spring-boot-starter:3.0.2'
+        implementation 'cn.hutool:hutool-all:5.6.6'
         compileOnly 'org.projectlombok:lombok'
-        developmentOnly 'org.springframework.boot:spring-boot-devtools'
         runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
         annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
         annotationProcessor 'org.projectlombok:lombok'
@@ -60,6 +62,8 @@ subprojects {
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
         testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
         testImplementation 'junit:junit:4.13.2'
+        implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
+        implementation group: 'ch.qos.logback', name: 'logback-core', version: '1.2.3'
     }
 
     test {

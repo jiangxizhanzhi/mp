@@ -2,7 +2,11 @@ package cn.cyberpeace.mp.auth.config.security;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.extensions.security.*;
+import cn.cyberpeace.mp.auth.extensions.security.client.ClientAuthentication2Filter;
+import cn.cyberpeace.mp.auth.extensions.security.mobile.MobilePasswordAuthenticationFilter;
+import cn.cyberpeace.mp.auth.extensions.security.mobile.MobilePasswordAuthenticationProvider;
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetailsService;
+import cn.cyberpeace.mp.auth.service.ClientDetailsService;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -16,6 +20,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private static final String LOGIN_PATH = ControllerConstant.BASE_API_PATH + "/login";
+    private static final String LOGIN_MOBILE_PATH = ControllerConstant.BASE_API_PATH + "/login/mobile";
     private static final String LOGOUT_PATH = ControllerConstant.BASE_API_PATH + "/logout";
 
     private AuthUserDetailsService userDetailsService;
@@ -24,6 +29,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private JwtAuthenticationFilter jwtAuthenticationFilter;
     private CustomAuthenticationSuccessHandler authenticationSuccessHandler;
     private CustomAuthenticationFailureHandler authenticationFailureHandler;
+    private ClientAuthenticationFilter clientAuthenticationFilter;
+
+
+    @Autowired
+    private ClientDetailsService clientDetailsService;
 
     @Autowired
     public WebSecurityConfig(AuthUserDetailsService userDetailsService,
@@ -31,13 +41,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                              HttpLogoutSuccessHandler logoutSuccessHandler,
                              JwtAuthenticationFilter jwtAuthenticationFilter,
                              CustomAuthenticationSuccessHandler authenticationSuccessHandler,
-                             CustomAuthenticationFailureHandler authenticationFailureHandler) {
+                             CustomAuthenticationFailureHandler authenticationFailureHandler,
+                             ClientAuthenticationFilter clientAuthenticationFilter) {
         this.userDetailsService = userDetailsService;
         this.authenticationEntryPoint = authenticationEntryPoint;
         this.logoutSuccessHandler = logoutSuccessHandler;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.authenticationSuccessHandler = authenticationSuccessHandler;
         this.authenticationFailureHandler = authenticationFailureHandler;
+        this.clientAuthenticationFilter = clientAuthenticationFilter;
     }
 
     @Override
@@ -48,7 +60,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-//                .anyRequest().authenticated()
+//                .antMatchers("/login", "/logout").permitAll()  // login logout
+//                .antMatchers("/doc.html", "/webjars/**").permitAll()  // swagger
+                .antMatchers("/auth/**").authenticated()
                 .anyRequest().permitAll()
                 .and()
                 .csrf().disable()
@@ -64,13 +78,41 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .logoutUrl(LOGOUT_PATH)
                 .logoutSuccessHandler(logoutSuccessHandler)
                 .and()
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(clientAuthenticationFilter, JwtAuthenticationFilter.class);
 
+        // usernamePassword
         var customUsernamePasswordAuthenticationFilter = new CustomUsernamePasswordAuthenticationFilter();
         customUsernamePasswordAuthenticationFilter.setAuthenticationSuccessHandler(authenticationSuccessHandler);
         customUsernamePasswordAuthenticationFilter.setAuthenticationFailureHandler(authenticationFailureHandler);
         customUsernamePasswordAuthenticationFilter.setAuthenticationManager(authenticationManagerBean());
         customUsernamePasswordAuthenticationFilter.setFilterProcessesUrl(LOGIN_PATH);
         http.addFilterAt(customUsernamePasswordAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
+
+        // mobilePassword
+        var mobilePasswordAuthenticationFilter = new MobilePasswordAuthenticationFilter();
+        mobilePasswordAuthenticationFilter.setAuthenticationSuccessHandler(authenticationSuccessHandler);
+        mobilePasswordAuthenticationFilter.setAuthenticationFailureHandler(authenticationFailureHandler);
+        mobilePasswordAuthenticationFilter.setAuthenticationManager(authenticationManagerBean());
+        mobilePasswordAuthenticationFilter.setFilterProcessesUrl(LOGIN_MOBILE_PATH);
+        var mobilePasswordAuthenticationProvider = new MobilePasswordAuthenticationProvider();
+        mobilePasswordAuthenticationProvider.setUserDetailsService(userDetailsService);
+
+        http.authenticationProvider(mobilePasswordAuthenticationProvider).addFilterAt(mobilePasswordAuthenticationFilter, CustomUsernamePasswordAuthenticationFilter.class);
+
+
+
+        // client
+//        var clientAuthenticationFilter = new ClientAuthentication2Filter();
+//        clientAuthenticationFilter.setAuthenticationSuccessHandler(authenticationSuccessHandler);
+//        clientAuthenticationFilter.setAuthenticationFailureHandler(authenticationFailureHandler);
+//        clientAuthenticationFilter.setAuthenticationManager(authenticationManagerBean());
+//        clientAuthenticationFilter.setFilterProcessesUrl("/**");
+//        var clientAuthenticationProvider = new ClientAuthenticationProvider();
+//        clientAuthenticationProvider.setClientDetailsService(clientDetailsService);
+//
+//        http.authenticationProvider(clientAuthenticationProvider).addFilterAt(clientAuthenticationFilter, JwtAuthenticationFilter.class);
+
     }
 }

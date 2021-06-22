@@ -1,0 +1,4 @@
+dependencies {
+    implementation project(':mp-base')
+    implementation project(':mp-devops-log')
+}

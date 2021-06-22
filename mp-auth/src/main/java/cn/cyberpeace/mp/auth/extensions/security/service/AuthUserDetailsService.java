@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.auth.extensions.security.service;
 
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -15,22 +16,24 @@ import org.springframework.stereotype.Service;
 @Service
 public class AuthUserDetailsService implements UserDetailsService {
 
-    private final UserMapper userMapper;
+    private final UserService userService;
 
     @Autowired
-    public AuthUserDetailsService(UserMapper userMapper) {
-        this.userMapper = userMapper;
+    public AuthUserDetailsService(UserService userService) {
+        this.userService = userService;
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        log.info("username:{}", username);
         if (StringUtils.isEmpty(username)) {
             throw new UsernameNotFoundException(StringUtils.EMPTY);
         }
 
         UserModel user;
         try {
-            user = userMapper.first(new HumanCondition().filterEqual("username", username));
+            user = userService.getByUserName(username);
+            // todo 查询权限信息
         } catch (Exception e) {
             log.error("Get user by username[{}] error: {}", username, e.getMessage());
             throw new UsernameNotFoundException(e.getMessage());
@@ -41,4 +44,28 @@ public class AuthUserDetailsService implements UserDetailsService {
 
         return new AuthUserDetails(user);
     }
+
+
+    public UserDetails loadUserByMobile(String mobile) {
+        log.info("mobile:{}", mobile);
+        if (StringUtils.isEmpty(mobile)) {
+            throw new UsernameNotFoundException(StringUtils.EMPTY);
+        }
+
+        UserModel user;
+        try {
+            user = userService.getByMobile(mobile);
+            // todo 查询权限信息
+        } catch (Exception e) {
+            log.error("Get user by mobile[{}] error: {}", mobile, e.getMessage());
+            throw new UsernameNotFoundException(e.getMessage());
+        }
+        if (user == null) {
+            throw new UsernameNotFoundException(StringUtils.EMPTY);
+        }
+
+        return new AuthUserDetails(user);
+    }
+
+
 }

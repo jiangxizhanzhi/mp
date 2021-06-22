@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.annotation.ClassFieldClasses;
 import cn.cyberpeace.mp.scene.core.base.BaseSceneHandler;
 import cn.cyberpeace.mp.scene.core.bo.*;
 import cn.cyberpeace.mp.scene.core.exception.SceneNotExistException;
+import cn.cyberpeace.mp.scene.core.plugin.SceneConfigPluginHandler;
 import cn.cyberpeace.mp.scene.model.*;
 import cn.cyberpeace.mp.scene.repository.*;
 
@@ -29,6 +30,7 @@ import cn.cyberpeace.mp.scene.repository.*;
         SceneConfigElementMapper.class,
         SceneConfigElementPortMapper.class,
         SceneConfigElementPortConnectionMapper.class,
+        SceneConfigElementPluginMapper.class,
 })
 public class SceneConfigHandler extends BaseSceneHandler<
         SceneConfigModel,
@@ -36,6 +38,7 @@ public class SceneConfigHandler extends BaseSceneHandler<
         SceneConfigElementModel,
         SceneConfigElementPortModel,
         SceneConfigElementPortConnectionModel,
+        SceneConfigElementPluginModel,
         SceneConfigBO,
         SceneConfigAreaBO,
         SceneConfigElementPortBO,
@@ -48,7 +51,8 @@ public class SceneConfigHandler extends BaseSceneHandler<
         SceneConfigElementMapper,
         SceneConfigElementPortMapper,
         SceneConfigElementPortConnectionMapper,
-        SceneConfigPluginHandler> {
+        SceneConfigElementPluginMapper,
+        SceneConfigPluginHandler<?, ?>> {
 
     public SceneConfigHandler(SceneConfigDataBO sceneConfigDataBO) throws SceneNotExistException {
         init(sceneConfigDataBO, false);

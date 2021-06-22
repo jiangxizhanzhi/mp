@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
@@ -28,10 +29,17 @@ public class CustomAuthenticationFailureHandler extends SimpleUrlAuthenticationF
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
                                         AuthenticationException exception) throws IOException {
         response.setContentType("application/json;charset=UTF-8");
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
-        ObjServiceResult<UserModel> result = new ObjServiceResult<>(null, AuthErrorCode.AUTHENTICATION_FAILED,
-                exception.getMessage());
+        ObjServiceResult<UserModel> result;
+        if(exception instanceof BadCredentialsException) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            result = new ObjServiceResult<>(null, AuthErrorCode.BAD_CREDENTIALS,
+                    exception.getMessage());
+        } else {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            result = new ObjServiceResult<>(null, AuthErrorCode.AUTHENTICATION_FAILED,
+                    exception.getMessage());
+        }
 
         PrintWriter writer = response.getWriter();
         mapper.writeValue(writer, result.asResult());

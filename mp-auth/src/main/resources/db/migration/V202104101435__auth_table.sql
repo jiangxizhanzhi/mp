@@ -60,6 +60,8 @@ CREATE TABLE mp_auth_user (
     `id_card` varchar(64) NOT NULL COMMENT '身份证号',
     `address` varchar(255) NOT NULL COMMENT '地址',
     `status` int(10) NOT NULL COMMENT '账号状态',
+    `init_check` int NOT NULL DEFAULT 0 COMMENT '是否首次登陆需要强制修改密码 0:否，1:是',
+    `description` varchar(1024) NULL COMMENT '描述',
     `date_joined` datetime(6) NOT NULL COMMENT '加入时间',
     `expired_time` datetime(6) NOT NULL COMMENT '过期时间',
     `last_login` datetime(6) NOT NULL COMMENT '最后登录时间',
@@ -104,7 +106,9 @@ CREATE TABLE mp_auth_target (
    `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
    `id` varchar(64)  NOT NULL COMMENT 'id',
    `identifier` varchar(64)  NOT NULL COMMENT '编号',
+   `tenant` varchar(64)  NOT NULL COMMENT '所属租户',
    `name` varchar(64) NOT NULL COMMENT '名称',
+   `type` int NOT NULL COMMENT '资源类型 1:菜单, 2:API, 3:数据',
    `create_time` datetime(6) NOT NULL COMMENT '创建时间',
    `update_time` datetime(6) NOT NULL COMMENT '更新时间',
    PRIMARY KEY (`pk`),
@@ -165,3 +169,53 @@ CREATE TABLE mp_auth_user_permission (
     UNIQUE (`id`),
     UNIQUE (`tenant`, `owner`, `target`)
 );
+
+
+
+# 组织-用户关系表
+CREATE TABLE mp_auth_org_user (
+     `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
+     `id` varchar(64)  NOT NULL COMMENT 'id',
+     `tenant` varchar(64)  NOT NULL COMMENT '所属租户' default '',
+     `org` varchar(64)  NOT NULL COMMENT '组织id',
+     `user` varchar(64)  NOT NULL COMMENT '账号id',
+     `create_time` datetime(6) NOT NULL COMMENT '创建时间',
+     `update_time` datetime(6) NOT NULL COMMENT '更新时间',
+     PRIMARY KEY (`pk`),
+     UNIQUE (`id`)
+);
+
+
+create table mp_auth_client_details (
+    `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
+    client_id VARCHAR(256),
+    resource_ids VARCHAR(256),
+    client_secret VARCHAR(256),
+    type int not null default 1 comment '类型 1:Oauth2渠道 2:免认证渠道',
+    scope VARCHAR(256),
+    authorized_grant_types VARCHAR(256),
+    web_server_redirect_uri VARCHAR(256),
+    authorities VARCHAR(256),
+    access_token_validity INTEGER,
+    refresh_token_validity INTEGER,
+    additional_information VARCHAR(4096),
+    autoapprove VARCHAR(256),
+    PRIMARY KEY (`pk`),
+    UNIQUE (`client_id`)
+) COMMENT '渠道认证配置表';
+
+
+# 系统配置信息表
+CREATE TABLE mp_sys_config (
+         `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
+         `id` varchar(64)  NOT NULL COMMENT 'id',
+         `tenant` varchar(64) NOT NULL COMMENT '租户',
+         `key_name` varchar(256)  NULL COMMENT '键',
+         `value` varchar(1024)  NULL COMMENT '值',
+         `create_time` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+         `update_time` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+         PRIMARY KEY (`pk`),
+         UNIQUE (`id`)
+) COMMENT '其他配置信息表';
+
+

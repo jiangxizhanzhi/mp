@@ -23,6 +23,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Table("mp_auth_user")
 public class UserModel extends BaseModel implements Serializable {
+
+    public static final int INT_CHECK_NO = 0;
+
+    public static final int INT_CHECK_YES = 1;
+
     @DefaultStr
     private String tenant;
     private String identifier;
@@ -46,8 +51,12 @@ public class UserModel extends BaseModel implements Serializable {
     private String idCard;
     @DefaultStr
     private String address;
-    @DefaultInt(3)
+    @DefaultInt(1)
     private Integer status;
+    @DefaultInt(INT_CHECK_NO)
+    private Integer initCheck;
+    @DefaultStr
+    private String description;
     @DefaultGen(DateTimeGenerator.class)
     private LocalDateTime dateJoined;
     private LocalDateTime expiredTime;
@@ -58,7 +67,6 @@ public class UserModel extends BaseModel implements Serializable {
         public static final Integer NORMAL = 1;
         public static final Integer DISABLE = 2;
         public static final Integer PENDING = 3;
-
         private Status() {}
     }
 
