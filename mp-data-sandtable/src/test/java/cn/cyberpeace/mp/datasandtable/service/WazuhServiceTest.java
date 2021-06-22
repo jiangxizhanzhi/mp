@@ -35,12 +35,12 @@ public class WazuhServiceTest {
     @Test
     public void testQueryFileEvents() {
         WazuhFileEventRequest wazuhFileEventRequest = new WazuhFileEventRequest();
-        wazuhFileEventRequest.setAgentId("001");
+        wazuhFileEventRequest.setAgentId("004");
         wazuhFileEventRequest.setStartTime(LocalDateTime.now().minusDays(7));
         wazuhFileEventRequest.setEndTime(LocalDateTime.now());
         wazuhFileEventRequest.setPageNum(1);
         wazuhFileEventRequest.setPageSize(20);
-        wazuhFileEventRequest.setFileEventType(FileEventType.FILE);
+        wazuhFileEventRequest.setFileEventType(FileEventType.REGISTRY);
         ListObjResult<FileEventModel> listObjResult =  wazuhService.queryFileEvents(wazuhFileEventRequest);
         Assert.isTrue(listObjResult.getObjs().size() >0, "查询文件监控分页有数据");
     }

@@ -17,6 +17,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.annotation.Resource;
@@ -87,7 +88,8 @@ public class WazuhService {
             List<FileEventModel> fileEventModelList = wazuhFileRootList.stream().map(wazuhFileRoot -> FileEventModel.builder()
                 .filePath(wazuhFileRoot.getSyscheck().getPath())
                 .size(wazuhFileRoot.getSyscheck().getSizeAfter())
-                .updateTime(LocalDateTimeUtils.dateToLocalDateTime(wazuhFileRoot.getSyscheck().getMtimeAfter()))
+                .updateTime(LocalDateTimeUtils.dateToLocalDateTime(wazuhFileRoot.getTimestamp()))
+                .user(wazuhFileRoot.getSyscheck().getUnameAfter())
                 .action(wazuhFileRoot.getSyscheck().getEvent())
                 .build()).collect(Collectors.toList());
             return new ListObjResult<FileEventModel>(fileEventModelList, total);
