@@ -23,8 +23,8 @@ public class MpRuntimeExceptionHandler {
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public ServiceResult<String> b2bRuntimeExceptionHandler(MpRuntimeException ex) {
-        log.error(LOGGER_FORMAT, ex.getMessage(), ex);
-        return ServiceResult.<String>builder().message(ex.getMessage()).serviceCode(BaseErrorCode.ERROR).build();
+        log.error(LOGGER_FORMAT, ex.getMessage(), ex.getDetail());
+        return ServiceResult.<String>builder().message(ex.getMessage()).serviceCode(ex.getServiceCode()).detail(ex.getDetail()).build();
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

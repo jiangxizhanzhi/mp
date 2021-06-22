@@ -78,7 +78,7 @@ public class SessionService {
         buildDynamicQuery(sessionRequest, boolQueryBuilder);
         searchRequest.source(sourceBuilder.query(boolQueryBuilder.must(rangeQueryBuilder)));
 
-        CountRequest countRequest = new CountRequest(indexArray);
+        var countRequest = new CountRequest(indexArray);
         countRequest.query(boolQueryBuilder);
 
         log.info("Search JSON query: {}", searchRequest.source().toString());
