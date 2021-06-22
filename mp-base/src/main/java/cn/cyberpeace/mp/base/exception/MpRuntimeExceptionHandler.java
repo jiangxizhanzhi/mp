@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -32,7 +33,8 @@ public class MpRuntimeExceptionHandler {
     @ResponseBody
     public ServiceResult<String> validationExceptionHandle(MethodArgumentNotValidException ex) {
         log.error(ex.getMessage());
-        return ServiceResult.<String>builder().message("参数异常" + ex.getMessage()).serviceCode(BaseErrorCode.PARAMS_INVALID).build();
+        ObjectError objectError = ex.getBindingResult().getAllErrors().get(0);
+        return ServiceResult.fail(BaseErrorCode.PARAMS_INVALID, objectError.getDefaultMessage());
     }
 
     @ExceptionHandler(Exception.class)
@@ -40,6 +42,6 @@ public class MpRuntimeExceptionHandler {
     @ResponseBody
     public ServiceResult<String> handleException(Exception ex){
         log.error(LOGGER_FORMAT, ex.getMessage(), ex);
-        return ServiceResult.<String>builder().message("系统异常" + ex.getMessage()).serviceCode(BaseErrorCode.PARAMS_INVALID).build();
+        return ServiceResult.fail("系统异常：" + ex.getMessage());
     }
 }
