@@ -68,7 +68,7 @@ public class WazuhService {
         var sourceBuilder = new SearchSourceBuilder();
 
         //构造查询条件
-        boolQueryBuilder.must(QueryBuilders.termQuery("rule.groups", "syscheck"));
+        boolQueryBuilder.must(QueryBuilders.boolQuery().must(QueryBuilders.termQuery("rule.groups", "syscheck")));
 
         buildAgentIdQuery(wazuhFileEventRequest, boolQueryBuilder);
 
@@ -110,7 +110,7 @@ public class WazuhService {
     private void buildAgentIdQuery(WazuhFileEventRequest wazuhFileEventRequest, BoolQueryBuilder boolQueryBuilder) {
         var agentIdBoolQuery = QueryBuilders.boolQuery();
         wazuhFileEventRequest.getAgentIdList().forEach(agentId -> {
-            agentIdBoolQuery.must(QueryBuilders.termQuery("rule.id", agentId));
+            agentIdBoolQuery.must(QueryBuilders.termQuery("agent.id", agentId));
         });
         boolQueryBuilder.should(agentIdBoolQuery);
     }

@@ -40,8 +40,7 @@ public class WazuhServiceTest {
         wazuhFileEventRequest.setStartTime(LocalDateTime.now().minusDays(7));
         wazuhFileEventRequest.setEndTime(LocalDateTime.now());
         wazuhFileEventRequest.setPageNum(1);
-        wazuhFileEventRequest.setPageSize(20);
-        wazuhFileEventRequest.setFileEventType(FileEventType.REGISTRY);
+        wazuhFileEventRequest.setPageSize(10);
         ListObjResult<FileEventModel> listObjResult =  wazuhService.queryFileEvents(wazuhFileEventRequest);
         Assert.isTrue(listObjResult.getObjs().size() >0, "查询文件监控分页有数据");
     }

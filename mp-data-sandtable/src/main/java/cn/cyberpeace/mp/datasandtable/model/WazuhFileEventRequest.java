@@ -47,9 +47,4 @@ public class WazuhFileEventRequest {
      * wazuh agentId
      */
     private List<String> agentIdList;
-
-    /**
-     * file 、registry
-     */
-    private FileEventType fileEventType;
 }
