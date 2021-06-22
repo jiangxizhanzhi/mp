@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.datasandtable.dao.WazuhDao;
 import cn.cyberpeace.mp.datasandtable.model.FileEventModel;
 import cn.cyberpeace.mp.datasandtable.model.WazuhFileEventRequest;
 import cn.cyberpeace.mp.datasandtable.model.WazuhFileRoot;
+import cn.cyberpeace.mp.datasandtable.model.emum.FileEventType;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
@@ -64,7 +65,9 @@ public class WazuhService {
         var rangeQueryBuilder = QueryBuilders.rangeQuery("timestamp")
             .from(wazuhFileEventRequest.getStartTime().toString()).to(wazuhFileEventRequest.getEndTime().toString());
         var sourceBuilder = new SearchSourceBuilder();
-        boolQueryBuilder.must(QueryBuilders.termQuery("rule.groups", "syscheck"))
+
+        //构造查询条件
+        boolQueryBuilder.must(QueryBuilders.termQuery("rule.groups", wazuhFileEventRequest.getFileEventType().equals(FileEventType.REGISTRY)? "syscheck_registry": "syscheck"))
         .must(QueryBuilders.termQuery("agent.id", wazuhFileEventRequest.getAgentId()));
 
         searchRequest.source(sourceBuilder.query(boolQueryBuilder.must(rangeQueryBuilder)));
@@ -94,7 +97,12 @@ public class WazuhService {
         }
     }
 
-
+    /**
+     * 查询count
+     * @param indexArray
+     * @param boolQueryBuilder
+     * @return count
+     */
     private int queryTotalCount(String[] indexArray, BoolQueryBuilder boolQueryBuilder) {
         var countRequest = new CountRequest(indexArray);
         countRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));

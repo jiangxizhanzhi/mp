@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.datasandtable.model;
 
 import cn.cyberpeace.mp.base.serializer.CustomLocalDateTimeDeserializer;
 import cn.cyberpeace.mp.base.serializer.CustomLocalDateTimeSerializer;
+import cn.cyberpeace.mp.datasandtable.model.emum.FileEventType;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.swagger.annotations.ApiModelProperty;
@@ -47,7 +48,7 @@ public class WazuhFileEventRequest {
     private String agentId;
 
     /**
-     * file 、registry_value
+     * file 、registry
      */
-    private String type;
+    private FileEventType fileEventType;
 }
