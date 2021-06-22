@@ -48,7 +48,6 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
             user = ((AuthUserDetails) principal).getUser();
         }
 
-
         if (user != null) {
             String jwt = JwtUtils.generateToken(new JwtUtils.UserInfo(user.getId(), user.getUsername(), user.getTokenSecret()));
             ObjResult<UserModel> userResult = new ObjResult(user, new UserFields().getAvailableFields());
@@ -56,6 +55,11 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
             loginResp.setUser(userResult.asResult());
             loginResp.setToken(jwt);
             result = ServiceResult.builder().source(loginResp).build();
+
+            if (user.getInitCheck() == UserModel.INT_CHECK_YES) {
+                result = ServiceResult.builder().source(loginResp).serviceCode(AuthErrorCode.NEED_UPDATE_CREDENTIALS).build();
+            }
+
         } else {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             result = new ServiceResult<>(null, BaseErrorCode.ERROR);

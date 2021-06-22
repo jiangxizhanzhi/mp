@@ -2,9 +2,11 @@ package cn.cyberpeace.mp.auth.config.security;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.extensions.security.*;
+import cn.cyberpeace.mp.auth.extensions.security.client.ClientAuthentication2Filter;
 import cn.cyberpeace.mp.auth.extensions.security.mobile.MobilePasswordAuthenticationFilter;
 import cn.cyberpeace.mp.auth.extensions.security.mobile.MobilePasswordAuthenticationProvider;
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetailsService;
+import cn.cyberpeace.mp.auth.service.ClientDetailsService;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -27,6 +29,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private JwtAuthenticationFilter jwtAuthenticationFilter;
     private CustomAuthenticationSuccessHandler authenticationSuccessHandler;
     private CustomAuthenticationFailureHandler authenticationFailureHandler;
+    private ClientAuthenticationFilter clientAuthenticationFilter;
+
+
+    @Autowired
+    private ClientDetailsService clientDetailsService;
 
     @Autowired
     public WebSecurityConfig(AuthUserDetailsService userDetailsService,
@@ -34,13 +41,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                              HttpLogoutSuccessHandler logoutSuccessHandler,
                              JwtAuthenticationFilter jwtAuthenticationFilter,
                              CustomAuthenticationSuccessHandler authenticationSuccessHandler,
-                             CustomAuthenticationFailureHandler authenticationFailureHandler) {
+                             CustomAuthenticationFailureHandler authenticationFailureHandler,
+                             ClientAuthenticationFilter clientAuthenticationFilter) {
         this.userDetailsService = userDetailsService;
         this.authenticationEntryPoint = authenticationEntryPoint;
         this.logoutSuccessHandler = logoutSuccessHandler;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.authenticationSuccessHandler = authenticationSuccessHandler;
         this.authenticationFailureHandler = authenticationFailureHandler;
+        this.clientAuthenticationFilter = clientAuthenticationFilter;
     }
 
     @Override
@@ -53,23 +62,24 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http.authorizeRequests()
 //                .antMatchers("/login", "/logout").permitAll()  // login logout
 //                .antMatchers("/doc.html", "/webjars/**").permitAll()  // swagger
-//                .antMatchers("/auth/**").authenticated()
+                .antMatchers("/auth/**").authenticated()
                 .anyRequest().permitAll()
                 .and()
-                    .csrf().disable()
-                    .sessionManagement().disable()
-                    .cors()
+                .csrf().disable()
+                .sessionManagement().disable()
+                .cors()
                 .and()
-                    .formLogin().disable()
+                .formLogin().disable()
                 .exceptionHandling()
-                    .authenticationEntryPoint(authenticationEntryPoint)
+                .authenticationEntryPoint(authenticationEntryPoint)
                 .and()
-                    .logout()
-                    .permitAll()
-                    .logoutUrl(LOGOUT_PATH)
-                    .logoutSuccessHandler(logoutSuccessHandler)
+                .logout()
+                .permitAll()
+                .logoutUrl(LOGOUT_PATH)
+                .logoutSuccessHandler(logoutSuccessHandler)
                 .and()
-                    .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(clientAuthenticationFilter, JwtAuthenticationFilter.class);
 
         // usernamePassword
         var customUsernamePasswordAuthenticationFilter = new CustomUsernamePasswordAuthenticationFilter();
@@ -90,6 +100,19 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         mobilePasswordAuthenticationProvider.setUserDetailsService(userDetailsService);
 
         http.authenticationProvider(mobilePasswordAuthenticationProvider).addFilterAt(mobilePasswordAuthenticationFilter, CustomUsernamePasswordAuthenticationFilter.class);
+
+
+
+        // client
+//        var clientAuthenticationFilter = new ClientAuthentication2Filter();
+//        clientAuthenticationFilter.setAuthenticationSuccessHandler(authenticationSuccessHandler);
+//        clientAuthenticationFilter.setAuthenticationFailureHandler(authenticationFailureHandler);
+//        clientAuthenticationFilter.setAuthenticationManager(authenticationManagerBean());
+//        clientAuthenticationFilter.setFilterProcessesUrl("/**");
+//        var clientAuthenticationProvider = new ClientAuthenticationProvider();
+//        clientAuthenticationProvider.setClientDetailsService(clientDetailsService);
+//
+//        http.authenticationProvider(clientAuthenticationProvider).addFilterAt(clientAuthenticationFilter, JwtAuthenticationFilter.class);
 
     }
 }
