@@ -1,7 +1,9 @@
 package cn.cyberpeace.mp.base.util;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 
 public class LocalDateTimeUtils {
 
@@ -16,5 +18,10 @@ public class LocalDateTimeUtils {
      */
     public static String localDateTimeToString(LocalDateTime localDateTime, DateTimeFormatter dateTimeFormatter) {
         return localDateTime.format(dateTimeFormatter);
+    }
+
+    public static LocalDateTime dateToLocalDateTime(Date date) {
+        return LocalDateTime.ofInstant(date.toInstant(),
+            ZoneId.systemDefault());
     }
 }

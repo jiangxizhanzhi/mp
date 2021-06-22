@@ -13,14 +13,16 @@ public class FileEventModel {
      */
     private String filePath;
 
-    /**
-     * 变更枚举
-     */
-    private int changes;
-
     //文件大小
-    private int size;
+    private String size;
 
     //文件的时间
-    private LocalDateTime localDateTime;
+    private LocalDateTime updateTime;
+
+    private String user;
+
+    /**
+     * 文件事件类型
+     */
+    private String action;
 }
