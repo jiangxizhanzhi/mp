@@ -91,6 +91,8 @@ public class WazuhService {
                 .updateTime(LocalDateTimeUtils.dateToLocalDateTime(wazuhFileRoot.getTimestamp()))
                 .user(wazuhFileRoot.getSyscheck().getUnameAfter())
                 .action(wazuhFileRoot.getSyscheck().getEvent())
+                //区分文件还是注册表
+                .fileEventType(wazuhFileRoot.getRule().getGroups().stream().allMatch(group -> group.equals("syscheck_registry"))? FileEventType.REGISTRY: FileEventType.FILE)
                 .build()).collect(Collectors.toList());
             return new ListObjResult<FileEventModel>(fileEventModelList, total);
         } catch (IOException e) {

@@ -36,7 +36,7 @@ public class WazuhServiceTest {
     @Test
     public void testQueryFileEvents() {
         WazuhFileEventRequest wazuhFileEventRequest = new WazuhFileEventRequest();
-        wazuhFileEventRequest.setAgentIdList(Lists.newArrayList("001", "004"));
+        wazuhFileEventRequest.setAgentIdList(Lists.newArrayList("004"));
         wazuhFileEventRequest.setStartTime(LocalDateTime.now().minusDays(7));
         wazuhFileEventRequest.setEndTime(LocalDateTime.now());
         wazuhFileEventRequest.setPageNum(1);
