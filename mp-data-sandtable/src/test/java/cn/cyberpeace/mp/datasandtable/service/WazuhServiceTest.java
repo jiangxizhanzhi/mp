@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.datasandtable.TestDatasandtableApplciation;
 import cn.cyberpeace.mp.datasandtable.model.FileEventModel;
 import cn.cyberpeace.mp.datasandtable.model.WazuhFileEventRequest;
+import cn.cyberpeace.mp.datasandtable.model.emum.FileEventType;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -39,6 +40,7 @@ public class WazuhServiceTest {
         wazuhFileEventRequest.setEndTime(LocalDateTime.now());
         wazuhFileEventRequest.setPageNum(1);
         wazuhFileEventRequest.setPageSize(20);
+        wazuhFileEventRequest.setFileEventType(FileEventType.FILE);
         ListObjResult<FileEventModel> listObjResult =  wazuhService.queryFileEvents(wazuhFileEventRequest);
         Assert.isTrue(listObjResult.getObjs().size() >0, "查询文件监控分页有数据");
     }
