@@ -66,3 +66,9 @@ spring:
 logging:
   file:
     path: /home/mp/logs
+
+---
+# 文件服务器地址
+file_server_addr: http://192.168.5.68:80
+# 最大连接数 并发量较大的话可加大该连接数
+max_storage_connection: 8

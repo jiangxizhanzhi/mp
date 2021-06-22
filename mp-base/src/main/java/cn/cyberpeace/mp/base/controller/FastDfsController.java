@@ -6,7 +6,10 @@ import cn.cyberpeace.mp.base.fdfsclient.FileResponseData;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
@@ -18,7 +21,6 @@ import javax.servlet.http.HttpServletResponse;
  * @Date：2021/6/21 15:01
  */
 @RestController
-@RequestMapping("/fastdfs")
 @Slf4j
 public class FastDfsController {
 
@@ -31,7 +33,6 @@ public class FastDfsController {
     @Value("${file_server_addr}")
     private String fileServerAddr;
 
-
     /**
      * 上传文件通用，只上传文件到服务器
      *
@@ -39,7 +40,7 @@ public class FastDfsController {
      * @param request
      * @return 返回文件路径等信息
      */
-    @PostMapping(value = "/upload/file")
+    @PostMapping(value = "/file/upload")
     @ResponseBody
     public FileResponseData uploadFile(MultipartFile file, HttpServletRequest request) {
         return uploadSample(file, request);
@@ -51,7 +52,7 @@ public class FastDfsController {
      * @param filePath 文件地址
      * @param response
      */
-    @PostMapping("/download/file")
+    @PostMapping("/file/download")
     public void downloadFile(String filePath, HttpServletResponse response) throws FastDFSException {
         try {
             fastDFSClient.downloadFile(filePath, response);
@@ -66,7 +67,7 @@ public class FastDfsController {
      *
      * @param filePath
      */
-    @DeleteMapping("/delete/file")
+    @DeleteMapping("/file/delete")
     public FileResponseData deleteFile(String filePath) {
         FileResponseData responseData = new FileResponseData();
         try {

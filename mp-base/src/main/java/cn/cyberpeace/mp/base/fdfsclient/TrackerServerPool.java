@@ -14,10 +14,11 @@ import org.springframework.beans.factory.annotation.Value;
  */
 @Slf4j
 public class TrackerServerPool {
+
     /**
      * TrackerServer 配置文件路径
      */
-    private static final String FASTDFS_CONFIG_PATH = "application.properties";
+    private static final String FASTDFS_CONFIG_PATH = "fdfs.properties";
 
     /**
      * 最大连接数 default 8.
@@ -40,7 +41,7 @@ public class TrackerServerPool {
                 // 加载配置文件
                 ClientGlobal.initByProperties(FASTDFS_CONFIG_PATH);
             } catch (Exception e) {
-                log.error("加载FDFS配置文件事变");
+                log.error("加载FDFS配置文件失败");
             }
 
             log.info("ClientGlobal configInfo: {}", ClientGlobal.configInfo());

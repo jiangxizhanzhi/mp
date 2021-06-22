@@ -469,18 +469,10 @@ public class FastDFSClient {
 
     /**
      * 获取文件信息
-     * 
+     *
      * @param filepath 文件路径
      * @return 文件信息
-     * 
-     * <pre>
-     *  {<br>
-     *      "SourceIpAddr": 源IP <br>
-     *      "FileSize": 文件大小 <br>
-     *      "CreateTime": 创建时间 <br>
-     *      "CRC32": 签名 <br>
-     *  }  <br>
-     * </pre>
+     *
      */
     public Map<String, Object> getFileInfo(String filepath) throws FastDFSException {
         TrackerServer trackerServer = TrackerServerPool.borrowObject();
@@ -508,7 +500,7 @@ public class FastDFSClient {
 
     /**
      * 获取文件描述信息
-     * 
+     *
      * @param filepath 文件路径
      * @return 文件描述信息
      */
@@ -539,7 +531,7 @@ public class FastDFSClient {
 
     /**
      * 获取源文件的文件名称
-     * 
+     *
      * @param filepath 文件路径
      * @return 文件名称
      */
