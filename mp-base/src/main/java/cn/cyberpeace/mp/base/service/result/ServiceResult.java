@@ -130,4 +130,17 @@ public class ServiceResult<T> {
                 .build();
     }
 
+    /**
+     * 返回自定义失败信息
+     * @param errorCode
+     * @param msg
+     * @return
+     */
+    public static ServiceResult fail(BaseErrorCode errorCode, String msg) {
+        return ServiceResult.builder()
+                .code(errorCode.getCode())
+                .message(msg)
+                .build();
+    }
+
 }
