@@ -1,4 +1,4 @@
-CREATE TABLE mp.`mp_devops_device` (
+CREATE TABLE mp_devops_device (
                                     `pk` bigint(11) unsigned NOT NULL AUTO_INCREMENT,
                                     `id` varchar(64) NOT NULL COMMENT '设备ID',
                                     `crate_id` varchar(64) NOT NULL COMMENT '机箱编号',
@@ -14,14 +14,14 @@ CREATE TABLE mp.`mp_devops_device` (
                                     `run_state` tinyint(2) unsigned NOT NULL COMMENT '运行状态',
                                     `description` varchar(255) NOT NULL COMMENT '描述',
                                     `create_time` datetime NOT NULL COMMENT '创建时间',
-                                    `create_person` varchar(50) NOT NULL COMMENT '创建人ID',
+                                    `create_person` varchar(50) DEFAULT NULL COMMENT '创建人ID',
                                     `update_time` datetime NOT NULL COMMENT '更新时间',
                                     `update_person` varchar(50) DEFAULT NULL COMMENT '更新人ID',
                                     PRIMARY KEY (`pk`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='运维管控-集群管理-计算节点-设备管理表';
 
 
-CREATE TABLE mp.`mp_devops_device_analyse` (
+CREATE TABLE mp_devops_device_analyse (
                                             `pk` bigint(11) unsigned NOT NULL AUTO_INCREMENT,
                                             `id` varchar(64) NOT NULL COMMENT '设备参数分析ID',
                                             `device_id` varchar(64) NOT NULL COMMENT '设备ID',
@@ -33,12 +33,12 @@ CREATE TABLE mp.`mp_devops_device_analyse` (
                                             `mbps` int(8) unsigned NOT NULL COMMENT '带宽大小',
                                             `temperature` decimal(8,2) unsigned NOT NULL COMMENT '工作温度',
                                             `create_time` datetime NOT NULL COMMENT '创建时间',
-                                            `create_person` varchar(50) NOT NULL COMMENT '创建人ID',
+                                            `create_person` varchar(50) DEFAULT NULL COMMENT '创建人ID',
                                             PRIMARY KEY (`pk`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='运维管控-集群管理-计算节点-设备参数分析表';
 
 
-CREATE TABLE mp.`mp_devops_device_service` (
+CREATE TABLE mp_devops_device_service (
                                             `pk` bigint(11) unsigned NOT NULL AUTO_INCREMENT,
                                             `id` varchar(64) NOT NULL COMMENT '设备服务ID',
                                             `device_id` varchar(64) NOT NULL COMMENT '设备ID',
@@ -51,7 +51,7 @@ CREATE TABLE mp.`mp_devops_device_service` (
                                             `firewall_num` int(10) NOT NULL COMMENT '防火墙数量',
                                             `bridge_num` int(10) unsigned NOT NULL COMMENT '网桥数量',
                                             `create_time` datetime NOT NULL COMMENT '创建时间',
-                                            `create_person` varchar(50) NOT NULL COMMENT '创建人ID',
+                                            `create_person` varchar(50) DEFAULT NULL COMMENT '创建人ID',
                                             `update_time` datetime NOT NULL COMMENT '更新时间',
                                             `update_person` varchar(50) DEFAULT NULL COMMENT '更新人ID',
                                             PRIMARY KEY (`pk`)

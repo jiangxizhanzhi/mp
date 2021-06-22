@@ -29,7 +29,10 @@ public enum ErrorCode {
 
     FILE_TYPE_ERROR_VIDEO("error.file.type.video", "音频类型错误"),
 
-    FILE_TYPE_ERROR_COMPRESS("error.file.type.compress", "压缩文件类型错误");
+    FILE_TYPE_ERROR_COMPRESS("error.file.type.compress", "压缩文件类型错误"),
+
+    FILE_SERVER_INIT_FAILED("error.fastdfs.file_server_init_failed", "文件服务器初始化失败");
+
 
 
     public String CODE;
