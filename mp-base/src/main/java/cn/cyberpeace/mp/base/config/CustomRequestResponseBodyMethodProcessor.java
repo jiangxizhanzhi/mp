@@ -14,6 +14,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
@@ -35,6 +36,12 @@ public class CustomRequestResponseBodyMethodProcessor extends RequestResponseBod
 
     public CustomRequestResponseBodyMethodProcessor(List<HttpMessageConverter<?>> converters) {
         super(converters);
+    }
+
+    @Override
+    public Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,
+                                  NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory) throws Exception {
+       return super.resolveArgument(parameter,mavContainer,webRequest,binderFactory);
     }
 
     @Override
@@ -88,6 +95,7 @@ public class CustomRequestResponseBodyMethodProcessor extends RequestResponseBod
                 ((ObjServiceResult<?>) returnValue).setData(toUnderlineCase(map));
             }
         }
+
         super.handleReturnValue(returnValue, returnType, mavContainer, webRequest);
     }
 
