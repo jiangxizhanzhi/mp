@@ -13,4 +13,10 @@ public interface UserService extends BaseModelService<UserModel> {
 
     boolean resetPwd(String userId, String newPwd);
 
+    void downloadExcelTemplate();
+
+    void importExcel();
+
+    void exportExcel();
+
 }

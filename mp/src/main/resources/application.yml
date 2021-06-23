@@ -72,3 +72,10 @@ logging:
 file_server_addr: http://192.168.5.68:80
 # 最大连接数 并发量较大的话可加大该连接数
 max_storage_connection: 8
+
+
+
+mp:
+  auth:
+    excel-template-name: 用户列表.xls
+    excel-template-path: group1/M00/00/00/wKgFRGDRsliAWdiuAAAmALa0U-o081.xls
