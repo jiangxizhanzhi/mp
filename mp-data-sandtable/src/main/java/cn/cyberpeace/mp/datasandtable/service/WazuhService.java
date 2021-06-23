@@ -8,16 +8,19 @@ import cn.cyberpeace.mp.datasandtable.dao.WazuhDao;
 import cn.cyberpeace.mp.datasandtable.model.FileEventModel;
 import cn.cyberpeace.mp.datasandtable.model.WazuhFileEventRequest;
 import cn.cyberpeace.mp.datasandtable.model.WazuhFileRoot;
+import cn.cyberpeace.mp.datasandtable.model.WazuhNetifaceRoot;
 import cn.cyberpeace.mp.datasandtable.model.emum.FileEventType;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.annotation.Resource;
@@ -34,6 +37,8 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 /**
  * wazuh对接
@@ -44,6 +49,9 @@ public class WazuhService {
 
     @Resource(name = "wazuhRestHighLevelClient")
     private RestHighLevelClient restHighLevelClient;
+
+    @Autowired
+    private WazuhDao wazuhDao;
 
     private static final String wazuhAlertIndexPrefix = "wazuh-alerts-4.x-";
 
@@ -76,6 +84,38 @@ public class WazuhService {
             log.error("es 查询文件事件分页 {}", e);
             throw new MpRuntimeException(BaseErrorCode.ERROR, e.toString());
         }
+    }
+
+    /**
+     * 查询所有mac地址对应的
+     * @return
+     */
+    public MultiValueMap<String, String> queryAllAgentMacAddr() {
+        MultiValueMap<String, String> responseMultiMap = new LinkedMultiValueMap<>();
+        var wazuhNetifaceRoot = wazuhDao.queryAllAgentMac();
+        wazuhNetifaceRoot.getData().getAffectedItems().forEach(item->{
+            responseMultiMap.add(item.getAgentId(), item.getMac());
+        });
+
+        return responseMultiMap;
+    }
+
+    
+    /**
+     * 根据mac地质查询AgentIds
+     * @param macs
+     * @return agentSet
+     */
+    public Set<String> queryAgentIdsByMac(List<String> macs) {
+        MultiValueMap<String, String> multiValueMap = this.queryAllAgentMacAddr();
+        Set<String> agentSet = Sets.newHashSet();
+        multiValueMap.forEach((key, macList) -> {
+            if (macList.stream().anyMatch(macs::contains)) {
+                agentSet.add(key);
+            }
+        });
+
+        return agentSet;
     }
 
     /**

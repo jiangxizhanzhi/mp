@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.datasandtable.dao;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.datasandtable.constant.DataSandtableConstant;
 import cn.cyberpeace.mp.datasandtable.model.WazuhFileRoot;
+import cn.cyberpeace.mp.datasandtable.model.WazuhNetifaceRoot;
 import cn.cyberpeace.mp.datasandtable.model.WazuhRamRoot;
 import cn.cyberpeace.mp.datasandtable.utils.WazuhHttpsUtils;
 import com.alibaba.fastjson.JSON;
@@ -73,6 +74,23 @@ public class WazuhDao {
             throw new MpRuntimeException("查询文件预警是失败 requestUri : " + requestUri);
         }
         return JSONObject.toJavaObject(JSON.parseObject(res), WazuhFileRoot.class);
+    }
+
+    /**
+     * 查询机器所有的mac地址关系 这里如果遇到性能瓶颈，可做guava缓存，或者缓存查询单个
+     * @return
+     */
+    public WazuhNetifaceRoot queryAllAgentMac() {
+        var requestUri = "/experimental/syscollector/netiface";
+        var requestUrl = wazuhUrl + requestUri;
+        String res;
+        try {
+            res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
+        } catch (Exception e) {
+            log.error("查询文件预警是失败 requestUri {}: stack: {}" , requestUri, e);
+            throw new MpRuntimeException("查询文件预警是失败 requestUri : " + requestUri);
+        }
+        return JSONObject.toJavaObject(JSON.parseObject(res), WazuhNetifaceRoot.class);
     }
 
 }
