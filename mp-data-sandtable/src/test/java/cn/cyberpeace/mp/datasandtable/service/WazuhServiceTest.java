@@ -9,6 +9,7 @@ import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import javax.annotation.Resource;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
@@ -22,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
+import org.springframework.util.MultiValueMap;
 
 @SpringBootTest(classes = TestDatasandtableApplciation.class)
 @RunWith(SpringRunner.class)
@@ -36,13 +38,26 @@ public class WazuhServiceTest {
     @Test
     public void testQueryFileEvents() {
         WazuhFileEventRequest wazuhFileEventRequest = new WazuhFileEventRequest();
-        wazuhFileEventRequest.setAgentIdList(Lists.newArrayList("004"));
+        wazuhFileEventRequest.setMacIds(Lists.newArrayList("00:0c:29:22:d3:95"));
         wazuhFileEventRequest.setStartTime(LocalDateTime.now().minusDays(7));
         wazuhFileEventRequest.setEndTime(LocalDateTime.now());
         wazuhFileEventRequest.setPageNum(1);
         wazuhFileEventRequest.setPageSize(10);
         ListObjResult<FileEventModel> listObjResult =  wazuhService.queryFileEvents(wazuhFileEventRequest);
         Assert.isTrue(listObjResult.getObjs().size() >0, "查询文件监控分页有数据");
+    }
+
+
+    @Test
+    public void testQueryWindowsRegistory() {
+        WazuhFileEventRequest wazuhFileEventRequest = new WazuhFileEventRequest();
+        wazuhFileEventRequest.setMacIds(Lists.newArrayList("30:D0:42:E0:84:CC"));
+        wazuhFileEventRequest.setStartTime(LocalDateTime.now().minusDays(7));
+        wazuhFileEventRequest.setEndTime(LocalDateTime.now());
+        wazuhFileEventRequest.setPageNum(1);
+        wazuhFileEventRequest.setPageSize(10);
+        ListObjResult<FileEventModel> listObjResult =  wazuhService.queryFileEvents(wazuhFileEventRequest);
+        Assert.isTrue(listObjResult.getObjs().get(0).getFileEventType().equals(FileEventType.REGISTRY), "查询文件监控分页有数据");
     }
 
     @Test
@@ -63,6 +78,13 @@ public class WazuhServiceTest {
         wazuhFileEventRequest.setEndTime(LocalDateTime.now());
         List<String> indexList= wazuhService.indexListBuilder(wazuhFileEventRequest);
         System.out.println(indexList);
+    }
+
+
+    @Test
+    public void testQueryAllAgentMacAddr() {
+        MultiValueMap multiValueMap = wazuhService.queryAllAgentMacAddr();
+        Assert.isTrue(Objects.nonNull(multiValueMap), "查询到mac的关系");
     }
 
 

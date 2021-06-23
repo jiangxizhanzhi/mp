@@ -8,16 +8,19 @@ import cn.cyberpeace.mp.datasandtable.dao.WazuhDao;
 import cn.cyberpeace.mp.datasandtable.model.FileEventModel;
 import cn.cyberpeace.mp.datasandtable.model.WazuhFileEventRequest;
 import cn.cyberpeace.mp.datasandtable.model.WazuhFileRoot;
+import cn.cyberpeace.mp.datasandtable.model.WazuhNetifaceRoot;
 import cn.cyberpeace.mp.datasandtable.model.emum.FileEventType;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.annotation.Resource;
@@ -34,6 +37,8 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 /**
  * wazuh对接
@@ -42,14 +47,13 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class WazuhService {
 
-    @Autowired
-    private WazuhDao wazuhDao;
-
-
     @Resource(name = "wazuhRestHighLevelClient")
     private RestHighLevelClient restHighLevelClient;
 
-    private static String wazuhAlertIndexPrefix = "wazuh-alerts-4.x-";
+    @Autowired
+    private WazuhDao wazuhDao;
+
+    private static final String wazuhAlertIndexPrefix = "wazuh-alerts-4.x-";
 
     /**
      * 查询文件事件分页
@@ -57,50 +61,120 @@ public class WazuhService {
      * @return ListObjResult<FileEventModel>
      */
     public ListObjResult<FileEventModel> queryFileEvents(WazuhFileEventRequest wazuhFileEventRequest){
-        List<String> indexList = indexListBuilder(wazuhFileEventRequest);
-        var indexArray = new String[indexList.size()];
-        indexList.toArray(indexArray);
+        //根据日期构造索引
+        String[] indexArray = buildRequestIndex(wazuhFileEventRequest);
         var searchRequest = new SearchRequest(indexArray);
-
         var boolQueryBuilder = QueryBuilders.boolQuery();
-        var rangeQueryBuilder = QueryBuilders.rangeQuery("timestamp")
-            .from(wazuhFileEventRequest.getStartTime().toString()).to(wazuhFileEventRequest.getEndTime().toString());
         var sourceBuilder = new SearchSourceBuilder();
 
         //构造查询条件
-        boolQueryBuilder.must(QueryBuilders.boolQuery().must(QueryBuilders.termQuery("rule.groups", "syscheck")));
-
-        buildAgentIdQuery(wazuhFileEventRequest, boolQueryBuilder);
-
-        searchRequest.source(sourceBuilder.query(boolQueryBuilder.must(rangeQueryBuilder)));
+        buildBoolQueryBuilder(wazuhFileEventRequest, boolQueryBuilder);
+        searchRequest.source(sourceBuilder.query(boolQueryBuilder));
         //配置索引为空
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
-
         //处理分页
-        int  offset = (wazuhFileEventRequest.getPageNum() -1) * (wazuhFileEventRequest.getPageSize());
-        sourceBuilder.from(offset);
-        sourceBuilder.size(wazuhFileEventRequest.getPageSize());
-        int total = queryTotalCount(indexArray, boolQueryBuilder);
+        int total = processPageable(wazuhFileEventRequest, indexArray, boolQueryBuilder, sourceBuilder);
 
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             List<WazuhFileRoot> wazuhFileRootList = Arrays.stream(response.getHits().getHits()).map(hit -> JSONObject.parseObject(hit.getSourceAsString(), WazuhFileRoot.class)).collect(Collectors.toList());
-            List<FileEventModel> fileEventModelList = wazuhFileRootList.stream().map(wazuhFileRoot -> FileEventModel.builder()
-                .filePath(wazuhFileRoot.getSyscheck().getPath())
-                .size(wazuhFileRoot.getSyscheck().getSizeAfter())
-                .updateTime(LocalDateTimeUtils.dateToLocalDateTime(wazuhFileRoot.getTimestamp()))
-                .user(wazuhFileRoot.getSyscheck().getUnameAfter())
-                .action(wazuhFileRoot.getSyscheck().getEvent())
-                //区分文件还是注册表
-                .fileEventType(wazuhFileRoot.getRule().getGroups().stream().allMatch(group -> group.equals("syscheck_registry"))? FileEventType.REGISTRY: FileEventType.FILE)
-                .build()).collect(Collectors.toList());
-            return new ListObjResult<FileEventModel>(fileEventModelList, total);
+            List<FileEventModel> fileEventModelList = wazuhFileRootList.stream().map(this::getFileEventModel).collect(Collectors.toList());
+            return new ListObjResult<>(fileEventModelList, total);
         } catch (IOException e) {
-            log.error("es 查询失败 {}", e);
+            log.error("es 查询文件事件分页 {}", e);
             throw new MpRuntimeException(BaseErrorCode.ERROR, e.toString());
         }
     }
 
+    /**
+     * 查询所有mac地址对应的
+     * @return
+     */
+    public MultiValueMap<String, String> queryAllAgentMacAddr() {
+        MultiValueMap<String, String> responseMultiMap = new LinkedMultiValueMap<>();
+        var wazuhNetifaceRoot = wazuhDao.queryAllAgentMac();
+        wazuhNetifaceRoot.getData().getAffectedItems().forEach(item->{
+            responseMultiMap.add(item.getAgentId(), item.getMac());
+        });
+
+        return responseMultiMap;
+    }
+
+
+    /**
+     * 根据mac地质查询AgentIds
+     * @param macs
+     * @return agentSet
+     */
+    public Set<String> queryAgentIdsByMac(List<String> macs) {
+        MultiValueMap<String, String> multiValueMap = this.queryAllAgentMacAddr();
+        Set<String> agentSet = Sets.newHashSet();
+        multiValueMap.forEach((key, macList) -> {
+            if (macList.stream().anyMatch(macs::contains)) {
+                agentSet.add(key);
+            }
+        });
+
+        return agentSet;
+    }
+
+    /**
+     * 文件转换
+     * @param wazuhFileRoot
+     * @return
+     */
+    private FileEventModel getFileEventModel(WazuhFileRoot wazuhFileRoot) {
+        return FileEventModel.builder()
+            .filePath(wazuhFileRoot.getSyscheck().getPath())
+            .size(wazuhFileRoot.getSyscheck().getSizeAfter())
+            .updateTime(LocalDateTimeUtils.dateToLocalDateTime(wazuhFileRoot.getTimestamp()))
+            .user(wazuhFileRoot.getSyscheck().getUnameAfter())
+            .action(wazuhFileRoot.getSyscheck().getEvent())
+            //区分文件还是注册表
+            .fileEventType(wazuhFileRoot.getRule().getGroups().stream().anyMatch("syscheck_registry"::equals) ? FileEventType.REGISTRY : FileEventType.FILE)
+            .build();
+    }
+
+    /**
+     * 处理分页
+     * @param wazuhFileEventRequest
+     * @param indexArray
+     * @param boolQueryBuilder
+     * @param sourceBuilder
+     * @return
+     */
+    private int processPageable(WazuhFileEventRequest wazuhFileEventRequest, String[] indexArray,
+        BoolQueryBuilder boolQueryBuilder, SearchSourceBuilder sourceBuilder) {
+        int  offset = (wazuhFileEventRequest.getPageNum() -1) * (wazuhFileEventRequest.getPageSize());
+        sourceBuilder.from(offset);
+        sourceBuilder.size(wazuhFileEventRequest.getPageSize());
+        int total = queryTotalCount(indexArray, boolQueryBuilder);
+        return total;
+    }
+
+    /**
+     * 构造请求的索引
+     * @param wazuhFileEventRequest wazuhFileEventRequest
+     * @return String[]
+     */
+    private String[] buildRequestIndex(WazuhFileEventRequest wazuhFileEventRequest) {
+        List<String> indexList = indexListBuilder(wazuhFileEventRequest);
+        var indexArray = new String[indexList.size()];
+        indexList.toArray(indexArray);
+        return indexArray;
+    }
+
+    private void buildBoolQueryBuilder(WazuhFileEventRequest wazuhFileEventRequest, BoolQueryBuilder boolQueryBuilder) {
+        //构造查询条件
+        boolQueryBuilder.must(QueryBuilders.boolQuery().must(QueryBuilders.termQuery("rule.groups", "syscheck")));
+
+        //构造agentId
+        buildAgentIdQuery(wazuhFileEventRequest, boolQueryBuilder);
+
+        //构造事件条件
+        boolQueryBuilder.must(QueryBuilders.rangeQuery("timestamp")
+            .from(wazuhFileEventRequest.getStartTime().toString()).to(wazuhFileEventRequest.getEndTime().toString()));
+    }
 
     /**
      * 构造agentIdQuery
@@ -109,7 +183,7 @@ public class WazuhService {
      */
     private void buildAgentIdQuery(WazuhFileEventRequest wazuhFileEventRequest, BoolQueryBuilder boolQueryBuilder) {
         var agentIdBoolQuery = QueryBuilders.boolQuery();
-        wazuhFileEventRequest.getAgentIdList().forEach(agentId -> {
+        this.queryAgentIdsByMac(wazuhFileEventRequest.getMacIds()).forEach(agentId -> {
             agentIdBoolQuery.must(QueryBuilders.termQuery("agent.id", agentId));
         });
         boolQueryBuilder.should(agentIdBoolQuery);

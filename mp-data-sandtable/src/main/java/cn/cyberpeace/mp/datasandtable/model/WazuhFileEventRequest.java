@@ -44,7 +44,7 @@ public class WazuhFileEventRequest {
     private Integer pageNum = 1;
 
     /**
-     * wazuh agentId
+     * wazuh macIds
      */
-    private List<String> agentIdList;
+    private List<String> macIds;
 }
