@@ -1,22 +1,30 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
+import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.UserFields;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
+import cn.cyberpeace.mp.auth.util.ServletUtils;
 import cn.cyberpeace.mp.auth.util.UserUtils;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.fdfsclient.FastDFSClient;
+import cn.cyberpeace.mp.base.fdfsclient.FastDFSException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.hutool.core.lang.Assert;
+import cn.hutool.extra.servlet.ServletUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +32,12 @@ import java.util.Map;
 @Slf4j
 public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper, UserFields>
         implements UserService {
+
+    @Autowired
+    private AuthConfig authConfig;
+
+    @Autowired
+    private FastDFSClient fastDFSClient;
 
     @Autowired
     public UserServiceImpl(UserMapper modelMapper, UserFields modelFields) {
@@ -98,6 +112,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return true;
     }
 
+
     @Override
     public void loadListFilterCondition(HumanCondition humanCondition, Map<String, Object> params) {
         Object tenant = params.getOrDefault("tenant", null);
@@ -120,4 +135,29 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             humanCondition.filterEqual("status", status);
         }
     }
+
+
+
+    @Override
+    public void downloadExcelTemplate() {
+        try {
+            HttpServletResponse response = ServletUtils.getResponse();
+            fastDFSClient.downloadFile(authConfig.getExcelTemplatePath(), authConfig.getExcelTemplateName(), response);
+        } catch (FastDFSException e) {
+            throw new MpRuntimeException("下载模板错误！");
+        }
+    }
+
+    @Override
+    public void importExcel() {
+
+    }
+
+    @Override
+    public void exportExcel() {
+
+    }
+
+
+
 }

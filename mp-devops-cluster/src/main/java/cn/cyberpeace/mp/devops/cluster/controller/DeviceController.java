@@ -18,11 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/device")
 public class DeviceController extends BaseModelController<DeviceModel, DeviceService> {
 
-    private DeviceService deviceService;
-
     @Autowired
     public DeviceController(DeviceService modelService) {
         setModelService(modelService);
-        this.deviceService = getModelService();
     }
 }

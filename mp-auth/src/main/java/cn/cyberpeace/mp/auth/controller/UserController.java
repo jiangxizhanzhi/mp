@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.controller;
 
+import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.ResetPwdReq;
 import cn.cyberpeace.mp.auth.dto.validate.AddGroup;
@@ -34,6 +35,10 @@ public class UserController extends BaseModelController<UserModel, UserService> 
     public UserController(UserService modelService) {
         setModelService(modelService);
     }
+
+
+    @Autowired
+    private AuthConfig authConfig;
 
 
     @ApiOperation(value = "修改密码", notes = "")
@@ -75,9 +80,8 @@ public class UserController extends BaseModelController<UserModel, UserService> 
     }
 
     @GetMapping("/excel/template")
-    public ServiceResult excelTemplate() {
-        // todo excel 模板
-        return null;
+    public void excelTemplate() {
+        getModelService().downloadExcelTemplate();
     }
 
 

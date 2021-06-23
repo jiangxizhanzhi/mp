@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.config.security;
 
+import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.extensions.security.*;
 import cn.cyberpeace.mp.auth.extensions.security.client.ClientAuthentication2Filter;
@@ -9,6 +10,7 @@ import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetailsService;
 import cn.cyberpeace.mp.auth.service.ClientDetailsService;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -30,10 +32,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private CustomAuthenticationSuccessHandler authenticationSuccessHandler;
     private CustomAuthenticationFailureHandler authenticationFailureHandler;
     private ClientAuthenticationFilter clientAuthenticationFilter;
-
-
-    @Autowired
-    private ClientDetailsService clientDetailsService;
 
     @Autowired
     public WebSecurityConfig(AuthUserDetailsService userDetailsService,
@@ -62,7 +60,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http.authorizeRequests()
 //                .antMatchers("/login", "/logout").permitAll()  // login logout
 //                .antMatchers("/doc.html", "/webjars/**").permitAll()  // swagger
-                .antMatchers("/auth/**").authenticated()
+//                .antMatchers("/auth/**").authenticated()
                 .anyRequest().permitAll()
                 .and()
                 .csrf().disable()
