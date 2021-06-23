@@ -45,6 +45,19 @@ public class WazuhServiceTest {
         Assert.isTrue(listObjResult.getObjs().size() >0, "查询文件监控分页有数据");
     }
 
+
+    @Test
+    public void testQueryWindowsRegistory() {
+        WazuhFileEventRequest wazuhFileEventRequest = new WazuhFileEventRequest();
+        wazuhFileEventRequest.setAgentIdList(Lists.newArrayList("004"));
+        wazuhFileEventRequest.setStartTime(LocalDateTime.now().minusDays(7));
+        wazuhFileEventRequest.setEndTime(LocalDateTime.now());
+        wazuhFileEventRequest.setPageNum(1);
+        wazuhFileEventRequest.setPageSize(10);
+        ListObjResult<FileEventModel> listObjResult =  wazuhService.queryFileEvents(wazuhFileEventRequest);
+        Assert.isTrue(listObjResult.getObjs().get(0).getFileEventType().equals(FileEventType.REGISTRY), "查询文件监控分页有数据");
+    }
+
     @Test
     public void testWazuhESQuery() throws IOException {
         var searchRequest = new SearchRequest("wazuh-alerts-4.x-2021.06.18");
