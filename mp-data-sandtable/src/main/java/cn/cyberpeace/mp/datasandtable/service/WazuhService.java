@@ -100,7 +100,7 @@ public class WazuhService {
         return responseMultiMap;
     }
 
-    
+
     /**
      * 根据mac地质查询AgentIds
      * @param macs
@@ -183,7 +183,7 @@ public class WazuhService {
      */
     private void buildAgentIdQuery(WazuhFileEventRequest wazuhFileEventRequest, BoolQueryBuilder boolQueryBuilder) {
         var agentIdBoolQuery = QueryBuilders.boolQuery();
-        wazuhFileEventRequest.getAgentIdList().forEach(agentId -> {
+        this.queryAgentIdsByMac(wazuhFileEventRequest.getMacIds()).forEach(agentId -> {
             agentIdBoolQuery.must(QueryBuilders.termQuery("agent.id", agentId));
         });
         boolQueryBuilder.should(agentIdBoolQuery);

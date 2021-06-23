@@ -38,7 +38,7 @@ public class WazuhServiceTest {
     @Test
     public void testQueryFileEvents() {
         WazuhFileEventRequest wazuhFileEventRequest = new WazuhFileEventRequest();
-        wazuhFileEventRequest.setAgentIdList(Lists.newArrayList("004"));
+        wazuhFileEventRequest.setMacIds(Lists.newArrayList("00:0c:29:22:d3:95"));
         wazuhFileEventRequest.setStartTime(LocalDateTime.now().minusDays(7));
         wazuhFileEventRequest.setEndTime(LocalDateTime.now());
         wazuhFileEventRequest.setPageNum(1);
@@ -51,7 +51,7 @@ public class WazuhServiceTest {
     @Test
     public void testQueryWindowsRegistory() {
         WazuhFileEventRequest wazuhFileEventRequest = new WazuhFileEventRequest();
-        wazuhFileEventRequest.setAgentIdList(Lists.newArrayList("004"));
+        wazuhFileEventRequest.setMacIds(Lists.newArrayList("30:D0:42:E0:84:CC"));
         wazuhFileEventRequest.setStartTime(LocalDateTime.now().minusDays(7));
         wazuhFileEventRequest.setEndTime(LocalDateTime.now());
         wazuhFileEventRequest.setPageNum(1);
