@@ -16,7 +16,7 @@ import java.io.IOException;
  */
 @Slf4j
 @Service
-public class BaseOpenStackServiceImpl<T extends BaseOpenStackModel> {
+public class BaseOpenStackServiceImpl {
 
     protected OpenStackConfig openStackConfig;
 
@@ -29,14 +29,17 @@ public class BaseOpenStackServiceImpl<T extends BaseOpenStackModel> {
     }
 
     /**
-     * 分页查询信息
+     * 通过Get方式查询信息
      */
-    protected T page(String api,Class<T> valueType){
+    protected <T extends BaseOpenStackModel> T sendGet(String api,Class<T> valueType){
         T model = null;
         String result = "";
         try {
             result = HttpUtils.sendGet(openStackConfig.getUrl().concat(api));
             model = objectMapper.readValue(result,valueType);
+            if (!model.isSuccess()){
+                log.info("=====分页查询信息失败,api接口名称：{},对应返回结果信息：{},报错信息：{}",api,result,model.getMessage());
+            }
         } catch (IOException e) {
             log.info("=====分页查询信息失败,api接口名称：{},对应返回结果信息：{},报错信息：{}",api,result,e.getMessage());
         }
