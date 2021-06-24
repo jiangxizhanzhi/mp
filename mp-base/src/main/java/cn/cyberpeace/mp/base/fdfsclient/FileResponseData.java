@@ -54,6 +54,12 @@ public class FileResponseData {
     private String httpUrl;
 
     /**
+     * 内部地址
+     */
+    @JsonInclude(Include.NON_NULL)
+    private String innerHttpUrl;
+
+    /**
      * Http Token
      */
     @JsonInclude(Include.NON_NULL)
