@@ -91,8 +91,8 @@ public class FastDFSClient {
      * @param file MultipartFile
      * @return 返回上传成功后的文件路径
      */
-    public String uploadFileWithMultipart(MultipartFile file) throws FastDFSException {
-        return upload(file, null);
+    public String uploadFileWithMultipart(MultipartFile file, String groupName) throws FastDFSException {
+        return upload(file, null, groupName);
     }
 
     /**
@@ -102,8 +102,8 @@ public class FastDFSClient {
      * @param descriptions 文件描述
      * @return 返回上传成功后的文件路径
      */
-    public String uploadFileWithMultipart(MultipartFile file, Map<String, String> descriptions) throws FastDFSException {
-        return upload(file, descriptions);
+    public String uploadFileWithMultipart(MultipartFile file, Map<String, String> descriptions, String groupName) throws FastDFSException {
+        return upload(file, descriptions, groupName);
     }
 
     /**
@@ -112,8 +112,8 @@ public class FastDFSClient {
      * @param filepath 文件路径
      * @return 返回上传成功后的文件路径
      */
-    public String uploadFileWithFilepath(String filepath) throws FastDFSException {
-        return upload(filepath, null);
+    public String uploadFileWithFilepath(String filepath, String groupName) throws FastDFSException {
+        return upload(filepath, null, groupName);
     }
 
     /**
@@ -123,8 +123,8 @@ public class FastDFSClient {
      * @param descriptions 文件描述
      * @return 返回上传成功后的文件路径
      */
-    public String uploadFileWithFilepath(String filepath, Map<String, String> descriptions) throws FastDFSException {
-        return upload(filepath, descriptions);
+    public String uploadFileWithFilepath(String filepath, Map<String, String> descriptions, String groupName) throws FastDFSException {
+        return upload(filepath, descriptions, groupName);
     }
 
     /**
@@ -144,8 +144,8 @@ public class FastDFSClient {
      * @param filename 文件名
      * @return 返回上传成功后的文件路径
      */
-    public String uploadFileWithBase64(String base64, String filename) throws FastDFSException {
-        return upload(base64, filename, null);
+    public String uploadFileWithBase64(String base64, String filename, String groupName) throws FastDFSException {
+        return upload(base64, filename, null, groupName);
     }
 
     /**
@@ -156,8 +156,8 @@ public class FastDFSClient {
      * @param descriptions 文件描述信息
      * @return 返回上传成功后的文件路径
      */
-    public String uploadFileWithBase64(String base64, String filename, Map<String, String> descriptions) throws FastDFSException {
-        return upload(base64, filename, descriptions);
+    public String uploadFileWithBase64(String base64, String filename, Map<String, String> descriptions, String groupName) throws FastDFSException {
+        return upload(base64, filename, descriptions, groupName);
     }
 
     /**
@@ -168,13 +168,13 @@ public class FastDFSClient {
      * @return 文件路径
      * @throws FastDFSException file为空则抛出异常
      */
-    public String upload(MultipartFile file, Map<String, String> descriptions) throws FastDFSException {
+    public String upload(MultipartFile file, Map<String, String> descriptions, String groupName) throws FastDFSException {
         if(file == null || file.isEmpty()){
             throw new FastDFSException(ErrorCode.FILE_ISNULL.CODE, ErrorCode.FILE_ISNULL.MESSAGE);
         }
         String path = null;
         try {
-            path = upload(file.getInputStream(), file.getOriginalFilename(), descriptions);
+            path = upload(file.getInputStream(), file.getOriginalFilename(), descriptions, groupName);
         } catch (IOException e) {
             log.error("上传文件失败", e);
             throw new FastDFSException(ErrorCode.FILE_ISNULL.CODE, ErrorCode.FILE_ISNULL.MESSAGE);
@@ -190,7 +190,7 @@ public class FastDFSClient {
      * @return 文件路径
      * @throws FastDFSException 文件路径为空则抛出异常
      */
-    public String upload(String filepath, Map<String, String> descriptions) throws FastDFSException {
+    public String upload(String filepath, Map<String, String> descriptions, String groupName) throws FastDFSException {
         if(StringUtils.isBlank(filepath)){
             throw new FastDFSException(ErrorCode.FILE_PATH_ISNULL.CODE, ErrorCode.FILE_PATH_ISNULL.MESSAGE);
         }
@@ -202,7 +202,7 @@ public class FastDFSClient {
             filepath = toLocal(filepath);
             String filename = filepath.substring(filepath.lastIndexOf("/") + 1);
 
-            path = upload(is, filename, descriptions);
+            path = upload(is, filename, descriptions, groupName);
         } catch (FileNotFoundException e) {
             log.error("上传文件失败", e);
             throw new FastDFSException(ErrorCode.FILE_NOT_EXIST.CODE, ErrorCode.FILE_NOT_EXIST.MESSAGE);
@@ -221,11 +221,11 @@ public class FastDFSClient {
      * @return 文件路径
      * @throws FastDFSException base64为空则抛出异常
      */
-    public String upload(String base64, String filename, Map<String, String> descriptions) throws FastDFSException {
+    public String upload(String base64, String filename, Map<String, String> descriptions, String groupName) throws FastDFSException {
         if(StringUtils.isBlank(base64)){
             throw new FastDFSException(ErrorCode.FILE_ISNULL.CODE, ErrorCode.FILE_ISNULL.MESSAGE);
         }
-        return upload(new ByteArrayInputStream(Base64.decodeBase64(base64)), filename, descriptions);
+        return upload(new ByteArrayInputStream(Base64.decodeBase64(base64)), filename, descriptions, groupName);
     }
 
     /**
@@ -237,7 +237,7 @@ public class FastDFSClient {
      * @return 组名+文件路径，如：group1/M00/00/00/wKgz6lnduTeAMdrcAAEoRmXZPp870.jpeg
      * @throws FastDFSException
      */
-    public String upload(InputStream is, String filename, Map<String, String> descriptions) throws FastDFSException {
+    public String upload(InputStream is, String filename, Map<String, String> descriptions, String groupName) throws FastDFSException {
         if(is == null){
             throw new FastDFSException(ErrorCode.FILE_ISNULL.CODE, ErrorCode.FILE_ISNULL.MESSAGE);
         }
@@ -274,7 +274,7 @@ public class FastDFSClient {
             nvpsList.toArray(nvps);
         }
 
-        TrackerServer trackerServer = TrackerServerPool.borrowObject();
+        TrackerServer trackerServer = TrackerServerPool.borrowObject(groupName);
         StorageClient1 storageClient = new StorageClient1(trackerServer, null);
         try {
             // 读取流
@@ -296,7 +296,7 @@ public class FastDFSClient {
             IOUtils.closeQuietly(is);
         }
         // 返还对象
-        TrackerServerPool.returnObject(trackerServer);
+        TrackerServerPool.returnObject(trackerServer, groupName);
 
         return path;
     }
@@ -307,8 +307,8 @@ public class FastDFSClient {
      * @param filepath 文件路径
      * @param response
      */
-    public void downloadFile(String filepath, HttpServletResponse response) throws FastDFSException {
-        download(filepath, null, null, response);
+    public void downloadFile(String filepath, HttpServletResponse response, String groupName) throws FastDFSException {
+        download(filepath, null, null, response, groupName);
     }
 
     /**
@@ -317,8 +317,8 @@ public class FastDFSClient {
      * @param filepath 文件路径
      * @param os 输出流
      */
-    public void downloadFile(String filepath, OutputStream os) throws FastDFSException {
-        download(filepath, null, os, null);
+    public void downloadFile(String filepath, OutputStream os, String groupName) throws FastDFSException {
+        download(filepath, null, os, null, groupName);
     }
 
     /**
@@ -328,8 +328,8 @@ public class FastDFSClient {
      * @param filename 文件名称
      * @param response HttpServletResponse
      */
-    public void downloadFile(String filepath, String filename, HttpServletResponse response) throws FastDFSException {
-        download(filepath, filename, null, response);
+    public void downloadFile(String filepath, String filename, HttpServletResponse response, String groupName) throws FastDFSException {
+        download(filepath, filename, null, response, groupName);
     }
 
     /**
@@ -340,7 +340,7 @@ public class FastDFSClient {
      * @param os 输出流
      * @param response HttpServletResponse
      */
-    public void download(String filepath, String filename, OutputStream os, HttpServletResponse response) throws FastDFSException {
+    public void download(String filepath, String filename, OutputStream os, HttpServletResponse response, String groupName) throws FastDFSException {
         if(StringUtils.isBlank(filepath)){
             throw new FastDFSException(ErrorCode.FILE_PATH_ISNULL.CODE, ErrorCode.FILE_PATH_ISNULL.MESSAGE);
         }
@@ -348,7 +348,7 @@ public class FastDFSClient {
         filepath = toLocal(filepath);
         // 文件名
         if (StringUtils.isBlank(filename)) {
-            filename = getOriginalFilename(filepath);
+            filename = getOriginalFilename(filepath, groupName);
 
             if (null == filename) {
                 throw new FastDFSException(ErrorCode.FILE_NOT_EXIST.CODE, ErrorCode.FILE_NOT_EXIST.MESSAGE);
@@ -358,7 +358,7 @@ public class FastDFSClient {
 
         log.info("download file, filepath = {}, filename = {}", filepath, filename);
 
-        TrackerServer trackerServer = TrackerServerPool.borrowObject();
+        TrackerServer trackerServer = TrackerServerPool.borrowObject(groupName);
         StorageClient1 storageClient = new StorageClient1(trackerServer, null);
         InputStream is = null;
         try {
@@ -399,7 +399,7 @@ public class FastDFSClient {
             IOUtils.closeQuietly(is);
         }
         // 返还对象
-        TrackerServerPool.returnObject(trackerServer);
+        TrackerServerPool.returnObject(trackerServer, groupName);
     }
 
     /**
@@ -409,12 +409,12 @@ public class FastDFSClient {
      * @return 返回文件字节
      * @throws FastDFSException
      */
-    public byte[] download(String filepath) throws FastDFSException {
+    public byte[] download(String filepath, String groupName) throws FastDFSException {
         if(StringUtils.isBlank(filepath)){
             throw new FastDFSException(ErrorCode.FILE_PATH_ISNULL.CODE, ErrorCode.FILE_PATH_ISNULL.MESSAGE);
         }
 
-        TrackerServer trackerServer = TrackerServerPool.borrowObject();
+        TrackerServer trackerServer = TrackerServerPool.borrowObject(groupName);
         StorageClient1 storageClient = new StorageClient1(trackerServer, null);
         InputStream is = null;
         byte[] fileByte = null;
@@ -431,7 +431,7 @@ public class FastDFSClient {
             throw new FastDFSException(ErrorCode.FILE_DOWNLOAD_FAILED.CODE, ErrorCode.FILE_DOWNLOAD_FAILED.MESSAGE);
         }
         // 返还对象
-        TrackerServerPool.returnObject(trackerServer);
+        TrackerServerPool.returnObject(trackerServer, groupName);
 
         return fileByte;
     }
@@ -442,12 +442,12 @@ public class FastDFSClient {
      * @param filepath 文件路径
      * @return 删除成功返回 0, 失败返回其它
      */
-    public int deleteFile(String filepath) throws FastDFSException {
+    public int deleteFile(String filepath, String groupName) throws FastDFSException {
         if(StringUtils.isBlank(filepath)){
             throw new FastDFSException(ErrorCode.FILE_PATH_ISNULL.CODE, ErrorCode.FILE_PATH_ISNULL.MESSAGE);
         }
 
-        TrackerServer trackerServer = TrackerServerPool.borrowObject();
+        TrackerServer trackerServer = TrackerServerPool.borrowObject(groupName);
         StorageClient1 storageClient = new StorageClient1(trackerServer, null);
         int success = 0;
         try {
@@ -462,7 +462,7 @@ public class FastDFSClient {
             throw new FastDFSException(ErrorCode.FILE_DELETE_FAILED.CODE, ErrorCode.FILE_DELETE_FAILED.MESSAGE);
         }
         // 返还对象
-        TrackerServerPool.returnObject(trackerServer);
+        TrackerServerPool.returnObject(trackerServer, groupName);
 
         return success;
     }
@@ -474,8 +474,8 @@ public class FastDFSClient {
      * @return 文件信息
      *
      */
-    public Map<String, Object> getFileInfo(String filepath) throws FastDFSException {
-        TrackerServer trackerServer = TrackerServerPool.borrowObject();
+    public Map<String, Object> getFileInfo(String filepath, String groupName) throws FastDFSException {
+        TrackerServer trackerServer = TrackerServerPool.borrowObject(groupName);
         StorageClient1 storageClient = new StorageClient1(trackerServer, null);
         FileInfo fileInfo = null;
         try {
@@ -486,7 +486,7 @@ public class FastDFSClient {
             e.printStackTrace();
         }
         // 返还对象
-        TrackerServerPool.returnObject(trackerServer);
+        TrackerServerPool.returnObject(trackerServer, groupName);
 
         Map<String, Object> infoMap = new HashMap<>(4);
 
@@ -504,8 +504,8 @@ public class FastDFSClient {
      * @param filepath 文件路径
      * @return 文件描述信息
      */
-    public Map<String, Object> getFileDescriptions(String filepath) throws FastDFSException {
-        TrackerServer trackerServer = TrackerServerPool.borrowObject();
+    public Map<String, Object> getFileDescriptions(String filepath, String groupName) throws FastDFSException {
+        TrackerServer trackerServer = TrackerServerPool.borrowObject(groupName);
         StorageClient1 storageClient = new StorageClient1(trackerServer, null);
         NameValuePair[] nvps = null;
         try {
@@ -514,7 +514,7 @@ public class FastDFSClient {
             log.error("获取文件描述信息失败", e);
         }
         // 返还对象
-        TrackerServerPool.returnObject(trackerServer);
+        TrackerServerPool.returnObject(trackerServer, groupName);
 
         Map<String, Object> infoMap = null;
 
@@ -535,8 +535,8 @@ public class FastDFSClient {
      * @param filepath 文件路径
      * @return 文件名称
      */
-    public String getOriginalFilename(String filepath) throws FastDFSException {
-        Map<String, Object> descriptions = getFileDescriptions(filepath);
+    public String getOriginalFilename(String filepath, String groupName) throws FastDFSException {
+        Map<String, Object> descriptions = getFileDescriptions(filepath, groupName);
         if (MapUtils.isNotEmpty(descriptions) && descriptions.get(FILENAME) != null) {
             return (String) descriptions.get(FILENAME);
         }

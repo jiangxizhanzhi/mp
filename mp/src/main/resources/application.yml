@@ -74,19 +74,21 @@ logging:
     path: /home/mp/logs
 
 ---
-# fastdfs配置
-fastdfs:
-  fileServerAddr: http://192.168.5.68:80  # 文件服务器地址
-  maxStorageConnection: 8 # 最大连接数
-  connectTimeoutInSeconds: 10
-  networkTimeoutInSeconds: 30
-  charset: UTF-8
-  httpTrackerHttpPort: 80
-  trackerServers: 192.168.5.68:22122
-
-
-
 mp:
   auth:
     excel-template-name: 用户列表.xls
     excel-template-path: group1/M00/00/00/wKgFRGDRsliAWdiuAAAmALa0U-o081.xls
+  base:
+    # fastdfs配置
+    fastdfs:
+      max-storage-connection: 8   # 最大连接数
+      connect-timeout-in-seconds: 10
+      network-timeout-in-seconds: 30
+      charset: UTF-8
+      http-tracker-http-port: 80
+      groups:
+        # 集群配置：每增加一个集群，参考下例添加相应配置即可，同时在FdfsGroupEnum.java枚举类中添加该集群名称
+        - group-name: DEFAULT    # 集群名称
+          tracker-servers: 192.168.5.68:22122
+          file-server-addr: http://192.168.5.68:80    # 外部文件服务器地址
+          inner-file-server-addr: http://192.168.5.68:80    # 内部文件服务器地址
