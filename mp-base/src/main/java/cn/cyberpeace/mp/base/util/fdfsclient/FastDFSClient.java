@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.base.fdfsclient;
+package cn.cyberpeace.mp.base.util.fdfsclient;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Base64;

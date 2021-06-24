@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.base.fdfsclient;
+package cn.cyberpeace.mp.base.util.fdfsclient;
 
 import cn.cyberpeace.mp.base.config.FastDfsConfig;
 import cn.cyberpeace.mp.base.constant.BaseConstants;
