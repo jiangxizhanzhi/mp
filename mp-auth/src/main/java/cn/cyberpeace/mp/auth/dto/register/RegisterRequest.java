@@ -25,6 +25,9 @@ public class RegisterRequest {
     @ApiModelProperty(value = "昵称", example = "")
     private String nickname;
 
+    @ApiModelProperty(value = "头像地址 http或者https开头", example = "")
+    private String avatar;
+
     @ApiModelProperty(value = "手机号", example = "")
     private String mobile;
 

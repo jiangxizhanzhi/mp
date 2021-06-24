@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.service;
 
+import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.dto.register.RegisterRequest;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -21,6 +22,9 @@ public class RegisterService {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private AuthConfig authConfig;
+
     public ObjServiceResult<UserModel> register(RegisterRequest registerRequest) {
 
         UserModel userModel = new UserModel();
@@ -30,6 +34,13 @@ public class RegisterService {
         userModel.setEmail(registerRequest.getEmail());
         userModel.setNickname(registerRequest.getNickname());
         userModel.setName(registerRequest.getName());
+        userModel.setAvatar(registerRequest.getAvatar());
+
+        // todo 查看系统设置，注册用户是否需要审批
+        if (authConfig.isNeedRegistrationAudit()) {
+            log.info("need registration audit...");
+            userModel.setStatus(UserModel.Status.PENDING);
+        }
 
         check(userModel);
 

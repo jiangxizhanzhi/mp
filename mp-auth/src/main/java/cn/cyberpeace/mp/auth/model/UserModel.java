@@ -64,8 +64,11 @@ public class UserModel extends BaseModel implements Serializable {
     private LocalDateTime lastLogin;
 
     public static class Status {
+        // 正常
         public static final Integer NORMAL = 1;
+        // 禁用状态
         public static final Integer DISABLE = 2;
+        // 挂起，等待审批
         public static final Integer PENDING = 3;
         private Status() {}
     }

@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
+import cn.cyberpeace.mp.base.fdfsclient.FastDFSException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.hutool.core.lang.Assert;
 import io.swagger.annotations.Api;
@@ -24,6 +25,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletRequest;
 
 @Api(value = "用户管理接口", tags = "UserController")
 @Slf4j
@@ -46,7 +50,7 @@ public class UserController extends BaseModelController<UserModel, UserService> 
     public ServiceResult resetPwd(@Validated(AddGroup.class) @RequestBody ResetPwdReq resetPwdReq) {
         String decryptedPwd = PasswordUtils.desDecrypt(resetPwdReq.getNewPwd());
         boolean result = getModelService().resetPwd(resetPwdReq.getUserId(), decryptedPwd);
-        if(result) {
+        if (result) {
             return ServiceResult.builder().build().asResult();
         }
 
@@ -57,11 +61,55 @@ public class UserController extends BaseModelController<UserModel, UserService> 
     @PostMapping("/resetpwd/self")
     public ServiceResult resetSelfPwd(@Validated(UpdateGroup.class) @RequestBody ResetPwdReq resetPwdReq) {
         String decryptedPwd = PasswordUtils.desDecrypt(resetPwdReq.getNewPwd());
-        boolean result = getModelService().resetSelfPwd(decryptedPwd);
-        if(result) {
+        boolean success = getModelService().resetSelfPwd(decryptedPwd);
+        if (success) {
             return ServiceResult.builder().build().asResult();
         }
 
+        return ServiceResult.builder().serviceCode(BaseErrorCode.ERROR).build().asResult();
+    }
+
+
+    @ApiOperation(value = "禁用用户", notes = "")
+    @PostMapping("/disable")
+    public ServiceResult disable(@RequestParam String userId) {
+        boolean success = getModelService().disable(userId);
+        if (success) {
+            return ServiceResult.builder().build().asResult();
+        }
+        return ServiceResult.builder().serviceCode(BaseErrorCode.ERROR).build().asResult();
+    }
+
+
+    @ApiOperation(value = "启用用户", notes = "")
+    @PostMapping("/enable")
+    public ServiceResult enable(@RequestParam String userId) {
+        boolean success = getModelService().enable(userId);
+        if (success) {
+            return ServiceResult.builder().build().asResult();
+        }
+        return ServiceResult.builder().serviceCode(BaseErrorCode.ERROR).build().asResult();
+    }
+
+
+    @ApiOperation(value = "审批用户", notes = "")
+    @PostMapping("/approve")
+    public ServiceResult approve(@RequestParam String userId) {
+        boolean success = getModelService().approve(userId);
+        if (success) {
+            return ServiceResult.builder().build().asResult();
+        }
+        return ServiceResult.builder().serviceCode(BaseErrorCode.ERROR).build().asResult();
+    }
+
+
+    @ApiOperation(value = "更改用户头像", notes = "")
+    @PostMapping("/updateAvatar")
+    public ServiceResult updateAvatar(@RequestParam String userId, MultipartFile file) throws FastDFSException {
+        boolean success = getModelService().updateAvatar(userId, file);
+        if (success) {
+            return ServiceResult.builder().build().asResult();
+        }
         return ServiceResult.builder().serviceCode(BaseErrorCode.ERROR).build().asResult();
     }
 
@@ -83,9 +131,6 @@ public class UserController extends BaseModelController<UserModel, UserService> 
     public void excelTemplate() {
         getModelService().downloadExcelTemplate();
     }
-
-
-
 
 
 }

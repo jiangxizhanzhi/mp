@@ -76,6 +76,7 @@ logging:
 ---
 mp:
   auth:
+    needRegistrationAudit: true
     excel-template-name: 用户列表.xls
     excel-template-path: group1/M00/00/00/wKgFRGDRsliAWdiuAAAmALa0U-o081.xls
   base:
