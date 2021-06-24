@@ -13,10 +13,19 @@ import org.csource.fastdfs.TrackerServer;
  */
 public class TrackerServerFactory extends BasePooledObjectFactory<TrackerServer> {
 
+    /**
+     * fdfs集群名
+     */
+    private String groupName;
+
+    public TrackerServerFactory(String groupName) {
+        this.groupName = groupName;
+    }
+
     @Override
     public TrackerServer create() throws Exception {
-        // TrackerClient
-        TrackerClient trackerClient = new TrackerClient();
+        // TrackerClient:根据集群名称，传入对应的trackerGroup
+        TrackerClient trackerClient = new TrackerClient(TrackerServerPool.trackerGroupMap.get(groupName));
         // TrackerServer
         TrackerServer trackerServer = trackerClient.getConnection();
 

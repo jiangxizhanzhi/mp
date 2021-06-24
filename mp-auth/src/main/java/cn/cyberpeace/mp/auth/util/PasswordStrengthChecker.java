@@ -7,6 +7,8 @@ package cn.cyberpeace.mp.auth.util;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Objects;
+
 public class PasswordStrengthChecker {
 
     private final static int[] SIZE_TABLE = {9, 99, 999, 9999, 99999, 999999, 9999999, 99999999, 999999999,
@@ -174,7 +176,7 @@ public class PasswordStrengthChecker {
         if (len % 2 == 0) { // aaabbb
             String part1 = passwd.substring(0, len / 2);
             String part2 = passwd.substring(len / 2);
-            if (part1.equals(part2)) {
+            if (Objects.equals(part1, part2)) {
                 level--;
             }
             if (isCharEqual(part1) && isCharEqual(part2)) {
@@ -185,7 +187,7 @@ public class PasswordStrengthChecker {
             String part1 = passwd.substring(0, len / 3);
             String part2 = passwd.substring(len / 3, len / 3 * 2);
             String part3 = passwd.substring(len / 3 * 2);
-            if (part1.equals(part2) && part2.equals(part3)) {
+            if (Objects.equals(part1, part2) && Objects.equals(part2, part3)) {
                 level--;
             }
         }

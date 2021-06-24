@@ -32,7 +32,6 @@ CREATE TABLE mp_auth_role (
     `id` varchar(64)  NOT NULL COMMENT 'id',
     `tenant` varchar(64)  NOT NULL COMMENT '所属租户' default '',
     `org` varchar(64)  NOT NULL COMMENT '所属组织' default '',
-    `parent` varchar(64)  NOT NULL COMMENT '父角色' default '',
     `identifier` varchar(64)  NOT NULL COMMENT '编号',
     `name` varchar(64) NOT NULL COMMENT '名称',
     `create_time` datetime(6) NOT NULL COMMENT '创建时间',
@@ -188,7 +187,7 @@ CREATE TABLE mp_auth_org_user (
 
 create table mp_auth_client_details (
     `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
-    client_id VARCHAR(256),
+    client_id VARCHAR(128),
     resource_ids VARCHAR(256),
     client_secret VARCHAR(256),
     type int not null default 1 comment '类型 1:Oauth2渠道 2:免认证渠道',

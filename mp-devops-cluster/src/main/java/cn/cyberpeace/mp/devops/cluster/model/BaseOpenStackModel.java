@@ -24,7 +24,7 @@ public class BaseOpenStackModel implements Serializable {
     /**
      * 总数据大小
      */
-    private Long total;
+    private Integer total;
 
     /**
      * 消息体
