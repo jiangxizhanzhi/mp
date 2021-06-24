@@ -31,7 +31,7 @@ public class OrgController extends BaseModelController<OrgModel, OrgService> {
     @ApiOperation(value = "获取所有parent组织", notes = "")
     @GetMapping("/parents")
     public ServiceResult getParentOrg() {
-        List<OrgModel> orgs = getModelService().getParents();
+        List<OrgModel> orgs = getModelService().listParents();
         return ServiceResult.builder().source(orgs).build().asResult();
     }
 
@@ -39,11 +39,9 @@ public class OrgController extends BaseModelController<OrgModel, OrgService> {
     @ApiOperation(value = "根据parent组织获取下级组织", notes = "")
     @GetMapping("/byparent")
     public ServiceResult getByParent(@RequestParam String parentId) {
-        List<OrgModel> orgs = getModelService().getByParent(parentId);
+        List<OrgModel> orgs = getModelService().listByParent(parentId);
         return ServiceResult.builder().source(orgs).build().asResult();
     }
-
-
 
 
 }

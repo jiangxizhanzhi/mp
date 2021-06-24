@@ -8,5 +8,5 @@ import java.util.List;
 
 public interface UserRoleService extends BaseModelService<UserRoleModel> {
 
-    List<RoleModel> getByUserId(String userId);
+    List<RoleModel> listByUserId(String userId);
 }

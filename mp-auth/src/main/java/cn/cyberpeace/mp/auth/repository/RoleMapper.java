@@ -15,7 +15,7 @@ import java.util.List;
 @ModelClass(RoleModel.class)
 public interface RoleMapper extends BaseModelMapper<RoleModel> {
 
-    @Select("select * from mp_auth_role where tenant = #{tenant}")
-    List<RoleModel> selectByTenant(@Param("tenant") String tenant);
+    @Select("select * from mp_auth_role where tenant = #{tenantId}")
+    List<RoleModel> listByTenantId(@Param("tenantId") String tenantId);
 
 }

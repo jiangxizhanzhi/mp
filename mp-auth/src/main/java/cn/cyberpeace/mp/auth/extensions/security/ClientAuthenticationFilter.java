@@ -21,6 +21,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Objects;
 
 @Component
 @Slf4j
@@ -41,7 +42,7 @@ public class ClientAuthenticationFilter extends OncePerRequestFilter {
         if(StringUtils.isNotBlank(clientId) && StringUtils.isNotBlank(clientSecret)) {
             ClientDetailsModel clientDetails = clientDetailsService.getByClientId(clientId);
             log.info("client auth... clientId:{}, clientSecret:{}, clientDetails:{}", clientId, clientSecret, clientDetails);
-            if (clientDetails != null && clientDetails.getType().equals(ClientDetailsModel.CLIENT_TYPE_UNAUTH)) {
+            if (clientDetails != null && Objects.equals(clientDetails.getType(), ClientDetailsModel.CLIENT_TYPE_UNAUTH)) {
                 // 认证
                 var clientAuthenticationToken = new ClientAuthenticationToken(clientDetails, clientSecret, null);
                 clientAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

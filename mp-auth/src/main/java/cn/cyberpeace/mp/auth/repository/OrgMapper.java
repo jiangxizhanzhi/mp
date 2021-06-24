@@ -18,9 +18,9 @@ import java.util.List;
 public interface OrgMapper extends BaseModelMapper<OrgModel> {
 
     @Select("SELECT * FROM mp_auth_org where parent = '' or parent is null")
-    List<OrgModel> selectParentOrgs();
+    List<OrgModel> listParents();
 
     @Select("SELECT * FROM mp_auth_org where parent = #{parentId}")
-    List<OrgModel> selectOrgsByParentId(@Param("parentId") String parentId);
+    List<OrgModel> listByParentId(@Param("parentId") String parentId);
 
 }

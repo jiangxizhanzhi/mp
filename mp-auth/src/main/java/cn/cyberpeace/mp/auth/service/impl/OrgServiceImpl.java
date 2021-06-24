@@ -4,7 +4,6 @@ import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.repository.OrgMapper;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.fields.OrgFields;
-import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.hutool.core.lang.Assert;
 import lombok.extern.slf4j.Slf4j;
@@ -25,15 +24,15 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     }
 
     @Override
-    public List<OrgModel> getParents() {
-        List<OrgModel> orgs = getModelMapper().selectParentOrgs();
+    public List<OrgModel> listParents() {
+        List<OrgModel> orgs = getModelMapper().listParents();
         return orgs;
     }
 
     @Override
-    public List<OrgModel> getByParent(String parentId) {
+    public List<OrgModel> listByParent(String parentId) {
         Assert.notBlank(parentId, "parentId不能为空！");
-        List<OrgModel> orgs = getModelMapper().selectOrgsByParentId(parentId);
+        List<OrgModel> orgs = getModelMapper().listByParentId(parentId);
         return orgs;
     }
 }

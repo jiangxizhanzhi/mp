@@ -31,7 +31,7 @@ public class RoleController extends BaseModelController<RoleModel, RoleService> 
     @ApiOperation(value = "根据租户查询所有角色", notes = "")
     @GetMapping("/bytenant")
     public ServiceResult getRoleByTenant(@RequestParam String tenant) {
-        List<RoleModel> roles = getModelService().getByTenant(tenant);
+        List<RoleModel> roles = getModelService().listByTenantId(tenant);
         return ServiceResult.builder().source(roles).build().asResult();
     }
 

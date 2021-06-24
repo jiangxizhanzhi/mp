@@ -15,7 +15,7 @@ import java.util.List;
 @ModelClass(TargetModel.class)
 public interface TargetMapper extends BaseModelMapper<TargetModel> {
 
-    @Select("select * from mp_auth_target where tenant = #{tenant}")
-    List<TargetModel> selectAllByTenant(@Param("tenant") String tenant);
+    @Select("select * from mp_auth_target where tenant = #{tenantId}")
+    List<TargetModel> listByTenantId(@Param("tenantId") String tenantId);
 
 }

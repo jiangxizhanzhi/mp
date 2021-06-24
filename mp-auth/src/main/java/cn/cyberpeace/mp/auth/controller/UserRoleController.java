@@ -32,7 +32,7 @@ public class UserRoleController extends BaseModelController<UserRoleModel, UserR
     @ApiOperation(value = "根据userId查询用户所有角色", notes = "")
     @GetMapping("/byuser")
     public ServiceResult getRolesByUser(@RequestParam String userId) {
-        List<RoleModel> roles = getModelService().getByUserId(userId);
+        List<RoleModel> roles = getModelService().listByUserId(userId);
         return ServiceResult.builder().source(roles).build().asResult();
     }
 }

@@ -23,10 +23,10 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     }
 
     @Override
-    public List<RoleModel> getByUserId(String userId) {
+    public List<RoleModel> listByUserId(String userId) {
         Assert.notBlank(userId, "userId不能为空！");
         // 查询user直接绑定的角色
-        List<RoleModel> roles = getModelMapper().selectRolesByUserId(userId);
+        List<RoleModel> roles = getModelMapper().listByUserId(userId);
 
         // todo 查询用户所在组织（上级组织）的角色
 

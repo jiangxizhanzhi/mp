@@ -32,7 +32,7 @@ public class UserPermissionController extends BaseModelController<UserPermission
     @ApiOperation(value = "根据userId查询所有权限", notes = "")
     @GetMapping("/byuser")
     public ServiceResult getTargetsByUser(@RequestParam String userId) {
-        List<TargetModel> targets = getModelService().getByUserId(userId);
+        List<TargetModel> targets = getModelService().listByUserId(userId);
         return ServiceResult.builder().source(targets).build().asResult();
     }
 
@@ -41,7 +41,7 @@ public class UserPermissionController extends BaseModelController<UserPermission
     @ApiOperation(value = "根据userId查询所有菜单权限", notes = "")
     @GetMapping("/menus/byuser")
     public ServiceResult getMenuTargetsByUser(@RequestParam String userId) {
-        List<TargetModel> targets = getModelService().getMenusByUserId(userId);
+        List<TargetModel> targets = getModelService().listMenusByUserId(userId);
         return ServiceResult.builder().source(targets).build().asResult();
     }
 

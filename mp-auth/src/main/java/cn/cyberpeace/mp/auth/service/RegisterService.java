@@ -40,7 +40,6 @@ public class RegisterService {
 
     public void check(UserModel user) {
         Assert.notBlank(user.getUsername(), "username不能为空!");
-//        Assert.notBlank(registerReq.getPassword(), "password不能为空!");
 
         // 密码是否合法
         Assert.isFalse(PasswordUtils.isPasswordStrengthLowLevel(user.getPassword()), AuthConstant.ERROR_CODE_PREFIX + "password_strength_invalid");

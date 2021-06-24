@@ -9,16 +9,13 @@ import cn.cyberpeace.mp.auth.service.fields.TargetFields;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
-import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.hutool.core.lang.Assert;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @Slf4j
@@ -38,8 +35,8 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
     }
 
     @Override
-    public List<TargetModel> getAllByTenant(String tenant) {
-        List<TargetModel> targets = getModelMapper().selectAllByTenant(tenant);
+    public List<TargetModel> listByTenantId(String tenantId) {
+        List<TargetModel> targets = getModelMapper().listByTenantId(tenantId);
         return targets;
     }
 
@@ -50,6 +47,7 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
 
         return super.create(obj, fields);
     }
+
 
 
     private void check(TargetModel target) {

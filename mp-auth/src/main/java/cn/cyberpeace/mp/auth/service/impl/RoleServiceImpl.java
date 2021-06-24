@@ -4,7 +4,6 @@ import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.repository.RoleMapper;
 import cn.cyberpeace.mp.auth.service.RoleService;
 import cn.cyberpeace.mp.auth.service.fields.RoleFields;
-import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.hutool.core.lang.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +22,14 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     }
 
     @Override
-    public List<RoleModel> getByTenant(String tenant) {
-        Assert.notBlank(tenant, "tenant不能为空！");
-        List<RoleModel> roles = getModelMapper().selectByTenant(tenant);
+    public List<RoleModel> listByTenantId(String tenantId) {
+        Assert.notBlank(tenantId, "tenantId不能为空！");
+        List<RoleModel> roles = getModelMapper().listByTenantId(tenantId);
         return roles;
+    }
+
+    @Override
+    public List<RoleModel> listByOrgId(String orgId) {
+        return null;
     }
 }

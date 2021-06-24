@@ -24,10 +24,10 @@ public class RolePermissionServiceImpl
     }
 
     @Override
-    public List<TargetModel> getByRole(String roleId) {
+    public List<TargetModel> listTargetsByRoleId(String roleId) {
         Assert.notBlank(roleId, "roleId不能为空！");
 
-        List<TargetModel> targets = getModelMapper().selectTargetsByRole(roleId);
+        List<TargetModel> targets = getModelMapper().listTargetsByRoleId(roleId);
         return targets;
     }
 }

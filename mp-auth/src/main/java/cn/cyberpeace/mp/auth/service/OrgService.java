@@ -7,9 +7,9 @@ import java.util.List;
 
 public interface OrgService extends BaseModelService<OrgModel> {
 
-    List<OrgModel> getParents();
+    List<OrgModel> listParents();
 
-    List<OrgModel> getByParent(String parentId);
+    List<OrgModel> listByParent(String parentId);
 
 
 }

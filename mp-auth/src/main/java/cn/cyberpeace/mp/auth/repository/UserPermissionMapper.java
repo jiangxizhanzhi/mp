@@ -18,6 +18,6 @@ public interface UserPermissionMapper extends BaseModelMapper<UserPermissionMode
 
     @Select("select * from mp_auth_target where id in " +
             "(select target from mp_auth_user_permission where owner = #{userId})")
-    List<TargetModel> selectByUser(@Param("userId") String userId);
+    List<TargetModel> listByUserId(@Param("userId") String userId);
 
 }

@@ -8,8 +8,8 @@ import java.util.List;
 
 public interface UserPermissionService extends BaseModelService<UserPermissionModel> {
 
-    List<TargetModel> getByUserId(String userId);
+    List<TargetModel> listByUserId(String userId);
 
-    List<TargetModel> getMenusByUserId(String userId);
+    List<TargetModel> listMenusByUserId(String userId);
 
 }

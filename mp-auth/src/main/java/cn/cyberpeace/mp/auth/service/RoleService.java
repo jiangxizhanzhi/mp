@@ -7,6 +7,9 @@ import java.util.List;
 
 public interface RoleService extends BaseModelService<RoleModel> {
 
-    List<RoleModel> getByTenant(String tenant);
+    List<RoleModel> listByTenantId(String tenantId);
+
+
+    List<RoleModel> listByOrgId(String orgId);
 
 }

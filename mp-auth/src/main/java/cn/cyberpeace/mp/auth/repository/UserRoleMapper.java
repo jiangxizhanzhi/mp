@@ -18,5 +18,5 @@ public interface UserRoleMapper extends BaseModelMapper<UserRoleModel> {
 
     @Select("select distinct * from mp_auth_role where id in " +
             "(select role from mp_auth_user_role where user = #{userId})")
-    List<RoleModel> selectRolesByUserId(@Param("userId") String userId);
+    List<RoleModel> listByUserId(@Param("userId") String userId);
 }

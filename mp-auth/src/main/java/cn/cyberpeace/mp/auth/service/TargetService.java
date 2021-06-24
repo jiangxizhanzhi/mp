@@ -9,6 +9,6 @@ public interface TargetService extends BaseModelService<TargetModel> {
 
     TargetModel getByIdentifier(String identifier);
 
-    List<TargetModel> getAllByTenant(String tenant);
+    List<TargetModel> listByTenantId(String tenantId);
 
 }
