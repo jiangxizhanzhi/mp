@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
-import cn.cyberpeace.mp.auth.dto.register.RegisterReq;
+import cn.cyberpeace.mp.auth.dto.register.RegisterRequest;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -21,15 +21,15 @@ public class RegisterService {
     @Autowired
     private UserService userService;
 
-    public ObjServiceResult<UserModel> register(RegisterReq registerReq) {
+    public ObjServiceResult<UserModel> register(RegisterRequest registerRequest) {
 
         UserModel userModel = new UserModel();
-        userModel.setUsername(registerReq.getUsername());
-        userModel.setPassword(registerReq.getPassword());
-        userModel.setMobile(registerReq.getMobile());
-        userModel.setEmail(registerReq.getEmail());
-        userModel.setNickname(registerReq.getNickname());
-        userModel.setName(registerReq.getName());
+        userModel.setUsername(registerRequest.getUsername());
+        userModel.setPassword(registerRequest.getPassword());
+        userModel.setMobile(registerRequest.getMobile());
+        userModel.setEmail(registerRequest.getEmail());
+        userModel.setNickname(registerRequest.getNickname());
+        userModel.setName(registerRequest.getName());
 
         check(userModel);
 

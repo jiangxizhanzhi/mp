@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -34,6 +35,12 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
     public TargetModel getByIdentifier(String identifier) {
         Assert.notBlank(identifier);
         return getModelMapper().first(new HumanCondition().filterEqual("identifier", identifier));
+    }
+
+    @Override
+    public List<TargetModel> getAllByTenant(String tenant) {
+        List<TargetModel> targets = getModelMapper().selectAllByTenant(tenant);
+        return targets;
     }
 
     @Override

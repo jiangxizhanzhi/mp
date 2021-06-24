@@ -13,7 +13,6 @@ import lombok.NoArgsConstructor;
 public class RoleModel extends BaseModel {
     private String tenant;
     private String org;
-    private String parent;
     private String identifier;
     private String name;
 }
