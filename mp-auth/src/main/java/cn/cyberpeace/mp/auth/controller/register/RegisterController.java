@@ -15,12 +15,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 @Api(value = "注册接口", tags = "RegisterController")
@@ -38,7 +33,7 @@ public class RegisterController {
     public ServiceResult sms(@RequestParam String mobile) {
         log.info("mobile:{}", mobile);
 
-        return ServiceResult.builder().message("OK").data("no sms support!").serviceCode(BaseErrorCode.SUCCESS).build();
+        return ServiceResult.builder().message("OK").context("no sms support!").serviceCode(BaseErrorCode.SUCCESS).build();
 
     }
 
