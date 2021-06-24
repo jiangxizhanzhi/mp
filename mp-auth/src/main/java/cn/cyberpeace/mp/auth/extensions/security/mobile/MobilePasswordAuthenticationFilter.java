@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 public class MobilePasswordAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
@@ -55,11 +56,11 @@ public class MobilePasswordAuthenticationFilter extends AbstractAuthenticationPr
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException, ServletException {
 
-        if (!request.getMethod().equals("POST")) {
+        if (!Objects.equals(request.getMethod(), "POST")) {
             throw new AuthenticationServiceException("Authentication method not supported: " + request.getMethod());
         }
 
-        if (request.getContentType().equals(MediaType.APPLICATION_JSON_VALUE)) {
+        if (Objects.equals(request.getContentType(), MediaType.APPLICATION_JSON_VALUE)) {
             Map<String, String> loginData = new HashMap<>();
             try {
                 loginData = new ObjectMapper().readValue(request.getInputStream(), Map.class);

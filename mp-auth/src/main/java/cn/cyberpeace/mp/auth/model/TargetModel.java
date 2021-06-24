@@ -15,6 +15,11 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @Table("mp_auth_target")
 public class TargetModel extends BaseModel {
+
+    public static Integer TYPE_MENU = 1;
+    public static Integer TYPE_API = 2;
+    public static Integer TYPE_DATA = 3;
+
     @NotBlank(groups = AddGroup.class)
     private String identifier;
     private String tenant;

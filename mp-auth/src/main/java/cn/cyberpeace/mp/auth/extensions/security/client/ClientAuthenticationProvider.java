@@ -24,6 +24,8 @@ import org.springframework.security.core.userdetails.UserDetailsChecker;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.Assert;
 
+import java.util.Objects;
+
 @Slf4j
 public class ClientAuthenticationProvider implements AuthenticationProvider {
 
@@ -83,7 +85,7 @@ public class ClientAuthenticationProvider implements AuthenticationProvider {
                     .getMessage("AbstractUserDetailsAuthenticationProvider.badCredentials", "Bad credentials"));
         }
         String secret = authentication.getCredentials().toString();
-        if (!clientDetails.getClientSecret().equals(secret)) {
+        if (!Objects.equals(clientDetails.getClientSecret(), secret)) {
             log.info("Failed to authenticate since password does not match stored value");
             throw new BadCredentialsException(this.messages
                     .getMessage("AbstractUserDetailsAuthenticationProvider.badCredentials", "Bad credentials"));

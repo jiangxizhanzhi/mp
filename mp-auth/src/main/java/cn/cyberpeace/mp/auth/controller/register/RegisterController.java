@@ -2,13 +2,12 @@ package cn.cyberpeace.mp.auth.controller.register;
 
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
-import cn.cyberpeace.mp.auth.dto.register.RegisterReq;
+import cn.cyberpeace.mp.auth.dto.register.RegisterRequest;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.RegisterService;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
-import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import io.swagger.annotations.Api;
@@ -45,12 +44,12 @@ public class RegisterController {
 
     @ApiOperation(value = "注册接口", notes = "")
     @PostMapping
-    public ServiceResult register(@RequestBody @Validated RegisterReq registerReq) {
-        log.info("registerReq:{}", registerReq);
+    public ServiceResult register(@RequestBody @Validated RegisterRequest req) {
+        log.info("req:{}", req);
 
-        String encryptedPwd = registerReq.getPassword();
-        registerReq.setPassword(PasswordUtils.desDecrypt(encryptedPwd));
-        ObjServiceResult<UserModel> result = registerService.register(registerReq);
+        String encryptedPwd = req.getPassword();
+        req.setPassword(PasswordUtils.desDecrypt(encryptedPwd));
+        ObjServiceResult<UserModel> result = registerService.register(req);
 
         if (result.getSource() != null) {
             UserModel userModel = result.getSource().getObj();

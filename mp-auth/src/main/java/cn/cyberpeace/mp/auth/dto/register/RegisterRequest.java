@@ -9,7 +9,7 @@ import javax.validation.constraints.NotEmpty;
 
 @ApiModel(value = "注册请求")
 @Data
-public class RegisterReq {
+public class RegisterRequest {
 
     @ApiModelProperty(value = "用户名", example = "")
     @NotBlank(message = "username不能为空!")
