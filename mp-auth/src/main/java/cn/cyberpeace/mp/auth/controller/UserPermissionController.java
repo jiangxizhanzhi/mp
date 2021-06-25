@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.auth.controller;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
+import cn.cyberpeace.mp.auth.dto.TargetDto;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.model.UserPermissionModel;
 import cn.cyberpeace.mp.auth.service.UserPermissionService;
@@ -34,6 +35,14 @@ public class UserPermissionController extends BaseModelController<UserPermission
     public ServiceResult getTargetsByUser(@RequestParam String userId) {
         List<TargetModel> targets = getModelService().listByUserId(userId);
         return ServiceResult.builder().source(targets).build().asResult();
+    }
+
+
+    @ApiOperation(value = "根据userId查询所有权限", notes = "")
+    @GetMapping("/tree/byuser")
+    public ServiceResult getTargetsTreeByUser(@RequestParam String userId) {
+        List<TargetDto> tree = getModelService().getTreeByUserId(userId);
+        return ServiceResult.builder().source(tree).build().asResult();
     }
 
 

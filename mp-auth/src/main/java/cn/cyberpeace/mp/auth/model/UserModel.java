@@ -17,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Data
 @AllArgsConstructor
@@ -89,5 +90,19 @@ public class UserModel extends BaseModel implements Serializable {
         if (expiredTime == null) {
             expiredTime =  LocalDateTime.now().plusYears(99L);
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        UserModel userModel = (UserModel) o;
+        return Objects.equals(tenant, userModel.tenant) && Objects.equals(identifier, userModel.identifier) && Objects.equals(username, userModel.username) && Objects.equals(password, userModel.password) && Objects.equals(tokenSecret, userModel.tokenSecret) && Objects.equals(name, userModel.name) && Objects.equals(nickname, userModel.nickname) && Objects.equals(avatar, userModel.avatar) && Objects.equals(birthday, userModel.birthday) && Objects.equals(email, userModel.email) && Objects.equals(mobile, userModel.mobile) && Objects.equals(idCard, userModel.idCard) && Objects.equals(address, userModel.address) && Objects.equals(status, userModel.status) && Objects.equals(initCheck, userModel.initCheck) && Objects.equals(description, userModel.description) && Objects.equals(dateJoined, userModel.dateJoined) && Objects.equals(expiredTime, userModel.expiredTime) && Objects.equals(lastLogin, userModel.lastLogin);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), tenant, identifier, username, password, tokenSecret, name, nickname, avatar, birthday, email, mobile, idCard, address, status, initCheck, description, dateJoined, expiredTime, lastLogin);
     }
 }

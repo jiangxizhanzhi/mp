@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Objects;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -15,4 +17,19 @@ public class OrgModel extends BaseModel {
     private String parent;
     private String identifier;
     private String name;
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        OrgModel orgModel = (OrgModel) o;
+        return Objects.equals(tenant, orgModel.tenant) && Objects.equals(parent, orgModel.parent) && Objects.equals(identifier, orgModel.identifier) && Objects.equals(name, orgModel.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), tenant, parent, identifier, name);
+    }
 }

@@ -2,7 +2,8 @@ package cn.cyberpeace.mp.auth.controller;
 
 import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
-import cn.cyberpeace.mp.auth.dto.ResetPwdReq;
+import cn.cyberpeace.mp.auth.dto.ResetPwdRequest;
+import cn.cyberpeace.mp.auth.dto.ResetSelfPwdRequest;
 import cn.cyberpeace.mp.auth.dto.validate.AddGroup;
 import cn.cyberpeace.mp.auth.dto.validate.UpdateGroup;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -19,6 +20,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletRequest;
 
 @Api(value = "用户管理接口", tags = "UserController")
 @Slf4j
@@ -38,9 +41,9 @@ public class UserController extends BaseModelController<UserModel, UserService> 
 
     @ApiOperation(value = "修改密码", notes = "")
     @PostMapping("/resetpwd")
-    public ServiceResult resetPwd(@Validated(AddGroup.class) @RequestBody ResetPwdReq resetPwdReq) {
-        String decryptedPwd = PasswordUtils.desDecrypt(resetPwdReq.getNewPwd());
-        boolean result = getModelService().resetPwd(resetPwdReq.getUserId(), decryptedPwd);
+    public ServiceResult resetPwd(@Validated(AddGroup.class) @RequestBody ResetPwdRequest resetPwdRequest) {
+        String decryptedPwd = PasswordUtils.desDecrypt(resetPwdRequest.getNewPwd());
+        boolean result = getModelService().resetPwd(resetPwdRequest.getUserId(), decryptedPwd);
         if (result) {
             return ServiceResult.builder().build().asResult();
         }
@@ -50,9 +53,10 @@ public class UserController extends BaseModelController<UserModel, UserService> 
 
     @ApiOperation(value = "修改自己的密码", notes = "")
     @PostMapping("/resetpwd/self")
-    public ServiceResult resetSelfPwd(@Validated(UpdateGroup.class) @RequestBody ResetPwdReq resetPwdReq) {
-        String decryptedPwd = PasswordUtils.desDecrypt(resetPwdReq.getNewPwd());
-        boolean success = getModelService().resetSelfPwd(decryptedPwd);
+    public ServiceResult resetSelfPwd(@Validated(UpdateGroup.class) @RequestBody ResetSelfPwdRequest req) {
+        String decryptedOldPwd = PasswordUtils.desDecrypt(req.getOldPwd());
+        String decryptedNewPwd = PasswordUtils.desDecrypt(req.getNewPwd());
+        boolean success = getModelService().resetSelfPwd(decryptedOldPwd, decryptedNewPwd);
         if (success) {
             return ServiceResult.builder().build().asResult();
         }
