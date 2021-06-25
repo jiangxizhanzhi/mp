@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Objects;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -15,4 +17,18 @@ public class RoleModel extends BaseModel {
     private String org;
     private String identifier;
     private String name;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        RoleModel roleModel = (RoleModel) o;
+        return Objects.equals(tenant, roleModel.tenant) && Objects.equals(org, roleModel.org) && Objects.equals(identifier, roleModel.identifier) && Objects.equals(name, roleModel.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), tenant, org, identifier, name);
+    }
 }

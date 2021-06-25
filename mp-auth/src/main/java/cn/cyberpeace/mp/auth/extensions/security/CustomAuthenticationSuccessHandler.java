@@ -56,6 +56,7 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
             loginResp.setToken(jwt);
             result = ServiceResult.builder().source(loginResp).build();
 
+            // 首次登陆，需要修改密码
             if (user.getInitCheck() == UserModel.INT_CHECK_YES) {
                 result = ServiceResult.builder().source(loginResp).serviceCode(AuthErrorCode.NEED_UPDATE_CREDENTIALS).build();
             }
