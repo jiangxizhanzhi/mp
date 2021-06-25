@@ -235,7 +235,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         Optional<UserModel> userOptional = Optional.ofNullable(getModelMapper().get(userId));
         if (userOptional.isPresent()) {
             // 上传服务器
-            String filepath;
+            String filepath = null;
             try {
                 filepath = fastDFSClient.uploadFileWithMultipart(multipartFile, FdfsGroupEnum.DEFAULT.toString());
                 log.info("uploaded avatar success! filepath:{}", filepath);

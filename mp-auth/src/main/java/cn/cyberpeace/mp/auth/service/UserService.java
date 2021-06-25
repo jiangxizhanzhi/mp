@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.auth.model.UserModel;
-import cn.cyberpeace.mp.base.fdfsclient.FastDFSException;
 import cn.cyberpeace.mp.base.service.BaseModelService;
+import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSException;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface UserService extends BaseModelService<UserModel> {
