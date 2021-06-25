@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.base.util.fdfsclient;
 
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections4.MapUtils;
@@ -91,7 +92,7 @@ public class FastDFSClient {
      * @param file MultipartFile
      * @return 返回上传成功后的文件路径
      */
-    public String uploadFileWithMultipart(MultipartFile file, String groupName) throws FastDFSException {
+    public String uploadFileWithMultipart(MultipartFile file, String groupName) throws MpRuntimeException {
         return upload(file, null, groupName);
     }
 
@@ -102,7 +103,7 @@ public class FastDFSClient {
      * @param descriptions 文件描述
      * @return 返回上传成功后的文件路径
      */
-    public String uploadFileWithMultipart(MultipartFile file, Map<String, String> descriptions, String groupName) throws FastDFSException {
+    public String uploadFileWithMultipart(MultipartFile file, Map<String, String> descriptions, String groupName) throws MpRuntimeException {
         return upload(file, descriptions, groupName);
     }
 
@@ -112,7 +113,7 @@ public class FastDFSClient {
      * @param filepath 文件路径
      * @return 返回上传成功后的文件路径
      */
-    public String uploadFileWithFilepath(String filepath, String groupName) throws FastDFSException {
+    public String uploadFileWithFilepath(String filepath, String groupName) throws MpRuntimeException {
         return upload(filepath, null, groupName);
     }
 
@@ -123,7 +124,7 @@ public class FastDFSClient {
      * @param descriptions 文件描述
      * @return 返回上传成功后的文件路径
      */
-    public String uploadFileWithFilepath(String filepath, Map<String, String> descriptions, String groupName) throws FastDFSException {
+    public String uploadFileWithFilepath(String filepath, Map<String, String> descriptions, String groupName) throws MpRuntimeException {
         return upload(filepath, descriptions, groupName);
     }
 
@@ -133,7 +134,7 @@ public class FastDFSClient {
      * @param base64 文件base64
      * @return 返回上传成功后的文件路径
      */
-    public String uploadFileWithBase64(String base64) throws FastDFSException {
+    public String uploadFileWithBase64(String base64) throws MpRuntimeException {
         return upload(base64, null, null);
     }
 
@@ -144,7 +145,7 @@ public class FastDFSClient {
      * @param filename 文件名
      * @return 返回上传成功后的文件路径
      */
-    public String uploadFileWithBase64(String base64, String filename, String groupName) throws FastDFSException {
+    public String uploadFileWithBase64(String base64, String filename, String groupName) throws MpRuntimeException {
         return upload(base64, filename, null, groupName);
     }
 
@@ -156,7 +157,7 @@ public class FastDFSClient {
      * @param descriptions 文件描述信息
      * @return 返回上传成功后的文件路径
      */
-    public String uploadFileWithBase64(String base64, String filename, Map<String, String> descriptions, String groupName) throws FastDFSException {
+    public String uploadFileWithBase64(String base64, String filename, Map<String, String> descriptions, String groupName) throws MpRuntimeException {
         return upload(base64, filename, descriptions, groupName);
     }
 
@@ -166,18 +167,18 @@ public class FastDFSClient {
      * @param file MultipartFile
      * @param descriptions 文件描述信息
      * @return 文件路径
-     * @throws FastDFSException file为空则抛出异常
+     * @throws MpRuntimeException file为空则抛出异常
      */
-    public String upload(MultipartFile file, Map<String, String> descriptions, String groupName) throws FastDFSException {
+    public String upload(MultipartFile file, Map<String, String> descriptions, String groupName) throws MpRuntimeException {
         if(file == null || file.isEmpty()){
-            throw new FastDFSException(ErrorCode.FILE_ISNULL.CODE, ErrorCode.FILE_ISNULL.MESSAGE);
+            throw new MpRuntimeException(FastDfsErrorCode.FILE_ISNULL);
         }
         String path = null;
         try {
             path = upload(file.getInputStream(), file.getOriginalFilename(), descriptions, groupName);
         } catch (IOException e) {
             log.error("上传文件失败", e);
-            throw new FastDFSException(ErrorCode.FILE_ISNULL.CODE, ErrorCode.FILE_ISNULL.MESSAGE);
+            throw new MpRuntimeException(FastDfsErrorCode.FILE_ISNULL);
         }
         return path;
     }
@@ -188,11 +189,11 @@ public class FastDFSClient {
      * @param filepath 文件路径
      * @param descriptions 文件描述
      * @return 文件路径
-     * @throws FastDFSException 文件路径为空则抛出异常
+     * @throws MpRuntimeException 文件路径为空则抛出异常
      */
-    public String upload(String filepath, Map<String, String> descriptions, String groupName) throws FastDFSException {
+    public String upload(String filepath, Map<String, String> descriptions, String groupName) throws MpRuntimeException {
         if(StringUtils.isBlank(filepath)){
-            throw new FastDFSException(ErrorCode.FILE_PATH_ISNULL.CODE, ErrorCode.FILE_PATH_ISNULL.MESSAGE);
+            throw new MpRuntimeException(FastDfsErrorCode.FILE_PATH_ISNULL);
         }
         File file = new File(filepath);
         String path = null;
@@ -205,7 +206,7 @@ public class FastDFSClient {
             path = upload(is, filename, descriptions, groupName);
         } catch (FileNotFoundException e) {
             log.error("上传文件失败", e);
-            throw new FastDFSException(ErrorCode.FILE_NOT_EXIST.CODE, ErrorCode.FILE_NOT_EXIST.MESSAGE);
+            throw new MpRuntimeException(FastDfsErrorCode.FILE_NOT_EXIST);
         }
 
         return path;
@@ -219,11 +220,11 @@ public class FastDFSClient {
      * @param filename 文件名
      * @param descriptions 文件描述信息
      * @return 文件路径
-     * @throws FastDFSException base64为空则抛出异常
+     * @throws MpRuntimeException base64为空则抛出异常
      */
-    public String upload(String base64, String filename, Map<String, String> descriptions, String groupName) throws FastDFSException {
+    public String upload(String base64, String filename, Map<String, String> descriptions, String groupName) throws MpRuntimeException {
         if(StringUtils.isBlank(base64)){
-            throw new FastDFSException(ErrorCode.FILE_ISNULL.CODE, ErrorCode.FILE_ISNULL.MESSAGE);
+            throw new MpRuntimeException(FastDfsErrorCode.FILE_ISNULL);
         }
         return upload(new ByteArrayInputStream(Base64.decodeBase64(base64)), filename, descriptions, groupName);
     }
@@ -235,16 +236,16 @@ public class FastDFSClient {
      * @param filename 文件名
      * @param descriptions 文件描述信息
      * @return 组名+文件路径，如：group1/M00/00/00/wKgz6lnduTeAMdrcAAEoRmXZPp870.jpeg
-     * @throws FastDFSException
+     * @throws MpRuntimeException
      */
-    public String upload(InputStream is, String filename, Map<String, String> descriptions, String groupName) throws FastDFSException {
+    public String upload(InputStream is, String filename, Map<String, String> descriptions, String groupName) throws MpRuntimeException {
         if(is == null){
-            throw new FastDFSException(ErrorCode.FILE_ISNULL.CODE, ErrorCode.FILE_ISNULL.MESSAGE);
+            throw new MpRuntimeException(FastDfsErrorCode.FILE_ISNULL);
         }
 
         try {
             if(is.available() > maxFileSize){
-                throw new FastDFSException(ErrorCode.FILE_OUT_SIZE.CODE, ErrorCode.FILE_OUT_SIZE.MESSAGE);
+                throw new MpRuntimeException(FastDfsErrorCode.FILE_OUT_SIZE);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -285,13 +286,13 @@ public class FastDFSClient {
             path = storageClient.upload_file1(fileBuff, suffix, nvps);
 
             if(StringUtils.isBlank(path)) {
-                throw new FastDFSException(ErrorCode.FILE_UPLOAD_FAILED.CODE, ErrorCode.FILE_UPLOAD_FAILED.MESSAGE);
+                throw new MpRuntimeException(FastDfsErrorCode.FILE_UPLOAD_FAILED);
             }
 
             log.info("upload file success, return path is {}", path);
         } catch (Exception e) {
             log.error("上传文件失败", e);
-            throw new FastDFSException(ErrorCode.FILE_UPLOAD_FAILED.CODE, ErrorCode.FILE_UPLOAD_FAILED.MESSAGE);
+            throw new MpRuntimeException(FastDfsErrorCode.FILE_UPLOAD_FAILED);
         } finally {
             IOUtils.closeQuietly(is);
         }
@@ -307,7 +308,7 @@ public class FastDFSClient {
      * @param filepath 文件路径
      * @param response
      */
-    public void downloadFile(String filepath, HttpServletResponse response, String groupName) throws FastDFSException {
+    public void downloadFile(String filepath, HttpServletResponse response, String groupName) throws MpRuntimeException {
         download(filepath, null, null, response, groupName);
     }
 
@@ -317,7 +318,7 @@ public class FastDFSClient {
      * @param filepath 文件路径
      * @param os 输出流
      */
-    public void downloadFile(String filepath, OutputStream os, String groupName) throws FastDFSException {
+    public void downloadFile(String filepath, OutputStream os, String groupName) throws MpRuntimeException {
         download(filepath, null, os, null, groupName);
     }
 
@@ -328,7 +329,7 @@ public class FastDFSClient {
      * @param filename 文件名称
      * @param response HttpServletResponse
      */
-    public void downloadFile(String filepath, String filename, HttpServletResponse response, String groupName) throws FastDFSException {
+    public void downloadFile(String filepath, String filename, HttpServletResponse response, String groupName) throws MpRuntimeException {
         download(filepath, filename, null, response, groupName);
     }
 
@@ -340,9 +341,9 @@ public class FastDFSClient {
      * @param os 输出流
      * @param response HttpServletResponse
      */
-    public void download(String filepath, String filename, OutputStream os, HttpServletResponse response, String groupName) throws FastDFSException {
+    public void download(String filepath, String filename, OutputStream os, HttpServletResponse response, String groupName) throws MpRuntimeException {
         if(StringUtils.isBlank(filepath)){
-            throw new FastDFSException(ErrorCode.FILE_PATH_ISNULL.CODE, ErrorCode.FILE_PATH_ISNULL.MESSAGE);
+            throw new MpRuntimeException(FastDfsErrorCode.FILE_PATH_ISNULL);
         }
 
         filepath = toLocal(filepath);
@@ -351,7 +352,7 @@ public class FastDFSClient {
             filename = getOriginalFilename(filepath, groupName);
 
             if (null == filename) {
-                throw new FastDFSException(ErrorCode.FILE_NOT_EXIST.CODE, ErrorCode.FILE_NOT_EXIST.MESSAGE);
+                throw new MpRuntimeException(FastDfsErrorCode.FILE_NOT_EXIST);
             }
         }
         String contentType = EXT_MAPS.get(getFilenameSuffix(filename));
@@ -366,7 +367,7 @@ public class FastDFSClient {
             byte[] fileByte = storageClient.download_file1(filepath);
 
             if(fileByte == null){
-                throw new FastDFSException(ErrorCode.FILE_NOT_EXIST.CODE, ErrorCode.FILE_NOT_EXIST.MESSAGE);
+                throw new MpRuntimeException(FastDfsErrorCode.FILE_NOT_EXIST);
             }
 
             if (response != null) {
@@ -393,7 +394,7 @@ public class FastDFSClient {
             e.printStackTrace();
         } catch (MyException e) {
             e.printStackTrace();
-            throw new FastDFSException(ErrorCode.FILE_DOWNLOAD_FAILED.CODE, ErrorCode.FILE_DOWNLOAD_FAILED.MESSAGE);
+            throw new MpRuntimeException(FastDfsErrorCode.FILE_DOWNLOAD_FAILED);
         } finally {
             // 关闭流
             IOUtils.closeQuietly(is);
@@ -407,11 +408,11 @@ public class FastDFSClient {
      *
      * @param filepath 文件路径
      * @return 返回文件字节
-     * @throws FastDFSException
+     * @throws MpRuntimeException
      */
-    public byte[] download(String filepath, String groupName) throws FastDFSException {
+    public byte[] download(String filepath, String groupName) throws MpRuntimeException {
         if(StringUtils.isBlank(filepath)){
-            throw new FastDFSException(ErrorCode.FILE_PATH_ISNULL.CODE, ErrorCode.FILE_PATH_ISNULL.MESSAGE);
+            throw new MpRuntimeException(FastDfsErrorCode.FILE_PATH_ISNULL);
         }
 
         TrackerServer trackerServer = TrackerServerPool.borrowObject(groupName);
@@ -422,13 +423,13 @@ public class FastDFSClient {
             fileByte = storageClient.download_file1(filepath);
 
             if(fileByte == null){
-                throw new FastDFSException(ErrorCode.FILE_NOT_EXIST.CODE, ErrorCode.FILE_NOT_EXIST.MESSAGE);
+                throw new MpRuntimeException(FastDfsErrorCode.FILE_NOT_EXIST);
             }
         } catch (IOException e) {
             e.printStackTrace();
         } catch (MyException e) {
             e.printStackTrace();
-            throw new FastDFSException(ErrorCode.FILE_DOWNLOAD_FAILED.CODE, ErrorCode.FILE_DOWNLOAD_FAILED.MESSAGE);
+            throw new MpRuntimeException(FastDfsErrorCode.FILE_DOWNLOAD_FAILED);
         }
         // 返还对象
         TrackerServerPool.returnObject(trackerServer, groupName);
@@ -442,9 +443,9 @@ public class FastDFSClient {
      * @param filepath 文件路径
      * @return 删除成功返回 0, 失败返回其它
      */
-    public int deleteFile(String filepath, String groupName) throws FastDFSException {
+    public int deleteFile(String filepath, String groupName) throws MpRuntimeException {
         if(StringUtils.isBlank(filepath)){
-            throw new FastDFSException(ErrorCode.FILE_PATH_ISNULL.CODE, ErrorCode.FILE_PATH_ISNULL.MESSAGE);
+            throw new MpRuntimeException(FastDfsErrorCode.FILE_PATH_ISNULL);
         }
 
         TrackerServer trackerServer = TrackerServerPool.borrowObject(groupName);
@@ -453,13 +454,13 @@ public class FastDFSClient {
         try {
             success = storageClient.delete_file1(filepath);
             if(success != 0){
-                throw new FastDFSException(ErrorCode.FILE_DELETE_FAILED.CODE, ErrorCode.FILE_DELETE_FAILED.MESSAGE);
+                throw new MpRuntimeException(FastDfsErrorCode.FILE_DELETE_FAILED);
             }
         } catch (IOException e) {
             e.printStackTrace();
         } catch (MyException e) {
             e.printStackTrace();
-            throw new FastDFSException(ErrorCode.FILE_DELETE_FAILED.CODE, ErrorCode.FILE_DELETE_FAILED.MESSAGE);
+            throw new MpRuntimeException(FastDfsErrorCode.FILE_DELETE_FAILED);
         }
         // 返还对象
         TrackerServerPool.returnObject(trackerServer, groupName);
@@ -474,7 +475,7 @@ public class FastDFSClient {
      * @return 文件信息
      *
      */
-    public Map<String, Object> getFileInfo(String filepath, String groupName) throws FastDFSException {
+    public Map<String, Object> getFileInfo(String filepath, String groupName) throws MpRuntimeException {
         TrackerServer trackerServer = TrackerServerPool.borrowObject(groupName);
         StorageClient1 storageClient = new StorageClient1(trackerServer, null);
         FileInfo fileInfo = null;
@@ -504,7 +505,7 @@ public class FastDFSClient {
      * @param filepath 文件路径
      * @return 文件描述信息
      */
-    public Map<String, Object> getFileDescriptions(String filepath, String groupName) throws FastDFSException {
+    public Map<String, Object> getFileDescriptions(String filepath, String groupName) throws MpRuntimeException {
         TrackerServer trackerServer = TrackerServerPool.borrowObject(groupName);
         StorageClient1 storageClient = new StorageClient1(trackerServer, null);
         NameValuePair[] nvps = null;
@@ -535,7 +536,7 @@ public class FastDFSClient {
      * @param filepath 文件路径
      * @return 文件名称
      */
-    public String getOriginalFilename(String filepath, String groupName) throws FastDFSException {
+    public String getOriginalFilename(String filepath, String groupName) throws MpRuntimeException {
         Map<String, Object> descriptions = getFileDescriptions(filepath, groupName);
         if (MapUtils.isNotEmpty(descriptions) && descriptions.get(FILENAME) != null) {
             return (String) descriptions.get(FILENAME);

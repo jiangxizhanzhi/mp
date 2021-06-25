@@ -12,12 +12,11 @@ import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.config.FastDfsConfig;
 import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
-import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.lang.Assert;
 import lombok.extern.slf4j.Slf4j;
@@ -213,7 +212,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         try {
             HttpServletResponse response = ServletUtils.getResponse();
             fastDFSClient.downloadFile(authConfig.getExcelTemplatePath(), authConfig.getExcelTemplateName(), response, FdfsGroupEnum.DEFAULT.toString());
-        } catch (FastDFSException e) {
+        } catch (MpRuntimeException e) {
             throw new MpRuntimeException("下载模板错误！");
         }
     }
@@ -230,7 +229,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
 
     @Override
-    public boolean updateAvatar(String userId, MultipartFile multipartFile) throws FastDFSException {
+    public boolean updateAvatar(String userId, MultipartFile multipartFile) throws MpRuntimeException {
         Assert.notBlank(userId, "userId不能为空！");
         Optional<UserModel> userOptional = Optional.ofNullable(getModelMapper().get(userId));
         if (userOptional.isPresent()) {
@@ -239,7 +238,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             try {
                 filepath = fastDFSClient.uploadFileWithMultipart(multipartFile, FdfsGroupEnum.DEFAULT.toString());
                 log.info("uploaded avatar success! filepath:{}", filepath);
-            } catch (FastDFSException e) {
+            } catch (MpRuntimeException e) {
                 log.error("uploaded error! {}", ExceptionUtil.stacktraceToString(e));
                 throw e;
             }

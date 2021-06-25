@@ -2,10 +2,10 @@ package cn.cyberpeace.mp.base.controller;
 
 import cn.cyberpeace.mp.base.config.FastDfsConfig;
 import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
-import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
-import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSException;
-import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
+import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -54,10 +55,10 @@ public class FastDfsController {
      * @param response
      */
     @PostMapping("/file/download")
-    public void downloadFile(String filePath, HttpServletResponse response) throws FastDFSException {
+    public void downloadFile(String filePath, HttpServletResponse response) throws MpRuntimeException {
         try {
             fastDFSClient.downloadFile(filePath, response, FdfsGroupEnum.DEFAULT.toString());
-        } catch (FastDFSException e) {
+        } catch (MpRuntimeException e) {
             log.error("downloadFile error", e);
             throw e;
         }
@@ -73,7 +74,7 @@ public class FastDfsController {
     public ServiceResult deleteFile(String filePath) {
         try {
             fastDFSClient.deleteFile(filePath, FdfsGroupEnum.DEFAULT.toString());
-        } catch (FastDFSException e) {
+        } catch (MpRuntimeException e) {
             log.error("deleteFile error", e);
             return ServiceResult.fail(e.getMessage());
         }
@@ -101,9 +102,9 @@ public class FastDfsController {
             responseData.setFileType(FastDFSClient.getFilenameSuffix(file.getOriginalFilename()));
             responseData.setHttpUrl(group.getFileServerAddr() + File.separator + filepath);
             responseData.setInnerHttpUrl(group.getInnerFileServerAddr() + File.separator + filepath);
-        } catch (FastDFSException e) {
+        } catch (MpRuntimeException e) {
             responseData.setSuccess(false);
-            responseData.setCode(e.getCode());
+            responseData.setCode(e.getErrorCode());
             responseData.setMessage(e.getMessage());
         }
 

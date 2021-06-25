@@ -1,11 +1,13 @@
 package cn.cyberpeace.mp.base.util.fdfsclient;
 
+import cn.cyberpeace.mp.base.service.code.ErrorCode;
+
 /**
  * @Description: FastDFS错误码
  * @Autho qiaokang
  * @Date：2021/6/21 15:01
  */
-public enum ErrorCode {
+public enum FastDfsErrorCode implements ErrorCode {
 
     FILE_PATH_ISNULL("error.fastdfs.file_path_isnull", "文件路径为空"),
 
@@ -33,15 +35,8 @@ public enum ErrorCode {
 
     FILE_SERVER_INIT_FAILED("error.fastdfs.file_server_init_failed", "文件服务器初始化失败");
 
-
-
-    public String CODE;
-
-    public String MESSAGE;
-
-    ErrorCode(String CODE, String MESSAGE) {
-        this.CODE = CODE;
-        this.MESSAGE = MESSAGE;
+    FastDfsErrorCode(String code, String message) {
+        setCode(code, message);
     }
 
 }

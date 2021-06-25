@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.base.util.fdfsclient;
 
 import cn.cyberpeace.mp.base.config.FastDfsConfig;
 import cn.cyberpeace.mp.base.constant.BaseConstants;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.pool2.impl.GenericObjectPool;
@@ -101,16 +102,16 @@ public class TrackerServerPool {
      * 获取 TrackerServer
      *
      * @return TrackerServer
-     * @throws FastDFSException
+     * @throws MpRuntimeException
      */
-    public static TrackerServer borrowObject(String groupName) throws FastDFSException {
+    public static TrackerServer borrowObject(String groupName) throws MpRuntimeException {
         TrackerServer trackerServer = null;
         try {
             trackerServer = getObjectPool(groupName).borrowObject();
         } catch (Exception e) {
             log.error("borrowObject error", e);
-            if (e instanceof FastDFSException) {
-                throw (FastDFSException) e;
+            if (e instanceof MpRuntimeException) {
+                throw (MpRuntimeException) e;
             }
         }
         return trackerServer;
@@ -128,15 +129,14 @@ public class TrackerServerPool {
     /**
      * 初始化trackerServers
      *
-     * @throws FastDFSException
+     * @throws MpRuntimeException
      */
-    public static void initTrackers(String trackerServers) throws FastDFSException {
+    public static void initTrackers(String trackerServers) throws MpRuntimeException {
         try {
             ClientGlobal.initByTrackers(trackerServers);
         } catch (Exception e) {
             log.error("initByTrackers error", e);
-            throw new FastDFSException(ErrorCode.FILE_SERVER_INIT_FAILED.CODE,
-                    ErrorCode.FILE_SERVER_INIT_FAILED.MESSAGE);
+            throw new MpRuntimeException(FastDfsErrorCode.FILE_SERVER_INIT_FAILED);
         }
     }
 
