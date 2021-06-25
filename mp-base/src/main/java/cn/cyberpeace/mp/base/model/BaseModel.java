@@ -8,7 +8,6 @@ import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.base.util.ClassUtils;
 import cn.cyberpeace.mp.base.util.ModelUtils;
 import cn.cyberpeace.mp.base.util.SerializableFunction;
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +18,6 @@ import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.Map;
 
-@ApiModel(value = "object", description = "数据对象")
 @Slf4j
 @Data
 public class BaseModel {

@@ -25,7 +25,7 @@ public class InstanceOpenStackModel extends BaseOpenStackModel implements Serial
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    public static final class InstanceModel{
+    public static final class InstanceModel implements Serializable{
 
         /**
          * ID

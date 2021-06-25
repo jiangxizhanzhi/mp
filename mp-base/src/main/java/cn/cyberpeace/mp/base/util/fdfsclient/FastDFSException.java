@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.base.fdfsclient;
+package cn.cyberpeace.mp.base.util.fdfsclient;
 
 import lombok.Data;
 

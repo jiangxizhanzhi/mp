@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Data
 @AllArgsConstructor
@@ -32,10 +33,10 @@ public class ListObjResult<T> extends BaseObjResult {
         setTotal(total);
     }
 
-    public ListObjResult(List<T> objs, int total, DynamicFields fields) {
+    public ListObjResult(List<T> objs, Integer total, DynamicFields fields) {
         this();
         setObjs(objs);
-        setTotal(total);
+        setTotal(Objects.nonNull(total) ? total : 0);
         setFields(fields);
     }
 

@@ -1,11 +1,8 @@
 package cn.cyberpeace.mp;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
@@ -32,10 +29,5 @@ public class Application {
         } catch (UnknownHostException e) {
             log.error("getLocalHost error", e);
         }
-    }
-
-    @Bean
-    public CommandLineRunner commandLineRunner(ApplicationContext ctx) {
-        return args -> log.info("Application loaded");
     }
 }

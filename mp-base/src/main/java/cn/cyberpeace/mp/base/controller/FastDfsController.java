@@ -2,9 +2,9 @@ package cn.cyberpeace.mp.base.controller;
 
 import cn.cyberpeace.mp.base.config.FastDfsConfig;
 import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
-import cn.cyberpeace.mp.base.fdfsclient.FastDFSClient;
-import cn.cyberpeace.mp.base.fdfsclient.FastDFSException;
-import cn.cyberpeace.mp.base.fdfsclient.FileResponseData;
+import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
+import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSException;
+import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
