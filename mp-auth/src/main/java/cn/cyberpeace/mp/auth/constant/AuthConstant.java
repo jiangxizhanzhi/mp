@@ -17,5 +17,7 @@ public class AuthConstant {
 
     public static final String TENANT_COLUMN_ID = "tenant";
 
+    public static final String ADMIN = "ADMIN";
+
     private AuthConstant() {}
 }

@@ -90,12 +90,20 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     @Override
-    public boolean resetSelfPwd(String newPwd) {
-        // 密码是否合法
-        Assert.isFalse(PasswordUtils.isPasswordStrengthLowLevel(newPwd), AuthConstant.ERROR_CODE_PREFIX + "password_strength_invalid");
-
+    public boolean resetSelfPwd(String oldPwd, String newPwd) {
         var currentUser = UserUtils.getLoginUser();
         Assert.notNull(currentUser, AuthConstant.ERROR_CODE_PREFIX + "account_not_login");
+
+        // 旧密码是否正确
+        boolean isOldPwdMatch = PasswordUtils.getPasswordEncoder().matches(oldPwd, currentUser.getPassword());
+        if (!isOldPwdMatch) {
+            log.warn("旧密码不正确！");
+        }
+        Assert.isTrue(isOldPwdMatch, "bad_credentials");
+
+        // 检查新密码强度是否合法
+        Assert.isFalse(PasswordUtils.isPasswordStrengthLowLevel(newPwd), AuthConstant.ERROR_CODE_PREFIX + "password_strength_invalid");
+
 
         UserModel userUpdate = new UserModel();
         userUpdate.setId(currentUser.getId());

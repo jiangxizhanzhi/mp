@@ -104,6 +104,7 @@ CREATE TABLE mp_auth_user_role (
 CREATE TABLE mp_auth_target (
    `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
    `id` varchar(64)  NOT NULL COMMENT 'id',
+   `parent` varchar(64) NULL COMMENT '父权限ID',
    `identifier` varchar(64)  NOT NULL COMMENT '编号',
    `tenant` varchar(64)  NOT NULL COMMENT '所属租户',
    `name` varchar(64) NOT NULL COMMENT '名称',
