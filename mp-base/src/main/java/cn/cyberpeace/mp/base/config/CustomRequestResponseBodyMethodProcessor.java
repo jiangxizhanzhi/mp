@@ -1,11 +1,7 @@
 package cn.cyberpeace.mp.base.config;
 
-import cn.cyberpeace.mp.base.service.result.ListObjResult;
-import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
-import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import com.google.common.base.CaseFormat;
-import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -26,8 +22,6 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * 自定义返回结果处理器
@@ -79,39 +73,6 @@ public class CustomRequestResponseBodyMethodProcessor extends RequestResponseBod
     public void handleReturnValue(@Nullable Object returnValue, MethodParameter returnType,
                                   ModelAndViewContainer mavContainer, NativeWebRequest webRequest)
             throws IOException, HttpMediaTypeNotAcceptableException, HttpMessageNotWritableException {
-
-        if (returnValue instanceof ListObjServiceResult){
-            Object context = ((ListObjServiceResult<?>) returnValue).getContext();
-            if (Objects.nonNull(context)){
-                List<Object> data =  ((ListObjResult) context).getData();
-                if (!CollectionUtils.isEmpty(data)) {
-                    List<Object> resultList = Lists.newArrayList();
-                    data.stream().forEach(map -> {
-                        resultList.add(toUnderlineCase((Map<String, Object>) map));
-                    });
-                    ((ListObjResult) ((ListObjServiceResult) returnValue).getContext()).setData(resultList);
-                }
-            }
-        }
-
-        if (returnValue instanceof ObjServiceResult){
-           Object context = ((ObjServiceResult<?>) returnValue).getContext();
-           if (context instanceof Map) {
-               Map<String, Object> map = (Map<String, Object>) ((ObjServiceResult<?>) returnValue).getContext();
-               if (!CollectionUtils.isEmpty(map)) {
-                   ((ObjServiceResult<?>) returnValue).setContext(toUnderlineCase(map));
-               }
-           }
-           if (context instanceof List){
-               List<Map<String, Object>> map = (List<Map<String, Object>>) ((ObjServiceResult<?>) returnValue).getContext();
-               if (!CollectionUtils.isEmpty(map)) {
-                   ((ObjServiceResult<?>) returnValue).setContext(
-                           map.stream().peek(v -> toUnderlineCase(v)).collect(Collectors.toList())
-                   );
-               }
-           }
-        }
-
         super.handleReturnValue(returnValue, returnType, mavContainer, webRequest);
     }
 
