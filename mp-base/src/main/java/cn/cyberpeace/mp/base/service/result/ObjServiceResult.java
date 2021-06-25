@@ -19,6 +19,12 @@ public class ObjServiceResult<T> extends ServiceResult<ObjResult<T>> {
     }
 
     @Override
+    public ObjResult<T> sourceToData(ObjResult<T> source) {
+        source.asResult();
+        return source;
+    }
+
+    @Override
     public ObjServiceResult<T> asResult() {
         super.asResult();
         return this;

@@ -5,11 +5,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 @Data
-public abstract class BaseObjResult {
+public abstract class BaseObjResult<T, R> {
     @JsonIgnore
     private DynamicFields fields;
 
-    public Object objToResult(Object obj, DynamicFields fields) {
+    public Object objToResult(T obj, DynamicFields fields) {
         if (obj == null || fields == null) {
             return obj;
         }
@@ -17,5 +17,13 @@ public abstract class BaseObjResult {
         return fields.apply(obj);
     }
 
-    public abstract Object asResult();
+    public T objToResultWithNull(T obj, DynamicFields fields) {
+        if (obj == null || fields == null) {
+            return obj;
+        }
+
+        return fields.applyWithNull(obj);
+    }
+
+    public abstract R asResult();
 }

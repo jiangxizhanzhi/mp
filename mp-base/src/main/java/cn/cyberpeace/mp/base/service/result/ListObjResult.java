@@ -15,10 +15,10 @@ import java.util.Objects;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ListObjResult<T> extends BaseObjResult {
+public class ListObjResult<T> extends BaseObjResult<T, ListObjResult<T>> {
 
     @Builder.Default
-    private List<Object> data = new ArrayList<>();
+    private List<T> data = new ArrayList<>();
 
     @Builder.Default
     private Integer total = 0;
@@ -43,7 +43,7 @@ public class ListObjResult<T> extends BaseObjResult {
     @Override
     public ListObjResult<T> asResult() {
         data.clear();
-        objs.forEach(obj -> data.add(objToResult(obj, getFields())));
+        objs.forEach(obj -> data.add(objToResultWithNull(obj, getFields())));
         return this;
     }
 }

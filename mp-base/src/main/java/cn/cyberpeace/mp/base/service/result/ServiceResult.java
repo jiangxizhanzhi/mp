@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.base.service.result;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.code.ServiceCode;
-import cn.cyberpeace.mp.base.util.MessageUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -18,24 +17,20 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ServiceResult<T> {
+public class ServiceResult<T> extends BaseServiceResult<T, T> {
 
+    // 重复定义for Builder
     @ApiModelProperty(value = "响应数据")
-    private Object context;
-
+    private T context;
     @ApiModelProperty(value = "错误码")
     private String code;
-
     @ApiModelProperty(value = "错误说明")
     private String message;
-
     @ApiModelProperty(value = "错误详细说明")
     private String detail;
-
     @JsonIgnore
     @Builder.Default
     private ServiceCode serviceCode = BaseErrorCode.SUCCESS;
-
     @JsonIgnore
     private T source;
 
@@ -57,27 +52,10 @@ public class ServiceResult<T> {
         setDetail(detail);
     }
 
-    /**
-     * 从数据源加载最终序列化数据
-     * @return this
-     */
+    @Override
     public ServiceResult<T> asResult() {
-        if (source instanceof BaseObjResult) {
-            context = ((BaseObjResult) source).asResult();
-        } else {
-            context = source;
-        }
-
-        if (serviceCode != null) {
-            setCode(serviceCode.getCode());
-            setMessage(serviceCode.getMessage());
-        }
-
+        super.asResult();
         return this;
-    }
-
-    public void setMessage(String message) {
-        this.message = MessageUtils.get(message);
     }
 
     /**
