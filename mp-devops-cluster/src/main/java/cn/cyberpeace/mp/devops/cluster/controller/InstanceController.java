@@ -38,9 +38,14 @@ public class InstanceController {
         this.instanceService = instanceService;
     }
 
+    /**
+     * 分页查询实例信息
+     * @param request
+     * @return
+     */
     @ApiOperation("分页查询实例信息")
     @PostMapping("/page")
-    public ListObjServiceResult page(@RequestBody @Valid InstancePageRequest request){
+    public ListObjServiceResult<InstancePageResponse> page(@RequestBody @Valid InstancePageRequest request){
 
         InstanceOpenStackModel model = instanceService.page(request);
         List<InstanceOpenStackModel.InstanceModel> instances = model.getInstances();

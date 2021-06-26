@@ -14,4 +14,10 @@ public interface InstanceService extends BaseOpenStackService {
      * @return
      */
     InstanceOpenStackModel page(InstancePageRequest request);
+
+    /**
+     * 获取虚拟机总数
+     * @return
+     */
+    Integer getTotalInstances(InstancePageRequest request);
 }
