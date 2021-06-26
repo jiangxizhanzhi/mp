@@ -5,8 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
-
 /**
  * 基础模型，对应云平台接口返回信息
  */
@@ -14,7 +12,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "基础模型，对应云平台接口返回信息")
-public class BaseOpenStackModel implements Serializable {
+public class BaseOpenStackModel extends BaseModel {
 
     /**
      * 是否成功
@@ -22,9 +20,14 @@ public class BaseOpenStackModel implements Serializable {
     private boolean success;
 
     /**
+     * 请求ID
+     */
+    private String request_id;
+
+    /**
      * 总数据大小
      */
-    private Integer total;
+    private Integer total = 0;
 
     /**
      * 消息体

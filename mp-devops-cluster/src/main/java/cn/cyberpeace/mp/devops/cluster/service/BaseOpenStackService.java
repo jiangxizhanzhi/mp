@@ -5,4 +5,19 @@ package cn.cyberpeace.mp.devops.cluster.service;
  * @author wanggang
  */
 public interface BaseOpenStackService {
+
+    /**
+     * cpcloud平台URL前缀
+     */
+    String CPCLOUD_URL = "/cpcloud";
+
+    /**
+     * cpcloud平台info模块URL前缀
+     */
+    String CPCLOUD_INFO_URL = CPCLOUD_URL + "/info";
+
+    /**
+     * 版本
+     */
+    String URL_VERSION = "/v1";
 }
