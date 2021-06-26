@@ -35,9 +35,14 @@ public class ElasticIpController {
         this.elasticIpService = elasticIpService;
     }
 
+    /**
+     * 分页查询弹性IP信息
+     * @param request
+     * @return
+     */
     @ApiOperation("分页查询弹性IP信息")
     @PostMapping("/page")
-    public ListObjServiceResult page(@RequestBody ElasticIpPageRequest request){
+    public ListObjServiceResult<ElasticIpResponse> page(@RequestBody ElasticIpPageRequest request){
         ElasticIpOpenStackModel model = elasticIpService.page(request);
         List<ElasticIpOpenStackModel.ElasticIpModel> floatingips = model.getFloatingips();
         if (CollectionUtils.isEmpty(floatingips)){

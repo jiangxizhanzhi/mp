@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.service.impl;
 
+import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.devops.cluster.config.OpenStackConfig;
 import cn.cyberpeace.mp.devops.cluster.model.ElasticIpOpenStackModel;
 import cn.cyberpeace.mp.devops.cluster.request.ElasticIpPageRequest;
@@ -20,8 +21,6 @@ public class ElasticIpServiceImpl extends BaseOpenStackServiceImpl implements El
 
     @Override
     public ElasticIpOpenStackModel page(ElasticIpPageRequest request) {
-        Integer limit = request.getLimit();
-        Integer offset = request.getOffset();
-        return super.sendGet("/networks/floatingips?" + "limit=" + limit + "&offset=" + offset,ElasticIpOpenStackModel.class);
+        return super.sendGet(URL_VERSION + "/networks/floatingips" + BeanUtils.wrapperGetParamsByObject(request),ElasticIpOpenStackModel.class);
     }
 }
