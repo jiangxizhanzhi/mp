@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.service.impl;
 
+import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.devops.cluster.config.OpenStackConfig;
 import cn.cyberpeace.mp.devops.cluster.model.NetworkOpenStackModel;
 import cn.cyberpeace.mp.devops.cluster.request.NetworkPageRequest;
@@ -20,8 +21,6 @@ public class NetworkServiceImpl extends BaseOpenStackServiceImpl implements Netw
 
     @Override
     public NetworkOpenStackModel page(NetworkPageRequest request) {
-        Integer limit = request.getLimit();
-        Integer offset = request.getOffset();
-        return super.sendGet("/networks?" + "limit=" + limit + "&offset=" + offset,NetworkOpenStackModel.class);
+        return super.sendGet(URL_VERSION + "/networks" + BeanUtils.wrapperGetParamsByObject(request),NetworkOpenStackModel.class);
     }
 }

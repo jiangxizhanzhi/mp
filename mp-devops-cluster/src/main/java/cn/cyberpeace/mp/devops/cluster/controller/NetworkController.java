@@ -35,9 +35,14 @@ public class NetworkController {
         this.networkService = networkService;
     }
 
+    /**
+     * 分页查询网络信息
+     * @param request
+     * @return
+     */
     @ApiOperation("分页查询网络信息")
     @PostMapping("/page")
-    public ListObjServiceResult page(@RequestBody NetworkPageRequest request){
+    public ListObjServiceResult<NetworkPageResponse> page(@RequestBody NetworkPageRequest request){
         NetworkOpenStackModel model = networkService.page(request);
         List<NetworkOpenStackModel.NetworkModel> networks = model.getNetworks();
         if (CollectionUtils.isEmpty(networks)){
