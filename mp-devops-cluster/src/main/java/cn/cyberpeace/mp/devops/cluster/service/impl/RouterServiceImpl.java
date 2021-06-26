@@ -1,11 +1,14 @@
 package cn.cyberpeace.mp.devops.cluster.service.impl;
 
+import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.devops.cluster.config.OpenStackConfig;
 import cn.cyberpeace.mp.devops.cluster.model.RouterOpenStackModel;
 import cn.cyberpeace.mp.devops.cluster.request.RouterPageRequest;
 import cn.cyberpeace.mp.devops.cluster.service.RouterService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
+
+import java.util.Objects;
 
 /**
  * 运维管控-系统运维-网络实例管理-路由
@@ -20,8 +23,12 @@ public class RouterServiceImpl extends BaseOpenStackServiceImpl implements Route
 
     @Override
     public RouterOpenStackModel page(RouterPageRequest request) {
-        Integer limit = request.getLimit();
-        Integer offset = request.getOffset();
-        return super.sendGet("/routers?" + "limit=" + limit + "&offset=" + offset,RouterOpenStackModel.class);
+        return super.sendGet(URL_VERSION + "/routers" + BeanUtils.wrapperGetParamsByObject(request),RouterOpenStackModel.class);
+    }
+
+    @Override
+    public Integer getTotalRouters(RouterPageRequest request) {
+        RouterOpenStackModel page = this.page(request);
+        return Objects.isNull(page) || Objects.isNull(page.getTotal()) ? 0 : page.getTotal();
     }
 }

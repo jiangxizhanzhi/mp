@@ -35,9 +35,14 @@ public class RouterController {
         this.routerService = routerService;
     }
 
+    /**
+     * 分页查询路由信息
+     * @param request
+     * @return
+     */
     @ApiOperation("分页查询路由信息")
     @PostMapping("/page")
-    public ListObjServiceResult page(@RequestBody RouterPageRequest request){
+    public ListObjServiceResult<RouterPageResponse> page(@RequestBody RouterPageRequest request){
         RouterOpenStackModel model = routerService.page(request);
         List<RouterOpenStackModel.RouterModel> routers = model.getRouters();
         if (CollectionUtils.isEmpty(routers)){
