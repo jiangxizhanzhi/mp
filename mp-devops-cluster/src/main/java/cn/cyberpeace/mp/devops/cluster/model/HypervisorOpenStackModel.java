@@ -82,9 +82,14 @@ public class HypervisorOpenStackModel extends BaseOpenStackModel{
         private List<Server> servers;
 
         /**
-         * 状态
+         * 服务状态
          */
         private String status;
+
+        /**
+         * 节点管理
+         */
+        private String state;
 
         @Data
         @NoArgsConstructor

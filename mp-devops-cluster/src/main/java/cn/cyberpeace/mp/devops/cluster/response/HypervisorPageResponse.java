@@ -7,6 +7,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -39,34 +42,94 @@ public class HypervisorPageResponse extends BaseOpenStackResponse{
     private String state;
 
     /**
-     * CPU
+     * CPU核数
+     */
+    @ApiModelProperty("CPU核数")
+    private Integer cpu;
+
+    /**
+     * 内存大小
+     */
+    @ApiModelProperty("内存大小")
+    private Long ram;
+
+    /**
+     * 磁盘大小
+     */
+    @ApiModelProperty("磁盘大小")
+    private Long disk;
+
+    /**
+     * 已使用CPU核数
+     */
+    @ApiModelProperty("已使用CPU核数")
+    private Integer cpuUsed;
+
+    /**
+     * 已使用内存大小
+     */
+    @ApiModelProperty("已使用内存大小")
+    private Long ramUsed;
+
+    /**
+     * 已使用磁盘大小
+     */
+    @ApiModelProperty("已使用磁盘大小")
+    private Long diskUsed;
+
+    /**
+     * CPU使用率
      */
     @ApiModelProperty("CPU使用率")
-    private Integer vcpus_percent;
+    private BigDecimal cpuPercent;
 
     /**
-     * 内存
+     * 内存使用率
      */
     @ApiModelProperty("内存使用率")
-    private Long ram_percent;
+    private BigDecimal ramPercent;
 
     /**
-     * 磁盘
+     * 磁盘使用率
      */
-    @ApiModelProperty("磁盘")
-    private Long disk_percent;
+    @ApiModelProperty("磁盘使用率")
+    private BigDecimal diskPercent;
 
     /**
      * 虚拟机数量
      */
     @ApiModelProperty("虚拟机数量")
-    private Integer running_vms;
+    private Integer totalInstances;
 
     /**
      * 容器数量
      */
     @ApiModelProperty("容器数量")
-    private Integer container_count;
+    private Integer totalContainers;
+
+    /**
+     * 权重
+     */
+    @ApiModelProperty("权重")
+    private Integer weight;
+
+    /**
+     * 虚拟机数量限制
+     */
+    @ApiModelProperty("虚拟机数量限制")
+    private Integer maxInstances;
 
 
+    public BigDecimal getRamPercent() {
+        return BigDecimal.valueOf(this.ramUsed).divide(BigDecimal.valueOf(this.ram),2, RoundingMode.DOWN).multiply(BigDecimal.valueOf(100));
+
+    }
+
+    public BigDecimal getCpuPercent() {
+        return BigDecimal.valueOf(this.cpuUsed).divide(BigDecimal.valueOf(this.cpu),2,RoundingMode.DOWN).multiply(BigDecimal.valueOf(100));
+    }
+
+    public BigDecimal getDiskPercent() {
+        return BigDecimal.valueOf(this.diskUsed).divide(BigDecimal.valueOf(this.disk),2,RoundingMode.DOWN).multiply(BigDecimal.valueOf(100));
+    }
 }
