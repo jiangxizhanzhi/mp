@@ -18,4 +18,9 @@ public class OpenStackConfig {
      */
     private String url;
 
+    /**
+     * mg中台接口地址
+     */
+    private String mg_url;
+
 }
