@@ -2,6 +2,9 @@ package cn.cyberpeace.mp.base.util;
 
 import cn.cyberpeace.mp.base.annotation.BeanFieldClasses;
 import cn.cyberpeace.mp.base.annotation.BeanFieldNames;
+import com.google.common.base.Joiner;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
@@ -9,11 +12,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.lang.reflect.Field;
+import java.util.*;
 
+@Slf4j
 @Component
 public class BeanUtils implements ApplicationContextAware {
 
@@ -106,4 +108,57 @@ public class BeanUtils implements ApplicationContextAware {
             ClassUtils.setFieldValue(field, obj, getBean(fieldClasses[i]));
         }
     }
+
+
+    /**
+     * 包装成get方式的请求参数格式，例如：?a=1&b=2
+     * @param fieldList
+     * @param object
+     * @return
+     */
+    public static String wrapperGetParamsByFieldsAndObject(List<Field> fieldList, Object object) {
+        String result = "";
+        StringBuffer joinerStr = new StringBuffer();
+        fieldList.stream().forEach(field -> {
+            field.setAccessible(true);
+            try {
+                String fieldName = field.getName();
+                Object fieldVal = field.get(object);
+                if (Objects.nonNull(fieldVal)) {
+                    joinerStr.append(Joiner.on("&").join(Joiner.on("=").join(fieldName, fieldVal),""));
+                }
+            } catch (IllegalAccessException e) {
+                log.error("wrapperGetParamsByFieldsAndObject报错信息：{}",e.getMessage());
+            }
+        });
+        result = StringUtils.substringBeforeLast(joinerStr.toString(),"&");
+        return StringUtils.isBlank(result) ? "" : "?" + result;
+    }
+
+    /**
+     * 获取对象所有的字段对象Field
+     * @param object
+     * @return
+     */
+    public static List<Field> getFieldsByObject(Object object) {
+        Class<?> clazz = object.getClass();
+        List<Field> fieldList = new ArrayList<>();
+        while (clazz != null) {
+            Field[] fields = clazz.getDeclaredFields();
+            fieldList.addAll(Arrays.asList(fields));
+            clazz = clazz.getSuperclass();
+        }
+        return fieldList;
+    }
+
+    /**
+     * 将对象的所有字段转化为Get请求方式的参数格式
+     * @param object
+     * @return
+     */
+    public static String wrapperGetParamsByObject(Object object){
+        List<Field> fieldList = getFieldsByObject(object);
+        return wrapperGetParamsByFieldsAndObject(fieldList,object);
+    }
+
 }
