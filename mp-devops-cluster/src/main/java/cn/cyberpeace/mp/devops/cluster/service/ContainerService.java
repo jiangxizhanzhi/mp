@@ -9,5 +9,16 @@ import cn.cyberpeace.mp.devops.cluster.request.ContainerPageRequest;
  */
 public interface ContainerService extends BaseOpenStackService {
 
+    /**
+     * 分页查询容器信息
+     * @param request
+     * @return
+     */
     ContainerOpenStackModel page(ContainerPageRequest request);
+
+    /**
+     * 获取容器总数
+     * @return
+     */
+    Integer getTotalContainers(ContainerPageRequest request);
 }

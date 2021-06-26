@@ -35,9 +35,14 @@ public class ContainerController {
         this.containerService = containerService;
     }
 
+    /**
+     * 分页查询容器列表
+     * @param request
+     * @return
+     */
     @ApiOperation("分页查询容器列表")
     @PostMapping("/page")
-    public ListObjServiceResult page(@RequestBody ContainerPageRequest request){
+    public ListObjServiceResult<ContainerPageResponse> page(@RequestBody ContainerPageRequest request){
         ContainerOpenStackModel model = containerService.page(request);
         List<ContainerOpenStackModel.ContainerModel> containers = model.getContainers();
         if (CollectionUtils.isEmpty(containers)){
