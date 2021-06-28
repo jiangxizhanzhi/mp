@@ -14,5 +14,4 @@ import lombok.NoArgsConstructor;
 @ApiModel(value = "节点管理分页请求参数")
 public class HypervisorPageRequest extends BasePageRequest {
 
-    private String[] s;
 }
