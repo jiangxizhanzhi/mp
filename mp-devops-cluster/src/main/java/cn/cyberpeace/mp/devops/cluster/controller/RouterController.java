@@ -7,7 +7,6 @@ import cn.cyberpeace.mp.devops.cluster.model.RouterOpenStackModel;
 import cn.cyberpeace.mp.devops.cluster.request.RouterPageRequest;
 import cn.cyberpeace.mp.devops.cluster.response.RouterPageResponse;
 import cn.cyberpeace.mp.devops.cluster.service.RouterService;
-import cn.cyberpeace.mp.devops.cluster.service.fields.RouterFields;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -51,7 +50,7 @@ public class RouterController {
         List<RouterPageResponse> list = routers.stream().map(routerModel ->
                 RouterPageResponse.builder().name(routerModel.getName()).status(routerModel.getStatus()).createdAt(routerModel.getCreated_at()).build()
         ).collect(Collectors.toList());
-        return new ListObjServiceResult(new ListObjResult(list,model.getTotal(), RouterFields.allFields).asResult()).asResult();
+        return new ListObjServiceResult(new ListObjResult(list,model.getTotal()).asResult()).asResult();
     }
 
 }
