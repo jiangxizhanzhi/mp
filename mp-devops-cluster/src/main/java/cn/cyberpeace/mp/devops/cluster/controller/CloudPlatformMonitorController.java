@@ -36,8 +36,8 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @RestController
-@RequestMapping(ControllerConstant.BASE_API_PATH + "/hypervisor")
-public class HypervisorController {
+@RequestMapping(ControllerConstant.BASE_API_PATH + "/monitor")
+public class CloudPlatformMonitorController {
 
     private HypervisorService hypervisorService;
 
@@ -50,9 +50,9 @@ public class HypervisorController {
     private RealEquipmentService realEquipmentService;
 
     @Autowired
-    public HypervisorController(HypervisorService hypervisorService,InstanceService instanceService,
-                                ContainerService containerService,RouterService routerService,
-                                RealEquipmentService realEquipmentService) {
+    public CloudPlatformMonitorController(HypervisorService hypervisorService, InstanceService instanceService,
+                                          ContainerService containerService, RouterService routerService,
+                                          RealEquipmentService realEquipmentService) {
         this.hypervisorService = hypervisorService;
         this.instanceService = instanceService;
         this.containerService = containerService;
@@ -65,7 +65,7 @@ public class HypervisorController {
      * @return
      */
     @ApiOperation("资源统计")
-    @PostMapping("/statistics")
+    @PostMapping("/resources/statistics")
     public ObjServiceResult<HypervisorStatisticsResponse> statistics(){
         //虚拟机个数
         final Integer totalInstances = instanceService.getTotalInstances(new InstancePageRequest());
@@ -104,7 +104,7 @@ public class HypervisorController {
      * @return
      */
     @ApiOperation("节点管理")
-    @PostMapping("/page")
+    @PostMapping("/hypervisor/page")
     public ObjServiceResult<HypervisorPageResponse> page(){
         HypervisorOpenStackModel model = hypervisorService.pageHypervisors();
         List<HypervisorOpenStackModel.Hypervisor> hypervisorList = model.getHypervisors();
@@ -139,7 +139,7 @@ public class HypervisorController {
      * @return
      */
     @ApiOperation("节点管理-关机/重启")
-    @PostMapping("/reboot-poweroff")
+    @PostMapping("/hypervisor/reboot-poweroff")
     public ObjServiceResult rebootOrPowerOff(@Valid @RequestBody HypervisorRequest request){
         hypervisorService.rebootOrPowerOff(request);
         return new ObjServiceResult().asResult();
