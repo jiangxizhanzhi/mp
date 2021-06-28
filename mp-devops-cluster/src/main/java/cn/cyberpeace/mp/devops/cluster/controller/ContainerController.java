@@ -7,7 +7,6 @@ import cn.cyberpeace.mp.devops.cluster.model.ContainerOpenStackModel;
 import cn.cyberpeace.mp.devops.cluster.request.ContainerPageRequest;
 import cn.cyberpeace.mp.devops.cluster.response.ContainerPageResponse;
 import cn.cyberpeace.mp.devops.cluster.service.ContainerService;
-import cn.cyberpeace.mp.devops.cluster.service.fields.ContainerFields;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -54,7 +53,7 @@ public class ContainerController {
                 .status(containerModel.getStatus()).build()
         ).collect(Collectors.toList());
 
-        return new ListObjServiceResult(new ListObjResult(list,model.getTotal(), ContainerFields.allFields).asResult()).asResult();
+        return new ListObjServiceResult(new ListObjResult(list,model.getTotal()).asResult()).asResult();
     }
 
 }

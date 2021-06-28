@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 容器分页返回信息
@@ -41,7 +42,7 @@ public class ContainerPageResponse extends BaseOpenStackResponse {
      * IP地址
      */
     @ApiModelProperty("IP地址")
-    private List<Object> addressList;
+    private List<Map<String,Object>> addressList;
 
     /**
      * 状态

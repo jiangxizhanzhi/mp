@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 容器模型，对应云平台接口返回信息
@@ -60,7 +61,7 @@ public class ContainerOpenStackModel extends BaseOpenStackModel implements Seria
         /**
          * 地址信息
          */
-        private Object addresses;
+        private Map<String,Object> addresses;
 
         /**
          * 逻辑卷

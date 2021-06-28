@@ -7,7 +7,6 @@ import cn.cyberpeace.mp.devops.cluster.model.ElasticIpOpenStackModel;
 import cn.cyberpeace.mp.devops.cluster.request.ElasticIpPageRequest;
 import cn.cyberpeace.mp.devops.cluster.response.ElasticIpResponse;
 import cn.cyberpeace.mp.devops.cluster.service.ElasticIpService;
-import cn.cyberpeace.mp.devops.cluster.service.fields.ElasticIpFields;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -53,7 +52,7 @@ public class ElasticIpController {
                       .fixedIpAddress(elasticIpModel.getFixed_ip_address()).status(elasticIpModel.getStatus())
                .createdAt(elasticIpModel.getCreated_at()).build()
         ).collect(Collectors.toList());
-        return new ListObjServiceResult(new ListObjResult(list, model.getTotal(), ElasticIpFields.allFields).asResult()).asResult();
+        return new ListObjServiceResult(new ListObjResult(list, model.getTotal()).asResult()).asResult();
     }
 
 }
