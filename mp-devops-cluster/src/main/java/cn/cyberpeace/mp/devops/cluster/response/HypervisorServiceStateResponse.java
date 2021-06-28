@@ -44,4 +44,8 @@ public class HypervisorServiceStateResponse extends BaseOpenStackResponse{
         this.name = name;
         this.state = state;
     }
+
+//    public String getState() {
+//        return StringUtils.isNotBlank(state) ? state.equals("up") ? "正常" : "异常" : alive ? "正常" : "异常";
+//    }
 }

@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -24,130 +25,150 @@ public class HypervisorStatisticsResponse extends BaseOpenStackResponse{
      * CPU核数
      */
     @ApiModelProperty(value = "CPU核数")
-    private Integer vcpus;
+    @JsonIgnore
+    private Integer cpus;
 
     /**
      * 内存大小
      */
     @ApiModelProperty(value = "内存大小")
+    @JsonIgnore
     private Long memoryMb;
 
     /**
      * 磁盘总大小
      */
     @ApiModelProperty(value = "磁盘大小")
+    @JsonIgnore
     private Long localGb;
 
     /**
      * 已使用CPU核数
      */
     @ApiModelProperty(value = "已使用CPU核数")
-    private Long vcpusUsed;
+    @JsonIgnore
+    private Long cpusUsed;
 
     /**
      * 已使用内存大小
      */
     @ApiModelProperty(value = "已使用内存大小")
+    @JsonIgnore
     private Long memoryMbUsed;
 
     /**
      * 已使用磁盘大小
      */
     @ApiModelProperty(value = "已使用磁盘大小")
+    @JsonIgnore
     private Long localGbUsed;
 
     /**
      * 空闲内存大小
      */
     @ApiModelProperty(value = "空闲内存大小")
+    @JsonIgnore
     private Long freeRamMb;
 
     /**
      * 空闲磁盘大小
      */
     @ApiModelProperty(value = "空闲磁盘大小")
+    @JsonIgnore
     private Long freeDiskGb;
 
     /**
      * CPU使用率
      */
     @ApiModelProperty("CPU使用率")
-    private BigDecimal cpuPercent;
+    @Builder.Default
+    private BigDecimal cpuPercent = BigDecimal.ZERO;
 
     /**
      * 内存使用率
      */
     @ApiModelProperty("内存使用率")
-    private BigDecimal ramPercent;
+    @Builder.Default
+    private BigDecimal ramPercent = BigDecimal.ZERO;
 
     /**
      * 磁盘使用率
      */
     @ApiModelProperty("磁盘使用率")
-    private BigDecimal diskPercent;
+    @Builder.Default
+    private BigDecimal diskPercent = BigDecimal.ZERO;
 
     /**
      * 磁盘IO
      */
     @ApiModelProperty(value = "磁盘IO")
-    private BigDecimal diskIo;
+    @Builder.Default
+    private BigDecimal diskIo = BigDecimal.ZERO;
 
     /**
      * 网络IO
      */
     @ApiModelProperty(value = "网络IO")
-    private BigDecimal netIo;
+    @Builder.Default
+    private BigDecimal netIo = BigDecimal.ZERO;
 
     /**
      * 虚拟机个数
      */
     @ApiModelProperty(value = "虚拟机个数")
-    private Integer totalInstances;
+    @Builder.Default
+    private Integer totalInstances = 0;
 
     /**
      * 容器个数
      */
     @ApiModelProperty(value = "容器个数")
-    private Integer totalContainers;
+    @Builder.Default
+    private Integer totalContainers = 0;
 
     /**
      * 实装设备个数
      */
     @ApiModelProperty(value = "实装设备个数")
-    private Integer totalRealEquipments;
+    @Builder.Default
+    private Integer totalRealEquipments = 0;
 
     /**
      * NPC个数
      */
     @ApiModelProperty(value = "NPC个数")
-    private Integer totalNpc;
+    @Builder.Default
+    private Integer totalNpc = 0;
 
     /**
      * 交换机个数
      */
     @ApiModelProperty(value = "交换机个数")
-    private Integer totalSwitch;
+    @Builder.Default
+    private Integer totalSwitch = 0;
 
     /**
      * 网桥个数
      */
     @ApiModelProperty(value = "网桥个数")
-    private Integer totalBridge;
+    @Builder.Default
+    private Integer totalBridge = 0;
 
     /**
      * 路由器个数
      */
     @ApiModelProperty(value = "路由器个数")
-    private Integer totalRouters;
+    @Builder.Default
+    private Integer totalRouters = 0;
 
 
-    public HypervisorStatisticsResponse HypervisorStatisticsResponse(Integer vcpus, Long memoryMb, Long localGb,
-                                        Long vcpusUsed, Long memoryMbUsed, Long localGbUsed,
+    public HypervisorStatisticsResponse HypervisorStatisticsResponse(Integer cpus, Long memoryMb, Long localGb,
+                                        Long cpusUsed, Long memoryMbUsed, Long localGbUsed,
                                         Long freeRamMb, Long freeDiskGb) {
-        this.vcpus = vcpus;
+        this.cpus = cpus;
         this.memoryMb = memoryMb;
         this.localGb = localGb;
-        this.vcpusUsed = vcpusUsed;
+        this.cpusUsed = cpusUsed;
         this.memoryMbUsed = memoryMbUsed;
         this.localGbUsed = localGbUsed;
         this.freeRamMb = freeRamMb;
@@ -161,7 +182,7 @@ public class HypervisorStatisticsResponse extends BaseOpenStackResponse{
     }
 
     public BigDecimal getCpuPercent() {
-        return BigDecimal.valueOf(this.vcpusUsed).divide(BigDecimal.valueOf(this.vcpus),2,RoundingMode.DOWN).multiply(BigDecimal.valueOf(100));
+        return BigDecimal.valueOf(this.cpusUsed).divide(BigDecimal.valueOf(this.cpus),2,RoundingMode.DOWN).multiply(BigDecimal.valueOf(100));
     }
 
     public BigDecimal getDiskPercent() {
