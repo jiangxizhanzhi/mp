@@ -7,7 +7,6 @@ import cn.cyberpeace.mp.devops.cluster.model.NetworkOpenStackModel;
 import cn.cyberpeace.mp.devops.cluster.request.NetworkPageRequest;
 import cn.cyberpeace.mp.devops.cluster.response.NetworkPageResponse;
 import cn.cyberpeace.mp.devops.cluster.service.NetworkService;
-import cn.cyberpeace.mp.devops.cluster.service.fields.NetworkFields;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -56,7 +55,7 @@ public class NetworkController {
                         .subnets(subnets).createdAt(networkModel.getCreated_at()).build();
                 }
         ).collect(Collectors.toList());
-        return new ListObjServiceResult(new ListObjResult(list,model.getTotal(), NetworkFields.allFields).asResult()).asResult();
+        return new ListObjServiceResult(new ListObjResult(list,model.getTotal()).asResult()).asResult();
     }
 
 }
