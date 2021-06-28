@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.datasandtable.dao.WazuhDao;
 import cn.cyberpeace.mp.datasandtable.model.FileEventModel;
 import cn.cyberpeace.mp.datasandtable.model.WazuhEventRequest;
 import cn.cyberpeace.mp.datasandtable.model.WazuhFileRoot;
+import cn.cyberpeace.mp.datasandtable.model.WazuhMonitorRoot;
 import cn.cyberpeace.mp.datasandtable.model.emum.FileEventType;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.annotations.VisibleForTesting;
@@ -102,9 +103,7 @@ public class WazuhService {
 
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
-//            List<WazuhFileRoot> wazuhFileRootList = Arrays.stream(response.getHits().getHits()).map(hit -> JSONObject.parseObject(hit.getSourceAsString(), WazuhFileRoot.class)).collect(Collectors.toList());
-//            List<FileEventModel> fileEventModelList = wazuhFileRootList.stream().map(this::getFileEventModel).collect(Collectors.toList());
-            System.out.println(response);
+            List<WazuhMonitorRoot> wazuhFileRootList = Arrays.stream(response.getHits().getHits()).map(hit -> JSONObject.parseObject(hit.getSourceAsString(), WazuhMonitorRoot.class)).collect(Collectors.toList());
         } catch (IOException e) {
             log.error("es 查询监控事件分页失败 {}", e);
             throw new MpRuntimeException(BaseErrorCode.ERROR, e.toString());
