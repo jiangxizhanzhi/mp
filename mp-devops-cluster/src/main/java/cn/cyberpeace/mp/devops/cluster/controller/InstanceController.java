@@ -12,8 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -43,8 +42,8 @@ public class InstanceController {
      * @return
      */
     @ApiOperation("分页查询实例信息")
-    @PostMapping("/page")
-    public ListObjServiceResult<InstancePageResponse> page(@RequestBody @Valid InstancePageRequest request){
+    @GetMapping("/page")
+    public ListObjServiceResult<InstancePageResponse> page(@Valid InstancePageRequest request){
 
         InstanceOpenStackModel model = instanceService.page(request);
         List<InstanceOpenStackModel.InstanceModel> instances = model.getInstances();

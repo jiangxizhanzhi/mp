@@ -11,10 +11,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -40,8 +37,8 @@ public class RouterController {
      * @return
      */
     @ApiOperation("分页查询路由信息")
-    @PostMapping("/page")
-    public ListObjServiceResult<RouterPageResponse> page(@RequestBody RouterPageRequest request){
+    @GetMapping("/page")
+    public ListObjServiceResult<RouterPageResponse> page(RouterPageRequest request){
         RouterOpenStackModel model = routerService.page(request);
         List<RouterOpenStackModel.RouterModel> routers = model.getRouters();
         if (CollectionUtils.isEmpty(routers)){
