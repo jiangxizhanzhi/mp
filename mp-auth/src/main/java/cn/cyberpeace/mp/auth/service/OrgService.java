@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.service;
 
+import cn.cyberpeace.mp.auth.dto.OrgDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.base.service.BaseModelService;
 
@@ -10,6 +11,10 @@ public interface OrgService extends BaseModelService<OrgModel> {
     List<OrgModel> listParents();
 
     List<OrgModel> listByParent(String parentId);
+
+    List<OrgModel> listAll(String tenantId);
+
+    List<OrgDto> getTree();
 
 
 }

@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.auth.controller;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
+import cn.cyberpeace.mp.auth.dto.TargetDto;
 import cn.cyberpeace.mp.auth.model.OrgUserModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
@@ -35,6 +36,7 @@ public class OrgUserController extends BaseModelController<OrgUserModel, OrgUser
         List<UserModel> users = getModelService().listUsersByOrgId(orgId);
         return ServiceResult.builder().source(users).build().asResult();
     }
+
 
 
 

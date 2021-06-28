@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.auth.controller;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
+import cn.cyberpeace.mp.auth.dto.OrgDto;
+import cn.cyberpeace.mp.auth.dto.TargetDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
@@ -41,6 +43,14 @@ public class OrgController extends BaseModelController<OrgModel, OrgService> {
     public ServiceResult getByParent(@RequestParam String parentId) {
         List<OrgModel> orgs = getModelService().listByParent(parentId);
         return ServiceResult.builder().source(orgs).build().asResult();
+    }
+
+
+    @ApiOperation(value = "查询所有组织树形结构", notes = "")
+    @GetMapping("/tree")
+    public ServiceResult getOrgTree() {
+        List<OrgDto> tree = getModelService().getTree();
+        return ServiceResult.builder().source(tree).build().asResult();
     }
 
 
