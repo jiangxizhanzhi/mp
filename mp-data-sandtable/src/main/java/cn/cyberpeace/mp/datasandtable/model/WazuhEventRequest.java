@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.datasandtable.model;
 
 import cn.cyberpeace.mp.base.serializer.CustomLocalDateTimeDeserializer;
 import cn.cyberpeace.mp.base.serializer.CustomLocalDateTimeSerializer;
-import cn.cyberpeace.mp.datasandtable.model.emum.FileEventType;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.swagger.annotations.ApiModelProperty;
@@ -12,7 +11,7 @@ import javax.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
-public class WazuhFileEventRequest {
+public class WazuhEventRequest {
 
     /**
      * 查询开始时间

@@ -6,13 +6,11 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.util.LocalDateTimeUtils;
 import cn.cyberpeace.mp.datasandtable.dao.WazuhDao;
 import cn.cyberpeace.mp.datasandtable.model.FileEventModel;
-import cn.cyberpeace.mp.datasandtable.model.WazuhFileEventRequest;
+import cn.cyberpeace.mp.datasandtable.model.WazuhEventRequest;
 import cn.cyberpeace.mp.datasandtable.model.WazuhFileRoot;
-import cn.cyberpeace.mp.datasandtable.model.WazuhNetifaceRoot;
 import cn.cyberpeace.mp.datasandtable.model.emum.FileEventType;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -57,23 +55,23 @@ public class WazuhService {
 
     /**
      * 查询文件事件分页
-     * @param wazuhFileEventRequest
+     * @param wazuhEventRequest
      * @return ListObjResult<FileEventModel>
      */
-    public ListObjResult<FileEventModel> queryFileEvents(WazuhFileEventRequest wazuhFileEventRequest){
+    public ListObjResult<FileEventModel> queryFileEvents(WazuhEventRequest wazuhEventRequest){
         //根据日期构造索引
-        String[] indexArray = buildRequestIndex(wazuhFileEventRequest);
+        String[] indexArray = buildRequestIndex(wazuhEventRequest);
         var searchRequest = new SearchRequest(indexArray);
         var boolQueryBuilder = QueryBuilders.boolQuery();
         var sourceBuilder = new SearchSourceBuilder();
 
         //构造查询条件
-        buildBoolQueryBuilder(wazuhFileEventRequest, boolQueryBuilder);
+        buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder);
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
         //配置索引为空
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
         //处理分页
-        int total = processPageable(wazuhFileEventRequest, indexArray, boolQueryBuilder, sourceBuilder);
+        int total = processPageable(wazuhEventRequest, indexArray, boolQueryBuilder, sourceBuilder);
 
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
@@ -84,6 +82,50 @@ public class WazuhService {
             log.error("es 查询文件事件分页 {}", e);
             throw new MpRuntimeException(BaseErrorCode.ERROR, e.toString());
         }
+    }
+
+    /**
+     * 查询监控数据
+     * @param wazuhEventRequest
+     */
+    public void queryMonitorEvents(WazuhEventRequest wazuhEventRequest){
+        //根据日期构造索引
+        String[] indexArray = buildRequestIndex(wazuhEventRequest);
+        var searchRequest = new SearchRequest(indexArray);
+        var boolQueryBuilder = QueryBuilders.boolQuery();
+        var sourceBuilder = new SearchSourceBuilder();
+
+        buildMonitorEventsBuilder(wazuhEventRequest, boolQueryBuilder);
+        searchRequest.source(sourceBuilder.query(boolQueryBuilder));
+        //配置索引为空
+        searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
+
+        try {
+            SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+//            List<WazuhFileRoot> wazuhFileRootList = Arrays.stream(response.getHits().getHits()).map(hit -> JSONObject.parseObject(hit.getSourceAsString(), WazuhFileRoot.class)).collect(Collectors.toList());
+//            List<FileEventModel> fileEventModelList = wazuhFileRootList.stream().map(this::getFileEventModel).collect(Collectors.toList());
+            System.out.println(response);
+        } catch (IOException e) {
+            log.error("es 查询监控事件分页失败 {}", e);
+            throw new MpRuntimeException(BaseErrorCode.ERROR, e.toString());
+        }
+    }
+
+    /**
+     * 文件监控时间过滤
+     * @param wazuhEventRequest wazuhEventRequest
+     * @param boolQueryBuilder boolQueryBuilder
+     */
+    private void buildMonitorEventsBuilder(WazuhEventRequest wazuhEventRequest, BoolQueryBuilder boolQueryBuilder) {
+        //构造查询条件
+        boolQueryBuilder.must(QueryBuilders.termQuery("rule.id", "900002"));
+        buildAgentIdQuery(wazuhEventRequest, boolQueryBuilder);
+        //构造事件条件
+        var end  = LocalDateTime.now();
+        var start = end.minusMinutes(5L);
+        boolQueryBuilder.must(QueryBuilders.rangeQuery("timestamp")
+            .from(LocalDateTimeUtils.localDateTimeToString(start, LocalDateTimeUtils.esdateTimeFormatter))
+            .to(LocalDateTimeUtils.localDateTimeToString(end, LocalDateTimeUtils.esdateTimeFormatter)));
     }
 
     /**
@@ -137,56 +179,52 @@ public class WazuhService {
 
     /**
      * 处理分页
-     * @param wazuhFileEventRequest
+     * @param wazuhEventRequest
      * @param indexArray
      * @param boolQueryBuilder
      * @param sourceBuilder
      * @return
      */
-    private int processPageable(WazuhFileEventRequest wazuhFileEventRequest, String[] indexArray,
+    private int processPageable(WazuhEventRequest wazuhEventRequest, String[] indexArray,
         BoolQueryBuilder boolQueryBuilder, SearchSourceBuilder sourceBuilder) {
-        int  offset = (wazuhFileEventRequest.getPageNum() -1) * (wazuhFileEventRequest.getPageSize());
+        int  offset = (wazuhEventRequest.getPageNum() -1) * (wazuhEventRequest.getPageSize());
         sourceBuilder.from(offset);
-        sourceBuilder.size(wazuhFileEventRequest.getPageSize());
+        sourceBuilder.size(wazuhEventRequest.getPageSize());
         int total = queryTotalCount(indexArray, boolQueryBuilder);
         return total;
     }
 
     /**
      * 构造请求的索引
-     * @param wazuhFileEventRequest wazuhFileEventRequest
+     * @param wazuhEventRequest wazuhFileEventRequest
      * @return String[]
      */
-    private String[] buildRequestIndex(WazuhFileEventRequest wazuhFileEventRequest) {
-        List<String> indexList = indexListBuilder(wazuhFileEventRequest);
+    private String[] buildRequestIndex(WazuhEventRequest wazuhEventRequest) {
+        List<String> indexList = indexListBuilder(wazuhEventRequest);
         var indexArray = new String[indexList.size()];
         indexList.toArray(indexArray);
         return indexArray;
     }
 
-    private void buildBoolQueryBuilder(WazuhFileEventRequest wazuhFileEventRequest, BoolQueryBuilder boolQueryBuilder) {
+    private void buildFileEventBoolQueryBuilder(WazuhEventRequest wazuhEventRequest, BoolQueryBuilder boolQueryBuilder) {
         //构造查询条件
         boolQueryBuilder.must(QueryBuilders.boolQuery().must(QueryBuilders.termQuery("rule.groups", "syscheck")));
 
         //构造agentId
-        buildAgentIdQuery(wazuhFileEventRequest, boolQueryBuilder);
+        buildAgentIdQuery(wazuhEventRequest, boolQueryBuilder);
 
         //构造事件条件
         boolQueryBuilder.must(QueryBuilders.rangeQuery("timestamp")
-            .from(wazuhFileEventRequest.getStartTime().toString()).to(wazuhFileEventRequest.getEndTime().toString()));
+            .from(wazuhEventRequest.getStartTime().toString()).to(wazuhEventRequest.getEndTime().toString()));
     }
 
     /**
      * 构造agentIdQuery
-     * @param wazuhFileEventRequest wazuhFileEventRequest
+     * @param wazuhEventRequest wazuhFileEventRequest
      * @param boolQueryBuilder boolQueryBuilder
      */
-    private void buildAgentIdQuery(WazuhFileEventRequest wazuhFileEventRequest, BoolQueryBuilder boolQueryBuilder) {
-        var agentIdBoolQuery = QueryBuilders.boolQuery();
-        this.queryAgentIdsByMac(wazuhFileEventRequest.getMacIds()).forEach(agentId -> {
-            agentIdBoolQuery.must(QueryBuilders.termQuery("agent.id", agentId));
-        });
-        boolQueryBuilder.should(agentIdBoolQuery);
+    private void buildAgentIdQuery(WazuhEventRequest wazuhEventRequest, BoolQueryBuilder boolQueryBuilder) {
+        boolQueryBuilder.filter(QueryBuilders.termsQuery("agent.id", this.queryAgentIdsByMac(wazuhEventRequest.getMacIds())));
     }
 
     /**
@@ -215,8 +253,8 @@ public class WazuhService {
      * @return List<IndexBoost>
      */
     @VisibleForTesting
-    protected List<String> indexListBuilder(WazuhFileEventRequest wazuhFileEventRequest) {
-        List<String> dateStringList = fetchFormatterTime(wazuhFileEventRequest.getStartTime(), wazuhFileEventRequest.getEndTime());
+    protected List<String> indexListBuilder(WazuhEventRequest wazuhEventRequest) {
+        List<String> dateStringList = fetchFormatterTime(wazuhEventRequest.getStartTime(), wazuhEventRequest.getEndTime());
         return dateStringList.stream().map(dateString -> wazuhAlertIndexPrefix + dateString).collect(Collectors.toList());
     }
 
