@@ -42,6 +42,10 @@ mp:
       base-url: https://192.168.5.125:55000
       username: wazuh
       password: wazuh
+      es-url: 192.168.5.125
+      es-port: 9200
+      es-username: admin
+      es-password: admin
   log:
     exclude-uri: /login
     exclude-method: OPTIONS

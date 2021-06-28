@@ -5,8 +5,7 @@ server:
 
 spring:
   datasource:
-    name: mp
-    url: jdbc:mysql://10.100.9.150:3306/mp?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&createDatabaseIfNotExist=true
+    url: jdbc:mysql://10.100.0.101:3306/mp?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&createDatabaseIfNotExist=true
     username: root
     password: root
     driver-class-name: org.mariadb.jdbc.Driver
@@ -15,15 +14,21 @@ spring:
     time-zone: GMT+8
   flyway:
     clean-disabled: true
+  application:
+    name: mp
 
 logging:
+  config: classpath:logback-spring.xml
+  level:
+    root: INFO
   file:
-    name: log/log.log
+    path: ${user.home}/logs
 
 mybatis:
   mapper-locations: classpath*:mapper/*.xml
   configuration:
     map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
 # 请求云平台组信息的url配置，必需填写
 mp:
@@ -37,3 +42,41 @@ mp:
       base-url: https://192.168.5.125:55000
       username: wazuh
       password: wazuh
+      es-url: 192.168.5.125
+      es-port: 9200
+      es-username: admin
+      es-password: admin
+  log:
+    exclude-uri: /login
+    exclude-method: OPTIONS
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, mappings
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+logging:
+  file:
+    path: ${user.home}/logs
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+logging:
+  file:
+    path: /home/mp/logs
+
+---
+# 文件服务器地址
+file_server_addr: http://192.168.5.68:80
+# 最大连接数 并发量较大的话可加大该连接数
+max_storage_connection: 8
