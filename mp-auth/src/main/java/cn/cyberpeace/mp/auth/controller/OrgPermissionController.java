@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.auth.controller;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.target.BindOrgTargetsRequest;
 import cn.cyberpeace.mp.auth.model.OrgPermissionModel;
+import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.service.OrgPermissionService;
 import cn.cyberpeace.mp.auth.util.ServletUtils;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
@@ -11,10 +12,15 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @RestController
@@ -29,9 +35,26 @@ public class OrgPermissionController extends BaseModelController<OrgPermissionMo
 
     @ApiOperation(value = "绑定组织-权限关系，注意，如果targetIds为空，表示删除组织所有权限！", notes = "")
     @PostMapping("/bind")
-    public ServiceResult bindOrgPermission(@RequestBody @Validated BindOrgTargetsRequest bindOrgTargetsReq) {
+    public ServiceResult bindOrgPermissions(@RequestBody @Validated BindOrgTargetsRequest bindOrgTargetsReq) {
         boolean success = getModelService().bindOrgTargets(bindOrgTargetsReq.getUserId(), bindOrgTargetsReq.getTargetIds());
         return ServletUtils.commonResult(success, null);
     }
+
+
+    @ApiOperation(value = "查询当前组织所有权限")
+    @GetMapping("/byorg")
+    public ServiceResult getOrgPermissions(@RequestParam String orgId) {
+        Set<TargetModel> targets = getModelService().listTargetsByOrgId(orgId);
+        return ServletUtils.commonResult(true, targets);
+    }
+
+
+    @ApiOperation(value = "查询当前组织所有权限（继承上级组织权限）")
+    @GetMapping("/byorg/includeparent")
+    public ServiceResult getOrgPermission(@RequestParam String orgId) {
+        Set<TargetModel> targets = getModelService().listTargetsByOrgIdIncludeAllParentsOrg(orgId);
+        return ServletUtils.commonResult(true, null);
+    }
+
 
 }

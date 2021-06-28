@@ -2,15 +2,22 @@ package cn.cyberpeace.mp.auth.extensions.security;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
+import cn.cyberpeace.mp.auth.dto.OrgDto;
 import cn.cyberpeace.mp.auth.dto.login.LoginResp;
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetails;
+import cn.cyberpeace.mp.auth.model.RoleModel;
+import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.service.OrgUserService;
+import cn.cyberpeace.mp.auth.service.UserPermissionService;
+import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.service.fields.UserFields;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -24,11 +31,24 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
 public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
     private final ObjectMapper mapper;
+
+    @Autowired
+    private UserRoleService userRoleService;
+
+    @Autowired
+    private UserPermissionService userPermissionService;
+
+    @Autowired
+    private OrgUserService orgUserService;
 
     @Autowired
     public CustomAuthenticationSuccessHandler(MappingJackson2HttpMessageConverter messageConverter) {
@@ -54,6 +74,25 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
             LoginResp loginResp = new LoginResp();
             loginResp.setUser(userResult.asResult());
             loginResp.setToken(jwt);
+            // 角色
+            List<RoleModel> roles = userRoleService.listByUserId(user.getId());
+            loginResp.setRoles(roles);
+
+            // 权限
+            List<TargetModel> targets = userPermissionService.listByUserId(user.getId());
+            loginResp.setTargets(targets);
+
+            // 菜单
+            List<TargetModel> menuTargets = new ArrayList<>();
+            if (CollectionUtil.isNotEmpty(targets)) {
+                menuTargets = targets.stream().filter(t -> Objects.equals(t.getType(), TargetModel.TYPE_MENU)).collect(Collectors.toList());
+            }
+            loginResp.setMenus(menuTargets);
+
+            // 组织
+            List<OrgDto> orgDtos = orgUserService.listHierarchicalOrgsByUserId(user.getId());
+            loginResp.setOrgs(orgDtos);
+
             result = ServiceResult.builder().source(loginResp).build();
 
             // 首次登陆，需要修改密码

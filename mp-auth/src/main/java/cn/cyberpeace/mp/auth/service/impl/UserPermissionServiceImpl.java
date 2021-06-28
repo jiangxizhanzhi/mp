@@ -1,12 +1,16 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.dto.OrgDto;
 import cn.cyberpeace.mp.auth.dto.TargetDto;
+import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.model.UserPermissionModel;
 import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.auth.repository.UserPermissionMapper;
+import cn.cyberpeace.mp.auth.service.OrgPermissionService;
+import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.service.RolePermissionService;
 import cn.cyberpeace.mp.auth.service.TargetService;
 import cn.cyberpeace.mp.auth.service.UserPermissionService;
@@ -51,6 +55,12 @@ public class UserPermissionServiceImpl
     private UserService userService;
 
     @Autowired
+    private OrgUserService orgUserService;
+
+    @Autowired
+    private OrgPermissionService orgPermissionService;
+
+    @Autowired
     public UserPermissionServiceImpl(UserPermissionMapper modelMapper, UserPermissionFields modelFields) {
         setModelMapper(modelMapper);
         setModelFields(modelFields);
@@ -73,6 +83,7 @@ public class UserPermissionServiceImpl
             return targets;
         }
 
+        // 角色绑定的target
         roles.forEach((r) -> {
             List<TargetModel> targets = rolePermissionService.listTargetsByRoleId(r.getId());
             authorizedTargets.addAll(targets);
@@ -82,9 +93,15 @@ public class UserPermissionServiceImpl
         List<TargetModel> targets1 = getModelMapper().listByUserId(userId);
         authorizedTargets.addAll(targets1);
 
-        // todo 用户所在组织绑定的角色绑定的target
+        // todo 用户所在组织绑定的target
+        List<OrgModel> orgs = orgUserService.listOrgsByUserId(userId);
+        Set<TargetModel> allFromOrg = new HashSet<>();
+        orgs.forEach(o -> {
+            Set<TargetModel> tset = orgPermissionService.listTargetsByOrgIdIncludeAllParentsOrg(o.getId());
+            allFromOrg.addAll(tset);
+        });
+        authorizedTargets.addAll(allFromOrg);
 
-        // todo 用户所在组织直接绑定的target
 
         List<TargetModel> targetModelList = authorizedTargets.stream().collect(Collectors.toList());
         return targetModelList;
