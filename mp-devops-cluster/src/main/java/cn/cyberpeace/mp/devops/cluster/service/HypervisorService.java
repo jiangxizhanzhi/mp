@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.devops.cluster.model.HypervisorOpenStackModel;
 import cn.cyberpeace.mp.devops.cluster.model.HypervisorStatisticsOpenStackModel;
 import cn.cyberpeace.mp.devops.cluster.model.HypervisorWeightAndMaxInstanceOpenStackModel;
 import cn.cyberpeace.mp.devops.cluster.request.HypervisorComputeStatusRequest;
+import cn.cyberpeace.mp.devops.cluster.request.HypervisorPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.HypervisorRequest;
 import cn.cyberpeace.mp.devops.cluster.request.HypervisorWeightAndMaxInstanceRequest;
 import cn.cyberpeace.mp.devops.cluster.response.HypervisorServiceStateResponse;
@@ -26,7 +27,7 @@ public interface HypervisorService extends BaseOpenStackService{
      * 查询节点管理信息
      * @return
      */
-    HypervisorOpenStackModel pageHypervisors();
+    HypervisorOpenStackModel pageHypervisors(HypervisorPageRequest request);
 
     /**
      * 获取虚拟机数量限制

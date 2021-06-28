@@ -21,7 +21,7 @@ public class ServiceResult<T> extends BaseServiceResult<T, T> {
 
     // 重复定义for Builder
     @ApiModelProperty(value = "响应数据")
-    private T context;
+    private T data;
     @ApiModelProperty(value = "错误码")
     private String code;
     @ApiModelProperty(value = "错误说明")
@@ -78,7 +78,7 @@ public class ServiceResult<T> extends BaseServiceResult<T, T> {
         return ServiceResult.builder()
                 .code(BaseErrorCode.SUCCESS.getCode())
                 .message(BaseErrorCode.SUCCESS.toString())
-                .context(source)
+                .data(source)
                 .build();
     }
 

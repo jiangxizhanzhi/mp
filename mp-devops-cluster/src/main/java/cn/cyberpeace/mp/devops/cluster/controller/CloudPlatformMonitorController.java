@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
-import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.model.HypervisorComputeStatusOpenStackModel;
 import cn.cyberpeace.mp.devops.cluster.model.HypervisorOpenStackModel;
@@ -17,10 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.math.BigDecimal;
@@ -65,8 +62,8 @@ public class CloudPlatformMonitorController {
      * @return
      */
     @ApiOperation("资源统计")
-    @PostMapping("/resources/statistics")
-    public ObjServiceResult<HypervisorStatisticsResponse> statistics(){
+    @GetMapping("/resources/statistics")
+    public ServiceResult<HypervisorStatisticsResponse> statistics(){
         //虚拟机个数
         final Integer totalInstances = instanceService.getTotalInstances(new InstancePageRequest());
         //容器个数
@@ -91,7 +88,7 @@ public class CloudPlatformMonitorController {
 
         HypervisorStatisticsOpenStackModel model = hypervisorService.statistics();
         if(Objects.isNull(model) || Objects.isNull(model.getHypervisor_statistics())){
-            return new ObjServiceResult(new ObjResult(response)).asResult();
+            return new ServiceResult(response).asResult();
         }
 
         HypervisorStatisticsOpenStackModel.HypervisorStatistics hypervisorStatistics = model.getHypervisor_statistics();
@@ -100,7 +97,7 @@ public class CloudPlatformMonitorController {
         ,hypervisorStatistics.getLocal_gb(),hypervisorStatistics.getVcpus_used(),hypervisorStatistics.getMemory_mb_used()
         ,hypervisorStatistics.getLocal_gb_used(),hypervisorStatistics.getFree_ram_mb(),hypervisorStatistics.getFree_disk_gb());
 
-        return new ObjServiceResult(new ObjResult(response)).asResult();
+        return new ServiceResult(response).asResult();
     }
 
     /**
@@ -108,11 +105,11 @@ public class CloudPlatformMonitorController {
      * @return
      */
     @ApiOperation("节点管理")
-    @PostMapping("/hypervisor/page")
-    public ObjServiceResult<HypervisorPageResponse> page(){
-        HypervisorOpenStackModel model = hypervisorService.pageHypervisors();
+    @GetMapping("/hypervisor/page")
+    public ServiceResult<HypervisorPageResponse> page(HypervisorPageRequest request){
+        HypervisorOpenStackModel model = hypervisorService.pageHypervisors(request);
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getHypervisors())){
-            return new ObjServiceResult();
+            return new ServiceResult();
         }
         List<HypervisorOpenStackModel.Hypervisor> hypervisorList = model.getHypervisors();
         List<HypervisorPageResponse> hypervisorPageResponses = hypervisorList.stream().map(hypervisor ->
@@ -134,7 +131,7 @@ public class CloudPlatformMonitorController {
             }
         });
 
-        return new ObjServiceResult(new ObjResult(hypervisorPageResponses)).asResult();
+        return new ServiceResult(hypervisorPageResponses).asResult();
     }
 
     /**
@@ -143,8 +140,8 @@ public class CloudPlatformMonitorController {
      * @return
      */
     @ApiOperation("节点管理-关机/重启")
-    @PostMapping("/hypervisor/reboot-poweroff")
-    public ObjServiceResult rebootOrPowerOff(@Valid @RequestBody HypervisorRequest request){
+    @GetMapping("/hypervisor/reboot-poweroff")
+    public ObjServiceResult rebootOrPowerOff(@Valid HypervisorRequest request){
         hypervisorService.rebootOrPowerOff(request);
         return new ObjServiceResult().asResult();
     }
@@ -154,10 +151,10 @@ public class CloudPlatformMonitorController {
      * @return
      */
     @ApiOperation("服务状态监控")
-    @PostMapping("/service-state")
-    public ObjServiceResult<HypervisorServiceStateResponse> serviceState(){
+    @GetMapping("/service-state")
+    public ServiceResult<HypervisorServiceStateResponse> serviceState(){
         List<HypervisorServiceStateResponse> responseList = hypervisorService.serviceState();
-        return new ObjServiceResult(new ObjResult(responseList)).asResult();
+        return new ServiceResult(responseList).asResult();
     }
 
     /**
@@ -165,10 +162,9 @@ public class CloudPlatformMonitorController {
      * @return
      */
     @ApiOperation("虚实结合交换机状态")
-    @PostMapping("/virtual-real-switch-state")
-    public ObjServiceResult virtualRealSwitchStatus(){
-        List<HypervisorServiceStateResponse> responseList = hypervisorService.serviceState();
-        return new ObjServiceResult(new ObjResult(responseList)).asResult();
+    @GetMapping("/virtual-real-switch-state")
+    public ServiceResult virtualRealSwitchStatus(){
+        return new ServiceResult().asResult();
     }
 
 

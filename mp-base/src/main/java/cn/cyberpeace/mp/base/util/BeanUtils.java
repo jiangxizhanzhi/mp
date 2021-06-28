@@ -123,9 +123,11 @@ public class BeanUtils implements ApplicationContextAware {
             field.setAccessible(true);
             try {
                 String fieldName = field.getName();
-                Object fieldVal = field.get(object);
-                if (Objects.nonNull(fieldVal)) {
-                    joinerStr.append(Joiner.on("&").join(Joiner.on("=").join(fieldName, fieldVal),""));
+                if (!fieldName.equals("pageNo") && !fieldName.equals("pageSize")) {
+                    Object fieldVal = field.get(object);
+                    if (Objects.nonNull(fieldVal)) {
+                        joinerStr.append(Joiner.on("&").join(Joiner.on("=").join(fieldName, fieldVal), ""));
+                    }
                 }
             } catch (IllegalAccessException e) {
                 log.error("wrapperGetParamsByFieldsAndObject报错信息：{}",e.getMessage());

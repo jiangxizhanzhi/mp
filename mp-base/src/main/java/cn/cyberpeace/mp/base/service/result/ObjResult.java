@@ -26,7 +26,6 @@ public class ObjResult<T> extends BaseObjResult<T, T>  {
         if (obj == null) {
             return null;
         }
-
         return objToResultWithNull(obj, getFields());
     }
 }

@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.Min;
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * 基础的分页参数
@@ -30,11 +31,24 @@ public class BasePageRequest extends BaseRequest implements Serializable {
     @ApiModelProperty(value = "页码",required = false)
     private Integer offset = 1;
 
+    /**
+     * 页码
+     */
+    @ApiModelProperty(value = "页码",required = false)
+    private Integer pageNo = 1;
+
+    /**
+     * 每页条数
+     */
+    @ApiModelProperty(value = "每页条数",required = false)
+    private Integer pageSize = 10;
+
+
     public Integer getLimit() {
-        return limit;
+        return Objects.nonNull(pageSize) ? pageSize : limit;
     }
 
     public Integer getOffset() {
-        return offset;
+        return Objects.nonNull(pageNo) ? pageNo : offset;
     }
 }

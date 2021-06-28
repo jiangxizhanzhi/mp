@@ -6,7 +6,6 @@ import cn.cyberpeace.mp.base.util.MessageUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -20,7 +19,7 @@ import lombok.NoArgsConstructor;
 public class BaseServiceResult<T, R> {
 
     @ApiModelProperty(value = "响应数据")
-    private R context;
+    private R data;
 
     @ApiModelProperty(value = "错误码")
     private String code;
@@ -68,7 +67,7 @@ public class BaseServiceResult<T, R> {
      * @return this
      */
     public BaseServiceResult<T, R> asResult() {
-        setContext(sourceToData(getSource()));
+        setData(sourceToData(getSource()));
 
         ServiceCode actualServiceCode = getServiceCode();
         if (actualServiceCode != null) {

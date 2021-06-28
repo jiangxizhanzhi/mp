@@ -33,7 +33,7 @@ public class RegisterController {
     public ServiceResult sms(@RequestParam String mobile) {
         log.info("mobile:{}", mobile);
 
-        return ServiceResult.builder().message("OK").context("no sms support!").serviceCode(BaseErrorCode.SUCCESS).build();
+        return ServiceResult.builder().message("OK").data("no sms support!").serviceCode(BaseErrorCode.SUCCESS).build();
 
     }
 

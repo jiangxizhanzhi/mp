@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.devops.cluster.config.OpenStackConfig;
 import cn.cyberpeace.mp.devops.cluster.model.*;
 import cn.cyberpeace.mp.devops.cluster.request.HypervisorComputeStatusRequest;
+import cn.cyberpeace.mp.devops.cluster.request.HypervisorPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.HypervisorRequest;
 import cn.cyberpeace.mp.devops.cluster.request.HypervisorWeightAndMaxInstanceRequest;
 import cn.cyberpeace.mp.devops.cluster.response.HypervisorServiceStateResponse;
@@ -35,8 +36,8 @@ public class HypervisorServiceImpl extends BaseOpenStackServiceImpl implements H
     }
 
     @Override
-    public HypervisorOpenStackModel pageHypervisors() {
-        return super.sendGet(URL_VERSION + "/hypervisors",HypervisorOpenStackModel.class);
+    public HypervisorOpenStackModel pageHypervisors(HypervisorPageRequest request) {
+        return super.sendGet(URL_VERSION + "/hypervisors" + BeanUtils.wrapperGetParamsByObject(request),HypervisorOpenStackModel.class);
     }
 
     @Override
@@ -97,7 +98,7 @@ public class HypervisorServiceImpl extends BaseOpenStackServiceImpl implements H
      */
     @Override
     public List<HypervisorComputeStatusOpenStackModel> computeStatus(){
-        HypervisorOpenStackModel model = this.pageHypervisors();
+        HypervisorOpenStackModel model = this.pageHypervisors(new HypervisorPageRequest());
         List<HypervisorOpenStackModel.Hypervisor> hypervisorList = model.getHypervisors();
         if (CollectionUtils.isEmpty(hypervisorList)){
             return new ArrayList<>();
