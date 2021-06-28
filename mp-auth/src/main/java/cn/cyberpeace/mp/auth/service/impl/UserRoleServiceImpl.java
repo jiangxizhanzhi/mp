@@ -36,7 +36,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         // 查询user直接绑定的角色
         List<RoleModel> roles = getModelMapper().listByUserId(userId);
 
-        // todo 查询用户所在组织（上级组织）的角色
+        // todo 查询用户所在组织（上级组织）的角色  暂无
         return roles;
     }
 

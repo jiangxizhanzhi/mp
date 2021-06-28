@@ -57,6 +57,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
     }
 
 
+    @Override
     public List<OrgDto> listHierarchicalOrgsByUserId(String userId) {
         List<OrgModel> orgs = getModelMapper().listOrgsByUserId(userId);
         List<OrgDto> orgDtos = new ArrayList<>();

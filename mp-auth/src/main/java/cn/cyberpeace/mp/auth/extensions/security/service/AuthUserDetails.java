@@ -7,13 +7,17 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Set;
 
 public class AuthUserDetails implements UserDetails {
 
     private final UserModel user;
 
-    public AuthUserDetails(UserModel user) {
+    private final Set<GrantedAuthority> authorities;
+
+    public AuthUserDetails(UserModel user, Set<GrantedAuthority> authorities) {
         this.user = user;
+        this.authorities = authorities;
     }
 
     public UserModel getUser() {
@@ -22,7 +26,7 @@ public class AuthUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return new ArrayList<>();
+        return authorities;
     }
 
     @Override
