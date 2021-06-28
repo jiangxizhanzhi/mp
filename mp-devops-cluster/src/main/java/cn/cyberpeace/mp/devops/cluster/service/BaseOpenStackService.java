@@ -17,6 +17,11 @@ public interface BaseOpenStackService {
     String CPCLOUD_INFO_URL = CPCLOUD_URL + "/info";
 
     /**
+     * cpcloud平台NPC模块URL前缀
+     */
+    String CPCLOUD_NPC_URL = CPCLOUD_URL + "/npc_node";
+
+    /**
      * 版本
      */
     String URL_VERSION = "/v1";
