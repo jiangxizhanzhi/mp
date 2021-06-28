@@ -1,21 +1,37 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.dto.OrgDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.OrgUserModel;
+import cn.cyberpeace.mp.auth.model.RolePermissionModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.repository.OrgUserMapper;
+import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.service.fields.OrgUserFields;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.lang.Assert;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @Service
+@Slf4j
 public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUserMapper, OrgUserFields>
         implements OrgUserService {
+
+    @Autowired
+    private OrgService orgService;
+
+    @Autowired
+    private QueryParentOrgOperation queryParentOrgOperation;
 
     @Autowired
     public OrgUserServiceImpl(OrgUserMapper modelMapper, OrgUserFields modelFields) {
@@ -34,14 +50,54 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
     @Override
     public List<OrgModel> listOrgsByUserId(String userId) {
         Assert.notBlank(userId, "userId不能为空！");
+
         List<OrgModel> orgs = getModelMapper().listOrgsByUserId(userId);
 
         return orgs;
     }
 
+
+    public List<OrgDto> listHierarchicalOrgsByUserId(String userId) {
+        List<OrgModel> orgs = getModelMapper().listOrgsByUserId(userId);
+        List<OrgDto> orgDtos = new ArrayList<>();
+        orgs.forEach(o -> {
+            OrgDto orgDto = new OrgDto();
+            BeanUtils.copyProperties(o, orgDto);
+            log.warn("queryParentOrgOperation:{}", queryParentOrgOperation);
+            orgDto.execute(queryParentOrgOperation);
+            orgDtos.add(orgDto);
+        });
+
+        return orgDtos;
+    }
+
+
     @Override
-    public boolean addOrgUsers(String orgId, List<String> userIds) {
-        return false;
+    public boolean additionalBindOrgUsers(String orgId, List<String> userIds) {
+        Assert.notBlank(orgId, "orgId不能为空！");
+        var objResult = orgService.get(orgId).getSource();
+        if (objResult == null || objResult.getObj() == null) {
+            throw new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "org_not_existed");
+        }
+
+        // 不清楚组织-用户关系，而是增量添加
+
+        if (CollectionUtil.isEmpty(userIds)) {
+            // 完成，直接返回
+            return true;
+        }
+
+        // 添加组织-用户关系
+        userIds.forEach(uid -> {
+            // todo 校验用户是否存在
+            OrgUserModel orguser = new OrgUserModel();
+            orguser.setOrg(orgId);
+            orguser.setUser(uid);
+            orguser.setTenant(AuthConstant.DEFAULT_TENANT);
+        });
+
+        return true;
+
     }
 
 

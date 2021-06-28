@@ -54,4 +54,12 @@ public class OrgController extends BaseModelController<OrgModel, OrgService> {
     }
 
 
+    @ApiOperation(value = "根据orgId查询所在组织信息（按照层级排列）", notes = "")
+    @GetMapping("/hierarchical")
+    public ServiceResult listHierarchicalOrgs(@RequestParam String orgId) {
+        OrgDto orgDto = getModelService().getHierarchicalOrgsByOrgId(orgId);
+        return ServiceResult.builder().source(orgDto).build().asResult();
+    }
+
+
 }

@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.model.RolePermissionModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -19,4 +20,9 @@ public interface RolePermissionMapper extends BaseModelMapper<RolePermissionMode
     @Select("select * from mp_auth_target where id in " +
             "(select target from mp_auth_role_permission where owner = #{roleId})")
     List<TargetModel> listTargetsByRoleId(@Param("roleId") String roleId);
+
+
+    @Delete("delete form mp_auth_role_permission where owner = #{roleId}")
+    void deleteByRole(@Param("roleId") String roleId);
+
 }

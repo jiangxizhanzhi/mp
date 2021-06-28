@@ -16,5 +16,8 @@ public interface OrgService extends BaseModelService<OrgModel> {
 
     List<OrgDto> getTree();
 
+    // 列出组织的层级关系
+    OrgDto getHierarchicalOrgsByOrgId(String orgId);
+
 
 }
