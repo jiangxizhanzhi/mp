@@ -20,6 +20,10 @@ public class ListObjServiceResult<T> extends ServiceResult<ListObjResult<T>> {
 
     @Override
     public ListObjResult<T> sourceToData(ListObjResult<T> source) {
+        if (source == null) {
+            return null;
+        }
+
         source.asResult();
         return source;
     }

@@ -7,9 +7,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class ObjResult<T> extends BaseObjResult<T, ObjResult<T>>  {
-
-    private T data;
+public class ObjResult<T> extends BaseObjResult<T, T>  {
 
     @JsonIgnore
     private T obj;
@@ -24,11 +22,11 @@ public class ObjResult<T> extends BaseObjResult<T, ObjResult<T>>  {
     }
 
     @Override
-    public ObjResult<T> asResult() {
+    public T asResult() {
         if (obj == null) {
             return null;
         }
-        data = objToResultWithNull(obj, getFields());
-        return this;
+
+        return objToResultWithNull(obj, getFields());
     }
 }

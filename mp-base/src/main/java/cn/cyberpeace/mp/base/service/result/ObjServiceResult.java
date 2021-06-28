@@ -4,7 +4,7 @@ import cn.cyberpeace.mp.base.service.code.ServiceCode;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
-public class ObjServiceResult<T> extends ServiceResult<ObjResult<T>> {
+public class ObjServiceResult<T> extends BaseServiceResult<ObjResult<T>, T> {
 
     public ObjServiceResult(ObjResult<T> source) {
         super(source);
@@ -19,9 +19,12 @@ public class ObjServiceResult<T> extends ServiceResult<ObjResult<T>> {
     }
 
     @Override
-    public ObjResult<T> sourceToData(ObjResult<T> source) {
-        source.asResult();
-        return source;
+    public T sourceToData(ObjResult<T> source) {
+        if (source == null) {
+            return null;
+        }
+
+        return source.asResult();
     }
 
     @Override

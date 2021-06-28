@@ -56,6 +56,10 @@ public class BaseServiceResult<T, R> {
     }
 
     public R sourceToData(T source) {
+        if (source == null) {
+            return null;
+        }
+
         return (R) source;
     }
 
