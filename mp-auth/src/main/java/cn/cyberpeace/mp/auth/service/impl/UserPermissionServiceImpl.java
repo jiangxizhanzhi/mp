@@ -62,7 +62,7 @@ public class UserPermissionServiceImpl
         boolean isAdmin = hasAdminRole(roles);
         if(isAdmin) {
             // 直接查询该租户下所有权限返回
-            List<TargetModel> targets = targetService.listByTenantId("default");
+            List<TargetModel> targets = targetService.listByTenantId(AuthConstant.DEFAULT_TENANT_ID);
             return targets;
         }
 
@@ -96,6 +96,9 @@ public class UserPermissionServiceImpl
 
     public List<TargetDto> getTreeByUserId(String userId) {
         List<TargetModel> targets = listByUserId(userId);
+        if (CollectionUtil.isEmpty(targets)) {
+            return new ArrayList<>();
+        }
         List<TargetDto> tree = toTree(targets);
         return tree;
     }

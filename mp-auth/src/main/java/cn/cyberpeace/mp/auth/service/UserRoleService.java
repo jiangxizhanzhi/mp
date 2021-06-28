@@ -9,4 +9,6 @@ import java.util.List;
 public interface UserRoleService extends BaseModelService<UserRoleModel> {
 
     List<RoleModel> listByUserId(String userId);
+
+    boolean bindUserRoles(String userId, List<String> roleIds);
 }

@@ -1,20 +1,30 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.model.RoleModel;
+import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.UserRoleFields;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.lang.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, UserRoleMapper, UserRoleFields>
         implements UserRoleService {
+
+    @Autowired
+    private UserService userService;
 
     @Autowired
     public UserRoleServiceImpl(UserRoleMapper modelMapper, UserRoleFields modelFields) {
@@ -32,4 +42,39 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
 
         return roles;
     }
+
+
+    @Override
+    @Transactional
+    public boolean bindUserRoles(String userId, List<String> roleIds) {
+        Assert.notNull(userId, "userid不能为空");
+
+        var objResult = userService.get(userId).getSource();
+        if (objResult == null || objResult.getObj() == null) {
+            new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "account_not_existed");
+        }
+
+        // todo 清除用户权限
+
+        if (CollectionUtil.isEmpty(roleIds)) {
+            // 完成，直接返回
+            return true;
+        }
+
+        // 添加用户权限
+        roleIds.forEach(rid -> {
+            // todo 校验角色是否存在
+            UserRoleModel userRole = new UserRoleModel();
+            userRole.setUser(userId);
+            userRole.setRole(rid);
+            create(userRole);
+        });
+
+
+
+        return true;
+    }
+
+
+
 }
