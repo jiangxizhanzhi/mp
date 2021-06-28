@@ -38,4 +38,11 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
 
         return orgs;
     }
+
+    @Override
+    public boolean addOrgUsers(String orgId, List<String> userIds) {
+        return false;
+    }
+
+
 }

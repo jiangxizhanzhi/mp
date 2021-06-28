@@ -5,12 +5,15 @@ import cn.cyberpeace.mp.auth.dto.TargetDto;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.model.UserPermissionModel;
+import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.auth.repository.UserPermissionMapper;
 import cn.cyberpeace.mp.auth.service.RolePermissionService;
 import cn.cyberpeace.mp.auth.service.TargetService;
 import cn.cyberpeace.mp.auth.service.UserPermissionService;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.UserPermissionFields;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.lang.Assert;
@@ -18,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,6 +48,9 @@ public class UserPermissionServiceImpl
     private TargetService targetService;
 
     @Autowired
+    private UserService userService;
+
+    @Autowired
     public UserPermissionServiceImpl(UserPermissionMapper modelMapper, UserPermissionFields modelFields) {
         setModelMapper(modelMapper);
         setModelFields(modelFields);
@@ -62,7 +69,7 @@ public class UserPermissionServiceImpl
         boolean isAdmin = hasAdminRole(roles);
         if(isAdmin) {
             // 直接查询该租户下所有权限返回
-            List<TargetModel> targets = targetService.listByTenantId(AuthConstant.DEFAULT_TENANT_ID);
+            List<TargetModel> targets = targetService.listByTenantId(AuthConstant.DEFAULT_TENANT);
             return targets;
         }
 
@@ -103,7 +110,42 @@ public class UserPermissionServiceImpl
         return tree;
     }
 
+    @Override
+    @Transactional
+    public boolean bindUserTargets(String userId, List<String> targetIds) {
+        Assert.notNull(userId, "userId不能为空");
 
+        var objResult = userService.get(userId).getSource();
+        if (objResult == null || objResult.getObj() == null) {
+            throw new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "account_not_existed");
+        }
+
+        // 清除用户角色
+        boolean success = cleanUserTargets(userId);
+        if (!success) {
+            throw new MpRuntimeException("清除用户权限失败！");
+        }
+
+
+        if (CollectionUtil.isEmpty(targetIds)) {
+            // 完成，直接返回
+            return true;
+        }
+
+        // 添加用户角色
+        targetIds.forEach(tid -> {
+            // todo 校验权限是否存在
+            UserPermissionModel userPerm = new UserPermissionModel();
+            userPerm.setOwner(userId);
+            userPerm.setTarget(tid);
+            userPerm.setTenant(AuthConstant.DEFAULT_TENANT);
+        });
+
+        return true;
+
+
+
+    }
 
     public List<TargetDto> toTree(List<TargetModel> targets) {
         Assert.notEmpty(targets, "menus should not be empty!");
@@ -154,5 +196,13 @@ public class UserPermissionServiceImpl
     public boolean hasAdminRole(List<RoleModel> roles) {
         return roles.stream().anyMatch(r -> Objects.equals(r.getIdentifier(), AuthConstant.ADMIN));
     }
+
+
+    public boolean cleanUserTargets(String userId) {
+        Assert.notBlank(userId, "userId不能为空！");
+        getModelMapper().deleteByUser(userId);
+        return true;
+    }
+
 
 }

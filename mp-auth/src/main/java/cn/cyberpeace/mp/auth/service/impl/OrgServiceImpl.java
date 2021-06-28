@@ -2,9 +2,7 @@ package cn.cyberpeace.mp.auth.service.impl;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.dto.OrgDto;
-import cn.cyberpeace.mp.auth.dto.TargetDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
-import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.repository.OrgMapper;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.fields.OrgFields;
@@ -54,7 +52,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
 
     @Override
     public List<OrgDto> getTree() {
-        List<OrgModel> orgs = listAll(AuthConstant.DEFAULT_TENANT_ID);
+        List<OrgModel> orgs = listAll(AuthConstant.DEFAULT_TENANT);
         if (CollectionUtil.isEmpty(orgs)) {
             return new ArrayList<>();
         }

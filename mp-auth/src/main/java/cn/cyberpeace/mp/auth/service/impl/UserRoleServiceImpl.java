@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.auth.service.impl;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.model.RoleModel;
-import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, UserRoleMapper, UserRoleFields>
@@ -39,7 +37,6 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         List<RoleModel> roles = getModelMapper().listByUserId(userId);
 
         // todo 查询用户所在组织（上级组织）的角色
-
         return roles;
     }
 
@@ -47,6 +44,39 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     @Override
     @Transactional
     public boolean bindUserRoles(String userId, List<String> roleIds) {
+        Assert.notNull(userId, "userId不能为空");
+
+        var objResult = userService.get(userId).getSource();
+        if (objResult == null || objResult.getObj() == null) {
+            throw new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "account_not_existed");
+        }
+
+        // 清除用户角色
+        boolean success = cleanUserRoles(userId);
+        if (!success) {
+            throw new MpRuntimeException("清除用户角色失败！");
+        }
+
+        if (CollectionUtil.isEmpty(roleIds)) {
+            // 完成，直接返回
+            return true;
+        }
+
+        // 添加用户角色
+        roleIds.forEach(rid -> {
+            // todo 校验角色是否存在
+            UserRoleModel userRole = new UserRoleModel();
+            userRole.setUser(userId);
+            userRole.setRole(rid);
+            userRole.setTenant(AuthConstant.DEFAULT_TENANT);
+            create(userRole);
+        });
+
+        return true;
+    }
+
+    @Override
+    public boolean cleanUserRoles(String userId) {
         Assert.notNull(userId, "userid不能为空");
 
         var objResult = userService.get(userId).getSource();
@@ -54,27 +84,10 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
             new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "account_not_existed");
         }
 
-        // todo 清除用户权限
-
-        if (CollectionUtil.isEmpty(roleIds)) {
-            // 完成，直接返回
-            return true;
-        }
-
-        // 添加用户权限
-        roleIds.forEach(rid -> {
-            // todo 校验角色是否存在
-            UserRoleModel userRole = new UserRoleModel();
-            userRole.setUser(userId);
-            userRole.setRole(rid);
-            create(userRole);
-        });
-
-
+        getModelMapper().deleteByUser(userId);
 
         return true;
     }
-
 
 
 }

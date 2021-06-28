@@ -11,4 +11,7 @@ public interface UserRoleService extends BaseModelService<UserRoleModel> {
     List<RoleModel> listByUserId(String userId);
 
     boolean bindUserRoles(String userId, List<String> roleIds);
+
+    // 清除用户所有角色
+    boolean cleanUserRoles(String userId);
 }

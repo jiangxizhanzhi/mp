@@ -26,7 +26,7 @@ public class ServletUtils {
 
     public static ServiceResult commonResult(boolean success, Object source) {
         if (success) {
-            if (source == null) {
+            if (source != null) {
                 return ServiceResult.builder().source(source).build().asResult();
             }
             return ServiceResult.builder().build().asResult();

@@ -13,4 +13,7 @@ public interface OrgUserService extends BaseModelService<OrgUserModel> {
 
     List<OrgModel> listOrgsByUserId(String userId);
 
+    // 增量添加组织-用户关系
+    boolean addOrgUsers(String orgId, List<String> userIds);
+
 }

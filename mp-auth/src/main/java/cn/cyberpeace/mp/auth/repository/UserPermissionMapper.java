@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.model.UserPermissionModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -19,5 +20,9 @@ public interface UserPermissionMapper extends BaseModelMapper<UserPermissionMode
     @Select("select * from mp_auth_target where id in " +
             "(select target from mp_auth_user_permission where owner = #{userId})")
     List<TargetModel> listByUserId(@Param("userId") String userId);
+
+
+    @Delete("delete from mp_auth_user_permission where user = #{userId}")
+    void deleteByUser(@Param("userId") String userId);
 
 }
