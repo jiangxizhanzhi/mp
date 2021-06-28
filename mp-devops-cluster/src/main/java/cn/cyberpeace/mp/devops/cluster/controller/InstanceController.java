@@ -7,7 +7,6 @@ import cn.cyberpeace.mp.devops.cluster.model.InstanceOpenStackModel;
 import cn.cyberpeace.mp.devops.cluster.request.InstancePageRequest;
 import cn.cyberpeace.mp.devops.cluster.response.InstancePageResponse;
 import cn.cyberpeace.mp.devops.cluster.service.InstanceService;
-import cn.cyberpeace.mp.devops.cluster.service.fields.InstanceFields;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -60,7 +59,7 @@ public class InstanceController {
                     .status(instanceModel.getStatus()).createTime(instanceModel.getCreated_at()).build()
         ).collect(Collectors.toList());
 
-        return new ListObjServiceResult(new ListObjResult(list, model.getTotal(), InstanceFields.allFields).asResult()).asResult();
+        return new ListObjServiceResult(new ListObjResult(list, model.getTotal()).asResult()).asResult();
     }
 
 }
