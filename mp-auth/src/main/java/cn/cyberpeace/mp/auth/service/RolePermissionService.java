@@ -10,4 +10,10 @@ public interface RolePermissionService extends BaseModelService<RolePermissionMo
 
     List<TargetModel> listTargetsByRoleId(String roleId);
 
+
+    boolean bindRoleTargets(String roleId, List<String> targetIds);
+
+    // 清除角色绑定的所有权限
+    boolean cleanRoleTargets(String roleId);
+
 }

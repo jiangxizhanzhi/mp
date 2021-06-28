@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.repository.OrgMapper;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.fields.OrgFields;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.lang.Assert;
@@ -24,6 +25,9 @@ import java.util.Map;
 @Slf4j
 public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, OrgFields>
         implements OrgService {
+
+    @Autowired
+    private QueryParentOrgOperation queryParentOrgOperation;
 
     @Autowired
     public OrgServiceImpl(OrgMapper modelMapper, OrgFields modelFields) {
@@ -61,6 +65,23 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     }
 
 
+    @Override
+    public OrgDto getHierarchicalOrgsByOrgId(String orgId) {
+        Assert.notBlank(orgId, "orgId不能为空！");
+
+        OrgModel orgModel = getModelMapper().get(orgId);
+        if (orgModel == null) {
+            log.info("org:{}不存在!", orgId);
+            throw new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "org_not_existed");
+        }
+
+        OrgDto orgDto = new OrgDto();
+        BeanUtils.copyProperties(orgModel, orgDto);
+        log.warn("queryParentOrgOperation:{}", queryParentOrgOperation);
+        orgDto.execute(queryParentOrgOperation);
+
+        return orgDto;
+    }
 
 
     public List<OrgDto> toTree(List<OrgModel> orgs) {

@@ -142,10 +142,8 @@ public class UserPermissionServiceImpl
         });
 
         return true;
-
-
-
     }
+
 
     public List<TargetDto> toTree(List<TargetModel> targets) {
         Assert.notEmpty(targets, "menus should not be empty!");
@@ -199,7 +197,12 @@ public class UserPermissionServiceImpl
 
 
     public boolean cleanUserTargets(String userId) {
-        Assert.notBlank(userId, "userId不能为空！");
+        Assert.notNull(userId, "userid不能为空");
+
+        var objResult = userService.get(userId).getSource();
+        if (objResult == null || objResult.getObj() == null) {
+            new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "account_not_existed");
+        }
         getModelMapper().deleteByUser(userId);
         return true;
     }
