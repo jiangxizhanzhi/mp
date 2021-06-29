@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.datasandtable.dao.WazuhDao;
 import cn.cyberpeace.mp.datasandtable.model.FileEventModel;
 import cn.cyberpeace.mp.datasandtable.model.WazuhEventRequest;
 import cn.cyberpeace.mp.datasandtable.model.WazuhFileRoot;
+import cn.cyberpeace.mp.datasandtable.model.WazuhMonitorModel;
 import cn.cyberpeace.mp.datasandtable.model.WazuhMonitorRoot;
 import cn.cyberpeace.mp.datasandtable.model.emum.FileEventType;
 import com.alibaba.fastjson.JSONObject;
@@ -18,7 +19,10 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -89,7 +93,7 @@ public class WazuhService {
      * 查询监控数据
      * @param wazuhEventRequest
      */
-    public void queryMonitorEvents(WazuhEventRequest wazuhEventRequest){
+    public ListObjResult<WazuhMonitorModel> queryMonitorEvents(WazuhEventRequest wazuhEventRequest){
         //根据日期构造索引
         String[] indexArray = buildRequestIndex(wazuhEventRequest);
         var searchRequest = new SearchRequest(indexArray);
@@ -104,10 +108,38 @@ public class WazuhService {
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             List<WazuhMonitorRoot> wazuhFileRootList = Arrays.stream(response.getHits().getHits()).map(hit -> JSONObject.parseObject(hit.getSourceAsString(), WazuhMonitorRoot.class)).collect(Collectors.toList());
+
+            Map<String, Optional<WazuhMonitorRoot>> wazuhMonitorMap =
+                wazuhFileRootList.stream()
+                    .filter(wazuhMonitorRoot-> wazuhMonitorRoot.getFullLog().contains("MonitorMessage:"))
+                    .sorted(Comparator.comparing(WazuhMonitorRoot::getTimestamp))
+                    .collect(Collectors.groupingBy(root-> root.getAgent().getId(),
+                        Collectors.maxBy(Comparator.comparing(WazuhMonitorRoot::getTimestamp))));
+
+            wazuhFileRootList = wazuhMonitorMap.values().stream().filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
+            var wazuhModelList = wazuhFileRootList.stream()
+                .filter(model-> model.getFullLog().contains("MonitorMessage:")).map(model -> {
+                    var monitorMessage = model.getFullLog().substring("MonitorMessage:".length());
+                    return JSONObject.parseObject(monitorMessage, WazuhMonitorModel.class);
+                }).collect(Collectors.toList());
+
+            ListObjResult<WazuhMonitorModel> wazuhModelList1 = processWazuhMonitorModelPage(wazuhEventRequest, wazuhModelList);
+            if (wazuhModelList1 != null)
+                return wazuhModelList1;
+
+            return new ListObjResult<>(wazuhModelList, wazuhModelList.size());
         } catch (IOException e) {
             log.error("es 查询监控事件分页失败 {}", e);
             throw new MpRuntimeException(BaseErrorCode.ERROR, e.toString());
         }
+    }
+
+    private ListObjResult<WazuhMonitorModel> processWazuhMonitorModelPage(WazuhEventRequest wazuhEventRequest, List<WazuhMonitorModel> wazuhMonitorModelList) {
+        int offset = wazuhEventRequest.getPageNum() * wazuhEventRequest.getPageSize();
+        if (offset < wazuhMonitorModelList.size()) {
+            return new ListObjResult<>(wazuhMonitorModelList.subList(offset, offset + wazuhEventRequest.getPageSize()), wazuhMonitorModelList.size());
+        }
+        return null;
     }
 
     /**
