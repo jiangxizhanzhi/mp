@@ -29,4 +29,14 @@ public class RealEquipmentServiceImpl extends BaseServiceImpl implements RealEqu
         return Objects.isNull(page) || Objects.isNull(page.getLinks()) || Objects.isNull(page.getLinks().getPagination())
                || Objects.isNull(page.getLinks().getPagination().getTotal()) ? 0 : page.getLinks().getPagination().getTotal();
     }
+
+    @Override
+    public String[] getDefaultPageIgnoreField() {
+        return new String[0];
+    }
+
+    @Override
+    public String[] getTotalPageIgnoreField() {
+        return new String[0];
+    }
 }

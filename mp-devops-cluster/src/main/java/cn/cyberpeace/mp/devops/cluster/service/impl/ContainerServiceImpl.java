@@ -1,15 +1,17 @@
 package cn.cyberpeace.mp.devops.cluster.service.impl;
 
 import cn.cyberpeace.mp.base.util.BeanUtils;
-import cn.cyberpeace.mp.base.util.ClassUtils;
 import cn.cyberpeace.mp.devops.cluster.config.OpenStackConfig;
 import cn.cyberpeace.mp.devops.cluster.model.ContainerOpenStackModel;
 import cn.cyberpeace.mp.devops.cluster.request.ContainerPageRequest;
+import cn.cyberpeace.mp.devops.cluster.request.HypervisorPageRequest;
 import cn.cyberpeace.mp.devops.cluster.service.ContainerService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -25,13 +27,25 @@ public class ContainerServiceImpl extends BaseOpenStackServiceImpl implements Co
     }
 
     @Override
-    public ContainerOpenStackModel page(ContainerPageRequest request) {
-        return super.sendGet(URL_VERSION + "/containers" + BeanUtils.wrapperGetParamsByObject(request),ContainerOpenStackModel.class);
+    public String[] getDefaultPageIgnoreField() {
+        return BeanUtils.getBeanGetterFieldName(HypervisorPageRequest::getPage,HypervisorPageRequest::getPerPage);
+    }
+
+    @Override
+    public String[] getTotalPageIgnoreField() {
+        return BeanUtils.getBeanGetterFieldName(HypervisorPageRequest::getLimit,HypervisorPageRequest::getOffset,
+                HypervisorPageRequest::getPage,HypervisorPageRequest::getPerPage);
+    }
+
+    @Override
+    public ContainerOpenStackModel page(ContainerPageRequest request,String... ignoreFields) {
+        ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
+        return super.sendGet(URL_VERSION + "/containers" + BeanUtils.wrapperGetParamsByObject(request,ignoreFields),ContainerOpenStackModel.class);
     }
 
     @Override
     public Integer getTotalContainers(ContainerPageRequest request) {
-        ContainerOpenStackModel page = this.page(request);
+        ContainerOpenStackModel page = this.page(request,this.getTotalPageIgnoreField());
         return Objects.isNull(page) || Objects.isNull(page.getTotal()) ? 0 : page.getTotal();
     }
 }

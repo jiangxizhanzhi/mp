@@ -14,5 +14,5 @@ public interface NetworkService extends BaseOpenStackService {
      * @param request
      * @return
      */
-    NetworkOpenStackModel page(NetworkPageRequest request);
+    NetworkOpenStackModel page(NetworkPageRequest request,String... ignoreFields);
 }

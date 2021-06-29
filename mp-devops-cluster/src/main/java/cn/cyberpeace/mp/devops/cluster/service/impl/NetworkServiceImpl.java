@@ -3,10 +3,14 @@ package cn.cyberpeace.mp.devops.cluster.service.impl;
 import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.devops.cluster.config.OpenStackConfig;
 import cn.cyberpeace.mp.devops.cluster.model.NetworkOpenStackModel;
+import cn.cyberpeace.mp.devops.cluster.request.InstancePageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.NetworkPageRequest;
 import cn.cyberpeace.mp.devops.cluster.service.NetworkService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
+
+import java.util.Arrays;
 
 /**
  * 运维管控-系统运维-网络实例管理-网络
@@ -20,7 +24,19 @@ public class NetworkServiceImpl extends BaseOpenStackServiceImpl implements Netw
     }
 
     @Override
-    public NetworkOpenStackModel page(NetworkPageRequest request) {
-        return super.sendGet(URL_VERSION + "/networks" + BeanUtils.wrapperGetParamsByObject(request),NetworkOpenStackModel.class);
+    public NetworkOpenStackModel page(NetworkPageRequest request,String... ignoreFields) {
+        ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
+        return super.sendGet(URL_VERSION + "/networks" + BeanUtils.wrapperGetParamsByObject(request,ignoreFields),NetworkOpenStackModel.class);
+    }
+
+    @Override
+    public String[] getDefaultPageIgnoreField() {
+        return BeanUtils.getBeanGetterFieldName(InstancePageRequest::getPage,InstancePageRequest::getPerPage);
+    }
+
+    @Override
+    public String[] getTotalPageIgnoreField() {
+        return BeanUtils.getBeanGetterFieldName(InstancePageRequest::getLimit,InstancePageRequest::getOffset,
+                InstancePageRequest::getPage,InstancePageRequest::getPerPage);
     }
 }

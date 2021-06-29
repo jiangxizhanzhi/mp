@@ -1,10 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.service;
 
-import cn.cyberpeace.mp.base.util.BeanUtils;
-import cn.cyberpeace.mp.devops.cluster.model.HypervisorComputeStatusOpenStackModel;
-import cn.cyberpeace.mp.devops.cluster.model.HypervisorOpenStackModel;
-import cn.cyberpeace.mp.devops.cluster.model.HypervisorStatisticsOpenStackModel;
-import cn.cyberpeace.mp.devops.cluster.model.HypervisorWeightAndMaxInstanceOpenStackModel;
+import cn.cyberpeace.mp.devops.cluster.model.*;
 import cn.cyberpeace.mp.devops.cluster.request.HypervisorComputeStatusRequest;
 import cn.cyberpeace.mp.devops.cluster.request.HypervisorPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.HypervisorRequest;
@@ -17,11 +13,6 @@ import java.util.List;
  * 云平台监控
  */
 public interface HypervisorService extends BaseOpenStackService{
-
-    String[] DEFAULT_PAGE_IGNORE_FIELD = BeanUtils.getBeanGetterFieldName(HypervisorPageRequest::getPage,HypervisorPageRequest::getPerPage);
-
-    String[] TOTAL_PAGE_IGNORE_FIELD = BeanUtils.getBeanGetterFieldName(HypervisorPageRequest::getLimit,HypervisorPageRequest::getOffset,
-            HypervisorPageRequest::getPage,HypervisorPageRequest::getPerPage);
 
     /**
      * 资源统计
@@ -63,4 +54,10 @@ public interface HypervisorService extends BaseOpenStackService{
      * @return
      */
     List<HypervisorComputeStatusOpenStackModel> computeStatus();
+
+    /**
+     * 查询虚拟结合交换机状态列表
+     * @return
+     */
+    VirtualRealSwitchOpenStackModel listVirtualRealSwitch();
 }

@@ -5,14 +5,12 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
-import cn.cyberpeace.mp.devops.cluster.model.HypervisorComputeStatusOpenStackModel;
-import cn.cyberpeace.mp.devops.cluster.model.HypervisorOpenStackModel;
-import cn.cyberpeace.mp.devops.cluster.model.HypervisorStatisticsOpenStackModel;
-import cn.cyberpeace.mp.devops.cluster.model.HypervisorWeightAndMaxInstanceOpenStackModel;
+import cn.cyberpeace.mp.devops.cluster.model.*;
 import cn.cyberpeace.mp.devops.cluster.request.*;
 import cn.cyberpeace.mp.devops.cluster.response.HypervisorPageResponse;
 import cn.cyberpeace.mp.devops.cluster.response.HypervisorServiceStateResponse;
 import cn.cyberpeace.mp.devops.cluster.response.HypervisorStatisticsResponse;
+import cn.cyberpeace.mp.devops.cluster.response.VirtualRealSwitchStatusResponse;
 import cn.cyberpeace.mp.devops.cluster.service.*;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -165,8 +163,16 @@ public class CloudPlatformMonitorController {
      */
     @ApiOperation("虚实结合交换机状态")
     @GetMapping("/virtual-real-switch-state")
-    public ServiceResult virtualRealSwitchStatus(){
-        return new ServiceResult().asResult();
+    public ServiceResult<VirtualRealSwitchStatusResponse> virtualRealSwitchStatus(){
+        VirtualRealSwitchOpenStackModel model = hypervisorService.listVirtualRealSwitch();
+        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getSwitchs())){
+            return new ServiceResult();
+        }
+        List<VirtualRealSwitchStatusResponse> list = model.getSwitchs().stream().map(v ->
+                VirtualRealSwitchStatusResponse.builder().name(v.getName()).managementIp(v.getManagement_ip()).state(v.getStatus())
+                        .usedPorts(Integer.valueOf(v.getInterfaces_used())).ports(Integer.valueOf(v.getInterfaces_summary())).build()
+        ).collect(Collectors.toList());
+        return new ServiceResult(list).asResult();
     }
 
 

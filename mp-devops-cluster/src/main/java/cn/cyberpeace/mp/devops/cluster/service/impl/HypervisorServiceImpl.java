@@ -38,7 +38,7 @@ public class HypervisorServiceImpl extends BaseOpenStackServiceImpl implements H
 
     @Override
     public HypervisorOpenStackModel pageHypervisors(HypervisorPageRequest request,String... ignoreFields) {
-        ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? DEFAULT_PAGE_IGNORE_FIELD : ignoreFields;
+        ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         return super.sendGet(URL_VERSION + "/hypervisors" + BeanUtils.wrapperGetParamsByObject(request,ignoreFields),HypervisorOpenStackModel.class);
     }
 
@@ -100,7 +100,7 @@ public class HypervisorServiceImpl extends BaseOpenStackServiceImpl implements H
      */
     @Override
     public List<HypervisorComputeStatusOpenStackModel> computeStatus(){
-        HypervisorOpenStackModel model = this.pageHypervisors(new HypervisorPageRequest(),TOTAL_PAGE_IGNORE_FIELD);
+        HypervisorOpenStackModel model = this.pageHypervisors(new HypervisorPageRequest(),this.getTotalPageIgnoreField());
         List<HypervisorOpenStackModel.Hypervisor> hypervisorList = model.getHypervisors();
         if (CollectionUtils.isEmpty(hypervisorList)){
             return new ArrayList<>();
@@ -109,6 +109,22 @@ public class HypervisorServiceImpl extends BaseOpenStackServiceImpl implements H
         return hypervisorList.stream().map(hypervisor ->
             this.computeStatus(new HypervisorComputeStatusRequest(hypervisor.getHostname()))
         ).filter(Objects::nonNull).collect(Collectors.toList());
+    }
+
+    @Override
+    public String[] getDefaultPageIgnoreField() {
+        return BeanUtils.getBeanGetterFieldName(HypervisorPageRequest::getPage,HypervisorPageRequest::getPerPage);
+    }
+
+    @Override
+    public String[] getTotalPageIgnoreField() {
+        return BeanUtils.getBeanGetterFieldName(HypervisorPageRequest::getLimit,HypervisorPageRequest::getOffset,
+                HypervisorPageRequest::getPage,HypervisorPageRequest::getPerPage);
+    }
+
+    @Override
+    public VirtualRealSwitchOpenStackModel listVirtualRealSwitch() {
+        return super.sendGet(CPCLOUD_SWITCH_URL + URL_VERSION + "/switchs" ,VirtualRealSwitchOpenStackModel.class);
     }
 
 }

@@ -14,7 +14,7 @@ public interface RouterService extends BaseOpenStackService{
      * @param request
      * @return
      */
-    RouterOpenStackModel page(RouterPageRequest request);
+    RouterOpenStackModel page(RouterPageRequest request,String... ignoreFields);
 
     /**
      * 获取路由总数

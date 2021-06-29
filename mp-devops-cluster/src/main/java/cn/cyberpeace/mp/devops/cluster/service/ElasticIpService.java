@@ -8,5 +8,11 @@ import cn.cyberpeace.mp.devops.cluster.request.ElasticIpPageRequest;
  */
 public interface ElasticIpService extends BaseOpenStackService  {
 
-    ElasticIpOpenStackModel page(ElasticIpPageRequest request);
+    /**
+     * 分页查询
+     * @param request
+     * @param ignoreFields 忽略的字段
+     * @return
+     */
+    ElasticIpOpenStackModel page(ElasticIpPageRequest request,String... ignoreFields);
 }

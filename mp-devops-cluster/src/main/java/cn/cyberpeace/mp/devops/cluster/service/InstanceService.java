@@ -13,7 +13,7 @@ public interface InstanceService extends BaseOpenStackService {
      * 分页查询
      * @return
      */
-    InstanceOpenStackModel page(InstancePageRequest request);
+    InstanceOpenStackModel page(InstancePageRequest request,String... ignoreFields);
 
     /**
      * 获取虚拟机总数

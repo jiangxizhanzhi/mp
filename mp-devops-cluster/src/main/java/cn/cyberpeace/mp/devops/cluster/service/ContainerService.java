@@ -14,7 +14,7 @@ public interface ContainerService extends BaseOpenStackService {
      * @param request
      * @return
      */
-    ContainerOpenStackModel page(ContainerPageRequest request);
+    ContainerOpenStackModel page(ContainerPageRequest request,String... ignoreFields);
 
     /**
      * 获取容器总数
