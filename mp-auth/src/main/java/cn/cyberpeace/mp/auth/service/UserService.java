@@ -1,9 +1,12 @@
 package cn.cyberpeace.mp.auth.service;
 
+import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.BaseModelService;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 public interface UserService extends BaseModelService<UserModel> {
 
@@ -38,7 +41,7 @@ public interface UserService extends BaseModelService<UserModel> {
 
     void downloadExcelTemplate();
 
-    void importExcel();
+    void importExcel(List<ImportUser> list);
 
     void exportExcel();
 

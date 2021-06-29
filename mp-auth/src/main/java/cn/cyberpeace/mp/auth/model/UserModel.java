@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.model;
 
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.model.generator.DateGenerator;
@@ -29,7 +30,7 @@ public class UserModel extends BaseModel implements Serializable {
 
     public static final int INT_CHECK_YES = 1;
 
-    @DefaultStr
+    @DefaultStr(AuthConstant.DEFAULT_TENANT)
     private String tenant;
     private String identifier;
     private String username;
