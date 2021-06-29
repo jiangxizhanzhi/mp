@@ -5,6 +5,7 @@ import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.event.AnalysisEventListener;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,20 +26,15 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
     /**
      * 假设这个是一个DAO，当然有业务逻辑这个也可以是一个service。当然如果不用存储这个对象没用。
      */
-    private UploadDAO uploadDAO;
-
-    public UploadDataListener() {
-        // 这里是demo，所以随便new一个。实际使用如果到了spring,请使用下面的有参构造函数
-        uploadDAO = new UploadDAO();
-    }
+    private UserService userService;
 
     /**
      * 如果使用了spring,请使用这个构造方法。每次创建Listener的时候需要把spring管理的类传进来
      *
      * @param uploadDAO
      */
-    public UploadDataListener(UploadDAO uploadDAO) {
-        this.uploadDAO = uploadDAO;
+    public UploadDataListener(UserService userService) {
+        this.userService = userService;
     }
 
     /**
@@ -77,7 +73,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
      */
     private void saveData() {
         log.info("{}条数据，开始存储数据库！", list.size());
-        uploadDAO.save(list);
+        userService.importExcel(list);
         log.info("存储数据库成功！");
     }
 

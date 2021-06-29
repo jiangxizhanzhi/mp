@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
 import cn.cyberpeace.mp.auth.service.UploadDAO;
 import cn.cyberpeace.mp.auth.service.UploadDataListener;
+import cn.cyberpeace.mp.auth.service.UserService;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.fastjson.JSON;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,7 @@ import java.util.Map;
 public class ExcelTestController {
 
     @Autowired
-    private UploadDAO uploadDAO;
+    private UserService userService;
 
     /**
      * 文件下载（失败了会返回一个有部分数据的Excel）
@@ -88,7 +89,7 @@ public class ExcelTestController {
     @PostMapping("upload")
     @ResponseBody
     public String upload(MultipartFile file) throws IOException {
-        EasyExcel.read(file.getInputStream(), ImportUser.class, new UploadDataListener(uploadDAO)).headRowNumber(2).sheet().doRead();
+        EasyExcel.read(file.getInputStream(), ImportUser.class, new UploadDataListener(userService)).headRowNumber(2).sheet().doRead();
         return "success";
     }
 
@@ -99,7 +100,7 @@ public class ExcelTestController {
             user.setUsername("demo-" + i);
             user.setName("张三" + i);
             user.setOrg("南京赛宁/研发部/研发一部/研发组" + i);
-            user.setStat("审核通过");
+            user.setStat(i + "");
             user.setRoles("角色1/角色2/角色3");
             list.add(user);
         }

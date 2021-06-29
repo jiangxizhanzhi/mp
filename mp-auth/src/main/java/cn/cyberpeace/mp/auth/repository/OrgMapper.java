@@ -23,9 +23,10 @@ public interface OrgMapper extends BaseModelMapper<OrgModel> {
     @Select("SELECT * FROM mp_auth_org where parent = #{parentId}")
     List<OrgModel> listByParentId(@Param("parentId") String parentId);
 
-
-
     @Select("SELECT * FROM mp_auth_org where tenant = #{tenantId}")
     List<OrgModel> listAll(@Param("tenantId") String tenantId);
+
+    @Select("SELECT * FROM mp_auth_org where path = #{path}")
+    OrgModel getByPath(@Param("path") String path);
 
 }

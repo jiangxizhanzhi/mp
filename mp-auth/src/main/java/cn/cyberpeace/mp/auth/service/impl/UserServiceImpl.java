@@ -3,7 +3,9 @@ package cn.cyberpeace.mp.auth.service.impl;
 import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
+import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
@@ -20,7 +22,6 @@ import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
-import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
@@ -34,11 +35,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.net.PasswordAuthentication;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -252,19 +252,33 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             // 1.保存用户信息
             UserModel userModel = importUser2User(importUser);
             try {
-                // todo 考虑将错误信息包装返回到页面
+
+                String userId = UUID.randomUUID().toString().replaceAll("-", "");
+                log.warn("userId:{}", userId);
+                userModel.setId(userId);
                 create(userModel);
+
             } catch (Exception e) {
+                // todo 考虑将错误信息包装返回到页面
                 log.error(ExceptionUtil.stacktraceToString(e));
             }
 
             // 2. 保存用户-角色关系
             String roles = importUser.getRoles().trim();
-            String[] roleNameArr = roles.split(",");
-            for (String roleName : roleNameArr) {
+            String[] idents = roles.split(",");
+            for (String ident : idents) {
+                RoleModel roleModel = roleService.getByIdent(ident.trim());
+                if (roleModel != null) {
+                    UserRoleModel userRoleModel = new UserRoleModel();
+                    userRoleModel.setUser(userModel.getId());
+                    userRoleModel.setRole(roleModel.getId());
+                    userRoleService.create(userRoleModel);
+                }
             }
 
             // 3. 保存组织-用户关系
+
+
         }
     }
 

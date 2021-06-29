@@ -23,7 +23,7 @@ public class ExportUser {
     @ColumnWidth(50)
     private String org;
 
-    @ExcelProperty("状态")
+    @ExcelProperty(value = "状态", converter = Stat2StringConverter.class)
     @ColumnWidth(12)
     private String stat;
 
