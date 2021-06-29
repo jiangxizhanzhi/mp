@@ -21,5 +21,7 @@ public class AuthConstant {
 
     public static final String ADMIN = "ADMIN";
 
+    public static final String ORG_PATH_SEPARATOR = "/";
+
     private AuthConstant() {}
 }

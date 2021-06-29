@@ -18,4 +18,14 @@ public interface RoleMapper extends BaseModelMapper<RoleModel> {
     @Select("select * from mp_auth_role where tenant = #{tenantId}")
     List<RoleModel> listByTenantId(@Param("tenantId") String tenantId);
 
+
+    @Select("select * from mp_auth_role where org = #{orgId}")
+    List<RoleModel> listByOrgId(@Param("orgId") String orgId);
+
+
+    @Select("select * from mp_auth_role where identifier = #{ident}")
+    RoleModel selectByIdent(@Param("ident") String ident);
+
+
+
 }

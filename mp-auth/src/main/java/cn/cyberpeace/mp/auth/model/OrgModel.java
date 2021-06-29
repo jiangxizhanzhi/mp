@@ -17,7 +17,7 @@ public class OrgModel extends BaseModel {
     private String parent;
     private String identifier;
     private String name;
-
+    private String path;
 
     @Override
     public boolean equals(Object o) {
@@ -25,11 +25,11 @@ public class OrgModel extends BaseModel {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         OrgModel orgModel = (OrgModel) o;
-        return Objects.equals(tenant, orgModel.tenant) && Objects.equals(parent, orgModel.parent) && Objects.equals(identifier, orgModel.identifier) && Objects.equals(name, orgModel.name);
+        return Objects.equals(tenant, orgModel.tenant) && Objects.equals(parent, orgModel.parent) && Objects.equals(identifier, orgModel.identifier) && Objects.equals(name, orgModel.name) && Objects.equals(path, orgModel.path);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), tenant, parent, identifier, name);
+        return Objects.hash(super.hashCode(), tenant, parent, identifier, name, path);
     }
 }
