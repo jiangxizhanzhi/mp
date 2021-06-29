@@ -15,6 +15,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -36,8 +37,9 @@ public class HypervisorServiceImpl extends BaseOpenStackServiceImpl implements H
     }
 
     @Override
-    public HypervisorOpenStackModel pageHypervisors(HypervisorPageRequest request) {
-        return super.sendGet(URL_VERSION + "/hypervisors" + BeanUtils.wrapperGetParamsByObject(request),HypervisorOpenStackModel.class);
+    public HypervisorOpenStackModel pageHypervisors(HypervisorPageRequest request,String... ignoreFields) {
+        ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? DEFAULT_PAGE_IGNORE_FIELD : ignoreFields;
+        return super.sendGet(URL_VERSION + "/hypervisors" + BeanUtils.wrapperGetParamsByObject(request,ignoreFields),HypervisorOpenStackModel.class);
     }
 
     @Override
@@ -98,7 +100,7 @@ public class HypervisorServiceImpl extends BaseOpenStackServiceImpl implements H
      */
     @Override
     public List<HypervisorComputeStatusOpenStackModel> computeStatus(){
-        HypervisorOpenStackModel model = this.pageHypervisors(new HypervisorPageRequest());
+        HypervisorOpenStackModel model = this.pageHypervisors(new HypervisorPageRequest(),TOTAL_PAGE_IGNORE_FIELD);
         List<HypervisorOpenStackModel.Hypervisor> hypervisorList = model.getHypervisors();
         if (CollectionUtils.isEmpty(hypervisorList)){
             return new ArrayList<>();

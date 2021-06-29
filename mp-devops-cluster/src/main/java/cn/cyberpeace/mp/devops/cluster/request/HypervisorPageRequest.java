@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 /**
  * 节点管理分页请求参数
  */
@@ -12,6 +14,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @ApiModel(value = "节点管理分页请求参数")
-public class HypervisorPageRequest extends BasePageRequest {
+public class HypervisorPageRequest extends BasePageRequest implements Serializable {
 
 }

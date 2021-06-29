@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.service;
 
+import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.devops.cluster.model.HypervisorComputeStatusOpenStackModel;
 import cn.cyberpeace.mp.devops.cluster.model.HypervisorOpenStackModel;
 import cn.cyberpeace.mp.devops.cluster.model.HypervisorStatisticsOpenStackModel;
@@ -17,6 +18,11 @@ import java.util.List;
  */
 public interface HypervisorService extends BaseOpenStackService{
 
+    String[] DEFAULT_PAGE_IGNORE_FIELD = BeanUtils.getBeanGetterFieldName(HypervisorPageRequest::getPage,HypervisorPageRequest::getPerPage);
+
+    String[] TOTAL_PAGE_IGNORE_FIELD = BeanUtils.getBeanGetterFieldName(HypervisorPageRequest::getLimit,HypervisorPageRequest::getOffset,
+            HypervisorPageRequest::getPage,HypervisorPageRequest::getPerPage);
+
     /**
      * 资源统计
      * @return
@@ -27,7 +33,7 @@ public interface HypervisorService extends BaseOpenStackService{
      * 查询节点管理信息
      * @return
      */
-    HypervisorOpenStackModel pageHypervisors(HypervisorPageRequest request);
+    HypervisorOpenStackModel pageHypervisors(HypervisorPageRequest request,String... ignoreFields);
 
     /**
      * 获取虚拟机数量限制

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -37,6 +38,10 @@ public class BeanUtils implements ApplicationContextAware {
 
     public static <T> Map<String, T> getBeanType(Class<T> clazz) {
         return context.getBeansOfType(clazz);
+    }
+
+    public static <T> String[] getBeanGetterFieldName(SerializableFunction<T>... fieldGetters){
+       return Arrays.stream(fieldGetters).map(BeanUtils::getBeanGetterFieldName).toArray(String[]::new);
     }
 
     public static <T> String getBeanGetterFieldName(SerializableFunction<T> func) {
@@ -123,11 +128,9 @@ public class BeanUtils implements ApplicationContextAware {
         fieldList.stream().forEach(field -> {
             field.setAccessible(true);
             String fieldName = field.getName();
-            if (!fieldName.equals("pageNo") && !fieldName.equals("pageSize")) {
-                Object fieldVal = objWrapper.getPropertyValue(fieldName);
-                if (Objects.nonNull(fieldVal)) {
-                    joinerStr.append(Joiner.on("&").join(Joiner.on("=").join(fieldName, fieldVal), ""));
-                }
+            Object fieldVal = objWrapper.getPropertyValue(fieldName);
+            if (Objects.nonNull(fieldVal)) {
+                joinerStr.append(Joiner.on("&").join(Joiner.on("=").join(fieldName, fieldVal), ""));
             }
         });
         result = StringUtils.substringBeforeLast(joinerStr.toString(),"&");
@@ -157,6 +160,17 @@ public class BeanUtils implements ApplicationContextAware {
      */
     public static String wrapperGetParamsByObject(Object object){
         List<Field> fieldList = getFieldsByObject(object);
+        return wrapperGetParamsByFieldsAndObject(fieldList,object);
+    }
+
+    /**
+     * 将对象的所有字段转化为Get请求方式的参数格式
+     * @param object
+     * @return
+     */
+    public static String wrapperGetParamsByObject(Object object,String... ignoreFields){
+        List<Field> fieldList = getFieldsByObject(object);
+        fieldList = fieldList.stream().filter(field -> Arrays.stream(ignoreFields).noneMatch(f ->field.getName().equals(f))).collect(Collectors.toList());
         return wrapperGetParamsByFieldsAndObject(fieldList,object);
     }
 

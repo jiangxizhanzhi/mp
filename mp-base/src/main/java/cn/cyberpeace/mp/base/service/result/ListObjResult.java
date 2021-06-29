@@ -18,7 +18,7 @@ import java.util.Objects;
 public class ListObjResult<T> extends BaseObjResult<T, ListObjResult<T>> {
 
     @Builder.Default
-    private List<T> list = new ArrayList<>();
+    private List<T> data = new ArrayList<>();
 
     @Builder.Default
     private Integer total = 0;
@@ -42,8 +42,8 @@ public class ListObjResult<T> extends BaseObjResult<T, ListObjResult<T>> {
 
     @Override
     public ListObjResult<T> asResult() {
-        list.clear();
-        objs.forEach(obj -> list.add(objToResultWithNull(obj, getFields())));
+        data.clear();
+        objs.forEach(obj -> data.add(objToResultWithNull(obj, getFields())));
         return this;
     }
 }
