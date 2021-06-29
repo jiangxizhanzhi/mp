@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.base.service.result;
 
 import cn.cyberpeace.mp.base.repository.fields.DynamicFields;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,6 +22,7 @@ public class ListObjResult<T> extends BaseObjResult<T, ListObjResult<T>> {
     private List<T> list = new ArrayList<>();
 
     @Builder.Default
+    @ApiModelProperty(value = "总数")
     private Integer total = 0;
 
     @JsonIgnore

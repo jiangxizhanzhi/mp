@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.micrometer.core.instrument.util.StringUtils;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -27,6 +29,7 @@ public class HypervisorServiceStateResponse extends BaseOpenStackResponse{
      * 是否存活
      */
     @ApiModelProperty(value = "是否存活")
+    @JsonIgnore
     private Boolean alive;
 
     /**
@@ -45,7 +48,7 @@ public class HypervisorServiceStateResponse extends BaseOpenStackResponse{
         this.state = state;
     }
 
-//    public String getState() {
-//        return StringUtils.isNotBlank(state) ? state.equals("up") ? "正常" : "异常" : alive ? "正常" : "异常";
-//    }
+    public String getState() {
+        return StringUtils.isNotBlank(state) ? state.equals("up") ? "正常" : "异常" : alive ? "正常" : "异常";
+    }
 }
