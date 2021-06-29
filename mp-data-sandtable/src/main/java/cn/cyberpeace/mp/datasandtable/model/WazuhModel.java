@@ -7,7 +7,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class WazuhMonitorModel {
+public class WazuhModel {
 
     @JSONField(name = "MemoryTotal")
     private long memoryTotal;

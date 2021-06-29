@@ -3,12 +3,13 @@ package cn.cyberpeace.mp.datasandtable.service;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
+import cn.cyberpeace.mp.base.util.IteratorUtils;
 import cn.cyberpeace.mp.base.util.LocalDateTimeUtils;
 import cn.cyberpeace.mp.datasandtable.dao.WazuhDao;
 import cn.cyberpeace.mp.datasandtable.model.FileEventModel;
 import cn.cyberpeace.mp.datasandtable.model.WazuhEventRequest;
 import cn.cyberpeace.mp.datasandtable.model.WazuhFileRoot;
-import cn.cyberpeace.mp.datasandtable.model.WazuhMonitorModel;
+import cn.cyberpeace.mp.datasandtable.model.WazuhModel;
 import cn.cyberpeace.mp.datasandtable.model.WazuhMonitorRoot;
 import cn.cyberpeace.mp.datasandtable.model.emum.FileEventType;
 import com.alibaba.fastjson.JSONObject;
@@ -20,6 +21,8 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -90,10 +93,10 @@ public class WazuhService {
     }
 
     /**
-     * 查询监控数据
-     * @param wazuhEventRequest
+     * 查询监控数据 查询最近五分钟数据，监控指标频率为 1min, 对五分钟数据按照agentId进行分组，再去最近的时间的数据
+     * @param wazuhEventRequest wazuhEventRequest
      */
-    public ListObjResult<WazuhMonitorModel> queryMonitorEvents(WazuhEventRequest wazuhEventRequest){
+    public ListObjResult<WazuhModel> queryMonitorEvents(WazuhEventRequest wazuhEventRequest){
         //根据日期构造索引
         String[] indexArray = buildRequestIndex(wazuhEventRequest);
         var searchRequest = new SearchRequest(indexArray);
@@ -107,8 +110,8 @@ public class WazuhService {
 
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
-            List<WazuhMonitorRoot> wazuhFileRootList = Arrays.stream(response.getHits().getHits()).map(hit -> JSONObject.parseObject(hit.getSourceAsString(), WazuhMonitorRoot.class)).collect(Collectors.toList());
 
+            List<WazuhMonitorRoot> wazuhFileRootList = Arrays.stream(response.getHits().getHits()).map(hit -> JSONObject.parseObject(hit.getSourceAsString(), WazuhMonitorRoot.class)).collect(Collectors.toList());
             Map<String, Optional<WazuhMonitorRoot>> wazuhMonitorMap =
                 wazuhFileRootList.stream()
                     .filter(wazuhMonitorRoot-> wazuhMonitorRoot.getFullLog().contains("MonitorMessage:"))
@@ -120,26 +123,20 @@ public class WazuhService {
             var wazuhModelList = wazuhFileRootList.stream()
                 .filter(model-> model.getFullLog().contains("MonitorMessage:")).map(model -> {
                     var monitorMessage = model.getFullLog().substring("MonitorMessage:".length());
-                    return JSONObject.parseObject(monitorMessage, WazuhMonitorModel.class);
+                    return JSONObject.parseObject(monitorMessage, WazuhModel.class);
                 }).collect(Collectors.toList());
 
-            ListObjResult<WazuhMonitorModel> wazuhModelList1 = processWazuhMonitorModelPage(wazuhEventRequest, wazuhModelList);
-            if (wazuhModelList1 != null)
-                return wazuhModelList1;
+            //process page
+            int offset = wazuhEventRequest.getPageNum() * wazuhEventRequest.getPageSize();
+            if (offset < wazuhModelList.size()) {
+                return new ListObjResult<>(wazuhModelList.subList(offset, offset + wazuhEventRequest.getPageSize()), wazuhModelList.size());
+            }
 
             return new ListObjResult<>(wazuhModelList, wazuhModelList.size());
         } catch (IOException e) {
             log.error("es 查询监控事件分页失败 {}", e);
             throw new MpRuntimeException(BaseErrorCode.ERROR, e.toString());
         }
-    }
-
-    private ListObjResult<WazuhMonitorModel> processWazuhMonitorModelPage(WazuhEventRequest wazuhEventRequest, List<WazuhMonitorModel> wazuhMonitorModelList) {
-        int offset = wazuhEventRequest.getPageNum() * wazuhEventRequest.getPageSize();
-        if (offset < wazuhMonitorModelList.size()) {
-            return new ListObjResult<>(wazuhMonitorModelList.subList(offset, offset + wazuhEventRequest.getPageSize()), wazuhMonitorModelList.size());
-        }
-        return null;
     }
 
     /**
