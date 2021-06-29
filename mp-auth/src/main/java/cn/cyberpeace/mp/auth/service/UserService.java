@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.service;
 
+import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -39,7 +40,7 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
 
     void downloadExcelTemplate();
 
-    void importExcel();
+    void importExcel(List<ImportUser> list);
 
     void exportExcel();
 

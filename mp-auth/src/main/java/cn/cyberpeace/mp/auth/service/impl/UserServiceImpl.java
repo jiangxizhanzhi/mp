@@ -2,8 +2,13 @@ package cn.cyberpeace.mp.auth.service.impl;
 
 import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
+import cn.cyberpeace.mp.auth.service.OrgService;
+import cn.cyberpeace.mp.auth.service.OrgUserService;
+import cn.cyberpeace.mp.auth.service.RoleService;
+import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.UserFields;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
@@ -29,6 +34,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.net.PasswordAuthentication;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -47,6 +53,18 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Autowired
     private FastDfsConfig fastDfsConfig;
+
+    @Autowired
+    private RoleService roleService;
+
+    @Autowired
+    private UserRoleService userRoleService;
+
+    @Autowired
+    private OrgService orgService;
+
+    @Autowired
+    private OrgUserService orgUserService;
 
     @Autowired
     public UserServiceImpl(UserMapper modelMapper, UserFields modelFields) {
@@ -227,8 +245,27 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     @Override
-    public void importExcel() {
+    public void importExcel(List<ImportUser> list) {
+        for (int i = 0; i < list.size(); i++) {
+            ImportUser importUser = list.get(i);
 
+            // 1.保存用户信息
+            UserModel userModel = importUser2User(importUser);
+            try {
+                // todo 考虑将错误信息包装返回到页面
+                create(userModel);
+            } catch (Exception e) {
+                log.error(ExceptionUtil.stacktraceToString(e));
+            }
+
+            // 2. 保存用户-角色关系
+            String roles = importUser.getRoles().trim();
+            String[] roleNameArr = roles.split(",");
+            for (String roleName : roleNameArr) {
+            }
+
+            // 3. 保存组织-用户关系
+        }
     }
 
     @Override
@@ -272,4 +309,20 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         }
 
     }
+
+
+    private UserModel importUser2User(ImportUser importUser) {
+        if (importUser == null) {
+            return null;
+        }
+        UserModel userModel = new UserModel();
+        userModel.setUsername(importUser.getUsername());
+        userModel.setName(importUser.getName());
+        userModel.setPassword(PasswordUtils.getPasswordEncoder().encode(importUser.getPassword()));
+
+        userModel.setIdentifier(importUser.getUsername());
+
+        return userModel;
+    }
+
 }
