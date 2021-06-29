@@ -3,10 +3,11 @@ package cn.cyberpeace.mp.auth.service;
 import cn.cyberpeace.mp.auth.dto.OrgDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.base.service.BaseModelService;
+import cn.cyberpeace.mp.base.service.param.QueryParams;
 
 import java.util.List;
 
-public interface OrgService extends BaseModelService<OrgModel> {
+public interface OrgService extends BaseModelService<OrgModel, QueryParams> {
 
     List<OrgModel> listParents();
 

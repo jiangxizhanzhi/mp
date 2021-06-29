@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.scene.controller;
 
 import cn.cyberpeace.mp.base.controller.BaseModelController;
+import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.scene.constant.ControllerConstant;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/scene_configs")
-public class SceneConfigController extends BaseModelController<SceneConfigModel, SceneConfigService> {
+public class SceneConfigController extends BaseModelController<SceneConfigModel, QueryParams, SceneConfigService> {
 
     @Autowired
     public SceneConfigController(SceneConfigService modelService) {

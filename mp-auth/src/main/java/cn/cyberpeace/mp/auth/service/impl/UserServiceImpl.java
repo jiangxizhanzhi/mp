@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.UserFields;
+import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.auth.util.ServletUtils;
 import cn.cyberpeace.mp.auth.util.UserUtils;
@@ -14,6 +15,7 @@ import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
+import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
@@ -34,7 +36,7 @@ import java.util.Optional;
 
 @Service
 @Slf4j
-public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper, UserFields>
+public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper, UserFields, UserQueryParams>
         implements UserService {
 
     @Autowired
@@ -191,26 +193,25 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     @Override
-    public void loadListFilterCondition(HumanCondition humanCondition, Map<String, Object> params) {
-        Object tenant = params.getOrDefault("tenant", null);
+    public void loadListFilterCondition(HumanCondition humanCondition, UserQueryParams queryParams) {
+        String tenant = queryParams.getTenant();
         if (tenant != null) {
             humanCondition.filterEqual("tenant", tenant);
         }
 
-        Object username = params.getOrDefault("username", null);
+        String username = queryParams.getUsername();
         if (username != null) {
             humanCondition.filterContains("username", username);
         }
 
-        Object name = params.getOrDefault("name", null);
+        String name = queryParams.getName();
         if (name != null) {
             humanCondition.filterContains("name", name);
         }
 
-        Object status = params.getOrDefault("status", 1);
-        if (status != null) {
-            humanCondition.filterEqual("status", status);
-        }
+        Integer status = queryParams.getStatus();
+        status = status == null ? UserModel.Status.NORMAL : status;
+        humanCondition.filterEqual("status", status);
     }
 
 

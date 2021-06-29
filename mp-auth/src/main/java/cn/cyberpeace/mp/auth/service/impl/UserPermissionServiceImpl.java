@@ -19,6 +19,7 @@ import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.UserPermissionFields;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
+import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.lang.Assert;
 import org.apache.commons.lang3.StringUtils;
@@ -39,7 +40,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserPermissionServiceImpl
-        extends BaseModelServiceImpl<UserPermissionModel, UserPermissionMapper, UserPermissionFields>
+        extends BaseModelServiceImpl<UserPermissionModel, UserPermissionMapper, UserPermissionFields, QueryParams>
         implements UserPermissionService {
 
     @Autowired

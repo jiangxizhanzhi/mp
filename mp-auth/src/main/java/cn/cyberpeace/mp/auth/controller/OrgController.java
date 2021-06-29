@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.auth.dto.TargetDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
+import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -22,7 +23,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/orgs")
-public class OrgController extends BaseModelController<OrgModel, OrgService> {
+public class OrgController extends BaseModelController<OrgModel, QueryParams, OrgService> {
 
     @Autowired
     public OrgController(OrgService modelService) {

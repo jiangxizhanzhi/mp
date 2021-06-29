@@ -5,10 +5,11 @@ import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.OrgUserModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.base.service.BaseModelService;
+import cn.cyberpeace.mp.base.service.param.QueryParams;
 
 import java.util.List;
 
-public interface OrgUserService extends BaseModelService<OrgUserModel> {
+public interface OrgUserService extends BaseModelService<OrgUserModel, QueryParams> {
 
     List<UserModel> listUsersByOrgId(String orgId);
 

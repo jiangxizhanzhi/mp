@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.auth.model.SysConfigModel;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.SysConfigService;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
+import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 @RequestMapping("/sys/config")
-public class SysConfigController extends BaseModelController<SysConfigModel, SysConfigService> {
+public class SysConfigController extends BaseModelController<SysConfigModel, QueryParams, SysConfigService> {
 
     @Autowired
     public SysConfigController(SysConfigService modelService) {

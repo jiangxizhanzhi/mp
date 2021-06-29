@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.auth.model.UserPermissionModel;
 import cn.cyberpeace.mp.auth.service.UserPermissionService;
 import cn.cyberpeace.mp.auth.util.ServletUtils;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
+import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -28,7 +29,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/user_permissions")
-public class UserPermissionController extends BaseModelController<UserPermissionModel, UserPermissionService> {
+public class UserPermissionController extends BaseModelController<UserPermissionModel, QueryParams, UserPermissionService> {
 
     @Autowired
     public UserPermissionController(UserPermissionService modelService) {

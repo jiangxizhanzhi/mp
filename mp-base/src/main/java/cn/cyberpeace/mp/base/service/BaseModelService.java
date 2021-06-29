@@ -5,12 +5,10 @@ import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 
 import java.util.List;
-import java.util.Map;
 
-public interface BaseModelService<M> {
+public interface BaseModelService<M, Q> {
 
-    default ListObjServiceResult<M> list(Map<String, Object> params, String[] ids, String search, String[] searchFields,
-                                         String[] orders, int page, int pageSize, String[] fields) {
+    default ListObjServiceResult<M> list(Q queryParams) {
         return new ListObjServiceResult<>();
     }
 
@@ -40,11 +38,6 @@ public interface BaseModelService<M> {
 
     default ServiceResult<Integer> bulkDelete(String[] ids) {
         return new ServiceResult<>();
-    }
-
-    default ListObjServiceResult<M> list(Map<String, Object> params, String[] ids, String search, String[] searchFields,
-                                         String[] orders, int page, int pageSize) {
-        return list(params, ids, search, searchFields, orders, page, pageSize, null);
     }
 
     default ObjServiceResult<M> get(String id) {

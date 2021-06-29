@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.util.ServletUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
+import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -27,7 +28,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/user_roles")
-public class UserRoleController extends BaseModelController<UserRoleModel, UserRoleService> {
+public class UserRoleController extends BaseModelController<UserRoleModel, QueryParams, UserRoleService> {
 
     @Autowired
     public UserRoleController(UserRoleService modelService) {

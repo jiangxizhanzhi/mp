@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.service.RolePermissionService;
 import cn.cyberpeace.mp.auth.util.ServletUtils;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
+import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -27,7 +28,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/role_permissions")
-public class RolePermissionController extends BaseModelController<RolePermissionModel, RolePermissionService> {
+public class RolePermissionController extends BaseModelController<RolePermissionModel, QueryParams, RolePermissionService> {
 
     @Autowired
     public RolePermissionController(RolePermissionService modelService) {

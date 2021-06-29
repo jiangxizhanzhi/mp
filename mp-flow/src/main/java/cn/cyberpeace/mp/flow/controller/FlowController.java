@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.flow.controller;
 
 import cn.cyberpeace.mp.base.controller.BaseModelController;
+import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.flow.constant.ControllerConstant;
 import cn.cyberpeace.mp.flow.model.FlowExecuteRequest;
@@ -18,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/info")
-public class FlowController extends BaseModelController<FlowModel, FlowService> {
+public class FlowController extends BaseModelController<FlowModel, QueryParams, FlowService> {
 
     @Autowired
     public FlowController(FlowService flowService) {

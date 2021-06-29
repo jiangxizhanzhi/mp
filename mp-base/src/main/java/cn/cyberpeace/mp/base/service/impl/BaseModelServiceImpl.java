@@ -8,8 +8,10 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.repository.fields.DynamicFields;
 import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.fields.BaseModelFields;
+import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.*;
 import cn.cyberpeace.mp.base.service.stereotype.CustomConditionClass;
+import cn.cyberpeace.mp.base.util.JsonUtils;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -27,8 +29,8 @@ import java.util.Map;
  */
 @Slf4j
 @Data
-public abstract class BaseModelServiceImpl<M extends BaseModel,
-        P extends BaseModelMapper<M>, F extends BaseModelFields> implements BaseModelService<M> {
+public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseModelMapper<M>, F extends BaseModelFields,
+        Q extends QueryParams> implements BaseModelService<M, Q> {
 
     private P modelMapper;
 
@@ -106,18 +108,20 @@ public abstract class BaseModelServiceImpl<M extends BaseModel,
         return customCondition.loadFromParams(params);
     }
 
-    public void loadListFilterCondition(HumanCondition humanCondition, Map<String, Object> params) {}
+    public void loadListFilterCondition(HumanCondition humanCondition, Q queryParams) {}
 
     @Override
-    public ListObjServiceResult<M> list(Map<String, Object> params, String[] ids, String search, String[] searchFields,
-                                        String[] orders, int page, int pageSize, String[] fields) {
+    public ListObjServiceResult<M> list(Q queryParams) {
         F actualModelFields = getModelFields();
-        DynamicFields validModelFields = actualModelFields != null ? actualModelFields.getValidFields(fields) : null;
+        DynamicFields validModelFields = actualModelFields != null ?
+                actualModelFields.getValidFields(queryParams.getFields()) : null;
         String[] selectFields = validModelFields != null ? validModelFields.getFields() : null;
-        var humanCondition = getHumanCondition(selectFields, ids, search, searchFields, orders, page,
-                pageSize);
-        loadListFilterCondition(humanCondition, params);
-        humanCondition.setCustomCondition(getCustomCondition(params, CustomConditionClass.class));
+        var humanCondition = getHumanCondition(selectFields, queryParams.getIds(),
+                queryParams.getSearch(), queryParams.getSearchFields(), queryParams.getOrders(), queryParams.getPage(),
+                queryParams.getPageSize());
+        loadListFilterCondition(humanCondition, queryParams);
+        humanCondition.setCustomCondition(getCustomCondition(JsonUtils.beanToMap(queryParams),
+                CustomConditionClass.class));
 
         List<M> data;
         int total;

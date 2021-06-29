@@ -1,11 +1,12 @@
 package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.BaseModelService;
 import org.springframework.web.multipart.MultipartFile;
 
-public interface UserService extends BaseModelService<UserModel> {
+public interface UserService extends BaseModelService<UserModel, UserQueryParams> {
 
     UserModel getByUserName(String userName);
 

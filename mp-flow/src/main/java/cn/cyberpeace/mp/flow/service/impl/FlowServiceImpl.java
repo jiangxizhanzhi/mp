@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.flow.service.impl;
 
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
+import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.flow.model.FlowModel;
 import cn.cyberpeace.mp.flow.repository.FlowMapper;
 import cn.cyberpeace.mp.flow.service.FlowService;
@@ -15,7 +16,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @Slf4j
-public class FlowServiceImpl extends BaseModelServiceImpl<FlowModel, FlowMapper, FlowFields>
+public class FlowServiceImpl extends BaseModelServiceImpl<FlowModel, FlowMapper, FlowFields, QueryParams>
         implements FlowService {
 
     public FlowServiceImpl(FlowMapper stuMapper, FlowFields stuFields) {

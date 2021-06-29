@@ -1,11 +1,10 @@
 package cn.cyberpeace.mp.base.controller;
 
 import cn.cyberpeace.mp.base.constant.BaseSingleton;
-import cn.cyberpeace.mp.base.controller.param.QueryParams;
-import cn.cyberpeace.mp.base.controller.stereotype.ListParamNames;
 import cn.cyberpeace.mp.base.controller.stereotype.UnlimitPagination;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.service.BaseModelService;
+import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -15,12 +14,9 @@ import io.swagger.annotations.ApiOperation;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import springfox.documentation.annotations.ApiIgnore;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 通用的基于单表的具有增删改查能力的controller
@@ -29,7 +25,7 @@ import java.util.Map;
  */
 @Slf4j
 @Data
-public abstract class BaseModelController<M extends BaseModel, S extends BaseModelService<M>> {
+public abstract class BaseModelController<M extends BaseModel, Q extends QueryParams, S extends BaseModelService<M, Q>> {
 
     /** 在实现类注入 */
     private S modelService;
@@ -51,36 +47,9 @@ public abstract class BaseModelController<M extends BaseModel, S extends BaseMod
     /**
      * 处理有效的查询参数
      * @param listFuncName 查询方法名称
-     * @param listParamNamesAnnotationClass 查询方法对应的列表字段标记注解类
-     * @param request http请求对象
      * @param queryParams 查询参数
      */
-    public void handleQueryParams(String listFuncName,
-                                  Class<? extends ListParamNames> listParamNamesAnnotationClass,
-                                  HttpServletRequest request,
-                                  QueryParams queryParams) {
-        String[] actualListParamNames;
-        ListParamNames listParamNamesAnnotation = getClass().getAnnotation(listParamNamesAnnotationClass);
-        if (listParamNamesAnnotation != null) {
-            actualListParamNames = listParamNamesAnnotation.value();
-        } else {
-            actualListParamNames = new String[0];
-        }
-        Map<String, Object> params = queryParams.getParams();
-        Map<String, String[]> listParams = request.getParameterMap();
-        for (String listParamName: actualListParamNames) {
-            if (listParams.containsKey(listParamName)) {
-                params.put(listParamName, listParams.get(listParamName));
-            }
-        }
-        params.remove("ids");
-        params.remove("search");
-        params.remove("searchFields");
-        params.remove("orders");
-        params.remove("page");
-        params.remove("pageSize");
-        params.remove("fields");
-
+    public void handleQueryParams(String listFuncName, QueryParams queryParams) {
         int page = queryParams.getPage() == null ? 0 : queryParams.getPage();
         int pageSize = queryParams.getPageSize() == null ? 0 : queryParams.getPageSize();
         if (pageSize <= 0) {
@@ -94,40 +63,14 @@ public abstract class BaseModelController<M extends BaseModel, S extends BaseMod
 
     /**
      * 通用查询方法
-     * @param request http请求对象
-     * @param params 业务查询参数
-     * @param search 搜索关键词
-     * @param searchFields 搜索涉及字段
-     * @param orders 排序字段
-     * @param page 页码
-     * @param pageSize 每页大小
-     * @param fields 返回数据字段
+     * @param queryParams 查询参数
      * @return 列表查询结果
      */
     @ApiOperation("获取分页数据")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name="search", value="搜索关键词"),
-            @ApiImplicitParam(name="searchFields", value="搜索字段"),
-            @ApiImplicitParam(name="orders",value="排序字段", paramType="query"),
-            @ApiImplicitParam(name="page", value="页码", dataType="Integer"),
-            @ApiImplicitParam(name="pageSize", value="每页数量", dataType="Integer"),
-            @ApiImplicitParam(name="fields", value="需要返回的字段"),
-    })
     @GetMapping
-    public ListObjServiceResult<M> list(HttpServletRequest request,
-                                        @ApiIgnore @RequestParam Map<String, Object> params,
-                                        @RequestParam(required = false) String[] ids,
-                                        @RequestParam(required = false) String search,
-                                        @RequestParam(required = false) String[] searchFields,
-                                        @RequestParam(required = false) String[] orders,
-                                        @RequestParam(required = false) Integer page,
-                                        @RequestParam(required = false) Integer pageSize,
-                                        @RequestParam(required = false) String[] fields) {
-        var queryParams = new QueryParams(params, ids, search, searchFields, orders, page, pageSize, fields);
-        handleQueryParams("list", ListParamNames.class, request, queryParams);
-        return getModelService().list(queryParams.getParams(), queryParams.getIds(), queryParams.getSearch(),
-                queryParams.getSearchFields(), queryParams.getOrders(), queryParams.getPage(),
-                queryParams.getPageSize(), queryParams.getFields()).asResult();
+    public ListObjServiceResult<M> list(Q queryParams) {
+        handleQueryParams("list", queryParams);
+        return getModelService().list(queryParams).asResult();
     }
 
     /**

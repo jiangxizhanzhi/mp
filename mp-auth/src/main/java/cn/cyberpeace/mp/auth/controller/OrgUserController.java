@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.util.ServletUtils;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
+import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -30,7 +31,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/org_users")
-public class OrgUserController extends BaseModelController<OrgUserModel, OrgUserService> {
+public class OrgUserController extends BaseModelController<OrgUserModel, QueryParams, OrgUserService> {
 
     @Autowired
     public OrgUserController(OrgUserService modelService) {

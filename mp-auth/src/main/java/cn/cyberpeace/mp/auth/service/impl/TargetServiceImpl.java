@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.auth.service.fields.TargetFields;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
+import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.hutool.core.lang.Assert;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +20,7 @@ import java.util.List;
 
 @Service
 @Slf4j
-public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetMapper, TargetFields>
+public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetMapper, TargetFields, QueryParams>
         implements TargetService {
 
     @Autowired
