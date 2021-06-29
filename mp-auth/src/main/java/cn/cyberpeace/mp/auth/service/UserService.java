@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.BaseModelService;
+import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;

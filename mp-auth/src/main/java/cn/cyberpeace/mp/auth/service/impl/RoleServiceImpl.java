@@ -31,6 +31,15 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
     @Override
     public List<RoleModel> listByOrgId(String orgId) {
-        return null;
+        Assert.notBlank(orgId, "orgId不能为空！");
+        List<RoleModel> roles = getModelMapper().listByOrgId(orgId);
+        return roles;
+    }
+
+    @Override
+    public RoleModel getByIdent(String ident) {
+        Assert.notBlank(ident, "identifier不能为空！");
+        RoleModel roleModel = getModelMapper().selectByIdent(ident);
+        return roleModel;
     }
 }

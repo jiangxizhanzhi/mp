@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.auth.service.fields.OrgFields;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.lang.Assert;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +35,20 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     public OrgServiceImpl(OrgMapper modelMapper, OrgFields modelFields) {
         setModelMapper(modelMapper);
         setModelFields(modelFields);
+    }
+
+    @Override
+    public ObjServiceResult<OrgModel> create(OrgModel obj, String[] fields) {
+        if (StringUtils.isNotBlank(obj.getParent())) {
+            OrgModel orgModel = getModelMapper().get(obj.getParent());
+            if (orgModel == null) {
+                throw new IllegalArgumentException("id为"+ obj.getParent() + "的组织不存在");
+            }
+            String path = getPathByOrgId(orgModel.getId());
+            path = path + AuthConstant.ORG_PATH_SEPARATOR + obj.getName();
+            obj.setPath(path);
+        }
+        return super.create(obj, fields);
     }
 
     @Override
@@ -85,7 +100,34 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     }
 
 
-    public List<OrgDto> toTree(List<OrgModel> orgs) {
+    @Override
+    public String getPathByOrgId(String orgId) {
+        OrgDto orgDto = getHierarchicalOrgsByOrgId(orgId);
+        Assert.notNull(orgDto, "未查询到id为" + orgId + "的组织");
+
+        StringBuilder path = new StringBuilder(orgDto.getName());
+        while (true) {
+            if ((orgDto = orgDto.getParentOrg()) != null) {
+                path.insert(0, orgDto.getName() + "/");
+            } else {
+                break;
+            }
+        }
+
+        return path.toString();
+    }
+
+
+    @Override
+    public OrgModel getByPath(String path) {
+        Assert.notBlank(path, "path不能为空！");
+        OrgModel orgModel = getModelMapper().getByPath(path);
+        return orgModel;
+    }
+
+
+
+    private List<OrgDto> toTree(List<OrgModel> orgs) {
         Assert.notEmpty(orgs, "orgs should not be empty!");
         Map<String, List<OrgModel>> map = new HashMap<>();
         Map<String, OrgDto> mapTmp = new HashMap<>();
