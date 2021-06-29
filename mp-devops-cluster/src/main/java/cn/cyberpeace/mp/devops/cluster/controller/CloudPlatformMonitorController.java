@@ -15,7 +15,6 @@ import cn.cyberpeace.mp.devops.cluster.service.*;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -77,12 +76,11 @@ public class CloudPlatformMonitorController {
         //路由个数
         final Integer totalRouters = routerService.getTotalRouters(new RouterPageRequest());
 
-        //获取所有节点的磁盘信息、网络IO、内存信息、网络IO、CPU信息
-        List<HypervisorComputeStatusOpenStackModel> hypervisorComputeStatusOpenStackModels = hypervisorService.computeStatus();
+        //TODO 原计算方式不正确，云平台暂时不支持计算总的网络IO、磁盘IO
         //磁盘IO
-        BigDecimal diskIo = hypervisorComputeStatusOpenStackModels.stream().filter(v -> MapUtils.isNotEmpty(v.getDisk_io()) && Objects.nonNull(v.getDisk_io().get("read_bytes/write_bytes"))).map(v -> new BigDecimal(v.getDisk_io().get("read_bytes/write_bytes").toString())).reduce(BigDecimal.ZERO, (a, b) -> a.add(b));
+        BigDecimal diskIo = BigDecimal.ZERO;
         //网络IO
-        BigDecimal netIo = hypervisorComputeStatusOpenStackModels.stream().filter(v -> MapUtils.isNotEmpty(v.getNet_io()) && Objects.nonNull(v.getNet_io().get("bytes_sent/bytes_recv")) ).map(v -> new BigDecimal(v.getNet_io().get("bytes_sent/bytes_recv").toString())).reduce(BigDecimal.ZERO, (a, b) -> a.add(b));
+        BigDecimal netIo = BigDecimal.ZERO;
 
         HypervisorStatisticsResponse response = HypervisorStatisticsResponse.builder().diskIo(diskIo).netIo(netIo)
                 .totalNpc(totalNPCs).totalInstances(totalInstances)
