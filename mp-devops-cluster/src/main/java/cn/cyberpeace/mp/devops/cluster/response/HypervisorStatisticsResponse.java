@@ -161,6 +161,15 @@ public class HypervisorStatisticsResponse extends BaseOpenStackResponse{
     @Builder.Default
     private Integer totalRouters = 0;
 
+    /**
+     * 防火墙个数
+     */
+    @ApiModelProperty(value = "防火墙个数")
+    @Builder.Default
+    private Integer totalFireWall = 0;
+
+
+
 
     public HypervisorStatisticsResponse HypervisorStatisticsResponse(Integer cpus, Long memoryMb, Long localGb,
                                         Long cpusUsed, Long memoryMbUsed, Long localGbUsed,
