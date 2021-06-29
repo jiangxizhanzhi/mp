@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
@@ -106,10 +108,10 @@ public class CloudPlatformMonitorController {
      */
     @ApiOperation("节点管理")
     @GetMapping("/hypervisor/page")
-    public ServiceResult<HypervisorPageResponse> page(HypervisorPageRequest request){
+    public ListObjServiceResult<HypervisorPageResponse> page(HypervisorPageRequest request){
         HypervisorOpenStackModel model = hypervisorService.pageHypervisors(request);
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getHypervisors())){
-            return new ServiceResult();
+            return new ListObjServiceResult();
         }
         List<HypervisorOpenStackModel.Hypervisor> hypervisorList = model.getHypervisors();
         List<HypervisorPageResponse> hypervisorPageResponses = hypervisorList.stream().map(hypervisor ->
@@ -131,7 +133,7 @@ public class CloudPlatformMonitorController {
             }
         });
 
-        return new ServiceResult(hypervisorPageResponses).asResult();
+        return new ListObjServiceResult(new ListObjResult(hypervisorPageResponses, model.getTotal())).asResult();
     }
 
     /**

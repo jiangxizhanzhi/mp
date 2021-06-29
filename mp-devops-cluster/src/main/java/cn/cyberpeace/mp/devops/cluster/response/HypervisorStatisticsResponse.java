@@ -168,9 +168,6 @@ public class HypervisorStatisticsResponse extends BaseOpenStackResponse{
     @Builder.Default
     private Integer totalFireWall = 0;
 
-
-
-
     public HypervisorStatisticsResponse HypervisorStatisticsResponse(Integer cpus, Long memoryMb, Long localGb,
                                         Long cpusUsed, Long memoryMbUsed, Long localGbUsed,
                                         Long freeRamMb, Long freeDiskGb) {
