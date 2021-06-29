@@ -4,16 +4,23 @@ import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.ResetPwdRequest;
 import cn.cyberpeace.mp.auth.dto.ResetSelfPwdRequest;
+import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
+import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
 import cn.cyberpeace.mp.auth.dto.validate.AddGroup;
 import cn.cyberpeace.mp.auth.dto.validate.UpdateGroup;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.service.UploadDataListener;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
+import cn.cyberpeace.mp.auth.util.ServletUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import com.alibaba.excel.EasyExcel;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +28,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.List;
 
 @Api(value = "用户管理接口", tags = "UserController")
 @Slf4j
@@ -42,12 +55,8 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
     @PostMapping("/resetpwd")
     public ServiceResult resetPwd(@Validated(AddGroup.class) @RequestBody ResetPwdRequest resetPwdRequest) {
         String decryptedPwd = PasswordUtils.desDecrypt(resetPwdRequest.getNewPwd());
-        boolean result = getModelService().resetPwd(resetPwdRequest.getUserId(), decryptedPwd);
-        if (result) {
-            return ServiceResult.builder().build().asResult();
-        }
-
-        return ServiceResult.builder().serviceCode(BaseErrorCode.ERROR).build().asResult();
+        boolean success = getModelService().resetPwd(resetPwdRequest.getUserId(), decryptedPwd);
+        return ServletUtils.commonResult(success, null);
     }
 
     @ApiOperation(value = "修改自己的密码", notes = "")
@@ -56,11 +65,7 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
         String decryptedOldPwd = PasswordUtils.desDecrypt(req.getOldPwd());
         String decryptedNewPwd = PasswordUtils.desDecrypt(req.getNewPwd());
         boolean success = getModelService().resetSelfPwd(decryptedOldPwd, decryptedNewPwd);
-        if (success) {
-            return ServiceResult.builder().build().asResult();
-        }
-
-        return ServiceResult.builder().serviceCode(BaseErrorCode.ERROR).build().asResult();
+        return ServletUtils.commonResult(success, null);
     }
 
 
@@ -68,10 +73,7 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
     @PostMapping("/disable")
     public ServiceResult disable(@RequestParam String userId) {
         boolean success = getModelService().disable(userId);
-        if (success) {
-            return ServiceResult.builder().build().asResult();
-        }
-        return ServiceResult.builder().serviceCode(BaseErrorCode.ERROR).build().asResult();
+        return ServletUtils.commonResult(success, null);
     }
 
 
@@ -79,10 +81,7 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
     @PostMapping("/enable")
     public ServiceResult enable(@RequestParam String userId) {
         boolean success = getModelService().enable(userId);
-        if (success) {
-            return ServiceResult.builder().build().asResult();
-        }
-        return ServiceResult.builder().serviceCode(BaseErrorCode.ERROR).build().asResult();
+        return ServletUtils.commonResult(success, null);
     }
 
 
@@ -90,10 +89,7 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
     @PostMapping("/approve")
     public ServiceResult approve(@RequestParam String userId) {
         boolean success = getModelService().approve(userId);
-        if (success) {
-            return ServiceResult.builder().build().asResult();
-        }
-        return ServiceResult.builder().serviceCode(BaseErrorCode.ERROR).build().asResult();
+        return ServletUtils.commonResult(success, null);
     }
 
 
@@ -101,28 +97,42 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
     @PostMapping("/updateAvatar")
     public ServiceResult updateAvatar(@RequestParam String userId, MultipartFile file) throws MpRuntimeException {
         boolean success = getModelService().updateAvatar(userId, file);
-        if (success) {
-            return ServiceResult.builder().build().asResult();
-        }
-        return ServiceResult.builder().serviceCode(BaseErrorCode.ERROR).build().asResult();
+        return ServletUtils.commonResult(success, null);
     }
 
 
+
+    @ApiOperation(value = "导出用户excel", notes = "")
     @PostMapping("/excel/export")
-    public ServiceResult exportUsers() {
-        // todo excel 导出
-        return null;
+    public void exportExcel(UserQueryParams queryParams, HttpServletResponse response) throws IOException {
+
+        handleQueryParams("list", queryParams);
+        ListObjServiceResult<UserModel> listObjServiceResult = getModelService().list(queryParams).asResult();
+        List<UserModel> users = listObjServiceResult.getSource().getList();
+        List<ExportUser> exportUserList = getModelService().exportExcel(users);
+
+
+        // 这里注意 有同学反应使用swagger 会导致各种问题，请直接用浏览器或者用postman
+        response.setContentType("application/vnd.ms-excel");
+        response.setCharacterEncoding("utf-8");
+        // 这里URLEncoder.encode可以防止中文乱码 当然和easyexcel没有关系
+        String fileName = URLEncoder.encode("用户导出列表", "UTF-8").replaceAll("\\+", "%20");
+        response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
+        EasyExcel.write(response.getOutputStream(), ExportUser.class).sheet("用户导出列表").doWrite(exportUserList);
     }
 
 
+    @ApiOperation(value = "通过excel导入用户数据", notes = "")
     @PostMapping("/excel/import")
-    public ServiceResult importUsers() {
-        // todo excel 导入
-        return null;
+    @ResponseBody
+    public ServiceResult importUsers(MultipartFile file) throws IOException {
+        EasyExcel.read(file.getInputStream(), ImportUser.class, new UploadDataListener(getModelService())).headRowNumber(2).sheet().doRead();
+        return ServletUtils.commonResult(true, null);
     }
+
 
     @GetMapping("/excel/template")
-    public void excelTemplate() {
+    public void downloadExcelTemplate() {
         getModelService().downloadExcelTemplate();
     }
 

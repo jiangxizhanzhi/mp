@@ -108,7 +108,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         StringBuilder path = new StringBuilder(orgDto.getName());
         while (true) {
             if ((orgDto = orgDto.getParentOrg()) != null) {
-                path.insert(0, orgDto.getName() + "/");
+                path.insert(0, orgDto.getName() + AuthConstant.ORG_PATH_SEPARATOR);
             } else {
                 break;
             }

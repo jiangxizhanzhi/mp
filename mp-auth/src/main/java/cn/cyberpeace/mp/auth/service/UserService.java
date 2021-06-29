@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.service;
 
+import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
@@ -45,7 +46,7 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
 
     void importExcel(List<ImportUser> list);
 
-    void exportExcel();
+    List<ExportUser> exportExcel(List<UserModel> users);
 
     boolean updateAvatar(String userId, MultipartFile multipartFile) throws MpRuntimeException;
 

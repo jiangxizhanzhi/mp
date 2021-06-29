@@ -2,7 +2,10 @@ package cn.cyberpeace.mp.auth.service.impl;
 
 import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
+import cn.cyberpeace.mp.auth.model.OrgModel;
+import cn.cyberpeace.mp.auth.model.OrgUserModel;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserRoleModel;
@@ -31,14 +34,19 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.sql.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -245,14 +253,14 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void importExcel(List<ImportUser> list) {
         for (int i = 0; i < list.size(); i++) {
             ImportUser importUser = list.get(i);
 
             // 1.保存用户信息
-            UserModel userModel = importUser2User(importUser);
+            UserModel userModel = importUser2UserModel(importUser);
             try {
-
                 String userId = UUID.randomUUID().toString().replaceAll("-", "");
                 log.warn("userId:{}", userId);
                 userModel.setId(userId);
@@ -264,9 +272,19 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             }
 
             // 2. 保存用户-角色关系
+            // todo
             String roles = importUser.getRoles().trim();
-            String[] idents = roles.split(",");
-            for (String ident : idents) {
+//            String[] idents = roles.split(",");
+//            for (String ident : idents) {
+//                RoleModel roleModel = roleService.getByIdent(ident.trim());
+//                if (roleModel != null) {
+//                    UserRoleModel userRoleModel = new UserRoleModel();
+//                    userRoleModel.setUser(userModel.getId());
+//                    userRoleModel.setRole(roleModel.getId());
+//                    userRoleService.create(userRoleModel);
+//                }
+//            }
+            Arrays.stream(StringUtils.split(roles, ",")).forEach(ident -> {
                 RoleModel roleModel = roleService.getByIdent(ident.trim());
                 if (roleModel != null) {
                     UserRoleModel userRoleModel = new UserRoleModel();
@@ -274,17 +292,28 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                     userRoleModel.setRole(roleModel.getId());
                     userRoleService.create(userRoleModel);
                 }
-            }
+            });
 
             // 3. 保存组织-用户关系
-
+            String orgPaths = importUser.getOrgpath().trim();
+            String[] paths = orgPaths.split(",");
+            for (String path : paths) {
+                OrgModel orgModel = orgService.getByPath(path.trim());
+                if (orgModel != null) {
+                    OrgUserModel orgUserModel = new OrgUserModel();
+                    orgUserModel.setUser(userModel.getId());
+                    orgUserModel.setOrg(orgModel.getId());
+                    orgUserService.create(orgUserModel);
+                }
+            }
 
         }
     }
 
     @Override
-    public void exportExcel() {
-
+    public List<ExportUser> exportExcel(List<UserModel> users) {
+        List<ExportUser> exportUserList = users.stream().map(u -> user2ExportUser(u)).filter(o -> Objects.nonNull(o)).collect(Collectors.toList());
+        return exportUserList;
     }
 
 
@@ -325,7 +354,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
 
-    private UserModel importUser2User(ImportUser importUser) {
+    private UserModel importUser2UserModel(ImportUser importUser) {
         if (importUser == null) {
             return null;
         }
@@ -337,6 +366,37 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         userModel.setIdentifier(importUser.getUsername());
 
         return userModel;
+    }
+
+
+    private ExportUser user2ExportUser(UserModel user) {
+        if (user == null) {
+            return null;
+        }
+        ExportUser exportUser = new ExportUser();
+        exportUser.setUsername(user.getUsername());
+        exportUser.setName(user.getName());
+
+        // org path
+        List<OrgModel> orgList = orgUserService.listOrgsByUserId(user.getId());
+//        List<String> orgList = new ArrayList<>();
+//        for (OrgModel org : orgs) {
+//            orgList.add(orgService.getPathByOrgId(org.getId()));
+//        }
+
+        String paths = orgList.stream().map(o -> orgService.getPathByOrgId(o.getId())).collect(Collectors.joining(","));
+        log.info("paths:{}", paths);
+        exportUser.setOrg(paths);
+
+        exportUser.setStat(user.getStatus() + "");
+
+        // role
+        List<RoleModel> roleList = userRoleService.listByUserId(user.getId());
+        String roles = roleList.stream().map(r -> r.getIdentifier()).collect(Collectors.joining(","));
+        log.info("roles:{}", roles);
+        exportUser.setRoles(roles);
+
+        return exportUser;
     }
 
 }
