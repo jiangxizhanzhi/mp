@@ -17,7 +17,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import java.math.BigDecimal;
@@ -78,9 +80,9 @@ public class CloudPlatformMonitorController {
         //获取所有节点的磁盘信息、网络IO、内存信息、网络IO、CPU信息
         List<HypervisorComputeStatusOpenStackModel> hypervisorComputeStatusOpenStackModels = hypervisorService.computeStatus();
         //磁盘IO
-        BigDecimal diskIo = hypervisorComputeStatusOpenStackModels.stream().filter(v -> MapUtils.isNotEmpty(v.getDisk_io())).map(v -> new BigDecimal(v.getDisk_io().get("read_bytes/write_byte").toString())).reduce(BigDecimal.ZERO, (a, b) -> a.add(b));
+        BigDecimal diskIo = hypervisorComputeStatusOpenStackModels.stream().filter(v -> MapUtils.isNotEmpty(v.getDisk_io()) && Objects.nonNull(v.getDisk_io().get("read_bytes/write_bytes"))).map(v -> new BigDecimal(v.getDisk_io().get("read_bytes/write_bytes").toString())).reduce(BigDecimal.ZERO, (a, b) -> a.add(b));
         //网络IO
-        BigDecimal netIo = hypervisorComputeStatusOpenStackModels.stream().filter(v -> MapUtils.isNotEmpty(v.getNet_io())).map(v -> new BigDecimal(v.getNet_io().get("bytes_sent/bytes_recv").toString())).reduce(BigDecimal.ZERO, (a, b) -> a.add(b));
+        BigDecimal netIo = hypervisorComputeStatusOpenStackModels.stream().filter(v -> MapUtils.isNotEmpty(v.getNet_io()) && Objects.nonNull(v.getNet_io().get("bytes_sent/bytes_recv")) ).map(v -> new BigDecimal(v.getNet_io().get("bytes_sent/bytes_recv").toString())).reduce(BigDecimal.ZERO, (a, b) -> a.add(b));
 
         HypervisorStatisticsResponse response = HypervisorStatisticsResponse.builder().diskIo(diskIo).netIo(netIo)
                 .totalNpc(totalNPCs).totalInstances(totalInstances)

@@ -10,11 +10,12 @@ import java.io.Serializable;
  */
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 @Builder
 @EqualsAndHashCode(callSuper = true)
 @ApiModel(description = "NPC模型，对应云平台接口返回信息")
 public class NpcOpenStackModel extends BaseOpenStackModel implements Serializable {
 
-    private Integer npc_nums;
+//    private Integer npc_nums;
+
+//    private List<Object> ip_list;
 }

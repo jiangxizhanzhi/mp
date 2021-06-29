@@ -24,7 +24,7 @@ public class NpcServiceImpl extends BaseOpenStackServiceImpl implements NpcServi
     @Override
     public Integer getTotalNPCs() {
         NpcOpenStackModel npcOpenStackModel =  super.sendGet(CPCLOUD_NPC_URL + URL_VERSION + "/bulk_create" , NpcOpenStackModel.class);
-        return Objects.isNull(npcOpenStackModel) || Objects.isNull(npcOpenStackModel.getNpc_nums()) ? 0 : npcOpenStackModel.getNpc_nums();
+        return Objects.isNull(npcOpenStackModel) || Objects.isNull(npcOpenStackModel.getTotal()) ? 0 : npcOpenStackModel.getTotal();
     }
 
     @Override
