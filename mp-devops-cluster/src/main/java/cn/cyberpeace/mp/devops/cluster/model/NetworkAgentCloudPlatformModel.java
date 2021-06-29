@@ -15,7 +15,7 @@ import java.util.List;
 @Builder
 @EqualsAndHashCode(callSuper = true)
 @ApiModel(description = "网络代理模型，对应云平台接口返回信息")
-public class NetworkAgentOpenStackModel extends BaseOpenStackModel implements Serializable {
+public class NetworkAgentCloudPlatformModel extends BaseCloudPlatformModel implements Serializable {
 
     /**
      * 网络代理

@@ -19,7 +19,7 @@ import java.math.RoundingMode;
 @AllArgsConstructor
 @Builder
 @ApiModel(value = "资源统计返回信息")
-public class HypervisorStatisticsResponse extends BaseOpenStackResponse{
+public class HypervisorStatisticsResponse extends BaseCloudPlatformResponse {
 
     /**
      * CPU核数

@@ -12,7 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode(callSuper = true)
-public class ElasticIpOpenStackModel extends BaseOpenStackModel {
+public class ElasticIpCloudPlatformModel extends BaseCloudPlatformModel {
 
     /**
      * 弹性IP列表

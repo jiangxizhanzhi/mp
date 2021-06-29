@@ -18,7 +18,7 @@ import java.util.Map;
 @AllArgsConstructor
 @Builder
 @ApiModel(description = "容器分页返回信息")
-public class ContainerPageResponse extends BaseOpenStackResponse {
+public class ContainerPageResponse extends BaseCloudPlatformResponse {
 
     /**
      * 容器名称

@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.service.impl;
 
-import cn.cyberpeace.mp.devops.cluster.config.OpenStackConfig;
+import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.RealEquipmentOpenStackModel;
 import cn.cyberpeace.mp.devops.cluster.service.RealEquipmentService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,13 +14,13 @@ import java.util.Objects;
 @Service
 public class RealEquipmentServiceImpl extends BaseServiceImpl implements RealEquipmentService {
 
-    public RealEquipmentServiceImpl(OpenStackConfig openStackConfig, ObjectMapper objectMapper) {
-        super(openStackConfig, objectMapper);
+    public RealEquipmentServiceImpl(DevopsConfig devopsConfig, ObjectMapper objectMapper) {
+        super(devopsConfig, objectMapper);
     }
 
     @Override
     public RealEquipmentOpenStackModel page() {
-        return super.sendGet(openStackConfig.getMg_url().concat("/api/cr/api/admin/scene/devices/?entity=true"),RealEquipmentOpenStackModel.class);
+        return super.sendGet(devopsConfig.getMg_url().concat("/api/cr/api/admin/scene/devices/?entity=true"),RealEquipmentOpenStackModel.class);
     }
 
     @Override

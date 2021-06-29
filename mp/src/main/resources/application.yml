@@ -32,8 +32,8 @@ mybatis:
 
 # 请求云平台组信息的url配置，必需填写
 mp:
-  openstack:
-    url: http://10.100.7.28:11111
+  devops:
+    cp-url: http://10.100.7.28:11111
     mg-url: http://10.100.2.21
   datasandtable:
     group-url: http://10.100.7.50:5079/v1/scenes

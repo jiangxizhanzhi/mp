@@ -12,25 +12,25 @@ import java.util.List;
 /**
  * 云平台监控
  */
-public interface HypervisorService extends BaseOpenStackService{
+public interface HypervisorService extends BaseCloudPlatformService {
 
     /**
      * 资源统计
      * @return
      */
-    HypervisorStatisticsOpenStackModel statistics();
+    HypervisorStatisticsCloudPlatformModel statistics();
 
     /**
      * 查询节点管理信息
      * @return
      */
-    HypervisorOpenStackModel pageHypervisors(HypervisorPageRequest request,String... ignoreFields);
+    HypervisorCloudPlatformModel pageHypervisors(HypervisorPageRequest request, String... ignoreFields);
 
     /**
      * 获取虚拟机数量限制
      * @return
      */
-    HypervisorWeightAndMaxInstanceOpenStackModel getWeightAndMaxInstances(HypervisorWeightAndMaxInstanceRequest request);
+    HypervisorWeightAndMaxInstanceCloudPlatformModel getWeightAndMaxInstances(HypervisorWeightAndMaxInstanceRequest request);
 
     /**
      * 节点管理-重启/关机
@@ -47,17 +47,17 @@ public interface HypervisorService extends BaseOpenStackService{
      * @param request
      * @return
      */
-    HypervisorComputeStatusOpenStackModel computeStatus(HypervisorComputeStatusRequest request);
+    HypervisorComputeStatusCloudPlatformModel computeStatus(HypervisorComputeStatusRequest request);
 
     /**
      * 获取所有节点的磁盘信息、网络IO、内存信息、网络IO、CPU信息
      * @return
      */
-    List<HypervisorComputeStatusOpenStackModel> computeStatus();
+    List<HypervisorComputeStatusCloudPlatformModel> computeStatus();
 
     /**
      * 查询虚拟结合交换机状态列表
      * @return
      */
-    VirtualRealSwitchOpenStackModel listVirtualRealSwitch();
+    VirtualRealSwitchCloudPlatformModel listVirtualRealSwitch();
 }

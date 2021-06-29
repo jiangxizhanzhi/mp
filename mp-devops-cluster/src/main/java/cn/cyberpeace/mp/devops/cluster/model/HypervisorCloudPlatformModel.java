@@ -9,7 +9,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode(callSuper = true)
-public class HypervisorOpenStackModel extends BaseOpenStackModel{
+public class HypervisorCloudPlatformModel extends BaseCloudPlatformModel {
 
     /**
      * 资源统计

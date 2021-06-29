@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.devops.cluster.controller;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
-import cn.cyberpeace.mp.devops.cluster.model.RouterOpenStackModel;
+import cn.cyberpeace.mp.devops.cluster.model.RouterCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.request.RouterPageRequest;
 import cn.cyberpeace.mp.devops.cluster.response.RouterPageResponse;
 import cn.cyberpeace.mp.devops.cluster.service.RouterService;
@@ -39,8 +39,8 @@ public class RouterController {
     @ApiOperation("分页查询路由信息")
     @GetMapping("/page")
     public ListObjServiceResult<RouterPageResponse> page(RouterPageRequest request){
-        RouterOpenStackModel model = routerService.page(request);
-        List<RouterOpenStackModel.RouterModel> routers = model.getRouters();
+        RouterCloudPlatformModel model = routerService.page(request);
+        List<RouterCloudPlatformModel.RouterModel> routers = model.getRouters();
         if (CollectionUtils.isEmpty(routers)){
             return new ListObjServiceResult<>();
         }

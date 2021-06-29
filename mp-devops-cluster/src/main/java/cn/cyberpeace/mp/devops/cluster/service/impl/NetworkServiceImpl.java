@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.devops.cluster.service.impl;
 
 import cn.cyberpeace.mp.base.util.BeanUtils;
-import cn.cyberpeace.mp.devops.cluster.config.OpenStackConfig;
-import cn.cyberpeace.mp.devops.cluster.model.NetworkOpenStackModel;
+import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
+import cn.cyberpeace.mp.devops.cluster.model.NetworkCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.request.InstancePageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.NetworkPageRequest;
 import cn.cyberpeace.mp.devops.cluster.service.NetworkService;
@@ -19,14 +19,14 @@ import java.util.Arrays;
 @Service
 public class NetworkServiceImpl extends BaseOpenStackServiceImpl implements NetworkService {
 
-    public NetworkServiceImpl(OpenStackConfig openStackConfig, ObjectMapper objectMapper) {
-        super(openStackConfig, objectMapper);
+    public NetworkServiceImpl(DevopsConfig devopsConfig, ObjectMapper objectMapper) {
+        super(devopsConfig, objectMapper);
     }
 
     @Override
-    public NetworkOpenStackModel page(NetworkPageRequest request,String... ignoreFields) {
+    public NetworkCloudPlatformModel page(NetworkPageRequest request, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
-        return super.sendGet(URL_VERSION + "/networks" + BeanUtils.wrapperGetParamsByObject(request,ignoreFields),NetworkOpenStackModel.class);
+        return super.sendGet(URL_VERSION + "/networks" + BeanUtils.wrapperGetParamsByObject(request,ignoreFields), NetworkCloudPlatformModel.class);
     }
 
     @Override

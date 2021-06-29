@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "基础模型，对应云平台接口返回信息")
-public class BaseOpenStackModel extends BaseModel {
+public class BaseCloudPlatformModel extends BaseModel {
 
     /**
      * 是否成功

@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @ApiModel(value = "服务状态信息")
-public class HypervisorServiceStateResponse extends BaseOpenStackResponse{
+public class HypervisorServiceStateResponse extends BaseCloudPlatformResponse {
 
     /**
      * 服务

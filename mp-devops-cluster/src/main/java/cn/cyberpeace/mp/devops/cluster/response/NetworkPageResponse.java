@@ -17,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @ApiModel(value = "网络分页返回信息")
-public class NetworkPageResponse extends BaseOpenStackResponse {
+public class NetworkPageResponse extends BaseCloudPlatformResponse {
 
     /**
      * 网络名称

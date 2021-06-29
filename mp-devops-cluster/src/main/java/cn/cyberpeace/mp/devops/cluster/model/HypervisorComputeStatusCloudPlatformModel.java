@@ -10,7 +10,7 @@ import java.util.Map;
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode(callSuper = true)
-public class HypervisorComputeStatusOpenStackModel extends BaseOpenStackModel{
+public class HypervisorComputeStatusCloudPlatformModel extends BaseCloudPlatformModel {
 
     /**
      * 磁盘信息

@@ -1,16 +1,10 @@
 package cn.cyberpeace.mp.devops.cluster.service.impl;
 
-import cn.cyberpeace.mp.base.util.BeanUtils;
-import cn.cyberpeace.mp.base.util.SerializableFunction;
-import cn.cyberpeace.mp.devops.cluster.config.OpenStackConfig;
+import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.BaseModel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 基础对接云平台接口层
@@ -19,8 +13,8 @@ import java.util.stream.Collectors;
 @Service
 public class BaseOpenStackServiceImpl extends BaseServiceImpl {
 
-    public BaseOpenStackServiceImpl(OpenStackConfig openStackConfig, ObjectMapper objectMapper) {
-        super(openStackConfig, objectMapper);
+    public BaseOpenStackServiceImpl(DevopsConfig devopsConfig, ObjectMapper objectMapper) {
+        super(devopsConfig, objectMapper);
     }
 
     /**
@@ -32,7 +26,7 @@ public class BaseOpenStackServiceImpl extends BaseServiceImpl {
      */
     @Override
     protected <T extends BaseModel> T sendGet(String api, Class<T> valueType){
-        return super.sendGet(openStackConfig.getUrl().concat(api),valueType);
+        return super.sendGet(devopsConfig.getCp_url().concat(api),valueType);
     }
 
     /**
@@ -45,6 +39,6 @@ public class BaseOpenStackServiceImpl extends BaseServiceImpl {
      */
     @Override
     protected <T extends BaseModel> T sendPost(String api,String body,Class<T> valueType){
-        return super.sendPost(openStackConfig.getUrl().concat(api),body,valueType);
+        return super.sendPost(devopsConfig.getCp_url().concat(api),body,valueType);
     }
 }

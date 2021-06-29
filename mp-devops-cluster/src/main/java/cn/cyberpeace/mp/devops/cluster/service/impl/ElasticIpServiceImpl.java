@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.devops.cluster.service.impl;
 
 import cn.cyberpeace.mp.base.util.BeanUtils;
-import cn.cyberpeace.mp.devops.cluster.config.OpenStackConfig;
-import cn.cyberpeace.mp.devops.cluster.model.ElasticIpOpenStackModel;
+import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
+import cn.cyberpeace.mp.devops.cluster.model.ElasticIpCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.request.ElasticIpPageRequest;
 import cn.cyberpeace.mp.devops.cluster.service.ElasticIpService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,14 +18,14 @@ import java.util.Arrays;
 @Service
 public class ElasticIpServiceImpl extends BaseOpenStackServiceImpl implements ElasticIpService {
 
-    public ElasticIpServiceImpl(OpenStackConfig openStackConfig, ObjectMapper objectMapper) {
-        super(openStackConfig, objectMapper);
+    public ElasticIpServiceImpl(DevopsConfig devopsConfig, ObjectMapper objectMapper) {
+        super(devopsConfig, objectMapper);
     }
 
     @Override
-    public ElasticIpOpenStackModel page(ElasticIpPageRequest request,String... ignoreFields) {
+    public ElasticIpCloudPlatformModel page(ElasticIpPageRequest request, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
-        return super.sendGet(URL_VERSION + "/networks/floatingips" + BeanUtils.wrapperGetParamsByObject(request,ignoreFields),ElasticIpOpenStackModel.class);
+        return super.sendGet(URL_VERSION + "/networks/floatingips" + BeanUtils.wrapperGetParamsByObject(request,ignoreFields), ElasticIpCloudPlatformModel.class);
     }
 
     @Override

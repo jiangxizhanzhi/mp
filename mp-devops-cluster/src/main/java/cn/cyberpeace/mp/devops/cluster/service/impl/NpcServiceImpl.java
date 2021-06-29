@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.service.impl;
 
-import cn.cyberpeace.mp.devops.cluster.config.OpenStackConfig;
-import cn.cyberpeace.mp.devops.cluster.model.NpcOpenStackModel;
+import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
+import cn.cyberpeace.mp.devops.cluster.model.NpcCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.service.NpcService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -17,13 +17,13 @@ import java.util.Objects;
 @Service
 public class NpcServiceImpl extends BaseOpenStackServiceImpl implements NpcService {
 
-    public NpcServiceImpl(OpenStackConfig openStackConfig, ObjectMapper objectMapper) {
-        super(openStackConfig,objectMapper);
+    public NpcServiceImpl(DevopsConfig devopsConfig, ObjectMapper objectMapper) {
+        super(devopsConfig,objectMapper);
     }
 
     @Override
     public Integer getTotalNPCs() {
-        NpcOpenStackModel npcOpenStackModel =  super.sendGet(CPCLOUD_NPC_URL + URL_VERSION + "/bulk_create" , NpcOpenStackModel.class);
+        NpcCloudPlatformModel npcOpenStackModel =  super.sendGet(CPCLOUD_NPC_URL + URL_VERSION + "/bulk_create" , NpcCloudPlatformModel.class);
         return Objects.isNull(npcOpenStackModel) || Objects.isNull(npcOpenStackModel.getTotal()) ? 0 : npcOpenStackModel.getTotal();
     }
 

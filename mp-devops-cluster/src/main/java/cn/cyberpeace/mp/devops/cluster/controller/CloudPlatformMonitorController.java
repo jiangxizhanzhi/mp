@@ -86,12 +86,12 @@ public class CloudPlatformMonitorController {
                 .totalNpc(totalNPCs).totalInstances(totalInstances)
                 .totalContainers(totalContainers).totalRealEquipments(totalRealEquipments).totalRouters(totalRouters).build();
 
-        HypervisorStatisticsOpenStackModel model = hypervisorService.statistics();
+        HypervisorStatisticsCloudPlatformModel model = hypervisorService.statistics();
         if(Objects.isNull(model) || Objects.isNull(model.getHypervisor_statistics())){
             return new ServiceResult(response).asResult();
         }
 
-        HypervisorStatisticsOpenStackModel.HypervisorStatistics hypervisorStatistics = model.getHypervisor_statistics();
+        HypervisorStatisticsCloudPlatformModel.HypervisorStatistics hypervisorStatistics = model.getHypervisor_statistics();
 
         response = response.HypervisorStatisticsResponse(hypervisorStatistics.getVcpus(),hypervisorStatistics.getMemory_mb()
         ,hypervisorStatistics.getLocal_gb(),hypervisorStatistics.getVcpus_used(),hypervisorStatistics.getMemory_mb_used()
@@ -107,11 +107,11 @@ public class CloudPlatformMonitorController {
     @ApiOperation("节点管理")
     @GetMapping("/hypervisor/page")
     public ListObjServiceResult<HypervisorPageResponse> page(HypervisorPageRequest request){
-        HypervisorOpenStackModel model = hypervisorService.pageHypervisors(request);
+        HypervisorCloudPlatformModel model = hypervisorService.pageHypervisors(request);
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getHypervisors())){
             return new ListObjServiceResult();
         }
-        List<HypervisorOpenStackModel.Hypervisor> hypervisorList = model.getHypervisors();
+        List<HypervisorCloudPlatformModel.Hypervisor> hypervisorList = model.getHypervisors();
         List<HypervisorPageResponse> hypervisorPageResponses = hypervisorList.stream().map(hypervisor ->
                 HypervisorPageResponse.builder().name(hypervisor.getHostname())
                         .ip(hypervisor.getHost_ip()).status(hypervisor.getStatus()).state(hypervisor.getState())
@@ -124,7 +124,7 @@ public class CloudPlatformMonitorController {
             String name = v.getName();
             v.setTotalInstances(instanceService.getTotalInstances(new InstancePageRequest(name)));
             v.setTotalContainers(containerService.getTotalContainers(new ContainerPageRequest(name)));
-            HypervisorWeightAndMaxInstanceOpenStackModel weightAndMaxInstances = hypervisorService.getWeightAndMaxInstances(new HypervisorWeightAndMaxInstanceRequest(name));
+            HypervisorWeightAndMaxInstanceCloudPlatformModel weightAndMaxInstances = hypervisorService.getWeightAndMaxInstances(new HypervisorWeightAndMaxInstanceRequest(name));
             if (Objects.nonNull(weightAndMaxInstances)) {
                 v.setWeight(weightAndMaxInstances.getWeight());
                 v.setMaxInstances(weightAndMaxInstances.getMax_instances());
@@ -164,7 +164,7 @@ public class CloudPlatformMonitorController {
     @ApiOperation("虚实结合交换机状态")
     @GetMapping("/virtual-real-switch-state")
     public ServiceResult<VirtualRealSwitchStatusResponse> virtualRealSwitchStatus(){
-        VirtualRealSwitchOpenStackModel model = hypervisorService.listVirtualRealSwitch();
+        VirtualRealSwitchCloudPlatformModel model = hypervisorService.listVirtualRealSwitch();
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getSwitchs())){
             return new ServiceResult();
         }

@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.devops.cluster.controller;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
-import cn.cyberpeace.mp.devops.cluster.model.InstanceOpenStackModel;
+import cn.cyberpeace.mp.devops.cluster.model.InstanceCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.request.InstancePageRequest;
 import cn.cyberpeace.mp.devops.cluster.response.InstancePageResponse;
 import cn.cyberpeace.mp.devops.cluster.service.InstanceService;
@@ -45,8 +45,8 @@ public class InstanceController {
     @GetMapping("/page")
     public ListObjServiceResult<InstancePageResponse> page(@Valid InstancePageRequest request){
 
-        InstanceOpenStackModel model = instanceService.page(request);
-        List<InstanceOpenStackModel.InstanceModel> instances = model.getInstances();
+        InstanceCloudPlatformModel model = instanceService.page(request);
+        List<InstanceCloudPlatformModel.InstanceModel> instances = model.getInstances();
 
         if (CollectionUtils.isEmpty(instances)){
             return new ListObjServiceResult();
@@ -54,7 +54,7 @@ public class InstanceController {
 
         List<InstancePageResponse> list = instances.stream().map(instanceModel ->
             InstancePageResponse.builder().name(instanceModel.getInstance_name()).node(instanceModel.getHostname())
-                    .addressList(instanceModel.getAddresses().stream().map(InstanceOpenStackModel.InstanceModel.Address::getIp).collect(Collectors.toList()))
+                    .addressList(instanceModel.getAddresses().stream().map(InstanceCloudPlatformModel.InstanceModel.Address::getIp).collect(Collectors.toList()))
                     .status(instanceModel.getStatus()).createTime(instanceModel.getCreated_at()).build()
         ).collect(Collectors.toList());
 

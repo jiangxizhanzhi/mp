@@ -9,14 +9,14 @@ import org.springframework.context.annotation.Configuration;
  * 对接云平台配置类
  */
 @Configuration
-@ConfigurationProperties(prefix = "mp.openstack",ignoreInvalidFields = true)
+@ConfigurationProperties(prefix = "mp.devops",ignoreInvalidFields = true)
 @Data
-public class OpenStackConfig {
+public class DevopsConfig {
 
     /**
      * 云平台接口地址
      */
-    private String url;
+    private String cp_url;
 
     /**
      * mg中台接口地址

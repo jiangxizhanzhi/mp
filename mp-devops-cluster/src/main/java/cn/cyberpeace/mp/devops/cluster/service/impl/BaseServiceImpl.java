@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.service.impl;
 
 import cn.cyberpeace.mp.base.util.HttpUtils;
-import cn.cyberpeace.mp.devops.cluster.config.OpenStackConfig;
+import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.BaseModel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -17,13 +17,13 @@ import java.io.IOException;
 @Service
 public class BaseServiceImpl {
 
-    protected OpenStackConfig openStackConfig;
+    protected DevopsConfig devopsConfig;
 
     protected ObjectMapper objectMapper;
 
     @Autowired
-    public BaseServiceImpl(OpenStackConfig openStackConfig, ObjectMapper objectMapper) {
-        this.openStackConfig = openStackConfig;
+    public BaseServiceImpl(DevopsConfig devopsConfig, ObjectMapper objectMapper) {
+        this.devopsConfig = devopsConfig;
         this.objectMapper = objectMapper;
     }
 

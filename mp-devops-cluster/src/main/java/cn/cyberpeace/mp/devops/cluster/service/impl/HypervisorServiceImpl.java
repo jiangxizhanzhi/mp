@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.service.impl;
 
 import cn.cyberpeace.mp.base.util.BeanUtils;
-import cn.cyberpeace.mp.devops.cluster.config.OpenStackConfig;
+import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.*;
 import cn.cyberpeace.mp.devops.cluster.request.HypervisorComputeStatusRequest;
 import cn.cyberpeace.mp.devops.cluster.request.HypervisorPageRequest;
@@ -27,24 +27,24 @@ import java.util.stream.Collectors;
 public class HypervisorServiceImpl extends BaseOpenStackServiceImpl implements HypervisorService {
 
 
-    public HypervisorServiceImpl(OpenStackConfig openStackConfig, ObjectMapper objectMapper) {
-        super(openStackConfig, objectMapper);
+    public HypervisorServiceImpl(DevopsConfig devopsConfig, ObjectMapper objectMapper) {
+        super(devopsConfig, objectMapper);
     }
 
     @Override
-    public HypervisorStatisticsOpenStackModel statistics() {
-        return super.sendGet(URL_VERSION + "/hypervisors/statistics",HypervisorStatisticsOpenStackModel.class);
+    public HypervisorStatisticsCloudPlatformModel statistics() {
+        return super.sendGet(URL_VERSION + "/hypervisors/statistics", HypervisorStatisticsCloudPlatformModel.class);
     }
 
     @Override
-    public HypervisorOpenStackModel pageHypervisors(HypervisorPageRequest request,String... ignoreFields) {
+    public HypervisorCloudPlatformModel pageHypervisors(HypervisorPageRequest request, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
-        return super.sendGet(URL_VERSION + "/hypervisors" + BeanUtils.wrapperGetParamsByObject(request,ignoreFields),HypervisorOpenStackModel.class);
+        return super.sendGet(URL_VERSION + "/hypervisors" + BeanUtils.wrapperGetParamsByObject(request,ignoreFields), HypervisorCloudPlatformModel.class);
     }
 
     @Override
-    public HypervisorWeightAndMaxInstanceOpenStackModel getWeightAndMaxInstances(HypervisorWeightAndMaxInstanceRequest request) {
-        return super.sendGet(CPCLOUD_INFO_URL + URL_VERSION + "/vm_status" + BeanUtils.wrapperGetParamsByObject(request),HypervisorWeightAndMaxInstanceOpenStackModel.class);
+    public HypervisorWeightAndMaxInstanceCloudPlatformModel getWeightAndMaxInstances(HypervisorWeightAndMaxInstanceRequest request) {
+        return super.sendGet(CPCLOUD_INFO_URL + URL_VERSION + "/vm_status" + BeanUtils.wrapperGetParamsByObject(request), HypervisorWeightAndMaxInstanceCloudPlatformModel.class);
     }
 
     @Override
@@ -56,22 +56,22 @@ public class HypervisorServiceImpl extends BaseOpenStackServiceImpl implements H
      * 
      * @return
      */
-    public InstanceOsServiceOpenStackModel osServicesStateFromInstances(){
-       return super.sendGet(URL_VERSION + "/instances/os-services", InstanceOsServiceOpenStackModel.class);
+    public InstanceOsServiceCloudPlatformModel osServicesStateFromInstances(){
+       return super.sendGet(URL_VERSION + "/instances/os-services", InstanceOsServiceCloudPlatformModel.class);
     }
 
     /**
      *
      * @return
      */
-    public NetworkAgentOpenStackModel agentsStateFromNetworks(){
-       return super.sendGet(URL_VERSION + "/networks/agents", NetworkAgentOpenStackModel.class);
+    public NetworkAgentCloudPlatformModel agentsStateFromNetworks(){
+       return super.sendGet(URL_VERSION + "/networks/agents", NetworkAgentCloudPlatformModel.class);
     }
 
     @Override
     public List<HypervisorServiceStateResponse> serviceState() {
-        InstanceOsServiceOpenStackModel osServiceOpenStackModel = this.osServicesStateFromInstances();
-        NetworkAgentOpenStackModel networkAgentOpenStackModel = this.agentsStateFromNetworks();
+        InstanceOsServiceCloudPlatformModel osServiceOpenStackModel = this.osServicesStateFromInstances();
+        NetworkAgentCloudPlatformModel networkAgentOpenStackModel = this.agentsStateFromNetworks();
 
         List<HypervisorServiceStateResponse> resultList = new ArrayList<>();
 
@@ -90,8 +90,8 @@ public class HypervisorServiceImpl extends BaseOpenStackServiceImpl implements H
     }
 
     @Override
-    public HypervisorComputeStatusOpenStackModel computeStatus(HypervisorComputeStatusRequest request) {
-        return super.sendGet(CPCLOUD_INFO_URL + URL_VERSION + "/compute_status" + BeanUtils.wrapperGetParamsByObject(request), HypervisorComputeStatusOpenStackModel.class);
+    public HypervisorComputeStatusCloudPlatformModel computeStatus(HypervisorComputeStatusRequest request) {
+        return super.sendGet(CPCLOUD_INFO_URL + URL_VERSION + "/compute_status" + BeanUtils.wrapperGetParamsByObject(request), HypervisorComputeStatusCloudPlatformModel.class);
     }
 
     /**
@@ -99,9 +99,9 @@ public class HypervisorServiceImpl extends BaseOpenStackServiceImpl implements H
      * @return
      */
     @Override
-    public List<HypervisorComputeStatusOpenStackModel> computeStatus(){
-        HypervisorOpenStackModel model = this.pageHypervisors(new HypervisorPageRequest(),this.getTotalPageIgnoreField());
-        List<HypervisorOpenStackModel.Hypervisor> hypervisorList = model.getHypervisors();
+    public List<HypervisorComputeStatusCloudPlatformModel> computeStatus(){
+        HypervisorCloudPlatformModel model = this.pageHypervisors(new HypervisorPageRequest(),this.getTotalPageIgnoreField());
+        List<HypervisorCloudPlatformModel.Hypervisor> hypervisorList = model.getHypervisors();
         if (CollectionUtils.isEmpty(hypervisorList)){
             return new ArrayList<>();
         }
@@ -123,8 +123,8 @@ public class HypervisorServiceImpl extends BaseOpenStackServiceImpl implements H
     }
 
     @Override
-    public VirtualRealSwitchOpenStackModel listVirtualRealSwitch() {
-        return super.sendGet(CPCLOUD_SWITCH_URL + URL_VERSION + "/switchs" ,VirtualRealSwitchOpenStackModel.class);
+    public VirtualRealSwitchCloudPlatformModel listVirtualRealSwitch() {
+        return super.sendGet(CPCLOUD_SWITCH_URL + URL_VERSION + "/switchs" , VirtualRealSwitchCloudPlatformModel.class);
     }
 
 }

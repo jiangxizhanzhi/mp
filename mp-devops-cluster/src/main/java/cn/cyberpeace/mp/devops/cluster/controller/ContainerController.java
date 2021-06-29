@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.devops.cluster.controller;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
-import cn.cyberpeace.mp.devops.cluster.model.ContainerOpenStackModel;
+import cn.cyberpeace.mp.devops.cluster.model.ContainerCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.request.ContainerPageRequest;
 import cn.cyberpeace.mp.devops.cluster.response.ContainerPageResponse;
 import cn.cyberpeace.mp.devops.cluster.service.ContainerService;
@@ -39,8 +39,8 @@ public class ContainerController {
     @ApiOperation("分页查询容器列表")
     @GetMapping("/page")
     public ListObjServiceResult<ContainerPageResponse> page(ContainerPageRequest request){
-        ContainerOpenStackModel model = containerService.page(request);
-        List<ContainerOpenStackModel.ContainerModel> containers = model.getContainers();
+        ContainerCloudPlatformModel model = containerService.page(request);
+        List<ContainerCloudPlatformModel.ContainerModel> containers = model.getContainers();
         if (CollectionUtils.isEmpty(containers)){
             return new ListObjServiceResult();
         }

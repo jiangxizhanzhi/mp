@@ -16,7 +16,7 @@ import java.util.Map;
 @Builder
 @EqualsAndHashCode(callSuper = true)
 @ApiModel(description = "容器模型，对应云平台接口返回信息")
-public class ContainerOpenStackModel extends BaseOpenStackModel implements Serializable {
+public class ContainerCloudPlatformModel extends BaseCloudPlatformModel implements Serializable {
 
     /**
      * 容器列表

@@ -16,7 +16,7 @@ import java.math.RoundingMode;
 @AllArgsConstructor
 @Builder
 @ApiModel(value = "节点管理分页返回信息")
-public class HypervisorPageResponse extends BaseOpenStackResponse{
+public class HypervisorPageResponse extends BaseCloudPlatformResponse {
 
     /**
      * 节点名称

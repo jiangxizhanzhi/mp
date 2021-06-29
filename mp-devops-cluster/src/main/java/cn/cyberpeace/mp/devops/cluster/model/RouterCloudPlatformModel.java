@@ -15,7 +15,7 @@ import java.util.List;
 @Builder
 @EqualsAndHashCode(callSuper = true)
 @ApiModel(description = "路由模型，对应云平台接口返回信息")
-public class RouterOpenStackModel extends BaseOpenStackModel implements Serializable {
+public class RouterCloudPlatformModel extends BaseCloudPlatformModel implements Serializable {
 
     /**
      * 路由列表

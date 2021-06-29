@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.devops.cluster.controller;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
-import cn.cyberpeace.mp.devops.cluster.model.ElasticIpOpenStackModel;
+import cn.cyberpeace.mp.devops.cluster.model.ElasticIpCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.request.ElasticIpPageRequest;
 import cn.cyberpeace.mp.devops.cluster.response.ElasticIpResponse;
 import cn.cyberpeace.mp.devops.cluster.service.ElasticIpService;
@@ -39,8 +39,8 @@ public class ElasticIpController {
     @ApiOperation("分页查询弹性IP信息")
     @GetMapping("/page")
     public ListObjServiceResult<ElasticIpResponse> page(ElasticIpPageRequest request){
-        ElasticIpOpenStackModel model = elasticIpService.page(request);
-        List<ElasticIpOpenStackModel.ElasticIpModel> floatingips = model.getFloatingips();
+        ElasticIpCloudPlatformModel model = elasticIpService.page(request);
+        List<ElasticIpCloudPlatformModel.ElasticIpModel> floatingips = model.getFloatingips();
         if (CollectionUtils.isEmpty(floatingips)){
             return new ListObjServiceResult<>();
         }

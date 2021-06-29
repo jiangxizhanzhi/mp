@@ -6,7 +6,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class HypervisorWeightAndMaxInstanceOpenStackModel extends BaseOpenStackModel{
+public class HypervisorWeightAndMaxInstanceCloudPlatformModel extends BaseCloudPlatformModel {
 
     /**
      * 权重

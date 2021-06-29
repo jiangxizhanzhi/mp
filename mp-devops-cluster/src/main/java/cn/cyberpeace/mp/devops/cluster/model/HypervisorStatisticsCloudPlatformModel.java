@@ -7,7 +7,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode(callSuper = true)
-public class HypervisorStatisticsOpenStackModel extends BaseOpenStackModel{
+public class HypervisorStatisticsCloudPlatformModel extends BaseCloudPlatformModel {
 
     /**
      * 资源统计

@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.devops.cluster.service.impl;
 
 import cn.cyberpeace.mp.base.util.BeanUtils;
-import cn.cyberpeace.mp.devops.cluster.config.OpenStackConfig;
-import cn.cyberpeace.mp.devops.cluster.model.InstanceOpenStackModel;
+import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
+import cn.cyberpeace.mp.devops.cluster.model.InstanceCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.request.InstancePageRequest;
 import cn.cyberpeace.mp.devops.cluster.service.InstanceService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,19 +21,19 @@ import java.util.Objects;
 @Service
 public class InstanceServiceImpl extends BaseOpenStackServiceImpl implements InstanceService {
 
-    public InstanceServiceImpl(OpenStackConfig openStackConfig, ObjectMapper objectMapper) {
-        super(openStackConfig,objectMapper);
+    public InstanceServiceImpl(DevopsConfig devopsConfig, ObjectMapper objectMapper) {
+        super(devopsConfig,objectMapper);
     }
 
     @Override
-    public InstanceOpenStackModel page(InstancePageRequest request,String... ignoreFields) {
+    public InstanceCloudPlatformModel page(InstancePageRequest request, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
-        return super.sendGet(URL_VERSION + "/instances" + BeanUtils.wrapperGetParamsByObject(request,ignoreFields),InstanceOpenStackModel.class);
+        return super.sendGet(URL_VERSION + "/instances" + BeanUtils.wrapperGetParamsByObject(request,ignoreFields), InstanceCloudPlatformModel.class);
     }
 
     @Override
     public Integer getTotalInstances(InstancePageRequest request) {
-        InstanceOpenStackModel page = this.page(request,this.getTotalPageIgnoreField());
+        InstanceCloudPlatformModel page = this.page(request,this.getTotalPageIgnoreField());
         return Objects.isNull(page) ||  Objects.isNull(page.getTotal()) ? 0 : page.getTotal() ;
     }
 

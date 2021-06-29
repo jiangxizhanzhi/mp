@@ -15,7 +15,7 @@ import java.util.List;
 @Builder
 @EqualsAndHashCode(callSuper = true)
 @ApiModel(description = "虚拟机OS服务返回信息")
-public class InstanceOsServiceOpenStackModel extends BaseOpenStackModel implements Serializable {
+public class InstanceOsServiceCloudPlatformModel extends BaseCloudPlatformModel implements Serializable {
 
     /**
      * OsService列表

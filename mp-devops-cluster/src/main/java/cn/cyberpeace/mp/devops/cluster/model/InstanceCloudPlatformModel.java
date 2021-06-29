@@ -15,7 +15,7 @@ import java.util.List;
 @Builder
 @EqualsAndHashCode(callSuper = true)
 @ApiModel(description = "虚拟机模型，对应云平台接口返回信息")
-public class InstanceOpenStackModel extends BaseOpenStackModel implements Serializable {
+public class InstanceCloudPlatformModel extends BaseCloudPlatformModel implements Serializable {
 
     /**
      * 实例列表

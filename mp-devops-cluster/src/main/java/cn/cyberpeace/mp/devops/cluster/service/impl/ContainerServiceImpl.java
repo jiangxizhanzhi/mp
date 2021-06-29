@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.devops.cluster.service.impl;
 
 import cn.cyberpeace.mp.base.util.BeanUtils;
-import cn.cyberpeace.mp.devops.cluster.config.OpenStackConfig;
-import cn.cyberpeace.mp.devops.cluster.model.ContainerOpenStackModel;
+import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
+import cn.cyberpeace.mp.devops.cluster.model.ContainerCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.request.ContainerPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.HypervisorPageRequest;
 import cn.cyberpeace.mp.devops.cluster.service.ContainerService;
@@ -22,8 +22,8 @@ import java.util.Objects;
 @Service
 public class ContainerServiceImpl extends BaseOpenStackServiceImpl implements ContainerService {
 
-    public ContainerServiceImpl(OpenStackConfig openStackConfig,ObjectMapper objectMapper) {
-        super(openStackConfig,objectMapper);
+    public ContainerServiceImpl(DevopsConfig devopsConfig, ObjectMapper objectMapper) {
+        super(devopsConfig,objectMapper);
     }
 
     @Override
@@ -38,14 +38,14 @@ public class ContainerServiceImpl extends BaseOpenStackServiceImpl implements Co
     }
 
     @Override
-    public ContainerOpenStackModel page(ContainerPageRequest request,String... ignoreFields) {
+    public ContainerCloudPlatformModel page(ContainerPageRequest request, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
-        return super.sendGet(URL_VERSION + "/containers" + BeanUtils.wrapperGetParamsByObject(request,ignoreFields),ContainerOpenStackModel.class);
+        return super.sendGet(URL_VERSION + "/containers" + BeanUtils.wrapperGetParamsByObject(request,ignoreFields), ContainerCloudPlatformModel.class);
     }
 
     @Override
     public Integer getTotalContainers(ContainerPageRequest request) {
-        ContainerOpenStackModel page = this.page(request,this.getTotalPageIgnoreField());
+        ContainerCloudPlatformModel page = this.page(request,this.getTotalPageIgnoreField());
         return Objects.isNull(page) || Objects.isNull(page.getTotal()) ? 0 : page.getTotal();
     }
 }

@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.devops.cluster.controller;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
-import cn.cyberpeace.mp.devops.cluster.model.NetworkOpenStackModel;
+import cn.cyberpeace.mp.devops.cluster.model.NetworkCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.request.NetworkPageRequest;
 import cn.cyberpeace.mp.devops.cluster.response.NetworkPageResponse;
 import cn.cyberpeace.mp.devops.cluster.service.NetworkService;
@@ -39,13 +39,13 @@ public class NetworkController {
     @ApiOperation("分页查询网络信息")
     @GetMapping("/page")
     public ListObjServiceResult<NetworkPageResponse> page(NetworkPageRequest request){
-        NetworkOpenStackModel model = networkService.page(request);
-        List<NetworkOpenStackModel.NetworkModel> networks = model.getNetworks();
+        NetworkCloudPlatformModel model = networkService.page(request);
+        List<NetworkCloudPlatformModel.NetworkModel> networks = model.getNetworks();
         if (CollectionUtils.isEmpty(networks)){
             return new ListObjServiceResult();
         }
         List<NetworkPageResponse> list = networks.stream().map(networkModel -> {
-            NetworkOpenStackModel.NetworkModel.Subnet subnet = networkModel.getSubnet();
+            NetworkCloudPlatformModel.NetworkModel.Subnet subnet = networkModel.getSubnet();
             List<NetworkPageResponse.Subnet> subnets = List.of(new NetworkPageResponse.Subnet(subnet.getId(), subnet.getCidr(), subnet.getGateway_ip()));
             return  NetworkPageResponse.builder().name(networkModel.getName()).networkType(networkModel.getNetwork_type())
                 .status(networkModel.getStatus())

@@ -5,7 +5,7 @@ import cn.cyberpeace.mp.devops.cluster.model.RealEquipmentOpenStackModel;
 /**
  * 实装管理接口
  */
-public interface RealEquipmentService extends BaseOpenStackService{
+public interface RealEquipmentService extends BaseCloudPlatformService {
 
     /**
      * 分页查询
