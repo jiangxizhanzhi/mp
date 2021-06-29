@@ -10,7 +10,9 @@ import cn.cyberpeace.mp.devops.cluster.request.InstancePageRequest;
 public interface InstanceService extends BaseCloudPlatformService {
 
     /**
-     * 分页查询
+     * 分页查询虚拟机信息
+     * @param request
+     * @param ignoreFields 不需要传递给云平台接口的参数,默认过滤page与perPage,此参数已转化成limit与offset这两个参数
      * @return
      */
     InstanceCloudPlatformModel page(InstancePageRequest request, String... ignoreFields);

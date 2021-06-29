@@ -4,11 +4,11 @@ import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.ContainerCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.request.ContainerPageRequest;
-import cn.cyberpeace.mp.devops.cluster.request.HypervisorPageRequest;
 import cn.cyberpeace.mp.devops.cluster.service.ContainerService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -28,13 +28,13 @@ public class ContainerServiceImpl extends BaseOpenStackServiceImpl implements Co
 
     @Override
     public String[] getDefaultPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldName(HypervisorPageRequest::getPage,HypervisorPageRequest::getPerPage);
+        return BeanUtils.getBeanGetterFieldName(ContainerPageRequest::getPage,ContainerPageRequest::getPerPage);
     }
 
     @Override
     public String[] getTotalPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldName(HypervisorPageRequest::getLimit,HypervisorPageRequest::getOffset,
-                HypervisorPageRequest::getPage,HypervisorPageRequest::getPerPage);
+        return BeanUtils.getBeanGetterFieldName(ContainerPageRequest::getLimit,ContainerPageRequest::getOffset,
+                ContainerPageRequest::getPage,ContainerPageRequest::getPerPage);
     }
 
     @Override
@@ -46,6 +46,6 @@ public class ContainerServiceImpl extends BaseOpenStackServiceImpl implements Co
     @Override
     public Integer getTotalContainers(ContainerPageRequest request) {
         ContainerCloudPlatformModel page = this.page(request,this.getTotalPageIgnoreField());
-        return Objects.isNull(page) || Objects.isNull(page.getTotal()) ? 0 : page.getTotal();
+        return Objects.isNull(page) || Objects.isNull(page.getTotal()) ? NumberUtils.INTEGER_ZERO : page.getTotal();
     }
 }

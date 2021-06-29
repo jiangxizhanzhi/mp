@@ -23,12 +23,6 @@ public class ElasticIpServiceImpl extends BaseOpenStackServiceImpl implements El
     }
 
     @Override
-    public ElasticIpCloudPlatformModel page(ElasticIpPageRequest request, String... ignoreFields) {
-        ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
-        return super.sendGet(URL_VERSION + "/networks/floatingips" + BeanUtils.wrapperGetParamsByObject(request,ignoreFields), ElasticIpCloudPlatformModel.class);
-    }
-
-    @Override
     public String[] getDefaultPageIgnoreField() {
         return BeanUtils.getBeanGetterFieldName(ElasticIpPageRequest::getPage,ElasticIpPageRequest::getPerPage);
     }
@@ -38,4 +32,12 @@ public class ElasticIpServiceImpl extends BaseOpenStackServiceImpl implements El
         return BeanUtils.getBeanGetterFieldName(ElasticIpPageRequest::getLimit,ElasticIpPageRequest::getOffset,
                 ElasticIpPageRequest::getPage,ElasticIpPageRequest::getPerPage);
     }
+
+    @Override
+    public ElasticIpCloudPlatformModel page(ElasticIpPageRequest request, String... ignoreFields) {
+        ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
+        return super.sendGet(URL_VERSION + "/networks/floatingips" + BeanUtils.wrapperGetParamsByObject(request,ignoreFields), ElasticIpCloudPlatformModel.class);
+    }
+
+
 }

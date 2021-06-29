@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.devops.cluster.model.NpcCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.service.NpcService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -22,18 +23,19 @@ public class NpcServiceImpl extends BaseOpenStackServiceImpl implements NpcServi
     }
 
     @Override
-    public Integer getTotalNPCs() {
-        NpcCloudPlatformModel npcOpenStackModel =  super.sendGet(CPCLOUD_NPC_URL + URL_VERSION + "/bulk_create" , NpcCloudPlatformModel.class);
-        return Objects.isNull(npcOpenStackModel) || Objects.isNull(npcOpenStackModel.getTotal()) ? 0 : npcOpenStackModel.getTotal();
-    }
-
-    @Override
     public String[] getDefaultPageIgnoreField() {
-        return null;
+        return new String[0];
     }
 
     @Override
     public String[] getTotalPageIgnoreField() {
-        return null;
+        return new String[0];
     }
+
+    @Override
+    public Integer getTotalNPCs() {
+        NpcCloudPlatformModel npcOpenStackModel =  super.sendGet(CPCLOUD_NPC_URL + URL_VERSION + "/bulk_create" , NpcCloudPlatformModel.class);
+        return Objects.isNull(npcOpenStackModel) || Objects.isNull(npcOpenStackModel.getTotal()) ? NumberUtils.INTEGER_ZERO : npcOpenStackModel.getTotal();
+    }
+
 }

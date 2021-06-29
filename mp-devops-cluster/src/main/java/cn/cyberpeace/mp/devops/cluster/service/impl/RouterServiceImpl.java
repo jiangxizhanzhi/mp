@@ -3,11 +3,11 @@ package cn.cyberpeace.mp.devops.cluster.service.impl;
 import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.RouterCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.request.InstancePageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RouterPageRequest;
 import cn.cyberpeace.mp.devops.cluster.service.RouterService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -25,6 +25,17 @@ public class RouterServiceImpl extends BaseOpenStackServiceImpl implements Route
     }
 
     @Override
+    public String[] getDefaultPageIgnoreField() {
+        return BeanUtils.getBeanGetterFieldName(RouterPageRequest::getPage,RouterPageRequest::getPerPage);
+    }
+
+    @Override
+    public String[] getTotalPageIgnoreField() {
+        return BeanUtils.getBeanGetterFieldName(RouterPageRequest::getLimit,RouterPageRequest::getOffset,
+                RouterPageRequest::getPage,RouterPageRequest::getPerPage);
+    }
+
+    @Override
     public RouterCloudPlatformModel page(RouterPageRequest request, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         return super.sendGet(URL_VERSION + "/routers" + BeanUtils.wrapperGetParamsByObject(request,ignoreFields), RouterCloudPlatformModel.class);
@@ -33,17 +44,7 @@ public class RouterServiceImpl extends BaseOpenStackServiceImpl implements Route
     @Override
     public Integer getTotalRouters(RouterPageRequest request) {
         RouterCloudPlatformModel page = this.page(request,this.getTotalPageIgnoreField());
-        return Objects.isNull(page) || Objects.isNull(page.getTotal()) ? 0 : page.getTotal();
+        return Objects.isNull(page) || Objects.isNull(page.getTotal()) ? NumberUtils.INTEGER_ZERO : page.getTotal();
     }
 
-    @Override
-    public String[] getDefaultPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldName(InstancePageRequest::getPage,InstancePageRequest::getPerPage);
-    }
-
-    @Override
-    public String[] getTotalPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldName(InstancePageRequest::getLimit,InstancePageRequest::getOffset,
-                InstancePageRequest::getPage,InstancePageRequest::getPerPage);
-    }
 }

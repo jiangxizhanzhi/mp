@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.devops.cluster.service.impl;
 import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.NetworkCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.request.InstancePageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.NetworkPageRequest;
 import cn.cyberpeace.mp.devops.cluster.service.NetworkService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,19 +23,21 @@ public class NetworkServiceImpl extends BaseOpenStackServiceImpl implements Netw
     }
 
     @Override
+    public String[] getDefaultPageIgnoreField() {
+        return BeanUtils.getBeanGetterFieldName(NetworkPageRequest::getPage,NetworkPageRequest::getPerPage);
+    }
+
+    @Override
+    public String[] getTotalPageIgnoreField() {
+        return BeanUtils.getBeanGetterFieldName(NetworkPageRequest::getLimit,NetworkPageRequest::getOffset,
+                NetworkPageRequest::getPage,NetworkPageRequest::getPerPage);
+    }
+
+    @Override
     public NetworkCloudPlatformModel page(NetworkPageRequest request, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         return super.sendGet(URL_VERSION + "/networks" + BeanUtils.wrapperGetParamsByObject(request,ignoreFields), NetworkCloudPlatformModel.class);
     }
 
-    @Override
-    public String[] getDefaultPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldName(InstancePageRequest::getPage,InstancePageRequest::getPerPage);
-    }
 
-    @Override
-    public String[] getTotalPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldName(InstancePageRequest::getLimit,InstancePageRequest::getOffset,
-                InstancePageRequest::getPage,InstancePageRequest::getPerPage);
-    }
 }

@@ -32,6 +32,17 @@ public class HypervisorServiceImpl extends BaseOpenStackServiceImpl implements H
     }
 
     @Override
+    public String[] getDefaultPageIgnoreField() {
+        return BeanUtils.getBeanGetterFieldName(HypervisorPageRequest::getPage,HypervisorPageRequest::getPerPage);
+    }
+
+    @Override
+    public String[] getTotalPageIgnoreField() {
+        return BeanUtils.getBeanGetterFieldName(HypervisorPageRequest::getLimit,HypervisorPageRequest::getOffset,
+                HypervisorPageRequest::getPage,HypervisorPageRequest::getPerPage);
+    }
+
+    @Override
     public HypervisorStatisticsCloudPlatformModel statistics() {
         return super.sendGet(URL_VERSION + "/hypervisors/statistics", HypervisorStatisticsCloudPlatformModel.class);
     }
@@ -111,16 +122,6 @@ public class HypervisorServiceImpl extends BaseOpenStackServiceImpl implements H
         ).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
-    @Override
-    public String[] getDefaultPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldName(HypervisorPageRequest::getPage,HypervisorPageRequest::getPerPage);
-    }
-
-    @Override
-    public String[] getTotalPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldName(HypervisorPageRequest::getLimit,HypervisorPageRequest::getOffset,
-                HypervisorPageRequest::getPage,HypervisorPageRequest::getPerPage);
-    }
 
     @Override
     public VirtualRealSwitchCloudPlatformModel listVirtualRealSwitch() {

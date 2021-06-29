@@ -9,9 +9,9 @@ import cn.cyberpeace.mp.devops.cluster.request.ElasticIpPageRequest;
 public interface ElasticIpService extends BaseCloudPlatformService {
 
     /**
-     * 分页查询
+     * 分页查询弹性IP信息
      * @param request
-     * @param ignoreFields 忽略的字段
+     * @param ignoreFields 不需要传递给云平台接口的参数,默认过滤page与perPage,此参数已转化成limit与offset这两个参数
      * @return
      */
     ElasticIpCloudPlatformModel page(ElasticIpPageRequest request, String... ignoreFields);

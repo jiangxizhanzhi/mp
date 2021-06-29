@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.response;
 
+import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.micrometer.core.instrument.util.StringUtils;
 import io.swagger.annotations.ApiModel;
@@ -49,6 +50,9 @@ public class HypervisorServiceStateResponse extends BaseCloudPlatformResponse {
     }
 
     public String getState() {
-        return StringUtils.isNotBlank(state) ? state.equals("up") ? "正常" : "异常" : alive ? "正常" : "异常";
+        return StringUtils.isNotBlank(state) ?
+                state.equals(CloudPlatformEnum.UP.getDesc()) ?
+                        CloudPlatformEnum.NORMAL.getDesc() : CloudPlatformEnum.ABNORMAL.getDesc()
+                : alive ? CloudPlatformEnum.NORMAL.getDesc() : CloudPlatformEnum.ABNORMAL.getDesc();
     }
 }
