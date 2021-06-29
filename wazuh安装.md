@@ -19,7 +19,16 @@
 3. 执行 systemctl start wazuh-agent
 
 4. 查看https://192.168.5.125/app/wazuh#/agents-preview/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_a=(columns:!(_source),filters:!(('$state':(isImplicit:!t,store:appState),meta:(alias:!n,disabled:!f,index:'wazuh-alerts-*',key:manager.name,negate:!f,params:(query:localhost.localdomain),removable:!f,type:phrase),query:(match:(manager.name:(query:localhost.localdomain,type:phrase))))),index:'wazuh-alerts-*',interval:auto,query:(language:kuery,query:''),sort:!()) 查看状态，如下图表示成功
-  ![img.png](img/agents.png)
+    ![img.png](img/agents.png)
 
-5. 远程命令 安装
+5. 远程命令 安装，比如脚本监控
 
+### windows agent安装
+
+1. 下载[wazuh-agent-4.1.5-1.msi](https://packages.wazuh.com/4.x/windows/wazuh-agent-4.1.5-1.msi) 
+
+2. powershell 管理员权限执行   ` .\wazuh-agent-4.1.5-1.msi /q WAZUH_MANAGER="192.168.5.125" WAZUH_REGISTRATION_SERVER="192.168.5.125"` 完成agent跟 wazuh-manager注册
+
+3. 执行remote command ，比如monitor.exe配置
+
+   
