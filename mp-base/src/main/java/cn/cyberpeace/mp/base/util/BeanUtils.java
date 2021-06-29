@@ -119,18 +119,15 @@ public class BeanUtils implements ApplicationContextAware {
     public static String wrapperGetParamsByFieldsAndObject(List<Field> fieldList, Object object) {
         String result = "";
         StringBuffer joinerStr = new StringBuffer();
+        final BeanWrapper objWrapper = new BeanWrapperImpl(object);
         fieldList.stream().forEach(field -> {
             field.setAccessible(true);
-            try {
-                String fieldName = field.getName();
-                if (!fieldName.equals("pageNo") && !fieldName.equals("pageSize")) {
-                    Object fieldVal = field.get(object);
-                    if (Objects.nonNull(fieldVal)) {
-                        joinerStr.append(Joiner.on("&").join(Joiner.on("=").join(fieldName, fieldVal), ""));
-                    }
+            String fieldName = field.getName();
+            if (!fieldName.equals("pageNo") && !fieldName.equals("pageSize")) {
+                Object fieldVal = objWrapper.getPropertyValue(fieldName);
+                if (Objects.nonNull(fieldVal)) {
+                    joinerStr.append(Joiner.on("&").join(Joiner.on("=").join(fieldName, fieldVal), ""));
                 }
-            } catch (IllegalAccessException e) {
-                log.error("wrapperGetParamsByFieldsAndObject报错信息：{}",e.getMessage());
             }
         });
         result = StringUtils.substringBeforeLast(joinerStr.toString(),"&");
