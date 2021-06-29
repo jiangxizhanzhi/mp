@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.util.LocalDateTimeUtils;
 import cn.cyberpeace.mp.datasandtable.TestDatasandtableApplciation;
 import cn.cyberpeace.mp.datasandtable.model.FileEventModel;
 import cn.cyberpeace.mp.datasandtable.model.WazuhEventRequest;
+import cn.cyberpeace.mp.datasandtable.model.WazuhModel;
 import cn.cyberpeace.mp.datasandtable.model.emum.FileEventType;
 import com.google.common.collect.Lists;
 import java.io.IOException;
@@ -96,7 +97,8 @@ public class WazuhServiceTest {
         wazuhEventRequest.setPageSize(10);
         wazuhEventRequest.setStartTime(LocalDateTime.now());
         wazuhEventRequest.setEndTime(LocalDateTime.now());
-        wazuhService.queryMonitorEvents(wazuhEventRequest);
+        ListObjResult<WazuhModel> listObjResult= wazuhService.queryMonitorEvents(wazuhEventRequest);
+        Assert.isTrue(listObjResult.getObjs().size() > 1 , "查询文件监控分页有数据");
     }
 
     @Test

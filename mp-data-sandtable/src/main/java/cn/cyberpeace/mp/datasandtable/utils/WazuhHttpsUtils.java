@@ -4,10 +4,9 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.datasandtable.constant.DataSandtableConstant;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.Base64;
-import javax.net.ssl.SSLContext;
+import lombok.Cleanup;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
@@ -23,24 +22,17 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
 
+@Slf4j
 public class WazuhHttpsUtils {
-
-
     public static CloseableHttpClient createIgnoreSSLHttpClient() {
         try {
-            SSLContext sslContext = new SSLContextBuilder().loadTrustMaterial(null, new TrustStrategy() {
-                @Override
-                public boolean isTrusted(X509Certificate[] chain,
-                    String authType) throws CertificateException {
-                    return true;
-                }
-            }).build();
-            SSLConnectionSocketFactory sslConnectionSocketFactory = new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE);
+            var sslContext = new SSLContextBuilder().loadTrustMaterial(null, (TrustStrategy) (chain, authType) -> true).build();
+            var sslConnectionSocketFactory = new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE);
             return HttpClients.custom().setSSLSocketFactory(sslConnectionSocketFactory).build();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("{}",e);
+            throw new MpRuntimeException("createIgnoreSSLHttpClient error");
         }
-        return null;
     }
 
     /**
@@ -51,8 +43,8 @@ public class WazuhHttpsUtils {
      * @throws IOException
      */
     public static String sendGetWithAuthToken(String url) throws IOException {
-        CloseableHttpResponse response = null;
-        CloseableHttpClient httpClient = null;
+        @Cleanup CloseableHttpResponse response = null;
+        @Cleanup CloseableHttpClient httpClient = null;
         try {
             httpClient = createIgnoreSSLHttpClient();
 
@@ -67,25 +59,9 @@ public class WazuhHttpsUtils {
             }
             return EntityUtils.toString(response.getEntity(), "UTF-8");
         } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (response != null) {
-                try {
-                    response.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (httpClient != null) {
-                try {
-                    httpClient.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+            log.error("{}",e);
+            throw new MpRuntimeException("sendGetWithAuth 失败");
         }
-
-        throw new MpRuntimeException("sendGetWithAuth 失败");
     }
 
     /**
@@ -96,8 +72,8 @@ public class WazuhHttpsUtils {
      * @throws IOException
      */
     public static String sendGetWithAuth(String url, String userName, String password) throws IOException {
-        CloseableHttpResponse response = null;
-        CloseableHttpClient httpClient = null;
+        @Cleanup CloseableHttpResponse response = null;
+        @Cleanup CloseableHttpClient httpClient = null;
         try {
             var pass = userName + ":" + password;
             String encoding = Base64.getEncoder().encodeToString(pass.getBytes(StandardCharsets.UTF_8));
@@ -109,24 +85,8 @@ public class WazuhHttpsUtils {
             return EntityUtils.toString(response.getEntity(), "UTF-8");
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            if (response != null) {
-                try {
-                    response.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (httpClient != null) {
-                try {
-                    httpClient.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+            throw new MpRuntimeException("sendGetWithAuth 失败");
         }
-
-        throw new MpRuntimeException("sendGetWithAuth 失败");
     }
 
     private static String doGetRequest(String url, HttpClient client) throws IOException {
