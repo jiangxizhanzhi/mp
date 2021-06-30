@@ -14,25 +14,29 @@ import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.auth.util.ServletUtils;
-import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
+import cn.cyberpeace.mp.devops.log.enums.ModuleEnums;
 import com.alibaba.excel.EasyExcel;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
 
@@ -72,6 +76,7 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
 
     @ApiOperation(value = "禁用用户", notes = "")
     @PostMapping("/disable")
+//    @OperateLog(module = ModuleEnums.AUTH)
     public ServiceResult disable(@RequestParam String userId) {
         boolean success = getModelService().disable(userId);
         return ServletUtils.commonResult(success, null);

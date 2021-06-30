@@ -11,7 +11,7 @@ import java.net.UnknownHostException;
 
 @Slf4j
 @SpringBootApplication
-@EnableSwagger2
+//@EnableSwagger2
 public class Application {
 
     public static void main(String[] args) {

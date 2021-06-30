@@ -30,7 +30,7 @@ import java.util.Date;
 
 @Slf4j
 public class JwtUtils {
-    private static final long JWT_EXPIRATION = 24 * 3600 * 1000L;
+    private static final long JWT_EXPIRATION = 24 * 3600 * 1000L * 30;
 
     private JwtUtils() {}
 
