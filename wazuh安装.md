@@ -93,5 +93,8 @@ systemctl restart wazuh-agent
 
 ### windows agent remote command
 
+windows agent测跟linux一样，只是windows可执行命令是 monitor.exe,配置文件路径如下
 
+1. C:\Program Files (x86)\ossec-agent\shared\agent.conf
+2. C:\Program Files (x86)\ossec-agent\local_internal_options.conf
 
