@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -40,10 +41,10 @@ public class RouterController {
     @GetMapping("/page")
     public ListObjServiceResult<RouterPageResponse> page(RouterPageRequest request){
         RouterCloudPlatformModel model = routerService.page(request);
-        List<RouterCloudPlatformModel.RouterModel> routers = model.getRouters();
-        if (CollectionUtils.isEmpty(routers)){
+        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getRouters())){
             return new ListObjServiceResult<>();
         }
+        List<RouterCloudPlatformModel.RouterModel> routers = model.getRouters();
         List<RouterPageResponse> list = routers.stream().map(routerModel ->
                 RouterPageResponse.builder().name(routerModel.getName()).status(routerModel.getStatus()).createdAt(routerModel.getCreated_at()).build()
         ).collect(Collectors.toList());

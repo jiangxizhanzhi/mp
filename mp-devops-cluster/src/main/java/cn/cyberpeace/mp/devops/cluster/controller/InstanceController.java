@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -44,14 +45,11 @@ public class InstanceController {
     @ApiOperation("分页查询实例信息")
     @GetMapping("/page")
     public ListObjServiceResult<InstancePageResponse> page(@Valid InstancePageRequest request){
-
         InstanceCloudPlatformModel model = instanceService.page(request);
-        List<InstanceCloudPlatformModel.InstanceModel> instances = model.getInstances();
-
-        if (CollectionUtils.isEmpty(instances)){
+        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getInstances())){
             return new ListObjServiceResult();
         }
-
+        List<InstanceCloudPlatformModel.InstanceModel> instances = model.getInstances();
         List<InstancePageResponse> list = instances.stream().map(instanceModel ->
             InstancePageResponse.builder().name(instanceModel.getInstance_name()).node(instanceModel.getHostname())
                     .addressList(instanceModel.getAddresses().stream().map(InstanceCloudPlatformModel.InstanceModel.Address::getIp).collect(Collectors.toList()))

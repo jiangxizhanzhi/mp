@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -40,10 +41,10 @@ public class NetworkController {
     @GetMapping("/page")
     public ListObjServiceResult<NetworkPageResponse> page(NetworkPageRequest request){
         NetworkCloudPlatformModel model = networkService.page(request);
-        List<NetworkCloudPlatformModel.NetworkModel> networks = model.getNetworks();
-        if (CollectionUtils.isEmpty(networks)){
+        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getNetworks())){
             return new ListObjServiceResult();
         }
+        List<NetworkCloudPlatformModel.NetworkModel> networks = model.getNetworks();
         List<NetworkPageResponse> list = networks.stream().map(networkModel -> {
             NetworkCloudPlatformModel.NetworkModel.Subnet subnet = networkModel.getSubnet();
             List<NetworkPageResponse.Subnet> subnets = List.of(new NetworkPageResponse.Subnet(subnet.getId(), subnet.getCidr(), subnet.getGateway_ip()));

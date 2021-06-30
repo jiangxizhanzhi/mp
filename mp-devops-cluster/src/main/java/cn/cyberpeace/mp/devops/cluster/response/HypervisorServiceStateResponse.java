@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.response;
 
 import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
+import cn.cyberpeace.mp.devops.cluster.enums.FontColorEnum;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.micrometer.core.instrument.util.StringUtils;
 import io.swagger.annotations.ApiModel;
@@ -39,6 +40,12 @@ public class HypervisorServiceStateResponse extends BaseCloudPlatformResponse {
     @ApiModelProperty(value = "状态")
     private String state;
 
+    /**
+     * 状态
+     */
+    @ApiModelProperty(value = "状态")
+    private FontColorEnum fontColor;
+
     public HypervisorServiceStateResponse(String name, Boolean alive) {
         this.name = name;
         this.alive = alive;
@@ -54,5 +61,9 @@ public class HypervisorServiceStateResponse extends BaseCloudPlatformResponse {
                 state.equals(CloudPlatformEnum.UP.getDesc()) ?
                         CloudPlatformEnum.NORMAL.getDesc() : CloudPlatformEnum.ABNORMAL.getDesc()
                 : alive ? CloudPlatformEnum.NORMAL.getDesc() : CloudPlatformEnum.ABNORMAL.getDesc();
+    }
+
+    public FontColorEnum getFontColor() {
+        return getState().equals(CloudPlatformEnum.NORMAL.getDesc()) ? FontColorEnum.GREEN : FontColorEnum.RED;
     }
 }

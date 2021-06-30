@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -40,10 +41,10 @@ public class ContainerController {
     @GetMapping("/page")
     public ListObjServiceResult<ContainerPageResponse> page(ContainerPageRequest request){
         ContainerCloudPlatformModel model = containerService.page(request);
-        List<ContainerCloudPlatformModel.ContainerModel> containers = model.getContainers();
-        if (CollectionUtils.isEmpty(containers)){
+        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getContainers())){
             return new ListObjServiceResult();
         }
+        List<ContainerCloudPlatformModel.ContainerModel> containers = model.getContainers();
         List<ContainerPageResponse> list = containers.stream().map(containerModel ->
                 ContainerPageResponse.builder().name(containerModel.getName()).image(containerModel.getImage())
                 .node(containerModel.getHost()).addressList(List.of(containerModel.getAddresses()))

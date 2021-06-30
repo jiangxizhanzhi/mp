@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -40,10 +41,10 @@ public class ElasticIpController {
     @GetMapping("/page")
     public ListObjServiceResult<ElasticIpResponse> page(ElasticIpPageRequest request){
         ElasticIpCloudPlatformModel model = elasticIpService.page(request);
-        List<ElasticIpCloudPlatformModel.ElasticIpModel> floatingips = model.getFloatingips();
-        if (CollectionUtils.isEmpty(floatingips)){
+        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getFloatingips())){
             return new ListObjServiceResult<>();
         }
+        List<ElasticIpCloudPlatformModel.ElasticIpModel> floatingips = model.getFloatingips();
         List<ElasticIpResponse> list = floatingips.stream().map(elasticIpModel ->
               ElasticIpResponse.builder().floatIpAddress(elasticIpModel.getFloating_ip_address())
                       .fixedIpAddress(elasticIpModel.getFixed_ip_address()).status(elasticIpModel.getStatus())
