@@ -5,11 +5,15 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+
+import java.util.Objects;
 
 /**
  * 业务异常统一处理
@@ -34,7 +38,19 @@ public class MpRuntimeExceptionHandler {
     public ServiceResult<String> validationExceptionHandle(BindException ex) {
         log.error(ex.getMessage());
         ObjectError objectError = ex.getBindingResult().getAllErrors().get(0);
-        return ServiceResult.fail(BaseErrorCode.PARAMS_INVALID, objectError.getDefaultMessage());
+        BindingResult bindingResult = ex.getBindingResult();
+        if(Objects.nonNull(bindingResult)){
+            if(bindingResult.hasErrors()){
+                FieldError fieldError = bindingResult.getFieldError();
+                String field = fieldError.getField();
+                String defaultMessage = fieldError.getDefaultMessage();
+                return ServiceResult.fail(BaseErrorCode.PARAMS_INVALID,field + ":" + defaultMessage);
+            }else {
+                return ServiceResult.fail(BaseErrorCode.PARAMS_INVALID,objectError.getDefaultMessage());
+            }
+        }else {
+            return ServiceResult.fail(BaseErrorCode.PARAMS_INVALID,objectError.getDefaultMessage());
+        }
     }
 
     @ExceptionHandler(Exception.class)
