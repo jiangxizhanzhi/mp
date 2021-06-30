@@ -97,15 +97,15 @@ public class ExcelTestController {
 
     private List<ExportUser> data() {
         List<ExportUser> list = new ArrayList<ExportUser>();
-        for (int i = 0; i < 10; i++) {
-            ExportUser user = new ExportUser();
-            user.setUsername("demo-" + i);
-            user.setName("张三" + i);
-            user.setOrg("南京赛宁/研发部/研发一部/研发组" + i);
-            user.setStat(i + "");
-            user.setRoles("角色1/角色2/角色3");
-            list.add(user);
-        }
+//        for (int i = 0; i < 10; i++) {
+//            ExportUser user = new ExportUser();
+//            user.setUsername("demo-" + i);
+//            user.setName("张三" + i);
+//            user.setOrg("南京赛宁/研发部/研发一部/研发组" + i);
+//            user.setStat(i + "");
+//            user.setRoles("角色1/角色2/角色3");
+//            list.add(user);
+//        }
 //        int i = 1 / 0;
         return list;
     }

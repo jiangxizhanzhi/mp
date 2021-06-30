@@ -1,7 +1,9 @@
 package cn.cyberpeace.mp.auth.model;
 
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.dto.validate.AddGroup;
 import cn.cyberpeace.mp.base.model.BaseModel;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,6 +31,7 @@ public class TargetModel extends BaseModel {
     private String parent;
     @NotBlank(groups = AddGroup.class)
     private String identifier;
+    @DefaultStr(AuthConstant.DEFAULT_TENANT)
     private String tenant;
     @NotBlank(groups = AddGroup.class)
     private String name;

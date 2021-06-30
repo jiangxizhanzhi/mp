@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.base.model.stereotype.DefaultGen;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -30,6 +31,7 @@ public class UserModel extends BaseModel implements Serializable {
 
     public static final int INT_CHECK_YES = 1;
 
+
     @DefaultStr(AuthConstant.DEFAULT_TENANT)
     private String tenant;
     private String identifier;
@@ -41,6 +43,8 @@ public class UserModel extends BaseModel implements Serializable {
     private String name;
     @DefaultStr
     private String nickname;
+
+    @ApiModelProperty(value = "头像")
     @DefaultStr
     private String avatar;
     @DefaultGen(DateGenerator.class)

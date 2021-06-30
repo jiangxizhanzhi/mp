@@ -69,11 +69,21 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
         }
 
         if (user != null) {
+//            if (!Objects.equals(user.getStatus(), UserModel.Status.NORMAL)) {
+//
+//            }
+
             String jwt = JwtUtils.generateToken(new JwtUtils.UserInfo(user.getId(), user.getUsername(), user.getTokenSecret()));
             ObjResult<UserModel> userResult = new ObjResult(user, new UserFields().getAvailableFields());
             LoginResp loginResp = new LoginResp();
             loginResp.setUser(userResult.asResult());
             loginResp.setToken(jwt);
+
+            // 首次登陆，需要修改密码
+            if (user.getInitCheck() == UserModel.INT_CHECK_YES) {
+                result = ServiceResult.builder().source(loginResp).serviceCode(AuthErrorCode.NEED_UPDATE_CREDENTIALS).build();
+            }
+
             // 角色
             List<RoleModel> roles = userRoleService.listByUserId(user.getId());
             loginResp.setRoles(roles);
@@ -94,11 +104,6 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
             loginResp.setOrgs(orgDtos);
 
             result = ServiceResult.builder().source(loginResp).build();
-
-            // 首次登陆，需要修改密码
-            if (user.getInitCheck() == UserModel.INT_CHECK_YES) {
-                result = ServiceResult.builder().source(loginResp).serviceCode(AuthErrorCode.NEED_UPDATE_CREDENTIALS).build();
-            }
 
         } else {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
