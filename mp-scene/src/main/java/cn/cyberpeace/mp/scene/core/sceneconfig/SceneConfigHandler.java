@@ -27,6 +27,7 @@ import cn.cyberpeace.mp.scene.repository.*;
         SceneConfigElementPortModel.class,
         SceneConfigElementPortConnectionModel.class,
         SceneConfigPluginHandler.class,
+        SceneConfigHandler.class,
 })
 @BeanFieldClasses({
         SceneConfigMapper.class,
@@ -56,7 +57,8 @@ public class SceneConfigHandler extends BaseSceneHandler<
         SceneConfigElementPortMapper,
         SceneConfigElementPortConnectionMapper,
         SceneConfigElementPluginMapper,
-        SceneConfigPluginHandler<?, ?>> {
+        SceneConfigPluginHandler<?, ?>,
+        SceneConfigHandler> {
 
     public SceneConfigHandler(SceneConfigDataBO sceneConfigDataBO) throws SceneNotExistException {
         init(sceneConfigDataBO, false);
