@@ -18,8 +18,6 @@ import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
-import cn.cyberpeace.mp.devops.log.enums.ModuleEnums;
 import com.alibaba.excel.EasyExcel;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
