@@ -43,6 +43,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -83,24 +84,38 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     @Override
+    public ObjServiceResult<UserModel> get(String id) {
+        ObjServiceResult<UserModel> objServiceResult = super.get(id);
+
+        if (Objects.isNull(objServiceResult.getSource()) || Objects.isNull(objServiceResult.getSource().getObj())) {
+            return objServiceResult;
+        }
+        UserModel userModel = objServiceResult.getSource().getObj();
+        processExpiredStatus(userModel);
+        return objServiceResult;
+    }
+
+    @Override
     public ListObjServiceResult list(UserQueryParams queryParams) {
         ListObjServiceResult<UserModel> listObjSrvResult = super.list(queryParams);
 
         List<UserDto> userDtos;
-        if (listObjSrvResult.getSource() == null || CollectionUtil.isEmpty(listObjSrvResult.getSource().getObjs())) {
+        if (Objects.isNull(listObjSrvResult.getSource()) || CollectionUtil.isEmpty(listObjSrvResult.getSource().getObjs())) {
             return listObjSrvResult;
         }
 
         List<UserModel> users = listObjSrvResult.getSource().getObjs();
         userDtos = users.stream().map(u -> {
+            processExpiredStatus(u);
+
             UserDto userDto = new UserDto();
             BeanUtils.copyProperties(u, userDto);
             String allorgpath = orgUserService.getAllOrgPathByUserId(u.getId());
             userDto.setOrgpath(allorgpath);
 
             List<RoleModel> roles = userRoleService.listByUserId(u.getId());
-            String allroles = roles.stream().map(r -> r.getIdentifier()).collect(Collectors.joining(","));
-            userDto.setRoles(allroles);
+//            String allroles = roles.stream().map(r -> r.getIdentifier()).collect(Collectors.joining(","));
+            userDto.setRoles(roles);
             return userDto;
         }).collect(Collectors.toList());
 
@@ -142,13 +157,17 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     public UserModel getByUserName(String userName) {
         log.info("userName:{}", userName);
-        return getModelMapper().first(new HumanCondition().filterEqual("username", userName));
+        UserModel userModel = getModelMapper().first(new HumanCondition().filterEqual("username", userName));
+        processExpiredStatus(userModel);
+        return userModel;
     }
 
     @Override
     public UserModel getByMobile(String mobile) {
         log.info("mobile:{}", mobile);
-        return getModelMapper().first(new HumanCondition().filterEqual("mobile", mobile));
+        UserModel userModel = getModelMapper().first(new HumanCondition().filterEqual("mobile", mobile));
+        processExpiredStatus(userModel);
+        return userModel;
     }
 
     @Override
@@ -180,7 +199,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         Assert.isFalse(PasswordUtils.isPasswordStrengthLowLevel(newPwd), AuthConstant.ERROR_CODE_PREFIX + "password_strength_invalid");
 
         var source = get(userId).getSource();
-        UserModel user = source == null ? null : source.getObj();
+        UserModel user = Objects.isNull(source) ? null : source.getObj();
         Assert.notNull(user, AuthConstant.ERROR_CODE_PREFIX + "account_not_existed");
 
         UserModel userUpdate = new UserModel();
@@ -271,8 +290,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         }
 
         Integer status = queryParams.getStatus();
-        status = status == null ? UserModel.Status.NORMAL : status;
-        humanCondition.filterEqual("status", status);
+        if (Objects.nonNull(status)) {
+            humanCondition.filterEqual("status", status);
+        }
     }
 
 
@@ -309,7 +329,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             String roles = importUser.getRoles().trim();
             Arrays.stream(StringUtils.split(roles, ",")).forEach(ident -> {
                 RoleModel roleModel = roleService.getByIdent(ident.trim());
-                if (roleModel != null) {
+                if (Objects.nonNull(roleModel)) {
                     UserRoleModel userRoleModel = new UserRoleModel();
                     userRoleModel.setUser(userModel.getId());
                     userRoleModel.setRole(roleModel.getId());
@@ -377,7 +397,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
 
     private UserModel importUser2UserModel(ImportUser importUser) {
-        if (importUser == null) {
+        if (Objects.isNull(importUser)) {
             return null;
         }
         UserModel userModel = new UserModel();
@@ -392,7 +412,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
 
     private ExportUser user2ExportUser(UserModel user) {
-        if (user == null) {
+        if (Objects.isNull(user)) {
             return null;
         }
         ExportUser exportUser = new ExportUser();
@@ -419,6 +439,27 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         exportUser.setRoles(roles);
 
         return exportUser;
+    }
+
+
+    /**
+     * 处理用户过期状态，只有当用户状态为正常状态，且过期时间已到的时候，才会更改为过期状态
+     * @param user
+     */
+    private void processExpiredStatus(UserModel user) {
+        if (Objects.isNull(user.getExpiredTime())) {
+            return;
+        }
+        LocalDateTime now = LocalDateTime.now();
+        if (now.isAfter(user.getExpiredTime()) && Objects.equals(user.getStatus(), UserModel.Status.NORMAL)) {
+            log.info("用户状态已经过期，准备更新数据库用户状态！ username:{}", user.getUsername());
+            user.setStatus(UserModel.Status.EXPIRED);
+
+            UserModel userUpdate = new UserModel();
+            userUpdate.setId(user.getId());
+            userUpdate.setStatus(UserModel.Status.EXPIRED);
+            update(userUpdate);
+        }
     }
 
 }

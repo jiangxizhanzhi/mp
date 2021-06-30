@@ -38,6 +38,10 @@ public class Stat2StringConverter implements Converter<String> {
         if (Objects.equals(value, UserModel.Status.PENDING.toString())) {
             return new CellData("待审批");
         }
+
+        if (Objects.equals(value, UserModel.Status.EXPIRED.toString())) {
+            return new CellData("过期");
+        }
         return new CellData(value);
     }
 }
