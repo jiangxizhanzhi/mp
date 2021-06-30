@@ -69,21 +69,75 @@ public class CloudPlatformMonitorController {
     public ServiceResult<HypervisorStatisticsResponse> statistics(){
 
         //虚拟机个数
-        CompletableFuture<Integer> totalInstances = CompletableFuture.supplyAsync(() -> instanceService.getTotalInstances(new InstancePageRequest()));
+        CompletableFuture<Integer> totalInstances = CompletableFuture.supplyAsync(() ->
+                instanceService.getTotalInstances(new InstancePageRequest())).handle((result, throwable) -> {
+            // 如果异常存在,打印异常，并且返回默认值
+            if (throwable != null) {
+                log.info("=======statistics方法:getTotalInstances获取虚拟机个数异常信息：{}",throwable.getMessage());
+                return 0;
+            } else {
+                return result;
+            }
+        });
 
         //容器个数
-        CompletableFuture<Integer> totalContainers = CompletableFuture.supplyAsync(() -> containerService.getTotalContainers(new ContainerPageRequest()));
+        CompletableFuture<Integer> totalContainers = CompletableFuture.supplyAsync(() ->
+                containerService.getTotalContainers(new ContainerPageRequest())).handle((result,throwable) -> {
+            // 如果异常存在,打印异常，并且返回默认值
+            if (throwable != null) {
+                log.info("========statistics方法:getTotalContainers获取容器个数异常信息：{}",throwable.getMessage());
+                return 0;
+            } else {
+                return result;
+            }
+        });
 
         //实装设备个数
-        CompletableFuture<Integer> totalRealEquipments = CompletableFuture.supplyAsync(() -> realEquipmentService.getTotalRealEquipment());
+        CompletableFuture<Integer> totalRealEquipments = CompletableFuture.supplyAsync(() ->
+                realEquipmentService.getTotalRealEquipment()).handle((result,throwable) -> {
+            // 如果异常存在,打印异常，并且返回默认值
+            if (throwable != null) {
+                log.info("========statistics方法:getTotalRealEquipment获取实装设备个数异常信息：{}",throwable.getMessage());
+                return 0;
+            } else {
+                return result;
+            }
+        });
 
         //NPC总数
-        CompletableFuture<Integer> totalNPCs = CompletableFuture.supplyAsync(() -> npcService.getTotalNPCs());
+        CompletableFuture<Integer> totalNPCs = CompletableFuture.supplyAsync(() ->
+                npcService.getTotalNPCs()).handle((result,throwable) -> {
+            // 如果异常存在,打印异常，并且返回默认值
+            if (throwable != null) {
+                log.info("========statistics方法:getTotalNPCs获取NPC个数异常信息：{}",throwable.getMessage());
+                return 0;
+            } else {
+                return result;
+            }
+        });
 
         //路由个数
-        CompletableFuture<Integer> totalRouters = CompletableFuture.supplyAsync(() -> routerService.getTotalRouters(new RouterPageRequest()));
+        CompletableFuture<Integer> totalRouters = CompletableFuture.supplyAsync(() ->
+                routerService.getTotalRouters(new RouterPageRequest())).handle((result,throwable) -> {
+            // 如果异常存在,打印异常，并且返回默认值
+            if (throwable != null) {
+                log.info("========statistics方法:getTotalRouters获取路由个数异常信息：{}",throwable.getMessage());
+                return 0;
+            } else {
+                return result;
+            }
+        });
 
-        CompletableFuture<HypervisorStatisticsCloudPlatformModel> model = CompletableFuture.supplyAsync(() -> hypervisorService.statistics());
+        CompletableFuture<HypervisorStatisticsCloudPlatformModel> model = CompletableFuture.supplyAsync(() ->
+                hypervisorService.statistics()).handle((result,throwable) -> {
+            // 如果异常存在,打印异常，并且返回默认值
+            if (throwable != null) {
+                log.info("========statistics方法:statistics获取资源统计信息异常信息：{}",throwable.getMessage());
+                return null;
+            } else {
+                return result;
+            }
+        });
 
         CompletableFuture.allOf(totalInstances, totalContainers,totalRealEquipments,totalNPCs,totalRouters,model).join();
 
@@ -109,13 +163,11 @@ public class CloudPlatformMonitorController {
                     ,hypervisorStatistics.getLocal_gb_used(),hypervisorStatistics.getFree_ram_mb(),hypervisorStatistics.getFree_disk_gb());
         } catch (InterruptedException e) {
            log.error("资源统计多线程异步合并请求异常信息:{}",e.getMessage());
-            return new ServiceResult(response).asResult();
         } catch (ExecutionException e) {
             log.error("资源统计多线程异步合并请求异常信息:{}",e.getMessage());
+        }finally {
             return new ServiceResult(response).asResult();
         }
-
-        return new ServiceResult(response).asResult();
     }
 
     /**
@@ -140,9 +192,11 @@ public class CloudPlatformMonitorController {
 
         hypervisorPageResponses.stream().forEach(v -> {
             String name = v.getName();
-            v.setTotalInstances(instanceService.getTotalInstances(new InstancePageRequest(name)));
-            v.setTotalContainers(containerService.getTotalContainers(new ContainerPageRequest(name)));
             HypervisorWeightAndMaxInstanceCloudPlatformModel weightAndMaxInstances = hypervisorService.getWeightAndMaxInstances(new HypervisorWeightAndMaxInstanceRequest(name));
+            Integer totalInstances = instanceService.getTotalInstances(new InstancePageRequest(name));
+            Integer totalContainers = containerService.getTotalContainers(new ContainerPageRequest(name));
+            v.setTotalInstances(totalInstances);
+            v.setTotalContainers(totalContainers);
             if (Objects.nonNull(weightAndMaxInstances)) {
                 v.setWeight(weightAndMaxInstances.getWeight());
                 v.setMaxInstances(weightAndMaxInstances.getMax_instances());
