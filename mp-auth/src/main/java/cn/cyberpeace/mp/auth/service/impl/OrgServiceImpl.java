@@ -6,7 +6,6 @@ import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.repository.OrgMapper;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.fields.OrgFields;
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
@@ -44,11 +43,27 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
             if (orgModel == null) {
                 throw new IllegalArgumentException("id为"+ obj.getParent() + "的组织不存在");
             }
-            String path = getPathByOrgId(orgModel.getId());
+            String path = calculatePathByOrgId(orgModel.getId());
             path = path + AuthConstant.ORG_PATH_SEPARATOR + obj.getName();
             obj.setPath(path);
         }
         return super.create(obj, fields);
+    }
+
+    @Override
+    public ObjServiceResult<OrgModel> update(OrgModel obj, String[] fields) {
+        // 如果更新parent，则重新计算path
+        if (StringUtils.isNotBlank(obj.getParent())) {
+            OrgModel orgModel = getModelMapper().get(obj.getParent());
+            if (orgModel == null) {
+                throw new IllegalArgumentException("id为"+ obj.getParent() + "的组织不存在");
+            }
+            String path = calculatePathByOrgId(orgModel.getId());
+            path = path + AuthConstant.ORG_PATH_SEPARATOR + obj.getName();
+            obj.setPath(path);
+        }
+
+        return super.update(obj, fields);
     }
 
     @Override
@@ -101,7 +116,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
 
 
     @Override
-    public String getPathByOrgId(String orgId) {
+    public String calculatePathByOrgId(String orgId) {
         OrgDto orgDto = getHierarchicalOrgsByOrgId(orgId);
         Assert.notNull(orgDto, "未查询到id为" + orgId + "的组织");
 

@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.base.model.stereotype.DefaultGen;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -33,39 +34,75 @@ public class UserModel extends BaseModel implements Serializable {
 
 
     @DefaultStr(AuthConstant.DEFAULT_TENANT)
+    @ApiModelProperty(value = "租户")
     private String tenant;
+
+    @ApiModelProperty(value = "编号")
     private String identifier;
+
+    @ApiModelProperty(value = "用户名")
     private String username;
+
+    @ApiModelProperty(value = "密码")
+    @JsonIgnore
     private String password;
+
+    @ApiModelProperty(value = "token秘钥")
     @DefaultGen(UuidGenerator.class)
     private String tokenSecret;
+
+    @ApiModelProperty(value = "用户姓名")
     @DefaultStr
     private String name;
+
+    @ApiModelProperty(value = "昵称")
     @DefaultStr
     private String nickname;
 
     @ApiModelProperty(value = "头像")
     @DefaultStr
     private String avatar;
+
+    @ApiModelProperty(value = "生日")
     @DefaultGen(DateGenerator.class)
     private LocalDate birthday;
+
+    @ApiModelProperty(value = "邮箱")
     @DefaultStr
     private String email;
+
+    @ApiModelProperty(value = "手机号")
     @DefaultStr
     private String mobile;
+
+    @ApiModelProperty(value = "身份证号")
     @DefaultStr
     private String idCard;
+
+    @ApiModelProperty(value = "地址")
     @DefaultStr
     private String address;
+
+    @ApiModelProperty(value = "账号状态 1：正常   2：禁用   3：挂起（待审批）")
     @DefaultInt(1)
     private Integer status;
+
+    @ApiModelProperty(value = "是否首次登陆需要强制修改密码 0:否，1:是")
     @DefaultInt(INT_CHECK_NO)
     private Integer initCheck;
+
+    @ApiModelProperty(value = "描述")
     @DefaultStr
     private String description;
+
+    @ApiModelProperty(value = "加入时间")
     @DefaultGen(DateTimeGenerator.class)
     private LocalDateTime dateJoined;
+
+    @ApiModelProperty(value = "过期时间")
     private LocalDateTime expiredTime;
+
+    @ApiModelProperty(value = "最后登录时间")
     @DefaultGen(DateTimeGenerator.class)
     private LocalDateTime lastLogin;
 
@@ -76,7 +113,9 @@ public class UserModel extends BaseModel implements Serializable {
         public static final Integer DISABLE = 2;
         // 挂起，等待审批
         public static final Integer PENDING = 3;
-        private Status() {}
+
+        private Status() {
+        }
     }
 
     public void encodePassword() {
@@ -93,7 +132,7 @@ public class UserModel extends BaseModel implements Serializable {
 
     public void initDefaultExpiredTime() {
         if (expiredTime == null) {
-            expiredTime =  LocalDateTime.now().plusYears(99L);
+            expiredTime = LocalDateTime.now().plusYears(99L);
         }
     }
 

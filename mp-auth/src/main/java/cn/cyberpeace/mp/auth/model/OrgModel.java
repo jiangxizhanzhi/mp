@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,11 +16,21 @@ import java.util.Objects;
 @NoArgsConstructor
 @Table("mp_auth_org")
 public class OrgModel extends BaseModel {
+
+    @ApiModelProperty(value = "租户")
     @DefaultStr(AuthConstant.DEFAULT_TENANT)
     private String tenant;
+
+    @ApiModelProperty(value = "上级组织ID")
     private String parent;
+
+    @ApiModelProperty(value = "编号")
     private String identifier;
+
+    @ApiModelProperty(value = "名称")
     private String name;
+
+    @ApiModelProperty(value = "路径")
     private String path;
 
     @Override

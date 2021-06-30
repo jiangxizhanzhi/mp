@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
+import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.OrgUserModel;
 import cn.cyberpeace.mp.auth.model.RoleModel;
@@ -25,9 +26,12 @@ import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.lang.Assert;
 import lombok.extern.slf4j.Slf4j;
@@ -39,8 +43,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.sql.Array;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -78,6 +80,39 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public UserServiceImpl(UserMapper modelMapper, UserFields modelFields) {
         setModelMapper(modelMapper);
         setModelFields(modelFields);
+    }
+
+    @Override
+    public ListObjServiceResult list(UserQueryParams queryParams) {
+        ListObjServiceResult<UserModel> listObjSrvResult = super.list(queryParams);
+
+        List<UserDto> userDtos;
+        if (listObjSrvResult.getSource() == null || CollectionUtil.isEmpty(listObjSrvResult.getSource().getObjs())) {
+            return listObjSrvResult;
+        }
+
+        List<UserModel> users = listObjSrvResult.getSource().getObjs();
+        userDtos = users.stream().map(u -> {
+            UserDto userDto = new UserDto();
+            BeanUtils.copyProperties(u, userDto);
+            String allorgpath = orgUserService.getAllOrgPathByUserId(u.getId());
+            userDto.setOrgpath(allorgpath);
+
+            List<RoleModel> roles = userRoleService.listByUserId(u.getId());
+            String allroles = roles.stream().map(r -> r.getIdentifier()).collect(Collectors.joining(","));
+            userDto.setRoles(allroles);
+            return userDto;
+        }).collect(Collectors.toList());
+
+        if (CollectionUtil.isNotEmpty(userDtos)) {
+            // 转换
+            ListObjServiceResult<UserDto> result = new ListObjServiceResult<>();
+            BeanUtils.copyProperties(listObjSrvResult, result);
+            result.getSource().setObjs(userDtos);
+            return result;
+        }
+
+        return listObjSrvResult;
     }
 
     @Override
@@ -241,7 +276,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
 
-
     @Override
     public void downloadExcelTemplate() {
         try {
@@ -372,7 +406,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 //            orgList.add(orgService.getPathByOrgId(org.getId()));
 //        }
 
-        String paths = orgList.stream().map(o -> orgService.getPathByOrgId(o.getId())).collect(Collectors.joining(","));
+        String paths = orgList.stream().map(o -> orgService.calculatePathByOrgId(o.getId())).collect(Collectors.joining(","));
         log.info("paths:{}", paths);
         exportUser.setOrg(paths);
 

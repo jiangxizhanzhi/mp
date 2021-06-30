@@ -21,4 +21,6 @@ public interface OrgUserService extends BaseModelService<OrgUserModel, QueryPara
     // 增量添加组织-用户关系
     boolean additionalBindOrgUsers(String orgId, List<String> userIds);
 
+    String getAllOrgPathByUserId(String userId);
+
 }
