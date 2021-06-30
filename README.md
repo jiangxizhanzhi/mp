@@ -23,5 +23,5 @@ try {
 }
 ```
 
-[wazuh安装]: wazuh安装.md	"wazuh安装"
+
 
