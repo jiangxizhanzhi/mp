@@ -20,7 +20,7 @@ public class ExportUser {
     private String name;
 
     @ExcelProperty("组织")
-    @ColumnWidth(50)
+    @ColumnWidth(80)
     private String org;
 
     @ExcelProperty(value = "状态", converter = Stat2StringConverter.class)
@@ -28,7 +28,7 @@ public class ExportUser {
     private String stat;
 
     @ExcelProperty("角色")
-    @ColumnWidth(50)
+    @ColumnWidth(80)
     private String roles;
 
 }

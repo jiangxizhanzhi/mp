@@ -25,6 +25,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -110,7 +111,6 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
         ListObjServiceResult<UserModel> listObjServiceResult = getModelService().list(queryParams).asResult();
         List<UserModel> users = listObjServiceResult.getSource().getList();
         List<ExportUser> exportUserList = getModelService().exportExcel(users);
-
 
         // 这里注意 有同学反应使用swagger 会导致各种问题，请直接用浏览器或者用postman
         response.setContentType("application/vnd.ms-excel");

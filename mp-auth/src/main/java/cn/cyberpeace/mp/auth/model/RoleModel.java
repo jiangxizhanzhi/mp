@@ -1,6 +1,9 @@
 package cn.cyberpeace.mp.auth.model;
 
+import cn.cyberpeace.mp.auth.config.AuthConfig;
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.base.model.BaseModel;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,6 +16,7 @@ import java.util.Objects;
 @NoArgsConstructor
 @Table("mp_auth_role")
 public class RoleModel extends BaseModel {
+    @DefaultStr(AuthConstant.DEFAULT_TENANT)
     private String tenant;
     private String org;
     private String identifier;

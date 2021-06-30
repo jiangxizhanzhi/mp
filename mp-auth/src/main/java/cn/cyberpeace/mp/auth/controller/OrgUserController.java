@@ -51,7 +51,6 @@ public class OrgUserController extends BaseModelController<OrgUserModel, QueryPa
     @GetMapping("/hierarchical/byuser")
     public ServiceResult listHierarchicalOrgs(@RequestParam String userId) {
         List<OrgDto> orgDtos = getModelService().listHierarchicalOrgsByUserId(userId);
-        // todo
         return ServiceResult.builder().source(orgDtos).build().asResult();
     }
 
