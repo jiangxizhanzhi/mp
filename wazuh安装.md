@@ -27,7 +27,7 @@
 
 #### agent端
 
-###### 启用agent 远程执行命令
+###### agent端 启用agent 远程执行命令，需要修改agent的配置文件
 
 ```
 echo "wazuh_command.remote_commands=1" >> /var/ossec/etc/local_internal_options.conf
@@ -52,9 +52,9 @@ systemctl restart wazuh-agent
 </agent_config>
 ```
 
-#### agent-manager
+#### wazuh-manager
 
-###### 新增decoder，用于解析命令的内容
+###### 控制台新增decoder，用于解析命令的内容
 
 ```xml
 <decoder name="system-monitor">
@@ -64,7 +64,7 @@ systemctl restart wazuh-agent
 </decoder>
 ```
 
-###### 新增rule,触发规则，就会产生对应的alert事件
+###### 控制台新增rule,触发规则，就会产生对应的alert事件
 
 ```xml
 <group name="system-monitor">
