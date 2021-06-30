@@ -41,9 +41,9 @@ public class HypervisorServiceStateResponse extends BaseCloudPlatformResponse {
     private String state;
 
     /**
-     * 状态
+     * 字体颜色
      */
-    @ApiModelProperty(value = "状态")
+    @ApiModelProperty(value = "字体颜色")
     private FontColorEnum fontColor;
 
     public HypervisorServiceStateResponse(String name, Boolean alive) {
