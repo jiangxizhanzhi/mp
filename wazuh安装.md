@@ -1,5 +1,9 @@
 # wazuh 安装
 
+[TOC]
+
+
+
 ## wazuh-agent 安装
 
 ### linux 安装
@@ -31,4 +35,5 @@
 
 3. 执行remote command ，比如monitor.exe配置
 
-   
+
+
