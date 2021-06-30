@@ -62,6 +62,14 @@ public class UserPermissionController extends BaseModelController<UserPermission
     }
 
 
+    @ApiOperation(value = "查询当前登录用户所有菜单权限", notes = "")
+    @GetMapping("/menus/byloginuser")
+    public ServiceResult getMenuTargetsByCurrentUser() {
+        List<TargetModel> targets = getModelService().listMenusByLoginUser();
+        return ServiceResult.builder().source(targets).build().asResult();
+    }
+
+
     @ApiOperation(value = "绑定用户-资源关系，注意，如果roleIds为空，表示删除用户所有角色！", notes = "")
     @PostMapping("/bind")
     public ServiceResult bindUserRoles(@RequestBody @Validated BindUserTargetsRequest userTargetsReq) {
