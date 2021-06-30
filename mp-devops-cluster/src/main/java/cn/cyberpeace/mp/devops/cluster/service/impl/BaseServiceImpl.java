@@ -35,7 +35,7 @@ public class BaseServiceImpl {
     protected String sendGet(String url){
         String result = "";
         try {
-            result = HttpUtils.sendGet(url);
+            result = HttpUtils.getInstance().sendGet(url);
             log.info("=====GET调用url：{},对应返回结果信息：{}",url,result);
         } catch (IOException e) {
             log.info("=====GET调用url：{},对应返回结果信息：{},报错信息：{}",url,result,e.getMessage());
@@ -71,7 +71,7 @@ public class BaseServiceImpl {
     protected String sendPost(String url,String body){
         String result = "";
         try {
-            result = HttpUtils.sendPost(url,body);
+            result = HttpUtils.getInstance().sendPost(url,body);
             log.info("=====POST调用url：{},参数：{},对应返回结果信息：{}",url,body,result);
         } catch (IOException e) {
             log.info("=====POST调用url：{},参数：{},对应返回结果信息：{},报错信息：{}",url,body,result,e.getMessage());
