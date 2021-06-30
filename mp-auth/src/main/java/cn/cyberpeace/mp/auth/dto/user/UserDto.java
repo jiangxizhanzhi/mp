@@ -1,8 +1,11 @@
 package cn.cyberpeace.mp.auth.dto.user;
 
+import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class UserDto extends UserModel {
@@ -11,6 +14,6 @@ public class UserDto extends UserModel {
     String orgpath;
 
     @ApiModelProperty(value = "角色")
-    String roles;
+    List<RoleModel> roles;
 
 }

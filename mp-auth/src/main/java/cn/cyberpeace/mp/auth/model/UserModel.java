@@ -83,7 +83,7 @@ public class UserModel extends BaseModel implements Serializable {
     @DefaultStr
     private String address;
 
-    @ApiModelProperty(value = "账号状态 1：正常   2：禁用   3：挂起（待审批）")
+    @ApiModelProperty(value = "账号状态 1：正常  2：禁用  3：挂起（待审批） 4:过期")
     @DefaultInt(1)
     private Integer status;
 
@@ -113,6 +113,8 @@ public class UserModel extends BaseModel implements Serializable {
         public static final Integer DISABLE = 2;
         // 挂起，等待审批
         public static final Integer PENDING = 3;
+        // 过期
+        public static final Integer EXPIRED = 4;
 
         private Status() {
         }

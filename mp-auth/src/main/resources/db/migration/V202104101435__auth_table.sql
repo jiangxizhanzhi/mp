@@ -60,7 +60,7 @@ CREATE TABLE mp_auth_user (
     `mobile` varchar(64) NOT NULL COMMENT '手机号',
     `id_card` varchar(64) NOT NULL COMMENT '身份证号',
     `address` varchar(255) NOT NULL COMMENT '地址',
-    `status` int(10) NOT NULL COMMENT '账号状态',
+    `status` int(10) NOT NULL COMMENT '账号状态 1：正常  2：禁用  3：挂起（待审批） 4:过期',
     `init_check` int NOT NULL DEFAULT 0 COMMENT '是否首次登陆需要强制修改密码 0:否，1:是',
     `description` varchar(1024) NULL COMMENT '描述',
     `date_joined` datetime(6) NOT NULL COMMENT '加入时间',
