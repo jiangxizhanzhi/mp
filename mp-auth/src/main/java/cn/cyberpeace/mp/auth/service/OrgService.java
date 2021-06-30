@@ -21,7 +21,7 @@ public interface OrgService extends BaseModelService<OrgModel, QueryParams> {
     OrgDto getHierarchicalOrgsByOrgId(String orgId);
 
     // 列出组织的路径
-    String getPathByOrgId(String orgId);
+    String calculatePathByOrgId(String orgId);
 
     // 根据路径查出组织
     OrgModel getByPath(String path);

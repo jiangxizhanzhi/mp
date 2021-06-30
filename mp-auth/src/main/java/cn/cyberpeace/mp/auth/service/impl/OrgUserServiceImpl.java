@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -100,6 +101,15 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
 
         return true;
 
+    }
+
+    @Override
+    public String getAllOrgPathByUserId(String userId) {
+        Assert.notBlank(userId, "userId不能为空！");
+        List<OrgModel> orgs = listOrgsByUserId(userId);
+//        String allorgpath = orgs.stream().map(o -> orgService.calculatePathByOrgId(o.getId())).collect(Collectors.joining(","));
+        String allorgpath = orgs.stream().map(OrgModel::getPath).collect(Collectors.joining(","));
+        return allorgpath;
     }
 
 

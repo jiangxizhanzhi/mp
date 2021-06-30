@@ -65,4 +65,13 @@ public class OrgUserController extends BaseModelController<OrgUserModel, QueryPa
 
 
 
+    @ApiOperation(value = "根据userId查询所有所在组织的路径 如： 赛宁信息/产品研发中心/产品部,赛宁信息/产品研发中心/研发部", notes = "")
+    @GetMapping("/allorgpath/byuser")
+    public ServiceResult getAllOrgPath(@RequestParam String userId) {
+        String allOrgPath = getModelService().getAllOrgPathByUserId(userId);
+        return ServiceResult.builder().source(allOrgPath).build().asResult();
+    }
+
+
+
 }

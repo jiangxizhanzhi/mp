@@ -2,12 +2,10 @@ package cn.cyberpeace.mp.auth.controller;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.OrgDto;
-import cn.cyberpeace.mp.auth.dto.TargetDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
-import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -64,10 +62,10 @@ public class OrgController extends BaseModelController<OrgModel, QueryParams, Or
     }
 
 
-    @ApiOperation(value = "根据orgId查询所在组织路径", notes = "")
-    @GetMapping("/path")
+    @ApiOperation(value = "根据orgId计算所在组织路径", notes = "")
+    @GetMapping("/calculate/path")
     public ServiceResult getOrgPath(@RequestParam String orgId) {
-        String path = getModelService().getPathByOrgId(orgId);
+        String path = getModelService().calculatePathByOrgId(orgId);
         return ServiceResult.builder().source(path).build().asResult();
     }
 
