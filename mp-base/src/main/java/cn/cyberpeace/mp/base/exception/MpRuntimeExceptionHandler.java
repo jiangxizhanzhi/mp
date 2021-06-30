@@ -4,8 +4,8 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.BindException;
 import org.springframework.validation.ObjectError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -28,10 +28,10 @@ public class MpRuntimeExceptionHandler {
         return ServiceResult.fail(ex.getMessage());
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ExceptionHandler({BindException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    public ServiceResult<String> validationExceptionHandle(MethodArgumentNotValidException ex) {
+    public ServiceResult<String> validationExceptionHandle(BindException ex) {
         log.error(ex.getMessage());
         ObjectError objectError = ex.getBindingResult().getAllErrors().get(0);
         return ServiceResult.fail(BaseErrorCode.PARAMS_INVALID, objectError.getDefaultMessage());
