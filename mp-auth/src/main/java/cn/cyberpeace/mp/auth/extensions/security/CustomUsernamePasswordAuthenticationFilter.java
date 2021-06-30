@@ -41,7 +41,7 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
             String username = loginData.getOrDefault(getUsernameParameter(), StringUtils.EMPTY);
             String decryptedPwd = loginData.getOrDefault(getPasswordParameter(), StringUtils.EMPTY);
             String originPwd = PasswordUtils.desDecrypt(decryptedPwd);
-
+            // todo 用户挂起，禁用状态拦截
             username = username.trim();
             var authRequest = new UsernamePasswordAuthenticationToken(username, originPwd);
             setDetails(request, authRequest);

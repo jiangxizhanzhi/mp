@@ -94,7 +94,7 @@ public class UserPermissionServiceImpl
         List<TargetModel> targets1 = getModelMapper().listByUserId(userId);
         authorizedTargets.addAll(targets1);
 
-        // todo 用户所在组织绑定的target
+        // 用户所在组织绑定的target
         List<OrgModel> orgs = orgUserService.listOrgsByUserId(userId);
         Set<TargetModel> allFromOrg = new HashSet<>();
         orgs.forEach(o -> {

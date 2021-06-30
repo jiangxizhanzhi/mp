@@ -272,18 +272,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             }
 
             // 2. 保存用户-角色关系
-            // todo
             String roles = importUser.getRoles().trim();
-//            String[] idents = roles.split(",");
-//            for (String ident : idents) {
-//                RoleModel roleModel = roleService.getByIdent(ident.trim());
-//                if (roleModel != null) {
-//                    UserRoleModel userRoleModel = new UserRoleModel();
-//                    userRoleModel.setUser(userModel.getId());
-//                    userRoleModel.setRole(roleModel.getId());
-//                    userRoleService.create(userRoleModel);
-//                }
-//            }
             Arrays.stream(StringUtils.split(roles, ",")).forEach(ident -> {
                 RoleModel roleModel = roleService.getByIdent(ident.trim());
                 if (roleModel != null) {
@@ -296,16 +285,15 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
             // 3. 保存组织-用户关系
             String orgPaths = importUser.getOrgpath().trim();
-            String[] paths = orgPaths.split(",");
-            for (String path : paths) {
-                OrgModel orgModel = orgService.getByPath(path.trim());
+            Arrays.stream(StringUtils.split(orgPaths, ",")).forEach(path -> {
+                OrgModel orgModel = orgService.getByPath(path);
                 if (orgModel != null) {
                     OrgUserModel orgUserModel = new OrgUserModel();
                     orgUserModel.setUser(userModel.getId());
                     orgUserModel.setOrg(orgModel.getId());
                     orgUserService.create(orgUserModel);
                 }
-            }
+            });
 
         }
     }

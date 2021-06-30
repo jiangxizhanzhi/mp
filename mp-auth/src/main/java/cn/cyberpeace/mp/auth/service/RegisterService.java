@@ -36,7 +36,7 @@ public class RegisterService {
         userModel.setName(registerRequest.getName());
         userModel.setAvatar(registerRequest.getAvatar());
 
-        // todo 查看系统设置，注册用户是否需要审批
+        // 查看系统设置，注册用户是否需要审批
         if (authConfig.isNeedRegistrationAudit()) {
             log.info("need registration audit...");
             userModel.setStatus(UserModel.Status.PENDING);
