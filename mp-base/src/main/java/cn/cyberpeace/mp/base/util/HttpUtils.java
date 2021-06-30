@@ -13,9 +13,11 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
+import java.util.Objects;
 
 /**
  * http工具类
@@ -23,8 +25,20 @@ import java.io.IOException;
 @Slf4j
 public class HttpUtils {
 
+    private HttpClient httpClient;
+
+    private RequestConfig requestConfig;
+
+    private static final HttpUtils INSTANCE = new HttpUtils();
+
     private HttpUtils() {
-        throw new IllegalStateException("Utility class");
+        httpClient = HttpClients.custom().disableAutomaticRetries().build();;
+        requestConfig = RequestConfig.custom().setConnectionRequestTimeout(30000)
+                .setSocketTimeout(30000).setConnectTimeout(30000).build();// 设置超时时间
+    }
+
+    public synchronized static HttpUtils getInstance() {
+        return INSTANCE;
     }
 
     /**
@@ -79,7 +93,7 @@ public class HttpUtils {
      */
     public static String sendGet(String url) throws IOException {
         HttpClient client = HttpClientBuilder.create().build();
-        return doGetRequest(url, client);
+        return doGetRequest(url, Objects.nonNull(INSTANCE.httpClient) ? INSTANCE.httpClient : client);
     }
 
     /**
@@ -99,7 +113,7 @@ public class HttpUtils {
         HttpResponse resp = client.execute(httpget);
         // 设置请求和传输超时时间
         RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
-        httpget.setConfig(requestConfig);
+        httpget.setConfig(Objects.nonNull(INSTANCE.requestConfig) ? INSTANCE.requestConfig : requestConfig);
         // 获得返回值
         return EntityUtils.toString(resp.getEntity(), "UTF-8");
     }
