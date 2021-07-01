@@ -1,11 +1,13 @@
 package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.auth.dto.OrgDto;
+import cn.cyberpeace.mp.auth.dto.org.OrgUserPageRequest;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.OrgUserModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
+import com.github.pagehelper.PageInfo;
 
 import java.util.List;
 
@@ -23,4 +25,5 @@ public interface OrgUserService extends BaseModelService<OrgUserModel, QueryPara
 
     String getAllOrgPathByUserId(String userId);
 
+    PageInfo<UserModel> pageUsersByOrg(OrgUserPageRequest req);
 }
