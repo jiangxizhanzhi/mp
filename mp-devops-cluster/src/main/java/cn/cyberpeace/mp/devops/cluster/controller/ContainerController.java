@@ -7,13 +7,18 @@ import cn.cyberpeace.mp.devops.cluster.model.ContainerCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.request.ContainerPageRequest;
 import cn.cyberpeace.mp.devops.cluster.response.ContainerPageResponse;
 import cn.cyberpeace.mp.devops.cluster.service.ContainerService;
+import com.alibaba.fastjson.JSONArray;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -45,11 +50,19 @@ public class ContainerController {
             return new ListObjServiceResult();
         }
         List<ContainerCloudPlatformModel.ContainerModel> containers = model.getContainers();
-        List<ContainerPageResponse> list = containers.stream().map(containerModel ->
-                ContainerPageResponse.builder().name(containerModel.getName()).image(containerModel.getImage())
-                .node(containerModel.getHost()).addressList(List.of(containerModel.getAddresses()))
-                .status(containerModel.getStatus()).build()
-        ).collect(Collectors.toList());
+
+        List<ContainerPageResponse> list = containers.stream().map(containerModel -> {
+            ContainerPageResponse response = ContainerPageResponse.builder().name(containerModel.getName()).image(containerModel.getImage())
+                    .node(containerModel.getHost()).status(containerModel.getStatus()).build();
+            Map<String,Object> addresses = containerModel.getAddresses();
+            if (MapUtils.isNotEmpty(addresses)){
+                List<ContainerCloudPlatformModel.ContainerModel.Address> addressList = addresses.values().stream()
+                        .map(v -> JSONArray.parseArray(JSONArray.toJSONString(v), ContainerCloudPlatformModel.ContainerModel.Address.class))
+                        .flatMap(v -> v.stream()).collect(Collectors.toList());
+                response.setAddressList(addressList.stream().map(ContainerCloudPlatformModel.ContainerModel.Address::getAddr).collect(Collectors.toList()));
+            }
+            return response;
+        }).collect(Collectors.toList());
 
         return new ListObjServiceResult(new ListObjResult(list,model.getTotal()).asResult()).asResult();
     }

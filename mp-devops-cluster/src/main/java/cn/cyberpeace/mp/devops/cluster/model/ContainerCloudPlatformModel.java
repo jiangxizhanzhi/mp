@@ -61,7 +61,7 @@ public class ContainerCloudPlatformModel extends BaseCloudPlatformModel implemen
         /**
          * 地址信息
          */
-        private Map<String,Object> addresses;
+        private Map<String, Object> addresses;
 
         /**
          * 逻辑卷
@@ -149,5 +149,22 @@ public class ContainerCloudPlatformModel extends BaseCloudPlatformModel implemen
          * 更新时间
          */
         private String updated_at;
+
+        @Data
+        @NoArgsConstructor
+        @AllArgsConstructor
+        public static final class Address{
+
+            private String addr;
+
+            private Integer version;
+
+            private String port;
+
+            private String subnet_id;
+
+            private Boolean preserve_on_delete;
+
+        }
     }
 }
