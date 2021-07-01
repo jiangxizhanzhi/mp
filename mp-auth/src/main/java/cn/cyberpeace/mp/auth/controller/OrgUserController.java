@@ -45,7 +45,8 @@ public class OrgUserController extends BaseModelController<OrgUserModel, QueryPa
 
     @ApiOperation(value = "分页查询组织下所有用户信息", notes = "")
     @GetMapping("/page/byorg")
-    public ListObjServiceResult<Object> getPageByOrg(@RequestBody OrgUserPageRequest req) {
+    public ListObjServiceResult<Object> getPageByOrg(OrgUserPageRequest req) {
+        req.ensure();
         PageInfo<UserModel> pageInfo = getModelService().pageUsersByOrg(req);
 
         List<UserModel> users = pageInfo.getList();
