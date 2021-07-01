@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.auth.service.fields.OrgFields;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.lang.Assert;
 import lombok.extern.slf4j.Slf4j;
@@ -64,6 +65,12 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         }
 
         return super.update(obj, fields);
+    }
+
+    @Override
+    public ServiceResult<Boolean> delete(String id) {
+        // todo 删除组织-权限，组织-用户关联关系
+        return super.delete(id);
     }
 
     @Override

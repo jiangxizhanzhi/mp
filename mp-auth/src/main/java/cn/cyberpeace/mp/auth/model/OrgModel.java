@@ -2,6 +2,8 @@ package cn.cyberpeace.mp.auth.model;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.base.model.BaseModel;
+import cn.cyberpeace.mp.base.model.generator.UuidGenerator;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultGen;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 import io.swagger.annotations.ApiModelProperty;
@@ -26,7 +28,7 @@ public class OrgModel extends BaseModel {
     private String parent;
 
     @ApiModelProperty(value = "编号")
-    @DefaultStr
+    @DefaultGen(UuidGenerator.class)
     private String identifier;
 
     @ApiModelProperty(value = "名称")
