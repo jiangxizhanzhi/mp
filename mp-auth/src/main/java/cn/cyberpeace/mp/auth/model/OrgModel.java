@@ -22,15 +22,19 @@ public class OrgModel extends BaseModel {
     private String tenant;
 
     @ApiModelProperty(value = "上级组织ID")
+    @DefaultStr
     private String parent;
 
     @ApiModelProperty(value = "编号")
+    @DefaultStr
     private String identifier;
 
     @ApiModelProperty(value = "名称")
+    @DefaultStr
     private String name;
 
     @ApiModelProperty(value = "路径")
+    @DefaultStr
     private String path;
 
     @Override
