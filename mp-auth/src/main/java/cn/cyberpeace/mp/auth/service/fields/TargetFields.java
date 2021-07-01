@@ -11,7 +11,7 @@ public class TargetFields extends BaseModelFields {
     public static final DynamicFields allFields = new DynamicFields(ClassUtils.getBeanClassFields(TargetModel.class));
 
     public static final DynamicFields availableFields = new DynamicFields(TargetModel::getParent, TargetModel::getIdentifier, TargetModel::getTenant,
-            TargetModel::getName, TargetModel::getType
+            TargetModel::getName, TargetModel:: getPath, TargetModel::getType
     ).merge(BaseModelFields.availableFields);
 
     public static final DynamicFields hiddenFields = allFields.subtract(availableFields);
@@ -19,7 +19,7 @@ public class TargetFields extends BaseModelFields {
     public static final DynamicFields readonlyFields = new DynamicFields().merge(BaseModelFields.readonlyFields);
 
     public static final DynamicFields searchFields = new DynamicFields(TargetModel::getParent, TargetModel::getIdentifier, TargetModel::getTenant,
-            TargetModel::getName);
+            TargetModel::getName, TargetModel::getPath);
 
     public static final DynamicFields orderFields = new DynamicFields().merge(BaseModelFields.readonlyFields);
 }

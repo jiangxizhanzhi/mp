@@ -54,11 +54,27 @@ public class UserPermissionController extends BaseModelController<UserPermission
 
 
 
-    @ApiOperation(value = "根据userId查询所有菜单权限", notes = "")
+    @ApiOperation(value = "根据userId查询所有菜单权限（对象集合）", notes = "")
     @GetMapping("/menus/byuser")
     public ServiceResult getMenuTargetsByUser(@RequestParam String userId) {
         List<TargetModel> targets = getModelService().listMenusByUserId(userId);
         return ServiceResult.builder().source(targets).build().asResult();
+    }
+
+
+    @ApiOperation(value = "查询当前登录用户所有菜单权限（对象集合）", notes = "")
+    @GetMapping("/menus/byloginuser")
+    public ServiceResult getMenuTargetsByLoginUser() {
+        List<TargetModel> targets = getModelService().listMenusByLoginUser();
+        return ServiceResult.builder().source(targets).build().asResult();
+    }
+
+
+    @ApiOperation(value = "查询当前登录用户所有菜单权限（编码集合）", notes = "")
+    @GetMapping("/menuidents/byloginuser")
+    public ServiceResult listMenuIdentsByLoginUser() {
+        List<String> menuIdents = getModelService().listMenuIdentsByLoginUser();
+        return ServiceResult.builder().source(menuIdents).build().asResult();
     }
 
 

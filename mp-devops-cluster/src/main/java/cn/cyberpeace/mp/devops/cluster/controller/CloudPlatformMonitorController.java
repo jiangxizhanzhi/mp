@@ -24,6 +24,8 @@ import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 /**
@@ -65,16 +67,79 @@ public class CloudPlatformMonitorController {
     @ApiOperation("资源统计")
     @GetMapping("/resources/statistics")
     public ServiceResult<HypervisorStatisticsResponse> statistics(){
+
         //虚拟机个数
-        final Integer totalInstances = instanceService.getTotalInstances(new InstancePageRequest());
+        CompletableFuture<Integer> totalInstances = CompletableFuture.supplyAsync(() ->
+                instanceService.getTotalInstances(new InstancePageRequest())).handle((result, throwable) -> {
+            // 如果异常存在,打印异常，并且返回默认值
+            if (throwable != null) {
+                log.info("=======statistics方法:getTotalInstances获取虚拟机个数异常信息：{}",throwable.getMessage());
+                return 0;
+            } else {
+                return result;
+            }
+        });
+
         //容器个数
-        final Integer totalContainers = containerService.getTotalContainers(new ContainerPageRequest());
+        CompletableFuture<Integer> totalContainers = CompletableFuture.supplyAsync(() ->
+                containerService.getTotalContainers(new ContainerPageRequest())).handle((result,throwable) -> {
+            // 如果异常存在,打印异常，并且返回默认值
+            if (throwable != null) {
+                log.info("========statistics方法:getTotalContainers获取容器个数异常信息：{}",throwable.getMessage());
+                return 0;
+            } else {
+                return result;
+            }
+        });
+
         //实装设备个数
-        final Integer totalRealEquipments = realEquipmentService.getTotalRealEquipment();
+        CompletableFuture<Integer> totalRealEquipments = CompletableFuture.supplyAsync(() ->
+                realEquipmentService.getTotalRealEquipment()).handle((result,throwable) -> {
+            // 如果异常存在,打印异常，并且返回默认值
+            if (throwable != null) {
+                log.info("========statistics方法:getTotalRealEquipment获取实装设备个数异常信息：{}",throwable.getMessage());
+                return 0;
+            } else {
+                return result;
+            }
+        });
+
         //NPC总数
-        final Integer totalNPCs = npcService.getTotalNPCs();
+        CompletableFuture<Integer> totalNPCs = CompletableFuture.supplyAsync(() ->
+                npcService.getTotalNPCs()).handle((result,throwable) -> {
+            // 如果异常存在,打印异常，并且返回默认值
+            if (throwable != null) {
+                log.info("========statistics方法:getTotalNPCs获取NPC个数异常信息：{}",throwable.getMessage());
+                return 0;
+            } else {
+                return result;
+            }
+        });
+
         //路由个数
-        final Integer totalRouters = routerService.getTotalRouters(new RouterPageRequest());
+        CompletableFuture<Integer> totalRouters = CompletableFuture.supplyAsync(() ->
+                routerService.getTotalRouters(new RouterPageRequest())).handle((result,throwable) -> {
+            // 如果异常存在,打印异常，并且返回默认值
+            if (throwable != null) {
+                log.info("========statistics方法:getTotalRouters获取路由个数异常信息：{}",throwable.getMessage());
+                return 0;
+            } else {
+                return result;
+            }
+        });
+
+        CompletableFuture<HypervisorStatisticsCloudPlatformModel> model = CompletableFuture.supplyAsync(() ->
+                hypervisorService.statistics()).handle((result,throwable) -> {
+            // 如果异常存在,打印异常，并且返回默认值
+            if (throwable != null) {
+                log.info("========statistics方法:statistics获取资源统计信息异常信息：{}",throwable.getMessage());
+                return null;
+            } else {
+                return result;
+            }
+        });
+
+        CompletableFuture.allOf(totalInstances, totalContainers,totalRealEquipments,totalNPCs,totalRouters,model).join();
 
         //TODO 原计算方式不正确，云平台暂时不支持计算总的网络IO、磁盘IO
         //磁盘IO
@@ -82,22 +147,27 @@ public class CloudPlatformMonitorController {
         //网络IO
         BigDecimal netIo = BigDecimal.ZERO;
 
-        HypervisorStatisticsResponse response = HypervisorStatisticsResponse.builder().diskIo(diskIo).netIo(netIo)
-                .totalNpc(totalNPCs).totalInstances(totalInstances)
-                .totalContainers(totalContainers).totalRealEquipments(totalRealEquipments).totalRouters(totalRouters).build();
+        HypervisorStatisticsResponse response = null;
+        try {
+            response = HypervisorStatisticsResponse.builder().diskIo(diskIo).netIo(netIo)
+                    .totalNpc(totalNPCs.get()).totalInstances(totalInstances.get())
+                    .totalContainers(totalContainers.get()).totalRealEquipments(totalRealEquipments.get()).totalRouters(totalRouters.get()).build();
+            if(Objects.isNull(model) || Objects.isNull(model.get().getHypervisor_statistics())){
+                return new ServiceResult(response).asResult();
+            }
 
-        HypervisorStatisticsCloudPlatformModel model = hypervisorService.statistics();
-        if(Objects.isNull(model) || Objects.isNull(model.getHypervisor_statistics())){
+            HypervisorStatisticsCloudPlatformModel.HypervisorStatistics hypervisorStatistics = model.get().getHypervisor_statistics();
+
+            response = response.HypervisorStatisticsResponse(hypervisorStatistics.getVcpus(),hypervisorStatistics.getMemory_mb()
+                    ,hypervisorStatistics.getLocal_gb(),hypervisorStatistics.getVcpus_used(),hypervisorStatistics.getMemory_mb_used()
+                    ,hypervisorStatistics.getLocal_gb_used(),hypervisorStatistics.getFree_ram_mb(),hypervisorStatistics.getFree_disk_gb());
+        } catch (InterruptedException e) {
+           log.error("资源统计多线程异步合并请求异常信息:{}",e.getMessage());
+        } catch (ExecutionException e) {
+            log.error("资源统计多线程异步合并请求异常信息:{}",e.getMessage());
+        }finally {
             return new ServiceResult(response).asResult();
         }
-
-        HypervisorStatisticsCloudPlatformModel.HypervisorStatistics hypervisorStatistics = model.getHypervisor_statistics();
-
-        response = response.HypervisorStatisticsResponse(hypervisorStatistics.getVcpus(),hypervisorStatistics.getMemory_mb()
-        ,hypervisorStatistics.getLocal_gb(),hypervisorStatistics.getVcpus_used(),hypervisorStatistics.getMemory_mb_used()
-        ,hypervisorStatistics.getLocal_gb_used(),hypervisorStatistics.getFree_ram_mb(),hypervisorStatistics.getFree_disk_gb());
-
-        return new ServiceResult(response).asResult();
     }
 
     /**
@@ -122,9 +192,11 @@ public class CloudPlatformMonitorController {
 
         hypervisorPageResponses.stream().forEach(v -> {
             String name = v.getName();
-            v.setTotalInstances(instanceService.getTotalInstances(new InstancePageRequest(name)));
-            v.setTotalContainers(containerService.getTotalContainers(new ContainerPageRequest(name)));
             HypervisorWeightAndMaxInstanceCloudPlatformModel weightAndMaxInstances = hypervisorService.getWeightAndMaxInstances(new HypervisorWeightAndMaxInstanceRequest(name));
+            Integer totalInstances = instanceService.getTotalInstances(new InstancePageRequest(name));
+            Integer totalContainers = containerService.getTotalContainers(new ContainerPageRequest(name));
+            v.setTotalInstances(totalInstances);
+            v.setTotalContainers(totalContainers);
             if (Objects.nonNull(weightAndMaxInstances)) {
                 v.setWeight(weightAndMaxInstances.getWeight());
                 v.setMaxInstances(weightAndMaxInstances.getMax_instances());

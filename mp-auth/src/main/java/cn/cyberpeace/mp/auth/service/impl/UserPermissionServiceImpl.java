@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.auth.dto.TargetDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
+import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserPermissionModel;
 import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.auth.repository.UserPermissionMapper;
@@ -17,6 +18,7 @@ import cn.cyberpeace.mp.auth.service.UserPermissionService;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.UserPermissionFields;
+import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
@@ -28,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.security.auth.login.LoginContext;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -225,5 +228,18 @@ public class UserPermissionServiceImpl
         return true;
     }
 
+    @Override
+    public List<TargetModel> listMenusByLoginUser() {
+        UserModel user = UserUtils.getLoginUser();
+        List<TargetModel> menus = listMenusByUserId(user.getId());
+        return menus;
+    }
 
+
+    @Override
+    public List<String> listMenuIdentsByLoginUser() {
+        List<TargetModel> menus = listMenusByLoginUser();
+        List<String> menuIdents = menus.stream().map(m -> m.getIdentifier()).collect(Collectors.toList());
+        return menuIdents;
+    }
 }

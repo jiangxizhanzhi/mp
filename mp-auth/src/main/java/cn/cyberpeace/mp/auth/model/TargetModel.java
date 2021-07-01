@@ -28,13 +28,20 @@ public class TargetModel extends BaseModel {
     public static Integer TYPE_API = 2;
     public static Integer TYPE_DATA = 3;
 
+
     private String parent;
+
     @NotBlank(groups = AddGroup.class)
     private String identifier;
+
     @DefaultStr(AuthConstant.DEFAULT_TENANT)
     private String tenant;
+
     @NotBlank(groups = AddGroup.class)
     private String name;
+
+    private String path;
+
     @NotNull(groups = AddGroup.class)
     private Integer type;
 

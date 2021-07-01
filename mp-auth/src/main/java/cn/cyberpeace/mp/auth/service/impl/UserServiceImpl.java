@@ -230,6 +230,22 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return false;
     }
 
+
+    @Override
+    public String batchDisable(List<String> userIds) {
+        Assert.notEmpty(userIds, "userIds不能为空！");
+        StringBuilder errMsg = new StringBuilder();
+        for (String userId : userIds) {
+            try {
+                disable(userId);
+            } catch (Exception e) {
+                errMsg.append(e.getMessage());
+            }
+        }
+
+        return errMsg.toString();
+    }
+
     @Override
     public boolean enable(String userId) {
         Assert.notBlank(userId, "userId不能为空！");
@@ -251,6 +267,24 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return false;
     }
 
+
+    @Override
+    public String batchEnable(List<String> userIds) {
+        Assert.notEmpty(userIds, "userIds不能为空！");
+        StringBuilder errMsg = new StringBuilder();
+        for (String userId : userIds) {
+            try {
+                enable(userId);
+            } catch (Exception e) {
+                errMsg.append(e.getMessage());
+            }
+        }
+
+        return errMsg.toString();
+    }
+
+
+
     @Override
     public boolean approve(String userId) {
         Assert.notBlank(userId, "userId不能为空！");
@@ -270,6 +304,22 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         }
 
         return false;
+    }
+
+
+    @Override
+    public String batchApprove(List<String> userIds) {
+        Assert.notEmpty(userIds, "userIds不能为空！");
+        StringBuilder errMsg = new StringBuilder();
+        for (String userId : userIds) {
+            try {
+                approve(userId);
+            } catch (Exception e) {
+                errMsg.append(e.getMessage());
+            }
+        }
+
+        return errMsg.toString();
     }
 
     @Override
