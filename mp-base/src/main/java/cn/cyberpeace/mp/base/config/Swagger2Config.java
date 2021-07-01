@@ -34,19 +34,16 @@ public class Swagger2Config {
 
     @Bean
     public Docket createRestApi() {
+        String defaultJwt = "JWT eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjZmYjZmNWQ0N2Q4YTQwOGQ5ZjZlNTMzNzE2NWNmNjQ5IiwiZXhwIjoxNjI3NjM1ODYzLCJrZXkiOiIzNTE2NzJmZjg4NTQ0MzhlYWFhNDhjNDZlZmRmYTk0NyIsInVzZXJuYW1lIjoiZGVtbzQifQ.CK6861lgss2BGH-fHBK2EHPzVfO3o5Bo4vIdURmlmPE";
         //在配置好的配置类中增加此段代码即可
-//        RequestParameterBuilder ticketPar = new RequestParameterBuilder().b;
-//        List<RequestParameter> pars = new ArrayList<>();
-//        ticketPar.name("Authorization").description("登录校验")//name表示名称，description表示描述
-//                .modelRef(new ModelRef("string")).parameterType("header")
-//                .required(false).defaultValue(null).build();//required表示是否必填，defaultvalue表示默认值
-//        pars.add(ticketPar.build());//添加完此处一定要把下边的带***的也加上否则不生效
-
         RequestParameter parameter =
                 new RequestParameterBuilder()
                         .name("Authorization")
                         .description("认证")
                         .in(ParameterType.HEADER)
+                        .query(simpleParameterSpecificationBuilder ->
+                                simpleParameterSpecificationBuilder.defaultValue(defaultJwt)
+                                .allowEmptyValue(true))
                         .required(false)
                         .build();
 

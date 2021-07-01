@@ -236,4 +236,10 @@ public class UserPermissionServiceImpl
     }
 
 
+    @Override
+    public List<String> listMenuIdentsByLoginUser() {
+        List<TargetModel> menus = listMenusByLoginUser();
+        List<String> menuIdents = menus.stream().map(m -> m.getIdentifier()).collect(Collectors.toList());
+        return menuIdents;
+    }
 }
