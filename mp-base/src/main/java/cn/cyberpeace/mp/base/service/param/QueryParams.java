@@ -33,4 +33,15 @@ public class QueryParams {
     /** 指定的返回字段 */
     @ApiModelProperty(value = "指定的返回字段")
     private String[] fields;
+
+    /** @Deprecated 分页每页条数 */
+    @ApiModelProperty(value = "分页每页条数(兼容)")
+    private Integer perPage;
+
+    public void ensure() {
+        if (perPage != null) {
+            pageSize = perPage;
+        }
+    }
+
 }

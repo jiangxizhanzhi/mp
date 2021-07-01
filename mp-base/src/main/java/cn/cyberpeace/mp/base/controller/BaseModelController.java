@@ -50,6 +50,8 @@ public abstract class BaseModelController<M extends BaseModel, Q extends QueryPa
      * @param queryParams 查询参数
      */
     public void handleQueryParams(String listFuncName, QueryParams queryParams) {
+        queryParams.ensure();
+
         int page = queryParams.getPage() == null ? 0 : queryParams.getPage();
         int pageSize = queryParams.getPageSize() == null ? 0 : queryParams.getPageSize();
         if (pageSize <= 0) {
