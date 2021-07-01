@@ -22,6 +22,7 @@ import com.alibaba.excel.EasyExcel;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -75,25 +76,34 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
     @ApiOperation(value = "禁用用户", notes = "")
     @PostMapping("/disable")
 //    @OperateLog(module = ModuleEnums.AUTH)
-    public ServiceResult disable(@RequestParam String userId) {
-        boolean success = getModelService().disable(userId);
-        return ServletUtils.commonResult(success, null);
+    public ServiceResult disable(@RequestBody List<String> userIds) {
+        String errMsg = getModelService().batchDisable(userIds);
+        if (StringUtils.isBlank(errMsg)) {
+            return ServletUtils.commonResult(true, null);
+        }
+        return ServletUtils.commonResult(true, errMsg);
     }
 
 
     @ApiOperation(value = "启用用户", notes = "")
     @PostMapping("/enable")
-    public ServiceResult enable(@RequestParam String userId) {
-        boolean success = getModelService().enable(userId);
-        return ServletUtils.commonResult(success, null);
+    public ServiceResult enable(@RequestBody List<String> userIds) {
+        String errMsg = getModelService().batchEnable(userIds);
+        if (StringUtils.isBlank(errMsg)) {
+            return ServletUtils.commonResult(true, null);
+        }
+        return ServletUtils.commonResult(true, errMsg);
     }
 
 
     @ApiOperation(value = "审批用户", notes = "")
     @PostMapping("/approve")
-    public ServiceResult approve(@RequestParam String userId) {
-        boolean success = getModelService().approve(userId);
-        return ServletUtils.commonResult(success, null);
+    public ServiceResult approve(@RequestBody List<String> userIds) {
+        String errMsg = getModelService().batchApprove(userIds);
+        if (StringUtils.isBlank(errMsg)) {
+            return ServletUtils.commonResult(true, null);
+        }
+        return ServletUtils.commonResult(true, errMsg);
     }
 
 

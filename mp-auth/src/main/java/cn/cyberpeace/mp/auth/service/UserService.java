@@ -28,6 +28,8 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
      */
     boolean disable(String userId);
 
+    String batchDisable(List<String> userIds);
+
     /**
      * 启用
      * @param userId
@@ -35,12 +37,17 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
      */
     boolean enable(String userId);
 
+    String batchEnable(List<String> userIds);
+
     /**
      * 审批user
      * @param userId
      * @return
      */
     boolean approve(String userId);
+
+
+    String batchApprove(List<String> userIds);
 
     void downloadExcelTemplate();
 

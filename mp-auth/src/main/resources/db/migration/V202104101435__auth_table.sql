@@ -110,6 +110,7 @@ CREATE TABLE mp_auth_target (
    `identifier` varchar(64)  NOT NULL COMMENT '编号',
    `tenant` varchar(64)  NOT NULL COMMENT '所属租户',
    `name` varchar(64) NOT NULL COMMENT '名称',
+   `path` varchar(255) NULL COMMENT '路径',
    `type` int NOT NULL COMMENT '资源类型 1:菜单, 2:API, 3:数据',
    `create_time` datetime(6) NOT NULL COMMENT '创建时间',
    `update_time` datetime(6) NOT NULL COMMENT '更新时间',
