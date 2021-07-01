@@ -64,9 +64,9 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
 
         Assert.isTrue(supportedType, AuthConstant.ERROR_CODE_PREFIX + "target_type_not_support");
 
-        TargetModel targetModel = getByIdentifier(target.getIdentifier());
-        if (targetModel != null) {
-            throw new MpRuntimeException("Identifier为" + target.getIdentifier() + "的记录已经存在!");
-        }
+//        TargetModel targetModel = getByIdentifier(target.getIdentifier());
+//        if (targetModel != null) {
+//            throw new MpRuntimeException("Identifier为" + target.getIdentifier() + "的记录已经存在!");
+//        }
     }
 }

@@ -155,6 +155,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     @Override
+    public ServiceResult<Boolean> delete(String id) {
+        // todo 删除用户-组织，用户-角色关联关系
+        return super.delete(id);
+    }
+
+    @Override
     public UserModel getByUserName(String userName) {
         log.info("userName:{}", userName);
         UserModel userModel = getModelMapper().first(new HumanCondition().filterEqual("username", userName));

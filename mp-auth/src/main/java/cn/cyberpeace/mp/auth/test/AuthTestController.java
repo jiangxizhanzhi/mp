@@ -1,9 +1,9 @@
-package cn.cyberpeace.mp.auth.controller;
+package cn.cyberpeace.mp.auth.test;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.util.PasswordStrengthChecker;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
-import cn.cyberpeace.mp.auth.util.TmpMenuService;
+import cn.cyberpeace.mp.auth.test.TmpMenuService;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,8 +51,8 @@ public class AuthTestController {
 
 
     @GetMapping("test/tmpmenu")
-    public void test(@RequestParam String json) {
-        tmpMenuService.convert();
+    public void test() {
+        tmpMenuService.process();
     }
 
 
