@@ -44,7 +44,7 @@ public class UserModel extends BaseModel implements Serializable {
     private String username;
 
     @ApiModelProperty(value = "密码")
-    @JsonIgnore
+//    @JsonIgnore
     private String password;
 
     @ApiModelProperty(value = "token秘钥")

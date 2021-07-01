@@ -791,6 +791,7 @@ public class TmpMenuService {
             menu.setName(names[i]);
             menu.setIdentifier(values[i]);
             menu.setPath(paths[i]);
+            menu.setType(TargetModel.TYPE_MENU);
 
             targetService.create(menu);
         }

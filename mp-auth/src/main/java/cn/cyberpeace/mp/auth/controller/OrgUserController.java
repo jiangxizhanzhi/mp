@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.OrgDto;
 import cn.cyberpeace.mp.auth.dto.TargetDto;
 import cn.cyberpeace.mp.auth.dto.org.BindOrgUsersRequest;
+import cn.cyberpeace.mp.auth.dto.org.OrgUserPageRequest;
 import cn.cyberpeace.mp.auth.dto.target.BindRoleTargetsRequest;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.OrgUserModel;
@@ -12,7 +13,10 @@ import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.util.ServletUtils;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -39,8 +43,20 @@ public class OrgUserController extends BaseModelController<OrgUserModel, QueryPa
     }
 
 
-    @ApiOperation(value = "根据orgId查询组织下所有用户信息", notes = "")
-    @GetMapping("/byorg")
+    @ApiOperation(value = "分页查询组织下所有用户信息", notes = "")
+    @GetMapping("/page/byorg")
+    public ListObjServiceResult<Object> getPageByOrg(@RequestBody OrgUserPageRequest req) {
+        PageInfo<UserModel> pageInfo = getModelService().pageUsersByOrg(req);
+
+        List<UserModel> users = pageInfo.getList();
+        int total = (int) pageInfo.getTotal();
+        ListObjServiceResult result = new ListObjServiceResult(new ListObjResult(users, total));
+        return result.asResult();
+    }
+
+
+    @ApiOperation(value = "查询组织下所有用户信息", notes = "")
+    @GetMapping("/list/byorg")
     public ServiceResult getByOrg(@RequestParam String orgId) {
         List<UserModel> users = getModelService().listUsersByOrgId(orgId);
         return ServiceResult.builder().source(users).build().asResult();

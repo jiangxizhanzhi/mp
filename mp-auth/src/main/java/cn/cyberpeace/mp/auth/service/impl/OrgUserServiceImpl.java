@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.auth.service.impl;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.dto.OrgDto;
+import cn.cyberpeace.mp.auth.dto.org.OrgUserPageRequest;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.OrgUserModel;
 import cn.cyberpeace.mp.auth.model.RolePermissionModel;
@@ -14,6 +15,8 @@ import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.lang.Assert;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -110,6 +113,15 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
 //        String allorgpath = orgs.stream().map(o -> orgService.calculatePathByOrgId(o.getId())).collect(Collectors.joining(","));
         String allorgpath = orgs.stream().map(OrgModel::getPath).collect(Collectors.joining(","));
         return allorgpath;
+    }
+
+    @Override
+    public PageInfo<UserModel> pageUsersByOrg(OrgUserPageRequest req) {
+        PageHelper.startPage(req.getPage(), req.getPageSize());
+        List<UserModel> users = getModelMapper().listUsers(req.getOrg(), req.getUsername());
+        PageInfo<UserModel> pageInfo = new PageInfo(users);
+
+        return pageInfo;
     }
 
 
