@@ -5,20 +5,31 @@ import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Table("mp_auth_org_user")
 public class OrgUserModel extends BaseModel {
     @DefaultStr(AuthConstant.DEFAULT_TENANT)
     private String tenant;
     private String org;
     private String user;
+
+    @Builder
+    public OrgUserModel(String id, LocalDateTime createTime, LocalDateTime updateTime, String tenant, String org, String user) {
+        super(id, createTime, updateTime);
+        this.tenant = tenant;
+        this.org = org;
+        this.user = user;
+    }
 
     @Override
     public boolean equals(Object o) {

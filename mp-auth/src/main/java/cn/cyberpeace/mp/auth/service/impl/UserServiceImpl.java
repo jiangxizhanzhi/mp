@@ -191,11 +191,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         // 检查新密码强度是否合法
         Assert.isFalse(PasswordUtils.isPasswordStrengthLowLevel(newPwd), AuthConstant.ERROR_CODE_PREFIX + "password_strength_invalid");
 
-
-//        UserModel userUpdate = new UserModel();
-//        userUpdate.setId(currentUser.getId());
-//        userUpdate.setPassword(newPwd);
-
         UserModel userUpdate = UserModel.builder().password(newPwd).build();
         userUpdate.setId(currentUser.getId());
         update(userUpdate);
@@ -211,13 +206,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         UserModel user = Objects.isNull(source) ? null : source.getObj();
         Assert.notNull(user, AuthConstant.ERROR_CODE_PREFIX + "account_not_existed");
 
-//        UserModel userUpdate = new UserModel();
-//        userUpdate.setId(user.getId());
-//        userUpdate.setPassword(newPwd);
-//        UserModel userUpdate = UserModel.builder().password(newPwd).build();
-//        userUpdate.setId(user.getId());
-//        UserModel user1 = new UserModel();
-//        use
         UserModel userUpdate = UserModel.builder().id(user.getId()).password(newPwd).build();
         update(userUpdate);
         return true;
@@ -230,9 +218,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         if (userOptional.isPresent()) {
             UserModel userModel = userOptional.get();
             if (Objects.equals(userModel.getStatus(), UserModel.Status.NORMAL)) {
-                UserModel updateUser = new UserModel();
-                updateUser.setId(userId);
-                updateUser.setStatus(UserModel.Status.DISABLE);
+                UserModel updateUser = UserModel.builder().id(userId).status(UserModel.Status.DISABLE).build();
                 return getModelMapper().update(updateUser);
             }
             log.error("id为{}的用户状态不是正常状态！", userId);
@@ -267,9 +253,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         if (userOptional.isPresent()) {
             UserModel userModel = userOptional.get();
             if (Objects.equals(userModel.getStatus(), UserModel.Status.DISABLE)) {
-                UserModel updateUser = new UserModel();
-                updateUser.setId(userId);
-                updateUser.setStatus(UserModel.Status.NORMAL);
+                UserModel updateUser = UserModel.builder().id(userId).status(UserModel.Status.NORMAL).build();
                 return getModelMapper().update(updateUser);
             }
             log.error("id为{}的用户状态不是禁用状态！", userId);
@@ -306,9 +290,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         if (userOptional.isPresent()) {
             UserModel userModel = userOptional.get();
             if (Objects.equals(userModel.getStatus(), UserModel.Status.PENDING)) {
-                UserModel updateUser = new UserModel();
-                updateUser.setId(userId);
-                updateUser.setStatus(UserModel.Status.NORMAL);
+                UserModel updateUser = UserModel.builder().id(userId).status(UserModel.Status.NORMAL).build();
                 return getModelMapper().update(updateUser);
             }
             log.error("id为{}的用户状态不是挂起状态！", userId);
@@ -394,9 +376,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             Arrays.stream(StringUtils.split(roles, ",")).forEach(ident -> {
                 RoleModel roleModel = roleService.getByIdent(ident.trim());
                 if (Objects.nonNull(roleModel)) {
-                    UserRoleModel userRoleModel = new UserRoleModel();
-                    userRoleModel.setUser(userModel.getId());
-                    userRoleModel.setRole(roleModel.getId());
+                    UserRoleModel userRoleModel = UserRoleModel.builder().user(userModel.getId()).role(roleModel.getId()).build();
                     userRoleService.create(userRoleModel);
                 }
             });
@@ -406,9 +386,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             Arrays.stream(StringUtils.split(orgPaths, ",")).forEach(path -> {
                 OrgModel orgModel = orgService.getByPath(path);
                 if (orgModel != null) {
-                    OrgUserModel orgUserModel = new OrgUserModel();
-                    orgUserModel.setUser(userModel.getId());
-                    orgUserModel.setOrg(orgModel.getId());
+                    OrgUserModel orgUserModel = OrgUserModel.builder().user(userModel.getId()).org(orgModel.getId()).build();
                     orgUserService.create(orgUserModel);
                 }
             });
@@ -443,9 +421,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                 FastDfsConfig.Group group = fastDfsConfig.getGroupByName(FdfsGroupEnum.DEFAULT);
                 String httpUrl = group.getFileServerAddr() + File.separator + filepath;
 
-                UserModel updateUser = new UserModel();
-                updateUser.setId(userId);
-                updateUser.setAvatar(httpUrl);
+                UserModel updateUser = UserModel.builder().id(userId).avatar(httpUrl).build();
                 return getModelMapper().update(updateUser);
             } else {
                 log.error("upload failed! userId:{}", userId);
@@ -473,10 +449,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             log.info("用户状态已经过期，准备更新数据库用户状态！ username:{}", user.getUsername());
             user.setStatus(UserModel.Status.EXPIRED);
 
-            UserModel userUpdate = new UserModel();
-            userUpdate.setId(user.getId());
-            userUpdate.setStatus(UserModel.Status.EXPIRED);
-            update(userUpdate);
+            UserModel updateUser = UserModel.builder().id(user.getId()).status(UserModel.Status.EXPIRED).build();
+            update(updateUser);
         }
     }
 
@@ -485,10 +459,11 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         if (Objects.isNull(importUser)) {
             return null;
         }
-        UserModel userModel = new UserModel();
-        userModel.setUsername(importUser.getUsername());
-        userModel.setName(importUser.getName());
-        userModel.setPassword(PasswordUtils.getPasswordEncoder().encode(importUser.getPassword()));
+        UserModel userModel =
+                UserModel.builder().username(importUser.getUsername())
+                        .name(importUser.getName())
+                        .password(PasswordUtils.getPasswordEncoder().encode(importUser.getPassword()))
+                        .build();
 
         userModel.setIdentifier(importUser.getUsername());
 
@@ -500,10 +475,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         if (Objects.isNull(user)) {
             return null;
         }
-        ExportUser exportUser = new ExportUser();
-        exportUser.setUsername(user.getUsername());
-        exportUser.setName(user.getName());
-
+        ExportUser exportUser = ExportUser.builder().username(user.getUsername()).name(user.getName()).build();
         // org path
         List<OrgModel> orgList = orgUserService.listOrgsByUserId(user.getId());
 //        List<String> orgList = new ArrayList<>();
@@ -514,7 +486,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         String paths = orgList.stream().map(o -> orgService.calculatePathByOrgId(o.getId())).collect(Collectors.joining(","));
         log.info("paths:{}", paths);
         exportUser.setOrg(paths);
-
         exportUser.setStat(user.getStatus() + "");
 
         // role

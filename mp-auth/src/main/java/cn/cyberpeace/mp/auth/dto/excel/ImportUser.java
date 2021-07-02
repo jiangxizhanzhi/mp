@@ -1,10 +1,12 @@
 package cn.cyberpeace.mp.auth.dto.excel;
 
+import lombok.Builder;
 import lombok.Data;
 
 import java.util.Date;
 
 @Data
+@Builder
 public class ImportUser {
 
     // 用户名，不能重复
