@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.auth.model.SysConfigModel;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.SysConfigService;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
+import cn.cyberpeace.mp.base.controller.stereotype.UnlimitPagination;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import io.swagger.annotations.Api;
@@ -21,21 +22,12 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 @RequestMapping("/sys/config")
+@UnlimitPagination("list")
 public class SysConfigController extends BaseModelController<SysConfigModel, QueryParams, SysConfigService> {
 
     @Autowired
     public SysConfigController(SysConfigService modelService) {
         setModelService(modelService);
-    }
-
-
-    @PostMapping("/add")
-    public ServiceResult addConfig(@RequestBody ConfigReq configReq) {
-        log.info("configReq:{}", configReq);
-
-
-
-        return null;
     }
 
 
