@@ -25,26 +25,26 @@ public class RegisterService {
     @Autowired
     private AuthConfig authConfig;
 
-    public ObjServiceResult<UserModel> register(RegisterRequest registerRequest) {
+    public ObjServiceResult<UserModel> register(RegisterRequest req) {
 
-        UserModel userModel = new UserModel();
-        userModel.setUsername(registerRequest.getUsername());
-        userModel.setPassword(registerRequest.getPassword());
-        userModel.setMobile(registerRequest.getMobile());
-        userModel.setEmail(registerRequest.getEmail());
-        userModel.setNickname(registerRequest.getNickname());
-        userModel.setName(registerRequest.getName());
-        userModel.setAvatar(registerRequest.getAvatar());
+        UserModel user = UserModel.builder()
+                .username(req.getUsername())
+                .password(req.getPassword())
+                .mobile(req.getMobile())
+                .email(req.getEmail())
+                .nickname(req.getNickname())
+                .name(req.getName())
+                .avatar(req.getAvatar()).build();
 
         // 查看系统设置，注册用户是否需要审批
         if (authConfig.isNeedRegistrationAudit()) {
             log.info("need registration audit...");
-            userModel.setStatus(UserModel.Status.PENDING);
+            user.setStatus(UserModel.Status.PENDING);
         }
 
-        check(userModel);
+        check(user);
 
-        ObjServiceResult<UserModel> result = userService.create(userModel);
+        ObjServiceResult<UserModel> result = userService.create(user);
         return result;
     }
 
