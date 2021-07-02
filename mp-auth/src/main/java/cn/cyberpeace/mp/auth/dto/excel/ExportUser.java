@@ -3,12 +3,14 @@ package cn.cyberpeace.mp.auth.dto.excel;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.write.style.ColumnWidth;
 import com.alibaba.excel.annotation.write.style.HeadRowHeight;
+import lombok.Builder;
 import lombok.Data;
 
 import java.util.Date;
 
 @Data
 @HeadRowHeight(20)
+@Builder
 public class ExportUser {
 
     @ExcelProperty("用户名")
