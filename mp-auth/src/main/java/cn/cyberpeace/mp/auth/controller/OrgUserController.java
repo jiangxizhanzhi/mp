@@ -47,12 +47,9 @@ public class OrgUserController extends BaseModelController<OrgUserModel, QueryPa
     @GetMapping("/page/byorg")
     public ListObjServiceResult<Object> getPageByOrg(OrgUserPageRequest req) {
         req.ensure();
-        PageInfo<UserModel> pageInfo = getModelService().pageUsersByOrg(req);
+        PageInfo pageInfo = getModelService().pageUsersByOrg(req);
 
-        List<UserModel> users = pageInfo.getList();
-        int total = (int) pageInfo.getTotal();
-        ListObjServiceResult result = new ListObjServiceResult(new ListObjResult(users, total));
-        return result.asResult();
+        return ServletUtils.pageInfo2ObjServiceResult(pageInfo);
     }
 
 

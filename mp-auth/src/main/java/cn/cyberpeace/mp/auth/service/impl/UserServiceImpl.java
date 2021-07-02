@@ -192,9 +192,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         Assert.isFalse(PasswordUtils.isPasswordStrengthLowLevel(newPwd), AuthConstant.ERROR_CODE_PREFIX + "password_strength_invalid");
 
 
-        UserModel userUpdate = new UserModel();
+//        UserModel userUpdate = new UserModel();
+//        userUpdate.setId(currentUser.getId());
+//        userUpdate.setPassword(newPwd);
+
+        UserModel userUpdate = UserModel.builder().password(newPwd).build();
         userUpdate.setId(currentUser.getId());
-        userUpdate.setPassword(newPwd);
         update(userUpdate);
         return true;
     }
@@ -208,9 +211,14 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         UserModel user = Objects.isNull(source) ? null : source.getObj();
         Assert.notNull(user, AuthConstant.ERROR_CODE_PREFIX + "account_not_existed");
 
-        UserModel userUpdate = new UserModel();
-        userUpdate.setId(user.getId());
-        userUpdate.setPassword(newPwd);
+//        UserModel userUpdate = new UserModel();
+//        userUpdate.setId(user.getId());
+//        userUpdate.setPassword(newPwd);
+//        UserModel userUpdate = UserModel.builder().password(newPwd).build();
+//        userUpdate.setId(user.getId());
+//        UserModel user1 = new UserModel();
+//        use
+        UserModel userUpdate = UserModel.builder().id(user.getId()).password(newPwd).build();
         update(userUpdate);
         return true;
     }
@@ -452,6 +460,27 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
 
+    /**
+     * 处理用户过期状态，只有当用户状态为正常状态，且过期时间已到的时候，才会更改为过期状态
+     * @param user
+     */
+    public void processExpiredStatus(UserModel user) {
+        if (Objects.isNull(user.getExpiredTime())) {
+            return;
+        }
+        LocalDateTime now = LocalDateTime.now();
+        if (now.isAfter(user.getExpiredTime()) && Objects.equals(user.getStatus(), UserModel.Status.NORMAL)) {
+            log.info("用户状态已经过期，准备更新数据库用户状态！ username:{}", user.getUsername());
+            user.setStatus(UserModel.Status.EXPIRED);
+
+            UserModel userUpdate = new UserModel();
+            userUpdate.setId(user.getId());
+            userUpdate.setStatus(UserModel.Status.EXPIRED);
+            update(userUpdate);
+        }
+    }
+
+
     private UserModel importUser2UserModel(ImportUser importUser) {
         if (Objects.isNull(importUser)) {
             return null;
@@ -497,25 +526,5 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return exportUser;
     }
 
-
-    /**
-     * 处理用户过期状态，只有当用户状态为正常状态，且过期时间已到的时候，才会更改为过期状态
-     * @param user
-     */
-    private void processExpiredStatus(UserModel user) {
-        if (Objects.isNull(user.getExpiredTime())) {
-            return;
-        }
-        LocalDateTime now = LocalDateTime.now();
-        if (now.isAfter(user.getExpiredTime()) && Objects.equals(user.getStatus(), UserModel.Status.NORMAL)) {
-            log.info("用户状态已经过期，准备更新数据库用户状态！ username:{}", user.getUsername());
-            user.setStatus(UserModel.Status.EXPIRED);
-
-            UserModel userUpdate = new UserModel();
-            userUpdate.setId(user.getId());
-            userUpdate.setStatus(UserModel.Status.EXPIRED);
-            update(userUpdate);
-        }
-    }
 
 }

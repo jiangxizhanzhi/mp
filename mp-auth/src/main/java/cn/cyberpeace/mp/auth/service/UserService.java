@@ -57,4 +57,6 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
 
     boolean updateAvatar(String userId, MultipartFile multipartFile) throws MpRuntimeException;
 
+    void processExpiredStatus(UserModel user);
+
 }
