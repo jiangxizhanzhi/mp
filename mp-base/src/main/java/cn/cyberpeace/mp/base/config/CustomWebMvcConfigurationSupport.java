@@ -41,7 +41,7 @@ public class CustomWebMvcConfigurationSupport extends WebMvcConfigurationSupport
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
         super.addArgumentResolvers(argumentResolvers);
-        argumentResolvers.add(new UnderlineToCamelArgumentResolver());
+//        argumentResolvers.add(new UnderlineToCamelArgumentResolver());
     }
 
     @Override
