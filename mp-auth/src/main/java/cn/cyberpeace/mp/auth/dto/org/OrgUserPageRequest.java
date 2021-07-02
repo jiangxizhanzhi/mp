@@ -21,9 +21,18 @@ public class OrgUserPageRequest {
     @ApiModelProperty(value = "分页每页条数(兼容)")
     private Integer perPage;
 
+    // todo 临时
+    @ApiModelProperty(value = "分页每页条数(兼容)")
+    private Integer per_page;
+
+
     public void ensure() {
         if (perPage != null) {
             pageSize = perPage;
+        }
+
+        if (per_page != null) {
+            pageSize = per_page;
         }
     }
 
