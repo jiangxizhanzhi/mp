@@ -3,13 +3,17 @@ package cn.cyberpeace.mp.auth.service.impl;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.dto.OrgDto;
 import cn.cyberpeace.mp.auth.dto.org.OrgUserPageRequest;
+import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.OrgUserModel;
+import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.RolePermissionModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.repository.OrgUserMapper;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
+import cn.cyberpeace.mp.auth.service.UserRoleService;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.OrgUserFields;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
@@ -34,6 +38,12 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
 
     @Autowired
     private OrgService orgService;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private UserRoleService userRoleService;
 
     @Autowired
     private QueryParentOrgOperation queryParentOrgOperation;
@@ -119,8 +129,22 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
     public PageInfo<UserModel> pageUsersByOrg(OrgUserPageRequest req) {
         PageHelper.startPage(req.getPage(), req.getPageSize());
         List<UserModel> users = getModelMapper().listUsers(req.getOrg(), req.getUsername());
-        PageInfo<UserModel> pageInfo = new PageInfo(users);
+        PageInfo pageInfo = new PageInfo(users);
 
+        List<UserDto> userDtos = users.stream().map(u -> {
+            userService.processExpiredStatus(u);
+
+            UserDto userDto = new UserDto();
+            cn.cyberpeace.mp.base.util.BeanUtils.copyProperties(u, userDto);
+            String allorgpath = getAllOrgPathByUserId(u.getId());
+            userDto.setOrgpath(allorgpath);
+
+            List<RoleModel> roles = userRoleService.listByUserId(u.getId());
+            userDto.setRoles(roles);
+            return userDto;
+        }).collect(Collectors.toList());
+
+        pageInfo.setList(userDtos);
         return pageInfo;
     }
 

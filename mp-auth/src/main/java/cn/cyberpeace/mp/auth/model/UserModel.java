@@ -13,6 +13,7 @@ import cn.cyberpeace.mp.base.model.stereotype.Table;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -25,6 +26,7 @@ import java.util.Objects;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+//@Builder
 @Table("mp_auth_user")
 public class UserModel extends BaseModel implements Serializable {
 
@@ -106,6 +108,34 @@ public class UserModel extends BaseModel implements Serializable {
     @DefaultGen(DateTimeGenerator.class)
     private LocalDateTime lastLogin;
 
+//    public UserModel(String id, LocalDateTime createTime, LocalDateTime updateTime) {
+//        super(id, createTime, updateTime);
+//    }
+
+    @Builder
+    public UserModel(String id, LocalDateTime createTime, LocalDateTime updateTime, String tenant, String identifier, String username, String password, String tokenSecret, String name, String nickname, String avatar, LocalDate birthday, String email, String mobile, String idCard, String address, Integer status, Integer initCheck, String description, LocalDateTime dateJoined, LocalDateTime expiredTime, LocalDateTime lastLogin) {
+        super(id, createTime, updateTime);
+        this.tenant = tenant;
+        this.identifier = identifier;
+        this.username = username;
+        this.password = password;
+        this.tokenSecret = tokenSecret;
+        this.name = name;
+        this.nickname = nickname;
+        this.avatar = avatar;
+        this.birthday = birthday;
+        this.email = email;
+        this.mobile = mobile;
+        this.idCard = idCard;
+        this.address = address;
+        this.status = status;
+        this.initCheck = initCheck;
+        this.description = description;
+        this.dateJoined = dateJoined;
+        this.expiredTime = expiredTime;
+        this.lastLogin = lastLogin;
+    }
+
     public static class Status {
         // 正常
         public static final Integer NORMAL = 1;
@@ -151,4 +181,10 @@ public class UserModel extends BaseModel implements Serializable {
     public int hashCode() {
         return Objects.hash(super.hashCode(), tenant, identifier, username, password, tokenSecret, name, nickname, avatar, birthday, email, mobile, idCard, address, status, initCheck, description, dateJoined, expiredTime, lastLogin);
     }
+
+
+
+
+
+
 }

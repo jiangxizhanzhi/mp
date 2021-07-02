@@ -9,7 +9,9 @@ import cn.cyberpeace.mp.base.util.ClassUtils;
 import cn.cyberpeace.mp.base.util.ModelUtils;
 import cn.cyberpeace.mp.base.util.SerializableFunction;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
@@ -20,6 +22,8 @@ import java.util.Map;
 
 @Slf4j
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class BaseModel {
 
     @ApiModelProperty(value = "ID")
