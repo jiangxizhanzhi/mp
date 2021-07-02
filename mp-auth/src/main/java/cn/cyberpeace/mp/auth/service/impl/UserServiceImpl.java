@@ -133,6 +133,11 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     public ObjServiceResult<UserModel> create(UserModel obj, String[] fields) {
         obj.encodePassword();
+        // 查看系统设置，注册用户是否需要审批
+        if (authConfig.isNeedRegistrationAudit()) {
+            log.info("need registration audit...");
+            obj.setStatus(UserModel.Status.PENDING);
+        }
         return super.create(obj, fields);
     }
 
@@ -145,6 +150,11 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     public ServiceResult<Integer> bulkCreate(List<UserModel> objs) {
         objs.forEach(UserModel::encodePassword);
+        // 查看系统设置，注册用户是否需要审批
+        if (authConfig.isNeedRegistrationAudit()) {
+            log.info("need registration audit...");
+            objs.forEach(o -> o.setStatus(UserModel.Status.PENDING));
+        }
         return super.bulkCreate(objs);
     }
 
