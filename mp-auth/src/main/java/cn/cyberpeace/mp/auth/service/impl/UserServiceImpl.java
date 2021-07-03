@@ -30,6 +30,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.BeanUtils;
+import cn.cyberpeace.mp.base.util.IdGenerator;
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.hutool.core.collection.CollectionUtil;
@@ -187,6 +188,11 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
         String decryptedPwd = PasswordUtils.desDecrypt(createRequest.getPassword());
         userModel.setPassword(decryptedPwd);
+
+        if (StringUtils.isBlank(userModel.getIdentifier())) {
+            // 如果ident为空，则随机生成一个
+            userModel.setIdentifier(String.valueOf(IdGenerator.generateGlobalId()));
+        }
 
         createCheckService.check(userModel);
 
