@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,12 +32,23 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
 
     @ApiOperation(value = "根据租户查询所有角色", notes = "")
     @GetMapping("/bytenant")
-    public ServiceResult getRoleByTenant(@RequestParam String tenant) {
-        List<RoleModel> roles = getModelService().listByTenantId(tenant);
+    public ServiceResult getRoleByTenant(@RequestParam(required = false) String tenant) {
+        List<RoleModel> roles;
+        if (StringUtils.isNotBlank(tenant)) {
+            roles = getModelService().listByTenantId(tenant);
+        } else {
+            roles = getModelService().listAll();
+        }
         return ServiceResult.builder().source(roles).build().asResult();
     }
 
 
+    @ApiOperation(value = "查询所有角色", notes = "")
+    @GetMapping("/all")
+    public ServiceResult getRoleByTenant() {
+        List<RoleModel> roles = getModelService().listAll();
+        return ServiceResult.builder().source(roles).build().asResult();
+    }
 
 
 }

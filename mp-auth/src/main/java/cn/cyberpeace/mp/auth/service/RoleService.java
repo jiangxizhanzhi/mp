@@ -10,6 +10,7 @@ public interface RoleService extends BaseModelService<RoleModel, QueryParams> {
 
     List<RoleModel> listByTenantId(String tenantId);
 
+    List<RoleModel> listAll();
 
     List<RoleModel> listByOrgId(String orgId);
 
