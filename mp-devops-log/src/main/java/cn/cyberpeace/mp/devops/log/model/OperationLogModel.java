@@ -52,6 +52,11 @@ public class OperationLogModel {
     private String userName;
 
     /**
+     * 用户类型（用户，客户端）
+     */
+    private String userType;
+
+    /**
      * 描述
      */
     private String description;

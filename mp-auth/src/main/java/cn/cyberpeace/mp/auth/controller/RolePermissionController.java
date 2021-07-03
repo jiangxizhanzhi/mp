@@ -1,12 +1,11 @@
 package cn.cyberpeace.mp.auth.controller;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
-import cn.cyberpeace.mp.auth.dto.target.BindOrgTargetsRequest;
 import cn.cyberpeace.mp.auth.dto.target.BindRoleTargetsRequest;
 import cn.cyberpeace.mp.auth.model.RolePermissionModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.service.RolePermissionService;
-import cn.cyberpeace.mp.auth.util.ServletUtils;
+import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -48,7 +47,7 @@ public class RolePermissionController extends BaseModelController<RolePermission
     @PostMapping("/bind")
     public ServiceResult bindOrgPermission(@RequestBody @Validated BindRoleTargetsRequest bindRoleTargetsReq) {
         boolean success = getModelService().bindRoleTargets(bindRoleTargetsReq.getUserId(), bindRoleTargetsReq.getTargetIds());
-        return ServletUtils.commonResult(success, null);
+        return ResultUtils.commonResult(success, null);
     }
 
 

@@ -2,12 +2,11 @@ package cn.cyberpeace.mp.auth.controller;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.TargetDto;
-import cn.cyberpeace.mp.auth.dto.role.BindUserRolesRequest;
 import cn.cyberpeace.mp.auth.dto.target.BindUserTargetsRequest;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.model.UserPermissionModel;
 import cn.cyberpeace.mp.auth.service.UserPermissionService;
-import cn.cyberpeace.mp.auth.util.ServletUtils;
+import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -82,7 +81,7 @@ public class UserPermissionController extends BaseModelController<UserPermission
     @PostMapping("/bind")
     public ServiceResult bindUserRoles(@RequestBody @Validated BindUserTargetsRequest userTargetsReq) {
         boolean success = getModelService().bindUserTargets(userTargetsReq.getUserId(), userTargetsReq.getTargetIds());
-        return ServletUtils.commonResult(success, null);
+        return ResultUtils.commonResult(success, null);
     }
 
 

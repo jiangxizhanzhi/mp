@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.auth.controller;
 
-import cn.cyberpeace.mp.auth.config.AuthConfig;
+import cn.cyberpeace.mp.auth.constant.AuthLogConstant;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.ResetPwdRequest;
 import cn.cyberpeace.mp.auth.dto.ResetSelfPwdRequest;
@@ -13,11 +13,12 @@ import cn.cyberpeace.mp.auth.service.UploadDataListener;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
-import cn.cyberpeace.mp.auth.util.ServletUtils;
+import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
 import com.alibaba.excel.EasyExcel;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -50,17 +51,12 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
         setModelService(modelService);
     }
 
-
-    @Autowired
-    private AuthConfig authConfig;
-
-
     @ApiOperation(value = "修改密码", notes = "")
     @PostMapping("/resetpwd")
     public ServiceResult resetPwd(@Validated(AddGroup.class) @RequestBody ResetPwdRequest resetPwdRequest) {
         String decryptedPwd = PasswordUtils.desDecrypt(resetPwdRequest.getNewPwd());
         boolean success = getModelService().resetPwd(resetPwdRequest.getUserId(), decryptedPwd);
-        return ServletUtils.commonResult(success, null);
+        return ResultUtils.commonResult(success, null);
     }
 
     @ApiOperation(value = "修改自己的密码", notes = "")
@@ -69,19 +65,21 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
         String decryptedOldPwd = PasswordUtils.desDecrypt(req.getOldPwd());
         String decryptedNewPwd = PasswordUtils.desDecrypt(req.getNewPwd());
         boolean success = getModelService().resetSelfPwd(decryptedOldPwd, decryptedNewPwd);
-        return ServletUtils.commonResult(success, null);
+        return ResultUtils.commonResult(success, null);
     }
 
 
     @ApiOperation(value = "禁用用户", notes = "")
     @PostMapping("/disable")
-//    @OperateLog(module = ModuleEnums.AUTH)
+    @OperateLog(module = AuthLogConstant.MODULE, type = AuthLogConstant.TYPE_UPDATE, title = "禁用用户")
     public ServiceResult disable(@RequestBody List<String> userIds) {
         String errMsg = getModelService().batchDisable(userIds);
         if (StringUtils.isBlank(errMsg)) {
-            return ServletUtils.commonResult(true, null);
+            return ResultUtils.commonResult(true, null);
         }
-        return ServletUtils.commonResult(true, errMsg);
+//        ModuleEnums mo = ModuleEnums.AUTH.getCode();
+//        mo.getCode();
+        return ResultUtils.commonResult(true, errMsg);
     }
 
 
@@ -90,9 +88,9 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
     public ServiceResult enable(@RequestBody List<String> userIds) {
         String errMsg = getModelService().batchEnable(userIds);
         if (StringUtils.isBlank(errMsg)) {
-            return ServletUtils.commonResult(true, null);
+            return ResultUtils.commonResult(true, null);
         }
-        return ServletUtils.commonResult(true, errMsg);
+        return ResultUtils.commonResult(true, errMsg);
     }
 
 
@@ -101,9 +99,9 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
     public ServiceResult approve(@RequestBody List<String> userIds) {
         String errMsg = getModelService().batchApprove(userIds);
         if (StringUtils.isBlank(errMsg)) {
-            return ServletUtils.commonResult(true, null);
+            return ResultUtils.commonResult(true, null);
         }
-        return ServletUtils.commonResult(true, errMsg);
+        return ResultUtils.commonResult(true, errMsg);
     }
 
 
@@ -111,7 +109,7 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
     @PostMapping("/updateAvatar")
     public ServiceResult updateAvatar(@RequestParam String userId, MultipartFile file) throws MpRuntimeException {
         boolean success = getModelService().updateAvatar(userId, file);
-        return ServletUtils.commonResult(success, null);
+        return ResultUtils.commonResult(success, null);
     }
 
 
@@ -125,10 +123,8 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
         List<UserModel> users = listObjServiceResult.getSource().getList();
         List<ExportUser> exportUserList = getModelService().exportExcel(users);
 
-        // 这里注意 有同学反应使用swagger 会导致各种问题，请直接用浏览器或者用postman
         response.setContentType("application/vnd.ms-excel");
         response.setCharacterEncoding("utf-8");
-        // 这里URLEncoder.encode可以防止中文乱码 当然和easyexcel没有关系
         String fileName = URLEncoder.encode("用户导出列表", "UTF-8").replaceAll("\\+", "%20");
         response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
         EasyExcel.write(response.getOutputStream(), ExportUser.class).sheet("用户导出列表").doWrite(exportUserList);
@@ -140,7 +136,7 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
     @ResponseBody
     public ServiceResult importUsers(MultipartFile file) throws IOException {
         EasyExcel.read(file.getInputStream(), ImportUser.class, new UploadDataListener(getModelService())).headRowNumber(2).sheet().doRead();
-        return ServletUtils.commonResult(true, null);
+        return ResultUtils.commonResult(true, null);
     }
 
 

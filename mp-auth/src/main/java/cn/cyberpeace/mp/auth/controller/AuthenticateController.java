@@ -5,7 +5,7 @@ import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
-import cn.cyberpeace.mp.auth.util.ServletUtils;
+import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import com.auth0.jwt.exceptions.TokenExpiredException;
@@ -41,7 +41,7 @@ public class AuthenticateController {
         }
 
         UserModel userModel = UserUtils.getUser(user.getId());
-        return ServletUtils.commonResult(true, userModel);
+        return ResultUtils.commonResult(true, userModel);
 
     }
 

@@ -19,7 +19,7 @@ import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.UserFields;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
-import cn.cyberpeace.mp.auth.util.ServletUtils;
+import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.config.FastDfsConfig;
 import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
@@ -30,6 +30,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.BeanUtils;
+import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
@@ -459,8 +460,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             log.info("用户状态已经过期，准备更新数据库用户状态！ username:{}", user.getUsername());
             user.setStatus(UserModel.Status.EXPIRED);
 
-            UserModel updateUser = UserModel.builder().id(user.getId()).status(UserModel.Status.EXPIRED).build();
-            update(updateUser);
+//            UserModel updateUser = UserModel.builder().id(user.getId()).status(UserModel.Status.EXPIRED).build();
+//            update(updateUser);
         }
     }
 

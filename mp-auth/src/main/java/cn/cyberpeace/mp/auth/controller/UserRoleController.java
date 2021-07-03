@@ -5,8 +5,7 @@ import cn.cyberpeace.mp.auth.dto.role.BindUserRolesRequest;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
-import cn.cyberpeace.mp.auth.util.ServletUtils;
-import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -41,7 +40,7 @@ public class UserRoleController extends BaseModelController<UserRoleModel, Query
     public ServiceResult getRolesByUser(@RequestParam String userId) {
         List<RoleModel> roles = getModelService().listByUserId(userId);
 //        return ServiceResult.builder().source(roles).build().asResult();
-        return ServletUtils.commonResult(true, roles);
+        return ResultUtils.commonResult(true, roles);
     }
 
 
@@ -49,7 +48,7 @@ public class UserRoleController extends BaseModelController<UserRoleModel, Query
     @PostMapping("/bind")
     public ServiceResult bindUserRoles(@RequestBody @Validated BindUserRolesRequest userRolesReq) {
         boolean success = getModelService().bindUserRoles(userRolesReq.getUserId(), userRolesReq.getRoleIds());
-        return ServletUtils.commonResult(success, null);
+        return ResultUtils.commonResult(success, null);
     }
 
 

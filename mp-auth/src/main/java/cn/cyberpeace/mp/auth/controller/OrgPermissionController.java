@@ -5,7 +5,7 @@ import cn.cyberpeace.mp.auth.dto.target.BindOrgTargetsRequest;
 import cn.cyberpeace.mp.auth.model.OrgPermissionModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.service.OrgPermissionService;
-import cn.cyberpeace.mp.auth.util.ServletUtils;
+import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
 import java.util.Set;
 
 @Slf4j
@@ -38,7 +37,7 @@ public class OrgPermissionController extends BaseModelController<OrgPermissionMo
     @PostMapping("/bind")
     public ServiceResult bindOrgPermissions(@RequestBody @Validated BindOrgTargetsRequest bindOrgTargetsReq) {
         boolean success = getModelService().bindOrgTargets(bindOrgTargetsReq.getUserId(), bindOrgTargetsReq.getTargetIds());
-        return ServletUtils.commonResult(success, null);
+        return ResultUtils.commonResult(success, null);
     }
 
 
@@ -46,7 +45,7 @@ public class OrgPermissionController extends BaseModelController<OrgPermissionMo
     @GetMapping("/byorg")
     public ServiceResult getOrgPermissions(@RequestParam String orgId) {
         Set<TargetModel> targets = getModelService().listTargetsByOrgId(orgId);
-        return ServletUtils.commonResult(true, targets);
+        return ResultUtils.commonResult(true, targets);
     }
 
 
@@ -54,7 +53,7 @@ public class OrgPermissionController extends BaseModelController<OrgPermissionMo
     @GetMapping("/byorg/includeparent")
     public ServiceResult getOrgPermission(@RequestParam String orgId) {
         Set<TargetModel> targets = getModelService().listTargetsByOrgIdIncludeAllParentsOrg(orgId);
-        return ServletUtils.commonResult(true, null);
+        return ResultUtils.commonResult(true, null);
     }
 
 

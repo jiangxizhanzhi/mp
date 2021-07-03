@@ -2,18 +2,14 @@ package cn.cyberpeace.mp.auth.controller;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.OrgDto;
-import cn.cyberpeace.mp.auth.dto.TargetDto;
 import cn.cyberpeace.mp.auth.dto.org.BindOrgUsersRequest;
 import cn.cyberpeace.mp.auth.dto.org.OrgUserPageRequest;
-import cn.cyberpeace.mp.auth.dto.target.BindRoleTargetsRequest;
-import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.OrgUserModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
-import cn.cyberpeace.mp.auth.util.ServletUtils;
+import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
-import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import com.github.pagehelper.PageInfo;
@@ -49,7 +45,7 @@ public class OrgUserController extends BaseModelController<OrgUserModel, QueryPa
         req.ensure();
         PageInfo pageInfo = getModelService().pageUsersByOrg(req);
 
-        return ServletUtils.pageInfo2ObjServiceResult(pageInfo);
+        return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
     }
 
 
@@ -74,7 +70,7 @@ public class OrgUserController extends BaseModelController<OrgUserModel, QueryPa
     @PostMapping("/bind")
     public ServiceResult bindOrgPermission(@RequestBody @Validated BindOrgUsersRequest bindOrgUsersReq) {
         boolean success = getModelService().additionalBindOrgUsers(bindOrgUsersReq.getOrgId(), bindOrgUsersReq.getUserIds());
-        return ServletUtils.commonResult(success, null);
+        return ResultUtils.commonResult(success, null);
     }
 
 
