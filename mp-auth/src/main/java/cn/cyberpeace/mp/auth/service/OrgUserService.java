@@ -26,4 +26,8 @@ public interface OrgUserService extends BaseModelService<OrgUserModel, QueryPara
     String getAllOrgPathByUserId(String userId);
 
     PageInfo<UserModel> pageUsersByOrg(OrgUserPageRequest req);
+
+    // 清除用户所有组织
+    boolean cleanUserOrgs(String userId);
+
 }

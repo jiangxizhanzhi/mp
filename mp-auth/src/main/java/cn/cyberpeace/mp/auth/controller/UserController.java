@@ -6,8 +6,7 @@ import cn.cyberpeace.mp.auth.dto.ResetPwdRequest;
 import cn.cyberpeace.mp.auth.dto.ResetSelfPwdRequest;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
-import cn.cyberpeace.mp.auth.dto.user.UserCreateRequest;
-import cn.cyberpeace.mp.auth.dto.user.UserDto;
+import cn.cyberpeace.mp.auth.dto.user.UserRequest;
 import cn.cyberpeace.mp.auth.dto.validate.AddGroup;
 import cn.cyberpeace.mp.auth.dto.validate.UpdateGroup;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -19,6 +18,7 @@ import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
 import com.alibaba.excel.EasyExcel;
@@ -54,10 +54,29 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
     }
 
 
+    @Override
+    @ApiOperation(value = "(弃用，建议用/add) 创建数据", notes = "")
+    public ObjServiceResult<UserModel> create(UserModel obj, String[] fields) {
+        return super.create(obj, fields);
+    }
+
+    @Override
+    @ApiOperation(value = "(弃用，建议用/modify)更新指定id数据", notes = "")
+    public ObjServiceResult<UserModel> update(String id, UserModel obj, String[] fields) {
+        return super.update(id, obj, fields);
+    }
+
     @ApiOperation(value = "创建用户，同时完成组织，角色绑定关系", notes = "")
     @PostMapping("/add")
-    public ServiceResult add(@RequestBody UserCreateRequest userCreateRequest) {
-        UserModel userModel = getModelService().add(userCreateRequest);
+    public ServiceResult add(@RequestBody UserRequest createRequest) {
+        UserModel userModel = getModelService().add(createRequest);
+        return ResultUtils.commonResult(true, userModel);
+    }
+
+    @ApiOperation(value = "修改用户，同时完成组织，角色绑定关系", notes = "")
+    @PostMapping("/modify")
+    public ServiceResult modify(@RequestBody UserRequest modifyRequest) {
+        UserModel userModel = getModelService().modify(modifyRequest);
         return ResultUtils.commonResult(true, userModel);
     }
 

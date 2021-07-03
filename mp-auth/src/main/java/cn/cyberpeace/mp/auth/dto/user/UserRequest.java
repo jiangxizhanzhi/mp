@@ -8,7 +8,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class UserCreateRequest extends UserModel {
+public class UserRequest extends UserModel {
 
     @ApiModelProperty(value = "组织集合")
     List<String> orgIds;

@@ -68,7 +68,7 @@ public class OrgUserController extends BaseModelController<OrgUserModel, QueryPa
 
     @ApiOperation(value = "增量绑定组织-用户关系！", notes = "")
     @PostMapping("/bind")
-    public ServiceResult bindOrgPermission(@RequestBody @Validated BindOrgUsersRequest bindOrgUsersReq) {
+    public ServiceResult bindOrgUsersAdditional(@RequestBody @Validated BindOrgUsersRequest bindOrgUsersReq) {
         boolean success = getModelService().additionalBindOrgUsers(bindOrgUsersReq.getOrgId(), bindOrgUsersReq.getUserIds());
         return ResultUtils.commonResult(success, null);
     }
