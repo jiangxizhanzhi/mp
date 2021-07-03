@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
+import cn.cyberpeace.mp.auth.dto.user.UserCreateRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.OrgUserModel;
@@ -19,7 +20,6 @@ import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.UserFields;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
-import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.config.FastDfsConfig;
 import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
@@ -30,6 +30,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.BeanUtils;
+import cn.cyberpeace.mp.base.util.IdGenerator;
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.hutool.core.collection.CollectionUtil;
@@ -169,6 +170,42 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public ServiceResult<Boolean> delete(String id) {
         // todo 删除用户-组织，用户-角色关联关系
         return super.delete(id);
+    }
+
+    @Override
+    @Transactional
+    public UserModel add(UserCreateRequest createRequest) {
+        Assert.notNull(createRequest, "userDto不能为空");
+
+        // 保存用户
+        String userId = IdGenerator.generateUUID();
+        UserModel userModel = new UserModel();
+        org.springframework.beans.BeanUtils.copyProperties(createRequest, userModel);
+        userModel.setId(userId);
+
+        // 保存组织-用户关系
+        createRequest.getOrgIds().forEach(id -> {
+            boolean isOrgExist = orgService.exists(id);
+            if (!isOrgExist) {
+                log.error("组织id:{}不存在", id);
+                throw new MpRuntimeException("组织id：" + id + "不存在！");
+            }
+            OrgUserModel orgUserModel = OrgUserModel.builder().user(userId).org(id).build();
+            orgUserService.create(orgUserModel);
+        });
+
+        // 保存角色-用户关系
+        createRequest.getRoleIds().forEach(id -> {
+            boolean isRoleExist = roleService.exists(id);
+            if (!isRoleExist) {
+                log.error("角色id:{}不存在", id);
+                throw new MpRuntimeException("角色id：" + id + "不存在！");
+            }
+            UserRoleModel userRoleModel = UserRoleModel.builder().user(userId).role(id).build();
+            userRoleService.create(userRoleModel);
+        });
+
+        return userModel;
     }
 
     @Override
@@ -372,7 +409,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             // 1.保存用户信息
             UserModel userModel = importUser2UserModel(importUser);
             try {
-                String userId = UUID.randomUUID().toString().replaceAll("-", "");
+                String userId = cn.cyberpeace.mp.base.util.IdGenerator.generateUUID();
                 log.warn("userId:{}", userId);
                 userModel.setId(userId);
                 create(userModel);

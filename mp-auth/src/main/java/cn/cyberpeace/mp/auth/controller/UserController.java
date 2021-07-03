@@ -6,6 +6,8 @@ import cn.cyberpeace.mp.auth.dto.ResetPwdRequest;
 import cn.cyberpeace.mp.auth.dto.ResetSelfPwdRequest;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
+import cn.cyberpeace.mp.auth.dto.user.UserCreateRequest;
+import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.dto.validate.AddGroup;
 import cn.cyberpeace.mp.auth.dto.validate.UpdateGroup;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -50,6 +52,16 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
     public UserController(UserService modelService) {
         setModelService(modelService);
     }
+
+
+    @ApiOperation(value = "创建用户，同时完成组织，角色绑定关系", notes = "")
+    @PostMapping("/add")
+    public ServiceResult add(@RequestBody UserCreateRequest userCreateRequest) {
+        String decryptedPwd = PasswordUtils.desDecrypt(resetPwdRequest.getNewPwd());
+        boolean success = getModelService().resetPwd(resetPwdRequest.getUserId(), decryptedPwd);
+        return ResultUtils.commonResult(success, null);
+    }
+
 
     @ApiOperation(value = "修改密码", notes = "")
     @PostMapping("/resetpwd")
