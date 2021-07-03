@@ -19,6 +19,8 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
 
     UserModel getByUserName(String userName);
 
+    UserModel getByIdent(String ident);
+
     UserModel getByMobile(String mobile);
 
     boolean resetSelfPwd(String oldPwd, String newPwd);

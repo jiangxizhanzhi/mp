@@ -57,9 +57,8 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
     @ApiOperation(value = "创建用户，同时完成组织，角色绑定关系", notes = "")
     @PostMapping("/add")
     public ServiceResult add(@RequestBody UserCreateRequest userCreateRequest) {
-        String decryptedPwd = PasswordUtils.desDecrypt(resetPwdRequest.getNewPwd());
-        boolean success = getModelService().resetPwd(resetPwdRequest.getUserId(), decryptedPwd);
-        return ResultUtils.commonResult(success, null);
+        UserModel userModel = getModelService().add(userCreateRequest);
+        return ResultUtils.commonResult(true, userModel);
     }
 
 
