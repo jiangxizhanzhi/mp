@@ -25,6 +25,9 @@ public class RegisterService {
     @Autowired
     private AuthConfig authConfig;
 
+    @Autowired
+    private UserCreateCheckService checkService;
+
     public ObjServiceResult<UserModel> register(RegisterRequest req) {
 
         UserModel user = UserModel.builder()
@@ -42,37 +45,12 @@ public class RegisterService {
             user.setStatus(UserModel.Status.PENDING);
         }
 
-        check(user);
+        checkService.check(user);
 
         ObjServiceResult<UserModel> result = userService.create(user);
         return result;
     }
 
-
-    public void check(UserModel user) {
-        Assert.notBlank(user.getUsername(), "username不能为空!");
-
-        // 密码是否合法
-        Assert.isFalse(PasswordUtils.isPasswordStrengthLowLevel(user.getPassword()), AuthConstant.ERROR_CODE_PREFIX + "password_strength_invalid");
-
-        // 邮箱是否合法
-        if (StringUtils.isNotBlank(user.getEmail())) {
-            Assert.isTrue(Validator.isEmail(user.getEmail()), AuthConstant.ERROR_CODE_PREFIX + "email_invalid");
-        }
-
-        // 手机号是否合法
-        if (StringUtils.isNotBlank(user.getMobile())) {
-            Assert.isTrue(PhoneUtil.isMobile(user.getMobile()), AuthConstant.ERROR_CODE_PREFIX + "mobile_invalid");
-            if (userService.getByMobile(user.getMobile()) != null) {
-                throw new MpRuntimeException("mobile已存在！" + user.getMobile());
-            }
-        }
-
-        if (userService.getByUserName(user.getUsername()) != null) {
-            throw new MpRuntimeException("username已存在！" + user.getUsername());
-        }
-
-    }
 
 
 }

@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -147,6 +148,12 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         return orgModel;
     }
 
+    @Override
+    public boolean exists(String id) {
+        Assert.notBlank(id, "id不能为空！");
+        OrgModel orgModel = getModelMapper().get(id);
+        return Objects.nonNull(orgModel);
+    }
 
 
     private List<OrgDto> toTree(List<OrgModel> orgs) {

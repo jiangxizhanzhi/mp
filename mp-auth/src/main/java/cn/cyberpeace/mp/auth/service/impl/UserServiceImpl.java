@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
+import cn.cyberpeace.mp.auth.dto.user.UserCreateRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.OrgUserModel;
@@ -13,13 +14,14 @@ import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
+import cn.cyberpeace.mp.auth.service.RegisterService;
 import cn.cyberpeace.mp.auth.service.RoleService;
+import cn.cyberpeace.mp.auth.service.UserCreateCheckService;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.UserFields;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
-import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.config.FastDfsConfig;
 import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
@@ -30,6 +32,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.BeanUtils;
+import cn.cyberpeace.mp.base.util.IdGenerator;
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.hutool.core.collection.CollectionUtil;
@@ -77,6 +80,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Autowired
     private OrgUserService orgUserService;
+
+    @Autowired
+    private UserCreateCheckService checkService;
 
     @Autowired
     public UserServiceImpl(UserMapper modelMapper, UserFields modelFields) {
@@ -172,9 +178,73 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
+    public UserModel add(UserCreateRequest createRequest) {
+        Assert.notNull(createRequest, "userDto不能为空");
+
+        // 保存用户
+        UserModel userModel = new UserModel();
+        org.springframework.beans.BeanUtils.copyProperties(createRequest, userModel);
+
+        String decryptedPwd = PasswordUtils.desDecrypt(createRequest.getPassword());
+        userModel.setPassword(decryptedPwd);
+
+        checkService.check(userModel);
+
+        // create中会对密码加密，外层不需要再次加密
+        ObjServiceResult<UserModel> result = create(userModel);
+
+        if (Objects.isNull(result.getSource()) || Objects.isNull(result.getSource().getObj())) {
+            throw new MpRuntimeException("创建用户失败！");
+        }
+
+        UserModel userCreated = result.getSource().getObj();
+        String userId = userCreated.getId();
+        log.info("user created userId:{}", userId);
+
+        // 保存组织-用户关系
+        if (CollectionUtil.isNotEmpty(createRequest.getOrgIds())) {
+            createRequest.getOrgIds().forEach(id -> {
+                boolean isOrgExist = orgService.exists(id);
+                if (!isOrgExist) {
+                    log.error("组织id:{}不存在", id);
+                    throw new MpRuntimeException("组织id：" + id + "不存在！");
+                }
+                OrgUserModel orgUserModel = OrgUserModel.builder().user(userId).org(id).build();
+                orgUserService.create(orgUserModel);
+            });
+        }
+
+
+        // 保存角色-用户关系
+        if (CollectionUtil.isNotEmpty(createRequest.getRoleIds())) {
+            createRequest.getRoleIds().forEach(id -> {
+                boolean isRoleExist = roleService.exists(id);
+                if (!isRoleExist) {
+                    log.error("角色id:{}不存在", id);
+                    throw new MpRuntimeException("角色id：" + id + "不存在！");
+                }
+                UserRoleModel userRoleModel = UserRoleModel.builder().user(userId).role(id).build();
+                userRoleService.create(userRoleModel);
+            });
+        }
+
+        return userModel;
+    }
+
+    @Override
     public UserModel getByUserName(String userName) {
         log.info("userName:{}", userName);
         UserModel userModel = getModelMapper().first(new HumanCondition().filterEqual("username", userName));
+        processExpiredStatus(userModel);
+        return userModel;
+    }
+
+
+    @Override
+    public UserModel getByIdent(String ident) {
+        log.info("ident:{}", ident);
+        UserModel userModel = getModelMapper().first(new HumanCondition().filterEqual("identifier", ident));
         processExpiredStatus(userModel);
         return userModel;
     }
@@ -372,7 +442,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             // 1.保存用户信息
             UserModel userModel = importUser2UserModel(importUser);
             try {
-                String userId = UUID.randomUUID().toString().replaceAll("-", "");
+                String userId = cn.cyberpeace.mp.base.util.IdGenerator.generateUUID();
                 log.warn("userId:{}", userId);
                 userModel.setId(userId);
                 create(userModel);
@@ -452,7 +522,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
      * @param user
      */
     public void processExpiredStatus(UserModel user) {
-        if (Objects.isNull(user.getExpiredTime())) {
+        if (Objects.isNull(user) || Objects.isNull(user.getExpiredTime())) {
             return;
         }
         LocalDateTime now = LocalDateTime.now();

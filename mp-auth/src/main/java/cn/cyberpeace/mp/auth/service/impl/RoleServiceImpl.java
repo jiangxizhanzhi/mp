@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper, RoleFields, QueryParams>
@@ -48,5 +49,12 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         Assert.notBlank(ident, "identifier不能为空！");
         RoleModel roleModel = getModelMapper().selectByIdent(ident);
         return roleModel;
+    }
+
+    @Override
+    public boolean exists(String id) {
+        Assert.notBlank(id, "id不能为空！");
+        RoleModel roleModel = getModelMapper().get(id);
+        return Objects.nonNull(roleModel);
     }
 }

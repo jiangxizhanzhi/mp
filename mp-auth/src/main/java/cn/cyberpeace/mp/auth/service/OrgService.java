@@ -26,5 +26,7 @@ public interface OrgService extends BaseModelService<OrgModel, QueryParams> {
     // 根据路径查出组织
     OrgModel getByPath(String path);
 
+    boolean exists(String id);
+
 
 }
