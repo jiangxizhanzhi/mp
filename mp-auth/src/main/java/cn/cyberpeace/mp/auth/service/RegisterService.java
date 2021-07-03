@@ -1,17 +1,11 @@
 package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.auth.config.AuthConfig;
-import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.dto.register.RegisterRequest;
 import cn.cyberpeace.mp.auth.model.UserModel;
-import cn.cyberpeace.mp.auth.util.PasswordUtils;
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.auth.service.impl.UserCreateCheckService;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
-import cn.hutool.core.lang.Assert;
-import cn.hutool.core.lang.Validator;
-import cn.hutool.core.util.PhoneUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

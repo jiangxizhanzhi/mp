@@ -1,7 +1,9 @@
-package cn.cyberpeace.mp.auth.service;
+package cn.cyberpeace.mp.auth.service.impl;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.service.UserCheckService;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.hutool.core.lang.Assert;
@@ -12,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UserCreateCheckService {
+public class UserCreateCheckService implements UserCheckService {
 
     @Autowired
     private UserService userService;

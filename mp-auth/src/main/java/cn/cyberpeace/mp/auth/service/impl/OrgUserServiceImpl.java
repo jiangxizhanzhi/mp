@@ -148,5 +148,19 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
         return pageInfo;
     }
 
+    @Override
+    public boolean cleanUserOrgs(String userId) {
+        Assert.notNull(userId, "userid不能为空");
+
+        var objResult = userService.get(userId).getSource();
+        if (objResult == null || objResult.getObj() == null) {
+            new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "account_not_existed");
+        }
+
+        getModelMapper().deleteByUser(userId);
+
+        return true;
+    }
+
 
 }

@@ -4,7 +4,7 @@ import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
-import cn.cyberpeace.mp.auth.dto.user.UserCreateRequest;
+import cn.cyberpeace.mp.auth.dto.user.UserRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.OrgUserModel;
@@ -14,9 +14,7 @@ import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
-import cn.cyberpeace.mp.auth.service.RegisterService;
 import cn.cyberpeace.mp.auth.service.RoleService;
-import cn.cyberpeace.mp.auth.service.UserCreateCheckService;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.UserFields;
@@ -32,7 +30,6 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.BeanUtils;
-import cn.cyberpeace.mp.base.util.IdGenerator;
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.hutool.core.collection.CollectionUtil;
@@ -52,7 +49,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -82,7 +78,10 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     private OrgUserService orgUserService;
 
     @Autowired
-    private UserCreateCheckService checkService;
+    private UserCreateCheckService createCheckService;
+
+    @Autowired
+    private UserUpdateCheckService updateCheckService;
 
     @Autowired
     public UserServiceImpl(UserMapper modelMapper, UserFields modelFields) {
@@ -179,7 +178,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public UserModel add(UserCreateRequest createRequest) {
+    public UserModel add(UserRequest createRequest) {
         Assert.notNull(createRequest, "userDto不能为空");
 
         // 保存用户
@@ -189,7 +188,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         String decryptedPwd = PasswordUtils.desDecrypt(createRequest.getPassword());
         userModel.setPassword(decryptedPwd);
 
-        checkService.check(userModel);
+        createCheckService.check(userModel);
 
         // create中会对密码加密，外层不需要再次加密
         ObjServiceResult<UserModel> result = create(userModel);
@@ -200,7 +199,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
         UserModel userCreated = result.getSource().getObj();
         String userId = userCreated.getId();
-        log.info("user created userId:{}", userId);
+        log.info("user created id:{}", userId);
 
         // 保存组织-用户关系
         if (CollectionUtil.isNotEmpty(createRequest.getOrgIds())) {
@@ -219,6 +218,62 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         // 保存角色-用户关系
         if (CollectionUtil.isNotEmpty(createRequest.getRoleIds())) {
             createRequest.getRoleIds().forEach(id -> {
+                boolean isRoleExist = roleService.exists(id);
+                if (!isRoleExist) {
+                    log.error("角色id:{}不存在", id);
+                    throw new MpRuntimeException("角色id：" + id + "不存在！");
+                }
+                UserRoleModel userRoleModel = UserRoleModel.builder().user(userId).role(id).build();
+                userRoleService.create(userRoleModel);
+            });
+        }
+
+        return userModel;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public UserModel modify(UserRequest modifyRequest) {
+        // 保存用户
+        UserModel userModel = new UserModel();
+        org.springframework.beans.BeanUtils.copyProperties(modifyRequest, userModel);
+
+        updateCheckService.check(userModel);
+
+        // create中会对密码加密，外层不需要再次加密
+        ObjServiceResult<UserModel> result = update(userModel);
+
+        if (Objects.isNull(result.getSource()) || Objects.isNull(result.getSource().getObj())) {
+            throw new MpRuntimeException("修改用户失败！");
+        }
+
+        UserModel userModified = result.getSource().getObj();
+        String userId = userModified.getId();
+        log.info("user modified id:{}", userId);
+
+        // 保存组织-用户关系
+        if (CollectionUtil.isNotEmpty(modifyRequest.getOrgIds())) {
+            // 清除原来所有用户关联的组织
+            orgUserService.cleanUserOrgs(userId);
+
+            modifyRequest.getOrgIds().forEach(id -> {
+                boolean isOrgExist = orgService.exists(id);
+                if (!isOrgExist) {
+                    log.error("组织id:{}不存在", id);
+                    throw new MpRuntimeException("组织id：" + id + "不存在！");
+                }
+                OrgUserModel orgUserModel = OrgUserModel.builder().user(userId).org(id).build();
+                orgUserService.create(orgUserModel);
+            });
+        }
+
+
+        // 保存角色-用户关系
+        if (CollectionUtil.isNotEmpty(modifyRequest.getRoleIds())) {
+            // 清除原来所有用户关联的角色
+            userRoleService.cleanUserRoles(userId);
+
+            modifyRequest.getRoleIds().forEach(id -> {
                 boolean isRoleExist = roleService.exists(id);
                 if (!isRoleExist) {
                     log.error("角色id:{}不存在", id);
