@@ -208,17 +208,29 @@ create table mp_auth_client_details (
 ) COMMENT '渠道认证配置表';
 
 
+# 用户默认头像
+CREATE TABLE mp_auth_avatar (
+       `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
+       `id` varchar(64)  NOT NULL COMMENT 'id',
+       `url` varchar(1024)  NULL COMMENT '头像url',
+       `create_time` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+       `update_time` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+       PRIMARY KEY (`pk`),
+       UNIQUE (`id`)
+) COMMENT '默认头像';
+
+
 # 系统配置信息表
 CREATE TABLE mp_sys_config (
-         `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
-         `id` varchar(64)  NOT NULL COMMENT 'id',
-         `tenant` varchar(64) NOT NULL COMMENT '租户',
-         `key_name` varchar(256)  NULL COMMENT '键',
-         `value` varchar(1024)  NULL COMMENT '值',
-         `create_time` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-         `update_time` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-         PRIMARY KEY (`pk`),
-         UNIQUE (`id`)
+     `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
+     `id` varchar(64)  NOT NULL COMMENT 'id',
+     `tenant` varchar(64) NOT NULL COMMENT '租户',
+     `key_name` varchar(256)  NULL COMMENT '键',
+     `value` varchar(1024)  NULL COMMENT '值',
+     `create_time` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+     `update_time` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+     PRIMARY KEY (`pk`),
+     UNIQUE (`id`)
 ) COMMENT '其他配置信息表';
 
 
