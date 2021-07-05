@@ -26,6 +26,9 @@ import java.util.Map;
 @NoArgsConstructor
 public class BaseModel {
 
+    @ApiModelProperty(value = "自增ID(只读)")
+    private Integer pk;
+
     @ApiModelProperty(value = "ID")
     @DefaultGen(UuidGenerator.class)
     private String id;
@@ -37,6 +40,12 @@ public class BaseModel {
     @ApiModelProperty(value = "更新时间")
     @DefaultGen(DateTimeGenerator.class)
     private LocalDateTime updateTime;
+
+    public BaseModel(String id, LocalDateTime createTime, LocalDateTime updateTime) {
+        this.id = id;
+        this.createTime = createTime;
+        this.updateTime = updateTime;
+    }
 
     private void initDefault(String fieldName, Map<String, Object[]> initDefaultFields) {
         Object[] value = initDefaultFields.getOrDefault(fieldName, null);
