@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.RequestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -48,8 +49,8 @@ public class OrgController extends BaseModelController<OrgModel, QueryParams, Or
 
     @ApiOperation(value = "查询所有组织树形结构", notes = "")
     @GetMapping("/tree")
-    public ServiceResult getOrgTree() {
-        List<OrgDto> tree = getModelService().getTree();
+    public ServiceResult getOrgTree(@RequestParam(required = false) String orgId) {
+        List<OrgDto> tree = getModelService().getTree(orgId);
         return ServiceResult.builder().source(tree).build().asResult();
     }
 
