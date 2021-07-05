@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.base.repository.fields;
 
 import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.base.util.CastUtils;
+import cn.cyberpeace.mp.base.util.ClassUtils;
 import cn.cyberpeace.mp.base.util.SerializableFunction;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
@@ -108,25 +109,28 @@ public class DynamicFields {
             return obj;
         }
 
-        fieldsMap.forEach((fieldName, fieldFlag) -> {
-            if (obj instanceof Map) {
-                Map<Object, Object> actualObj = (Map<Object, Object>) obj;
-                if (fieldFlag instanceof Boolean && !(boolean) fieldFlag) {
+        if (obj instanceof Map) {
+            Map<String, Object> actualObj = (Map<String, Object>) obj;
+            actualObj.forEach((fieldName, fieldValue) -> {
+                Object fieldFlag = fieldsMap.getOrDefault(fieldName, null);
+                if (fieldFlag == null || (fieldFlag instanceof Boolean && !(boolean) fieldFlag)) {
                     actualObj.put(fieldName, null);
                 } else if (fieldFlag instanceof DynamicFields) {
-                    Object fieldValue = actualObj.getOrDefault(fieldName, null);
                     ((DynamicFields) fieldFlag).applyWithNull(fieldValue);
                 }
-            } else {
-                final BeanWrapper objWrapper = new BeanWrapperImpl(obj);
-                if (fieldFlag instanceof Boolean && !(boolean) fieldFlag) {
+            });
+        } else {
+            final BeanWrapper objWrapper = new BeanWrapperImpl(obj);
+            for (String fieldName: ClassUtils.getBeanClassFields(obj.getClass())) {
+                Object fieldFlag = fieldsMap.getOrDefault(fieldName, null);
+                if (fieldFlag == null || (fieldFlag instanceof Boolean && !(boolean) fieldFlag)) {
                     objWrapper.setPropertyValue(fieldName, null);
                 } else if (fieldFlag instanceof DynamicFields) {
                     Object fieldValue = objWrapper.getPropertyValue(fieldName);
                     ((DynamicFields) fieldFlag).applyWithNull(fieldValue);
                 }
             }
-        });
+        }
 
         return obj;
     }
