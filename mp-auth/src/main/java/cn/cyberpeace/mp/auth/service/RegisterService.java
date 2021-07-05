@@ -36,7 +36,7 @@ public class RegisterService {
         // 查看系统设置，注册用户是否需要审批
         if (authConfig.isNeedRegistrationAudit()) {
             log.info("need registration audit...");
-            user.setStatus(UserModel.Status.PENDING);
+            user.setIsAudited(UserModel.Status.NOT_AUDITED);
         }
 
         checkService.check(user);

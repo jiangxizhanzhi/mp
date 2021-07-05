@@ -13,7 +13,13 @@ public class UserDto extends UserModel {
     @ApiModelProperty(value = "组织路径")
     String orgpath;
 
-    @ApiModelProperty(value = "角色")
+    @ApiModelProperty(value = "角色集合")
     List<RoleModel> roles;
+
+    @ApiModelProperty(value = "组织id集合")
+    List<String> orgIds;
+
+    @ApiModelProperty(value = "角色id集合")
+    List<String> roleIds;
 
 }

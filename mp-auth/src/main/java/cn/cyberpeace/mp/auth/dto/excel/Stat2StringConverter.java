@@ -27,21 +27,21 @@ public class Stat2StringConverter implements Converter<String> {
 
     @Override
     public CellData convertToExcelData(String value, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) throws Exception {
-        if (Objects.equals(value, UserModel.Status.NORMAL.toString())) {
-            return new CellData("正常");
-        }
-
-        if (Objects.equals(value, UserModel.Status.DISABLE.toString())) {
-            return new CellData("禁用");
-        }
-
-        if (Objects.equals(value, UserModel.Status.PENDING.toString())) {
-            return new CellData("待审批");
-        }
-
-        if (Objects.equals(value, UserModel.Status.EXPIRED.toString())) {
-            return new CellData("过期");
-        }
+//        if (Objects.equals(value, UserModel.Status.ENABLED.toString())) {
+//            return new CellData("正常");
+//        }
+//
+//        if (Objects.equals(value, UserModel.Status.DISABLE.toString())) {
+//            return new CellData("禁用");
+//        }
+//
+//        if (Objects.equals(value, UserModel.Status.PENDING.toString())) {
+//            return new CellData("待审批");
+//        }
+//
+//        if (Objects.equals(value, UserModel.Status.EXPIRED.toString())) {
+//            return new CellData("过期");
+//        }
         return new CellData(value);
     }
 }

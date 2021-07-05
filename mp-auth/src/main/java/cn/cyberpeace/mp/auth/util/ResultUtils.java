@@ -4,6 +4,8 @@ import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ObjResult;
+import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.BeanUtils;
 import com.github.pagehelper.PageInfo;
@@ -36,6 +38,10 @@ public class ResultUtils {
 
     public static ListObjServiceResult pageInfo2ObjServiceResult(PageInfo pageInfo) {
         return new ListObjServiceResult(new ListObjResult(pageInfo.getList(), Long.valueOf(pageInfo.getTotal()).intValue()).asResult()).asResult();
+    }
+
+    public static ObjServiceResult obj2ObjServiceResult(Object obj) {
+        return new ObjServiceResult(new ObjResult(obj)).asResult();
     }
 
 

@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
+import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.dto.user.UserRequest;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
@@ -12,6 +13,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 public interface UserService extends BaseModelService<UserModel, UserQueryParams> {
+
+    UserDto getUserDto(String id);
 
     UserModel add(UserRequest createRequest);
 
@@ -64,5 +67,8 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
     boolean updateAvatar(String userId, MultipartFile multipartFile) throws MpRuntimeException;
 
     void processExpiredStatus(UserModel user);
+
+    // userModel转换为userdto，附加组织，角色信息
+    UserDto userModel2UserDto(UserModel userModel);
 
 }

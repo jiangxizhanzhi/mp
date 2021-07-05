@@ -102,6 +102,15 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return objServiceResult;
     }
 
+    public UserDto getUserDto(String id) {
+        UserModel userModel = getModelMapper().get(id);
+        processExpiredStatus(userModel);
+
+        UserDto userDto = userModel2UserDto(userModel);
+
+        return userDto;
+    }
+
     @Override
     public ListObjServiceResult list(UserQueryParams queryParams) {
         ListObjServiceResult<UserModel> listObjSrvResult = super.list(queryParams);
@@ -115,14 +124,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         userDtos = users.stream().map(u -> {
             processExpiredStatus(u);
 
-            UserDto userDto = new UserDto();
-            BeanUtils.copyProperties(u, userDto);
-            String allorgpath = orgUserService.getAllOrgPathByUserId(u.getId());
-            userDto.setOrgpath(allorgpath);
-
-            List<RoleModel> roles = userRoleService.listByUserId(u.getId());
-//            String allroles = roles.stream().map(r -> r.getIdentifier()).collect(Collectors.joining(","));
-            userDto.setRoles(roles);
+            UserDto userDto = userModel2UserDto(u);
             return userDto;
         }).collect(Collectors.toList());
 
@@ -143,7 +145,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         // 查看系统设置，注册用户是否需要审批
         if (authConfig.isNeedRegistrationAudit()) {
             log.info("need registration audit...");
-            obj.setStatus(UserModel.Status.PENDING);
+            obj.setIsAudited(UserModel.Status.NOT_AUDITED);
         }
         return super.create(obj, fields);
     }
@@ -160,7 +162,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         // 查看系统设置，注册用户是否需要审批
         if (authConfig.isNeedRegistrationAudit()) {
             log.info("need registration audit...");
-            objs.forEach(o -> o.setStatus(UserModel.Status.PENDING));
+            objs.forEach(o -> o.setIsAudited(UserModel.Status.NOT_AUDITED));
         }
         return super.bulkCreate(objs);
     }
@@ -359,8 +361,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         Optional<UserModel> userOptional = Optional.ofNullable(getModelMapper().get(userId));
         if (userOptional.isPresent()) {
             UserModel userModel = userOptional.get();
-            if (Objects.equals(userModel.getStatus(), UserModel.Status.NORMAL)) {
-                UserModel updateUser = UserModel.builder().id(userId).status(UserModel.Status.DISABLE).build();
+            if (Objects.equals(userModel.getIsEnabled(), UserModel.Status.ENABLED)) {
+                UserModel updateUser = UserModel.builder().id(userId).isEnabled(UserModel.Status.DISABLED).build();
                 return getModelMapper().update(updateUser);
             }
             log.error("id为{}的用户状态不是正常状态！", userId);
@@ -394,8 +396,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         Optional<UserModel> userOptional = Optional.ofNullable(getModelMapper().get(userId));
         if (userOptional.isPresent()) {
             UserModel userModel = userOptional.get();
-            if (Objects.equals(userModel.getStatus(), UserModel.Status.DISABLE)) {
-                UserModel updateUser = UserModel.builder().id(userId).status(UserModel.Status.NORMAL).build();
+            if (Objects.equals(userModel.getIsEnabled(), UserModel.Status.DISABLED)) {
+                UserModel updateUser = UserModel.builder().id(userId).isEnabled(UserModel.Status.ENABLED).build();
                 return getModelMapper().update(updateUser);
             }
             log.error("id为{}的用户状态不是禁用状态！", userId);
@@ -431,8 +433,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         Optional<UserModel> userOptional = Optional.ofNullable(getModelMapper().get(userId));
         if (userOptional.isPresent()) {
             UserModel userModel = userOptional.get();
-            if (Objects.equals(userModel.getStatus(), UserModel.Status.PENDING)) {
-                UserModel updateUser = UserModel.builder().id(userId).status(UserModel.Status.NORMAL).build();
+            if (Objects.equals(userModel.getIsEnabled(), UserModel.Status.NOT_AUDITED)) {
+                UserModel updateUser = UserModel.builder().id(userId).isAudited(UserModel.Status.AUDITED).build();
                 return getModelMapper().update(updateUser);
             }
             log.error("id为{}的用户状态不是挂起状态！", userId);
@@ -586,14 +588,38 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         if (Objects.isNull(user) || Objects.isNull(user.getExpiredTime())) {
             return;
         }
-        LocalDateTime now = LocalDateTime.now();
-        if (now.isAfter(user.getExpiredTime()) && Objects.equals(user.getStatus(), UserModel.Status.NORMAL)) {
-            log.info("用户状态已经过期，准备更新数据库用户状态！ username:{}", user.getUsername());
-            user.setStatus(UserModel.Status.EXPIRED);
 
-//            UserModel updateUser = UserModel.builder().id(user.getId()).status(UserModel.Status.EXPIRED).build();
-//            update(updateUser);
+        user.setIsExpired(UserModel.Status.NOT_EXPIRED);
+
+        LocalDateTime now = LocalDateTime.now();
+        if (Objects.nonNull(user.getExpiredTime()) && now.isAfter(user.getExpiredTime())) {
+            log.info("用户状态已经过期，准备更新数据库用户状态！ username:{}", user.getUsername());
+            user.setIsExpired(UserModel.Status.EXPIRED);
         }
+    }
+
+
+
+    public UserDto userModel2UserDto(UserModel userModel) {
+        if (Objects.isNull(userModel)) {
+            return null;
+        }
+
+        UserDto userDto = new UserDto();
+        BeanUtils.copyProperties(userModel, userDto);
+
+        List<OrgModel> orgs = orgUserService.listOrgsByUserId(userModel.getId());
+        List<String> orgIds = orgs.stream().map(o -> o.getId()).collect(Collectors.toList());
+        String allorgpath = orgs.stream().map(OrgModel::getPath).collect(Collectors.joining(","));
+        userDto.setOrgIds(orgIds);
+        userDto.setOrgpath(allorgpath);
+
+        List<RoleModel> roles = userRoleService.listByUserId(userModel.getId());
+        List<String> roleIds = roles.stream().map(r -> r.getId()).collect(Collectors.toList());
+        userDto.setRoles(roles);
+        userDto.setRoleIds(roleIds);
+
+        return userDto;
     }
 
 
@@ -628,7 +654,17 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         String paths = orgList.stream().map(o -> orgService.calculatePathByOrgId(o.getId())).collect(Collectors.joining(","));
         log.info("paths:{}", paths);
         exportUser.setOrg(paths);
-        exportUser.setStat(user.getStatus() + "");
+
+        exportUser.setStat("正常");
+        if (user.getIsEnabled().equals(UserModel.Status.DISABLED)) {
+            exportUser.setStat("禁用");
+        }
+        if (user.getIsAudited().equals(UserModel.Status.NOT_AUDITED)) {
+            exportUser.setStat("未审批");
+        }
+        if (user.getIsEnabled().equals(UserModel.Status.EXPIRED)) {
+            exportUser.setStat("过期");
+        }
 
         // role
         List<RoleModel> roleList = userRoleService.listByUserId(user.getId());

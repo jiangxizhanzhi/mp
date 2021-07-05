@@ -10,10 +10,10 @@ import java.util.List;
 @Data
 public class UserRequest extends UserModel {
 
-    @ApiModelProperty(value = "组织集合")
+    @ApiModelProperty(value = "组织id集合")
     List<String> orgIds;
 
-    @ApiModelProperty(value = "角色id列表")
+    @ApiModelProperty(value = "角色id集合")
     List<String> roleIds;
 
 }
