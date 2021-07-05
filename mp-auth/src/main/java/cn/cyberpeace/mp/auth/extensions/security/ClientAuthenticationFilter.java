@@ -49,7 +49,7 @@ public class ClientAuthenticationFilter extends OncePerRequestFilter {
                 var clientAuthenticationToken = new ClientAuthenticationToken(clientDetails, clientSecret, null);
                 clientAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(clientAuthenticationToken);
-                UserUtils.setLoginUser2RequestAttr(clientDetails.getId(), clientDetails.getClientId(), LogConstant.USER_TYPE_CLIENT);
+                UserUtils.setLoginUser2RequestAttr(request, clientDetails.getId(), clientDetails.getClientId(), LogConstant.USER_TYPE_CLIENT);
             }
         }
 

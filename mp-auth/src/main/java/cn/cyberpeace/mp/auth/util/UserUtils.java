@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Objects;
 
 @Component
 @Slf4j
@@ -33,8 +34,13 @@ public class UserUtils {
     }
 
 
-    public static void setLoginUser2RequestAttr(String id, String name, String userType) {
-        HttpServletRequest request = ServletUtils.getRequest();
+    public static void setLoginUser2RequestAttr(HttpServletRequest request, String id, String name, String userType) {
+        if (Objects.isNull(request)) {
+            request = ServletUtils.getRequest();
+        }
+        if (Objects.isNull(request)) {
+            return;
+        }
         request.setAttribute(LogConstant.USER_ID_KEY, id);
         request.setAttribute(LogConstant.USER_NAME_KEY, name);
         request.setAttribute(LogConstant.USER_TYPE_KEY, userType);
