@@ -20,6 +20,7 @@ import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.UserFields;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
+import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.config.FastDfsConfig;
 import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
@@ -27,6 +28,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.BeanUtils;
@@ -39,6 +41,7 @@ import cn.hutool.core.lang.Assert;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -100,6 +103,15 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         UserModel userModel = objServiceResult.getSource().getObj();
         processExpiredStatus(userModel);
         return objServiceResult;
+    }
+
+    public UserDto getUserDto(String id) {
+        UserModel userModel = getModelMapper().get(id);
+        processExpiredStatus(userModel);
+
+        UserDto userDto = transferUserModel2UserDto(userModel);
+
+        return userDto;
     }
 
     @Override
@@ -591,6 +603,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             log.info("用户状态已经过期，准备更新数据库用户状态！ username:{}", user.getUsername());
             user.setStatus(UserModel.Status.EXPIRED);
 
+            // 不再更新数据库状态
 //            UserModel updateUser = UserModel.builder().id(user.getId()).status(UserModel.Status.EXPIRED).build();
 //            update(updateUser);
         }
@@ -637,6 +650,23 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         exportUser.setRoles(roles);
 
         return exportUser;
+    }
+
+
+    private UserDto transferUserModel2UserDto(UserModel userModel) {
+        if (Objects.isNull(userModel)) {
+            return null;
+        }
+
+        UserDto userDto = new UserDto();
+        BeanUtils.copyProperties(userModel, userDto);
+
+        String allorgpath = orgUserService.getAllOrgPathByUserId(userModel.getId());
+        userDto.setOrgpath(allorgpath);
+
+        List<RoleModel> roles = userRoleService.listByUserId(userModel.getId());
+        userDto.setRoles(roles);
+        return userDto;
     }
 
 
