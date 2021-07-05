@@ -55,7 +55,7 @@ public class RouterCloudPlatformModel extends BaseCloudPlatformModel implements 
         /**
          *
          */
-        private List<String> interfaces;
+        private List<Interfaces> interfaces;
 
         /**
          * 路由器状态
@@ -90,6 +90,28 @@ public class RouterCloudPlatformModel extends BaseCloudPlatformModel implements 
              * 外部网关地址
              */
             private String fixed_ip;
+
+        }
+
+        @Data
+        @NoArgsConstructor
+        @AllArgsConstructor
+        public static final class Interfaces{
+
+            /**
+             * 外部网络ID
+             */
+            private String network_id;
+
+            /**
+             * 外部网关地址
+             */
+            private String fixed_ip;
+
+            /**
+             * 端口ID
+             */
+            private String port_id;
         }
 
         @Data
