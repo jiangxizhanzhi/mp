@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.devops.cluster.model.ElasticIpCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.request.ElasticIpPageRequest;
 import cn.cyberpeace.mp.devops.cluster.response.ElasticIpResponse;
 import cn.cyberpeace.mp.devops.cluster.service.ElasticIpService;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/elasticip")
+@Api(tags = "网络实例管理-弹性IP")
 public class ElasticIpController {
 
     private ElasticIpService elasticIpService;
