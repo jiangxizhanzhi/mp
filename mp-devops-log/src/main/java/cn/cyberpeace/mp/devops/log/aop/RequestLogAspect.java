@@ -26,7 +26,6 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.annotation.Annotation;
@@ -260,20 +259,20 @@ public class RequestLogAspect {
 
     private void handleOperationUser(OperationLogModel operationLogModel) {
         HttpServletRequest request = ServletUtils.getRequest();
-        Object userId = request.getAttribute(LogConstant.USER_ID);
-        Object userName = request.getAttribute(LogConstant.USER_NAME);
-        Object userType = request.getAttribute(LogConstant.USER_TYPE);
+        Object userId = request.getAttribute(LogConstant.USER_ID_KEY);
+        Object userName = request.getAttribute(LogConstant.USER_NAME_KEY);
+        Object userType = request.getAttribute(LogConstant.USER_TYPE_KEY);
 
         if (Objects.nonNull(userId)) {
             operationLogModel.setUserId(userId.toString());
         }
 
         if (Objects.nonNull(userName)) {
-            operationLogModel.setUserId(userName.toString());
+            operationLogModel.setUserName(userName.toString());
         }
 
         if (Objects.nonNull(userType)) {
-            operationLogModel.setUserId(userType.toString());
+            operationLogModel.setUserType(userType.toString());
         }
     }
 

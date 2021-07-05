@@ -75,6 +75,7 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
 
     @ApiOperation(value = "修改用户，同时完成组织，角色绑定关系", notes = "")
     @PostMapping("/modify")
+    @OperateLog(module = AuthLogConstant.MODULE, type = AuthLogConstant.TYPE_UPDATE, title = "更新用户")
     public ServiceResult modify(@RequestBody UserRequest modifyRequest) {
         UserModel userModel = getModelService().modify(modifyRequest);
         return ResultUtils.commonResult(true, userModel);
@@ -101,7 +102,6 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
 
     @ApiOperation(value = "禁用用户", notes = "")
     @PostMapping("/disable")
-    @OperateLog(module = AuthLogConstant.MODULE, type = AuthLogConstant.TYPE_UPDATE, title = "禁用用户")
     public ServiceResult disable(@RequestBody List<String> userIds) {
         String errMsg = getModelService().batchDisable(userIds);
         if (StringUtils.isBlank(errMsg)) {

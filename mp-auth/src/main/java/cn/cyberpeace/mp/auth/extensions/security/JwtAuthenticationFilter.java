@@ -5,6 +5,8 @@ import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetails;
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetailsService;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserPermissionService;
+import cn.cyberpeace.mp.auth.util.UserUtils;
+import cn.cyberpeace.mp.devops.log.constant.LogConstant;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +47,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 authenticationToken = new UsernamePasswordAuthenticationToken(new AuthUserDetails(user, authoritySet), token,
                         null);
                 authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                UserUtils.setLoginUser2RequestAttr(user.getId(), user.getName(), LogConstant.USER_TYPE_USER);
             }
 
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
