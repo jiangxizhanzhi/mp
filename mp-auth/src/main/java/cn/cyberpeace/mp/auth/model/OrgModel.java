@@ -39,6 +39,11 @@ public class OrgModel extends BaseModel {
     @DefaultStr
     private String path;
 
+    @ApiModelProperty(value = "描述")
+    @DefaultStr
+    private String description;
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

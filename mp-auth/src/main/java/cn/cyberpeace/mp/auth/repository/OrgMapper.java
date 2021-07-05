@@ -28,5 +28,4 @@ public interface OrgMapper extends BaseModelMapper<OrgModel> {
 
     @Select("SELECT * FROM mp_auth_org where path = #{path}")
     OrgModel getByPath(@Param("path") String path);
-
 }

@@ -1,10 +1,14 @@
 package cn.cyberpeace.mp.auth.repository;
 
+import cn.cyberpeace.mp.auth.dto.role.RoleDto;
+import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Result;
+import org.apache.ibatis.annotations.Results;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
 
@@ -31,5 +35,16 @@ public interface RoleMapper extends BaseModelMapper<RoleModel> {
     RoleModel selectByIdent(@Param("ident") String ident);
 
 
+    @Select("<script>" +
+            "select r.*, (select count(*) from mp_auth_user_role ru where r.id = ru.role) cnt from mp_auth_role r " +
+            "<where>" +
+            "  <if test=\"roleName != null and roleName != ''\">" +
+            "    AND r.name like CONCAT('%', #{roleName}, '%')" +
+            "  </if>" +
+            "</where></script>")
+    @Results({
+            @Result(column = "cnt", property = "userCnt"),
+    })
+    List<RoleDto> listWithUserCnt(@Param("roleName") String roleName);
 
 }
