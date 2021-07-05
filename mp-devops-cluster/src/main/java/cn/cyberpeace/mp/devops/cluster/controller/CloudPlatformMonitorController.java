@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.devops.cluster.response.HypervisorServiceStateResponse;
 import cn.cyberpeace.mp.devops.cluster.response.HypervisorStatisticsResponse;
 import cn.cyberpeace.mp.devops.cluster.response.VirtualRealSwitchStatusResponse;
 import cn.cyberpeace.mp.devops.cluster.service.*;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -34,6 +35,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/monitor")
+@Api(tags = "云平台监控")
 public class CloudPlatformMonitorController {
 
     private HypervisorService hypervisorService;
