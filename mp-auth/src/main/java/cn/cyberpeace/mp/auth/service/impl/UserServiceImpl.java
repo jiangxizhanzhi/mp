@@ -98,13 +98,11 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             return objServiceResult;
         }
         UserModel userModel = objServiceResult.getSource().getObj();
-        processExpiredStatus(userModel);
         return objServiceResult;
     }
 
     public UserDto getUserDto(String id) {
         UserModel userModel = getModelMapper().get(id);
-        processExpiredStatus(userModel);
 
         UserDto userDto = userModel2UserDto(userModel);
 
@@ -122,8 +120,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
         List<UserModel> users = listObjSrvResult.getSource().getObjs();
         userDtos = users.stream().map(u -> {
-            processExpiredStatus(u);
-
             UserDto userDto = userModel2UserDto(u);
             return userDto;
         }).collect(Collectors.toList());
@@ -299,7 +295,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public UserModel getByUserName(String userName) {
         log.info("userName:{}", userName);
         UserModel userModel = getModelMapper().first(new HumanCondition().filterEqual("username", userName));
-        processExpiredStatus(userModel);
         return userModel;
     }
 
@@ -308,7 +303,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public UserModel getByIdent(String ident) {
         log.info("ident:{}", ident);
         UserModel userModel = getModelMapper().first(new HumanCondition().filterEqual("identifier", ident));
-        processExpiredStatus(userModel);
         return userModel;
     }
 
@@ -316,7 +310,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public UserModel getByMobile(String mobile) {
         log.info("mobile:{}", mobile);
         UserModel userModel = getModelMapper().first(new HumanCondition().filterEqual("mobile", mobile));
-        processExpiredStatus(userModel);
         return userModel;
     }
 
@@ -584,7 +577,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
      * 处理用户过期状态，只有当用户状态为正常状态，且过期时间已到的时候，才会更改为过期状态
      * @param user
      */
-    public void processExpiredStatus(UserModel user) {
+    public void processExpiredStatus(UserDto user) {
         if (Objects.isNull(user) || Objects.isNull(user.getExpiredTime())) {
             return;
         }
@@ -607,6 +600,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
         UserDto userDto = new UserDto();
         BeanUtils.copyProperties(userModel, userDto);
+        // 过期状态处理
+        processExpiredStatus(userDto);
 
         List<OrgModel> orgs = orgUserService.listOrgsByUserId(userModel.getId());
         List<String> orgIds = orgs.stream().map(o -> o.getId()).collect(Collectors.toList());
@@ -615,9 +610,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         userDto.setOrgpath(allorgpath);
 
         List<RoleModel> roles = userRoleService.listByUserId(userModel.getId());
-        List<String> roleIds = roles.stream().map(r -> r.getId()).collect(Collectors.toList());
         userDto.setRoles(roles);
-        userDto.setRoleIds(roleIds);
 
         return userDto;
     }

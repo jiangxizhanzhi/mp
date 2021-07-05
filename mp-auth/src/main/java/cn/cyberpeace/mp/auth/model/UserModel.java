@@ -17,6 +17,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
+import java.beans.Transient;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -33,6 +34,9 @@ public class UserModel extends BaseModel implements Serializable {
 
     public static final int INT_CHECK_YES = 1;
 
+
+    @ApiModelProperty(value = "主键")
+    private Integer pk;
 
     @DefaultStr(AuthConstant.DEFAULT_TENANT)
     @ApiModelProperty(value = "租户")
@@ -84,9 +88,6 @@ public class UserModel extends BaseModel implements Serializable {
     @DefaultStr
     private String address;
 
-//    @ApiModelProperty(value = "账号状态 1：正常  2：禁用  3：挂起（待审批） 4:过期")
-//    @DefaultInt(1)
-//    private Integer status;
 
     @ApiModelProperty(value = "是否首次登陆需要强制修改密码 0:否，1:是")
     @DefaultInt(INT_CHECK_NO)
@@ -106,11 +107,6 @@ public class UserModel extends BaseModel implements Serializable {
     @DefaultInt(1)
     private Integer isAudited;
 
-    // 1：已过期  0：未过期，数据库中没有该字段，由expiredtime字段判断
-    @ApiModelProperty(value = "1：已过期 0：未过期")
-    private Integer isExpired;
-
-
 
     @ApiModelProperty(value = "加入时间")
     @DefaultGen(DateTimeGenerator.class)
@@ -129,7 +125,7 @@ public class UserModel extends BaseModel implements Serializable {
 
 
     @Builder
-    public UserModel(String id, LocalDateTime createTime, LocalDateTime updateTime, String tenant, String identifier, String username, String password, String tokenSecret, String name, String nickname, String avatar, LocalDate birthday, String email, String mobile, String idCard, String address, Integer initCheck, String description, Integer isEnabled, Integer isAudited, Integer isExpired, LocalDateTime dateJoined, LocalDateTime expiredTime, LocalDateTime lastLogin) {
+    public UserModel(String id, LocalDateTime createTime, LocalDateTime updateTime, String tenant, String identifier, String username, String password, String tokenSecret, String name, String nickname, String avatar, LocalDate birthday, String email, String mobile, String idCard, String address, Integer initCheck, String description, Integer isEnabled, Integer isAudited, LocalDateTime dateJoined, LocalDateTime expiredTime, LocalDateTime lastLogin) {
         super(id, createTime, updateTime);
         this.tenant = tenant;
         this.identifier = identifier;
@@ -148,7 +144,6 @@ public class UserModel extends BaseModel implements Serializable {
         this.description = description;
         this.isEnabled = isEnabled;
         this.isAudited = isAudited;
-        this.isExpired = isExpired;
         this.dateJoined = dateJoined;
         this.expiredTime = expiredTime;
         this.lastLogin = lastLogin;
@@ -196,11 +191,11 @@ public class UserModel extends BaseModel implements Serializable {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         UserModel userModel = (UserModel) o;
-        return Objects.equals(tenant, userModel.tenant) && Objects.equals(identifier, userModel.identifier) && Objects.equals(username, userModel.username) && Objects.equals(password, userModel.password) && Objects.equals(tokenSecret, userModel.tokenSecret) && Objects.equals(name, userModel.name) && Objects.equals(nickname, userModel.nickname) && Objects.equals(avatar, userModel.avatar) && Objects.equals(birthday, userModel.birthday) && Objects.equals(email, userModel.email) && Objects.equals(mobile, userModel.mobile) && Objects.equals(idCard, userModel.idCard) && Objects.equals(address, userModel.address) && Objects.equals(initCheck, userModel.initCheck) && Objects.equals(description, userModel.description) && Objects.equals(isEnabled, userModel.isEnabled) && Objects.equals(isAudited, userModel.isAudited) && Objects.equals(isExpired, userModel.isExpired) && Objects.equals(dateJoined, userModel.dateJoined) && Objects.equals(expiredTime, userModel.expiredTime) && Objects.equals(lastLogin, userModel.lastLogin);
+        return Objects.equals(tenant, userModel.tenant) && Objects.equals(identifier, userModel.identifier) && Objects.equals(username, userModel.username) && Objects.equals(password, userModel.password) && Objects.equals(tokenSecret, userModel.tokenSecret) && Objects.equals(name, userModel.name) && Objects.equals(nickname, userModel.nickname) && Objects.equals(avatar, userModel.avatar) && Objects.equals(birthday, userModel.birthday) && Objects.equals(email, userModel.email) && Objects.equals(mobile, userModel.mobile) && Objects.equals(idCard, userModel.idCard) && Objects.equals(address, userModel.address) && Objects.equals(initCheck, userModel.initCheck) && Objects.equals(description, userModel.description) && Objects.equals(isEnabled, userModel.isEnabled) && Objects.equals(isAudited, userModel.isAudited) && Objects.equals(dateJoined, userModel.dateJoined) && Objects.equals(expiredTime, userModel.expiredTime) && Objects.equals(lastLogin, userModel.lastLogin);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), tenant, identifier, username, password, tokenSecret, name, nickname, avatar, birthday, email, mobile, idCard, address, initCheck, description, isEnabled, isAudited, isExpired, dateJoined, expiredTime, lastLogin);
+        return Objects.hash(super.hashCode(), tenant, identifier, username, password, tokenSecret, name, nickname, avatar, birthday, email, mobile, idCard, address, initCheck, description, isEnabled, isAudited, dateJoined, expiredTime, lastLogin);
     }
 }
