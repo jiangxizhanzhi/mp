@@ -20,7 +20,6 @@ import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.UserFields;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
-import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.config.FastDfsConfig;
 import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
@@ -28,7 +27,6 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
-import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.BeanUtils;
@@ -41,7 +39,6 @@ import cn.hutool.core.lang.Assert;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -148,7 +145,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         // 查看系统设置，注册用户是否需要审批
         if (authConfig.isNeedRegistrationAudit()) {
             log.info("need registration audit...");
-            obj.setStatus(UserModel.Status.PENDING);
+            obj.setIsAudited(UserModel.Status.NOT_AUDITED);
         }
         return super.create(obj, fields);
     }
@@ -165,7 +162,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         // 查看系统设置，注册用户是否需要审批
         if (authConfig.isNeedRegistrationAudit()) {
             log.info("need registration audit...");
-            objs.forEach(o -> o.setStatus(UserModel.Status.PENDING));
+            objs.forEach(o -> o.setIsAudited(UserModel.Status.NOT_AUDITED));
         }
         return super.bulkCreate(objs);
     }
@@ -364,8 +361,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         Optional<UserModel> userOptional = Optional.ofNullable(getModelMapper().get(userId));
         if (userOptional.isPresent()) {
             UserModel userModel = userOptional.get();
-            if (Objects.equals(userModel.getStatus(), UserModel.Status.NORMAL)) {
-                UserModel updateUser = UserModel.builder().id(userId).status(UserModel.Status.DISABLE).build();
+            if (Objects.equals(userModel.getIsEnabled(), UserModel.Status.ENABLED)) {
+                UserModel updateUser = UserModel.builder().id(userId).isEnabled(UserModel.Status.DISABLED).build();
                 return getModelMapper().update(updateUser);
             }
             log.error("id为{}的用户状态不是正常状态！", userId);
@@ -399,8 +396,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         Optional<UserModel> userOptional = Optional.ofNullable(getModelMapper().get(userId));
         if (userOptional.isPresent()) {
             UserModel userModel = userOptional.get();
-            if (Objects.equals(userModel.getStatus(), UserModel.Status.DISABLE)) {
-                UserModel updateUser = UserModel.builder().id(userId).status(UserModel.Status.NORMAL).build();
+            if (Objects.equals(userModel.getIsEnabled(), UserModel.Status.DISABLED)) {
+                UserModel updateUser = UserModel.builder().id(userId).isEnabled(UserModel.Status.ENABLED).build();
                 return getModelMapper().update(updateUser);
             }
             log.error("id为{}的用户状态不是禁用状态！", userId);
@@ -436,8 +433,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         Optional<UserModel> userOptional = Optional.ofNullable(getModelMapper().get(userId));
         if (userOptional.isPresent()) {
             UserModel userModel = userOptional.get();
-            if (Objects.equals(userModel.getStatus(), UserModel.Status.PENDING)) {
-                UserModel updateUser = UserModel.builder().id(userId).status(UserModel.Status.NORMAL).build();
+            if (Objects.equals(userModel.getIsEnabled(), UserModel.Status.NOT_AUDITED)) {
+                UserModel updateUser = UserModel.builder().id(userId).isAudited(UserModel.Status.AUDITED).build();
                 return getModelMapper().update(updateUser);
             }
             log.error("id为{}的用户状态不是挂起状态！", userId);
@@ -591,14 +588,13 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         if (Objects.isNull(user) || Objects.isNull(user.getExpiredTime())) {
             return;
         }
-        LocalDateTime now = LocalDateTime.now();
-        if (now.isAfter(user.getExpiredTime()) && Objects.equals(user.getStatus(), UserModel.Status.NORMAL)) {
-            log.info("用户状态已经过期，准备更新数据库用户状态！ username:{}", user.getUsername());
-            user.setStatus(UserModel.Status.EXPIRED);
 
-            // 不再更新数据库状态
-//            UserModel updateUser = UserModel.builder().id(user.getId()).status(UserModel.Status.EXPIRED).build();
-//            update(updateUser);
+        user.setIsNonExpired(UserModel.Status.NOT_EXPIRED);
+
+        LocalDateTime now = LocalDateTime.now();
+        if (Objects.nonNull(user.getExpiredTime()) && now.isAfter(user.getExpiredTime())) {
+            log.info("用户状态已经过期，准备更新数据库用户状态！ username:{}", user.getUsername());
+            user.setIsNonExpired(UserModel.Status.EXPIRED);
         }
     }
 
@@ -658,7 +654,17 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         String paths = orgList.stream().map(o -> orgService.calculatePathByOrgId(o.getId())).collect(Collectors.joining(","));
         log.info("paths:{}", paths);
         exportUser.setOrg(paths);
-        exportUser.setStat(user.getStatus() + "");
+
+        exportUser.setStat("正常");
+        if (user.getIsEnabled().equals(UserModel.Status.DISABLED)) {
+            exportUser.setStat("禁用");
+        }
+        if (user.getIsAudited().equals(UserModel.Status.NOT_AUDITED)) {
+            exportUser.setStat("未审批");
+        }
+        if (user.getIsEnabled().equals(UserModel.Status.EXPIRED)) {
+            exportUser.setStat("过期");
+        }
 
         // role
         List<RoleModel> roleList = userRoleService.listByUserId(user.getId());
