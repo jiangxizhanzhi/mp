@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.auth.dto.ResetPwdRequest;
 import cn.cyberpeace.mp.auth.dto.ResetSelfPwdRequest;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
+import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.dto.user.UserRequest;
 import cn.cyberpeace.mp.auth.dto.validate.AddGroup;
 import cn.cyberpeace.mp.auth.dto.validate.UpdateGroup;
@@ -23,12 +24,15 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
 import com.alibaba.excel.EasyExcel;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,6 +40,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -55,6 +60,7 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
 
 
     @Override
+    @ApiIgnore
     @ApiOperation(value = "(弃用，建议用/add) 创建数据", notes = "")
     public ObjServiceResult<UserModel> create(UserModel obj, String[] fields) {
         return super.create(obj, fields);
@@ -65,6 +71,14 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
     public ObjServiceResult<UserModel> update(String id, UserModel obj, String[] fields) {
         return super.update(id, obj, fields);
     }
+
+    @Override
+    @ApiOperation(value = "查询指定id数据", notes = "")
+    public ObjServiceResult get(@PathVariable String id, @RequestParam(required = false) String[] fields) {
+        UserDto userDto = getModelService().getUserDto(id);
+        return ResultUtils.obj2ObjServiceResult(userDto);
+    }
+
 
     @ApiOperation(value = "创建用户，同时完成组织，角色绑定关系", notes = "")
     @PostMapping("/add")
