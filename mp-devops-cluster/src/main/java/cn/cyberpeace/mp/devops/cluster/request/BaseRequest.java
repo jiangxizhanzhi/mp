@@ -12,4 +12,10 @@ import java.io.Serializable;
 @NoArgsConstructor
 public class BaseRequest implements Serializable {
 
+    /**
+     * 自定义验证参数方法
+     */
+    public void customValidParams(){
+
+    }
 }

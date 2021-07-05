@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.devops.cluster.controller;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
+import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
 import cn.cyberpeace.mp.devops.cluster.model.InstanceCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.request.InstancePageRequest;
 import cn.cyberpeace.mp.devops.cluster.response.InstancePageResponse;
@@ -22,7 +23,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * 实例管理类
+ * 虚拟机管理类
  */
 @Validated
 @Slf4j
@@ -38,11 +39,11 @@ public class InstanceController {
     }
 
     /**
-     * 分页查询实例信息
+     * 分页查询虚拟机信息
      * @param request
      * @return
      */
-    @ApiOperation("分页查询实例信息")
+    @ApiOperation("分页查询虚拟机信息")
     @GetMapping("/page")
     public ListObjServiceResult<InstancePageResponse> page(@Valid InstancePageRequest request){
         InstanceCloudPlatformModel model = instanceService.page(request);
@@ -53,7 +54,7 @@ public class InstanceController {
         List<InstancePageResponse> list = instances.stream().map(instanceModel ->
             InstancePageResponse.builder().name(instanceModel.getInstance_name()).node(instanceModel.getHostname())
                     .addressList(instanceModel.getAddresses().stream().map(InstanceCloudPlatformModel.InstanceModel.Address::getIp).collect(Collectors.toList()))
-                    .status(instanceModel.getStatus()).createTime(instanceModel.getCreated_at()).build()
+                    .status(CloudPlatformEnum.fromValue(instanceModel.getStatus())).createTime(instanceModel.getCreated_at()).build()
         ).collect(Collectors.toList());
 
         return new ListObjServiceResult(new ListObjResult(list, model.getTotal()).asResult()).asResult();

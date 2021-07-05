@@ -58,12 +58,12 @@ public class HypervisorServiceStateResponse extends BaseCloudPlatformResponse {
 
     public String getState() {
         return StringUtils.isNotBlank(state) ?
-                state.equals(CloudPlatformEnum.UP.getDesc()) ?
-                        CloudPlatformEnum.NORMAL.getDesc() : CloudPlatformEnum.ABNORMAL.getDesc()
-                : alive ? CloudPlatformEnum.NORMAL.getDesc() : CloudPlatformEnum.ABNORMAL.getDesc();
+                state.equals(CloudPlatformEnum.UP.getState()) ?
+                        CloudPlatformEnum.UP.getDesc() : CloudPlatformEnum.DOWN.getDesc()
+                : alive ? CloudPlatformEnum.UP.getDesc() : CloudPlatformEnum.DOWN.getDesc();
     }
 
     public FontColorEnum getFontColor() {
-        return getState().equals(CloudPlatformEnum.NORMAL.getDesc()) ? FontColorEnum.GREEN : FontColorEnum.RED;
+        return getState().equals(CloudPlatformEnum.UP.getDesc()) ? FontColorEnum.GREEN : FontColorEnum.RED;
     }
 }

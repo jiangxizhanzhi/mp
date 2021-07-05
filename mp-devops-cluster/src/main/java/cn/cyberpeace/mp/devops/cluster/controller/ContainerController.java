@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.devops.cluster.controller;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
+import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
 import cn.cyberpeace.mp.devops.cluster.model.ContainerCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.request.ContainerPageRequest;
 import cn.cyberpeace.mp.devops.cluster.response.ContainerPageResponse;
@@ -53,7 +54,7 @@ public class ContainerController {
 
         List<ContainerPageResponse> list = containers.stream().map(containerModel -> {
             ContainerPageResponse response = ContainerPageResponse.builder().name(containerModel.getName()).image(containerModel.getImage())
-                    .node(containerModel.getHost()).status(containerModel.getStatus()).build();
+                    .node(containerModel.getHost()).status(CloudPlatformEnum.fromValue(containerModel.getStatus())).build();
             Map<String,Object> addresses = containerModel.getAddresses();
             if (MapUtils.isNotEmpty(addresses)){
                 List<ContainerCloudPlatformModel.ContainerModel.Address> addressList = addresses.values().stream()
