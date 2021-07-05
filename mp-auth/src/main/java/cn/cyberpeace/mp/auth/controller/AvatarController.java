@@ -25,7 +25,7 @@ import java.util.List;
 @Api(value = "默认头像管理接口", tags = "AvatarController")
 @Slf4j
 @RestController
-@RequestMapping(ControllerConstant.BASE_API_PATH + "/avatar")
+@RequestMapping(ControllerConstant.BASE_UNAUTH_API_PATH + "/avatar")
 public class AvatarController extends BaseModelController<AvatarModel, QueryParams, AvatarService> {
 
     @Autowired
