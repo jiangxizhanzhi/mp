@@ -68,4 +68,7 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
 
     void processExpiredStatus(UserModel user);
 
+    // userModel转换为userdto，附加组织，角色信息
+    UserDto userModel2UserDto(UserModel userModel);
+
 }

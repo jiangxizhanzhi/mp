@@ -6,8 +6,6 @@ import cn.cyberpeace.mp.auth.dto.org.OrgUserPageRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.OrgUserModel;
-import cn.cyberpeace.mp.auth.model.RoleModel;
-import cn.cyberpeace.mp.auth.model.RolePermissionModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.repository.OrgUserMapper;
 import cn.cyberpeace.mp.auth.service.OrgService;
@@ -27,7 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -126,7 +123,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
     }
 
     @Override
-    public PageInfo<UserModel> pageUsersByOrg(OrgUserPageRequest req) {
+    public PageInfo<UserDto> pageUsersByOrg(OrgUserPageRequest req) {
         PageHelper.startPage(req.getPage(), req.getPageSize());
         List<UserModel> users = getModelMapper().listUsers(req.getOrg(), req.getUsername());
         PageInfo pageInfo = new PageInfo(users);
@@ -134,13 +131,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
         List<UserDto> userDtos = users.stream().map(u -> {
             userService.processExpiredStatus(u);
 
-            UserDto userDto = new UserDto();
-            cn.cyberpeace.mp.base.util.BeanUtils.copyProperties(u, userDto);
-            String allorgpath = getAllOrgPathByUserId(u.getId());
-            userDto.setOrgpath(allorgpath);
-
-            List<RoleModel> roles = userRoleService.listByUserId(u.getId());
-            userDto.setRoles(roles);
+            UserDto userDto = userService.userModel2UserDto(u);
             return userDto;
         }).collect(Collectors.toList());
 

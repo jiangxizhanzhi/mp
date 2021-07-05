@@ -97,6 +97,17 @@ public class UserModel extends BaseModel implements Serializable {
     @DefaultStr
     private String description;
 
+    // 1：正常， 0：禁用
+    private Integer isEnabled;
+
+    // 1：已审批 0：待审批
+    private Integer isAudited;
+
+    // 1：已过期  0：未过期
+    private Integer isExpired;
+
+
+
     @ApiModelProperty(value = "加入时间")
     @DefaultGen(DateTimeGenerator.class)
     private LocalDateTime dateJoined;

@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.auth.dto.OrgDto;
 import cn.cyberpeace.mp.auth.dto.org.OrgUserPageRequest;
+import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.OrgUserModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -25,7 +26,7 @@ public interface OrgUserService extends BaseModelService<OrgUserModel, QueryPara
 
     String getAllOrgPathByUserId(String userId);
 
-    PageInfo<UserModel> pageUsersByOrg(OrgUserPageRequest req);
+    PageInfo<UserDto> pageUsersByOrg(OrgUserPageRequest req);
 
     // 清除用户所有组织
     boolean cleanUserOrgs(String userId);

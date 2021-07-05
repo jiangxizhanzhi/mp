@@ -109,7 +109,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         UserModel userModel = getModelMapper().get(id);
         processExpiredStatus(userModel);
 
-        UserDto userDto = transferUserModel2UserDto(userModel);
+        UserDto userDto = userModel2UserDto(userModel);
 
         return userDto;
     }
@@ -127,14 +127,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         userDtos = users.stream().map(u -> {
             processExpiredStatus(u);
 
-            UserDto userDto = new UserDto();
-            BeanUtils.copyProperties(u, userDto);
-            String allorgpath = orgUserService.getAllOrgPathByUserId(u.getId());
-            userDto.setOrgpath(allorgpath);
-
-            List<RoleModel> roles = userRoleService.listByUserId(u.getId());
-//            String allroles = roles.stream().map(r -> r.getIdentifier()).collect(Collectors.joining(","));
-            userDto.setRoles(roles);
+            UserDto userDto = userModel2UserDto(u);
             return userDto;
         }).collect(Collectors.toList());
 
@@ -610,6 +603,30 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
 
+
+    public UserDto userModel2UserDto(UserModel userModel) {
+        if (Objects.isNull(userModel)) {
+            return null;
+        }
+
+        UserDto userDto = new UserDto();
+        BeanUtils.copyProperties(userModel, userDto);
+
+        List<OrgModel> orgs = orgUserService.listOrgsByUserId(userModel.getId());
+        List<String> orgIds = orgs.stream().map(o -> o.getId()).collect(Collectors.toList());
+        String allorgpath = orgs.stream().map(OrgModel::getPath).collect(Collectors.joining(","));
+        userDto.setOrgIds(orgIds);
+        userDto.setOrgpath(allorgpath);
+
+        List<RoleModel> roles = userRoleService.listByUserId(userModel.getId());
+        List<String> roleIds = roles.stream().map(r -> r.getId()).collect(Collectors.toList());
+        userDto.setRoles(roles);
+        userDto.setRoleIds(roleIds);
+
+        return userDto;
+    }
+
+
     private UserModel importUser2UserModel(ImportUser importUser) {
         if (Objects.isNull(importUser)) {
             return null;
@@ -650,23 +667,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         exportUser.setRoles(roles);
 
         return exportUser;
-    }
-
-
-    private UserDto transferUserModel2UserDto(UserModel userModel) {
-        if (Objects.isNull(userModel)) {
-            return null;
-        }
-
-        UserDto userDto = new UserDto();
-        BeanUtils.copyProperties(userModel, userDto);
-
-        String allorgpath = orgUserService.getAllOrgPathByUserId(userModel.getId());
-        userDto.setOrgpath(allorgpath);
-
-        List<RoleModel> roles = userRoleService.listByUserId(userModel.getId());
-        userDto.setRoles(roles);
-        return userDto;
     }
 
 
