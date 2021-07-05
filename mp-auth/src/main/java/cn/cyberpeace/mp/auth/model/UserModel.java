@@ -36,6 +36,7 @@ public class UserModel extends BaseModel implements Serializable {
 
 
     @ApiModelProperty(value = "主键")
+    @DefaultInt(0)
     private Integer pk;
 
     @DefaultStr(AuthConstant.DEFAULT_TENANT)

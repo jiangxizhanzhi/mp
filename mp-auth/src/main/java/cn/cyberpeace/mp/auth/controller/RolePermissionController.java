@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.RequestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,7 +42,6 @@ public class RolePermissionController extends BaseModelController<RolePermission
 
         return ServiceResult.builder().source(targets).build().asResult();
     }
-
 
     @ApiOperation(value = "绑定角色-权限关系，注意，如果targetIds为空，表示删除角色所有权限！", notes = "")
     @PostMapping("/bind")

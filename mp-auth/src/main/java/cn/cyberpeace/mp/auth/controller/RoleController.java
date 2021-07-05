@@ -1,11 +1,16 @@
 package cn.cyberpeace.mp.auth.controller;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
+import cn.cyberpeace.mp.auth.dto.role.RoleDto;
+import cn.cyberpeace.mp.auth.dto.role.RolePageRequest;
 import cn.cyberpeace.mp.auth.model.RoleModel;
+import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.service.RoleService;
+import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +45,16 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
             roles = getModelService().listAll();
         }
         return ServiceResult.builder().source(roles).build().asResult();
+    }
+
+
+    @ApiOperation(value = "查询角色列表（附加权限信息，绑定的用户信息）", notes = "")
+    @GetMapping("/page")
+    public ServiceResult getTargetsByRole(RolePageRequest pageRequest) {
+        pageRequest.ensure();
+        PageInfo page = getModelService().getPage(pageRequest);
+
+        return ResultUtils.pageInfo2ObjServiceResult(page);
     }
 
 
