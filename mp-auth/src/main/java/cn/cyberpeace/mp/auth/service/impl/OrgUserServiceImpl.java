@@ -129,8 +129,6 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
         PageInfo pageInfo = new PageInfo(users);
 
         List<UserDto> userDtos = users.stream().map(u -> {
-            userService.processExpiredStatus(u);
-
             UserDto userDto = userService.userModel2UserDto(u);
             return userDto;
         }).collect(Collectors.toList());
