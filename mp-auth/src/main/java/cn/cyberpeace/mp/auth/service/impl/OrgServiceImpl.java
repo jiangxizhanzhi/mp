@@ -94,7 +94,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     }
 
     @Override
-    public List<OrgDto> getTree() {
+    public List<OrgDto> getTree(String orgId) {
         List<OrgModel> orgs = listAll(AuthConstant.DEFAULT_TENANT);
         if (CollectionUtil.isEmpty(orgs)) {
             return new ArrayList<>();
