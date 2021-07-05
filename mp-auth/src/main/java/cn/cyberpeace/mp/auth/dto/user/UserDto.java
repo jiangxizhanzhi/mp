@@ -17,7 +17,7 @@ public class UserDto extends UserModel {
     private Integer isExpired;
 
     @ApiModelProperty(value = "组织路径")
-    String orgpath;
+    List<List<String>> orgpaths;
 
     @ApiModelProperty(value = "组织id集合")
     List<String> orgIds;

@@ -605,9 +605,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
         List<OrgModel> orgs = orgUserService.listOrgsByUserId(userModel.getId());
         List<String> orgIds = orgs.stream().map(o -> o.getId()).collect(Collectors.toList());
-        String allorgpath = orgs.stream().map(OrgModel::getPath).collect(Collectors.joining(","));
+
+
+
+        List<List<String>> allorgpath = orgs.stream().map(o -> CollectionUtil.toList(StringUtils.split(o.getPath(), AuthConstant.ORG_PATH_SEPARATOR))).collect(Collectors.toList());
         userDto.setOrgIds(orgIds);
-        userDto.setOrgpath(allorgpath);
+        userDto.setOrgpaths(allorgpath);
 
         List<RoleModel> roles = userRoleService.listByUserId(userModel.getId());
         userDto.setRoles(roles);
@@ -649,14 +652,16 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         exportUser.setOrg(paths);
 
         exportUser.setStat("正常");
-        if (user.getIsEnabled().equals(UserModel.Status.DISABLED)) {
-            exportUser.setStat("禁用");
-        }
+
+        // 状态展示优先级 禁用 > 过期 > 待审核
         if (user.getIsAudited().equals(UserModel.Status.NOT_AUDITED)) {
             exportUser.setStat("未审批");
         }
         if (user.getIsEnabled().equals(UserModel.Status.EXPIRED)) {
             exportUser.setStat("过期");
+        }
+        if (user.getIsEnabled().equals(UserModel.Status.DISABLED)) {
+            exportUser.setStat("禁用");
         }
 
         // role
