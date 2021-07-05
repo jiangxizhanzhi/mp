@@ -589,12 +589,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             return;
         }
 
-        user.setIsNonExpired(UserModel.Status.NOT_EXPIRED);
+        user.setIsExpired(UserModel.Status.NOT_EXPIRED);
 
         LocalDateTime now = LocalDateTime.now();
         if (Objects.nonNull(user.getExpiredTime()) && now.isAfter(user.getExpiredTime())) {
             log.info("用户状态已经过期，准备更新数据库用户状态！ username:{}", user.getUsername());
-            user.setIsNonExpired(UserModel.Status.EXPIRED);
+            user.setIsExpired(UserModel.Status.EXPIRED);
         }
     }
 

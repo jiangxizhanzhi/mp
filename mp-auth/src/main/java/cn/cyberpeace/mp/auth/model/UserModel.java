@@ -107,8 +107,8 @@ public class UserModel extends BaseModel implements Serializable {
     private Integer isAudited;
 
     // 1：已过期  0：未过期，数据库中没有该字段，由expiredtime字段判断
-    @ApiModelProperty(value = "1：未过期 0：已过期")
-    private Integer isNonExpired;
+    @ApiModelProperty(value = "1：已过期 0：未过期")
+    private Integer isExpired;
 
 
 
@@ -129,7 +129,7 @@ public class UserModel extends BaseModel implements Serializable {
 
 
     @Builder
-    public UserModel(String id, LocalDateTime createTime, LocalDateTime updateTime, String tenant, String identifier, String username, String password, String tokenSecret, String name, String nickname, String avatar, LocalDate birthday, String email, String mobile, String idCard, String address, Integer initCheck, String description, Integer isEnabled, Integer isAudited, Integer isNonExpired, LocalDateTime dateJoined, LocalDateTime expiredTime, LocalDateTime lastLogin) {
+    public UserModel(String id, LocalDateTime createTime, LocalDateTime updateTime, String tenant, String identifier, String username, String password, String tokenSecret, String name, String nickname, String avatar, LocalDate birthday, String email, String mobile, String idCard, String address, Integer initCheck, String description, Integer isEnabled, Integer isAudited, Integer isExpired, LocalDateTime dateJoined, LocalDateTime expiredTime, LocalDateTime lastLogin) {
         super(id, createTime, updateTime);
         this.tenant = tenant;
         this.identifier = identifier;
@@ -148,7 +148,7 @@ public class UserModel extends BaseModel implements Serializable {
         this.description = description;
         this.isEnabled = isEnabled;
         this.isAudited = isAudited;
-        this.isNonExpired = isNonExpired;
+        this.isExpired = isExpired;
         this.dateJoined = dateJoined;
         this.expiredTime = expiredTime;
         this.lastLogin = lastLogin;
@@ -164,8 +164,8 @@ public class UserModel extends BaseModel implements Serializable {
         public static final Integer NOT_AUDITED = 0;
 
         // 过期与否
-        public static final Integer NOT_EXPIRED = 1;
-        public static final Integer EXPIRED = 0;
+        public static final Integer EXPIRED = 1;
+        public static final Integer NOT_EXPIRED = 0;
 
         private Status() {
         }
@@ -196,11 +196,11 @@ public class UserModel extends BaseModel implements Serializable {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         UserModel userModel = (UserModel) o;
-        return Objects.equals(tenant, userModel.tenant) && Objects.equals(identifier, userModel.identifier) && Objects.equals(username, userModel.username) && Objects.equals(password, userModel.password) && Objects.equals(tokenSecret, userModel.tokenSecret) && Objects.equals(name, userModel.name) && Objects.equals(nickname, userModel.nickname) && Objects.equals(avatar, userModel.avatar) && Objects.equals(birthday, userModel.birthday) && Objects.equals(email, userModel.email) && Objects.equals(mobile, userModel.mobile) && Objects.equals(idCard, userModel.idCard) && Objects.equals(address, userModel.address) && Objects.equals(initCheck, userModel.initCheck) && Objects.equals(description, userModel.description) && Objects.equals(isEnabled, userModel.isEnabled) && Objects.equals(isAudited, userModel.isAudited) && Objects.equals(isNonExpired, userModel.isNonExpired) && Objects.equals(dateJoined, userModel.dateJoined) && Objects.equals(expiredTime, userModel.expiredTime) && Objects.equals(lastLogin, userModel.lastLogin);
+        return Objects.equals(tenant, userModel.tenant) && Objects.equals(identifier, userModel.identifier) && Objects.equals(username, userModel.username) && Objects.equals(password, userModel.password) && Objects.equals(tokenSecret, userModel.tokenSecret) && Objects.equals(name, userModel.name) && Objects.equals(nickname, userModel.nickname) && Objects.equals(avatar, userModel.avatar) && Objects.equals(birthday, userModel.birthday) && Objects.equals(email, userModel.email) && Objects.equals(mobile, userModel.mobile) && Objects.equals(idCard, userModel.idCard) && Objects.equals(address, userModel.address) && Objects.equals(initCheck, userModel.initCheck) && Objects.equals(description, userModel.description) && Objects.equals(isEnabled, userModel.isEnabled) && Objects.equals(isAudited, userModel.isAudited) && Objects.equals(isExpired, userModel.isExpired) && Objects.equals(dateJoined, userModel.dateJoined) && Objects.equals(expiredTime, userModel.expiredTime) && Objects.equals(lastLogin, userModel.lastLogin);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), tenant, identifier, username, password, tokenSecret, name, nickname, avatar, birthday, email, mobile, idCard, address, initCheck, description, isEnabled, isAudited, isNonExpired, dateJoined, expiredTime, lastLogin);
+        return Objects.hash(super.hashCode(), tenant, identifier, username, password, tokenSecret, name, nickname, avatar, birthday, email, mobile, idCard, address, initCheck, description, isEnabled, isAudited, isExpired, dateJoined, expiredTime, lastLogin);
     }
 }
