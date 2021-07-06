@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.auth.util;
 
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjResult;
@@ -9,6 +10,8 @@ import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.BeanUtils;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.lang3.StringUtils;
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -42,6 +45,17 @@ public class ResultUtils {
 
     public static ObjServiceResult obj2ObjServiceResult(Object obj) {
         return new ObjServiceResult(new ObjResult(obj)).asResult();
+    }
+
+
+
+    public static void throwExceptionIfError(ObjServiceResult result, String errorMsg) {
+        if (StringUtils.isBlank(errorMsg)) {
+            errorMsg = "execute error!";
+        }
+        if (Objects.isNull(result.getSource())) {
+            throw new MpRuntimeException(errorMsg);
+        }
     }
 
 

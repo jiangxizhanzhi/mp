@@ -18,6 +18,7 @@ import cn.cyberpeace.mp.auth.service.UserPermissionService;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.UserPermissionFields;
+import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
@@ -132,14 +133,12 @@ public class UserPermissionServiceImpl
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public boolean bindUserTargets(String userId, List<String> targetIds) {
         Assert.notNull(userId, "userId不能为空");
 
-        var objResult = userService.get(userId).getSource();
-        if (objResult == null || objResult.getObj() == null) {
-            throw new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "account_not_existed");
-        }
+        var result = userService.get(userId);
+        ResultUtils.throwExceptionIfError(result, AuthConstant.ERROR_CODE_PREFIX + "account_not_existed");
 
         // 清除用户角色
         boolean success = cleanUserTargets(userId);
@@ -160,6 +159,8 @@ public class UserPermissionServiceImpl
             userPerm.setOwner(userId);
             userPerm.setTarget(tid);
             userPerm.setTenant(AuthConstant.DEFAULT_TENANT);
+            var re = create(userPerm);
+            ResultUtils.throwExceptionIfError(re, "创建用户-权限关系失败！");
         });
 
         return true;

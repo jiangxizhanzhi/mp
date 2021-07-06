@@ -7,9 +7,13 @@ import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Data
@@ -23,18 +27,30 @@ public class RoleModel extends BaseModel {
     private String tenant;
 
     @ApiModelProperty(value = "所属组织")
+    @DefaultStr("default")
     private String org;
 
     @ApiModelProperty(value = "编号")
     private String identifier;
 
     @ApiModelProperty(value = "名称")
+    @NotBlank(message = "名称不能为空")
     private String name;
 
     @ApiModelProperty(value = "描述")
     @DefaultStr
     private String description;
 
+
+    @Builder
+    public RoleModel(String id, LocalDateTime createTime, LocalDateTime updateTime, String tenant, String org, String identifier, String name, String description) {
+        super(id, createTime, updateTime);
+        this.tenant = tenant;
+        this.org = org;
+        this.identifier = identifier;
+        this.name = name;
+        this.description = description;
+    }
 
     @Override
     public boolean equals(Object o) {

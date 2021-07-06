@@ -8,9 +8,11 @@ import cn.cyberpeace.mp.auth.repository.RolePermissionMapper;
 import cn.cyberpeace.mp.auth.service.RolePermissionService;
 import cn.cyberpeace.mp.auth.service.RoleService;
 import cn.cyberpeace.mp.auth.service.fields.RolePermissionFields;
+import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.lang.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class RolePermissionServiceImpl
@@ -26,6 +29,9 @@ public class RolePermissionServiceImpl
 
     @Autowired
     private RoleService roleService;
+
+    @Autowired
+    private RolePermissionService rolePermissionService;
 
     @Autowired
     public RolePermissionServiceImpl(RolePermissionMapper modelMapper, RolePermissionFields modelFields) {
@@ -44,14 +50,12 @@ public class RolePermissionServiceImpl
 
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public boolean bindRoleTargets(String roleId, List<String> targetIds) {
         Assert.notNull(roleId, "roleId不能为空");
 
-        var objResult = roleService.get(roleId).getSource();
-        if (objResult == null || objResult.getObj() == null) {
-            throw new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "role_not_existed");
-        }
+        var result = roleService.get(roleId);
+        ResultUtils.throwExceptionIfError(result, AuthConstant.ERROR_CODE_PREFIX + "role_not_existed");
 
         // 清除角色绑定的权限
         boolean success = cleanRoleTargets(roleId);
@@ -72,6 +76,8 @@ public class RolePermissionServiceImpl
             rolePerm.setOwner(roleId);
             rolePerm.setTarget(tid);
             rolePerm.setTenant(AuthConstant.DEFAULT_TENANT);
+            var re = rolePermissionService.create(rolePerm);
+            ResultUtils.throwExceptionIfError(re, "创建角色-权限关系失败！");
         });
 
         return true;

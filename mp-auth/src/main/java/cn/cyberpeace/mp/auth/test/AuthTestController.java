@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.auth.service.LogService;
 import cn.cyberpeace.mp.auth.util.PasswordStrengthChecker;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.auth.test.TmpMenuService;
+import cn.cyberpeace.mp.devops.log.model.OperationLogModel;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Api(value = "TEST", tags = "AUTH-TEST")
@@ -61,8 +63,9 @@ public class AuthTestController {
 
 
     @GetMapping("test/userlog")
-    public void userlog() {
-        logService.getUserLog(null, null, null);
+    public List<OperationLogModel> userlog() {
+        List<OperationLogModel> logs = logService.getUserLog(null, null, null);
+        return logs;
     }
 
 }

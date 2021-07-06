@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.auth.service.impl;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.dto.TargetType;
+import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.repository.TargetMapper;
 import cn.cyberpeace.mp.auth.service.TargetService;
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -42,10 +44,15 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
     }
 
     @Override
+    public boolean exists(String id) {
+        Assert.notBlank(id, "id不能为空！");
+        TargetModel targetModel = getModelMapper().get(id);
+        return Objects.nonNull(targetModel);
+    }
+
+    @Override
     public ObjServiceResult<TargetModel> create(TargetModel obj, String[] fields) {
-
         check(obj);
-
         return super.create(obj, fields);
     }
 

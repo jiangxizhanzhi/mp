@@ -20,6 +20,7 @@ import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.UserFields;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
+import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.config.FastDfsConfig;
 import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
@@ -182,7 +183,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
         // 保存用户
         UserModel userModel = new UserModel();
-        org.springframework.beans.BeanUtils.copyProperties(createRequest, userModel);
+        BeanUtils.copyProperties(createRequest, userModel);
 
         String decryptedPwd = PasswordUtils.desDecrypt(createRequest.getPassword());
         userModel.setPassword(decryptedPwd);
@@ -196,10 +197,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
         // create中会对密码加密，外层不需要再次加密
         ObjServiceResult<UserModel> result = create(userModel);
-
-        if (Objects.isNull(result.getSource()) || Objects.isNull(result.getSource().getObj())) {
-            throw new MpRuntimeException("创建用户失败！");
-        }
+        ResultUtils.throwExceptionIfError(result, "创建用户失败！");
 
         UserModel userCreated = result.getSource().getObj();
         String userId = userCreated.getId();
@@ -214,7 +212,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                     throw new MpRuntimeException("组织id：" + id + "不存在！");
                 }
                 OrgUserModel orgUserModel = OrgUserModel.builder().user(userId).org(id).build();
-                orgUserService.create(orgUserModel);
+                var re = orgUserService.create(orgUserModel);
+                ResultUtils.throwExceptionIfError(re, "创建组织-用户关系失败！");
             });
         }
 
@@ -228,7 +227,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                     throw new MpRuntimeException("角色id：" + id + "不存在！");
                 }
                 UserRoleModel userRoleModel = UserRoleModel.builder().user(userId).role(id).build();
-                userRoleService.create(userRoleModel);
+                var re = userRoleService.create(userRoleModel);
+                ResultUtils.throwExceptionIfError(re, "创建用户-角色关系失败！");
             });
         }
 
@@ -267,7 +267,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                     throw new MpRuntimeException("组织id：" + id + "不存在！");
                 }
                 OrgUserModel orgUserModel = OrgUserModel.builder().user(userId).org(id).build();
-                orgUserService.create(orgUserModel);
+                var re = orgUserService.create(orgUserModel);
+                ResultUtils.throwExceptionIfError(re, "重新创建组织-用户关系失败！");
             });
         }
 
@@ -284,7 +285,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                     throw new MpRuntimeException("角色id：" + id + "不存在！");
                 }
                 UserRoleModel userRoleModel = UserRoleModel.builder().user(userId).role(id).build();
-                userRoleService.create(userRoleModel);
+                var re = userRoleService.create(userRoleModel);
+                ResultUtils.throwExceptionIfError(re, "重新创建用户-角色关系失败！");
             });
         }
 
@@ -506,6 +508,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             } catch (Exception e) {
                 // todo 考虑将错误信息包装返回到页面
                 log.error(ExceptionUtil.stacktraceToString(e));
+                throw new MpRuntimeException(e.getMessage());
             }
 
             // 2. 保存用户-角色关系
@@ -514,7 +517,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                 RoleModel roleModel = roleService.getByIdent(ident.trim());
                 if (Objects.nonNull(roleModel)) {
                     UserRoleModel userRoleModel = UserRoleModel.builder().user(userModel.getId()).role(roleModel.getId()).build();
-                    userRoleService.create(userRoleModel);
+                    var re = userRoleService.create(userRoleModel);
+                    ResultUtils.throwExceptionIfError(re, "创建用户-角色关系失败！");
                 }
             });
 
@@ -524,7 +528,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                 OrgModel orgModel = orgService.getByPath(path);
                 if (orgModel != null) {
                     OrgUserModel orgUserModel = OrgUserModel.builder().user(userModel.getId()).org(orgModel.getId()).build();
-                    orgUserService.create(orgUserModel);
+                    var re = orgUserService.create(orgUserModel);
+                    ResultUtils.throwExceptionIfError(re, "创建组织-用户关系失败！");
                 }
             });
 

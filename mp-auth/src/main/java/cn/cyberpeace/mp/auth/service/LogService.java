@@ -2,12 +2,15 @@ package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.auth.constant.AuthLogConstant;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.devops.log.constant.LogConstant;
 import cn.cyberpeace.mp.devops.log.enums.SiteTypeEnums;
 import cn.cyberpeace.mp.devops.log.model.OperationLogModel;
 import cn.cyberpeace.mp.devops.log.service.OperateLogServiceFactory;
 import cn.cyberpeace.mp.devops.log.utils.SnUtils;
+import cn.hutool.core.exceptions.ExceptionUtil;
+import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.search.SearchRequest;
@@ -29,6 +32,8 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -77,7 +82,7 @@ public class LogService {
     }
 
 
-    public void getUserLog(String userId, String username, String type) {
+    public List<OperationLogModel> getUserLog(String userId, String username, String type) {
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
 //        sourceBuilder.query(QueryBuilders.termQuery("user", "kimchy"));
@@ -93,22 +98,29 @@ public class LogService {
             boolBuilder.must(QueryBuilders.termQuery("opType.keyword", type));
         }
 
-        sourceBuilder.query(boolBuilder);
-        sourceBuilder.sort("opTime", SortOrder.DESC);
+        sourceBuilder.query(boolBuilder).sort("opTime", SortOrder.DESC).from(1).size(10);
+
         SearchRequest searchRequest = new SearchRequest("mp_operate_log");
         searchRequest.source(sourceBuilder);
+
+//        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder()
+//                .from(pageSize * pageable.getPageNumber())
+//                .size(pageSize)
+//                .query(queryBuilder);
 
         try {
             SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             SearchHits hits = searchResponse.getHits();
+            List<OperationLogModel> logList = new ArrayList<>(hits.getHits().length);
             for (SearchHit hit : hits.getHits()) {
-                Map<String, HighlightField> highlightFields = hit.getHighlightFields();
-                HighlightField highlight = highlightFields.get("title");
-                Text[] fragments = highlight.fragments();
-                String fragmentString = fragments[0].string();
+                OperationLogModel operationLog = JSON.parseObject(hit.getSourceAsString(), OperationLogModel.class);
+                logList.add(operationLog);
             }
-        } catch (Exception e) {
 
+            return logList;
+        } catch (Exception e) {
+            log.error("{}", ExceptionUtil.stacktraceToString(e));
+            throw new MpRuntimeException(e.getMessage());
         }
 
 

@@ -12,4 +12,5 @@ public interface TargetService extends BaseModelService<TargetModel, QueryParams
 
     List<TargetModel> listByTenantId(String tenantId);
 
+    boolean exists(String id);
 }
