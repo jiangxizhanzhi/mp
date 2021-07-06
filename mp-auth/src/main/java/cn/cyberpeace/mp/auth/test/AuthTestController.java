@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.auth.test;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
+import cn.cyberpeace.mp.auth.service.LogService;
 import cn.cyberpeace.mp.auth.util.PasswordStrengthChecker;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.auth.test.TmpMenuService;
@@ -24,6 +25,9 @@ public class AuthTestController {
 
     @Autowired
     private TmpMenuService tmpMenuService;
+
+    @Autowired
+    private LogService logService;
 
     @PostMapping("/desEncryptPwd")
     public String desEncryptPwd(@RequestParam String pwd) {
@@ -55,5 +59,10 @@ public class AuthTestController {
         tmpMenuService.process();
     }
 
+
+    @GetMapping("test/userlog")
+    public void userlog() {
+        logService.getUserLog(null, null, null);
+    }
 
 }
