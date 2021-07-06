@@ -49,7 +49,7 @@ public class TargetController extends BaseModelController<TargetModel, QueryPara
             @ApiImplicitParam(name = "type", value = "权限类型 1：菜单，2：API，3：数据权限 不传默认为1：菜单", paramType = "form", dataType = "Integer")
     })
     @GetMapping("/tree")
-    public ServiceResult getOrgTree(@RequestParam(required = false) String targetId, @RequestParam(required = false) Integer type) {
+    public ServiceResult getTree(@RequestParam(required = false) String targetId, @RequestParam(required = false) Integer type) {
         List<TargetDto> tree = getModelService().getTree(targetId, type);
         return ServiceResult.builder().source(tree).build().asResult();
     }

@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.auth.test;
 
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.service.TargetService;
+import cn.cyberpeace.mp.base.util.IdGenerator;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.json.JSONObject;
 import com.alibaba.fastjson.JSON;
@@ -28,13 +29,13 @@ public class TmpMenuService {
     private TargetService targetService;
 
     public void process() {
-        String path = "/Users/sternberg/Downloads/all_permissions_json.json";
+        String path = "/Users/sternberg/work/saining/all_permissions_json.json";
         String s = readJsonFile(path);
         List<TmpMenuDTO> menus = JSON.parseArray(s, TmpMenuDTO.class);
         List<TargetModel> targets = new ArrayList<>();
 
         for (TmpMenuDTO menu : menus) {
-            String id = UUID.randomUUID().toString().replaceAll("-", "");
+            String id = IdGenerator.generateUUID();
             menu.setId(id);
             // 一开始parentid为null
             recursion(targets, menu, "");
@@ -43,12 +44,14 @@ public class TmpMenuService {
         log.info("size:{}", targets.size());
 
         for (TargetModel target : targets) {
+            // 需要把 cn.cyberpeace.mp.base.service.fields.BaseModelFields.readonlyFields这个里面的ID拿掉，不然塞入的id不起作用
             targetService.create(target);
         }
     }
 
     private TargetModel convert(TmpMenuDTO menuDTO, String parentId) {
         TargetModel targetModel = new TargetModel();
+        targetModel.setId(menuDTO.getId());
         targetModel.setType(TargetModel.TYPE_MENU);
         targetModel.setName(menuDTO.getName());
         targetModel.setIdentifier(menuDTO.getValue());
@@ -62,7 +65,7 @@ public class TmpMenuService {
         List<TmpMenuDTO> children = menu.getChildren();
         if (CollectionUtil.isNotEmpty(children)) {
             for (TmpMenuDTO child : children) {
-                String id = UUID.randomUUID().toString().replaceAll("-", "");
+                String id = IdGenerator.generateUUID();
                 child.setId(id);
                 recursion(targets, child, menu.getId());
             }
