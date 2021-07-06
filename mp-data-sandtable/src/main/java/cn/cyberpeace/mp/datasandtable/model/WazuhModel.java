@@ -23,4 +23,6 @@ public class WazuhModel {
     private long diskSpace;
 
     private String agentId;
+
+    private String macId;
 }
