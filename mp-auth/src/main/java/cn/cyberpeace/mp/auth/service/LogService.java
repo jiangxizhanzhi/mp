@@ -8,18 +8,33 @@ import cn.cyberpeace.mp.devops.log.enums.SiteTypeEnums;
 import cn.cyberpeace.mp.devops.log.model.OperationLogModel;
 import cn.cyberpeace.mp.devops.log.service.OperateLogServiceFactory;
 import cn.cyberpeace.mp.devops.log.utils.SnUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.TermQueryBuilder;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Service
+@Slf4j
 public class LogService {
 
     @Autowired
     private OperateLogServiceFactory operateLogServiceFactory;
+
+    @Resource(name = "logRestHighLevelClient")
+    private RestHighLevelClient restHighLevelClient;
 
     public void record(UserModel user) {
         if (Objects.isNull(user)) {
@@ -55,8 +70,34 @@ public class LogService {
     }
 
 
+    public void getUserLog(String userId, String username, String type) {
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
-    public void getUserLog() {
+//        sourceBuilder.query(QueryBuilders.termQuery("user", "kimchy"));
+
+        BoolQueryBuilder boolBuilder = QueryBuilders.boolQuery();
+
+        boolBuilder.must(QueryBuilders.termQuery("opModule", AuthLogConstant.MODULE));
+
+        if (StringUtils.isNotBlank(username)) {
+            boolBuilder.must(QueryBuilders.termQuery("userName", username));
+        }
+        if (StringUtils.isNotBlank(type)) {
+            boolBuilder.must(QueryBuilders.termQuery("opType", type));
+        }
+
+        sourceBuilder.query(boolBuilder);
+        SearchRequest searchRequest = new SearchRequest("mp_operate_log");
+//        searchRequest.types(type);
+        searchRequest.source(sourceBuilder);
+
+        try {
+            SearchResponse search = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            log.info("{}", search);
+        } catch (Exception e) {
+
+        }
+
 
     }
 

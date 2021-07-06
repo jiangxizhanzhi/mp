@@ -1,10 +1,8 @@
 package cn.cyberpeace.mp.auth.controller;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
-import cn.cyberpeace.mp.auth.dto.role.RoleDto;
 import cn.cyberpeace.mp.auth.dto.role.RolePageRequest;
 import cn.cyberpeace.mp.auth.model.RoleModel;
-import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.service.RoleService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
@@ -50,9 +48,9 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
 
     @ApiOperation(value = "查询角色列表（附加权限信息，绑定的用户信息）", notes = "")
     @GetMapping("/page")
-    public ServiceResult getTargetsByRole(RolePageRequest pageRequest) {
+    public ServiceResult getRolesWithUserCnt(RolePageRequest pageRequest) {
         pageRequest.ensure();
-        PageInfo page = getModelService().getPage(pageRequest);
+        PageInfo page = getModelService().getPageWithUserCnt(pageRequest);
 
         return ResultUtils.pageInfo2ObjServiceResult(page);
     }

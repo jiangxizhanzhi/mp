@@ -16,6 +16,12 @@ public class UserDto extends UserModel {
     @ApiModelProperty(value = "1：已过期 0：未过期")
     private Integer isExpired;
 
+    @ApiModelProperty(value = "是否是管理员 1：是 0：否")
+    private Integer isAdmin;
+
+    @ApiModelProperty(value = "是否是超级用户 1：是 0：否")
+    private Integer isSuperUser;
+
     @ApiModelProperty(value = "组织路径")
     List<List<String>> orgpaths;
 
