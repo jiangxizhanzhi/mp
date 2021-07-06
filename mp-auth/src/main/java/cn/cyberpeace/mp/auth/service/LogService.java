@@ -2,28 +2,39 @@ package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.auth.constant.AuthLogConstant;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.devops.log.constant.LogConstant;
 import cn.cyberpeace.mp.devops.log.enums.SiteTypeEnums;
 import cn.cyberpeace.mp.devops.log.model.OperationLogModel;
 import cn.cyberpeace.mp.devops.log.service.OperateLogServiceFactory;
 import cn.cyberpeace.mp.devops.log.utils.SnUtils;
+import cn.hutool.core.exceptions.ExceptionUtil;
+import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.text.Text;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermQueryBuilder;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Service
@@ -59,7 +70,8 @@ public class LogService {
         HttpServletRequest request = ServletUtils.getRequest();
 
         //请求IP
-        operationLogModel.setOpIp(SnUtils.getRealRemoteIp(request));
+        // 登录接口获取不到request
+        operationLogModel.setOpIp(request == null ? "" : SnUtils.getRealRemoteIp(request));
 
         //操作用
         operationLogModel.setUserId(user.getId());
@@ -70,32 +82,45 @@ public class LogService {
     }
 
 
-    public void getUserLog(String userId, String username, String type) {
+    public List<OperationLogModel> getUserLog(String userId, String username, String type) {
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
 //        sourceBuilder.query(QueryBuilders.termQuery("user", "kimchy"));
 
         BoolQueryBuilder boolBuilder = QueryBuilders.boolQuery();
 
-        boolBuilder.must(QueryBuilders.termQuery("opModule", AuthLogConstant.MODULE));
+        boolBuilder.must(QueryBuilders.termQuery("opModule.keyword", AuthLogConstant.MODULE));
 
         if (StringUtils.isNotBlank(username)) {
-            boolBuilder.must(QueryBuilders.termQuery("userName", username));
+            boolBuilder.must(QueryBuilders.termQuery("userName.keyword", username));
         }
         if (StringUtils.isNotBlank(type)) {
-            boolBuilder.must(QueryBuilders.termQuery("opType", type));
+            boolBuilder.must(QueryBuilders.termQuery("opType.keyword", type));
         }
 
-        sourceBuilder.query(boolBuilder);
+        sourceBuilder.query(boolBuilder).sort("opTime", SortOrder.DESC).from(1).size(10);
+
         SearchRequest searchRequest = new SearchRequest("mp_operate_log");
-//        searchRequest.types(type);
         searchRequest.source(sourceBuilder);
 
-        try {
-            SearchResponse search = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
-            log.info("{}", search);
-        } catch (Exception e) {
+//        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder()
+//                .from(pageSize * pageable.getPageNumber())
+//                .size(pageSize)
+//                .query(queryBuilder);
 
+        try {
+            SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            SearchHits hits = searchResponse.getHits();
+            List<OperationLogModel> logList = new ArrayList<>(hits.getHits().length);
+            for (SearchHit hit : hits.getHits()) {
+                OperationLogModel operationLog = JSON.parseObject(hit.getSourceAsString(), OperationLogModel.class);
+                logList.add(operationLog);
+            }
+
+            return logList;
+        } catch (Exception e) {
+            log.error("{}", ExceptionUtil.stacktraceToString(e));
+            throw new MpRuntimeException(e.getMessage());
         }
 
 

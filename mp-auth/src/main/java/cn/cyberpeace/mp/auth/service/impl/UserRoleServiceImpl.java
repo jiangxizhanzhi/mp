@@ -43,7 +43,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
 
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public boolean bindUserRoles(String userId, List<String> roleIds) {
         Assert.notNull(userId, "userId不能为空");
 

@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.auth.repository.OrgPermissionMapper;
 import cn.cyberpeace.mp.auth.service.OrgPermissionService;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.fields.OrgPermissionFields;
+import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
@@ -31,6 +32,9 @@ public class OrgPermissionServiceImpl
 
     @Autowired
     private OrgService orgService;
+
+    @Autowired
+    private OrgPermissionService orgPermissionService;
 
 
     @Autowired
@@ -64,14 +68,12 @@ public class OrgPermissionServiceImpl
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public boolean bindOrgTargets(String orgId, List<String> targetIds) {
         Assert.notNull(orgId, "orgId不能为空");
 
-        var objResult = orgService.get(orgId).getSource();
-        if (objResult == null || objResult.getObj() == null) {
-            throw new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "org_not_existed");
-        }
+        var result = orgService.get(orgId);
+        ResultUtils.throwExceptionIfError(result, AuthConstant.ERROR_CODE_PREFIX + "org_not_existed");
 
         // 清除组织权限
         boolean success = cleanOrgTargets(orgId);
@@ -92,6 +94,8 @@ public class OrgPermissionServiceImpl
             orgPerm.setOwner(orgId);
             orgPerm.setTarget(tid);
             orgPerm.setTenant(AuthConstant.DEFAULT_TENANT);
+            var re = orgPermissionService.create(orgPerm);
+            ResultUtils.throwExceptionIfError(re, "创建组织权限关系失败！");
         });
 
         return true;
