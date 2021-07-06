@@ -16,6 +16,8 @@ public enum CloudPlatformEnum{
 
     DOWN("down","异常"),
 
+    UPPER_DOWN("DOWN","异常"),
+
     ACTIVE("ACTIVE","运行"),
 
     RUNNING("Running","运行中"),
@@ -39,6 +41,7 @@ public enum CloudPlatformEnum{
     CloudPlatformEnum(String state, String desc) {
         this.state = state;
         this.desc = desc;
+
     }
 
     public String getState() {

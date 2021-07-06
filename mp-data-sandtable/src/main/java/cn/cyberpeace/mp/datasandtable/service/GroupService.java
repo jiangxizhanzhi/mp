@@ -42,14 +42,13 @@ public class GroupService {
             log.error("查询所有分组错误:"+ e);
             throw new MpRuntimeException("查询分组错误:"+ e);
         }
-        JSONObject jsonObject = JSONObject.parseObject(sceneListString);
-        JSONArray groupList= jsonObject.getJSONArray("scenes");
+        var jsonObject = JSONObject.parseObject(sceneListString);
+        var groupList= jsonObject.getJSONArray("scenes");
         if (CollectionUtils.isEmpty(groupList)) {
             return new ArrayList<>();
         }
         List<String> groupIds = groupList.stream().map(String.class::cast).collect(Collectors.toList());
-        List<GroupModel> groupModels = groupIds.stream().map(id -> queryGroupById(id)).collect(Collectors.toList());
-        return groupModels;
+        return groupIds.stream().map(this::queryGroupById).collect(Collectors.toList());
     }
 
     /**
@@ -100,7 +99,7 @@ public class GroupService {
      * @param groupModel
      */
     public void addGroup(GroupModel groupModel) {
-        JSONObject jsonObject = new JSONObject();
+        var jsonObject = new JSONObject();
         if (ObjectUtils.isEmpty(groupModel.getGroupId()) || CollectionUtils.isEmpty(groupModel.getMacIds())) {
             log.error("新增分组参数为空");
             throw new MpRuntimeException("新增分组参数为空:");

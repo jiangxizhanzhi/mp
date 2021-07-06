@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.devops.cluster.controller;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
+import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
 import cn.cyberpeace.mp.devops.cluster.model.ElasticIpCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.request.ElasticIpPageRequest;
 import cn.cyberpeace.mp.devops.cluster.response.ElasticIpResponse;
@@ -49,7 +50,8 @@ public class ElasticIpController {
         List<ElasticIpCloudPlatformModel.ElasticIpModel> floatingips = model.getFloatingips();
         List<ElasticIpResponse> list = floatingips.stream().map(elasticIpModel ->
               ElasticIpResponse.builder().floatIpAddress(elasticIpModel.getFloating_ip_address())
-                      .fixedIpAddress(elasticIpModel.getFixed_ip_address()).status(elasticIpModel.getStatus())
+                      .fixedIpAddress(elasticIpModel.getFixed_ip_address())
+                      .status(CloudPlatformEnum.fromValue(elasticIpModel.getStatus()))
                .createdAt(elasticIpModel.getCreated_at()).build()
         ).collect(Collectors.toList());
         return new ListObjServiceResult(new ListObjResult(list, model.getTotal()).asResult()).asResult();

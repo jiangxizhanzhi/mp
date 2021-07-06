@@ -161,9 +161,6 @@ public class HttpUtils {
         CloseableHttpClient client = HttpClientBuilder.create().setDefaultCredentialsProvider(credentialsProvider).build();
         return client;
     }
-
-
-
 }
 
 

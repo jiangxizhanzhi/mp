@@ -1,10 +1,14 @@
 package cn.cyberpeace.mp.datasandtable.service;
 
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
+import cn.cyberpeace.mp.base.util.LocalDateTimeUtils;
 import cn.cyberpeace.mp.datasandtable.TestDatasandtableApplciation;
 import cn.cyberpeace.mp.datasandtable.model.FileEventModel;
-import cn.cyberpeace.mp.datasandtable.model.WazuhFileEventRequest;
+import cn.cyberpeace.mp.datasandtable.model.WazuhEventRequest;
+import cn.cyberpeace.mp.datasandtable.model.WazuhModel;
 import cn.cyberpeace.mp.datasandtable.model.emum.FileEventType;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -37,26 +41,26 @@ public class WazuhServiceTest {
 
     @Test
     public void testQueryFileEvents() {
-        WazuhFileEventRequest wazuhFileEventRequest = new WazuhFileEventRequest();
-        wazuhFileEventRequest.setMacIds(Lists.newArrayList("00:0c:29:22:d3:95"));
-        wazuhFileEventRequest.setStartTime(LocalDateTime.now().minusDays(7));
-        wazuhFileEventRequest.setEndTime(LocalDateTime.now());
-        wazuhFileEventRequest.setPageNum(1);
-        wazuhFileEventRequest.setPageSize(10);
-        ListObjResult<FileEventModel> listObjResult =  wazuhService.queryFileEvents(wazuhFileEventRequest);
+        WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
+        wazuhEventRequest.setMacIds(Lists.newArrayList("00:0c:29:22:d3:95"));
+        wazuhEventRequest.setStartTime(LocalDateTime.now().minusDays(7));
+        wazuhEventRequest.setEndTime(LocalDateTime.now());
+        wazuhEventRequest.setPageNum(1);
+        wazuhEventRequest.setPageSize(10);
+        ListObjResult<FileEventModel> listObjResult =  wazuhService.queryFileEvents(wazuhEventRequest);
         Assert.isTrue(listObjResult.getObjs().size() >0, "查询文件监控分页有数据");
     }
 
 
     @Test
     public void testQueryWindowsRegistory() {
-        WazuhFileEventRequest wazuhFileEventRequest = new WazuhFileEventRequest();
-        wazuhFileEventRequest.setMacIds(Lists.newArrayList("30:D0:42:E0:84:CC"));
-        wazuhFileEventRequest.setStartTime(LocalDateTime.now().minusDays(7));
-        wazuhFileEventRequest.setEndTime(LocalDateTime.now());
-        wazuhFileEventRequest.setPageNum(1);
-        wazuhFileEventRequest.setPageSize(10);
-        ListObjResult<FileEventModel> listObjResult =  wazuhService.queryFileEvents(wazuhFileEventRequest);
+        WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
+        wazuhEventRequest.setMacIds(Lists.newArrayList("30:D0:42:E0:84:CC"));
+        wazuhEventRequest.setStartTime(LocalDateTime.now().minusDays(7));
+        wazuhEventRequest.setEndTime(LocalDateTime.now());
+        wazuhEventRequest.setPageNum(1);
+        wazuhEventRequest.setPageSize(10);
+        ListObjResult<FileEventModel> listObjResult =  wazuhService.queryFileEvents(wazuhEventRequest);
         Assert.isTrue(listObjResult.getObjs().get(0).getFileEventType().equals(FileEventType.REGISTRY), "查询文件监控分页有数据");
     }
 
@@ -73,10 +77,10 @@ public class WazuhServiceTest {
 
     @Test
     public void indexListBuilder(){
-        WazuhFileEventRequest wazuhFileEventRequest = new WazuhFileEventRequest();
-        wazuhFileEventRequest.setStartTime(LocalDateTime.now().minusDays(7));
-        wazuhFileEventRequest.setEndTime(LocalDateTime.now());
-        List<String> indexList= wazuhService.indexListBuilder(wazuhFileEventRequest);
+        WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
+        wazuhEventRequest.setStartTime(LocalDateTime.now().minusDays(7));
+        wazuhEventRequest.setEndTime(LocalDateTime.now());
+        List<String> indexList= wazuhService.indexListBuilder(wazuhEventRequest);
         System.out.println(indexList);
     }
 
@@ -87,5 +91,42 @@ public class WazuhServiceTest {
         Assert.isTrue(Objects.nonNull(multiValueMap), "查询到mac的关系");
     }
 
+    @Test
+    public void testQueryMonitorEvents() {
+        WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
+        wazuhEventRequest.setMacIds(Lists.newArrayList("30:D0:42:E0:84:CC", "00:0c:29:22:d3:95"));
+        wazuhEventRequest.setPageNum(1);
+        wazuhEventRequest.setPageSize(10);
+        wazuhEventRequest.setStartTime(LocalDateTime.now());
+        wazuhEventRequest.setEndTime(LocalDateTime.now());
+        ListObjResult<WazuhModel> listObjResult= wazuhService.queryMonitorEvents(wazuhEventRequest);
+        Assert.isTrue(listObjResult.getObjs().size() > 1 , "查询文件监控分页有数据");
+    }
 
+    @Test
+    public void testDateFormate() {
+        String date = LocalDateTimeUtils.localDateTimeToString(LocalDateTime.now(), LocalDateTimeUtils.esdateTimeFormatter);
+        System.out.println(date);
+    }
+
+    @Test
+    public void testGetJSon() {
+        String address = "{\"addresses\":{\n" +
+            "                \"1f01c2bd-042b-472e-a2de-d8af55374f9e\":[\n" +
+            "                    {\n" +
+            "                        \"addr\":\"192.168.1.78\",\n" +
+            "                        \"version\":4,\n" +
+            "                        \"port\":\"462abcff-9a26-46bb-8d13-49f22e6b2d9c\",\n" +
+            "                        \"subnet_id\":\"40fbb744-05f2-4206-bbee-d8d64cf18f64\",\n" +
+            "                        \"preserve_on_delete\":false\n" +
+            "                    }\n" +
+            "                ]\n" +
+            "            }}";
+        JSONObject jsonObject = JSONObject.parseObject(address);
+        JSONObject addresses = (JSONObject) jsonObject.get("addresses");
+        addresses.values().forEach((val)->{
+            System.out.println(val);
+        });
+
+    }
 }
