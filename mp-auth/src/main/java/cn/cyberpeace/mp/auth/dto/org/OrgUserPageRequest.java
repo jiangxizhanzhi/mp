@@ -3,6 +3,8 @@ package cn.cyberpeace.mp.auth.dto.org;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.util.Objects;
+
 @Data
 public class OrgUserPageRequest {
 
@@ -25,6 +27,14 @@ public class OrgUserPageRequest {
     public void ensure() {
         if (perPage != null) {
             pageSize = perPage;
+        }
+
+        // 默认值
+        if (Objects.isNull(page)) {
+            page = 1;
+        }
+        if (Objects.isNull(pageSize)) {
+            pageSize = 10;
         }
     }
 
