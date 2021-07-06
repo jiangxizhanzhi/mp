@@ -63,10 +63,11 @@ public class WazuhService {
 
     /**
      * 查询文件事件分页
+     *
      * @param wazuhEventRequest
      * @return ListObjResult<FileEventModel>
      */
-    public ListObjResult<FileEventModel> queryFileEvents(WazuhEventRequest wazuhEventRequest){
+    public ListObjResult<FileEventModel> queryFileEvents(WazuhEventRequest wazuhEventRequest) {
         //根据日期构造索引
         String[] indexArray = buildRequestIndex(wazuhEventRequest);
         var searchRequest = new SearchRequest(indexArray);
@@ -94,9 +95,10 @@ public class WazuhService {
 
     /**
      * 查询监控数据 查询最近五分钟数据，监控指标频率为 1min, 对五分钟数据按照agentId进行分组，再去最近的时间的数据
+     *
      * @param wazuhEventRequest wazuhEventRequest
      */
-    public ListObjResult<WazuhModel> queryMonitorEvents(WazuhEventRequest wazuhEventRequest){
+    public ListObjResult<WazuhModel> queryMonitorEvents(WazuhEventRequest wazuhEventRequest) {
         //根据日期构造索引
         String[] indexArray = buildRequestIndex(wazuhEventRequest);
         var searchRequest = new SearchRequest(indexArray);
@@ -114,16 +116,19 @@ public class WazuhService {
             List<WazuhMonitorRoot> wazuhFileRootList = Arrays.stream(response.getHits().getHits()).map(hit -> JSONObject.parseObject(hit.getSourceAsString(), WazuhMonitorRoot.class)).collect(Collectors.toList());
             Map<String, Optional<WazuhMonitorRoot>> wazuhMonitorMap =
                 wazuhFileRootList.stream()
-                    .filter(wazuhMonitorRoot-> wazuhMonitorRoot.getFullLog().contains("MonitorMessage:"))
+                    .filter(wazuhMonitorRoot -> wazuhMonitorRoot.getFullLog().contains("MonitorMessage:"))
                     .sorted(Comparator.comparing(WazuhMonitorRoot::getTimestamp))
-                    .collect(Collectors.groupingBy(root-> root.getAgent().getId(),
+                    .collect(Collectors.groupingBy(root -> root.getAgent().getId(),
                         Collectors.maxBy(Comparator.comparing(WazuhMonitorRoot::getTimestamp))));
 
             wazuhFileRootList = wazuhMonitorMap.values().stream().filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
             var wazuhModelList = wazuhFileRootList.stream()
-                .filter(model-> model.getFullLog().contains("MonitorMessage:")).map(model -> {
+                .filter(model -> model.getFullLog().contains("MonitorMessage:")).map(model -> {
                     var monitorMessage = model.getFullLog().substring("MonitorMessage:".length());
-                    return JSONObject.parseObject(monitorMessage, WazuhModel.class);
+                    var result = JSONObject.parseObject(monitorMessage, WazuhModel.class);
+                    result.setAgentId(model.getAgent().getId());
+                    result.setMacId(findMacIdByAgentId(model.getAgent().getId(), wazuhEventRequest.getMacIds()));
+                    return result;
                 }).collect(Collectors.toList());
 
             //process page
@@ -140,7 +145,20 @@ public class WazuhService {
     }
 
     /**
+     * 根据agent查询
+     * @param agentId
+     * @param macIds
+     */
+    private String findMacIdByAgentId(String agentId, List<String> macIds) {
+        MultiValueMap<String, String> multiValueMap = this.queryAllAgentMacAddr();
+        List<String> ids = multiValueMap.get(agentId);
+        var currentMacId = Sets.intersection(Sets.newHashSet(macIds), Sets.newHashSet(ids));
+        return currentMacId.iterator().next();
+    }
+
+    /**
      * 文件监控时间过滤
+     *
      * @param wazuhEventRequest wazuhEventRequest
      * @param boolQueryBuilder boolQueryBuilder
      */
@@ -149,7 +167,7 @@ public class WazuhService {
         boolQueryBuilder.must(QueryBuilders.termQuery("rule.id", "900002"));
         buildAgentIdQuery(wazuhEventRequest, boolQueryBuilder);
         //构造事件条件
-        var end  = LocalDateTime.now();
+        var end = LocalDateTime.now();
         var start = end.minusMinutes(5L);
         boolQueryBuilder.must(QueryBuilders.rangeQuery("timestamp")
             .from(LocalDateTimeUtils.localDateTimeToString(start, LocalDateTimeUtils.esdateTimeFormatter))
@@ -158,21 +176,22 @@ public class WazuhService {
 
     /**
      * 查询所有mac地址对应的
+     *
      * @return
      */
     public MultiValueMap<String, String> queryAllAgentMacAddr() {
         MultiValueMap<String, String> responseMultiMap = new LinkedMultiValueMap<>();
         var wazuhNetifaceRoot = wazuhDao.queryAllAgentMac();
-        wazuhNetifaceRoot.getData().getAffectedItems().forEach(item->{
+        wazuhNetifaceRoot.getData().getAffectedItems().forEach(item -> {
             responseMultiMap.add(item.getAgentId(), item.getMac());
         });
 
         return responseMultiMap;
     }
 
-
     /**
      * 根据mac地质查询AgentIds
+     *
      * @param macs
      * @return agentSet
      */
@@ -190,6 +209,7 @@ public class WazuhService {
 
     /**
      * 文件转换
+     *
      * @param wazuhFileRoot
      * @return
      */
@@ -207,6 +227,7 @@ public class WazuhService {
 
     /**
      * 处理分页
+     *
      * @param wazuhEventRequest
      * @param indexArray
      * @param boolQueryBuilder
@@ -215,7 +236,7 @@ public class WazuhService {
      */
     private int processPageable(WazuhEventRequest wazuhEventRequest, String[] indexArray,
         BoolQueryBuilder boolQueryBuilder, SearchSourceBuilder sourceBuilder) {
-        int  offset = (wazuhEventRequest.getPageNum() -1) * (wazuhEventRequest.getPageSize());
+        int offset = (wazuhEventRequest.getPageNum() - 1) * (wazuhEventRequest.getPageSize());
         sourceBuilder.from(offset);
         sourceBuilder.size(wazuhEventRequest.getPageSize());
         int total = queryTotalCount(indexArray, boolQueryBuilder);
@@ -227,6 +248,7 @@ public class WazuhService {
 
     /**
      * 构造请求的索引
+     *
      * @param wazuhEventRequest wazuhFileEventRequest
      * @return String[]
      */
@@ -237,7 +259,8 @@ public class WazuhService {
         return indexArray;
     }
 
-    private void buildFileEventBoolQueryBuilder(WazuhEventRequest wazuhEventRequest, BoolQueryBuilder boolQueryBuilder) {
+    private void buildFileEventBoolQueryBuilder(WazuhEventRequest wazuhEventRequest,
+        BoolQueryBuilder boolQueryBuilder) {
         //构造查询条件
         boolQueryBuilder.must(QueryBuilders.boolQuery().must(QueryBuilders.termQuery("rule.groups", "syscheck")));
 
@@ -251,6 +274,7 @@ public class WazuhService {
 
     /**
      * 构造agentIdQuery
+     *
      * @param wazuhEventRequest wazuhFileEventRequest
      * @param boolQueryBuilder boolQueryBuilder
      */
@@ -260,6 +284,7 @@ public class WazuhService {
 
     /**
      * 查询count
+     *
      * @param indexArray
      * @param boolQueryBuilder
      * @return count
