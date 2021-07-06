@@ -606,14 +606,27 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         List<OrgModel> orgs = orgUserService.listOrgsByUserId(userModel.getId());
         List<String> orgIds = orgs.stream().map(o -> o.getId()).collect(Collectors.toList());
 
-
-
         List<List<String>> allorgpath = orgs.stream().map(o -> CollectionUtil.toList(StringUtils.split(o.getPath(), AuthConstant.ORG_PATH_SEPARATOR))).collect(Collectors.toList());
         userDto.setOrgIds(orgIds);
         userDto.setOrgpaths(allorgpath);
 
         List<RoleModel> roles = userRoleService.listByUserId(userModel.getId());
         userDto.setRoles(roles);
+
+        boolean isAdmin = roles.stream().anyMatch(r -> r.getIdentifier().equals(AuthConstant.ROLE_ADMIN));
+        boolean isSuperUser = roles.stream().anyMatch(r -> r.getIdentifier().equals(AuthConstant.ROLE_SUPERUSER));
+
+        if(isAdmin) {
+            userDto.setIsAdmin(1);
+        } else {
+            userDto.setIsAdmin(0);
+        }
+
+        if(isSuperUser) {
+            userDto.setIsSuperUser(1);
+        } else {
+            userDto.setIsSuperUser(0);
+        }
 
         return userDto;
     }

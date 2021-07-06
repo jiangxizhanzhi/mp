@@ -82,6 +82,7 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
 
     @ApiOperation(value = "创建用户，同时完成组织，角色绑定关系", notes = "")
     @PostMapping("/add")
+    @OperateLog(module = AuthLogConstant.MODULE, type = AuthLogConstant.TYPE_ADD, title = "新增用户")
     public ServiceResult add(@RequestBody UserRequest createRequest) {
         UserModel userModel = getModelService().add(createRequest);
         return ResultUtils.commonResult(true, userModel);

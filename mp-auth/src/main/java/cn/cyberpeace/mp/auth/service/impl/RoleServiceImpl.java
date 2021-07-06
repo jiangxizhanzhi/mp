@@ -74,13 +74,13 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     }
 
     @Override
-    public PageInfo getPage(RolePageRequest rolePageRequest) {
+    public PageInfo getPageWithUserCnt(RolePageRequest rolePageRequest) {
         PageHelper.startPage(rolePageRequest.getPage(), rolePageRequest.getPageSize());
         List<RoleDto> roleDtos = getModelMapper().listWithUserCnt(rolePageRequest.getName());
         PageInfo pageInfo = new PageInfo(roleDtos);
 
         roleDtos.forEach(r -> {
-            if (r.getIdentifier().equals(AuthConstant.ADMIN)) {
+            if (r.getIdentifier().equals(AuthConstant.ROLE_ADMIN)) {
                 r.setTargets(targetService.listByTenantId(AuthConstant.DEFAULT_TENANT));
             } else {
                 List<TargetModel> targetModels = rolePermissionService.listTargetsByRoleId(r.getId());

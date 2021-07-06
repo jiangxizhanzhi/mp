@@ -213,7 +213,7 @@ public class UserPermissionServiceImpl
 
 
     public boolean hasAdminRole(List<RoleModel> roles) {
-        return roles.stream().anyMatch(r -> Objects.equals(r.getIdentifier(), AuthConstant.ADMIN));
+        return roles.stream().anyMatch(r -> Objects.equals(r.getIdentifier(), AuthConstant.ROLE_ADMIN));
     }
 
 
