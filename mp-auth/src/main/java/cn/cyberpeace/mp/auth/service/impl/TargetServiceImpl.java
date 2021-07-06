@@ -1,29 +1,43 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.dto.OrgDto;
+import cn.cyberpeace.mp.auth.dto.TargetDto;
 import cn.cyberpeace.mp.auth.dto.TargetType;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.repository.TargetMapper;
 import cn.cyberpeace.mp.auth.service.TargetService;
 import cn.cyberpeace.mp.auth.service.fields.TargetFields;
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.lang.Assert;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.lang.annotation.Target;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Service
 @Slf4j
 public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetMapper, TargetFields, QueryParams>
         implements TargetService {
+
+    @Autowired
+    private QueryChildTargetOperation queryChildTargetOperation;
+
+    @Autowired
+    private QueryParentTargetOperation queryParentTargetOperation;
 
     @Autowired
     public TargetServiceImpl(TargetMapper modelMapper, TargetFields modelFields) {
@@ -51,12 +65,52 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
     }
 
     @Override
+    public List<TargetModel> listByParent(String parentId) {
+        Assert.notBlank(parentId, "parentId不能为空！");
+        List<TargetModel> list = getModelMapper().listByParent(parentId);
+        return list;
+    }
+
+    @Override
     public ObjServiceResult<TargetModel> create(TargetModel obj, String[] fields) {
         check(obj);
         return super.create(obj, fields);
     }
 
+    @Override
+    public List<TargetDto> getTree(String parentId, Integer type) {
+        if (Objects.isNull(type)) {
+            type = TargetModel.TYPE_MENU;
+        }
 
+        if (StringUtils.isBlank(parentId)) {
+            // 查询所有权限
+            List<TargetModel> targets = listAll(AuthConstant.DEFAULT_TENANT, type);
+            if (CollectionUtil.isEmpty(targets)) {
+                return new ArrayList<>();
+            }
+            List<TargetDto> tree = toTree(targets);
+            return tree;
+        }
+
+        // 根据parentId查询单个权限树
+        TargetModel parentTarget = getModelMapper().get(parentId);
+        if (parentTarget == null) {
+            log.info("target:{}不存在!", parentId);
+            throw new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "target_not_existed");
+        }
+
+        TargetDto targetDto = new TargetDto();
+        BeanUtils.copyProperties(parentTarget, targetDto);
+        targetDto.execute(queryChildTargetOperation);
+
+        return CollectionUtil.toList(targetDto);
+    }
+
+    public List<TargetModel> listAll(String tenant, Integer type) {
+        List<TargetModel> targets = getModelMapper().listAll(tenant, type);
+        return targets;
+    }
 
     private void check(TargetModel target) {
         boolean supportedType = false;
@@ -75,5 +129,49 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
 //        if (targetModel != null) {
 //            throw new MpRuntimeException("Identifier为" + target.getIdentifier() + "的记录已经存在!");
 //        }
+    }
+
+
+
+    private List<TargetDto> toTree(List<TargetModel> targets) {
+        Assert.notEmpty(targets, "targets should not be empty!");
+        Map<String, List<TargetModel>> map = new HashMap<>();
+        Map<String, TargetDto> mapTmp = new HashMap<>();
+
+        //Save all nodes to a map
+        for (TargetModel targetm : targets) {
+            TargetDto targetDto = new TargetDto();
+            BeanUtils.copyProperties(targetm, targetDto);
+            mapTmp.put(targetDto.getId(), targetDto);
+        }
+
+        //loop and assign parent/child relationships
+        for (Map.Entry<String, TargetDto> entry : mapTmp.entrySet()) {
+            TargetDto current = entry.getValue();
+            String parentId = current.getParent();
+
+            if (StringUtils.isNotBlank(parentId)) {
+                TargetDto parent = mapTmp.get(parentId);
+                if (parent != null) {
+                    //                    current.(parent);
+                    if (parent.getChildren() == null) {
+                        parent.setChildren(new ArrayList<>());
+                    }
+                    parent.getChildren().add(current);
+                    mapTmp.put(parentId, parent);
+                }
+            }
+
+        }
+
+        List<TargetDto> parentTargets = new ArrayList<>();
+        //get the root
+        for (TargetDto node : mapTmp.values()) {
+            if(StringUtils.isBlank(node.getParent())) {
+                parentTargets.add(node);
+            }
+        }
+
+        return parentTargets;
     }
 }
