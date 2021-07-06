@@ -42,7 +42,7 @@ public class WazuhServiceTest {
     @Test
     public void testQueryFileEvents() {
         WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
-        wazuhEventRequest.setMacIds(Lists.newArrayList("00:0c:29:22:d3:95"));
+        wazuhEventRequest.setMacIds(Lists.newArrayList("00:0c:29:86:21:ac"));
         wazuhEventRequest.setStartTime(LocalDateTime.now().minusDays(7));
         wazuhEventRequest.setEndTime(LocalDateTime.now());
         wazuhEventRequest.setPageNum(1);

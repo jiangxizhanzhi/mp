@@ -219,6 +219,9 @@ public class WazuhService {
         sourceBuilder.from(offset);
         sourceBuilder.size(wazuhEventRequest.getPageSize());
         int total = queryTotalCount(indexArray, boolQueryBuilder);
+        if (10000 < total) {
+            total = 10000;
+        }
         return total;
     }
 
