@@ -61,6 +61,13 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
 
     @Override
     @ApiIgnore
+    @ApiOperation(value = "(弃用，建议用/api/mp/auth/org_users/page/byorg) 分页查询组织下的用户", notes = "")
+    public ListObjServiceResult<UserModel> list(UserQueryParams queryParams) {
+        return super.list(queryParams);
+    }
+
+    @Override
+    @ApiIgnore
     @ApiOperation(value = "(弃用，建议用/add) 创建数据", notes = "")
     public ObjServiceResult<UserModel> create(UserModel obj, String[] fields) {
         return super.create(obj, fields);
