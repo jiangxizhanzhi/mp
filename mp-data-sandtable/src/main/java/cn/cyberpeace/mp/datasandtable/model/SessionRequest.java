@@ -37,25 +37,31 @@ public class SessionRequest {
      * 查询条件需要的分组
      */
     @NotNull(message = "分组id列表不能为空")
+    @ApiModelProperty("分组")
     private List<String> groupList;
 
+    @ApiModelProperty("源IP")
     private String sourceIp;
 
+    @ApiModelProperty("源端口")
     private String srcPort;
 
+    @ApiModelProperty("目的IP")
     private String targetIp;
 
+    @ApiModelProperty("目的端口")
     private String dstPort;
 
     /**
      * 查询条数默认限制
      */
-    @ApiModelProperty("不走分页场景的时候默认返回100条数据")
+    @ApiModelProperty("分页数量：不走分页场景的时候默认返回100条数据")
     private Integer pageSize = 100;
 
     /**
      * 分页页码
      */
+    @ApiModelProperty("分页页码")
     private Integer pageNum = 1;
 
     /**
