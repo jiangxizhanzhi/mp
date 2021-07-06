@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.devops.log.model;
 
 import cn.cyberpeace.mp.devops.log.enums.SiteTypeEnums;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,7 +12,6 @@ import java.time.LocalDateTime;
  * @author wanggang
  */
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class OperationLogModel {
@@ -52,6 +50,11 @@ public class OperationLogModel {
      * 用户名称
      */
     private String userName;
+
+    /**
+     * 用户类型（用户，客户端）
+     */
+    private String userType;
 
     /**
      * 描述

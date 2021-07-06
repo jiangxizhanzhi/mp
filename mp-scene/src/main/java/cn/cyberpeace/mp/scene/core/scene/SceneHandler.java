@@ -9,6 +9,10 @@ import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
 import cn.cyberpeace.mp.scene.model.*;
 import cn.cyberpeace.mp.scene.repository.*;
 
+/**
+ * 场景实例的处理
+ * 场景实例的功能由本类对外提供
+ */
 @ClassFieldClasses({
         SceneDataBO.class,
         SceneTopologyBO.class,
@@ -23,6 +27,7 @@ import cn.cyberpeace.mp.scene.repository.*;
         SceneElementPortModel.class,
         SceneElementPortConnectionModel.class,
         ScenePluginHandler.class,
+        SceneHandler.class,
 })
 @BeanFieldClasses({
         SceneMapper.class,
@@ -52,7 +57,8 @@ public class SceneHandler extends BaseSceneHandler<
         SceneElementPortMapper,
         SceneElementPortConnectionMapper,
         SceneElementPluginMapper,
-        ScenePluginHandler<?, ?>> {
+        ScenePluginHandler<?, ?>,
+        SceneHandler> {
 
     public SceneHandler(SceneDataBO sceneDataBO) throws SceneNotExistException {
         init(sceneDataBO, false);

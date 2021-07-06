@@ -4,6 +4,8 @@ import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.protocol.HTTP;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 public class CustomUsernamePasswordAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
@@ -24,12 +27,11 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
     @SuppressWarnings("unchecked")
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException {
-
-        if (!request.getMethod().equals("POST")) {
+        if (!Objects.equals(request.getMethod(), "POST")) {
             throw new AuthenticationServiceException("Authentication method not supported: " + request.getMethod());
         }
 
-        if (request.getContentType().equals(MediaType.APPLICATION_JSON_VALUE)) {
+        if (Objects.equals(request.getContentType(), MediaType.APPLICATION_JSON_VALUE)) {
             Map<String, String> loginData = new HashMap<>();
             try {
                 loginData = new ObjectMapper().readValue(request.getInputStream(), Map.class);
@@ -39,7 +41,7 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
             String username = loginData.getOrDefault(getUsernameParameter(), StringUtils.EMPTY);
             String decryptedPwd = loginData.getOrDefault(getPasswordParameter(), StringUtils.EMPTY);
             String originPwd = PasswordUtils.desDecrypt(decryptedPwd);
-
+            // todo 用户挂起，禁用状态拦截
             username = username.trim();
             var authRequest = new UsernamePasswordAuthenticationToken(username, originPwd);
             setDetails(request, authRequest);

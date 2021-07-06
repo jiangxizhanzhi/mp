@@ -9,11 +9,15 @@ import cn.cyberpeace.mp.auth.service.SysConfigService;
 import cn.cyberpeace.mp.auth.service.fields.OrgFields;
 import cn.cyberpeace.mp.auth.service.fields.SysConfigFields;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
+import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.hutool.core.lang.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
-public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, SysConfigMapper, SysConfigFields>
+public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, SysConfigMapper, SysConfigFields, QueryParams>
         implements SysConfigService {
 
     @Autowired
@@ -22,4 +26,15 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
         setModelFields(modelFields);
     }
 
+
+    @Override
+    public List<SysConfigModel> listAll() {
+        return getModelMapper().selectAll();
+    }
+
+    @Override
+    public SysConfigModel getByKeyName(String keyName) {
+        Assert.notBlank(keyName, "keyName不能为空！");
+        return getModelMapper().selectByKey(keyName);
+    }
 }

@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.devops.log.aop;
 
+import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
+import cn.cyberpeace.mp.devops.log.constant.LogConstant;
 import cn.cyberpeace.mp.devops.log.enums.SiteTypeEnums;
 import cn.cyberpeace.mp.devops.log.model.OperationLogModel;
 import cn.cyberpeace.mp.devops.log.service.OperateLogServiceFactory;
@@ -141,9 +143,7 @@ public class RequestLogAspect {
      */
     @AfterReturning(returning = "result", pointcut = "pointcut()")
     public void afterReturning(JoinPoint joinPoint,Object result) {
-        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-        ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) requestAttributes;
-        HttpServletRequest request = servletRequestAttributes.getRequest();
+        HttpServletRequest request = ServletUtils.getRequest();
 
         try {
 
@@ -171,14 +171,13 @@ public class RequestLogAspect {
             operationLogModel.setTitle(operateLog.title());
             //操作描述
             operationLogModel.setDescription(operateLog.desc());
-            //用户ID todo 暂时写死，后期从request对象获取
-            operationLogModel.setUserId("1");
-            //用户名称
-            operationLogModel.setUserName("admin");
             //记录操作时间
             operationLogModel.setOpTime(LocalDateTime.now());
             //请求IP
             operationLogModel.setOpIp(SnUtils.getRealRemoteIp(request));
+
+            //操作用户
+            handleOperationUser(operationLogModel);
 
             operateLogServiceFactory.create(operationLogModel);
 
@@ -256,4 +255,25 @@ public class RequestLogAspect {
 
         return Boolean.FALSE;
     }
+
+
+    private void handleOperationUser(OperationLogModel operationLogModel) {
+        HttpServletRequest request = ServletUtils.getRequest();
+        Object userId = request.getAttribute(LogConstant.USER_ID_KEY);
+        Object userName = request.getAttribute(LogConstant.USER_NAME_KEY);
+        Object userType = request.getAttribute(LogConstant.USER_TYPE_KEY);
+
+        if (Objects.nonNull(userId)) {
+            operationLogModel.setUserId(userId.toString());
+        }
+
+        if (Objects.nonNull(userName)) {
+            operationLogModel.setUserName(userName.toString());
+        }
+
+        if (Objects.nonNull(userType)) {
+            operationLogModel.setUserType(userType.toString());
+        }
+    }
+
 }

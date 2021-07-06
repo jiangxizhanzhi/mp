@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
 import cn.cyberpeace.mp.base.controller.BaseModelController;
+import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceServiceModel;
 import cn.cyberpeace.mp.devops.cluster.service.DeviceServiceService;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/device-service")
-public class DeviceServiceController extends BaseModelController<DeviceServiceModel, DeviceServiceService> {
+public class DeviceServiceController extends BaseModelController<DeviceServiceModel, QueryParams, DeviceServiceService> {
 
     @Autowired
     public DeviceServiceController(DeviceServiceService modelService) {

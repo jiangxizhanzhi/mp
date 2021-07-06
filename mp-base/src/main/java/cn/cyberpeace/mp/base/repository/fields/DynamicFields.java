@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.base.repository.fields;
 
 import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.base.util.CastUtils;
+import cn.cyberpeace.mp.base.util.ClassUtils;
 import cn.cyberpeace.mp.base.util.SerializableFunction;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
@@ -41,6 +42,11 @@ public class DynamicFields {
         }
     }
 
+    /**
+     * 过滤数据对象字段, 核心数据对象返回过滤后的map
+     * @param obj 数据对象
+     * @return 过滤后的数据对象
+     */
     public Object apply(Object obj) {
         if (obj == null || fieldsMap == null) {
             return obj;
@@ -78,6 +84,55 @@ public class DynamicFields {
         });
 
         return resultMap;
+    }
+
+    /**
+     * 过滤数据对象字段, 只是把不需要的字段设置成null
+     * @param obj 数据对象
+     * @return 过滤后的数据对象
+     */
+    @SuppressWarnings("unchecked")
+    public <T> T applyWithNull(T obj) {
+        if (obj == null || fieldsMap == null) {
+            return obj;
+        }
+
+        if (obj instanceof Object[]) {
+            for (Object objItem: (Object[]) obj) {
+                applyWithNull(objItem);
+            }
+            return obj;
+        }
+
+        if (obj instanceof List<?>) {
+            ((List<?>) obj).forEach(this::applyWithNull);
+            return obj;
+        }
+
+        if (obj instanceof Map) {
+            Map<String, Object> actualObj = (Map<String, Object>) obj;
+            actualObj.forEach((fieldName, fieldValue) -> {
+                Object fieldFlag = fieldsMap.getOrDefault(fieldName, null);
+                if (fieldFlag == null || (fieldFlag instanceof Boolean && !(boolean) fieldFlag)) {
+                    actualObj.put(fieldName, null);
+                } else if (fieldFlag instanceof DynamicFields) {
+                    ((DynamicFields) fieldFlag).applyWithNull(fieldValue);
+                }
+            });
+        } else {
+            final BeanWrapper objWrapper = new BeanWrapperImpl(obj);
+            for (String fieldName: ClassUtils.getBeanClassFields(obj.getClass())) {
+                Object fieldFlag = fieldsMap.getOrDefault(fieldName, null);
+                if (fieldFlag == null || (fieldFlag instanceof Boolean && !(boolean) fieldFlag)) {
+                    objWrapper.setPropertyValue(fieldName, null);
+                } else if (fieldFlag instanceof DynamicFields) {
+                    Object fieldValue = objWrapper.getPropertyValue(fieldName);
+                    ((DynamicFields) fieldFlag).applyWithNull(fieldValue);
+                }
+            }
+        }
+
+        return obj;
     }
 
     public boolean hasField(String fieldName) {

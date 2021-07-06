@@ -4,11 +4,16 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.validation.BindException;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+
+import java.util.Objects;
 
 /**
  * 业务异常统一处理
@@ -24,15 +29,28 @@ public class MpRuntimeExceptionHandler {
     @ResponseBody
     public ServiceResult<String> b2bRuntimeExceptionHandler(MpRuntimeException ex) {
         log.error(LOGGER_FORMAT, ex.getMessage(), ex.getDetail());
-        return ServiceResult.<String>builder().message(ex.getMessage()).serviceCode(ex.getServiceCode()).detail(ex.getDetail()).build();
+        return ServiceResult.fail(ex.getMessage());
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ExceptionHandler({BindException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    public ServiceResult<String> validationExceptionHandle(MethodArgumentNotValidException ex) {
+    public ServiceResult<String> validationExceptionHandle(BindException ex) {
         log.error(ex.getMessage());
-        return ServiceResult.<String>builder().message("参数异常" + ex.getMessage()).serviceCode(BaseErrorCode.PARAMS_INVALID).build();
+        ObjectError objectError = ex.getBindingResult().getAllErrors().get(0);
+        BindingResult bindingResult = ex.getBindingResult();
+        if(Objects.nonNull(bindingResult)){
+            if(bindingResult.hasErrors()){
+                FieldError fieldError = bindingResult.getFieldError();
+                String field = fieldError.getField();
+                String defaultMessage = fieldError.getDefaultMessage();
+                return ServiceResult.fail(BaseErrorCode.PARAMS_INVALID,field + ":" + defaultMessage);
+            }else {
+                return ServiceResult.fail(BaseErrorCode.PARAMS_INVALID,objectError.getDefaultMessage());
+            }
+        }else {
+            return ServiceResult.fail(BaseErrorCode.PARAMS_INVALID,objectError.getDefaultMessage());
+        }
     }
 
     @ExceptionHandler(Exception.class)
@@ -40,6 +58,6 @@ public class MpRuntimeExceptionHandler {
     @ResponseBody
     public ServiceResult<String> handleException(Exception ex){
         log.error(LOGGER_FORMAT, ex.getMessage(), ex);
-        return ServiceResult.<String>builder().message("系统异常" + ex.getMessage()).serviceCode(BaseErrorCode.PARAMS_INVALID).build();
+        return ServiceResult.fail("系统异常：" + ex.getMessage());
     }
 }

@@ -22,6 +22,34 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * 基础的场景处理类，场景模板和场景实例的拓扑数据操作都是一样的
+ * 对于场景拓扑分为全拓扑操作、区域拓扑操作
+ * 全拓扑操作可视作特殊的区域拓扑操作，其处理逻辑都是一样的，都是对节点、连线的数据处理
+ * 区域拓扑操作需要特别考虑边界连线(连线的另一端涉及到其他区域的节点)的数据处理，不能遗漏
+ *
+ * @param <S0> 表模型类   场景模板/场景实例
+ * @param <A0> 表模型类   区域节点
+ * @param <E0> 表模型类   网元节点
+ * @param <P0> 表模型类   网元端口
+ * @param <C0> 表模型类   网元端口连接（也代表节点之间连接）
+ * @param <P1> 表模型类   网元节点插件关系
+ * @param <S>  业务模型类  场景模板/场景实例
+ * @param <A>  业务模型类  区域节点
+ * @param <P>  业务模型类  网元端口
+ * @param <E>  业务模型类  网元节点
+ * @param <C>  业务模型类  网元端口连接（也代表节点之间连接）
+ * @param <T>  业务模型类  场景拓扑数据
+ * @param <D>  业务模型类  场景数据（包含拓扑数据、插件数据）
+ * @param <M1> mapper类  场景模板/场景实例
+ * @param <M2> mapper类  区域节点
+ * @param <M3> mapper类  网元节点
+ * @param <M4> mapper类  网元端口
+ * @param <M5> mapper类  网元端口连接（也代表节点之间连接）
+ * @param <M6> mapper类  网元节点插件关系
+ * @param <P2> 场景插件处理接口类
+ * @param <H> 场景处理实现类
+ */
 @ClassFieldNames({
         "sceneDataBOClass",
         "sceneTopologyBOClass",
@@ -36,6 +64,7 @@ import java.util.stream.Collectors;
         "sceneElementPortModelClass",
         "sceneElementPortConnectionModelClass",
         "scenePluginHandlerInterface",
+        "sceneHandlerClass",
 })
 @BeanFieldNames({
         "sceneMapper",
@@ -66,18 +95,29 @@ public abstract class BaseSceneHandler<
         M4 extends BaseSceneElementPortMapper<P0>,
         M5 extends BaseSceneElementPortConnectionMapper<C0>,
         M6 extends BaseSceneElementPluginMapper<P1>,
-        P2 extends BaseScenePluginHandler<?, ?>> {
+        P2 extends BaseScenePluginHandler<?, ?>,
+        H extends BaseSceneHandler<S0, A0, E0, P0, C0, P1, S, A, P, E, C, T, D, M1, M2, M3, M4, M5, M6, P2, H>> {
 
+    /** 是否区域模式 */
     private boolean isAreaMode;
+    /** 场景模板/场景实例 */
     private S scene;
+    /** 区域模式下，当前区域id */
     private String areaId;
+    /** 区域节点集合 */
     private final Map<String, A> areaMap = new HashMap<>();
+    /** 网元节点集合 */
     private final Map<String, E> elementMap = new HashMap<>();
+    /** 网元端口集合 */
     private final Map<String, P> elementPortMap = new HashMap<>();
+    /** 网元端口连接集合 */
     private final Map<String, C> elementPortConnectionMap = new HashMap<>();
+    /** 区域外连接端口id集合 */
     private final Set<String> outerConnectionPortIds = new HashSet<>();
+    /** 场景插件数据，key为插件代号 */
     private final Map<String, ScenePluginDataBO> scenePluginData = new HashMap<>();
 
+    // 通过ClassFieldNames注解和实现类ClassFieldClasses注解，初始化调用ClassUtils.loadClassFields(this)设置
     private Class<D> sceneDataBOClass;
     private Class<T> sceneTopologyBOClass;
     private Class<S> sceneBOClass;
@@ -85,14 +125,16 @@ public abstract class BaseSceneHandler<
     private Class<E> sceneElementBOClass;
     private Class<P> sceneElementPortBOClass;
     private Class<C> sceneElementPortConnectionBOClass;
-
     private Class<S0> sceneModelClass;
     private Class<A0> sceneAreaModelClass;
     private Class<E0> sceneElementModelClass;
     private Class<P0> sceneElementPortModelClass;
     private Class<C0> sceneElementPortConnectionModelClass;
     private Class<P1> sceneElementPluginModelClass;
+    private Class<P2> scenePluginHandlerInterface;
+    private Class<H> sceneHandlerClass;
 
+    // 通过BeanFieldNames注解和实现类BeanFieldClasses注解，初始化调用BeanUtils.loadBeanFields(this)设置
     private M1 sceneMapper;
     private M2 sceneAreaMapper;
     private M3 sceneElementMapper;
@@ -100,11 +142,14 @@ public abstract class BaseSceneHandler<
     private M5 sceneElementPortConnectionMapper;
     private M6 sceneElementPluginMapper;
 
-    private Class<P2> scenePluginHandlerInterface;
+    /** 插件数据处理对象集合，key为插件代号 */
     private Map<String, P2> pluginMap;
-
+    /** 网元对应节点插件关系，一个网元节点对于多个插件 */
     private Map<String, List<P1>> elementIdPluginsMap;
 
+    /**
+     * 初始化插件集合
+     */
     @SuppressWarnings("unchecked")
     private void initPluginMap() {
         Map<String, P2> pluginKeyMap = new HashMap<>();
@@ -114,13 +159,22 @@ public abstract class BaseSceneHandler<
             if (pluginKeyAnnotation == null) {
                 return;
             }
-            pluginKeyMap.put(pluginKeyAnnotation.value(), (P2) ClassUtils.createInstance(pluginClass));
+            String pluginKey = pluginKeyAnnotation.value();
+            P2 plugin = (P2) ClassUtils.createInstance(pluginClass);
+            ScenePluginDataBO pluginData = scenePluginData.getOrDefault(pluginKey, null);
+            plugin.init(pluginData);
+            pluginKeyMap.put(pluginKey, plugin);
         });
         pluginMap = pluginKeyMap;
     }
 
+    /**
+     * 过滤无效的区域数据
+     */
     private void filterAreaData() {
+        // 根节点
         ListTreeNode<A> areaNodeTree = new ListTreeNode<>();
+
         Map<String, ListTreeNode<A>> areaNodeMap = new HashMap<>();
         if (StringUtils.isEmpty(areaId)) {
             areaNodeMap.put(null, areaNodeTree);
@@ -128,13 +182,15 @@ public abstract class BaseSceneHandler<
         } else {
             areaNodeMap.put(areaId, areaNodeTree);
         }
-
         areaMap.forEach((areaNodeId, area) -> areaNodeMap.put(areaNodeId, new ListTreeNode<>(area)));
+
         areaNodeMap.forEach((areaNodeId, areaNode) -> {
             var area = areaNode.get();
             if (area == null) {
                 return;
             }
+
+            // 去除父节点不在此区域的节点
             ListTreeNode<A> parentAreaNode = areaNodeMap.getOrDefault(area.getArea(), null);
             if (parentAreaNode == null) {
                 return;
@@ -146,10 +202,14 @@ public abstract class BaseSceneHandler<
         filterAreaTree(areaNodeTree, areaMap);
     }
 
+    /**
+     * 过滤关闭的区域数据
+     */
     private void filterAreaTree(ListTreeNode<A> areaNode, Map<String, A> targetAreaMap) {
         var area = areaNode.get();
         if (area != null) {
             targetAreaMap.put(area.getId(), area);
+            // 只保留未关闭的区域
             if (!Boolean.TRUE.equals(area.getOpen())) {
                 return;
             }
@@ -158,6 +218,11 @@ public abstract class BaseSceneHandler<
         areaNode.getChildren().forEach(areaChildNode -> filterAreaTree(areaChildNode, targetAreaMap));
     }
 
+    /**
+     * 判断节点是否是区域内
+     * @param element 节点
+     * @return boolean 节点是否是区域内
+     */
     private boolean isValidAreaElement(E element) {
         if (!isAreaMode) {
             return true;
@@ -172,25 +237,45 @@ public abstract class BaseSceneHandler<
             return true;
         }
 
+        // 节点所属区域也在区域内并且是展开的
         var parentArea = areaMap.getOrDefault(elementArea, null);
         return parentArea != null && parentArea.getOpen();
     }
 
+    /**
+     * 网元端口连接的唯一标识(场景内唯一) 源端口id:目的端口id
+     * @param elementPortConnection 表模型-网元端口连接
+     * @return 连接的唯一标识
+     */
     private String elementPortConnectionKey(C0 elementPortConnection) {
         return StringUtils.joinWith(":", elementPortConnection.getSourcePortId(),
                 elementPortConnection.getTargetPortId());
     }
 
+    /**
+     * 网元端口连接的唯一标识(场景内唯一) 源端口id:目的端口id
+     * @param elementPortConnection 业务模型-网元端口连接
+     * @return 连接的唯一标识
+     */
     private String elementPortConnectionKey(C elementPortConnection) {
         return StringUtils.joinWith(":", elementPortConnection.getSource(),
                 elementPortConnection.getTarget());
     }
 
+    /**
+     * 网元节点插件的唯一标识 网元id:插件代号
+     * @param elementPlugin 表模型-网元节点插件
+     * @return 网元节点插件的唯一标识
+     */
     private String elementPluginKey(P1 elementPlugin) {
         return StringUtils.joinWith(":", elementPlugin.getSceneElement(),
                 elementPlugin.getPluginKey());
     }
 
+    /**
+     * 载入区域节点数据
+     * @param areas 业务模型-区域节点
+     */
     private void loadAreaBOs(List<A> areas) {
         if (areas == null) {
             return;
@@ -202,6 +287,10 @@ public abstract class BaseSceneHandler<
         }
     }
 
+    /**
+     * 载入网元节点数据
+     * @param elements 业务模型-网元节点
+     */
     private void loadElementBOs(List<E> elements) {
         if (elements == null) {
             return;
@@ -224,6 +313,10 @@ public abstract class BaseSceneHandler<
         });
     }
 
+    /**
+     * 载入网元端口连接数据
+     * @param connections 业务模型-网元端口连接
+     */
     private void loadConnectionBOs(List<C> connections) {
         if (connections == null) {
             return;
@@ -248,6 +341,10 @@ public abstract class BaseSceneHandler<
         });
     }
 
+    /**
+     * 载入场景插件数据
+     * @param scenePluginData 插件代号：插件数据
+     */
     private void loadScenePluginData(Map<String, ScenePluginDataBO> scenePluginData) {
         if (scenePluginData == null) {
             return;
@@ -255,6 +352,10 @@ public abstract class BaseSceneHandler<
         scenePluginData.forEach(this.scenePluginData::put);
     }
 
+    /**
+     * 载入区域节点数据
+     * @param areas 表模型-区域节点
+     */
     private void loadAreas(List<A0> areas) {
         if (areas == null) {
             return;
@@ -267,6 +368,10 @@ public abstract class BaseSceneHandler<
         });
     }
 
+    /**
+     * 载入网元节点数据
+     * @param elements 表模型-网元节点
+     */
     private void loadElements(List<E0> elements) {
         if (elements == null) {
             return;
@@ -278,6 +383,10 @@ public abstract class BaseSceneHandler<
         });
     }
 
+    /**
+     * 载入网元端口数据
+     * @param elementPorts 表模型-网元端口
+     */
     private void loadElementPorts(List<P0> elementPorts) {
         if (elementPorts == null) {
             return;
@@ -294,6 +403,10 @@ public abstract class BaseSceneHandler<
         });
     }
 
+    /**
+     * 载入网元端口连接数据
+     * @param connections 表模型-网元端口连接
+     */
     private void loadConnections(List<C0> connections) {
         if (connections == null) {
             return;
@@ -320,6 +433,10 @@ public abstract class BaseSceneHandler<
         });
     }
 
+    /**
+     * 载入网元插件关系数据
+     * @param elementPlugins 表模型-网元插件关系
+     */
     private void loadElementPlugin(List<P1> elementPlugins) {
         elementPlugins.forEach(elementPlugin -> {
             String elementId = elementPlugin.getSceneElement();
@@ -329,10 +446,20 @@ public abstract class BaseSceneHandler<
         });
     }
 
+    /**
+     * 从数据库读取场景
+     * @param sceneId 场景id
+     * @return 表模型-场景对象
+     */
     private S0 readScene(String sceneId) {
         return sceneMapper.logicGet(sceneId);
     }
 
+    /**
+     * 从数据库读取区域节点
+     * @param areaIds 父区域节点
+     * @return 表模型-区域节点
+     */
     private List<A0> readAreas(String... areaIds) {
         var condition = new HumanCondition().filterEqual(BaseSceneAreaModel::getScene, scene.getEid());
         if (areaIds.length > 0) {
@@ -353,6 +480,11 @@ public abstract class BaseSceneHandler<
         return areas;
     }
 
+    /**
+     * 从数据库读取网元节点
+     * @param areaIds 父区域节点
+     * @return 表模型-网元节点
+     */
     private List<E0> readElements(String... areaIds) {
         List<E0> elements;
         var condition = new HumanCondition()
@@ -364,6 +496,11 @@ public abstract class BaseSceneHandler<
         return elements;
     }
 
+    /**
+     * 从数据库读取网元端口
+     * @param areaIds 父区域节点
+     * @return 表模型-网元端口
+     */
     private List<P0> readElementPorts(String... areaIds) {
         var condition = new HumanCondition()
                 .link(sceneElementPortModelClass, sceneElementModelClass)
@@ -378,6 +515,11 @@ public abstract class BaseSceneHandler<
         return sceneElementPortMapper.list(condition);
     }
 
+    /**
+     * 从数据库读取网元端口连接
+     * @param areaIds 父区域节点
+     * @return 表模型-网元端口连接
+     */
     private List<C0> readElementPortConnections(String... areaIds) {
         var condition = new HumanCondition()
                 .link(sceneElementPortConnectionModelClass, sceneElementPortModelClass, sceneElementModelClass)
@@ -398,6 +540,11 @@ public abstract class BaseSceneHandler<
         return sceneElementPortConnectionMapper.list(condition);
     }
 
+    /**
+     * 从数据库读取网元插件关系
+     * @param elementIds 网元节点id
+     * @return 表模型-网元插件关系
+     */
     private List<P1> readElementPlugins(String... elementIds) {
         var condition = new HumanCondition()
                 .filterEqual(BaseSceneElementPluginModel::getScene, scene.getEid());
@@ -407,6 +554,13 @@ public abstract class BaseSceneHandler<
         return sceneElementPluginMapper.list(condition);
     }
 
+    /**
+     * 对比需要更新的场景元素
+     * @param targetMap 待更新的场景元素
+     * @param existTargetMap 已存在的场景元素
+     * @param <M> 目标元素表模型类
+     * @return 需要更新的场景元素结果集，包含待添加的元素、待更新属性的元素、待删除的元素
+     */
     private <M extends BaseModel> DiffTargets<M> diffTargets(Map<String, M> targetMap,
                                                              Map<String, M> existTargetMap) {
         var diff = new DiffTargets<M>();
@@ -425,6 +579,13 @@ public abstract class BaseSceneHandler<
         return diff;
     }
 
+    /**
+     * 保存需要更新的场景元素结果集，包含待添加的元素、待更新属性的元素、待删除的元素
+     * @param modelMapper 目标元素的表mapper
+     * @param diff 需要更新的区域元素结果集
+     * @param <M> 目标元素的表模型类
+     * @param <O> 目标元素的表mapper类
+     */
     private <M extends BaseModel, O extends BaseModelMapper<M>> void saveDiff(O modelMapper, DiffTargets<M> diff) {
         String[] removingTargetIds = diff.getRemovingTargets().stream()
                 .map(BaseModel::getId)
@@ -434,12 +595,20 @@ public abstract class BaseSceneHandler<
         modelMapper.bulkUpdate(diff.getUpdatingTargets());
     }
 
+    /**
+     * 保存场景属性数据
+     */
     private void saveScene() {
         S0 sceneObj = scene.toModel();
         sceneMapper.save(sceneObj);
         scene.fromModel(sceneObj);
     }
 
+    /**
+     * 保存区域节点
+     * @param existAreaMap 已存在的区域节点
+     * @return 更新的区域节点，包含添加的、更新属性的、删除的
+     */
     private DiffTargets<A0> saveAreas(Map<String, A0> existAreaMap) {
         String sceneId = scene.getEid();
         Map<String, A0> savingAreaMap = areaMap.entrySet().stream()
@@ -449,12 +618,28 @@ public abstract class BaseSceneHandler<
                     return area;
                 }));
         DiffTargets<A0> diff = diffTargets(savingAreaMap, existAreaMap);
+        if (isAreaMode) {
+            // 删除闭合的子区域
+            diff.getRemovingTargets().forEach(removingArea -> {
+                if (!Boolean.TRUE.equals(removingArea.getOpen())) {
+                    var sceneHandler = ClassUtils.createInstance(sceneHandlerClass);
+                    sceneHandler.init(scene, removingArea.getNodeId(), isAreaMode);
+                    sceneHandler.delete();
+                }
+            });
+        }
+
         saveDiff(sceneAreaMapper, diff);
         ListUtils.union(diff.getAddingTargets(), diff.getUpdatingTargets())
                 .forEach(area -> areaMap.get(area.getNodeId()).fromModel(area));
         return diff;
     }
 
+    /**
+     * 保存网元节点
+     * @param existElementMap 已存在的网元节点
+     * @return 更新的网元节点，包含添加的、更新属性的、删除的
+     */
     private DiffTargets<E0> saveElements(Map<String, E0> existElementMap) {
         String sceneId = scene.getEid();
         Map<String, E0> savingElementMap = elementMap.entrySet().stream()
@@ -470,6 +655,11 @@ public abstract class BaseSceneHandler<
         return diff;
     }
 
+    /**
+     * 保存网元端口
+     * @param existElementPortMap 已存在的网元端口
+     * @return 更新的网元端口，包含添加的、更新属性的、删除的
+     */
     private DiffTargets<P0> saveElementPorts(Map<String, P0> existElementPortMap) {
         String sceneId = scene.getEid();
         Map<String, P0> savingElementPortMap = new HashMap<>();
@@ -495,6 +685,11 @@ public abstract class BaseSceneHandler<
         return diff;
     }
 
+    /**
+     * 保存网元端口连接
+     * @param existElementPortConnectionMap 已存在的网元端口连接
+     * @return 更新的网元端口连接，包含添加的、更新属性的、删除的
+     */
     private DiffTargets<C0> saveElementPortConnections(Map<String, C0> existElementPortConnectionMap) {
         Map<String, P0> outerElementPortMap = new HashMap<>();
         if (!outerConnectionPortIds.isEmpty()) {
@@ -541,6 +736,11 @@ public abstract class BaseSceneHandler<
         return diff;
     }
 
+    /**
+     * 保存网元插件关系
+     * @param existElementPluginMap 已存在的网元插件关系
+     * @return 更新的网元插件关系，包含添加的、更新属性的、删除的
+     */
     private DiffTargets<P1> saveElementPlugins(Map<String, P1> existElementPluginMap) {
         Map<String, P1> savingElementPluginMap = new HashMap<>();
         String sceneId = scene.getEid();
@@ -570,6 +770,10 @@ public abstract class BaseSceneHandler<
         return diff;
     }
 
+    /**
+     * 从场景业务数据载入场景元素
+     * @param sceneDataBO 场景业务数据
+     */
     private void fromData(D sceneDataBO) {
         var topology = sceneDataBO.getTopology();
         scene = topology.getScene();
@@ -580,6 +784,12 @@ public abstract class BaseSceneHandler<
         loadScenePluginData(sceneDataBO.getPlugins());
     }
 
+    /**
+     * 从场景业务数据初始化
+     * @param sceneDataBO 场景业务数据
+     * @param isAreaMode 是否区域模式
+     * @throws SceneNotExistException 场景不存在
+     */
     public void init(D sceneDataBO, boolean isAreaMode) throws SceneNotExistException {
         ClassUtils.loadClassFields(this);
         BeanUtils.loadBeanFields(this);
@@ -592,22 +802,66 @@ public abstract class BaseSceneHandler<
         initPluginMap();
     }
 
+    /**
+     * 从场景id初始化
+     * @param sceneId 场景id
+     * @param areaId 区域id
+     * @param isAreaMode 是否区域模式
+     * @throws SceneNotExistException 场景不存在
+     */
     public void init(String sceneId, String areaId, boolean isAreaMode) throws SceneNotExistException {
-        ClassUtils.loadClassFields(this);
-        BeanUtils.loadBeanFields(this);
         S0 sceneObj = readScene(sceneId);
         if (sceneObj == null) {
             throw new SceneNotExistException("Scene " + sceneId + " not exist");
         }
+        init(sceneObj, areaId, isAreaMode);
+    }
+
+    /**
+     * 从场景初始化
+     * @param scene 场景
+     * @param areaId 区域id
+     * @param isAreaMode 是否区域模式
+     */
+    public void init(S0 scene, String areaId, boolean isAreaMode) {
         var sceneBO = ClassUtils.createInstance(sceneBOClass);
-        sceneBO.fromModel(sceneObj);
-        this.scene = sceneBO;
+        sceneBO.fromModel(scene);
+        init(sceneBO, areaId, isAreaMode);
+    }
+
+    /**
+     * 从场景初始化
+     * @param scene 场景
+     * @param areaId 区域id
+     * @param isAreaMode 是否区域模式
+     */
+    public void init(S scene, String areaId, boolean isAreaMode) {
+        ClassUtils.loadClassFields(this);
+        BeanUtils.loadBeanFields(this);
+
+        this.scene = scene;
         this.areaId = areaId;
         this.isAreaMode = isAreaMode;
         reload();
         initPluginMap();
     }
 
+    /**
+     * 切换区域
+     * @param areaId 区域id
+     */
+    public void switchArea(String areaId) {
+        if (!isAreaMode) {
+            return;
+        }
+
+        this.areaId = areaId;
+        reload();
+    }
+
+    /**
+     * 输出场景业务数据
+     */
     public D toData() {
         var topologyBO = ClassUtils.createInstance(sceneTopologyBOClass);
         topologyBO.setScene(scene);
@@ -621,11 +875,18 @@ public abstract class BaseSceneHandler<
         return dataBO;
     }
 
+    /**
+     * 清空场景数据，从数据库重新载入
+     */
     public void reload() {
         areaMap.clear();
         elementMap.clear();
         elementPortMap.clear();
         elementPortConnectionMap.clear();
+        outerConnectionPortIds.clear();
+        scenePluginData.clear();
+        elementIdPluginsMap.clear();
+        pluginMap.clear();
 
         loadAreas(readAreas());
         var filterAreaIds = new String[0];
@@ -638,8 +899,12 @@ public abstract class BaseSceneHandler<
         loadElementPorts(readElementPorts(filterAreaIds));
         loadConnections(readElementPortConnections(filterAreaIds));
         loadElementPlugin(readElementPlugins(elements.stream().map(BaseModel::getId).toArray(String[]::new)));
+        // TODO 从插件加载scenePluginData数据
     }
 
+    /**
+     * 保存当前场景数据
+     */
     public void save() {
         Map<String, A0> existAreaMap;
         Map<String, E0> existElementMap;
@@ -681,6 +946,9 @@ public abstract class BaseSceneHandler<
         DiffTargets<P1> diffElementPlugins = saveElementPlugins(existElementPluginMap);
     }
 
+    /**
+     * 删除场景数据
+     */
     public void delete() {
         String sceneId = scene.getEid();
 //        sceneMapper.logicDelete(sceneId);
@@ -688,6 +956,15 @@ public abstract class BaseSceneHandler<
         List<A0> areas = readAreas();
         var filterAreaIds = new String[0];
         if (isAreaMode) {
+            // 递归删除闭合的子区域
+            areas.forEach(removingArea -> {
+                if (!Boolean.TRUE.equals(removingArea.getOpen())) {
+                    var sceneHandler = ClassUtils.createInstance(sceneHandlerClass);
+                    sceneHandler.init(scene, removingArea.getNodeId(), isAreaMode);
+                    sceneHandler.delete();
+                }
+            });
+
             String currentAreaId = areaId == null ? StringUtils.EMPTY : areaId;
             filterAreaIds = ArrayUtils.addAll(areas.stream()
                     .map(BaseSceneNodeModel::getNodeId).toArray(String[]::new), currentAreaId);
@@ -710,4 +987,5 @@ public abstract class BaseSceneHandler<
             sceneElementPortConnectionMapper.bulkDelete(elementPortConnections.stream().map(BaseModel::getId).toArray(String[]::new));
         }
     }
+
 }

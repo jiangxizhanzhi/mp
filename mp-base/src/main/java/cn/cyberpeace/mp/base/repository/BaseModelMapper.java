@@ -24,10 +24,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 public interface BaseModelMapper<M extends BaseModel> {
+
+    String pkFieldName = BeanUtils.getBeanGetterFieldName(BaseModel::getPk);
 
     Logger log = LoggerFactory.getLogger(BaseModelMapper.class);
 
@@ -152,7 +155,8 @@ public interface BaseModelMapper<M extends BaseModel> {
 
     private Object[] convertCreateParams(List<M> objs) {
         var allModelFields = new DynamicFields(ClassUtils.getBeanClassFields(getModelClass()));
-        String[] createFields = allModelFields.getFields();
+        String[] createFields = Arrays.stream(allModelFields.getFields())
+                .filter(fieldName -> !fieldName.equals(pkFieldName)).toArray(String[]::new);
         var createColumnFields = new String[createFields.length];
         for (var i = 0; i < createFields.length; i++) {
             createColumnFields[i] = TextUtils.humpToLine(createFields[i]);
@@ -183,9 +187,12 @@ public interface BaseModelMapper<M extends BaseModel> {
         sampleObj.initDefault(BaseModel::getUpdateTime);
 
         var allModelFields = new DynamicFields(ClassUtils.getBeanClassFields(getModelClass()));
+        String[] availableFields = Arrays.stream(allModelFields.getFields())
+                .filter(fieldName -> !fieldName.equals(pkFieldName)).toArray(String[]::new);
+
         List<String> updateFields = new ArrayList<>();
         List<String> updateColumnFields = new ArrayList<>();
-        for (String fieldName: allModelFields.getFields()) {
+        for (String fieldName: availableFields) {
             Object fieldValue = ClassUtils.getObjFieldValue(sampleObj, fieldName);
             if (fieldValue != null) {
                 updateFields.add(fieldName);

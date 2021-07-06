@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.config.security;
 
+import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.extensions.security.*;
 import cn.cyberpeace.mp.auth.extensions.security.client.ClientAuthentication2Filter;
@@ -9,11 +10,13 @@ import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetailsService;
 import cn.cyberpeace.mp.auth.service.ClientDetailsService;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
@@ -30,10 +33,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private CustomAuthenticationSuccessHandler authenticationSuccessHandler;
     private CustomAuthenticationFailureHandler authenticationFailureHandler;
     private ClientAuthenticationFilter clientAuthenticationFilter;
-
-
-    @Autowired
-    private ClientDetailsService clientDetailsService;
 
     @Autowired
     public WebSecurityConfig(AuthUserDetailsService userDetailsService,
@@ -66,8 +65,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest().permitAll()
                 .and()
                 .csrf().disable()
-                .sessionManagement().disable()
-                .cors()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and().cors()
                 .and()
                 .formLogin().disable()
                 .exceptionHandling()

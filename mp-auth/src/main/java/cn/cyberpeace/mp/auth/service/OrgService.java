@@ -1,7 +1,37 @@
 package cn.cyberpeace.mp.auth.service;
 
+import cn.cyberpeace.mp.auth.dto.OrgDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.base.service.BaseModelService;
+import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 
-public interface OrgService extends BaseModelService<OrgModel> {
+import java.util.List;
+
+public interface OrgService extends BaseModelService<OrgModel, QueryParams> {
+
+    List<OrgModel> listParents();
+
+    List<OrgModel> listByParent(String parentId);
+
+    List<OrgModel> listAll(String tenantId);
+
+    List<OrgDto> getTree(String orgId);
+
+    // 列出组织的层级关系
+    OrgDto getHierarchicalOrgsByOrgId(String orgId);
+
+    // 列出组织的路径
+    String calculatePathByOrgId(String orgId);
+
+    // 根据路径查出组织
+    OrgModel getByPath(String path);
+
+    boolean exists(String id);
+
+    @Override
+    default ObjServiceResult<OrgModel> update(OrgModel obj, String[] fields) {
+        // todo 如果是更新组织名称，那要更新关联的组织orgpath
+        return BaseModelService.super.update(obj, fields);
+    }
 }

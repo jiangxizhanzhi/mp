@@ -16,4 +16,9 @@ public class LoginResp {
     @ApiModelProperty(value = "用户信息", example = "")
     private Object user;
 
+    private Object roles;
+    private Object targets;
+    private Object orgs;
+    private Object menus;
+
 }

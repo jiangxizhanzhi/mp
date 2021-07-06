@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.base.config;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.ServletRequestDataBinder;
 
 import javax.servlet.ServletRequest;
@@ -20,8 +21,12 @@ public class CustomServletRequestDataBinder extends ServletRequestDataBinder {
      */
     private final Pattern underLinePattern = Pattern.compile("_(\\w)");
 
-    public CustomServletRequestDataBinder(final Object target) {
+    public CustomServletRequestDataBinder(@Nullable Object target) {
         super(target);
+    }
+
+    public CustomServletRequestDataBinder(@Nullable Object target, String objectName) {
+        super(target, objectName);
     }
 
     /** 遍历请求参数对象 把请求参数的名转换成驼峰体
@@ -31,6 +36,7 @@ public class CustomServletRequestDataBinder extends ServletRequestDataBinder {
      */
     @Override
     protected void addBindValues(MutablePropertyValues mutablePropertyValues, ServletRequest request) {
+
         List<PropertyValue> propertyValueList = mutablePropertyValues.getPropertyValueList();
         List<PropertyValue> adds = new LinkedList<>();
         for (PropertyValue propertyValue : propertyValueList) {

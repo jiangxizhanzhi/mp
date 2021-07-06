@@ -17,5 +17,13 @@ public class AuthConstant {
 
     public static final String TENANT_COLUMN_ID = "tenant";
 
+    public static final String DEFAULT_TENANT = "default";
+
+    public static final String ROLE_ADMIN = "ADMIN";
+
+    public static final String ROLE_SUPERUSER = "SUPERUSER";
+
+    public static final String ORG_PATH_SEPARATOR = "/";
+
     private AuthConstant() {}
 }

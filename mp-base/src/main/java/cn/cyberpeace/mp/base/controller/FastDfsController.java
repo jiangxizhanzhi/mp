@@ -1,11 +1,13 @@
 package cn.cyberpeace.mp.base.controller;
 
-import cn.cyberpeace.mp.base.fdfsclient.FastDFSClient;
-import cn.cyberpeace.mp.base.fdfsclient.FastDFSException;
-import cn.cyberpeace.mp.base.fdfsclient.FileResponseData;
+import cn.cyberpeace.mp.base.config.FastDfsConfig;
+import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
+import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -14,9 +16,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 
 /**
  * @Description: FastDFS控制层
+ *               trackerServers每个接口初始化一次，便于不同业务对接不同集群的FastDFS
  * @Autho qiaokang
  * @Date：2021/6/21 15:01
  */
@@ -27,11 +31,8 @@ public class FastDfsController {
     @Autowired
     private FastDFSClient fastDFSClient;
 
-    /**
-     * 文件服务器地址
-     */
-    @Value("${file_server_addr}")
-    private String fileServerAddr;
+    @Autowired
+    private FastDfsConfig fastDfsConfig;
 
     /**
      * 上传文件通用，只上传文件到服务器
@@ -42,8 +43,9 @@ public class FastDfsController {
      */
     @PostMapping(value = "/file/upload")
     @ResponseBody
-    public FileResponseData uploadFile(MultipartFile file, HttpServletRequest request) {
-        return uploadSample(file, request);
+    public ServiceResult uploadFile(MultipartFile file, HttpServletRequest request) {
+        FileResponseData responseData = uploadSample(file, request);
+        return ServiceResult.success(responseData);
     }
 
     /**
@@ -53,14 +55,15 @@ public class FastDfsController {
      * @param response
      */
     @PostMapping("/file/download")
-    public void downloadFile(String filePath, HttpServletResponse response) throws FastDFSException {
+    public void downloadFile(String filePath, HttpServletResponse response) throws MpRuntimeException {
         try {
-            fastDFSClient.downloadFile(filePath, response);
-        } catch (FastDFSException e) {
+            fastDFSClient.downloadFile(filePath, response, FdfsGroupEnum.DEFAULT.toString());
+        } catch (MpRuntimeException e) {
             log.error("downloadFile error", e);
             throw e;
         }
     }
+
 
     /**
      * 根据指定的路径删除服务器文件
@@ -68,17 +71,14 @@ public class FastDfsController {
      * @param filePath
      */
     @DeleteMapping("/file/delete")
-    public FileResponseData deleteFile(String filePath) {
-        FileResponseData responseData = new FileResponseData();
+    public ServiceResult deleteFile(String filePath) {
         try {
-            fastDFSClient.deleteFile(filePath);
-        } catch (FastDFSException e) {
+            fastDFSClient.deleteFile(filePath, FdfsGroupEnum.DEFAULT.toString());
+        } catch (MpRuntimeException e) {
             log.error("deleteFile error", e);
-            responseData.setSuccess(false);
-            responseData.setCode(e.getCode());
-            responseData.setMessage(e.getMessage());
+            return ServiceResult.fail(e.getMessage());
         }
-        return responseData;
+        return ServiceResult.successful();
     }
 
     /**
@@ -92,15 +92,19 @@ public class FastDfsController {
         FileResponseData responseData = new FileResponseData();
         try {
             // 上传到服务器
-            String filepath = fastDFSClient.uploadFileWithMultipart(file);
+            String filepath = fastDFSClient.uploadFileWithMultipart(file, FdfsGroupEnum.DEFAULT.toString());
+
+            // 获取当前集群配置
+            FastDfsConfig.Group group = fastDfsConfig.getGroupByName(FdfsGroupEnum.DEFAULT);
 
             responseData.setFileName(file.getOriginalFilename());
             responseData.setFilePath(filepath);
             responseData.setFileType(FastDFSClient.getFilenameSuffix(file.getOriginalFilename()));
-            responseData.setHttpUrl(fileServerAddr + "/" + filepath);
-        } catch (FastDFSException e) {
+            responseData.setHttpUrl(group.getFileServerAddr() + File.separator + filepath);
+            responseData.setInnerHttpUrl(group.getInnerFileServerAddr() + File.separator + filepath);
+        } catch (MpRuntimeException e) {
             responseData.setSuccess(false);
-            responseData.setCode(e.getCode());
+            responseData.setCode(e.getErrorCode());
             responseData.setMessage(e.getMessage());
         }
 

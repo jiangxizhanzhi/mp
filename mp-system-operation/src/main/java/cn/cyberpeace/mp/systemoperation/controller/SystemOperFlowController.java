@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.systemoperation.controller;
 
 
-import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -16,7 +15,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -58,14 +56,8 @@ public class SystemOperFlowController {
      * @return ServiceResult<List < SessionResult>>
      */
     @PostMapping
-    public ServiceResult<List<SessionResult>> querySessionListWithGroup(
-            @RequestBody @Valid SessionRequest sessionRequest, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            return ServiceResult.<List<SessionResult>>builder()
-                    .code(BaseErrorCode.PARAMS_INVALID.getCode()).message(bindingResult.getAllErrors().get(0).getDefaultMessage()).build();
-        }
-
-        return ServiceResult.<List<SessionResult>>builder().data(sessionService.querySessionListWithGroup(sessionRequest)).build();
+    public ServiceResult<List<SessionResult>> querySessionListWithGroup(@RequestBody @Valid SessionRequest sessionRequest) {
+        return ServiceResult.success(sessionService.querySessionListWithGroup(sessionRequest));
     }
 
     /**
@@ -75,13 +67,8 @@ public class SystemOperFlowController {
      * @return ServiceResult<ListObjResult < SessionResult>>
      */
     @PostMapping("pageable")
-    public ServiceResult<ListObjResult<SessionResult>> querySessionListWithGroupWithPage(
-            @RequestBody @Valid SessionRequest sessionRequest, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            return ServiceResult.<ListObjResult<SessionResult>>builder()
-                    .code(BaseErrorCode.PARAMS_INVALID.getCode()).message(bindingResult.getAllErrors().get(0).getDefaultMessage()).build();
-        }
-        return ServiceResult.<ListObjResult<SessionResult>>builder().data(sessionService.querySessionWithPage(sessionRequest)).build();
+    public ServiceResult<ListObjResult<SessionResult>> querySessionListWithGroupWithPage(@RequestBody @Valid SessionRequest sessionRequest) {
+        return ServiceResult.success(sessionService.querySessionWithPage(sessionRequest));
     }
 
 

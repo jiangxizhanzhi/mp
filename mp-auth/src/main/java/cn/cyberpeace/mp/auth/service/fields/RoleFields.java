@@ -11,7 +11,7 @@ public class RoleFields extends BaseModelFields {
     public static final DynamicFields allFields = new DynamicFields(ClassUtils.getBeanClassFields(RoleModel.class));
 
     public static final DynamicFields availableFields = new DynamicFields(RoleModel::getTenant, RoleModel::getOrg,
-            RoleModel::getParent, RoleModel::getIdentifier, RoleModel::getName
+           RoleModel::getIdentifier, RoleModel::getName
     ).merge(BaseModelFields.availableFields);
 
     public static final DynamicFields hiddenFields = allFields.subtract(availableFields);

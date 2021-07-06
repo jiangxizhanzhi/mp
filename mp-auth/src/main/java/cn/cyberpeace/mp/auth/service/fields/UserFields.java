@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.service.fields;
 
+import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.base.repository.fields.DynamicFields;
 import cn.cyberpeace.mp.base.service.fields.BaseModelFields;
@@ -13,7 +14,7 @@ public class UserFields extends BaseModelFields {
     public static final DynamicFields availableFields = new DynamicFields(UserModel::getTenant,
             UserModel::getIdentifier, UserModel::getUsername, UserModel::getName, UserModel::getNickname,
             UserModel::getAvatar, UserModel::getBirthday, UserModel::getEmail, UserModel::getMobile,
-            UserModel::getIdCard, UserModel::getAddress, UserModel::getStatus, UserModel::getInitCheck, UserModel::getDescription, UserModel::getDateJoined,
+            UserModel::getIdCard, UserModel::getAddress, UserModel::getIsEnabled, UserModel::getIsAudited, UserModel::getInitCheck, UserModel::getDescription, UserModel::getDateJoined,
             UserModel::getExpiredTime, UserModel::getLastLogin
     ).merge(BaseModelFields.availableFields);
 

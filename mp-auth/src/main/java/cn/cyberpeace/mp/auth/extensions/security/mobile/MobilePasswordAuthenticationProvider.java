@@ -61,7 +61,6 @@ public class MobilePasswordAuthenticationProvider implements AuthenticationProvi
         Assert.isTrue(Validator.isMobile(mobile), AuthConstant.ERROR_CODE_PREFIX + "mobile_invalid");
 
         UserDetails userDetails = retrieveUser(mobile, null);
-        // todo userDetails状态检查
         preAuthenticationChecks.check(userDetails);
         additionalAuthenticationChecks(userDetails, (MobilePasswordAuthenticationToken) authentication);
 

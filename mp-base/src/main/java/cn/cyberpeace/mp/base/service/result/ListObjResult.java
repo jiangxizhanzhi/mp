@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.base.service.result;
 
 import cn.cyberpeace.mp.base.repository.fields.DynamicFields;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,17 +10,19 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ListObjResult<T> extends BaseObjResult {
+public class ListObjResult<T> extends BaseObjResult<T, ListObjResult<T>> {
 
     @Builder.Default
-    private List<Object> data = new ArrayList<>();
+    private List<T> list = new ArrayList<>();
 
     @Builder.Default
+    @ApiModelProperty(value = "总数")
     private Integer total = 0;
 
     @JsonIgnore
@@ -32,17 +35,17 @@ public class ListObjResult<T> extends BaseObjResult {
         setTotal(total);
     }
 
-    public ListObjResult(List<T> objs, int total, DynamicFields fields) {
+    public ListObjResult(List<T> objs, Integer total, DynamicFields fields) {
         this();
         setObjs(objs);
-        setTotal(total);
+        setTotal(Objects.nonNull(total) ? total : 0);
         setFields(fields);
     }
 
     @Override
     public ListObjResult<T> asResult() {
-        data.clear();
-        objs.forEach(obj -> data.add(objToResult(obj, getFields())));
+        list.clear();
+        objs.forEach(obj -> list.add(objToResultWithNull(obj, getFields())));
         return this;
     }
 }

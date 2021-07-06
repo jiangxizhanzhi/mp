@@ -23,7 +23,10 @@ public class CustomServletModelAttributeMethodProcessor extends ServletModelAttr
         Assert.state(servletRequest != null,"No servletRequest");
         ServletRequestDataBinder servletRequestDataBinder = (ServletRequestDataBinder) binder;
         //更换请求参数绑定器
-        new CustomServletRequestDataBinder(servletRequestDataBinder.getTarget()).bind(servletRequest);
+        CustomServletRequestDataBinder customServletRequestDataBinder = new CustomServletRequestDataBinder(servletRequestDataBinder.getTarget());
+        customServletRequestDataBinder.setConversionService(servletRequestDataBinder.getConversionService());
+        customServletRequestDataBinder.bind(servletRequest);
+
 
     }
 }

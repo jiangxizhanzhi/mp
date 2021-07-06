@@ -1,6 +1,6 @@
 server:
   servlet:
-    context-path: /api
+    context-path: /api/mp
   port: 8080
 
 spring:
@@ -32,6 +32,9 @@ mybatis:
 
 # 请求云平台组信息的url配置，必需填写
 mp:
+  devops:
+    cp-url: http://10.100.7.5:11111
+    mg-url: http://10.100.2.21
   datasandtable:
     group-url: http://10.100.7.50:5079/v1/scenes
     moloch:
@@ -76,7 +79,22 @@ logging:
     path: /home/mp/logs
 
 ---
-# 文件服务器地址
-file_server_addr: http://192.168.5.68:80
-# 最大连接数 并发量较大的话可加大该连接数
-max_storage_connection: 8
+mp:
+  auth:
+    needRegistrationAudit: true
+    excel-template-name: 用户列表.xls
+    excel-template-path: group1/M00/00/00/wKgFRGDRsliAWdiuAAAmALa0U-o081.xls
+  base:
+    # fastdfs配置
+    fastdfs:
+      max-storage-connection: 8   # 最大连接数
+      connect-timeout-in-seconds: 10
+      network-timeout-in-seconds: 30
+      charset: UTF-8
+      http-tracker-http-port: 80
+      groups:
+        # 集群配置：每增加一个集群，参考下例添加相应配置即可，同时在FdfsGroupEnum.java枚举类中添加该集群名称
+        - group-name: DEFAULT    # 集群名称
+          tracker-servers: 192.168.5.68:22122
+          file-server-addr: http://192.168.5.68:80    # 外部文件服务器地址
+          inner-file-server-addr: http://192.168.5.68:80    # 内部文件服务器地址

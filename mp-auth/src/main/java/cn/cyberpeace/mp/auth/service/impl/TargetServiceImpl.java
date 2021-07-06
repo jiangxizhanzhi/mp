@@ -9,19 +9,18 @@ import cn.cyberpeace.mp.auth.service.fields.TargetFields;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
-import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.hutool.core.lang.Assert;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 @Service
 @Slf4j
-public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetMapper, TargetFields>
+public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetMapper, TargetFields, QueryParams>
         implements TargetService {
 
     @Autowired
@@ -37,12 +36,19 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
     }
 
     @Override
+    public List<TargetModel> listByTenantId(String tenantId) {
+        List<TargetModel> targets = getModelMapper().listByTenantId(tenantId);
+        return targets;
+    }
+
+    @Override
     public ObjServiceResult<TargetModel> create(TargetModel obj, String[] fields) {
 
         check(obj);
 
         return super.create(obj, fields);
     }
+
 
 
     private void check(TargetModel target) {
@@ -58,9 +64,9 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
 
         Assert.isTrue(supportedType, AuthConstant.ERROR_CODE_PREFIX + "target_type_not_support");
 
-        TargetModel targetModel = getByIdentifier(target.getIdentifier());
-        if (targetModel != null) {
-            throw new MpRuntimeException("Identifier为" + target.getIdentifier() + "的记录已经存在!");
-        }
+//        TargetModel targetModel = getByIdentifier(target.getIdentifier());
+//        if (targetModel != null) {
+//            throw new MpRuntimeException("Identifier为" + target.getIdentifier() + "的记录已经存在!");
+//        }
     }
 }

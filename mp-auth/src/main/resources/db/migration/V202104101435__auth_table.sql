@@ -19,11 +19,14 @@ CREATE TABLE mp_auth_org (
     `parent` varchar(64)  NOT NULL COMMENT '父组织' default '',
     `identifier` varchar(64)  NOT NULL COMMENT '编号',
     `name` varchar(64) NOT NULL COMMENT '名称',
+    `path` varchar(512) NOT NULL COMMENT '组织结构路径',
+    `description` varchar(1024) NOT NULL COMMENT '描述',
     `create_time` datetime(6) NOT NULL COMMENT '创建时间',
     `update_time` datetime(6) NOT NULL COMMENT '更新时间',
     PRIMARY KEY (`pk`),
     UNIQUE (`id`),
-    UNIQUE (`tenant`, `identifier`)
+    UNIQUE (`tenant`, `identifier`),
+    UNIQUE (`path`)
 );
 
 # 角色表
@@ -32,9 +35,9 @@ CREATE TABLE mp_auth_role (
     `id` varchar(64)  NOT NULL COMMENT 'id',
     `tenant` varchar(64)  NOT NULL COMMENT '所属租户' default '',
     `org` varchar(64)  NOT NULL COMMENT '所属组织' default '',
-    `parent` varchar(64)  NOT NULL COMMENT '父角色' default '',
     `identifier` varchar(64)  NOT NULL COMMENT '编号',
     `name` varchar(64) NOT NULL COMMENT '名称',
+    `description` varchar(1024) NOT NULL COMMENT '描述',
     `create_time` datetime(6) NOT NULL COMMENT '创建时间',
     `update_time` datetime(6) NOT NULL COMMENT '更新时间',
     PRIMARY KEY (`pk`),
@@ -59,7 +62,8 @@ CREATE TABLE mp_auth_user (
     `mobile` varchar(64) NOT NULL COMMENT '手机号',
     `id_card` varchar(64) NOT NULL COMMENT '身份证号',
     `address` varchar(255) NOT NULL COMMENT '地址',
-    `status` int(10) NOT NULL COMMENT '账号状态',
+    `is_enabled` int NOT NULL COMMENT '1:启用 0：禁用',
+    `is_audited` int NOT NULL COMMENT '1:已审批 0：未审批',
     `init_check` int NOT NULL DEFAULT 0 COMMENT '是否首次登陆需要强制修改密码 0:否，1:是',
     `description` varchar(1024) NULL COMMENT '描述',
     `date_joined` datetime(6) NOT NULL COMMENT '加入时间',
@@ -105,9 +109,11 @@ CREATE TABLE mp_auth_user_role (
 CREATE TABLE mp_auth_target (
    `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
    `id` varchar(64)  NOT NULL COMMENT 'id',
+   `parent` varchar(64) NULL COMMENT '父权限ID',
    `identifier` varchar(64)  NOT NULL COMMENT '编号',
    `tenant` varchar(64)  NOT NULL COMMENT '所属租户',
    `name` varchar(64) NOT NULL COMMENT '名称',
+   `path` varchar(255) NULL COMMENT '路径',
    `type` int NOT NULL COMMENT '资源类型 1:菜单, 2:API, 3:数据',
    `create_time` datetime(6) NOT NULL COMMENT '创建时间',
    `update_time` datetime(6) NOT NULL COMMENT '更新时间',
@@ -188,7 +194,7 @@ CREATE TABLE mp_auth_org_user (
 
 create table mp_auth_client_details (
     `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
-    client_id VARCHAR(256),
+    client_id VARCHAR(128),
     resource_ids VARCHAR(256),
     client_secret VARCHAR(256),
     type int not null default 1 comment '类型 1:Oauth2渠道 2:免认证渠道',
@@ -205,17 +211,29 @@ create table mp_auth_client_details (
 ) COMMENT '渠道认证配置表';
 
 
+# 用户默认头像
+CREATE TABLE mp_auth_avatar (
+       `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
+       `id` varchar(64)  NOT NULL COMMENT 'id',
+       `url` varchar(1024)  NULL COMMENT '头像url',
+       `create_time` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+       `update_time` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+       PRIMARY KEY (`pk`),
+       UNIQUE (`id`)
+) COMMENT '默认头像';
+
+
 # 系统配置信息表
 CREATE TABLE mp_sys_config (
-         `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
-         `id` varchar(64)  NOT NULL COMMENT 'id',
-         `tenant` varchar(64) NOT NULL COMMENT '租户',
-         `key_name` varchar(256)  NULL COMMENT '键',
-         `value` varchar(1024)  NULL COMMENT '值',
-         `create_time` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-         `update_time` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-         PRIMARY KEY (`pk`),
-         UNIQUE (`id`)
+     `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
+     `id` varchar(64)  NOT NULL COMMENT 'id',
+     `tenant` varchar(64) NOT NULL COMMENT '租户',
+     `key_name` varchar(256)  NULL COMMENT '键',
+     `value` varchar(1024)  NULL COMMENT '值',
+     `create_time` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+     `update_time` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+     PRIMARY KEY (`pk`),
+     UNIQUE (`id`)
 ) COMMENT '其他配置信息表';
 
 

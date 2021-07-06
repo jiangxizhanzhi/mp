@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.service.impl;
 
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
+import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceModel;
 import cn.cyberpeace.mp.devops.cluster.repository.DeviceMapper;
 import cn.cyberpeace.mp.devops.cluster.service.DeviceService;
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Service;
  * @author wanggang
  */
 @Service
-public class DeviceServiceImpl extends BaseModelServiceImpl<DeviceModel, DeviceMapper, DeviceFields>
+public class DeviceServiceImpl extends BaseModelServiceImpl<DeviceModel, DeviceMapper, DeviceFields, QueryParams>
         implements DeviceService {
 
     @Autowired
