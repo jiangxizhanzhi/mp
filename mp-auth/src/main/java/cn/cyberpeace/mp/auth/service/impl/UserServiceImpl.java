@@ -421,7 +421,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
 
-
     @Override
     public boolean approve(String userId) {
         Assert.notBlank(userId, "userId不能为空！");
@@ -494,22 +493,14 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void importExcel(List<ImportUser> list) {
-        for (int i = 0; i < list.size(); i++) {
-            ImportUser importUser = list.get(i);
-
+        for (ImportUser importUser : list) {
             // 1.保存用户信息
             UserModel userModel = importUser2UserModel(importUser);
-            try {
-                String userId = cn.cyberpeace.mp.base.util.IdGenerator.generateUUID();
-                log.warn("userId:{}", userId);
-                userModel.setId(userId);
-                create(userModel);
-
-            } catch (Exception e) {
-                // todo 考虑将错误信息包装返回到页面
-                log.error(ExceptionUtil.stacktraceToString(e));
-                throw new MpRuntimeException(e.getMessage());
-            }
+            String userId = IdGenerator.generateUUID();
+            log.warn("userId:{}", userId);
+            userModel.setId(userId);
+            var result = create(userModel);
+            ResultUtils.throwExceptionIfError(result, "创建用户失败！");
 
             // 2. 保存用户-角色关系
             String roles = importUser.getRoles().trim();
@@ -580,6 +571,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     /**
      * 处理用户过期状态，只有当用户状态为正常状态，且过期时间已到的时候，才会更改为过期状态
+     *
      * @param user
      */
     public void processExpiredStatus(UserDto user) {
@@ -595,7 +587,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             user.setIsExpired(UserModel.Status.EXPIRED);
         }
     }
-
 
 
     public UserDto userModel2UserDto(UserModel userModel) {
@@ -621,13 +612,13 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         boolean isAdmin = roles.stream().anyMatch(r -> r.getIdentifier().equals(AuthConstant.ROLE_ADMIN));
         boolean isSuperUser = roles.stream().anyMatch(r -> r.getIdentifier().equals(AuthConstant.ROLE_SUPERUSER));
 
-        if(isAdmin) {
+        if (isAdmin) {
             userDto.setIsAdmin(1);
         } else {
             userDto.setIsAdmin(0);
         }
 
-        if(isSuperUser) {
+        if (isSuperUser) {
             userDto.setIsSuperUser(1);
         } else {
             userDto.setIsSuperUser(0);

@@ -33,6 +33,9 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     private QueryParentOrgOperation queryParentOrgOperation;
 
     @Autowired
+    private QueryChildOrgOperation queryChildOrgOperation;
+
+    @Autowired
     public OrgServiceImpl(OrgMapper modelMapper, OrgFields modelFields) {
         setModelMapper(modelMapper);
         setModelFields(modelFields);
@@ -94,13 +97,30 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     }
 
     @Override
-    public List<OrgDto> getTree(String orgId) {
-        List<OrgModel> orgs = listAll(AuthConstant.DEFAULT_TENANT);
-        if (CollectionUtil.isEmpty(orgs)) {
-            return new ArrayList<>();
+    public List<OrgDto> getTree(String parentOrgId) {
+        if (StringUtils.isBlank(parentOrgId)) {
+            // 查询所有组织树
+            List<OrgModel> orgs = listAll(AuthConstant.DEFAULT_TENANT);
+            if (CollectionUtil.isEmpty(orgs)) {
+                return new ArrayList<>();
+            }
+            List<OrgDto> tree = toTree(orgs);
+            return tree;
         }
-        List<OrgDto> tree = toTree(orgs);
-        return tree;
+
+        // 根据parentId查询单个组织树
+        OrgModel parentOrg = getModelMapper().get(parentOrgId);
+        if (parentOrg == null) {
+            log.info("org:{}不存在!", parentOrgId);
+            throw new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "org_not_existed");
+        }
+
+        OrgDto orgDto = new OrgDto();
+        BeanUtils.copyProperties(parentOrg, orgDto);
+        log.warn("queryChildOrgOperation:{}", queryChildOrgOperation);
+        orgDto.execute(queryChildOrgOperation);
+
+        return CollectionUtil.toList(orgDto);
     }
 
 

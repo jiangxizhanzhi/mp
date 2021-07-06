@@ -31,7 +31,7 @@ public interface OrgUserMapper extends BaseModelMapper<OrgUserModel> {
     @Select("<script>" +
             "select * from mp_auth_user " +
             "<where>" +
-            "  <if test=\"orgId != null\">" +
+            "  <if test=\"orgId != null and orgId != ''\">" +
             "    AND id in (select user from mp_auth_org_user where org = #{orgId})" +
             "  </if>" +
             "  <if test=\"username != null and username != ''\">" +
