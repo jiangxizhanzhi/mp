@@ -9,6 +9,7 @@ public class LocalDateTimeUtils {
 
     //yyyy-MM-dd HH:mm:ss
     public static DateTimeFormatter dateTimeFormatter1 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    public static DateTimeFormatter esdateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS+0800");
 
     /**
      * localDateTimeToString

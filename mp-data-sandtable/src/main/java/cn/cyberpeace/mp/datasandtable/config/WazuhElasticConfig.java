@@ -10,12 +10,29 @@ import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @Slf4j
 public class WazuhElasticConfig {
+
+    @Value("${mp.datasandtable.wazuh.es-url}")
+    private String esUrl;
+
+
+    @Value("${mp.datasandtable.wazuh.es-port}")
+    private Integer port;
+
+
+    @Value("${mp.datasandtable.wazuh.es-username}")
+    private String userName;
+
+    @Value("${mp.datasandtable.wazuh.es-password}")
+    private String passWord;
+
+
 
     /**
      * es disable https client
@@ -25,14 +42,14 @@ public class WazuhElasticConfig {
     public RestHighLevelClient restHighLevelClient() {
         final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
         credentialsProvider.setCredentials(AuthScope.ANY,
-            new UsernamePasswordCredentials("admin", "admin"));
+            new UsernamePasswordCredentials(userName, passWord));
 
         var sslFactory = SSLFactory.builder()
             .withTrustingAllCertificatesWithoutValidation()
             .withHostnameVerifier((host, session) -> true).build();
 
         var restClientBuilder = RestClient
-            .builder(new HttpHost("192.168.5.125", 9200, "https"))
+            .builder(new HttpHost(esUrl, port, "https"))
             .setHttpClientConfigCallback(httpClientBuilder ->
                 httpClientBuilder.setSSLContext(sslFactory.getSslContext())
                     .setDefaultCredentialsProvider(credentialsProvider)

@@ -14,16 +14,22 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.text.Text;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermQueryBuilder;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Objects;
 
 @Service
@@ -59,7 +65,8 @@ public class LogService {
         HttpServletRequest request = ServletUtils.getRequest();
 
         //请求IP
-        operationLogModel.setOpIp(SnUtils.getRealRemoteIp(request));
+        // 登录接口获取不到request
+        operationLogModel.setOpIp(request == null ? "" : SnUtils.getRealRemoteIp(request));
 
         //操作用
         operationLogModel.setUserId(user.getId());
@@ -77,23 +84,29 @@ public class LogService {
 
         BoolQueryBuilder boolBuilder = QueryBuilders.boolQuery();
 
-        boolBuilder.must(QueryBuilders.termQuery("opModule", AuthLogConstant.MODULE));
+        boolBuilder.must(QueryBuilders.termQuery("opModule.keyword", AuthLogConstant.MODULE));
 
         if (StringUtils.isNotBlank(username)) {
-            boolBuilder.must(QueryBuilders.termQuery("userName", username));
+            boolBuilder.must(QueryBuilders.termQuery("userName.keyword", username));
         }
         if (StringUtils.isNotBlank(type)) {
-            boolBuilder.must(QueryBuilders.termQuery("opType", type));
+            boolBuilder.must(QueryBuilders.termQuery("opType.keyword", type));
         }
 
         sourceBuilder.query(boolBuilder);
+        sourceBuilder.sort("opTime", SortOrder.DESC);
         SearchRequest searchRequest = new SearchRequest("mp_operate_log");
-//        searchRequest.types(type);
         searchRequest.source(sourceBuilder);
 
         try {
-            SearchResponse search = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
-            log.info("{}", search);
+            SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            SearchHits hits = searchResponse.getHits();
+            for (SearchHit hit : hits.getHits()) {
+                Map<String, HighlightField> highlightFields = hit.getHighlightFields();
+                HighlightField highlight = highlightFields.get("title");
+                Text[] fragments = highlight.fragments();
+                String fragmentString = fragments[0].string();
+            }
         } catch (Exception e) {
 
         }

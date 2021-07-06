@@ -4,7 +4,7 @@ package cn.cyberpeace.mp.systemoperation.controller;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.datasandtable.model.FileEventModel;
-import cn.cyberpeace.mp.datasandtable.model.WazuhFileEventRequest;
+import cn.cyberpeace.mp.datasandtable.model.WazuhEventRequest;
 import cn.cyberpeace.mp.datasandtable.model.WazuhFileEventResponse;
 import cn.cyberpeace.mp.datasandtable.service.WazuhService;
 import cn.cyberpeace.mp.systemoperation.constant.ControllerConstant;
@@ -31,7 +31,7 @@ public class SystemOperEventController {
      * @return
      */
     @PostMapping("pageable")
-    public ServiceResult<WazuhFileEventResponse> queryFileEvents(@RequestBody @Valid WazuhFileEventRequest wazuhFileEventRequest) {
+    public ServiceResult<WazuhFileEventResponse> queryFileEvents(@RequestBody @Valid WazuhEventRequest wazuhFileEventRequest) {
         ListObjResult<FileEventModel> listObjResult = wazuhService.queryFileEvents(wazuhFileEventRequest);
         WazuhFileEventResponse response = WazuhFileEventResponse.builder()
                 .fileEventModelList(listObjResult.getObjs())
