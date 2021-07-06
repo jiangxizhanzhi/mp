@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.devops.cluster.controller;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
+import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
 import cn.cyberpeace.mp.devops.cluster.model.NetworkCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.request.NetworkPageRequest;
 import cn.cyberpeace.mp.devops.cluster.response.NetworkPageResponse;
@@ -51,7 +52,7 @@ public class NetworkController {
             NetworkCloudPlatformModel.NetworkModel.Subnet subnet = networkModel.getSubnet();
             List<NetworkPageResponse.Subnet> subnets = List.of(new NetworkPageResponse.Subnet(subnet.getId(), subnet.getCidr(), subnet.getGateway_ip()));
             return  NetworkPageResponse.builder().name(networkModel.getName()).networkType(networkModel.getNetwork_type())
-                .status(networkModel.getStatus())
+                .status(CloudPlatformEnum.fromValue(networkModel.getStatus()))
                         .subnets(subnets).createdAt(networkModel.getCreated_at()).build();
                 }
         ).collect(Collectors.toList());
