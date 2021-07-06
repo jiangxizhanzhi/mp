@@ -98,3 +98,36 @@ windows agent测跟linux一样，只是windows可执行命令是 monitor.exe,配
 1. C:\Program Files (x86)\ossec-agent\shared\agent.conf
 2. C:\Program Files (x86)\ossec-agent\local_internal_options.conf
 
+# Wazuh server端的配置
+
+1. 中心化配置文件需要配置，路径 /var/ossec/etc/shared/default/agent.conf
+
+   ```xml
+   <agent_config os="Linux">
+   
+       <wodle name="command">
+           <disabled>no</disabled>
+           <tag>system-monitor</tag>
+           <command>/home/wazuh/monitor</command>
+           <interval>1m</interval>
+           <run_on_start>yes</run_on_start>
+           <timeout>10</timeout>
+           <skip_verification>yes</skip_verification>
+       </wodle>
+   </agent_config>
+   
+   
+   <agent_config os="Windows">
+       <wodle name="command">
+           <disabled>no</disabled>
+           <tag>system-monitor</tag>
+           <command>C:\Program Files (x86)\ossec-agent\monitor.exe</command>
+           <interval>1m</interval>
+           <run_on_start>yes</run_on_start>
+           <timeout>10</timeout>
+           <skip_verification>yes</skip_verification>
+       </wodle>
+   </agent_config>
+   ```
+
+   

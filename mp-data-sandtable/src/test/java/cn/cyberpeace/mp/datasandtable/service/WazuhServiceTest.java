@@ -7,6 +7,8 @@ import cn.cyberpeace.mp.datasandtable.model.FileEventModel;
 import cn.cyberpeace.mp.datasandtable.model.WazuhEventRequest;
 import cn.cyberpeace.mp.datasandtable.model.WazuhModel;
 import cn.cyberpeace.mp.datasandtable.model.emum.FileEventType;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -105,5 +107,26 @@ public class WazuhServiceTest {
     public void testDateFormate() {
         String date = LocalDateTimeUtils.localDateTimeToString(LocalDateTime.now(), LocalDateTimeUtils.esdateTimeFormatter);
         System.out.println(date);
+    }
+
+    @Test
+    public void testGetJSon() {
+        String address = "{\"addresses\":{\n" +
+            "                \"1f01c2bd-042b-472e-a2de-d8af55374f9e\":[\n" +
+            "                    {\n" +
+            "                        \"addr\":\"192.168.1.78\",\n" +
+            "                        \"version\":4,\n" +
+            "                        \"port\":\"462abcff-9a26-46bb-8d13-49f22e6b2d9c\",\n" +
+            "                        \"subnet_id\":\"40fbb744-05f2-4206-bbee-d8d64cf18f64\",\n" +
+            "                        \"preserve_on_delete\":false\n" +
+            "                    }\n" +
+            "                ]\n" +
+            "            }}";
+        JSONObject jsonObject = JSONObject.parseObject(address);
+        JSONObject addresses = (JSONObject) jsonObject.get("addresses");
+        addresses.values().forEach((val)->{
+            System.out.println(val);
+        });
+
     }
 }
