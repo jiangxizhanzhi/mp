@@ -1,11 +1,9 @@
 package cn.cyberpeace.mp.datasandtable.model;
 
-import cn.cyberpeace.mp.base.serializer.CustomLocalDateTimeDeserializer;
-import cn.cyberpeace.mp.base.serializer.CustomLocalDateTimeSerializer;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import java.time.LocalDateTime;
-import lombok.*;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
 
 @Data
 @AllArgsConstructor
@@ -15,25 +13,33 @@ public class SessionResult {
     /**
      * 分组id
      */
+    @ApiModelProperty("分组id")
     private String groupId;
 
-
+    @ApiModelProperty("源IP")
     private String sourceIp;
 
+    @ApiModelProperty("目的IP")
     private String targetIp;
 
+    @ApiModelProperty("源Mac")
     private String sourceMac;
 
+    @ApiModelProperty("目的Mac")
     private String targetMac;
 
+    @ApiModelProperty("源端口")
     private String srcPort;
 
+    @ApiModelProperty("目的端口")
     private String dstPort;
 
     /**
      * 协议类型
      */
+    @ApiModelProperty("协议类型")
     private String protocalType;
 
+    @ApiModelProperty("时间")
     private String timestamp;
 }
