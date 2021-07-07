@@ -21,8 +21,14 @@ public class TenantUserServiceImpl
     }
 
     @Override
-    public boolean cleanUserTenants(String userId) {
+    public boolean deleteByUserId(String userId) {
         // todo 
+        return true;
+    }
+
+    @Override
+    public boolean deleteByTenantId(String tenantId) {
+        // todo
         return true;
     }
 }

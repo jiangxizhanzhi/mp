@@ -29,7 +29,10 @@ public interface UserRoleMapper extends BaseModelMapper<UserRoleModel> {
 
 
     @Delete("delete from mp_auth_user_role where user = #{userId}")
-    int deleteAllByUser(@Param("userId") String userId);
+    int deleteByUserId(@Param("userId") String userId);
+
+    @Delete("delete from mp_auth_user_role where role = #{roleId}")
+    int deleteByRoleId(@Param("roleId") String roleId);
 
     @Delete("<script>" +
             "delete from mp_auth_user_role where role = #{roleId} " +
@@ -40,6 +43,6 @@ public interface UserRoleMapper extends BaseModelMapper<UserRoleModel> {
             "    </foreach>" +
             "  </if>" +
             "</script>")
-    int deleteByRoleUsers(@Param("roleId") String roleId, @Param("userIds") List<String> userIds);
+    int deleteByRoleIdAndUserIds(@Param("roleId") String roleId, @Param("userIds") List<String> userIds);
 
 }

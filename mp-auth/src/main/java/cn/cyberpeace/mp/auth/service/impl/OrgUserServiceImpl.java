@@ -146,15 +146,29 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
     }
 
     @Override
-    public boolean cleanUserOrgs(String userId) {
-        Assert.notNull(userId, "userid不能为空");
+    public boolean deleteByUserId(String userId) {
+        Assert.notNull(userId, "userId不能为空");
 
         var objResult = userService.get(userId).getSource();
         if (objResult == null || objResult.getObj() == null) {
             new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "account_not_existed");
         }
 
-        getModelMapper().deleteByUser(userId);
+        getModelMapper().deleteByUserId(userId);
+
+        return true;
+    }
+
+    @Override
+    public boolean deleteByOrgId(String orgId) {
+        Assert.notNull(orgId, "orgId不能为空");
+
+        var objResult = orgService.get(orgId).getSource();
+        if (objResult == null || objResult.getObj() == null) {
+            new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "org_not_existed");
+        }
+
+        getModelMapper().deleteByOrgId(orgId);
 
         return true;
     }

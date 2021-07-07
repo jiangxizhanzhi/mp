@@ -186,10 +186,10 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Transactional(rollbackFor = Exception.class)
     public ServiceResult<Boolean> delete(String userId) {
         // todo 删除用户-组织，用户-角色关联关系 用户-权限关系 租户-用户关系
-        boolean cleanUserRolesSuccess = userRoleService.cleanUserRoles(userId);
-        boolean cleanUserOrgsSuccess = orgUserService.cleanUserOrgs(userId);
-        boolean cleanUserTargetsSuccess = userPermissionService.cleanUserTargets(userId);
-        boolean cleanUserTenantsSuccess = tenantUserService.cleanUserTenants(userId);
+        boolean cleanUserRolesSuccess = userRoleService.deleteByUserId(userId);
+        boolean cleanUserOrgsSuccess = orgUserService.deleteByUserId(userId);
+        boolean cleanUserTargetsSuccess = userPermissionService.deleteByUserId(userId);
+        boolean cleanUserTenantsSuccess = tenantUserService.deleteByUserId(userId);
         
         if(!cleanUserRolesSuccess || !cleanUserOrgsSuccess || !cleanUserTargetsSuccess || !cleanUserTenantsSuccess) {
             log.info("cleanUserRolesSuccess:{}, cleanUserOrgsSuccess:{}, cleanUserTargetsSuccess:{}, cleanUserTenantsSuccess:{}", cleanUserRolesSuccess, cleanUserOrgsSuccess, cleanUserTargetsSuccess, cleanUserTenantsSuccess);
@@ -206,10 +206,10 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public ServiceResult<Integer> bulkDelete(String[] userIds) {
 
         for (String userId : userIds) {
-            boolean cleanUserRolesSuccess = userRoleService.cleanUserRoles(userId);
-            boolean cleanUserOrgsSuccess = orgUserService.cleanUserOrgs(userId);
-            boolean cleanUserTargetsSuccess = userPermissionService.cleanUserTargets(userId);
-            boolean cleanUserTenantsSuccess = tenantUserService.cleanUserTenants(userId);
+            boolean cleanUserRolesSuccess = userRoleService.deleteByUserId(userId);
+            boolean cleanUserOrgsSuccess = orgUserService.deleteByUserId(userId);
+            boolean cleanUserTargetsSuccess = userPermissionService.deleteByUserId(userId);
+            boolean cleanUserTenantsSuccess = tenantUserService.deleteByUserId(userId);
 
             if(!cleanUserRolesSuccess || !cleanUserOrgsSuccess || !cleanUserTargetsSuccess || !cleanUserTenantsSuccess) {
                 log.info("cleanUserRolesSuccess:{}, cleanUserOrgsSuccess:{}, cleanUserTargetsSuccess:{}, cleanUserTenantsSuccess:{}", cleanUserRolesSuccess, cleanUserOrgsSuccess, cleanUserTargetsSuccess, cleanUserTenantsSuccess);
@@ -302,7 +302,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         // 保存组织-用户关系
         if (CollectionUtil.isNotEmpty(modifyRequest.getOrgIds())) {
             // 清除原来所有用户关联的组织
-            orgUserService.cleanUserOrgs(userId);
+            orgUserService.deleteByUserId(userId);
 
             modifyRequest.getOrgIds().forEach(id -> {
                 boolean isOrgExist = orgService.exists(id);
@@ -320,7 +320,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         // 保存角色-用户关系
         if (CollectionUtil.isNotEmpty(modifyRequest.getRoleIds())) {
             // 清除原来所有用户关联的角色
-            userRoleService.cleanUserRoles(userId);
+            userRoleService.deleteByUserId(userId);
 
             modifyRequest.getRoleIds().forEach(id -> {
                 boolean isRoleExist = roleService.exists(id);

@@ -56,15 +56,15 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public ServiceResult<Boolean> delete(String id) {
-        Assert.notBlank(id, "id不能为空！");
+    public ServiceResult<Boolean> delete(String roleId) {
+        Assert.notBlank(roleId, "id不能为空！");
         // todo 删除关联用户关系，权限关系
-        boolean cleanSuccess = rolePermissionService.cleanRoleTargets(id);
+        boolean cleanSuccess = rolePermissionService.cleanRoleTargets(roleId);
         if (!cleanSuccess) {
             throw new MpRuntimeException("清除原来角色绑定的权限关系失败！");
         }
 
-        return super.delete(id);
+        return super.delete(roleId);
     }
 
     @Override

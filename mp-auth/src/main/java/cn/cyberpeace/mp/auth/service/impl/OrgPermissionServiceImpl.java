@@ -18,11 +18,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class OrgPermissionServiceImpl
@@ -77,7 +75,7 @@ public class OrgPermissionServiceImpl
 
         if (cleanOldTargets) {
             // 清除组织权限
-            boolean success = cleanOrgTargets(orgId);
+            boolean success = deleteByOrgId(orgId);
             if (!success) {
                 throw new MpRuntimeException("清除组织权限失败！");
             }
@@ -106,7 +104,7 @@ public class OrgPermissionServiceImpl
 
 
     @Override
-    public boolean cleanOrgTargets(String orgId) {
+    public boolean deleteByOrgId(String orgId) {
         Assert.notBlank(orgId, "orgId不能为空！");
         getModelMapper().deleteByOrg(orgId);
         return true;

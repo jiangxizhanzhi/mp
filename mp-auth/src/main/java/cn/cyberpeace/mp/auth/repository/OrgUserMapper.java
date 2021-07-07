@@ -48,5 +48,8 @@ public interface OrgUserMapper extends BaseModelMapper<OrgUserModel> {
 
 
     @Delete("delete from mp_auth_org_user where user = #{userId}")
-    void deleteByUser(@Param("userId") String userId);
+    void deleteByUserId(@Param("userId") String userId);
+
+    @Delete("delete from mp_auth_org_user where org = #{orgId}")
+    void deleteByOrgId(@Param("orgId") String orgId);
 }

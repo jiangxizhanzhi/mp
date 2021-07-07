@@ -17,7 +17,7 @@ public interface OrgPermissionService extends BaseModelService<OrgPermissionMode
 
     boolean bindOrgTargets(String orgId, List<String> targetIds, boolean cleanOldTargets);
 
-    boolean cleanOrgTargets(String orgId);
+    boolean deleteByOrgId(String orgId);
 
 
 }

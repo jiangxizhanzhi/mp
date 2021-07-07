@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.nio.file.attribute.UserDefinedFileAttributeView;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -73,7 +72,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
 
         if (cleanOldRoles) {
             // 清除用户角色
-            boolean success = cleanUserRoles(userId);
+            boolean success = deleteByUserId(userId);
             if (!success) {
                 throw new MpRuntimeException("清除用户角色失败！");
             }
@@ -126,21 +125,36 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     }
 
     @Override
-    public boolean cleanUserRoles(String userId) {
-        Assert.notNull(userId, "userid不能为空");
+    public boolean deleteByUserId(String userId) {
+        Assert.notNull(userId, "userId不能为空");
 
         var objResult = userService.get(userId).getSource();
         if (objResult == null || objResult.getObj() == null) {
             new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "account_not_existed");
         }
 
-        getModelMapper().deleteAllByUser(userId);
+        getModelMapper().deleteByUserId(userId);
 
         return true;
     }
 
     @Override
-    public boolean unBindRoleUsers(String roleId, List<String> userIds) {
+    public boolean deleteByRoleId(String roleId) {
+
+        Assert.notNull(roleId, "roleId不能为空");
+
+        var objResult = roleService.get(roleId).getSource();
+        if (objResult == null || objResult.getObj() == null) {
+            new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "account_not_existed");
+        }
+
+        getModelMapper().deleteByRoleId(roleId);
+
+        return true;
+    }
+
+    @Override
+    public boolean deleteByRoleIdAndUserIds(String roleId, List<String> userIds) {
         Assert.notNull(roleId, "roleId不能为空");
 
         var objResult = roleService.get(roleId).getSource();
@@ -154,7 +168,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         }
 
         // 删除用户角色
-        getModelMapper().deleteByRoleUsers(roleId, userIds);
+        getModelMapper().deleteByRoleIdAndUserIds(roleId, userIds);
         return true;
     }
 

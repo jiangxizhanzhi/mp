@@ -71,7 +71,7 @@ public class UserRoleController extends BaseModelController<UserRoleModel, Query
     @ApiOperation(value = "解绑用户-角色关系(单个角色 -> 多个用户)", notes = "")
     @PostMapping("/unbind/roleUsers")
     public ServiceResult unBindRoleUsers(@RequestBody @Validated RoleUsersRequest roleUsersReq) {
-        boolean success = getModelService().unBindRoleUsers(roleUsersReq.getRoleId(), roleUsersReq.getUserIds());
+        boolean success = getModelService().deleteByRoleIdAndUserIds(roleUsersReq.getRoleId(), roleUsersReq.getUserIds());
         return ResultUtils.commonResult(success, null);
     }
 
