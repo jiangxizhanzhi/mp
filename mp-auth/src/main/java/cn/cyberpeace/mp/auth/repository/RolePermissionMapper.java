@@ -17,7 +17,7 @@ import java.util.List;
 @ModelClass(RolePermissionModel.class)
 public interface RolePermissionMapper extends BaseModelMapper<RolePermissionModel> {
 
-    @Select("select * from mp_auth_target where id in " +
+    @Select("select distinct * from mp_auth_target where id in " +
             "(select target from mp_auth_role_permission where owner = #{roleId})")
     List<TargetModel> listTargetsByRoleId(@Param("roleId") String roleId);
 
