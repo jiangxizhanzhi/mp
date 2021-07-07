@@ -34,7 +34,6 @@ public class RoleModel extends BaseModel {
     private String identifier;
 
     @ApiModelProperty(value = "名称")
-    @NotBlank(message = "名称不能为空")
     private String name;
 
     @ApiModelProperty(value = "描述")

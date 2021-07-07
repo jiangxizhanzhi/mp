@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.auth.controller;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.role.BindRoleUsersRequest;
 import cn.cyberpeace.mp.auth.dto.role.BindUserRolesRequest;
+import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
@@ -40,17 +41,14 @@ public class UserRoleController extends BaseModelController<UserRoleModel, Query
     @GetMapping("/roles/byuser")
     public ServiceResult getRolesByUser(@RequestParam String userId) {
         List<RoleModel> roles = getModelService().listByUserId(userId);
-//        return ServiceResult.builder().source(roles).build().asResult();
         return ResultUtils.commonResult(true, roles);
     }
 
     @ApiOperation(value = "根据roleId查询角色绑定的所有用户", notes = "")
     @GetMapping("/users/byrole")
     public ServiceResult getUsersByRole(@RequestParam String roleId) {
-//        List<RoleModel> roles = getModelService().listByUserId(userId);
-//        return ServiceResult.builder().source(roles).build().asResult();
-        // todo
-        return ResultUtils.commonResult(true, null);
+        List<UserDto> userDtos = getModelService().listByRoleId(roleId);
+        return ResultUtils.commonResult(true, userDtos);
     }
 
 

@@ -1,7 +1,9 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.model.RoleModel;
+import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
@@ -16,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.file.attribute.UserDefinedFileAttributeView;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -41,6 +45,17 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         return roles;
     }
 
+    @Override
+    public List<UserDto> listByRoleId(String roleId) {
+        Assert.notBlank(roleId, "roleId不能为空！");
+        List<UserModel> userModels = getModelMapper().listByRoleId(roleId);
+        List<UserDto> userDtos = new ArrayList<>();
+        if (CollectionUtil.isEmpty(userModels)) {
+            return userDtos;
+        }
+        userModels.forEach(u -> userDtos.add(userService.userModel2UserDto(u)));
+        return userDtos;
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
