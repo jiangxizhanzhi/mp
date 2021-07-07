@@ -22,7 +22,7 @@ public interface RolePermissionMapper extends BaseModelMapper<RolePermissionMode
     List<TargetModel> listTargetsByRoleId(@Param("roleId") String roleId);
 
 
-    @Delete("delete form mp_auth_role_permission where owner = #{roleId}")
+    @Delete("delete from mp_auth_role_permission where owner = #{roleId}")
     void deleteByRole(@Param("roleId") String roleId);
 
 }
