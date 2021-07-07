@@ -8,6 +8,8 @@ import cn.cyberpeace.mp.datasandtable.model.SessionRequest;
 import cn.cyberpeace.mp.datasandtable.model.SessionResult;
 import cn.cyberpeace.mp.datasandtable.service.SessionService;
 import cn.cyberpeace.mp.systemoperation.constant.ControllerConstant;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
@@ -23,6 +25,7 @@ import java.io.IOException;
 import java.util.List;
 
 @Slf4j
+@Api(tags = "流量监控接口")
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/flow")
 public class SystemOperFlowController {
@@ -31,6 +34,7 @@ public class SystemOperFlowController {
     private SessionService sessionService;
 
     @GetMapping("/pcap/{groupId}/{sessionId}")
+    @ApiOperation("pcap包下载")
     public ResponseEntity<Resource> downloadPcapFile(HttpServletResponse httpServletResponse,
                                                      @PathVariable("sessionId") String sessionId, @PathVariable("groupId") String groupId) {
         var httpResponse = sessionService.queryPcapFileByGroupId(groupId, sessionId);
@@ -56,17 +60,19 @@ public class SystemOperFlowController {
      * @return ServiceResult<List < SessionResult>>
      */
     @PostMapping
+    @ApiOperation("根据groupId查询流量信息")
     public ServiceResult<List<SessionResult>> querySessionListWithGroup(@RequestBody @Valid SessionRequest sessionRequest) {
         return ServiceResult.success(sessionService.querySessionListWithGroup(sessionRequest));
     }
 
     /**
-     * 分局分组id查询流量分页信息接口
+     * 根据分组id查询流量分页信息接口
      *
      * @param sessionRequest
      * @return ServiceResult<ListObjResult < SessionResult>>
      */
     @PostMapping("pageable")
+    @ApiOperation("根据分组id查询流量分页信息")
     public ServiceResult<ListObjResult<SessionResult>> querySessionListWithGroupWithPage(@RequestBody @Valid SessionRequest sessionRequest) {
         return ServiceResult.success(sessionService.querySessionWithPage(sessionRequest));
     }

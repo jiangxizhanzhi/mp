@@ -40,10 +40,12 @@ public class WazuhEventRequest {
     /**
      * 分页页码
      */
+    @ApiModelProperty("分页页码")
     private Integer pageNum = 1;
 
     /**
      * wazuh macIds
      */
+    @ApiModelProperty("macId集合")
     private List<String> macIds;
 }
