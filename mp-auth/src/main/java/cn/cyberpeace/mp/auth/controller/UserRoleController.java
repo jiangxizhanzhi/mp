@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@Api(value = "用户-角色管理接口", tags = "UserRoleController")
+@Api(value = "用户-角色管理接口", tags = "用户-角色管理接口")
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/user_roles")

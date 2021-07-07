@@ -50,7 +50,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.List;
 
-@Api(value = "用户管理接口", tags = "UserController")
+@Api(value = "用户管理接口", tags = "用户管理接口")
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/users")
