@@ -38,7 +38,7 @@ public class SessionResult {
      * 协议类型
      */
     @ApiModelProperty("协议类型")
-    private String protocalType;
+    private String protocolType;
 
     @ApiModelProperty("时间")
     private String timestamp;

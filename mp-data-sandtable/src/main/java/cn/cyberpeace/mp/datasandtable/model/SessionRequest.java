@@ -68,5 +68,5 @@ public class SessionRequest {
      * 协议
      */
     @ApiModelProperty("协议 模糊查询字段")
-    private String protocal;
+    private String protocol;
 }
