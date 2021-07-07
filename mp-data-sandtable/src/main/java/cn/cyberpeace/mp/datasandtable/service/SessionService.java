@@ -233,8 +233,8 @@ public class SessionService {
         if (!ObjectUtils.isEmpty(sessionRequest.getTargetIp())) {
             boolQueryBuilder.must(QueryBuilders.termQuery("dstIp", sessionRequest.getTargetIp()));
         }
-        if (!ObjectUtils.isEmpty(sessionRequest.getProtocal())) {
-            boolQueryBuilder.must(QueryBuilders.wildcardQuery("protocol","*" +sessionRequest.getProtocal() + "*"));
+        if (!ObjectUtils.isEmpty(sessionRequest.getProtocol())) {
+            boolQueryBuilder.must(QueryBuilders.wildcardQuery("protocol","*" +sessionRequest.getProtocol() + "*"));
         }
     }
 
@@ -265,7 +265,7 @@ public class SessionService {
             .targetIp(model.getDstIp())
             .sourceMac(model.getSrcMac())
             .targetMac(model.getDstMac())
-            .protocalType(model.getProtocol())
+            .protocolType(model.getProtocol())
             .srcPort(model.getSrcPort())
             .dstPort(model.getDstPort())
             .timestamp(model.getTimestamp().toString())

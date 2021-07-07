@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.serializer.CustomLocalDateTimeDeserializer;
 import cn.cyberpeace.mp.base.serializer.CustomLocalDateTimeSerializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -13,6 +14,7 @@ import lombok.*;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@ApiModel("流量查询条件")
 public class SessionRequest {
 
     /**
@@ -68,5 +70,5 @@ public class SessionRequest {
      * 协议
      */
     @ApiModelProperty("协议 模糊查询字段")
-    private String protocal;
+    private String protocol;
 }
