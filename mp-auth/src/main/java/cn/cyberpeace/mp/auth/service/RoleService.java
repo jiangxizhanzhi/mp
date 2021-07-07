@@ -26,4 +26,6 @@ public interface RoleService extends BaseModelService<RoleModel, QueryParams> {
     PageInfo getPageWithUserCnt(RolePageRequest rolePageRequest);
 
     RoleModel add(RoleRequest createRequest);
+
+    RoleModel modify(RoleRequest modifyRequest);
 }

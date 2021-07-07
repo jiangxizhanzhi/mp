@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.auth.service.RoleService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
 import com.github.pagehelper.PageInfo;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.management.relation.Role;
 import java.util.List;
@@ -42,11 +44,34 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
     }
 
 
+    @ApiOperation(value = "(弃用，建议用/add) 创建数据", notes = "")
+    @ApiIgnore
+    @Override
+    public ObjServiceResult<RoleModel> create(RoleModel obj, String[] fields) {
+        return super.create(obj, fields);
+    }
+
+    @ApiOperation(value = "(弃用，建议用/modify) 修改数据", notes = "")
+    @ApiIgnore
+    @Override
+    public ObjServiceResult<RoleModel> update(String id, RoleModel obj, String[] fields) {
+        return super.update(id, obj, fields);
+    }
+
     @ApiOperation(value = "创建角色，同时完成角色-权限绑定关系", notes = "")
     @PostMapping("/add")
     @OperateLog(module = AuthLogConstant.MODULE, type = AuthLogConstant.TYPE_ADD, title = "新增角色")
     public ServiceResult add(@RequestBody @Validated RoleRequest createRequest) {
         RoleModel roleModel = getModelService().add(createRequest);
+        return ResultUtils.commonResult(true, roleModel);
+    }
+
+
+    @ApiOperation(value = "更新角色，同时完成角色-权限绑定关系", notes = "")
+    @PostMapping("modify")
+    @OperateLog(module = AuthLogConstant.MODULE, type = AuthLogConstant.TYPE_UPDATE, title = "修改角色")
+    public ServiceResult modify(@RequestBody @Validated RoleRequest modifyRequest) {
+        RoleModel roleModel = getModelService().modify(modifyRequest);
         return ResultUtils.commonResult(true, roleModel);
     }
 

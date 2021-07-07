@@ -121,9 +121,8 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     @Override
     @Transactional(rollbackFor = Exception.class)
     public RoleModel add(RoleRequest createRequest) {
-        Assert.notNull(createRequest, "roleRequest不能为空！");
+        Assert.notNull(createRequest, "createRequest不能为空！");
 
-        // 保存用户
         RoleModel roleModel = new RoleModel();
         BeanUtils.copyProperties(createRequest, roleModel);
 
@@ -152,10 +151,54 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
                 rolePermissionModel.setTarget(id);
                 // 如果保存错误，抛出异常
                 ObjServiceResult re = rolePermissionService.create(rolePermissionModel);
-                ResultUtils.throwExceptionIfError(re, "保存权限关系失败!");
+                ResultUtils.throwExceptionIfError(re, "保存角色权限关系失败!");
             });
         }
 
         return roleCreated;
+    }
+
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public RoleModel modify(RoleRequest modifyRequest) {
+        Assert.notNull(modifyRequest, "modifyRequest不能为空！");
+        String roleId = modifyRequest.getId();
+        Assert.notBlank(roleId, "id不能为空！");
+        log.info("roleid:{}", roleId);
+
+        var result = get(roleId);
+        ResultUtils.throwExceptionIfError(result, AuthConstant.ERROR_CODE_PREFIX + "role_not_existed");
+
+        RoleModel roleUpdate = new RoleModel();
+        BeanUtils.copyProperties(modifyRequest, roleUpdate);
+        ObjServiceResult<RoleModel> updateResult = update(roleUpdate);
+        ResultUtils.throwExceptionIfError(updateResult, "修改角色失败！");
+
+
+        // todo 清除原来角色绑定的权限？
+        boolean cleanSuccess = rolePermissionService.cleanRoleTargets(roleId);
+        if (!cleanSuccess) {
+            throw new MpRuntimeException("清除原来角色绑定的权限关系失败！");
+        }
+
+        // 保存角色-权限关系
+        if (CollectionUtil.isNotEmpty(modifyRequest.getTargetIds())) {
+            modifyRequest.getTargetIds().forEach(id -> {
+                boolean isTargetExist = targetService.exists(id);
+                if (!isTargetExist) {
+                    log.error("权限id:{}不存在", id);
+                    throw new MpRuntimeException("权限id：" + id + "不存在！");
+                }
+                RolePermissionModel rolePermissionModel = new RolePermissionModel();
+                rolePermissionModel.setOwner(roleId);
+                rolePermissionModel.setTarget(id);
+                // 如果保存错误，抛出异常
+                ObjServiceResult re = rolePermissionService.create(rolePermissionModel);
+                ResultUtils.throwExceptionIfError(re, "保存角色权限关系失败!");
+            });
+        }
+
+        return updateResult.getSource().getObj();
     }
 }
