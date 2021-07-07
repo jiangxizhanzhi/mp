@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@Api(value = "权限管理接口", tags = "TargetController")
+@Api(value = "权限管理接口", tags = "权限管理接口")
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/targets")
@@ -45,8 +45,8 @@ public class TargetController extends BaseModelController<TargetModel, QueryPara
 
     @ApiOperation(value = "查询权限树形结构", notes = "")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "targetId", value = "权限id", paramType = "form", dataType = "String"),
-            @ApiImplicitParam(name = "type", value = "权限类型 1：菜单，2：API，3：数据权限 不传默认为1：菜单", paramType = "form", dataType = "Integer")
+            @ApiImplicitParam(name = "targetId", value = "权限id", paramType = "query"),
+            @ApiImplicitParam(name = "type", value = "权限类型 1：菜单，2：API，3：数据权限 不传默认为1：菜单", paramType = "query")
     })
     @GetMapping("/tree")
     public ServiceResult getTree(@RequestParam(required = false) String targetId, @RequestParam(required = false) Integer type) {

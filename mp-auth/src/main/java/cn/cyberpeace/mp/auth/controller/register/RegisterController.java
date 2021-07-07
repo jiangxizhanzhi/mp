@@ -18,7 +18,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 
-@Api(value = "注册接口", tags = "RegisterController")
+@Api(value = "注册接口", tags = "注册接口")
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/register")
