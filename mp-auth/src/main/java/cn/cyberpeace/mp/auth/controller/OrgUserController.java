@@ -39,7 +39,7 @@ public class OrgUserController extends BaseModelController<OrgUserModel, QueryPa
     }
 
 
-    @ApiOperation(value = "分页查询组织下所有用户信息", notes = "")
+    @ApiOperation(value = "分页查询组织下所有用户信息，附带组织，角色信息", notes = "")
     @GetMapping("/page/byorg")
     public ListObjServiceResult<Object> getPageByOrg(OrgUserPageRequest req) {
         req.ensure();

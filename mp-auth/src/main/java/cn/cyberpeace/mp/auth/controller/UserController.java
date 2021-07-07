@@ -86,9 +86,16 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
     }
 
     @Override
-    @ApiOperation(value = "查询指定id数据", notes = "")
+    @ApiOperation(value = "查询指定id数据 附带组织，角色信息", notes = "")
     public ObjServiceResult get(@PathVariable String id, @RequestParam(required = false) String[] fields) {
         UserDto userDto = getModelService().getUserDto(id);
+        return ResultUtils.obj2ObjServiceResult(userDto);
+    }
+
+    @ApiOperation(value = "查询当前登录用户信息 附带组织，角色信息", notes = "")
+    @GetMapping("/current")
+    public ObjServiceResult getCurrentUser() {
+        UserDto userDto = getModelService().getCurrentUserDto();
         return ResultUtils.obj2ObjServiceResult(userDto);
     }
 

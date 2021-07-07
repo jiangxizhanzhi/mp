@@ -91,8 +91,19 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         setModelFields(modelFields);
     }
 
+    @Override
     public UserDto getUserDto(String id) {
         UserModel userModel = getModelMapper().get(id);
+
+        UserDto userDto = userModel2UserDto(userModel);
+
+        return userDto;
+    }
+
+
+    @Override
+    public UserDto getCurrentUserDto() {
+        UserModel userModel = UserUtils.getLoginUser();
 
         UserDto userDto = userModel2UserDto(userModel);
 
