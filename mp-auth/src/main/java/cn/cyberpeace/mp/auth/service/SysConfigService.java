@@ -13,4 +13,8 @@ public interface SysConfigService extends BaseModelService<SysConfigModel, Query
 
     SysConfigModel getByKeyName(String keyName);
 
+    boolean updateByKeyName(SysConfigModel sysConfigModel);
+
+    boolean batchUpdateByKeyname(List<SysConfigModel> configs);
+
 }
