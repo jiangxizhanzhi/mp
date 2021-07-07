@@ -34,11 +34,17 @@ public interface OrgUserMapper extends BaseModelMapper<OrgUserModel> {
             "  <if test=\"orgId != null and orgId != ''\">" +
             "    AND id in (select user from mp_auth_org_user where org = #{orgId})" +
             "  </if>" +
+            "  <if test=\"userIds != null\"> " +
+            "    AND id in " +
+            "    <foreach item=\"userId\" index=\"index\" collection=\"userIds\" open=\"(\" separator=\",\" close=\")\"> " +
+            "      #{userId} " +
+            "    </foreach>" +
+            "  </if>" +
             "  <if test=\"username != null and username != ''\">" +
             "    AND username like CONCAT('%', #{username}, '%')" +
             "  </if>" +
             "</where></script>")
-    List<UserModel> listUsers(@Param("orgId") String orgId, @Param("username") String username);
+    List<UserModel> listUsers(@Param("orgId") String orgId, @Param("username") String username, @Param("userIds") List<String> userIds);
 
 
     @Delete("delete from mp_auth_org_user where user = #{userId}")

@@ -88,10 +88,9 @@ public class RolePermissionServiceImpl
     public boolean cleanRoleTargets(String roleId) {
         Assert.notNull(roleId, "roleId不能为空");
 
-        var objResult = roleService.get(roleId).getSource();
-        if (objResult == null || objResult.getObj() == null) {
-            new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "role_not_existed");
-        }
+        var result = roleService.get(roleId);
+        ResultUtils.throwExceptionIfError(result, AuthConstant.ERROR_CODE_PREFIX + "role_not_existed");
+
         getModelMapper().deleteByRole(roleId);
         return true;
     }

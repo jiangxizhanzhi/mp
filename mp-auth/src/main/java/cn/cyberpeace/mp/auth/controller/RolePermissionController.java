@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@Api(value = "角色-权限管理接口", tags = "RolePermissionController")
+@Api(value = "角色-权限管理接口", tags = "AUTH-角色-权限管理接口")
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/role_permissions")
@@ -40,13 +40,13 @@ public class RolePermissionController extends BaseModelController<RolePermission
     public ServiceResult getTargetsByRole(@RequestParam String roleId) {
         List<TargetModel> targets = getModelService().listTargetsByRoleId(roleId);
 
-        return ServiceResult.builder().source(targets).build().asResult();
+        return ResultUtils.commonResult(true, targets);
     }
 
     @ApiOperation(value = "绑定角色-权限关系，注意，如果targetIds为空，表示删除角色所有权限！", notes = "")
     @PostMapping("/bind")
     public ServiceResult bindOrgPermission(@RequestBody @Validated BindRoleTargetsRequest bindRoleTargetsReq) {
-        boolean success = getModelService().bindRoleTargets(bindRoleTargetsReq.getUserId(), bindRoleTargetsReq.getTargetIds());
+        boolean success = getModelService().bindRoleTargets(bindRoleTargetsReq.getRoleId(), bindRoleTargetsReq.getTargetIds());
         return ResultUtils.commonResult(success, null);
     }
 

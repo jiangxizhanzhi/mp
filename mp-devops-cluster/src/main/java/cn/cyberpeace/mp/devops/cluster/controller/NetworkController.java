@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.devops.cluster.model.NetworkCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.request.NetworkPageRequest;
 import cn.cyberpeace.mp.devops.cluster.response.NetworkPageResponse;
 import cn.cyberpeace.mp.devops.cluster.service.NetworkService;
+import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -50,7 +51,10 @@ public class NetworkController {
         List<NetworkCloudPlatformModel.NetworkModel> networks = model.getNetworks();
         List<NetworkPageResponse> list = networks.stream().map(networkModel -> {
             NetworkCloudPlatformModel.NetworkModel.Subnet subnet = networkModel.getSubnet();
-            List<NetworkPageResponse.Subnet> subnets = List.of(new NetworkPageResponse.Subnet(subnet.getId(), subnet.getCidr(), subnet.getGateway_ip()));
+            List<NetworkPageResponse.Subnet> subnets = Lists.newArrayList();
+            if (Objects.nonNull(subnet)) {
+                subnets = List.of(new NetworkPageResponse.Subnet(subnet.getId(), subnet.getCidr(), subnet.getGateway_ip()));
+            }
             return  NetworkPageResponse.builder().name(networkModel.getName()).networkType(networkModel.getNetwork_type())
                 .status(CloudPlatformEnum.fromValue(networkModel.getStatus()))
                         .subnets(subnets).createdAt(networkModel.getCreated_at()).build();

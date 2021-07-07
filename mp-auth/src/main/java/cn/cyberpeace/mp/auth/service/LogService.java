@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.auth.constant.AuthLogConstant;
+import cn.cyberpeace.mp.auth.dto.user.UserLogPageRequest;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.ServletUtils;
@@ -82,31 +83,31 @@ public class LogService {
     }
 
 
-    public List<OperationLogModel> getUserLog(String userId, String username, String type) {
+    public List<OperationLogModel> getUserLog(UserLogPageRequest logPageRequest) {
+        logPageRequest.ensure();
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
-//        sourceBuilder.query(QueryBuilders.termQuery("user", "kimchy"));
+        if (logPageRequest.getPage() * logPageRequest.getPageSize() > 10000) {
+            throw new MpRuntimeException("不支持深度分页查询！");
+        }
 
         BoolQueryBuilder boolBuilder = QueryBuilders.boolQuery();
-
         boolBuilder.must(QueryBuilders.termQuery("opModule.keyword", AuthLogConstant.MODULE));
 
-        if (StringUtils.isNotBlank(username)) {
-            boolBuilder.must(QueryBuilders.termQuery("userName.keyword", username));
+        if (StringUtils.isNotBlank(logPageRequest.getUserid())) {
+            boolBuilder.must(QueryBuilders.termQuery("userId.keyword", logPageRequest.getUserid()));
         }
-        if (StringUtils.isNotBlank(type)) {
-            boolBuilder.must(QueryBuilders.termQuery("opType.keyword", type));
+        if (StringUtils.isNotBlank(logPageRequest.getUsername())) {
+            boolBuilder.must(QueryBuilders.termQuery("userName.keyword", logPageRequest.getUsername()));
+        }
+        if (StringUtils.isNotBlank(logPageRequest.getType())) {
+            boolBuilder.must(QueryBuilders.termQuery("opType.keyword", logPageRequest.getType()));
         }
 
-        sourceBuilder.query(boolBuilder).sort("opTime", SortOrder.DESC).from(1).size(10);
+        sourceBuilder.query(boolBuilder).sort("opTime", SortOrder.DESC).from(logPageRequest.getPage() * logPageRequest.getPageSize()).size(logPageRequest.getPageSize());
 
         SearchRequest searchRequest = new SearchRequest("mp_operate_log");
         searchRequest.source(sourceBuilder);
-
-//        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder()
-//                .from(pageSize * pageable.getPageNumber())
-//                .size(pageSize)
-//                .query(queryBuilder);
 
         try {
             SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);

@@ -86,12 +86,20 @@ public class AuthUserDetailsService implements UserDetailsService {
     }
 
 
+    /**
+     * @param userId
+     * @param targetType   @see cn.cyberpeace.mp.auth.model.TargetModel
+     * @return
+     */
     public Set<GrantedAuthority> loadAuthorities(String userId) {
         List<RoleModel> roles = userRoleService.listByUserId(userId);
         Set<GrantedAuthority> authoritySet = new HashSet<>();
         roles.forEach(r -> {
             authoritySet.add(new SimpleGrantedAuthority("ROLE_" + r.getIdentifier()));
         });
+
+
+        // 加载权限
         List<TargetModel> targets = userPermissionService.listByUserId(userId);
         targets.forEach(t -> {
             authoritySet.add(new SimpleGrantedAuthority(t.getIdentifier()));

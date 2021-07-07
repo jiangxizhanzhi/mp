@@ -91,17 +91,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         setModelFields(modelFields);
     }
 
-    @Override
-    public ObjServiceResult<UserModel> get(String id) {
-        ObjServiceResult<UserModel> objServiceResult = super.get(id);
-
-        if (Objects.isNull(objServiceResult.getSource()) || Objects.isNull(objServiceResult.getSource().getObj())) {
-            return objServiceResult;
-        }
-        UserModel userModel = objServiceResult.getSource().getObj();
-        return objServiceResult;
-    }
-
     public UserDto getUserDto(String id) {
         UserModel userModel = getModelMapper().get(id);
 
@@ -603,6 +592,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         List<String> orgIds = orgs.stream().map(o -> o.getId()).collect(Collectors.toList());
 
         List<List<String>> allorgpath = orgs.stream().map(o -> CollectionUtil.toList(StringUtils.split(o.getPath(), AuthConstant.ORG_PATH_SEPARATOR))).collect(Collectors.toList());
+        userDto.setOrgs(orgs);
         userDto.setOrgIds(orgIds);
         userDto.setOrgpaths(allorgpath);
 

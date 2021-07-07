@@ -51,11 +51,11 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
         return getModelMapper().first(new HumanCondition().filterEqual("identifier", identifier));
     }
 
-    @Override
-    public List<TargetModel> listByTenantId(String tenantId) {
-        List<TargetModel> targets = getModelMapper().listByTenantId(tenantId);
-        return targets;
-    }
+//    @Override
+//    public List<TargetModel> listByTenantId(String tenantId) {
+//        List<TargetModel> targets = getModelMapper().listByTenantId(tenantId);
+//        return targets;
+//    }
 
     @Override
     public boolean exists(String id) {
@@ -80,11 +80,12 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
     @Override
     public List<TargetDto> getTree(String parentId, Integer type) {
         if (Objects.isNull(type)) {
+            // 默认查询菜单树
             type = TargetModel.TYPE_MENU;
         }
 
         if (StringUtils.isBlank(parentId)) {
-            // 查询所有权限
+            // parent为空，则查询所有权限
             List<TargetModel> targets = listAll(AuthConstant.DEFAULT_TENANT, type);
             if (CollectionUtil.isEmpty(targets)) {
                 return new ArrayList<>();
@@ -109,6 +110,11 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
 
     public List<TargetModel> listAll(String tenant, Integer type) {
         List<TargetModel> targets = getModelMapper().listAll(tenant, type);
+        return targets;
+    }
+
+    public List<TargetModel> listByMultiTypes(String tenant, Integer[] types) {
+        List<TargetModel> targets = getModelMapper().listByMultiTypes(tenant, types);
         return targets;
     }
 

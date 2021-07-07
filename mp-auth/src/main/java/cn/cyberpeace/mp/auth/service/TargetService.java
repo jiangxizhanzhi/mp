@@ -11,15 +11,15 @@ public interface TargetService extends BaseModelService<TargetModel, QueryParams
 
     TargetModel getByIdentifier(String identifier);
 
-    List<TargetModel> listByTenantId(String tenantId);
-
-
+//    List<TargetModel> listByTenantId(String tenantId);
 
     boolean exists(String id);
 
     List<TargetModel> listByParent(String parentId);
 
     List<TargetModel> listAll(String tenant, Integer type);
+
+    List<TargetModel> listByMultiTypes(String tenant, Integer[] types);
 
     List<TargetDto> getTree(String parentId, Integer type);
 }

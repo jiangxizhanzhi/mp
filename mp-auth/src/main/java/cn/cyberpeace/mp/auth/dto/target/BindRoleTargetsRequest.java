@@ -12,7 +12,7 @@ import java.util.List;
 public class BindRoleTargetsRequest {
 
     @NotBlank
-    String userId;
+    String roleId;
 
     List<String> targetIds;
 

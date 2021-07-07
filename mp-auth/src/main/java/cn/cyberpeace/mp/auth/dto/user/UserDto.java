@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.dto.user;
 
+import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -27,6 +28,9 @@ public class UserDto extends UserModel {
 
     @ApiModelProperty(value = "组织id集合")
     List<String> orgIds;
+
+    @ApiModelProperty(value = "组织集合")
+    List<OrgModel> orgs;
 
     @ApiModelProperty(value = "角色集合")
     List<RoleModel> roles;

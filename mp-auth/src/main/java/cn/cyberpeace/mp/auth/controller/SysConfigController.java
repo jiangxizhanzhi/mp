@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Api(value = "配置管理接口", tags = "SysConfigController")
+@Api(value = "配置管理接口", tags = "AUTH-配置管理接口")
 @Slf4j
 @RestController
 @RequestMapping("/sys/config")

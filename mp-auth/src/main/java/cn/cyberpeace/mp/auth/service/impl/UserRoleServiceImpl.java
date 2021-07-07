@@ -77,6 +77,34 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean bindRoleUsers(String roleId, List<String> userIds) {
+        Assert.notNull(roleId, "roleId不能为空");
+
+        var objResult = get(roleId).getSource();
+        if (objResult == null || objResult.getObj() == null) {
+            throw new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "role_not_existed");
+        }
+
+        if (CollectionUtil.isEmpty(userIds)) {
+            // 完成，直接返回
+            return true;
+        }
+
+        // 添加用户角色
+        userIds.forEach(uid -> {
+            // todo 校验角色是否存在
+            UserRoleModel userRole = new UserRoleModel();
+            userRole.setUser(uid);
+            userRole.setRole(roleId);
+            userRole.setTenant(AuthConstant.DEFAULT_TENANT);
+            create(userRole);
+        });
+
+        return true;
+    }
+
+    @Override
     public boolean cleanUserRoles(String userId) {
         Assert.notNull(userId, "userid不能为空");
 
