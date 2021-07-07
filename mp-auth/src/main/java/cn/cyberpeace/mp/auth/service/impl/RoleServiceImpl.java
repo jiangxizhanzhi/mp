@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.dto.role.RoleDto;
 import cn.cyberpeace.mp.auth.dto.role.RolePageRequest;
 import cn.cyberpeace.mp.auth.dto.role.RoleRequest;
+import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.model.OrgUserModel;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.RolePermissionModel;
@@ -119,6 +120,14 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     }
 
     @Override
+    public RoleDto getRoleDto(String id) {
+        Assert.notBlank(id, "id不能为空！");
+        RoleModel roleModel = getModelMapper().get(id);
+        RoleDto roleDto = roleModel2RoleDto(roleModel);
+        return roleDto;
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public RoleModel add(RoleRequest createRequest) {
         Assert.notNull(createRequest, "createRequest不能为空！");
@@ -201,4 +210,21 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
         return updateResult.getSource().getObj();
     }
+
+
+
+    private RoleDto roleModel2RoleDto(RoleModel roleModel) {
+        if (Objects.isNull(roleModel)) {
+            return null;
+        }
+
+        RoleDto roleDto = new RoleDto();
+        cn.cyberpeace.mp.base.util.BeanUtils.copyProperties(roleModel, roleDto);
+
+        List<TargetModel> targets = rolePermissionService.listTargetsByRoleId(roleModel.getId());
+        roleDto.setTargets(targets);
+        return roleDto;
+    }
+
+
 }

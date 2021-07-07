@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.auth.controller;
 
 import cn.cyberpeace.mp.auth.constant.AuthLogConstant;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
+import cn.cyberpeace.mp.auth.dto.role.RoleDto;
 import cn.cyberpeace.mp.auth.dto.role.RolePageRequest;
 import cn.cyberpeace.mp.auth.dto.role.RoleRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserRequest;
@@ -13,6 +14,7 @@ import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
@@ -22,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -56,6 +59,13 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
     @Override
     public ObjServiceResult<RoleModel> update(String id, RoleModel obj, String[] fields) {
         return super.update(id, obj, fields);
+    }
+
+    @Override
+    @ApiOperation(value = "查询指定id数据", notes = "")
+    public ObjServiceResult get(@PathVariable String id, @RequestParam(required = false) String[] fields) {
+        RoleDto roleDto = getModelService().getRoleDto(id);
+        return ResultUtils.obj2ObjServiceResult(roleDto);
     }
 
     @ApiOperation(value = "创建角色，同时完成角色-权限绑定关系", notes = "")
