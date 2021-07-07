@@ -32,7 +32,7 @@ public class CustomAuthenticationFailureHandler extends SimpleUrlAuthenticationF
 
         ObjServiceResult<UserModel> result;
         if(exception instanceof BadCredentialsException) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.setStatus(HttpServletResponse.SC_OK);
             result = new ObjServiceResult<>(null, AuthErrorCode.BAD_CREDENTIALS,
                     exception.getMessage());
         } else {

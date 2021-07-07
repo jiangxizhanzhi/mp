@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.service;
 
+import cn.cyberpeace.mp.auth.dto.role.RoleDto;
 import cn.cyberpeace.mp.auth.dto.role.RolePageRequest;
 import cn.cyberpeace.mp.auth.dto.role.RoleRequest;
 import cn.cyberpeace.mp.auth.model.RoleModel;
@@ -24,6 +25,8 @@ public interface RoleService extends BaseModelService<RoleModel, QueryParams> {
     boolean exists(String id);
 
     PageInfo getPageWithUserCnt(RolePageRequest rolePageRequest);
+
+    RoleDto getRoleDto(String id);
 
     RoleModel add(RoleRequest createRequest);
 
