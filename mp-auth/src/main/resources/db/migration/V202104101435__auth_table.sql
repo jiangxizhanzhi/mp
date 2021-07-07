@@ -228,12 +228,13 @@ CREATE TABLE mp_sys_config (
      `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
      `id` varchar(64)  NOT NULL COMMENT 'id',
      `tenant` varchar(64) NOT NULL COMMENT '租户',
-     `key_name` varchar(256)  NULL COMMENT '键',
+     `key_name` varchar(100)  NULL COMMENT '键',
      `value` varchar(1024)  NULL COMMENT '值',
      `create_time` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
      `update_time` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
      PRIMARY KEY (`pk`),
-     UNIQUE (`id`)
+     UNIQUE (`id`),
+     UNIQUE (`tenant`, `key_name`)
 ) COMMENT '其他配置信息表';
 
 
