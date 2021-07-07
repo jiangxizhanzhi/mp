@@ -1,14 +1,12 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
-import cn.cyberpeace.mp.auth.dto.OrgDto;
 import cn.cyberpeace.mp.auth.dto.TargetDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserPermissionModel;
-import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.auth.repository.UserPermissionMapper;
 import cn.cyberpeace.mp.auth.service.OrgPermissionService;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
@@ -31,7 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.security.auth.login.LoginContext;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -74,7 +71,7 @@ public class UserPermissionServiceImpl
     @Override
     public List<TargetModel> listByUserId(String userId) {
         Assert.notBlank(userId, "userId不能为空！");
-        Set<TargetModel> authorizedTargets = new HashSet<>();
+        Set<TargetModel> authorizedTargetsSet = new HashSet<>();
 
 
         // 用户绑定的所有角色绑定的target
@@ -84,31 +81,31 @@ public class UserPermissionServiceImpl
         boolean isAdmin = hasAdminRole(roles);
         if(isAdmin) {
             // 直接查询该租户下所有权限返回
-            List<TargetModel> targets = targetService.listByTenantId(AuthConstant.DEFAULT_TENANT);
-            return targets;
+            List<TargetModel> allTargets = targetService.listAll(AuthConstant.DEFAULT_TENANT, null);
+            return allTargets;
         }
 
         // 角色绑定的target
         roles.forEach((r) -> {
-            List<TargetModel> targets = rolePermissionService.listTargetsByRoleId(r.getId());
-            authorizedTargets.addAll(targets);
+            List<TargetModel> roleTargets = rolePermissionService.listTargetsByRoleId(r.getId());
+            authorizedTargetsSet.addAll(roleTargets);
         });
 
         // 用户直接绑定的target
-        List<TargetModel> targets1 = getModelMapper().listByUserId(userId);
-        authorizedTargets.addAll(targets1);
+        List<TargetModel> userTargets = getModelMapper().listByUserId(userId);
+        authorizedTargetsSet.addAll(userTargets);
 
         // 用户所在组织绑定的target
-        List<OrgModel> orgs = orgUserService.listOrgsByUserId(userId);
-        Set<TargetModel> allFromOrg = new HashSet<>();
-        orgs.forEach(o -> {
+        List<OrgModel> userOrgs = orgUserService.listOrgsByUserId(userId);
+        Set<TargetModel> allTargetsByOrgSet = new HashSet<>();
+        userOrgs.forEach(o -> {
             Set<TargetModel> tset = orgPermissionService.listTargetsByOrgIdIncludeAllParentsOrg(o.getId());
-            allFromOrg.addAll(tset);
+            allTargetsByOrgSet.addAll(tset);
         });
-        authorizedTargets.addAll(allFromOrg);
+        authorizedTargetsSet.addAll(allTargetsByOrgSet);
 
 
-        List<TargetModel> targetModelList = authorizedTargets.stream().collect(Collectors.toList());
+        List<TargetModel> targetModelList = authorizedTargetsSet.stream().collect(Collectors.toList());
         return targetModelList;
     }
 

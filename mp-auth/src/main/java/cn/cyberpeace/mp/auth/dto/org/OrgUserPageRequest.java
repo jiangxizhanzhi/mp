@@ -14,6 +14,9 @@ public class OrgUserPageRequest {
     @ApiModelProperty(value = "组织id")
     private String org;
 
+    @ApiModelProperty(value = "用户id列表")
+    private String[] ids;
+
     @ApiModelProperty(value = "当前页")
     private Integer page;
 

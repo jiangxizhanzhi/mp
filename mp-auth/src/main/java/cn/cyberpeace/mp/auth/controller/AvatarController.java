@@ -30,7 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 
-@Api(value = "头像管理接口", tags = "头像管理接口")
+@Api(value = "头像管理接口", tags = "AUTH-头像管理接口")
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_UNAUTH_API_PATH + "/avatar")

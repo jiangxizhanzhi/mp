@@ -603,6 +603,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         List<String> orgIds = orgs.stream().map(o -> o.getId()).collect(Collectors.toList());
 
         List<List<String>> allorgpath = orgs.stream().map(o -> CollectionUtil.toList(StringUtils.split(o.getPath(), AuthConstant.ORG_PATH_SEPARATOR))).collect(Collectors.toList());
+        userDto.setOrgs(orgs);
         userDto.setOrgIds(orgIds);
         userDto.setOrgpaths(allorgpath);
 

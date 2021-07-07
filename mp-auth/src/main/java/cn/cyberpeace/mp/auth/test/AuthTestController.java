@@ -1,8 +1,11 @@
 package cn.cyberpeace.mp.auth.test;
 
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.user.UserLogPageRequest;
+import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.service.LogService;
+import cn.cyberpeace.mp.auth.service.TargetService;
 import cn.cyberpeace.mp.auth.util.PasswordStrengthChecker;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.auth.test.TmpMenuService;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.lang.annotation.Target;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +37,9 @@ public class AuthTestController {
 
     @Autowired
     private LogService logService;
+
+    @Autowired
+    private TargetService targetService;
 
     @PostMapping("/desEncryptPwd")
     public String desEncryptPwd(@RequestParam String pwd) {
@@ -59,16 +66,23 @@ public class AuthTestController {
     }
 
 
-    @GetMapping("test/tmpmenu")
+    @GetMapping("/tmpmenu")
     public void testTmpMenu() {
 //        tmpMenuService.process();
     }
 
 
-    @GetMapping("test/userlog")
+    @GetMapping("/userlog")
     public List<OperationLogModel> userlog(UserLogPageRequest logPageRequest) {
         List<OperationLogModel> logs = logService.getUserLog(logPageRequest);
         return logs;
     }
 
+
+    @GetMapping("/targets")
+    public void targets(Integer[] types) {
+        log.info("types:{}", types);
+        List<TargetModel> logs = targetService.listByMultiTypes(AuthConstant.DEFAULT_TENANT, types);
+        log.info("logs:{}", logs);
+    }
 }

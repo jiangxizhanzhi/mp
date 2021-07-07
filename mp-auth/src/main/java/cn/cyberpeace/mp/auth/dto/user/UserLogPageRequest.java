@@ -39,6 +39,15 @@ public class UserLogPageRequest {
         if (Objects.isNull(pageSize)) {
             pageSize = 10;
         }
+
+        if(page < 1) {
+            page = 1;
+        }
+        page = page - 1;
+
+        if(pageSize < 1) {
+            pageSize = 10;
+        }
     }
 
 }

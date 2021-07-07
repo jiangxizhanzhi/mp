@@ -10,6 +10,15 @@ import java.util.List;
 
 public interface UserPermissionService extends BaseModelService<UserPermissionModel, QueryParams> {
 
+    /**
+     * TYPE_ALL = 0 / null
+     * TYPE_MENU = 1;
+     * TYPE_API = 2;
+     * TYPE_DATA = 3;
+     * @param userId
+     * @param targetType
+     * @return
+     */
     List<TargetModel> listByUserId(String userId);
 
     List<TargetModel> listMenusByUserId(String userId);

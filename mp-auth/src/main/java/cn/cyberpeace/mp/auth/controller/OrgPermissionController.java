@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Set;
 
-@Api(value = "组织-权限管理接口", tags = "组织-权限管理接口")
+@Api(value = "组织-权限管理接口", tags = "AUTH-组织-权限管理接口")
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/org_permissions")

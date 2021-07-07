@@ -25,7 +25,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -125,7 +127,13 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
     @Override
     public PageInfo<UserDto> pageUsersByOrg(OrgUserPageRequest req) {
         PageHelper.startPage(req.getPage(), req.getPageSize());
-        List<UserModel> users = getModelMapper().listUsers(req.getOrg(), req.getUsername());
+
+        List<String> idsList = null;
+        if (Objects.nonNull(req.getIds()) && req.getIds().length > 0) {
+            idsList = Arrays.asList(req.getIds());
+        }
+
+        List<UserModel> users = getModelMapper().listUsers(req.getOrg(), req.getUsername(), idsList);
         PageInfo pageInfo = new PageInfo(users);
 
         List<UserDto> userDtos = users.stream().map(u -> {

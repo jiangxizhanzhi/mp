@@ -51,11 +51,11 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
         return getModelMapper().first(new HumanCondition().filterEqual("identifier", identifier));
     }
 
-    @Override
-    public List<TargetModel> listByTenantId(String tenantId) {
-        List<TargetModel> targets = getModelMapper().listByTenantId(tenantId);
-        return targets;
-    }
+//    @Override
+//    public List<TargetModel> listByTenantId(String tenantId) {
+//        List<TargetModel> targets = getModelMapper().listByTenantId(tenantId);
+//        return targets;
+//    }
 
     @Override
     public boolean exists(String id) {
@@ -109,6 +109,11 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
 
     public List<TargetModel> listAll(String tenant, Integer type) {
         List<TargetModel> targets = getModelMapper().listAll(tenant, type);
+        return targets;
+    }
+
+    public List<TargetModel> listByMultiTypes(String tenant, Integer[] types) {
+        List<TargetModel> targets = getModelMapper().listByMultiTypes(tenant, types);
         return targets;
     }
 

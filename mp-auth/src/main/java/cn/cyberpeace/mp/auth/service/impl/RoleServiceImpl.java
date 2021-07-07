@@ -108,7 +108,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
         roleDtos.forEach(r -> {
             if (r.getIdentifier().equals(AuthConstant.ROLE_ADMIN)) {
-                r.setTargets(targetService.listByTenantId(AuthConstant.DEFAULT_TENANT));
+                r.setTargets(targetService.listAll(AuthConstant.DEFAULT_TENANT, null));
             } else {
                 List<TargetModel> targetModels = rolePermissionService.listTargetsByRoleId(r.getId());
                 r.setTargets(targetModels);

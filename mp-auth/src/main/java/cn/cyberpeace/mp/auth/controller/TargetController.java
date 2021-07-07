@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@Api(value = "权限管理接口", tags = "权限管理接口")
+@Api(value = "权限管理接口", tags = "AUTH-权限管理接口")
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/targets")
