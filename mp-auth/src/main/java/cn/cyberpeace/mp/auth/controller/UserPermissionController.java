@@ -77,10 +77,10 @@ public class UserPermissionController extends BaseModelController<UserPermission
     }
 
 
-    @ApiOperation(value = "绑定用户-资源关系，注意，如果roleIds为空，表示删除用户所有角色！", notes = "")
+    @ApiOperation(value = "绑定用户-资源关系，注意，该操作会清除用户原来绑定的权限。如果targetIds为空，表示删除用户所有角色！", notes = "")
     @PostMapping("/bind")
     public ServiceResult bindUserRoles(@RequestBody @Validated BindUserTargetsRequest userTargetsReq) {
-        boolean success = getModelService().bindUserTargets(userTargetsReq.getUserId(), userTargetsReq.getTargetIds());
+        boolean success = getModelService().bindUserTargets(userTargetsReq.getUserId(), userTargetsReq.getTargetIds(), true);
         return ResultUtils.commonResult(success, null);
     }
 

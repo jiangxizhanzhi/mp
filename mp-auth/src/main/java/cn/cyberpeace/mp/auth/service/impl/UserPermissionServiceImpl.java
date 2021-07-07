@@ -131,18 +131,19 @@ public class UserPermissionServiceImpl
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean bindUserTargets(String userId, List<String> targetIds) {
+    public boolean bindUserTargets(String userId, List<String> targetIds, boolean cleanOldTargets) {
         Assert.notNull(userId, "userId不能为空");
 
         var result = userService.get(userId);
         ResultUtils.throwExceptionIfError(result, AuthConstant.ERROR_CODE_PREFIX + "account_not_existed");
 
-        // 清除用户角色
-        boolean success = cleanUserTargets(userId);
-        if (!success) {
-            throw new MpRuntimeException("清除用户权限失败！");
+        if (cleanOldTargets) {
+            // 清除用户原来的权限
+            boolean success = cleanUserTargets(userId);
+            if (!success) {
+                throw new MpRuntimeException("清除用户权限失败！");
+            }
         }
-
 
         if (CollectionUtil.isEmpty(targetIds)) {
             // 完成，直接返回

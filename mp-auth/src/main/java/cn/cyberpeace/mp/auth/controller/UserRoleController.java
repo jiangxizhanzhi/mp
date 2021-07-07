@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.auth.controller;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
-import cn.cyberpeace.mp.auth.dto.role.BindRoleUsersRequest;
-import cn.cyberpeace.mp.auth.dto.role.BindUserRolesRequest;
+import cn.cyberpeace.mp.auth.dto.role.RoleUsersRequest;
+import cn.cyberpeace.mp.auth.dto.role.UserRolesRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.UserRoleModel;
@@ -52,18 +52,26 @@ public class UserRoleController extends BaseModelController<UserRoleModel, Query
     }
 
 
-    @ApiOperation(value = "绑定用户-角色关系(单个用户 -> 多个角色)，注意，如果roleIds为空，表示删除用户所有角色！", notes = "")
+    @ApiOperation(value = "绑定用户-角色关系(单个用户 -> 多个角色)，注意，该操作会删除原有用户的所有角色。 如果roleIds为空，表示删除用户所有角色！", notes = "")
     @PostMapping("/bind/userRoles")
-    public ServiceResult bindUserRoles(@RequestBody @Validated BindUserRolesRequest userRolesReq) {
-        boolean success = getModelService().bindUserRoles(userRolesReq.getUserId(), userRolesReq.getRoleIds());
+    public ServiceResult bindUserRoles(@RequestBody @Validated UserRolesRequest userRolesReq) {
+        boolean success = getModelService().bindUserRoles(userRolesReq.getUserId(), userRolesReq.getRoleIds(), true);
         return ResultUtils.commonResult(success, null);
     }
 
 
     @ApiOperation(value = "绑定用户-角色关系(单个角色 -> 多个用户)", notes = "")
     @PostMapping("/bind/roleUsers")
-    public ServiceResult bindRoleUsers(@RequestBody @Validated BindRoleUsersRequest roleUsersReq) {
-        boolean success = getModelService().bindUserRoles(roleUsersReq.getRoleId(), roleUsersReq.getUserIds());
+    public ServiceResult bindRoleUsers(@RequestBody @Validated RoleUsersRequest roleUsersReq) {
+        boolean success = getModelService().bindRoleUsers(roleUsersReq.getRoleId(), roleUsersReq.getUserIds());
+        return ResultUtils.commonResult(success, null);
+    }
+
+
+    @ApiOperation(value = "解绑用户-角色关系(单个角色 -> 多个用户)", notes = "")
+    @PostMapping("/unbind/roleUsers")
+    public ServiceResult unBindRoleUsers(@RequestBody @Validated RoleUsersRequest roleUsersReq) {
+        boolean success = getModelService().unBindRoleUsers(roleUsersReq.getRoleId(), roleUsersReq.getUserIds());
         return ResultUtils.commonResult(success, null);
     }
 

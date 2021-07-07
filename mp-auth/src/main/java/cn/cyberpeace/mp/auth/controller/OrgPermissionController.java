@@ -35,10 +35,10 @@ public class OrgPermissionController extends BaseModelController<OrgPermissionMo
     }
 
 
-    @ApiOperation(value = "绑定组织-权限关系，注意，如果targetIds为空，表示删除组织所有权限！", notes = "")
+    @ApiOperation(value = "绑定组织-权限关系，注意，该操作会清除原来绑定的所有权限， 如果targetIds为空，表示删除组织所有权限！", notes = "")
     @PostMapping("/bind")
     public ServiceResult bindOrgPermissions(@RequestBody @Validated BindOrgTargetsRequest bindOrgTargetsReq) {
-        boolean success = getModelService().bindOrgTargets(bindOrgTargetsReq.getUserId(), bindOrgTargetsReq.getTargetIds());
+        boolean success = getModelService().bindOrgTargets(bindOrgTargetsReq.getUserId(), bindOrgTargetsReq.getTargetIds(), true);
         return ResultUtils.commonResult(success, null);
     }
 

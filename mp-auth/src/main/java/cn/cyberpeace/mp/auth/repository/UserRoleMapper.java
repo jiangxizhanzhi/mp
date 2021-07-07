@@ -29,6 +29,17 @@ public interface UserRoleMapper extends BaseModelMapper<UserRoleModel> {
 
 
     @Delete("delete from mp_auth_user_role where user = #{userId}")
-    void deleteByUser(@Param("userId") String userId);
+    int deleteAllByUser(@Param("userId") String userId);
+
+    @Delete("<script>" +
+            "delete from mp_auth_user_role where role = #{roleId} " +
+            "  <if test=\"userIds != null\"> " +
+            "    AND user IN " +
+            "    <foreach item=\"userId\" index=\"index\" collection=\"userIds\" open=\"(\" separator=\",\" close=\")\"> " +
+            "      #{userId} " +
+            "    </foreach>" +
+            "  </if>" +
+            "</script>")
+    int deleteByRoleUsers(@Param("roleId") String roleId, @Param("userIds") List<String> userIds);
 
 }

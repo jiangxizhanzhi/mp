@@ -69,18 +69,19 @@ public class OrgPermissionServiceImpl
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean bindOrgTargets(String orgId, List<String> targetIds) {
+    public boolean bindOrgTargets(String orgId, List<String> targetIds, boolean cleanOldTargets) {
         Assert.notNull(orgId, "orgId不能为空");
 
         var result = orgService.get(orgId);
         ResultUtils.throwExceptionIfError(result, AuthConstant.ERROR_CODE_PREFIX + "org_not_existed");
 
-        // 清除组织权限
-        boolean success = cleanOrgTargets(orgId);
-        if (!success) {
-            throw new MpRuntimeException("清除组织权限失败！");
+        if (cleanOldTargets) {
+            // 清除组织权限
+            boolean success = cleanOrgTargets(orgId);
+            if (!success) {
+                throw new MpRuntimeException("清除组织权限失败！");
+            }
         }
-
 
         if (CollectionUtil.isEmpty(targetIds)) {
             // 完成，直接返回

@@ -51,18 +51,19 @@ public class RolePermissionServiceImpl
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean bindRoleTargets(String roleId, List<String> targetIds) {
+    public boolean bindRoleTargets(String roleId, List<String> targetIds, boolean cleanOldTargets) {
         Assert.notNull(roleId, "roleId不能为空");
 
         var result = roleService.get(roleId);
         ResultUtils.throwExceptionIfError(result, AuthConstant.ERROR_CODE_PREFIX + "role_not_existed");
 
-        // 清除角色绑定的权限
-        boolean success = cleanRoleTargets(roleId);
-        if (!success) {
-            throw new MpRuntimeException("清除角色权限失败！");
+        if (cleanOldTargets) {
+            // 清除角色绑定的权限
+            boolean success = cleanRoleTargets(roleId);
+            if (!success) {
+                throw new MpRuntimeException("清除角色权限失败！");
+            }
         }
-
 
         if (CollectionUtil.isEmpty(targetIds)) {
             // 完成，直接返回

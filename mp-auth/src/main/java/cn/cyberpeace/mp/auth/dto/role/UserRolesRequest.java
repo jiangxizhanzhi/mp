@@ -7,13 +7,13 @@ import lombok.Data;
 import javax.validation.constraints.NotBlank;
 import java.util.List;
 
-@ApiModel(value = "绑定用户-角色关系请求(一个角色，多个用户)")
+@ApiModel(value = "绑定用户-角色关系请求（一个用户，多个角色）")
 @Data
-public class BindRoleUsersRequest {
+public class UserRolesRequest {
 
     @NotBlank
-    String roleId;
+    String userId;
 
-    List<String> userIds;
+    List<String> roleIds;
 
 }
