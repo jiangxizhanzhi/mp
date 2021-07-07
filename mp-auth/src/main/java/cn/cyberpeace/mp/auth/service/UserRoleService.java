@@ -13,6 +13,8 @@ public interface UserRoleService extends BaseModelService<UserRoleModel, QueryPa
 
     boolean bindUserRoles(String userId, List<String> roleIds);
 
+    boolean bindRoleUsers(String roleId, List<String> userIds);
+
     // 清除用户所有角色
     boolean cleanUserRoles(String userId);
 }

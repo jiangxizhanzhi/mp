@@ -80,11 +80,12 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
     @Override
     public List<TargetDto> getTree(String parentId, Integer type) {
         if (Objects.isNull(type)) {
+            // 默认查询菜单树
             type = TargetModel.TYPE_MENU;
         }
 
         if (StringUtils.isBlank(parentId)) {
-            // 查询所有权限
+            // parent为空，则查询所有权限
             List<TargetModel> targets = listAll(AuthConstant.DEFAULT_TENANT, type);
             if (CollectionUtil.isEmpty(targets)) {
                 return new ArrayList<>();

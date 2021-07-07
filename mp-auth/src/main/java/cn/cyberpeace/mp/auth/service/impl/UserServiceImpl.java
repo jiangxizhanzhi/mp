@@ -91,17 +91,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         setModelFields(modelFields);
     }
 
-    @Override
-    public ObjServiceResult<UserModel> get(String id) {
-        ObjServiceResult<UserModel> objServiceResult = super.get(id);
-
-        if (Objects.isNull(objServiceResult.getSource()) || Objects.isNull(objServiceResult.getSource().getObj())) {
-            return objServiceResult;
-        }
-        UserModel userModel = objServiceResult.getSource().getObj();
-        return objServiceResult;
-    }
-
     public UserDto getUserDto(String id) {
         UserModel userModel = getModelMapper().get(id);
 

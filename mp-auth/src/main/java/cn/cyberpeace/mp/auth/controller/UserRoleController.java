@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.auth.controller;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
+import cn.cyberpeace.mp.auth.dto.role.BindRoleUsersRequest;
 import cn.cyberpeace.mp.auth.dto.role.BindUserRolesRequest;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.UserRoleModel;
@@ -44,12 +45,19 @@ public class UserRoleController extends BaseModelController<UserRoleModel, Query
     }
 
 
-    @ApiOperation(value = "绑定用户-角色关系，注意，如果roleIds为空，表示删除用户所有角色！", notes = "")
-    @PostMapping("/bind")
+    @ApiOperation(value = "绑定用户-角色关系(单个用户 -> 多个角色)，注意，如果roleIds为空，表示删除用户所有角色！", notes = "")
+    @PostMapping("/bind/userRoles")
     public ServiceResult bindUserRoles(@RequestBody @Validated BindUserRolesRequest userRolesReq) {
         boolean success = getModelService().bindUserRoles(userRolesReq.getUserId(), userRolesReq.getRoleIds());
         return ResultUtils.commonResult(success, null);
     }
 
+
+    @ApiOperation(value = "绑定用户-角色关系(单个角色 -> 多个用户)", notes = "")
+    @PostMapping("/bind/roleUsers")
+    public ServiceResult bindRoleUsers(@RequestBody @Validated BindRoleUsersRequest roleUsersReq) {
+        boolean success = getModelService().bindUserRoles(roleUsersReq.getRoleId(), roleUsersReq.getUserIds());
+        return ResultUtils.commonResult(success, null);
+    }
 
 }
