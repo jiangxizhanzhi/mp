@@ -16,9 +16,9 @@ public class WazuhModel {
     @JSONField(name = "MemoryPercent")
     private int memoryPercent;
     @JSONField(name = "CPUTotalPercent")
-    private double CPUTotalPercent;
+    private double cpuTotalPercent;
     @JSONField(name = "CPUCount")
-    private int CPUCount;
+    private int cpuCount;
     @JSONField(name = "DiskSpace")
     private long diskSpace;
 
