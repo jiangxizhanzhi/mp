@@ -102,4 +102,13 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
 
         return super.update(obj, fields);
     }
+
+    @Override
+    public boolean isUserAudit() {
+        SysConfigModel config = getByKeyName("user_audit");
+        if (Objects.nonNull(config) && Objects.equals("1", config.getValue())) {
+            return true;
+        }
+        return false;
+    }
 }

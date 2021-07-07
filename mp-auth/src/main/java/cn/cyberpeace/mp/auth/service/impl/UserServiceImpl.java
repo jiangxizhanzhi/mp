@@ -15,6 +15,7 @@ import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.service.RoleService;
+import cn.cyberpeace.mp.auth.service.SysConfigService;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.UserFields;
@@ -60,6 +61,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Autowired
     private AuthConfig authConfig;
+
+    @Autowired
+    private SysConfigService sysConfigService;
 
     @Autowired
     private FastDFSClient fastDFSClient;
@@ -140,7 +144,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public ObjServiceResult<UserModel> create(UserModel obj, String[] fields) {
         obj.encodePassword();
         // 查看系统设置，注册用户是否需要审批
-        if (authConfig.isNeedRegistrationAudit()) {
+        if (sysConfigService.isUserAudit()) {
             log.info("need registration audit...");
             obj.setIsAudited(UserModel.Status.NOT_AUDITED);
         }
@@ -157,7 +161,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public ServiceResult<Integer> bulkCreate(List<UserModel> objs) {
         objs.forEach(UserModel::encodePassword);
         // 查看系统设置，注册用户是否需要审批
-        if (authConfig.isNeedRegistrationAudit()) {
+        if (sysConfigService.isUserAudit()) {
             log.info("need registration audit...");
             objs.forEach(o -> o.setIsAudited(UserModel.Status.NOT_AUDITED));
         }
