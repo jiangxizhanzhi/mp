@@ -71,4 +71,8 @@ public class SessionRequest {
      */
     @ApiModelProperty("协议 模糊查询字段")
     private String protocol;
+
+
+    @ApiModelProperty("场景source macId")
+    private List<String> macIds;
 }
