@@ -5,4 +5,5 @@ import cn.cyberpeace.mp.auth.service.param.TenantQueryParams;
 import cn.cyberpeace.mp.base.service.BaseModelService;
 
 public interface TenantService extends BaseModelService<TenantModel, TenantQueryParams> {
+
 }

@@ -16,6 +16,8 @@ import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.service.RoleService;
 import cn.cyberpeace.mp.auth.service.SysConfigService;
+import cn.cyberpeace.mp.auth.service.TenantUserService;
+import cn.cyberpeace.mp.auth.service.UserPermissionService;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.UserFields;
@@ -76,6 +78,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Autowired
     private UserRoleService userRoleService;
+
+    @Autowired
+    private UserPermissionService userPermissionService;
+
+    @Autowired
+    private TenantUserService tenantUserService;
 
     @Autowired
     private OrgService orgService;
@@ -175,9 +183,41 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     @Override
-    public ServiceResult<Boolean> delete(String id) {
-        // todo 删除用户-组织，用户-角色关联关系
-        return super.delete(id);
+    @Transactional(rollbackFor = Exception.class)
+    public ServiceResult<Boolean> delete(String userId) {
+        // todo 删除用户-组织，用户-角色关联关系 用户-权限关系 租户-用户关系
+        boolean cleanUserRolesSuccess = userRoleService.cleanUserRoles(userId);
+        boolean cleanUserOrgsSuccess = orgUserService.cleanUserOrgs(userId);
+        boolean cleanUserTargetsSuccess = userPermissionService.cleanUserTargets(userId);
+        boolean cleanUserTenantsSuccess = tenantUserService.cleanUserTenants(userId);
+        
+        if(!cleanUserRolesSuccess || !cleanUserOrgsSuccess || !cleanUserTargetsSuccess || !cleanUserTenantsSuccess) {
+            log.info("cleanUserRolesSuccess:{}, cleanUserOrgsSuccess:{}, cleanUserTargetsSuccess:{}, cleanUserTenantsSuccess:{}", cleanUserRolesSuccess, cleanUserOrgsSuccess, cleanUserTargetsSuccess, cleanUserTenantsSuccess);
+            throw new MpRuntimeException("删除失败！");
+        }
+
+        return super.delete(userId);
+
+    }
+
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public ServiceResult<Integer> bulkDelete(String[] userIds) {
+
+        for (String userId : userIds) {
+            boolean cleanUserRolesSuccess = userRoleService.cleanUserRoles(userId);
+            boolean cleanUserOrgsSuccess = orgUserService.cleanUserOrgs(userId);
+            boolean cleanUserTargetsSuccess = userPermissionService.cleanUserTargets(userId);
+            boolean cleanUserTenantsSuccess = tenantUserService.cleanUserTenants(userId);
+
+            if(!cleanUserRolesSuccess || !cleanUserOrgsSuccess || !cleanUserTargetsSuccess || !cleanUserTenantsSuccess) {
+                log.info("cleanUserRolesSuccess:{}, cleanUserOrgsSuccess:{}, cleanUserTargetsSuccess:{}, cleanUserTenantsSuccess:{}", cleanUserRolesSuccess, cleanUserOrgsSuccess, cleanUserTargetsSuccess, cleanUserTenantsSuccess);
+                throw new MpRuntimeException("删除失败！");
+            }
+        }
+
+        return super.bulkDelete(userIds);
     }
 
     @Override

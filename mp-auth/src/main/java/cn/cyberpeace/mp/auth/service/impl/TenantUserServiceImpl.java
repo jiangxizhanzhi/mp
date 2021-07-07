@@ -20,4 +20,9 @@ public class TenantUserServiceImpl
         setModelFields(modelFields);
     }
 
+    @Override
+    public boolean cleanUserTenants(String userId) {
+        // todo 
+        return true;
+    }
 }
