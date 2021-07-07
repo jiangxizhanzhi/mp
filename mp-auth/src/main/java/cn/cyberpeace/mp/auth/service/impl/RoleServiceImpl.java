@@ -55,14 +55,30 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ServiceResult<Boolean> delete(String id) {
+        Assert.notBlank(id, "id不能为空！");
         // todo 删除关联用户关系，权限关系
+        boolean cleanSuccess = rolePermissionService.cleanRoleTargets(id);
+        if (!cleanSuccess) {
+            throw new MpRuntimeException("清除原来角色绑定的权限关系失败！");
+        }
+
         return super.delete(id);
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ServiceResult<Integer> bulkDelete(String[] ids) {
         // todo 删除关联用户关系，权限关系
+
+        for (String id : ids) {
+            boolean cleanSuccess = rolePermissionService.cleanRoleTargets(id);
+            if (!cleanSuccess) {
+                throw new MpRuntimeException("清除原来角色绑定的权限关系失败！");
+            }
+        }
+
         return super.bulkDelete(ids);
     }
 
@@ -220,6 +236,13 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
         RoleDto roleDto = new RoleDto();
         cn.cyberpeace.mp.base.util.BeanUtils.copyProperties(roleModel, roleDto);
+
+        if (Objects.equals(roleModel.getIdentifier(), AuthConstant.ROLE_ADMIN)) {
+            // 管理员特殊处理 直接查询该租户下所有权限返回
+            List<TargetModel> allTargets = targetService.listAll(AuthConstant.DEFAULT_TENANT, null);
+            roleDto.setTargets(allTargets);
+            return roleDto;
+        }
 
         List<TargetModel> targets = rolePermissionService.listTargetsByRoleId(roleModel.getId());
         roleDto.setTargets(targets);

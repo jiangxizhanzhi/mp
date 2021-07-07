@@ -62,7 +62,7 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
     }
 
     @Override
-    @ApiOperation(value = "查询指定id数据", notes = "")
+    @ApiOperation(value = "查询指定id数据，附带权限集合", notes = "")
     public ObjServiceResult get(@PathVariable String id, @RequestParam(required = false) String[] fields) {
         RoleDto roleDto = getModelService().getRoleDto(id);
         return ResultUtils.obj2ObjServiceResult(roleDto);

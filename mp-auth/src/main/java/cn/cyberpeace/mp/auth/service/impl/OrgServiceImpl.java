@@ -17,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -68,12 +69,16 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
             obj.setPath(path);
         }
 
+        // todo 如果更新组织名称，则递归更新所有关联组织的path
+
         return super.update(obj, fields);
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ServiceResult<Boolean> delete(String id) {
         // todo 删除组织-权限，组织-用户关联关系
+        // todo 或者，如果存在绑定关系，是否允许删除？
         return super.delete(id);
     }
 
