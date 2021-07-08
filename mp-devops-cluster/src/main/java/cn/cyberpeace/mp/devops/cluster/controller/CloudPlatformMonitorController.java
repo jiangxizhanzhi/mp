@@ -1,11 +1,13 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
-import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
-import cn.cyberpeace.mp.devops.cluster.model.*;
+import cn.cyberpeace.mp.devops.cluster.model.HypervisorCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.HypervisorStatisticsCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.HypervisorWeightAndMaxInstanceCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.VirtualRealSwitchCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.request.*;
 import cn.cyberpeace.mp.devops.cluster.response.HypervisorPageResponse;
 import cn.cyberpeace.mp.devops.cluster.response.HypervisorServiceStateResponse;
@@ -168,7 +170,7 @@ public class CloudPlatformMonitorController {
         } catch (ExecutionException e) {
             log.error("资源统计多线程异步合并请求异常信息:{}",e.getMessage());
         }finally {
-            return new ServiceResult(response).asResult();
+            return new ServiceResult(response);
         }
     }
 
@@ -205,7 +207,7 @@ public class CloudPlatformMonitorController {
             }
         });
 
-        return new ListObjServiceResult(new ListObjResult(hypervisorPageResponses, model.getTotal())).asResult();
+        return new ListObjServiceResult(hypervisorPageResponses, model.getTotal());
     }
 
     /**
@@ -217,7 +219,7 @@ public class CloudPlatformMonitorController {
     @GetMapping("/hypervisor/reboot-poweroff")
     public ObjServiceResult rebootOrPowerOff(@Valid HypervisorRequest request){
         hypervisorService.rebootOrPowerOff(request);
-        return new ObjServiceResult().asResult();
+        return new ObjServiceResult();
     }
 
     /**
@@ -228,7 +230,7 @@ public class CloudPlatformMonitorController {
     @GetMapping("/service-state")
     public ServiceResult<HypervisorServiceStateResponse> serviceState(){
         List<HypervisorServiceStateResponse> responseList = hypervisorService.serviceState();
-        return new ServiceResult(responseList).asResult();
+        return new ServiceResult(responseList);
     }
 
     /**
@@ -246,7 +248,7 @@ public class CloudPlatformMonitorController {
                 VirtualRealSwitchStatusResponse.builder().name(v.getName()).managementIp(v.getManagement_ip()).state(v.getStatus())
                         .usedPorts(Integer.valueOf(v.getInterfaces_used())).ports(Integer.valueOf(v.getInterfaces_summary())).build()
         ).collect(Collectors.toList());
-        return new ServiceResult(list).asResult();
+        return new ServiceResult(list);
     }
 
 

@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.auth.extensions.security;
 
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
+import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,11 +30,10 @@ public class HttpAuthenticationEntryPoint implements AuthenticationEntryPoint {
         response.setContentType("application/json;charset=UTF-8");
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
-        ServiceResult<Object> result = new ServiceResult<>(null, AuthErrorCode.NOT_CERTIFIED,
-                authException.getMessage());
+        ServiceResult result = ServiceResult.builder().serviceCode(AuthErrorCode.NOT_CERTIFIED).build().asResult();
 
         PrintWriter writer = response.getWriter();
-        mapper.writeValue(writer, result.asResult());
+        mapper.writeValue(writer, result);
         writer.flush();
     }
 }
