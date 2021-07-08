@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/wazuh")
-@Api(value = "数据沙盘-场景监控时间查询接口", tags = "数据沙盘-场景监控时间查询接口")
+@Api(value = "数据沙盘-场景监控事件查询接口", tags = "数据沙盘-场景监控事件查询接口")
 public class WazuhController {
 
     @Autowired

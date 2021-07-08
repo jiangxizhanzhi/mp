@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.datasandtable.service;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.util.HttpUtils;
+import cn.cyberpeace.mp.base.util.LocalDateTimeUtils;
 import cn.cyberpeace.mp.datasandtable.config.SandTableConfig;
 import cn.cyberpeace.mp.datasandtable.constant.DataSandtableConstant;
 import cn.cyberpeace.mp.datasandtable.model.SPIViewRequest;
@@ -26,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.support.IndicesOptions;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.core.CountRequest;
@@ -116,12 +118,14 @@ public class SessionService {
         sourceBuilder.size(sessionRequest.getPageSize());
         var boolQueryBuilder = QueryBuilders.boolQuery();
         //时间查询
-        var rangeQueryBuilder = QueryBuilders.rangeQuery("timestamp")
-            .from(sessionRequest.getStartTime().toString()).to(sessionRequest.getEndTime().toString());
+        boolQueryBuilder.must(QueryBuilders.rangeQuery("timestamp")
+            .from(LocalDateTimeUtils.localDateTimeToString(sessionRequest.getStartTime(), LocalDateTimeUtils.esdateTimeFormatter))
+            .to(LocalDateTimeUtils.localDateTimeToString(sessionRequest.getEndTime(), LocalDateTimeUtils.esdateTimeFormatter)));
 
         //构造动态条件查询
         buildDynamicQuery(sessionRequest, boolQueryBuilder);
-        searchRequest.source(sourceBuilder.query(boolQueryBuilder.must(rangeQueryBuilder)));
+        searchRequest.source(sourceBuilder.query(boolQueryBuilder));
+        searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
 
         //处理分页
         int  offset = (sessionRequest.getPageNum() -1) * (sessionRequest.getPageSize());
@@ -190,7 +194,6 @@ public class SessionService {
      * @return String
      */
     public String querySPIView(SPIViewRequest spiViewRequest) {
-        HttpResponse httpResponse = null;
         String molochUrl;
         try {
             molochUrl = DataSandtableConstant.groupIdSessionUrlCache.get(spiViewRequest.getGroupId());
@@ -235,6 +238,9 @@ public class SessionService {
         }
         if (!ObjectUtils.isEmpty(sessionRequest.getProtocol())) {
             boolQueryBuilder.must(QueryBuilders.wildcardQuery("protocol","*" +sessionRequest.getProtocol() + "*"));
+        }
+        if (!ObjectUtils.isEmpty(sessionRequest.getMacIds())) {
+            boolQueryBuilder.filter(QueryBuilders.termsQuery("srcMacCnt.srcMac", sessionRequest.getMacIds()));
         }
     }
 
