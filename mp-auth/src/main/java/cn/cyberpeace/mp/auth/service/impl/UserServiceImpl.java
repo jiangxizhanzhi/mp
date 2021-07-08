@@ -184,7 +184,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public ServiceResult<Boolean> delete(String userId) {
+    public ServiceResult<Boolean>  delete(String userId) {
         // todo 删除用户-组织，用户-角色关联关系 用户-权限关系 租户-用户关系
         deleteReleated(userId);
 

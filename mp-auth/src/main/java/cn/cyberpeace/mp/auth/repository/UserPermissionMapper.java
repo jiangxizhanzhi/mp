@@ -22,7 +22,7 @@ public interface UserPermissionMapper extends BaseModelMapper<UserPermissionMode
     List<TargetModel> listByUserId(@Param("userId") String userId);
 
 
-    @Delete("delete from mp_auth_user_permission where user = #{userId}")
+    @Delete("delete from mp_auth_user_permission where owner = #{userId}")
     void deleteByUserId(@Param("userId") String userId);
 
     @Delete("delete from mp_auth_user_permission where target = #{targetId}")

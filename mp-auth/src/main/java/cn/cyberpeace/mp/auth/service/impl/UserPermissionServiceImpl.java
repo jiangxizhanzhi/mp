@@ -216,7 +216,7 @@ public class UserPermissionServiceImpl
     }
 
 
-    public boolean deleteByUserId(String userId) {
+    public boolean  deleteByUserId(String userId) {
         Assert.notNull(userId, "userid不能为空");
 
 //        var objResult = userService.get(userId).getSource();
