@@ -3,7 +3,9 @@ package cn.cyberpeace.mp.auth.service.impl;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.dto.role.RoleDto;
 import cn.cyberpeace.mp.auth.dto.role.RolePageRequest;
+import cn.cyberpeace.mp.auth.dto.role.RolePermDto;
 import cn.cyberpeace.mp.auth.dto.role.RoleRequest;
+import cn.cyberpeace.mp.auth.dto.target.PermissionDto;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.RolePermissionModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
@@ -31,8 +33,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -137,6 +141,14 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     }
 
     @Override
+    public RolePermDto getRolePermDto(String id) {
+        Assert.notBlank(id, "id不能为空！");
+        RoleModel roleModel = getModelMapper().get(id);
+        RolePermDto rolePermDto = roleModel2RolePermDto(roleModel);
+        return rolePermDto;
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public RoleModel add(RoleRequest createRequest) {
         Assert.notNull(createRequest, "createRequest不能为空！");
@@ -221,7 +233,6 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     }
 
 
-
     private RoleDto roleModel2RoleDto(RoleModel roleModel) {
         if (Objects.isNull(roleModel)) {
             return null;
@@ -230,16 +241,48 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         RoleDto roleDto = new RoleDto();
         cn.cyberpeace.mp.base.util.BeanUtils.copyProperties(roleModel, roleDto);
 
-        if (Objects.equals(roleModel.getIdentifier(), AuthConstant.ROLE_ADMIN)) {
-            // 管理员特殊处理 直接查询该租户下所有权限返回
-            List<TargetModel> allTargets = targetService.listAll(AuthConstant.DEFAULT_TENANT, null);
-            roleDto.setTargets(allTargets);
-            return roleDto;
-        }
+        List<TargetModel> targets = getRoleTargets(roleModel);
 
-        List<TargetModel> targets = rolePermissionService.listTargetsByRoleId(roleModel.getId());
         roleDto.setTargets(targets);
         return roleDto;
+    }
+
+
+    private RolePermDto roleModel2RolePermDto(RoleModel roleModel) {
+        if (Objects.isNull(roleModel)) {
+            return null;
+        }
+
+        RolePermDto rolePermDto = new RolePermDto();
+        cn.cyberpeace.mp.base.util.BeanUtils.copyProperties(roleModel, rolePermDto);
+
+        List<TargetModel> targets = getRoleTargets(roleModel);
+
+        rolePermDto.setTargets(targetModel2PermissionDto(targets));
+        return rolePermDto;
+    }
+
+    private List<TargetModel> getRoleTargets(RoleModel roleModel) {
+        List<TargetModel> targets = new ArrayList<>();
+        if (Objects.equals(roleModel.getIdentifier(), AuthConstant.ROLE_ADMIN)) {
+            // 管理员特殊处理 直接查询该租户下所有权限返回
+            targets = targetService.listAll(AuthConstant.DEFAULT_TENANT, null);
+        } else {
+            targets = rolePermissionService.listTargetsByRoleId(roleModel.getId());
+        }
+        return targets;
+    }
+
+    private List<PermissionDto> targetModel2PermissionDto(List<TargetModel> targets) {
+        List<PermissionDto> permissionDtos =
+                targets.stream().map(t -> {
+                    PermissionDto permissionDto = new PermissionDto();
+                    BeanUtils.copyProperties(t, permissionDto);
+                    permissionDto.setPerm("R/W/X");
+                    permissionDto.setIsEnabled(1);
+                    return permissionDto;
+                }).collect(Collectors.toList());
+        return permissionDtos;
     }
 
 

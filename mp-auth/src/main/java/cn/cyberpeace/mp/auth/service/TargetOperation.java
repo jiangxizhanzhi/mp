@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.auth.service;
 
-import cn.cyberpeace.mp.auth.dto.TargetDto;
+import cn.cyberpeace.mp.auth.dto.target.TargetDto;
 
 public interface TargetOperation<T> {
 

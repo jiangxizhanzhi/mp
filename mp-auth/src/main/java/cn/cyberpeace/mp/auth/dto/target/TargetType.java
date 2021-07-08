@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.auth.dto;
+package cn.cyberpeace.mp.auth.dto.target;
 
 public enum TargetType {
 
