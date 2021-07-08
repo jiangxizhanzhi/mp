@@ -699,9 +699,14 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         if (user.getIsAudited().equals(UserModel.Status.NOT_AUDITED)) {
             exportUser.setStat("未审批");
         }
-        if (user.getIsEnabled().equals(UserModel.Status.EXPIRED)) {
+
+        // 过期
+        LocalDateTime now = LocalDateTime.now();
+        if (Objects.nonNull(user.getExpiredTime()) && now.isAfter(user.getExpiredTime())) {
             exportUser.setStat("过期");
         }
+
+        // 禁用
         if (user.getIsEnabled().equals(UserModel.Status.DISABLED)) {
             exportUser.setStat("禁用");
         }
