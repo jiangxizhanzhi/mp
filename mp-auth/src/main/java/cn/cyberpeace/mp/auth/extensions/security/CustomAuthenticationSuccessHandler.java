@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.auth.extensions.security;
 
-import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.AuthLogConstant;
 import cn.cyberpeace.mp.auth.dto.OrgDto;
@@ -10,7 +9,7 @@ import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
-import cn.cyberpeace.mp.auth.service.LogService;
+import cn.cyberpeace.mp.auth.service.UserLogService;
 import cn.cyberpeace.mp.auth.service.UserPermissionService;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.service.fields.UserFields;
@@ -54,7 +53,7 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
     private OrgUserService orgUserService;
 
     @Autowired
-    private LogService logService;
+    private UserLogService userLogService;
 
     @Autowired
     public CustomAuthenticationSuccessHandler(MappingJackson2HttpMessageConverter messageConverter) {
@@ -141,7 +140,7 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
         logModel.setOpIp(SnUtils.getRealRemoteIp(request));
 
         // 记录登录日志
-        logService.record(logModel);
+        userLogService.record(logModel);
     }
 
 

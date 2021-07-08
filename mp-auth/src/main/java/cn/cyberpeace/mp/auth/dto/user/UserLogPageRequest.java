@@ -14,6 +14,9 @@ public class UserLogPageRequest {
     @ApiModelProperty(value = "用户id")
     private String userid;
 
+    @ApiModelProperty(value = "模块")
+    private String module;
+
     @ApiModelProperty(value = "日志类型")
     private String type;
 

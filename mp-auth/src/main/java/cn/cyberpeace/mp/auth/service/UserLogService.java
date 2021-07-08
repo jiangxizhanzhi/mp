@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.devops.log.service.OperateLogServiceFactory;
 import cn.cyberpeace.mp.devops.log.utils.SnUtils;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import com.alibaba.fastjson.JSON;
+import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.search.SearchRequest;
@@ -40,7 +41,7 @@ import java.util.Objects;
 
 @Service
 @Slf4j
-public class LogService {
+public class UserLogService {
 
     @Autowired
     private OperateLogServiceFactory operateLogServiceFactory;
@@ -71,7 +72,7 @@ public class LogService {
     }
 
 
-    public List<OperationLogModel> getUserLog(UserLogPageRequest logPageRequest) {
+    public PageInfo getUserLog(UserLogPageRequest logPageRequest) {
         logPageRequest.ensure();
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
@@ -80,8 +81,9 @@ public class LogService {
         }
 
         BoolQueryBuilder boolBuilder = QueryBuilders.boolQuery();
-        boolBuilder.must(QueryBuilders.termQuery("opModule.keyword", AuthLogConstant.MODULE));
-
+        if (StringUtils.isNotBlank(logPageRequest.getModule())) {
+            boolBuilder.must(QueryBuilders.termQuery("opModule.keyword", logPageRequest.getModule()));
+        }
         if (StringUtils.isNotBlank(logPageRequest.getUserid())) {
             boolBuilder.must(QueryBuilders.termQuery("userId.keyword", logPageRequest.getUserid()));
         }
@@ -106,7 +108,10 @@ public class LogService {
                 logList.add(operationLog);
             }
 
-            return logList;
+            PageInfo page = new PageInfo();
+            page.setList(logList);
+            page.setTotal(hits.getTotalHits().value);
+            return page;
         } catch (Exception e) {
             log.error("{}", ExceptionUtil.stacktraceToString(e));
             throw new MpRuntimeException(e.getMessage());

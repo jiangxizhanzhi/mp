@@ -12,7 +12,7 @@ import cn.cyberpeace.mp.auth.dto.user.UserRequest;
 import cn.cyberpeace.mp.auth.dto.validate.AddGroup;
 import cn.cyberpeace.mp.auth.dto.validate.UpdateGroup;
 import cn.cyberpeace.mp.auth.model.UserModel;
-import cn.cyberpeace.mp.auth.service.LogService;
+import cn.cyberpeace.mp.auth.service.UserLogService;
 import cn.cyberpeace.mp.auth.service.UploadDataListener;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
@@ -26,9 +26,8 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
 import cn.cyberpeace.mp.devops.log.model.OperationLogModel;
 import com.alibaba.excel.EasyExcel;
+import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -57,7 +56,7 @@ import java.util.List;
 public class UserController extends BaseModelController<UserModel, UserQueryParams, UserService> {
 
     @Autowired
-    private LogService logService;
+    private UserLogService userLogService;
 
     @Autowired
     public UserController(UserService modelService) {
@@ -214,9 +213,9 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
 
     @ApiOperation(value = "查询用户操作日志", notes = "")
     @GetMapping("/log")
-    public ServiceResult userlog(UserLogPageRequest logPageRequest) {
-        List<OperationLogModel> logs = logService.getUserLog(logPageRequest);
-        return ResultUtils.commonResult(true, logs);
+    public ListObjServiceResult userlog(UserLogPageRequest logPageRequest) {
+        PageInfo pageInfo = userLogService.getUserLog(logPageRequest);
+        return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
     }
 
 
