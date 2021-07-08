@@ -4,8 +4,11 @@ import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.dto.OrgDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.repository.OrgMapper;
+import cn.cyberpeace.mp.auth.service.OrgPermissionService;
 import cn.cyberpeace.mp.auth.service.OrgService;
+import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.service.fields.OrgFields;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
@@ -35,6 +38,12 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
 
     @Autowired
     private QueryChildOrgOperation queryChildOrgOperation;
+
+    @Autowired
+    private OrgPermissionService orgPermissionService;
+
+    @Autowired
+    private OrgUserService orgUserService;
 
     @Autowired
     public OrgServiceImpl(OrgMapper modelMapper, OrgFields modelFields) {
@@ -76,10 +85,22 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public ServiceResult<Boolean> delete(String id) {
+    public ServiceResult<Boolean> delete(String orgId) {
         // todo 删除组织-权限，组织-用户关联关系
         // todo 或者，如果存在绑定关系，是否允许删除？
-        return super.delete(id);
+
+        deleteReleated(orgId);
+
+        return super.delete(orgId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public ServiceResult<Integer> bulkDelete(String[] ids) {
+        for (String id : ids) {
+            deleteReleated(id);
+        }
+        return super.bulkDelete(ids);
     }
 
     @Override
@@ -221,5 +242,20 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         }
 
         return parentOrgs;
+    }
+
+
+    private void deleteReleated(String orgId) {
+        if (StringUtils.isBlank(orgId)) {
+            return;
+        }
+
+        boolean deleteOrgPermissionSuccess = orgPermissionService.deleteByOrgId(orgId);
+        boolean deleteOrgUserSuccess = orgUserService.deleteByOrgId(orgId);
+
+        if(!deleteOrgPermissionSuccess || !deleteOrgUserSuccess) {
+            log.info("deleteOrgPermissionSuccess:{}, deleteOrgUserSuccess:{}", deleteOrgPermissionSuccess, deleteOrgUserSuccess);
+            throw new MpRuntimeException("删除失败！");
+        }
     }
 }

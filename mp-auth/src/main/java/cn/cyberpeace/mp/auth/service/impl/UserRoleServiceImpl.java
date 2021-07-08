@@ -128,10 +128,10 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     public boolean deleteByUserId(String userId) {
         Assert.notNull(userId, "userId不能为空");
 
-        var objResult = userService.get(userId).getSource();
-        if (objResult == null || objResult.getObj() == null) {
-            new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "account_not_existed");
-        }
+//        var objResult = userService.get(userId).getSource();
+//        if (objResult == null || objResult.getObj() == null) {
+//            new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "account_not_existed");
+//        }
 
         getModelMapper().deleteByUserId(userId);
 
@@ -143,10 +143,10 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
 
         Assert.notNull(roleId, "roleId不能为空");
 
-        var objResult = roleService.get(roleId).getSource();
-        if (objResult == null || objResult.getObj() == null) {
-            new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "account_not_existed");
-        }
+//        var objResult = roleService.get(roleId).getSource();
+//        if (objResult == null || objResult.getObj() == null) {
+//            new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "account_not_existed");
+//        }
 
         getModelMapper().deleteByRoleId(roleId);
 

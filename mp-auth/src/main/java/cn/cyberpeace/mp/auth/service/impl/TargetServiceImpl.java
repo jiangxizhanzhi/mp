@@ -7,12 +7,17 @@ import cn.cyberpeace.mp.auth.dto.TargetType;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.repository.TargetMapper;
+import cn.cyberpeace.mp.auth.service.OrgPermissionService;
+import cn.cyberpeace.mp.auth.service.RolePermissionService;
 import cn.cyberpeace.mp.auth.service.TargetService;
+import cn.cyberpeace.mp.auth.service.UserPermissionService;
 import cn.cyberpeace.mp.auth.service.fields.TargetFields;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.lang.Assert;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.annotation.Target;
 import java.util.ArrayList;
@@ -40,9 +46,34 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
     private QueryParentTargetOperation queryParentTargetOperation;
 
     @Autowired
+    private UserPermissionService userPermissionService;
+
+    @Autowired
+    private OrgPermissionService orgPermissionService;
+
+    @Autowired
+    private RolePermissionService rolePermissionService;
+
+    @Autowired
     public TargetServiceImpl(TargetMapper modelMapper, TargetFields modelFields) {
         setModelMapper(modelMapper);
         setModelFields(modelFields);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public ServiceResult<Boolean> delete(String id) {
+        deleteReleated(id);
+        return super.delete(id);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public ServiceResult<Integer> bulkDelete(String[] ids) {
+        for (String id : ids) {
+            deleteReleated(id);
+        }
+        return super.bulkDelete(ids);
     }
 
     @Override
@@ -179,5 +210,22 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
         }
 
         return parentTargets;
+    }
+
+
+    private void deleteReleated(String targetId) {
+        if (StringUtils.isBlank(targetId)) {
+            return;
+        }
+
+        boolean deleteUserPermissionSuccess = userPermissionService.deleteByTargetId(targetId);
+        boolean deleteOrgPermissionSuccess = orgPermissionService.deleteByTargetId(targetId);
+        boolean deleteRolePermissionSuccess = rolePermissionService.deleteByTargetId(targetId);
+
+        if(!deleteUserPermissionSuccess || !deleteOrgPermissionSuccess || !deleteRolePermissionSuccess) {
+            throw new MpRuntimeException("删除失败！");
+        }
+
+
     }
 }
