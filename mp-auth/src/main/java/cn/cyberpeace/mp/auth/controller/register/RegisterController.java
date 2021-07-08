@@ -42,7 +42,6 @@ public class RegisterController {
     @PostMapping
     public ServiceResult register(@RequestBody @Validated RegisterRequest req) {
         log.info("req:{}", req);
-
         String encryptedPwd = req.getPassword();
         req.setPassword(PasswordUtils.desDecrypt(encryptedPwd));
         ObjServiceResult<UserModel> result = registerService.register(req);
