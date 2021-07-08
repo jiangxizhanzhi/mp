@@ -1,12 +1,13 @@
 package cn.cyberpeace.mp.auth.dto.user;
 
+import cn.cyberpeace.mp.auth.dto.common.PageRequest;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.util.Objects;
 
 @Data
-public class UserLogPageRequest {
+public class UserLogPageRequest extends PageRequest {
 
     @ApiModelProperty(value = "username")
     private String username;
@@ -14,39 +15,23 @@ public class UserLogPageRequest {
     @ApiModelProperty(value = "用户id")
     private String userid;
 
+    @ApiModelProperty(value = "模块")
+    private String module;
+
     @ApiModelProperty(value = "日志类型")
     private String type;
 
-    @ApiModelProperty(value = "当前页")
-    private Integer page;
-
-    @ApiModelProperty(value = "每页数量")
-    private Integer pageSize;
-
-    @ApiModelProperty(value = "分页每页条数(兼容)")
-    private Integer perPage;
-
 
     public void ensure() {
-        if (perPage != null) {
-            pageSize = perPage;
-        }
+        super.ensure();
 
-        // 默认值
-        if (Objects.isNull(page)) {
-            page = 1;
+        if(super.getPage() < 1) {
+            super.setPage(1);
         }
-        if (Objects.isNull(pageSize)) {
-            pageSize = 10;
-        }
+        super.setPage(super.getPage() - 1);
 
-        if(page < 1) {
-            page = 1;
-        }
-        page = page - 1;
-
-        if(pageSize < 1) {
-            pageSize = 10;
+        if(super.getPageSize() < 1) {
+            super.setPageSize(10);
         }
     }
 

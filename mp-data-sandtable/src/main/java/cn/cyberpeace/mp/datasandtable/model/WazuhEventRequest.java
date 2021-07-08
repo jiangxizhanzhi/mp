@@ -20,7 +20,7 @@ public class WazuhEventRequest {
      */
     @JsonSerialize(using = CustomLocalDateTimeSerializer.class)
     @JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)
-    @ApiModelProperty("开始时间-yyyy-MM-dd HH:mm:ss")
+    @ApiModelProperty(value = "开始时间-yyyy-MM-dd HH:mm:ss", required = true)
     @NotNull(message = "开始时间不能为空")
     private LocalDateTime startTime;
 
@@ -29,7 +29,7 @@ public class WazuhEventRequest {
      */
     @JsonSerialize(using = CustomLocalDateTimeSerializer.class)
     @JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)
-    @ApiModelProperty("结束时间-yyyy-MM-dd HH:mm:ss")
+    @ApiModelProperty(value = "结束时间-yyyy-MM-dd HH:mm:ss", required = true)
     @NotNull(message = "结束时间不能为空")
     private LocalDateTime endTime;
 
@@ -48,6 +48,6 @@ public class WazuhEventRequest {
     /**
      * wazuh macIds
      */
-    @ApiModelProperty("macId集合")
+    @ApiModelProperty(value = "macId集合", required = true)
     private List<String> macIds;
 }

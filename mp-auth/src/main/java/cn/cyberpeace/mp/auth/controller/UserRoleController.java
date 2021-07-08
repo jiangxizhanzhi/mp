@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.auth.controller;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.role.RoleUsersRequest;
+import cn.cyberpeace.mp.auth.dto.role.UserRolePageRequest;
 import cn.cyberpeace.mp.auth.dto.role.UserRolesRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.model.RoleModel;
@@ -10,7 +11,9 @@ import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -37,18 +40,18 @@ public class UserRoleController extends BaseModelController<UserRoleModel, Query
     }
 
 
-    @ApiOperation(value = "根据userId查询用户所有角色", notes = "")
-    @GetMapping("/roles/byuser")
-    public ServiceResult getRolesByUser(@RequestParam String userId) {
-        List<RoleModel> roles = getModelService().listByUserId(userId);
-        return ResultUtils.commonResult(true, roles);
+    @ApiOperation(value = "分页 根据userId查询用户所有角色", notes = "")
+    @GetMapping("/roles/page/byuser")
+    public ListObjServiceResult getRolesByUser(UserRolePageRequest pageRequest) {
+        PageInfo pageInfo = getModelService().pageByUserId(pageRequest);
+        return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
     }
 
-    @ApiOperation(value = "根据roleId查询角色绑定的所有用户", notes = "")
-    @GetMapping("/users/byrole")
-    public ServiceResult getUsersByRole(@RequestParam String roleId) {
-        List<UserDto> userDtos = getModelService().listByRoleId(roleId);
-        return ResultUtils.commonResult(true, userDtos);
+    @ApiOperation(value = "分页 根据roleId查询角色绑定的所有用户", notes = "")
+    @GetMapping("/users/page/byrole")
+    public ListObjServiceResult getUsersByRole(UserRolePageRequest pageRequest) {
+        PageInfo pageInfo = getModelService().pageByRoleId(pageRequest);
+        return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
     }
 
 

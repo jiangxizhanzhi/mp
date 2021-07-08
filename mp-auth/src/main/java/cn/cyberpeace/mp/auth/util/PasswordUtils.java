@@ -42,7 +42,7 @@ public class PasswordUtils {
     public static boolean isPasswordStrengthLowLevel(String password) {
         int score = PasswordStrengthChecker.checkPasswordStrength(password);
         var level = PasswordStrengthChecker.getPasswordLevel(password);
-        boolean isLowLevel = score < 4;
+        boolean isLowLevel = score < 3;
         log.info("password score:{}, level:{}", score, level);
         return isLowLevel;
     }
@@ -58,7 +58,7 @@ public class PasswordUtils {
 
 
     public static void main(String[] args) {
-        String context = "Ab123#";
+        String context = "xctfoj01";
         String strB64 = DES.encryptBase64(context);
         String encryptHex = DES.encryptHex(context);
         String encryptHexUtf8 = DES.encryptHex(context, "UTF-8");
