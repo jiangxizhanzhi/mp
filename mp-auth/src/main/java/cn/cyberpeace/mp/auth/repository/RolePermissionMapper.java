@@ -17,12 +17,15 @@ import java.util.List;
 @ModelClass(RolePermissionModel.class)
 public interface RolePermissionMapper extends BaseModelMapper<RolePermissionModel> {
 
-    @Select("select * from mp_auth_target where id in " +
+    @Select("select distinct * from mp_auth_target where id in " +
             "(select target from mp_auth_role_permission where owner = #{roleId})")
     List<TargetModel> listTargetsByRoleId(@Param("roleId") String roleId);
 
 
-    @Delete("delete form mp_auth_role_permission where owner = #{roleId}")
-    void deleteByRole(@Param("roleId") String roleId);
+    @Delete("delete from mp_auth_role_permission where owner = #{roleId}")
+    void deleteByRoleId(@Param("roleId") String roleId);
+
+    @Delete("delete from mp_auth_role_permission where target = #{targetId}")
+    void deleteByTargetId(@Param("targetId") String targetId);
 
 }

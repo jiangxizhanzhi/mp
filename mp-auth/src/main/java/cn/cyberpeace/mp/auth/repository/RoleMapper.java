@@ -36,7 +36,7 @@ public interface RoleMapper extends BaseModelMapper<RoleModel> {
 
 
     @Select("<script>" +
-            "select r.*, (select count(*) from mp_auth_user_role ru where r.id = ru.role) cnt from mp_auth_role r " +
+            "select r.*, (select count(distinct id) from mp_auth_user_role ru where r.id = ru.role) cnt from mp_auth_role r " +
             "<where>" +
             "  <if test=\"roleName != null and roleName != ''\">" +
             "    AND r.name like CONCAT('%', #{roleName}, '%')" +

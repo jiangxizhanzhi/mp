@@ -18,11 +18,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class OrgPermissionServiceImpl
@@ -69,18 +67,19 @@ public class OrgPermissionServiceImpl
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean bindOrgTargets(String orgId, List<String> targetIds) {
+    public boolean bindOrgTargets(String orgId, List<String> targetIds, boolean cleanOldTargets) {
         Assert.notNull(orgId, "orgId不能为空");
 
         var result = orgService.get(orgId);
         ResultUtils.throwExceptionIfError(result, AuthConstant.ERROR_CODE_PREFIX + "org_not_existed");
 
-        // 清除组织权限
-        boolean success = cleanOrgTargets(orgId);
-        if (!success) {
-            throw new MpRuntimeException("清除组织权限失败！");
+        if (cleanOldTargets) {
+            // 清除组织权限
+            boolean success = deleteByOrgId(orgId);
+            if (!success) {
+                throw new MpRuntimeException("清除组织权限失败！");
+            }
         }
-
 
         if (CollectionUtil.isEmpty(targetIds)) {
             // 完成，直接返回
@@ -105,9 +104,16 @@ public class OrgPermissionServiceImpl
 
 
     @Override
-    public boolean cleanOrgTargets(String orgId) {
+    public boolean deleteByOrgId(String orgId) {
         Assert.notBlank(orgId, "orgId不能为空！");
-        getModelMapper().deleteByOrg(orgId);
+        getModelMapper().deleteByOrgId(orgId);
+        return true;
+    }
+
+    @Override
+    public boolean deleteByTargetId(String targetId) {
+        Assert.notBlank(targetId, "targetId不能为空！");
+        getModelMapper().deleteByTargetId(targetId);
         return true;
     }
 

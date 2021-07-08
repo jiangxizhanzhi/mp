@@ -1,9 +1,12 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.model.RoleModel;
+import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
+import cn.cyberpeace.mp.auth.service.RoleService;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.UserRoleFields;
@@ -16,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -24,6 +28,9 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private RoleService roleService;
 
     @Autowired
     public UserRoleServiceImpl(UserRoleMapper modelMapper, UserRoleFields modelFields) {
@@ -41,10 +48,21 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         return roles;
     }
 
+    @Override
+    public List<UserDto> listByRoleId(String roleId) {
+        Assert.notBlank(roleId, "roleId不能为空！");
+        List<UserModel> userModels = getModelMapper().listByRoleId(roleId);
+        List<UserDto> userDtos = new ArrayList<>();
+        if (CollectionUtil.isEmpty(userModels)) {
+            return userDtos;
+        }
+        userModels.forEach(u -> userDtos.add(userService.userModel2UserDto(u)));
+        return userDtos;
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean bindUserRoles(String userId, List<String> roleIds) {
+    public boolean bindUserRoles(String userId, List<String> roleIds, boolean cleanOldRoles) {
         Assert.notNull(userId, "userId不能为空");
 
         var objResult = userService.get(userId).getSource();
@@ -52,10 +70,12 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
             throw new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "account_not_existed");
         }
 
-        // 清除用户角色
-        boolean success = cleanUserRoles(userId);
-        if (!success) {
-            throw new MpRuntimeException("清除用户角色失败！");
+        if (cleanOldRoles) {
+            // 清除用户角色
+            boolean success = deleteByUserId(userId);
+            if (!success) {
+                throw new MpRuntimeException("清除用户角色失败！");
+            }
         }
 
         if (CollectionUtil.isEmpty(roleIds)) {
@@ -81,7 +101,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     public boolean bindRoleUsers(String roleId, List<String> userIds) {
         Assert.notNull(roleId, "roleId不能为空");
 
-        var objResult = get(roleId).getSource();
+        var objResult = roleService.get(roleId).getSource();
         if (objResult == null || objResult.getObj() == null) {
             throw new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "role_not_existed");
         }
@@ -105,16 +125,50 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     }
 
     @Override
-    public boolean cleanUserRoles(String userId) {
-        Assert.notNull(userId, "userid不能为空");
+    public boolean deleteByUserId(String userId) {
+        Assert.notNull(userId, "userId不能为空");
 
         var objResult = userService.get(userId).getSource();
         if (objResult == null || objResult.getObj() == null) {
             new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "account_not_existed");
         }
 
-        getModelMapper().deleteByUser(userId);
+        getModelMapper().deleteByUserId(userId);
 
+        return true;
+    }
+
+    @Override
+    public boolean deleteByRoleId(String roleId) {
+
+        Assert.notNull(roleId, "roleId不能为空");
+
+        var objResult = roleService.get(roleId).getSource();
+        if (objResult == null || objResult.getObj() == null) {
+            new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "account_not_existed");
+        }
+
+        getModelMapper().deleteByRoleId(roleId);
+
+        return true;
+    }
+
+    @Override
+    public boolean deleteByRoleIdAndUserIds(String roleId, List<String> userIds) {
+        Assert.notNull(roleId, "roleId不能为空");
+
+        var objResult = roleService.get(roleId).getSource();
+        if (objResult == null || objResult.getObj() == null) {
+            throw new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "role_not_existed");
+        }
+
+        if (CollectionUtil.isEmpty(userIds)) {
+            // 完成，直接返回
+            return true;
+        }
+
+        // 删除用户角色
+        getModelMapper().deleteByRoleIdAndUserIds(roleId, userIds);
         return true;
     }
 

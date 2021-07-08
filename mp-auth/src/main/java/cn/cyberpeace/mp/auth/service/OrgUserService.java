@@ -29,6 +29,8 @@ public interface OrgUserService extends BaseModelService<OrgUserModel, QueryPara
     PageInfo<UserDto> pageUsersByOrg(OrgUserPageRequest req);
 
     // 清除用户所有组织
-    boolean cleanUserOrgs(String userId);
+    boolean deleteByUserId(String userId);
+
+    boolean deleteByOrgId(String orgId);
 
 }

@@ -22,6 +22,9 @@ public class RegisterService {
     @Autowired
     private UserCreateCheckService checkService;
 
+    @Autowired
+    private SysConfigService sysConfigService;
+
     public ObjServiceResult<UserModel> register(RegisterRequest req) {
 
         UserModel user = UserModel.builder()
@@ -34,7 +37,7 @@ public class RegisterService {
                 .avatar(req.getAvatar()).build();
 
         // 查看系统设置，注册用户是否需要审批
-        if (authConfig.isNeedRegistrationAudit()) {
+        if (sysConfigService.isUserAudit()) {
             log.info("need registration audit...");
             user.setIsAudited(UserModel.Status.NOT_AUDITED);
         }

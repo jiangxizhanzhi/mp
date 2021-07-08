@@ -15,6 +15,9 @@ import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.service.RoleService;
+import cn.cyberpeace.mp.auth.service.SysConfigService;
+import cn.cyberpeace.mp.auth.service.TenantUserService;
+import cn.cyberpeace.mp.auth.service.UserPermissionService;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.UserFields;
@@ -62,6 +65,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     private AuthConfig authConfig;
 
     @Autowired
+    private SysConfigService sysConfigService;
+
+    @Autowired
     private FastDFSClient fastDFSClient;
 
     @Autowired
@@ -72,6 +78,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Autowired
     private UserRoleService userRoleService;
+
+    @Autowired
+    private UserPermissionService userPermissionService;
+
+    @Autowired
+    private TenantUserService tenantUserService;
 
     @Autowired
     private OrgService orgService;
@@ -140,7 +152,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public ObjServiceResult<UserModel> create(UserModel obj, String[] fields) {
         obj.encodePassword();
         // 查看系统设置，注册用户是否需要审批
-        if (authConfig.isNeedRegistrationAudit()) {
+        if (sysConfigService.isUserAudit()) {
             log.info("need registration audit...");
             obj.setIsAudited(UserModel.Status.NOT_AUDITED);
         }
@@ -157,7 +169,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public ServiceResult<Integer> bulkCreate(List<UserModel> objs) {
         objs.forEach(UserModel::encodePassword);
         // 查看系统设置，注册用户是否需要审批
-        if (authConfig.isNeedRegistrationAudit()) {
+        if (sysConfigService.isUserAudit()) {
             log.info("need registration audit...");
             objs.forEach(o -> o.setIsAudited(UserModel.Status.NOT_AUDITED));
         }
@@ -171,9 +183,41 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     @Override
-    public ServiceResult<Boolean> delete(String id) {
-        // todo 删除用户-组织，用户-角色关联关系
-        return super.delete(id);
+    @Transactional(rollbackFor = Exception.class)
+    public ServiceResult<Boolean> delete(String userId) {
+        // todo 删除用户-组织，用户-角色关联关系 用户-权限关系 租户-用户关系
+        boolean cleanUserRolesSuccess = userRoleService.deleteByUserId(userId);
+        boolean cleanUserOrgsSuccess = orgUserService.deleteByUserId(userId);
+        boolean cleanUserTargetsSuccess = userPermissionService.deleteByUserId(userId);
+        boolean cleanUserTenantsSuccess = tenantUserService.deleteByUserId(userId);
+        
+        if(!cleanUserRolesSuccess || !cleanUserOrgsSuccess || !cleanUserTargetsSuccess || !cleanUserTenantsSuccess) {
+            log.info("cleanUserRolesSuccess:{}, cleanUserOrgsSuccess:{}, cleanUserTargetsSuccess:{}, cleanUserTenantsSuccess:{}", cleanUserRolesSuccess, cleanUserOrgsSuccess, cleanUserTargetsSuccess, cleanUserTenantsSuccess);
+            throw new MpRuntimeException("删除失败！");
+        }
+
+        return super.delete(userId);
+
+    }
+
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public ServiceResult<Integer> bulkDelete(String[] userIds) {
+
+        for (String userId : userIds) {
+            boolean cleanUserRolesSuccess = userRoleService.deleteByUserId(userId);
+            boolean cleanUserOrgsSuccess = orgUserService.deleteByUserId(userId);
+            boolean cleanUserTargetsSuccess = userPermissionService.deleteByUserId(userId);
+            boolean cleanUserTenantsSuccess = tenantUserService.deleteByUserId(userId);
+
+            if(!cleanUserRolesSuccess || !cleanUserOrgsSuccess || !cleanUserTargetsSuccess || !cleanUserTenantsSuccess) {
+                log.info("cleanUserRolesSuccess:{}, cleanUserOrgsSuccess:{}, cleanUserTargetsSuccess:{}, cleanUserTenantsSuccess:{}", cleanUserRolesSuccess, cleanUserOrgsSuccess, cleanUserTargetsSuccess, cleanUserTenantsSuccess);
+                throw new MpRuntimeException("删除失败！");
+            }
+        }
+
+        return super.bulkDelete(userIds);
     }
 
     @Override
@@ -258,7 +302,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         // 保存组织-用户关系
         if (CollectionUtil.isNotEmpty(modifyRequest.getOrgIds())) {
             // 清除原来所有用户关联的组织
-            orgUserService.cleanUserOrgs(userId);
+            orgUserService.deleteByUserId(userId);
 
             modifyRequest.getOrgIds().forEach(id -> {
                 boolean isOrgExist = orgService.exists(id);
@@ -276,7 +320,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         // 保存角色-用户关系
         if (CollectionUtil.isNotEmpty(modifyRequest.getRoleIds())) {
             // 清除原来所有用户关联的角色
-            userRoleService.cleanUserRoles(userId);
+            userRoleService.deleteByUserId(userId);
 
             modifyRequest.getRoleIds().forEach(id -> {
                 boolean isRoleExist = roleService.exists(id);

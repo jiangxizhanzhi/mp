@@ -17,4 +17,10 @@ public interface SysConfigService extends BaseModelService<SysConfigModel, Query
 
     boolean batchUpdateByKeyname(List<SysConfigModel> configs);
 
+    /**
+     * 是否需要审核 true（1）:需要 false（0）:不需要
+     * @return
+     */
+    boolean isUserAudit();
+
 }

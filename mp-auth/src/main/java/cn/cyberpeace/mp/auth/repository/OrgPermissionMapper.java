@@ -24,5 +24,8 @@ public interface OrgPermissionMapper extends BaseModelMapper<OrgPermissionModel>
 
 
     @Delete("delete from mp_auth_org_permission where owner = #{orgId}")
-    void deleteByOrg(@Param("orgId") String orgId);
+    void deleteByOrgId(@Param("orgId") String orgId);
+
+    @Delete("delete from mp_auth_org_permission where target = #{targetId}")
+    void deleteByTargetId(@Param("targetId") String targetId);
 }

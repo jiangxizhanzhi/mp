@@ -131,18 +131,19 @@ public class UserPermissionServiceImpl
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean bindUserTargets(String userId, List<String> targetIds) {
+    public boolean bindUserTargets(String userId, List<String> targetIds, boolean cleanOldTargets) {
         Assert.notNull(userId, "userId不能为空");
 
         var result = userService.get(userId);
         ResultUtils.throwExceptionIfError(result, AuthConstant.ERROR_CODE_PREFIX + "account_not_existed");
 
-        // 清除用户角色
-        boolean success = cleanUserTargets(userId);
-        if (!success) {
-            throw new MpRuntimeException("清除用户权限失败！");
+        if (cleanOldTargets) {
+            // 清除用户原来的权限
+            boolean success = deleteByUserId(userId);
+            if (!success) {
+                throw new MpRuntimeException("清除用户权限失败！");
+            }
         }
-
 
         if (CollectionUtil.isEmpty(targetIds)) {
             // 完成，直接返回
@@ -215,14 +216,20 @@ public class UserPermissionServiceImpl
     }
 
 
-    public boolean cleanUserTargets(String userId) {
+    public boolean deleteByUserId(String userId) {
         Assert.notNull(userId, "userid不能为空");
 
         var objResult = userService.get(userId).getSource();
         if (objResult == null || objResult.getObj() == null) {
             new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "account_not_existed");
         }
-        getModelMapper().deleteByUser(userId);
+        getModelMapper().deleteByUserId(userId);
+        return true;
+    }
+
+    public boolean deleteByTargetId(String targetId) {
+        Assert.notNull(targetId, "targetId不能为空");
+        getModelMapper().deleteByTargetId(targetId);
         return true;
     }
 

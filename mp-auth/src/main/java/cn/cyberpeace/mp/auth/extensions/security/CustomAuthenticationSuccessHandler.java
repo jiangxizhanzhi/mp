@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.auth.extensions.security;
 
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
+import cn.cyberpeace.mp.auth.constant.AuthLogConstant;
 import cn.cyberpeace.mp.auth.dto.OrgDto;
 import cn.cyberpeace.mp.auth.dto.login.LoginResp;
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetails;
@@ -16,6 +18,9 @@ import cn.cyberpeace.mp.auth.util.JwtUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.devops.log.constant.LogConstant;
+import cn.cyberpeace.mp.devops.log.model.OperationLogModel;
+import cn.cyberpeace.mp.devops.log.utils.SnUtils;
 import cn.hutool.core.collection.CollectionUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -80,8 +85,6 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
             loginResp.setUser(userResult.asResult());
             loginResp.setToken(jwt);
 
-
-
             // 角色
             List<RoleModel> roles = userRoleService.listByUserId(user.getId());
             loginResp.setRoles(roles);
@@ -113,12 +116,32 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
             result = new ServiceResult<>(null, BaseErrorCode.ERROR);
         }
 
-        // 记录登录日志
-        logService.record(user);
+        recordLoginLog(user, request);
 
         PrintWriter writer = response.getWriter();
         mapper.writeValue(writer, result.asResult());
         writer.flush();
+    }
+
+
+    private void recordLoginLog(UserModel user, HttpServletRequest request) {
+        OperationLogModel logModel = new OperationLogModel();
+        //操作类型
+        logModel.setOpType(AuthLogConstant.TYPE_LOGIN);
+        //操作主题
+        logModel.setTitle("登录");
+        //操作描述
+        logModel.setDescription("账号密码登录");
+
+        //操作用户
+        logModel.setUserId(user.getId());
+        logModel.setUserName(user.getUsername());
+        logModel.setUserType(LogConstant.USER_TYPE_USER);
+
+        logModel.setOpIp(SnUtils.getRealRemoteIp(request));
+
+        // 记录登录日志
+        logService.record(logModel);
     }
 
 

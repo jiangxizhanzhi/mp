@@ -19,11 +19,11 @@ import java.util.List;
 public interface OrgUserMapper extends BaseModelMapper<OrgUserModel> {
 
 
-    @Select("select * from mp_auth_user where id in " +
+    @Select("select distinct * from mp_auth_user where id in " +
             "(select user from mp_auth_org_user where org = #{orgId})")
     List<UserModel> listUsersByOrgId(@Param("orgId") String orgId);
 
-    @Select("select * from mp_auth_org where id in " +
+    @Select("select distinct * from mp_auth_org where id in " +
             "(select org from mp_auth_org_user where user = #{userId})")
     List<OrgModel> listOrgsByUserId(@Param("userId") String userId);
 
@@ -48,5 +48,8 @@ public interface OrgUserMapper extends BaseModelMapper<OrgUserModel> {
 
 
     @Delete("delete from mp_auth_org_user where user = #{userId}")
-    void deleteByUser(@Param("userId") String userId);
+    void deleteByUserId(@Param("userId") String userId);
+
+    @Delete("delete from mp_auth_org_user where org = #{orgId}")
+    void deleteByOrgId(@Param("orgId") String orgId);
 }

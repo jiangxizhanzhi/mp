@@ -98,7 +98,7 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
     }
 
 
-    @ApiOperation(value = "查询角色列表（附加权限信息，绑定的用户信息）", notes = "")
+    @ApiOperation(value = "分页查询角色列表（附加权限信息，绑定的用户信息）", notes = "")
     @GetMapping("/page")
     public ServiceResult getRolesWithUserCnt(RolePageRequest pageRequest) {
         pageRequest.ensure();

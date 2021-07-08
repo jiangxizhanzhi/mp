@@ -20,4 +20,15 @@ public class TenantUserServiceImpl
         setModelFields(modelFields);
     }
 
+    @Override
+    public boolean deleteByUserId(String userId) {
+        // todo 
+        return true;
+    }
+
+    @Override
+    public boolean deleteByTenantId(String tenantId) {
+        // todo
+        return true;
+    }
 }

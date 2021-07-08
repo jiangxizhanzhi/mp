@@ -25,14 +25,15 @@ public interface UserPermissionService extends BaseModelService<UserPermissionMo
 
     List<TargetDto> getTreeByUserId(String userId);
 
-    boolean bindUserTargets(String userId, List<String> targetIds);
-
-    // 清除用户所有权限
-    boolean cleanUserTargets(String userId);
+    boolean bindUserTargets(String userId, List<String> targetIds, boolean cleanOldTargets);
 
     // 返回菜单对象集合
     List<TargetModel> listMenusByLoginUser();
 
     // 返回菜单对象编码集合
     List<String> listMenuIdentsByLoginUser();
+
+    boolean deleteByUserId(String userId);
+
+    boolean deleteByTargetId(String targetId);
 }

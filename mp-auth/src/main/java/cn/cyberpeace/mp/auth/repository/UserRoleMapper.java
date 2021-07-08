@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.auth.repository;
 
 import cn.cyberpeace.mp.auth.model.RoleModel;
+import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
@@ -22,7 +23,26 @@ public interface UserRoleMapper extends BaseModelMapper<UserRoleModel> {
     List<RoleModel> listByUserId(@Param("userId") String userId);
 
 
+    @Select("select distinct * from mp_auth_user where id in " +
+            "(select user from mp_auth_user_role where role = #{roleId})")
+    List<UserModel> listByRoleId(@Param("roleId") String roleId);
+
+
     @Delete("delete from mp_auth_user_role where user = #{userId}")
-    void deleteByUser(@Param("userId") String userId);
+    int deleteByUserId(@Param("userId") String userId);
+
+    @Delete("delete from mp_auth_user_role where role = #{roleId}")
+    int deleteByRoleId(@Param("roleId") String roleId);
+
+    @Delete("<script>" +
+            "delete from mp_auth_user_role where role = #{roleId} " +
+            "  <if test=\"userIds != null\"> " +
+            "    AND user IN " +
+            "    <foreach item=\"userId\" index=\"index\" collection=\"userIds\" open=\"(\" separator=\",\" close=\")\"> " +
+            "      #{userId} " +
+            "    </foreach>" +
+            "  </if>" +
+            "</script>")
+    int deleteByRoleIdAndUserIds(@Param("roleId") String roleId, @Param("userIds") List<String> userIds);
 
 }
