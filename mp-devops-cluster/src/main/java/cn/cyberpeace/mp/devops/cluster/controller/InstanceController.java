@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
-import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
@@ -59,7 +58,7 @@ public class InstanceController {
                     .status(CloudPlatformEnum.fromValue(instanceModel.getStatus())).createTime(instanceModel.getCreated_at()).build()
         ).collect(Collectors.toList());
 
-        return new ListObjServiceResult(new ListObjResult(list, model.getTotal()).asResult()).asResult();
+        return new ListObjServiceResult(list, model.getTotal());
     }
 
 }

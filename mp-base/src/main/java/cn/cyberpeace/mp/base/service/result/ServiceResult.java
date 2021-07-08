@@ -37,6 +37,7 @@ public class ServiceResult<T> extends BaseServiceResult<T, T> {
     public ServiceResult(T source) {
         this();
         setSource(source);
+        this.asResult();
     }
 
     public ServiceResult(T source, ServiceCode code) {

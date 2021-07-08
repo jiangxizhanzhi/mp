@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
-import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
@@ -14,7 +13,9 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Objects;
@@ -60,7 +61,7 @@ public class NetworkController {
                         .subnets(subnets).createdAt(networkModel.getCreated_at()).build();
                 }
         ).collect(Collectors.toList());
-        return new ListObjServiceResult(new ListObjResult(list,model.getTotal()).asResult()).asResult();
+        return new ListObjServiceResult(list,model.getTotal());
     }
 
 }
