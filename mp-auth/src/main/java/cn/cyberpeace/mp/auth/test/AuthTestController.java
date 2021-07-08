@@ -83,9 +83,9 @@ public class AuthTestController {
 
 
     @GetMapping("/targets")
-    public void targets(Integer[] types) {
-        log.info("types:{}", types);
-        List<TargetModel> logs = targetService.listByMultiTypes(AuthConstant.DEFAULT_TENANT, types);
-        log.info("logs:{}", logs);
+    public void targets() {
+//        log.info("types:{}", types);
+//        List<TargetModel> logs = targetService.listByMultiTypes(AuthConstant.DEFAULT_TENANT, types);
+//        log.info("logs:{}", logs);
     }
 }
