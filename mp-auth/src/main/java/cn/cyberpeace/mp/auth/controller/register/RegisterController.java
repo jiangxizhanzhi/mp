@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.RegisterService;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
+import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -21,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @Api(value = "注册接口", tags = "AUTH-注册接口")
 @Slf4j
 @RestController
-@RequestMapping(ControllerConstant.BASE_API_PATH + "/register")
+@RequestMapping(ControllerConstant.BASE_UNAUTH_API_PATH + "/register")
 public class RegisterController {
 
     @Autowired
@@ -49,10 +50,10 @@ public class RegisterController {
         if (result.getSource() != null) {
             UserModel userModel = result.getSource().getObj();
             JwtUtils.addResponseHeaderWithJWT(userModel);
-            return ServiceResult.builder().source(result.getSource()).build().asResult();
+            return ResultUtils.commonResult(true, userModel);
         }
 
-        return ServiceResult.builder().serviceCode(BaseErrorCode.ERROR).build().asResult();
+        return ResultUtils.commonResult(false, null);
     }
 
 }
