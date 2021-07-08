@@ -39,10 +39,7 @@ public class GroupController {
 
 
     @PostMapping
-    public ServiceResult addGroup(@RequestBody @Valid GroupRequest groupRequest, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            throw new MpRuntimeException(bindingResult.getAllErrors().get(0).getDefaultMessage());
-        }
+    public ServiceResult addGroup(@RequestBody @Valid GroupRequest groupRequest) {
         var groupModel = new GroupModel();
         BeanUtils.copyProperties(groupRequest, groupModel);
         groupService.addGroup(groupModel);

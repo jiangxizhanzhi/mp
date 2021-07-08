@@ -120,4 +120,18 @@ public class ServiceResult<T> extends BaseServiceResult<T, T> {
                 .build();
     }
 
+    /**
+     * 返回自定义失败信息
+     * @param errorCode
+     * @param msg
+     * @return
+     */
+    public static ServiceResult fail(BaseErrorCode errorCode, String msg, String detail) {
+        return ServiceResult.builder()
+            .code(errorCode.getCode())
+            .detail(detail)
+            .message(msg)
+            .build();
+    }
+
 }

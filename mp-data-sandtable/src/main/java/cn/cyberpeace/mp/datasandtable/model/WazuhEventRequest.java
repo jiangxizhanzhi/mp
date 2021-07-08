@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.serializer.CustomLocalDateTimeDeserializer;
 import cn.cyberpeace.mp.base.serializer.CustomLocalDateTimeSerializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -11,6 +12,7 @@ import javax.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
+@ApiModel("系统监控事件变更查询条件")
 public class WazuhEventRequest {
 
     /**
