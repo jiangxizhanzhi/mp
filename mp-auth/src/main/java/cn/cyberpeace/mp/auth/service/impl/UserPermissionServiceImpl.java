@@ -219,10 +219,10 @@ public class UserPermissionServiceImpl
     public boolean deleteByUserId(String userId) {
         Assert.notNull(userId, "userid不能为空");
 
-        var objResult = userService.get(userId).getSource();
-        if (objResult == null || objResult.getObj() == null) {
-            new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "account_not_existed");
-        }
+//        var objResult = userService.get(userId).getSource();
+//        if (objResult == null || objResult.getObj() == null) {
+//            new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "account_not_existed");
+//        }
         getModelMapper().deleteByUserId(userId);
         return true;
     }

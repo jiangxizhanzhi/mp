@@ -86,8 +86,8 @@ public class RolePermissionServiceImpl
     public boolean deleteByRoleId(String roleId) {
         Assert.notNull(roleId, "roleId不能为空");
 
-        var result = roleService.get(roleId);
-        ResultUtils.throwExceptionIfError(result, AuthConstant.ERROR_CODE_PREFIX + "role_not_existed");
+//        var result = roleService.get(roleId);
+//        ResultUtils.throwExceptionIfError(result, AuthConstant.ERROR_CODE_PREFIX + "role_not_existed");
 
         getModelMapper().deleteByRoleId(roleId);
         return true;
