@@ -55,8 +55,7 @@ public class SessionController {
      */
     @PostMapping
     public ServiceResult<List<SessionResult>> querySessionListWithGroup(
-        @RequestBody @Valid SessionRequest sessionRequest, BindingResult bindingResult) {
-        handleValidMessage(bindingResult);
+        @RequestBody @Valid SessionRequest sessionRequest) {
         return ServiceResult.<List<SessionResult>>builder().data(sessionService.querySessionListWithGroup(sessionRequest)).build();
     }
 
@@ -68,26 +67,13 @@ public class SessionController {
      */
     @PostMapping("pageable")
     public ServiceResult<ListObjResult<SessionResult>> querySessionListWithGroupWithPage(
-        @RequestBody @Valid SessionRequest sessionRequest, BindingResult bindingResult) {
-        handleValidMessage(bindingResult);
-
+        @RequestBody @Valid SessionRequest sessionRequest) {
         return ServiceResult.<ListObjResult<SessionResult>>builder().data(sessionService.querySessionWithPage(sessionRequest)).build();
     }
 
     @PostMapping("spiview")
-    public ServiceResult<JSONObject> querySessionSpiView(@RequestBody @Valid SPIViewRequest spiViewRequest, BindingResult bindingResult) {
-        handleValidMessage(bindingResult);
+    public ServiceResult<JSONObject> querySessionSpiView(@RequestBody @Valid SPIViewRequest spiViewRequest) {
         var spiView = sessionService.querySPIView(spiViewRequest);
         return ServiceResult.<JSONObject>builder().data(JSONObject.parseObject(spiView)).build();
-    }
-
-    /**
-     * 处理参数异常
-     * @param bindingResult
-     */
-    private void handleValidMessage(BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            throw new MpRuntimeException(bindingResult.getAllErrors().get(0).getDefaultMessage());
-        }
     }
 }

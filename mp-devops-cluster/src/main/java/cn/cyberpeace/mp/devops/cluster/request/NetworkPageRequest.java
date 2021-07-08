@@ -19,7 +19,7 @@ public class NetworkPageRequest extends BasePageRequest implements Serializable 
     /**
      * 网络名称
      */
-    @ApiModelProperty(value = "网络名称",required = false)
+    @ApiModelProperty(value = "网络名称")
     private String name;
 
 }

@@ -16,14 +16,14 @@ public class HypervisorRequest extends BaseRequest {
     /**
      * 主机名/节点名称
      */
-    @NotBlank
+    @NotBlank(message = "节点名称不能为空")
     @ApiModelProperty(value = "节点名称",required = true)
     private String hostname;
 
     /**
      * 操作：重启reboot、关机poweroff
      */
-    @NotBlank
+    @NotBlank(message = "操作action不能为空")
     @ApiModelProperty(value = "操作(重启:reboot;关机:poweroff)",required = true)
     private String action;
 }

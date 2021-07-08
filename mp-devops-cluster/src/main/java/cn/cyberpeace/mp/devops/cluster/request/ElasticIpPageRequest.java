@@ -19,7 +19,7 @@ public class ElasticIpPageRequest extends BasePageRequest implements Serializabl
     /**
      * 名称
      */
-    @ApiModelProperty(value = "名称",required = false)
+    @ApiModelProperty(value = "名称")
     private String name;
 
 }
