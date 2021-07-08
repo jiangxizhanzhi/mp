@@ -266,9 +266,10 @@ public class WazuhService {
         //构造agentId
         buildAgentIdQuery(wazuhEventRequest, boolQueryBuilder, allAgentMacAddr);
 
-        //构造事件条件
+        //时间查询
         boolQueryBuilder.must(QueryBuilders.rangeQuery("timestamp")
-            .from(wazuhEventRequest.getStartTime().toString()).to(wazuhEventRequest.getEndTime().toString()));
+            .from(LocalDateTimeUtils.localDateTimeToString(wazuhEventRequest.getStartTime(), LocalDateTimeUtils.esdateTimeFormatter))
+            .to(LocalDateTimeUtils.localDateTimeToString(wazuhEventRequest.getEndTime(), LocalDateTimeUtils.esdateTimeFormatter)));
     }
 
     /**

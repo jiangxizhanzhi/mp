@@ -2,12 +2,15 @@ package cn.cyberpeace.mp.datasandtable.controller;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.datasandtable.model.SPIViewRequest;
 import cn.cyberpeace.mp.datasandtable.model.SessionRequest;
 import cn.cyberpeace.mp.datasandtable.model.SessionResult;
 import cn.cyberpeace.mp.datasandtable.service.SessionService;
 import com.alibaba.fastjson.JSONObject;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import java.io.IOException;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
@@ -23,12 +26,14 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/sessions")
+@Api(value = "数据沙盘-流量接口", tags = "数据沙盘-流量接口")
 public class SessionController {
 
     @Autowired
     private SessionService sessionService;
 
     @GetMapping("/pcap/{groupId}/{sessionId}")
+    @ApiOperation(value = "流量下载", notes = "")
     public ResponseEntity<Resource> downloadPcapFile(HttpServletResponse httpServletResponse,
         @PathVariable("sessionId") String sessionId, @PathVariable("groupId") String groupId) {
         var httpResponse = sessionService.queryPcapFileByGroupId(groupId, sessionId);
@@ -66,9 +71,9 @@ public class SessionController {
      * @return ServiceResult<ListObjResult < SessionResult>>
      */
     @PostMapping("pageable")
-    public ServiceResult<ListObjResult<SessionResult>> querySessionListWithGroupWithPage(
+    public ListObjServiceResult<SessionResult> querySessionListWithGroupWithPage(
         @RequestBody @Valid SessionRequest sessionRequest) {
-        return ServiceResult.<ListObjResult<SessionResult>>builder().data(sessionService.querySessionWithPage(sessionRequest)).build();
+        return new ListObjServiceResult<>(sessionService.querySessionWithPage(sessionRequest));
     }
 
     @PostMapping("spiview")
