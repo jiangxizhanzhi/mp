@@ -7,11 +7,13 @@ import cn.cyberpeace.mp.auth.dto.ResetSelfPwdRequest;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
+import cn.cyberpeace.mp.auth.dto.user.UserExportRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserLogPageRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserRequest;
 import cn.cyberpeace.mp.auth.dto.validate.AddGroup;
 import cn.cyberpeace.mp.auth.dto.validate.UpdateGroup;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.service.UserLogService;
 import cn.cyberpeace.mp.auth.service.UploadDataListener;
 import cn.cyberpeace.mp.auth.service.UserService;
@@ -57,6 +59,9 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
 
     @Autowired
     private UserLogService userLogService;
+
+    @Autowired
+    private OrgUserService orgUserService;
 
     @Autowired
     public UserController(UserService modelService) {
@@ -180,11 +185,13 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
 
     @ApiOperation(value = "导出用户数据excel", notes = "")
     @PostMapping("/excel/export")
-    public void exportExcel(UserQueryParams queryParams, HttpServletResponse response) throws IOException {
+    public void exportExcel(HttpServletResponse response, @RequestBody UserExportRequest exportRequest) throws IOException {
 
-        handleQueryParams("list", queryParams);
-        ListObjServiceResult<UserModel> listObjServiceResult = getModelService().list(queryParams).asResult();
-        List<UserModel> users = listObjServiceResult.getSource().getList();
+//        handleQueryParams("list", queryParams);
+//        ListObjServiceResult<UserModel> listObjServiceResult = getModelService().list(queryParams).asResult();
+//        List<UserModel> users = listObjServiceResult.getSource().getList();
+
+        List<UserModel> users =  orgUserService.listUsersByOrgAndUname(exportRequest.getOrg(), exportRequest.getUsername());
         List<ExportUser> exportUserList = getModelService().exportExcel(users);
 
         response.setContentType("application/vnd.ms-excel");

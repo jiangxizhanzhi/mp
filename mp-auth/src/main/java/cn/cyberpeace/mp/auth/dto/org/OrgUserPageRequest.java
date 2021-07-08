@@ -9,7 +9,7 @@ import java.util.Objects;
 @Data
 public class OrgUserPageRequest extends PageRequest {
 
-    @ApiModelProperty(value = "username")
+    @ApiModelProperty(value = "username 注意 后台会匹配 username 或者 name")
     private String username;
 
     @ApiModelProperty(value = "组织id")

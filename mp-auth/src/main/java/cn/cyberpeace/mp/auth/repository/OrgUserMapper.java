@@ -28,6 +28,13 @@ public interface OrgUserMapper extends BaseModelMapper<OrgUserModel> {
     List<OrgModel> listOrgsByUserId(@Param("userId") String userId);
 
 
+    /**
+     *
+     * @param orgId
+     * @param username 会同时模糊查询username和name
+     * @param userIds
+     * @return
+     */
     @Select("<script>" +
             "select * from mp_auth_user " +
             "<where>" +
@@ -41,7 +48,7 @@ public interface OrgUserMapper extends BaseModelMapper<OrgUserModel> {
             "    </foreach>" +
             "  </if>" +
             "  <if test=\"username != null and username != ''\">" +
-            "    AND username like CONCAT('%', #{username}, '%')" +
+            "    AND ( username like CONCAT('%', #{username}, '%') or name like CONCAT('%', #{username}, '%')) " +
             "  </if>" +
             "</where></script>")
     List<UserModel> listUsers(@Param("orgId") String orgId, @Param("username") String username, @Param("userIds") List<String> userIds);

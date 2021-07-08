@@ -16,6 +16,8 @@ public interface OrgUserService extends BaseModelService<OrgUserModel, QueryPara
 
     List<UserModel> listUsersByOrgId(String orgId);
 
+    List<UserModel> listUsersByOrgAndUname(String orgId, String uname);
+
     List<OrgModel> listOrgsByUserId(String userId);
 
     // 列出用户所在组织的层级关系
