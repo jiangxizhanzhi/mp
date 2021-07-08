@@ -223,7 +223,13 @@ public class UserPermissionServiceImpl
         if (objResult == null || objResult.getObj() == null) {
             new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "account_not_existed");
         }
-        getModelMapper().deleteByUser(userId);
+        getModelMapper().deleteByUserId(userId);
+        return true;
+    }
+
+    public boolean deleteByTargetId(String targetId) {
+        Assert.notNull(targetId, "targetId不能为空");
+        getModelMapper().deleteByTargetId(targetId);
         return true;
     }
 

@@ -4,12 +4,9 @@ import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.dto.role.RoleDto;
 import cn.cyberpeace.mp.auth.dto.role.RolePageRequest;
 import cn.cyberpeace.mp.auth.dto.role.RoleRequest;
-import cn.cyberpeace.mp.auth.dto.user.UserDto;
-import cn.cyberpeace.mp.auth.model.OrgUserModel;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.RolePermissionModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
-import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.repository.RoleMapper;
 import cn.cyberpeace.mp.auth.service.RolePermissionService;
 import cn.cyberpeace.mp.auth.service.RoleService;
@@ -33,7 +30,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.management.relation.Role;
 import java.util.List;
 import java.util.Objects;
 
@@ -59,7 +55,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     public ServiceResult<Boolean> delete(String roleId) {
         Assert.notBlank(roleId, "id不能为空！");
         // todo 删除关联用户关系，权限关系
-        boolean cleanSuccess = rolePermissionService.cleanRoleTargets(roleId);
+        boolean cleanSuccess = rolePermissionService.deleteByRoleId(roleId);
         if (!cleanSuccess) {
             throw new MpRuntimeException("清除原来角色绑定的权限关系失败！");
         }
@@ -73,7 +69,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         // todo 删除关联用户关系，权限关系
 
         for (String id : ids) {
-            boolean cleanSuccess = rolePermissionService.cleanRoleTargets(id);
+            boolean cleanSuccess = rolePermissionService.deleteByRoleId(id);
             if (!cleanSuccess) {
                 throw new MpRuntimeException("清除原来角色绑定的权限关系失败！");
             }
@@ -202,7 +198,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
 
         // todo 清除原来角色绑定的权限？
-        boolean cleanSuccess = rolePermissionService.cleanRoleTargets(roleId);
+        boolean cleanSuccess = rolePermissionService.deleteByRoleId(roleId);
         if (!cleanSuccess) {
             throw new MpRuntimeException("清除原来角色绑定的权限关系失败！");
         }

@@ -106,7 +106,14 @@ public class OrgPermissionServiceImpl
     @Override
     public boolean deleteByOrgId(String orgId) {
         Assert.notBlank(orgId, "orgId不能为空！");
-        getModelMapper().deleteByOrg(orgId);
+        getModelMapper().deleteByOrgId(orgId);
+        return true;
+    }
+
+    @Override
+    public boolean deleteByTargetId(String targetId) {
+        Assert.notBlank(targetId, "targetId不能为空！");
+        getModelMapper().deleteByTargetId(targetId);
         return true;
     }
 

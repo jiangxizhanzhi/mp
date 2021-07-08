@@ -23,9 +23,9 @@ public interface UserPermissionMapper extends BaseModelMapper<UserPermissionMode
 
 
     @Delete("delete from mp_auth_user_permission where user = #{userId}")
-    void deleteByUser(@Param("userId") String userId);
+    void deleteByUserId(@Param("userId") String userId);
 
     @Delete("delete from mp_auth_user_permission where target = #{targetId}")
-    void deleteByTarget(@Param("targetId") String targetId);
+    void deleteByTargetId(@Param("targetId") String targetId);
 
 }

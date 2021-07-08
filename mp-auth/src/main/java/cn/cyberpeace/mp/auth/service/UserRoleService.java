@@ -20,12 +20,10 @@ public interface UserRoleService extends BaseModelService<UserRoleModel, QueryPa
     // 绑定一个角色，多个用户
     boolean bindRoleUsers(String roleId, List<String> userIds);
 
-    // 清除用户所有角色
-    boolean deleteByUserId(String userId);
-
-    // 清除用户所有角色
-    boolean deleteByRoleId(String roleId);
-
     // 解绑一个角色，多个用户
     boolean deleteByRoleIdAndUserIds(String roleId, List<String> userIds);
+
+    boolean deleteByUserId(String userId);
+
+    boolean deleteByRoleId(String roleId);
 }

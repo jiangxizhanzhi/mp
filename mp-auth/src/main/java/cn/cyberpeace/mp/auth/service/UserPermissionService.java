@@ -27,12 +27,13 @@ public interface UserPermissionService extends BaseModelService<UserPermissionMo
 
     boolean bindUserTargets(String userId, List<String> targetIds, boolean cleanOldTargets);
 
-    // 清除用户所有权限
-    boolean deleteByUserId(String userId);
-
     // 返回菜单对象集合
     List<TargetModel> listMenusByLoginUser();
 
     // 返回菜单对象编码集合
     List<String> listMenuIdentsByLoginUser();
+
+    boolean deleteByUserId(String userId);
+
+    boolean deleteByTargetId(String targetId);
 }
