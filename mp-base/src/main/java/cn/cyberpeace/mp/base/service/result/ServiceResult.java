@@ -4,7 +4,6 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.code.ServiceCode;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModelProperty;
-import javax.annotation.Nullable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -88,7 +87,7 @@ public class ServiceResult<T> extends BaseServiceResult<T, T> {
      * @param errorCode
      * @return
      */
-    public static ServiceResult fail(BaseErrorCode errorCode) {
+    public static ServiceResult fail(ServiceCode errorCode) {
         return ServiceResult.builder()
                 .code(errorCode.getCode())
                 .message(errorCode.toString())
@@ -113,7 +112,7 @@ public class ServiceResult<T> extends BaseServiceResult<T, T> {
      * @param msg
      * @return
      */
-    public static ServiceResult fail(BaseErrorCode errorCode, String msg) {
+    public static ServiceResult fail(ServiceCode errorCode, String msg) {
         return ServiceResult.builder()
                 .code(errorCode.getCode())
                 .message(msg)
@@ -126,7 +125,7 @@ public class ServiceResult<T> extends BaseServiceResult<T, T> {
      * @param msg
      * @return
      */
-    public static ServiceResult fail(BaseErrorCode errorCode, String msg, String detail) {
+    public static ServiceResult fail(ServiceCode errorCode, String msg, String detail) {
         return ServiceResult.builder()
             .code(errorCode.getCode())
             .detail(detail)

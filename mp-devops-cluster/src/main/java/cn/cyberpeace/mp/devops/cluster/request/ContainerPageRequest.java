@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.request;
 
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -21,5 +22,6 @@ public class ContainerPageRequest extends BasePageRequest implements Serializabl
     /**
      * 主机名/节点名称
      */
+    @ApiModelProperty(value = "主机名/节点名称")
     private String host;
 }

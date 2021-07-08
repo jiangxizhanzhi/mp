@@ -19,7 +19,7 @@ public class RouterPageRequest extends BasePageRequest implements Serializable {
     /**
      * 路由名称
      */
-    @ApiModelProperty(value = "路由名称",required = false)
+    @ApiModelProperty(value = "路由名称")
     private String name;
 
 }
