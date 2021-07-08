@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.dto.role.UserRolePageRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -15,6 +16,8 @@ import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.lang.Assert;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,23 +44,35 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     @Override
     public List<RoleModel> listByUserId(String userId) {
         Assert.notBlank(userId, "userId不能为空！");
-        // 查询user直接绑定的角色
         List<RoleModel> roles = getModelMapper().listByUserId(userId);
-
-        // todo 查询用户所在组织（上级组织）的角色  暂无此功能
         return roles;
     }
 
     @Override
-    public List<UserDto> listByRoleId(String roleId) {
-        Assert.notBlank(roleId, "roleId不能为空！");
-        List<UserModel> userModels = getModelMapper().listByRoleId(roleId);
+    public PageInfo pageByUserId(UserRolePageRequest pageRequest) {
+        pageRequest.ensure();
+        Assert.notBlank(pageRequest.getUserId(), "userId不能为空！");
+        PageHelper.startPage(pageRequest.getPage(), pageRequest.getPageSize());
+        // 查询user直接绑定的角色
+        List<RoleModel> roles = getModelMapper().listByUserId(pageRequest.getUserId());
+        PageInfo pageInfo = new PageInfo(roles);
+        // todo 查询用户所在组织（上级组织）的角色  暂无此功能
+        return pageInfo;
+    }
+
+    @Override
+    public PageInfo pageByRoleId(UserRolePageRequest pageRequest) {
+        pageRequest.ensure();
+        Assert.notBlank(pageRequest.getRoleId(), "roleId不能为空！");
+        PageHelper.startPage(pageRequest.getPage(), pageRequest.getPageSize());
+        List<UserModel> userModels = getModelMapper().listByRoleId(pageRequest.getRoleId());
+        PageInfo pageInfo = new PageInfo(userModels);
         List<UserDto> userDtos = new ArrayList<>();
-        if (CollectionUtil.isEmpty(userModels)) {
-            return userDtos;
+        if (CollectionUtil.isNotEmpty(userModels)) {
+            userModels.forEach(u -> userDtos.add(userService.userModel2UserDto(u)));
         }
-        userModels.forEach(u -> userDtos.add(userService.userModel2UserDto(u)));
-        return userDtos;
+        pageInfo.setList(userDtos);
+        return pageInfo;
     }
 
     @Override
