@@ -4,12 +4,16 @@ import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.user.UserLogPageRequest;
 import cn.cyberpeace.mp.auth.model.TargetModel;
-import cn.cyberpeace.mp.auth.service.LogService;
+import cn.cyberpeace.mp.auth.service.UserLogService;
 import cn.cyberpeace.mp.auth.service.TargetService;
 import cn.cyberpeace.mp.auth.util.PasswordStrengthChecker;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
-import cn.cyberpeace.mp.auth.test.TmpMenuService;
+import cn.cyberpeace.mp.auth.util.ResultUtils;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.log.model.OperationLogModel;
+import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
-import java.lang.annotation.Target;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +31,6 @@ import java.util.Map;
 @Api(value = "TEST", tags = "AUTH-TEST")
 @Slf4j
 @RestController
-@ApiIgnore
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/test")
 public class AuthTestController {
 
@@ -36,7 +38,7 @@ public class AuthTestController {
     private TmpMenuService tmpMenuService;
 
     @Autowired
-    private LogService logService;
+    private UserLogService userLogService;
 
     @Autowired
     private TargetService targetService;
@@ -67,15 +69,16 @@ public class AuthTestController {
 
 
     @GetMapping("/tmpmenu")
+    @ApiIgnore
     public void testTmpMenu() {
 //        tmpMenuService.process();
     }
 
 
     @GetMapping("/userlog")
-    public List<OperationLogModel> userlog(UserLogPageRequest logPageRequest) {
-        List<OperationLogModel> logs = logService.getUserLog(logPageRequest);
-        return logs;
+    public ListObjServiceResult userlog(UserLogPageRequest logPageRequest) {
+        PageInfo pageInfo = userLogService.getUserLog(logPageRequest);
+        return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
     }
 
 
