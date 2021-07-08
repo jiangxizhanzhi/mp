@@ -67,7 +67,7 @@ public class WazuhServiceTest {
 
     @Test
     public void testWazuhESQuery() throws IOException {
-        var searchRequest = new SearchRequest("wazuh-alerts-4.x-2021.06.18");
+        var searchRequest = new SearchRequest("wazuh-alerts-4.x-2021.07.*");
         var boolQueryBuilder = QueryBuilders.boolQuery();
         var sourceBuilder = new SearchSourceBuilder();
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
@@ -79,9 +79,9 @@ public class WazuhServiceTest {
     @Test
     public void indexListBuilder(){
         WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
-        wazuhEventRequest.setStartTime(LocalDateTime.now().minusDays(7));
+        wazuhEventRequest.setStartTime(LocalDateTime.now().minusMonths(7));
         wazuhEventRequest.setEndTime(LocalDateTime.now());
-        List<String> indexList= wazuhService.indexListBuilder(LocalDateTime.now(), LocalDateTime.now());
+        List<String> indexList= wazuhService.indexListBuilder(LocalDateTime.now().minusDays(7), LocalDateTime.now());
         System.out.println(indexList);
     }
 

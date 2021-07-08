@@ -248,10 +248,9 @@ public class WazuhService {
 
     /**
      * 构造请求的索引
-     *
-     * @param LocalDateTime start
-     * @param LocalDateTime end
-     * @return String[]
+     * @param start
+     * @param end
+     * @return
      */
     private String[] buildRequestIndex(LocalDateTime start , LocalDateTime end) {
         List<String> indexList = indexListBuilder(start, end);
@@ -325,10 +324,14 @@ public class WazuhService {
      * @return List<String>
      */
     private List<String> fetchFormatterTime(LocalDateTime startTime, LocalDateTime endTime) {
-        var formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
         long betweenDay = ChronoUnit.DAYS.between(startTime, endTime);
+        long month = ChronoUnit.MONTHS.between(startTime, endTime);
         int days = (int) betweenDay;
-        return IntStream.range(0, days + 1).boxed().map(startTime::plusDays).map((time) -> time.format(formatter))
-            .collect(Collectors.toList());
+        if (month > 1) {
+            return IntStream.range(0, days + 1).boxed().map(startTime::plusDays).map((time) -> time.format(DateTimeFormatter.ofPattern("yyyy.MM.*")))
+                .distinct().collect(Collectors.toList());
+        }
+        return  IntStream.range(0, days + 1).boxed().map(startTime::plusDays).map((time) -> time.format(DateTimeFormatter.ofPattern("yyyy.MM.dd")))
+            .distinct().collect(Collectors.toList());
     }
 }
