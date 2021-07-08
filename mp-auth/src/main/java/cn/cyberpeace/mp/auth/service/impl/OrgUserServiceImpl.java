@@ -64,7 +64,6 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
     @Override
     public List<UserModel> listUsersByOrgAndUname(String orgId, String uname) {
         log.info("orgId:{}, uname:{}", orgId, uname);
-        Assert.notBlank(orgId, "orgId不能为空！");
         List<UserModel> users = getModelMapper().listUsers(orgId, uname, null);
         return users;
     }
