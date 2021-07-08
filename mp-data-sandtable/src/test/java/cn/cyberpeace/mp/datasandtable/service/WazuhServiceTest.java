@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.datasandtable.TestDatasandtableApplciation;
 import cn.cyberpeace.mp.datasandtable.model.FileEventModel;
 import cn.cyberpeace.mp.datasandtable.model.WazuhEventRequest;
 import cn.cyberpeace.mp.datasandtable.model.WazuhModel;
+import cn.cyberpeace.mp.datasandtable.model.WazuhMonitorEventsRequest;
 import cn.cyberpeace.mp.datasandtable.model.emum.FileEventType;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -80,7 +81,7 @@ public class WazuhServiceTest {
         WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
         wazuhEventRequest.setStartTime(LocalDateTime.now().minusDays(7));
         wazuhEventRequest.setEndTime(LocalDateTime.now());
-        List<String> indexList= wazuhService.indexListBuilder(wazuhEventRequest);
+        List<String> indexList= wazuhService.indexListBuilder(LocalDateTime.now(), LocalDateTime.now());
         System.out.println(indexList);
     }
 
@@ -93,12 +94,10 @@ public class WazuhServiceTest {
 
     @Test
     public void testQueryMonitorEvents() {
-        WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
+        WazuhMonitorEventsRequest wazuhEventRequest = new WazuhMonitorEventsRequest();
         wazuhEventRequest.setMacIds(Lists.newArrayList("30:D0:42:E0:84:CC", "00:0c:29:22:d3:95"));
         wazuhEventRequest.setPageNum(1);
         wazuhEventRequest.setPageSize(10);
-        wazuhEventRequest.setStartTime(LocalDateTime.now());
-        wazuhEventRequest.setEndTime(LocalDateTime.now());
         ListObjResult<WazuhModel> listObjResult= wazuhService.queryMonitorEvents(wazuhEventRequest);
         Assert.isTrue(listObjResult.getObjs().size() > 1 , "查询文件监控分页有数据");
     }

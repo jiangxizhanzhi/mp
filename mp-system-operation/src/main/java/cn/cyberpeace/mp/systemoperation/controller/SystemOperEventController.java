@@ -50,7 +50,7 @@ public class SystemOperEventController {
      */
     @ApiOperation("监控指标分页查询")
     @PostMapping("pageMonitorEvent")
-    public ServiceResult<WazuhMonitorEventResponse> queryMonitorEvents(@RequestBody @Valid WazuhEventRequest wazuhMonitorEventRequest) {
+    public ServiceResult<WazuhMonitorEventResponse> queryMonitorEvents(@RequestBody @Valid WazuhMonitorEventsRequest wazuhMonitorEventRequest) {
         ListObjResult<WazuhModel> listObjResult = wazuhService.queryMonitorEvents(wazuhMonitorEventRequest);
         WazuhMonitorEventResponse response = WazuhMonitorEventResponse.builder()
                 .monitorEventModelList(listObjResult.getObjs())
@@ -59,6 +59,4 @@ public class SystemOperEventController {
 
         return ServiceResult.success(response);
     }
-
-
 }

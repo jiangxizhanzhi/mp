@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.datasandtable.model.FileEventModel;
 import cn.cyberpeace.mp.datasandtable.model.WazuhEventRequest;
 import cn.cyberpeace.mp.datasandtable.model.WazuhModel;
+import cn.cyberpeace.mp.datasandtable.model.WazuhMonitorEventsRequest;
 import cn.cyberpeace.mp.datasandtable.service.WazuhService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -25,12 +26,12 @@ public class WazuhController {
     @PostMapping("/file_events")
     @ApiOperation(value = "查询文件注册表变更信息", notes = "")
     public ListObjServiceResult<FileEventModel> queryFileEvents(@RequestBody @Valid WazuhEventRequest wazuhEventRequest) {
-        return new ListObjServiceResult<>(wazuhService.queryFileEvents(wazuhEventRequest));
+        return new ListObjServiceResult<>(wazuhService.queryFileEvents(wazuhEventRequest)).asResult();
     }
 
     @PostMapping("/monitor_events")
     @ApiOperation(value = "查询场景系统指标信息信息", notes = "")
-    public ListObjServiceResult<WazuhModel> queryMonitorEvents(@RequestBody @Valid  WazuhEventRequest wazuhEventRequest) {
-        return new ListObjServiceResult<>(wazuhService.queryMonitorEvents(wazuhEventRequest));
+    public ListObjServiceResult<WazuhModel> queryMonitorEvents(@RequestBody @Valid WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
+        return new ListObjServiceResult<>(wazuhService.queryMonitorEvents(wazuhMonitorEventsRequest)).asResult();
     }
 }
