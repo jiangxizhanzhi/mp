@@ -274,6 +274,7 @@ public class SessionService {
             .protocolType(model.getProtocol())
             .srcPort(model.getSrcPort())
             .dstPort(model.getDstPort())
+            .totalBytes(model.getTotBytes())
             .timestamp(model.getTimestamp().toString())
             .build();
     }

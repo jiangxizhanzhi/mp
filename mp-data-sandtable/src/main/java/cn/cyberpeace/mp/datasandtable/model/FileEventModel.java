@@ -31,7 +31,7 @@ public class FileEventModel {
     /**
      * 文件事件类型
      */
-    @ApiModelProperty("文件事件类型")
+    @ApiModelProperty("变更描述")
     private String action;
 
     /**

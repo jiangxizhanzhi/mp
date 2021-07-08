@@ -42,4 +42,7 @@ public class SessionResult {
 
     @ApiModelProperty("时间")
     private String timestamp;
+
+    @ApiModelProperty("流量大小")
+    private Integer totalBytes;
 }

@@ -36,5 +36,7 @@ public class SessionModel {
 
     private String dstPort;
 
+    private Integer totBytes;
+
     private LocalDateTime timestamp;
 }
