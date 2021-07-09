@@ -98,16 +98,7 @@ public class CloudPlatformMonitorController {
         });
 
         //实装设备个数
-        CompletableFuture<Integer> totalRealEquipments = CompletableFuture.supplyAsync(() ->
-                realEquipmentService.getTotalRealEquipment()).handle((result,throwable) -> {
-            // 如果异常存在,打印异常，并且返回默认值
-            if (throwable != null) {
-                log.info("========statistics方法:getTotalRealEquipment获取实装设备个数异常信息：{}",throwable.getMessage());
-                return 0;
-            } else {
-                return result;
-            }
-        });
+        Integer totalRealEquipments = realEquipmentService.getTotalRealEquipment();
 
         //NPC总数
         CompletableFuture<Integer> totalNPCs = CompletableFuture.supplyAsync(() ->
@@ -144,7 +135,7 @@ public class CloudPlatformMonitorController {
             }
         });
 
-        CompletableFuture.allOf(totalInstances, totalContainers,totalRealEquipments,totalNPCs,totalRouters,model).join();
+        CompletableFuture.allOf(totalInstances, totalContainers,totalNPCs,totalRouters,model).join();
 
         //TODO 原计算方式不正确，云平台暂时不支持计算总的网络IO、磁盘IO
         //磁盘IO
@@ -156,9 +147,9 @@ public class CloudPlatformMonitorController {
         try {
             response = HypervisorStatisticsResponse.builder().diskIo(diskIo).netIo(netIo)
                     .totalNpc(totalNPCs.get()).totalInstances(totalInstances.get())
-                    .totalContainers(totalContainers.get()).totalRealEquipments(totalRealEquipments.get()).totalRouters(totalRouters.get()).build();
+                    .totalContainers(totalContainers.get()).totalRealEquipments(totalRealEquipments).totalRouters(totalRouters.get()).build();
             if(Objects.isNull(model) || Objects.isNull(model.get().getHypervisor_statistics())){
-                return new ServiceResult(response).asResult();
+                return new ServiceResult(response);
             }
 
             HypervisorStatisticsCloudPlatformModel.HypervisorStatistics hypervisorStatistics = model.get().getHypervisor_statistics();
