@@ -28,6 +28,7 @@ import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.config.FastDfsConfig;
 import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
@@ -536,8 +537,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
             // 2. 保存用户-角色关系
             String roles = importUser.getRoles().trim();
-            Arrays.stream(StringUtils.split(roles, ",")).forEach(ident -> {
-                RoleModel roleModel = roleService.getByIdent(ident.trim());
+            Arrays.stream(StringUtils.split(roles, ",")).forEach(rname -> {
+                RoleModel roleModel = roleService.getByName(rname.trim());
                 if (Objects.nonNull(roleModel)) {
                     UserRoleModel userRoleModel = UserRoleModel.builder().user(userId).role(roleModel.getId()).build();
                     var re = userRoleService.create(userRoleModel);
@@ -561,7 +562,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     public List<ExportUser> exportExcel(List<UserModel> users) {
-        List<ExportUser> exportUserList = users.stream().map(u -> user2ExportUser(u)).filter(o -> Objects.nonNull(o)).collect(Collectors.toList());
+        List<ExportUser> exportUserList = users.stream().map(this::user2ExportUser).filter(Objects::nonNull).collect(Collectors.toList());
         return exportUserList;
     }
 
@@ -632,7 +633,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         processExpiredStatus(userDto);
 
         List<OrgModel> orgs = orgUserService.listOrgsByUserId(userModel.getId());
-        List<String> orgIds = orgs.stream().map(o -> o.getId()).collect(Collectors.toList());
+        List<String> orgIds = orgs.stream().map(BaseModel::getId).collect(Collectors.toList());
 
         List<List<String>> allorgpath = orgs.stream().map(o -> CollectionUtil.toList(StringUtils.split(o.getPath(), AuthConstant.ORG_PATH_SEPARATOR))).collect(Collectors.toList());
         userDto.setOrgs(orgs);
@@ -671,7 +672,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                         .password(PasswordUtils.getPasswordEncoder().encode(importUser.getPassword()))
                         .build();
 
-        userModel.setIdentifier(importUser.getUsername());
+        userModel.setIdentifier(IdGenerator.generateGlobalId() + "");
 
         return userModel;
     }
@@ -713,7 +714,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
         // role
         List<RoleModel> roleList = userRoleService.listByUserId(user.getId());
-        String roles = roleList.stream().map(r -> r.getName()).collect(Collectors.joining("/"));
+        String roles = roleList.stream().map(RoleModel::getName).collect(Collectors.joining("/"));
         log.info("roles:{}", roles);
         exportUser.setRoles(roles);
 

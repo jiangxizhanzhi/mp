@@ -19,7 +19,7 @@ CREATE TABLE mp_auth_org (
     `parent` varchar(64)  NOT NULL COMMENT '父组织' default '',
     `identifier` varchar(64)  NOT NULL COMMENT '编号',
     `name` varchar(64) NOT NULL COMMENT '名称',
-    `path` varchar(512) NOT NULL COMMENT '组织结构路径',
+    `path` varchar(180) NOT NULL COMMENT '组织结构路径',
     `description` varchar(1024) NOT NULL COMMENT '描述',
     `create_time` datetime(6) NOT NULL COMMENT '创建时间',
     `update_time` datetime(6) NOT NULL COMMENT '更新时间',
@@ -42,7 +42,8 @@ CREATE TABLE mp_auth_role (
     `update_time` datetime(6) NOT NULL COMMENT '更新时间',
     PRIMARY KEY (`pk`),
     UNIQUE (`id`),
-    UNIQUE (`tenant`, `identifier`)
+    UNIQUE (`tenant`, `identifier`),
+    UNIQUE (`tenant`, `name`)
 );
 
 # 用户表

@@ -108,6 +108,13 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     }
 
     @Override
+    public RoleModel getByName(String name) {
+        Assert.notBlank(name, "name不能为空！");
+        RoleModel roleModel = getModelMapper().selectByName(name);
+        return roleModel;
+    }
+
+    @Override
     public boolean exists(String id) {
         Assert.notBlank(id, "id不能为空！");
         RoleModel roleModel = getModelMapper().get(id);
@@ -155,6 +162,8 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
         RoleModel roleModel = new RoleModel();
         BeanUtils.copyProperties(createRequest, roleModel);
+
+        createCheck(roleModel);
 
         if (StringUtils.isBlank(roleModel.getIdentifier())) {
             // 如果ident为空，则随机生成一个
@@ -296,6 +305,14 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         if (!deleteRolePermissionSuccess || !deleteUserRoleSuccess) {
             log.info("deleteRolePermissionSuccess:{}, deleteUserRoleSuccess:{}", deleteRolePermissionSuccess, deleteUserRoleSuccess);
             throw new MpRuntimeException("删除失败！");
+        }
+    }
+
+    private void createCheck(RoleModel roleModel) {
+        if (StringUtils.isNotBlank(roleModel.getName())) {
+            if (getByName(roleModel.getName()) != null) {
+                throw new MpRuntimeException("角色名已存在！[" + roleModel.getName() + "]");
+            }
         }
     }
 

@@ -31,7 +31,8 @@ public class RealEquipmentServiceImpl extends BaseServiceImpl implements RealEqu
 
     @Override
     public RealEquipmentOpenStackModel page() {
-        return super.sendGet(devopsConfig.getMg_url().concat("/api/cr/api/admin/scene/devices/?entity=true"),RealEquipmentOpenStackModel.class);
+
+        return super.sendGet(devopsConfig.getMg_url().concat("/api/cr/api/admin/scene/devices/?entity=true"),getToken(),RealEquipmentOpenStackModel.class);
     }
 
     @Override

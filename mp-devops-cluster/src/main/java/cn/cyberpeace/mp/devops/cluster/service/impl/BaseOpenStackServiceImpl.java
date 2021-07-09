@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+
 /**
  * 基础对接云平台接口层
  */
@@ -26,6 +28,18 @@ public class BaseOpenStackServiceImpl extends BaseServiceImpl {
      */
     @Override
     protected <T extends BaseModel> T sendGet(String api, Class<T> valueType){
+        return super.sendGet(devopsConfig.getCp_url().concat(api),valueType);
+    }
+
+    /**
+     * 通过Get方式查询信息
+     * @param api
+     * @param valueType
+     * @param <T>
+     * @return
+     */
+    @Override
+    protected <T extends BaseModel> T sendGet(String api,Map<String,String> headers, Class<T> valueType){
         return super.sendGet(devopsConfig.getCp_url().concat(api),valueType);
     }
 

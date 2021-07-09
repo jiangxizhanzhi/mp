@@ -23,6 +23,7 @@ public class RealEquipmentOpenStackModel extends BaseModel {
     @NoArgsConstructor
     @AllArgsConstructor
     public static final class Links{
+
         private Pagination pagination;
 
         @Data
