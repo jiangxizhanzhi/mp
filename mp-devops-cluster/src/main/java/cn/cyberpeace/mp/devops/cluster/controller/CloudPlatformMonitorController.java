@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
-import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.model.HypervisorCloudPlatformModel;
@@ -219,9 +218,9 @@ public class CloudPlatformMonitorController {
      */
     @ApiOperation("节点管理-关机/重启")
     @GetMapping("/hypervisor/reboot-poweroff")
-    public ObjServiceResult rebootOrPowerOff(@Valid HypervisorRequest request){
+    public ServiceResult rebootOrPowerOff(@Valid HypervisorRequest request){
         hypervisorService.rebootOrPowerOff(request);
-        return new ObjServiceResult();
+        return ServiceResult.successful();
     }
 
     /**
