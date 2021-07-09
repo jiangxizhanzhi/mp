@@ -16,6 +16,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,6 +31,7 @@ import java.util.List;
 
 @Api(value = "用户导入导出Excel管理接口", tags = "AUTH-用户导入导出Excel接口")
 @Slf4j
+@Controller
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/users")
 public class UserExcelController {
 
