@@ -25,7 +25,7 @@ public class ImportUser {
     // 组织路径，多个用逗号隔开
     private String orgpath;
 
-    // 角色 identifier，多个用逗号隔开
+    // 角色 名称，多个用逗号隔开
     private String roles;
 
 }

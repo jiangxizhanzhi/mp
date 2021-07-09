@@ -21,6 +21,8 @@ public interface RoleService extends BaseModelService<RoleModel, QueryParams> {
 
     RoleModel getByIdent(String identifier);
 
+    RoleModel getByName(String name);
+
     boolean exists(String id);
 
     PageInfo getPageWithUserCnt(RolePageRequest rolePageRequest);

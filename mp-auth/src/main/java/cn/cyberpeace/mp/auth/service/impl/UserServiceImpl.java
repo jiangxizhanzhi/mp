@@ -537,8 +537,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
             // 2. 保存用户-角色关系
             String roles = importUser.getRoles().trim();
-            Arrays.stream(StringUtils.split(roles, ",")).forEach(ident -> {
-                RoleModel roleModel = roleService.getByIdent(ident.trim());
+            Arrays.stream(StringUtils.split(roles, ",")).forEach(rname -> {
+                RoleModel roleModel = roleService.getByName(rname.trim());
                 if (Objects.nonNull(roleModel)) {
                     UserRoleModel userRoleModel = UserRoleModel.builder().user(userId).role(roleModel.getId()).build();
                     var re = userRoleService.create(userRoleModel);
@@ -672,7 +672,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                         .password(PasswordUtils.getPasswordEncoder().encode(importUser.getPassword()))
                         .build();
 
-        userModel.setIdentifier(importUser.getUsername());
+        userModel.setIdentifier(IdGenerator.generateGlobalId() + "");
 
         return userModel;
     }

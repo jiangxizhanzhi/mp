@@ -49,14 +49,15 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
     @ApiOperation(value = "(弃用，建议用/add) 创建数据", notes = "")
     @ApiIgnore
     @Override
-    public ObjServiceResult<RoleModel> create(RoleModel obj, String[] fields) {
+    public ObjServiceResult<RoleModel> create(@RequestBody RoleModel obj, @RequestParam String[] fields) {
         return super.create(obj, fields);
     }
 
     @ApiOperation(value = "(弃用，建议用/modify) 修改数据", notes = "")
     @ApiIgnore
     @Override
-    public ObjServiceResult<RoleModel> update(String id, RoleModel obj, String[] fields) {
+    public ObjServiceResult<RoleModel> update(@PathVariable String id, @RequestBody RoleModel obj,
+                                              @RequestParam(required = false) String[] fields) {
         return super.update(id, obj, fields);
     }
 
