@@ -399,6 +399,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public String batchDisable(List<String> userIds) {
         Assert.notEmpty(userIds, "userIds不能为空！");
         StringBuilder errMsg = new StringBuilder();
@@ -434,6 +435,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public String batchEnable(List<String> userIds) {
         Assert.notEmpty(userIds, "userIds不能为空！");
         StringBuilder errMsg = new StringBuilder();
@@ -455,7 +457,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         Optional<UserModel> userOptional = Optional.ofNullable(getModelMapper().get(userId));
         if (userOptional.isPresent()) {
             UserModel userModel = userOptional.get();
-            if (Objects.equals(userModel.getIsEnabled(), UserModel.Status.NOT_AUDITED)) {
+            if (Objects.equals(userModel.getIsAudited(), UserModel.Status.NOT_AUDITED)) {
                 UserModel updateUser = UserModel.builder().id(userId).isAudited(UserModel.Status.AUDITED).build();
                 return getModelMapper().update(updateUser);
             }
@@ -470,6 +472,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public String batchApprove(List<String> userIds) {
         Assert.notEmpty(userIds, "userIds不能为空！");
         StringBuilder errMsg = new StringBuilder();
