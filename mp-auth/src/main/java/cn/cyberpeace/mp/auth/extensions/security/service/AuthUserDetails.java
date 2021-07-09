@@ -41,7 +41,8 @@ public class AuthUserDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return LocalDateTime.now().compareTo(user.getExpiredTime()) < 0;
+//        return LocalDateTime.now().compareTo(user.getExpiredTime()) < 0;
+        return true;
     }
 
     @Override
@@ -56,6 +57,7 @@ public class AuthUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return UserModel.Status.ENABLED.equals(user.getIsEnabled());
+//        return UserModel.Status.ENABLED.equals(user.getIsEnabled());
+        return true;
     }
 }
