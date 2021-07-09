@@ -73,7 +73,7 @@ public class OpenFlowService extends BaseOpenStackServiceImpl {
             actionList.addAll(brOvsVpnList);
         }
 
-        response.setActionList(actionList);
+        response.setList(actionList);
         response.setTotal(actionList.size());
 
         return response;

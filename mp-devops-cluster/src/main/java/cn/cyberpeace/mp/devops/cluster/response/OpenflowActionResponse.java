@@ -23,7 +23,7 @@ import java.util.List;
 public class OpenflowActionResponse extends BaseCloudPlatformModel {
 
     @ApiModelProperty("流表操作列表")
-    private List<Action> actionList;
+    private List<Action> list;
 
     @Data
     @NoArgsConstructor
