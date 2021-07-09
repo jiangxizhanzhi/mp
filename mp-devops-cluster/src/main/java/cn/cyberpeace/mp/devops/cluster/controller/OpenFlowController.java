@@ -9,10 +9,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
@@ -28,9 +25,19 @@ public class OpenFlowController {
     @Autowired
     private OpenFlowService openFlowService;
 
+    /**
+     * 流表操作查询
+     * @param method
+     * @param hostname
+     * @return
+     */
     @ApiOperation("流表操作查询")
-    @PostMapping("/action")
-    public ServiceResult<OpenflowActionResponse> queryOpenFlowAction(@RequestBody @Valid OpenflowActionRequest request) {
+    @GetMapping("/action")
+    public ServiceResult<OpenflowActionResponse> queryOpenFlowAction(@RequestParam String method, @RequestParam String hostname) {
+        OpenflowActionRequest request = OpenflowActionRequest.builder()
+                .method(method)
+                .hostname(hostname)
+                .build();
         OpenflowActionResponse response = openFlowService.queryOpenFlowAction(request);
 
         return ServiceResult.success(response);
