@@ -55,4 +55,15 @@ public class BaseOpenStackServiceImpl extends BaseServiceImpl {
     protected <T extends BaseModel> T sendPost(String api,String body,Class<T> valueType){
         return super.sendPost(devopsConfig.getCp_url().concat(api),body,valueType);
     }
+
+    /**
+     * 通过Post方式查询信息
+     * @param api
+     * @param body
+     * @return
+     */
+    @Override
+    protected String sendPost(String api,String body){
+        return super.sendPost(devopsConfig.getCp_url().concat(api),body);
+    }
 }
