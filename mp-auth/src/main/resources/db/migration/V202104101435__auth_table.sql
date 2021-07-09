@@ -43,7 +43,7 @@ CREATE TABLE mp_auth_role (
     PRIMARY KEY (`pk`),
     UNIQUE (`id`),
     UNIQUE (`tenant`, `identifier`),
-    UNIQUE (`name`)
+    UNIQUE (`tenant`, `name`)
 );
 
 # 用户表
