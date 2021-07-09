@@ -50,6 +50,7 @@ public interface OrgUserMapper extends BaseModelMapper<OrgUserModel> {
             "  <if test=\"username != null and username != ''\">" +
             "    AND ( username like CONCAT('%', #{username}, '%') or name like CONCAT('%', #{username}, '%')) " +
             "  </if>" +
+            "order by username " +
             "</where></script>")
     List<UserModel> listUsers(@Param("orgId") String orgId, @Param("username") String username, @Param("userIds") List<String> userIds);
 
