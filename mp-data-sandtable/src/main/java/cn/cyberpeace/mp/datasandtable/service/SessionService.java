@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.datasandtable.service;
 
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.util.HttpUtils;
@@ -24,7 +25,9 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.http.HttpResponse;
+import org.elasticsearch.ElasticsearchStatusException;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.IndicesOptions;
@@ -153,8 +156,9 @@ public class SessionService {
         try {
             CountResponse totalSize = restHighLevelClient.count(countRequest, RequestOptions.DEFAULT);
             total = (int) totalSize.getCount();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException | ElasticsearchStatusException exception) {
+            log.error("query session error macIds{} error{}", sessionRequest.getMacIds(), ExceptionUtils.getStackTrace(exception));
+            throw new MpRuntimeException(BaseErrorCode.DATA_NOT_EXIST, ExceptionUtils.getStackTrace(exception));
         }
 
         return new ListObjResult<>(sessionResults, total);
