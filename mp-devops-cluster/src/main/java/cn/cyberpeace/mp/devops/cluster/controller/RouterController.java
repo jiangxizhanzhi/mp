@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.devops.cluster.model.RouterCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.request.RouterPageRequest;
 import cn.cyberpeace.mp.devops.cluster.response.RouterPageResponse;
 import cn.cyberpeace.mp.devops.cluster.service.RouterService;
+import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -46,7 +47,7 @@ public class RouterController {
     public ListObjServiceResult<RouterPageResponse> page(RouterPageRequest request){
         RouterCloudPlatformModel model = routerService.page(request);
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getRouters())){
-            return new ListObjServiceResult<>();
+            return new ListObjServiceResult(Lists.newArrayList(),0);
         }
         List<RouterCloudPlatformModel.RouterModel> routers = model.getRouters();
         List<RouterPageResponse> list = routers.stream().map(routerModel ->

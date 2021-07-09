@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.devops.cluster.request.ContainerPageRequest;
 import cn.cyberpeace.mp.devops.cluster.response.ContainerPageResponse;
 import cn.cyberpeace.mp.devops.cluster.service.ContainerService;
 import com.alibaba.fastjson.JSONArray;
+import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -49,7 +50,7 @@ public class ContainerController {
     public ListObjServiceResult<ContainerPageResponse> page(ContainerPageRequest request){
         ContainerCloudPlatformModel model = containerService.page(request);
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getContainers())){
-            return new ListObjServiceResult();
+            return new ListObjServiceResult(Lists.newArrayList(),0);
         }
         List<ContainerCloudPlatformModel.ContainerModel> containers = model.getContainers();
 

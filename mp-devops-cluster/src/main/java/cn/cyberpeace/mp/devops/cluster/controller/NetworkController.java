@@ -47,7 +47,7 @@ public class NetworkController {
     public ListObjServiceResult<NetworkPageResponse> page(NetworkPageRequest request){
         NetworkCloudPlatformModel model = networkService.page(request);
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getNetworks())){
-            return new ListObjServiceResult();
+            return new ListObjServiceResult(Lists.newArrayList(),0);
         }
         List<NetworkCloudPlatformModel.NetworkModel> networks = model.getNetworks();
         List<NetworkPageResponse> list = networks.stream().map(networkModel -> {

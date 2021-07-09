@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.devops.cluster.response.HypervisorServiceStateResponse;
 import cn.cyberpeace.mp.devops.cluster.response.HypervisorStatisticsResponse;
 import cn.cyberpeace.mp.devops.cluster.response.VirtualRealSwitchStatusResponse;
 import cn.cyberpeace.mp.devops.cluster.service.*;
+import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -183,7 +184,7 @@ public class CloudPlatformMonitorController {
     public ListObjServiceResult<HypervisorPageResponse> page(HypervisorPageRequest request){
         HypervisorCloudPlatformModel model = hypervisorService.pageHypervisors(request);
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getHypervisors())){
-            return new ListObjServiceResult();
+            return new ListObjServiceResult(Lists.newArrayList(),0);
         }
         List<HypervisorCloudPlatformModel.Hypervisor> hypervisorList = model.getHypervisors();
         List<HypervisorPageResponse> hypervisorPageResponses = hypervisorList.stream().map(hypervisor ->
