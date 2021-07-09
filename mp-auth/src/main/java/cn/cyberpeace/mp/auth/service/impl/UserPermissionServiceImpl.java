@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
-import cn.cyberpeace.mp.auth.dto.TargetDto;
+import cn.cyberpeace.mp.auth.dto.target.TargetDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
@@ -216,7 +216,7 @@ public class UserPermissionServiceImpl
     }
 
 
-    public boolean deleteByUserId(String userId) {
+    public boolean  deleteByUserId(String userId) {
         Assert.notNull(userId, "userid不能为空");
 
 //        var objResult = userService.get(userId).getSource();

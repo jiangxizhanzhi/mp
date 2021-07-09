@@ -184,7 +184,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public ServiceResult<Boolean> delete(String userId) {
+    public ServiceResult<Boolean>  delete(String userId) {
         // todo 删除用户-组织，用户-角色关联关系 用户-权限关系 租户-用户关系
         deleteReleated(userId);
 
@@ -523,18 +523,23 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         for (ImportUser importUser : list) {
             // 1.保存用户信息
             UserModel userModel = importUser2UserModel(importUser);
-            String userId = IdGenerator.generateUUID();
-            log.warn("userId:{}", userId);
-            userModel.setId(userId);
+            if (Objects.isNull(userModel)) {
+                continue;
+            }
+//            String userId = IdGenerator.generateUUID();
+//            log.warn("userId:{}", userId);
+//            userModel.setId(userId);
             var result = create(userModel);
             ResultUtils.throwExceptionIfError(result, "创建用户失败！");
+            UserModel userCreated = result.getSource().getObj();
+            String userId = userCreated.getId();
 
             // 2. 保存用户-角色关系
             String roles = importUser.getRoles().trim();
             Arrays.stream(StringUtils.split(roles, ",")).forEach(ident -> {
                 RoleModel roleModel = roleService.getByIdent(ident.trim());
                 if (Objects.nonNull(roleModel)) {
-                    UserRoleModel userRoleModel = UserRoleModel.builder().user(userModel.getId()).role(roleModel.getId()).build();
+                    UserRoleModel userRoleModel = UserRoleModel.builder().user(userId).role(roleModel.getId()).build();
                     var re = userRoleService.create(userRoleModel);
                     ResultUtils.throwExceptionIfError(re, "创建用户-角色关系失败！");
                 }
@@ -544,8 +549,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             String orgPaths = importUser.getOrgpath().trim();
             Arrays.stream(StringUtils.split(orgPaths, ",")).forEach(path -> {
                 OrgModel orgModel = orgService.getByPath(path);
-                if (orgModel != null) {
-                    OrgUserModel orgUserModel = OrgUserModel.builder().user(userModel.getId()).org(orgModel.getId()).build();
+                if (Objects.nonNull(orgModel)) {
+                    OrgUserModel orgUserModel = OrgUserModel.builder().user(userId).org(orgModel.getId()).build();
                     var re = orgUserService.create(orgUserModel);
                     ResultUtils.throwExceptionIfError(re, "创建组织-用户关系失败！");
                 }
@@ -694,16 +699,21 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         if (user.getIsAudited().equals(UserModel.Status.NOT_AUDITED)) {
             exportUser.setStat("未审批");
         }
-        if (user.getIsEnabled().equals(UserModel.Status.EXPIRED)) {
+
+        // 过期
+        LocalDateTime now = LocalDateTime.now();
+        if (Objects.nonNull(user.getExpiredTime()) && now.isAfter(user.getExpiredTime())) {
             exportUser.setStat("过期");
         }
+
+        // 禁用
         if (user.getIsEnabled().equals(UserModel.Status.DISABLED)) {
             exportUser.setStat("禁用");
         }
 
         // role
         List<RoleModel> roleList = userRoleService.listByUserId(user.getId());
-        String roles = roleList.stream().map(r -> r.getIdentifier()).collect(Collectors.joining(","));
+        String roles = roleList.stream().map(r -> r.getName()).collect(Collectors.joining("/"));
         log.info("roles:{}", roles);
         exportUser.setRoles(roles);
 

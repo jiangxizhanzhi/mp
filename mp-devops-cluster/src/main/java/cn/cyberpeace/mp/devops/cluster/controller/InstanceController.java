@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.devops.cluster.model.InstanceCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.request.InstancePageRequest;
 import cn.cyberpeace.mp.devops.cluster.response.InstancePageResponse;
 import cn.cyberpeace.mp.devops.cluster.service.InstanceService;
+import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -49,7 +50,7 @@ public class InstanceController {
     public ListObjServiceResult<InstancePageResponse> page(@Valid InstancePageRequest request){
         InstanceCloudPlatformModel model = instanceService.page(request);
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getInstances())){
-            return new ListObjServiceResult();
+            return new ListObjServiceResult(Lists.newArrayList(),0);
         }
         List<InstanceCloudPlatformModel.InstanceModel> instances = model.getInstances();
         List<InstancePageResponse> list = instances.stream().map(instanceModel ->

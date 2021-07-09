@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.devops.cluster.model.ElasticIpCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.request.ElasticIpPageRequest;
 import cn.cyberpeace.mp.devops.cluster.response.ElasticIpResponse;
 import cn.cyberpeace.mp.devops.cluster.service.ElasticIpService;
+import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -46,7 +47,7 @@ public class ElasticIpController {
     public ListObjServiceResult<ElasticIpResponse> page(ElasticIpPageRequest request){
         ElasticIpCloudPlatformModel model = elasticIpService.page(request);
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getFloatingips())){
-            return new ListObjServiceResult<>();
+            return new ListObjServiceResult(Lists.newArrayList(),0);
         }
         List<ElasticIpCloudPlatformModel.ElasticIpModel> floatingips = model.getFloatingips();
         List<ElasticIpResponse> list = floatingips.stream().map(elasticIpModel ->

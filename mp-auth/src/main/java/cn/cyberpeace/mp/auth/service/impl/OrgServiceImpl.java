@@ -86,8 +86,13 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     @Override
     @Transactional(rollbackFor = Exception.class)
     public ServiceResult<Boolean> delete(String orgId) {
+        Assert.notBlank(orgId, "orgId不能为空！");
         // todo 删除组织-权限，组织-用户关联关系
         // todo 或者，如果存在绑定关系，是否允许删除？
+        List<OrgModel> children = listByParent(orgId);
+        if (CollectionUtil.isNotEmpty(children)) {
+            throw new MpRuntimeException("该组织下有子组织，不能删除！");
+        }
 
         deleteReleated(orgId);
 
@@ -98,6 +103,11 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     @Transactional(rollbackFor = Exception.class)
     public ServiceResult<Integer> bulkDelete(String[] ids) {
         for (String id : ids) {
+            List<OrgModel> children = listByParent(id);
+            if (CollectionUtil.isNotEmpty(children)) {
+                throw new MpRuntimeException("该组织下有子组织，不能删除！");
+            }
+
             deleteReleated(id);
         }
         return super.bulkDelete(ids);

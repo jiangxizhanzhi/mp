@@ -1,7 +1,6 @@
-package cn.cyberpeace.mp.auth.dto;
+package cn.cyberpeace.mp.auth.dto.target;
 
 import cn.cyberpeace.mp.auth.model.TargetModel;
-import cn.cyberpeace.mp.auth.service.OrgOperation;
 import cn.cyberpeace.mp.auth.service.TargetOperation;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
