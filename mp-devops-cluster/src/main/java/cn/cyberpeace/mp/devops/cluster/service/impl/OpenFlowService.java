@@ -74,6 +74,7 @@ public class OpenFlowService extends BaseOpenStackServiceImpl {
         }
 
         response.setActionList(actionList);
+        response.setTotal(actionList.size());
 
         return response;
     }
