@@ -181,43 +181,6 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
         return ResultUtils.commonResult(success, null);
     }
 
-
-
-    @ApiOperation(value = "导出用户数据excel", notes = "")
-    @PostMapping("/excel/export")
-    public void exportExcel(HttpServletResponse response, @RequestBody UserExportRequest exportRequest) throws IOException {
-
-//        handleQueryParams("list", queryParams);
-//        ListObjServiceResult<UserModel> listObjServiceResult = getModelService().list(queryParams).asResult();
-//        List<UserModel> users = listObjServiceResult.getSource().getList();
-
-        List<UserModel> users =  orgUserService.listUsersByOrgAndUname(exportRequest.getOrg(), exportRequest.getUsername());
-        List<ExportUser> exportUserList = getModelService().exportExcel(users);
-
-        response.setContentType("application/vnd.ms-excel");
-        response.setCharacterEncoding("utf-8");
-        String fileName = URLEncoder.encode("用户导出列表", "UTF-8").replaceAll("\\+", "%20");
-        response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
-        EasyExcel.write(response.getOutputStream(), ExportUser.class).sheet("用户导出列表").doWrite(exportUserList);
-    }
-
-
-    @ApiOperation(value = "通过excel导入用户数据", notes = "")
-    @PostMapping("/excel/import")
-    @ResponseBody
-    public ServiceResult importUsers(MultipartFile file) throws IOException {
-        EasyExcel.read(file.getInputStream(), ImportUser.class, new UploadDataListener(getModelService())).headRowNumber(2).sheet().doRead();
-        return ResultUtils.commonResult(true, null);
-    }
-
-
-    @ApiOperation(value = "下载用户导入excel模板", notes = "")
-    @GetMapping("/excel/template")
-    public void downloadExcelTemplate() {
-        getModelService().downloadExcelTemplate();
-    }
-
-
     @ApiOperation(value = "查询用户操作日志", notes = "")
     @GetMapping("/log")
     public ListObjServiceResult userlog(UserLogPageRequest logPageRequest) {
