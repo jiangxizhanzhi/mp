@@ -33,7 +33,7 @@ public class ContainerServiceImpl extends BaseOpenStackServiceImpl implements Co
 
     @Override
     public String[] getTotalPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldName(ContainerPageRequest::getLimit,ContainerPageRequest::getOffset,
+        return BeanUtils.getBeanGetterFieldName(ContainerPageRequest::getOffset,
                 ContainerPageRequest::getPage,ContainerPageRequest::getPerPage);
     }
 

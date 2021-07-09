@@ -7,9 +7,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.math.NumberUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Objects;
 
 /**
  * 资源统计信息
@@ -117,56 +119,56 @@ public class HypervisorStatisticsResponse extends BaseCloudPlatformResponse {
      */
     @ApiModelProperty(value = "虚拟机个数")
     @Builder.Default
-    private Integer totalInstances = 0;
+    private Integer totalInstances = NumberUtils.INTEGER_ZERO;
 
     /**
      * 容器个数
      */
     @ApiModelProperty(value = "容器个数")
     @Builder.Default
-    private Integer totalContainers = 0;
+    private Integer totalContainers = NumberUtils.INTEGER_ZERO;
 
     /**
      * 实装设备个数
      */
     @ApiModelProperty(value = "实装设备个数")
     @Builder.Default
-    private Integer totalRealEquipments = 0;
+    private Integer totalRealEquipments = NumberUtils.INTEGER_ZERO;
 
     /**
      * NPC个数
      */
     @ApiModelProperty(value = "NPC个数")
     @Builder.Default
-    private Integer totalNpc = 0;
+    private Integer totalNpc = NumberUtils.INTEGER_ZERO;
 
     /**
      * 交换机个数
      */
     @ApiModelProperty(value = "交换机个数")
     @Builder.Default
-    private Integer totalSwitch = 0;
+    private Integer totalSwitch = NumberUtils.INTEGER_ZERO;
 
     /**
      * 网桥个数
      */
     @ApiModelProperty(value = "网桥个数")
     @Builder.Default
-    private Integer totalBridge = 0;
+    private Integer totalBridge = NumberUtils.INTEGER_ZERO;
 
     /**
      * 路由器个数
      */
     @ApiModelProperty(value = "路由器个数")
     @Builder.Default
-    private Integer totalRouters = 0;
+    private Integer totalRouters = NumberUtils.INTEGER_ZERO;
 
     /**
      * 防火墙个数
      */
     @ApiModelProperty(value = "防火墙个数")
     @Builder.Default
-    private Integer totalFireWall = 0;
+    private Integer totalFireWall = NumberUtils.INTEGER_ZERO;
 
     public HypervisorStatisticsResponse HypervisorStatisticsResponse(Integer cpus, Long memoryMb, Long localGb,
                                         Long cpusUsed, Long memoryMbUsed, Long localGbUsed,
@@ -183,15 +185,18 @@ public class HypervisorStatisticsResponse extends BaseCloudPlatformResponse {
     }
 
     public BigDecimal getRamPercent() {
-        return BigDecimal.valueOf(this.memoryMbUsed).divide(BigDecimal.valueOf(this.memoryMb),2, RoundingMode.DOWN).multiply(BigDecimal.valueOf(100));
+        return Objects.isNull(this.memoryMb) || Objects.isNull(this.memoryMbUsed) ?
+                BigDecimal.ZERO : BigDecimal.valueOf(this.memoryMbUsed).divide(BigDecimal.valueOf(this.memoryMb),2, RoundingMode.DOWN).multiply(BigDecimal.valueOf(100));
 
     }
 
     public BigDecimal getCpuPercent() {
-        return BigDecimal.valueOf(this.cpusUsed).divide(BigDecimal.valueOf(this.cpus),2,RoundingMode.DOWN).multiply(BigDecimal.valueOf(100));
+        return  Objects.isNull(this.cpus) || Objects.isNull(this.cpusUsed) ?
+                BigDecimal.ZERO : BigDecimal.valueOf(this.cpusUsed).divide(BigDecimal.valueOf(this.cpus),2,RoundingMode.DOWN).multiply(BigDecimal.valueOf(100));
     }
 
     public BigDecimal getDiskPercent() {
-        return BigDecimal.valueOf(this.localGbUsed).divide(BigDecimal.valueOf(this.localGb),2,RoundingMode.DOWN).multiply(BigDecimal.valueOf(100));
+        return  Objects.isNull(this.localGb) || Objects.isNull(this.localGbUsed) ?
+                BigDecimal.ZERO : BigDecimal.valueOf(this.localGbUsed).divide(BigDecimal.valueOf(this.localGb),2,RoundingMode.DOWN).multiply(BigDecimal.valueOf(100));
     }
 }

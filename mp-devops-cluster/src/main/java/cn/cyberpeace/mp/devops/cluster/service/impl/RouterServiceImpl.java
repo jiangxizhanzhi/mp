@@ -31,7 +31,7 @@ public class RouterServiceImpl extends BaseOpenStackServiceImpl implements Route
 
     @Override
     public String[] getTotalPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldName(RouterPageRequest::getLimit,RouterPageRequest::getOffset,
+        return BeanUtils.getBeanGetterFieldName(RouterPageRequest::getOffset,
                 RouterPageRequest::getPage,RouterPageRequest::getPerPage);
     }
 
