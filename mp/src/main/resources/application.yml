@@ -36,7 +36,7 @@ mp:
     cp-url: http://10.100.7.5:11111
     mg-url: http://10.100.2.21
   datasandtable:
-    group-url: http://10.100.7.50:5079/v1/scenes
+    group-url: http://10.100.7.104:5079/v1/scenes
     moloch:
       username: api
       password: api
