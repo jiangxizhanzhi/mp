@@ -30,12 +30,16 @@ import cn.cyberpeace.mp.devops.log.model.OperationLogModel;
 import com.alibaba.excel.EasyExcel;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -72,6 +76,7 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
     @Override
     @ApiIgnore
     @ApiOperation(value = "(弃用，建议用/api/mp/auth/org_users/page/byorg) 分页查询组织下的用户", notes = "")
+    @GetMapping
     public ListObjServiceResult<UserModel> list(UserQueryParams queryParams) {
         return super.list(queryParams);
     }
@@ -79,18 +84,45 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
     @Override
     @ApiIgnore
     @ApiOperation(value = "(弃用，建议用/add) 创建数据", notes = "")
-    public ObjServiceResult<UserModel> create(UserModel obj, String[] fields) {
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="fields", value="需要返回的字段",dataTypeClass = String[].class),
+    })
+    @PostMapping
+    public ObjServiceResult<UserModel> create(@RequestBody UserModel obj, @RequestParam(required = false) String[] fields) {
         return super.create(obj, fields);
     }
 
     @Override
     @ApiOperation(value = "(弃用，建议用/modify)更新指定id数据", notes = "")
-    public ObjServiceResult<UserModel> update(String id, UserModel obj, String[] fields) {
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class),
+            @ApiImplicitParam(name="fields", value="需要返回的字段",dataTypeClass = String[].class),
+    })
+    @PatchMapping("/{id}")
+    @OperateLog(module = AuthLogConstant.MODULE, type = AuthLogConstant.TYPE_UPDATE, title = "修改用户")
+    public ObjServiceResult<UserModel> update(@PathVariable String id, @RequestBody UserModel obj,
+                                              @RequestParam(required = false) String[] fields) {
         return super.update(id, obj, fields);
     }
 
     @Override
+    @ApiOperation("删除指定id用户")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class),
+    })
+    @DeleteMapping("/{id}")
+    @OperateLog(module = AuthLogConstant.MODULE, type = AuthLogConstant.TYPE_DELETE, title = "删除用户")
+    public ServiceResult<Boolean> delete(@PathVariable String id) {
+        return super.delete(id);
+    }
+
+    @Override
     @ApiOperation(value = "查询指定id数据 附带组织，角色信息", notes = "")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class),
+            @ApiImplicitParam(name="fields", value="需要返回的字段",dataTypeClass = String[].class),
+    })
+    @GetMapping("/{id}")
     public ObjServiceResult get(@PathVariable String id, @RequestParam(required = false) String[] fields) {
         UserDto userDto = getModelService().getUserDto(id);
         return ResultUtils.obj2ObjServiceResult(userDto);
@@ -123,6 +155,7 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
 
     @ApiOperation(value = "修改密码", notes = "")
     @PostMapping("/resetpwd")
+    @OperateLog(module = AuthLogConstant.MODULE, type = AuthLogConstant.TYPE_UPDATE, title = "重置密码")
     public ServiceResult resetPwd(@Validated(AddGroup.class) @RequestBody ResetPwdRequest resetPwdRequest) {
         String decryptedPwd = PasswordUtils.desDecrypt(resetPwdRequest.getNewPwd());
         boolean success = getModelService().resetPwd(resetPwdRequest.getUserId(), decryptedPwd);
@@ -131,6 +164,7 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
 
     @ApiOperation(value = "修改自己的密码", notes = "")
     @PostMapping("/resetpwd/self")
+    @OperateLog(module = AuthLogConstant.MODULE, type = AuthLogConstant.TYPE_UPDATE, title = "重置本人密码")
     public ServiceResult resetSelfPwd(@Validated(UpdateGroup.class) @RequestBody ResetSelfPwdRequest req) {
         String decryptedOldPwd = PasswordUtils.desDecrypt(req.getOldPwd());
         String decryptedNewPwd = PasswordUtils.desDecrypt(req.getNewPwd());
@@ -141,6 +175,7 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
 
     @ApiOperation(value = "禁用用户", notes = "")
     @PostMapping("/disable")
+    @OperateLog(module = AuthLogConstant.MODULE, type = AuthLogConstant.TYPE_UPDATE, title = "禁用用户")
     public ServiceResult disable(@RequestBody List<String> userIds) {
         String errMsg = getModelService().batchDisable(userIds);
         if (StringUtils.isBlank(errMsg)) {
@@ -154,6 +189,7 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
 
     @ApiOperation(value = "启用用户", notes = "")
     @PostMapping("/enable")
+    @OperateLog(module = AuthLogConstant.MODULE, type = AuthLogConstant.TYPE_UPDATE, title = "启用用户")
     public ServiceResult enable(@RequestBody List<String> userIds) {
         String errMsg = getModelService().batchEnable(userIds);
         if (StringUtils.isBlank(errMsg)) {
@@ -165,6 +201,7 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
 
     @ApiOperation(value = "审批用户", notes = "")
     @PostMapping("/approve")
+    @OperateLog(module = AuthLogConstant.MODULE, type = AuthLogConstant.TYPE_UPDATE, title = "审批用户")
     public ServiceResult approve(@RequestBody List<String> userIds) {
         String errMsg = getModelService().batchApprove(userIds);
         if (StringUtils.isBlank(errMsg)) {
@@ -176,6 +213,7 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
 
     @ApiOperation(value = "更改用户头像", notes = "")
     @PostMapping("/updateAvatar")
+    @OperateLog(module = AuthLogConstant.MODULE, type = AuthLogConstant.TYPE_UPDATE, title = "更改头像")
     public ServiceResult updateAvatar(@RequestParam String userId, MultipartFile file) throws MpRuntimeException {
         boolean success = getModelService().updateAvatar(userId, file);
         return ResultUtils.commonResult(success, null);

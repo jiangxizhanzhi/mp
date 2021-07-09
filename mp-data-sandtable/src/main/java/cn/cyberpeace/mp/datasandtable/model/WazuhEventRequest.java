@@ -1,9 +1,5 @@
 package cn.cyberpeace.mp.datasandtable.model;
 
-import cn.cyberpeace.mp.base.serializer.CustomLocalDateTimeDeserializer;
-import cn.cyberpeace.mp.base.serializer.CustomLocalDateTimeSerializer;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.time.LocalDateTime;
@@ -18,8 +14,6 @@ public class WazuhEventRequest {
     /**
      * 查询开始时间
      */
-    @JsonSerialize(using = CustomLocalDateTimeSerializer.class)
-    @JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)
     @ApiModelProperty(value = "开始时间-yyyy-MM-dd HH:mm:ss", required = true)
     @NotNull(message = "开始时间不能为空")
     private LocalDateTime startTime;
@@ -27,8 +21,6 @@ public class WazuhEventRequest {
     /**
      * 查询
      */
-    @JsonSerialize(using = CustomLocalDateTimeSerializer.class)
-    @JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)
     @ApiModelProperty(value = "结束时间-yyyy-MM-dd HH:mm:ss", required = true)
     @NotNull(message = "结束时间不能为空")
     private LocalDateTime endTime;

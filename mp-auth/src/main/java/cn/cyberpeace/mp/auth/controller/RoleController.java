@@ -23,7 +23,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -48,17 +50,37 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
 
     @ApiOperation(value = "(弃用，建议用/add) 创建数据", notes = "")
     @ApiIgnore
-    @Override
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="fields", value="需要返回的字段",dataTypeClass = String[].class),
+    })
+    @PostMapping
     public ObjServiceResult<RoleModel> create(@RequestBody RoleModel obj, @RequestParam String[] fields) {
         return super.create(obj, fields);
     }
 
-    @ApiOperation(value = "(弃用，建议用/modify) 修改数据", notes = "")
-    @ApiIgnore
+
     @Override
+    @ApiIgnore
+    @ApiOperation(value = "(弃用，建议用/modify) 修改数据", notes = "")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class),
+            @ApiImplicitParam(name="fields", value="需要返回的字段",dataTypeClass = String[].class),
+    })
+    @PatchMapping("/{id}")
     public ObjServiceResult<RoleModel> update(@PathVariable String id, @RequestBody RoleModel obj,
                                               @RequestParam(required = false) String[] fields) {
         return super.update(id, obj, fields);
+    }
+
+    @Override
+    @ApiOperation("删除指定id角色")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="id", paramType="path", value="id",dataTypeClass = String.class),
+    })
+    @DeleteMapping("/{id}")
+    @OperateLog(module = AuthLogConstant.MODULE, type = AuthLogConstant.TYPE_DELETE, title = "删除角色")
+    public ServiceResult<Boolean> delete(@PathVariable String id) {
+        return super.delete(id);
     }
 
     @Override

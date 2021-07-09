@@ -178,9 +178,7 @@ public class SessionService {
             throw new MpRuntimeException("查询缓存异常 groupId: "+ groupId);
         }
 
-        //todo 为了调试
-        molochUrl = "http://10.100.7.50:8005" + "/sessions.pcap?ids=" + sessionId;
-//        molochUrl = molochUrl + "/sessions.pcap?ids=" + sessionId;
+        molochUrl = molochUrl + "/sessions.pcap?ids=" + sessionId;
 
         try {
             httpResponse =  HttpUtils.sendGetDownLoadWithDigestAuth(molochUrl,
@@ -206,11 +204,9 @@ public class SessionService {
             throw new MpRuntimeException("查询缓存异常 groupId: "+ spiViewRequest.getGroupId());
         }
 
-        //todo 为了调试
-        var spiMolochUrl = "http://10.100.7.50:8005" + "/spiview.json";
-//        spiMolochUrl = molochUrl + "/spiview.json";
+        molochUrl = molochUrl + "/spiview.json";
         var spiMolochUrlBuilder = new StringBuilder();
-        spiMolochUrlBuilder.append(spiMolochUrl)
+        spiMolochUrlBuilder.append(molochUrl)
             .append("?facets=").append(1)
             .append("&spi=").append("srcIp,dstIp,ipProtocol")
             .append("&startTime=").append(spiViewRequest.getStartTime())
