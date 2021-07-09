@@ -27,8 +27,8 @@ public class QueryParentOrgOperation implements OrgOperation<OrgDto> {
         }
 
         var objSrvResult = orgService.get(orgDto.getParent());
-        if (objSrvResult != null) {
-            ObjResult<OrgModel> result = objSrvResult.getSource();
+        ObjResult<OrgModel> result = objSrvResult.getSource();
+        if (result != null) {
             OrgModel org = result.getObj();
             if (org != null) {
                 OrgDto parentOrgDto = new OrgDto();

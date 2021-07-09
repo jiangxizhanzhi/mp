@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Set;
 
 public class AuthUserDetails implements UserDetails {
@@ -46,8 +47,10 @@ public class AuthUserDetails implements UserDetails {
     }
 
     @Override
+    // 用来代替是否已审核
     public boolean isAccountNonLocked() {
-        return isEnabled();
+//        return Objects.equals(UserModel.Status.AUDITED, user.getIsAudited());
+        return true;
     }
 
     @Override
@@ -57,7 +60,7 @@ public class AuthUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-//        return UserModel.Status.ENABLED.equals(user.getIsEnabled());
+//        return Objects.equals(UserModel.Status.ENABLED, user.getIsEnabled());
         return true;
     }
 }

@@ -26,8 +26,8 @@ public class QueryParentTargetOperation implements TargetOperation<TargetDto> {
         }
 
         var objSrvResult = targetService.get(targetDto.getParent());
-        if (objSrvResult != null) {
-            ObjResult<TargetModel> result = objSrvResult.getSource();
+        ObjResult<TargetModel> result = objSrvResult.getSource();
+        if (result != null) {
             TargetModel parentTarget = result.getObj();
             if (parentTarget != null) {
                 TargetDto parentTargetDto = new TargetDto();
