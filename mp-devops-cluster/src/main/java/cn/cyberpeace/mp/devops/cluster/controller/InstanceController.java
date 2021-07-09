@@ -54,7 +54,7 @@ public class InstanceController {
         }
         List<InstanceCloudPlatformModel.InstanceModel> instances = model.getInstances();
         List<InstancePageResponse> list = instances.stream().map(instanceModel ->
-            InstancePageResponse.builder().name(instanceModel.getInstance_name()).node(instanceModel.getHostname())
+            InstancePageResponse.builder().name(instanceModel.getName()).node(instanceModel.getHostname())
                     .addressList(instanceModel.getAddresses().stream().map(InstanceCloudPlatformModel.InstanceModel.Address::getIp).collect(Collectors.toList()))
                     .status(CloudPlatformEnum.fromValue(instanceModel.getStatus())).createTime(instanceModel.getCreated_at()).build()
         ).collect(Collectors.toList());
