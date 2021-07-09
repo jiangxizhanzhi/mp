@@ -1,14 +1,17 @@
 package cn.cyberpeace.mp.devops.cluster.service.impl;
 
+import cn.cyberpeace.mp.auth.extensions.security.common.JwtCommon;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.BaseModel;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * 基础对接接口层
@@ -46,6 +49,22 @@ public class BaseServiceImpl {
     /**
      * 通过Get方式查询信息
      * @param url
+     * @return
+     */
+    protected String sendGet(String url,Map<String,String> headers){
+        String result = "";
+        try {
+            result = HttpUtils.getInstance().sendGet(url,headers);
+            log.info("=====GET调用url：{},对应返回结果信息：{}",url,result);
+        } catch (IOException e) {
+            log.info("=====GET调用url：{},对应返回结果信息：{},报错信息：{}",url,result,e.getMessage());
+        }
+        return result;
+    }
+
+    /**
+     * 通过Get方式查询信息
+     * @param url
      * @param valueType
      * @param <T>
      * @return
@@ -55,6 +74,26 @@ public class BaseServiceImpl {
         String result = "";
         try {
             result = this.sendGet(url);
+            model = objectMapper.readValue(result,valueType);
+        } catch (IOException e) {
+            log.info("=====GET调用url：{},对应返回结果信息：{},报错信息：{}",url,result,e.getMessage());
+        }
+        return model;
+    }
+
+    /**
+     * 通过Get方式查询信息
+     * @param url
+     * @param headers
+     * @param valueType
+     * @param <T>
+     * @return
+     */
+    protected <T extends BaseModel> T sendGet(String url, Map<String,String> headers, Class<T> valueType){
+        T model = null;
+        String result = "";
+        try {
+            result = this.sendGet(url,headers);
             model = objectMapper.readValue(result,valueType);
         } catch (IOException e) {
             log.info("=====GET调用url：{},对应返回结果信息：{},报错信息：{}",url,result,e.getMessage());
@@ -97,5 +136,15 @@ public class BaseServiceImpl {
             log.info("=====POST调用url：{},参数：{},对应返回结果信息：{},报错信息：{}",url,body,result,e.getMessage());
         }
         return model;
+    }
+
+    /**
+     * 组装token
+     * @return
+     */
+    protected Map<String,String> getToken(){
+        Map<String,String> headers = Maps.newHashMap();
+        headers.put("Authorization", JwtCommon.getToken());
+        return headers;
     }
 }

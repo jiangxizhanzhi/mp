@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.base.util;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -14,9 +16,11 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -103,6 +107,19 @@ public class HttpUtils {
      * @return
      * @throws IOException
      */
+    public static String sendGet(String url,Map<String,String> headerMap) throws IOException {
+        HttpClient client = HttpClientBuilder.create().build();
+        return doGetRequest(url,headerMap, Objects.nonNull(INSTANCE.httpClient) ? INSTANCE.httpClient : client);
+    }
+
+
+    /**
+     * get请求
+     *
+     * @param url
+     * @return
+     * @throws IOException
+     */
     public static String sendGet(String url, String userName, String password) throws IOException {
         HttpClient client = withDigestAuth(userName, password);
         return doGetRequest(url, client);
@@ -110,6 +127,22 @@ public class HttpUtils {
 
     private static String doGetRequest(String url, HttpClient client) throws IOException {
         HttpGet httpget = new HttpGet(url);
+        HttpResponse resp = client.execute(httpget);
+        // 设置请求和传输超时时间
+        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
+        httpget.setConfig(Objects.nonNull(INSTANCE.requestConfig) ? INSTANCE.requestConfig : requestConfig);
+        // 获得返回值
+        return EntityUtils.toString(resp.getEntity(), "UTF-8");
+    }
+
+    private static String doGetRequest(String url, Map<String,String> headerMap, HttpClient client) throws IOException {
+        HttpGet httpget = new HttpGet(url);
+        if (MapUtils.isNotEmpty(headerMap)) {
+            Header[] headers = headerMap.entrySet().stream().map(v ->
+                new BasicHeader(v.getKey(), v.getValue())
+            ).toArray(Header[]::new);
+            httpget.setHeaders(headers);
+        }
         HttpResponse resp = client.execute(httpget);
         // 设置请求和传输超时时间
         RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
