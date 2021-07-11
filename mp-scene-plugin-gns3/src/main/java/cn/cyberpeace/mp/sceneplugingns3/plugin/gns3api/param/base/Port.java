@@ -4,11 +4,7 @@ import com.alibaba.fastjson.annotation.JSONField;
 import lombok.Getter;
 import lombok.Setter;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/9/7
- */
+
 @Getter
 @Setter
 public class Port {

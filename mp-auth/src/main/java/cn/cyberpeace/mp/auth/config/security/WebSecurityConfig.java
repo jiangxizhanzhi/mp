@@ -29,11 +29,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import javax.annotation.Resource;
 
-/**
- * @Description: Security配置化类
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
@@ -84,7 +80,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 
-        // custom authenticate urls
+        
         String[] authenticateUrls = {};
         if (CollectionUtil.isNotEmpty(authConfig.getAuthenticateUrls())) {
             authenticateUrls = authConfig.getAuthenticateUrls().toArray(new String[authConfig.getAuthenticateUrls().size()]);
@@ -116,9 +112,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(clientAuthenticationFilter, JwtAuthenticationFilter.class)
                 .addFilterAfter(loadAuthoritiesFilter, JwtAuthenticationFilter.class);
-//                .addFilterBefore(licenseFilter, ClientAuthenticationFilter.class);
 
-        // usernamePassword
+
+        
         var customUsernamePasswordAuthenticationFilter = new CustomUsernamePasswordAuthenticationFilter();
         customUsernamePasswordAuthenticationFilter.setAuthenticationSuccessHandler(authenticationSuccessHandler);
         customUsernamePasswordAuthenticationFilter.setAuthenticationFailureHandler(authenticationFailureHandler);
@@ -128,7 +124,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http.addFilterAt(customUsernamePasswordAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
 
-        // mobilePassword
+        
         var mobilePasswordAuthenticationFilter = new MobilePasswordAuthenticationFilter();
         mobilePasswordAuthenticationFilter.setAuthenticationSuccessHandler(authenticationSuccessHandler);
         mobilePasswordAuthenticationFilter.setAuthenticationFailureHandler(authenticationFailureHandler);
@@ -139,16 +135,16 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
         http.authenticationProvider(mobilePasswordAuthenticationProvider).addFilterAt(mobilePasswordAuthenticationFilter, CustomUsernamePasswordAuthenticationFilter.class);
 
-        // client
-//        var clientAuthenticationFilter = new ClientAuthentication2Filter();
-//        clientAuthenticationFilter.setAuthenticationSuccessHandler(authenticationSuccessHandler);
-//        clientAuthenticationFilter.setAuthenticationFailureHandler(authenticationFailureHandler);
-//        clientAuthenticationFilter.setAuthenticationManager(authenticationManagerBean());
-//        clientAuthenticationFilter.setFilterProcessesUrl("/**");
-//        var clientAuthenticationProvider = new ClientAuthenticationProvider();
-//        clientAuthenticationProvider.setClientDetailsService(clientDetailsService);
-//
-//        http.authenticationProvider(clientAuthenticationProvider).addFilterAt(clientAuthenticationFilter, JwtAuthenticationFilter.class);
+        
+
+
+
+
+
+
+
+
+
 
     }
 }

@@ -37,11 +37,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/2/23 16:55
- */
+
 @Service
 @Slf4j
 public class SysCollectorService extends RequestProcessor {
@@ -52,11 +48,7 @@ public class SysCollectorService extends RequestProcessor {
     @Autowired
     private AgentService agentService;
 
-    /**
-     * 查询端口
-     *
-     * @return 端口号
-     */
+    
     public ListObjServiceResult<Port> pagePorts(CollectorBaseRequest collectorBaseRequest) {
         String agentId = agentService.getSingleAgentId(collectorBaseRequest.getAgentName());
         if (StringUtils.isBlank(agentId)) {
@@ -79,11 +71,7 @@ public class SysCollectorService extends RequestProcessor {
     }
 
 
-    /**
-     * 查询进程
-     *
-     * @return 进程集合
-     */
+    
     public ListObjServiceResult<Process> pageProcesses(CollectorBaseRequest collectorBaseRequest) {
         String agentId = agentService.getSingleAgentId(collectorBaseRequest.getAgentName());
         if (StringUtils.isBlank(agentId)) {
@@ -107,11 +95,7 @@ public class SysCollectorService extends RequestProcessor {
     }
 
 
-    /**
-     * 查询网卡列表
-     *
-     * @return 进程集合
-     */
+    
     public ListObjServiceResult<Netiface> pageNetifaces(CollectorBaseRequest collectorBaseRequest) {
         String agentId = agentService.getSingleAgentId(collectorBaseRequest.getAgentName());
         if (StringUtils.isBlank(agentId)) {
@@ -140,11 +124,7 @@ public class SysCollectorService extends RequestProcessor {
         return new ListObjServiceResult(new ListObjResult<>(netifaces, result.getData().getTotalAffectedItems()).asResult()).asResult();
     }
 
-    /**
-     * 查询网卡列表
-     *
-     * @return 进程集合
-     */
+    
     public List<NetAddr> listNetAddrs(String agentId, String iface, String proto) {
         if (StringUtils.isBlank(agentId)) {
             log.error("agentId is null");
@@ -178,10 +158,7 @@ public class SysCollectorService extends RequestProcessor {
     }
 
 
-    /**
-     * @param
-     * @return
-     */
+    
     public List<Hardware> getHardware(String agentName) {
 
         String agentId = agentService.getSingleAgentId(agentName);
@@ -202,10 +179,7 @@ public class SysCollectorService extends RequestProcessor {
 
 
 
-    /**
-     * @param
-     * @return
-     */
+    
     public List<OS> getOS(String agentName) {
 
         String agentId = agentService.getSingleAgentId(agentName);
@@ -224,12 +198,7 @@ public class SysCollectorService extends RequestProcessor {
         return oslist;
     }
 
-    /**
-     * 查询agentPort
-     *
-     * @param agents agents
-     * @return 端口号
-     */
+    
     @Deprecated
     public List<WazuhAgentPortsModel> queryAgentsPorts(List<String> agents) {
         List<WazuhAgentPortsModel> agentPortsModels = Lists.newArrayList();
@@ -263,13 +232,7 @@ public class SysCollectorService extends RequestProcessor {
     }
 
 
-    /**
-     * 查询hardware信息
-     *
-     * @param agentId
-     * @return
-     * @throws IOException
-     */
+    
     @Deprecated
     public WazuhRamRoot queryRamByAgentId(String agentId) {
         var requestUrl = situationAwareConfig.getWazuhBaseUrl() + "/syscollector/" + agentId + "/hardware";

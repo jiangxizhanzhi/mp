@@ -43,18 +43,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/8/15
- */
+
 @Slf4j
 public class SceneExporter {
 
     private static String EXPORT_DEVICE_YML = "/cpcloud/device/v1/image/export_device_yml";
 
     public ExportResult export(String sceneId, String envPath, String imagePath, String singleImagePath, String sceneNumber, boolean disableImageExport) {
-        // 生成topo.yml
+        
         SceneParseResourceCenterV1.Result resultV1 = new SceneParseResourceCenterV1().parseAndLoadInfo(sceneId);
         if (CollectionUtils.isNotEmpty(resultV1.getYmlResult().getNodes())) {
             resultV1.getYmlResult().getNodes().forEach(n -> {
@@ -103,9 +99,9 @@ public class SceneExporter {
         }
         this.createSceneYml(parseResult.getYmlResult(), envPath, "topo2");
 
-        // 下载附件
+        
         this.downloadNodeFile(envPath, resultV1.getFile2Download());
-        // 生成server.yml与导出靶标
+        
         if (!disableImageExport) {
             this.createImageAndServiceYml(imagePath, singleImagePath, resultV1.getDevices(), sceneNumber);
         }else{
@@ -141,7 +137,7 @@ public class SceneExporter {
                 var imageInfo = imagesConverter.findByUuid(device.getImageUuid());
                 Image image = new Image();
 
-                // cloud-init
+                
                 image.setCloudInit(false);
                 boolean vmSupportInit = imageInfo.getExtVm() != null && Boolean.TRUE.equals(imageInfo.getExtVm()
                                                                                                     .getInitSupport());
@@ -151,22 +147,22 @@ public class SceneExporter {
                     image.setCloudInit(true);
                 }
 
-                // 描述
+                
                 image.set描述(imageInfo.getDescription());
-                // 系统架构
+                
                 if (imageInfo.getExtSystemInfo() != null) {
                     image.set系统架构(imageInfo.getExtSystemInfo()
                                               .getSystemArchitecture());
                 }
-                // 系统版本
+                
                 image.set系统版本("系统版本");
-                // 系统语言
+                
                 if (imageInfo.getExtImageInfo() != null) {
                     String language = "cn".equals(imageInfo.getExtSystemInfo()
                                                           .getLanguage()) ? "中文" : "英文";
                     image.set系统语言(language);
                 }
-                // 系统类型
+                
                 if (imageInfo.getExtSystemInfo() != null) {
                     Integer systemType = imageInfo.getExtSystemInfo()
                             .getSystemType();
@@ -191,7 +187,7 @@ public class SceneExporter {
                     image.set实例大小(formatFlavor(flavor));
                 }
 
-                // 下载图片
+                
                 if (device.getLogo().startsWith("/fdfs") || device.getLogo().startsWith("group/") || device.getLogo().startsWith("group1/")) {
                     String logoUrl = StringUtils.replaceOnce(device.getLogo(), "/fdfs/", "");
                     byte[] content = null;
@@ -202,7 +198,7 @@ public class SceneExporter {
                         log.error(detail, e);
                         throw new MpRuntimeException(BaseErrorCode.ERROR, detail);
                     }
-                    // 判断图片文件类型
+                    
                     if (this.isPng(content)) {
                         this.createFile(content, currentImageDir + "/logo.png");
                         image.setLOGO("logo.png");
@@ -238,7 +234,7 @@ public class SceneExporter {
                         log.error(detail, e);
                         throw new MpRuntimeException(BaseErrorCode.ERROR, detail);
                     }
-                    // 判断图片文件类型
+                    
                     if (this.isPng(content)) {
                         this.createFile(content, currentImageDir + "/logo.png");
                         image.setLOGO("logo.png");
@@ -247,7 +243,7 @@ public class SceneExporter {
                         image.setLOGO("logo.jpg");
                     }
                 }
-                // 生成service.yml
+                
                 if (CollectionUtils.isNotEmpty(device.getAccessModes())) {
                     List<AccessModeExportResult> normal = new ArrayList<>();
                     List<AccessModeExportResult> manage = new ArrayList<>();
@@ -259,7 +255,7 @@ public class SceneExporter {
                         }
                         accessModeParseResult.setProtocol(m.getProtocol());
                         accessModeParseResult.setPrivateKey(m.getPrivateKeyFileName());
-                        //下载密钥文件
+                        
                         downloadPrivateKeyFile(m.getPrivateKeyPath(), currentImageDir, m.getPrivateKeyFileName());
                         if (m.getPort() != null) {
                             accessModeParseResult.setPort(m.getPort());
@@ -285,7 +281,7 @@ public class SceneExporter {
                     }
                 }
 
-                // 设置发布时间
+                
                 if (StringUtils.isEmpty(image.get发布时间())) {
                     String time = TimeUtils.localDateToString(LocalDate.now());
                     time = StringUtils.replace(time, "-", "timeFormatSplit");
@@ -340,7 +336,7 @@ public class SceneExporter {
                 if (!file.exists()) {
                     file.mkdirs();
                 }
-                // 生成镜像
+                
                 ExportDeviceYmlParams params = new ExportDeviceYmlParams();
                 params.setImageName(device.getImage());
                 params.setDestPath(currentImageDir);
@@ -364,7 +360,7 @@ public class SceneExporter {
                     image.set实例大小(formatFlavor(flavor));
                 }
 
-                // 下载图片
+                
                 if (device.getLogo().startsWith("/fdfs") || device.getLogo().startsWith("group/") || device.getLogo().startsWith("group1/")) {
                     String logoUrl = StringUtils.replaceOnce(device.getLogo(), "/fdfs/", "");
                     byte[] content = null;
@@ -375,7 +371,7 @@ public class SceneExporter {
                         log.error(detail, e);
                         throw new MpRuntimeException(BaseErrorCode.ERROR, detail);
                     }
-                    // 判断图片文件类型
+                    
                     if (this.isPng(content)) {
                         this.createFile(content, currentImageDir + "/logo.png");
                         image.setLOGO("logo.png");
@@ -411,7 +407,7 @@ public class SceneExporter {
                         log.error(detail, e);
                         throw new MpRuntimeException(BaseErrorCode.ERROR, detail);
                     }
-                    // 判断图片文件类型
+                    
                     if (this.isPng(content)) {
                         this.createFile(content, currentImageDir + "/logo.png");
                         image.setLOGO("logo.png");
@@ -420,7 +416,7 @@ public class SceneExporter {
                         image.setLOGO("logo.jpg");
                     }
                 }
-                // 生成service.yml
+                
                 if (CollectionUtils.isNotEmpty(device.getAccessModes())) {
                     List<AccessModeExportResult> normal = new ArrayList<>();
                     List<AccessModeExportResult> manage = new ArrayList<>();
@@ -432,7 +428,7 @@ public class SceneExporter {
                         }
                         accessModeParseResult.setProtocol(m.getProtocol());
                         accessModeParseResult.setPrivateKey(m.getPrivateKeyFileName());
-                        //下载密钥文件
+                        
                         downloadPrivateKeyFile(m.getPrivateKeyPath(), currentImageDir, m.getPrivateKeyFileName());
                         if (m.getPort() != null) {
                             accessModeParseResult.setPort(m.getPort());
@@ -458,7 +454,7 @@ public class SceneExporter {
                     }
                 }
 
-                // 设置发布时间
+                
                 if (StringUtils.isEmpty(image.get发布时间())) {
                     String time = TimeUtils.localDateToString(LocalDate.now());
                     time = StringUtils.replace(time, "-", "timeFormatSplit");
@@ -535,7 +531,7 @@ public class SceneExporter {
 
     private void downloadNodeFile(String envPath, Map<String, String> file2Download) {
         for (Map.Entry<String, String> entry : file2Download.entrySet()) {
-            // 下载附件
+            
             String fdfsFilePath = entry.getValue();
             if (StringUtils.contains(entry.getValue(), "?")) {
                 fdfsFilePath = StringUtils.split(entry.getValue(), "?")[0];

@@ -13,7 +13,7 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Slf4j
-//@Component  // 测试接收
+
 public class CsceneSceneReportRabbitmqReceiver extends BaseSimpleMessageReceiver {
 
     @Autowired

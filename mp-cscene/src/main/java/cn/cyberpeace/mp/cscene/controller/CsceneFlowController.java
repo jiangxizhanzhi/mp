@@ -26,11 +26,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * @Description: 场景流量
- * @Author: guquan
- * @Date：2023/5/8 14:56
- */
+
 @Api(value = "场景流量", tags = "场景流量")
 @Slf4j
 @RestController
@@ -41,11 +37,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
     @Autowired
     private CsceneFlowService csceneFlowService;
 
-    /**
-     * 新增流量任务
-     * @param request
-     * @return
-     */
+    
     @ApiOperation("新增流量任务")
     @PostMapping("/task/add")
     public ServiceResult addTask(@RequestBody AddFlowTaskTaskRequest request) {
@@ -59,11 +51,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
         return ResultCommon.success();
     }
 
-    /**
-     * 删除流量任务
-     * @param id
-     * @return
-     */
+    
     @ApiOperation("删除流量任务")
     @ApiImplicitParam(name = "id", value = "流量任务ID", dataTypeClass = String.class)
     @DeleteMapping("/task/delete")
@@ -74,11 +62,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
         return ResultCommon.success();
     }
 
-    /**
-     * 流量任务列表查询
-     * @param request
-     * @return
-     */
+    
     @ApiOperation("流量任务列表查询")
     @GetMapping("/task/list")
     public ListObjServiceResult<FlowTaskPageResponse> taskList(FlowTaskPageQueryParams request) {
@@ -89,11 +73,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
         return result;
     }
 
-    /**
-     * 条件查询任务id集合
-     * @param request
-     * @return
-     */
+    
     @ApiOperation("条件查询任务id集合")
     @GetMapping("/task_ids/list")
     public ServiceResult<List<String>> taskIdsList(FlowTaskPageQueryParams request) {
@@ -101,11 +81,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
         return csceneFlowService.getTaskIds(request);
     }
 
-    /**
-     * 编辑流量任务配置
-     * @param request
-     * @return
-     */
+    
     @ApiOperation("编辑流量任务配置")
     @PostMapping("/task/conf/edit")
     public ServiceResult editTaskConf(@RequestBody EditFlowTaskConfRequest request) {
@@ -115,11 +91,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
         return ResultCommon.success();
     }
 
-    /**
-     * 流量任务配置查询
-     * @param taskId
-     * @return
-     */
+    
     @ApiOperation("流量任务配置查询")
     @ApiImplicitParam(name = "taskId", value = "流量任务ID", dataTypeClass = String.class)
     @GetMapping("/task/conf/detail")
@@ -130,11 +102,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
         return ResultCommon.success(result);
     }
 
-    /**
-     * 流量仿真概况
-     * @param id
-     * @return
-     */
+    
     @ApiOperation("流量仿真概况")
     @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class)
     @GetMapping("/summary")
@@ -145,11 +113,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
         return ResultCommon.success(result);
     }
 
-    /**
-     * 流量仿真统计
-     * @param id
-     * @return
-     */
+    
     @ApiOperation("流量仿真统计")
     @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class)
     @GetMapping("/statistics")
@@ -160,11 +124,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
         return ResultCommon.success(result);
     }
 
-    /**
-     * 流量仿真所有统计（包括概况、统计、环境总速率、top5）
-     * @param id
-     * @return
-     */
+    
     @ApiOperation("流量仿真所有统计")
     @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class)
     @GetMapping("/statistics_all")
@@ -175,11 +135,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
         return ResultCommon.success(result);
     }
 
-    /**
-     * TOP5实时速率
-     * @param id
-     * @return
-     */
+    
     @ApiOperation("TOP5实时速率")
     @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class)
     @GetMapping("/top5_node_txbps")
@@ -190,11 +146,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
         return ResultCommon.success(result);
     }
 
-    /**
-     * TOP5流量协议
-     * @param id
-     * @return
-     */
+    
     @ApiOperation("TOP5流量协议")
     @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class)
     @GetMapping("/top5_protocols")
@@ -205,11 +157,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
         return ResultCommon.success(result);
     }
 
-    /**
-     * 流量任务启动
-     * @param taskId
-     * @return
-     */
+    
     @ApiOperation("流量任务启动")
     @ApiImplicitParam(name = "taskId", value = "流量任务ID", dataTypeClass = String.class)
     @PostMapping("/task/start")
@@ -220,11 +168,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
         return ResultCommon.success();
     }
 
-    /**
-     * 流量任务批量启动
-     * @param request
-     * @return
-     */
+    
     @ApiOperation("流量任务批量启动")
     @PostMapping("/task/batch_start")
     public ServiceResult batchStartTasks(@RequestBody FlowTaskBatchStartRequest request) {
@@ -234,11 +178,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
         return ResultCommon.success();
     }
 
-    /**
-     * 流量任务停止
-     * @param taskId
-     * @return
-     */
+    
     @ApiOperation("流量任务停止")
     @ApiImplicitParam(name = "taskId", value = "流量任务ID", dataTypeClass = String.class)
     @PostMapping("/task/stop")
@@ -249,11 +189,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
         return ResultCommon.success();
     }
 
-    /**
-     * 流量任务批量停止
-     * @param request
-     * @return
-     */
+    
     @ApiOperation("流量任务批量停止")
     @PostMapping("/task/batch_stop")
     public ServiceResult batchStopTasks(@RequestBody FlowTaskBatchStopRequest request) {
@@ -263,11 +199,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
         return ResultCommon.success();
     }
 
-    /**
-     * 目标设备下拉选项
-     * @param id
-     * @return
-     */
+    
     @ApiOperation("目标设备下拉选项")
     @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class)
     @GetMapping("/node_option")
@@ -278,11 +210,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
         return ResultCommon.success(result);
     }
 
-    /**
-     * 环境总速率
-     * @param id
-     * @return
-     */
+    
     @ApiOperation("环境总速率")
     @ApiImplicitParam(name = "id", value = "环境总速率", dataTypeClass = String.class)
     @GetMapping("/total_rate")

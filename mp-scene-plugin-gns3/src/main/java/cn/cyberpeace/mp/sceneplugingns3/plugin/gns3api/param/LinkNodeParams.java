@@ -6,11 +6,7 @@ import lombok.Setter;
 
 import java.util.List;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/9/6
- */
+
 @Getter
 @Setter
 public class LinkNodeParams implements Gns3HttpData {

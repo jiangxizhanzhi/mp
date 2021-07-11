@@ -5,11 +5,7 @@ import lombok.Setter;
 
 import java.util.List;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/8/29
- */
+
 @Getter
 @Setter
 public class SceneElementShape {

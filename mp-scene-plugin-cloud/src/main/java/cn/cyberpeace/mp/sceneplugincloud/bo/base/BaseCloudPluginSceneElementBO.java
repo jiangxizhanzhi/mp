@@ -37,7 +37,7 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     @ApiModelProperty(value = "云平台三层防火墙资源id")
     private String firewallResourceId;
 
-    // 虚拟交换机/路由/防火墙属性
+    
     @ApiModelProperty(value = "电口数量")
     private Integer electricPortNumber;
     @ApiModelProperty(value = "电口类型")
@@ -55,7 +55,7 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     @ApiModelProperty(value = "lan口类型")
     private String lanPortType;
 
-    // 虚拟交换机属性
+    
     @ApiModelProperty(value = "虚拟交换机cidr地址段")
     private String cidr;
     @ApiModelProperty(value = "虚拟交换机网关")
@@ -78,30 +78,30 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     @VlanId
     private Integer vlanId;
 
-    // 虚拟路由属性
+    
     @ApiModelProperty(value = "虚拟路由静态路由")
     @Valid
     private List<StaticRoute> staticRoutes;
 
-    // ospf网络属性
+    
     @ApiModelProperty(value = "ospf网络下的routerID")
     private String ospfRouterId;
 
     @ApiModelProperty(value = "rip网络下的lookback")
     private String ripLoopback;
 
-    // 虚拟防火墙属性
+    
     @ApiModelProperty(value = "虚拟防火墙规则")
     @Valid
     private List<FirewallRule> firewallRules;
 
-    // 虚拟机属性
+    
     @ApiModelProperty(value = "挂载iso文件名")
     private String isoAttachFilename;
     @ApiModelProperty(value = "挂载iso临时文件地址")
     private String isoTmpdirUuid;
 
-    // 虚拟机/容器属性
+    
     @ApiModelProperty(value = "虚拟机/容器镜像名称")
     private String image;
     @ApiModelProperty(value = "虚拟机/容器镜像id")
@@ -116,7 +116,7 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     @ApiModelProperty(value = "docker参数")
     private DockerParams dockerParams;
 
-    // gns3 属性
+    
     @ApiModelProperty(value = "gns3 platform")
     private String platform;
 
@@ -126,7 +126,7 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     @ApiModelProperty(value = "mib文件数据")
     private List<MibData> mibData;
 
-    // 靶标属性
+    
     @ApiModelProperty(value = "靶标角色")
     private Integer role;
     @ApiModelProperty(value = "镜像类型")
@@ -218,7 +218,7 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
 
     @Override
     public void fromModel(M obj, String... ignoreFields) {
-        //忽略直接赋值处理的字段，需要定制处理
+        
         super.fromModel(obj, ArrayUtils.addAll(ignoreFields,
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getDnsNameservers),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAllocationPools),

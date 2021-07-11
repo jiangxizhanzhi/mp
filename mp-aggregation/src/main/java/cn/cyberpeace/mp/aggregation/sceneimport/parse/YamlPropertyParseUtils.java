@@ -6,11 +6,7 @@ import org.yaml.snakeyaml.introspector.PropertyUtils;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * @Description yml文件中key名称格式化为驼峰
- * @Author maojun
- * @Date 2021/10/11
- */
+
 class YamlPropertyParseUtils extends PropertyUtils {
     private static final Pattern middleLinePattern = Pattern.compile("-([a-z])");
 

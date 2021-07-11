@@ -13,11 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * @Description: 新增app任务请求
- * @Author qiaokang
- * @Date：2021/8/18 14:13
- */
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -53,11 +49,11 @@ public class AddAppTaskRequest {
         private String srcIpRange;
         private String dstIpRange;
         private List<CapList> capList;
-        // 流量协议
+        
         private String flowProtocol;
-        // 流量内容
+        
         private String content;
-        // 倍数,默认为1
+        
         private Integer mult;
     }
 
@@ -118,14 +114,14 @@ public class AddAppTaskRequest {
         AddAppTaskRequest.Client client = new AddAppTaskRequest.Client();
         client.setIp(flowPortModel.getClientIp());
         client.setPort(flowPortModel.getClientMac());
-        // 目标ip作为客户端网关
+        
         client.setDefaultGw(targetIp);
         client.setNodeName(flowTaskModel.getNodeId());
 
         AddAppTaskRequest.Server server = new AddAppTaskRequest.Server();
         server.setIp(flowPortModel.getServerIp());
         server.setPort(flowPortModel.getServerMac());
-        // 目标ip作为服务端网关
+        
         server.setDefaultGw(targetIp);
         server.setNodeName(flowTaskModel.getNodeId());
 
@@ -140,7 +136,7 @@ public class AddAppTaskRequest {
         config.setSpecifics(specifics);
         config.setNetworkStructure(networkStructure);
 
-        // 名称加时间戳，防止重复
+        
         this.name = flowTaskModel.getTitle() + System.currentTimeMillis();
         this.description = flowTaskModel.getTaskDesc();
         this.config = config;

@@ -15,11 +15,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2021/11/2
- */
+
 @Slf4j
 class FilePathYmlParser<T> implements YmlParse<T> {
     private String filePath;

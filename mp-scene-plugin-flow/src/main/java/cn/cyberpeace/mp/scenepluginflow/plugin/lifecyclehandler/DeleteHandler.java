@@ -31,7 +31,7 @@ public class DeleteHandler extends HandlerCommon {
     public void delete() {
         prepareEventProcess(SceneModel.Event.DELETE, SceneProcess.class, ElementProcess.class);
 
-        // 删除流量任务
+        
         FlowPluginSceneBO scene = getPluginHandler().getScene();
         List<Runnable> deleteFlowTasks = new ArrayList<>();
         getPluginHandler().getElementMap().forEach((nodeId, flowElement) -> {
@@ -43,7 +43,7 @@ public class DeleteHandler extends HandlerCommon {
         });
         runSceneProgress(SceneProcess.DELETE_FLOW, () -> runTasks(deleteFlowTasks));
 
-        // 删除执行器
+        
         String executorId = scene.getExecutor();
         if (StringUtils.isNotBlank(executorId)) {
             runSceneProgress(SceneProcess.DELETE_EXECUTOR, () -> {

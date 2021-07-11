@@ -7,11 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/7/11
- */
+
 @Getter
 @Setter
 class ConvertRule {

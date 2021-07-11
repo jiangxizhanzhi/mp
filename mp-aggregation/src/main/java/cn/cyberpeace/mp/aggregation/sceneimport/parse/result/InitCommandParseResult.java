@@ -7,11 +7,7 @@ import lombok.Data;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2021/10/12
- */
+
 @Data
 public class InitCommandParseResult {
     private String o;

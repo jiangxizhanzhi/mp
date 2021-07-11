@@ -1,10 +1,6 @@
 package cn.cyberpeace.mp.authbase.context;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/10/13 18:49
- */
+
 public class LoginUserHolder {
 
     private static ThreadLocal<String> userContext = new ThreadLocal();

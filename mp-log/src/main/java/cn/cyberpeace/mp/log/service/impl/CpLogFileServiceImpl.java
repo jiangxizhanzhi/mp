@@ -29,20 +29,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-/**
- * 云平台日志模块
- *
- * @description:
- * @author：Geek Wang
- * @date: 2022/6/15
- */
+
 @Slf4j
 @Service
 public class CpLogFileServiceImpl extends BaseCpHttpService implements LogFileService {
 
-    /**
-     * cpcloud平台URL前缀
-     */
+    
     public static final String CPCLOUD_URL = "/cpcloud";
 
     private static final String LIST_URL = CPCLOUD_URL + "/logger_app/v1/logfile";
@@ -138,9 +130,7 @@ public class CpLogFileServiceImpl extends BaseCpHttpService implements LogFileSe
         return 30;
     }
 
-    /**
-     *
-     */
+    
     @Data
     @NoArgsConstructor
     private class LogListParams{

@@ -29,9 +29,7 @@ public abstract class BaseSceneDataBO<
     @Valid
     private T topology;
 
-    /**
-     * pluginId: pluginData
-     */
+    
     @ApiModelProperty(value = "插件数据(字典: key-插件代号, value-插件数据[不同插件代号对应的数据模型不一样]), "
             + "cpcloud(云平台): CloudPluginSceneConfigDataBO/CloudPluginSceneDataBO, "
             + "cpcollection(采集): CollectionPluginSceneConfigDataBO/CollectionPluginSceneDataBO, "

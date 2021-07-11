@@ -13,13 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * @ClassName LogDynamicSettingController
- * @description 日志级别设置Controller
- * @author wangssh
- * @date 2023/5/30
- * @version 1.0
- **/
+
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/settings")
@@ -48,22 +42,14 @@ public class LogDynamicSettingController {
         return logSettingService.resetDefualtLogLevel();
     }
 
-    /**
-     * 获取日志级别列表
-     *
-     * @return 日志级别信息
-     */
+    
     @GetMapping("/logLevel/{logName}")
     @ApiOperation(value = "获取日志级别")
     public ServiceResult<List<LogLevelResponse>> getLogLevelList(@PathVariable String logName) {
         return logSettingService.getLogLevel(logName);
     }
 
-    /**
-     * 获取日志级别列表
-     *
-     * @return 日志级别信息
-     */
+    
     @GetMapping("/logLevel")
     @ApiOperation(value = "获取日志级别")
     public ServiceResult<List<LogLevelResponse>> getLogLevelList() {

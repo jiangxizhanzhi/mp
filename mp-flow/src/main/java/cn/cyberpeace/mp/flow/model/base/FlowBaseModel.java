@@ -5,11 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * @Description: 流量基础对象
- * @Author qiaokang
- * @Date：2021/6/17 10:29
- */
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

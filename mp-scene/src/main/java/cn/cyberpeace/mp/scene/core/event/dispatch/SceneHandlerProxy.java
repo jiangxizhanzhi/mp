@@ -7,11 +7,7 @@ import org.springframework.cglib.proxy.MethodInterceptor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/5/12
- */
+
 public class SceneHandlerProxy implements MethodInterceptor {
     private SceneHandler sceneHandler;
 

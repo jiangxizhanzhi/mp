@@ -36,13 +36,11 @@ public class LoadAuthHotDataLocalCallService {
     @Autowired
     private AuthUserDetailsService authUserDetailsService;
 
-    /**
-     * 加载用户热数据
-     */
+    
     @LocalCallFunc
     public void loadHotData() {
         log.info("local-call loadHotData");
-        // 加载用户信息
+        
         ListObjServiceResult<UserModel> result = userService.list(new UserQueryParams());
         List<UserModel> userModelList = result.getSource().getObjs();
         Cache cacheById = cacheManagerNormal.getCache(UserServiceImpl.CACHE_VAL_USERMODEL_BY_ID);
@@ -56,7 +54,7 @@ public class LoadAuthHotDataLocalCallService {
                 cacheByUserName.put(userModel.getUsername(), userModel);
             }
 
-            // 加载权限
+            
             authUserDetailsService.loadAuthorities(userModel.getId());
         }
         log.info("local-call loadHotData success!");

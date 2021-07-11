@@ -2,9 +2,7 @@ package cn.cyberpeace.mp.flow.enums;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
-/**
- * 任务操作枚举类：1 start， 2 stop, 3 reset
- */
+
 public enum TaskActionEnum {
 
     INIT("INIT"),

@@ -12,10 +12,7 @@ import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-/**
- * 运维管控-系统运维-网络实例管理-网络
- * @author wanggang
- */
+
 @Service
 @Slf4j
 public class NetworkService extends BaseCpService {
@@ -27,21 +24,13 @@ public class NetworkService extends BaseCpService {
         super(devopsClusterConfig);
     }
 
-    /**
-     * 分页查询网络信息
-     * @param getParams
-     * @return
-     */
+    
     public CloudPlatformPageResult<NetworkModel> page(String getParams){
         return super.page(BaseCloudPlatformConstant.URL_VERSION + NETWORKS + getParams, NetworkModel.class);
     }
 
 
-    /**
-     * 查询网络vlan ip信息
-     * @param getParams
-     * @return
-     */
+    
     public CloudPlatformResult<VlanIpStockModel> vlanIpStock(String getParams){
         CloudPlatformResult result = super.sendGet(BaseCloudPlatformConstant.URL_VERSION + NETWORKS + "/vlan_ip_stock" + getParams, CloudPlatformResult.class);
         super.checkResult(result);
@@ -52,19 +41,12 @@ public class NetworkService extends BaseCpService {
         return cpresult;
     }
 
-    /**
-     * 分页查询弹性IP
-     * @param getParams
-     * @return
-     */
+    
     public CloudPlatformPageResult<ElasticIpModel> pageElasticIp(String getParams){
         return super.page(BaseCloudPlatformConstant.URL_VERSION + NETWORKS + "/floatingips" + getParams, ElasticIpModel.class);
     }
 
-    /**
-     *
-     * @return
-     */
+    
     public CloudPlatformPageResult<NetworkAgentModel> agentsStateFromNetworks(){
         return super.page(BaseCloudPlatformConstant.URL_VERSION + NETWORKS + "/agents", NetworkAgentModel.class);
     }

@@ -13,11 +13,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/6/21 17:53
- */
+
 @Slf4j
 @Component
 public class AuthInitService implements ApplicationListener<ContextRefreshedEvent>, EnvironmentAware {
@@ -41,14 +37,8 @@ public class AuthInitService implements ApplicationListener<ContextRefreshedEven
 
         authConfig.setAuthenticateJwtSecret(jwtSecret);
 
-        // 更新admin的tokenSecret
-        /*String env = environment.getProperty("spring.profiles.active");
-        if (StringUtils.isNotBlank(env) && "prod".equals(env)) {
-            var updateUser = new UserModel();
-            updateUser.setId(AuthConstant.ROOT_USER_ID);
-            updateUser.initDefault("tokenSecret");
-            userService.update(updateUser);
-        }*/
+        
+        
     }
 
     @Override

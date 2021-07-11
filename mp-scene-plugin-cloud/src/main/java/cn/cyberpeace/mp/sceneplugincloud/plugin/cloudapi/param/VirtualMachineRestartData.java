@@ -16,6 +16,6 @@ public class VirtualMachineRestartData implements CloudHttpData {
     private Map reboot = new HashMap();
 
     public VirtualMachineRestartData() {
-//        this.reboot.put("reboot_type", "HARD");
+
     }
 }

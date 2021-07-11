@@ -18,9 +18,7 @@ public class ResultCommon {
         return ServiceResult.<T1>builder().serviceCode(errorCode).build().asResult();
     }
 
-    /**
-     * 只用在不可预知的错误
-     */
+    
     public static <T1> ServiceResult<T1> fail(String detail) {
         return ServiceResult.<T1>builder().serviceCode(BaseErrorCode.ERROR).detail(detail).build().asResult();
     }

@@ -6,11 +6,7 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/11/22 17:40
- */
+
 @Data
 public class FlowPageRequest extends PageRequest {
 

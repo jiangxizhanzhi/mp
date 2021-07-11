@@ -13,7 +13,7 @@ public class ContextRegistry {
         FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();
         filterRegistrationBean.setFilter(new HttpContextFilter());
         filterRegistrationBean.addUrlPatterns("/*");
-        // 设置优先级最高,http请求一进入就设置context
+        
         filterRegistrationBean.setOrder(Integer.MIN_VALUE);
         return filterRegistrationBean;
     }

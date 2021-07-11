@@ -14,15 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @author wangssh
- * @version 1.0
- * @description Yaml重写时注释回写，该方法慎用，如需使用请充分测试
- * 注意事项：
- * 1. 如果替换内容中存在非注释 #，替换内容可能出现不一致问题
- * 2. 如果注释放在key后部，#号与前面内容至少有一个空格符相隔
- * @date 2023/6/5
- **/
+
 @Slf4j
 public class YamlUtils {
 
@@ -96,14 +88,7 @@ public class YamlUtils {
         }
     }
 
-    /**
-     * 替换第position个匹配的目标子串
-     *
-     * @param str         源字符串。
-     * @param target      需要替换的目标子串。
-     * @param replacement 需要替换成的字符串。
-     * @return 将源字符串中出现的第n个target换成replacement后的字符串。
-     */
+    
     public static String replacePosition(String str, String target, String replacement, int position) {
         if (str == null || target == null || replacement == null) {
             log.error("Invalid params. str:{}, target:{}, replacement:{}", str, target, replacement);
@@ -124,14 +109,7 @@ public class YamlUtils {
     }
 
 
-    /**
-     * 替换第二个匹配的目标子串
-     *
-     * @param str         源字符串。
-     * @param target      需要替换的目标子串。
-     * @param replacement 需要替换成的字符串。
-     * @return 将源字符串中出现的第二个target换成replacement后的字符串。
-     */
+    
     public static String replaceSecond(String str, String target, String replacement) {
         if (str == null || target == null || replacement == null) {
             throw new NullPointerException();
@@ -154,19 +132,13 @@ public class YamlUtils {
 
 class Comment {
 
-    /**
-     * 替换前的
-     */
+    
     private String key;
 
-    /**
-     * 替换后的
-     */
+    
     private String replaceKey;
 
-    /**
-     * 位置(默认为1，一般替换前的行内容(key)都不一样)：若存在替换前的行内容(key)一致,则需此参数
-     */
+    
     private Integer sort;
 
     public String getKey() {

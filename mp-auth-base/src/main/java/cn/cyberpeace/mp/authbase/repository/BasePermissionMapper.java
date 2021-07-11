@@ -54,27 +54,7 @@ public interface BasePermissionMapper<P extends BasePermissionModel, T extends B
         return total(innerCondition);
     }
 
-    /*
-    @Recommendation
-    default List<P> listPermissionsByOwner(String owner) {
-
-        HumanCondition humanCondition = new HumanCondition();
-        humanCondition.filterEqual("owner", owner);
-
-
-        return list(humanCondition);
-    }
-
-
-    @Recommendation
-    default List<P> listPermissionsByTarget(String target) {
-
-        HumanCondition humanCondition = new HumanCondition();
-        humanCondition.filterEqual("target", target);
-
-        return list(humanCondition);
-    }
-    */
+    
 
     @Recommendation
     default int deleteByOwner(String owner) {
@@ -97,18 +77,18 @@ public interface BasePermissionMapper<P extends BasePermissionModel, T extends B
         HumanCondition innerCondition = getInnerCondition(owner);
         String currentLinkName = innerCondition.getCurrentLinkName();
 
-        // distinct
+        
         innerCondition.setDistinct(outerCondition.getDistinct());
-        // select fields
+        
         innerCondition.getSelectFields().putAll(convertSelectFields(currentLinkName, outerCondition));
-        // paging
+        
         innerCondition.setLimit(outerCondition.getLimit());
         innerCondition.setOffset(outerCondition.getOffset());
-        // group
+        
         innerCondition.getGroupFields().addAll(convertGroupFields(currentLinkName, outerCondition));
-        // orders
+        
         innerCondition.getOrders().addAll(convertOrders(currentLinkName, outerCondition));
-        // andi
+        
         innerCondition.getAndCondition().addCondition(convertAndCondition(currentLinkName, outerCondition));
         return innerCondition;
     }

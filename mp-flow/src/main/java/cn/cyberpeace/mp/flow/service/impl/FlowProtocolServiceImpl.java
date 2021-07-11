@@ -22,11 +22,7 @@ public class FlowProtocolServiceImpl extends BaseModelServiceImpl<FlowProtocolMo
         setModelMapper(stuMapper);
     }
 
-    /**
-     * 根据流量id查询
-     * @param flowId
-     * @return
-     */
+    
     @Override
     public List<FlowProtocolModel> selectByFlowId(String flowId) {
         HumanCondition condition = new HumanCondition();
@@ -34,11 +30,7 @@ public class FlowProtocolServiceImpl extends BaseModelServiceImpl<FlowProtocolMo
         return getModelMapper().list(condition);
     }
 
-    /**
-     * 根据流量id删除
-     * @param flowId
-     * @return
-     */
+    
     @Override
     public void deleteByFlowId(String flowId) {
         HumanCondition condition = new HumanCondition();

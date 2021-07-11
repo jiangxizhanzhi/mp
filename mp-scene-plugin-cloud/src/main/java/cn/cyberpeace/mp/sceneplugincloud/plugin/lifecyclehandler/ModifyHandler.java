@@ -68,7 +68,7 @@ public class ModifyHandler extends HandlerCommon {
             this.modifyDeleteHandler.delete();
             getPluginHandler().getSceneHandler().addProgressPercentage(10);
         });
-        // 更新时不处理DYNAMIPS节点
+        
         Set<String> dynamipsIds = new HashSet<>();
         this.modifyCreateHandler.getPluginHandler().getElementMap().forEach((k, v) -> {
             if (v != null && v.getImageType().equals(BaseCloudPluginSceneElementModel.ImageType.DYNAMIPS)) {
@@ -158,7 +158,7 @@ public class ModifyHandler extends HandlerCommon {
                 networkBOMap.put(networkBO.getId(), connectedNetworkBO);
                 getPluginHandler().getElement(networkBO.getSceneElement()).getDeriveNetworks().add(connectedNetworkBO);
             });
-            // 处理加入的网络
+            
             for (var e : allElements) {
                 if (e.getSrcElement().getPorts() != null && e.getSrcElement().getPorts().size() > 0) {
                     Set<String> findedNetPortIds = new HashSet<>();
@@ -169,9 +169,9 @@ public class ModifyHandler extends HandlerCommon {
                         if (pluginPort != null) {
                             boolean handlerd = false ;
                             if (e.getSrcElement().getType() != null && e.getSrcElement().getType() == BaseSceneElementModel.Type.TERMINAL) {
-                                // 终端,优先看对端网络
+                                
                                 if (to != null) {
-                                    // 未构建网络看对端端口
+                                    
                                     var pluginToPort = getPluginHandler().getPort(to.getId());
                                     if (StringUtils.isNotEmpty(pluginToPort.getLogicNetworkId())) {
                                         if (networkBOMap.containsKey(pluginToPort.getLogicNetworkId())) {
@@ -185,7 +185,7 @@ public class ModifyHandler extends HandlerCommon {
                                         }
                                     }
                                 } else if (StringUtils.isNotEmpty(pluginPort.getLogicNetworkId())) {
-                                    // 自己构建网络直接加入
+                                    
                                     if (networkBOMap.containsKey(pluginPort.getLogicNetworkId())) {
                                         networkBOMap.get(pluginPort.getLogicNetworkId()).addPort(p, to, true);
                                         findedNetPortIds.add(p.getId());
@@ -196,14 +196,14 @@ public class ModifyHandler extends HandlerCommon {
                             }
                             if (!handlerd) {
                                 if (StringUtils.isNotEmpty(pluginPort.getLogicNetworkId())) {
-                                    // 自己构建网络直接加入
+                                    
                                     if (networkBOMap.containsKey(pluginPort.getLogicNetworkId())) {
                                         networkBOMap.get(pluginPort.getLogicNetworkId()).addPort(p, to, true);
                                         findedNetPortIds.add(p.getId());
                                         defaultCreatedNetPluginPort = pluginPort;
                                     }
                                 } else if (to != null) {
-                                    // 未构建网络看对端端口
+                                    
                                     var pluginToPort = getPluginHandler().getPort(to.getId());
                                     if (StringUtils.isNotEmpty(pluginToPort.getLogicNetworkId())) {
                                         if (networkBOMap.containsKey(pluginToPort.getLogicNetworkId())) {
@@ -226,7 +226,7 @@ public class ModifyHandler extends HandlerCommon {
                             if (isAddedPort && (e.getSrcElement().getType() == BaseSceneElementModel.Type.SWITCH
                                     || e.getSrcElement().getType() == BaseSceneElementModel.Type.ROUTER
                                     || e.getSrcElement().getType() == BaseSceneElementModel.Type.FIREWALL)) {
-                                // 网关设备新增的端口 需要加到原有的网络上
+                                
                                 var to = getHandlerUtils().getPortConnectedOpaqueSrcPort(p.getId());
                                 var pluginPort = getPluginHandler().getPort(p.getId());
                                 pluginPort.setLogicNetworkId(defaultCreatedNetPluginPort.getLogicNetworkId());
@@ -269,7 +269,7 @@ public class ModifyHandler extends HandlerCommon {
         @Override
         protected void createVirtualRouter(CloudPluginSceneElementBO cloudElement) {
             if (this.createdNodeIds.contains(cloudElement.getSrcElement().getId()) && cloudElement.getResourceId() != null) {
-                // 已存在的节点无需再次创建
+                
                 return;
             }
             super.createVirtualRouter(cloudElement);
@@ -278,7 +278,7 @@ public class ModifyHandler extends HandlerCommon {
         @Override
         protected void createVirtualFirewall(CloudPluginSceneElementBO cloudElement) {
             if (this.createdNodeIds.contains(cloudElement.getSrcElement().getId()) && cloudElement.getResourceId() != null) {
-                // 已存在的节点无需再次创建
+                
                 return;
             }
             super.createVirtualFirewall(cloudElement);
@@ -287,7 +287,7 @@ public class ModifyHandler extends HandlerCommon {
         @Override
         protected void createVirtualMachine(CloudPluginSceneElementBO cloudElement) {
             if (this.createdNodeIds.contains(cloudElement.getSrcElement().getId()) && cloudElement.getResourceId() != null) {
-                // 已存在的节点无需再次创建
+                
                 return;
             }
             super.createVirtualMachine(cloudElement);
@@ -296,7 +296,7 @@ public class ModifyHandler extends HandlerCommon {
         @Override
         protected void createContainer(CloudPluginSceneElementBO cloudElement) {
             if (this.createdNodeIds.contains(cloudElement.getSrcElement().getId()) && cloudElement.getResourceId() != null) {
-                // 已存在的节点无需再次创建
+                
                 return;
             }
             super.createContainer(cloudElement);
@@ -305,7 +305,7 @@ public class ModifyHandler extends HandlerCommon {
         @Override
         protected void createEntityNode(CloudPluginSceneElementBO cloudElement) {
             if (this.createdNodeIds.contains(cloudElement.getSrcElement().getId()) && cloudElement.getResourceId() != null) {
-                // 已存在的节点无需再次创建
+                
                 return;
             }
             super.createEntityNode(cloudElement);
@@ -314,7 +314,7 @@ public class ModifyHandler extends HandlerCommon {
         @Override
         protected void recordNpcNode(CloudPluginSceneElementBO cloudElement) {
             if (this.createdNodeIds.contains(cloudElement.getSrcElement().getId()) && cloudElement.getResourceId() != null) {
-                // 已存在的节点无需再次创建
+                
                 return;
             }
             super.recordNpcNode(cloudElement);
@@ -339,7 +339,7 @@ public class ModifyHandler extends HandlerCommon {
         @Override
         public void delete() {
             super.delete();
-            // 删除网络信息
+            
             List<CloudPluginSceneElementNetworkModel> networks = getPluginHandler().getPluginModelHandler().readNetworks();
             List<String> deleteNets = new ArrayList<>();
             for (var net : networks) {

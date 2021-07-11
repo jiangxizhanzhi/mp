@@ -5,11 +5,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.RecreateTaskPool;
 import lombok.extern.slf4j.Slf4j;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2021/10/25
- */
+
 @Slf4j
 public class ElementDeleteHandler extends HandlerCommon {
 

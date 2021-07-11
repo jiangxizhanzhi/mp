@@ -15,11 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-/**
- * @description: 日志文件上报接口
- * @author：Geek Wang
- * @date: 2022/6/15
- */
+
 @Slf4j
 @Service
 @RequiredArgsConstructor

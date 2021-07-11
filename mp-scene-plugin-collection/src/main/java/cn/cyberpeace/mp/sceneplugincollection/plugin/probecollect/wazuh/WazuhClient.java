@@ -41,9 +41,7 @@ public class WazuhClient {
     private String wazuhToken;
     private LocalDateTime wazuhTokenExpiredTime;
 
-    /**
-     * TODO 缓存优化
-     */
+    
     private static final Map<String, String> agentNameIdMap = new ConcurrentHashMap<>();
 
     private Map<String, String> genWazuhBaseAuthHeaders() {
@@ -69,13 +67,11 @@ public class WazuhClient {
         return response.getData().getToken();
     }
 
-    /**
-     * TODO 简单示例，需要优化, 缓存...
-     */
+    
     private void syncWazuhApiToken() {
         if (wazuhTokenExpiredTime == null || LocalDateTime.now().compareTo(wazuhTokenExpiredTime) >= 0) {
             this.wazuhToken = getWazuhApiToken();
-            // 预留十秒，减少网络延迟导致的过期概率
+            
             this.wazuhTokenExpiredTime = LocalDateTime.now().plusSeconds(wazuhTokenExpiredSeconds - 10L);
         }
     }
@@ -101,9 +97,7 @@ public class WazuhClient {
         return response.getData().getAffectedItems();
     }
 
-    /**
-     * TODO 简单示例，需要优化, 缓存...
-     */
+    
     private void syncAgentInfo() {
         var agents = getAgents();
         agentNameIdMap.clear();

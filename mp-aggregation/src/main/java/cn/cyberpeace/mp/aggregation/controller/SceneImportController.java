@@ -23,11 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2021/10/11
- */
+
 @Api(value = "场景导入相关接口", tags = "场景导入相关接口")
 @Slf4j
 @RestController

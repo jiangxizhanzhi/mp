@@ -114,11 +114,7 @@ public class CsceneSpecialService {
         private Integer instanceCount;
     }
 
-    /**
-     * 统计场景模板中各类型节点数量，测试场景数量
-     * @param ids 场景模板id列表
-     * @return 统计结果
-     */
+    
     public ServiceResult<List<CsceneStat>> statCscenes(String[] ids) {
         if (ids == null || ids.length == 0) {
             return new ServiceResult<>(new ArrayList<>());
@@ -203,11 +199,7 @@ public class CsceneSpecialService {
         return new ServiceResult<>(new ArrayList<>(statMap.values()));
     }
 
-    /**
-     * 场景实例数据
-     * @param queryParams 查询参数
-     * @return 统计结果
-     */
+    
     public ListObjServiceResult<CsceneInstanceStat> listCsceneInstanceStats(CsceneInstanceStatQueryParams queryParams) {
         var humanCondition = new HumanCondition()
                 .link(CsceneInstanceModel.class, SceneModel.class)
@@ -355,15 +347,15 @@ public class CsceneSpecialService {
         int total;
         try {
             if (queryParams.getOrders() == null || queryParams.getOrders().length == 0) {
-                // 排序,默认使用时间倒序排列
+                
                 humanCondition.setCurrentLinkName(null);
                 humanCondition.orderBy("-pk");
             } else {
-                // todo 可根据需要去实现按cpu数量等排列 暂时只支持createTime、updateTime
+                
                 humanCondition.orderBy(queryParams.getOrders());
             }
             data = csceneInstanceMapper.list(humanCondition, CsceneInstanceStat.class);
-            // 场景运行时长
+            
             if (CollectionUtils.isNotEmpty(data)) {
                 data.forEach(s -> {
                     if (StringUtils.isNotEmpty(s.getReferenceMetaData())) {
@@ -376,13 +368,13 @@ public class CsceneSpecialService {
                         }
                     }
                     if (SceneModel.Event.DELETE == s.getEvent() && EventStatus.OVER == s.getEventStatus()) {
-                        // 已删除场景的运行时间=删除时刻 - 创建时刻
+                        
                         s.setSceneRunTime(s.getUpdateTime().toEpochSecond(ZoneOffset.UTC) - s.getCreateTime().toEpochSecond(ZoneOffset.UTC));
                     } else {
-                        // 未删除场景的运行时间=当前时刻 - 创建时刻
+                        
                         s.setSceneRunTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC) - s.getCreateTime().toEpochSecond(ZoneOffset.UTC));
                     }
-                    // 转换场景实例状态
+                    
                     var status = SceneStatusUtil.getSceneStatus(s.getDeleted(), s.getEvent(), s.getEventStatus());
                     s.setSceneStatus(status.getSceneStatus());
                     s.setSceneStatusDesc(status.getSceneStatusDesc());
@@ -470,11 +462,7 @@ public class CsceneSpecialService {
         return new ListObjServiceResult<>(new ListObjResult<>(data, total));
     }
 
-    /**
-     * 统计靶标名称 对应 引用了靶标的场景模板
-     * @param imageNames 靶标名称
-     * @return 靶标名称 对应 引用了靶标的场景模板
-     */
+    
     public ServiceResult<Map<String, List<DeviceReferCsceneStat>>> statDeviceReferCscenes(String[] imageNames) {
         var deviceReferCondition = new HumanCondition()
                 .link(CsceneModel.class, SceneConfigModel.class, CloudPluginSceneConfigElementModel.class)
@@ -509,11 +497,7 @@ public class CsceneSpecialService {
         return new ServiceResult<>(result);
     }
 
-    /**
-     * 统计靶标快照 对应 引用了靶标的场景模板
-     * @param snapUuids 靶标名称
-     * @return 靶标名称 对应 引用了靶标的场景模板
-     */
+    
     public ServiceResult<Map<String, List<DeviceReferCsceneStat>>> statDeviceReferCscenesByPrefix(List<String> snapUuids) {
         var deviceReferCondition = new HumanCondition()
                 .link(CsceneModel.class, SceneConfigModel.class, CloudPluginSceneConfigElementModel.class)
@@ -552,12 +536,7 @@ public class CsceneSpecialService {
         return new ServiceResult<>(result);
     }
 
-    /**
-     * 查询引用了虚拟usb的场景模板
-     *
-     * @param uuid
-     * @return
-     */
+    
     public ServiceResult<List<DeviceReferCsceneStat>> statVirtualUsbReferCscenes(String uuid) {
         var referCondition = new HumanCondition()
                 .link(CsceneModel.class, SceneConfigModel.class, SceneConfigElementModel.class, CloudPluginSceneConfigElementModel.class)
@@ -585,12 +564,7 @@ public class CsceneSpecialService {
         return new ServiceResult<>(deviceReferCsceneStats);
     }
 
-    /**
-     * 查询使用虚拟usb的场景实例
-     *
-     * @param uuid
-     * @return
-     */
+    
     public ServiceResult<List<DeviceReferCsceneStat>> statVirtualUsbUsedCscenes(String uuid) {
         var referCondition = new HumanCondition()
                 .link(CsceneInstanceModel.class, SceneModel.class, CloudPluginSceneElementModel.class, SceneElementModel.class)
@@ -618,12 +592,7 @@ public class CsceneSpecialService {
         return new ServiceResult<>(deviceReferCsceneStats);
     }
 
-    /**
-     * 查询引用了实体usb的场景模板
-     *
-     * @param uuid
-     * @return
-     */
+    
     public ServiceResult<List<DeviceReferCsceneStat>> statEntityUsbReferCscenes(String uuid) {
         var referCondition = new HumanCondition()
                 .link(CsceneModel.class, SceneConfigModel.class, SceneConfigElementModel.class, CloudPluginSceneConfigElementModel.class)
@@ -652,12 +621,7 @@ public class CsceneSpecialService {
     }
 
 
-    /**
-     * 查询使用实体usb的场景实例
-     *
-     * @param uuid
-     * @return
-     */
+    
     public ServiceResult<List<DeviceReferCsceneStat>> statEntityUsbUsedCscenes(String uuid) {
         var referCondition = new HumanCondition()
                 .link(CsceneInstanceModel.class, SceneModel.class, CloudPluginSceneElementModel.class, SceneElementModel.class)
@@ -686,11 +650,7 @@ public class CsceneSpecialService {
     }
 
 
-    /**
-     * 统计iso文件 对应 引用了iso文件的场景模板
-     * @param isoTmpdirUuid iso文件地址uuid
-     * @return iso文件uuid 对应 引用了iso文件的场景模板
-     */
+    
     public ServiceResult<List<String>> statISOReferCscenes(String isoTmpdirUuid) {
         var isoReferCondition = new HumanCondition()
                 .link(CsceneModel.class, SceneConfigModel.class, CloudPluginSceneConfigElementModel.class)
@@ -715,11 +675,7 @@ public class CsceneSpecialService {
         return new ServiceResult<>(result);
     }
 
-    /**
-     * 统计靶标名称 对应 引用了靶标的场景实例
-     * @param imageNames 靶标名称
-     * @return 靶标名称 对应 引用了靶标的场景实例
-     */
+    
     public ServiceResult<Map<String, List<DeviceReferCsceneInstanceStat>>> statDeviceReferCsceneInstances(
             String[] imageNames) {
         var deviceReferCondition = new HumanCondition()
@@ -761,11 +717,7 @@ public class CsceneSpecialService {
         return new ServiceResult<>(result);
     }
 
-    /**
-     * 统计靶标快照 对应 引用了靶标的场景实例
-     * @param snapUuids 靶标名称
-     * @return 靶标名称 对应 引用了靶标的场景实例
-     */
+    
     public ServiceResult<Map<String, List<DeviceReferCsceneInstanceStat>>> statDeviceReferCsceneInstancesByPrefix(
             List<String> snapUuids) {
         var deviceReferCondition = new HumanCondition()
@@ -807,10 +759,7 @@ public class CsceneSpecialService {
         return new ServiceResult<>(result);
     }
 
-    /**
-     * 统计活动场景总数和场景总数
-     * @return
-     */
+    
     public CsceneInstanceCountActivitySceneBO countActivityScene() {
         CsceneInstanceCountActivitySceneModel model = csceneInstanceMapper.countActivityScene();
         return CsceneInstanceCountActivitySceneBO.builder().activitySceneTotal(model.getActivitySceneTotal()).total(model.getTotal()).build();
@@ -820,12 +769,7 @@ public class CsceneSpecialService {
         return csceneMapper.total(new HumanCondition().filterEqual(CsceneModel::getDeleted, false));
     }
 
-    /**
-     * 统计一段时间区间内活跃过的场景数(活跃数 = 区间内启动过的(不管有没有关闭) + 之前启动的而且未关闭的)
-     * @param startTime
-     * @param endTime
-     * @return
-     */
+    
     public int countActivitySceneByTime(LocalDateTime startTime, LocalDateTime endTime) {
         Integer cnt = csceneInstanceMapper.countActivitySceneByTime(startTime, endTime);
         return Optional.ofNullable(cnt).orElse(0);
@@ -848,13 +792,7 @@ public class CsceneSpecialService {
         }
     }
 
-    /**
-     * 根据场景模板查询启动的实例数量
-     * @param csceneIds
-     * @param includeFailedScene 是否包括启动失败的场景
-     * @param includeDeleteScene 是否包括已删除的场景
-     * @return
-     */
+    
     public ServiceResult<Map<String, Integer>> statSceneInstanceCount(String[] csceneIds, boolean includeFailedScene, boolean includeDeleteScene) {
         Map<String, Integer> result = new HashMap<>();
         for (String csceneId : csceneIds) {
@@ -887,23 +825,13 @@ public class CsceneSpecialService {
         return new ServiceResult<>(result);
     }
 
-    /**
-     * 根据场景模板查询启动的实例数量
-     * @param csceneId
-     * @param includeFailedScene 是否包括启动失败的场景
-     * @param includeDeleteScene 是否包括已删除的场景
-     * @return
-     */
+    
     public ServiceResult<Integer> statSceneInstanceCount(String csceneId, boolean includeFailedScene, boolean includeDeleteScene) {
         Map<String, Integer> result = this.statSceneInstanceCount(new String[]{ csceneId }, includeFailedScene, includeDeleteScene).getSource();
         return new ServiceResult<>(result.get(csceneId));
     }
 
-    /**
-     * 获取实例运行的状态信息
-     * @param csceneId
-     * @return
-     */
+    
     public ServiceResult<SceneStateInfo> getSceneStateInfo(String csceneId) {
         CsceneInstanceModel csceneInstanceModel = csceneInstanceMapper.get(csceneId);
         if (csceneInstanceModel == null) {
@@ -914,11 +842,7 @@ public class CsceneSpecialService {
         return new ServiceResult<>(new SceneStateInfo(sceneModel));
     }
 
-    /**
-     * 根据资源名称反查节点和场景信息
-     * @param resourceNames
-     * @return
-     */
+    
     public ServiceResult<Map<String, CsceneNodeInfoBO>> getSceneInfoByNodeResourceName(List<String> resourceNames) {
         if (CollectionUtils.isEmpty(resourceNames)) {
             return new ServiceResult<>(new HashMap<>());
@@ -937,7 +861,7 @@ public class CsceneSpecialService {
         }
         Map<String, CsceneNodeInfoBO> result = new HashMap<>();
         infos.forEach(info -> {
-            // 转换场景实例状态
+            
             var status = SceneStatusUtil.getSceneStatus(info.getDeleted(), info.getEvent(), info.getEventStatus());
             info.setSceneStatus(status.getSceneStatus());
             info.setSceneStatusDesc(status.getSceneStatusDesc());

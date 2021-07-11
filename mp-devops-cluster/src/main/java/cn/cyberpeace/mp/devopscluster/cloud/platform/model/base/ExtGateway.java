@@ -10,10 +10,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * 扩展网关信息
- * @author wanggang
- */
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
@@ -22,9 +19,7 @@ public class ExtGateway implements Serializable {
 
     private List<PortConfig> portConfigs;
 
-    /**
-     * console协议配置
-     */
+    
     private AccessProtocol consoleConfig;
 
     public AccessProtocol getConsoleConfig() {

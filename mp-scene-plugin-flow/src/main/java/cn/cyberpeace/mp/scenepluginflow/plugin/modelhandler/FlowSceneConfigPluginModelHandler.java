@@ -18,10 +18,7 @@ import cn.cyberpeace.mp.scenepluginflow.repository.FlowPluginSceneConfigElementP
 import cn.cyberpeace.mp.scenepluginflow.repository.FlowPluginSceneConfigMapper;
 
 
-/**
- * 场景实例的处理
- * 场景实例的功能由本类对外提供
- */
+
 @ClassFieldClasses({
         FlowPluginSceneConfigBO.class,
         FlowPluginSceneConfigElementBO.class,

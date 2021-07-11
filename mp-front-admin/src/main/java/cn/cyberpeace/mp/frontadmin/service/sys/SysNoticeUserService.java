@@ -6,11 +6,7 @@ import cn.cyberpeace.mp.frontadmin.model.SysNoticeUserModel;
 
 import java.util.List;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/9/20 13:55
- */
+
 public interface SysNoticeUserService extends BaseModelService<SysNoticeUserModel, QueryParams> {
 
     int deleteByNoticeIds(List<String> noticeIds);

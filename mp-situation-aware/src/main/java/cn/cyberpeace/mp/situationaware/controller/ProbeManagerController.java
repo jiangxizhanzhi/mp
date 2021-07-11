@@ -104,12 +104,7 @@ public class ProbeManagerController {
         return ResultCommon.success(probeDtos);
     }
 
-    /**
-     * 新增探针
-     *
-     * @param probeRequest 新增探针参数
-     * @return ServiceResult<Void>
-     */
+    
     @PostMapping
     @ApiOperation(value = "新增自定义探针")
     @OperateLog(module = OpModuleEnums.PROBE, type = OpTypeEnums.CREATE, title = "创建探针", target = OpTargetEnums.PROBE)
@@ -134,7 +129,7 @@ public class ProbeManagerController {
         var oldScript = probeScriptService.getScriptModelByProbeId(probeRequest.getId());
         String oldMd5 = oldScript.getChecksum();
         Integer oldScriptType = oldScript.getScriptType();
-        // 判断脚本内容是否有变动，如无变动则不需要重新上传脚本
+        
         boolean contentChanged = false;
         if (Objects.nonNull(probeRequest.getScriptType()) && !oldScriptType.equals(probeRequest.getScriptType())) {
             contentChanged = true;

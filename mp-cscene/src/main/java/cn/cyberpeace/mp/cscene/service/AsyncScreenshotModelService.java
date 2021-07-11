@@ -9,19 +9,12 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-/**
- * @Description: 截屏文件异步操作类
- * @Author qiaokang
- * @Date：2021/9/13 16:17
- */
+
 @Service
 @Slf4j
 public class AsyncScreenshotModelService {
 
-    /**
-     * 轮询删除截屏文件
-     * @param screenshotModels
-     */
+    
     @Async
     public void batchDeleteScreenshot(List<ScreenshotModel> screenshotModels) {
         try {

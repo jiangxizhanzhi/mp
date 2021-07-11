@@ -14,14 +14,7 @@ import cn.cyberpeace.mp.scene.model.base.BaseSceneElementPortConnectionModel;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * 基础的场景插件处理类, 基于通用bo处理
- * 场景插件处理目前只对网元节点和网元端口做插件配置处理
- *
- * @param <S> 插件对应配置类
- * @param <E> 网元节点的插件对应配置类
- * @param <P> 网元端口的插件对应配置类
- */
+
 public abstract class BasePluginCommonHandler<
         S9 extends BaseSceneBO<?, S9>,
         E9 extends BaseSceneElementBO<?, P9, E9>,

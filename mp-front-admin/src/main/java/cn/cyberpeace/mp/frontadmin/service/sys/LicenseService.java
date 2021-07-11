@@ -17,11 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Service
 @Slf4j
 public class LicenseService {
@@ -33,7 +29,7 @@ public class LicenseService {
 
     public interface Awesome extends Library {
 
-//        Awesome INSTANCE = (Awesome) Native.loadLibrary("/home/mp/config/license/license.so", Awesome.class);
+
 
         public class GoString extends Structure {
             public static class ByValue extends GoString implements Structure.ByValue {
@@ -52,13 +48,9 @@ public class LicenseService {
     }
 
 
-    /**
-     * @param verifyStr  校验json串，如 "{\"machinecode\": \"CHTF-12H1-34S8-HV23-123S\", \"deadline\": 1, \"info\": {\"thj\":2}}"
-     * @param verifyCode 校验码
-     * @return
-     */
+    
     public boolean verify(String verifyStr, String verifyCode) {
-//        verifyStr = "{\"machinecode\": \"CHTF-12H1-34S8-HV23-123S\", \"deadline\": 1, \"info\": {\"thj\":2}}";
+
         if (StringUtils.isEmpty(verifyCode)) {
             log.info("verifyCode is empty!");
             throw new MpRuntimeException(AdminErrorCode.PARAMS_ERROR);
@@ -82,14 +74,14 @@ public class LicenseService {
             }
         }
 
-//        INSTANCE = (Awesome) Native.loadLibrary(activationConfig.getLicenseDir() + File.separator + "license.so", Awesome.class);
+
         log.info("Awesome INSTANCE:{}", INSTANCE);
         int ret = INSTANCE.Verify(str, code);
         log.info("verify complete! ret:{}", ret);
 
-        //  -1	json传入错误
-        //  0	此授权码正确
-        //  1	此授权码错误
+        
+        
+        
         if (ret == -1) {
             log.error("json error!");
             throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_FAILED);
@@ -99,7 +91,7 @@ public class LicenseService {
             throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_FAILED);
         }
         if (ret == 0) {
-            // 授权码正确
+            
             log.info("activation success!");
             return true;
         }

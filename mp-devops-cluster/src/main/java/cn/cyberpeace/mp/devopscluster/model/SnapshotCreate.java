@@ -9,18 +9,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SnapshotCreate {
 
-    /**
-     * UUID
-     */
+    
     private String deviceUuid;
 
-    /**
-     * 名称
-     */
+    
     private String name;
 
-    /**
-     * 描述
-     */
+    
     private String description;
 }

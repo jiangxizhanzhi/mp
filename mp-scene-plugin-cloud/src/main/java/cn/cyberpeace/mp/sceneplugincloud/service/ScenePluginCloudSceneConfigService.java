@@ -46,13 +46,7 @@ public class ScenePluginCloudSceneConfigService {
         this.cloudPluginSceneConfigElementMapper = cloudPluginSceneConfigElementMapper;
     }
 
-    /**
-     * 查询网元指定字段的聚合统计数量
-     * @param sceneIds 场景id列表，不传默认为全部
-     * @param nodeIds 节点id列表，不传默认为全部
-     * @param fieldNames 聚合统计字段  有效字段 COUNT_ELEMENT_FIELDS
-     * @return 字段的聚合统计数量 Map<字段名称, Map<字段值, 该字段统计数量>>
-     */
+    
     public ServiceResult<Map<String, Map<Object, Long>>> groupCountElement(
             List<String> sceneIds, List<String> nodeIds, List<String> fieldNames) {
         List<String> countFieldNames = new ArrayList<>();

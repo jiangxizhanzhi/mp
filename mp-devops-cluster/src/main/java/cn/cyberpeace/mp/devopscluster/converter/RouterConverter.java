@@ -22,12 +22,7 @@ public class RouterConverter implements BaseConverter{
 
     private final RouterService routerService;
 
-    /**
-     * 分页查询路由信息
-     * @param dto
-     * @param ignoreFields 不需要传递给云平台接口的参数,默认过滤page与perPage,此参数已转化成limit与offset这两个参数
-     * @return
-     */
+    
     public BasePageBO<RouterBO> page(RouterPageDTO dto, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         String getParams = ParamUtils.wrapperGetParamsByObject(dto,ignoreFields);
@@ -43,10 +38,7 @@ public class RouterConverter implements BaseConverter{
         return convertModel;
     }
 
-    /**
-     * 获取路由总数
-     * @return
-     */
+    
     public Integer getTotalRouters(RouterPageDTO dto) {
         dto.setLimit(NumberUtils.INTEGER_ONE);
         BasePageBO<RouterBO> page = this.page(dto,this.getTotalPageIgnoreField());

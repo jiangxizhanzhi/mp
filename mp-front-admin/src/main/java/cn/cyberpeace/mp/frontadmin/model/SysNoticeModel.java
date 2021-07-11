@@ -14,11 +14,7 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -44,7 +40,7 @@ public class SysNoticeModel extends BaseModel {
     @ApiModelProperty(value = "发布人")
     private String publisher;
 
-    // 1:系统  2:课程  3:练习  4:考试
+    
     @ApiModelProperty(value = "1:系统  2:课程  3:练习  4:考试")
     @DefaultInt(1)
     private Integer type;

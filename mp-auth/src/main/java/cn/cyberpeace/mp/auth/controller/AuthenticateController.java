@@ -24,11 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Objects;
 
-/**
- * @Description: 认证接口
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Api(value = "认证相关接口", tags = "AUTH-认证相关接口")
 @Slf4j
 @RestController

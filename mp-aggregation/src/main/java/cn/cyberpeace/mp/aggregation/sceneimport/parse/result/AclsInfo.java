@@ -3,11 +3,7 @@ package cn.cyberpeace.mp.aggregation.sceneimport.parse.result;
 import lombok.Getter;
 import lombok.Setter;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/3/30
- */
+
 @Getter
 @Setter
 public class AclsInfo {

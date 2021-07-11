@@ -10,11 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 public class ResultUtils {
 
     public static ListObjServiceResult objList2ListObjServiceResult(List<Objects> list, Integer total) {
@@ -35,17 +31,17 @@ public class ResultUtils {
 
 
 
-//    public static void throwExceptionIfError(ObjServiceResult result, ErrorCode errorCode) {
-//        if (Objects.isNull(result.getSource())) {
-//            throw new MpRuntimeException(errorCode);
-//        }
-//    }
-//
-//    public static void throwExceptionIfError(ObjServiceResult result, ErrorCode errorCode, String... params) {
-//        if (Objects.isNull(result.getSource())) {
-//            throw new MpRuntimeException(errorCode.format(params));
-//        }
-//    }
+
+
+
+
+
+
+
+
+
+
+
 
 
 }

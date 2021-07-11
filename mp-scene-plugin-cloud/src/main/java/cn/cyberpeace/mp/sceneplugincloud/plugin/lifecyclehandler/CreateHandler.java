@@ -84,7 +84,7 @@ public class CreateHandler extends HandlerCommon {
             List<VirtualFirewallCreateData.Rule> egressRules = new ArrayList<>();
             if (srcRules != null) {
                 srcRules.forEach(srcRule -> {
-                    // 如果未设置端口 则使用一个null的元素,使用统一的一个循环
+                    
                     List<String> sourcePorts = Arrays.asList(new String[]{null});
                     List<String> desPorts = Arrays.asList(new String[]{null});
                     if (StringUtils.isNotEmpty(srcRule.getSourcePort())) {
@@ -189,7 +189,7 @@ public class CreateHandler extends HandlerCommon {
             subnet.setCidr(connectedNetwork.network.getCidr());
             subnet.setGatewayIp(TextUtils.emptyNull(connectedNetwork.network.getGateway()));
             subnet.setDhcpPortIp(TextUtils.emptyNull(connectedNetwork.network.getDhcpIp()));
-            // 默认开启dhcp
+            
             var dhcp =  Objects.nonNull(subnet.getDhcpPortIp()) || Boolean.TRUE.equals(connectedNetwork.network.getDhcp());
             if (Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getDhcpControl())) {
                 subnet.setEnableDhcp(dhcp);
@@ -228,7 +228,7 @@ public class CreateHandler extends HandlerCommon {
                 if (cloudElement.getVirtualType() != null && cloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH) {
                     cloudElement.setResourceId(virtualSwitch.getId());
                 }
-                // 向端口回写网络id
+                
                 connectedNetwork.getFromPorts().forEach(p -> {
                     var pluginPort = getPluginHandler().getPort(p.getId());
                     if (pluginPort != null) {
@@ -250,7 +250,7 @@ public class CreateHandler extends HandlerCommon {
         if (!Boolean.TRUE.equals(network.getAuxiliaryNetworkRouterOn())) {
             return;
         }
-        // 创建辅助路由
+        
         var createData = new VirtualRouterCreateData();
         createData.setName(HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid()));
         var virtualNic = new VirtualNic();
@@ -267,15 +267,13 @@ public class CreateHandler extends HandlerCommon {
         }
     }
 
-    /**
-     * 创建默认路由模拟的三层防火墙
-     */
+    
     private void createVirtualRouterFirewall(CloudPluginSceneElementBO cloudElement) {
         var srcElement = cloudElement.getSrcElement();
         List<FirewallRule> srcRules = cloudElement.getFirewallRules();
-        // 创建节点全局防火墙，对节点上所有端口生效，增加端口注意同步此数据
+        
         if (srcRules != null && !srcRules.isEmpty()) {
-            // 防火墙的虚拟路由端口
+            
             Set<String> targetPorts = new HashSet<>();
             var cloudPorts = getPluginHandler().getPorts(cloudElement);
             for (var cloudPort : cloudPorts) {
@@ -302,7 +300,7 @@ public class CreateHandler extends HandlerCommon {
     }
 
     private void createVirtualRouterGroupPortFirewall(CloudPluginSceneElementBO cloudElement) {
-        // 单独创建端口防火墙
+        
         for (ConnectedNetworkBO network : cloudElement.getDeriveNetworks()) {
             createVirtualRouterPortsFirewall(cloudElement, network.getFromPorts());
         }
@@ -312,7 +310,7 @@ public class CreateHandler extends HandlerCommon {
     }
 
     public void createVirtualRouterPortsFirewall(CloudPluginSceneElementBO cloudElement, List<SceneElementPortBO> ports) {
-        // 防火墙的虚拟路由端口
+        
         Set<String> targetPorts = new HashSet<>();
         List<FirewallRule> srcRules = new ArrayList<>();
         List<CloudPluginSceneElementPortBO> cloudPorts = new ArrayList<>();
@@ -348,29 +346,25 @@ public class CreateHandler extends HandlerCommon {
         });
     }
 
-    /**
-     * @param cloudElement
-     * @return List<VirtualNic>
-     * @description: 生成虚拟网卡
-     */
+    
     private List<VirtualNic> genVirutalNics(CloudPluginSceneElementBO cloudElement) {
         List<VirtualNic> virtualNics = new ArrayList<>();
-        // 添加管理网卡
+        
         if (Boolean.TRUE.equals(cloudElement.getEnableMgmt())) {
             var virtualNic = new VirtualNic();
             virtualNic.setNetworkId(CloudSingleton.cloudAppConfig.getMgmtNetId());
             virtualNics.add(virtualNic);
         }
-        //所有网络，包含生成的网络和连接的网络
+        
         List<ConnectedNetworkBO> allNetworks = new ArrayList<>();
         allNetworks.addAll(cloudElement.getDeriveNetworks());
         allNetworks.addAll(cloudElement.getAccessNetworks());
-        //节点端口存在
+        
         if (cloudElement.getSrcElement().getPorts() != null && cloudElement.getSrcElement().getPorts().size() > 0) {
             Map<String, ConnectedNetworkBO> portId2Net = new HashMap<>();
             allNetworks.forEach(net -> portId2Net.put(net.getFromPorts().get(0).getId(), net));
             List<ConnectedNetworkBO> orderNetwork = new ArrayList<>();
-            // 端口使用前再执行一次排序
+            
             Collections.sort(cloudElement.getSrcElement().getPorts(), (p1, p2) -> {
                 if (p1.getOrder() == null || p2.getOrder() == null) {
                     return 0;
@@ -395,15 +389,11 @@ public class CreateHandler extends HandlerCommon {
         return virtualNics;
     }
 
-    /**
-     * @param connectedNetwork
-     * @return VirtualNic
-     * @description: 获得连接网络的虚拟网卡相关信息
-     */
+    
     private VirtualNic genConnectedNetwork(ConnectedNetworkBO connectedNetwork) {
         var network = connectedNetwork.network;
         List<SceneElementPortBO> fromPorts = connectedNetwork.getFromPorts();
-        // 找到第一个有ip值的端口,否则使用第一个端口
+        
         SceneElementPortBO samplePort = fromPorts.get(0);
         for (SceneElementPortBO sceneElementPortBO : fromPorts) {
             if (StringUtils.isNotEmpty(sceneElementPortBO.getIp())) {
@@ -431,17 +421,17 @@ public class CreateHandler extends HandlerCommon {
             qosRule.setDirection(QosRuleDirection.EGRESS);
             qosRules.add(qosRule);
         }
-        //云平台暂不支持上下行带宽和时延丢包率同时设置，时延丢包率通过命令执行
-//        if(samplePort.getDelay() > 0){
-//            var qosRule = new VirtualNic.QosRule();
-//            qosRule.setDelayMs(samplePort.getDelay());
-//            qosRules.add(qosRule);
-//        }
-//        if(samplePort.getLoss() > 0){
-//            var qosRule = new VirtualNic.QosRule();
-//            qosRule.setLossPercent(samplePort.getLoss());
-//            qosRules.add(qosRule);
-//        }
+        
+
+
+
+
+
+
+
+
+
+
         virtualNic.setQosRules(CollectionUtils.emptyNull(qosRules));
 
         if (!HandlerUtils.isExternalNetwork(network.getResourceId())) {
@@ -473,21 +463,17 @@ public class CreateHandler extends HandlerCommon {
         return virtualNic;
     }
 
-    /**
-     * @description: 生成实体设备网口
-     * @param cloudElement
-     * @return List<Interface>
-     */
+    
     private List<EntityNodeCreateData.Interface> genEntityInterfaces(CloudPluginSceneElementBO cloudElement) {
         List<EntityNodeCreateData.Interface> entityInterfaces = new ArrayList<>();
-        //节点信息
+        
         var srcElement = cloudElement.getSrcElement();
-        //端口信息
+        
         var ports = srcElement.getPorts();
         if (ports == null) {
             return entityInterfaces;
         }
-        //网络业务信息
+        
         List<ConnectedNetworkBO> networks = new ArrayList<>();
         networks.addAll(cloudElement.getDeriveNetworks());
         networks.addAll(cloudElement.getAccessNetworks());
@@ -495,7 +481,7 @@ public class CreateHandler extends HandlerCommon {
         for (var connectNetwork : networks) {
             var port = connectNetwork.getFromPorts().get(0);
             var cloudPort = getPluginHandler().getPort(port.getId());
-            // 没有定义的端口补全
+            
             if (cloudPort == null) {
                 cloudPort = new CloudPluginSceneElementPortBO();
                 getPluginHandler().addPort(port.getId(), cloudPort);
@@ -528,11 +514,11 @@ public class CreateHandler extends HandlerCommon {
                     return accessModeParam;
                 }).collect(Collectors.toList()));
             }
-            //不存在任何接入方式则初始化一个空的
+            
             if(CollectionUtil.isEmpty(entityInterface.getAccessModes())){
                 entityInterface.setAccessModes(new ArrayList<>());
             }
-            //配置勾选了snmp，则单独处理snmp协议
+            
             SnmpConfig snmpConfig = cloudElement.getSnmpConfig();
             if (!Objects.isNull(snmpConfig) && Boolean.TRUE.equals(snmpConfig.getConfigSwitch()) && !configSnmpFinished) {
                 var accessMode = new EntityNodeCreateData.Interface.AccessMode();
@@ -580,9 +566,9 @@ public class CreateHandler extends HandlerCommon {
             commands.add("echo \"169.254.169.254     res.cr.com\" >>/etc/hosts");
         }
 
-        // TODO: 应用安装
+        
 
-        // TODO: 快速创建安装
+        
         if (Boolean.TRUE.equals(cloudElement.getQuickCreateSupport())) {
             if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(cloudElement.getQuickCreateParams())) {
                 cloudElement.getQuickCreateParams().forEach(p -> {
@@ -643,10 +629,7 @@ public class CreateHandler extends HandlerCommon {
         return command;
     }
 
-    /**
-     * 容器不保证有 curl/unzip 无法正常通过系统命令方式初始化
-     * 容器默认linux
-     */
+    
     private void execContainerInitCommand(CloudPluginSceneElementBO cloudElement) {
         var containerId = cloudElement.getResourceId();
         var srcElement = cloudElement.getSrcElement();
@@ -683,7 +666,7 @@ public class CreateHandler extends HandlerCommon {
         }
 
         if (!StringUtils.isEmpty(sceneFileUrl) || !StringUtils.isEmpty(elementFileUrl) || !commands.isEmpty()) {
-            // 准备容器的unzip工具,需要尝试apk的安装,而且容器本身可能自带,所以忽略失败
+            
             try {
                 ContainerFileUtils.prepareUnzip(containerClient, containerId, extraCommands);
             } catch (Exception e) {
@@ -737,7 +720,7 @@ public class CreateHandler extends HandlerCommon {
                         containerClient.executeCommand(containerId, "nohup sh /tmp/tmp_installers/install_wazuh.sh > nohup.out 2>&1 &");
 
                         try {
-                            // 安装探针失败要重试
+                            
                             List<String> checks = new ArrayList<>(){{
                                 this.add("sleep 180 ;");
                                 this.add("if [ -e /var/ossec/bin/tools/09ffcc4a67ef4accb407a1555629d0f8.py ] ;");
@@ -801,7 +784,7 @@ public class CreateHandler extends HandlerCommon {
 
         virtualNics.forEach(virtualNic -> {
             var networkId = virtualNic.getNetworkId();
-            // 管理网卡判断
+            
             if (Boolean.TRUE.equals(cloudElement.getEnableMgmt())
                     && CloudSingleton.cloudAppConfig.getMgmtNetId().equals(networkId)) {
                 cloudElement.setMgmtPortResourceId(virtualNic.getPortId());
@@ -815,7 +798,7 @@ public class CreateHandler extends HandlerCommon {
                 return;
             }
 
-            // 多个端口连到同一个网络上的时候暂时当做一个端口处理
+            
             networkCloudPorts.forEach(cloudPort -> {
                 var srcPort = cloudPort.getSrcPort();
                 if (srcPort.isUsing()) {
@@ -975,7 +958,7 @@ public class CreateHandler extends HandlerCommon {
             createData.setEgressRules(cloudFirewallRules.getEgressRules());
         }
 
-        // 防火墙连接的虚拟路由端口
+        
         Set<String> targetPorts = new HashSet<>();
         var connectedSrcPorts = getPluginHandler().getElementConnectedSrcPorts(srcElement.getId());
         for (var connectedSrcPort : connectedSrcPorts) {
@@ -999,7 +982,7 @@ public class CreateHandler extends HandlerCommon {
 
     protected void createVirtualMachine(CloudPluginSceneElementBO cloudElement) {
         if (ElementTypeUtils.isExternal(cloudElement)) {
-            // 外部虚拟机 需要连接网络
+            
             var nics = CollectionUtils.emptyNull(genVirutalNics(cloudElement));
             if (nics != null && nics.size() > 0) {
                 List<VirtualNic> created = new ArrayList<>();
@@ -1021,8 +1004,8 @@ public class CreateHandler extends HandlerCommon {
         var srcElement = cloudElement.getSrcElement();
         var createData = new VirtualMachineCreateData();
         createData.setRequestUser(TextUtils.emptyNull(getHandlerUtils().getRequestUser()));
-//        createData.setDepartment(Optional.ofNullable(getHandlerUtils().getRequestUserOrg()).orElse(StringUtils.EMPTY));
-//        createData.setScene(Optional.ofNullable(getPluginHandler().getSrcScene().getName()).orElse(StringUtils.EMPTY));
+
+
         createData.setName(HandlerUtils.genResourceName(srcElement.getEid()));
         createData.setImage(cloudElement.getImage());
         createData.setCpu(IntUtils.zeroNull(srcElement.getCpu()));
@@ -1075,14 +1058,14 @@ public class CreateHandler extends HandlerCommon {
         var srcElement = cloudElement.getSrcElement();
         var createData = new ContainerCreateData();
         createData.setRequestUser(TextUtils.emptyNull(getHandlerUtils().getRequestUser()));
-//        createData.setDepartment(Optional.ofNullable(getHandlerUtils().getRequestUserOrg()).orElse(StringUtils.EMPTY));
-//        createData.setScene(Optional.ofNullable(getPluginHandler().getSrcScene().getName()).orElse(StringUtils.EMPTY));
+
+
         createData.setName(HandlerUtils.genResourceName(srcElement.getEid()));
         createData.setImage(cloudElement.getImage());
-        // todo 暂时不传
-//        createData.setCpu(IntUtils.zeroNull(srcElement.getCpu()));
-//        createData.setRam(IntUtils.zeroNull(srcElement.getRam()));
-//        createData.setDisk(IntUtils.zeroNull(srcElement.getDisk()));
+        
+
+
+
 
         if (srcElement.getRam() != null && srcElement.getRam() > 1) {
             createData.setRam(srcElement.getRam());
@@ -1091,7 +1074,7 @@ public class CreateHandler extends HandlerCommon {
             createData.setDisk(srcElement.getDisk());
         }
 
-        // 容器参数
+        
         if (cloudElement.getDockerParams() != null) {
             var dockerParams = cloudElement.getDockerParams();
             createData.setEnvironment(dockerParams.getEnvironment());
@@ -1100,10 +1083,10 @@ public class CreateHandler extends HandlerCommon {
             createData.setRun(dockerParams.getRun());
         }
 
-        // 容器初始化命令通过execContainerInitCommand执行
-//        if (Boolean.TRUE.equals(cloudElement.getInitSupport())) {
-//            createData.setPostCommand(TextUtils.emptyNull(combineInitCommand(cloudElement)));
-//        }
+        
+
+
+
         if (macvlanNet != null) {
             MacvlanContainerCreateData macvlanContainerCreateData = new MacvlanContainerCreateData();
             BeanUtils.copyProperties(createData, macvlanContainerCreateData);
@@ -1132,16 +1115,12 @@ public class CreateHandler extends HandlerCommon {
         }
     }
 
-    /**
-     * @description: 创建实体设备
-     * @param cloudElement 云平台场景节点业务信息
-     * @return void
-     */
+    
     protected void createEntityNode(CloudPluginSceneElementBO cloudElement) {
         var createData = new EntityNodeCreateData();
         createData.setRequestUser(TextUtils.emptyNull(getHandlerUtils().getRequestUser()));
-//        createData.setDepartment(Optional.ofNullable(getHandlerUtils().getRequestUserOrg()).orElse(StringUtils.EMPTY));
-//        createData.setScene(Optional.ofNullable(getPluginHandler().getSrcScene().getName()).orElse(StringUtils.EMPTY));
+
+
         createData.setName(cloudElement.getImage());
         createData.setInterfaces(CollectionUtils.emptyNull(genEntityInterfaces(cloudElement)));
         var entityNode = enClient.create(createData);
@@ -1225,7 +1204,7 @@ public class CreateHandler extends HandlerCommon {
         }
 
         var cloudPorts = getPluginHandler().getPorts(cloudElement);
-        // 同样ip、端口可能对应多个接入方式
+        
         if (cloudPorts != null) {
             cloudPorts.forEach(cloudPort -> {
                 if (Boolean.TRUE.equals(cloudPort.getSrcPort().getIsAuxiliary())) {
@@ -1258,7 +1237,7 @@ public class CreateHandler extends HandlerCommon {
         long terminalTasks = getPluginHandler().getTerminalElementMap().values().size();
         int stepPercentage = (int) (100 / Math.max(networkTasks + gatewayTasks + firewallTasks + terminalTasks, 1));
 
-        // 先创建辅助网络(包含虚拟交换机)
+        
         var createAuxiliaryNetworkTasks = getPluginHandler().getElementMap().values().stream()
                 .filter(cloudElement -> getPluginHandler().getSceneHandler().isHandleNode(cloudElement.getSrcElement().getId()))
                 .filter(cloudElement -> !cloudElement.getDeriveNetworks().isEmpty())
@@ -1273,7 +1252,7 @@ public class CreateHandler extends HandlerCommon {
             runSceneProgress(SceneProcess.CREATE_AUXILIARY_NETWORKS, () -> runTasks(createAuxiliaryNetworkTasks));
         }
 
-        // 再创建网关
+        
         var createGatewayTasks = getPluginHandler().getGatewayElementMap().values().stream()
                 .filter(cloudElement -> getPluginHandler().getSceneHandler().isHandleNode(cloudElement.getSrcElement().getId()))
                 .map(cloudElement -> (Runnable) () -> {
@@ -1286,7 +1265,7 @@ public class CreateHandler extends HandlerCommon {
             runSceneProgress(SceneProcess.CREATE_GATEWAYS, () -> runTasks(createGatewayTasks));
         }
 
-        // 再创建防火墙
+        
         var createFirewallTasks = getPluginHandler().getFirewallElementMap().values().stream()
                 .filter(cloudElement -> getPluginHandler().getSceneHandler().isHandleNode(cloudElement.getSrcElement().getId()))
                 .map(cloudElement -> (Runnable) () -> {
@@ -1297,7 +1276,7 @@ public class CreateHandler extends HandlerCommon {
             runSceneProgress(SceneProcess.CREATE_FIREWALLS, () -> runTasks(createFirewallTasks));
         }
 
-        // 再创建终端
+        
         var createTerminalTasks = getPluginHandler().getTerminalElementMap().values().stream()
                 .filter(cloudElement -> getPluginHandler().getSceneHandler().isHandleNode(cloudElement.getSrcElement().getId()))
                 .map(cloudElement -> (Runnable) () -> {
@@ -1307,15 +1286,15 @@ public class CreateHandler extends HandlerCommon {
         if (!createTerminalTasks.isEmpty()) {
             runSceneProgress(SceneProcess.CREATE_TERMINALS, () -> runTasks(createTerminalTasks));
         }
-        // 批量创建NPC节点
+        
         if (network2Info.values().size() > 0) {
             runSceneProgress(SceneProcess.CREATE_NPCS, () -> createNpcElements(new ArrayList<>(network2Info.values())));
         }
-        // 下发配置
+        
         runSceneProgress(SceneProcess.CONFIGURE, () -> {
             configDynamic(new ArrayList<>(getPluginHandler().getElementMap().values()));
         });
-        //通知云平台需要统计环境总速率的端口
+        
         if (Boolean.TRUE.equals(getPluginHandler().getScene().getEnableRate())) {
             List<String> portIds = new ArrayList<>();
             Map<String, CloudPluginSceneElementPortBO> portMap = getPluginHandler().getElementPortMap();
@@ -1336,7 +1315,7 @@ public class CreateHandler extends HandlerCommon {
         NpcCreateData npcCreateData = new NpcCreateData();
         npcCreateData.setNetWorkNpcInfos(list);
         npcClient.create(npcCreateData);
-        // todo npc其实没有resourceId
+        
         for (var e : getPluginHandler().getTerminalElementMap().values()) {
             if (e.getVirtualType() != null && e.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.NPC) {
                 e.setResourceId(HandlerUtils.genResourceName(e.getSrcElement().getEid()));
@@ -1397,29 +1376,25 @@ public class CreateHandler extends HandlerCommon {
             List<String> commands = new ArrayList<>();
             commands.addAll(DynamicCommandUtils.genSetIpCmdList(e, getPluginHandler()));
             commands.addAll(DynamicCommandUtils.genNetworkCmdList(e, getPluginHandler()));
-            // 下发配置
+            
             vdClient.sendRule(e.getResourceId(), commands);
         }).collect(Collectors.toList());
         runTasks(configDynamicIps);
     }
 
-    /**
-     * 配置vyos网络
-     *
-     * @param elementBO
-     */
+    
     private void configVyosNetwork(CloudPluginSceneElementBO elementBO) {
         if (org.apache.commons.collections4.CollectionUtils.isEmpty(elementBO.getSrcElement().getPorts())) {
             return;
         }
-        // 查询串口地址
+        
         var port = vmRouter.queryPort(elementBO.getResourceId());
         if (port == null || StringUtils.isEmpty(port.getPort()) || StringUtils.isEmpty(port.getHost())) {
             log.error("get Serial Port failed , resource id is {} , port result is {}", elementBO.getResourceId(), JsonCommon.stringify(port));
             return;
         }
 
-        // 拼接组网命令
+        
         var defaultPort = getPluginHandler().getPort(elementBO.getSrcElement().getPorts().get(0).getId());
         List<String> cmds = VyosNetworkCommandUtils.genNetworkCmdList(elementBO, getPluginHandler());
         if (org.apache.commons.collections4.CollectionUtils.isEmpty(cmds)) {
@@ -1431,7 +1406,7 @@ public class CreateHandler extends HandlerCommon {
         buildNetwork.setSerialPort(defaultPort.getAccessModes().get(0).getAccessPort());
         buildNetwork.setCmds(cmds);
 
-        // 开启dhcp
+        
         var openDhcp = new RouterConfigCmdData();
         openDhcp.setSerialIp(port.getHost());
         openDhcp.setSerialPort(Integer.parseInt(port.getPort()));
@@ -1441,7 +1416,7 @@ public class CreateHandler extends HandlerCommon {
         int tryTimes = 10;
         Exception exception = null;
         for (int i = 0; i < tryTimes; i++) {
-            // 先等2s,等待串口可用
+            
             waitSeconds(2000);
             try {
                 openDhcpResult = vmRouter.createConfig(openDhcp);
@@ -1449,11 +1424,11 @@ public class CreateHandler extends HandlerCommon {
                 log.error("failed to open dhcp , try time {}", i, e);
                 openDhcpResult = false;
             }
-            // 失败可能是串口仍不可用,需要重试
+            
             if (!openDhcpResult) {
                 continue;
             }
-            // 发送拼接网络的命令
+            
             try {
                 buildNetworkResult = vmRouter.createConfig(buildNetwork);
             } catch (Exception e) {
@@ -1462,10 +1437,10 @@ public class CreateHandler extends HandlerCommon {
                 buildNetworkResult = false;
             }
             if (!buildNetworkResult) {
-                // 设置失败需要重试
+                
                 continue;
             } else {
-                // dhcp设置的ip可用之后 即可执行后续的命令
+                
                 break;
             }
         }

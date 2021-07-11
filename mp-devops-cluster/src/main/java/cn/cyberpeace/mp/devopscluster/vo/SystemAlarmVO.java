@@ -9,11 +9,7 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @Description: 系统告警对象
- * @Author qiaokang
- * @Date：2022/7/16 17:06
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

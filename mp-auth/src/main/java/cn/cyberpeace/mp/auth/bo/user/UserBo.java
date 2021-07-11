@@ -9,16 +9,12 @@ import lombok.Data;
 
 import java.util.List;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Data
 @ApiModel
 public class UserBo extends UserModel {
 
-    // 1：已过期  0：未过期，数据库中没有该字段，由expiredtime字段判断
+    
     @ApiModelProperty(value = "1：已过期 0：未过期")
     private Integer isExpired;
 

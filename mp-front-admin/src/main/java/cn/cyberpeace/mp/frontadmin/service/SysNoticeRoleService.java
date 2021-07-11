@@ -7,11 +7,7 @@ import cn.cyberpeace.mp.frontadmin.model.SysNoticeRoleModel;
 
 import java.util.List;
 
-/**
- * @Description
- * @Author shgang
- * @Date 2022/9/22
- */
+
 public interface SysNoticeRoleService extends BaseModelService<SysNoticeRoleModel, QueryParams> {
 
     List<RoleModel> listByNoticeIds(List<String> noticeIds);

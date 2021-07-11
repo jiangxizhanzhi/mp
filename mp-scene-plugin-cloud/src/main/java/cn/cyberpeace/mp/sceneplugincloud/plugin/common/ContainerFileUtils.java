@@ -101,10 +101,10 @@ public class ContainerFileUtils {
         if (output.contains("unzip_exist")) {
             return true;
         } else if (output.contains("apk_exist")) {
-            // 安装apk的unzip包
+            
             return prepareApkUnzip(containerClient, containerId);
         } else if (output.contains("CentOS release 6")) {
-            // 安装centos6的unzip包
+            
             return prepareCentos6Unzip(containerClient, containerId);
         } else if (output.contains("release 5")) {
             return prepareCentos5Unzip(containerClient, containerId);

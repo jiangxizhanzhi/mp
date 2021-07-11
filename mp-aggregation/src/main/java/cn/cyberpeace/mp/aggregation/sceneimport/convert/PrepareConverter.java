@@ -7,11 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- * @Description 将解析出的scene节点转成BO
- * @Author maojun
- * @Date 2021/10/12
- */
+
 class PrepareConverter implements IConverter {
 
     private YmlParseResult parseResult;

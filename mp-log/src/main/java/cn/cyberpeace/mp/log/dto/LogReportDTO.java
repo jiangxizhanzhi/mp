@@ -16,33 +16,23 @@ import java.time.LocalDateTime;
 @Builder
 public class LogReportDTO {
 
-    /**
-     * 文件名称
-     */
+    
     @ApiModelProperty(value = "文件名称")
     private String fileName;
 
-    /**
-     * 文件大小
-     */
+    
     @ApiModelProperty(value = "文件大小")
     private Long fileSize;
 
-    /**
-     * 下载地址
-     */
+    
     @ApiModelProperty(value = "下载地址")
     private String downloadUrl;
 
-    /**
-     * 节点ip
-     */
+    
     @ApiModelProperty(value = "节点ip")
     private String hostIp;
 
-    /**
-     * 日志类型
-     */
+    
     @ApiModelProperty(value = "日志类型")
     private LogReportTypeEnum logReportTypeEnum;
 

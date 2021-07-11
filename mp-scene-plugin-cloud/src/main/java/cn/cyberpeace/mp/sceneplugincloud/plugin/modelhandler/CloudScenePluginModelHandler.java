@@ -86,13 +86,13 @@ public class CloudScenePluginModelHandler extends BasePluginModelHandler<
     }
 
     public int createElementNetworks(List<ConnectedNetworkBO> deriveNetworks) {
-        // 删除原来的
+        
         this.cloudPluginSceneElementNetworkMapper.bulkDelete(deriveNetworks.stream()
                 .map(d -> d.getNetwork().getId())
                 .collect(Collectors.toList())
                 .toArray(new String[]{})
         );
-        // 新建
+        
         return this.cloudPluginSceneElementNetworkMapper.bulkCreate(deriveNetworks.stream().map(d -> d.getNetwork().toModel()).collect(Collectors.toList())).getSuccessCount();
     }
 

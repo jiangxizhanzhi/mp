@@ -101,12 +101,7 @@ public class HandlerUtils {
         return BeanCommon.getBean(ICloudResourceName.class).generate(name, params);
     }
 
-    /**
-     * 确认连接使用的辅助网络所在节点
-     * @param cloudElement 源节点
-     * @param connectedCloudElement 连接节点
-     * @return 辅助网络所在节点
-     */
+    
     public static CloudPluginSceneElementBO confirmAuxiliaryNetworkCloudElement(
             CloudPluginSceneElementBO cloudElement, CloudPluginSceneElementBO connectedCloudElement) {
         if (cloudElement == null || connectedCloudElement == null) {
@@ -126,7 +121,7 @@ public class HandlerUtils {
         Integer virtualType = cloudElement.getVirtualType();
         Integer connectedVirtualType = connectedCloudElement.getVirtualType();
 
-        // 判断是否是默认类型的虚拟交换机(默认包含辅助网络)
+        
         if (virtualType != null && virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH)) {
             return cloudElement;
         }
@@ -135,7 +130,7 @@ public class HandlerUtils {
             return connectedCloudElement;
         }
 
-        // 判断是否是交换机 且开启辅助网络
+        
         if (type != null && type.equals(BaseSceneElementModel.Type.SWITCH)
                 && Boolean.TRUE.equals(cloudElement.getAuxiliaryNetworkOn())) {
             return cloudElement;
@@ -145,7 +140,7 @@ public class HandlerUtils {
             return connectedCloudElement;
         }
 
-        // 判断是否是默认类型的虚拟路由 且开启辅助网络
+        
         if (virtualType != null && virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)
                 && Boolean.TRUE.equals(cloudElement.getAuxiliaryNetworkOn())) {
             return cloudElement;
@@ -156,7 +151,7 @@ public class HandlerUtils {
             return connectedCloudElement;
         }
 
-        // 判断是否是路由 且开启辅助网络
+        
         if (type != null && type.equals(BaseSceneElementModel.Type.ROUTER)
                 && Boolean.TRUE.equals(cloudElement.getAuxiliaryNetworkOn())) {
             return cloudElement;
@@ -166,7 +161,7 @@ public class HandlerUtils {
             return connectedCloudElement;
         }
 
-        // 判断是否是防火墙 且开启辅助网络
+        
         if (type != null && type.equals(BaseSceneElementModel.Type.FIREWALL)
                 && Boolean.TRUE.equals(cloudElement.getAuxiliaryNetworkOn())) {
             return cloudElement;
@@ -176,7 +171,7 @@ public class HandlerUtils {
             return connectedCloudElement;
         }
 
-        // 判断是否开启辅助网络
+        
         if (Boolean.TRUE.equals(cloudElement.getAuxiliaryNetworkOn())) {
             return cloudElement;
         }
@@ -225,9 +220,7 @@ public class HandlerUtils {
         return existCidrs;
     }
 
-    /**
-     * 预加载场景中端口关联的辅助网络节点
-     */
+    
     public void loadAuxiliaryNetworkCloudElementPortIdsMap() {
         getPluginHandler().getSceneHandler().getElementPortMap().forEach((portId, srcPort) -> {
             var auxiliaryNetworkCloudElement = getPortAuxiliaryNetworkCloudElement(portId);
@@ -238,9 +231,7 @@ public class HandlerUtils {
         });
     }
 
-    /**
-     * 获取辅助网络连接的所有端口
-     */
+    
     public synchronized List<String> getAuxiliaryNetworkCloudElementPortIds(CloudPluginSceneElementBO auxiliaryNetworkCloudElement) {
         if (networkNodeIdPortIdsMap.isEmpty()) {
             loadAuxiliaryNetworkCloudElementPortIdsMap();
@@ -258,11 +249,7 @@ public class HandlerUtils {
         return networkNodeIdOuterExistIpsMap.getOrDefault(nodeId, new HashSet<>());
     }
 
-    /**
-     * 获取端口所在辅助网络网元
-     * @param portId 网元端口id
-     * @return 端口所在辅助网络网元
-     */
+    
     public CloudPluginSceneElementBO getPortAuxiliaryNetworkCloudElement(String portId) {
         if (portId == null) {
             return null;
@@ -275,7 +262,7 @@ public class HandlerUtils {
         var cloudElement = getPluginHandler().getElement(srcElement.getId());
         var connectedOpaqueSrcPort = getPortConnectedOpaqueSrcPort(portId);
         if (connectedOpaqueSrcPort == null) {
-            // 未连接端口情况，如果节点存在其它连接，则忽略该端口
+            
             if (getPluginHandler().getSceneHandler().elementHasConnectedPort(srcElement.getId())) {
                 return null;
             }
@@ -295,9 +282,7 @@ public class HandlerUtils {
         return auxiliaryNetworkCloudElement;
     }
 
-    /**
-     * 同性质端口分组 <辅助网络，同性质端口列表>
-     */
+    
     public Map<String, List<SceneElementPortBO>> getCloudElementGroupPorts(CloudPluginSceneElementBO cloudElement) {
         Map<String, List<SceneElementPortBO>> groupPortsMap = new HashMap<>();
         var srcElement = cloudElement.getSrcElement();
@@ -319,9 +304,7 @@ public class HandlerUtils {
         return groupPortsMap;
     }
 
-    /**
-     * 获取网络连接的所有端口
-     */
+    
     public List<SceneElementPortBO> getAuxiliaryNetworkCloudElementAttachPorts(
             CloudPluginSceneElementBO auxiliaryNetworkCloudElement) {
         var groupPortsMap = getCloudElementGroupPorts(auxiliaryNetworkCloudElement);
@@ -336,11 +319,7 @@ public class HandlerUtils {
         return allAttachPorts;
     }
 
-    /**
-     * 获得节点连接的不透明元素，忽略透明模式节点
-     * @param nodeId 节点id
-     * @return 节点连接的不透明元素
-     */
+    
     public List<SceneElementBO> getEleConnectedOpaqueSrcElements(String nodeId) {
         Map<String, SceneElementBO> nodeIdSrcElementMap = new HashMap<>();
         List<SceneElementPortBO> connectedOpaqueSrcPorts = getEleConnectedOpaqueSrcPorts(nodeId);
@@ -352,11 +331,7 @@ public class HandlerUtils {
         return new ArrayList<>(nodeIdSrcElementMap.values());
     }
 
-    /**
-     * 获得节点连接的不透明端口，忽略透明模式节点
-     * @param nodeId 节点id
-     * @return 节点连接的不透明端口
-     */
+    
     public List<SceneElementPortBO> getEleConnectedOpaqueSrcPorts(String nodeId) {
         List<SceneElementPortBO> connectedOpaqueSrcPorts = new ArrayList<>();
         var srcElement = getPluginHandler().getSrcElement(nodeId);
@@ -375,11 +350,7 @@ public class HandlerUtils {
         return connectedOpaqueSrcPorts;
     }
 
-    /**
-     * 获得端口连接的不透明端口，忽略透明模式节点
-     * @param portId 端口id
-     * @return 节点连接的不透明元素
-     */
+    
     public SceneElementPortBO getPortConnectedOpaqueSrcPort(String portId) {
         var connectedSrcPort = getPluginHandler().getPortConnectedSrcPort(portId);
         if (connectedSrcPort == null) {
@@ -414,11 +385,7 @@ public class HandlerUtils {
         return null;
     }
 
-    /**
-     * 获得端口连接的不透明节点，忽略透明模式节点
-     * @param portId 端口id
-     * @return 节点连接的不透明元素
-     */
+    
     public SceneElementBO getPortConnectedOpaqueSrcElement(String portId) {
         var connectedSrcPort = getPortConnectedOpaqueSrcPort(portId);
         if (connectedSrcPort == null) {

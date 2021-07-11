@@ -12,10 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
-/**
- * 通用的远程文件上传controller
- * @param <S> 远程文件操作service
- */
+
 public interface BaseRemoteFileUploadController<S extends BaseRemoteFileService> {
 
     S getRemoteFileService();
@@ -36,10 +33,7 @@ public interface BaseRemoteFileUploadController<S extends BaseRemoteFileService>
                 uploadResult.getServiceCode(), uploadResult.getDetail());
     }
 
-    /**
-     * 通用上传接口
-     * @return 文件id
-     */
+    
     @ApiOperation("上传文件")
     @PostMapping("/file_upload")
     default ServiceResult<String> upload(@RequestParam(value = "file") MultipartFile file) throws IOException {

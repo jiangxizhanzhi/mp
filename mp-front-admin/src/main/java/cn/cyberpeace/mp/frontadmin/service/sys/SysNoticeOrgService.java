@@ -8,11 +8,7 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
-/**
- * @Description
- * @Author shgang
- * @Date 2022/9/22
- */
+
 public interface SysNoticeOrgService extends BaseModelService<SysNoticeOrgModel, QueryParams> {
 
     List<OrgModel> listByNoticeIds(@Param("noticeIds") List<String> noticeIds);

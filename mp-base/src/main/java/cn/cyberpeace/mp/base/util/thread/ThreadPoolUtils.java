@@ -6,11 +6,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
-/**
- * @Description: 全局ScheduledThreadPool工具类
- * @Author qiaokang
- * @Date：2021/8/9 11:29
- */
+
 public class ThreadPoolUtils {
 
     private static class SingletonHolder {

@@ -7,11 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.Set;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 public class AuthUserDetails implements UserDetails {
 
     private final UserModel user;
@@ -44,14 +40,14 @@ public class AuthUserDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-//        return LocalDateTime.now().compareTo(user.getExpiredTime()) < 0;
+
         return true;
     }
 
     @Override
-    // 用来代替是否已审核
+    
     public boolean isAccountNonLocked() {
-//        return Objects.equals(UserModel.Status.AUDITED, user.getIsAudited());
+
         return true;
     }
 
@@ -62,7 +58,7 @@ public class AuthUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-//        return Objects.equals(UserModel.Status.ENABLED, user.getIsEnabled());
+
         return true;
     }
 }

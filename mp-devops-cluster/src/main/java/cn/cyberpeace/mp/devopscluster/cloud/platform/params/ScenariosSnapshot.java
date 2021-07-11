@@ -9,23 +9,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ScenariosSnapshot {
 
-    /**
-     * UUID
-     */
+    
     private String deviceUuid;
 
-    /**
-     * 类型 vm/container
-     */
+    
     private String imageType;
 
-    /**
-     * 名称
-     */
+    
     private String name;
 
-    /**
-     * 描述
-     */
+    
     private String description;
 }

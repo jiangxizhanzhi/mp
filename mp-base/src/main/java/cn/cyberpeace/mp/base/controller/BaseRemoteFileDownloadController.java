@@ -14,17 +14,12 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
-/**
- * 通用的远程文件下载controller
- * @param <S> 远程文件操作service
- */
+
 public interface BaseRemoteFileDownloadController<S extends BaseRemoteFileService> {
 
     S getRemoteFileService();
 
-    /**
-     * 通用下载接口
-     */
+    
     @ApiOperation("下载文件")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "文件id", dataTypeClass = String.class),
@@ -38,7 +33,7 @@ public interface BaseRemoteFileDownloadController<S extends BaseRemoteFileServic
         }
 
         response.reset();
-        // 文件编码 处理文件名中的 '+'、' ' 特殊字符
+        
         String encodedFilename = URLEncoder.encode(filename, StandardCharsets.UTF_8).replace("+", "%20").replace("%2B", "+");
         response.setHeader("Content-Disposition", String.format("attachment;filename=\"%s\"", encodedFilename));
         response.setContentType("application/octet-stream;charset=utf-8");

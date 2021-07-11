@@ -7,10 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-/**
- * 聚合攻击方式
- * @author wanggang
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

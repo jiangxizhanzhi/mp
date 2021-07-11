@@ -14,9 +14,7 @@ public class GroupRequest {
     @ApiModelProperty(value = "场景分组id", required = true)
     private String groupId;
 
-    /**
-     * 物理机地址
-     */
+    
     @NotNull(message = "macIds不能为空")
     @ApiModelProperty(value = "物理机地址", required = true)
     private List<String> macIds;

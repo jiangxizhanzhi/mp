@@ -29,20 +29,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2021/12/13
- */
+
 @Slf4j
 public class CsceneDataModifier {
 
     public static final String ENABLE_PROBE_COLLECT = "enable_probe_collect";
     public static final String CIDR = "cidr";
 
-    /**
-     * 端口中补充协议
-     */
+    
     public static void supplyProtocol(CsceneInstanceBO csceneInstance, String protocol) {
         ScenePluginDataBO cloudPlugin = Optional.ofNullable(csceneInstance.getScene().getPlugins()).orElse(new HashMap<>()).get("cpcloud");
         if (cloudPlugin == null) {
@@ -67,7 +61,7 @@ public class CsceneDataModifier {
                         BaseCloudPluginSceneElementModel.VirtualType.CONTAINER != intVirtualType) {
                     continue;
                 }
-                // 当前节点所有端口上指定协议数量不为0则跳出此次
+                
                 boolean hasPro = false;
                 for (SceneElementPortBO portBO : elementBO.getPorts()) {
                     hasPro = portBO.getAccessModes().stream().filter(m -> protocol.equals(m.getProtocol())).collect(Collectors.toList()).size() > 0;
@@ -79,7 +73,7 @@ public class CsceneDataModifier {
                     continue;
                 }
                 for (SceneElementPortBO portBO : elementBO.getPorts()) {
-                    // 取端口
+                    
                     if (cloudPlugin.getElementPorts() == null) {
                         continue;
                     }
@@ -91,11 +85,11 @@ public class CsceneDataModifier {
                     List<AccessMode> modes = Optional.ofNullable(cpcloudPortData.getAccessModes()).orElse(new ArrayList<>());
                     boolean hasProtocol = modes.stream().filter(mode -> protocol.equals(mode.getProtocol())).collect(Collectors.toList()).size() > 0;
                     if (!hasProtocol) {
-                        // 无指定协议则补充
+                        
                         AccessMode mode = new AccessMode();
                         mode.setProtocol(protocol);
                         Map<String, Object> protocolMap = JsonCommon.beanToSnakeMap(mode);
-                        // 避免数据丢失,需要从element中获取原始的access_modes
+                        
                         Object originModes = portMap.getOrDefault("access_modes", new LinkedList<>());
                         List originModeList = (List) originModes;
                         originModeList.add(protocolMap);
@@ -159,7 +153,7 @@ public class CsceneDataModifier {
                 }
             }
         } catch (Exception e) {
-            // 忽略错误
+            
         }
     }
 
@@ -196,7 +190,7 @@ public class CsceneDataModifier {
                         BaseCloudPluginSceneElementModel.VirtualType.CONTAINER != intVirtualType) {
                     continue;
                 }
-                // 当前节点所有端口上指定协议数量不为0则跳出此次
+                
                 boolean hasPro = false;
                 for (SceneElementPortBO portBO : elementBO.getPorts()) {
                     hasPro = portBO.getAccessModes().stream().filter(m -> protocol.equals(m.getProtocol())).collect(Collectors.toList()).size() > 0;
@@ -208,7 +202,7 @@ public class CsceneDataModifier {
                     continue;
                 }
                 for (SceneElementPortBO portBO : elementBO.getPorts()) {
-                    // 取端口
+                    
                     if (cloudPlugin.getElementPorts() == null) {
                         continue;
                     }
@@ -220,11 +214,11 @@ public class CsceneDataModifier {
                     List<AccessMode> modes = Optional.ofNullable(cpcloudPortData.getAccessModes()).orElse(new ArrayList<>());
                     boolean hasProtocol = modes.stream().filter(mode -> protocol.equals(mode.getProtocol())).collect(Collectors.toList()).size() > 0;
                     if (!hasProtocol) {
-                        // 无指定协议则补充
+                        
                         AccessMode mode = new AccessMode();
                         mode.setProtocol(protocol);
                         Map<String, Object> protocolMap = JsonCommon.beanToSnakeMap(mode);
-                        // 避免数据丢失,需要从element中获取原始的access_modes
+                        
                         Object originModes = portMap.getOrDefault("access_modes", new LinkedList<>());
                         List originModeList = (List) originModes;
                         originModeList.add(protocolMap);
@@ -237,16 +231,12 @@ public class CsceneDataModifier {
         }
     }
 
-    /**
-     * 创建时去除多余的eid
-     *
-     * @param csceneBO
-     */
+    
     public static void removeEidWhenCreate(CsceneBO csceneBO) {
         if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getTopology() != null) {
             SceneConfigBO sceneConfigBO = csceneBO.getSceneConfig().getTopology().getScene();
             if (sceneConfigBO != null && sceneConfigBO.getEid() == null) {
-                // 属于新增 需要去除多余的eid
+                
                 List<SceneConfigElementBO> elementBOS = csceneBO.getSceneConfig().getTopology().getElements();
                 List<SceneConfigElementPortConnectionBO> connectionBOS = csceneBO.getSceneConfig().getTopology().getConnections();
                 List<SceneConfigAreaBO> areaBOS = csceneBO.getSceneConfig().getTopology().getAreas();
@@ -283,11 +273,7 @@ public class CsceneDataModifier {
         }
     }
 
-    /**
-     * 纠正创建和更新场景模板时 文件字段 的地址 去除文件字段的前缀，只保留文件对应的key值
-     *
-     * @param csceneBO
-     */
+    
     public static void removeFilePathPrefix(CsceneBO csceneBO) {
         if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getTopology() != null) {
             SceneConfigBO sceneConfig = csceneBO.getSceneConfig().getTopology().getScene();
@@ -303,9 +289,9 @@ public class CsceneDataModifier {
                     if (StringUtils.isNotEmpty(e.getIcon2())) {
                         e.setIcon2(FsCommon.getFileKey(e.getIcon2()));
                     }
-//                    if (StringUtils.isNotEmpty(e.getIcon3())) {
-//                        e.setIcon3(FsCommon.getFileKey(e.getIcon3()));
-//                    }
+
+
+
                     if (CollectionUtils.isNotEmpty(e.getPorts())) {
                         e.getPorts().forEach(port -> {
                             if (port != null) {
@@ -380,9 +366,9 @@ public class CsceneDataModifier {
                     if (StringUtils.isNotEmpty(e.getIcon2())) {
                         e.setIcon2(FsCommon.getFileKey(e.getIcon2()));
                     }
-//                    if (StringUtils.isNotEmpty(e.getIcon3())) {
-//                        e.setIcon3(FsCommon.getFileKey(e.getIcon3()));
-//                    }
+
+
+
                     if (CollectionUtils.isNotEmpty(e.getPorts())) {
                         e.getPorts().forEach(port -> {
                             if (port != null) {
@@ -435,7 +421,7 @@ public class CsceneDataModifier {
             csceneBO.getSceneConfig().getTopology().getElements().stream().forEach(e -> {
                 if (CollectionUtils.isNotEmpty(e.getInitCommands())) {
                     List<String> s = e.getInitCommands().stream().map(c -> {
-                        // TODO: 临时兼容业务界面
+                        
                         if (c.startsWith("o:") || c.startsWith("s:") || c.startsWith("n:")) {
                             return c;
                         } else {
@@ -476,7 +462,7 @@ public class CsceneDataModifier {
         if (gns3Routers.size() == 0) {
             return;
         }
-        // 补充gns3插件
+        
         ScenePluginDataBO gns3Plugin = new ScenePluginDataBO();
         gns3Plugin.setScene(new HashMap<>());
         gns3Plugin.setElements(new HashMap<>());
@@ -578,18 +564,14 @@ public class CsceneDataModifier {
         csceneInstanceBO.setEnableRecording(getOutputEnableRecording(csceneInstanceBO.getScene()));
     }
 
-    /**
-     * 处理需要隐藏的节点
-     *
-     * @param sceneDataBO
-     */
+    
     public static void handlerHiddenElement(SceneDataBO sceneDataBO) {
         if (sceneDataBO.getTopology() != null && sceneDataBO.getTopology().getElements() != null) {
             List<String> hiddenElements = new ArrayList<>();
             List<String> hiddenPorts = new ArrayList<>();
             for (var element : sceneDataBO.getTopology().getElements()) {
                 if (Boolean.TRUE.equals(element.getIsAuxiliary())) {
-                    // 辅助节点,节点和端口都要隐藏
+                    
                     hiddenElements.add(element.getId());
                     if (CollectionUtils.isNotEmpty(element.getPorts())) {
                         element.getPorts().forEach(p -> hiddenPorts.add(p.getId()));
@@ -597,17 +579,17 @@ public class CsceneDataModifier {
                 }
             }
 
-            // 隐藏连线
+            
             Set<String> auxiliaryPortIds = new HashSet<>();
             for (var e : sceneDataBO.getTopology().getElements()) {
                 List<SceneElementPortBO> auxiliaryPorts = new ArrayList<>();
                 if (Boolean.TRUE.equals(e.getIsAuxiliary())) {
-                    // 辅助节点,所有端口都是辅助端口
+                    
                     if (e.getPorts() != null) {
                         e.getPorts().forEach(p -> auxiliaryPorts.add(p));
                     }
                 } else if (e.getPorts() != null) {
-                    // 非辅助节点,需要判断字段
+                    
                     e.getPorts().forEach(p -> {
                         if (Boolean.TRUE.equals(p.getIsAuxiliary())) {
                             auxiliaryPorts.add(p);
@@ -630,18 +612,18 @@ public class CsceneDataModifier {
             while (elementIterator.hasNext()) {
                 var element = elementIterator.next();
                 if (Boolean.TRUE.equals(element.getIsAuxiliary())) {
-                    // 辅助节点整个隐藏
+                    
                     elementIterator.remove();
                     if (sceneDataBO.getPlugins() == null) {
                         continue;
                     }
-                    // 隐藏插件节点
+                    
                     sceneDataBO.getPlugins().values().forEach(plugin -> {
-                        // 处理节点
+                        
                         if (plugin.getElements() != null) {
                             plugin.getElements().remove(element.getId());
                         }
-                        // 处理端口
+                        
                         if (CollectionUtils.isNotEmpty(element.getPorts())) {
                             element.getPorts().forEach(p -> {
                                 if (plugin.getElementPorts() != null) {
@@ -651,17 +633,17 @@ public class CsceneDataModifier {
                         }
                     });
                 } else if (CollectionUtils.isNotEmpty(element.getPorts())) {
-                    // 其他节点隐藏辅助端口
+                    
                     var portIterator = element.getPorts().iterator();
                     while (portIterator.hasNext()) {
                         var port = portIterator.next();
                         if (Boolean.TRUE.equals(port.getIsAuxiliary())) {
-                            // 辅助端口隐藏
+                            
                             portIterator.remove();
                             if (sceneDataBO.getPlugins() == null) {
                                 continue;
                             }
-                            // 处理插件中的端口
+                            
                             sceneDataBO.getPlugins().values().forEach(plugin -> {
                                 if (plugin.getElementPorts() != null) {
                                     plugin.getElementPorts().remove(port.getId());
@@ -679,9 +661,9 @@ public class CsceneDataModifier {
             return;
         }
         try {
-            // 兼容name
+            
             if (String.valueOf(csceneInstance.getReferenceType()).startsWith("3")) {
-                // 竞赛
+                
                 if (StringUtils.isNotEmpty(name)) {
                     csceneInstance.setName(name);
                 } else if (cscene != null && cscene.getSceneConfig() != null && cscene.getSceneConfig().getTopology() != null && cscene.getSceneConfig().getTopology().getScene() != null) {
@@ -690,7 +672,7 @@ public class CsceneDataModifier {
                     csceneInstance.setName(dbCscene.getSceneConfig().getTopology().getScene().getName());
                 }
             } else {
-                // 靶场和实训
+                
                 CsceneDataModifier.NameParseResult result = JsonCommon.snakeParse(referenceMetaData, CsceneDataModifier.NameParseResult.class);
                 if (result.getRoomName() != null) {
                     csceneInstance.setName(result.getRoomName());
@@ -729,7 +711,7 @@ public class CsceneDataModifier {
                         });
                         sceneElement.setInitCommands(initCommands);
                         if (CollectionUtils.isNotEmpty(nodeCommands)) {
-                            // 暂时只有一个命令
+                            
                             sceneElement.setNodeCommand(nodeCommands.get(0));
                         }
                     }
@@ -744,11 +726,7 @@ public class CsceneDataModifier {
         }
     }
 
-    /**
-     * 纠正返回场景模板时文件的地址,增加前缀
-     *
-     * @param baseSceneDataBO
-     */
+    
     private static void addFilePathPrefix(BaseSceneDataBO baseSceneDataBO) {
         if (baseSceneDataBO.getTopology() != null) {
             BaseSceneBO scene = baseSceneDataBO.getTopology().getScene();
@@ -766,7 +744,7 @@ public class CsceneDataModifier {
                     } else {
                         sceneElement.setIcon2(FsCommon.genHttpUrl(sceneElement.getIcon2()));
                     }
-//                    sceneElement.setIcon3(FsCommon.genHttpUrl(sceneElement.getIcon3()));
+
                     if (CollectionUtils.isNotEmpty(sceneElement.getPorts())) {
                         sceneElement.getPorts().forEach(p -> {
                             if (p != null) {
@@ -852,7 +830,7 @@ public class CsceneDataModifier {
             if(!checkCidr){
                 return;
             }
-            //检查cpcloud下是否有相同cidr
+            
             ScenePluginDataBO cloudPluginDataBO = csceneBO.getSceneConfig().getPlugins().get(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
             var elements = cloudPluginDataBO.getElements();
             Set<String> cidrSet = new HashSet();
@@ -900,7 +878,7 @@ public class CsceneDataModifier {
     public static void checkVirtualUsb(CsceneBO csceneBO) {
         var elements = csceneBO.getSceneConfig().getPlugins().get("cpcloud").getElements();
         if (elements != null && elements.size() > 0) {
-            // 校验虚拟usb 规则: 单个节点usb不能超过4个 , 单个场景的虚拟usb不能重复
+            
             Set<String> existsUsbs = new HashSet<>();
             for (var entry : elements.entrySet()) {
                 CloudPluginSceneConfigElementBO elementBO = JsonCommon.snakeMapToBean(entry.getValue(), CloudPluginSceneConfigElementBO.class);
@@ -932,14 +910,14 @@ public class CsceneDataModifier {
         if (MapUtils.isEmpty(elements)) {
             return;
         }
-        //所有节点上usb集合
+        
         Set<String> existsUsbs = new HashSet<>();
         for (var entry : elements.entrySet()) {
             CloudPluginSceneConfigElementBO elementBO = JsonCommon.snakeMapToBean(entry.getValue(), CloudPluginSceneConfigElementBO.class);
             if (CollectionUtils.isEmpty(elementBO.getEntityUsbs())) {
                 continue;
             }
-            //1，同一个实体USB不能在一个场景中出现两次；2，同一个节点上挂的USB的host要一样
+            
             Set<String> hosts = new HashSet<>();
             elementBO.getEntityUsbs().forEach(usb -> {
                 if (existsUsbs.contains(usb.getUuid())) {
@@ -1020,7 +998,7 @@ public class CsceneDataModifier {
             var elements = csceneBO.getSceneConfig().getPlugins().get("cpcloud");
             if (elements.getElements() != null) {
                 elements.getElements().values().forEach(e -> {
-                    // 有软件需要安装的 quick_create_support 设置为true
+                    
                     if (e.get("quick_create_params") != null) {
                         Collection list = (Collection) e.get("quick_create_params");
                         if (list.size() > 0) {

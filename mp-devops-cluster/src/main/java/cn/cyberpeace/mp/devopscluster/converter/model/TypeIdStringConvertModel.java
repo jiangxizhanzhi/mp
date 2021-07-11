@@ -10,15 +10,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class TypeIdStringConvertModel {
 
-    /**
-     * ID
-     */
+    
     @ApiModelProperty(value = "ID")
     private String id;
 
-    /**
-     * 名称
-     */
+    
     @ApiModelProperty(value = "名称")
     private String name;
 

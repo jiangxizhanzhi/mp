@@ -31,7 +31,7 @@ public interface BaseModelGetBOController<T extends ModelBO<M, T>, M extends Bas
             @ApiImplicitParam(name = "id", value = "数据id", dataTypeClass = String.class),
             @ApiImplicitParam(name = "fields", value = "需要返回的字段", dataTypeClass = String[].class),
     })
-//    @GetMapping(params = "id")
+
     default ObjServiceResult<T> getByParam(@RequestParam String id, @RequestParam(required = false) String[] fields) {
         return getModelService().<T>getBO(id, ControllerCommon.convertValidFields(fields), ControllerCommon.getModelBOClass(getClass())).asResult();
     }

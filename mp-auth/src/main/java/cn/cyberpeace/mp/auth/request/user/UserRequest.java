@@ -7,11 +7,7 @@ import lombok.Data;
 
 import java.util.List;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Data
 @ApiModel("用户请求")
 public class UserRequest extends UserModel {

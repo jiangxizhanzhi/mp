@@ -15,10 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-/**
- * 文件注入管理
- * @author wanggang
- */
+
 @Service
 @Slf4j
 public class InjectFileService extends BaseCpService {
@@ -29,10 +26,7 @@ public class InjectFileService extends BaseCpService {
         super(devopsClusterConfig);
     }
 
-    /**
-     * 查询列表
-     * @param deviceUuid
-     */
+    
     public CloudPlatformPageResult<InjectFile> list(String deviceUuid){
         CloudPlatformItemsPageResult pageResult = super.sendGet(BaseCloudPlatformConstant.CPCLOUD_DEVICE + BaseCloudPlatformConstant.URL_VERSION + INJECT_FILE + "?device_uuid=" + deviceUuid, CloudPlatformItemsPageResult.class);
         super.checkResult(pageResult);
@@ -42,16 +36,12 @@ public class InjectFileService extends BaseCpService {
         return model;
     }
 
-    /**
-     * 创建
-     */
+    
     public Snapshot create(SnapshotCreate snapshotCreate){
         return super.sendPost(BaseCloudPlatformConstant.CPCLOUD_DEVICE + BaseCloudPlatformConstant.URL_VERSION + INJECT_FILE, JsonUtils.toUnderlineJSONString(snapshotCreate), Snapshot.class);
     }
 
-    /**
-     * 删除
-     */
+    
     public BaseCloudPlatformResult delete(List<String> uuids) {
         var jsonObject = new JSONObject();
         jsonObject.put("inject_uuids", uuids);

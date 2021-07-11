@@ -19,11 +19,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/4/27 18:19
- */
+
 @Slf4j
 @Service
 public class ProbeScriptService {
@@ -40,16 +36,12 @@ public class ProbeScriptService {
         return probeScriptMapper.getScriptModelByProbeId(probeId);
     }
 
-    /**
-     * 将脚本内容上传FDFS，返回上传文件url
-     * @param scriptContent
-     * @return
-     */
+    
     public String uploadScriptContentToFDFS(String scriptContent, Integer scriptType) {
-        // 处理探针脚本
-        // todo 语法校验
+        
+        
         String suffix = "sh";
-        //0:shell 1:python 2:bat
+        
         if (Objects.nonNull(scriptType)) {
             if (scriptType == 0) {
                 suffix = "sh";
@@ -71,10 +63,7 @@ public class ProbeScriptService {
     }
 
 
-    /**
-     * 导入脚本文件，返回脚本内容
-     * @return 脚本内容
-     */
+    
     public String readScriptFileContent(MultipartFile scriptFile) {
         if (Objects.isNull(scriptFile)) {
             return "";

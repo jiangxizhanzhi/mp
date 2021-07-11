@@ -14,11 +14,7 @@ import java.util.List;
 @ModelClass(FlowPortModel.class)
 public interface FlowPortMapper extends BaseModelMapper<FlowPortModel> {
 
-    /**
-     * 批量查询网口信息
-     * @param flowPortIds
-     * @return
-     */
+    
     List<FlowPortModel> selectByPortIds(@Param("flowPortIds") List<String> flowPortIds);
 
 }

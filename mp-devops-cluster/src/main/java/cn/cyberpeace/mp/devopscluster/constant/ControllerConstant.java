@@ -1,9 +1,6 @@
 package cn.cyberpeace.mp.devopscluster.constant;
 
-/**
- * 控制层常量池
- * @author wanggang
- */
+
 public final class ControllerConstant {
 
     private ControllerConstant(){

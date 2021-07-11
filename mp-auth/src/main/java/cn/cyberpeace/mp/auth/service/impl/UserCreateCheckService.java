@@ -13,11 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Service
 public class UserCreateCheckService implements UserCheckService {
 
@@ -28,27 +24,24 @@ public class UserCreateCheckService implements UserCheckService {
 
         ParamCheck.notBlank(user.getUsername(), AuthBasei18nCode.USER_USERNAME);
 
-        // 密码是否合法
+        
         if (PasswordUtils.isPasswordInvalid(user.getPassword())) {
             throw new MpRuntimeException(AuthErrorCode.PASSWORD_STRENGTH_INVALID);
         }
 
-        // 邮箱是否合法
+        
         if (StringUtils.isNotBlank(user.getEmail())) {
             if (!Validator.isEmail(user.getEmail())) {
                 throw new MpRuntimeException(AuthErrorCode.EMAIL_INVALID);
             }
         }
 
-        // 手机号是否合法
+        
 
         if (StringUtils.isNotBlank(user.getMobile())) {
 
-            // todo 国际化手机号校验
-            /*
-            if (!PhoneUtil.isMobile(user.getMobile())) {
-                throw new MpRuntimeException(AuthErrorCode.MOBILE_INVALID);
-            } */
+            
+            
 
             if (userService.getByMobile(user.getMobile()) != null) {
                 throw new MpRuntimeException(AuthErrorCode.ACCOUNT_MOBILE_EXISTED);

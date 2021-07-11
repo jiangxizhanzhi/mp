@@ -39,11 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/8/20
- */
+
 public class SceneParseResourceCenterV1 extends BaseSceneParseResourceCenter {
 
     public Result parseAndLoadInfo(String sceneId) {
@@ -55,11 +51,11 @@ public class SceneParseResourceCenterV1 extends BaseSceneParseResourceCenter {
         ymlParseResult.setNodes(new ArrayList<>());
         ymlParseResult.setNetworks(new ArrayList<>());
 
-        // 解析节点
+        
         Map<String, NetworkElementParseResultV2> id2Network = new HashMap<>();
         Map<String, NodeElementParseResult> id2Node = new HashMap<>();
         this.parseNodeAndNet(sceneHandler, ymlParseResult.getNetworks(), ymlParseResult.getNodes(), id2Network, id2Node);
-        // 建立nodeId和转换成yml之后id的映射关系
+        
         Map<String, String> idConvert = new HashMap<>();
         for (String nodeId : id2Network.keySet()) {
             idConvert.put(nodeId, id2Network.get(nodeId).getId());
@@ -68,14 +64,14 @@ public class SceneParseResourceCenterV1 extends BaseSceneParseResourceCenter {
             idConvert.put(nodeId, id2Node.get(nodeId).getId());
         }
 
-        // 处理连线
+        
         this.addConnect(sceneHandler, id2Network, id2Node);
 
-        // 处理节点附件
+        
         Map<String, String> file2Download = new HashMap<>();
         this.handleNodeFile(ymlParseResult.getNodes(), file2Download);
 
-        // 处理节点镜像
+        
         List<SceneParseResourceCenterV2.Device> devices = new ArrayList<>();
         this.handleNodeImage(sceneConfigHandler, id2Node, devices);
 
@@ -95,7 +91,7 @@ public class SceneParseResourceCenterV1 extends BaseSceneParseResourceCenter {
         }else{
             sceneElementParseResult.setDesc(SPECIAL_STR_EMPTY);
         }
-        // 设置下场景的前端展示信息
+        
         sceneElementParseResult.setDisplayContext(sceneHandler.getScene().getDisplayContext());
         return sceneElementParseResult;
     }
@@ -146,10 +142,10 @@ public class SceneParseResourceCenterV1 extends BaseSceneParseResourceCenter {
             var element = pluginElement.getSrcElement();
             if (BaseSceneElementModel.Type.SWITCH == element.getType()) {
                 if (pluginElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH) {
-                    // 二层交换机不用处理
+                    
                     continue;
                 } else if (pluginElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER) {
-                    // 三层当二层处理
+                    
                     continue;
                 } else if (pluginElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE
                         || pluginElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER
@@ -248,7 +244,7 @@ public class SceneParseResourceCenterV1 extends BaseSceneParseResourceCenter {
                 }
             }
         } catch (Exception exception) {
-            // do nothing
+            
         }
 
         return networkElementParseResult;
@@ -284,7 +280,7 @@ public class SceneParseResourceCenterV1 extends BaseSceneParseResourceCenter {
         nodeElementParseResult.setStaticRouters(new ArrayList<>());
         if (CollectionUtils.isNotEmpty(pluginElement.getStaticRoutes())) {
             pluginElement.getStaticRoutes().forEach(s -> {
-                // staticRoutes 和 staticRouters不能有相同对象,否则生成yml会多出特殊字符
+                
                 StaticRoutesResult resulta = new StaticRoutesResult();
                 resulta.setGateway(s.getNexthop());
                 resulta.setDestination(s.getDestination());
@@ -304,7 +300,7 @@ public class SceneParseResourceCenterV1 extends BaseSceneParseResourceCenter {
                 }
             }
         } catch (Exception exception) {
-            // do nothing
+            
         }
         return nodeElementParseResult;
     }
@@ -379,12 +375,12 @@ public class SceneParseResourceCenterV1 extends BaseSceneParseResourceCenter {
 
         @Override
         public void asyncAckElementChanged(String nodeId, boolean forceSave, boolean withPlugins) {
-            // do nothing
+            
         }
 
         @Override
         public void asyncAckSceneChanged(boolean forceSave, boolean withPlugins) {
-            // do nothing
+            
         }
     }
 

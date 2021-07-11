@@ -3,11 +3,7 @@ package cn.cyberpeace.mp.cscene.dto.flow;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/11/22 17:58
- */
+
 @Data
 public class FlowRiskCount {
 

@@ -10,11 +10,7 @@ import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/7/15
- */
+
 @Slf4j
 @Service
 public class ClearService {

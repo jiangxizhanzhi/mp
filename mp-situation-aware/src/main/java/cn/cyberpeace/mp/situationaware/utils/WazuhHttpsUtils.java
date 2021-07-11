@@ -42,13 +42,7 @@ public class WazuhHttpsUtils {
         }
     }
 
-    /**
-     * get请求
-     *
-     * @param url
-     * @return
-     * @throws IOException
-     */
+    
     public static String sendGetWithAuthToken(String url, List<NameValuePair> params) {
         CloseableHttpResponse response = null;
         CloseableHttpClient httpClient = null;
@@ -84,13 +78,7 @@ public class WazuhHttpsUtils {
         }
     }
 
-    /**
-     * get请求
-     *
-     * @param url
-     * @return
-     * @throws IOException
-     */
+    
     public static String sendGetWithAuthToken(String url) {
         CloseableHttpResponse response = null;
         CloseableHttpClient httpClient = null;
@@ -118,19 +106,13 @@ public class WazuhHttpsUtils {
             log.error("connected exception: {}", ExceptionUtil.stacktraceToString(e));
             throw new MpRuntimeException(SituationalAwareErrorCode.CONNECTION_FAIL);
         } catch (Exception e) {
-//            processException(e);
+
             log.error("wazuh api error: {}", ExceptionUtil.stacktraceToString(e));
             throw new MpRuntimeException("wazuh api query error!");
         }
     }
 
-    /**
-     * get请求
-     *
-     * @param url
-     * @return
-     * @throws IOException
-     */
+    
     public static String sendGetWithAuth(String url, String userName, String password) {
         CloseableHttpResponse response = null;
         CloseableHttpClient httpClient = null;
@@ -147,7 +129,7 @@ public class WazuhHttpsUtils {
             log.error("connected exception: {}", ExceptionUtil.stacktraceToString(e));
             throw new MpRuntimeException(SituationalAwareErrorCode.CONNECTION_FAIL);
         } catch (Exception e) {
-//            processException(e);
+
             log.error("wazuh api error: {}", ExceptionUtil.stacktraceToString(e));
             throw new MpRuntimeException("wazuh api query error!");
         }
@@ -156,22 +138,22 @@ public class WazuhHttpsUtils {
     private static String doGetRequest(String url, HttpClient client) throws IOException {
         HttpGet httpget = new HttpGet(url);
         HttpResponse resp = client.execute(httpget);
-        // 设置请求和传输超时时间
+        
         RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
         httpget.setConfig(requestConfig);
-        // 获得返回值
+        
         return EntityUtils.toString(resp.getEntity(), "UTF-8");
     }
 
-//    private static void processException(Exception e) {
-//        if (e instanceof IOException) {
-//            log.error("connected exception: {}", ExceptionUtil.stacktraceToString(e));
-//            throw new MpRuntimeException(SituationalAwareErrorCode.CONNECTION_FAIL);
-//        }
-//
-//        if (e instanceof UncheckedExecutionException) {
-//            log.error("unchecked exception: {}", ExceptionUtil.stacktraceToString(e));
-//            throw new MpRuntimeException(SituationalAwareErrorCode.WAZUH_AUTHENTICATION_FAIL);
-//        }
-//    }
+
+
+
+
+
+
+
+
+
+
+
 }

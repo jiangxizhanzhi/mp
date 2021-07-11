@@ -4,11 +4,7 @@ import lombok.Getter;
 
 import javax.validation.constraints.NotNull;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/5/18
- */
+
 @Getter
 public class ResourceParseWrapper<T extends RsourceNameParams> {
     private boolean success;

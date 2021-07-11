@@ -35,11 +35,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-/**
- * @Description: 流量集合service
- * @Author qiaokang
- * @Date：2021/8/31 10:31
- */
+
 @Service
 @Slf4j
 public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollectionModel, FlowCollectionMapper, FlowCollectionFields, FlowCollectionQueryParams> implements FlowCollectionService {
@@ -55,11 +51,7 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
     @Autowired
     private FlowInfoMapper flowInfoMapper;
 
-    /**
-     * 重写list查询方法
-     * @param humanCondition
-     * @param queryParams
-     */
+    
     @Override
     public void loadListFilterCondition(HumanCondition humanCondition, FlowCollectionQueryParams queryParams) {
         if (Objects.nonNull(queryParams.getCategory())) {
@@ -68,11 +60,7 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
     }
 
 
-    /**
-     * 根据集合id分页查询流量信息
-     * @param queryParams
-     * @return
-     */
+    
     public ListObjServiceResult<FlowInfoModel> getByCollectionId(FlowCollectionRelQueryParams queryParams) {
         List<FlowInfoModel> flowInfoModels = new ArrayList<>();
         ListObjServiceResult<FlowCollectionRelModel> objServiceResult = flowCollectionRelService.list(queryParams);
@@ -88,11 +76,7 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
         return new ListObjServiceResult<>(new ListObjResult<>(flowInfoModels, objServiceResult.getSource().getTotal())).asResult();
     }
 
-    /**
-     * 查询集合关联流量信息
-     * @param queryParams
-     * @return
-     */
+    
     public List<FlowInfoModel> getFlowsByCollectionId(FlowCollectionRelQueryParams queryParams) {
         List<FlowInfoModel> flowInfoModels = new ArrayList<>();
         ListObjServiceResult<FlowCollectionRelModel> objServiceResult = flowCollectionRelService.list(queryParams);
@@ -108,11 +92,7 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
         return flowInfoModels;
     }
 
-    /**
-     * 新增集合关联信息
-     * @param addRequest
-     * @return
-     */
+    
     @Transactional
     public ServiceResult<Integer> addCollectionRel(AddFlowCollectionRelRequest addRequest) {
         ObjResult<FlowCollectionModel> modelResult = get(addRequest.getCollectionId()).getSource();
@@ -133,28 +113,24 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
         if (CollectionUtils.isNotEmpty(addFlowIds)) {
             List<FlowCollectionRelModel> addRelModels = new ArrayList<>();
             addFlowIds.forEach(flowId -> {
-                // 遍历生成关联对象集合
+                
                 FlowCollectionRelModel relModel = new FlowCollectionRelModel();
                 relModel.setCollectionId(addRequest.getCollectionId());
                 relModel.setFlowId(flowId);
                 addRelModels.add(relModel);
             });
 
-            // 更新关联流量数量
+            
             updateRelFlowCount(modelResult.getObj(), addFlowIds, true);
 
-            // 批量新增关联信息
+            
             return flowCollectionRelService.bulkCreate(addRelModels);
         }
 
         return ResultCommon.success(0);
     }
 
-    /**
-     * 删除集合关联信息
-     * @param delRequest
-     * @return
-     */
+    
     @Transactional
     public ServiceResult<Integer> delCollectionRel(DelFlowCollectionRelRequest delRequest) {
         ObjResult<FlowCollectionModel> modelResult = get(delRequest.getCollectionId()).getSource();
@@ -167,31 +143,26 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
             return ResultCommon.success(0);
         }
 
-        // 更新关联流量数量
+        
         updateRelFlowCount(modelResult.getObj(), delRequest.getFlowIds(), false);
         return flowCollectionRelService.delCollectionRel(delRequest);
     }
 
-    /**
-     * 更新关联流量数量
-     * @param collectionModel
-     * @param flowIds
-     * @param isIncrease
-     */
+    
     private void updateRelFlowCount(FlowCollectionModel collectionModel, List<String> flowIds, boolean isIncrease) {
-        // 更新关联流量数量
+        
         List<FlowInfoModel> flowInfoModels = this.selectByFlowIds(flowIds);
         if (CollectionUtils.isNotEmpty(flowInfoModels)) {
-            // 背景流量数量
+            
             int backgroundCount = (int) flowInfoModels.stream().filter(model -> InteractiveTypeEnum.BACKGROUND.toValue() == model.getInteractiveType()).count();
-            // 攻击流量数量
+            
             int attackCount = (int) flowInfoModels.stream().filter(model -> InteractiveTypeEnum.ATTACK.toValue() == model.getInteractiveType()).count();
             if (isIncrease) {
-                // 增加
+                
                 collectionModel.setBackgroundFlowCount(collectionModel.getBackgroundFlowCount() + backgroundCount);
                 collectionModel.setAttackFlowCount(collectionModel.getAttackFlowCount() + attackCount);
             } else {
-                // 减少
+                
                 collectionModel.setBackgroundFlowCount(collectionModel.getBackgroundFlowCount() - backgroundCount);
                 collectionModel.setAttackFlowCount(collectionModel.getAttackFlowCount() - attackCount);
             }
@@ -202,11 +173,7 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
         }
     }
 
-    /**
-     * 根据流量id查询流量信息
-     * @param flowIds
-     * @return
-     */
+    
     private List<FlowInfoModel> selectByFlowIds(List<String> flowIds) {
         List<FlowInfoModel> flowInfoModels = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(flowIds)) {
@@ -215,11 +182,7 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
         return flowInfoModels;
     }
 
-    /**
-     * 新增流量集合
-     * @param request
-     * @return
-     */
+    
     public ServiceResult<FlowCollectionModel> addCollection(AddFlowCollectionRequest request) {
         if (!checkNameUnique(request.getTitle(), StringUtils.EMPTY)) {
             return ResultCommon.fail(FlowErrorCode.TITLE_UNIQUE);
@@ -228,7 +191,7 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
         BeanUtils.copyProperties(request, flowCollectionModel);
         this.getModelMapper().create(flowCollectionModel);
 
-        // 新增集合关联信息
+        
         AddFlowCollectionRelRequest relRequest = new AddFlowCollectionRelRequest();
         relRequest.setCollectionId(flowCollectionModel.getId());
         if (CollectionUtils.isNotEmpty(request.getFlowInfoList())) {
@@ -239,11 +202,7 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
         return ResultCommon.success(flowCollectionModel);
     }
 
-    /**
-     * 更新流量集合
-     * @param request
-     * @return
-     */
+    
     public ServiceResult<FlowCollectionModel> updateCollection(ModifyCollectionRequest request) {
         if (StringUtils.isNotBlank(request.getTitle()) && !checkNameUnique(request.getTitle(), request.getId())) {
             return ResultCommon.fail(FlowErrorCode.TITLE_UNIQUE);
@@ -251,14 +210,14 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
 
         FlowCollectionModel flowCollectionModel = new FlowCollectionModel();
         BeanUtils.copyProperties(request, flowCollectionModel);
-        // 原关联数量都设置为0
+        
         flowCollectionModel.setAttackFlowCount(0);
         flowCollectionModel.setBackgroundFlowCount(0);
         this.getModelMapper().update(flowCollectionModel);
-        // 删除原有关联信息
+        
         flowCollectionRelService.delByCollectionId(request.getId());
 
-        // 更新集合关联信息
+        
         AddFlowCollectionRelRequest relRequest = new AddFlowCollectionRelRequest();
         relRequest.setCollectionId(request.getId());
         if (CollectionUtils.isNotEmpty(request.getFlowInfoList())) {
@@ -269,12 +228,7 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
         return ResultCommon.success(flowCollectionModel);
     }
 
-    /**
-     * 校验标题是否唯一
-     * @param title
-     * @param id
-     * @return
-     */
+    
     private boolean checkNameUnique(String title, String id) {
         FlowCollectionModel flowCollectionModel = getModelMapper().selectByTitle(title);
         return Objects.isNull(flowCollectionModel) || flowCollectionModel.getId().equals(id);

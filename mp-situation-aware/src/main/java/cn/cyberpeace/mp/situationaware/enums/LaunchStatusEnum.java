@@ -2,9 +2,7 @@ package cn.cyberpeace.mp.situationaware.enums;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
-/**
- * launch status
- */
+
 public enum LaunchStatusEnum {
 
     ERROR("error"),

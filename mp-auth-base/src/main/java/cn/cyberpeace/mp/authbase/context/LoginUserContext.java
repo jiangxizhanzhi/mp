@@ -3,11 +3,7 @@ package cn.cyberpeace.mp.authbase.context;
 import cn.cyberpeace.mp.base.context.transfercontext.TransferContext;
 import org.springframework.stereotype.Component;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/10/13 17:59
- */
+
 @Component
 public class LoginUserContext implements TransferContext<String> {
 

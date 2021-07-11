@@ -10,9 +10,7 @@ import lombok.NoArgsConstructor;
 import javax.validation.constraints.NotBlank;
 import java.util.List;
 
-/**
- * 公告请求信息
- */
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -36,7 +34,7 @@ public class SysNoticeRequest {
     @ApiModelProperty(value = "标签")
     private List<String> tags;
 
-    // 1:系统  2:课程  3:练习  4:考试
+    
     @ApiModelProperty(value = "1:系统  2:课程  3:练习  4:考试")
     private Integer type;
 

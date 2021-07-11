@@ -6,17 +6,13 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-/**
- * es真是的bean
- */
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class SessionModel {
 
-    /**
-     * 物理索引
-     */
+    
     private String index;
 
     private String srcIp;

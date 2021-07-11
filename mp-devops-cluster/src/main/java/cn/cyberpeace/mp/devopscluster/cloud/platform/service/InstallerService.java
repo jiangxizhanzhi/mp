@@ -18,10 +18,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-/**
- * 靶标管理-服务管理
- * @author wanggang
- */
+
 @Service
 @Slf4j
 public class InstallerService extends BaseCpService {
@@ -34,11 +31,7 @@ public class InstallerService extends BaseCpService {
         super(devopsClusterConfig);
     }
 
-    /**
-     * 分页查询
-     * @param getParams
-     * @return
-     */
+    
     public CloudPlatformPageResult<Installer> page(String getParams){
         CloudPlatformItemsPageResult pageResult = super.sendGet(BaseCloudPlatformConstant.CPCLOUD_DEVICE + BaseCloudPlatformConstant.URL_VERSION + INSTALLER + LISTS + getParams, CloudPlatformItemsPageResult.class);
         super.checkResult(pageResult);
@@ -49,11 +42,7 @@ public class InstallerService extends BaseCpService {
         return model;
     }
 
-    /**
-     * 新增
-     * @param installer
-     * @return
-     */
+    
     public Installer add(InstallerFormDataCloudPlatformModel installer, List<File> fileList) throws IOException{
         Map<String, Object> formMap = BeanUtil.beanToMap(installer,true,true);
 
@@ -67,19 +56,12 @@ public class InstallerService extends BaseCpService {
         return result;
     }
 
-    /**
-     * 根据ID查询
-     * @param id
-     * @return
-     */
+    
     public Installer findById(String id){
         return super.sendGet(BaseCloudPlatformConstant.CPCLOUD_DEVICE + BaseCloudPlatformConstant.URL_VERSION + INSTALLER + "/" + id, Installer.class);
     }
 
-    /**
-     * 批量删除
-     * @param ids
-     */
+    
     public BaseCloudPlatformResult deleteByIds(List<String> ids) {
         var jsonObject = new JSONObject();
         jsonObject.put("uuids", ids);

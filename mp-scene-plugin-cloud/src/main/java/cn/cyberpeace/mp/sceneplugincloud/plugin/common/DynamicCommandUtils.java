@@ -15,11 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/4/20
- */
+
 public class DynamicCommandUtils {
 
     public static List<String> genSetIpCmdList(CloudPluginSceneElementBO element, CloudScenePluginHandler pluginHandler) {
@@ -87,9 +83,7 @@ public class DynamicCommandUtils {
 
     }
 
-    /**
-     * 设置静态路由
-     */
+    
     private static class StaticRouteCmdBuilder implements NetworkingCmdBuilder {
 
         private static String ENABLE = "enable";

@@ -41,10 +41,10 @@ public class LogFileUtil {
                                 return;
                             }
                             refreshing = true;
-                            // 查询所有活动场景
+                            
                             var csceneService = BeanCommon.getBean(CsceneService.class);
                             List<CsceneInstanceModel> cscenes = csceneService.getRunningCscenes();
-                            // 预热数据
+                            
                             for (CsceneInstanceModel scene : cscenes) {
                                 try {
                                     cache.refresh(scene.getId());

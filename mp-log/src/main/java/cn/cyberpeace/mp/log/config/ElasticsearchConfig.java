@@ -9,10 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.ObjectUtils;
 
-/**
- * ES配置类
- * @author wanggang
- */
+
 @Configuration(value = "LogElasticsearchConfig")
 public class ElasticsearchConfig {
 
@@ -24,11 +21,7 @@ public class ElasticsearchConfig {
         return new RestHighLevelClient(RestClient.builder(this.createHttpHost()));
     }
 
-    /**cn.cyberpeace.mp.situationaware
-     * 创建 HttpHost 对象
-     *
-     * @return 返回 HttpHost 对象数组
-     */
+    
     private HttpHost[] createHttpHost() {
         Asserts.check(!ObjectUtils.isEmpty(logConfig.getEsNodes()), "ElasticSearch cluster ip address cannot empty");
         String[] ipArray = logConfig.getEsNodes().split(",");

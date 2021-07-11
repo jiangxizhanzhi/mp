@@ -5,11 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
 
-/**
- * @Description
- * @Author zhanglin
- * @Date 2022/9/19
- */
+
 @Getter
 @Setter
 @ApiModel(value = "镜像导出的返回结果")

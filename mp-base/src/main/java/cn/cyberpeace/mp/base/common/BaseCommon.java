@@ -38,10 +38,7 @@ public class BaseCommon {
         BaseCommon.timeFormatter = DateTimeFormatter.ofPattern(baseAppConfig.getTimePattern());
     }
 
-    /**
-     * 创建通用的object mapper对象 （设定了项目默认值）
-     * @return 通用的object mapper对象
-     */
+    
     public static ObjectMapper createCommonObjectMapper() {
         var objectMapper = new ObjectMapper();
         var javaTimeModule = new JavaTimeModule();
@@ -60,10 +57,7 @@ public class BaseCommon {
         return objectMapper;
     }
 
-    /**
-     * 创建驼峰-蛇形的object mapper对象 （设定了项目默认值）
-     * @return 通用的object mapper对象
-     */
+    
     public static ObjectMapper createSnakeObjectMapper() {
         var objectMapper = createCommonObjectMapper();
         objectMapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);

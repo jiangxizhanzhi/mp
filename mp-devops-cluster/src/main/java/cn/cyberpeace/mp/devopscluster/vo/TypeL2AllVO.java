@@ -12,8 +12,6 @@ import java.util.List;
 @AllArgsConstructor
 public class TypeL2AllVO {
 
-    /**
-     * 数据列表
-     */
+    
     private List<TargetType> items;
 }

@@ -20,11 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * @Description: 组织管理接口
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Api(value = "组织管理接口", tags = "AUTH-组织管理接口")
 @Slf4j
 @RestController

@@ -59,10 +59,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-/**
- * 场景实例的处理
- * 场景实例的功能由本类对外提供
- */
+
 @Slf4j
 @ClassFieldClasses({
         SceneDataBO.class,
@@ -121,7 +118,7 @@ public class SceneHandler extends BaseSceneHandler<
 
     private static final DelayTaskPool delayTaskPool = new DelayTaskPool();
 
-    // mock的进度
+    
     private static Map<String, Integer> progressPercentageMap = new ConcurrentHashMap<>();
 
     @Setter
@@ -186,7 +183,7 @@ public class SceneHandler extends BaseSceneHandler<
         var flag = getSceneEventHandler(event).startEvent();
         this.getScene().setProgressPercentage(this.calculateProgressPercentage());
         if (isTriggerEventSuccess(flag)) {
-            // 推送场景最新的事件状态
+            
             asyncAckSceneStatusChanged();
             asyncAckSceneChanged(false, false);
         }
@@ -196,7 +193,7 @@ public class SceneHandler extends BaseSceneHandler<
     private int startElementEvent(String nodeId, int event) {
         var flag = getElementEventHandler(nodeId, event).startEvent();
         if (isTriggerEventSuccess(flag)) {
-            // 推送节点最新的事件状态
+            
             asyncAckSceneElementStatusChanged(nodeId);
             asyncAckElementChanged(nodeId, false, false);
         }
@@ -311,10 +308,10 @@ public class SceneHandler extends BaseSceneHandler<
     public CollectedSceneElementBO getCollectedSceneElementBO(String nodeId) {
         var collectedSceneElementBO = new CollectedSceneElementBO();
         collectedSceneElementBO.setSceneId(getScene().getEid());
-        // 深拷贝一个
+        
         var sceneElement = JsonCommon.parse(JsonCommon.stringify(getElement(nodeId)), SceneElementBO.class);
         if (CollectionUtils.isNotEmpty(sceneElement.getPorts())) {
-            // 所有非辅助端口
+            
             var ports = sceneElement.getPorts().stream()
                     .filter(p -> !Boolean.TRUE.equals(p.getIsAuxiliary()))
                     .collect(Collectors.toList());
@@ -368,7 +365,7 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public void reportElementUpdated(String nodeId) {
-        // 辅助节点无需通知
+        
         if (getElement(nodeId) == null || Boolean.TRUE.equals(getElement(nodeId).getIsAuxiliary())) {
             return;
         }
@@ -411,17 +408,17 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public void asyncAckSceneStatusChanged() {
-//        CollectedSceneStatusBO sceneStatusBO = this.getCollectedSceneStatusBO();
-//        delayTaskPool.execute(TextUtils.uuid(), () -> {
-//            sceneStatusReporter.reportStatus(sceneStatusBO);
-//        });
+
+
+
+
     }
 
     public void asyncAckSceneElementStatusChanged(String nodeId) {
-//        CollectedElementStatusBO elementStatusBO = this.getCollectedElementStatusBO(nodeId);
-//        delayTaskPool.execute(TextUtils.uuid(), () -> {
-//            elementStatusReporter.reportStatus(elementStatusBO);
-//        });
+
+
+
+
     }
 
     public void asyncAckSceneChanged(boolean forceSave, boolean withPlugins) {
@@ -714,9 +711,7 @@ public class SceneHandler extends BaseSceneHandler<
         return super.logicDelete();
     }
 
-    /**
-     * TODO: 修改场景
-     */
+    
     public void modify() {
     }
 
@@ -779,11 +774,11 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public void startElement(String nodeId) {
-        //获取节点的网元数据
+        
         SceneElementBO element = getElement(nodeId);
-        //节点前置事件
+        
         prepareElementEvent(element, SceneElementModel.Event.START);
-        //开始节点事件
+        
         startElementEvent(nodeId, SceneElementModel.Event.START);
         try {
             for (ScenePluginHandler plugin : getPlugins()) {
@@ -794,7 +789,7 @@ public class SceneHandler extends BaseSceneHandler<
             errorElement(nodeId, SceneElementModel.Event.START, e.getMessage());
             return;
         }
-        //节点后置事件
+        
         overElementEvent(nodeId, SceneElementModel.Event.START);
         if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
             updateSceneElementWithPlugins(nodeId);
@@ -875,7 +870,7 @@ public class SceneHandler extends BaseSceneHandler<
             return;
         }
         overElementEvent(nodeId, SceneElementModel.Event.DELETE);
-        // 去除 被删除节点 的数据
+        
         var scene = toData();
         Iterator<SceneElementBO> elementIts = scene.getTopology().getElements().iterator();
         while (elementIts.hasNext()) {
@@ -911,7 +906,7 @@ public class SceneHandler extends BaseSceneHandler<
             prepareElementEvent(element, SceneElementModel.Event.MODIFY);
             startElementEvent(nodeId, SceneElementModel.Event.MODIFY);
             try {
-                // 插件数据 modify
+                
                 for (ScenePluginHandler plugin : getPlugins()) {
                     plugin.modifyElement(nodeId, originHandler);
                 }
@@ -924,7 +919,7 @@ public class SceneHandler extends BaseSceneHandler<
             overElementEvent(nodeId, SceneElementModel.Event.MODIFY);
             updateSceneElementWithPlugins(nodeId);
         } else {
-            // 只更新拓扑信息，但是不更新插件信息
+            
             updateSceneElement(nodeId);
             asyncAckElementChanged(nodeId, false, false);
         }

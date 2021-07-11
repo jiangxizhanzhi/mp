@@ -9,11 +9,7 @@ import cn.cyberpeace.mp.sceneplugingns3.plugin.gns3api.param.switchs.SwitchPort;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/9/6
- */
+
 public class Switch extends Gns3Client {
     public String create(String projectId, String name, List<SwitchPort> switchPorts) {
         SwitchNodeCreateData switchNodeCreateData = new SwitchNodeCreateData();

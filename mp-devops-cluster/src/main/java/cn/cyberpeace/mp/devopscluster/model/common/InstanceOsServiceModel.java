@@ -11,43 +11,27 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class InstanceOsServiceModel implements Serializable {
 
-    /**
-     * id
-     */
+    
     private String id;
 
-    /**
-     * binary
-     */
+    
     private String binary;
 
-    /**
-     * host
-     */
+    
     private String host;
 
-    /**
-     * zone
-     */
+    
     private String zone;
 
-    /**
-     * status
-     */
+    
     private String status;
 
-    /**
-     * state
-     */
+    
     private String state;
 
-    /**
-     *
-     */
+    
     private String disabledReason;
 
-    /**
-     *
-     */
+    
     private String updatedAt;
 }

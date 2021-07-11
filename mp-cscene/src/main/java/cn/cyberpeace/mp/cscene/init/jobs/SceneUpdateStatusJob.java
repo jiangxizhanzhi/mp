@@ -13,11 +13,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
 
-/**
- * @Description 清理mp服务启动之前正在创建中的场景,仅修改状态
- * @Author zhanglin
- * @Date 2022/9/21
- */
+
 @Slf4j
 @Component
 public class SceneUpdateStatusJob extends AbstractInitJob {
@@ -28,7 +24,7 @@ public class SceneUpdateStatusJob extends AbstractInitJob {
 
     @Override
     protected boolean doExecute() {
-        //忽略服务启动之前一定时间内的启动的场景
+        
         var startServiceTime = LocalDateTime.now().minusSeconds(csceneAppConfig.getIgnoreSceneCreatingSeconds());
         HumanCondition humanCondition = new HumanCondition()
                 .filterOrStart()

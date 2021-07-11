@@ -7,11 +7,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 
-/**
- * @Description 初始化场景使用的节点数量
- * @Author maojun
- * @Date 2022/8/5
- */
+
 @Component
 public class SceneNodeNumInitJob extends AbstractInitJob {
 

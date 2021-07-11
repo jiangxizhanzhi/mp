@@ -15,9 +15,7 @@ import javax.websocket.server.ServerEndpoint;
 import javax.websocket.server.ServerEndpointConfig;
 import java.util.*;
 
-/**
- * from org.springframework.web.socket.server.standard.ServerEndpointExporter
- */
+
 public class ServerEndpointExporter extends WebApplicationObjectSupport
         implements InitializingBean, SmartInitializingSingleton {
 
@@ -28,27 +26,17 @@ public class ServerEndpointExporter extends WebApplicationObjectSupport
     private ServerContainer serverContainer;
 
 
-    /**
-     * Explicitly list annotated endpoint types that should be registered on startup. This
-     * can be done if you wish to turn off a Servlet container's scan for endpoints, which
-     * goes through all 3rd party jars in the, and rely on Spring configuration instead.
-     * @param annotatedEndpointClasses {@link ServerEndpoint}-annotated types
-     */
+    
     public void setAnnotatedEndpointClasses(Class<?>... annotatedEndpointClasses) {
         this.annotatedEndpointClasses = Arrays.asList(annotatedEndpointClasses);
     }
 
-    /**
-     * Set the JSR-356 {@link ServerContainer} to use for endpoint registration.
-     * If not set, the container is going to be retrieved via the {@code ServletContext}.
-     */
+    
     public void setServerContainer(@Nullable ServerContainer serverContainer) {
         this.serverContainer = serverContainer;
     }
 
-    /**
-     * Return the JSR-356 {@link ServerContainer} to use for endpoint registration.
-     */
+    
     @Nullable
     protected ServerContainer getServerContainer() {
         return this.serverContainer;
@@ -78,9 +66,7 @@ public class ServerEndpointExporter extends WebApplicationObjectSupport
     }
 
 
-    /**
-     * Actually register the endpoints. Called by {@link #afterSingletonsInstantiated()}.
-     */
+    
     protected void registerEndpoints() {
         Set<Class<?>> endpointClasses = new LinkedHashSet<>();
         if (this.annotatedEndpointClasses != null) {

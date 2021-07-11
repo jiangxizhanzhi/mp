@@ -11,18 +11,14 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * @Description 将解析出的scene节点转成BO
- * @Author maojun
- * @Date 2021/10/12
- */
+
 class NetConfigElementConvert implements IConverter {
 
     public void convert2BO(ConvertDataContainer container) {
         CsceneBO csceneBO = container.toCsceneBO();
         SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(csceneBO.getSceneConfig(), null);
         CloudSceneConfigPluginHandler pluginHandler = sceneConfigHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
-        // 处理核心路由
+        
         for (var element : container.getAllElements()) {
             var cloudElement = container.getCloudPluginElements().get(element.getId());
             if (cloudElement == null) {
@@ -30,7 +26,7 @@ class NetConfigElementConvert implements IConverter {
             }
             if (CollectionUtils.isNotEmpty(cloudElement.getStaticRoutes())) {
                 for (var sr : cloudElement.getStaticRoutes()) {
-                    // 这里 NexthopPortId 其实还是从yml里解析出来的节点id
+                    
                     if (StringUtils.isNotEmpty(sr.getNexthopPortId())) {
                         String realNexthopPortId = null;
                         if (CollectionUtils.isNotEmpty(element.getPorts())) {

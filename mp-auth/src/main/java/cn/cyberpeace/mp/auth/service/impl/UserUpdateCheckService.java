@@ -16,11 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Service
 public class UserUpdateCheckService implements UserCheckService {
 
@@ -35,24 +31,24 @@ public class UserUpdateCheckService implements UserCheckService {
         }
         UserModel oldUser = result.getSource().getObj();
 
-        // 修改操作允许直接修改密码
-        // 密码是否合法
+        
+        
         if (StringUtils.isNotBlank(user.getPassword())) {
             if (PasswordUtils.isPasswordInvalid(user.getPassword())) {
                 throw new MpRuntimeException(AuthErrorCode.PASSWORD_STRENGTH_INVALID);
             }
         }
 
-        // 邮箱是否合法
+        
         if (StringUtils.isNotBlank(user.getEmail())) {
             if (!Validator.isEmail(user.getEmail())) {
                 throw new MpRuntimeException(AuthErrorCode.EMAIL_INVALID);
             }
         }
 
-        // 手机号是否合法
+        
         if (StringUtils.isNotBlank(user.getMobile())) {
-            // 如果手机号已存在，查看手机号是否是oldUser
+            
             UserModel userByMobile = userService.getByMobile(user.getMobile());
 
             if (userByMobile != null && !Objects.equals(userByMobile.getId(), oldUser.getId())) {
@@ -61,7 +57,7 @@ public class UserUpdateCheckService implements UserCheckService {
         }
 
         if (StringUtils.isNotBlank(user.getUsername())) {
-            // 如果username已存在，查看username是否是oldUser的
+            
             UserModel userByUserName = userService.getByUserName(user.getUsername());
 
             if (userByUserName != null && !Objects.equals(userByUserName.getId(), oldUser.getId())) {
@@ -70,7 +66,7 @@ public class UserUpdateCheckService implements UserCheckService {
         }
 
         if (StringUtils.isNotBlank(user.getIdentifier())) {
-            // 如果identifier已存在，查看identifier是否是oldUser的
+            
             UserModel userByIdent = userService.getByIdent(user.getIdentifier());
 
             if (userByIdent != null && !Objects.equals(userByIdent.getId(), oldUser.getId())) {

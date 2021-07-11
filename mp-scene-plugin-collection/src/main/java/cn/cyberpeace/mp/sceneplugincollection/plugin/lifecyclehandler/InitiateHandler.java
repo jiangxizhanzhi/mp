@@ -75,7 +75,7 @@ public class InitiateHandler extends HandlerCommon {
         prepareEventProcess(SceneModel.Event.INITIATE, SceneProcess.class, ElementProcess.class);
 
         var scene = getPluginHandler().getScene();
-        // 全局开启流量采集
+        
         if (Boolean.TRUE.equals(CollectionSingleton.collectionAppConfig.getEnableFlowCollect())
                 || Boolean.TRUE.equals(scene.getEnableFlowCollect()) || Boolean.TRUE.equals(scene.getEnableFlowMirror())) {
             CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
@@ -102,14 +102,14 @@ public class InitiateHandler extends HandlerCommon {
             });
         }
 
-        // 全局开启探针采集
+        
         if (Boolean.TRUE.equals(CollectionSingleton.collectionAppConfig.getEnableProbeCollect())
                 || Boolean.TRUE.equals(scene.getEnableProbeCollect())) {
             CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
                     .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
             runSceneProgress(SceneProcess.INITIATE_PROBE_COLLECTION, () -> {
                 cloudPluginHandler.getElementMap().forEach((nodeId, cloudElement) -> {
-                    // TODO: 只支持虚拟机、Linux容器
+                    
                     var virtualType = cloudElement.getVirtualType();
                     if (virtualType == null
                             || (virtualType != BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE &&
@@ -132,7 +132,7 @@ public class InitiateHandler extends HandlerCommon {
                 .filter(collectionElement -> Boolean.TRUE.equals(collectionElement.getEnableProbeCollect()))
                 .collect(Collectors.toList());
         if (!probeCollectionElements.isEmpty()) {
-            // 准备采集路由
+            
             runSceneProgress(SceneProcess.INITIATE_PROBE_ROUTER, () -> {
                 final String externalNetCidr = CloudSingleton.cloudAppConfig.getExternalNetCidr();
                 if (StringUtils.isEmpty(externalNetCidr)) {
@@ -151,7 +151,7 @@ public class InitiateHandler extends HandlerCommon {
                     }
                     for (var network : cloudElement.getDeriveNetworks()) {
 
-                        //当连接两端只有virtual machine router, 不需要采集路由
+                        
                         boolean currentNodeIsVirtualMachineRouter = ElementTypeUtils.isVirtualRouter(cloudElement);
                         if (currentNodeIsVirtualMachineRouter) {
                             if (CollectionUtils.isEmpty(network.getToPorts())) {
@@ -195,13 +195,13 @@ public class InitiateHandler extends HandlerCommon {
                 }
             });
 
-            // 创建探针采集器
+            
             runSceneProgress(SceneProcess.CREATE_PROBE_COLLECTOR, () -> {
                 var collectionId = getProbeCollector().createCollector();
                 getPluginHandler().getScene().setProbeCollector(collectionId);
             });
 
-            // 初始化安装探针脚本
+            
             var collectionId = getPluginHandler().getScene().getProbeCollector();
             runSceneProgress(SceneProcess.INITIATE_PROBES, () -> {
                 CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
@@ -232,15 +232,7 @@ public class InitiateHandler extends HandlerCommon {
 
     }
 
-    /**
-     * 获取探针采集参数
-     *
-     * @param probes      探针集合
-     * @param agentName
-     * @param systemType  系统类型
-     * @param locationMap 日志采集探针参数Map
-     * @return 探针采集参数
-     */
+    
     private WazuhControl.ControlConfigParam getControlConfigParam(List<Probe> probes, String agentName, String systemType
             , Map<String, List<WazuhLogProbeLocationConfig.ProbeLocation>> locationMap) {
         List<WazuhControl.ControlProbeParam> customProbeParams = new ArrayList<>();
@@ -249,12 +241,12 @@ public class InitiateHandler extends HandlerCommon {
         List<WazuhControl.ControlLogCollectParam> logParams = new ArrayList<>();
         WazuhControl.ControlConfigParam controlParam = new WazuhControl.ControlConfigParam();
         for (Probe probe : probes) {
-            // 脚本驱动类型，新增脚本参数
+            
             if (probe.getExecType() == Probe.ExecType.SCRIPT_PROBE) {
                 ConvertScriptParams convertScript = new ConvertScriptParams(probe, agentName);
                 customProbeParams.addAll(convertScript.convertParams());
             } else if (probe.getExecType() == Probe.ExecType.REGISTRY_PROBE) {
-                // 注册表变更类型，新增注册表参数
+                
                 ConvertRegistryParams convertRegistry = new ConvertRegistryParams(probe);
                 registryParams.addAll(convertRegistry.convertParams());
                 List<String> collectPath = probe.getCollectPath().stream().filter(StringUtils::isNotEmpty).collect(Collectors.toList());
@@ -262,7 +254,7 @@ public class InitiateHandler extends HandlerCommon {
                     customProbeParams.add(getModifyProbeParam(agentName, collectPath, REGISTRY));
                 }
             } else if (probe.getExecType() == Probe.ExecType.FILE_PROBE) {
-                // 文件变更类型，新增文件参数
+                
                 ConvertFileParams convertFile = new ConvertFileParams(probe);
                 fileParams.addAll(convertFile.convertParams());
                 List<String> collectPath = probe.getCollectPath().stream().filter(StringUtils::isNotEmpty).collect(Collectors.toList());
@@ -270,16 +262,16 @@ public class InitiateHandler extends HandlerCommon {
                     customProbeParams.add(getModifyProbeParam(agentName, collectPath, FILE));
                 }
             } else if (probe.getExecType() == Probe.ExecType.LOG_PROBE) {
-                // 日志采集类型，新增日志参数
+                
                 ConvertLogParams convertLog = new ConvertLogParams(probe, systemType, locationMap);
                 logParams.addAll(convertLog.convertParams());
             }
         }
-        // 设置agent扫描间隔，默认60s
+        
         WazuhControl.ControlSyscheckParam syscheckParam = new WazuhControl.ControlSyscheckParam();
         syscheckParam.setFrequency(CollectionSingleton.collectionAppConfig.getSyscheckFrequency());
         syscheckParam.setAction(WazuhControl.CONTROL_ACTION_ADD);
-        // 设置agent系统采集间隔，默认15min
+        
         WazuhControl.ControlSyscollectorParam syscollectorParam = new WazuhControl.ControlSyscollectorParam();
         syscollectorParam.setAction(WazuhControl.CONTROL_ACTION_ADD);
         syscollectorParam.setInterval(CollectionSingleton.collectionAppConfig.getSyscollectorInterval());
@@ -293,11 +285,7 @@ public class InitiateHandler extends HandlerCommon {
         return controlParam;
     }
 
-    /**
-     * 获取日志采集探针参数Map
-     *
-     * @return 日志采集探针参数Map
-     */
+    
     private Map<String, List<WazuhLogProbeLocationConfig.ProbeLocation>> getLocationMap() {
         if (locationMap == null) {
             locationMap = new HashMap<>();
@@ -307,7 +295,7 @@ public class InitiateHandler extends HandlerCommon {
             if (CollectionUtils.isEmpty(locationConfig.getLocations())) {
                 return locationMap;
             }
-            // 探针id和系统类型为key，探针参数为value
+            
             locationConfig.getLocations().forEach(location -> {
                 String key = location.getProbeId() + "_" + location.getOsType();
                 if (!locationMap.containsKey(key)) {
@@ -319,13 +307,7 @@ public class InitiateHandler extends HandlerCommon {
         return locationMap;
     }
 
-    /**
-     * 获取变更事件初始数据脚本
-     * @param agentName
-     * @param collectPath
-     * @param type
-     * @return
-     */
+    
     private WazuhControl.ControlProbeParam getModifyProbeParam(String agentName, List<String> collectPath, Integer type) {
         if (wazuhModifyEventConfig == null) {
             wazuhModifyEventConfig = BeanCommon.getBean(WazuhModifyEventConfig.class);

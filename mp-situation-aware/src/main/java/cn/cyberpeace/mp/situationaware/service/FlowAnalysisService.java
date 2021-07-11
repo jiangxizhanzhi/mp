@@ -84,10 +84,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-/**
- * 流量分析Service
- * @author wanggang
- */
+
 @Slf4j
 @Service
 public class FlowAnalysisService extends AbstractBaseService {
@@ -102,11 +99,7 @@ public class FlowAnalysisService extends AbstractBaseService {
     @Autowired
     private FlowPortProtocolService flowPortProtocolService;
 
-    /**
-     * 初始化攻击方式
-     * @return
-     * @throws IOException
-     */
+    
     @Transactional
     public void initClassification() throws IOException {
         Resource[] resources = new PathMatchingResourcePatternResolver()
@@ -118,11 +111,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         flowClassificationsService.batchSave(attackClassificationBOS);
     }
 
-    /**
-     * 模拟生成流量
-     * @return
-     * @throws IOException
-     */
+    
     public Boolean addSimulationFlow(FlowSimulationRequest request) throws IOException {
 
         String group = request.getGroup();
@@ -210,15 +199,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         return Boolean.TRUE;
     }
 
-    /**
-     * 统计时间窗口里的流量大小
-     * @param request
-     *        属性secondsInterval不可为空且必须大于0;
-     *        属性groupList不可为空;
-     *        属性startDateTime不可为空;
-     *        属性endDateTime不可为空；
-     * @return
-     */
+    
     public List<AttackDateHistogramNetworkBytesBO> sumNetworkBytesByDateHistogramTimestamp(FlowAnalysisRequest request){
         Integer secondsInterval = request.getSecondsInterval();
         if (Objects.isNull(secondsInterval) || secondsInterval <= 0
@@ -267,15 +248,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         return attackTimestampBOS;
     }
 
-    /**
-     * 统计时间窗口里的攻击次数
-     * @param request
-     *        属性secondsInterval不可为空且必须大于0;
-     *        属性groupList不可为空;
-     *        属性startDateTime不可为空;
-     *        属性endDateTime不可为空；
-     * @return
-     */
+    
     public List<AttackDateHistogramNetworkBytesBO> countByDateHistogramTimestamp(FlowAnalysisRequest request){
         Integer secondsInterval = request.getSecondsInterval();
         if (Objects.isNull(secondsInterval) || secondsInterval <= 0
@@ -323,11 +296,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         return attackTimestampBOS;
     }
 
-    /**
-     * 统计受攻击端口-攻击次数&流量大小(端口映射协议)
-     * @param request
-     * @return
-     */
+    
     public List<AttackPortAggregationBO> groupByDestinationPortWithProtocol(FlowAnalysisRequest request){
 
         List<AttackPortAggregationBO> boList = this.groupByDestinationPort(request);
@@ -341,15 +310,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         return boList;
     }
 
-    /**
-     * 统计受攻击端口-攻击次数&流量大小
-     * @param request
-     *        属性secondsInterval不可为空且必须大于0;
-     *        属性groupList不可为空;
-     *        属性startDateTime不可为空;
-     *        属性endDateTime不可为空；
-     * @return
-     */
+    
     public List<AttackPortAggregationBO> groupByDestinationPort(FlowAnalysisRequest request){
         if (CollectionUtils.isEmpty(request.getGroupList())
                 || Objects.isNull(request.getStartDateTime())
@@ -399,11 +360,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         return attackTimestampBOS;
     }
 
-    /**
-     *
-     * @param request
-     * @return
-     */
+    
     public List<AttackSeverityAndDestinationIpAggregationBO> groupByDestinationIpAndSeverity(FlowAnalysisRequest request){
         if (CollectionUtils.isEmpty(request.getGroupList())
                 || Objects.isNull(request.getStartDateTime())
@@ -451,11 +408,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         return attackTimestampBOS;
     }
 
-    /**
-     * 攻击日志
-     * @param request
-     * @return
-     */
+    
     public List<FlowLogBO> flowLog(FlowAnalysisRequest request){
 
         var boolQueryBuilder = this.buildBoolQueryBuilder(request);
@@ -524,7 +477,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         long totalHits = 0;
         try {
 
-            // 先刷新下缓存
+            
             RefreshRequest refreshRequest = new RefreshRequest();
             refreshRequest.indices(ArrayUtils.isNotEmpty(request.getIndices()) ? request.getIndices() : this.indices(request.getGroupList(), request.getStartDateTime(), request.getEndDateTime()));
             refreshRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
@@ -549,11 +502,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         return new ListObjResult<>(flowLogBOList, Integer.valueOf(totalHits + ""));
     }
 
-    /**
-     * 流量日志，国际化处理
-     * @param request
-     * @return
-     */
+    
     public List<FlowLogBO> globalizedWithFlowLog(FlowAnalysisRequest request){
         List<FlowLogBO> flowLogBOS = this.flowLog(request);
         if (CollectionUtils.isEmpty(flowLogBOS)){
@@ -571,11 +520,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         return flowLogBOS;
     }
 
-    /**
-     * 根据聚合类型聚合不同的TOP N数据，目标支持攻击分类、源IP、目标IP、攻击严重性,默认TOP 10
-     * @param request
-     * @return
-     */
+    
     public List<AttackWayAggregationBO> topByAggregationTypeEnum(FlowAnalysisRequest request){
         AggregationTypeEnum aggregationTypeEnum = request.getAggregationTypeEnum();
         if (Objects.isNull(aggregationTypeEnum)){
@@ -591,11 +536,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         return aggregationBOS;
     }
 
-    /**
-     *
-     * @param request
-     * @return
-     */
+    
     public List<AttackWayAggregationBO>  queryTopByAggregationTypeEnum(FlowAnalysisRequest request){
         AggregationTypeEnum aggregationTypeEnum = request.getAggregationTypeEnum();
         if (Objects.isNull(aggregationTypeEnum)){
@@ -655,11 +596,7 @@ public class FlowAnalysisService extends AbstractBaseService {
 
 
 
-    /**
-     * 计算流量大小
-     * @param request
-     * @return
-     */
+    
     public Double calcNetworkBytes(FlowAnalysisRequest request){
         SumAggregationBuilder aggregationBuilder = AggregationBuilders.sum("network_bytes").field("network.bytes");
 
@@ -693,11 +630,7 @@ public class FlowAnalysisService extends AbstractBaseService {
     }
 
 
-    /**
-     * 统计总数
-     * @param request
-     * @return
-     */
+    
     public long count(FlowAnalysisRequest request){
         var boolQueryBuilder = this.buildBoolQueryBuilder(request);
 
@@ -717,22 +650,18 @@ public class FlowAnalysisService extends AbstractBaseService {
         return 0;
     }
 
-    /**
-     * 查询一个战队的数据聚合
-     *
-     * @return
-     */
+    
     public TeamAttackBO queryOneTeamAttackSumList(FlowAnalysisRequest request) {
         TeamAttackBO teamAttackResultVO = new TeamAttackBO();
 
-        // 1.创建并设置SearchSourceBuilder对象
+        
         var searchSourceBuilder = new SearchSourceBuilder();
 
         var boolQueryBuilder = this.buildBoolQueryBuilder(request);
 
         searchSourceBuilder.aggregation(AggregationBuilders.sum("packageSize").field("network.bytes"));
         searchSourceBuilder.aggregation(AggregationBuilders.terms("attackWay").field("suricata.category").size(request.getTopSize()));
-        //构造动态条件查询
+        
         searchSourceBuilder.trackTotalHits(true);
         searchSourceBuilder.query(boolQueryBuilder);
 
@@ -742,10 +671,10 @@ public class FlowAnalysisService extends AbstractBaseService {
 
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
-            //设置战队攻击流量攻击次数
+            
             teamAttackResultVO.setTrafficSize(((ParsedSum) response.getAggregations().get("packageSize")).getValue());
             teamAttackResultVO.setAttackNumber(response.getHits().getTotalHits().value);
-            //设置攻击手法
+            
             List<AttackWayAggregationBO> attackWayList = ((ParsedStringTerms) response.getAggregations().get("attackWay")).getBuckets().stream()
                     .map(bucket -> {
                         var parsedBucket = (ParsedStringTerms.ParsedBucket) bucket;
@@ -764,11 +693,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         return teamAttackResultVO;
     }
 
-    /**
-     * 删除对应场景流量数据
-     * @param groupList
-     * @return
-     */
+    
     public Boolean delete(List<String> groupList){
         if (CollectionUtils.isEmpty(groupList)){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
@@ -785,9 +710,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         return Boolean.TRUE;
     }
 
-    /**
-     * 攻击手法-攻击次数百分比
-     */
+    
     private List<AttackWayAggregationBO> buildTeamAttackWayPercent(List<AttackWayAggregationBO> attackResultVOS) {
         Long totalNumber = attackResultVOS.stream().mapToLong(AttackWayAggregationBO::getAttackNumber).sum();
         if (Long.valueOf(0).equals(totalNumber)) {
@@ -806,11 +729,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         return attackResultVOS;
     }
 
-    /**
-     * 构建SearchRequest对象
-     * @param request
-     * @return
-     */
+    
     protected SearchRequest buildSearchRequest(FlowAnalysisRequest request,SearchSourceBuilder searchSourceBuilder){
         var searchRequest = new SearchRequest();
         searchRequest.indices(ArrayUtils.isNotEmpty(request.getIndices()) ? request.getIndices() : this.indices(request.getGroupList(),request.getStartDateTime(),request.getEndDateTime()));
@@ -820,11 +739,7 @@ public class FlowAnalysisService extends AbstractBaseService {
     }
 
 
-    /**
-     * 构建BoolQueryBuilder对象
-     * @param request
-     * @return
-     */
+    
     protected BoolQueryBuilder buildBoolQueryBuilder(FlowAnalysisRequest request){
         var boolQueryBuilder = QueryBuilders.boolQuery();
 
@@ -893,7 +808,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         if (Objects.nonNull(request.getStartDateTime()) && Objects.nonNull(request.getEndDateTime())){
             RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery("@timestamp");
             rangeQueryBuilder.gte(request.getStartDateTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
-            //如果开始开始时间和节数时间的时分秒都为0、则认为前端传入的是日期，需修正结束时间
+            
             if (request.getStartDateTime().getHour() == 0 && request.getStartDateTime().getMinute() == 0 && request.getStartDateTime().getSecond() == 0
             && request.getEndDateTime().getHour() == 0 && request.getEndDateTime().getMinute() == 0 && request.getEndDateTime().getSecond() == 0) {
                 rangeQueryBuilder.lte(request.getEndDateTime().plusDays(1).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() - 1);
@@ -906,10 +821,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         return boolQueryBuilder;
     }
 
-    /**
-     * 国际化攻击手法
-     * @param aggregationBOS
-     */
+    
     protected void globalizedWithAttackWay(List<AttackWayAggregationBO> aggregationBOS){
         if (CollectionUtils.isEmpty(aggregationBOS)){
             return;
@@ -921,12 +833,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         });
     }
 
-    /**
-     * 国际化攻击手法
-     * @param attackWay
-     * @param allCategoryDicMap
-     * @return
-     */
+    
     protected String globalizedWithAttackWay(String attackWay,Map<String, FlowClassificationModel> allCategoryDicMap){
         if (MapUtils.isEmpty(allCategoryDicMap)){
             return attackWay;
@@ -940,10 +847,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         return globalized;
     }
 
-    /**
-     * 获取所有索引,支持模糊匹配索引
-     * @return
-     */
+    
     public String[] getAllIndices(String... indices){
         GetIndexRequest getIndexRequest = new GetIndexRequest(indices);
         GetIndexResponse getIndexResponse = null;

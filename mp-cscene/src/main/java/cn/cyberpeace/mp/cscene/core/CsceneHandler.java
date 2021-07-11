@@ -38,9 +38,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 
-/**
- * 综合场景处理
- */
+
 @ClassFieldClasses({
         CsceneModel.class,
         CsceneRoleModel.class,
@@ -61,20 +59,13 @@ public class CsceneHandler extends BaseCsceneHandler<
     private CsceneInstanceMapper csceneInstanceMapper;
     private CsceneInstanceRoleMapper csceneInstanceRoleMapper;
 
-    /**
-     * 从数据库读取综合场景实例信息
-     * @return 综合场景实例信息
-     */
+    
     private List<CsceneInstanceModel> readCsceneInstances() {
         return csceneInstanceMapper.list(new HumanCondition().filterEqual(CsceneInstanceModel::getCscene, getCsceneId())
                 .filterEqual(CsceneInstanceModel::getDeleted, false));
     }
 
-    /**
-     * 从数据库读取综合场景实例的角色信息
-     * @param csceneInstanceIds 综合场景实例id列表
-     * @return 多个综合场景实例的角色信息
-     */
+    
     private List<CsceneInstanceRoleModel> readCsceneInstanceRoles(String[] csceneInstanceIds) {
         if (csceneInstanceIds == null || csceneInstanceIds.length == 0) {
             return new ArrayList<>();
@@ -83,10 +74,7 @@ public class CsceneHandler extends BaseCsceneHandler<
                 .filterIn(CsceneInstanceRoleModel::getCscene, csceneInstanceIds));
     }
 
-    /**
-     * 重新载入综合场景实例数据
-     * @return 载入是否成功
-     */
+    
     private boolean reloadCsceneInstances() {
         if (StringUtils.isEmpty(getCsceneId())) {
             return false;
@@ -133,15 +121,15 @@ public class CsceneHandler extends BaseCsceneHandler<
         csceneInstance.setCscene(getCsceneId());
         csceneInstance.setType(type);
         if (type == CsceneInstanceModel.Type.TEST && csceneInstance.getScene() != null) {
-            // 测试模式下,需要默认可以有console登录协议
+            
             CsceneDataModifier.supplyProtocol(csceneInstance, AccessMode.Protocol.CONSOLE);
         } else if (type == CsceneInstanceModel.Type.APP && csceneInstance.getScene() != null) {
-            // 非测试模式,核心路由器需要加上console登录协议
+            
             CsceneDataModifier.supplyProtocolForCoreRouter(csceneInstance, AccessMode.Protocol.CONSOLE);
         }
         this.checkVlanIds(getCscene());
         var instanceHandler = new CsceneInstanceHandler(csceneInstance, getContext());
-        // 节点数量增加失败 说明已到达数量上限
+        
         NodeLimitUtils.UpdateResult updateResult = NodeLimitUtils.addLimitedNodeCount(instanceHandler);
         if (!updateResult.isSuccess()) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_USING_NODE_LIMIT.format(String.valueOf(updateResult.getLimitNode()),

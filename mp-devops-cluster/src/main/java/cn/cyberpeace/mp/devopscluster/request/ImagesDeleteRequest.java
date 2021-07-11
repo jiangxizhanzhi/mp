@@ -9,18 +9,14 @@ import lombok.NoArgsConstructor;
 import javax.validation.constraints.NotEmpty;
 import java.util.List;
 
-/**
- * 镜像删除请求信息
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class ImagesDeleteRequest extends BaseRequest {
 
-    /**
-     * 镜像ID
-     */
+    
     @NotEmpty
     @ApiModelProperty(value = "镜像ID列表")
     private List<String> imageIds;

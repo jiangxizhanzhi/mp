@@ -13,19 +13,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-/**
- * @Deprecated 使用`HttpParam`/`SnakeHttpParam`构造请求参数
- */
+
 public class ParamUtils {
 
 
-    /**
-     * @Deprecated
-     * 包装成get方式的请求参数格式，例如：?a=1&b=2
-     * @param fieldList
-     * @param object
-     * @return
-     */
+    
     public static String wrapperGetParamsByFieldsAndObject(List<Field> fieldList, Object object) {
         String result = "";
         StringBuffer joinerStr = new StringBuffer();
@@ -42,13 +34,7 @@ public class ParamUtils {
         return StringUtils.isBlank(result) ? "" : "?" + result;
     }
 
-    /**
-     * @Deprecated
-     * 包装成get方式的请求参数格式，例如：?a=1&b=2
-     * @param fieldList
-     * @param object
-     * @return
-     */
+    
     public static String wrapperGetParamsByFieldsAndObject(List<Field> fieldList, Object object,Boolean humpToLine) {
         String result = "";
         StringBuffer joinerStr = new StringBuffer();
@@ -68,12 +54,7 @@ public class ParamUtils {
         return StringUtils.isBlank(result) ? "" : "?" + result;
     }
 
-    /**
-     * @Deprecated
-     * 获取对象所有的字段对象Field
-     * @param object
-     * @return
-     */
+    
     public static List<Field> getFieldsByObject(Object object) {
         Class<?> clazz = object.getClass();
         List<Field> fieldList = new ArrayList<>();
@@ -85,35 +66,20 @@ public class ParamUtils {
         return fieldList;
     }
 
-    /**
-     * @Deprecated
-     * 将对象的所有字段转化为Get请求方式的参数格式
-     * @param object
-     * @return
-     */
+    
     public static String wrapperGetParamsByObject(Object object){
         List<Field> fieldList = getFieldsByObject(object);
         return wrapperGetParamsByFieldsAndObject(fieldList,object);
     }
 
-    /**
-     * @Deprecated
-     * 将对象的所有字段转化为Get请求方式的参数格式
-     * @param object
-     * @return
-     */
+    
     public static String wrapperGetParamsByObject(Object object,String... ignoreFields){
         List<Field> fieldList = getFieldsByObject(object);
         fieldList = fieldList.stream().filter(field -> Arrays.stream(ignoreFields).noneMatch(f ->field.getName().equals(f))).collect(Collectors.toList());
         return wrapperGetParamsByFieldsAndObject(fieldList,object,Boolean.FALSE);
     }
 
-    /**
-     * @Deprecated
-     * 将对象的所有字段转化为Get请求方式的参数格式
-     * @param object
-     * @return
-     */
+    
     public static String wrapperGetParamsByObject(Boolean humpToLine,Object object,String... ignoreFields){
         List<Field> fieldList = getFieldsByObject(object);
         fieldList = fieldList.stream().filter(field -> Arrays.stream(ignoreFields).noneMatch(f ->field.getName().equals(f))).collect(Collectors.toList());

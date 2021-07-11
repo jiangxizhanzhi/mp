@@ -6,11 +6,7 @@ import lombok.Data;
 
 import java.util.List;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/12/2 20:11
- */
+
 @Data
 public class BaseSceneElementPageRequest extends PageRequest {
 

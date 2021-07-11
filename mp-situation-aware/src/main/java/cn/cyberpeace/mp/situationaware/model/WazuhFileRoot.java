@@ -6,9 +6,7 @@ import lombok.Data;
 import java.util.Date;
 import java.util.List;
 
-/**
- * 文件json解析
- */
+
 @Data
 public class WazuhFileRoot {
     private Syscheck syscheck;

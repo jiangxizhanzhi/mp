@@ -22,11 +22,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2021/10/28
- */
+
 @Slf4j
 public class SnapshotHandler extends HandlerCommon {
 
@@ -75,7 +71,7 @@ public class SnapshotHandler extends HandlerCommon {
     }
 
     private void snapshot(CloudPluginSceneElementBO element, String snapshotId, String snapshotName, String description) {
-        // 调用云平台接口 snapshot
+        
         Map<String, Object> extInfo = Collections.singletonMap("sceneId", getPluginHandler().getSourceSceneId());
         var result = virtualMachine.snapshot(element.getResourceId(), element.getImage(),
                 element.getImageUuid(), snapshotName, description, extInfo);

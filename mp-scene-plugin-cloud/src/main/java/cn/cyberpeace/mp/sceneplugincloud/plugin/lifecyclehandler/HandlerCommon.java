@@ -36,12 +36,10 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
         handlerUtils = pluginHandler.getHandlerUtils();
     }
 
-    /**
-     * 检查接入方式可用性
-     */
+    
     public void checkAccessModes(CloudPluginSceneElementBO cloudElement) {
         var cloudPorts = getPluginHandler().getPorts(cloudElement);
-        // 同样ip、端口可能对应多个接入方式
+        
         Map<String, List<CloudAccessMode>> ipAccessModesMap = new HashMap<>();
         cloudPorts.forEach(cloudPort -> {
             if (Boolean.TRUE.equals(cloudPort.getSrcPort().getIsAuxiliary())) {
@@ -53,7 +51,7 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
             }
             accessModes.forEach(accessMode -> {
                 var protocol = accessMode.getProtocol();
-                // console特殊模式可直接接入，不用检查
+                
                 if (AccessMode.Protocol.CONSOLE.equals(protocol)) {
                     accessMode.setAvailable(true);
                     return;
@@ -84,7 +82,7 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
             });
         });
 
-        // 检查接入连通性
+        
         var nodeId = cloudElement.getSrcElement().getId();
         ipAccessModesMap.forEach((ipPortKey, accessModes) -> {
             var ip = accessModes.get(0).getAccessIp();
@@ -107,9 +105,7 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
         });
     }
 
-    /**
-     * 关闭接入方式可用性
-     */
+    
     public void closeAccessModes(CloudPluginSceneElementBO cloudElement) {
         var cloudPorts = getPluginHandler().getPorts(cloudElement);
         var closeFlag = false;
@@ -164,21 +160,21 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
             return null;
         }
 
-//        if (message.contains("instance") && message.contains("could not be found")) {
-//            // 实例不存在
-//            log.error("element {} real error info {}", element.getSrcElement().getEid(), message);
-//            MpRuntimeException resultException = new MpRuntimeException(MessageCommon.get("sceneplugincloud.error.instance_not_found", nodeName));
-//            return resultException;
-//        } else if (message.contains("object vm") && message.contains("status error") && message.contains("build of instance")) {
-//            log.error("element {} real error info {}", element.getSrcElement().getEid(), message);
-//            MpRuntimeException resultException = new MpRuntimeException(MessageCommon.get("sceneplugincloud.error.vm_create_error", nodeName));
-//            return resultException;
-//        } else if (message.equals("parameters image or volumes must be supplied.")) {
-//            log.error("element {} real error info {}", element.getSrcElement().getEid(), message);
-//            MpRuntimeException resultException = new MpRuntimeException(MessageCommon.get("sceneplugincloud.error.image_not_found", nodeName, cloudElement.getImage()));
-//            return resultException;
-//        } else {
-//            return null;
-//        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
 }

@@ -8,14 +8,10 @@ import lombok.Data;
 
 @Data
 public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementModel {
-    /**
-     * 外部资源
-     */
+    
     @DefaultBool
     private Boolean external;
-    /**
-     * 云平台资源类型
-     */
+    
     @DefaultInt(VirtualType.VIRTUAL_SWITCH)
     private Integer virtualType;
     @DefaultBool
@@ -25,18 +21,14 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     @DefaultInt
     private Integer netMode;
 
-    /**
-     * 云平台资源id
-     */
+    
     @DefaultStr
     private String resourceId;
-    /**
-     * 三层防火墙对应防火墙资源id
-     */
+    
     @DefaultStr
     private String firewallResourceId;
 
-    // 虚拟交换机/路由/防火墙属性
+    
     @DefaultInt
     private Integer electricPortNumber;
     @DefaultStr(ElectricPortType.E)
@@ -54,7 +46,7 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     @DefaultStr(LanPortType.E)
     private String lanPortType;
 
-    // 虚拟交换机属性
+    
     @DefaultStr
     private String cidr;
     @DefaultStr
@@ -77,23 +69,23 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     private Boolean auxiliaryRouterOff;
 
 
-    // 虚拟路由属性
+    
     @DefaultStr
     private String staticRoutes;
 
-    // ospf网络属性
+    
     @DefaultStr
     private String ospfRouterId;
 
-    // rip网络属性
+    
     @DefaultStr
     private String ripLoopback;
 
-    // 虚拟防火墙属性
+    
     @DefaultStr
     private String firewallRules;
 
-    // 虚拟机属性
+    
     @DefaultStr
     private String isoAttachFilename;
     @DefaultStr
@@ -112,7 +104,7 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     @DefaultStr
     private String mibData;
 
-    // 虚拟机/容器属性
+    
     @DefaultStr
     private String image;
     @DefaultStr
@@ -120,7 +112,7 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     @DefaultStr
     private String initialTools;
 
-    // 靶标属性
+    
     @DefaultInt
     private Integer role;
     @DefaultStr
@@ -138,7 +130,7 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     @DefaultStr
     private String quickCreateParams;
 
-    // 宿主机信息
+    
     @DefaultStr
     private String host;
 
@@ -222,7 +214,7 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
         }
     }
 
-    // 用于设备连接的辅助网络
+    
     @DefaultBool
     private Boolean auxiliaryNetworkOn;
     @DefaultStr
@@ -243,9 +235,7 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     private Boolean auxiliaryNetworkVlan;
     @DefaultInt
     private Integer auxiliaryNetworkVlanId;
-    /**
-     * 辅助网络辅助路由，ovs流表需要网络必须有默认路由
-     */
+    
     @DefaultBool
     private Boolean auxiliaryNetworkRouterOn;
     @DefaultStr
@@ -253,7 +243,7 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     @DefaultStr
     private String auxiliaryNetworkRouterIp;
 
-    // 用于管理网卡
+    
     @DefaultBool
     private Boolean enableMgmt;
     @DefaultStr

@@ -32,11 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Service
 @Slf4j
 public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetMapper, TargetFields, QueryParams>
@@ -92,11 +88,11 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
         return getModelMapper().first(new HumanCondition().filterEqual("identifier", identifier));
     }
 
-//    @Override
-//    public List<TargetModel> listByTenantId(String tenantId) {
-//        List<TargetModel> targets = getModelMapper().listByTenantId(tenantId);
-//        return targets;
-//    }
+
+
+
+
+
 
     @Override
     public boolean exists(String id) {
@@ -124,26 +120,26 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
     @Override
     public List<TargetBo> getTree(String parentId, Integer type) {
         if (Objects.isNull(type)) {
-            // 默认查询菜单树
+            
             type = TargetModel.TYPE_MENU;
         }
 
         if (StringUtils.isBlank(parentId)) {
-            // parent为空，则查询所有权限
+            
             List<TargetModel> targets = listAll(AuthConstant.DEFAULT_TENANT, type);
             if (CollectionUtil.isEmpty(targets)) {
                 return new ArrayList<>();
             }
             List<TargetBo> tree = toTree(targets);
 
-            // 父节点根据pk做排序
-//            tree.sort((o1, o2) -> o1.getPk() - o2.getPk());
+            
+
             sortTree(tree);
 
             return tree;
         }
 
-        // 根据parentId查询单个权限树
+        
         TargetModel parentTarget = getModelMapper().get(parentId);
         if (parentTarget == null) {
             log.info("target:{} not existed!", parentId);
@@ -232,14 +228,14 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
         Map<String, List<TargetModel>> map = new HashMap<>();
         Map<String, TargetBo> mapTmp = new HashMap<>();
 
-        //Save all nodes to a map
+        
         for (TargetModel targetm : targets) {
             TargetBo targetBo = new TargetBo();
             BeanUtils.copyProperties(targetm, targetBo);
             mapTmp.put(targetBo.getId(), targetBo);
         }
 
-        //loop and assign parent/child relationships
+        
         for (Map.Entry<String, TargetBo> entry : mapTmp.entrySet()) {
             TargetBo current = entry.getValue();
             String parentId = current.getParent();
@@ -247,7 +243,7 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
             if (StringUtils.isNotBlank(parentId)) {
                 TargetBo parent = mapTmp.get(parentId);
                 if (parent != null) {
-                    //                    current.(parent);
+                    
                     if (parent.getChildren() == null) {
                         parent.setChildren(new ArrayList<>());
                     }
@@ -259,7 +255,7 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
         }
 
         List<TargetBo> parentTargets = new ArrayList<>();
-        //get the root
+        
         for (TargetBo node : mapTmp.values()) {
             if(StringUtils.isBlank(node.getParent())) {
                 parentTargets.add(node);
@@ -285,7 +281,7 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
         }
     }
 
-    // 权限树排序
+    
     private void sortTree(List<TargetBo> targets) {
         targets.forEach(t -> {
             if (CollectionUtil.isNotEmpty(t.getChildren())) {
@@ -296,7 +292,7 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
         targets.sort(Comparator.comparingInt(BaseModel::getPk));
     }
 
-    // TargetMapper中的方法，没有使用
+    
     private List<TargetModel> listByTenantId(String tenantId) {
         HumanCondition humanCondition = new HumanCondition()
                 .filterEqual(TargetModel::getTenant, tenantId)

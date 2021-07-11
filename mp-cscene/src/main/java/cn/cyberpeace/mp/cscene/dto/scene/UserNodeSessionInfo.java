@@ -4,11 +4,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/1/26
- */
+
 @ApiModel(description = "场景接入会话数据")
 @Data
 public class UserNodeSessionInfo {

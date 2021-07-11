@@ -11,11 +11,7 @@ import com.github.pagehelper.PageInfo;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 public class ResultUtils {
 
     public static ListObjServiceResult objList2ListObjServiceResult(List<Objects> list, Integer total) {

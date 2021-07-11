@@ -25,11 +25,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/12/2 14:05
- */
+
 @Slf4j
 @Service
 @CacheConfig(cacheManager = SituationCacheConfig.CACHE_MANAGER)
@@ -74,13 +70,7 @@ public class CsceneCommonService {
         return cscene.getSceneConfig();
     }
 
-    /**
-     * 根据sceneId和elementIds查询agentNames
-     *
-     * @param sceneId
-     * @param elementIds 为空表示获取场景中所有的节点
-     * @return
-     */
+    
     @Cacheable(value = "query_agentnames_by_scene_and_elementids")
     public List<String> getAgentNamesBySceneIdAndElementIds(String sceneId, List<String> elementIds) {
         String translatedSceneId = translateSceneId(sceneId);
@@ -109,13 +99,7 @@ public class CsceneCommonService {
     }
 
 
-    /**
-     * 根据sceneId和elementIds查询agentNames
-     *
-     * @param sceneId
-     * @param elementIds 为空表示获取场景中所有的节点
-     * @return
-     */
+    
     @Cacheable(value = "get_agentnames_elementids_map")
     public Map<String, String> getAgentNames2ElementIdMap(String sceneId, List<String> elementIds) {
         List<String> sceneIds = CollectionUtil.toList(sceneId);
@@ -138,11 +122,7 @@ public class CsceneCommonService {
     }
 
 
-    /**
-     * 查询场景是否是开启状态
-     *
-     * @return
-     */
+    
     @Cacheable(value = "is_cscene_running")
     public boolean isCsceneInstanceRunning(String csceneId) {
         ServiceResult<SceneStateInfo> result = csceneSpecialService.getSceneStateInfo(csceneId);

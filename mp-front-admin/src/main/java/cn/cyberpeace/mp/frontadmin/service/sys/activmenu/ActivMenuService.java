@@ -35,11 +35,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Service
 @Slf4j
 public class ActivMenuService {
@@ -64,15 +60,7 @@ public class ActivMenuService {
     private OptionService optionService;
 
 
-    /**
-     * 适用场景：重新导入menu.json
-     * 1. 清空原有menu, keymenu, editionmenu表。
-     * 2. 如果导入menu的时候，系统已经激活，则需要根据查询的激活项目，激活版本，再结合menu自身的active[],edition[]属性，决定visible，再重新导入所有menu。
-     * 3. 如果导入menu的时候，系统还未激活，则所有visible默认为1
-     *
-     * @param jsonFile
-     * @return
-     */
+    
     public boolean reImportMenus(MultipartFile jsonFile) {
         log.info("reImportMenus...");
         String s = readJsonStrFromMultipartFile(jsonFile);
@@ -82,19 +70,19 @@ public class ActivMenuService {
         List<MenuExtraInfoModel> menuExtraInfoModels = new ArrayList<>();
 
         for (ActivMenuDTO menu : menus) {
-            // 以authority内的值为id
+            
             menu.setId(menu.getAuthority());
-            // 一开始parentid为null
+            
             recursion(targetModels, menuExtraInfoModels, menu, "");
         }
 
         check(targetModels);
 
-        // 根据系统激活与否，激活项目，版本，决定visible属性
+        
         ActivationResponse content = activationService.status();
-        // ActivationResponse content = mockActivationContent();
+        
         if (Objects.nonNull(content)) {
-            // 系统已激活，暂时忽略激活状态过期的场景
+            
             processMenuVisibility(targetModels, menuExtraInfoModels, content);
         }
 
@@ -111,7 +99,7 @@ public class ActivMenuService {
             throw new MpRuntimeException("json file error! value not equals with authority:" + notEqualList.get(0).getId());
         }
 
-        // 检查是否有重复
+        
         Map<String, Long> map = targetModels.stream().collect(Collectors.groupingBy(t -> t.getId(), Collectors.counting()));
         Map.Entry<String, Long> entry = map.entrySet().stream().filter(e -> e.getValue() > 1).findFirst().orElse(null);
         if (Objects.nonNull(entry)) {
@@ -121,12 +109,7 @@ public class ActivMenuService {
     }
 
 
-    /**
-     * 适用场景：系统中的总menu不变，需要根据重新激活的激活项，激活版本，重新设置所有菜单的visible属性，这一步需要用到menu_extra_info表
-     * 重新设置所有menu的visible属性
-     *
-     * @return
-     */
+    
     public boolean resetMenusVisibility(ActivationResponse content) {
         if (Objects.isNull(content)) {
             return false;
@@ -146,12 +129,7 @@ public class ActivMenuService {
     }
 
 
-    /**
-     *
-     * 重新设置所有option的visible属性
-     *
-     * @return
-     */
+    
     public void resetOptionsVisibility(ActivationResponse content) {
         if (Objects.isNull(content)) {
             return;
@@ -166,10 +144,7 @@ public class ActivMenuService {
     }
 
 
-    /**
-     * 重置Option的meta属性，添加修改visible属性
-     * @param activeItemMap
-     */
+    
     public void doResetOptionsVisibility(Map<String, String> activeItemMap) {
         if (CollectionUtil.isEmpty(activeItemMap)) {
             return;
@@ -224,13 +199,7 @@ public class ActivMenuService {
         }
     }
 
-    /**
-     * 转换 ActivMenuDTO -> TargetActivDto
-     *
-     * @param menuDTO
-     * @param parentId
-     * @return
-     */
+    
     private TargetModel activMenuDto2TargetActivDto(ActivMenuDTO menuDTO, String parentId) {
         TargetModel target = new TargetModel();
         target.setId(menuDTO.getId());
@@ -274,7 +243,7 @@ public class ActivMenuService {
 
 
     private String readJsonStrFromPath(String filePath) {
-//        filePath = "/Users/sternberg/work/saining/all_permissions_json_activ.json";
+
         String jsonStr = "";
         try {
             File jsonFile = new File(filePath);
@@ -322,12 +291,7 @@ public class ActivMenuService {
         return targetModels;
     }
 
-    /**
-     * 根据系统激活状态更改menu visible属性值
-     * <p>
-     * 逻辑：
-     * 如果一个menu edition[]跟激活状态的edition对应得上，并且active[]内有激活项中value为1的key，或者no_auth的，则最终的visible=1
-     */
+    
     private void processMenuVisibility(List<TargetModel> targetModels, List<MenuExtraInfoModel> menuExtraInfos, ActivationResponse activationResponse) {
         List<ActivationItem> items = activationResponse.getItems();
 
@@ -350,14 +314,14 @@ public class ActivMenuService {
             Optional<TargetModel> targetModelOptional = targetModels.stream().filter(t -> Objects.equals(t.getId(), menuId)).findFirst();
 
             if (!targetModelOptional.isPresent()) {
-                // 不存在的直接返回
+                
                 return;
             }
 
             boolean editionMatch = false;
             boolean itemMatch = false;
 
-            // 版本是否符合
+            
             if (StringUtils.isNotEmpty(mi.getEditions())) {
                 List<String> editions = Arrays.asList(mi.getEditions().split(","));
                 editionMatch = editions.contains(edition);
@@ -371,14 +335,14 @@ public class ActivMenuService {
                 List<String> activKeys = Arrays.asList(mi.getActivKeys().split(","));
 
                 for (String activKey : activKeys) {
-                    // 包含no_auth的菜单
+                    
                     if (Objects.equals(activKey.trim(), TargetActivBo.NO_AUTH)) {
                         itemMatch = true;
                     }
                 }
 
                 if (!itemMatch) {
-                    // 包含激活项中value为1的
+                    
                     for (String activKey : activKeys) {
                         for (String positiveKey : positiveKeys) {
                             if (Objects.equals(activKey.trim(), positiveKey.trim())) {
@@ -396,7 +360,7 @@ public class ActivMenuService {
             log.info("final result... editionMatch:{}, itemMatch:{}, menuId:{}", editionMatch, itemMatch, mi.getMenu());
             TargetModel targetModel = targetModelOptional.get();
 
-            // 版本匹配，激活项匹配，则最终的visible=1
+            
             if (editionMatch && itemMatch) {
                 log.info("edition and item matched! menuId:{}", targetModel.getId());
                 targetModel.setVisible(TargetModel.VISIBILITY_YES);

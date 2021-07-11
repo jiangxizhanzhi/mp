@@ -13,29 +13,19 @@ import java.util.List;
 @ConfigurationProperties(prefix = "mp.situationaware", ignoreInvalidFields = true)
 public class SituationAwareConfig {
 
-    /**
-     * moloch es节点地址
-     */
+    
     private String wazuhEsNodes;
 
-    /**
-     * 分页最大总数 max_result_window
-     */
+    
     private Integer wazuhEsMaxPageSize;
 
-    /**
-     * MP新中台ES地址
-     */
+    
     private String arkimeEsNodes;
 
-    /**
-     *
-     */
+    
     private String esDatePattern;
 
-    /**
-     * monitors
-     */
+    
     private String monitorCpCloudInterval;
     private String monitorBusinessInterval;
     private List<String> monitorCpCloudServerList;
@@ -43,9 +33,7 @@ public class SituationAwareConfig {
     private List<String> monitorCpCloudRestartRestrict;
     private List<String> monitorBusinessRestartRestrict;
 
-    /**
-     * arkime
-     */
+    
     private String arkimeCpcloudContainerCreateUrl;
     private String arkimeCpcloudNetworkMirrorUrl;
     private String arkimeEsProtocol;
@@ -59,16 +47,12 @@ public class SituationAwareConfig {
     private Boolean entityDst;
     private String entityDstNode;
 
-    /**
-     * wazuh
-     */
+    
     private String wazuhBaseUrl;
     private String wazuhUsername;
     private String wazuhPassword;
     private String wazuhFlowTableUrl;
-    /**
-     * wazuh-probe-manager
-     */
+    
     private String probeMgrUrl;
     private String probeMgrAgentScriptLinuxPath;
     private String probeMgrAgentScriptWindowsPath;
@@ -89,14 +73,10 @@ public class SituationAwareConfig {
 
         private String interval;
 
-        /**
-         * 服务列表
-         */
+        
         private String serviceList;
 
-        /**
-         * 该列表中的服务：正常状态下不允许重启，异常状态下才允许重启
-         */
+        
         private List<String> restartRestrictList;
     }
 

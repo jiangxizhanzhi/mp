@@ -12,13 +12,9 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = true)
 public class HypervisorWeightAndMaxInstanceCloudPlatformResult extends BaseCloudPlatformResult {
 
-    /**
-     * 权重
-     */
+    
    private Integer weight;
 
-    /**
-     * 虚拟机数量限制
-     */
+    
    private Integer maxInstances;
 }

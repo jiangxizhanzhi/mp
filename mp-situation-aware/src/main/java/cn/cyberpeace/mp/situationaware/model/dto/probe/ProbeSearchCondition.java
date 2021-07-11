@@ -6,11 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/4/26 10:33
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -41,7 +37,7 @@ public class ProbeSearchCondition {
     @ApiModelProperty(value = "null:全部, 0:shell 1:python 2:bat")
     private Integer[] scriptTypes;
 
-    // 是否显示脚本内容, 默认不显示
+    
     @Builder.Default
     private Boolean needScriptContent = false;
 }

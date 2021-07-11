@@ -16,11 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/9/20 13:56
- */
+
 @Service
 @Slf4j
 public class SysNoticeUserServiceImpl extends BaseModelServiceImpl<SysNoticeUserModel, SysNoticeUserMapper, SysNoticeUserFields, QueryParams> implements SysNoticeUserService {

@@ -12,27 +12,19 @@ import java.util.List;
 @AllArgsConstructor
 public class TypeItemModel {
 
-    /**
-     * ID
-     */
+    
     @ApiModelProperty(value = "ID")
     private Integer id;
 
-    /**
-     * 名称
-     */
+    
     @ApiModelProperty(value = "名称")
     private String name;
 
-    /**
-     * 父ID
-     */
+    
     @ApiModelProperty(value = "父ID")
     private Integer parentId;
 
-    /**
-     *
-     */
+    
     @ApiModelProperty(value = "子节点属性")
     private List<TypeItemModel> child;
 }

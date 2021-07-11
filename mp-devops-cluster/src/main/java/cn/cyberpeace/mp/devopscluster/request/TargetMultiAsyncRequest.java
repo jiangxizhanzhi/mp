@@ -12,9 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class TargetMultiAsyncRequest extends BasePageRequest{
 
-    /**
-     * 线程数量
-     */
+    
     @ApiModelProperty("线程数量")
     private Integer threadCount;
 }

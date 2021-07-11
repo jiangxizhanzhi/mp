@@ -7,11 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-/**
- * @Description: 流量执行测试类
- * @Author qiaokang
- * @Date：2021/8/18 15:56
- */
+
 @SpringBootTest(classes = TestFlowApplication.class)
 public class FlowActuatorServiceTest {
 

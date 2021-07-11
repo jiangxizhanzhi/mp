@@ -11,9 +11,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * 服务状态信息
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,28 +19,20 @@ import lombok.NoArgsConstructor;
 @ApiModel(value = "服务状态信息")
 public class HypervisorServiceStateVO extends BaseVO {
 
-    /**
-     * 服务
-     */
+    
     @ApiModelProperty(value = "服务")
     private String name;
 
-    /**
-     * 是否存活
-     */
+    
     @ApiModelProperty(value = "是否存活")
     @JsonIgnore
     private Boolean alive;
 
-    /**
-     * 状态
-     */
+    
     @ApiModelProperty(value = "状态")
     private String state;
 
-    /**
-     * 字体颜色
-     */
+    
     @ApiModelProperty(value = "字体颜色")
     private FontColorEnum fontColor;
 

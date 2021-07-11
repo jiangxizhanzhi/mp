@@ -24,12 +24,12 @@ public class CsceneSceneReportRabbitmqSender extends BaseSimpleMessageSender {
                         CSCENE_SCENE_REPORT_ROUTING_KEY, CSCENE_SCENE_REPORT_QUEUE_NAME));
     }
 
-//    @Bean
+
     public Queue csceneSceneReportQueue() {
         return getMessageConfig().queue();
     }
 
-//    @Bean
+
     public Binding csceneSceneReportBinding() {
         return getMessageConfig().topicBinding();
     }

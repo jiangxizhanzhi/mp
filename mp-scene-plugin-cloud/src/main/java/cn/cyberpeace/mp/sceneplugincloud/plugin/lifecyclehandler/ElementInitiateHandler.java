@@ -26,11 +26,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2021/10/25
- */
+
 @Slf4j
 public class ElementInitiateHandler extends HandlerCommon {
 
@@ -62,7 +58,7 @@ public class ElementInitiateHandler extends HandlerCommon {
                 }
             });
 
-            // 处理网关
+            
             if (StringUtils.isEmpty(network.getGateway())) {
                 String gatewayIp = null;
                 if (ElementTypeUtils.isVirtualGateway(element) || ElementTypeUtils.isCoreRouter(element)) {
@@ -124,7 +120,7 @@ public class ElementInitiateHandler extends HandlerCommon {
             int requireCount = 0;
             int gatewayCount = 0;
             boolean fromPortsAdd = false;
-            // 网络的from端口最多分一个
+            
             for (var port : connectedNetwork.getFromPorts()) {
                 if (StringUtils.isEmpty(port.getIp())) {
                     if (!fromPortsAdd) {
@@ -163,7 +159,7 @@ public class ElementInitiateHandler extends HandlerCommon {
             List<String> ipPool = IpUtils.newRandomIps(network.getCidr(), requireCount, new ArrayList<>(existIps), network.getAllocationPools(), BoolUtils.bool(network.getDhcp()));
             ipPool.addAll(gatewayIpPool);
             if (!portIps.contains(network.getGateway())) {
-                // 网关未分配 则放入地址池的最后等待分配
+                
                 if (!Boolean.TRUE.equals(network.getGatewayOff())) {
                     ipPool.add(network.getGateway());
                 }
@@ -181,7 +177,7 @@ public class ElementInitiateHandler extends HandlerCommon {
         var connectedNetworks = cloudElement.getDeriveNetworks();
         for (ConnectedNetworkBO connectedNetwork : connectedNetworks) {
             List<String> ipPool = connectedNetwork.network.getIpPool();
-            // 先处理连接的端口
+            
             List<SceneElementPortBO> toPorts = connectedNetwork.getToPorts();
             for (var port : toPorts) {
                 if (StringUtils.isNotEmpty(port.getIp())) {
@@ -203,7 +199,7 @@ public class ElementInitiateHandler extends HandlerCommon {
                 }
             }
 
-            // 处理自己的端口
+            
             List<ConnectedNetworkBO.ConnectPort> connectPorts = connectedNetwork.connectPorts;
             String fromIp = null;
             boolean noConnect = true;
@@ -237,17 +233,17 @@ public class ElementInitiateHandler extends HandlerCommon {
                 }
             }
             if (noConnect) {
-                // 网络没有任何连线
+                
                 Integer virtualType = cloudElement.getVirtualType();
                 if (virtualType != null && (virtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER || virtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH)) {
-                    // 路由或网络处理多个口
+                    
                     for (var port : connectedNetwork.getFromPorts()) {
                         if (StringUtils.isEmpty(port.getIp())) {
                             port.setIp(fromIp);
                         }
                     }
                 } else {
-                    // 其他处理一个口即可
+                    
                     for (var port : connectedNetwork.getFromPorts()) {
                         if (StringUtils.isEmpty(port.getIp())) {
                             port.setIp(fromIp);
@@ -268,7 +264,7 @@ public class ElementInitiateHandler extends HandlerCommon {
         var connectedNetworks = cloudElement.getDeriveNetworks();
         for (ConnectedNetworkBO connectedNetwork : connectedNetworks) {
             List<String> ipPool = connectedNetwork.network.getIpPool();
-            // 先处理连接的端口
+            
             List<SceneElementPortBO> toPorts = connectedNetwork.getToPorts();
             for (var port : toPorts) {
                 if (StringUtils.isNotEmpty(port.getIp())) {
@@ -308,7 +304,7 @@ public class ElementInitiateHandler extends HandlerCommon {
         for (var srcPort : srcPorts) {
             var cloudPort = getPluginHandler().getPort(srcPort.getId());
             if (cloudPort != null) {
-                // 初始化accessModeId
+                
                 var cloudAccessModes = cloudPort.getAccessModes();
                 if (cloudAccessModes != null) {
                     cloudAccessModes.forEach(cloudAccessMode -> {
@@ -323,10 +319,10 @@ public class ElementInitiateHandler extends HandlerCommon {
         if (isVirtualElement) {
             initiateVirtualPort(cloudElement);
         } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE)) {
-            // 实体节点的网络需要初始化对端端口
+            
             initiateVirtualToPort(cloudElement);
         } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH)) {
-            // 二层网络节点的网络、而且非外部网络需要初始化对端端口
+            
             if (cloudElement.getRole() != null && cloudElement.getRole() != BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK) {
                 initiateVirtualToPort(cloudElement);
             }
@@ -370,7 +366,7 @@ public class ElementInitiateHandler extends HandlerCommon {
     }
 
     public void initiate() {
-        // 标记已设置的ip的端口
+        
         if (getPluginHandler().getElementPortMap() != null) {
             getPluginHandler().getElementPortMap().values().forEach(p -> {
                 if (p.getSrcPort() != null && StringUtils.isNotEmpty(p.getSrcPort().getIp())) {
@@ -380,8 +376,8 @@ public class ElementInitiateHandler extends HandlerCommon {
         }
 
         var cloudElements = new ArrayList<>(getPluginHandler().getElementMap().values());
-        // 使用节点name排序一下,这样节点类型相同时可以有个相对固定的初始化顺序,节点名称相同的情况暂不处理
-        // 使初始化结果不受数据库数据顺序的影响
+        
+        
         Collections.sort(cloudElements, (a, b) -> {
             if (a.getSrcElement().getName() == null || b.getSrcElement().getName() == null) {
                 return 0;
@@ -390,18 +386,18 @@ public class ElementInitiateHandler extends HandlerCommon {
         });
 
         cloudElements.forEach(cloudElement -> this.initCoreType(cloudElement));
-        // 根据节点的类型排序,这个顺序直接影响组网的结果
+        
         Collections.sort(cloudElements, Comparator.comparing(CloudPluginSceneElementBO::getCoreType));
 
         getPluginHandler().createElementNetworks();
 
-        // 初始化ip池
+        
         var initiateElementIpPoolTasks = cloudElements.stream().filter(cloudElement -> !cloudElement.getDeriveNetworks().isEmpty()).map(cloudElement -> (Runnable) () -> initiateElementIpPoolProcess(cloudElement)).collect(Collectors.toList());
         if (!initiateElementIpPoolTasks.isEmpty()) {
             initiateElementIpPoolTasks.forEach(task -> task.run());
         }
 
-        // 初始化端口, 先初始化路由端口, 再初始化其它端口
+        
         List<Runnable> initiateRouterElementPortsTasks = new ArrayList<>();
         List<Runnable> initiateOtherElementPortsTasks = new ArrayList<>();
         cloudElements.forEach(cloudElement -> {
@@ -409,14 +405,14 @@ public class ElementInitiateHandler extends HandlerCommon {
             if (virtualType != null && (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER) || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE) || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER) || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE) || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH))) {
                 Runnable task = () -> initiateElementPortsProcess(cloudElement);
                 Integer type = cloudElement.getSrcElement().getType();
-                // 防火墙也看作路由
+                
                 if (type != null && (type.equals(BaseSceneElementModel.Type.ROUTER) || type.equals(BaseSceneElementModel.Type.FIREWALL))) {
                     initiateRouterElementPortsTasks.add(task);
                 } else {
                     initiateOtherElementPortsTasks.add(task);
                 }
             } else if (Boolean.TRUE.equals(cloudElement.getSrcElement().getIsAuxiliary())) {
-                // 辅助节点也需要处理下端口
+                
                 initiateOtherElementPortsTasks.add(() -> initiateVirtualPort(cloudElement));
             }
         });

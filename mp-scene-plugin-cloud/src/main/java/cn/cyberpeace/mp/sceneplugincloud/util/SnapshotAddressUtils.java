@@ -4,11 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/7/27
- */
+
 public final class SnapshotAddressUtils {
 
     public static String buildAddress(String imageName, String snapshotUuid) {

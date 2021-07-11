@@ -6,11 +6,7 @@ import lombok.Data;
 
 import java.util.List;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/4/25 09:40
- */
+
 @Data
 @ApiModel(value = "采集模板")
 public class CollectionTemplateDto extends CollectionTemplatePageItemDto {
@@ -24,7 +20,7 @@ public class CollectionTemplateDto extends CollectionTemplatePageItemDto {
     @ApiModelProperty(value = "日志采集探针列表")
     private List<ColTempCommonProbeDto> logProbes;
 
-    // 返回参数比通用探针要多一些
+    
     @ApiModelProperty(value = "自定义探针列表")
     private List<CollectionTemplateProbeDto> customProbes;
 

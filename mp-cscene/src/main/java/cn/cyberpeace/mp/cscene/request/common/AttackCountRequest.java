@@ -7,11 +7,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/11/29 19:52
- */
+
 @Data
 public class AttackCountRequest extends BaseSceneElementRequest {
 
@@ -32,9 +28,7 @@ public class AttackCountRequest extends BaseSceneElementRequest {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime endTime;
 
-    /**
-     * 源IP集合
-     */
+    
     @ApiModelProperty("源IP集合")
     private List<String> sourceIps;
 

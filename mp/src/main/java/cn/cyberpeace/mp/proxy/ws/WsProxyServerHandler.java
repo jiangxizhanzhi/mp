@@ -9,10 +9,7 @@ import org.springframework.web.socket.handler.AbstractWebSocketHandler;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Handles establishment and tracking of next 'hop', and
- * copies data from the current session to the next hop.
- */
+
 @Component
 public class WsProxyServerHandler extends AbstractWebSocketHandler {
 

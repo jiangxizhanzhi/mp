@@ -44,11 +44,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/8/2
- */
+
 @Slf4j
 @Service
 public class CsceneSnapshotService {
@@ -169,7 +165,7 @@ public class CsceneSnapshotService {
     }
 
     public ServiceResult<Boolean> correctSnapshotRelativeInfo() {
-        // 异常数据: cscene_snapshot 存在, 无resourceId
+        
         var noResourceIds = csceneSnapshotMapper.list(new HumanCondition()
                 .filterEqual(CsceneSnapshotModel::getSnapshotResourceId, StringUtils.EMPTY)
                 .filterEqual(CsceneSnapshotModel::getDeleted, false));
@@ -187,7 +183,7 @@ public class CsceneSnapshotService {
             }
         }
 
-        // 异常数据: cscene_snapshot 为删除状态
+        
         var deletedSnapshots = csceneSnapshotMapper.list(new HumanCondition()
                 .filterEqual(CsceneSnapshotModel::getDeleted, true));
         if (CollectionUtils.isNotEmpty(deletedSnapshots)) {
@@ -215,12 +211,12 @@ public class CsceneSnapshotService {
     private boolean correctCsceneSnapshotResourceId(CsceneSnapshotModel csceneSnapshot) {
         var result = sceneSnapshotService.getElementSnapshot(csceneSnapshot.getSnapshotId()).getSource();
         if (result != null) {
-            // 如果scene_snapshot存在, name补充resourceId字段
+            
             String resourceId = SnapshotAddressUtils.parseAddress(result.getAddress()).getSnapshotUuid();
             this.updateCsceneSnapshotRelativeInfo(csceneSnapshot.getSnapshotId(), resourceId, result.getSourceName());
             return true;
         } else {
-            // 如果不存在,则查看云平台是否存在该快照
+            
             SceneInfo sceneInfo = this.getSceneInfo(csceneSnapshot.getCsceneInstanceId());
             if (sceneInfo != null && StringUtils.isNotEmpty(sceneInfo.getSceneId())) {
                 SceneHandler sceneHandler = new SceneHandler(sceneInfo.getSceneId(), null, false, null);
@@ -228,7 +224,7 @@ public class CsceneSnapshotService {
                 if (cloudPlugin != null) {
                     var node = cloudPlugin.getElement(csceneSnapshot.getNodeId());
                     if (node != null && StringUtils.isNotEmpty(node.getImageUuid())) {
-                        // 查询云平台的快照列表
+                        
                         DeviceSnapshotParam param = new DeviceSnapshotParam();
                         param.setDeviceUuid(node.getImageUuid());
                         var snapShotResult = new Remote().getHttpClient().get(CloudUrlConstant.SNAPSHOT_LIST, param, DeviceSnapshotResultData.class);
@@ -241,7 +237,7 @@ public class CsceneSnapshotService {
                             }
                         }
                         if (cloudSnapshot != null) {
-                            // 如果存在 则修正数据
+                            
                             String snapshotId = csceneSnapshot.getSnapshotId();
                             String sceneId = sceneInfo.getSceneId();
                             String nodeId = csceneSnapshot.getNodeId();
@@ -252,7 +248,7 @@ public class CsceneSnapshotService {
                             sceneSnapshotService.addSnapshot(snapshotId, sceneId, nodeId, address, name, sourceName, description);
                             this.updateCsceneSnapshotRelativeInfo(snapshotId, cloudSnapshot.getUuid(), sourceName);
                         } else {
-                            // 如果不存在 则删除数据
+                            
                             csceneSnapshotMapper.delete(csceneSnapshot.getId());
                         }
                     }
@@ -331,19 +327,19 @@ public class CsceneSnapshotService {
             return false;
         }
 
-        // 快照没有被其他场景模板或场景实例引用 则需要删除云平台快照
+        
         SnapshotDeleteParams params = new SnapshotDeleteParams();
         params.setSnapshotName(snapshot.getName());
         params.setDeviceUuid(StringUtils.replaceOnce(info.getImageName(), snapshot.getName(), StringUtils.EMPTY));
         params.setSnapshotUuid(info.getSnapshotUuid());
-        // 先逻辑删除节点快照，再判断节点实例是否已删除
+        
         this.logicDeleteCsceneSnapshot(csceneId, snapshot.getSceneElement(), info.getSnapshotUuid());
         boolean isDeleted = false;
         for (int i = 0; i < 3; i++) {
             var elementModel = sceneElementMapper.list(new HumanCondition()
                     .filterEqual(SceneElementModel::getScene, snapshot.getScene())
                     .filterEqual(SceneElementModel::getNodeId, snapshot.getSceneElement()));
-            // 节点实例未删除完毕直接返回
+            
             if (CollectionUtils.isEmpty(elementModel)) {
                 isDeleted = true;
             }

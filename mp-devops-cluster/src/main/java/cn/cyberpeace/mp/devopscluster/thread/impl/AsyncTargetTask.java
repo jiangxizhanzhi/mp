@@ -16,9 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/**
- * 同步靶标任务类
- */
+
 @Service
 @RequiredArgsConstructor
 public class AsyncTargetTask implements ITask<ServiceResult<Integer>, List<Device>> {

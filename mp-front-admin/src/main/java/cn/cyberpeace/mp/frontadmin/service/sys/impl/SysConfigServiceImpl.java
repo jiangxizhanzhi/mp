@@ -31,11 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Service
 @Slf4j
 public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, SysConfigMapper, SysConfigFields, QueryParams>
@@ -94,7 +90,7 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
         sysConfigModel.setInitValue(null);
 
         if (sysConfigModel.getKeyName().equals(SysConfigConstant.USER_AUDIT_KEY) && sysConfigModel.getValue().equals("0")) {
-            // 如果要关闭审核功能，需要检查用户中有没有处于待审核状态的
+            
             List<UserModel> list = userService.listNotAudited();
             if (CollectionUtil.isNotEmpty(list)) {
                 throw new MpRuntimeException(AdminErrorCode.SYS_CONFIG_CANNOT_CLOSE_AUDIT);
@@ -134,7 +130,7 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
             throw new MpRuntimeException(AdminErrorCode.SYS_CONFIG_NOT_EXISTED.format(obj.getId()));
         }
 
-        // 查看keyname是否是oldConfigModel的
+        
         if (StringUtils.isNotBlank(obj.getKeyName())) {
             SysConfigModel configByKeyName = getByKeyName(obj.getKeyName());
             if (configByKeyName != null && !Objects.equals(configByKeyName.getId(), oldConfigModel.getId())) {
@@ -150,7 +146,7 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
     public boolean isNewUserNeedAudit() {
         SysConfigModel config = getByKeyName(SysConfigConstant.USER_AUDIT_KEY);
         if (Objects.nonNull(config) && Objects.equals(SysConfigConstant.USER_AUDIT_VALUE_YES, config.getValue())) {
-            // 新用户需要审核
+            
             return true;
         }
         return false;

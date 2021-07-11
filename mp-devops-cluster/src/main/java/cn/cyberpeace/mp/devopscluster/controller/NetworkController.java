@@ -33,9 +33,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-/**
- * 网络管理类
- */
+
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/network")
@@ -47,11 +45,7 @@ public class NetworkController {
 
     private final SceneInfoService sceneInfoService;
 
-    /**
-     * 分页查询网络信息
-     * @param request
-     * @return
-     */
+    
     @ApiOperation("分页查询网络信息")
     @GetMapping("/page")
     public PageResult<NetworkPageVO> page(NetworkPageRequest request){
@@ -67,14 +61,14 @@ public class NetworkController {
                     .status(networkModel.getStatus()).subnets(subnets).createdAt(networkModel.getCreatedAt())
                     .downloadSpeed(networkModel.getDownloadSpeed())
                     .uploadSpeed(networkModel.getUploadSpeed())
-                    //.freeIps(networkModel.getFreeIps())
-                    //.usedIps(networkModel.getUsedIps())
+                    
+                    
                     .nodeNum(networkModel.getNodeNum())
                     .build();
                 }
         ).collect(Collectors.toList());
 
-        // 处理场景信息
+        
         List<String> networkNames = networkList.stream().map(NetworkPageVO::getName).collect(Collectors.toList());
         Consumer<Map<String, CsceneNodeInfoBO>> consumer = (map) -> {
             networkList.forEach(net -> {
@@ -94,10 +88,7 @@ public class NetworkController {
 
 
 
-    /**
-     * 查询vlan ip占用信息
-     * @return
-     */
+    
     @ApiOperation("查询vlan ip占用信息")
     @GetMapping("/vlan_ip")
     public ServiceResult<VlanIpStockVO> vlanIpStock(){

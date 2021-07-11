@@ -9,11 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-/**
-  *@Desciption 查询日志
-  *@Author zhangjin
-  *@Date 9/13/21 9:30 上午
-**/
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -26,27 +22,19 @@ public class RunTimeLogDTO {
     @ApiModelProperty(value = "日志文件大小", required = true)
     private Long size;
 
-    /**
-     * id
-     */
+    
     @ApiModelProperty(value = "id")
     private String id;
 
-    /**
-     * 下载地址
-     */
+    
     @ApiModelProperty(value = "下载地址")
     private String downloadUrl;
 
-    /**
-     * 节点ip
-     */
+    
     @ApiModelProperty(value = "节点ip")
     private String hostIp;
 
-    /**
-     * 日志类型
-     */
+    
     @ApiModelProperty(value = "日志类型")
     private LogReportTypeEnum logReportTypeEnum;
 

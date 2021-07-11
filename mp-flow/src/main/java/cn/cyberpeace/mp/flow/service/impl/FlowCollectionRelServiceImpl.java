@@ -16,11 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-/**
- * @Description: 流量集合关联service
- * @Author qiaokang
- * @Date：2021/8/31 10:31
- */
+
 @Service
 @Slf4j
 public class FlowCollectionRelServiceImpl extends BaseModelServiceImpl<FlowCollectionRelModel, FlowCollectionRelMapper, FlowCollectionRelFields, FlowCollectionRelQueryParams> implements FlowCollectionRelService {
@@ -30,11 +26,7 @@ public class FlowCollectionRelServiceImpl extends BaseModelServiceImpl<FlowColle
         setModelMapper(stuMapper);
     }
 
-    /**
-     * 补充list查询条件
-     * @param humanCondition
-     * @param queryParams
-     */
+    
     @Override
     public void loadListFilterCondition(HumanCondition humanCondition, FlowCollectionRelQueryParams queryParams) {
         if (StringUtils.isNotBlank(queryParams.getCollectionId())) {
@@ -42,20 +34,12 @@ public class FlowCollectionRelServiceImpl extends BaseModelServiceImpl<FlowColle
         }
     }
 
-    /**
-     * 根据集合id查询关联信息
-     * @param collectionIds
-     * @return
-     */
+    
     public List<FlowCollectionRelModel> selectByCollectionIds(List<String> collectionIds) {
         return getModelMapper().selectByCollectionIds(collectionIds);
     }
 
-    /**
-     * 删除关联关系
-     * @param delRequest
-     * @return
-     */
+    
     public ServiceResult<Integer> delCollectionRel(DelFlowCollectionRelRequest delRequest) {
         HumanCondition condition = new HumanCondition();
         condition.filterEqual("collectionId", delRequest.getCollectionId());
@@ -64,11 +48,7 @@ public class FlowCollectionRelServiceImpl extends BaseModelServiceImpl<FlowColle
         return ResultCommon.success(count);
     }
 
-    /**
-     * 根据collectionId删除
-     * @param collectionId
-     * @return
-     */
+    
     public Integer delByCollectionId(String collectionId) {
         HumanCondition condition = new HumanCondition();
         condition.filterEqual(FlowCollectionRelModel::getCollectionId, collectionId);

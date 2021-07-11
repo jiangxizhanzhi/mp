@@ -10,20 +10,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
-/**
- * 通用的基于单表的具有批量创建能力的controller
- * @param <M> 数据model
- * @param <S> 数据model对应的service
- */
+
 public interface BaseModelBulkCreateController<M extends BaseModel, S extends BaseModelService<M, ?>> {
 
     S getModelService();
 
-    /**
-     * 通用批量创建
-     * @param objs 创建对象集
-     * @return 成功数量
-     */
+    
     @ApiOperation("批量创建数据")
     @ApiImplicitParam(name = "objs", value = "创建数据请求体", dataTypeClass = List.class)
     @PostMapping("/bulk_create")

@@ -109,9 +109,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/**
- * 镜像管理
- */
+
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/images")
@@ -164,9 +162,7 @@ public class ImagesController {
     @NonNull
     private CsceneSnapshotService csceneSnapshotService;
 
-    /**
-     * 分页查询
-     */
+    
     @ApiOperation("分页查询")
     @GetMapping("/page")
     public PageResult<ImagesPageVO> page(ImagePageRequest request){
@@ -176,9 +172,7 @@ public class ImagesController {
         return new PageResult<>(list,model.getTotal());
     }
 
-    /**
-     * 新增
-     */
+    
     @ApiOperation("新增")
     @ApiImplicitParam(name = "request", value = "查询信息请求体", dataTypeClass = ImageRequest.class)
     @PostMapping("/add")
@@ -190,9 +184,7 @@ public class ImagesController {
         return ResultCommon.success();
     }
 
-    /**
-     * 更新
-     */
+    
     @ApiOperation("更新")
     @ApiImplicitParam(name = "request", value = "更新信息请求体", dataTypeClass = ImageRequest.class)
     @PostMapping("/update")
@@ -207,9 +199,7 @@ public class ImagesController {
         return ResultCommon.success();
     }
 
-    /**
-     * 根据UUID查询
-     */
+    
     @ApiOperation("根据UUID查询")
     @ApiImplicitParam(name = "uuid", value = "镜像ID", dataTypeClass = String.class)
     @GetMapping("/search/{uuid}")
@@ -249,9 +239,7 @@ public class ImagesController {
     }
 
 
-    /**
-     * 根据UUID集合查询
-     */
+    
     @ApiOperation("根据UUID集合查询")
     @ApiImplicitParam(name = "request", value = "查询信息请求体", dataTypeClass = ImageByUuidsRequest.class)
     @PostMapping("/search/uuids")
@@ -266,9 +254,7 @@ public class ImagesController {
         return  new Result<>(responseList);
     }
 
-    /**
-     * 构建
-     */
+    
     @ApiOperation("快速构建")
     @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = ImagesBuildRequest.class)
     @PostMapping("/build")
@@ -279,9 +265,7 @@ public class ImagesController {
     }
 
 
-    /**
-     * 删除镜像
-     */
+    
     @ApiOperation("删除")
     @ApiImplicitParam(name = "request", value = "删除信息请求体", dataTypeClass = ImagesDeleteRequest.class)
     @DeleteMapping("/page")
@@ -291,9 +275,7 @@ public class ImagesController {
         return ResultCommon.success();
     }
 
-    /**
-     * 授权
-     */
+    
     @ApiOperation("授权/批量授权")
     @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = ImagesAuthRequest.class)
     @PostMapping("/auth")
@@ -303,9 +285,7 @@ public class ImagesController {
         return ResultCommon.success();
     }
 
-    /**
-     * 授权
-     */
+    
     @ApiOperation("根据uuid查询授权用户信息")
     @ApiImplicitParam(name = "uuid", value = "请求参数", dataTypeClass = String.class)
     @GetMapping("/auth-users")
@@ -314,9 +294,7 @@ public class ImagesController {
         return new Result<>(userBos);
     }
 
-    /**
-     * 导出
-     */
+    
     @ApiOperation("导出")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "请求参数", dataTypeClass = String.class),
@@ -343,9 +321,7 @@ public class ImagesController {
         return new Result<>(downloadUrl);
     }
 
-    /**
-     * 创建虚拟机/容器
-     */
+    
     @ApiOperation("编辑镜像")
     @PostMapping("/{id}/create")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.START, title = "创建虚拟机/容器", target = OpTargetEnums.IMAGE)
@@ -354,9 +330,7 @@ public class ImagesController {
         return ResultCommon.success();
     }
 
-    /**
-     * 删除虚拟机/容器
-     */
+    
     @ApiOperation("释放镜像机器")
     @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = ImagesDeleteInstanceRequest.class)
     @PostMapping("/delete-instance")
@@ -366,9 +340,7 @@ public class ImagesController {
         return ResultCommon.success();
     }
 
-    /**
-     * 重启镜像机器
-     */
+    
     @ApiOperation("重启镜像机器")
     @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = ImagesRebootInstanceRequest.class)
     @PostMapping("/reboot")
@@ -378,9 +350,7 @@ public class ImagesController {
         return ResultCommon.success();
     }
 
-    /**
-     * 查询快照历史
-     */
+    
     @ApiOperation("查询快照历史")
     @ApiImplicitParam(name = "uuid", value = "靶标id", paramType = "path", dataTypeClass = String.class)
     @GetMapping("/{id}/snapshot/list")
@@ -421,9 +391,7 @@ public class ImagesController {
     }
 
 
-    /**
-     * 查询快照历史
-     */
+    
     @ApiOperation("根据镜像名称或快照名称查询镜像名称和快照历史信息")
     @ApiImplicitParam(name = "name", value = "镜像名称", dataTypeClass = String.class)
     @GetMapping("/snapshot/by-name")
@@ -432,15 +400,13 @@ public class ImagesController {
         return new Result(convertModel);
     }
 
-    /**
-     * 合并快照历史
-     */
+    
     @ApiOperation("合并快照历史")
     @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = SnapshotMergeRequest.class)
     @PostMapping("/snapshot/merge")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.UPDATE, title = "合并快照", target = OpTargetEnums.SNAPSHOT)
     public ServiceResult mergeSnapshot(@RequestBody SnapshotMergeRequest request){
-//        targetConverter.validTargetCanMerge(Arrays.asList(request.getUuid()));
+
         var res = snapshotConverter.list(request.getUuid());
         snapshotConverter.merge(request);
         if (res != null && CollectionUtils.isNotEmpty(res.getList())) {
@@ -451,9 +417,7 @@ public class ImagesController {
         return ResultCommon.success();
     }
 
-    /**
-     * 删除快照
-     */
+    
     @ApiOperation("删除快照")
     @ApiImplicitParam(name = "request", value = "删除数据请求体", dataTypeClass = SnapshotDeleteRequest.class)
     @PostMapping("/snapshot/delete")
@@ -463,9 +427,7 @@ public class ImagesController {
         return ResultCommon.success(true);
     }
 
-    /**
-     * 创建快照
-     */
+    
     @ApiOperation("创建快照")
     @ApiImplicitParam(name = "request", value = "创建数据请求体", dataTypeClass = SnapshotRequest.class)
     @PostMapping("/snapshot/create")
@@ -475,9 +437,7 @@ public class ImagesController {
         return ResultCommon.success();
     }
 
-    /**
-     * 文件注入
-     */
+    
     @ApiOperation("文件注入")
     @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = ImageInjectFileRequest.class)
     @PostMapping("/inject-file")
@@ -488,9 +448,7 @@ public class ImagesController {
         return ResultCommon.success();
     }
 
-    /**
-     * 查看文件注入列表
-     */
+    
     @ApiOperation("查看文件注入列表")
     @GetMapping("/inject-file")
     public Result<InjectFileConvertModel> findInjectFileList(ImageInjectFilePageRequest request){
@@ -498,9 +456,7 @@ public class ImagesController {
         return new Result(list.getList());
     }
 
-    /**
-     * 删除文件注入
-     */
+    
     @ApiOperation("删除文件注入")
     @ApiImplicitParam(name = "request", value = "删除数据请求体", dataTypeClass = ImageInjectFileDeleteRequest.class)
     @DeleteMapping("/inject-file")
@@ -511,9 +467,7 @@ public class ImagesController {
     }
 
 
-    /**
-     * 分页查询
-     */
+    
     @ApiOperation("查询flavor")
     @GetMapping("/page-flavor")
     public Result<List<Flavor>> pageFlavor(){
@@ -561,13 +515,7 @@ public class ImagesController {
         return result > 0 ? ResultCommon.success() : ResultCommon.fail("");
     }
 
-    /**
-     * 自定义上传镜像方法
-     *
-     * @param file
-     * @param request
-     * @return 返回文件路径等信息
-     */
+    
     @ApiOperation("自定义上传镜像方法")
     @PostMapping(value = "/custom/upload")
     @ResponseBody
@@ -576,13 +524,7 @@ public class ImagesController {
         return customImageUploadService.upload();
     }
 
-    /**
-     * SSH文件上传方法
-     *
-     * @param file
-     * @param request
-     * @return 返回文件路径等信息
-     */
+    
     @ApiOperation("SSH文件上传方法")
     @PostMapping(value = "/file/upload/ssh")
     @ResponseBody
@@ -591,12 +533,7 @@ public class ImagesController {
         return sshPrivateKeyUploadService.upload();
     }
 
-    /**
-     * SSH文件下载方法
-     *
-     * @param filePath 文件地址
-     * @param response
-     */
+    
     @ApiOperation("SSH文件下载方法")
     @ApiImplicitParam(name = "filePath", value = "文件路径", dataTypeClass = String.class)
     @GetMapping(value = "/file/download/ssh")
@@ -604,13 +541,7 @@ public class ImagesController {
         fileService.downloadFile(filePath, response);
     }
 
-    /**
-     * 文件注入上传方法
-     *
-     * @param file
-     * @param request
-     * @return 返回文件路径等信息
-     */
+    
     @ApiOperation("文件注入上传方法")
     @PostMapping(value = "/file/upload/inject")
     @ResponseBody
@@ -644,10 +575,7 @@ public class ImagesController {
         return new ServiceResult<>(true).asResult();
     }
 
-    /**
-     * 验证请求参数
-     * @param request
-     */
+    
     private void validImageRequest(ImageRequest request){
         if (StringUtils.isNotBlank(request.getName()) && request.getName().length() > 126){
             throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_NAME_EXCEED_MAX_LENGTH);
@@ -657,11 +585,7 @@ public class ImagesController {
         }
     }
 
-    /**
-     * 转换BO to VO
-     * @param model
-     * @return
-     */
+    
     private List<ImagesPageVO> convertBOToPageVO(BasePageBO<ImageConvertModel> model){
         return model.getList().stream().map(v -> {
             ExtSystemInfo extSystemInfo = v.getExtSystemInfo();
@@ -697,13 +621,13 @@ public class ImagesController {
                     }
                 }
             }
-            // 禁止导出所有靶标
+            
             if (Boolean.FALSE.equals(devopsClusterConfig.getAllowExport())) {
-                // 内置靶标不可导出
+                
                 if (Boolean.TRUE.equals(v.getIsImport() || Boolean.TRUE.equals(v.getIsInit()) || Boolean.TRUE.equals(v.getIsInternal()))) {
                     vo.setAllowExport(false);
                 } else if (v.getExtImageInfo() != null && StringUtils.isNotEmpty(v.getExtImageInfo().getBaseImageName())) {
-                    // 有基础镜像的 以基础镜像为准设置是否可导出
+                    
                     ImagePageDTO pageDTO = new ImagePageDTO();
                     pageDTO.setName(v.getExtImageInfo().getBaseImageName());
                     pageDTO.setLikeName(false);

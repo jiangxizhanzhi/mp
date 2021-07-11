@@ -45,10 +45,7 @@ public class FlowClassificationsService {
         this.flowClassificationsMapper = flowClassificationsMapper;
     }
 
-    /**
-     * 查询所有攻击类型
-     * @return
-     */
+    
     public List<FlowClassificationModel> findAll(){
         String key = cache_prefix_model + "flow:" + ServletUtils.getAcceptLanguage();
         Object cache = lfuCache.get(key);
@@ -60,10 +57,7 @@ public class FlowClassificationsService {
         return modelList;
     }
 
-    /**
-     * 查询所有攻击类型
-     * @return
-     */
+    
     public Map<String,FlowClassificationModel> findAllCategoryDicMap(){
         List<FlowClassificationModel> categoryDicList = this.findAll();
         if (CollectionUtils.isEmpty(categoryDicList)){
@@ -72,20 +66,13 @@ public class FlowClassificationsService {
         return categoryDicList.stream().collect(Collectors.toMap(FlowClassificationModel::getCategoryEn, Function.identity()));
     }
 
-    /**
-     * 删除所有
-     * @return
-     */
+    
     @Transactional(rollbackFor = Exception.class)
     public void deleteAll(){
          flowClassificationsMapper.deleteAll();
     }
 
-    /**
-     * 批量保存
-     * @param classificationBO
-     * @return
-     */
+    
     @Transactional
     public Integer batchSave(AttackClassificationBO classificationBO){
         List<AttackClassificationBO.Classification> classifications = classificationBO.getClassifications();

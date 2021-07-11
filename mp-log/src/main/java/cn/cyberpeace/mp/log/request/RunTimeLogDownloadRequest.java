@@ -4,11 +4,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * @description:
- * @author：Geek Wang
- * @date: 2022/6/15
- */
+
 @Data
 @NoArgsConstructor
 public class RunTimeLogDownloadRequest {

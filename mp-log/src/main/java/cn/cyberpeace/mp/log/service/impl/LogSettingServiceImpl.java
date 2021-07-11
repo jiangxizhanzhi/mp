@@ -34,12 +34,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * @author wangssh
- * @version 1.0
- * @description 日志级别设置
- * @date 2023/5/30
- **/
+
 @Slf4j
 @Service
 public class LogSettingServiceImpl implements ILogSettingService {
@@ -102,7 +97,7 @@ public class LogSettingServiceImpl implements ILogSettingService {
             return null;
         }
         logLevel = logLevel.toUpperCase();
-        //如果是全局设置，默认为INFO级别
+        
         Level curLevel = targetLogger.getLevel();
         if (ROOT.equalsIgnoreCase(logName) && curLevel == null) {
             curLevel = Level.toLevel(defaulLogLevel, Level.ERROR);
@@ -126,11 +121,11 @@ public class LogSettingServiceImpl implements ILogSettingService {
             LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
             batchSetLogLevel(logLevelRequestList, logLevelList, poList, rootLevel, loggerContext);
             if (dynamicLevelKeeping) {
-                //批量删除，再插入，事务
+                
                 String[] ids = poList.stream().map(e -> e.getLogName()).collect(Collectors.toList()).toArray(new String[poList.size()]);
                 mpLogLevelMapper.bulkLogicDelete(ids);
                 mpLogLevelMapper.bulkCreate(poList);
-                //配置文件中设置日志级别
+                
                 if (StringUtils.isNotEmpty(rootLevel[0])) {
                     setLogLevel2ExtenalConfig(rootLevel[0]);
                 }
@@ -145,7 +140,7 @@ public class LogSettingServiceImpl implements ILogSettingService {
                 logLevelRequestList.stream().filter(e -> logger.getName().equals(getUpperLogNameIfRoot(e.getLogName())))
                         .forEach(e -> {
                             logger.setLevel(getTargetLogLevel(e.getLogName(), e.getLogLevel(), logger));
-                            //设置查询设置结果
+                            
                             String level = getLevelStr(logger);
                             if (ROOT.equalsIgnoreCase(logger.getName())) {
                                 rootLevel[0] = level;
@@ -163,7 +158,7 @@ public class LogSettingServiceImpl implements ILogSettingService {
     @Override
     public ServiceResult<List<LogLevelResponse>> resetDefualtLogLevel() {
         if (LoggerFactory.getILoggerFactory() instanceof LoggerContext) {
-            //删除所有日志级别记录
+            
             mpLogLevelMapper.deleteAll();
             setRootDefaultAndOtherNull();
         }
@@ -174,7 +169,7 @@ public class LogSettingServiceImpl implements ILogSettingService {
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
         for (Logger logger : loggerContext.getLoggerList()) {
             try {
-                //重置只设置全局配置，其他配置为空
+                
                 if (ROOT.equalsIgnoreCase(logger.getName())) {
                     String level = getLevelStr(logger);
                     if (!defaulLogLevel.equalsIgnoreCase(level)) {
@@ -210,7 +205,7 @@ public class LogSettingServiceImpl implements ILogSettingService {
 
     private void setYamlRootLevel(String logName, List<LogLevelResponse> logLevelList, Logger logger) {
         if (StringUtils.isNotEmpty(logName)) {
-            //后置星号模糊匹配
+            
             boolean suffixBlurMatch = logName.endsWith("*") && logger.getName().startsWith(logName.substring(0, logName.length() - 1));
             if (logger.getName().equals(logName) || suffixBlurMatch) {
                 logLevelList.add(new LogLevelResponse(logger.getName(), getLevelStr(logger)));
@@ -247,13 +242,7 @@ public class LogSettingServiceImpl implements ILogSettingService {
         return ObjectUtils.isNotEmpty(logger.getLevel()) ? logger.getLevel().levelStr : "";
     }
 
-    /**
-     * @description: 更新外部配置文件日志级别
-     * @param: rootLevel
-     * @return: void
-     * @author: wangssh
-     * @date: 2023/6/5
-     */
+    
     private synchronized void setLogLevel2ExtenalConfig(String rootLevel) {
         if (StringUtils.isEmpty(rootLevel)) {
             return;
@@ -262,16 +251,16 @@ public class LogSettingServiceImpl implements ILogSettingService {
         log.info("####### MP_ENV_PATH:{}", EnvConfig.getMpEnvPath());
         String envProp = EnvConfig.getMpEnvPath();
         if (StringUtils.isNotEmpty(envProp) && envProp.endsWith(PROPERTIES) && FileUtil.exist(envProp)) {
-            //优先配置DMP_ENV_PATH变量下的properties日志级别
+            
             setNewRootLevel(ROOT_KEY_FOR_PROP, rootLevel, envProp);
         } else if (StringUtils.isNotEmpty(EnvConfig.getApplicationProp())) {
             String applicationProp = EnvConfig.getApplicationProp();
-            //次优先配置spring.config.addition-location中的application-prop.properties日志级别
+            
             if (StringUtils.isNotEmpty(applicationProp) && applicationProp.endsWith(PROPERTIES) && FileUtil.exist(applicationProp)) {
                 setNewRootLevel(ROOT_KEY_FOR_PROP, rootLevel, applicationProp);
             }
         } else if (StringUtils.isNotEmpty(EnvConfig.getApplicationExt())) {
-            //如果前两者都不存在，配置application-ext.yml日志级别
+            
             setYamlRootLevel(rootLevel,  EnvConfig.getApplicationExt());
         }
     }
@@ -283,12 +272,12 @@ public class LogSettingServiceImpl implements ILogSettingService {
         try (BufferedReader reader = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
             int emptyLineCnt = 0;
             String line = "";
-            //最大空行连续允许10，如果超过10个认为文件结束
+            
             while (emptyLineCnt < 10) {
                 line = reader.readLine();
                 if (StringUtils.isEmpty(line)) {
                     emptyLineCnt++;
-                    //如果出现连续空行保留，只保留一个
+                    
                     if (emptyLineCnt == 1) {
                         linkedList.add(line);
                     }
@@ -305,7 +294,7 @@ public class LogSettingServiceImpl implements ILogSettingService {
                     }
                 }
             }
-            //最后一行如果为空行，移除
+            
             if (!CollectionUtils.isEmpty(linkedList) && StringUtils.isEmpty(linkedList.get(linkedList.size() - 1))) {
                 linkedList.remove(linkedList.size() - 1);
             }
@@ -321,10 +310,10 @@ public class LogSettingServiceImpl implements ILogSettingService {
             return rootKey;
         }
         if (line.trim().startsWith(ROOT_KEY_FOR_PROP)) {
-            //对应于application-prop.properties.template中 ROOT_LEVEL 变量
+            
             return ROOT_KEY_FOR_PROP;
         } else if (line.trim().startsWith(LOGGING_LEVEL_EXT_VAR_ROOT)) {
-            //对应于application-prop.properties.yml-template中 logging.level.ext-var.root 变量
+            
             return LOGGING_LEVEL_EXT_VAR_ROOT;
         }
         return rootKey;
@@ -339,7 +328,7 @@ public class LogSettingServiceImpl implements ILogSettingService {
                 IOUtils.writeLines(linkedList, null, outputStream, StandardCharsets.UTF_8);
                 log.info("set new ROOT log level :{}", rootLevel);
 
-                //MP_ENV_PATH模式下，mp.properties每次启动时都从mp_default.properties复制参数
+                
                 if(file.endsWith("mp.properties")){
                     String defFileStr = new File(file).getParent().concat(File.separator).concat("mp_default.properties");
                     log.info("mp_default.properties path:{}", defFileStr);

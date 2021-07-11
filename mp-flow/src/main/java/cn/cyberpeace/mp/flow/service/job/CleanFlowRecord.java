@@ -10,11 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
-/**
- * @Description:
- * @Author: guquan
- * @Date：2023/6/27 16:22
- */
+
 @Slf4j
 @Component
 public class CleanFlowRecord {

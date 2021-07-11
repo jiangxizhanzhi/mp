@@ -6,9 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * 流量分类
- **/
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

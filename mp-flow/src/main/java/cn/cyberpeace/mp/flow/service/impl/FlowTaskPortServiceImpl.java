@@ -23,12 +23,7 @@ public class FlowTaskPortServiceImpl extends BaseModelServiceImpl<FlowTaskPortMo
         setModelMapper(stuMapper);
     }
 
-    /**
-     * 根据网络id和流量执行器id查询网口信息
-     * @param networkId
-     * @param actuatorId
-     * @return
-     */
+    
     @Override
     public FlowTaskPortModel findByNetworkIdAndActuatorId(String networkId, String actuatorId) {
         log.info("FlowTaskPortServiceImpl.findByNetworkIdAndActuatorId begin. networkId:{}, actuatorId:{}", networkId, actuatorId);

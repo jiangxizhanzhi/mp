@@ -9,11 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.Objects;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/11/7 15:38
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -35,7 +31,7 @@ public class AlarmQueryParams extends QueryParams {
             setPageSize(getPerPage());
         }
 
-        // 默认值
+        
         if (Objects.isNull(getPage()) || getPage() <= 1) {
             setPage(1);
         }

@@ -33,11 +33,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
-/**
- * @Description
- * @Author zhanglin
- * @Date 2023/3/22
- */
+
 @Service
 @Slf4j
 public class RestCpcloudAllIpsService {
@@ -69,9 +65,9 @@ public class RestCpcloudAllIpsService {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_INSTANCE_IS_CLEARING);
         } else {
             try {
-                //首先要找到所有的需要清理的数据
+                
                 var allSceneInstances = getAllSceneInstances();
-                // 查询所有启动的靶标实例
+                
                 var allInstances = getAllInstances();
                 if (CollectionUtils.isNotEmpty(allSceneInstances)) {
                     CountDownLatch countDownLatch = new CountDownLatch(allSceneInstances.size());
@@ -102,11 +98,11 @@ public class RestCpcloudAllIpsService {
 
     public Boolean checkHasClear() {
         if (lock.isLocked()) {
-            // 正在清除，提示一下
+            
             throw new MpRuntimeException(CsceneErrorCode.SCENE_INSTANCE_IS_CLEARING);
         }
         if (CollectionUtils.isNotEmpty(getAllInstances()) || CollectionUtils.isNotEmpty(getAllSceneInstances())) {
-            // 还有没有清理的场景或实例
+            
             throw new MpRuntimeException(CsceneErrorCode.SCENE_INSTANCE_NEED_CLEAR);
         }
         return true;
@@ -114,7 +110,7 @@ public class RestCpcloudAllIpsService {
 
     public ServiceResult<Boolean> resetAllIps(ResetCplcoudAllIpsData request) {
         if (checkHasClear()) {
-            //调云平台接口
+            
             var response = scenePluginCloudSceneService.resetCpcloudAllIps(request);
             log.info("reset cpcloud all ip response:{}", JsonCommon.stringify(response));
             if (response != null) {
@@ -132,7 +128,7 @@ public class RestCpcloudAllIpsService {
     }
 
     public OriginIpsResult getOriginIps() {
-        //调云平台接口
+        
         var response = scenePluginCloudSceneService.getCpcloudOriginIps();
         log.info("get cpcloud origin ips response:{}", JsonCommon.stringify(response));
         return response;

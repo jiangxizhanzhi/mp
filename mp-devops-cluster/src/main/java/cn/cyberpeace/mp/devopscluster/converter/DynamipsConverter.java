@@ -18,20 +18,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * 虚拟机管理
- *
- * @author wanggang
- */
+
 @Service
 @RequiredArgsConstructor
 public class DynamipsConverter implements BaseConverter {
 
-    /**
-     * 分页查询 dynamips 信息
-     *
-     * @return
-     */
+    
     public BasePageBO<InstanceBO> page(DynamipsInstancePageRequest request) {
         VirtualDynamips virtualDynamips = new VirtualDynamips();
         VirtualDynamipsListParam param = new VirtualDynamipsListParam();
@@ -73,12 +65,7 @@ public class DynamipsConverter implements BaseConverter {
         return convertModel;
     }
 
-    /**
-     * 获取虚拟机总数
-     *
-     * @param dto
-     * @return
-     */
+    
     public Integer getTotalInstances(InstancePageDTO dto) {
         return 0;
     }

@@ -48,11 +48,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-/**
- * @Description: 录屏service
- * @Author qiaokang
- * @Date：2021/9/13 16:40
- */
+
 @Service
 @Slf4j
 public class ScreenrecordService extends BaseCpService {
@@ -73,11 +69,7 @@ public class ScreenrecordService extends BaseCpService {
     @Autowired
     private CsceneService csceneService;
 
-    /**
-     * 分页查询录屏文件
-     * @param queryParams
-     * @return
-     */
+    
     public ListObjServiceResult<ScreenrecordVO> pageScreenrecord(ScreenrecordQueryParams queryParams,String sceneId) {
         queryParams.ensure();
         StringBuffer getParams = new StringBuffer("?");
@@ -122,7 +114,7 @@ public class ScreenrecordService extends BaseCpService {
                 "/recordfile_list" + getParams, ScreenrecordPageVO.class);
         log.info("page screenrecord response: {}", pageResponse);
 
-        // 获取该场景的所有节点id，因为可能已经删除了一部分节点
+        
         var ids = csceneService.getOneSceneInstanceAllElementIds(sceneId);
 
         List<ScreenrecordVO> responseList = new ArrayList<>();
@@ -132,14 +124,14 @@ public class ScreenrecordService extends BaseCpService {
             Set<String> existUserIds = new HashSet<>();
             pageResponse.getRecord().forEach(record -> {
                 if (ids.size() == 0 || ids.contains(record.getHostId())) {
-                    // 结果转换
+                    
                     ScreenrecordVO response = new ScreenrecordVO();
                     response.parseResult(record);
                     responseList.add(response);
                     existUserIds.add(response.getUserId());
                 }
             });
-            // 处理头像
+            
             if (!existUserIds.isEmpty()) {
                 List<UserBo> users = userService.listByUserIds(existUserIds.toArray(new String[]{}));
                 if (CollectionUtils.isNotEmpty(users)) {
@@ -159,11 +151,7 @@ public class ScreenrecordService extends BaseCpService {
         return new ListObjServiceResult(new ListObjResult<>(responseList, count)).asResult();
     }
 
-    /**
-     * 按时间删除录屏文件
-     * @param request
-     * @return
-     */
+    
     public ServiceResult<Boolean> removeRecordfile(ScreenrecordDeleteRequest request) {
         JSONObject delObj = new JSONObject();
         delObj.put("recordtime", request.getRecordTime());
@@ -180,10 +168,7 @@ public class ScreenrecordService extends BaseCpService {
         return ResultCommon.success(false);
     }
 
-    /**
-     * 查询已用空间
-     * @return
-     */
+    
     public ServiceResult<ScreenRecordUsedSpaceVO> queryUsedSpace() {
         CpcloudRecordUsedSpaceVO cpResponse = super.sendGet(BaseCloudPlatformConstant.SCREENRECORD_METHOD +
                 "/storage_info", CpcloudRecordUsedSpaceVO.class);
@@ -198,35 +183,32 @@ public class ScreenrecordService extends BaseCpService {
         return ResultCommon.success(response);
     }
 
-    /**
-     * 查询资源用量情况
-     * @return
-     */
+    
     public ServiceResult<SpaceStaticsVO> querySpaceStatics() {
-        // 系统总空间
+        
         long totalSpace = 0L;
-        // 剩余可用空间
+        
         long leftSpace = 0L;
-        // 截屏已用空间
+        
         long screenshotUsed = 0L;
-        // 录屏已用空间
+        
         long screenRecordUsed = 0L;
-        // 其他占用空间
+        
         long otherUsed = 0L;
-        // 资源总占用空间
+        
         long usedTotal = 0L;
-        // 资源已用空间占比
+        
         double usedPercent = 0;
-        // 其他资源占比
+        
         double otherPercent = 0;
-        // 剩余占比
+        
         double leftPercent = 0;
-        // 录屏占比
+        
         double screenRecordPercent = 0;
-        // 截屏占比
+        
         double screenshotPercent = 0;
 
-        // 录屏占用空间信息
+        
         CpcloudRecordUsedSpaceVO cpResponse = super.sendGet(BaseCloudPlatformConstant.SCREENRECORD_METHOD +
                 "/storage_info", CpcloudRecordUsedSpaceVO.class);
         log.info("query screen record used space response: {}", cpResponse);
@@ -244,9 +226,9 @@ public class ScreenrecordService extends BaseCpService {
                 screenshotUsed = screenshotUsedSpaceResponse.getUsedSpace();
             }
         }
-        // 资源占用空间
+        
         usedTotal = screenRecordUsed + screenshotUsed;
-        // 剩余可用空间
+        
         leftSpace = totalSpace - usedTotal - otherUsed;
         if (leftSpace < 0) {
             leftSpace = 0L;
@@ -273,11 +255,7 @@ public class ScreenrecordService extends BaseCpService {
         return ResultCommon.success(spaceStaticsVO);
     }
 
-    /**
-     * 批量删除录屏文件
-     * @param request
-     * @return
-     */
+    
     public ServiceResult<Boolean> batchDeleteScreenRecord(ScreenrecordBatchDeleteRequest request) {
         JSONObject delObj = new JSONObject();
         JSONArray delArray = new JSONArray();
@@ -297,12 +275,9 @@ public class ScreenrecordService extends BaseCpService {
         return ResultCommon.success(false);
     }
 
-    /**
-     * 下载录屏文件
-     * @param fileName
-     */
+    
     public ServiceResult<String> getScreenRecordUrl(String fileName) {
-        // 录屏文件名称校验
+        
         if (StringUtils.isBlank(fileName) || !fileName.endsWith(".mp4") || fileName.contains("../")) {
             throw new MpRuntimeException(DevopsClusterErrorCode.SCREEN_RECORD_ERROR);
         }
@@ -312,13 +287,13 @@ public class ScreenrecordService extends BaseCpService {
         ScreenRecordData data = null;
         try {
             URL url = new URL(devopsClusterConfig.getCpUrl() + BaseCloudPlatformConstant.SCREENRECORD_METHOD + "/download_record_file?recordfilename=" + fileName);
-            // 建立连接
+            
             URLConnection urlConnection = url.openConnection();
-            // http的连接类
+            
             HttpURLConnection httpURLConnection = (HttpURLConnection) urlConnection;
-            // 设置字符编码
+            
             httpURLConnection.setRequestProperty("Charset", "UTF-8");
-            // 打开到此 URL引用的资源的通信链接
+            
             httpURLConnection.connect();
             bin = new BufferedInputStream(httpURLConnection.getInputStream());
             byteArrayOutputStream = new ByteArrayOutputStream();

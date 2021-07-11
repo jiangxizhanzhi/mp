@@ -7,11 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/11/6 14:21
- */
+
 @Service
 public class AdminConfigService {
 
@@ -24,38 +20,29 @@ public class AdminConfigService {
     @Autowired
     private AdminMapper adminMapper;
 
-    /**
-     * 允许用户公开注册
-     * @return
-     */
+    
     public boolean isPublicRegisterAvailable() {
         String value = adminMapper.getConfigValue(KEY_PUBLIC_REGISTER);
         if (StringUtils.isNotBlank(value) && Objects.equals("1", value)) {
-            // 允许注册
+            
             return true;
         }
-        // 不允许注册
+        
         return false;
     }
 
-    /**
-     * 是否新注册用户需要审核
-     * @return
-     */
+    
     public boolean isNewUserNeedAudit() {
         String value = adminMapper.getConfigValue(KEY_USER_AUDIT);
         if (StringUtils.isNotBlank(value) && Objects.equals("1", value)) {
-            // 新用户需要审核
+            
             return true;
         }
         return false;
     }
 
 
-    /**
-     * 查询注册用户默认角色ID
-     * @return
-     */
+    
     public String getRegisterDefaultRoleId() {
         String value = adminMapper.getConfigValue(KEY_REGISTER_USER_DEFAULT_ROLE);
         return value;

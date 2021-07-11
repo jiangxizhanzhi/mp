@@ -19,74 +19,50 @@ import java.io.File;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * @Description: 攻击流量返回信息
- * @Author qiaokang
- * @Date：2021/8/10 16:57
- */
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @ApiModel(value = "攻击流量返回信息")
 public class AttackFlowResponse extends FlowInfoResponse {
 
-    /**
-     * 攻击脚本文件地址
-     */
+    
     @ApiModelProperty(value = "攻击脚本文件地址")
     private String file;
 
-    /**
-     * 攻击脚本代码
-     */
+    
     @ApiModelProperty(value = "攻击脚本代码")
     private String code;
 
-    /**
-     * 攻击脚本语言 0:python, 1:shell
-     */
+    
     @ApiModelProperty(value = "攻击脚本语言 0:python, 1:shell")
     private Integer suffix;
 
-    /**
-     * 攻击脚本运行参数
-     */
+    
     @ApiModelProperty(value = "攻击脚本运行参数")
     private String runCmd;
 
-    /**
-     * 攻击脚本运行参数(JSON)
-     */
+    
     @ApiModelProperty(value = "攻击脚本运行参数")
     private String parameter;
 
-    /**
-     * 流量文件名称
-     */
+    
     @ApiModelProperty(value = "流量文件名称")
     private String fileName;
 
-    /**
-     * 流量文件路径(不带ip)
-     */
+    
     @ApiModelProperty(value = "流量文件路径(不带ip)")
     private String pcapFile;
 
-    /**
-     * 流量文件地址(全地址)
-     */
+    
     @ApiModelProperty(value = "流量文件地址(全地址)")
     private String pcapFilePath;
 
-    /**
-     * 资源类型：0 pcap包，1 脚本
-     */
+    
     @ApiModelProperty(value = "资源类型：0 pcap包，1 脚本")
     private Integer resourceType;
 
-    /**
-     * pcap包含的协议
-     */
+    
     @ApiModelProperty(value = "pcap包含协议集合")
     private List<ProtocolBO> protocolList;
 
@@ -122,11 +98,11 @@ public class AttackFlowResponse extends FlowInfoResponse {
                 } else {
                     type = "Bool";
                 }
-                // 类型
+                
                 paramArray.add(type);
-                // 默认值
+                
                 paramArray.add(param.getParamValue());
-                // 参数说明
+                
                 paramArray.add(param.getParamDesc());
                 paramObj.put(param.getParamKey(), paramArray);
             });

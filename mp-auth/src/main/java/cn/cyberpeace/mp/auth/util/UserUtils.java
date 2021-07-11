@@ -24,11 +24,7 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Component
 @Slf4j
 public class UserUtils {
@@ -59,10 +55,7 @@ public class UserUtils {
         request.setAttribute(LogConstant.USER_TYPE_KEY, userType);
     }
 
-    /**
-     * 获取当前登录用户类型
-     * @return
-     */
+    
     public static String getLoginUserType() {
         RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
         ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) attributes;
@@ -78,12 +71,7 @@ public class UserUtils {
         return null;
     }
 
-    /**
-     * 获取当前登录用户
-     * 如果返回null，有可能是client认证，也有可能是免认证的接口
-     * 需要另外根据 request.getAttribute(LogConstant.USER_TYPE_KEY) 来判断
-     * @return
-     */
+    
     @Nullable
     public static UserModel getLoginUser() {
         UserModel user = null;

@@ -8,11 +8,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/3/21
- */
+
 @Component("elementStatusReporter")
 public class ElementStatusReporter implements StatusReporter<CollectedElementStatusBO> {
 

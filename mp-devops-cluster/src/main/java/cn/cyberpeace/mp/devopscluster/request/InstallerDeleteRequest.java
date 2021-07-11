@@ -16,9 +16,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 public class InstallerDeleteRequest extends BaseRequest{
 
-    /**
-     * ID
-     */
+    
     @NotEmpty
     @ApiModelProperty(value = "UUIDS")
     private List<String> uuids;

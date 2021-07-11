@@ -14,17 +14,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
-/**
- * @Description: 头像管理service
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Service
 @Slf4j
 public class AvatarService {
 
     public FileResponseData upload(MultipartFile file) {
-        // 校验文件
+        
         FileCheckRequest fileCheckRequest = new FileCheckRequest();
         fileCheckRequest.setMaxSize(AuthConstant.UPLOAD_AVATAR_MAX_SIZE);
         fileCheckRequest.setSuffixList(AuthConstant.UPLOAD_AVATAR_SUFFIX_TYPE);
@@ -35,7 +31,7 @@ public class AvatarService {
         }
         FileResponseData responseData = new FileResponseData();
         try {
-            // 上传到服务器
+            
             String suffix = FileUtil.getSuffix(file.getOriginalFilename());
             String filepath = FsCommon.upload(file.getInputStream(), suffix);
             responseData.setFileName(file.getOriginalFilename());

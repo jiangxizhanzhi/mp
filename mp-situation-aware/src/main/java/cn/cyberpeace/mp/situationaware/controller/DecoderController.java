@@ -11,11 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2023/4/18 20:04
- */
+
 @RestController
 @RequestMapping("/wazuh/decoders")
 @Api(value = "探针采集解析器管理", tags = "探针采集解析器管理")

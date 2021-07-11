@@ -9,11 +9,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/8/5
- */
+
 @Component
 public class CloudLocalFileMappingInitJob extends AbstractInitJob {
 
@@ -25,7 +21,7 @@ public class CloudLocalFileMappingInitJob extends AbstractInitJob {
 
     @Override
     protected boolean doExecute() {
-        // 本地开发环境不运行资源的更新和删除
+        
         if (!baseAppConfig.isRunInit()) {
             return true;
         }

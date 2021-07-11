@@ -5,11 +5,7 @@ import lombok.Setter;
 
 import java.util.Map;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2021/11/2
- */
+
 @Setter
 @Getter
 public class ImageParseResult {

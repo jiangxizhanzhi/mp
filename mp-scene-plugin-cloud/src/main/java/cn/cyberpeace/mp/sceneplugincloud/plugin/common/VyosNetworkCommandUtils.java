@@ -22,11 +22,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/4/20
- */
+
 public class VyosNetworkCommandUtils {
 
     private static List<NetworkingCmdBuilder> builderChains = new ArrayList<>();
@@ -146,9 +142,7 @@ public class VyosNetworkCommandUtils {
         }
     }
 
-    /**
-     * 设置静态路由
-     */
+    
     private static class StaticRouteCmdBuilder implements NetworkingCmdBuilder {
         private static String SET_NEXT_HOP = "set protocols static route %s next-hop %s ";
         private static String SET_NEXT_HOP_INTERFACE = "next-hop-interface eth%s";
@@ -178,9 +172,7 @@ public class VyosNetworkCommandUtils {
         }
     }
 
-    /**
-     * 设置OSPF网络
-     */
+    
     private static class OSPFCmdBuilder implements NetworkingCmdBuilder {
 
         private static String SET_INTERFACES = "set interfaces ethernet eth%s address %s";
@@ -217,9 +209,7 @@ public class VyosNetworkCommandUtils {
         }
     }
 
-    /**
-     * 设置BGP网络
-     */
+    
     private static class BGPCmdBuilder implements NetworkingCmdBuilder {
         private static String SET_INTERFACE_ADDRESS = "set interfaces ethernet eth%s address %s";
         private static String SET_PEER = "set protocols bfd peer %s";
@@ -242,7 +232,7 @@ public class VyosNetworkCommandUtils {
             List<String> cmds = new ArrayList<>();
             paramsWrapper.pluginPorts.forEach(p -> {
                 if (bgpPorts.contains(p)) {
-                    // 端口有bgp配置 根据配置创建命
+                    
                     String interfaceIp = null;
                     var network = paramsWrapper.pluginHandler.getHandlerUtils().getNetworkByPort(p.getSrcPort());
                     if (network != null && StringUtils.isNotEmpty(network.getCidr())) {
@@ -258,7 +248,7 @@ public class VyosNetworkCommandUtils {
                             String.format(SET_NEIGHBOR_AS, p.getBgpAs(), p.getBgpPeer(), p.getBgpPeerAs())
                     }));
                 } else if (!Boolean.TRUE.equals(p.getSrcPort().getIsAuxiliary())) {
-                    // 非辅助端口 且 bgp无配置 设置下地址,宣告下网络
+                    
                     String interfaceIp = null;
                     var network = paramsWrapper.pluginHandler.getHandlerUtils().getNetworkByPort(p.getSrcPort());
                     if (network != null && StringUtils.isNotEmpty(network.getCidr())) {
@@ -280,7 +270,7 @@ public class VyosNetworkCommandUtils {
 
         private String LOOPBACK = "set interfaces loopback lo address %s";
         private String NETWORK = "set protocols rip network %s";
-        //        private String RIP_INTERFACE = "set protocols rip interface eth%s";
+        
         private String NEIGHBOOR = "set protocols rip neighbor %s";
 
         private String REDISTRIBUTE = "set protocols rip redistribute connected";
@@ -302,15 +292,15 @@ public class VyosNetworkCommandUtils {
             }
             paramsWrapper.pluginPorts.forEach(p -> {
                 if (ripPorts.contains(p)) {
-                    // 端口有bgp配置 根据配置创建命令
+                    
                     if (StringUtils.isNotEmpty(p.getRipIp())) {
                         var network = paramsWrapper.pluginHandler.getHandlerUtils().getNetworkByPort(p.getSrcPort());
                         String interfaceIp = null;
-//                        if (network != null && StringUtils.isNotEmpty(network.getCidr())) {
-//                            interfaceIp = p.getSrcPort().getIp() + "/" + network.getCidr().split("/")[1];
-//                        } else {
-//                            interfaceIp = p.getSrcPort().getIp() + "/24";
-//                        }
+
+
+
+
+
 
                         if (network != null && StringUtils.isNotEmpty(network.getCidr())) {
                             interfaceIp = p.getRipIp() + "/" + network.getCidr().split("/")[1];
@@ -329,7 +319,7 @@ public class VyosNetworkCommandUtils {
                         cmds.add(String.format(NEIGHBOOR, ripPear));
                     }
                 } else if (!Boolean.TRUE.equals(p.getSrcPort().getIsAuxiliary())) {
-                    // 非辅助端口 且 bgp无配置 设置下地址,宣告下网络
+                    
                 }
             });
             cmds.add(REDISTRIBUTE);
@@ -339,12 +329,12 @@ public class VyosNetworkCommandUtils {
 
     private static class QosCmdBuilder implements NetworkingCmdBuilder{
 
-        //设置时延
+        
         private String NETWORK_DELAY = "set traffic-policy network-emulator snpolicy%s network-delay %s";
-        //设置丢包率
+        
         private String NETWORK_PACKET_LOSS = "set traffic-policy network-emulator snpolicy%s packet-loss %s";
 
-        //绑定设置的策略（该策略只支持出站流量）
+        
         private String BIND_OUT_TRAFFIC_POLICY = "set interfaces ethernet eth%s traffic-policy out snpolicy%s";
 
         @Override
@@ -368,12 +358,12 @@ public class VyosNetworkCommandUtils {
                     String delayCmd = null;
                     String lossCmd = null;
                     if (delay > 0) {
-                        //时延命令
+                        
                         delayCmd = String.format(NETWORK_DELAY, order, delay);
                         result.add(delayCmd);
                     }
                     if (loss > 0) {
-                        //丢包率命令
+                        
                         lossCmd = String.format(NETWORK_PACKET_LOSS, order, loss);
                         result.add(lossCmd);
                     }
@@ -432,16 +422,16 @@ public class VyosNetworkCommandUtils {
 
     private static boolean isProtocolsChange(List<CloudPluginSceneElementPortBO> originPorts, List<CloudPluginSceneElementPortBO> newPorts) {
         if (CollectionUtils.isEmpty(originPorts) && CollectionUtils.isEmpty(newPorts)) {
-            // 都没有端口
+            
             return false;
         } else if (CollectionUtils.isEmpty(originPorts) || CollectionUtils.isEmpty(newPorts)) {
-            // 只有一个没有端口
+            
             return true;
         } else if (originPorts.size() != newPorts.size()) {
-            // 都有端口但是端口数不同
+            
             return true;
         } else {
-            // 都有端口,需要看端口里的配置有没有变化
+            
             Set<String> originKeys = keys(originPorts);
             Set<String> newKeys = keys(newPorts);
             if (originKeys.size() != newKeys.size()) {

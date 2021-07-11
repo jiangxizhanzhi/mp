@@ -13,13 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 
-/**
- * @BelongsPackage: cn.cyberpeace.mp.cscene.controller
- * @Author: hhuang
- * @CreateTime: 2023/05/10  09:12
- * @Description: 协议采集相关处理
- * @Version: 1.0
- */
+
 @Api(value = "协议采集", tags = "协议采集")
 @Slf4j
 @RestController
@@ -30,11 +24,11 @@ public class ProtocolCollectionController {
     private ProtocolCollectionService protocolCollectionService;
 
 
-//    @ApiOperation(value = "mib文件上传并解析")
-//    @PostMapping("/mib/import")
-//    public ServiceResult importMibFile(MultipartFile file) {
-//        return protocolCollectionService.importMibFile(file);
-//    }
+
+
+
+
+
 
 
     @ApiOperation(value = "mib节点信息查询")

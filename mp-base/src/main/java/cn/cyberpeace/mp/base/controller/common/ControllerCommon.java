@@ -68,7 +68,7 @@ public class ControllerCommon {
         }
 
         response.reset();
-        // 文件编码 处理文件名中的 '+'、' ' 特殊字符
+        
         String encodedFilename = URLEncoder.encode(filename, StandardCharsets.UTF_8).replace("+", "%20").replace("%2B", "+");
         response.setHeader("Content-Disposition", String.format("attachment;filename=\"%s\"", encodedFilename));
         response.setContentType("application/octet-stream;charset=utf-8");

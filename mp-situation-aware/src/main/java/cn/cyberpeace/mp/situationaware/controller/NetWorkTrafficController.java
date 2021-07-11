@@ -58,12 +58,7 @@ public class NetWorkTrafficController {
             .contentType(MediaType.parseMediaType("application/octet-stream")).body(resource);
     }
 
-    /**
-     * 按照groupId查询流量信息
-     *
-     * @param sessionRequest sessionRequest
-     * @return ServiceResult<List < SessionResult>>
-     */
+    
     @PostMapping
     @ApiOperation("按照组ID查询流量信息")
     @ApiImplicitParam(name = "sessionRequest", value = "查询请求", dataType = "body", dataTypeClass = SessionRequest.class)
@@ -72,12 +67,7 @@ public class NetWorkTrafficController {
         return ServiceResult.<List<SessionResult>>builder().source(netWorkTrafficService.querySessionListWithGroup(sessionRequest)).build().asResult();
     }
 
-    /**
-     * 分局分组id查询流量分页信息接口
-     *
-     * @param sessionRequest
-     * @return ServiceResult<ListObjResult < SessionResult>>
-     */
+    
     @PostMapping("pageable")
     @ApiOperation("分局分组id查询流量分页信息接口")
     @ApiImplicitParam(name = "sessionRequest", value = "查询请求", dataType = "body", dataTypeClass = SessionRequest.class)

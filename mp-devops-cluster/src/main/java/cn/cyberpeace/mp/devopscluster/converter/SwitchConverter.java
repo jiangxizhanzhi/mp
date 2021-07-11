@@ -14,20 +14,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * 运维管控-系统运维-网络实例管理-交换机
- * @author wanggang
- */
+
 @Service
 @RequiredArgsConstructor
 public class SwitchConverter {
 
     private final SwitchService switchService;
 
-    /**
-     * 树形结构-交换机列表
-     * @return
-     */
+    
     public List<SwitchConvertModel> treeList() {
         List<Switches> switchesList = this.list();
         List<SwitchConvertModel> switchConvertModels = new ArrayList<>();
@@ -50,10 +44,7 @@ public class SwitchConverter {
         return switchConvertModels;
     }
 
-    /**
-     * 查询交换机列表
-     * @return
-     */
+    
     public List<Switches> list() {
         SwitchesCloudPlatform model = switchService.list();
         if (Objects.isNull(model) || !model.isSuccess()){
@@ -62,10 +53,7 @@ public class SwitchConverter {
         return model.getSwitchs();
     }
 
-    /**
-     * 获取交换机总数
-     * @return
-     */
+    
     public Integer getTotalSwitch() {
         return this.list().size();
     }

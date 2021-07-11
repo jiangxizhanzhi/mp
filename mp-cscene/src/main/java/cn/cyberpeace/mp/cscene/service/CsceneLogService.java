@@ -19,11 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/6/23
- */
+
 @Service
 public class CsceneLogService {
     private static final String DESC_SCENE = "cscene.oplog.desc.scene";

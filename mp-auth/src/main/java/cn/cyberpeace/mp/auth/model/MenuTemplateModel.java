@@ -10,13 +10,7 @@ import lombok.NoArgsConstructor;
 import javax.validation.constraints.NotBlank;
 import java.util.Objects;
 
-/**
- * 这个target以后就当做menu
- *
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

@@ -28,12 +28,7 @@ public class ProbeParamService {
     @Autowired
     private ProbeParamMapper probeParamMapper;
 
-    /**
-     * 根绝probeId和templateId查询参数，并返回json字符串
-     * @param probeId
-     * @param templateId
-     * @return
-     */
+    
     public String getProbeParamAsJsonStr(String probeId, String templateId) {
         if (StringUtils.isNotBlank(probeId)) {
             List<ProbeParamModel> probeParamModels = probeParamMapper.selectByProbeIdAndTemplateId(probeId, templateId);
@@ -44,22 +39,18 @@ public class ProbeParamService {
         return null;
     }
 
-    /**
-     * 将请求json字符串形式的参数内容，处理成ParamRequest
-     * @param parameterStr
-     * @return
-     */
+    
     public List<ProbeParamRequest> paramStr2paramsRequest(String parameterStr) {
         if (StringUtils.isNotBlank(parameterStr)) {
             List<ProbeParamRequest> probeParamReqs = new ArrayList<>();
-            // 保持json字段原顺序
+            
             JSONObject paramObj = JSONObject.parseObject(parameterStr, Feature.OrderedField);
             paramObj.keySet().forEach(paramKey -> {
                 ProbeParamRequest paramReq = new ProbeParamRequest();
                 paramReq.setName(paramKey);
 
                 JSONArray paramArray = paramObj.getJSONArray(paramKey);
-                // 参数类型
+                
                 Integer type;
                 if (ParamTypeEnum.STRING.toString().equals(paramArray.getString(0))) {
                     type = ParamTypeEnum.STRING.toValue();
@@ -72,12 +63,12 @@ public class ProbeParamService {
                 }
                 paramReq.setType(type);
 
-                // 参数值
+                
                 paramReq.setDefaultValue(paramArray.getString(1));
-                // 参数描述
+                
                 paramReq.setDescription(paramArray.getString(2));
 
-                // 参数校验
+                
                 if (paramKey.length() > 40 || paramReq.getDefaultValue().length() > 50 ||
                         paramReq.getDescription().length() > 2048) {
                     log.error("param length is invalid");
@@ -93,13 +84,10 @@ public class ProbeParamService {
     }
 
 
-    /**
-     * 将probeParamModels转化成parameter json字符串
-     * @return
-     */
+    
     public String paramModels2ParamStr(List<ProbeParamModel> probeParamModels) {
         if (CollectionUtils.isNotEmpty(probeParamModels)) {
-            // 保持json字段原顺序
+            
             JSONObject paramObj = new JSONObject(true);
             probeParamModels.forEach(param -> {
                 JSONArray paramArray = new JSONArray();
@@ -113,11 +101,11 @@ public class ProbeParamService {
                 } else {
                     type = "Bool";
                 }
-                // 类型
+                
                 paramArray.add(type);
-                // 默认值
+                
                 paramArray.add(param.getDefaultValue());
-                // 参数说明
+                
                 paramArray.add(param.getDescription());
                 paramObj.put(param.getName(), paramArray);
             });

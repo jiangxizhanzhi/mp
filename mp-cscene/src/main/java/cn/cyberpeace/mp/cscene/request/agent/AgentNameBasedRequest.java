@@ -8,11 +8,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/7/20 15:19
- */
+
 @Data
 public class AgentNameBasedRequest extends PageRequest {
 

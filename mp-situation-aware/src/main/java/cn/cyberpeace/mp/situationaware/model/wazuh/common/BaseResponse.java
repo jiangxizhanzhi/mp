@@ -8,11 +8,7 @@ import lombok.Data;
 import java.io.Serializable;
 import java.util.List;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/2/24 09:37
- */
+
 @Data
 @ApiModel("响应体")
 public class BaseResponse<T> implements Serializable {

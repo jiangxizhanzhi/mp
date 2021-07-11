@@ -11,44 +11,29 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-/**
- * 流量日志
- * @author wanggang
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class FlowLogBO {
 
-    /**
-     * 来源
-     */
+    
     private AttackSource source;
 
-    /**
-     * 目的地
-     */
+    
     private AttackDestination destination;
 
-    /**
-     * 网络
-     */
+    
     private AttackNetwork network;
 
-    /**
-     * suricata信息
-     */
+    
     private AttackSuricata suricata;
 
-    /**
-     * 创建时间
-     */
+    
     private Long timestamp;
 
-    /**
-     * 协议类型
-     */
+    
     private List<String> protocol;
 
 }

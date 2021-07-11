@@ -17,152 +17,94 @@ import lombok.NoArgsConstructor;
 @Table("mp_devops_target")
 public class DeviceTargetPO extends BaseModel {
 
-    /**
-     * 镜像UUID
-     */
+    
     private String uuid;
 
-    /**
-     * 名称
-     */
+    
     private String name;
 
-    /**
-     * 图标
-     */
+    
     private String logo;
 
-    /**
-     * 角色
-     */
+    
     private Integer role;
 
-    /**
-     * 分类
-     */
+    
     private Integer mainCategory;
 
-    /**
-     * 子分类
-     */
+    
     private Integer subCategory;
 
-    /**
-     * 子分类
-     */
+    
     private Integer thirdCategory;
 
-    /**
-     * 镜像类型
-     */
+    
     private String imageType;
 
-    /**
-     * 是否导入
-     */
+    
     private Boolean isImport;
 
-    /**
-     * 是否公开
-     */
+    
     private PublicEnum isPublic;
 
-    /**
-     * 是否支持快速创建
-     */
+    
     private Boolean quickCreateSupport;
 
-    /**
-     * 在位状态
-     */
+    
     private StatusEnum inPosition;
 
-    /**
-     * 使用状态
-     */
+    
     private StatusEnum useStatus;
 
-    /**
-     * 引用状态
-     */
+    
     private Integer referenceStatus;
 
-    /**
-     * 系统类型
-     */
+    
     private Integer parentSystemType;
 
-    /**
-     * 系统类型
-     */
+    
     private Integer systemType;
 
-    /**
-     * 系统架构
-     */
+    
     private String systemArchitecure;
 
-    /**
-     * 系统语言
-     */
+    
     private String language;
 
-    /**
-     * 镜像状态
-     */
+    
     private Integer imageStatus;
 
-    /**
-     * 系统镜像类型，1：基础镜像，2：CP-CLOUD已有镜像，3：自定义上传
-     */
+    
     private Integer imageSource;
 
-    /**
-     * 是否支持基础镜像
-     */
+    
     private Boolean baseImageSupport;
 
-    /**
-     * 是否支持cloud init
-     */
+    
     private Boolean initSupport;
 
-    /**
-     * 是否隐藏
-     */
+    
     private Boolean isHide = Boolean.FALSE;
 
-    /**
-     * 是否初始靶标
-     */
+    
     private Boolean isInit = Boolean.FALSE;
 
-    /**
-     * 镜像状态 0:没有实例，1：创建中，2创建成功，3创建失败
-     */
+    
     @DefaultInt
     private Integer instanceState;
 
-    /**
-     * 靶标实例创建用户
-     */
+    
     private String instanceCreateUser;
 
-    /**
-     * 是否支持导出
-     */
+    
     @DefaultBool
     private Boolean supportExport ;
 
-    /**
-     * 靶标创建用户
-     */
+    
     @DefaultStr
     private String createUser ;
 
-    /**
-     * 靶标创建用户名
-     */
+    
     @DefaultStr
     private String createUserName;
 }

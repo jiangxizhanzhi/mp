@@ -88,9 +88,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * wazuh对接
- */
+
 @Service
 @Slf4j
 @CacheConfig(cacheManager = SituationCacheConfig.CACHE_MANAGER)
@@ -142,26 +140,21 @@ public class DataCollectionService extends CollectionBaseService {
     public static final String CACHE_KEY_COUNT_BY_AGENTNAME = "count_by_agentname";
 
 
-    /**
-     * 查询文件事件分页
-     *
-     * @param wazuhEventRequest
-     * @return ListObjResult<FileEventModel>
-     */
+    
     @Cacheable(value = CACHE_KEY_FILE_EVENTS)
     public ListObjResult<FileEventModel> queryFileEvents(WazuhEventRequest wazuhEventRequest) {
         if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
             return new ListObjResult<>(Collections.emptyList(), 0);
         }
-        //根据日期构造索引
+        
         String[] indexArray = buildRequestIndex(wazuhEventRequest.getStartTime(), wazuhEventRequest.getEndTime());
         var searchRequest = new SearchRequest(indexArray);
         var boolQueryBuilder = QueryBuilders.boolQuery();
         var sourceBuilder = new SearchSourceBuilder();
 
-        //构造查询条件
+        
         buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, null);
-        // 按时间降序
+        
         sourceBuilder.sort(SituationalAwareConstant.ES_TIMESTAMP_FIELD, SortOrder.DESC);
         sourceBuilder.trackTotalHits(true);
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
@@ -170,9 +163,9 @@ public class DataCollectionService extends CollectionBaseService {
             final Scroll scroll = new Scroll(TimeValue.timeValueMinutes(35L));
             searchRequest.scroll(scroll);
         }
-        //配置索引为空
+        
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
-        //处理分页
+        
         processPageable(wazuhEventRequest, indexArray, boolQueryBuilder, sourceBuilder);
 
         log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
@@ -198,29 +191,24 @@ public class DataCollectionService extends CollectionBaseService {
         }
     }
 
-    /**
-     * 文件 or 注册表变动事件
-     *
-     * @param wazuhEventRequest
-     * @return
-     */
+    
     public ListObjResult<FileEventModel> queryFileOrRegisterEvents(WazuhEventRequest wazuhEventRequest) {
         if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
             return new ListObjResult<>(Collections.emptyList(), 0);
         }
 
-        //根据日期构造索引
+        
         String[] indexArray = buildRequestIndex(wazuhEventRequest.getStartTime(), wazuhEventRequest.getEndTime());
         var searchRequest = new SearchRequest(indexArray);
         var boolQueryBuilder = QueryBuilders.boolQuery();
         var sourceBuilder = new SearchSourceBuilder();
 
-        //构造查询条件
+        
         buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, null);
         sourceBuilder.trackTotalHits(true);
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
 
-        //配置索引为空
+        
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
 
         log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
@@ -238,7 +226,7 @@ public class DataCollectionService extends CollectionBaseService {
                 if(rawOutput == null) {
                     continue;
                 }
-                // 获取等级信息
+                
                 Integer level = null;
                 if (Objects.nonNull(json.getJSONObject("rule"))) {
                     level = json.getJSONObject("rule").getInteger("level");
@@ -267,11 +255,7 @@ public class DataCollectionService extends CollectionBaseService {
     }
 
 
-    /**
-     * 滚动分页查询文件事件
-     *
-     * @return ListObjResult<FileEventModel>
-     */
+    
     public ListObjResult<FileEventModel> scrollFileEvents(String scrollId) {
         final Scroll scroll = new Scroll(TimeValue.timeValueMinutes(11L));
         SearchScrollRequest scrollRequest = new SearchScrollRequest(scrollId);
@@ -291,35 +275,29 @@ public class DataCollectionService extends CollectionBaseService {
 
     }
 
-    /**
-     * 查询自定义探针采集数据分页
-     *
-     * @param wazuhEventRequest
-     * @param probeIds 自定义探针id集合
-     * @return ListObjResult<WazuhProbeCommonModel>
-     */
+    
     public ListObjResult<WazuhProbeCommonModel> queryCustomProbeData(WazuhEventRequest wazuhEventRequest, List<String> probeIds) {
         if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
             return new ListObjResult<>(Collections.emptyList(), 0);
         }
-        // 根据日期构造索引
+        
         String[] indexArray = buildRequestIndex(wazuhEventRequest.getStartTime(), wazuhEventRequest.getEndTime());
         var searchRequest = new SearchRequest(indexArray);
         var boolQueryBuilder = QueryBuilders.boolQuery();
         var sourceBuilder = new SearchSourceBuilder();
 
-        // 构造查询条件
+        
         buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, null);
         if (CollUtil.isNotEmpty(probeIds)) {
             boolQueryBuilder.filter(QueryBuilders.termsQuery(CUSTOM_PROBE_ID_PATH, probeIds));
             addLaunchOutputSuccessCondition(boolQueryBuilder);
         }
-        // 按时间降序
+        
         sourceBuilder.sort(SituationalAwareConstant.ES_TIMESTAMP_FIELD, SortOrder.DESC);
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
-        // 配置索引为空
+        
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
-        // 处理分页
+        
         processPageable(wazuhEventRequest, indexArray, boolQueryBuilder, sourceBuilder);
 
         log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
@@ -353,36 +331,30 @@ public class DataCollectionService extends CollectionBaseService {
         }
     }
 
-    /**
-     * 查询漏洞信息分页
-     *
-     * @param wazuhEventRequest
-     * @param desc 是否按时间降序
-     * @return ListObjResult<WazuhVulnerabilityInfoModel>
-     */
+    
     public ListObjResult<WazuhVulnerabilityInfoModel> queryVulnerabilityInfo(WazuhEventRequest wazuhEventRequest, boolean desc) {
         if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
             return new ListObjResult<>(Collections.emptyList(), 0);
         }
-        // 根据日期构造索引,将本地时间转化为UTC时间后构建
+        
         String[] indexArray = buildRequestIndex(getUtcTime(wazuhEventRequest.getStartTime()), getUtcTime(wazuhEventRequest.getEndTime()));
         var searchRequest = new SearchRequest(indexArray);
         var boolQueryBuilder = QueryBuilders.boolQuery();
         var sourceBuilder = new SearchSourceBuilder();
 
-        // 构造查询条件
+        
         buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, null);
         if (desc) {
-            // 按时间降序
+            
             sourceBuilder.sort(SituationalAwareConstant.ES_TIMESTAMP_FIELD, SortOrder.DESC);
         } else {
-            // 按时间顺序
+            
             sourceBuilder.sort(SituationalAwareConstant.ES_TIMESTAMP_FIELD, SortOrder.ASC);
         }
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
-        // 配置索引为空
+        
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
-        // 处理分页
+        
         processPageable(wazuhEventRequest, indexArray, boolQueryBuilder, sourceBuilder);
 
         log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
@@ -418,35 +390,27 @@ public class DataCollectionService extends CollectionBaseService {
     }
 
 
-    /**
-     * 查询漏洞信息数量
-     *
-     * @param wazuhEventRequest
-     * @param isTop 是否获取前十条数据
-     * @param fieldPath 字段所在路径
-     * @param fieldName 字段名称
-     * @return List<WazuhVulnerabilityInfoCountModel>
-     */
+    
     public List<WazuhVulnerabilityInfoCountModel> queryVulnerabilityCountInfo(WazuhEventRequest wazuhEventRequest,
                                                                               boolean isTop, String fieldPath, String fieldName) {
         if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
             return new ArrayList<>();
         }
-        // 根据日期构造索引,将本地时间转化为UTC时间后构建
+        
         String[] indexArray = buildRequestIndex(getUtcTime(wazuhEventRequest.getStartTime()), getUtcTime(wazuhEventRequest.getEndTime()));
         var searchRequest = new SearchRequest(indexArray);
         var boolQueryBuilder = QueryBuilders.boolQuery();
         var sourceBuilder = new SearchSourceBuilder();
 
-        // 构造查询条件
+        
         buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, null);
         sourceBuilder.aggregation(AggregationBuilders.terms(fieldName).field(fieldPath));
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
         if (isTop) {
-            // 获取前十条的数据
+            
             sourceBuilder.from(0).size(10);
         }
-        // 配置索引为空
+        
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
 
         log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
@@ -473,31 +437,27 @@ public class DataCollectionService extends CollectionBaseService {
         }
     }
 
-    /**
-     * 查询监控数据 查询最近五分钟数据，监控指标频率为 1min, 对五分钟数据按照agentId进行分组，再去最近的时间的数据
-     *
-     * @param wazuhMonitorEventsRequest wazuhMonitorEventsRequest
-     */
+    
     @Cacheable(value = CACHE_KEY_MONITOR_EVENTS)
     public ListObjResult<WazuhHostStateModel> queryMonitorEvents(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
         if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return new ListObjResult<>(Collections.emptyList(), 0);
         }
-        //根据日期构造索引
+        
         String[] indexArray = buildRequestIndex(LocalDateTime.now(), LocalDateTime.now());
         var searchRequest = new SearchRequest(indexArray);
         var boolQueryBuilder = QueryBuilders.boolQuery();
         var sourceBuilder = new SearchSourceBuilder();
 
-//        MultiValueMap<String, String> multiValueMap = this.queryAllAgentMacAddr();
+
         int agentSize = buildMonitorEventsBuilder(wazuhMonitorEventsRequest, boolQueryBuilder, null);
-        // 按时间降序
+        
         sourceBuilder.sort(SituationalAwareConstant.ES_TIMESTAMP_FIELD, SortOrder.DESC);
-        // 监控数据每个agent一条，所以这里分页大小设为agent数量的2倍
+        
         sourceBuilder.from(0);
         sourceBuilder.size(NumberUtil.equals(agentSize, 0) ? 10 : agentSize * 2);
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
-        //配置索引为空
+        
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
         log.info("monitor JSON query index:{}, DSL: {}", indexArray, searchRequest.source().toString());
 
@@ -519,12 +479,12 @@ public class DataCollectionService extends CollectionBaseService {
                     var result = JSONObject.parseObject(monitorMessage, WazuhHostStateModel.class);
                     result.setAgentId(model.getAgent().getId());
                     result.setAgentName(model.getAgent().getName());
-//                    result.setMacIds(multiValueMap.get(model.getAgent().getId()));
+
                     result.setTime(TimeUtils.dateToLocalDateTime(model.getTimestamp()));
                     return result;
                 }).collect(Collectors.toList());
 
-            //process page
+            
             int offset = (wazuhMonitorEventsRequest.getPageNum() - 1) * wazuhMonitorEventsRequest.getPageSize();
             if (offset < wazuhModelList.size()) {
                 int toIndex = Math.min(offset + wazuhMonitorEventsRequest.getPageSize(), wazuhModelList.size());
@@ -538,30 +498,27 @@ public class DataCollectionService extends CollectionBaseService {
         }
     }
 
-    /**
-     * 查询聚合分析监控事件
-     * @param wazuhMonitorEventsRequest wazuhMonitorEventsRequest
-     */
+    
     @Deprecated
     public List<DataCollectionEventModel> queryMonitorEventsAgg(WazuhMonitorEventsRequest wazuhMonitorEventsRequest){
         if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return Collections.emptyList();
         }
-        //根据日期构造索引
+        
         String[] indexArray = buildRequestIndex(LocalDateTime.now(), LocalDateTime.now());
         var searchRequest = new SearchRequest(indexArray);
         var boolQueryBuilder = QueryBuilders.boolQuery();
         var sourceBuilder = new SearchSourceBuilder();
 
         buildMonitorEventsAggBuilder(wazuhMonitorEventsRequest, boolQueryBuilder, null);
-        // 按时间降序
+        
         sourceBuilder.sort(SituationalAwareConstant.ES_TIMESTAMP_FIELD, SortOrder.DESC);
-        // 监控数据每个agent一条，所以这里分页大小设为agent数量的2倍
+        
         sourceBuilder.from(0);
         sourceBuilder.size(situationAwareConfig.getWazuhEsMaxPageSize());
 
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
-        //配置索引为空
+        
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
         log.info("queryMonitorEventsAgg JSON query index:{}, DSL:{}", indexArray, searchRequest.source().toString());
 
@@ -583,11 +540,7 @@ public class DataCollectionService extends CollectionBaseService {
     }
 
 
-    /**
-     * 查询监控数据 查询最近五分钟数据，监控指标频率为 1min, 对五分钟数据按照agentId进行分组，再去最近的时间的数据
-     *
-     * @param wazuhMonitorEventsRequest wazuhMonitorEventsRequest
-     */
+    
     @Cacheable(value = CACHE_KEY_HOST_STATE)
     public List<WazuhHostStateModel> queryHostStateEventsWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
         if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
@@ -616,10 +569,7 @@ public class DataCollectionService extends CollectionBaseService {
 
 
 
-    /**
-     * 根据agentName分组查询监控数据
-     * @param wazuhMonitorEventsRequest wazuhMonitorEventsRequest
-     */
+    
     @Cacheable(value = CACHE_KEY_MAP_HOST_STATE)
     public Map<String, List<WazuhHostStateModel>> mapHostStatesByAgentNamesWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest, int topSize) {
         if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
@@ -662,17 +612,13 @@ public class DataCollectionService extends CollectionBaseService {
         return map;
     }
 
-    /**
-     * 查询网络连接
-     * @param
-     * @return
-     */
+    
     @Cacheable(value = CACHE_KEY_NET_CONN)
     public List<WazuhNetworkConnectionModel> queryNetConnEventsWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
         if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return Collections.emptyList();
         }
-        // 只取一条数据，做假分页处理
+        
         wazuhMonitorEventsRequest.setPageSize(1);
         SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_NET_CONNS);
         JSONObject jsonObject = processBaseChangeOutput(response);
@@ -701,17 +647,13 @@ public class DataCollectionService extends CollectionBaseService {
     }
 
 
-    /**
-     * 查询进程
-     * @param
-     * @return
-     */
+    
     @Cacheable(value = CACHE_KEY_PROCESS)
     public List<WazuhProcessModel> queryProcessesWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
         if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return Collections.emptyList();
         }
-        // 只取一条数据，做假分页处理
+        
         wazuhMonitorEventsRequest.setPageSize(1);
         SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_PROCESSES);
         JSONObject jsonObject = processBaseChangeOutput(response);
@@ -743,17 +685,13 @@ public class DataCollectionService extends CollectionBaseService {
         return list;
     }
 
-    /**
-     * 查询用户变更事件
-     * @param
-     * @return
-     */
+    
     @Cacheable(value = CACHE_KEY_USERS)
     public List<WazuhSystemUserModel> queryUserChangeEventWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
         if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return Collections.emptyList();
         }
-        // 只取一条数据，做假分页处理
+        
         wazuhMonitorEventsRequest.setPageSize(1);
         SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_SYSTEM_USERS);
         JSONObject jsonObject = processBaseChangeOutput(response);
@@ -781,11 +719,7 @@ public class DataCollectionService extends CollectionBaseService {
         return list;
     }
 
-    /**
-     * 一段时间内的环境变量数变动
-     * @param wazuhMonitorEventsRequest
-     * @return
-     */
+    
     @Cacheable(value = CACHE_KEY_ENV_VAR_CHANGED_COUNT)
     public int sumEnvVarChangedCountByTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
         if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
@@ -799,11 +733,7 @@ public class DataCollectionService extends CollectionBaseService {
     }
 
 
-    /**
-     * 一段时间内的用户数量变动
-     * @param wazuhMonitorEventsRequest
-     * @return
-     */
+    
     @Cacheable(value = CACHE_KEY_SYSTEM_USERS_CHANGED_COUNT)
     public int sumSysUsersChangedCountByTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
         if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
@@ -836,14 +766,9 @@ public class DataCollectionService extends CollectionBaseService {
     }
 
 
-    /**
-     * 查询LAUNCH_ID通用方法，返回SearchResponse
-     * @param wazuhMonitorEventsRequest
-     * @param launchId
-     * @return
-     */
+    
     public SearchResponse querySICLaunchEventsWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest, String launchId) {
-        //根据日期构造索引
+        
         String[] indexArray = buildRequestIndex(wazuhMonitorEventsRequest.getStartTime(), wazuhMonitorEventsRequest.getEndTime());
         var searchRequest = new SearchRequest(indexArray);
         var boolQueryBuilder = QueryBuilders.boolQuery();
@@ -855,7 +780,7 @@ public class DataCollectionService extends CollectionBaseService {
             boolQueryBuilder.must(QueryBuilders.termQuery(CUSTOM_PROBE_ID_PATH, launchId));
             addLaunchOutputSuccessCondition(boolQueryBuilder);
         }
-        // 按时间降序
+        
         sourceBuilder.sort(SituationalAwareConstant.ES_TIMESTAMP_FIELD, SortOrder.DESC);
         if (Objects.nonNull(wazuhMonitorEventsRequest.getPageNum()) && Objects.nonNull(wazuhMonitorEventsRequest.getPageSize())) {
             if (wazuhMonitorEventsRequest.getPageNum() * wazuhMonitorEventsRequest.getPageSize() > situationAwareConfig.getWazuhEsMaxPageSize()) {
@@ -867,9 +792,9 @@ public class DataCollectionService extends CollectionBaseService {
         } else {
             sourceBuilder.size(situationAwareConfig.getWazuhEsMaxPageSize());
         }
-        // 监控数据每个agent一条，所以这里分页大小设为agent数量的2倍
+        
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
-        //配置索引为空
+        
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
         log.info("monitor JSON query index:{}, \n DSL:{}", indexArray, searchRequest.source().toString());
 
@@ -882,15 +807,10 @@ public class DataCollectionService extends CollectionBaseService {
     }
 
 
-    /**
-     * 查询LAUNCH_ID通用方法，返回SearchResponse
-     * @param wazuhMonitorEventsRequest
-     * @param launchId
-     * @return
-     */
+    
     public SearchResponse aggsSICLaunchEventsByAgentNameWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest, String launchId, int topSize,
                                                                       String aggName, String subAggName) {
-        //根据日期构造索引
+        
         String[] indexArray = buildRequestIndex(wazuhMonitorEventsRequest.getStartTime(), wazuhMonitorEventsRequest.getEndTime());
         var searchRequest = new SearchRequest(indexArray);
         var boolQueryBuilder = QueryBuilders.boolQuery();
@@ -903,7 +823,7 @@ public class DataCollectionService extends CollectionBaseService {
             addLaunchOutputSuccessCondition(boolQueryBuilder);
         }
         sourceBuilder.size(0);
-        // build the aggregation
+        
         TermsAggregationBuilder aggr = AggregationBuilders.terms(aggName)
                 .field("agent.name")
                 .size(wazuhMonitorEventsRequest.getAgentNames().size())
@@ -918,7 +838,7 @@ public class DataCollectionService extends CollectionBaseService {
         sourceBuilder.aggregation(aggr);
 
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
-        //配置索引为空
+        
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
         log.info("monitor JSON query index:{}, \n DSL:{}", indexArray, searchRequest.source().toString());
 
@@ -931,11 +851,7 @@ public class DataCollectionService extends CollectionBaseService {
     }
 
 
-    /**
-     * 处理BaseChangeOutput通用方法
-     * @param response
-     * @return
-     */
+    
     public JSONObject processBaseChangeOutput(SearchResponse response) {
         List<WazuhMonitorRoot<Launch<BaseChangeCountOutput, BaseInput>>> wazuhFileRootList = Arrays.stream(response.getHits()
                 .getHits()).map(hit ->
@@ -946,7 +862,7 @@ public class DataCollectionService extends CollectionBaseService {
             return null;
         }
 
-        // 只取最近一条
+        
         WazuhMonitorRoot<Launch<BaseChangeCountOutput, BaseInput>> launchModel = wazuhFileRootList.get(0);
         if (Objects.nonNull(launchModel.getData()) && Objects.nonNull(launchModel.getData().getOutput())) {
             BaseChangeCountOutput changedCntOutput = launchModel.getData().getOutput();
@@ -954,7 +870,7 @@ public class DataCollectionService extends CollectionBaseService {
                 byte[] raw = TextUtils.rawDecodeBase64(StringUtils.strip(changedCntOutput.getData().trim(), "\""));
                 String output = TextUtils.decompress(raw);
                 JSONObject jsonObject = JSONObject.parseObject(output);
-                // 添加其他信息
+                
                 if (Objects.nonNull(launchModel.getRule())) {
                     jsonObject.put("level", launchModel.getRule().getLevel());
                     jsonObject.put("description", launchModel.getRule().getDescription());
@@ -971,11 +887,7 @@ public class DataCollectionService extends CollectionBaseService {
     }
 
 
-    /**
-     * 处理BaseRawOutput通用方法
-     * @param response
-     * @return
-     */
+    
     public JSONObject processBaseRawOutput(SearchResponse response) {
         List<WazuhMonitorRoot<Launch<BaseRawOutput, BaseInput>>> wazuhFileRootList = Arrays.stream(response.getHits()
                 .getHits()).map(hit ->
@@ -986,7 +898,7 @@ public class DataCollectionService extends CollectionBaseService {
             return null;
         }
 
-        // 只取最近一条
+        
         WazuhMonitorRoot<Launch<BaseRawOutput, BaseInput>> launchModel = wazuhFileRootList.get(0);
         if (Objects.nonNull(launchModel.getData()) && Objects.nonNull(launchModel.getData().getOutput())) {
             BaseRawOutput rawOutput = launchModel.getData().getOutput();
@@ -1012,7 +924,7 @@ public class DataCollectionService extends CollectionBaseService {
         if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return 0;
         }
-        //根据日期构造索引
+        
         String[] indexArray = buildRequestIndex(wazuhMonitorEventsRequest.getStartTime(), wazuhMonitorEventsRequest.getEndTime());
         var searchRequest = new SearchRequest(indexArray);
         var boolQueryBuilder = QueryBuilders.boolQuery();
@@ -1030,18 +942,18 @@ public class DataCollectionService extends CollectionBaseService {
 
         String aggregationNested = "aggs_nested";
         String aggregationSum = "aggs_changed_count_sum";
-        // build the aggregation
+        
         Script sumScript = new Script("Integer.parseInt(doc['data.sic_launch_output.changed_count'].value)");
         NestedAggregationBuilder sumAggregationBuilder = AggregationBuilders.nested(aggregationNested, "data.sic_launch_output").subAggregation(AggregationBuilders.sum(aggregationSum).script(sumScript));
 
         sourceBuilder.aggregation(sumAggregationBuilder);
 
-        // 按时间降序
+        
         sourceBuilder.sort(SituationalAwareConstant.ES_TIMESTAMP_FIELD, SortOrder.DESC);
         sourceBuilder.size(0);
-        // 监控数据每个agent一条，所以这里分页大小设为agent数量的2倍
+        
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
-        //配置索引为空
+        
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
         log.info("monitor JSON query index:{}, \n DSL:{}", indexArray, searchRequest.source().toString());
 
@@ -1063,30 +975,20 @@ public class DataCollectionService extends CollectionBaseService {
         }
     }
 
-    /**
-     * 根据agent查询
-     *
-     * @param agentId
-     * @param macIds
-     */
+    
     private String queryMacIdByAgentId(String agentId, List<String> macIds,
         MultiValueMap<String, String> multiValueMap) {
         List<String> ids = multiValueMap.get(agentId);
-        // macId集合都转换成小写
+        
         macIds = macIds.stream().map(String::toLowerCase).collect(Collectors.toList());
         var currentMacId = Sets.intersection(Sets.newHashSet(macIds), Sets.newHashSet(ids));
         return currentMacId.iterator().next();
     }
 
-    /**
-     * 文件监控时间过滤
-     *
-     * @param wazuhEventRequest wazuhEventRequest
-     * @param boolQueryBuilder boolQueryBuilder
-     */
+    
     private int buildMonitorEventsBuilder(WazuhMonitorEventsRequest wazuhEventRequest,
         BoolQueryBuilder boolQueryBuilder, MultiValueMap<String, String> allAgentMacAddr) {
-        //构造查询条件
+        
         boolQueryBuilder.must(QueryBuilders.termQuery(CUSTOM_PROBE_ID_PATH, SicLaunchConfig.LAUNCH_ID_HOST_STATE));
         addLaunchOutputSuccessCondition(boolQueryBuilder);
         int agentSize = 0;
@@ -1096,49 +998,39 @@ public class DataCollectionService extends CollectionBaseService {
             agentSize = wazuhEventRequest.getAgentNames().size();
         }
 
-        // 返回agent数量
+        
         return agentSize;
     }
 
 
 
-    /**
-     * 文件监控时间过滤
-     *
-     * @param wazuhEventRequest wazuhEventRequest
-     * @param boolQueryBuilder boolQueryBuilder
-     */
+    
     private void buildMonitorEventsBuilderTimeRange(WazuhMonitorEventsRequest wazuhEventRequest,
         BoolQueryBuilder boolQueryBuilder, MultiValueMap<String, String> allAgentMacAddr) {
-        //构造查询条件
+        
         if (!CollectionUtils.isEmpty(wazuhEventRequest.getAgentNames())) {
             buildAgentNameQuery(wazuhEventRequest.getAgentNames(), boolQueryBuilder);
         }
 
         if (Objects.nonNull(wazuhEventRequest.getStartTime()) && Objects.nonNull(wazuhEventRequest.getEndTime())) {
-            //构造事件条件
+            
             boolQueryBuilder.must(QueryBuilders.rangeQuery(SituationalAwareConstant.ES_TIMESTAMP_FIELD)
                     .from(wazuhEventRequest.getStartTime().atZone(ZoneId.systemDefault()).format(SituationAwareConfig.esDateTimeFormatter))
                     .to(wazuhEventRequest.getEndTime().atZone(ZoneId.systemDefault()).format(SituationAwareConfig.esDateTimeFormatter)));
         }
 
         if (!CollectionUtils.isEmpty(wazuhEventRequest.getLevels())) {
-            // 构造等级查询条件
+            
             buildLevelQuery(wazuhEventRequest.getLevels(), boolQueryBuilder);
         }
 
     }
 
 
-    /**
-     * 文件监控时间过滤
-     *
-     * @param wazuhEventRequest wazuhEventRequest
-     * @param boolQueryBuilder boolQueryBuilder
-     */
+    
     private void buildMonitorEventsAggBuilder(WazuhMonitorEventsRequest wazuhEventRequest,
         BoolQueryBuilder boolQueryBuilder, MultiValueMap<String, String> allAgentMacAddr) {
-        //构造查询条件
+        
         List<String> ruleIds = EnumSet.allOf(DataCollectionType.class).stream().map(DataCollectionType::getRuleId).collect(Collectors.toList());
         if (!CollectionUtils.isEmpty(ruleIds)) {
             boolQueryBuilder.filter(QueryBuilders.termsQuery("rule.id", ruleIds));
@@ -1149,11 +1041,7 @@ public class DataCollectionService extends CollectionBaseService {
         }
     }
 
-    /**
-     * 查询所有mac地址对应的
-     *
-     * @return
-     */
+    
     public MultiValueMap<String, String> queryAllAgentMacAddr() {
         MultiValueMap<String, String> responseMultiMap = new LinkedMultiValueMap<>();
         var wazuhNetifaceRoot = wazuhRepository.queryAllAgentMac();
@@ -1161,21 +1049,16 @@ public class DataCollectionService extends CollectionBaseService {
             return responseMultiMap;
         }
         wazuhNetifaceRoot.getData().getAffectedItems().forEach(item -> {
-            // 所有的macId都以小写保存
+            
             responseMultiMap.add(item.getAgentId(), Objects.isNull(item.getMac()) ? "" : item.getMac().toLowerCase());
         });
 
         return responseMultiMap;
     }
 
-    /**
-     * 根据mac地质查询AgentIds
-     *
-     * @param macs
-     * @return agentSet
-     */
+    
     public Set<String> queryAgentIdsByMac(List<String> macs, MultiValueMap<String, String> allAgentMacAddr) {
-        // 转小写macId集合
+        
         List<String> lowerMacs = macs.stream().map(String::toLowerCase).collect(Collectors.toList());
         Set<String> agentSet = Sets.newHashSet();
         allAgentMacAddr.forEach((key, macList) -> {
@@ -1187,12 +1070,7 @@ public class DataCollectionService extends CollectionBaseService {
         return agentSet;
     }
 
-    /**
-     * 统计每个节点的采集事件总数，并排序
-     * 如：node5:100  node4:85  node3:60  node2:50  node1: 10
-     * @param wazuhEventRequest
-     * @return
-     */
+    
     @Cacheable(value = CACHE_KEY_AGGS_BY_AGENTNAME)
     public Map<String, Long> aggsCountByAgentNamesBucket(WazuhEventRequest wazuhEventRequest) {
         Map<String, Long> map = new LinkedHashMap<>();
@@ -1202,24 +1080,24 @@ public class DataCollectionService extends CollectionBaseService {
         String aggregationName = "aggs_count_by_agent_name";
         wazuhEventRequest.getAgentNames().forEach(a -> map.put(a, 0L));
 
-        //根据日期构造索引
+        
         String[] indexArray = buildRequestIndex(wazuhEventRequest.getStartTime(), wazuhEventRequest.getEndTime());
         var searchRequest = new SearchRequest(indexArray);
         var boolQueryBuilder = QueryBuilders.boolQuery();
         var sourceBuilder = new SearchSourceBuilder();
         sourceBuilder.size(0);
 
-        // build the aggregation
+        
         TermsAggregationBuilder aggregation = AggregationBuilders.terms(aggregationName)
                 .field("agent.name");
 
         sourceBuilder.aggregation(aggregation);
 
-        //构造查询条件
+        
         buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, null);
-        // 按时间降序
+        
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
-        //配置索引为空
+        
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
 
         log.info("elasticsearch aggs request query... index:{}, JSON query:\n{}", indexArray, searchRequest.source().toString());
@@ -1247,14 +1125,14 @@ public class DataCollectionService extends CollectionBaseService {
         String aggregationName = "aggs_date_histogram";
         Map<String, Long> resultMap = new LinkedHashMap<>();
 
-        //根据日期构造索引
+        
         String[] indexArray = buildRequestIndex(wazuhEventRequest.getStartTime(), wazuhEventRequest.getEndTime());
         var searchRequest = new SearchRequest(indexArray);
         var boolQueryBuilder = QueryBuilders.boolQuery();
         var sourceBuilder = new SearchSourceBuilder();
         sourceBuilder.size(0);
 
-        // build the aggregation
+        
         DateHistogramAggregationBuilder aggrBuilder = AggregationBuilders.dateHistogram(aggregationName)
                 .field(SituationalAwareConstant.ES_TIMESTAMP_FIELD)
                 .fixedInterval(new DateHistogramInterval(interval))
@@ -1265,11 +1143,11 @@ public class DataCollectionService extends CollectionBaseService {
                 .timeZone(ZoneId.systemDefault());
         sourceBuilder.aggregation(aggrBuilder);
 
-        //构造查询条件
+        
         buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, null);
-        // 按时间降序
+        
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
-        //配置索引为空
+        
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
 
         log.info("elasticsearch aggs request query... index:{}, JSON query:\n{}", indexArray, searchRequest.source().toString());
@@ -1293,11 +1171,7 @@ public class DataCollectionService extends CollectionBaseService {
     }
 
 
-    /**
-     * 查询一个节点所有的rule id
-     * @param wazuhEventRequest
-     * @return
-     */
+    
     @Cacheable(value = CACHE_KEY_AGGS_RULEIDS_BY_AGENTNAME)
     public Map<String, Long> aggsRuleIdsByAgentName(WazuhEventRequest wazuhEventRequest) {
         Map<String, Long> map = new LinkedHashMap<>();
@@ -1305,26 +1179,26 @@ public class DataCollectionService extends CollectionBaseService {
             return map;
         }
         String aggregationName = "aggs_ruleids_by_agent_name";
-        //wazuhEventRequest.getAgentNames().forEach(a -> map.put(a, 0L));
+        
 
-        //根据日期构造索引
+        
         String[] indexArray = buildRequestIndex(wazuhEventRequest.getStartTime(), wazuhEventRequest.getEndTime());
         var searchRequest = new SearchRequest(indexArray);
         var boolQueryBuilder = QueryBuilders.boolQuery();
         var sourceBuilder = new SearchSourceBuilder();
         sourceBuilder.size(0);
 
-        // build the aggregation
+        
         TermsAggregationBuilder aggregation = AggregationBuilders.terms(aggregationName)
                 .field("rule.id").size(100);
 
         sourceBuilder.aggregation(aggregation);
 
-        //构造查询条件
+        
         buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, null);
-        // 按时间降序
+        
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
-        //配置索引为空
+        
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
 
         log.info("elasticsearch aggs request query... index:{}, JSON query:\n{}", indexArray, searchRequest.source().toString());
@@ -1347,28 +1221,24 @@ public class DataCollectionService extends CollectionBaseService {
     }
 
 
-    /**
-     * 所有节点的采集事件总数
-     * @param wazuhEventRequest
-     * @return
-     */
+    
     @Cacheable(value = CACHE_KEY_COUNT_BY_AGENTNAME)
     public long countByAgentNames(WazuhEventRequest wazuhEventRequest) {
         if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
             return 0;
         }
 
-        //根据日期构造索引
+        
         String[] indexArray = buildRequestIndex(wazuhEventRequest.getStartTime(), wazuhEventRequest.getEndTime());
         var countRequest = new CountRequest(indexArray);
         var boolQueryBuilder = QueryBuilders.boolQuery();
         var sourceBuilder = new SearchSourceBuilder();
 
-        //构造查询条件
+        
         buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, null);
-        // 按时间降序
+        
         countRequest.source(sourceBuilder.query(boolQueryBuilder));
-        //配置索引为空
+        
         countRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
 
         log.info("elasticsearch count quest query... index:{}, JSON query:\n{}", indexArray, countRequest.source().toString());
@@ -1383,25 +1253,22 @@ public class DataCollectionService extends CollectionBaseService {
         }
     }
 
-    /**
-     * 场景删除之后，删除对应es文档数据
-     * @param wazuhEventRequest
-     */
+    
     public Long deleteDocByAgentNames(WazuhEventRequest wazuhEventRequest) {
         if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
             return 0L;
         }
-        //根据日期构造索引
+        
         String[] indexArray = buildRequestIndex(wazuhEventRequest.getStartTime(), wazuhEventRequest.getEndTime());
         var deleteByQueryRequest = new DeleteByQueryRequest(indexArray);
         var boolQueryBuilder = QueryBuilders.boolQuery();
 
-        //构造查询条件
+        
         buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, null);
-        // 按时间降序
+        
         deleteByQueryRequest.setQuery(boolQueryBuilder);
 
-        //配置索引为空
+        
         deleteByQueryRequest.setIndicesOptions(IndicesOptions.fromOptions(true, true, true, false));
 
         log.info("elasticsearch delete by query quest... index:{}, JSON query:\n{}", indexArray, deleteByQueryRequest.getSearchRequest().source().toString());
@@ -1415,12 +1282,7 @@ public class DataCollectionService extends CollectionBaseService {
         }
     }
 
-    /**
-     * 文件转换
-     *
-     * @param wazuhFileRoot
-     * @return
-     */
+    
     private FileEventModel getFileEventModel(WazuhFileRoot wazuhFileRoot, MultiValueMap<String, String> multiValueMap) {
 
         FileEventModel.FileEventModelBuilder builder = FileEventModel.builder();
@@ -1459,7 +1321,7 @@ public class DataCollectionService extends CollectionBaseService {
             }
         }
         if (Objects.nonNull(wazuhFileRoot.getRule())) {
-            //区分文件还是注册表
+            
             builder.description(wazuhFileRoot.getRule().getDescription())
                     .level(wazuhFileRoot.getRule().getLevel()).ruleId(wazuhFileRoot.getRule().getId());
             if (CollectionUtil.isNotEmpty(wazuhFileRoot.getRule().getGroups()) && fileEventType == null) {
@@ -1488,15 +1350,7 @@ public class DataCollectionService extends CollectionBaseService {
         return jsonObject;
     }
 
-    /**
-     * 处理分页
-     *
-     * @param wazuhEventRequest
-     * @param indexArray
-     * @param boolQueryBuilder
-     * @param sourceBuilder
-     * @return
-     */
+    
     private int processPageable(WazuhEventRequest wazuhEventRequest, String[] indexArray,
         BoolQueryBuilder boolQueryBuilder, SearchSourceBuilder sourceBuilder) {
 
@@ -1523,13 +1377,7 @@ public class DataCollectionService extends CollectionBaseService {
         return Math.min(situationAwareConfig.getWazuhEsMaxPageSize(), total);
     }
 
-    /**
-     * 构造请求的索引
-     *
-     * @param start
-     * @param end
-     * @return
-     */
+    
     public static String[] buildRequestIndex(LocalDateTime start, LocalDateTime end) {
         List<String> indexList = indexListBuilder(start, end);
         var indexArray = new String[indexList.size()];
@@ -1539,12 +1387,12 @@ public class DataCollectionService extends CollectionBaseService {
 
     private void buildFileEventBoolQueryBuilder(WazuhEventRequest wazuhEventRequest,
                                                 BoolQueryBuilder boolQueryBuilder, MultiValueMap<String, String> allAgentMacAddr) {
-        //构造查询条件
+        
         if (!CollectionUtils.isEmpty(wazuhEventRequest.getRuleGroups())) {
             buildRuleGroupQuery(wazuhEventRequest.getRuleGroups(), boolQueryBuilder);
         }
 
-        // ruleIds
+        
         if (!CollectionUtil.isEmpty(wazuhEventRequest.getRuleIds())) {
             buildRuleIdsQuery(wazuhEventRequest.getRuleIds(), boolQueryBuilder);
         }
@@ -1553,34 +1401,34 @@ public class DataCollectionService extends CollectionBaseService {
             buildAgentNameQuery(wazuhEventRequest.getAgentNames(), boolQueryBuilder);
         }
 
-        // catagories
+        
         if(!CollectionUtils.isEmpty(wazuhEventRequest.getCatagories())) {
             buildCatagoryQuery(wazuhEventRequest.getCatagories(), boolQueryBuilder);
         }
 
-        // keywords
+        
         if(!CollectionUtils.isEmpty(wazuhEventRequest.getKeyword())) {
             buildKeywordsQuery(wazuhEventRequest.getKeyword(), boolQueryBuilder);
         }
 
-        // levels
+        
         if(!CollectionUtils.isEmpty(wazuhEventRequest.getLevels())) {
             buildLevelQuery(wazuhEventRequest.getLevels(), boolQueryBuilder);
         }
 
-        // path
+        
         if (StringUtils.isNotEmpty(wazuhEventRequest.getPath())) {
             buildPathQuery(wazuhEventRequest.getPath(), boolQueryBuilder);
         }
 
-        // sicLaunchId
+        
         if (StringUtils.isNotEmpty(wazuhEventRequest.getSicLaunchId())) {
             buildSicLaunchIdQuery(wazuhEventRequest.getSicLaunchId(), boolQueryBuilder);
         }
 
 
         if (Objects.nonNull(wazuhEventRequest.getStartTime()) && Objects.nonNull(wazuhEventRequest.getEndTime())) {
-            //时间查询
+            
             boolQueryBuilder.must(QueryBuilders.rangeQuery(SituationalAwareConstant.ES_TIMESTAMP_FIELD)
                     .from(wazuhEventRequest.getStartTime().atZone(ZoneId.systemDefault()).format(SituationAwareConfig.esDateTimeFormatter))
                     .to(wazuhEventRequest.getEndTime().atZone(ZoneId.systemDefault()).format(SituationAwareConfig.esDateTimeFormatter)));
@@ -1588,16 +1436,16 @@ public class DataCollectionService extends CollectionBaseService {
 
         if (Objects.nonNull(wazuhEventRequest.getType()) && wazuhEventRequest.getType() != 0) {
             if (wazuhEventRequest.getType() == 1) {
-                // 进程
+                
                 boolQueryBuilder.filter(QueryBuilders.termQuery(CUSTOM_PROBE_ID_PATH, SicLaunchConfig.LAUNCH_ID_PROCESSES));
             } else if (wazuhEventRequest.getType() == 2 || wazuhEventRequest.getType() == 3) {
-                // 端口、网络连接
+                
                 boolQueryBuilder.filter(QueryBuilders.termQuery(CUSTOM_PROBE_ID_PATH, SicLaunchConfig.LAUNCH_ID_NET_CONNS));
             } else if (wazuhEventRequest.getType() == 5) {
-                // 用户
+                
                 boolQueryBuilder.filter(QueryBuilders.termQuery(CUSTOM_PROBE_ID_PATH, SicLaunchConfig.LAUNCH_ID_SYSTEM_USERS));
             } else {
-                // 文件
+                
                 boolQueryBuilder.mustNot(QueryBuilders.termsQuery(CUSTOM_PROBE_ID_PATH, SicLaunchConfig.LAUNCH_ID_PROCESSES, SicLaunchConfig.LAUNCH_ID_NET_CONNS, SicLaunchConfig.LAUNCH_ID_SYSTEM_USERS));
             }
         } else {
@@ -1627,7 +1475,7 @@ public class DataCollectionService extends CollectionBaseService {
     }
 
     private void buildCatagoryQuery(List<String> catagories, BoolQueryBuilder boolQueryBuilder) {
-        // todo 分类 -> *.rules.xml -> ruleId 解析
+        
     }
 
     private void buildKeywordsQuery(List<String> keywords, BoolQueryBuilder boolQueryBuilder) {
@@ -1650,10 +1498,10 @@ public class DataCollectionService extends CollectionBaseService {
     private void buildLevelQuery(List<Integer> levels, BoolQueryBuilder boolQueryBuilder) {
         boolean lowLevel = levels.get(0) <= 4;
         if (lowLevel) {
-            // 规则级别匹配条件
+            
             boolQueryBuilder.should(QueryBuilders.termsQuery("rule.level", levels));
 
-            // 规则级别字段不存在条件：级别字段不存在，默认为低等级
+            
             ExistsQueryBuilder ruleLevelExistsQuery = QueryBuilders.existsQuery("rule.level");
             boolQueryBuilder.should(QueryBuilders.boolQuery().mustNot(ruleLevelExistsQuery));
             boolQueryBuilder.minimumShouldMatch(1);
@@ -1662,13 +1510,7 @@ public class DataCollectionService extends CollectionBaseService {
         }
     }
 
-    /**
-     * 构造agentIdQuery
-     *
-     * @param macIds
-     * @param boolQueryBuilder
-     * @param allAgentMacAddr
-     */
+    
     private int buildAgentIdQuery(List<String> macIds, BoolQueryBuilder boolQueryBuilder,
         MultiValueMap<String, String> allAgentMacAddr) {
         Set<String> agentSet = this.queryAgentIdsByMac(macIds, allAgentMacAddr);
@@ -1676,13 +1518,7 @@ public class DataCollectionService extends CollectionBaseService {
         return agentSet.size();
     }
 
-    /**
-     * 查询count
-     *
-     * @param indexArray
-     * @param boolQueryBuilder
-     * @return count
-     */
+    
     private int queryTotalCount(String[] indexArray, BoolQueryBuilder boolQueryBuilder) {
         var countRequest = new CountRequest(indexArray);
         countRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
@@ -1697,24 +1533,14 @@ public class DataCollectionService extends CollectionBaseService {
         return total;
     }
 
-    /**
-     * 构造查询需要的索引
-     *
-     * @return List<IndexBoost>
-     */
+    
     @VisibleForTesting
     public static List<String> indexListBuilder(LocalDateTime start, LocalDateTime end) {
         List<String> dateStringList = fetchFormatterTime(start, end);
         return dateStringList.stream().map(dateString -> WAZUH_ALERT_INDEX_PREFIX + dateString).collect(Collectors.toList());
     }
 
-    /**
-     * 获取比如2021-05-01 到2021-05-20.所有的日期，方便构建所有的时间字符串2021.05.01,2021.05.02,....
-     *
-     * @param startTime startTime
-     * @param endTime endTime
-     * @return List<String>
-     */
+    
     public static List<String> fetchFormatterTime(LocalDateTime startTime, LocalDateTime endTime) {
         LocalDate startDate = startTime.toLocalDate().minusDays(1);
         LocalDate endDate = endTime.toLocalDate();
@@ -1748,7 +1574,7 @@ public class DataCollectionService extends CollectionBaseService {
         if (wazuhHostStateModel.getDiskTotal() > 0 && wazuhHostStateModel.getDiskUsed() > 0) {
             double used = BigDecimal.valueOf(wazuhHostStateModel.getDiskUsed()).doubleValue();
             double total = BigDecimal.valueOf(wazuhHostStateModel.getDiskTotal()).doubleValue();
-            // 换算百分比 要 * 100
+            
             wazuhHostStateModel.setDiskPercent(NumberUtil.round(used * 100 / total, 2).doubleValue());
         }
 
@@ -1800,9 +1626,9 @@ public class DataCollectionService extends CollectionBaseService {
             wazuhHostStateModel.setMaxUploadSpeed(output.getMaxUploadSpeed());
         }
 
-        // 网卡最大速率
+        
         if (StringUtils.isNotBlank(output.getMaxNetSpeed())) {
-            // 默认1000
+            
             wazuhHostStateModel.setMaxNetSpeed(1000);
             String maxSpeedStr = output.getMaxNetSpeed();
             if (maxSpeedStr.contains("Mb/s")) {
@@ -1846,10 +1672,7 @@ public class DataCollectionService extends CollectionBaseService {
     }
 
 
-    /**
-     * 添加output字段存在，且status为success条件
-     * @param boolQueryBuilder
-     */
+    
     private void addLaunchOutputSuccessCondition(BoolQueryBuilder boolQueryBuilder) {
         boolQueryBuilder.filter(QueryBuilders.termQuery(SicLaunchConfig.FIELD_SIC_LAUNCH_STATUS, LaunchStatusEnum.SUCCESS.getValue()));
         ExistsQueryBuilder existsQuery = QueryBuilders.existsQuery(SicLaunchConfig.FIELD_SIC_LAUNCH_OUTPUT);

@@ -54,24 +54,22 @@ public class SystemAlarmTask {
 
     private final HypervisorConverter hypervisorConverter;
 
-    // 默认持续时间
+    
     private static final Integer RUNNING_TIME = 0;
 
-    /**
-     * 生成告警信息
-     */
+    
     @Scheduled(initialDelay = 1000 * 60, fixedRate = 1000 * 60 * 5)
     private void getSystemAlarm() {
         List<SystemAlarmModel> alarmModels = new ArrayList<>();
         SystemAlarmVO systemAlarmVO = serviceMonitorService.getSystemAlarm();
 
-        // 服务器监控
+        
         List<HostState> allcpNodesHostStates = listAllCPNodeHostStates();
 
         if (CollectionUtils.isNotEmpty(allcpNodesHostStates)) {
             allcpNodesHostStates.forEach(hostState -> {
                     if (Objects.nonNull(hostState.getDiskPercent()) && hostState.getDiskPercent() >= devopsClusterConfig.getDiskAlarmPercent()) {
-                        // 磁盘使用率大于阈值，添加告警
+                        
                         SystemAlarmModel serverAlarmModel = SystemAlarmModel.builder()
                                 .alarmMsg(String.format("%s disk usage is over %s%%", hostState.getAgentName(), devopsClusterConfig.getDiskAlarmPercent()))
                                 .alarmStatus(AlarmStatusEnum.ENABLED.toValue())
@@ -85,13 +83,13 @@ public class SystemAlarmTask {
             });
         }
 
-        // 云平台服务监控
+        
         CloudPlatformMonitorVO cpMonitorVO = systemAlarmVO.getCloudPlatformMonitorVO();
         List<ServiceMonitorDto> cpMonitors = cpMonitorVO.getCloudPlatformMonitors();
         if (CollectionUtils.isNotEmpty(cpMonitors)) {
             cpMonitors.forEach(cpMonitor -> {
                 if (!MonitorStateEnum.RUNNING.getDesc().equals(cpMonitor.getState())) {
-                    // 添加云平台服务告警信息
+                    
                     SystemAlarmModel cpAlarmModel = SystemAlarmModel.builder()
                             .alarmMsg(String.format("%s status is error", cpMonitor.getName()))
                             .alarmStatus(AlarmStatusEnum.ENABLED.toValue())
@@ -105,13 +103,13 @@ public class SystemAlarmTask {
             });
         }
 
-        // 业务服务监控
+        
         BizServiceMonitorVO crMonitorVO = systemAlarmVO.getBizServiceMonitorVO();
         List<ServiceMonitorDto> crMonitors = crMonitorVO.getBizServiceMonitors();
         if (CollectionUtils.isNotEmpty(crMonitors)) {
             crMonitors.forEach(crMonitor -> {
                 if (!MonitorStateEnum.RUNNING.getDesc().equals(crMonitor.getState())) {
-                    // 添加业务服务告警信息
+                    
                     SystemAlarmModel crAlarmModel = SystemAlarmModel.builder()
                             .alarmMsg(String.format("%s status is error", crMonitor.getName()))
                             .alarmStatus(AlarmStatusEnum.ENABLED.toValue())
@@ -127,17 +125,15 @@ public class SystemAlarmTask {
 
         systemAlarmService.processSystemAlarm(alarmModels);
 
-        // 生成告警统计信息
+        
         this.genAlarmStatistics();
     }
 
-    /**
-     * 生成告警统计信息
-     */
+    
     private void genAlarmStatistics() {
-        // 当前告警信息
+        
         List<AlarmCountVO> alarmCountVOs = systemAlarmService.todayAlarmCount();
-        // 已有告警数量统计信息
+        
         List<AlarmStatisticsModel> alarmStatisticsModels = alarmStatisticsService.todayAlarmStatistics();
         if (CollectionUtils.isNotEmpty(alarmStatisticsModels)) {
             List<Integer> existAlarmTypeList =
@@ -148,7 +144,7 @@ public class SystemAlarmTask {
                 this.addAlarmStatistics(addAlarmCountVOs);
             }
 
-            // 更新统计数量
+            
             List<AlarmCountVO> updateAlarmCountVOs =
                     alarmCountVOs.stream().filter(alarmCountVO -> existAlarmTypeList.contains(alarmCountVO.getAlarmType())).collect(Collectors.toList());
             if (CollectionUtils.isNotEmpty(updateAlarmCountVOs)) {
@@ -161,7 +157,7 @@ public class SystemAlarmTask {
                     }
                 }));
 
-                // 更新告警统计数量信息
+                
                 if (CollectionUtils.isNotEmpty(updateAlarmStatisticsVOs)) {
                     alarmStatisticsService.bulkUpdate(updateAlarmStatisticsVOs);
                 }
@@ -171,12 +167,9 @@ public class SystemAlarmTask {
         }
     }
 
-    /**
-     * 新增告警统计信息
-     * @param alarmCountVOs
-     */
+    
     private void addAlarmStatistics(List<AlarmCountVO> alarmCountVOs) {
-        // 新增告警统计信息
+        
         List<AlarmStatisticsModel> addModelList = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(alarmCountVOs)) {
             alarmCountVOs.forEach(alarmCountVO -> {

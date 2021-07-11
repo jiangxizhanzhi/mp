@@ -16,11 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2023/4/18 19:32
- */
+
 @Service
 @Slf4j
 public class DecoderService extends RequestProcessor {
@@ -31,11 +27,7 @@ public class DecoderService extends RequestProcessor {
     @Autowired
     private AgentService agentService;
 
-    /**
-     * 查询解析器
-     *
-     * @return 解析器
-     */
+    
     public ListObjServiceResult<Decoder> pageDecoders(BasePageRequest pageRequest) {
         var uri = "/decoders";
         var requestUrl = situationAwareConfig.getWazuhBaseUrl() + uri;

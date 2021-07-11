@@ -2,9 +2,7 @@ package cn.cyberpeace.mp.situationaware.model;
 
 import com.alibaba.fastjson.annotation.JSONField;
 
-/**
- * wazuh数据模型
- **/
+
 public class WazuhAgentProcessModel {
     private String pid;
 

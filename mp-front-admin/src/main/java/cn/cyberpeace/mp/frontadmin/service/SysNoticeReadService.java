@@ -4,11 +4,7 @@ import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.frontadmin.model.SysNoticeReadModel;
 
-/**
- * @Description
- * @Author shgang
- * @Date 2022/9/22
- */
+
 public interface SysNoticeReadService extends BaseModelService<SysNoticeReadModel, QueryParams> {
 
     SysNoticeReadModel selectByUserIdAndNoticeId(String user, String noticeId);

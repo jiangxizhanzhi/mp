@@ -9,14 +9,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ServiceStatus {
 
-    /**
-     * 节点名称
-     */
+    
     private String host;
 
-    /**
-     * 节点状态
-     */
+    
     private boolean status;
 
 }

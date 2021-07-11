@@ -20,11 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/4/29 10:17
- */
+
 @Service
 @Slf4j
 public class ProbeAbilityService {
@@ -32,11 +28,7 @@ public class ProbeAbilityService {
     @Autowired
     private ProbeAbilityMapper probeAbilityMapper;
 
-    /**
-     * 探针能力分页查询
-     *
-     * @return
-     */
+    
     public PageInfo<ProbeAbilityDto> page(ProbePageQueryRequest pageRequest) {
         pageRequest.ensure();
         if (StringUtils.isNotBlank(pageRequest.getAbilityName())) {

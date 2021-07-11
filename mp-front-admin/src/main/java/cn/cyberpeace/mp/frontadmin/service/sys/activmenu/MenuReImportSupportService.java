@@ -15,11 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/12/17 11:19
- */
+
 @Service
 @Slf4j
 public class MenuReImportSupportService {
@@ -32,51 +28,34 @@ public class MenuReImportSupportService {
     private MenuExtraInfoService menuExtraInfoService;
 
 
-    /**
-     * 场景：重新导入menu.json
-     * 清除并且重建menus, menu_extra_infos
-     *
-     * @param targets
-     * @param menuExtraInfoModels
-     * @return
-     */
+    
     @Transactional(rollbackFor = Exception.class)
     public boolean rebuildAllMenusAndExtraInfos(List<TargetModel> targets, List<MenuExtraInfoModel> menuExtraInfoModels) {
-        // step1. clean menus, keymenus, editionmenus
+        
         boolean cleanSuccess = cleanAllMenusAndExtraInfos();
         boolean reImportSuccess = false;
         if (cleanSuccess) {
-            // step2. rebuild menus, menuExtraInfos
+            
             reImportSuccess = reInsertAllMenusAndExtraInfos(targets, menuExtraInfoModels);
         }
         return reImportSuccess;
     }
 
 
-    /**
-     * 场景：重新激活
-     * 清除并且重建menus
-     *
-     * @param targets
-     * @return
-     */
+    
     @Transactional(rollbackFor = Exception.class)
     public boolean rebuildAllMenus(List<TargetModel> targets) {
-        // step1. clean menus, keymenus, editionmenus
+        
         boolean cleanSuccess = cleanAllMenus();
         boolean reImportSuccess = false;
         if (cleanSuccess) {
-            // step2. rebuild menus, menuExtraInfos
+            
             reImportSuccess = reInsertAllMenus(targets);
         }
         return reImportSuccess;
     }
 
-    /**
-     * 该方法会清除所有菜单(target)
-     *
-     * @return
-     */
+    
     private boolean cleanAllMenus() {
         boolean re1 = targetService.deleteAll();
         if (re1) {
@@ -86,12 +65,7 @@ public class MenuReImportSupportService {
         throw new MpRuntimeException(AuthErrorCode.OP_ERROR);
     }
 
-    /**
-     * 该方法会重新插入所有菜单(target)
-     *
-     * @param targets
-     * @return
-     */
+    
     private boolean reInsertAllMenus(List<TargetModel> targets) {
         ServiceResult<Integer> result = targetService.bulkCreate(targets);
         if (Objects.nonNull(result.getSource()) && result.getSource() > 0) {
@@ -101,11 +75,7 @@ public class MenuReImportSupportService {
         throw new MpRuntimeException(AuthErrorCode.OP_ERROR);
     }
 
-    /**
-     * 该方法会清除所有菜单(target)，菜单附属信息(menuExtraInfos)
-     *
-     * @return
-     */
+    
     private boolean cleanAllMenusAndExtraInfos() {
         boolean re1 = targetService.deleteAll();
         boolean re2 = menuExtraInfoService.deleteAll();
@@ -117,12 +87,7 @@ public class MenuReImportSupportService {
     }
 
 
-    /**
-     * 该方法会重新插入所有菜单(target)，菜单附属信息(menuExtraInfos)
-     *
-     * @param targets
-     * @return
-     */
+    
     private boolean reInsertAllMenusAndExtraInfos(List<TargetModel> targets, List<MenuExtraInfoModel> menuExtraInfoModels) {
         ServiceResult<Integer> result = targetService.bulkCreate(targets);
         log.info("inserted {} target rows.", result.getSource());

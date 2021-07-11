@@ -22,11 +22,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/11/22 11:22
- */
+
 @Api(value = "事件监控", tags = "事件监控")
 @Slf4j
 @RestController
@@ -36,11 +32,7 @@ public class EventMonitorController {
     @Autowired
     private EventMonitorService eventMonitorService;
 
-    /**
-     * 查询事件总数
-     * @param baseRequest
-     * @return
-     */
+    
     @ApiOperation(value = "查询一定时间范围内的事件总数")
     @GetMapping("/sum")
     public ServiceResult<Long> getAllEventSum(BaseTimeRangeRequest baseRequest) {
@@ -49,12 +41,7 @@ public class EventMonitorController {
     }
 
 
-    /**
-     * 采集事件统计，查询各个节点事件的占比情况
-     * 默认排序为前5个节点
-     * @param eventPercentRequest
-     * @return
-     */
+    
     @ApiOperation(value = "根据事件占比多少，统计并排序节点，默认显示前5个节点")
     @GetMapping("/aggr_top")
     public ServiceResult<List<ElementEventPercent>> getTopElementsByEventCount(EventPercentRequest eventPercentRequest) {
@@ -68,12 +55,7 @@ public class EventMonitorController {
     }
 
 
-    /**
-     * 根据事件类型，统计饼图
-     *
-     * @param baseRequest
-     * @return
-     */
+    
     @ApiOperation(value = "根据事件类型，统计饼图")
     @GetMapping("/aggr")
     public ServiceResult<EventAggr> getEventAggr(BaseTimeRangeRequest baseRequest) {
@@ -81,12 +63,7 @@ public class EventMonitorController {
         return ResultCommon.success(eventAggr);
     }
 
-    /**
-     * 采集事件趋势图
-     *
-     * @param
-     * @return
-     */
+    
     @ApiOperation(value = "采集事件趋势图")
     @GetMapping("/event_trend")
     public ServiceResult<List<EventTimeCount>> getEventTrend(EventTrendRequest eventTrendRequest) {

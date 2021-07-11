@@ -3,7 +3,6 @@ spring.datasource.ext-var.db-ip=10.100.7.1
 spring.datasource.ext-var.db-port=9306
 spring.datasource.ext-var.db-database=mp
 spring.datasource.ext-var.username=root
-spring.datasource.ext-var.password=cyberpeace@2020
 
 spring.flyway.ext-var.enabled=false
 

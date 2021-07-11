@@ -25,9 +25,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-/**
- * 网络管理类
- */
+
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/firewall")
@@ -39,11 +37,7 @@ public class FirewallController {
 
     private final SceneInfoService sceneInfoService;
 
-    /**
-     * 分页查询
-     * @param request
-     * @return
-     */
+    
     @ApiOperation("分页查询防火墙")
     @GetMapping("/page")
     public PageResult<FirewallPageVO> page(BasePageRequest request){
@@ -55,7 +49,7 @@ public class FirewallController {
         int skip = (request.getPage() - 1) * request.getPerPage();
         List<FirewallPageVO> firewallList = list.stream().skip(skip).limit(request.getPerPage()).collect(Collectors.toList());
 
-        // 处理场景信息
+        
         List<String> resourceNames = firewallList.stream().map(FirewallPageVO::getName).collect(Collectors.toList());
         Consumer<Map<String, CsceneNodeInfoBO>> consumer = (map) -> {
             firewallList.forEach(firewall -> {
@@ -72,11 +66,7 @@ public class FirewallController {
         return new PageResult<>(firewallList, total);
     }
 
-    /**
-     * 转换BO to VO
-     * @param model
-     * @return
-     */
+    
     private List<FirewallPageVO> convertBOToPageVO(BasePageBO<Firewall> model){
         return model.getList().stream().map(firewall ->
         {

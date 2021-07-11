@@ -10,31 +10,23 @@ import lombok.NoArgsConstructor;
 import javax.validation.constraints.NotEmpty;
 import java.util.List;
 
-/**
- * 镜像授权请求信息
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class ImagesAuthRequest extends BaseRequest {
 
-    /**
-     * 镜像ID
-     */
+    
     @ApiModelProperty("镜像UUID集合")
     @NotEmpty
     private List<String> uuids;
 
-    /**
-     * 用户ID
-     */
+    
     @ApiModelProperty("用户ID集合")
     private List<String> userIds;
 
-    /**
-     * 是否公开
-     */
+    
     @ApiModelProperty("是否公开")
     private PublicEnum isAllPublic;
 }

@@ -13,11 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @Description 经过多层解析的处理仍没有值的属性, 在这里做默认的处理
- * @Author maojun
- * @Date 2021/10/12
- */
+
 class SceneElementShapeConverter implements IConverter {
 
     private List<SceneElementShape> shapes;

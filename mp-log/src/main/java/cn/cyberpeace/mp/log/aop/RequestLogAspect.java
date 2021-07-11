@@ -34,10 +34,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-/**
- * 记录请求日志的切面
- * @author wanggang
- */
+
 @Aspect
 @Slf4j
 @Component
@@ -62,9 +59,7 @@ public class RequestLogAspect {
     @Autowired
     private OperateLogService operateLogService;
 
-    /**
-     * 定义公共切面
-     */
+    
     @Pointcut("execution(* cn.cyberpeace.mp..*Controller.*(..)) || @annotation(cn.cyberpeace.mp.log.annotation.OperateLog)")
     public void pointcut() {}
 
@@ -74,16 +69,16 @@ public class RequestLogAspect {
 
         Signature signature = joinPoint.getSignature();
 
-        //请求开始时间
+        
         long startTime = System.currentTimeMillis();
 
-        //返回对象
+        
         Object result;
 
-        //方法名称
+        
         String methodName = signature.getName();
 
-        //参数
+        
         Object[] args =  joinPoint.getArgs();
 
         RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
@@ -121,11 +116,7 @@ public class RequestLogAspect {
         return  result;
     }
 
-    /**
-     * 不抛异常时记录操作日志
-     * @param joinPoint
-     * @param result
-     */
+    
     @AfterReturning(returning = "result", pointcut = "pointcut()")
     public void afterReturning(JoinPoint joinPoint,Object result) {
         HttpServletRequest request = ServletUtils.getRequest();
@@ -151,12 +142,7 @@ public class RequestLogAspect {
         }
     }
 
-    /**
-     * 截取返回结果
-     * @param str
-     * @param maxLength
-     * @return
-     */
+    
     private String truncString(String str, int maxLength) {
         if (str == null) {
             return null;
@@ -171,13 +157,7 @@ public class RequestLogAspect {
     }
 
 
-    /**
-     * 获取指定注解
-     * @param joinPoint
-     * @param annotation
-     * @param <T>
-     * @return
-     */
+    
     private <T extends Annotation> T getAnnotation(JoinPoint joinPoint, Class<T> annotation) {
         Signature signature = joinPoint.getSignature();
         MethodSignature methodSignature = (MethodSignature) signature;
@@ -188,10 +168,7 @@ public class RequestLogAspect {
         return null;
     }
 
-    /**
-     * 判断是否为排除的uri
-     * @param requestUri 需判定的uri
-     */
+    
     private Boolean isExcludePath(String requestUri) {
         List<String> excludePatterns = logConfig.getExcludeUrls();
         if (CollectionUtils.isEmpty(excludePatterns)) {
@@ -205,10 +182,7 @@ public class RequestLogAspect {
         return Boolean.FALSE;
     }
 
-    /**
-     * 判断是否为排除的method
-     * @param method request method(GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE)
-     */
+    
     private boolean isExcludeMethod(String method) {
         List<String> excludeMethods = logConfig.getExcludeMethods();
         if (CollectionUtils.isEmpty(excludeMethods)) {

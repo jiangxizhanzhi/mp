@@ -70,7 +70,7 @@ public class WazuhControl {
         wazuhLauncher.runCommand(List.of(runCommandItem));
     }
 
-    // TODO 需要和 genControlConfigCommand 整合
+    
     public static String genControlConfigCommandOld(String osType, ControlConfigParam controlConfigParam) {
         return genControlConfigCommandOld(osType, controlConfigParam, false);
     }
@@ -112,7 +112,7 @@ public class WazuhControl {
         if (scriptParams.isEmpty()) {
             return StringUtils.EMPTY;
         }
-        // 把参数上传到文件服务器
+        
         String scriptParamsStr = TextUtils.encodeBase64(JsonCommon.stringify(scriptParams));
         if (restart) {
             return String.format("%s \"%s\" -r", controlScriptPath, scriptParamsStr);
@@ -162,7 +162,7 @@ public class WazuhControl {
         if (scriptParams.isEmpty()) {
             return StringUtils.EMPTY;
         }
-        // 把参数上传到文件服务器
+        
         String scriptParamsStr = TextUtils.encodeBase64(JsonCommon.stringify(scriptParams));
         String result = FsCommon.uploadContent(scriptParamsStr);
         result = SceneSingleton.sceneAppConfig.getMetadataFileServer() + "/" + result;
@@ -582,7 +582,7 @@ public class WazuhControl {
     public static class QueryLogCollectRelatedFileInfo {
         private String path;
         private Long size;
-        // linux下创建时间实际为changeTime，暂无法获取创建时间
+        
         private String createTime;
         private String modifyTime;
         private String accessTime;
@@ -594,16 +594,16 @@ public class WazuhControl {
         private String action;
         private String filepath;
 
-        // action: upload, download(remove)
+        
         private String remoteType;
 
-        // action: upload
+        
         private String uploadUrl;
 
-        // action: download
+        
         private String downloadUrl;
 
-        // action: write, append
+        
         private String fileContent;
 
         private void ensureId() {
@@ -661,10 +661,10 @@ public class WazuhControl {
         private String error;
         private String warning;
 
-        // action: upload
+        
         private String fileSrc;
 
-        // action: read
+        
         private String fileContent;
     }
 

@@ -26,10 +26,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * 镜像管理底层接口
- * @author wanggang
- */
+
 @Service
 @Slf4j
 public class ImagesService extends BaseCpService {
@@ -40,26 +37,22 @@ public class ImagesService extends BaseCpService {
         super(devopsClusterConfig);
     }
 
-    /**
-     * 新增
-     */
+    
     public Device add(Device device){
         Device result = super.sendPost(BaseCloudPlatformConstant.CPCLOUD_DEVICE + BaseCloudPlatformConstant.URL_VERSION + NORMAL + "/lists", JsonUtils.toUnderlineJSONString(device), Device.class);
         super.checkResult(result);
         return result;
     }
 
-    /**
-     * 更新
-     */
+    
     public Device update(String uuid,Device device){
         final ExtVm extVm = device.getExtVm();
-        //此状态MP只可查看，不可更新
+        
         if (Objects.nonNull(extVm)){
             extVm.setInstanceState(null);
         }
         final ExtDocker extDocker = device.getExtDocker();
-        //此状态MP只可查看，不可更新
+        
         if (Objects.nonNull(extDocker)){
             extDocker.setInstanceState(null);
         }
@@ -72,32 +65,21 @@ public class ImagesService extends BaseCpService {
         return result;
     }
 
-    /**
-     * 导出
-     */
+    
     public String export(String uuid, String imageName){
         BaseCloudPlatformResult result = super.sendGet(BaseCloudPlatformConstant.CPCLOUD_DEVICE + BaseCloudPlatformConstant.URL_VERSION + "/image/export?device_uuid=" + uuid + "&&image_name=" + imageName,10 * 60 * 1000, BaseCloudPlatformResult.class);
         super.checkResult(result);
         return result.getUrl();
     }
 
-    /**
-     * 快速构建
-     * @param model
-     * @return
-     */
+    
     public Device quickCreate(DeviceQuickCreateCloudPlatformModel model){
         Device device = super.sendPost(BaseCloudPlatformConstant.CPCLOUD_DEVICE + BaseCloudPlatformConstant.URL_VERSION + "/quick_create", JsonUtils.toUnderlineJSONString(model), Device.class);
         super.checkResult(device);
         return device;
     }
 
-    /**
-     * 上传文件
-     * @param fileList
-     * @param type :  image or installer
-     * @return
-     */
+    
     public BaseCloudPlatformResult upload(List<File> fileList, String type){
         if (CollectionUtils.isEmpty(fileList)){
             return null;
@@ -114,11 +96,7 @@ public class ImagesService extends BaseCpService {
         return null;
     }
 
-    /**
-     * 根据靶标ID查询连接信息
-     * @param deviceUuid
-     * @return
-     */
+    
     public CloudPlatformPageResult<TargetConnection> connection(String deviceUuid){
         CloudPlatformItemsPageResult pageResult =  super.sendGet(BaseCloudPlatformConstant.CPCLOUD_DEVICE + BaseCloudPlatformConstant.URL_VERSION + NORMAL + "/connection?device_uuid=" + deviceUuid + "&user_id=" + (Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : ""),CloudPlatformItemsPageResult.class);
         super.checkResult(pageResult);

@@ -32,10 +32,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-/**
- * 靶标管理
- * @author wanggang
- */
+
 @Service
 @RequiredArgsConstructor
 public class DevopsTargetService {
@@ -44,31 +41,19 @@ public class DevopsTargetService {
 
     private final SupportExportConvert supportExportConvert;
 
-    /**
-     * 分页
-     * @param dto
-     * @return
-     */
+    
     public List<DeviceTargetPO> page(ImagePageDTO dto) {
         List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.page(dto);
         POLogoUtils.changeLogoPathToUrl(deviceTargetPOS);
         return deviceTargetPOS;
     }
 
-    /**
-     * 统计总数
-     * @param dto
-     * @return
-     */
+    
     public Integer totalCount(ImagePageDTO dto) {
         return deviceTargetMapper.totalCount(dto);
     }
 
-    /**
-     * 更新
-     * @param device
-     * @return
-     */
+    
     @Transactional
     public Integer updateById(Device device) {
         DeviceTargetPO oldDeviceTargetPO = deviceTargetMapper.findByUuid(device.getUuid());
@@ -80,11 +65,7 @@ public class DevopsTargetService {
         return 0;
     }
 
-    /**
-     * 新增
-     * @param deviceList
-     * @return
-     */
+    
     @Transactional
     public Integer insert(List<Device> deviceList) {
         if (CollectionUtils.isEmpty(deviceList)) {
@@ -121,44 +102,28 @@ public class DevopsTargetService {
         }
     }
 
-    /**
-     * 靶标类型统计
-     * @return
-     */
+    
     public Map<String, Object> countTarget() {
         return deviceTargetMapper.countTarget();
     }
 
-    /**
-     * 虚拟靶标统计
-     * @return
-     */
+    
     public Map<String, Object> countVmTarget() {
         return deviceTargetMapper.countVmTarget();
     }
 
-    /**
-     * 实体靶标统计
-     * @return
-     */
+    
     public Map<String, Object> countEntityTarget() {
         return deviceTargetMapper.countEntityTarget();
     }
 
-    /**
-     * 删除所有靶标数据
-     * @return
-     */
+    
     @Transactional
     public int deleteAllTarget() {
         return deviceTargetMapper.deleteAllTarget();
     }
 
-    /**
-     * 删除指定靶标
-     * @param dto
-     * @return
-     */
+    
     @Transactional
     public Integer delete(ImageDeleteDTO dto) {
         return deviceTargetMapper.delete(dto);
@@ -172,11 +137,7 @@ public class DevopsTargetService {
         return deviceTargetPO;
     }
 
-    /**
-     * 转换Device
-     * @param device
-     * @return
-     */
+    
     protected DeviceTargetPO convertDevice(Device device) {
         DeviceTargetPO deviceTargetPO = new DeviceTargetPO();
         deviceTargetPO.setId(device.getId().toString());
@@ -204,8 +165,8 @@ public class DevopsTargetService {
             deviceTargetPO.setInstanceState(extVm.getInstanceState());
         } else if (StringUtils.isNotBlank(imageType) && imageType.equals(ImageTypeEnum.CONTAINER.toValue()) && Objects.nonNull(extDocker)) {
             deviceTargetPO.setQuickCreateSupport(extDocker.getQuickCreateSupport());
-//            deviceTargetPO.setInitSupport(extDocker.getInitSupport());
-            // 容器默认支持
+
+            
             deviceTargetPO.setInitSupport(true);
             deviceTargetPO.setInstanceState(extDocker.getInstanceState());
         } else {
@@ -239,11 +200,11 @@ public class DevopsTargetService {
     }
 
     private Boolean getSupportExport(Device device) {
-        // 内置靶标不可导出
+        
         if (Boolean.TRUE.equals(device.getIsImport() || Boolean.TRUE.equals(device.getIsInit()) || Boolean.TRUE.equals(device.getIsInternal()))) {
             return false;
         } else if (device.getExtImageInfo() != null && StringUtils.isNotEmpty(device.getExtImageInfo().getBaseImageName())) {
-            // 有基础镜像的 以基础镜像为准设置是否可导出
+            
             ImagePageDTO pageDTO = new ImagePageDTO();
             pageDTO.setName(device.getExtImageInfo().getBaseImageName());
             pageDTO.setLikeName(false);

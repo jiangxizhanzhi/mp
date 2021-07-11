@@ -27,10 +27,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * 服务管理
- * @author wanggang
- */
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -38,12 +35,7 @@ public class InstallerConverter implements BaseConverter{
 
     private final InstallerService installerService;
 
-    /**
-     * 分页查询服务列表
-     * @param request
-     * @param ignoreFields
-     * @return
-     */
+    
     public BasePageBO<InstallerConvertModel> page(InstallerPageRequest request, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         String getParams = ParamUtils.wrapperGetParamsByObject(Boolean.TRUE,request,ignoreFields);
@@ -56,21 +48,13 @@ public class InstallerConverter implements BaseConverter{
         return convertModel;
     }
 
-    /**
-     * 根据ID查询服务信息
-     * @param id
-     * @return
-     */
+    
     public InstallerConvertModel findById(String id) {
         Installer installer = installerService.findById(id);
         return convertInstaller(installer);
     }
 
-    /**
-     * 新增服务信息
-     * @param request
-     * @return
-     */
+    
     public InstallerConvertModel add(InstallerRequest request) {
         InstallerFormDataCloudPlatformModel installer = convertInstallerRequest(request);
         installer.setUuid(request.getUuid());
@@ -90,20 +74,12 @@ public class InstallerConverter implements BaseConverter{
         return convertInstaller(result);
     }
 
-    /**
-     * 删除服务信息
-     * @param request
-     * @return
-     */
+    
     public BaseCloudPlatformResult delete(InstallerDeleteRequest request) {
         return installerService.deleteByIds(request.getUuids());
     }
 
-    /**
-     * 转换Installer
-     * @param installer
-     * @return
-     */
+    
     private InstallerConvertModel convertInstaller(Installer installer){
         InstallerConvertModel model = new InstallerConvertModel();
         if (Objects.isNull(installer)){
@@ -139,11 +115,7 @@ public class InstallerConverter implements BaseConverter{
         return model;
     }
 
-    /**
-     * 转换InstallerRequest
-     * @param request
-     * @return
-     */
+    
     private InstallerFormDataCloudPlatformModel convertInstallerRequest(InstallerRequest request){
         InstallerFormDataCloudPlatformModel installer = new InstallerFormDataCloudPlatformModel();
         installer.setName(request.getName());

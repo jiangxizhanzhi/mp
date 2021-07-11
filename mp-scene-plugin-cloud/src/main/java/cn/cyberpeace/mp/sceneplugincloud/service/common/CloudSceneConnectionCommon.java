@@ -47,7 +47,7 @@ public class CloudSceneConnectionCommon {
         private String systemType;
         private Boolean entity;
 
-        //        private String username;
+        
         private String sceneName;
         private String department;
     }
@@ -96,7 +96,7 @@ public class CloudSceneConnectionCommon {
             sceneConnection = null;
         }
 
-        // console信息可能会变，获取最新的console信息
+        
         var resourceId = param.getResourceId();
         var resourceHost = param.getResourceHost();
         var accessIp = sceneConnection == null ? cloudAccessMode.getAccessIp() : sceneConnection.getAccessIp();
@@ -109,7 +109,7 @@ public class CloudSceneConnectionCommon {
             } catch (Exception e) {
                 log.error("Get instance({}, {}) console info error:", resourceHost, resourceId, e);
             }
-            // console信息不同，需要创建新的连接
+            
             if (consoleInfo != null) {
                 var latestConsoleIp = consoleInfo.getIpAddress();
                 var latestConsolePort = IntUtils.fromStr(consoleInfo.getPort());
@@ -129,7 +129,7 @@ public class CloudSceneConnectionCommon {
             } catch (Exception e) {
                 log.error("Get instance({}, {}) console info error:", resourceHost, resourceId, e);
             }
-            // com信息不同，需要创建新的连接
+            
             if (comInfoGetResult != null) {
                 var latestConsoleIp = comInfoGetResult.getIpAddress();
                 var latestConsolePort = IntUtils.fromStr(comInfoGetResult.getPort());
@@ -174,10 +174,10 @@ public class CloudSceneConnectionCommon {
             guacamoleCreateConnectionData.setHost(param.getResourceHost());
             guacamoleCreateConnectionData.setFlag(false);
             var connectionParams = new GuacamoleCreateConnectionData.ConnectionParams();
-            // 协议的特殊处理
+            
             String protocol = null;
             if (Boolean.TRUE.equals(param.getEntity()) && sceneConnection.getProtocol().equals(AccessMode.Protocol.CONSOLE)) {
-                // 实体节点的console协议使用telnet代替
+                
                 protocol = AccessMode.Protocol.TELNET;
             } else if (sceneConnection.getProtocol().equals(AccessMode.Protocol.CONSOLE)) {
                 protocol = AccessMode.Protocol.VNC;
@@ -187,7 +187,7 @@ public class CloudSceneConnectionCommon {
                 protocol = sceneConnection.getProtocol();
             }
             connectionParams.setProtocol(protocol);
-            // windows系统的rdp连接,需要禁用字形缓存
+            
             if (AccessMode.Protocol.RDP.equals(protocol) && SystemTypeCommandUtils.isWindows(SystemTypeUtils.getStandardSystemType(param.getSystemType()))) {
                 connectionParams.setDisableGlyphCaching(true);
             }

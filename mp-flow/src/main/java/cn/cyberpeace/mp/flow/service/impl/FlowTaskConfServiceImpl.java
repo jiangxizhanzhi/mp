@@ -23,11 +23,7 @@ public class FlowTaskConfServiceImpl extends BaseModelServiceImpl<FlowTaskConfMo
         setModelMapper(stuMapper);
     }
 
-    /**
-     * 根据taskId查询配置信息
-     * @param taskId
-     * @return
-     */
+    
     @Override
     public FlowTaskConfModel findByTaskId(String taskId) {
         log.info("FlowTaskConfServiceImpl.findByTaskId begin. taskId:{}", taskId);

@@ -9,11 +9,7 @@ import cn.cyberpeace.mp.log.response.OperationLogPageResponse;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Locale;
 
-/**
- * @Description
- * @Author shgang
- * @Date 2022/10/12
- */
+
 public interface OperateLogDbService {
     void create(OperationLogRequest request, Locale locale);
 

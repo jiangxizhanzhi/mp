@@ -17,7 +17,7 @@ public class BaseCloudPluginSceneElementPortModel extends BasePluginSceneElement
     @DefaultStr
     private String firewallRules;
 
-    // 靶标属性
+    
     @DefaultStr
     private String entityAccessType;
     @DefaultStr
@@ -31,7 +31,7 @@ public class BaseCloudPluginSceneElementPortModel extends BasePluginSceneElement
     @DefaultStr
     private String gatewayPortIps;
 
-    // 辅助信息
+    
     @DefaultStr
     private String auxiliaryNetworkId;
 
@@ -45,17 +45,17 @@ public class BaseCloudPluginSceneElementPortModel extends BasePluginSceneElement
     @DefaultStr
     private String floatingIpId;
 
-    // 三层防火墙对应防火墙资源id
+    
     @DefaultStr
     private String firewallResourceId;
 
-    // ospf 组网
+    
     @DefaultStr
     private String ospfIp;
     @DefaultStr
     private String ospfArea;
 
-    // bgp 组网
+    
     @DefaultStr
     private String bgpAs;
     @DefaultStr

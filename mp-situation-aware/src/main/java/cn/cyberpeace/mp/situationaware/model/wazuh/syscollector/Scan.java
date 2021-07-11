@@ -7,11 +7,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/2/24 14:16
- */
+
 @Data
 @ApiModel("扫描")
 public class Scan {

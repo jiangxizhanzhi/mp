@@ -12,9 +12,7 @@ import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
 
-/**
- * wazuh的数据层操作封装dao
- */
+
 @Repository
 @Slf4j
 public class WazuhRepository {
@@ -22,32 +20,21 @@ public class WazuhRepository {
     @Autowired
     private SituationAwareConfig situationAwareConfig;
 
-    /**
-     * 查询wazuhToken防止token失效
-     * @return
-     * @throws IOException
-     */
+    
     public String queryWazuhToken() throws IOException {
         var requestUrl = situationAwareConfig.getWazuhBaseUrl() + "/security/user/authenticate?raw=true";
         return WazuhHttpsUtils.sendGetWithAuth(requestUrl, situationAwareConfig.getWazuhUsername(), situationAwareConfig.getWazuhPassword());
     }
 
 
-    /**
-     * 查询文件监控
-     * @param requestUri requestUri
-     * @return WazuhFileRoot
-     */
+    
     public WazuhFileRoot queryFileEvents(String requestUri){
         var requestUrl = situationAwareConfig.getWazuhBaseUrl() + requestUri;
         String res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
         return JSONObject.toJavaObject(JSON.parseObject(res), WazuhFileRoot.class);
     }
 
-    /**
-     * 查询机器所有的mac地址关系 这里如果遇到性能瓶颈，可做guava缓存，或者缓存查询单个
-     * @return
-     */
+    
     public WazuhNetifaceRoot queryAllAgentMac() {
         var requestUri = "/experimental/syscollector/ports";
         var requestUrl = situationAwareConfig.getWazuhBaseUrl() + requestUri;

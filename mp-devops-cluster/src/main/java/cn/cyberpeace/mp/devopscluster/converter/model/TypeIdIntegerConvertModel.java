@@ -13,27 +13,19 @@ import java.util.List;
 @AllArgsConstructor
 public class TypeIdIntegerConvertModel {
 
-    /**
-     * ID
-     */
+    
     @ApiModelProperty(value = "ID")
     private Integer id;
 
-    /**
-     * 名称
-     */
+    
     @ApiModelProperty(value = "名称")
     private String name;
 
-    /**
-     * 父ID
-     */
+    
     @ApiModelProperty(value = "父ID")
     private Integer parentId;
 
-    /**
-     *
-     */
+    
     private List<TypeItemModel> child;
 
 }

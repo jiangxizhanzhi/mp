@@ -6,11 +6,7 @@ import cn.cyberpeace.mp.frontadmin.model.SysNoticeUserModel;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/9/20 11:13
- */
+
 @Mapper
 @Repository
 @ModelClass(SysNoticeUserModel.class)

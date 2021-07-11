@@ -5,11 +5,7 @@ import lombok.Data;
 
 import java.util.Objects;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Data
 public class PageRequest extends QueryParams {
 
@@ -18,7 +14,7 @@ public class PageRequest extends QueryParams {
             this.setPageSize(this.getPerPage());
         }
 
-        // 默认值
+        
         if (Objects.isNull(this.getPage()) || this.getPage() <= 1) {
             this.setPage(1);
         }

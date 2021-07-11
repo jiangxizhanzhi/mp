@@ -15,11 +15,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Objects;
 
-/**
- * @Description
- * @Author shgang
- * @Date 2022/12/27
- */
+
 public class KaptchaUtil {
 
     public static ServiceResult<Object> checkKaptcha(String code) {
@@ -34,26 +30,26 @@ public class KaptchaUtil {
         String kaptcha = (String) session.getAttribute(AuthConstant.KAPTCHA_SESSION_KEY);
         Long kaptchaDate = (Long) session.getAttribute(AuthConstant.KAPTCHA_SESSION_DATE);
 
-        // 1. 为空，返回不能为空
+        
         if (StringUtils.isBlank(code)) {
             result = ServiceResult.builder().source(false).serviceCode(AuthErrorCode.VERIFY_CODE_EMPTY).build();
             return result;
         }
 
-        // 2. 不为空，错误 返回错误
+        
         if (StringUtils.isBlank(kaptcha) || !kaptcha.equalsIgnoreCase(code)) {
             result = ServiceResult.builder().source(false).serviceCode(AuthErrorCode.VERIFY_CODE_INCORRECT).build();
             return result;
         }
 
-        // 3. 过期，返回错误
+        
         boolean expired = Objects.nonNull(kaptchaDate) && System.currentTimeMillis() - kaptchaDate > AuthConstant.VERIFY_CODE_LIFE_TIME;
         if (expired) {
             result = ServiceResult.builder().source(false).serviceCode(AuthErrorCode.VERIFY_CODE_INCORRECT).build();
             return result;
         }
 
-        // 验证码校验成功，删除session中的相关记录
+        
         result = ServiceResult.builder().source(true).build();
         session.removeAttribute(AuthConstant.KAPTCHA_SESSION_KEY);
         session.removeAttribute(AuthConstant.KAPTCHA_SESSION_DATE);

@@ -29,10 +29,7 @@ import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
 
-/**
- * 快照管理
- * @author wanggang
- */
+
 @Service
 @Slf4j
 public class SnapshotService extends BaseCpService {
@@ -51,10 +48,7 @@ public class SnapshotService extends BaseCpService {
         super(devopsClusterConfig);
     }
 
-    /**
-     * 查询列表
-     * @param deviceUuid
-     */
+    
     public CloudPlatformPageResult<Snapshot> list(String deviceUuid){
         CloudPlatformItemsPageResult pageResult =  super.sendGet(BaseCloudPlatformConstant.CPCLOUD_DEVICE + BaseCloudPlatformConstant.URL_VERSION + SNAPSHOT + "?device_uuid=" + deviceUuid, CloudPlatformItemsPageResult.class);
         super.checkResult(pageResult);
@@ -65,25 +59,17 @@ public class SnapshotService extends BaseCpService {
     }
 
 
-    /**
-     * 根据名称查询设备名称和快照列表
-     * @param name
-     * @return
-     */
+    
     public DeviceAndSnapshotCloudPlatformResult deviceAndSnapshotByName(String name){
         return super.sendGet(BaseCloudPlatformConstant.CPCLOUD_DEVICE + BaseCloudPlatformConstant.URL_VERSION + SNAPSHOT + "/device_snapshots?name=" + name, DeviceAndSnapshotCloudPlatformResult.class);
     }
 
-    /**
-     * 创建
-     */
+    
     public Snapshot create(SnapshotCreate snapshotCreate){
         return super.sendPost(BaseCloudPlatformConstant.CPCLOUD_DEVICE + BaseCloudPlatformConstant.URL_VERSION + SNAPSHOT, JsonUtils.toUnderlineJSONString(snapshotCreate), Snapshot.class);
     }
 
-    /**
-     * 删除
-     */
+    
     public Boolean delete(List<String> uuids) {
         var jsonObject = new JSONObject();
         jsonObject.put("snapshot_uuids", uuids);
@@ -91,11 +77,7 @@ public class SnapshotService extends BaseCpService {
         return model.isSuccess();
     }
 
-    /**
-     * 删除快照
-     * @param request
-     * @return
-     */
+    
     public BaseCloudPlatformResult deleteSnapshot(SnapshotDeleteRequest request) {
         String imageName = request.getDeviceUuid().concat(request.getSnapshotName());
         this.validSnapshot(imageName);
@@ -113,12 +95,9 @@ public class SnapshotService extends BaseCpService {
     }
 
 
-    /**
-     * 校验快照是否被引用或者使用
-     * @param imageName
-     */
+    
     public void validSnapshot(String imageName) {
-        //引用
+        
         ServiceResult<Map<String, List<DeviceReferCsceneStat>>> referStateServiceResult = csceneSpecialService.statDeviceReferCscenes(new String[]{imageName});
         Map<String, List<DeviceReferCsceneStat>> referStateMap = referStateServiceResult.getSource();
 
@@ -126,7 +105,7 @@ public class SnapshotService extends BaseCpService {
             throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_SNAPSHOT_REFERENCED_SCENE_WITH_NAME.format(referStateMap.get(imageName).get(0).getName()));
         }
 
-        //使用
+        
         ServiceResult<Map<String, List<DeviceReferCsceneInstanceStat>>> useStateServiceResult = csceneSpecialService.statDeviceReferCsceneInstances(new String[]{imageName});
         Map<String, List<DeviceReferCsceneInstanceStat>> useStateMap = useStateServiceResult.getSource();
 

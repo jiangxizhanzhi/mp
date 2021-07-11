@@ -4,11 +4,7 @@ import io.swagger.annotations.ApiModelProperty;
 import java.time.LocalDateTime;
 import lombok.*;
 
-/**
-  *@Desciption 查询日志
-  *@Author zhangjin
-  *@Date 9/13/21 9:30 上午
-**/
+
 @Data
 @Builder
 @AllArgsConstructor

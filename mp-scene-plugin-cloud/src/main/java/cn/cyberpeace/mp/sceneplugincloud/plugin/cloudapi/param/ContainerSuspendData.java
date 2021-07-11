@@ -11,7 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ContainerSuspendData implements CloudHttpData {
-    // 容器无法挂起,挂起时暂停容器
+    
     private String action = "pause";
     private boolean waitForStatus = true ;
 }

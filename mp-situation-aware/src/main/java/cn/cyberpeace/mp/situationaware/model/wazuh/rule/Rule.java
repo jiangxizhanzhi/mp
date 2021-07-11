@@ -7,11 +7,7 @@ import lombok.Data;
 
 import java.util.List;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2023/4/18 19:58
- */
+
 @Data
 @ApiModel("规则信息")
 public class Rule {
@@ -45,8 +41,8 @@ public class Rule {
     @ApiModelProperty(value = "hipaa")
     private List<String> hipaa;
 
-    //@JSONField(name = "nist_800_53")
-    //private List<String> nist80053;
+    
+    
 
     @ApiModelProperty(value = "tsc")
     private List<String> tsc;
@@ -64,7 +60,7 @@ public class Rule {
     private Details details;
 
     @Data
-    //@ApiModel("规则详情")
+    
     public static class Details {
 
         @ApiModelProperty(value = "触发")

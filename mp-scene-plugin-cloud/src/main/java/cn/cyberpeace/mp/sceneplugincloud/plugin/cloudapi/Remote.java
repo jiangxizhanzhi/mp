@@ -131,7 +131,7 @@ public class Remote extends CloudClient {
                 new DisableGuacamoleRecordingData(connectionId), null,
                 DisableGuacamoleRecordingResult.class);
         if (!Boolean.TRUE.equals(result.getSuccess())) {
-            // 不再抛出异常
+            
             return StringUtils.EMPTY;
         }
         return result.getRecordingName();
@@ -196,11 +196,7 @@ public class Remote extends CloudClient {
 
     }
 
-    /**
-     * 通知云平台需要统计流量的端口
-     * @param portIds
-     * @return
-     */
+    
     public boolean addFlowPorts(List<String> portIds) {
         log.info("Remote.addFlowPorts begin. portIds:{}", portIds);
         boolean result = true;
@@ -219,11 +215,7 @@ public class Remote extends CloudClient {
         return result;
     }
 
-    /**
-     * 通知云平台需要取消统计流量的端口
-     * @param portIds
-     * @return
-     */
+    
     public boolean deleteFlowPorts(List<String> portIds) {
         log.info("Remote.deleteFlowPorts begin. portIds:{}", portIds);
         boolean result = true;
@@ -242,12 +234,7 @@ public class Remote extends CloudClient {
         return result;
     }
 
-    /**
-     * 查询环境总速率
-     * @param portIds
-     * @param time
-     * @return
-     */
+    
     public NetworkFlowRateResult networkFlowRate(List<String> portIds, Long time) {
         log.info("Remote.networkFlowRate begin. portIds:{}, time:{}", portIds, time);
         NetworkFlowRateParam networkFlowRateParam = new NetworkFlowRateParam();

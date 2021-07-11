@@ -4,11 +4,7 @@ import cn.cyberpeace.mp.cscene.request.common.BaseTimeRangeRequest;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/3/14 14:15
- */
+
 @Data
 public class EventPercentRequest extends BaseTimeRangeRequest {
 

@@ -34,11 +34,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/3/11 14:57
- */
+
 @Slf4j
 @Service
 public class EventMonitorService {
@@ -63,11 +59,7 @@ public class EventMonitorService {
 
 
 
-    /**
-     * 统计一段时间内的事件总数
-     * @param request
-     * @return
-     */
+    
     public Long sumEvent(BaseTimeRangeRequest request) {
         BaseRequestUtil.checkBaseRequestWithSceneId(request);
         BaseRequestUtil.processDefaultTimeRange(request);
@@ -77,16 +69,12 @@ public class EventMonitorService {
         wazuhEventRequest.setAgentNames(agentNames);
         wazuhEventRequest.setStartTime(request.getStartTime());
         wazuhEventRequest.setEndTime(request.getEndTime());
-        // es中的事件总数，暂不包括进程，端口等system_inventory中的数据
+        
         long sumFromES = dataCollectionService.countByAgentNames(wazuhEventRequest);
         return sumFromES;
     }
 
-    /**
-     * 按照事件占比，对场景所有节点进行排序，top5
-     * @param
-     * @return
-     */
+    
     public List<ElementEventPercent> topElementByEventPercent(EventPercentRequest request) {
 
         BaseRequestUtil.checkBaseRequestWithSceneId(request);
@@ -102,29 +90,29 @@ public class EventMonitorService {
         wazuhEventRequest.setAgentNames(agentNames);
         wazuhEventRequest.setStartTime(request.getStartTime());
         wazuhEventRequest.setEndTime(request.getEndTime());
-        // TODO 处理事件类型
-//        wazuhEventRequest.setCatagories(null);
+        
+
 
         Map<String, Long> aggsMap = new LinkedHashMap<>();
         int connsCnt = 0;
         if (Objects.nonNull(request.getType()) && request.getType().equals(1)) {
-            // 进程
+            
             log.info("aggregate process");
             aggsMap = aggProcessCount(agentNames);
         } else if (Objects.nonNull(request.getType()) && request.getType().equals(2)) {
-            // 端口
+            
             log.info("aggregate ports");
             aggsMap = aggPortCount(agentNames);
         } else if (Objects.nonNull(request.getType()) && request.getType().equals(3)) {
-            // 网络连接
+            
             log.info("aggregate network connections");
             aggsMap = aggNetConnsCount(agentNames);
         } else if (Objects.nonNull(request.getType()) && request.getType().equals(5)) {
-            // 网络连接
+            
             log.info("aggregate system user change count");
             aggsMap = aggUserChangeCount(agentNames);
         } else {
-            // todo 其他，包括类型：所有，文件
+            
             aggsMap = dataCollectionService.aggsCountByAgentNamesBucket(wazuhEventRequest);
         }
 
@@ -155,11 +143,7 @@ public class EventMonitorService {
     }
 
 
-    /**
-     * 根据事件类型，统计百分比
-     * @param request
-     * @return
-     */
+    
     public EventAggr aggrByEventType(BaseTimeRangeRequest request) {
         Long sumFromEs = sumEvent(request);
 
@@ -185,7 +169,7 @@ public class EventMonitorService {
         eventAggr.setPort(toRoundPercent(portSum, sum));
         eventAggr.setNetwork(toRoundPercent(netConnsSum, sum));
 
-        // todo 文件和用户类型事件区分
+        
         eventAggr.setFile(toRoundPercent(sumFromEs, sum));
         eventAggr.setUser(toRoundPercent(netSysUserSum, sum));
 
@@ -193,12 +177,7 @@ public class EventMonitorService {
     }
 
 
-    /**
-     * 查询场景所有总共的采集事件趋势
-     *
-     * @param trendRequest
-     * @return
-     */
+    
     public List<EventTimeCount> getEventTrend(EventTrendRequest trendRequest) {
         log.info("{}", trendRequest);
         BaseRequestUtil.checkBaseRequestWithSceneId(trendRequest);
@@ -214,15 +193,15 @@ public class EventMonitorService {
 
 
     private List<EventTimeCount> processEventTrend(List<String> sceneIds, List<String> elementIds, LocalDateTime startTime, LocalDateTime endTime, Integer segmentCount) {
-        // 默认值
+        
         if (Objects.isNull(segmentCount)) {
             segmentCount = 10;
         }
 
-//        List<String> translatedSceneIds = sceneTranslationService.translateSceneIds(sceneIds);
-//        List<SceneElementBO> elementBOs = scenePluginCollectionSceneService.listProbeEnabledElementBOs(translatedSceneIds.get(0));
-//
-//        List<String> agentNames = elementBOs.stream().map(SceneElementBO::getEid).collect(Collectors.toList());
+
+
+
+
         List<String> agentNames = csceneCommonService.getAgentNamesBySceneIdAndElementIds(sceneIds.get(0), elementIds);
 
         Long intervalSeconds = SegmentCount2IntervalSecondsUtil.calculateIntervalSeconds(startTime, endTime, segmentCount);
@@ -247,10 +226,7 @@ public class EventMonitorService {
     }
 
 
-    /**
-     * 查询各个节点进程变化数量
-     * @return
-     */
+    
     private Map<String, Long> aggProcessCount(List<String> agentNames) {
         Map<String, Long> map = new LinkedHashMap<>();
         agentNames.forEach(a -> map.put(a, 0L));
@@ -265,12 +241,7 @@ public class EventMonitorService {
 
 
 
-    /**
-     * 查询各个节点端口变化总数
-     *  网络连接的变动数量和端口的变动数量实际上是一样的，所以底层都是用的
-     *  dataCollectionService.sumNetConnsChangedCountByTimeRange()
-     * @return
-     */
+    
     private Map<String, Long> aggPortCount(List<String> agentNames) {
         Map<String, Long> map = new LinkedHashMap<>();
         agentNames.forEach(a -> map.put(a, 0L));
@@ -285,13 +256,7 @@ public class EventMonitorService {
         return map;
     }
 
-    /**
-     * 查询各个节点网络连接变化总数
-     * 网络连接的变动数量和端口的变动数量实际上是一样的，所以底层都是用的
-     * dataCollectionService.sumNetConnsChangedCountByTimeRange()
-     * @param agentNames
-     * @return
-     */
+    
     private Map<String, Long> aggNetConnsCount(List<String> agentNames) {
         Map<String, Long> map = new LinkedHashMap<>();
         agentNames.forEach(a -> map.put(a, 0L));
@@ -306,11 +271,7 @@ public class EventMonitorService {
         return map;
     }
 
-    /**
-     * 各个节点系统用户变化数量
-     * @param agentNames
-     * @return
-     */
+    
     private Map<String, Long> aggUserChangeCount(List<String> agentNames) {
         Map<String, Long> map = new LinkedHashMap<>();
         agentNames.forEach(a -> map.put(a, 0L));
@@ -327,7 +288,7 @@ public class EventMonitorService {
         WazuhMonitorEventsRequest wazuhRequest = new WazuhMonitorEventsRequest();
         wazuhRequest.setAgentNames(CollectionUtil.toList(agentName));
         wazuhRequest.setPageSize(1);
-        // 默认24小时
+        
         LocalDateTime endTime = LocalDateTime.now();
         wazuhRequest.setStartTime(endTime.minusHours(hoursRange));
         wazuhRequest.setEndTime(endTime);
@@ -335,12 +296,7 @@ public class EventMonitorService {
     }
 
 
-    /**
-     * 计算百分比
-     * @param value
-     * @param sum
-     * @return
-     */
+    
     private double toRoundPercent(Long value, Long sum) {
         BigDecimal bigDecimal = BigDecimal.valueOf(0.0);
         if (sum > 0) {

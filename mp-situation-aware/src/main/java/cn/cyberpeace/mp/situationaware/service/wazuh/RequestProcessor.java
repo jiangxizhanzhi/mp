@@ -12,11 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/2/24 16:17
- */
+
 public class RequestProcessor {
 
     public List<NameValuePair> processRequestParams(BasePageRequest pageRequest) {

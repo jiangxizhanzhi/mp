@@ -27,7 +27,7 @@ public class DeleteHandler extends HandlerCommon {
     public void delete() {
         prepareEventProcess(SceneModel.Event.DELETE, SceneProcess.class, ElementProcess.class);
 
-        // 删除gns3的节点
+        
         runSceneProgress(SceneProcess.DELETE_GNS3NODES, () -> {
             String projectId = getPluginHandler().getScene().getResourceId();
             project.stop(projectId);

@@ -31,11 +31,11 @@ public class CloudPluginSceneElementBO extends BaseCloudPluginSceneElementBO<Clo
     @ApiModelProperty(value = "云平台用于分布式部署时需要的ip,节点的每个网络需要一个")
     private Map<String, String> fwdnsIps = new ConcurrentHashMap<>();
 
-    // 加入的网络
+    
     @JsonIgnore
     public List<ConnectedNetworkBO> accessNetworks = new ArrayList<>();
 
-    // 构建的网络
+    
     @JsonIgnore
     private List<ConnectedNetworkBO> deriveNetworks = new ArrayList<>();
 

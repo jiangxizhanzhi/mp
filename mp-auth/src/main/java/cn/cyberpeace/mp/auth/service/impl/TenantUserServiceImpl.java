@@ -55,11 +55,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Service
 @Slf4j
 @CacheConfig(cacheManager = AuthCacheConfig.CACHE_MANAGER_MEDIUM)
@@ -130,11 +126,11 @@ public class TenantUserServiceImpl
 
     @Override
     public List<UserModel> listUsersByOrgAndUname(String orgId, String uname, List<String> userIds) {
-        // 默认查出orgId下所有子组织的用户
+        
         List<String> orgIds = new ArrayList<>();
-        // 先添加父级id
+        
         if (StringUtils.isNotBlank(orgId)) {
-            orgIds.add(orgId);  // 把自己先加进去
+            orgIds.add(orgId);  
             List<OrgDto> childOrgDtos = orgService.listAllChildIgnoreLevelExcludeSelf(orgId);
             orgIds.addAll(childOrgDtos.stream().map(OrgDto::getId).collect(Collectors.toList()));
         }
@@ -255,14 +251,14 @@ public class TenantUserServiceImpl
             throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED);
         }
 
-        // 不清楚组织-用户关系，而是增量添加
+        
 
         if (CollectionUtil.isEmpty(userIds)) {
-            // 完成，直接返回
+            
             return true;
         }
 
-        // 添加组织-用户关系
+        
         List<TenantUserModel> tenantUserModels = new ArrayList<>();
         HumanCondition condition = new HumanCondition()
                 .filterEqual(TenantUserModel::getOrg, orgId)
@@ -292,7 +288,7 @@ public class TenantUserServiceImpl
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
 
         List<OrgBO> orgBOS = listOrgsByUserId(userId);
-        //String allorgpath = orgService.getBatchPath(orgs);
+        
         String allorgpath = orgBOS.stream().map(OrgBO::getPath).collect(Collectors.joining(","));
         return allorgpath;
     }
@@ -314,7 +310,7 @@ public class TenantUserServiceImpl
 
         List<String> orgIds = new ArrayList<>();
         if (StringUtils.isNotBlank(req.getOrg())) {
-            // 添加父级org（把自己先加进去）
+            
             orgIds.add(req.getOrg());
             if (req.isShowAllUnderLevel()) {
                 List<OrgDto> childOrgDtos = orgService.listAllChildIgnoreLevelExcludeSelf(req.getOrg());
@@ -389,7 +385,7 @@ public class TenantUserServiceImpl
 
     @Override
     public boolean deleteByTenantId(String tenantId) {
-        // todo
+        
         return true;
     }
 

@@ -23,11 +23,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * @Description: wazuh agent api
- * @Author zhouxinghuai
- * @Date：2022/2/23 16:12
- */
+
 @Service
 @Slf4j
 public class AgentService extends RequestProcessor {
@@ -38,11 +34,7 @@ public class AgentService extends RequestProcessor {
     private SituationAwareConfig situationAwareConfig;
 
 
-    /**
-     * 查询所有agent信息
-     *
-     * @return
-     */
+    
     @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_AGENTS)
     public PageInfo<Agent> pageAgents(AgentRequest agentRequest) {
         agentRequest.ensure();
@@ -66,38 +58,11 @@ public class AgentService extends RequestProcessor {
         return agentPageInfo.getList();
     }
 
-    /**
-     * 查询所有agent信息
-     * @return
-     */
-    /*public List<Agent> listAgents(List<String> agentNames) {
-        log.info("agentNames:{}", agentNames);
-        var requestUri = "/agents";
-        if (CollectionUtil.isNotEmpty(agentNames)) {
-            String names = agentNames.stream().collect(Collectors.joining(","));
-            requestUri = requestUri + "?name=" + names;
-        }
-        var requestUrl = wazuhUrl + requestUri;
-        try {
-            log.info("requestUrl:{}", requestUrl);
-            var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
-            BaseResponse<Agent> result = JSONObject.parseObject(res, new TypeReference<BaseResponse<Agent>>(){});
-            log.info("{}", result);
-            List<Agent> agents = result.getData().getAffectedItems();
-            return agents;
-        } catch (Exception e) {
-            log.error(SituationalAwareErrorCode.WAZUH_AGENTS_QUERY_ERROR.getMessage() + "{}", ExceptionUtils.getMessage(e));
-            throw new MpRuntimeException(SituationalAwareErrorCode.WAZUH_AGENTS_QUERY_ERROR, ExceptionUtils.getStackTrace(e));
-        }
-    }*/
+    
+    
 
 
-    /**
-     * 查询指定agentName的agentId
-     *
-     * @param agentNames
-     * @return
-     */
+    
     public List<String> listAgentIds(List<String> agentNames) {
         AgentRequest agentRequest = new AgentRequest();
         if (CollectionUtil.isNotEmpty(agentNames)) {
@@ -114,12 +79,7 @@ public class AgentService extends RequestProcessor {
     }
 
 
-    /**
-     * 查询指定agentName的agentId，agentName需要唯一
-     *
-     * @param agentName
-     * @return
-     */
+    
     public String getSingleAgentId(String agentName) {
         if (StringUtils.isNotBlank(agentName)) {
             AgentRequest agentRequest = new AgentRequest();

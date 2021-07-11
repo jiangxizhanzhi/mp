@@ -16,11 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * @Description:  脚本模板初始化
- * @Author qiaokang
- * @Date：2021/9/1 14:36
- */
+
 @Component
 @Slf4j
 public class InitFlowScriptDemoService implements CommandLineRunner {

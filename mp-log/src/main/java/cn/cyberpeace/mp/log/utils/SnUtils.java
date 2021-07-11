@@ -11,19 +11,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-/**
- * 工具类
- * @author wanggang
- */
+
 @Slf4j
 public class SnUtils {
 
-    /**
-     * 获取真实的远端IP
-     *
-     * @param request HttpServletRequest
-     * @return ip
-     */
+    
     public static String getRealRemoteIp(HttpServletRequest request) {
         String ip = request.getHeader("X-Real-IP");
         log.debug("X-Real-IP is {}", ip);
@@ -61,23 +53,19 @@ public class SnUtils {
         if (hasText(ip)) {
             StringTokenizer st = new StringTokenizer(ip, ",");
 
-            // 多级反向代理时，取第一个IP
+            
             if (st.countTokens() > 1) {
                 ip = st.nextToken();
             }
         } else {
-            // 未获取到反向代理IP，返回RemoteAddr
+            
             ip = request.getRemoteAddr();
         }
 
         return ip;
     }
 
-    /**
-     * 获取请求Header信息
-     * @param request
-     * @return
-     */
+    
     public static Map<String, Object> getRequestHeaders(HttpServletRequest request) {
         Map<String, Object> headers = new HashMap<>();
         Enumeration<String> headerNames = request.getHeaderNames();
@@ -89,19 +77,12 @@ public class SnUtils {
 
     }
 
-    /**
-     * 判断字符串是否有内容
-     *
-     * @param str 待判断的字符串
-     * @return 结果
-     */
+    
     public static boolean hasText(String str) {
         return StringUtils.isNotBlank(str);
     }
 
-    /**
-     * 打印异常堆栈
-     */
+    
     public static String getStackTrace(Throwable throwable) {
         if (throwable == null) {
             return null;
@@ -112,9 +93,7 @@ public class SnUtils {
         return sw.toString();
     }
 
-    /**
-     * 获取异常消息
-     */
+    
     public static String getExceptionMessage(Throwable throwable) {
         String msg = throwable.getMessage();
         if (hasText(msg)) {

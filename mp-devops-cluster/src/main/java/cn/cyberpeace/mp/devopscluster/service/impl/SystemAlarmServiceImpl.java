@@ -41,7 +41,7 @@ public class SystemAlarmServiceImpl extends BaseModelServiceImpl<SystemAlarmMode
 
     @Override
     public void processSystemAlarm(List<SystemAlarmModel> systemAlarmModels) {
-        // 查询当前生效的告警信息
+        
         List<SystemAlarmModel> enabledAlarms =
                 this.getModelMapper().list(new HumanCondition().filterEqual(SystemAlarmModel::getAlarmStatus,
                         AlarmStatusEnum.ENABLED.toValue()));
@@ -56,7 +56,7 @@ public class SystemAlarmServiceImpl extends BaseModelServiceImpl<SystemAlarmMode
                     for (SystemAlarmModel enabledAlarm : enabledAlarms) {
                         if (systemAlarmModel.getServername().equals(enabledAlarm.getServername())
                                 && Objects.equals(systemAlarmModel.getAlarmType(), enabledAlarm.getAlarmType())) {
-                            // 已存在告警，更新告警时间
+                            
                             Duration duration = Duration.between(enabledAlarm.getCreateTime(), LocalDateTime.now());
                             int runningTime = Long.valueOf(duration.toMillis() / 1000).intValue();
                             enabledAlarm.setRunningTime(runningTime);
@@ -72,12 +72,12 @@ public class SystemAlarmServiceImpl extends BaseModelServiceImpl<SystemAlarmMode
                     }
                 });
 
-                // 本次更新告警
+                
                 if (CollectionUtils.isNotEmpty(updateAlarmList)) {
                     this.getModelMapper().bulkUpdate(updateAlarmList);
                 }
 
-                // 本次新增告警信息
+                
                 if (CollectionUtils.isNotEmpty(addAlarmList)) {
                     this.getModelMapper().bulkCreate(addAlarmList);
                 }
@@ -91,7 +91,7 @@ public class SystemAlarmServiceImpl extends BaseModelServiceImpl<SystemAlarmMode
                         }
                     }
                     if (!isExist) {
-                        // 本次失效告警
+                        
                         enabledAlarm.setAlarmStatus(AlarmStatusEnum.DISABLED.toValue());
                         enabledAlarm.setUpdateTime(LocalDateTime.now());
                         delAlarmList.add(enabledAlarm);
@@ -106,7 +106,7 @@ public class SystemAlarmServiceImpl extends BaseModelServiceImpl<SystemAlarmMode
             }
 
         } else {
-            // 没有新告警信息，之前告警都设置为失效状态
+            
             enabledAlarms.forEach(enabledAlarm -> {
                 enabledAlarm.setAlarmStatus(AlarmStatusEnum.DISABLED.toValue());
                 enabledAlarm.setUpdateTime(LocalDateTime.now());
@@ -115,11 +115,7 @@ public class SystemAlarmServiceImpl extends BaseModelServiceImpl<SystemAlarmMode
         }
     }
 
-    /**
-     * 当天告警数量统计
-     *
-     * @return
-     */
+    
     @Override
     public List<AlarmCountVO> todayAlarmCount() {
         return this.getModelMapper().todayAlarmCount(LocalDateTime.now());

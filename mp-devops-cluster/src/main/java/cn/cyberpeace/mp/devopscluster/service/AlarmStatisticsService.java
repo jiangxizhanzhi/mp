@@ -9,35 +9,19 @@ import cn.cyberpeace.mp.devopscluster.vo.AlarmStatisticsVO;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/**
- * @Description 告警统计信息service
- * @Author qiaokang
- * @Date 2022-07-19 16:17:26
- */
+
 public interface AlarmStatisticsService extends BaseModelService<AlarmStatisticsModel, QueryParams> {
 
-    /**
-     * 查询今天告警统计信息
-     * @return
-     */
+    
     List<AlarmStatisticsModel> todayAlarmStatistics();
 
-    /**
-     * 服务告警趋势
-     * @return
-     */
+    
     List<AlarmStatisticsVO> serviceAlarmStatistics(int days);
 
-    /**
-     * 设备告警趋势
-     * @return
-     */
+    
     List<AlarmStatisticsVO> serverAlarmStatistics(int days);
 
-    /**
-     * 告警趋势
-     * @return
-     */
+    
     List<AlarmStatisticsTrendVO> alarmTrend(Integer[] types, String unit, Integer count, LocalDateTime startTime, LocalDateTime endTime);
 
 }

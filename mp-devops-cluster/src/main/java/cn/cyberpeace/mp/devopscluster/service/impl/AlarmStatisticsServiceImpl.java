@@ -53,24 +53,18 @@ public class AlarmStatisticsServiceImpl extends BaseModelServiceImpl<AlarmStatis
     public void init() {
         DATE_PROCESSOR_MAP.put(TimeSlotEnums.HOUR.getUnit(), TimeUnitProcessor.builder().dateFormatter("yyyy-MM-dd HH").sqlDateFormatter("%Y-%m-%d %H").previousTimeCalcFunc(date -> date.minusHours(1)).build());
         DATE_PROCESSOR_MAP.put(TimeSlotEnums.DAY.getUnit(), TimeUnitProcessor.builder().dateFormatter("yyyy-MM-dd").sqlDateFormatter("%Y-%m-%d").previousTimeCalcFunc(date -> date.minusDays(1)).build());
-        //DATE_PROCESSOR_MAP.put(TimeSlotEnums.WEEK.getUnit(), DateProcessor.builder().dateFormatter("w").sqlDateFormatter("%u").dateProcessFunc(date -> date.minusWeeks(1)).build());
+        
         DATE_PROCESSOR_MAP.put(TimeSlotEnums.MONTH.getUnit(), TimeUnitProcessor.builder().dateFormatter("yyyy-MM").sqlDateFormatter("%Y-%m").previousTimeCalcFunc(date -> date.minusMonths(1)).build());
         DATE_PROCESSOR_MAP.put(TimeSlotEnums.YEAR.getUnit(), TimeUnitProcessor.builder().dateFormatter("yyyy").sqlDateFormatter("%Y").previousTimeCalcFunc(date -> date.minusYears(1)).build());
     }
 
-    /**
-     * 查询今天告警统计信息
-     * @return
-     */
+    
     @Override
     public List<AlarmStatisticsModel> todayAlarmStatistics() {
         return this.getModelMapper().todayAlarmStatistics(LocalDateTime.now());
     }
 
-    /**
-     * 服务告警趋势
-     * @return
-     */
+    
     @Override
     public List<AlarmStatisticsVO> serviceAlarmStatistics(int days) {
         var list = this.getModelMapper().serviceAlarmStatistics(LocalDateTime.now(), days);
@@ -78,10 +72,7 @@ public class AlarmStatisticsServiceImpl extends BaseModelServiceImpl<AlarmStatis
         return processTrend(list, days);
     }
 
-    /**
-     * 设备告警趋势
-     * @return
-     */
+    
     @Override
     public List<AlarmStatisticsVO> serverAlarmStatistics(int days) {
         var list = this.getModelMapper().serverAlarmStatistics(LocalDateTime.now(), days);
@@ -111,13 +102,7 @@ public class AlarmStatisticsServiceImpl extends BaseModelServiceImpl<AlarmStatis
     }
 
 
-    /**
-     * 告警趋势
-     * @param types 告警类型
-     * @param unit 时间单位
-     * @param count 时间分段数
-     * @return
-     */
+    
     @Override
     public List<AlarmStatisticsTrendVO> alarmTrend(Integer[] types, String unit, Integer count, LocalDateTime startTime, LocalDateTime endTime) {
         TimeSlotEnums timeSlotEnum = TimeSlotEnums.fromUnit(unit);
@@ -130,7 +115,7 @@ public class AlarmStatisticsServiceImpl extends BaseModelServiceImpl<AlarmStatis
             count = timeSlotEnum.getCount();
         }
 
-        // todo
+        
         if (Objects.nonNull(startTime) && Objects.nonNull(endTime) && startTime.isAfter(endTime)) {
             log.error("start time is not before end time!");
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
@@ -163,22 +148,22 @@ public class AlarmStatisticsServiceImpl extends BaseModelServiceImpl<AlarmStatis
         LocalDateTime processedStartTime = null;
 
         if (Objects.equals(timeSlotEnum, TimeSlotEnums.HOUR)) {
-            // 按小时统计
+            
             LocalDateTime startHour = processedEndTime.minusHours(count - 1);
             processedStartTime = startHour.toLocalDate().atTime(startHour.getHour(), 0, 0);
         } else if (Objects.equals(timeSlotEnum, TimeSlotEnums.DAY)) {
-            // 按天统计
+            
             processedStartTime = LocalDateTime.of(processedEndTime.minusDays(count).toLocalDate(), LocalTime.MAX);
-        //} else if (Objects.equals(timeSlotEnum, TimeSlotEnums.WEEK)) {
-        //    // 按星期统计
-        //    LocalDate firstDayOfBeginWeek = processedEndTime.minusWeeks(count).toLocalDate().with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
-        //    processedStartTime = LocalDateTime.of(firstDayOfBeginWeek, LocalTime.MAX);
+        
+        
+        
+        
         } else if (Objects.equals(timeSlotEnum, TimeSlotEnums.MONTH)) {
-            // 按月统计
+            
             LocalDate firstDayOfBeginMonth = processedEndTime.minusMonths(count).toLocalDate().with(TemporalAdjusters.lastDayOfMonth());
             processedStartTime = LocalDateTime.of(firstDayOfBeginMonth, LocalTime.MAX);
         } else if (Objects.equals(timeSlotEnum, TimeSlotEnums.YEAR)) {
-            // 按年统计
+            
             LocalDate firstDayOfBeginYear = processedEndTime.minusYears(count).toLocalDate().with(TemporalAdjusters.lastDayOfYear());
             processedStartTime = LocalDateTime.of(firstDayOfBeginYear, LocalTime.MAX);
         }
@@ -187,29 +172,24 @@ public class AlarmStatisticsServiceImpl extends BaseModelServiceImpl<AlarmStatis
     }
 
 
-    /**
-     * 计算endtime
-     * @param endTime
-     * @param timeSlotEnum
-     * @return
-     */
+    
     private LocalDateTime processEndTime(LocalDateTime endTime, TimeSlotEnums timeSlotEnum) {
 
         LocalDateTime processedEndTime = null;
 
         if (Objects.equals(timeSlotEnum, TimeSlotEnums.DAY)) {
-            // 按天统计
+            
             processedEndTime = LocalDateTime.of(endTime.plusDays(1).toLocalDate(), LocalTime.MIN);
-        //} else if (Objects.equals(timeSlotEnum, TimeSlotEnums.WEEK)) {
-        //    // 按星期统计
-        //    LocalDate firstDayOfNextWeek = endTime.toLocalDate().with(TemporalAdjusters.next(DayOfWeek.MONDAY));
-        //    processedEndTime = LocalDateTime.of(firstDayOfNextWeek, LocalTime.MIN);
+        
+        
+        
+        
         } else if (Objects.equals(timeSlotEnum, TimeSlotEnums.MONTH)) {
-            // 按月统计
+            
             LocalDate firstDayOfNextMonth = endTime.toLocalDate().with(TemporalAdjusters.firstDayOfNextMonth());
             processedEndTime = LocalDateTime.of(firstDayOfNextMonth, LocalTime.MIN);
         } else if (Objects.equals(timeSlotEnum, TimeSlotEnums.YEAR)) {
-            // 按年统计
+            
             LocalDate firstDayOfNextYear = endTime.toLocalDate().with(TemporalAdjusters.firstDayOfNextYear());
             processedEndTime = LocalDateTime.of(firstDayOfNextYear, LocalTime.MIN);
         }

@@ -13,9 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * 靶标导入管理类
- */
+
 @Validated
 @Slf4j
 @RestController
@@ -26,10 +24,7 @@ public class ImportController {
 
     private final ImportConverter importConverter;
 
-    /**
-     * 获取磁盘剩余空间
-     * @return
-     */
+    
     @ApiOperation("获取磁盘剩余空间")
     @GetMapping("/disk_space")
     public Result<ImportDiskSpaceVO> getDiskSpace(){

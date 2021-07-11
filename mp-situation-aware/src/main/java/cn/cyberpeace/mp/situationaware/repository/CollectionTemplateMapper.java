@@ -15,17 +15,17 @@ import java.util.List;
 @Repository
 @ModelClass(CollectionTemplateModel.class)
 public interface CollectionTemplateMapper extends BaseModelMapper<CollectionTemplateModel> {
-//    int deleteByPrimaryKey(Integer pk);
-//
-//    int insert(CollectionTemplateModel record);
-//
-//    int insertSelective(CollectionTemplateModel record);
-//
-//    CollectionTemplateModel selectByPrimaryKey(Integer pk);
-//
-//    int updateByPrimaryKeySelective(CollectionTemplateModel record);
-//
-//    int updateByPrimaryKey(CollectionTemplateModel record);
+
+
+
+
+
+
+
+
+
+
+
 
     List<CollectionTemplatePageItemDto> listTemplateItemDtos(@Param("condition") CollectionTemplateSearchCondition condition);
 

@@ -6,11 +6,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2023/4/18 20:26
- */
+
 @Data
 @ApiModel("解析器信息")
 public class Decoder {
@@ -35,7 +31,7 @@ public class Decoder {
     private Details details;
 
     @Data
-    //@ApiModel("解析器详细信息")
+    
     public static class Details {
 
         @ApiModelProperty(value = "上级解析器")
@@ -55,7 +51,7 @@ public class Decoder {
     }
 
     @Data
-    //@ApiModel("前置匹配")
+    
     public static class Prematch {
 
         @ApiModelProperty(value = "模式")
@@ -76,7 +72,7 @@ public class Decoder {
     }
 
     @Data
-    //@ApiModel("正则")
+    
     public static class Regex {
 
         @ApiModelProperty(value = "模式")

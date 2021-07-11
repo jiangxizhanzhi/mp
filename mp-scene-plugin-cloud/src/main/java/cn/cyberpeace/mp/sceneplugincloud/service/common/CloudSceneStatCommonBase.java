@@ -29,9 +29,7 @@ import java.util.stream.Collectors;
 public abstract class CloudSceneStatCommonBase<P1 extends BasePluginSceneElementMapper<?>,
         P2 extends BasePluginSceneElementPortMapper<?>> {
 
-    /**
-     * count element方法
-     */
+    
     public static final Map<String, Function<List<Object>, Object>> CALC_COUNT_ELEMENT_FIELD_CALC_MAP = Map.of(
             BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getFirewallRules),
             fieldValues -> {
@@ -48,9 +46,7 @@ public abstract class CloudSceneStatCommonBase<P1 extends BasePluginSceneElement
             }
     );
 
-    /**
-     * count port方法
-     */
+    
     public static final Map<String, Function<List<Object>, Object>> CALC_COUNT_PORT_FIELD_CALC_MAP = Map.of(
             BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementPortModel::getFirewallRules),
             fieldValues -> {
@@ -78,16 +74,7 @@ public abstract class CloudSceneStatCommonBase<P1 extends BasePluginSceneElement
 
     protected abstract HumanCondition genNodePortCondition(List<String> sceneIds, List<String> nodeIds);
 
-    /**
-     * 分组查询指定字段的聚合统计数量
-     * @param sceneIds 场景id列表，不传默认为全部
-     * @param nodeIds 节点id列表，不传默认为全部
-     * @param groupFieldName 分组聚合字段
-     * @param countFieldNames 统计字段
-     * @param distinct 是否去重
-     * @param <T> 分组聚合字段的值类型
-     * @return 字段的聚合统计数量 Map<字段名, Map<分组字段值, 该字段值聚合结果>>
-     */
+    
     public <T> Map<String, Map<T, Long>> groupCountElement(List<String> sceneIds, List<String> nodeIds,
                                                            String groupFieldName, List<String> countFieldNames,
                                                            boolean distinct) {
@@ -106,14 +93,7 @@ public abstract class CloudSceneStatCommonBase<P1 extends BasePluginSceneElement
         return result;
     }
 
-    /**
-     * 分组查询节点指定字段的聚合统计数量, 需要自定义计算结果
-     * @param sceneIds 场景id列表，不传默认为全部
-     * @param nodeIds 节点id列表，不传默认为全部
-     * @param groupFieldName 分组聚合字段
-     * @param fieldNames 聚合统计字段 有效字段 CALC_COUNT_ELEMENT_FIELD_CALC_MAP
-     * @return 字段的聚合统计数量 Map<字段名, Map<分组字段值, 该字段值聚合结果>>
-     */
+    
     public <T> Map<String, Map<T, Long>> groupCalcCountElement(List<String> sceneIds, List<String> nodeIds,
                                                                String groupFieldName, List<String> fieldNames) {
         var fieldCalcMap = fieldNames.stream()
@@ -140,14 +120,7 @@ public abstract class CloudSceneStatCommonBase<P1 extends BasePluginSceneElement
         return formatResult;
     }
 
-    /**
-     * 查询网元指定字段的聚合统计数量
-     * @param sceneIds 场景id列表，不传默认为全部
-     * @param nodeIds 节点id列表，不传默认为全部
-     * @param fieldNames 聚合统计字段
-     * @param distinct 是否去重
-     * @return 字段的聚合统计数量 Map<字段名称, 该字段统计数量>
-     */
+    
     public Map<String, Long> countElement(List<String> sceneIds, List<String> nodeIds, List<String> fieldNames,
                                           boolean distinct) {
         var condition = genNodeCondition(sceneIds, nodeIds);
@@ -163,13 +136,7 @@ public abstract class CloudSceneStatCommonBase<P1 extends BasePluginSceneElement
         return result;
     }
 
-    /**
-     * 查询网元指定字段的聚合统计数量, 需要自定义计算结果
-     * @param sceneIds 场景id列表，不传默认为全部
-     * @param nodeIds 节点id列表，不传默认为全部
-     * @param fieldNames 聚合统计字段 有效字段 CALC_COUNT_ELEMENT_FIELD_CALC_MAP
-     * @return 字段的聚合统计数量 Map<字段名称, 该字段统计数量>
-     */
+    
     public Map<String, Long> calcCountElement(List<String> sceneIds, List<String> nodeIds, List<String> fieldNames) {
         var fieldCalcMap = fieldNames.stream()
                 .collect(Collectors.toMap(fieldName -> fieldName,
@@ -191,14 +158,7 @@ public abstract class CloudSceneStatCommonBase<P1 extends BasePluginSceneElement
         return formatResult;
     }
 
-    /**
-     * 查询端口指定字段的聚合统计数量
-     * @param sceneIds 场景id列表，不传默认为全部
-     * @param nodeIds 节点id列表，不传默认为全部
-     * @param fieldNames 聚合统计字段  有效字段CALC_COUNT_PORT_FIELDS
-     * @param distinct 是否去重
-     * @return 字段的聚合统计数量 Map<字段名称, 该字段统计数量>
-     */
+    
     public Map<String, Long> countPort(List<String> sceneIds, List<String> nodeIds, List<String> fieldNames,
                                        boolean distinct) {
         var condition = genNodePortCondition(sceneIds, nodeIds);
@@ -214,13 +174,7 @@ public abstract class CloudSceneStatCommonBase<P1 extends BasePluginSceneElement
         return result;
     }
 
-    /**
-     * 查询端口指定字段的聚合统计数量, 需要自定义计算结果
-     * @param sceneIds 场景id列表，不传默认为全部
-     * @param nodeIds 节点id列表，不传默认为全部
-     * @param fieldNames 聚合统计字段 有效字段CALC_COUNT_PORT_FIELDS
-     * @return 字段的聚合统计数量 Map<字段名称, 该字段统计数量>
-     */
+    
     public Map<String, Long> calcCountPort(List<String> sceneIds, List<String> nodeIds, List<String> fieldNames) {
         var fieldCalcMap = fieldNames.stream()
                 .collect(Collectors.toMap(fieldName -> fieldName,

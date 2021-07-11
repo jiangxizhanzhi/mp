@@ -16,11 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2023/4/18 19:32
- */
+
 @Service
 @Slf4j
 public class RuleService extends RequestProcessor {
@@ -31,11 +27,7 @@ public class RuleService extends RequestProcessor {
     @Autowired
     private AgentService agentService;
 
-    /**
-     * 查询规则
-     *
-     * @return 规则
-     */
+    
     public ListObjServiceResult<Rule> pageRules(BasePageRequest pageRequest) {
         var uri = "/rules";
         var requestUrl = situationAwareConfig.getWazuhBaseUrl() + uri;

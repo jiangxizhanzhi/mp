@@ -130,7 +130,7 @@ public class WazuhCommon {
                             "sh install.sh",
                             String.format("cd %s", linuxInstallDir),
                             "rm -rf agent-installer",
-//                            String.format("rm -rf %s", WAZUH_AGENT_LINUX_FILE_NAME),
+
                             "cd /opt/wazuha",
                             "sh config.sh",
                             probeCommand,
@@ -143,20 +143,20 @@ public class WazuhCommon {
         if (SystemTypeCommandUtils.isLinux(systemType)) {
             String addCommand;
             if (isContainer) {
-                // 容器不支持curl命令，需要添加一条复制wazuh-agent安装包文件的命令
+                
                 addCommand = String.format("%s %s %s", ContainerFileUtils.CONTAINER_COPY_FILE_PREFIX,
                         getAgentLinuxLocalFilepath(), linuxInstallDir);
             } else {
-                // Linux虚拟机增加按需下载agent安装包的命令
+                
                 String downloadUrl = StringUtils.joinWith(InstallerUtils.FILE_URL_SEPARATOR, metadataFileServer,
                         nameFileMap.getOrDefault(LINUX_DOWNLOAD_AGENT_FILE, StringUtils.EMPTY));
                 String downloadPath = StringUtils.joinWith(InstallerUtils.FILE_URL_SEPARATOR, linuxInstallDir,
                         LINUX_DOWNLOAD_AGENT_FILE);
-                // 下载按需安装脚本并执行
+                
                 addCommand = StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK,
                         String.format(InstallerUtils.LINUX_FILE_DOWNLOAD, downloadPath, downloadUrl),
                         String.format("sh %s/%s ", linuxInstallDir, LINUX_DOWNLOAD_AGENT_FILE));
-                // 给下载安装包的脚本添加参数`
+                
                 String filePathParam = String.format("filepath=%s/%s", linuxInstallDir,
                         WAZUH_AGENT_LINUX_FILE_NAME);
                 List<String> params = new ArrayList<>(CollectionUtil.toList(filePathParam));
@@ -169,7 +169,7 @@ public class WazuhCommon {
                 });
                 addCommand = addCommand.concat(StringUtils.joinWith(StringUtils.SPACE, params.toArray()));
             }
-            // 将容器或Linux虚拟机新增的获取agent安装包命令放在创建目录之后
+            
             int addCommandIndex = 0;
             for (int i = 0; i < result.size(); i++) {
                 if (result.get(i).contains("mkdir") && result.get(i).contains(linuxInstallDir)) {
@@ -183,48 +183,10 @@ public class WazuhCommon {
     }
 
     public static void uninstallAgent(String agentName, String systemType) {
-        /*String cmd = null;
-        String osType = null;
-        if (SystemTypeCommandUtils.isLinux(systemType)) {
-            osType = WazuhLauncher.OS_TYPE_LINUX;
-            cmd = StringUtils.joinWith(
-                    CommandUtils.LINUX_LINE_BREAK,
-                    String.format("sh %s", LINUX_STOP_SCRIPT),
-                    String.format("sh %s", LINUX_UNINSTALL_SCRIPT)
-            );
-        } else if (SystemTypeCommandUtils.isWindows(systemType)) {
-            osType = WazuhLauncher.OS_TYPE_WINDOWS;
-            cmd = StringUtils.joinWith(
-                    CommandUtils.WINDOWS_LINE_BREAK,
-                    String.format("call %s", WINDOWS_UNINSTALL_SCRIPT)
-            );
-        }
-
-        if (StringUtils.isNotEmpty(cmd)) {
-            var runCommandItem = new WazuhLauncher.RunCommandItem();
-            runCommandItem.setAgentName(agentName);
-            runCommandItem.setOsType(osType);
-            runCommandItem.setCommand(cmd);
-            runCommandItem.setExile(true);
-            var result = WazuhControlCommon.wazuhControl.getWazuhLauncher().runCommand(List.of(runCommandItem));
-            try {
-                Thread.sleep(10000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-        }*/
+        
     }
 
-    /**
-     * 获取默认脚本探针参数集合
-     *
-     * @param nameFileMap        文件名Map
-     * @param metadataFileServer 文件下载前缀
-     * @param agentName
-     * @param wazuhProbeConfig   默认脚本探针配置
-     * @return 默认脚本探针参数集合
-     */
+    
     private static List<WazuhControl.ControlProbeParam> getDefaultProbeParams(Map<String, String> nameFileMap,
                                                                               String metadataFileServer, String agentName,
                                                                               WazuhProbeConfig wazuhProbeConfig) {

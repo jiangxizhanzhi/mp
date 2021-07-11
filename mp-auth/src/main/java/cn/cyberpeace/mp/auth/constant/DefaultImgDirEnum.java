@@ -1,9 +1,6 @@
 package cn.cyberpeace.mp.auth.constant;
 
-/**
- * 默认图片文件夹
- * @author wanggang
- */
+
 public enum DefaultImgDirEnum  {
 
     AVATAR("/avatar", "default_img_avatar"),

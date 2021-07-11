@@ -16,10 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 
-/**
- * 靶标导入管理
- * @author qiaokang
- */
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -32,25 +29,22 @@ public class ImportConverter implements BaseConverter{
     @Autowired
     private DevopsClusterConfig devopsClusterConfig;
 
-    /**
-     * 获取磁盘剩余空间
-     * @return
-     */
+    
     public ImportDiskSpaceVO getDiskSpace() {
         ImportDiskSpaceCloudPlatformResult diskSpaceModel = importService.getDiskSpace();
 
         try {
-            // 获取最大并发启动场景节点数
+            
             ActivationResponse activationResponse = sysActivationService.status();
             ActivationItem activationItem = activationResponse.getItems().stream().filter(item ->
                     ("LCS-RES-CR-ACTIVENODES").equals(item.getKey())).findFirst().get();
             BigDecimal maxCount = new BigDecimal(activationItem.getValue());
             BigDecimal maxSize = new BigDecimal(devopsClusterConfig.getMaxTargetSize());
-            // 单位换算倍数
+            
             BigDecimal multi = new BigDecimal(1024);
-            // 预留容量
+            
             Long reserveSize = maxSize.multiply(maxCount).multiply(multi).multiply(multi).multiply(multi).longValue();
-            // 剩余空间 = 实际磁盘空间 - 预留容量
+            
             diskSpaceModel.getData().setVmSpace(diskSpaceModel.getData().getVmSpace() - reserveSize);
         } catch (Exception e) {
             log.error("get disk space error", e);

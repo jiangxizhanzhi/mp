@@ -32,9 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
-/**
- *
- **/
+
 @RestController
 @Slf4j
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/runtime_log")

@@ -14,12 +14,7 @@ public class SceneFileUtils {
 
     public static final String ZIP_FILE_SUFFIX = ".zip";
 
-    /**
-     * 生成场景文件目录
-     * @param systemType 网元系统类型
-     * @param sceneId 场景id
-     * @return 场景文件目录
-     */
+    
     public static String getSceneFileDir(String systemType, String sceneId) {
         if (SystemTypeCommandUtils.isWindows(systemType)) {
             return SystemTypeCommandUtils.joinPath(systemType, SceneSingleton.sceneAppConfig.getWindowsInstallerDir(), sceneId,
@@ -30,12 +25,7 @@ public class SceneFileUtils {
         }
     }
 
-    /**
-     * 生成场景文件解压目录
-     * @param systemType 网元系统类型
-     * @param sceneId 场景id
-     * @return 场景文件目录
-     */
+    
     public static String getSceneFileUnzipDir(String systemType, String sceneId) {
         if (SystemTypeCommandUtils.isWindows(systemType)) {
             return SystemTypeCommandUtils.joinPath(systemType, SceneSingleton.sceneAppConfig.getWindowsInstallerDir(), sceneId,
@@ -46,13 +36,7 @@ public class SceneFileUtils {
         }
     }
 
-    /**
-     * 生成节点文件解压目录
-     * @param systemType 网元系统类型
-     * @param sceneId 场景id
-     * @param elementId 节点id
-     * @return 场景文件目录
-     */
+    
     public static String getElementFileUnzipDir(String systemType, String sceneId, String elementId) {
         if (SystemTypeCommandUtils.isWindows(systemType)) {
             return SystemTypeCommandUtils.joinPath(systemType, SceneSingleton.sceneAppConfig.getWindowsInstallerDir(), sceneId,
@@ -63,13 +47,7 @@ public class SceneFileUtils {
         }
     }
 
-    /**
-     * 生成场景zip文件初始化命令
-     * @param systemType 网元系统类型
-     * @param fileUrl 文件url
-     * @param toPath 目的路径
-     * @return 初始化命令
-     */
+    
     public static List<String> genZipFileInitCommand(String systemType, String fileUrl, String toPath, String unzipDir) {
         var metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer();
         var absoluteFileUrl = StringUtils.joinWith(FILE_URL_SEPARATOR, metadataFileServer, fileUrl);

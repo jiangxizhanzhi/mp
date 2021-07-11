@@ -3,11 +3,7 @@ package cn.cyberpeace.mp.aggregation.sceneimport.convert;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2021/10/12
- */
+
 interface IConverter {
     void convert2BO(ConvertDataContainer container);
 

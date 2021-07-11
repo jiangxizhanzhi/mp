@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 @Data
 @NoArgsConstructor
-//@AllArgsConstructor
+
 public final class ComputeStatusModel implements Serializable {
 
     @Data
@@ -29,7 +29,7 @@ public final class ComputeStatusModel implements Serializable {
     @AllArgsConstructor
     public static class DiskIo implements Serializable{
 
-        // todo
+        
         private String test;
 
     }
@@ -63,7 +63,7 @@ public final class ComputeStatusModel implements Serializable {
     @AllArgsConstructor
     public static class NetIo implements Serializable{
 
-        // todo
+        
         private String test;
 
     }

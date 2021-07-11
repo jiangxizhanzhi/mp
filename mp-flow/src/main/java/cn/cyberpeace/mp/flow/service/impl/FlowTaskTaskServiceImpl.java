@@ -96,11 +96,7 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
         return getModelMapper().list(condition);
     }
 
-    /**
-     * 根据场景id查询节点列表
-     * @param sceneId
-     * @return
-     */
+    
     @Override
     public List<FlowTaskNode> nodeList(String sceneId) {
         log.info("FlowTaskTaskServiceImpl.nodeList start. sceneId:{}", sceneId);
@@ -109,20 +105,16 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
         return nodeList;
     }
 
-    /**
-     * 新增流量任务
-     * @param addFlowTaskTaskInfos
-     * @param sceneId
-     */
+    
     @Transactional
     public void addTask(List<AddFlowTaskTaskInfo> addFlowTaskTaskInfos, String sceneId, String actuatorId, boolean isAsync, List<FlowTaskTaskModel> flowTaskTaskModels) {
         log.info("FlowTaskTaskServiceImpl.addTask begin. addFlowTaskTaskInfos:{}, sceneId:{}", addFlowTaskTaskInfos, sceneId);
         if (CollectionUtils.isNotEmpty(addFlowTaskTaskInfos)) {
-            // 统计任务总数
+            
             int total = addFlowTaskTaskInfos.stream().mapToInt(detail -> detail.getFlowInfos().size()).sum();
 
             for (AddFlowTaskTaskInfo detail : addFlowTaskTaskInfos) {
-                //网口信息，如果不存在则创建网口
+                
                 FlowTaskPortModel flowTaskPortModel = flowTaskPortService.findByNetworkIdAndActuatorId(detail.getNetworkId(), actuatorId);
                 String macAddress = "";
                 if (flowTaskPortModel == null) {
@@ -157,7 +149,7 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
                 Map<String, AddFlowTaskFlowInfo> addFlowTaskFlowInfoMap = detail.getFlowInfos().stream().collect(Collectors.toMap(addFlowTaskFlowInfo -> addFlowTaskFlowInfo.getFlowId(), addFlowTaskFlowInfo -> addFlowTaskFlowInfo));
                 condition.filterIn(FlowInfoModel::getId, flowIds.toArray());
                 List<FlowInfoModel> flowInfoModelList = flowInfoMapper.list(condition);
-                //保存流量任务信息
+                
                 List<FlowTaskTaskModel> flowTaskTaskModelList = new ArrayList<FlowTaskTaskModel>();
                 if (isAsync && CollectionUtils.isNotEmpty(flowTaskTaskModels)) {
                     for (FlowInfoModel flowInfoModel : flowInfoModelList) {
@@ -192,7 +184,7 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
                     this.bulkCreate(flowTaskTaskModelList);
                 }
 
-                //保存流量任务配置信息
+                
                 List<FlowTaskConfModel> flowTaskConfModelList = new ArrayList<FlowTaskConfModel>();
                 for (FlowTaskTaskModel flowTaskTaskModel : flowTaskTaskModelList) {
                     FlowTaskConfModel flowTaskConfModel = new FlowTaskConfModel();
@@ -225,7 +217,7 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
                     flowTaskConfModelList.add(flowTaskConfModel);
                 }
                 flowTaskConfService.bulkCreate(flowTaskConfModelList);
-                //初始化网口
+                
                 List<String> taskIdList = new ArrayList<>();
                 for (FlowTaskTaskModel flowTaskTaskModel : flowTaskTaskModelList) {
                     taskIdList.add(flowTaskTaskModel.getId());
@@ -234,7 +226,7 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
                     log.error("init network error");
                     throw new MpRuntimeException(FlowErrorCode.ADD_TASK_ERROR);
                 }
-                //上传pcap包虚拟机
+                
                 for (FlowInfoModel flowInfoModel : flowInfoModelList) {
                     if (!uploadPcapToTrex(flowInfoModel, actuatorId)) {
                         log.error("upload flow file info error");
@@ -247,12 +239,7 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
     }
 
 
-    /**
-     * 上传pcap包到trex虚拟机
-     * @param flowInfoModel
-     * @param actuatorId
-     * @return
-     */
+    
     public boolean uploadPcapToTrex(FlowInfoModel flowInfoModel, String actuatorId) {
         log.info("FlowTaskTaskServiceImpl.uploadPcapToTrex begin. flowInfoModel:{}, actuatorId:{}", flowInfoModel, actuatorId);
         if (flowInfoModel == null || StringUtils.isEmpty(actuatorId)) {
@@ -266,7 +253,7 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
 
             JSONObject object = new JSONObject();
             object.put("flowId", flowInfoModel.getId());
-            // 判断是pcap包还是脚本
+            
             if (ResourceTypeEnum.PACP.toValue() == flowInfoModel.getResourceType()) {
                 fileByte = FsCommon.downloadRawContent(flowInfoModel.getPcapFile());
                 object.put("fileName", flowInfoModel.getTitle() + System.currentTimeMillis() + "." + flowInfoModel.getPcapFile().split(BaseConstants.SPOT)[1]);
@@ -297,15 +284,7 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
         return isSuccess;
     }
 
-    /**
-     * 初始化网口
-     * @param mac
-     * @param taskIdList
-     * @param targetIp
-     * @param actuatorId
-     * @param total
-     * @return
-     */
+    
     public boolean initNetwork(String mac, List<String> taskIdList, String targetIp, String actuatorId, int total) {
         log.info("FlowTaskTaskServiceImpl.initNetwork begin. mac:{}, taskIdList:{}, targetIp:{}, actuatorId:{}", mac, taskIdList, targetIp, actuatorId);
         if (StringUtils.isEmpty(mac) || CollectionUtils.isEmpty(taskIdList) || StringUtils.isEmpty(targetIp) || StringUtils.isEmpty(actuatorId)) {
@@ -360,12 +339,7 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
         return flowTaskTaskModels;
     }
 
-    /**
-     * 根据节点id、scendId删除任务
-     * @param nodeId
-     * @param sceneId
-     * @return
-     */
+    
     @Override
     public void deleteByNodeIdAndSceneId(String nodeId, String sceneId) {
         HumanCondition condition = new HumanCondition();

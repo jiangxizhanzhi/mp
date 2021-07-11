@@ -16,108 +16,14 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 
-/**
- * 实现例子，需要定义静态方法以发送到指定session
- * 单分组例子：
- * @Component
- * @ServerEndpoint("/ws_test_group")
- * public class TestGroupServer extends BaseGroupServer {
- *
- *     public static <T> void sendToGroup(String groupKey, T data) {
- *         BaseGroupServer.sendToGroup(TestGroupServer.class, groupKey, data, null, null);
- *     }
- *
- *     public static <T> void sendToSession(String sessionKey, T data) {
- *         BaseGroupServer.sendToSession(TestGroupServer.class, sessionKey, data, null, null);
- *     }
- *
- *     public static <T> void sendToAllSessions(T data) {
- *         BaseGroupServer.sendToAllSessions(TestGroupServer.class, data, null, null);
- *     }
- *
- *     @Override
- *     protected List<String> retrieveGroupKeys(Session session) {
- *         return List.of("test1");
- *     }
- *
- *     @Override
- *     protected void validateSession(Session session) throws ValidateException {
- *         super.validateSession(session);
- *         if (...validate error) {
- *             throw new ValidateException("validate failed");
- *         }
- *     }
- *
- *     @Override
- *     public MessageConverter getMessageConverter() {
- *         return BeanCommon.getBean(SnakeJsonMessageConverter.class);
- *     }
- *
- * }
- *
- *
- * 多分组例子：
- * @Component
- * @ServerEndpoint("/ws_test_group")
- * public class TestGroupServer extends BaseGroupServer {
- *
- *     public static final int groupIndexSize = 2;
- *
- *     public static <T> void sendToFirst(String groupKey, T data) {
- *         BaseGroupServer.sendToGroup(TestGroupServer.class, 0, groupKey, data, null, null);
- *     }
- *
- *     public static <T> void sendToSecond(String groupKey, T data) {
- *         BaseGroupServer.sendToGroup(TestGroupServer.class, 1, groupKey, data, null, null);
- *     }
- *
- *     public static <T> void sendToFirstAll(T data) {
- *         BaseGroupServer.sendToGroupIndex(TestGroupServer.class, 0, data, null, null);
- *     }
- *
- *     public static <T> void sendToSecondAll(T data) {
- *         BaseGroupServer.sendToGroupIndex(TestGroupServer.class, 1, data, null, null);
- *     }
- *
- *     public static <T> void sendToSession(String sessionKey, T data) {
- *         BaseGroupServer.sendToSession(TestGroupServer.class, sessionKey, data, null, null);
- *     }
- *
- *     public static <T> void sendToAllSessions(T data) {
- *         BaseGroupServer.sendToAllSessions(TestGroupServer.class, data, null, null);
- *     }
- *
- *     @Override
- *     protected List<String> retrieveGroupKeys(Session session) {
- *         return List.of("test1", "test2");
- *     }
- *
- *     @Override
- *     protected void validateSession(Session session) throws ValidateException {
- *         super.validateSession(session);
- *         if (...validate error) {
- *             throw new ValidateException("validate failed");
- *         }
- *     }
- *
- *     @Override
- *     public MessageConverter getMessageConverter() {
- *         return BeanCommon.getBean(SnakeJsonMessageConverter.class);
- *     }
- *
- * }
- */
+
 @Slf4j
 public abstract class BaseGroupServer extends BaseServer {
 
-    /**
-     * 组类型数数量定义，每个下标作为一个类型，子类重复定义可覆盖该变量
-     */
+    
     public static final int groupIndexSize = 1;
 
-    /**
-     * 组key列表，每个下标的值表示属于该组的key
-     */
+    
     @Getter
     private List<String> groupKeys;
 
@@ -208,14 +114,10 @@ public abstract class BaseGroupServer extends BaseServer {
         return groupSessionsList.get(groupIndex);
     }
 
-    /**
-     * 从session获取组key, 对session进行分组, 重写本方法添加自定义的组key取值方式
-     */
+    
     protected abstract List<String> retrieveGroupKeys(Session session);
 
-    /**
-     * 验证session合法性，重写本方法添加自定义的验证逻辑
-     */
+    
     @Override
     protected void validateSession(Session session) throws ValidateException {
         super.validateSession(session);

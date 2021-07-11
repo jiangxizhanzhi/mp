@@ -24,11 +24,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/5/16
- */
+
 
 @Api(value = "场景文件", tags = "CSCENE-场景文件")
 @Slf4j
@@ -43,11 +39,7 @@ public class CsceneFileController {
     @Autowired
     private ProtocolCollectionService protocolCollectionService;
 
-    /**
-     * @param file
-     * @return
-     * @throws IOException
-     */
+    
     @ApiOperation("上传场景中的附件")
     @ApiImplicitParam(name = "file", value = "附件", dataTypeClass = MultipartFile.class)
     @PostMapping("/attachment_upload")
@@ -59,11 +51,7 @@ public class CsceneFileController {
         return csceneFileService.sceneUpload(inputStream, fileName, fileSuffix, legalType).asResult();
     }
 
-    /**
-     * @param file
-     * @return
-     * @throws IOException
-     */
+    
     @ApiOperation("上传场景中的执行脚本")
     @ApiImplicitParam(name = "file", value = "脚本文件", dataTypeClass = MultipartFile.class)
     @PostMapping("/script_upload")
@@ -75,11 +63,7 @@ public class CsceneFileController {
         return csceneFileService.sceneUpload(inputStream, fileName, fileSuffix, legalType).asResult();
     }
 
-    /**
-     * @param file
-     * @return
-     * @throws IOException
-     */
+    
     @ApiOperation("上传场景中的图标")
     @ApiImplicitParam(name = "file", value = "图标文件", dataTypeClass = MultipartFile.class)
     @PostMapping("/icon_upload")
@@ -91,11 +75,7 @@ public class CsceneFileController {
         return csceneFileService.sceneUpload(inputStream, fileName, fileSuffix, legalSuffix).asResult();
     }
 
-    /**
-     * @param file
-     * @return
-     * @throws IOException
-     */
+    
     @ApiOperation("上传节点秘钥")
     @ApiImplicitParam(name = "file", value = "节点秘钥", dataTypeClass = MultipartFile.class)
     @PostMapping("/private_key_upload")
@@ -107,11 +87,7 @@ public class CsceneFileController {
         return csceneFileService.sceneUpload(inputStream, fileName, fileSuffix, legalSuffix).asResult();
     }
 
-    /**
-     * @param file
-     * @return
-     * @throws IOException
-     */
+    
     @ApiOperation("上传场景模板截图")
     @ApiImplicitParam(name = "file", value = "场景模板截图", dataTypeClass = MultipartFile.class)
     @PostMapping("/scene_template_screenshot_upload")
@@ -132,22 +108,22 @@ public class CsceneFileController {
         var fileName = file.getOriginalFilename();
         var inputStream = file.getInputStream();
         var fileSuffix = FileUtil.getSuffix(file.getOriginalFilename());
-        //上传文件到中间件
+        
         ServiceResult<SceneFileUploadResponse> sceneMibFileUpload =
             csceneFileService.sceneUpload(inputStream, fileName, fileSuffix, legalSuffix);
         SceneFileUploadResponse sceneFileUploadResponse = sceneMibFileUpload.getSource();
-        //上传失败响应
+        
         if(Objects.isNull(sceneFileUploadResponse)){
             return new ServiceResult<>(null, sceneMibFileUpload.getServiceCode(), sceneMibFileUpload.getDetail());
         }
-        //上传解析mib文件
+        
         ServiceResult<List<MibFileInfo>> mibFile = protocolCollectionService.importMibFile(file);
         List<MibFileInfo> mibFileInfos = mibFile.getSource();
-        //失败响应
+        
         if(Objects.isNull(mibFileInfos)){
             return new ServiceResult<>(null, mibFile.getServiceCode(), mibFile.getDetail());
         }
-        //成功响应结果
+        
         MibFileUploadResponse mibFileUploadResponse =
             new MibFileUploadResponse(sceneFileUploadResponse, mibFileInfos);
         return new ServiceResult<>(mibFileUploadResponse).asResult();

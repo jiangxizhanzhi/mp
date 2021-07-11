@@ -2,16 +2,10 @@ package cn.cyberpeace.mp.frontadmin.enums;
 
 import cn.cyberpeace.mp.frontadmin.constant.ControllerConstant;
 
-/**
- * @Description
- * @author: shgang
- * @Date: 2022/7/21
- */
+
 public enum NoticeTypeEnum {
 
-    /**
-     * 系统公告类型
-     */
+    
     SYSTEM(1, "system"),
     COURSE(2, "course"),
     EXERCISE(3, "exercise"),

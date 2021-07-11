@@ -6,9 +6,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-/**
- * 镜像构建请求信息
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,14 +14,10 @@ import lombok.NoArgsConstructor;
 public class ImagesDeleteInstanceCloudPlatform extends BaseRequest {
 
 
-    /**
-     * uuid
-     */
+    
     private String deviceUuid;
 
-    /**
-     * vm/container
-     */
+    
     private String imageType;
 
 }

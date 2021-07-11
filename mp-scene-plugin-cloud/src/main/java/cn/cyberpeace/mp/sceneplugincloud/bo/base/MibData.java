@@ -6,13 +6,7 @@ import lombok.Data;
 
 import java.util.List;
 
-/**
- * @BelongsPackage: cn.cyberpeace.mp.sceneplugincloud.bo.base
- * @Author: hhuang
- * @CreateTime: 2023/05/18  17:52
- * @Description: mib数据
- * @Version: 1.0
- */
+
 @Data
 public class MibData {
 

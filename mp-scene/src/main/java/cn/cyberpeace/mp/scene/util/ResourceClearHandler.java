@@ -11,11 +11,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
-/**
- * @Description
- * @Author zhanglin
- * @Date 2023/3/21
- */
+
 @Component
 @Slf4j
 public class ResourceClearHandler {
@@ -56,7 +52,7 @@ public class ResourceClearHandler {
 
     public void finishClearJob() {
         if (this.sceneIds.size() == 0 && this.status.get(Status.CLEARING) != null) {
-            // 标识一下，清除完毕
+            
             this.removeClearingStatus();
         }
     }

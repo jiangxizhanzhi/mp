@@ -8,11 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/12/17 11:13
- */
+
 @Mapper
 @Repository
 @ModelClass(MenuExtraInfoModel.class)

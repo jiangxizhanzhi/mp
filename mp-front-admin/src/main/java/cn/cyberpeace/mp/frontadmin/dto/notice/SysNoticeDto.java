@@ -30,7 +30,7 @@ public class SysNoticeDto {
     @ApiModelProperty(value = "发布人 (用户名)")
     private String publisherUserName;
 
-    // 1:系统  2:课程  3:练习  4:考试
+    
     @ApiModelProperty(value = "1:系统  2:课程  3:练习  4:考试")
     private Integer type;
 

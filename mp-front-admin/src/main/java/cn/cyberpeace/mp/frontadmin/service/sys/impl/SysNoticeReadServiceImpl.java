@@ -15,11 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
-/**
- * @Description
- * @Author shgang
- * @Date 2022/9/22
- */
+
 @Service
 public class SysNoticeReadServiceImpl extends BaseModelServiceImpl<SysNoticeReadModel, SysNoticeReadMapper, SysNoticeReadFields, QueryParams>
     implements SysNoticeReadService {

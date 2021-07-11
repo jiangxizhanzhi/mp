@@ -10,12 +10,7 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 import java.util.List;
 
-/**
- * @description 日志级别批量请求
- * @author wangssh
- * @date 2023/5/30
- * @version 1.0
- **/
+
 @Data
 @Builder
 @AllArgsConstructor

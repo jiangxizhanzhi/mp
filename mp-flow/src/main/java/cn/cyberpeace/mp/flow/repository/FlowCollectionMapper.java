@@ -12,11 +12,7 @@ import org.springframework.stereotype.Repository;
 @ModelClass(FlowCollectionModel.class)
 public interface FlowCollectionMapper extends BaseModelMapper<FlowCollectionModel> {
 
-    /**
-     * 根据名称查询
-     * @param title
-     * @return
-     */
+    
     FlowCollectionModel selectByTitle(@Param("title") String title);
 
 }

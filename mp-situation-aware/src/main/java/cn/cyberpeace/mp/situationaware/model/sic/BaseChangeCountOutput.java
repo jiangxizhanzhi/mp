@@ -3,15 +3,11 @@ package cn.cyberpeace.mp.situationaware.model.sic;
 import com.alibaba.fastjson.annotation.JSONField;
 import lombok.Data;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/04/11 10:41
- */
+
 @Data
 public class BaseChangeCountOutput {
 
-    // 是否有变动，综合
+    
     @JSONField(name = "changed_count")
     private String changedCount;
 

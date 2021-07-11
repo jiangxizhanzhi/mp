@@ -6,12 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-/**
- * @author wangssh
- * @version 1.0
- * @description 线程池信息
- * @date 2023/6/29
- **/
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

@@ -11,8 +11,6 @@ import java.util.List;
 @NoArgsConstructor
 public class ImageDeleteDTO extends BaseDTO {
 
-    /**
-     * id集合
-     */
+    
     private List<String> ids;
 }

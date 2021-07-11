@@ -10,9 +10,7 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 import java.util.List;
 
-/**
- * 网络分页返回信息
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,27 +18,19 @@ import java.util.List;
 @ApiModel(value = "网络分页返回信息")
 public class NetworkPageVO extends SceneInfoVO {
 
-    /**
-     * 网络名称
-     */
+    
     @ApiModelProperty("网络名称")
     private String name;
 
-    /**
-     * 网络类型
-     */
+    
     @ApiModelProperty("网络类型")
     private String networkType;
 
-    /**
-     * 状态
-     */
+    
     @ApiModelProperty("状态")
     private String status;
 
-    /**
-     * 已连接子网
-     */
+    
     @ApiModelProperty("IP地址")
     private List<Subnet> subnets;
 
@@ -53,9 +43,7 @@ public class NetworkPageVO extends SceneInfoVO {
     @ApiModelProperty("节点个数")
     private Integer nodeNum;
 
-    /**
-     * 创建时间
-     */
+    
     @ApiModelProperty("创建时间")
     private String createdAt;
 

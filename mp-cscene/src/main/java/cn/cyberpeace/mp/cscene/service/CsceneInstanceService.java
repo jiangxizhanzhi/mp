@@ -178,7 +178,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     @Resource
     private FlowMonitorService flowMonitorService;
 
-    // expires in 10 minutes
+    
     private TimedCache<String, String> TIMED_CACHE = CacheUtil.newTimedCache(10 * 60 * 1000);
 
 
@@ -268,19 +268,19 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 params.setLevels(queryParams.getLevels());
                 ListObjServiceResult<CollectionHostEventBO> r;
                 if (ProbeConstant.ProbeId.FILE_MODIFY.equals(probeId)) {
-                    // 文件变更信息
+                    
                     params.setType(4);
                 } else if (ProbeConstant.ProbeId.REGISTRY_MODIFY.equals(probeId)) {
-                    // 注册表变更信息
+                    
                     params.setRuleGroups(CsceneBizConstant.REGISTRY_MODIFY_GROUP);
                 } else if (ProbeConstant.ProbeId.OS_LOG.equals(probeId)) {
-                    // 操作系统日志信息
+                    
                     params.setCatagories(CsceneBizConstant.OS_CATEGORY);
                 } else if (ProbeConstant.ProbeId.APPLICATION_LOG.equals(probeId)) {
-                    // 应用系统日志信息
+                    
                     params.setCatagories(CsceneBizConstant.APPLICATION_CATEGORY);
                 } else {
-                    // 安全系统日志信息
+                    
                     params.setCatagories(CsceneBizConstant.SECURITY_CATEGORY);
                 }
                 if (StringUtils.isEmpty(scrollId)) {
@@ -308,13 +308,13 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 request.setPageSize(queryParams.getPageSize());
                 request.setLevels(queryParams.getLevels());
                 if (ProbeConstant.ProbeId.HARDWARE_INFO.equals(probeId)) {
-                    // 硬件信息
+                    
                     res = hostStateService.listHostStates(request);
                     if (!CollUtil.isEmpty(res)) {
                         total = res.size() + total;
                     }
                 } else if (ProbeConstant.ProbeId.LOG_FILE.equals(probeId)) {
-                    // 原始日志信息
+                    
                     request.setFetchIfSceneInstanceShutdown(true);
                     var r = logFileService.pageByElementId(request);
                     if (r.getSource() != null) {
@@ -322,7 +322,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                         total = r.getSource().getTotal() + total;
                     }
                 } else {
-                    // 网络连接
+                    
                     request.setFetchIfSceneInstanceShutdown(true);
                     if (multiNode) {
                         request.setPage(1);
@@ -335,7 +335,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     }
                 }
             } else if (ProbeConstant.ProbeId.OS_INFO.equals(probeId)) {
-                // 操作系统信息
+                
                 BaseSceneElementRequest request = new BaseSceneElementRequest();
                 request.setSceneId(sceneInstanceId);
                 request.setElementIds(CollUtil.toList(element.getId()));
@@ -353,14 +353,14 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 params.setFetchIfSceneInstanceShutdown(true);
                 params.setLevels(queryParams.getLevels());
                 if (ProbeConstant.ProbeId.NETWORK_INTERFACE_INFO.equals(probeId)) {
-                    // 网卡信息
+                    
                     var r = hostStateService.pageNetifaces(params);
                     if (r.getSource() != null) {
                         res = r.getSource().getObjs();
                         total = r.getSource().getTotal() + total;
                     }
                 } else if (ProbeConstant.ProbeId.PROCESS_INFO.equals(probeId)) {
-                    // 进程信息
+                    
                     if (multiNode) {
                         params.setPage(1);
                         params.setPageSize(1000);
@@ -371,7 +371,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                         total = r.getSource().getTotal() + total;
                     }
                 } else {
-                    // 用户变更信息
+                    
                     var r = hostStateService.pageSystemUserEvents(params);
                     if (r.getSource() != null) {
                         res = r.getSource().getObjs();
@@ -390,19 +390,19 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 params.setLevels(queryParams.getLevels());
                 ListObjServiceResult<CollectionHostEventBO> r;
                 if (ProbeConstant.ProbeId.FILE_MODIFY.equals(probeId)) {
-                    // 文件变更信息
+                    
                     params.setType(4);
                 } else if (ProbeConstant.ProbeId.REGISTRY_MODIFY.equals(probeId)) {
-                    // 注册表变更信息
+                    
                     params.setRuleGroups(CsceneBizConstant.REGISTRY_MODIFY_GROUP);
                 } else if (ProbeConstant.ProbeId.OS_LOG.equals(probeId)) {
-                    // 操作系统日志信息
+                    
                     params.setCatagories(CsceneBizConstant.OS_CATEGORY);
                 } else if (ProbeConstant.ProbeId.APPLICATION_LOG.equals(probeId)) {
-                    // 应用系统日志信息
+                    
                     params.setCatagories(CsceneBizConstant.APPLICATION_CATEGORY);
                 } else {
-                    // 安全系统日志信息
+                    
                     params.setCatagories(CsceneBizConstant.SECURITY_CATEGORY);
                 }
                 if (StringUtils.isEmpty(scrollId)) {
@@ -417,7 +417,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     total = r.getSource().getTotal() + total;
                 }
             } else {
-                // 自定义探针信息
+                
                 WazuhEventRequest request = new WazuhEventRequest();
                 request.setAgentNames(CollUtil.toList(element.getEid()));
                 request.setStartTime(startTime);
@@ -463,7 +463,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 if (Objects.nonNull(map.get("level"))) {
                     hostEventBO.setLevel((Integer) map.get("level"));
                 } else {
-                    // 默认等级
+                    
                     hostEventBO.setLevel(3);
                 }
                 var time = map.get("time");
@@ -483,7 +483,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 result.add(hostEventBO);
             });
         }
-        // 多节点分页大小处理
+        
         if (multiNode) {
             int start = queryParams.getPage() <= 0 ? 0 : (queryParams.getPage() - 1) * queryParams.getPageSize();
             if (start >= result.size()) {
@@ -508,7 +508,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         List<CollectionHostEventBO> result = new ArrayList<>();
         var batchSceneHandler = new BatchSceneHandler(CollUtil.toList(sceneId), null);
         var eid2Element = batchSceneHandler.getAllEid2ElementMap();
-        // 获取节点所有自定义探针id
+        
         List<String> agentNames = new ArrayList<>();
         List<String> probeIds = new ArrayList<>();
         Map<String, String> probeId2ProbeName = new HashMap<>();
@@ -538,14 +538,14 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         if (CollUtil.isEmpty(queryProbeIds)) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
-        // 构造查询请求
+        
         WazuhEventRequest request = new WazuhEventRequest();
         request.setStartTime(startTime);
         request.setEndTime(endTime);
         request.setPageNum(queryParams.getPage());
         request.setPageSize(queryParams.getPageSize());
         request.setAgentNames(agentNames);
-        // 分页查询自定义探针数据
+        
         var listObjResult = dataCollectionService.queryCustomProbeData(request, queryProbeIds);
         var res = listObjResult.getObjs();
         if (CollUtil.isEmpty(res)) {
@@ -608,7 +608,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     public ServiceResult<Boolean> deleteById(String id, boolean logic, CsceneContextBO context) {
         if (ReentrantLockUtils.tryLock(id)) {
             try {
-                // 移除定时任务
+                
                 SceneHostStateReportScheduleService.removeCsceneInstance(id);
                 var instanceHandler = new CsceneInstanceHandler(id, context);
                 NodeLimitUtils.substractLimitedNodeCount(instanceHandler);
@@ -803,7 +803,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         Map<String, Integer> count = new ConcurrentHashMap<>();
         List<Runnable> tasks = new ArrayList<>();
         String sceneId = params.getSceneId();
-        // 事件类
+        
         tasks.add(() -> {
             ElementMonitorRequest request = new ElementMonitorRequest();
             request.setSceneId(params.getSceneId());
@@ -819,24 +819,24 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     null).getSource().getTotal();
             count.put("event", fileCount + registryCount);
         });
-        // 信息类
+        
         tasks.add(() -> {
-            // 网络端口
+            
             TimeListPageInfoQueryParams infoParams = new TimeListPageInfoQueryParams();
             infoParams.setSceneIds(Arrays.asList(params.getSceneId()));
             infoParams.setNodeIds(params.getNodeIds());
             infoParams.setEndTime(params.getEndTime());
             infoParams.setFetchIfSceneInstanceShutdown(true);
             var netCount = hostStateService.pageNetifaces(infoParams).getSource().getTotal();
-            // 端口列表
+            
             infoParams.setSceneIds(Arrays.asList(params.getSceneId()));
             var portCount = hostStateService.pagePorts(infoParams).getSource().getTotal();
-            // 进程列表
+            
             infoParams.setSceneIds(Arrays.asList(params.getSceneId()));
             var processCount = hostStateService.pageProcesses(infoParams).getSource().getTotal();
             count.put("info",netCount+portCount+processCount);
         });
-        // 日志类
+        
         tasks.add(()->{
             HostEventQueryParams hostEventQueryParams = new HostEventQueryParams();
             hostEventQueryParams.setNodeIds(params.getNodeIds());
@@ -844,7 +844,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             var result = listHostEvents(params.getSceneId(), hostEventQueryParams);
             count.put("log", result.getSource().getTotal());
         });
-        // 流量类
+        
         tasks.add(()->{
             FlowQueryParams flowQueryParams = new FlowQueryParams();
             flowQueryParams.setTargetNodeIds(params.getNodeIds());
@@ -856,21 +856,16 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return new ServiceResult<>(count);
     }
 
-    /**
-     * 事件分页列表
-     * @param id
-     * @param queryParams
-     * @return
-     */
+    
     public ListObjServiceResult<CollectionHostEventBO> listHostEvents(String id, HostEventQueryParams queryParams) {
         var sceneId = getSceneId(id);
         if (StringUtils.isEmpty(sceneId)) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
 
-        // 0:所有 1:进程 2:端口 3:网络连接 4:文件 5:用户 6:注册表
+        
         if (Objects.nonNull(queryParams.getType()) && queryParams.getType() != 0) {
-            // 传入的sceneId不需要提前转
+            
             if (queryParams.getType().equals(1)) {
                 return getProbeCollectionData(null, id, ProbeConstant.ProbeId.PROCESS_INFO,
                         queryParams, FileEventType.PROCESS.name());
@@ -882,19 +877,19 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             }
 
             if (queryParams.getType().equals(3)) {
-                // 网络连接同端口
+                
                 return getProbeCollectionData(null, id, ProbeConstant.ProbeId.INTERNET_CONNECTION, queryParams,
                         FileEventType.INTERNET_CONNECTION.name());
             }
 
             if (queryParams.getType().equals(4)) {
-                // 文件变动
+                
                 return getProbeCollectionData(null, id, ProbeConstant.ProbeId.FILE_MODIFY, queryParams,
                         FileEventType.FILE.name());
             }
 
             if (queryParams.getType().equals(5)) {
-                // 用户变动
+                
                 return getProbeCollectionData(null, id, ProbeConstant.ProbeId.USERS_MODIFY, queryParams,
                         FileEventType.USERS.name());
             }
@@ -908,11 +903,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return scenePluginCollectionSceneService.listHostEvents(sceneId, queryParams);
     }
 
-    /**
-     * 滚动分页列表
-     * @param scrollId
-     * @return
-     */
+    
     public ListObjServiceResult<CollectionHostEventBO> scrollHostEvents(String id, String scrollId, HostEventQueryParams queryParams) {
         if (StringUtils.isEmpty(scrollId)) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
@@ -937,7 +928,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             nodeIds = sceneHandler.getElementMap().values().stream().map(e -> e.getId()).collect(Collectors.toList());
         }
         CloudScenePluginHandler cloudPluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
-        // 非虚拟机和容器节点不支持探针采集
+        
         List<String> newNodeIds = new ArrayList<>();
         for (String nodeId : nodeIds) {
             var cloudElement = cloudPluginHandler.getElement(nodeId);
@@ -968,11 +959,11 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             queryParams.setEndTime(TimeUtils.localDateTimeToString(LocalDateTime.now()));
         }
         if (probeId != null) {
-            // 有探针id，查询指定探针采集数据
+            
             return getProbeCollectData(sceneInstanceId, sceneId, requestId, newNodeIds, sceneHandler, nodeId2ProbeNameMap,
                     probeId, queryParams, cloudPluginHandler, type);
         } else {
-            // 无探针id，查询所有自定义探针采集数据
+            
             return getCustomProbeCollectData(sceneInstanceId, sceneId, newNodeIds, pluginHandler, nodeId2ProbeNameMap, queryParams);
         }
     }
@@ -1170,11 +1161,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
     }
 
-    /**
-     * 根据引用类型分组统计
-     * @param events 需要排除的event
-     * @return
-     */
+    
     public List<CsceneInstanceCountByReferenceTypeBO> countGroupByReferenceType(List<Integer> events) {
         List<CsceneInstanceCountByReferenceTypeModel> csceneInstanceCountByReferenceTypeModels = getModelMapper().countGroupByReferenceType(events);
         if (CollectionUtils.isEmpty(csceneInstanceCountByReferenceTypeModels)) {
@@ -1208,26 +1195,16 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return new ServiceResult<>(result);
     }
 
-    /**
-     * @description: 启动节点
-     * @param id 
-     * @param nodeId 
-     * @param context 
-     * @return ServiceResult<Boolean>
-     */
+    
     public ServiceResult<Boolean> startElement(String id, String nodeId, CsceneContextBO context) {
-        //获取场景实例操作对象
+        
         CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
-        //执行节点启动
+        
         boolean result = instanceHandler.startElement(nodeId);
         return new ServiceResult<>(result);
     }
 
-    /**
-     * @description: 如果是gns3靶标，禁止开机/重启/关机/重建
-     * @param csceneId 场景id
-     * @param nodeId 节点id
-     */
+    
     public void unSupportedOperation(String csceneId, String nodeId) {
         CsceneInstanceHandler csceneInstanceHandler = new CsceneInstanceHandler(csceneId, null, true);
         String sceneId = csceneInstanceHandler.getSceneId();
@@ -1238,17 +1215,11 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
     }
 
-    /**
-     * @description: 关闭节点
-     * @param id
-     * @param nodeId
-     * @param context
-     * @return ServiceResult<Boolean>
-     */
+    
     public ServiceResult<Boolean> stopElement(String id, String nodeId, CsceneContextBO context) {
-        //获取场景实例操作对象
+        
         CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
-        //执行节点启动
+        
         boolean result = instanceHandler.stopElement(nodeId);
         return new ServiceResult<>(result);
     }
@@ -1308,7 +1279,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     public ServiceResult<Boolean> snapshotElement(String id, String nodeId, String snapshotName, String description, CsceneContextBO context) {
-        // 校验快照名长度、是否重复等
+        
         if (StringUtils.isEmpty(snapshotName)) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
@@ -1330,16 +1301,16 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             throw new MpRuntimeException(CsceneErrorCode.SNAPSHOT_NAME_DUPLICATED);
         }
 
-        // 先保存cscene中的关联信息
+        
         String snapshotId = csceneSnapshotService.saveCsceneSnapshot(csceneId, csceneInstanceId, nodeId, snapshotName).getSource();
 
-        // 异步创建快照
+        
         ElementTaskPool.getInstance().executeTask(() -> {
-            // 打快照
+            
             CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
             boolean result = instanceHandler.snapshotElement(nodeId, snapshotId, snapshotName, description);
 
-            // 更新场景模板靶标的快照、cscene中的关联信息
+            
             var sceneInfo = this.getSceneInfo(id);
             if (StringUtils.isNotEmpty(sceneInfo.getSceneConfigId())) {
                 if (result) {
@@ -1389,7 +1360,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     public ServiceResult<Boolean> deleteElementSnapshot(String csceneId, String nodeId, String snapshotId) {
-        // 校验场景是否存在、快照是否在当前场景模板下
+        
         var queryInstance = this.get(csceneId).getSource();
         if (queryInstance == null || queryInstance.getObj() == null) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
@@ -1408,7 +1379,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
         }
 
-        // 校验快照是否被场景和场景模板引用
+        
         String image = SnapshotAddressUtils.parseAddress(snapshot.getAddress()).getImageName();
         var configUsed = csceneSpecialService.statDeviceReferCscenes(new String[]{ image }).getSource();
         var configNames = this.getReferCsceneNames(configUsed.get(image), (c) -> c.getName(), 3);
@@ -1467,7 +1438,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         instance.setScene(csceneBO.getUpdateScene());
 
         CsceneInstanceHandler originHandler = new CsceneInstanceHandler(csceneBO.getId(), null);
-        // 保留隐藏节点和隐藏端口
+        
         var originData = originHandler.toDataWithHidden().getScene();
         Set<String> hiddenElementIds = new HashSet<>();
         Set<String> hiddenPortIds = new HashSet<>();
@@ -1515,10 +1486,10 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         var plugins = originData.getPlugins();
         for (var plugin : plugins.entrySet()) {
             if (!cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY.equals(plugin.getKey())) {
-                // 暂不支持采集和发生插件的修改 保留原有配置
+                
                 instance.getScene().getPlugins().put(plugin.getKey(), plugin.getValue());
             } else {
-                // 保留插件的隐藏节点和隐藏端口
+                
                 var newPlugin = instance.getScene().getPlugins().get(plugin.getKey());
                 for (var e : plugin.getValue().getElements().entrySet()) {
                     if (hiddenElementIds.contains(e.getKey())) {
@@ -1551,10 +1522,10 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 var originConnectPort = originSceneHandler.getPortConnectedPort(portId);
                 var newConnectPort = newSceneHandler.getPortConnectedPort(portId);
                 if (originConnectPort == null && newConnectPort != null) {
-                    // 赋值一个新的id
+                    
                     var p = newPorts.get(portId);
                     p.setChange(true);
-//                    p.setId(portId + "00");
+
                     if (StringUtils.isNotEmpty(p.getIp())) {
                         var connectElement = newConnectPort.getElement();
                         if (connectElement != null) {

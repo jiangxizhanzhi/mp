@@ -10,11 +10,7 @@ import cn.cyberpeace.mp.frontbusiness.service.UrlACTargetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-/**
- * @Description
- * @Author shgang
- * @Date 2022/9/22
- */
+
 @Service
 public class UrlACTargetServiceImpl extends BaseModelServiceImpl<UrlACTargetModel, UrlACTargetMapper, UrlACTargetFields, QueryParams>
     implements UrlACTargetService {

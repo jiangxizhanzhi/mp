@@ -5,41 +5,29 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * 基础模型，对应云平台接口返回信息
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class BaseCloudPlatformResult extends BaseModel {
 
-    /**
-     * 是否成功
-     */
+    
     @ApiModelProperty(hidden = true)
     private boolean success;
 
-    /**
-     * 请求ID
-     */
+    
     @ApiModelProperty(hidden = true)
     private String requestId;
 
-    /**
-     * 总数据大小
-     */
+    
     @ApiModelProperty(hidden = true)
     private Integer total = 0;
 
-    /**
-     * 消息体
-     */
+    
     @ApiModelProperty(hidden = true)
     private String message;
 
-    /**
-     * code
-     */
+    
     @ApiModelProperty(hidden = true)
     private String code;
 }

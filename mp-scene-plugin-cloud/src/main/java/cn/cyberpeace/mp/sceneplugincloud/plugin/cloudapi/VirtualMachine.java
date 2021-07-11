@@ -79,7 +79,7 @@ public class VirtualMachine extends CloudClient {
             return doAction(instanceId, new VirtualMachinePauseData());
         } catch (Exception e) {
             if (e.getMessage() != null && e.getMessage().contains("Conflict")) {
-                // 判断实例是否已是暂停状态
+                
                 var instance = this.get(instanceId);
                 if (instance != null && VirtualMachineGetResult.Status.PAUSED.equalsIgnoreCase(instance.getStatus())) {
                     return true;
@@ -94,7 +94,7 @@ public class VirtualMachine extends CloudClient {
             return doAction(instanceId, new VirtualMachineUnPauseData());
         } catch (Exception e) {
             if (e.getMessage() != null && e.getMessage().contains("Conflict")) {
-                // 判断实例是否是活动状态
+                
                 var instance = this.get(instanceId);
                 if (instance != null && VirtualMachineGetResult.Status.ACTIVE.equalsIgnoreCase(instance.getStatus())) {
                     return true;
@@ -123,7 +123,7 @@ public class VirtualMachine extends CloudClient {
             return doAction(instanceId, new VirtualMachineResumeData());
         } catch (Exception e) {
             if (e.getMessage() != null && e.getMessage().contains("Conflict")) {
-                // 判断实例是否已是活动状态
+                
                 var instance = this.get(instanceId);
                 if (instance != null && VirtualMachineGetResult.Status.ACTIVE.equalsIgnoreCase(instance.getStatus())) {
                     return true;
@@ -138,7 +138,7 @@ public class VirtualMachine extends CloudClient {
             return doAction(instanceId, new VirtualMachineSuspendData());
         } catch (Exception e) {
             if (e.getMessage() != null && e.getMessage().contains("Conflict")) {
-                // 判断实例是否已是挂起状态
+                
                 var instance = this.get(instanceId);
                 if (instance != null && VirtualMachineGetResult.Status.SUSPENDED.equalsIgnoreCase(instance.getStatus())) {
                     return true;
@@ -153,7 +153,7 @@ public class VirtualMachine extends CloudClient {
             return doAction(instanceId, new VirtualMachineStartData());
         } catch (Exception e) {
             if (e.getMessage() != null && e.getMessage().contains("Conflict")) {
-                // 判断实例是否是活动状态
+                
                 var instance = this.get(instanceId);
                 if (instance != null && VirtualMachineGetResult.Status.ACTIVE.equalsIgnoreCase(instance.getStatus())) {
                     return true;
@@ -168,7 +168,7 @@ public class VirtualMachine extends CloudClient {
             return doAction(instanceId, new VirtualMachineStopData());
         } catch (Exception e) {
             if (e.getMessage() != null && e.getMessage().contains("Conflict")) {
-                // 判断实例是否已是暂停状态
+                
                 var instance = this.get(instanceId);
                 if (instance != null && VirtualMachineGetResult.Status.SHUTOFF.equalsIgnoreCase(instance.getStatus())) {
                     return true;
@@ -301,13 +301,10 @@ public class VirtualMachine extends CloudClient {
         }, true);
     }
 
-    /**
-     * 虚拟机挂载实体USB
-     * @param data
-     */
+    
     public void attachEntityUsbs(AttachEntityUsbsData data) {
         log.info("VirtualMachine.attachEntityUsbs begin. data:{}", data);
-        //外设挂载失败，不影响场景启动
+        
         try {
             CloudResponse<Object> response = cloudPost(CloudUrlConstant.ATTACH_ENTITY_USBS, data, null, new TypeReference<CloudResponse<Object>>() {
             }, true);
@@ -318,10 +315,7 @@ public class VirtualMachine extends CloudClient {
         log.info("VirtualMachine.attachEntityUsbs end.");
     }
 
-    /**
-     * 虚拟机卸载实体USB
-     * @param data
-     */
+    
     public void deleteEntityUsbs(AttachEntityUsbsData data) {
         log.info("VirtualMachine.deleteEntityUsbs begin. data:{}", data);
         CloudResponse<Object> response = cloudDelete(CloudUrlConstant.DELETE_ENTITY_USBS, data, null, new TypeReference<CloudResponse<Object>>() {

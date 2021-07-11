@@ -2,11 +2,7 @@ package cn.cyberpeace.mp.frontadmin.dto.option;
 
 import lombok.Data;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/8/15 14:39
- */
+
 @Data
 public class OptionMetaModel {
 

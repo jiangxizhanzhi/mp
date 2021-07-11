@@ -5,11 +5,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-/**
- * @Description 封装文件验证参数
- * @Author shgang
- * @Date 2022/10/27
- */
+
 @Data
 @NoArgsConstructor
 public class FileCheckRequest {

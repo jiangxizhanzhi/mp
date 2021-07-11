@@ -23,7 +23,7 @@ public class DefaultImageInit implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         log.info("DefaultImageInit init value is {}", baseAppConfig.isRunInit());
-        // 本地开发环境不运行资源的更新和删除
+        
         if (!baseAppConfig.isRunInit()) {
             return;
         }

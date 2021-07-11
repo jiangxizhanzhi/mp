@@ -10,30 +10,18 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/**
- * @author wanggang
- */
+
 @Mapper
 @Repository
 @ModelClass(FlowClassificationModel.class)
 public interface FlowClassificationsMapper extends BaseModelMapper<FlowClassificationModel> {
 
-    /**
-     * 查询所有
-     * @return
-     */
+    
     List<FlowClassificationModel> findAll();
 
-    /**
-     * 删除所有
-     * @return
-     */
+    
     int deleteAll();
 
-    /**
-     * 新增
-     * @param list
-     * @return
-     */
+    
     Integer batchInsert(@Param("list") List<FlowClassificationModel> list, @Param("currentTime")LocalDateTime currentTime);
 }

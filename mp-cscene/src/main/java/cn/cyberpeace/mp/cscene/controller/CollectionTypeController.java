@@ -17,11 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/5/18 16:09
- */
+
 
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/collection/type")

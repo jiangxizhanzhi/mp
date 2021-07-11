@@ -10,9 +10,7 @@ import javax.servlet.ServletRequest;
 import java.util.LinkedList;
 import java.util.List;
 
-/**
- * 自定义请求数据绑定处理类，主要解决将前端传递的下划线格式的字段自动转为驼峰格式
- */
+
 public class CustomServletRequestDataBinder extends ServletRequestDataBinder {
 
     public CustomServletRequestDataBinder(@Nullable Object target) {
@@ -23,11 +21,7 @@ public class CustomServletRequestDataBinder extends ServletRequestDataBinder {
         super(target, objectName);
     }
 
-    /** 遍历请求参数对象 把请求参数的名转换成驼峰体
-     * 重写addBindValues绑定数值的方法
-     * @param mutablePropertyValues 请求参数列表
-     * @param request 请求
-     */
+    
     @Override
     protected void addBindValues(MutablePropertyValues mutablePropertyValues, ServletRequest request) {
         List<PropertyValue> propertyValueList = mutablePropertyValues.getPropertyValueList();

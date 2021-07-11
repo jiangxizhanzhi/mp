@@ -12,23 +12,17 @@ import javax.validation.constraints.NotBlank;
 @AllArgsConstructor
 public class SnapshotDeleteRequest {
 
-    /**
-     * 靶标id
-     */
+    
     @ApiModelProperty(value = "靶标id", required = true)
     @NotBlank
     private String deviceUuid;
 
-    /**
-     * 快照id
-     */
+    
     @ApiModelProperty(value = "快照id", required = true)
     @NotBlank
     private String snapshotUuid;
 
-    /**
-     * 快照名称
-     */
+    
     @ApiModelProperty(value = "快照名称", required = true)
     @NotBlank
     private String snapshotName;

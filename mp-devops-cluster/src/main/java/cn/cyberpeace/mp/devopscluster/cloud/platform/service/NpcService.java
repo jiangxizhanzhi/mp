@@ -13,10 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-/**
- * 运维管控-系统运维-网络实例管理-NPC
- * @author wanggang
- */
+
 @Service
 @Slf4j
 public class NpcService extends BaseCpService {
@@ -25,11 +22,7 @@ public class NpcService extends BaseCpService {
         super(devopsClusterConfig);
     }
 
-    /**
-     * 分页查询NPC信息
-     * @param getParams
-     * @return
-     */
+    
     public CloudPlatformPageResult<NpcModel> page(String getParams) {
         CloudPlatformResult<List<NpcModel>> pageResult = super.sendGet(BaseCloudPlatformConstant.CPCLOUD_URL + "/npc_node" + BaseCloudPlatformConstant.URL_VERSION + "/node" + getParams, CloudPlatformResult.class);
         super.checkResult(pageResult);

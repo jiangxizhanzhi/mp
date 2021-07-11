@@ -6,11 +6,7 @@ import lombok.Setter;
 
 import java.util.List;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/4/19
- */
+
 @Getter
 @Setter
 public class RouterConfigCmdData implements CloudHttpData {

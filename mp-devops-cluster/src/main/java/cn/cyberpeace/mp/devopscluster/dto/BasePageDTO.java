@@ -7,14 +7,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class BasePageDTO extends BaseDTO{
 
-    /**
-     * 每页条数
-     */
+    
     private Integer limit;
 
-    /**
-     * 页码
-     */
+    
     private Integer offset;
 
     public BasePageDTO(Integer limit, Integer offset) {

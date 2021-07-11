@@ -15,11 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * @Description: 业务服务监控
- * @Author qiaokang
- * @Date：2022/7/15 14:18
- */
+
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/biz_monitor")
@@ -29,10 +25,7 @@ public class BizServiceMonitorController {
 
     private final ServiceMonitorService serviceMonitorService;
 
-    /**
-     * 业务服务监控
-     * @return
-     */
+    
     @ApiOperation("业务服务监控")
     @GetMapping("/page")
     public ServiceResult<ListObjResult<ServiceMonitorDto>> page(BizServicePageRequest request){

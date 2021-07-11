@@ -3,11 +3,7 @@ package cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image;
 import lombok.Getter;
 import lombok.Setter;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2021/11/2
- */
+
 @Getter
 @Setter
 public class AccessModeExportResult {

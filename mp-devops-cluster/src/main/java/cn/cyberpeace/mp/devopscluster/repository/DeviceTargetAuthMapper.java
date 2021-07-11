@@ -18,24 +18,12 @@ import java.util.List;
 @ModelClass(DeviceTargetAuthPO.class)
 public interface DeviceTargetAuthMapper extends BasePermissionMapper {
 
-    /**
-     * 分组查询镜像授权用户数
-     * @param ids
-     * @return
-     */
+    
     List<ImageAuthTotalCount> totalCount(@Param("ids") List<String> ids);
 
-    /**
-     * 根据镜像ID查询用户信息
-     * @param target
-     * @return
-     */
+    
     List<DeviceTargetAuthPO> findByTarget(String target);
 
-    /**
-     * 根据镜像ID集合批量删除数据
-     * @param ids
-     * @return
-     */
+    
     Integer deleteByTargets(@Param("ids") List<String> ids);
 }

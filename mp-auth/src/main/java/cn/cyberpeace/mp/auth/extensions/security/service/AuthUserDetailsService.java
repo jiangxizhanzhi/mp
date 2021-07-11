@@ -23,11 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Slf4j
 @Service
 @CacheConfig(cacheManager = AuthCacheConfig.CACHE_MANAGER_NORMAL)
@@ -93,10 +89,7 @@ public class AuthUserDetailsService implements UserDetailsService {
     }
 
 
-    /**
-     * @param userId
-     * @return
-     */
+    
     @Cacheable(value = CACHE_USER_AUTHORITIES)
     public Set<GrantedAuthority> loadAuthorities(String userId) {
         Set<GrantedAuthority> authoritySet = new HashSet<>();
@@ -108,7 +101,7 @@ public class AuthUserDetailsService implements UserDetailsService {
             authoritySet.add(new SimpleGrantedAuthority("ROLE_" + r.getIdentifier()));
         });
 
-        // 加载权限
+        
         List<TargetModel> targets = userPermissionService.listTargetsByUserId(userId);
         targets.forEach(t -> {
             authoritySet.add(new SimpleGrantedAuthority(t.getIdentifier()));

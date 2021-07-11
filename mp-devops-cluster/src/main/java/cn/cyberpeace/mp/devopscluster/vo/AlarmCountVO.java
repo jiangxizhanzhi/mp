@@ -6,11 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * @Description: 告警数量统计信息
- * @Author qiaokang
- * @Date：2022/7/19 16:39
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

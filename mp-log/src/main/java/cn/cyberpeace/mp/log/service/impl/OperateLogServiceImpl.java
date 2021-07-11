@@ -16,11 +16,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Locale;
 
-/**
- * @Description
- * @Author shgang
- * @Date 2022/9/14
- */
+
 @Repository
 public class OperateLogServiceImpl implements OperateLogService {
 

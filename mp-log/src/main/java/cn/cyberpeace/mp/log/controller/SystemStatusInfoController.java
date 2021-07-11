@@ -16,13 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * @ClassName LogDynamicSettingController
- * @description 日志级别设置Controller
- * @author wangssh
- * @date 2023/6/29
- * @version 1.0
- **/
+
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/system")
@@ -32,11 +26,7 @@ public class SystemStatusInfoController {
     @Autowired
     private ISystemStatusInfo systemStatusInfo;
 
-    /**
-     * 获取日志级别列表
-     *
-     * @return 日志级别信息
-     */
+    
     @GetMapping("/threadpool/info")
     @ApiOperation(value = "获取线程池状态信息")
     public ServiceResult getLogLevelList() {

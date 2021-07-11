@@ -95,7 +95,7 @@ public class SceneHandlerUtils {
             errorFLow(flow, e.getMessage());
             return false;
         }
-        // 流量执行次数
+        
         flow.setCount(Objects.nonNull(flow.getCount()) ? (flow.getCount() + 1) : 1);
         successOnFLow(flow);
         return true;
@@ -152,7 +152,7 @@ public class SceneHandlerUtils {
             });
             return false;
         }
-        // 流量执行次数
+        
         flows.forEach(flow -> {
             flow.setCount(Objects.nonNull(flow.getCount()) ? (flow.getCount() + 1) : 1);
             successOnFLow(flow);
@@ -255,13 +255,13 @@ public class SceneHandlerUtils {
             if (CollectionUtils.isNotEmpty(flowTaskTaskModels)) {
                 flowTaskId = flowTaskTaskModels.get(0).getId();
             }
-//            try {
-//                flowTaskId = flowExecutor.createFlow(executorId, flowNetworkId, srcElement.getEid(), flowId, fromIps, flowIp, null, null, null, flow, finalIp);
-//                log.info("flowExecutor createFlow success:[{}]", flowTaskId);
-//            } catch (Exception e) {
-//                errorFLow(flow, e.getMessage());
-//                return false;
-//            }
+
+
+
+
+
+
+
             flow.setTaskId(flowTaskId);
             return startFlow(flow, stopCallback);
         };
@@ -306,10 +306,10 @@ public class SceneHandlerUtils {
 
     public boolean startFlows(FlowPluginSceneElementBO flowElement, List<FlowWithSourceIp> flowWithSourceIps, Runnable stopCallback,
                               boolean async, Runnable asyncCallback, int runType, String nodeId) {
-//        // 需要创建流量任务的流量
-//        var needCreateTaskFlows = flowWithSourceIps.stream()
-//                .filter(f -> StringUtils.isEmpty(f.getFlow().getTaskId()))
-//                .collect(Collectors.toList());
+
+
+
+
         var flows = flowWithSourceIps.stream()
                 .map(f -> f.getFlow())
                 .collect(Collectors.toList());
@@ -322,7 +322,7 @@ public class SceneHandlerUtils {
             });
             return false;
         } else {
-            // 设置taskId
+            
             flows.forEach(flow -> {
                 flowTaskTaskModels.forEach(flowTaskTaskModel -> {
                     if (flow.getId().equals(flowTaskTaskModel.getFlowId())) {
@@ -334,111 +334,111 @@ public class SceneHandlerUtils {
         }
 
         return startFlows(flows, stopCallback, runType);
-//        if (needCreateTaskFlows.isEmpty()) {
-//            return startFlows(flows, stopCallback, runType);
-//        } else {
-//            log.info("taskIds has null value");
-//        }
-//
-//        var executorId = pluginHandler.getScene().getExecutor();
-//        if (StringUtils.isEmpty(executorId)) {
-//            flows.forEach(flow -> {
-//                errorFLow(flow, "Empty executor id");
-//            });
-//            return false;
-//        }
-//
-//        CloudScenePluginHandler cloudPluginHandler = pluginHandler.getSceneHandler()
-//                .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
-//        if (cloudPluginHandler == null) {
-//            flows.forEach(flow -> {
-//                errorFLow(flow, "Cloud plugin not found");
-//            });
-//            return false;
-//        }
-//
-//        var srcElement = flowElement.getSrcElement();
-//        var srcPorts = srcElement.getPorts();
-//        if (srcPorts == null) {
-//            flows.forEach(flow -> {
-//                errorFLow(flow, "Network port not found");
-//            });
-//            return false;
-//        }
-//
-//        String networkId = null;
-//        String ip = null;
-//        for (var srcPort : srcPorts) {
-//            var cloudPort = cloudPluginHandler.getPort(srcPort.getId());
-//            networkId = cloudPort.getAuxiliaryNetworkId();
-//            ip = srcPort.getIp();
-//            if (!StringUtils.isEmpty(networkId) && !StringUtils.isEmpty(ip)) {
-//                break;
-//            }
-//        }
-//
-//        if (StringUtils.isEmpty(networkId)) {
-//            flows.forEach(flow -> {
-//                errorFLow(flow, "Empty network id");
-//            });
-//            return false;
-//        }
-//
-//        if (StringUtils.isEmpty(ip)) {
-//            flows.forEach(flow -> {
-//                errorFLow(flow, "Empty ip");
-//            });
-//            return false;
-//        }
-//
-//        // 将流量id为空的流量状态置为错误
-//        var emptyIdFlows = needCreateTaskFlows.stream()
-//                .filter(flow -> flow.getFlow().getId() == null)
-//                .collect(Collectors.toList());
-//        if (!emptyIdFlows.isEmpty()) {
-//            emptyIdFlows.forEach(flow -> {
-//                errorFLow(flow.getFlow(), "Empty flow id");
-//            });
-//        }
-//
-//        // 流量id不为空的流量创建流量任务
-//        var newFlows = needCreateTaskFlows.stream()
-//                .filter(flow -> flow.getFlow().getId() != null)
-//                .collect(Collectors.toList());
-//        // 最终需要执行的流量集合
-//        var executeFlows = flows.stream()
-//                .filter(flow -> StringUtils.isNotEmpty(flow.getId()))
-//                .collect(Collectors.toList());
-//        if (newFlows.isEmpty()) {
-//            return false;
-//        }
-//        executeFlows.forEach(flow -> {
-//            preparingFLow(flow);
-//        });
-//
-//        Callable<Boolean> start = () -> {
-//            return startFlows(executeFlows, stopCallback, runType);
-//        };
-//        if (async) {
-//            TaskCommon.executeTask(() -> {
-//                try {
-//                    start.call();
-//                } catch (Exception e) {
-//                    log.info("Start flows error: ", e);
-//                }
-//                if (asyncCallback != null) {
-//                    asyncCallback.run();
-//                }
-//            });
-//            return true;
-//        } else {
-//            try {
-//                return start.call();
-//            } catch (Exception e) {
-//                log.info("Start flows error: ", e);
-//                return false;
-//            }
-//        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
 
     public boolean stopFlows(List<Flow> flows) {

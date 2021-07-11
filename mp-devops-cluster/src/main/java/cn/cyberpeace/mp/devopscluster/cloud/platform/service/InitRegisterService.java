@@ -25,10 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/**
- * 初始化注册MP信息到云平台
- * @author wanggang
- */
+
 @Service
 @Slf4j
 public class InitRegisterService extends BaseCpService {
@@ -43,10 +40,7 @@ public class InitRegisterService extends BaseCpService {
     @Resource
     private DeviceTargetMapper deviceTargetMapper;
 
-    /**
-     * 注册MP地址
-     * @return
-     */
+    
     @Async
     public BaseCloudPlatformResult register(String url) {
         Map<String, Object> map = new HashMap<>();
@@ -56,10 +50,7 @@ public class InitRegisterService extends BaseCpService {
         return pageResult;
     }
 
-    /**
-     * 同步云平台初始靶标
-     * @return
-     */
+    
     public Integer initTarget() {
         var result = new CloudPlatformItemsPageResult();
         try {

@@ -5,9 +5,7 @@ import lombok.*;
 
 import java.io.Serializable;
 
-/**
- * 磁盘剩余空间
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -15,9 +13,7 @@ import java.io.Serializable;
 @EqualsAndHashCode(callSuper = true)
 public class ImportDiskSpaceCloudPlatformResult extends BaseCloudPlatformResult implements Serializable {
 
-    /**
-     * 磁盘剩余空间
-     */
+    
     private DiskSpace data;
 
     @NoArgsConstructor
@@ -25,9 +21,7 @@ public class ImportDiskSpaceCloudPlatformResult extends BaseCloudPlatformResult 
     @Data
     public static final class DiskSpace implements Serializable {
 
-        /**
-         * 虚拟机空间
-         */
+        
         private Long vmSpace;
 
     }

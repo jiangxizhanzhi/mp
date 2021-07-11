@@ -9,13 +9,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/*
- * @BelongsPackage: cn.cyberpeace.mp.situationaware.model
- * @Author: hhuang
- * @CreateTime: 2023/04/21  16:03
- * @Description: Suricata Rule Model
- * @Version: 1.0
- */
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -51,29 +45,23 @@ public class SuricataRuleModel extends BaseModel {
     @DefaultStr
     private String destinationPorts;
 
-    /**
-     * 规则体   (msg:...)
-     */
+    
     @ApiModelProperty("规则体")
     @DefaultStr
     private String ruleMsg;
 
-    //其他规则体中需要单独取出的字段
+    
 
     @ApiModelProperty("规则名称")
     @DefaultStr
     private String ruleName;
 
-    /**
-     * sid一个指令，是一个元数据属性，表示signature id 签名的ID
-     */
+    
     @ApiModelProperty("SID")
     @DefaultStr
     private String sid;
 
-    /**
-     * Att&ck  对抗性战术，技术以及公共知识库
-     */
+    
     @ApiModelProperty("Att&ck")
     @DefaultStr
     private String attck;

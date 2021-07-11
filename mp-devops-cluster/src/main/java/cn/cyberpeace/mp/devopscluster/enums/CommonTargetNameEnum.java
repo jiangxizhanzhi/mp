@@ -9,9 +9,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-/**
- * 常用靶标名称枚举信息
- */
+
 public enum CommonTargetNameEnum {
 
     SWITCH_SIMPLE("Switch Simple","交换机"),

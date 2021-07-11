@@ -1,10 +1,6 @@
 package cn.cyberpeace.mp.auth.util;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/10/13 09:15
- */
+
 public class SQLUtils {
 
     public static String escapeLike(String value) {

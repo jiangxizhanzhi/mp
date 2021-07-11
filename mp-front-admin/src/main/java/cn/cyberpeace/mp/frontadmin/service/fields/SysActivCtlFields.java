@@ -7,11 +7,7 @@ import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.frontadmin.model.SysActivCtlModel;
 import org.springframework.stereotype.Component;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/2/15 11:13
- */
+
 @Component
 public class SysActivCtlFields extends BaseModelFields {
     public static final DynamicFields allFields = new DynamicFields(ClassUtils.getBeanClassFields(SysActivCtlModel.class));

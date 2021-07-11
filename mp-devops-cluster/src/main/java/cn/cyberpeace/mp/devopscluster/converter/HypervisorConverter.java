@@ -37,9 +37,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-/**
- * @author wanggang
- */
+
 @Service
 @RequiredArgsConstructor
 @CacheConfig(cacheManager = DevopsCacheConfig.CACHE_MANAGER_20S)
@@ -56,10 +54,7 @@ public class HypervisorConverter implements BaseConverter {
     public static final String CACHE_VALUE_HYPERVISOR_PAGE = "HYPERVISOR_PAGE";
 
 
-    /**
-     * 资源统计
-     * @return
-     */
+    
     public HypervisorStatisticsConvertModel statistics() {
         HypervisorStatisticsCloudPlatformResult statistics = hypervisorService.statistics();
         HypervisorStatistics hypervisorStatistics = statistics.getHypervisorStatistics();
@@ -68,12 +63,7 @@ public class HypervisorConverter implements BaseConverter {
                 ,hypervisorStatistics.getLocalGbUsed(),hypervisorStatistics.getFreeRamMb(),hypervisorStatistics.getFreeDiskGb());
     }
 
-    /**
-     * 分页查询节点管理信息
-     * @param dto
-     * @param ignoreFields 不需要传递给云平台接口的参数,默认过滤page与perPage,此参数已转化成limit与offset这两个参数
-     * @return
-     */
+    
     @Cacheable(value = CACHE_VALUE_HYPERVISOR_PAGE)
     public BasePageBO<HypervisorBO> page(BasePageDTO dto, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
@@ -94,11 +84,7 @@ public class HypervisorConverter implements BaseConverter {
         return convertModel;
     }
 
-    /**
-     * 获取虚拟机数量限制与权重
-     * @param dto
-     * @return
-     */
+    
     public HypervisorWeightAndMaxInstanceConvertModel getWeightAndMaxInstances(HypervisorWeightAndMaxInstanceDTO dto) {
         HypervisorWeightAndMaxInstanceCloudPlatformResult model = hypervisorService.getWeightAndMaxInstances(ParamUtils.wrapperGetParamsByObject(dto));
         if (Objects.isNull(model)){
@@ -107,18 +93,12 @@ public class HypervisorConverter implements BaseConverter {
         return new HypervisorWeightAndMaxInstanceConvertModel(model.getWeight(),model.getMaxInstances());
     }
 
-    /**
-     * 节点管理-重启/关机
-     * @param dto
-     */
+    
     public void rebootOrPowerOff(HypervisorActionDTO dto) {
         hypervisorService.rebootOrPowerOff(JSONObject.toJSONString(dto));
     }
 
-    /**
-     * 服务状态监控
-     * @return
-     */
+    
     public List<HypervisorServiceStateConvertModel> serviceState() {
         CloudPlatformPageResult<InstanceOsServiceModel> modelCloudPlatformPageResult = vmService.osServicesStateFromInstances();
         CloudPlatformPageResult<NetworkAgentModel> networks = networkService.agentsStateFromNetworks();
@@ -139,10 +119,7 @@ public class HypervisorConverter implements BaseConverter {
         return resultList;
     }
 
-    /**
-     * 查询虚拟结合交换机状态列表
-     * @return
-     */
+    
     public ListResult<VirtualRealSwitchBO> listVirtualRealSwitch() {
         SwitchesCloudPlatform model = switchService.list();
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getSwitchs())){

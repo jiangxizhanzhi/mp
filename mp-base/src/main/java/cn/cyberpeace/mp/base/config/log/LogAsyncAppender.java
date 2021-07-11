@@ -15,11 +15,11 @@ public class LogAsyncAppender extends AsyncAppender {
 
     @Override
     protected void preprocess(ILoggingEvent eventObject) {
-        // 每次打印日志前设置 追踪id
-        // 日志可能会在业务代码执行前打印,为避免在打印日志时创建线程上下文,需要加上SysContext是否存在的判断
+        
+        
         MDC.put("CALL_CHAIN_ID", SysContextHolder.getCallChainId());
         if (eventObject instanceof LoggingEvent) {
-            // 需要先置空 mdcPropertyMap 字段,然后重新生成一次,否则获取不到上一步设置的CALL_CHAIN_ID
+            
             var loggingEvent = (LoggingEvent) eventObject;
             ClassUtils.setFieldValue(mdcPropertyMapField, loggingEvent, null);
             loggingEvent.getMDCPropertyMap();

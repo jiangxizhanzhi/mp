@@ -48,11 +48,7 @@ public class SnapshotConverter {
 
     private final CsceneSpecialService csceneSpecialService;
 
-    /**
-     * 根据设备UUID查询快照列表
-     * @param deviceUuid
-     * @return
-     */
+    
     public BasePageBO<SnapshotConvertModel> list(String deviceUuid) {
         CloudPlatformPageResult<Snapshot> model = snapshotService.list(deviceUuid);
         List<SnapshotConvertModel> list = model.getList().stream().map(item -> {
@@ -71,11 +67,7 @@ public class SnapshotConverter {
         return convertModel;
     }
 
-    /**
-     * 根据名称查询设备名称和快照列表
-     * @param name
-     * @return
-     */
+    
     public DeviceAndSnapshotConvertModel deviceAndSnapshotByName(String name) {
         DeviceAndSnapshotCloudPlatformResult model = snapshotService.deviceAndSnapshotByName(name);
         if (Objects.isNull(model)){
@@ -104,11 +96,7 @@ public class SnapshotConverter {
         return convertModel;
     }
 
-    /**
-     * 创建快照
-     * @param request
-     * @return
-     */
+    
     public void create(SnapshotRequest request) {
         ScenariosSnapshot snapshotCreate = new ScenariosSnapshot();
         snapshotCreate.setDeviceUuid(request.getUuid());
@@ -121,11 +109,7 @@ public class SnapshotConverter {
         scenariosService.create(snapshotCreate);
     }
 
-    /**
-     * 合并快照
-     * @param request
-     * @return
-     */
+    
     public void merge(SnapshotMergeRequest request) {
         validSnapshot(Collections.singletonList(request.getUuid()));
         DeviceSnapshotMergeCloudPlatform mergeCloudPlatform = new DeviceSnapshotMergeCloudPlatform();
@@ -136,13 +120,10 @@ public class SnapshotConverter {
         scenariosService.mergeSnapshot(mergeCloudPlatform);
     }
 
-    /**
-     * 验证快照是否被引用或使用
-     * @param uuids
-     */
+    
     public void validSnapshot(List<String> uuids) {
 
-        //引用
+        
         ServiceResult<Map<String, List<DeviceReferCsceneStat>>> referStateServiceResult = csceneSpecialService.statDeviceReferCscenesByPrefix(uuids);
         Map<String, List<DeviceReferCsceneStat>> referStateMap = referStateServiceResult.getSource();
 
@@ -163,7 +144,7 @@ public class SnapshotConverter {
             }
             throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_SNAPSHOT_REFERENCED_SCENE_WITH_NAME.format(sceneName));
         }
-        //使用
+        
         ServiceResult<Map<String, List<DeviceReferCsceneInstanceStat>>> useStateServiceResult = csceneSpecialService.statDeviceReferCsceneInstancesByPrefix(uuids);
         Map<String, List<DeviceReferCsceneInstanceStat>> useStateMap = useStateServiceResult.getSource();
 

@@ -11,19 +11,13 @@ import java.util.List;
 @AllArgsConstructor
 public class AttackDestination{
 
-    /**
-     * 目标IP
-     */
+    
     private String ip;
 
-    /**
-     * 端口
-     */
+    
     private Integer port;
 
-    /**
-     * mac地址
-     */
+    
     private List<String> mac;
 
 }

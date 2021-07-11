@@ -28,7 +28,7 @@ public abstract class BaseCloudPluginSceneElementPortBO<M extends BaseCloudPlugi
     private List<FirewallRule> firewallRules;
     @ApiModelProperty(value = "是否是连接网络外网的端口")
     private Boolean connToExtNet = false;
-    // 靶标属性
+    
     @ApiModelProperty(value = "实体设备端口接入类型")
     private String entityAccessType;
     @ApiModelProperty(value = "实体设备端口链接的交换机名称")
@@ -59,13 +59,13 @@ public abstract class BaseCloudPluginSceneElementPortBO<M extends BaseCloudPlugi
     @ApiModelProperty(value = "连接模式: dot1q-tunnel(单臂路由)")
     private String connectMode;
 
-    // ospf 组网
+    
     @ApiModelProperty(value = "ospf组网下的ip地址")
     private String ospfIp;
     @ApiModelProperty(value = "ospf组网下的area")
     private String ospfArea;
 
-    // bgp 组网
+    
     @ApiModelProperty(value = "bgp组网下的as")
     private String bgpAs;
     @ApiModelProperty(value = "bgp组网下的ip地址")
@@ -75,7 +75,7 @@ public abstract class BaseCloudPluginSceneElementPortBO<M extends BaseCloudPlugi
     @ApiModelProperty(value = "bgp组网下的对端端口所属AS")
     private String bgpPeerAs;
 
-    // rip 组网
+    
     @ApiModelProperty(value = "rip组网下的IP")
     private String ripIp;
     @ApiModelProperty(value = "ip下的邻居")

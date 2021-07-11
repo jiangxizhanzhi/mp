@@ -5,11 +5,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/4/25 09:40
- */
+
 @Data
 @ApiModel("采集模板分页项")
 public class CollectionTemplatePageItemDto extends CollectionTemplateModel {

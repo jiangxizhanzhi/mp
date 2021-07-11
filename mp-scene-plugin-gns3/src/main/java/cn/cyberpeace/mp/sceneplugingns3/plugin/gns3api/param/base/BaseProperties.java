@@ -6,11 +6,7 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/9/7
- */
+
 @Getter
 @Setter
 public class BaseProperties {

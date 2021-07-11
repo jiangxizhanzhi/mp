@@ -4,10 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * SNMP参数信息
- * @author wanggang
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

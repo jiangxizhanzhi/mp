@@ -9,11 +9,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.concurrent.TimeUnit;
 
-/**
- * Represents a 'hop' in the proxying chain, establishes a 'client' to
- * communicate with the next server, with a {@link WsProxyClientHandler}
- * to copy data from the 'client' to the supplied 'server' session.
- */
+
 public class NextHop {
 
     private WsProxyTargetConfig targetConfig;

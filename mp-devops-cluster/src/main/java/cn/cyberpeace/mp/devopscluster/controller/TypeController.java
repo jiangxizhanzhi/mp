@@ -32,9 +32,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-/**
- * 类型管理类
- */
+
 @Validated
 @Slf4j
 @RestController
@@ -53,10 +51,7 @@ public class TypeController {
 
     private final SwitchConverter switchConverter;
 
-    /**
-     * 查询所有分类
-     * @return
-     */
+    
     @ApiOperation("查询所有靶标分类")
     @GetMapping("/target-categories")
     public Result<TypeAllVO> targetCategories(){
@@ -85,10 +80,7 @@ public class TypeController {
         return new Result<>(allResponse);
     }
 
-    /**
-     * 查询所有分类
-     * @return
-     */
+    
     @ApiOperation("查询所有镜像管理分类")
     @ApiImplicitParam(name = "isAll", value = "是否全部", dataTypeClass = Boolean.class)
     @GetMapping("/image-mg-categories")
@@ -122,10 +114,7 @@ public class TypeController {
         return new Result<>(allResponse);
     }
 
-    /**
-     * 查询所有分类
-     * @return
-     */
+    
     @ApiOperation("查询所有分类")
     @GetMapping("/categories")
     public Result<TypeAllVO> list(){
@@ -138,10 +127,7 @@ public class TypeController {
         return new Result<>(response);
     }
 
-    /**
-     * 查询所有分类
-     * @return
-     */
+    
     @ApiOperation("查询所有二级分类")
     @ApiImplicitParam(name = "firstTypeId", value = "一级分类id", dataTypeClass = Integer.class)
     @GetMapping("/l2-categories")
@@ -159,10 +145,7 @@ public class TypeController {
     }
 
 
-    /**
-     * 查询所有角色
-     * @return
-     */
+    
     @ApiOperation("查询所有角色")
     @GetMapping("/roles")
     public Result<TypeAllVO>  roles(){
@@ -175,10 +158,7 @@ public class TypeController {
         return new Result<>(response);
     }
 
-    /**
-     * 查询所有部署类型
-     * @return
-     */
+    
     @ApiOperation("查询所有部署类型")
     @GetMapping("/deploy_type")
     public Result<TypeAllVO>  deployType(){
@@ -191,10 +171,7 @@ public class TypeController {
         return new Result<>(response);
     }
 
-    /**
-     * 查询所有虚拟类型
-     * @return
-     */
+    
     @ApiOperation("查询所有虚拟类型")
     @GetMapping("/image-types")
     public Result<TypeAllVO> imageType(){
@@ -207,10 +184,7 @@ public class TypeController {
         return new Result<>(response);
     }
 
-    /**
-     * 查询所有语言
-     * @return
-     */
+    
     @ApiOperation("查询所有语言")
     @GetMapping("/language")
     public Result<TypeAllVO> language(){
@@ -223,10 +197,7 @@ public class TypeController {
         return new Result<>(response);
     }
 
-    /**
-     * 查询所有系统架构
-     * @return
-     */
+    
     @ApiOperation("查询所有系统架构")
     @GetMapping("/system-architecure")
     public Result<TypeAllVO> systemArchitecure(){
@@ -239,10 +210,7 @@ public class TypeController {
         return new Result<>(response);
     }
 
-    /**
-     * 查询支持的磁盘格式
-     * @return
-     */
+    
     @ApiOperation("查询支持的磁盘格式")
     @GetMapping("/disk-format")
     public Result<TypeAllVO> diskFormat(){
@@ -255,10 +223,7 @@ public class TypeController {
         return new Result<>(response);
     }
 
-    /**
-     * 查询所有访问类型
-     * @return
-     */
+    
     @ApiOperation("查询所有访问类型")
     @GetMapping("/access-type")
     public Result<TypeAllVO> accessType(){
@@ -271,10 +236,7 @@ public class TypeController {
         return new Result<>(response);
     }
 
-    /**
-     * 查询所有服务分类
-     * @return
-     */
+    
     @ApiOperation("查询所有服务管理分类")
     @GetMapping("/service-mg-categories")
     public Result<TypeAllVO> serviceMgCategories(){
@@ -290,10 +252,7 @@ public class TypeController {
         return new Result<>(response);
     }
 
-    /**
-     * 查询所有实装管理分类
-     * @return
-     */
+    
     @ApiOperation("查询所有实装管理分类")
     @GetMapping("/entity-mg-categories")
     public Result<TypeAllVO> entityMgCategories(){
@@ -318,10 +277,7 @@ public class TypeController {
         return new Result<>(allResponse);
     }
 
-    /**
-     * 查询所有服务分类
-     * @return
-     */
+    
     @ApiOperation("查询所有服务分类")
     @GetMapping("/service-categories")
     public Result<TypeAllVO> serviceCategories(){
@@ -334,10 +290,7 @@ public class TypeController {
         return new Result<>(response);
     }
 
-    /**
-     * 查询所有服务管理-启动参数类型
-     * @return
-     */
+    
     @ApiOperation("查询启动参数类型")
     @GetMapping("/service-start-type")
     public Result<TypeAllVO> serviceStartType(){
@@ -350,10 +303,7 @@ public class TypeController {
         return new Result<>(response);
     }
 
-    /**
-     * 查询所有平台
-     * @return
-     */
+    
     @ApiOperation("查询所有平台数据")
     @GetMapping("/installer-platforms")
     public Result<TypeAllVO> installerPlatforms(){

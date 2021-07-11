@@ -16,22 +16,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * 虚拟机管理
- * @author wanggang
- */
+
 @Service
 @RequiredArgsConstructor
 public class VmConverter implements BaseConverter{
 
     private final VmService vmService;
 
-    /**
-     * 分页查询虚拟机信息
-     * @param dto
-     * @param ignoreFields 不需要传递给云平台接口的参数,默认过滤page与perPage,此参数已转化成limit与offset这两个参数
-     * @return
-     */
+    
     public BasePageBO<InstanceBO> page(InstancePageDTO dto, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         String getParams = ParamUtils.wrapperGetParamsByObject(dto, ignoreFields);
@@ -50,11 +42,7 @@ public class VmConverter implements BaseConverter{
         return convertModel;
     }
 
-    /**
-     * 获取虚拟机总数
-     * @param dto
-     * @return
-     */
+    
     public Integer getTotalInstances(InstancePageDTO dto) {
         dto.setLimit(NumberUtils.INTEGER_ONE);
         BasePageBO<InstanceBO> page = this.page(dto,this.getTotalPageIgnoreField());

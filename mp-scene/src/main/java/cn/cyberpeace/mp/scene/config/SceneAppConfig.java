@@ -39,7 +39,6 @@ public class SceneAppConfig {
     @Value("${mp.scene.linux_installer_dir:/tmp/tmp_installers}")
     private String linuxInstallerDir;
 
-    // TODO: 迁移到cloud
     @Value("${mp.scene.metadata_file_server:http://169.254.169.254/file}")
     private String metadataFileServer;
 

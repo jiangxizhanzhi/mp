@@ -35,11 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/11/22 10:16
- */
+
 @Api(value = "节点监控", tags = "节点监控")
 @Slf4j
 @RestController
@@ -56,12 +52,7 @@ public class ElementMonitorController {
     @Autowired
     private HostStateService hostStateService;
 
-    /**
-     * elementIds不能为空，如果为多个值，默认只取第一个
-     *
-     * @param baseRequest
-     * @return
-     */
+    
     @ApiOperation(value = "查询节点基本信息")
     @GetMapping("/info")
     public ServiceResult<ElementMonitorBasicInfo> getElementMonitorInfo(BaseSceneElementRequest baseRequest) {
@@ -71,12 +62,7 @@ public class ElementMonitorController {
     }
 
 
-    /**
-     * elementIds不能为空，如果为多个值，默认只取第一个
-     *
-     * @param baseRequest
-     * @return
-     */
+    
     @ApiOperation(value = "查询节点实时状态")
     @GetMapping("/rtinfo")
     public ServiceResult<ElementRTInfo> getElementRTInfo(BaseSceneElementRequest baseRequest) {

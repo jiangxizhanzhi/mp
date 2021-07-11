@@ -23,10 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-/**
- * @author litian
- * @date 2023年09月25 11:18
- */
+
 @Slf4j
 @Component
 public class BlacklistFilter extends OncePerRequestFilter {
@@ -47,7 +44,7 @@ public class BlacklistFilter extends OncePerRequestFilter {
             String method = request.getMethod();
             String uri = request.getRequestURI();
 
-            // 快速失败模式，不使用流过滤
+            
             for (BlacklistModel.AccessItem item : blacklistModel.getPatterns()) {
                 if (StringUtils.isEmpty(item.getMethod()) || method.equals(item.getMethod())) {
                     if (item.getPattern().matches(PathContainer.parsePath(uri))) {

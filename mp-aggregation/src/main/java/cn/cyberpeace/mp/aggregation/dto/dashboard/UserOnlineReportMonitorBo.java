@@ -4,11 +4,7 @@ import cn.cyberpeace.mp.auth.bo.user.UserOnlineReportBo;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/8/26 11:04
- */
+
 @Data
 public class UserOnlineReportMonitorBo extends UserOnlineReportBo {
 

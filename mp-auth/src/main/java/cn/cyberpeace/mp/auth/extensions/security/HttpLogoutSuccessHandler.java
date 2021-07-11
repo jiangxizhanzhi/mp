@@ -32,11 +32,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Objects;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Slf4j
 @Component
 public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
@@ -72,7 +68,7 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
         if (Objects.nonNull(user)) {
             if (Objects.nonNull(authConfig.getLogoutResetSecret()) && authConfig.getLogoutResetSecret()) {
                 if (!StringUtils.equals(user.getId(), authConfig.getLogoutKeepSecretUser())) {
-                    // 退出是否重置秘钥
+                    
                     var updateUser = new UserModel();
                     updateUser.setId(user.getId());
                     updateUser.initDefault("tokenSecret");
@@ -99,23 +95,23 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
 
     private void recordLogoutLog(UserModel user, HttpServletRequest request) {
         OperationLogRequest logModel = new OperationLogRequest();
-        //操作类型
+        
         logModel.setOpModule(OpModuleEnums.ACCOUNT.ordinal());
         logModel.setOpType(OpTypeEnums.LOGOUT.ordinal());
         logModel.setOpTarget(MessageCommon.get(OpTargetEnums.USER.getCode()));
-        //操作主题
+        
         logModel.setTitle(MessageCommon.get(AuthBasei18nCode.LOGOUT));
-        //操作描述
+        
         logModel.setDescription(MessageCommon.get(AuthBasei18nCode.LOGOUT));
 
-        //操作用户
+        
         logModel.setUserId(user.getId());
         logModel.setUserName(user.getUsername());
         logModel.setUserType(LogConstant.USER_TYPE_USER);
 
         logModel.setOpIp(SnUtils.getRealRemoteIp(request));
 
-        // 记录登出日志
+        
         operateLogService.create(logModel);
     }
 }

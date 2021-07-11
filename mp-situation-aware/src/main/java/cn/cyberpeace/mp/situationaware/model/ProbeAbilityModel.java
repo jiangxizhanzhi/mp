@@ -9,10 +9,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * mp_situation_probe_ability
- * @author 
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,35 +17,25 @@ import lombok.NoArgsConstructor;
 @Table("mp_situation_probe_ability")
 public class ProbeAbilityModel extends BaseModel {
 
-    /**
-     * 探针id
-     */
+    
     @ApiModelProperty(value = "探针id")
     private String probeId;
 
-    /**
-     * 功能名称
-     */
+    
     @ApiModelProperty(value = "功能名称")
     private String name;
 
 
-    /**
-     * 分析引擎
-     */
+    
     @ApiModelProperty(value = "分析引擎 Y/N")
     private String engine;
 
 
-    /**
-     * 探针功能自己的操作系统，跟探针的不完全一样
-     */
+    
     @JsonIgnore
     private String osType;
 
-    /**
-     * 描述
-     */
+    
     @ApiModelProperty(value = "描述")
     private String description;
 

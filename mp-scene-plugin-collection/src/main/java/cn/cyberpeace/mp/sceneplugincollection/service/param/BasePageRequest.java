@@ -5,11 +5,7 @@ import lombok.Data;
 
 import java.util.Objects;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/2/24 16:08
- */
+
 @Data
 public class BasePageRequest {
 
@@ -25,9 +21,7 @@ public class BasePageRequest {
     @ApiModelProperty(value = "返回字段")
     private String[] select;
 
-    /**
-     * @Deprecated 排序字段
-     */
+    
     @ApiModelProperty(value = "排序字段(兼容)")
     private String[] sort;
 
@@ -37,7 +31,7 @@ public class BasePageRequest {
             pageSize = perPage;
         }
 
-        // 默认值
+        
         if (Objects.isNull(page)) {
             page = 1;
         }
@@ -45,9 +39,9 @@ public class BasePageRequest {
             pageSize = 10;
         }
 
-//        if (sort != null && sort.length > 0) {
-//            orders = sort;
-//        }
+
+
+
     }
 
 }

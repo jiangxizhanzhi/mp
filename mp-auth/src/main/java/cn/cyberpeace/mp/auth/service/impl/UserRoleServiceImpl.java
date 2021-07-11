@@ -51,11 +51,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Slf4j
 @Service
 @CacheConfig(cacheManager = AuthCacheConfig.CACHE_MANAGER_MEDIUM)
@@ -147,10 +143,10 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         pageRequest.ensure();
         ParamCheck.notBlank(pageRequest.getUserId(), AuthBasei18nCode.USER_ID);
         opUserPermService.checkByTargetUserIdsForSearching(Arrays.asList(pageRequest.getUserId()));
-        // 查询user直接绑定的角色
+        
         ListObjServiceResult result = getPageRolesByUserId(pageRequest.getUserId(), pageRequest.getPage(), pageRequest.getPageSize());
 
-        // todo 查询用户所在组织（上级组织）的角色  暂无此功能
+        
         return result;
     }
 
@@ -177,7 +173,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         }
 
         if (cleanOldRoles) {
-            // 清除用户角色
+            
             boolean success = deleteByUserId(userId);
             if (!success) {
                 throw new MpRuntimeException(AuthErrorCode.USER_ROLE_DELETE_ERROR);
@@ -185,13 +181,13 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         }
 
         if (CollectionUtil.isEmpty(roleIds)) {
-            // 完成，直接返回
+            
             return true;
         }
 
-        // 添加用户角色
+        
         roleIds.forEach(rid -> {
-            // todo 校验角色是否存在
+            
             UserRoleModel userRole = new UserRoleModel();
             userRole.setUser(userId);
             userRole.setRole(rid);
@@ -215,13 +211,13 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         }
 
         if (CollectionUtil.isEmpty(userIds)) {
-            // 完成，直接返回
+            
             return true;
         }
 
-        // 添加用户角色
+        
         userIds.forEach(uid -> {
-            // todo 校验角色是否存在
+            
             UserRoleModel userRole = new UserRoleModel();
             userRole.setUser(uid);
             userRole.setRole(roleId);
@@ -238,10 +234,10 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     public boolean deleteByUserId(String userId) {
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
 
-//        var objResult = userService.get(userId).getSource();
-//        if (objResult == null || objResult.getObj() == null) {
-//            new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "account_not_existed");
-//        }
+
+
+
+
         HumanCondition humanCondition = new HumanCondition()
                 .filterEqual(UserRoleModel::getUser, userId);
         getModelMapper().filterDelete(humanCondition);
@@ -304,11 +300,11 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         }
 
         if (CollectionUtil.isEmpty(userIds)) {
-            // 完成，直接返回
+            
             return true;
         }
 
-        // 删除用户角色
+        
         HumanCondition humanCondition = new HumanCondition();
         humanCondition.filterEqual(UserRoleModel::getRole, roleId);
         if (CollectionUtil.isNotEmpty(userIds)) {

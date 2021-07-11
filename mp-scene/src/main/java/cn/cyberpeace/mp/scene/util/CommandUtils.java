@@ -10,73 +10,45 @@ public class CommandUtils {
     public static final String WINDOWS_PATH_DELIMITER = "\\";
     public static final String LINUX_PATH_DELIMITER = "/";
 
-    /**
-     * windows创建目录
-     */
+    
     public static final String WINDOWS_MK_DIR = "md %s";
 
-    /**
-     * windows进入目录
-     */
+    
     public static final String WINDOWS_CD_DIR = "cd %s";
 
-    /**
-     * windows call执行
-     */
+    
     public static final String WINDOWS_CALL_TARGET = "call \"%s\"";
 
-    /**
-     * windows start执行
-     */
+    
     public static final String WINDOWS_START_TARGET = "start /b %s";
 
-    /**
-     * windows下载文件
-     */
+    
     public static final String WINDOWS_DOWNLOAD_FILE = "curl -o \"%s\" %s";
 
-    /**
-     * windows解压zip
-     */
+    
     public static final String WINDOWS_UNZIP_FILE = "unzip -o \"%s\" -d \"%s\"";
 
-    /**
-     * linux创建目录
-     */
+    
     public static final String LINUX_MK_DIR = "mkdir -p %s";
 
-    /**
-     * linux进入目录
-     */
+    
     public static final String LINUX_CD_DIR = "cd %s";
 
-    /**
-     * linux 添加执行权限
-     */
+    
     public static final String LINUX_CHMOD_X = "chmod -R +x %s";
 
-    /**
-     * linux sh执行
-     */
+    
     public static final String LINUX_CALL_SH = "/bin/sh %s";
 
-    /**
-     * linux下载文件
-     */
+    
     public static final String LINUX_DOWNLOAD_FILE = "curl -o \"%s\" %s";
 
-    /**
-     * linux解压zip
-     */
+    
     public static final String LINUX_UNZIP_FILE = "unzip -o %s -d %s";
 
     private CommandUtils() {}
 
-    /**
-     * 修复带中文的windows命令
-     * @param command windows命令
-     * @return 修复命令
-     */
+    
     public static String fixWinZhCommand(String command) {
         return StringUtils.joinWith(WINDOWS_LINE_BREAK, "chcp 65001", command, "chcp 936");
     }

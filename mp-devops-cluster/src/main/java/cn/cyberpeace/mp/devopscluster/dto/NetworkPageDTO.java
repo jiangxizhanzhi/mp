@@ -7,18 +7,14 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-/**
- * 网络分页请求信息
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class NetworkPageDTO extends BasePageDTO {
 
-    /**
-     * 网络名称
-     */
+    
     @ApiModelProperty(value = "网络名称")
     private String name;
 

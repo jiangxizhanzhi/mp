@@ -7,13 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-/*
- * @BelongsPackage: cn.cyberpeace.mp.cscene.vo
- * @Author: hhuang
- * @CreateTime: 2023/5/18 15:16
- * @Description: mib上传给前端的响应
- * @Version: 1.0
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

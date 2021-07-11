@@ -7,9 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * 查询参数定义
- */
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

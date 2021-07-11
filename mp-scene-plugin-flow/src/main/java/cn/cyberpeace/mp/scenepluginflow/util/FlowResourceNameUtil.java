@@ -6,11 +6,7 @@ import cn.cyberpeace.mp.sceneplugincloud.util.resourcename.RsourceNameParams;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/5/18
- */
+
 @Component
 public class FlowResourceNameUtil implements IFlowResourceName<RsourceNameParams> {
     @Override

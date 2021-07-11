@@ -30,11 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-/**
- * @Description 写入设备信息
- * @Author maojun
- * @Date 2021/10/12
- */
+
 @Slf4j
 class DeviceInfoConverter implements IConverter {
 
@@ -62,9 +58,9 @@ class DeviceInfoConverter implements IConverter {
             TargetSceneRequest request = new TargetSceneRequest();
             request.setName(elementBO.getImage());
             request.setIgnoreUser(true);
-            // 精确搜索
+            
             request.setLikeName(false);
-            //不过滤隐藏靶标
+            
             request.setIsHide(Boolean.TRUE);
             BasePageBO<Device> targetSceneConvertModel = null;
             ImagePageDTO imagePageDTOParams = new ImagePageDTO(request);
@@ -113,14 +109,14 @@ class DeviceInfoConverter implements IConverter {
         pluginElement.setCategory2(device.getSecondCategory());
         pluginElement.setCategory3(device.getL3Category());
         pluginElement.setImageType(device.getImageType());
-        // 先用内置靶标来判断 is_build_in
+        
         pluginElement.setIsBuildIn(device.getIsInternal());
-        // 云平台数据库大小写不敏感,这里名字不能覆盖
-//        pluginElement.setImage(device.getName());
-        // 默认交换机使用默认角色
-//        if (!Boolean.TRUE.equals(device.getIsInternal()) || !TargetConstant.DefaultTargetName.DEFAULT_NETWORK.equals(device.getName())) {
-//            pluginElement.setRole(device.getRole());
-//        }
+        
+
+        
+
+
+
 
         if (device.getExtSystemInfo() != null) {
             this.loadExtSystemInfo(params.element, device.getExtSystemInfo());
@@ -215,7 +211,7 @@ class DeviceInfoConverter implements IConverter {
     }
 
     private void loadExtSystemInfo(SceneConfigElementBO element, ExtSystemInfo extSystemInfo) {
-        // language_name systemTypeName systemTypeName 都是null?
+        
         element.setSystemLanguage(extSystemInfo.getLanguage());
         element.setSystemArchitecture(extSystemInfo.getSystemArchitecture());
         element.setSystemType(extSystemInfo.getSystemType() == null ? StringUtils.EMPTY : String.valueOf(extSystemInfo.getSystemType()));

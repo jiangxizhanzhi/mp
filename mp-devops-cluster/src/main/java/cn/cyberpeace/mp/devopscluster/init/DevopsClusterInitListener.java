@@ -16,11 +16,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/8/9 09:22
- */
+
 @Order(100)
 @Component
 @Slf4j
@@ -40,7 +36,7 @@ public class DevopsClusterInitListener implements ApplicationListener<Applicatio
             if (!collectionAppConfig.getBaseAppConfig().isRunInit()) {
                 return;
             }
-            //Add by wangssh 230531
+            
             String bizScriptInstallerDir = collectionAppConfig.getBizScriptsInstallerDir();
             if(!FileUtil.exist(bizScriptInstallerDir)){
                 FileUtil.mkdir(collectionAppConfig.getBizScriptsInstallerDir());

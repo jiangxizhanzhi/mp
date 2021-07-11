@@ -18,10 +18,7 @@ import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginSceneCo
 import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginSceneConfigMapper;
 
 
-/**
- * 场景实例的处理
- * 场景实例的功能由本类对外提供
- */
+
 @ClassFieldClasses({
         CollectionPluginSceneConfigBO.class,
         CollectionPluginSceneConfigElementBO.class,

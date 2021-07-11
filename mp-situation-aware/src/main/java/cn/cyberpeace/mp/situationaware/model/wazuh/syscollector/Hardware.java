@@ -5,11 +5,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/2/25 09:32
- */
+
 @Data
 @ApiModel("硬件")
 public class Hardware {
@@ -37,7 +33,7 @@ public class Hardware {
         private Integer cores;
 
         @ApiModelProperty(value = "主频mhz")
-        // Double?
+        
         private Double mhz;
 
         @ApiModelProperty(value = "名称")

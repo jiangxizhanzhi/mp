@@ -28,11 +28,7 @@ public class OpenFlowConverter implements BaseConverter{
 
     private final OpenFlowVoConverter openFlowVoConverter;
 
-    /**
-     * 分页查询流表信息
-     * @param request
-     * @return
-     */
+    
     public OpenFlowPageConverterModel page(OpenFlowPageDTO request) {
         OpenFlowPageParams params = new OpenFlowPageParams();
         params.setMethod(request.getMethod());
@@ -54,11 +50,7 @@ public class OpenFlowConverter implements BaseConverter{
         return convertModel;
     }
 
-    /**
-     * 字符串转Map
-     * @param matchCondition 例如：priority=4,in_port=2,dl_vlan=13
-     * @return
-     */
+    
     private Map<String,Object> convertMatchCondition(String matchCondition){
         Map<String,Object> matchConditionMap = new HashMap<>();
 

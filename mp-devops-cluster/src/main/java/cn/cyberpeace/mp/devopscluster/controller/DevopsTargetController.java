@@ -46,9 +46,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * 靶标管理类
- */
+
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/target")
@@ -72,10 +70,7 @@ public class DevopsTargetController {
 
     private final DevopsTargetService devopsTargetService;
 
-    /**
-     * 查询FTP信息
-     * @return
-     */
+    
     @ApiOperation("查询FTP信息")
     @GetMapping("/ftp-info")
     public Result<String> getFtpAddress(){
@@ -89,11 +84,7 @@ public class DevopsTargetController {
         return new Result<>(formatUrl);
     }
 
-    /**
-     * 查询所有靶标信息
-     * @param request
-     * @return
-     */
+    
     @ApiOperation("查询所有靶标信息")
     @GetMapping("/list")
     public ServiceResult<TargetSceneVO> list(TargetSceneRequest request) {
@@ -144,11 +135,7 @@ public class DevopsTargetController {
         return new Result(new ListResult<>(targetSceneVOS));
     }
 
-    /**
-     * 查询所有靶标信息
-     * @param request
-     * @return
-     */
+    
     @ApiOperation("查询所有靶标信息(带过滤条件)")
     @GetMapping("/listAll")
     public ServiceResult<Device> listAll(TargetSceneRequest request){
@@ -188,11 +175,7 @@ public class DevopsTargetController {
     }
 
 
-    /**
-     * 查询所有靶标信息
-     * @param request
-     * @return
-     */
+    
     @ApiOperation("查询所有靶标部分信息")
     @GetMapping("/list-part-info")
     public ServiceResult<DeviceTargetByTypeVO> listPartInfo(TargetSceneRequest request){
@@ -287,7 +270,7 @@ public class DevopsTargetController {
 
         Locale locale = LocaleContextHolder.getLocale();
         if (Objects.equals(locale, Locale.CHINA)) {
-            // 常用靶标名称国际化处理
+            
             deviceVOList.forEach(device -> {
                 device.setImage(device.getName());
                 device.setName(

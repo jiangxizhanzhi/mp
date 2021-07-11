@@ -38,11 +38,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Service
 @Slf4j
 @CacheConfig(cacheManager = AuthCacheConfig.CACHE_MANAGER_NORMAL)
@@ -108,16 +104,16 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
                 reportDto.setTotalOnlineHours(NumberUtil.round(totalHrs, 2).doubleValue());
             }
 
-            // 只获取最新的一条日志
+            
             OperationLogPageRequest logPageRequest = new OperationLogPageRequest();
             logPageRequest.setUserId(r.getUser());
             logPageRequest.setPage(1);
             logPageRequest.setPerPage(1);
             List<OperationLogPageResponse> logs = userLogService.listOpLog(logPageRequest);
             if (CollectionUtil.isNotEmpty(logs) && Objects.nonNull(logs.get(0))) {
-                // 动作
+                
                 reportDto.setAction(logs.get(0).getOpType());
-                // 对象
+                
                 reportDto.setSubject(logs.get(0).getOpTarget());
             }
 
@@ -138,7 +134,7 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
         });
 
 
-        // orgpaths
+        
         List<String> userIds = summaryDtos.stream().map(UserOnlineRecordSummaryBo::getUser).collect(Collectors.toList());
         List<UserOrgBo> userOrgBos = tenantUserService.listUserOrgByUserIds(userIds);
         reportDtos.forEach(r -> {
@@ -153,7 +149,7 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
             }
         });
 
-        // 替换为reportDto
+        
         pageInfo.setList(reportDtos);
         return pageInfo;
     }
@@ -173,7 +169,7 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
 
     @Override
     public List<UserOnlineRecordModel> listCurrentOfflined(List<String> userIds) {
-        // 默认超过5分钟没有更新end_time既判定为离线
+        
         LocalDateTime fromTime = LocalDateTime.now().minusMinutes(DEFAULT_MINUTES);
         HumanCondition humanCondition = new HumanCondition();
         if (CollectionUtil.isNotEmpty(userIds)) {
@@ -185,24 +181,7 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
         return onlineList;
     }
 
-    /*
-    @Override
-    public List<UserOnlineRecordModel> listCurrentOnlinedUser() {
-        List<UserOnlineRecordModel> list = getModelMapper().listOnlinedUserByPeriod(DEFAULT_MINUTES);
-        return list;
-    }
-
-
-    @Override
-    public int cntCurrentOnlinedUser() {
-        return getModelMapper().cntOnlinedUser(DEFAULT_MINUTES);
-    }
-
-    @Override
-    public List<UserOnlineRecordModel> listOnlinedUserByPeriod() {
-        List<UserOnlineRecordModel> list = getModelMapper().listOnlinedUserByPeriod(DEFAULT_MINUTES);
-        return list;
-    }*/
+    
 
 
     @Override

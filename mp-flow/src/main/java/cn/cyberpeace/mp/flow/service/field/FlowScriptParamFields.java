@@ -6,11 +6,7 @@ import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.flow.model.FlowScriptParamModel;
 import org.springframework.stereotype.Component;
 
-/**
- * @Description 流量脚本参数Fields
- * @Author qiaokang
- * @Date 2021-11-25 15:00:45
- */
+
 @Component
 public class FlowScriptParamFields extends BaseModelFields {
     public static final DynamicFields allFields = new DynamicFields(ClassUtils.getBeanClassFields(FlowScriptParamModel.class));

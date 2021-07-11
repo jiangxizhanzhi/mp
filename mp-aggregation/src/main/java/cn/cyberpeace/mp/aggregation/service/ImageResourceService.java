@@ -40,11 +40,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-/**
- * @Description
- * @Author zhanglin
- * @Date 2022/09/19
- */
+
 @Slf4j
 @Service
 public class ImageResourceService {
@@ -78,13 +74,13 @@ public class ImageResourceService {
         if (!file.exists()) {
             file.mkdirs();
         }
-        // 生成镜像
+        
         var image = exportImage(imageName, imagePath);
 
-        // 下载图片
+        
         image.setLOGO(exportLogo(logoPath, imagePath));
 
-        // 生成service.yml
+        
         createServiceYml(imageName, imagePath, image, deviceAccessModes);
     }
 
@@ -105,7 +101,7 @@ public class ImageResourceService {
         if (FsCommon.isFileServerOuterUrl(logoPath)) {
             String logoUrl = FsCommon.getFileKey(logoPath);
             byte[] content = FsCommon.downloadRawContent(logoUrl);
-            // 判断图片文件类型
+            
             if (this.isPng(content)) {
                 this.createFile(content, imagePath + "/logo.png");
                 return PNG;
@@ -133,7 +129,7 @@ public class ImageResourceService {
             }
         } else if (StringUtils.isNotEmpty(logoPath)) {
             byte[] content = FsCommon.downloadRawContent(logoPath);
-            // 判断图片文件类型
+            
             if (this.isPng(content)) {
                 this.createFile(content, imagePath + "/logo.png");
                 return PNG;

@@ -13,9 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * 国际化转换工具类
- */
+
 @Component
 public class MessageCommonUtil {
     private MessageCommonUtil() {

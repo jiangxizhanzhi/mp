@@ -17,11 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * @Description: 默认图片工具类
- * @Author qiaokang
- * @Date：2022/9/19 15:49
- */
+
 @Component
 @Slf4j
 public class DefaultImgUtil {
@@ -32,16 +28,12 @@ public class DefaultImgUtil {
         DefaultImgUtil.localFileMappingMapper = localFileMappingMapper;
     }
 
-    /**
-     * 文件路径转fdfs的url
-     * @param path
-     * @return
-     */
+    
     public static String pathToFdfsUrl(String path) {
         if (StringUtils.isNotBlank(path) && !FsCommon.isFileServerOuterUrl(path)) {
-//            if (!path.startsWith(AuthConstant.DEFAULT_IMAGE_PREFIX)) {
-//                path = AuthConstant.DEFAULT_IMAGE_PREFIX.concat(path);
-//            }
+
+
+
             HumanCondition humanCondition = new HumanCondition();
             humanCondition.filterEqual(LocalFileMappingModel::getGroup, splitToGroup(path))
                     .filterEqual(LocalFileMappingModel::getName, splitToName(path));
@@ -57,12 +49,7 @@ public class DefaultImgUtil {
         return path;
     }
 
-    /**
-     * 批量映射文件中获取fdfs地址
-     * @param path
-     * @param mappingModelList
-     * @return
-     */
+    
     public static String pickPathToFdfsUrl(String path, List<LocalFileMappingModel> mappingModelList) {
         if (StringUtils.isNotBlank(path) && !FsCommon.isFileServerOuterUrl(path) &&
                 CollectionUtils.isNotEmpty(mappingModelList)) {
@@ -86,11 +73,7 @@ public class DefaultImgUtil {
         return path;
     }
 
-    /**
-     * fdfs地址转文件路径
-     * @param url
-     * @return
-     */
+    
     public static String fdfsUrlToPath(String url) {
         if (StringUtils.isNotBlank(url) && url.startsWith(AuthConstant.FDFS_PREFIX)) {
             String tmpUrl = url.substring(6);
@@ -106,11 +89,7 @@ public class DefaultImgUtil {
         return url;
     }
 
-    /**
-     * 根据分组集合查询映射模型
-     * @param groupList
-     * @return
-     */
+    
     public static List<LocalFileMappingModel> listByGroups(List<String> groupList) {
         List<LocalFileMappingModel> modelList = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(groupList)) {
@@ -131,11 +110,7 @@ public class DefaultImgUtil {
         return modelList;
     }
 
-    /**
-     * 根据分组获取路径名
-     * @param group
-     * @return
-     */
+    
     public static String getPathByGroup(String group) {
         for (DefaultImgDirEnum imgDirEnum : DefaultImgDirEnum.values()) {
             if (imgDirEnum.getGroup().equals(group)) {
@@ -146,11 +121,7 @@ public class DefaultImgUtil {
         return StringUtils.EMPTY;
     }
 
-    /**
-     * 根据路径获取分组
-     * @param path 不带文件名
-     * @return
-     */
+    
     public static String getGroupByPath(String path) {
         for (DefaultImgDirEnum imgDirEnum : DefaultImgDirEnum.values()) {
             if (imgDirEnum.getCurrentPath().equals(path) || imgDirEnum.getEndPathName().equals(path)) {
@@ -161,21 +132,13 @@ public class DefaultImgUtil {
         return StringUtils.EMPTY;
     }
 
-    /**
-     * path中拆分group
-     * @param path
-     * @return
-     */
+    
     public static String splitToGroup(String path) {
         path = path.substring(0, path.lastIndexOf(AuthConstant.ORG_PATH_SEPARATOR));
         return getGroupByPath(path);
     }
 
-    /**
-     * path中拆分文件名
-     * @param path
-     * @return
-     */
+    
     public static String splitToName(String path) {
         return path.substring(path.lastIndexOf(AuthConstant.ORG_PATH_SEPARATOR) + 1);
     }

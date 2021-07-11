@@ -8,11 +8,7 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.concurrent.TimeUnit;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/4/8 10:33
- */
+
 @Configuration
 public class SituationCacheConfig {
 

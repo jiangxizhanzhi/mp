@@ -7,11 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2021/10/9
- */
+
 @Setter
 @Getter
 public class NetworkElementParseResultV2 {

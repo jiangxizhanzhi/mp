@@ -9,11 +9,7 @@ import lombok.NoArgsConstructor;
 import javax.validation.constraints.NotEmpty;
 import java.util.List;
 
-/**
- * @Description: 删除虚拟USB请求体
- * @Author: guquan
- * @Date：2023/4/17 17:52
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

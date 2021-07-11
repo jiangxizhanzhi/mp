@@ -10,11 +10,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/2/11
- */
+
 @Slf4j
 @Component
 public class CsceneInit implements ApplicationRunner {

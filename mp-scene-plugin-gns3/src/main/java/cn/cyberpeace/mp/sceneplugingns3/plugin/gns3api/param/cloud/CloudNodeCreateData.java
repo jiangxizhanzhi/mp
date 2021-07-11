@@ -2,11 +2,7 @@ package cn.cyberpeace.mp.sceneplugingns3.plugin.gns3api.param.cloud;
 
 import cn.cyberpeace.mp.sceneplugingns3.plugin.gns3api.param.base.BaseNodeCreateData;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/9/7
- */
+
 public class CloudNodeCreateData extends BaseNodeCreateData {
 
     private static String COMPUTE_ID = "local";

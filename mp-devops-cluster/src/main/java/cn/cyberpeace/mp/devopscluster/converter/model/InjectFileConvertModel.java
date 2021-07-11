@@ -6,9 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * 文件注入
- */
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Data

@@ -91,7 +91,7 @@ public class Container extends CloudClient {
         cloudDelete(CloudUrlConstant.DELETE_PORTS.replace("{port_id}", deletePortData.getPortId()), null, null, new TypeReference<CloudResponse<Object>>() {
         }, true);
         if (cloudPluginSceneElementPortBO != null && CollectionUtils.isNotEmpty(cloudPluginSceneElementPortBO.getAccessModes())) {
-            // 删除原来创建的端口映射 以及原来的接入连接
+            
             cloudPluginSceneElementPortBO.getAccessModes().forEach(a -> {
                 if (a.getFwdId() != null) {
                     cloudDelete(CloudUrlConstant.DELETE_PORT_MAPPING.replace("{fwd_id}", a.getFwdId()), null, null, new TypeReference<CloudResponse<Object>>() {
@@ -288,12 +288,7 @@ public class Container extends CloudClient {
         return false;
     }
 
-    /**
-     * 根据容器名称获取容器id
-     *
-     * @param name
-     * @return
-     */
+    
     public ContainerGetData getContainerByName(String name) {
         NameQueryParam param = new NameQueryParam();
         param.setName(name);
@@ -314,13 +309,7 @@ public class Container extends CloudClient {
         return null;
     }
 
-    /**
-     * 从容器中copy出文件
-     *
-     * @param containerId
-     * @param filepath
-     * @return
-     */
+    
     public HttpResult retrieveFile(String containerId, String filepath) {
         var data = new ContainerRetrieveParam();
         data.setContainerPath(filepath);

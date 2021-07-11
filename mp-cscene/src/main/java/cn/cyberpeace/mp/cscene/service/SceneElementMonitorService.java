@@ -75,11 +75,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-/**
- * @Description: 场景节点监控Service
- * @Author zhouxinghuai
- * @Date：2021/11/23 14:45
- */
+
 @Slf4j
 @Service
 public class SceneElementMonitorService {
@@ -117,11 +113,7 @@ public class SceneElementMonitorService {
         return CollectionSingleton.collectionAppConfig.getWazuhVulnerabilityScanInterval();
     }
 
-    /**
-     * CsceneInstanceBO转为ElementMonitorInfo
-     *
-     * @return
-     */
+    
     public ElementMonitorBasicInfo getElementMonitorInfo(BaseSceneElementRequest baseRequest, boolean fetchRealTimeHostState) {
         log.info("baseRequest:{}", baseRequest);
         BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(baseRequest);
@@ -136,7 +128,7 @@ public class SceneElementMonitorService {
         processTopologyElement(elementMonitorBasicInfo, csceneInstanceBO, elementId, fetchRealTimeHostState);
         processPluginElement(elementMonitorBasicInfo, csceneInstanceBO, elementId);
 
-        // todo 节点实时信息
+        
         ElementRTInfo rtInfo = processRTInfo(baseRequest);
         elementMonitorBasicInfo.setRtInfo(rtInfo);
         return elementMonitorBasicInfo;
@@ -170,12 +162,7 @@ public class SceneElementMonitorService {
         return new ListObjServiceResult<>(new ListObjResult<>(connectionStates, netConns.getSource().getTotal()).asResult()).asResult();
     }
 
-    /**
-     * 查询操作系统信息
-     *
-     * @param baseRequest
-     * @return
-     */
+    
     public OS getOSInfo(BaseSceneElementRequest baseRequest) {
         BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(baseRequest);
         List<String> agentNames = csceneCommonService.getAgentNamesBySceneIdAndElementIds(baseRequest.getSceneId(), baseRequest.getElementIds());
@@ -212,12 +199,7 @@ public class SceneElementMonitorService {
     }
 
 
-    /**
-     * 获取节点实时数据
-     *
-     * @param baseRequest
-     * @return
-     */
+    
     public ElementRTInfo getElementRTInfo(BaseSceneElementRequest baseRequest) {
         log.info("baseRequest:{}", baseRequest);
         ElementRTInfo rtInfo = processRTInfo(baseRequest);
@@ -264,7 +246,7 @@ public class SceneElementMonitorService {
 
     public void sceneElementBO2ElementMonitorBasicInfo(ElementMonitorBasicInfo basicInfo, SceneElementBO sceneElementBO, CsceneInstanceBO csceneInstanceBO, boolean fetchRealTimeHostState) {
         log.info("fetchHostState:{}", fetchRealTimeHostState);
-        // 获取hostState比较耗时，这里加个开关
+        
         if (fetchRealTimeHostState) {
             HostState resource = basicInfo.getHostState();
             if (Objects.isNull(resource)) {
@@ -283,7 +265,7 @@ public class SceneElementMonitorService {
                 resource.setCpuCount(hostState.getCpuCount());
                 resource.setMemoryTotal(hostState.getMemoryTotal());
                 resource.setDiskSpace(hostState.getDiskSpace());
-                //resource.setDiskUsed(hostState.getDiskUsed());
+                
                 resource.setDiskUnused(hostState.getDiskUnused());
 
                 resource.setCpuPercent(Objects.nonNull(hostState.getCpuPercent()) ? NumberUtil.round(hostState.getCpuPercent(), 2).doubleValue() : 0.0);
@@ -300,7 +282,7 @@ public class SceneElementMonitorService {
                 resource.setDiskIoPercent(hostState.getDiskIoPercent());
                 resource.setDiskIoPercent(hostState.getDiskIoPercent());
             } else {
-                // 如果从探针中查不到， 从拓扑图中获取数据
+                
                 resource.setCpuCount(sceneElementBO.getCpu());
                 resource.setMemoryTotal(sceneElementBO.getRam().longValue());
                 resource.setDiskSpace(sceneElementBO.getDisk().longValue());
@@ -308,31 +290,31 @@ public class SceneElementMonitorService {
             basicInfo.setHostState(resource);
         }
 
-        // ip地址
-//        List<String> ipList = sceneElementBO.getPorts().stream().map(BaseSceneElementPortBO::getIp).collect(Collectors.toList());
-//        basicInfo.setIps(ipList);
+        
 
-        // ID
+
+
+        
         basicInfo.setId(sceneElementBO.getId());
         basicInfo.setEid(sceneElementBO.getEid());
-        // 实例名称
+        
         basicInfo.setName(sceneElementBO.getName());
-        // 图标
+        
         basicInfo.setIcon2(sceneElementBO.getIcon2());
 
         basicInfo.setEvent(sceneElementBO.getEvent());
         basicInfo.setEventStatus(sceneElementBO.getEventStatus());
         basicInfo.setType(sceneElementBO.getType());
 
-        // 操作系统
-        // 参考SystemTypeUtils
+        
+        
         if (StringUtils.isNotBlank(sceneElementBO.getSystemType())) {
             basicInfo.setSystemType(sceneElementBO.getSystemType());
             var item = SystemTypeUtils.getSystemTypeItem(sceneElementBO.getSystemType());
             basicInfo.setSystemTypeName(item.getName());
         }
 
-        // ip, 用户名，登录方式
+        
         var ports = sceneElementBO.getPorts();
         List<ElementPort> ePorts = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(ports)) {
@@ -350,7 +332,7 @@ public class SceneElementMonitorService {
     }
 
     public void cpSceneElementBO2ElementMonitorBasicInfo(ElementMonitorBasicInfo basicInfo, CloudPluginSceneElementBO cpSceneElementBO) {
-        // 镜像名称
+        
         String imageName = null;
         if(StringUtils.contains(cpSceneElementBO.getImage(), cpSceneElementBO.getImageUuid())) {
             imageName = cpSceneElementBO.getImage().replaceFirst(cpSceneElementBO.getImageUuid(), "");
@@ -362,14 +344,14 @@ public class SceneElementMonitorService {
         basicInfo.setRole(cpSceneElementBO.getRole());
         basicInfo.setIsBuildIn(cpSceneElementBO.getIsBuildIn());
 
-        // 物理节点
+        
         basicInfo.setHost(cpSceneElementBO.getHost());
 
-        // 实例类型
+        
         basicInfo.setVirtualType(cpSceneElementBO.getVirtualType());
         basicInfo.setExternal(cpSceneElementBO.getExternal());
 
-        // 设备类型
+        
         basicInfo.setCategory(cpSceneElementBO.getCategory());
     }
 
@@ -378,7 +360,7 @@ public class SceneElementMonitorService {
         BaseRequestUtil.checkBaseRequestWithSceneId(pageRequest);
         var sceneId = csceneInstanceService.getSceneId(pageRequest.getSceneId());
         var sceneHandler = new SceneHandler(sceneId, null, false, null);
-        // 不传节点id默认查询全部节点
+        
         if (pageRequest.getElementIds() == null || pageRequest.getElementIds().isEmpty()) {
             pageRequest.setElementIds(sceneHandler.getElementMap().values().stream().map(e -> e.getId()).collect(Collectors.toList()));
         }
@@ -399,17 +381,10 @@ public class SceneElementMonitorService {
 
     }
 
-    /**
-     * 合并已有采集变动数据
-     *
-     * @param hostEventsBos
-     * @param hostEventQueryParams
-     * @param pageRequest
-     * @param sceneHandler
-     */
+    
     private void mergeModifyData(ListObjServiceResult<CollectionHostEventBO> hostEventsBos,
                                  HostEventQueryParams hostEventQueryParams, ElementMonitorRequest pageRequest, SceneHandler sceneHandler) {
-        // 无分页标识忽略
+        
         if (hostEventQueryParams.getPage() == null) {
             return;
         }
@@ -430,7 +405,7 @@ public class SceneElementMonitorService {
         request.setSicLaunchId(sicLaunchId);
         request.setRuleGroups(null);
 
-        // path -> null
+        
         if (StringUtils.isNotBlank(hostEventQueryParams.getPath())) {
             request.setPath(null);
         }
@@ -455,17 +430,17 @@ public class SceneElementMonitorService {
             fileEventModels = new ListObjResult<>(list, list.size());
         }
 
-        // 设置total
+        
         int alreadyHasNum = hostEventsBos.getSource().getTotal();
         hostEventsBos.getSource().setTotal(alreadyHasNum + fileEventModels.getTotal());
 
-        // 当前页元素数量足够
+        
         int pageSize = hostEventQueryParams.getPageSize();
         if (bos.size() == pageSize) {
             return;
         }
 
-        // 计算分页起始位置
+        
         int totalNeedNum = pageSize * hostEventQueryParams.getPage();
         int stillNeedNum = totalNeedNum - alreadyHasNum;
         int startIndex = stillNeedNum <= pageSize ? 0 : stillNeedNum - pageSize;
@@ -510,14 +485,7 @@ public class SceneElementMonitorService {
         }
     }
 
-    /**
-     * 按时间分桶查询事件数
-     *
-     * @param pageRequest
-     * @param ruleGroups
-     * @param intervalMinutes
-     * @return
-     */
+    
     public List<ElementHistogramInfo> listEventHistogram(ElementMonitorRequest pageRequest, List<String> ruleGroups, Integer intervalMinutes, Integer bucketSize) {
         if (Objects.isNull(intervalMinutes) || Objects.isNull(bucketSize)) {
             log.error("intervalMinutes:{}, bucketSize:{} should not be null!", intervalMinutes, bucketSize);
@@ -546,13 +514,13 @@ public class SceneElementMonitorService {
             });
         }
 
-        //LocalDateTime endTime = null;
-        //if (Objects.nonNull(wazuhEventRequest) && Objects.nonNull(wazuhEventRequest.getEndTime())) {
-        //    endTime = wazuhEventRequest.getEndTime();
-        //} else {
-        //    endTime = LocalDateTime.now();
-        //}
-        //var infos = processHistogramList(endTime, bucketSize, intervalMinutes, resultMap);
+        
+        
+        
+        
+        
+        
+        
         List<ElementHistogramInfo> finalList = infos.stream().limit(bucketSize).collect(Collectors.toList());
         Collections.reverse(finalList);
         return finalList;
@@ -568,14 +536,14 @@ public class SceneElementMonitorService {
         processRequest(pageRequest, sceneHandler);
         startTime = TimeUtils.stringToLocalDateTime(pageRequest.getStartTime());
         endTime = TimeUtils.stringToLocalDateTime(pageRequest.getEndTime());
-        // 根据配置设置查询的最大条数
+        
         pageRequest.setPageSize(10000);
         var result = getModifyData(pageRequest, ruleGroups, null);
         if (result == null || result.getSource() == null || CollUtil.isEmpty(result.getSource().getObjs())) {
             return new ArrayList<>();
         }
         if (segmentCount == null) {
-            // 默认时间分15段
+            
             segmentCount = 15;
         }
         long intervalSeconds = SegmentCount2IntervalSecondsUtil.calculateIntervalSeconds(startTime, endTime, segmentCount);
@@ -592,7 +560,7 @@ public class SceneElementMonitorService {
         for (int i = 0; i < result.getSource().getObjs().size(); ) {
             var collectionData = result.getSource().getObjs().get(i);
             var histogramInfo = histogramInfos.get(currentHistogramInfo);
-            // 超出时间区间的事件放到最后一个区间
+            
             if ((currentHistogramInfo == histogramInfos.size() - 1) || collectionData.getTime().isBefore(histogramInfo.getLocalDateTime())) {
                 histogramInfo.setCount(histogramInfo.getCount() + 1);
                 i++;
@@ -636,7 +604,7 @@ public class SceneElementMonitorService {
             ElementVulnerabilityInfo vulnerabilityInfo = new ElementVulnerabilityInfo();
             vulnerabilityInfo.setNodeName(elementEid2Name.get(r.getAgentName()));
             vulnerabilityInfo.setCve(r.getVulnerability().getCve());
-            // 等级转化为小写，便于前端转化
+            
             vulnerabilityInfo.setSeverity(r.getVulnerability().getSeverity().toLowerCase());
             vulnerabilityInfo.setTitle(r.getVulnerability().getTitle());
             vulnerabilityInfo.setTime(r.getTime());
@@ -664,7 +632,7 @@ public class SceneElementMonitorService {
         var first = dataCollectionService.queryVulnerabilityInfo(request, false);
         var last = dataCollectionService.queryVulnerabilityInfo(request, true);
         if (CollUtil.isEmpty(first.getObjs()) || CollUtil.isEmpty(last.getObjs())) {
-            // 两次上报漏洞信息的间隔超过扫描间隔且查不到数据时，将开始时间往前推扫描间隔的一半进行查询
+            
             pageRequest.setStartTime(TimeUtils.localDateTimeToString(startTime.plusHours(-halfScanTime)));
             return;
         }
@@ -717,9 +685,9 @@ public class SceneElementMonitorService {
         List<ElementVulnerabilityPieChartInfo> pieChartInfos = new ArrayList<>();
         result.forEach(r -> {
             ElementVulnerabilityPieChartInfo pieChartInfo = new ElementVulnerabilityPieChartInfo();
-            // 漏洞等级转化为小写，便于前端转化
+            
             pieChartInfo.setSeverity(r.getFieldName().toLowerCase());
-            // 设置等级，便于排序
+            
             if ("low".equals(pieChartInfo.getSeverity())) {
                 pieChartInfo.setSeverityLevel(0);
             } else if ("medium".equals(pieChartInfo.getSeverity())) {
@@ -729,7 +697,7 @@ public class SceneElementMonitorService {
             } else if ("critical".equals(pieChartInfo.getSeverity())) {
                 pieChartInfo.setSeverityLevel(3);
             }
-            // 计算百分比 单位：%
+            
             pieChartInfo.setPercent(BigDecimal.valueOf(r.getCount()).divide(BigDecimal.valueOf(sum), 4, RoundingMode.HALF_DOWN).multiply(BigDecimal.valueOf(100)).doubleValue());
             pieChartInfos.add(pieChartInfo);
         });
@@ -790,11 +758,11 @@ public class SceneElementMonitorService {
             endTime = sceneModel.getUpdateTime();
         }
         if (StringUtils.isEmpty(pageRequest.getStartTime())) {
-            //场景存在时间不足一个扫描周期，取全部漏洞数据
+            
             if (endTime.plusHours(-getWazuhVulnerabilityScanInterval()).isBefore(sceneModel.getCreateTime())) {
                 pageRequest.setStartTime(TimeUtils.localDateTimeToString(sceneModel.getCreateTime()));
             } else {
-                //场景存在时间超过一个扫描周期，取最近一个扫描周期的漏洞数据
+                
                 pageRequest.setStartTime(TimeUtils.localDateTimeToString(endTime.plusHours(-getWazuhVulnerabilityScanInterval())));
             }
         }
@@ -831,17 +799,12 @@ public class SceneElementMonitorService {
         return connectionState;
     }
 
-    /**
-     * 处理节点实时信息，用户，进程，端口，网络连接
-     *
-     * @param baseRequest
-     * @return
-     */
+    
     private ElementRTInfo processRTInfo(BaseSceneElementRequest baseRequest) {
         BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(baseRequest);
         ElementRTInfo rtInfo = new ElementRTInfo();
 
-        // 用户
+        
         rtInfo.setUserCount(countNodeSessionUsers(baseRequest));
 
         TimeListPageInfoQueryParams portsParams = new TimeListPageInfoQueryParams();
@@ -849,7 +812,7 @@ public class SceneElementMonitorService {
         portsParams.setNodeIds(baseRequest.getElementIds());
         ListObjServiceResult<Port> portsResult = hostStateService.pagePorts(portsParams);
 
-        // pagePorts内部有sceneId转换动作，这里pageProcesses不能共用一个param
+        
         TimeListPageInfoQueryParams processParams = new TimeListPageInfoQueryParams();
         processParams.setSceneIds(CollectionUtil.toList(baseRequest.getSceneId()));
         processParams.setNodeIds(baseRequest.getElementIds());
@@ -861,51 +824,46 @@ public class SceneElementMonitorService {
         ListObjServiceResult<ConnectionState> conns = pageNetworkConnections(pageRequest);
 
         if (Objects.nonNull(conns.getSource().getTotal())) {
-            // 网络连接
+            
             rtInfo.setConnectionCount(conns.getSource().getTotal());
         }
 
         if (Objects.nonNull(portsResult.getSource().getTotal())) {
-            // 端口
+            
             rtInfo.setPortsCount(portsResult.getSource().getTotal());
         }
 
         if (Objects.nonNull(processesResult.getSource().getTotal())) {
-            // 进程
+            
             rtInfo.setProcessCount(processesResult.getSource().getTotal());
         }
 
-        // 文件
+        
         HostEventQueryParams hostEventQueryParams = new HostEventQueryParams();
         hostEventQueryParams.setNodeIds(baseRequest.getElementIds());
         ListObjServiceResult<CollectionHostEventBO> fileResult = csceneInstanceService.listHostEvents(baseRequest.getSceneId(), hostEventQueryParams);
         if (CollectionUtil.isNotEmpty(fileResult.getSource().getObjs())) {
-            // 文件数量包含其他所有类型，所以这里不会剔除注册表数量
+            
             rtInfo.setFileOpCount(fileResult.getSource().getTotal());
         }
 
-        // 注册表
+        
         hostEventQueryParams.setRuleGroups(CollectionUtil.toList("syscheck_registry"));
         ListObjServiceResult<CollectionHostEventBO> registryResult = csceneInstanceService.listHostEvents(baseRequest.getSceneId(), hostEventQueryParams);
         if (CollectionUtil.isNotEmpty(fileResult.getSource().getObjs())) {
-            // 注册表数量
+            
             rtInfo.setRegistryOpCount(registryResult.getSource().getTotal());
         }
 
-        // todo 文件操作，注册表变动，环境变量变动
-        // todo 环境变量
+        
+        
         int envVarChangedCount = sumEnvVarChangedCount(baseRequest);
         rtInfo.setEnvOpCount(envVarChangedCount);
 
         return rtInfo;
     }
 
-    /**
-     * 统计节点当前登录用户数量
-     *
-     * @param baseSceneElementRequest
-     * @return
-     */
+    
     private int countNodeSessionUsers(BaseSceneElementRequest baseSceneElementRequest) {
         BaseRequestUtil.checkBaseRequestWithSceneId(baseSceneElementRequest);
         ServiceResult<List<UserNodeSessionInfo>> result = csceneInstanceService.getNodeSessions(CollectionUtil.toList(baseSceneElementRequest.getSceneId()), baseSceneElementRequest.getElementIds(), null, null);
@@ -946,10 +904,10 @@ public class SceneElementMonitorService {
         List<ElementHistogramInfo> infos = new ArrayList<>();
         var calculatedTime = LocalDateTime.of(endTime.toLocalDate(), LocalTime.of(endTime.getHour(), endTime.getMinute() / invervalMinutes * invervalMinutes));
 
-        //int minutes = LocalDateTime.now().getMinute() / invervalMinutes * invervalMinutes;
-        //int hour = Long.valueOf(Duration.between(LocalDate.now().atTime(LocalTime.MIN), LocalDateTime.now()).getSeconds() / 3600).intValue();
-        //
-        //var currentTime = LocalTime.of(hour, minutes);
+        
+        
+        
+        
 
         for (int i = 0; i < bucketSize; i++) {
             String timeStr = TimeUtils.localTime2yyyyMMddHHmm(calculatedTime);

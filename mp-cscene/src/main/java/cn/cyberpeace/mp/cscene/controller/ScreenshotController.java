@@ -28,11 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
 
-/**
- * @Description 截屏文件管理controller
- * @Author qiaokang
- * @Date 2021-09-13 11:05:18
- */
+
 @Slf4j
 @Api(tags = "截屏文件管理接口")
 @RestController
@@ -53,12 +49,7 @@ public class ScreenshotController extends BaseModelController<ScreenshotModel, S
         return getModelService().screenshotUpload(request);
     }
 
-    /**
-     * 截屏文件下载
-     *
-     * @param filePath 文件地址
-     * @param response
-     */
+    
     @ApiOperation("截屏文件下载")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "filePath", value = "请求参数", dataTypeClass = String.class),

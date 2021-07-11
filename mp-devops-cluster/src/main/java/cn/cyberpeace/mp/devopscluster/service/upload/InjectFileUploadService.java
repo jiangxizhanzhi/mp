@@ -6,9 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
-/**
- * 注入文件
- */
+
 @Service
 public class InjectFileUploadService extends BaseUploadService {
 

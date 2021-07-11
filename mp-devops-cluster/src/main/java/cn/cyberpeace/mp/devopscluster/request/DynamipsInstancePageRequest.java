@@ -5,9 +5,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-/**
- * 实例分页请求信息
- */
+
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)

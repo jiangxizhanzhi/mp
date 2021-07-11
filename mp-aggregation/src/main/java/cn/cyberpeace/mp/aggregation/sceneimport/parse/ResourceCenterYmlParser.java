@@ -18,11 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/**
- * @Description 解析资管的yml
- * @Author maojun
- * @Date 2021/10/12
- */
+
 public final class ResourceCenterYmlParser {
     private static String FILE_PATH_SEPARATOR = "/";
 
@@ -66,15 +62,15 @@ public final class ResourceCenterYmlParser {
 
     public static List<ImageParseResult> parseImageServicesYml(String filePath, String imageFilePath) {
         List<ImageParseResult> results = new ArrayList<>();
-        // env/images 下的目录
+        
         results.addAll(parseServicesYml(filePath + FILE_PATH_SEPARATOR + "images"));
 
-        // imageFilePath 下的目录
+        
         if (!StringUtils.isEmpty(imageFilePath)) {
             results.addAll(parseServicesYml(imageFilePath));
         }
 
-        // env 下的server.yml
+        
         String envServerYmlPath = filePath + FILE_PATH_SEPARATOR + "servers.yml";
         File file = new File(envServerYmlPath);
         if (file.exists()) {
@@ -88,15 +84,15 @@ public final class ResourceCenterYmlParser {
 
     public static List<ImageParseResult> parseImageServicesYml(String filePath, List<String> imageFilePathList) {
         List<ImageParseResult> results = new ArrayList<>();
-        // env/images 下的目录
+        
         results.addAll(parseServicesYml(filePath + FILE_PATH_SEPARATOR + "images"));
 
-        // imageFilePath 下的目录
+        
         if (CollectionUtils.isNotEmpty(imageFilePathList)) {
             imageFilePathList.forEach(imageFilePath -> results.addAll(parseServicesYml(imageFilePath)));
         }
 
-        // env 下的server.yml
+        
         String envServerYmlPath = filePath + FILE_PATH_SEPARATOR + "servers.yml";
         File file = new File(envServerYmlPath);
         if (file.exists()) {
@@ -114,7 +110,7 @@ public final class ResourceCenterYmlParser {
             return new ArrayList<>();
         }
         File[] imageFiles = file.listFiles();
-        // 取images目录下存在的servers.yml文件路径
+        
         List<String> serversYmlPaths = Arrays.asList(imageFiles).stream()
                 .map(imageFile -> imageFile.getPath() + FILE_PATH_SEPARATOR + "servers.yml")
                 .filter(serversYmlPath -> new File(serversYmlPath).exists())
@@ -122,7 +118,7 @@ public final class ResourceCenterYmlParser {
         if (CollectionUtils.isEmpty(serversYmlPaths)) {
             return new ArrayList<>();
         }
-        // 解析所有的 servers.yml
+        
         var imageParseResult = serversYmlPaths.stream()
                 .map(serversYmlPath -> new FilePathYmlParser<>(serversYmlPath, ImageParseResult.class).parse())
                 .collect(Collectors.toList());
@@ -144,7 +140,7 @@ public final class ResourceCenterYmlParser {
             if (CollectionUtils.isNotEmpty(accessModes)) {
                 for (var accessMode : accessModes) {
                     if (StringUtils.isNotEmpty(accessMode.getPrivateKey())) {
-                        //上传了秘钥,保存秘钥文件地址
+                        
                         accessMode.setPrivateKeyPath(StringUtils.replace(path, "servers.yml", "") + accessMode.getPrivateKey());
                     }
                 }
@@ -153,7 +149,7 @@ public final class ResourceCenterYmlParser {
             if (CollectionUtils.isNotEmpty(manageAccessModes)) {
                 for (var manageAccessMode : manageAccessModes) {
                     if (StringUtils.isNotEmpty(manageAccessMode.getPrivateKey())) {
-                        //上传了秘钥,保存秘钥文件地址
+                        
                         manageAccessMode.setPrivateKeyPath(StringUtils.replace(path, "servers.yml", "") + manageAccessMode.getPrivateKey());
                     }
                 }

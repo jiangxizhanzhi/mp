@@ -60,11 +60,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/11/22 11:22
- */
+
 @Api(value = "流量监控", tags = "流量监控")
 @Slf4j
 @RestController
@@ -91,12 +87,7 @@ public class FlowMonitorController {
     @Autowired
     private ScenePluginCollectionSceneService scenePluginCollectionSceneService;
 
-    /**
-     * 默认查询场景所有节点
-     * 忽略elementIds的值
-     *
-     * @return
-     */
+    
     @ApiOperation(value = "场景流量趋势图")
     @GetMapping("/scene_trend")
     public ServiceResult<List<FlowTrend>> getSceneFlowTrend(FlowTrendRequest flowTrendRequest) {
@@ -112,12 +103,7 @@ public class FlowMonitorController {
         }
     }
 
-    /**
-     * 默认查询场景所有节点
-     * 忽略elementIds的值
-     *
-     * @return
-     */
+    
     @ApiOperation(value = "场景受攻击端口")
     @GetMapping("/scene_attacked_port")
     public ServiceResult<List<FlowGroupPortWithProtocolVO>> getSceneAttackPort(FlowCommonRequest request) {
@@ -126,12 +112,7 @@ public class FlowMonitorController {
         return ResultCommon.success(list);
     }
 
-    /**
-     * 默认查询场景所有节点
-     * 忽略elementIds的值
-     *
-     * @return
-     */
+    
     @ApiOperation(value = "场景主机状态")
     @GetMapping("/scene_target_status")
     public ServiceResult<List<FlowGroupByDestinationIpAndSeverityVO>> getSceneTargetStatus(FlowCommonRequest request) {
@@ -141,11 +122,7 @@ public class FlowMonitorController {
     }
 
 
-    /**
-     * elementIds若为多值，则只取第一个值
-     *
-     * @return
-     */
+    
     @ApiOperation(value = "节点流量趋势图")
     @GetMapping("/element_trend")
     public ServiceResult<List<FlowTrend>> getElementFlowTrend(FlowTrendRequest flowTrendRequest) {
@@ -255,7 +232,7 @@ public class FlowMonitorController {
     @GetMapping("/assets_statistics")
     public ServiceResult<List<AssetsStatisticsResponse>> getAssetsStatistics(AssetsStatisticsRequest request) {
         log.info("assets_statistics params: {}", JsonCommon.stringify(request));
-        // 转换场景id
+        
         List<String> sceneIds = csceneCommonService.translateSceneIds(request.getSceneIds());
         if (CollectionUtils.isEmpty(sceneIds)) {
             log.error("translateSceneIds is null");
@@ -264,17 +241,17 @@ public class FlowMonitorController {
         List<SceneAssetsBO> sceneAssetsList = scenePluginCollectionSceneService.listSceneAssets(sceneIds).getSource();
 
         List<AssetsStatisticsResponse> responseList = new ArrayList<>();
-        // 统计资产数量
+        
         sceneIds.forEach(id -> {
             SceneAssetsBO sceneAssetsBO = sceneAssetsList.stream().filter(list -> id.equals(list.getSceneId())).findFirst().get();
             List<CategoryGroupBO> categoryGroups = sceneAssetsBO.getCategoryGroups();
-            // 操作系统
+            
             List<CategoryGroupBO> osList = categoryGroups.stream().filter(group -> group.getCategory() == 1).collect(Collectors.toList());
-            // 应用系统
+            
             List<CategoryGroupBO> asList = categoryGroups.stream().filter(group -> group.getCategory() == 2).collect(Collectors.toList());
-            // 网络设备
+            
             List<CategoryGroupBO> networkList = categoryGroups.stream().filter(group -> group.getCategory() == 3).collect(Collectors.toList());
-            // 安全设备
+            
             List<CategoryGroupBO> ssList = categoryGroups.stream().filter(group -> group.getCategory() == 4).collect(Collectors.toList());
             AssetsStatisticsResponse response = AssetsStatisticsResponse.builder().sceneId(id).assetsTotal(sceneAssetsBO.getNodeCount()).ipTotal(sceneAssetsBO.getIpCount()).operationSystemCount(CollectionUtils.isNotEmpty(osList) ? osList.get(0).getElements().size() : 0).applicationSystemCount(CollectionUtils.isNotEmpty(asList) ? asList.get(0).getElements().size() : 0).networkCount(CollectionUtils.isNotEmpty(networkList) ? networkList.get(0).getElements().size() : 0).safetySystemCount(CollectionUtils.isNotEmpty(ssList) ? ssList.get(0).getElements().size() : 0).build();
             responseList.add(response);
@@ -295,15 +272,15 @@ public class FlowMonitorController {
         }
         SceneConfigAssetBO sceneConfigAsset = scenePluginCollectionSceneService.listSceneConfigAssets(sceneConfigId).getSource();
         List<AssetsStatisticsResponse> responseList = new ArrayList<>();
-        // 统计资产数量
+        
         List<SceneConfigCategoryGroupBO> categoryGroups = sceneConfigAsset.getCategoryGroups();
-        // 操作系统
+        
         List<SceneConfigCategoryGroupBO> osList = categoryGroups.stream().filter(group -> group.getCategory() == 1).collect(Collectors.toList());
-        // 应用系统
+        
         List<SceneConfigCategoryGroupBO> asList = categoryGroups.stream().filter(group -> group.getCategory() == 2).collect(Collectors.toList());
-        // 网络设备
+        
         List<SceneConfigCategoryGroupBO> networkList = categoryGroups.stream().filter(group -> group.getCategory() == 3).collect(Collectors.toList());
-        // 安全设备
+        
         List<SceneConfigCategoryGroupBO> ssList = categoryGroups.stream().filter(group -> group.getCategory() == 4).collect(Collectors.toList());
         AssetsStatisticsResponse response = AssetsStatisticsResponse.builder().sceneId(id).assetsTotal(sceneConfigAsset.getNodeCount()).operationSystemCount(CollectionUtils.isNotEmpty(osList) ? osList.get(0).getElements().size() : 0).applicationSystemCount(CollectionUtils.isNotEmpty(asList) ? asList.get(0).getElements().size() : 0).networkCount(CollectionUtils.isNotEmpty(networkList) ? networkList.get(0).getElements().size() : 0).safetySystemCount(CollectionUtils.isNotEmpty(ssList) ? ssList.get(0).getElements().size() : 0).build();
         responseList.add(response);

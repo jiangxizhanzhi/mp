@@ -5,11 +5,7 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * @Description: 流量类型
- * @Author qiaokang
- * @Date：2022/6/23 11:52
- */
+
 @Component
 public class FlowCategory {
 
@@ -21,9 +17,7 @@ public class FlowCategory {
         init();
     }
 
-    /**
-     * 流量类型枚举类：0:"测试测量",1:"应用升级",2:"网络管理",3:"P2P",4:"金融",5:"邮件",6:"安全工作",7:"分布式计算",8:"手机",9:"移动设备",10:"即时通讯",11:"SCADA",12:"机动",13:"远程控制",14:"音视频",15:"企业应用",16:"社会网络搜索",17:"文件传输",18:"数据库",19:"身份认证",20:"ERP",21:"存储",22:"游戏",23:"安全数据传输"
-     */
+    
     public void init() {
         flowCategoryMap.put("测试测量", 0);
         flowCategoryMap.put("应用升级", 1);

@@ -9,20 +9,12 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-/**
- * 通用的基于单表的具有删除能力的controller
- * @param <M> 数据model
- * @param <S> 数据model对应的service
- */
+
 public interface BaseModelBulkDeleteController<M extends BaseModel, S extends BaseModelService<M, ?>> {
 
     S getModelService();
 
-    /**
-     * 通用批量删除
-     * @param ids 数据id集
-     * @return 成功数量
-     */
+    
     @ApiOperation("批量删除数据")
     @ApiImplicitParam(name = "ids", value = "删除数据id列表", dataTypeClass = String[].class)
     @DeleteMapping("/bulk_delete")
@@ -30,11 +22,7 @@ public interface BaseModelBulkDeleteController<M extends BaseModel, S extends Ba
         return getModelService().bulkDelete(ids).asResult();
     }
 
-    /**
-     * 通用删除
-     * @param deleteData 删除数据
-     * @return 成功数量
-     */
+    
     @ApiOperation("批量删除数据")
     @ApiImplicitParam(name = "deleteData", value = "删除数据请求体", dataTypeClass = BaseBulkDeleteData.class)
     @DeleteMapping("/pro_bulk_delete")

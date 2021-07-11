@@ -25,9 +25,7 @@ public class ProbeCollector {
         this.dataCollectionFlowTableService = dataCollectionFlowTableService;
     }
 
-    /**
-     * 目前方案固定一个wazuh server
-     */
+    
     public String createCollector() {
         return TextUtils.uuid();
     }

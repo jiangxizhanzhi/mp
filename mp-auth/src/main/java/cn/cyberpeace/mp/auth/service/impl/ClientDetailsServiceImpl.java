@@ -16,11 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Service
 @Slf4j
 public class ClientDetailsServiceImpl extends BaseModelServiceImpl<ClientDetailsModel, ClientDetailsMapper, ClientDetailsFields, QueryParams>

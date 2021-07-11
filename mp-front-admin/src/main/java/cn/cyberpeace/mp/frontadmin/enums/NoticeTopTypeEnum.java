@@ -1,15 +1,9 @@
 package cn.cyberpeace.mp.frontadmin.enums;
 
-/**
- * @Description
- * @author: zhouxinghuai
- * @Date: 2022/9/23
- */
+
 public enum NoticeTopTypeEnum {
 
-    /**
-     * 系统公告类型
-     */
+    
     UNTOP(0),
     TOP(1);
 

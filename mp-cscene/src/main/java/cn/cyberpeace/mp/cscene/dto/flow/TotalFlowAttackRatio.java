@@ -8,32 +8,22 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/2/22
- */
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class TotalFlowAttackRatio {
 
-    /**
-     * 攻击次数
-     */
+    
     @ApiModelProperty(value = "攻击次数")
     private Long totalAttackNumber;
 
-    /**
-     * 流量大小，单位B
-     */
+    
     @ApiModelProperty(value = "流量大小，单位B")
     private Double totalTrafficSize;
 
-    /**
-     * 攻击手法列表
-     */
+    
     @ApiModelProperty(value = "攻击手法列表")
     private List<FlowAttackRatio> attackWayList;
 }

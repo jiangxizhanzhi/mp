@@ -14,27 +14,19 @@ import lombok.NoArgsConstructor;
 @ApiModel(value = "弹性IP分页返回信息")
 public class ElasticIpVO extends BaseVO {
 
-    /**
-     * 固定IP
-     */
+    
     @ApiModelProperty("固定IP")
     private String fixedIpAddress;
 
-    /**
-     * 弹性IP
-     */
+    
     @ApiModelProperty("弹性IP")
     private String floatIpAddress;
 
-    /**
-     * 状态
-     */
+    
     @ApiModelProperty("状态")
     private String status;
 
-    /**
-     * 创建时间
-     */
+    
     @ApiModelProperty("创建时间")
     private String createdAt;
 }

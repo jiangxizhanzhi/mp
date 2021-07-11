@@ -43,11 +43,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-/**
- * @Description: 流量信息控制器
- * @Author qiaokang
- * @Date：2021/8/31 17:17
- */
+
 @Slf4j
 @Api(tags = "流量管理接口")
 @RestController
@@ -71,11 +67,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
     @Autowired
     private FlowPcapService flowPcapService;
 
-    /**
-     * 删除流量信息
-     * @param id
-     * @return
-     */
+    
     @ApiOperation("删除流量信息")
     @ApiImplicitParam(name = "id", value = "流量ID", dataTypeClass = String.class)
     @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.DELETE, title = "删除流量", target = OpTargetEnums.FLOW_INFO)
@@ -84,11 +76,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
         return flowServiceImpl.deleteFlowInfo(id, true);
     }
 
-    /**
-     * 批量删除流量信息
-     * @param ids
-     * @return
-     */
+    
     @ApiOperation("批量删除流量信息")
     @ApiImplicitParam(name = "ids", value = "流量ID集合", dataTypeClass = String[].class)
     @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.DELETE, title = "删除流量", target = OpTargetEnums.FLOW_INFO)
@@ -106,16 +94,12 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
         return optionService.getIntOptions(FlowConstant.MP_COMMON_OPTION_TYPE_FLOW_CATEGORY);
     }
 
-    /**
-     * 分页查询流量信息
-     * @param queryParams
-     * @return
-     */
+    
     @ApiOperation("分页查询流量信息")
     @GetMapping("/page")
     public ListObjServiceResult<FlowInfoResponse> pageFlowInfo(FlowInfoQueryParams queryParams) {
         if (Objects.isNull(queryParams.getOrders()) && Objects.isNull(queryParams.getSort())) {
-            // 默认按时间降序
+            
             queryParams.setOrders(new String[]{"-createTime", "-title"});
         }
 
@@ -123,11 +107,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
         return flowServiceImpl.pageFlowInfo(queryParams);
     }
 
-    /**
-     * 背景流量详情
-     * @param id
-     * @return
-     */
+    
     @ApiOperation("背景流量详情")
     @ApiImplicitParam(name = "id", value = "流量ID", dataTypeClass = String.class)
     @GetMapping("/background")
@@ -135,11 +115,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
         return flowServiceImpl.queryBackgroundDetail(id);
     }
 
-    /**
-     * 新增背景流量
-     * @param addRequest
-     * @return
-     */
+    
     @ApiOperation("新增背景流量")
     @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.CREATE, title = "新增背景流量", target = OpTargetEnums.FLOW_INFO)
     @PostMapping("/background")
@@ -147,11 +123,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
         return flowServiceImpl.addBackgroundFlow(addRequest);
     }
 
-    /**
-     * 更新背景流量
-     * @param modifyRequest
-     * @return
-     */
+    
     @ApiOperation("更新背景流量")
     @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.UPDATE, title = "更新背景流量", target = OpTargetEnums.FLOW_INFO)
     @PatchMapping("/background")
@@ -159,11 +131,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
         return flowServiceImpl.modifyBackgroundFlow(modifyRequest);
     }
 
-    /**
-     * 攻击流量详情
-     * @param id
-     * @return
-     */
+    
     @ApiOperation("攻击流量详情")
     @ApiImplicitParam(name = "id", value = "流量ID", dataTypeClass = String.class)
     @GetMapping("/attack")
@@ -171,11 +139,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
         return flowServiceImpl.queryAttackDetail(id);
     }
 
-    /**
-     * 新增攻击流量
-     * @param addRequest
-     * @return
-     */
+    
     @ApiOperation("新增攻击流量")
     @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.CREATE, title = "新增攻击流量", target = OpTargetEnums.FLOW_INFO)
     @PostMapping("/attack")
@@ -183,11 +147,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
         return flowServiceImpl.addAttackFlow(addRequest);
     }
 
-    /**
-     * 更新攻击流量
-     * @param modifyRequest
-     * @return
-     */
+    
     @ApiOperation("更新攻击流量")
     @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.UPDATE, title = "更新攻击流量", target = OpTargetEnums.FLOW_INFO)
     @PatchMapping("/attack")
@@ -195,22 +155,14 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
         return flowServiceImpl.modifyAttackFlow(modifyRequest);
     }
 
-    /**
-     * 根据集合id批量查询
-     * @param request
-     * @return
-     */
+    
     @ApiOperation("根据集合id批量查询")
     @GetMapping("/list_by_collection_ids")
     public ServiceResult<List<FlowInfoResponse>> listByCollectionIds(ListByCollectionIdsRequest request) {
         return flowServiceImpl.listByCollectionIds(request);
     }
 
-    /**
-     * 流量信息导入
-     * @param request
-     * @return
-     */
+    
     @ApiOperation("流量信息导入")
     @ApiImplicitParam(name = "request", value = "导入请求", dataTypeClass = ImportFlowInfoRequest.class)
     @PostMapping("/flow_import")
@@ -219,11 +171,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
     }
 
 
-    /**
-     * 名称存在校验
-     * @param request
-     * @return
-     */
+    
     @ApiOperation("名称存在校验")
     @ApiImplicitParam(name = "request", value = "校验请求", dataTypeClass = CheckNamesRequest.class)
     @PostMapping("/check_names")
@@ -244,7 +192,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
             throw new MpRuntimeException(FlowErrorCode.NOT_PCAP_FILE);
         }
 
-        // 上传文件获取路径
+        
         String filePath = null;
         try {
             filePath = FsCommon.upload(file.getInputStream(), suffix);
@@ -254,17 +202,13 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
             return ResultCommon.fail(FlowErrorCode.FLOW_FILE_UPLOAD_ERROR);
         }
 
-        // 解析流量包包含的协议内容
+        
         List<ProtocolBO> protocolList = flowServiceImpl.pcapAnalyse(file);
         response.setProtocolList(protocolList);
         return ResultCommon.success(response);
     }
 
-    /**
-     * 分页查询流量分类列表
-     * @param queryParams
-     * @return
-     */
+    
     @ApiOperation("分页查询流量分类列表")
     @GetMapping("/page_categories")
     public ListObjServiceResult<OptionModelBO> pageCategories(OptionQueryParams queryParams) {
@@ -279,11 +223,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
         return result;
     }
 
-    /**
-     * 新增流量分类
-     * @param optionModelBO
-     * @return
-     */
+    
     @ApiOperation("新增流量分类")
     @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.CREATE, title = "新增流量分类", target = OpTargetEnums.FLOW_INFO_CATEGORY)
     @PostMapping("/add_category")
@@ -298,11 +238,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
         return ResultCommon.success();
     }
 
-    /**
-     * 编辑流量分类
-     * @param optionModelBO
-     * @return
-     */
+    
     @ApiOperation("编辑流量分类")
     @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.UPDATE, title = "编辑流量分类", target = OpTargetEnums.FLOW_INFO_CATEGORY)
     @PostMapping("/edit_category")
@@ -314,11 +250,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
         return ResultCommon.success();
     }
 
-    /**
-     * 删除流量分类
-     * @param request
-     * @return
-     */
+    
     @ApiOperation("删除流量分类")
     @DeleteMapping("/delete_categories")
     @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.DELETE, title = "删除流量分类", target = OpTargetEnums.FLOW_INFO_CATEGORY)
@@ -334,11 +266,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
         return ResultCommon.success();
     }
 
-    /**
-     * 流量分类详情
-     * @param id
-     * @return
-     */
+    
     @ApiOperation("流量分类详情")
     @ApiImplicitParam(name = "id", value = "分类id", dataTypeClass = String.class)
     @GetMapping("/categories/detail")

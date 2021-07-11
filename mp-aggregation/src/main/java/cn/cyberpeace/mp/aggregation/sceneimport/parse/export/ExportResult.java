@@ -7,11 +7,7 @@ import lombok.Setter;
 
 import java.util.List;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/8/24
- */
+
 @Getter
 @Setter
 @ApiModel(value = "场景导出成yml的返回结果")

@@ -28,11 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Slf4j
 @Data
 public class CustomUsernamePasswordAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
@@ -57,7 +53,7 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
                 return null;
             }
             var authRequest = processAuthRequest(loginData, request, response);
-            // 认证
+            
             return getAuthenticationManager().authenticate(authRequest);
         } else {
             return super.attemptAuthentication(request, response);
@@ -67,13 +63,13 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
     private boolean checkVerifyCode(String verifyCode, String username, HttpServletResponse response) throws IOException {
         String needVerifyCode = AuthConstant.LOGIN_NEED_VERIFY_CODE + ":" + username;
         Integer flag = loginFailureCache.getIfPresent(needVerifyCode);
-        if (Objects.nonNull(flag)) { // 需要校验验证码
+        if (Objects.nonNull(flag)) { 
             ServiceResult<Object> result = KaptchaUtil.checkKaptcha(verifyCode);
-            if (Boolean.FALSE.equals(result.getSource())) { // 验证码校验不通过
+            if (Boolean.FALSE.equals(result.getSource())) { 
                 KaptchaUtil.checkFail(response, result);
                 return false;
             }
-            // 验证码校验通过，移除需要验证码标记
+            
             loginFailureCache.invalidate(needVerifyCode);
         }
         return true;

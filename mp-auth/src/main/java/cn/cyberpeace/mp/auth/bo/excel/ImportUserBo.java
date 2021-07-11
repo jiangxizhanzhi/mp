@@ -7,40 +7,36 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class ImportUserBo {
 
-    // 用户名，不能重复
+    
     private String username;
 
-    // 用户姓名
+    
     private String name;
 
-    // 密码，通过Excel导入的用户，密码为明文，且忽略密码强度限制
+    
     private String password;
 
-    // 组织路径，多个用逗号隔开
+    
     private String orgpath;
 
-    // 角色 名称，多个用逗号隔开
+    
     private String roles;
 
     private String expiredTime;
 
     private String description;
 
-    // 角色ID，Excel中不存在，留待后端绑定用
+    
     private List<String> roleIdList;
 
-    // 组织ID，Excel中不存在，留待后端绑定用
+    
     private List<String> orgIdList;
 
 }

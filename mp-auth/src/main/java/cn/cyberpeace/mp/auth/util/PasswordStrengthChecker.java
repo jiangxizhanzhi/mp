@@ -8,14 +8,10 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 public class PasswordStrengthChecker {
 
-    //密码长度为6位以上,必须包含大小写字母和数字
+    
     private static String regEx = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(.{6,})$";
 
     private final static int[] SIZE_TABLE = {9, 99, 999, 9999, 99999, 999999, 9999999, 99999999, 999999999,
@@ -30,18 +26,11 @@ public class PasswordStrengthChecker {
     private static final int CAPITAL_LETTER = 3;
     private static final int OTHER_CHAR = 4;
 
-    /**
-     * Simple password dictionary
-     */
+    
     private final static String[] DICTIONARY = {"password", "abc123", "iloveyou", "adobe123", "123123", "sunshine",
             "1314520", "a1b2c3", "123qwe", "aaa111", "qweasd", "admin", "passwd"};
 
-    /**
-     * Check character's type, includes num, capital letter, small letter and other character.
-     *
-     * @param c
-     * @return
-     */
+    
     private static int checkCharacterType(char c) {
         if (c >= 48 && c <= 57) {
             return NUM;
@@ -55,13 +44,7 @@ public class PasswordStrengthChecker {
         return OTHER_CHAR;
     }
 
-    /**
-     * Count password's number by different type
-     *
-     * @param passwd
-     * @param type
-     * @return
-     */
+    
     private static int countLetter(String passwd, int type) {
         int count = 0;
         if (null != passwd && passwd.length() > 0) {
@@ -74,19 +57,14 @@ public class PasswordStrengthChecker {
         return count;
     }
 
-    /**
-     * Check password's strength
-     *
-     * @param passwd
-     * @return strength level
-     */
+    
     public static int checkPasswordStrength(String passwd) {
         ParamCheck.notEmpty(passwd, AuthBasei18nCode.USER_PASSWORD);
 
         int len = passwd.length();
         int level = 0;
 
-        // increase points
+        
         if (countLetter(passwd, NUM) > 0) {
             level++;
         }
@@ -160,7 +138,7 @@ public class PasswordStrengthChecker {
             }
         }
 
-        // decrease points
+        
         if ("abcdefghijklmnopqrstuvwxyz".indexOf(passwd) > 0 || "ABCDEFGHIJKLMNOPQRSTUVWXYZ".indexOf(passwd) > 0) {
             level--;
         }
@@ -176,7 +154,7 @@ public class PasswordStrengthChecker {
             level--;
         }
 
-        if (len % 2 == 0) { // aaabbb
+        if (len % 2 == 0) { 
             String part1 = passwd.substring(0, len / 2);
             String part2 = passwd.substring(len / 2);
             if (Objects.equals(part1, part2)) {
@@ -186,7 +164,7 @@ public class PasswordStrengthChecker {
                 level--;
             }
         }
-        if (len % 3 == 0) { // ababab
+        if (len % 3 == 0) { 
             String part1 = passwd.substring(0, len / 3);
             String part2 = passwd.substring(len / 3, len / 3 * 2);
             String part3 = passwd.substring(len / 3 * 2);
@@ -195,7 +173,7 @@ public class PasswordStrengthChecker {
             }
         }
 
-        if (StringUtils.isNumeric(passwd) && len >= 6) { // 19881010 or 881010
+        if (StringUtils.isNumeric(passwd) && len >= 6) { 
             int year = 0;
             if (len == 8 || len == 6) {
                 year = Integer.parseInt(passwd.substring(0, len - 4));
@@ -208,7 +186,7 @@ public class PasswordStrengthChecker {
             }
         }
 
-        if (null != DICTIONARY && DICTIONARY.length > 0) {// dictionary
+        if (null != DICTIONARY && DICTIONARY.length > 0) {
             for (int i = 0; i < DICTIONARY.length; i++) {
                 if (passwd.equals(DICTIONARY[i]) || DICTIONARY[i].indexOf(passwd) >= 0) {
                     level--;
@@ -238,12 +216,7 @@ public class PasswordStrengthChecker {
         return level;
     }
 
-    /**
-     * Get password strength level, includes easy, midium, strong, very strong, extremely strong
-     *
-     * @param passwd
-     * @return
-     */
+    
     public static LEVEL getPasswordLevel(String passwd) {
         int level = checkPasswordStrength(passwd);
         switch (level) {
@@ -270,12 +243,7 @@ public class PasswordStrengthChecker {
     }
 
 
-    /**
-     * calculate the size of an integer number
-     *
-     * @param x
-     * @return
-     */
+    
     public static int sizeOfInt(int x) {
         for (int i = 0; ; i++)
             if (x <= SIZE_TABLE[i]) {
@@ -283,22 +251,13 @@ public class PasswordStrengthChecker {
             }
     }
 
-    /**
-     * Judge whether each character of the string equals
-     *
-     * @param str
-     * @return
-     */
+    
     public static boolean isCharEqual(String str) {
         return str.replace(str.charAt(0), ' ').trim().length() == 0;
     }
 
 
-    /**
-     * 密码中必须包含大小写字母、数字、至少6个字符
-     * @param password
-     * @return
-     */
+    
     public static boolean isValidPassword(String password){
         Pattern Password_Pattern = Pattern.compile(regEx);
         Matcher matcher = Password_Pattern.matcher(password);

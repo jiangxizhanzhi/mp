@@ -19,11 +19,7 @@ import javax.servlet.http.HttpSession;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
-/**
- * @Description
- * @Author shgang
- * @Date 2022/12/27
- */
+
 @Api(value = "认证相关接口", tags = "AUTH-获取验证码接口")
 @Slf4j
 @RestController
@@ -42,7 +38,7 @@ public class VerifyCodeController {
         response.setHeader("Pragma", "no-cache");
         response.setContentType("image/jpeg");
         String capText = kaptchaProducer.createText();
-        // Save the captcha code to the session
+        
         HttpSession session = request.getSession();
         session.setAttribute(AuthConstant.KAPTCHA_SESSION_KEY, capText);
         session.setAttribute(AuthConstant.KAPTCHA_SESSION_DATE, System.currentTimeMillis());

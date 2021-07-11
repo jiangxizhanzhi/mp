@@ -13,11 +13,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @Description: 脚本探针参数转换
- * @Author hewei
- * @Date：2022/5/6 9:23
- */
+
 public class ConvertScriptParams implements WazuhParamsConvert<WazuhControl.ControlProbeParam> {
 
     private Probe probe;
@@ -50,7 +46,7 @@ public class ConvertScriptParams implements WazuhParamsConvert<WazuhControl.Cont
                 }
             });
         }
-        // 参数用空格分开
+        
         if (!CollectionUtils.isEmpty(params)) {
             scriptProbeParam.setScriptParam(StringUtils.joinWith(StringUtils.SPACE, params.toArray()));
         }

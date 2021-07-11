@@ -10,20 +10,16 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @ApiModel
 @Table("mp_auth_client_details")
 public class ClientDetailsModel extends BaseModel implements Serializable {
-    // Oauth2渠道
+    
     public static final Integer CLIENT_TYPE_OAUTH2 = 1;
-    // 免认证渠道
+    
     public static final Integer CLIENT_TYPE_UNAUTH = 2;
 
     @ApiModelProperty("客户端ID")

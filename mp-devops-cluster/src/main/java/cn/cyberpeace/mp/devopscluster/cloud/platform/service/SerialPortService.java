@@ -6,10 +6,7 @@ import cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatform
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-/**
- * 运维管控-系统运维-网络实例管理-串口
- * @author wanggang
- */
+
 @Service
 @Slf4j
 public class SerialPortService extends BaseCpService {
@@ -18,10 +15,7 @@ public class SerialPortService extends BaseCpService {
         super(devopsClusterConfig);
     }
 
-    /**
-     * 查询串口信息
-     * @return
-     */
+    
     public SerialPortCloudPlatform list() {
         SerialPortCloudPlatform result = super.sendGet(BaseCloudPlatformConstant.CPCLOUD_CCM + BaseCloudPlatformConstant.URL_VERSION + "/list" , SerialPortCloudPlatform.class);
         return result;

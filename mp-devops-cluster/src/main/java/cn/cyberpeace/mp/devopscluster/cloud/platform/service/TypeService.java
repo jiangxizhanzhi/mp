@@ -20,10 +20,7 @@ import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * 靶标枚举值接口
- * @author wanggang
- */
+
 @Service
 @Slf4j
 public class TypeService extends BaseCpService {
@@ -47,10 +44,7 @@ public class TypeService extends BaseCpService {
         lfuCache = CacheUtil.newLFUCache(100);
     }
 
-    /**
-     * 查询所有类型数据
-     * @return
-     */
+    
     public CloudPlatformPageResult<TypeTreeItemModel> findL1AndL2AndL3Type(Boolean isAll){
         String key = cache_prefix_model + "l3:" + isAll + ":" + ServletUtils.getAcceptLanguage();
         Object cache = lfuCache.get(key);
@@ -66,10 +60,7 @@ public class TypeService extends BaseCpService {
         return model;
     }
 
-    /**
-     * 查询类型数据，仅返回L1和L2级类型数据
-     * @return
-     */
+    
     public CloudPlatformPageResult<TargetType> findL1AndL2Type(){
         String key = cache_prefix_model + "l2:" + ServletUtils.getAcceptLanguage();
         Object cache = lfuCache.get(key);
@@ -85,10 +76,7 @@ public class TypeService extends BaseCpService {
         return model;
     }
 
-    /**
-     * 查询接入协议端口
-     * @return
-     */
+    
     public CloudPlatformPageResult<AccessProtocolsPort> findAccessProtocolsPort(){
         String key = cache_prefix_model + "access_protocols_port:" + ServletUtils.getAcceptLanguage();
         Object cache = lfuCache.get(key);
@@ -105,10 +93,7 @@ public class TypeService extends BaseCpService {
         return model;
     }
 
-    /**
-     * 查询所有
-     * @return
-     */
+    
     public CloudPlatformPageResult<TypeItemModel> findIdIntegerByType(String type, Boolean isAll){
         String key = cache_prefix_model + type + ":" + isAll + ServletUtils.getAcceptLanguage();
         Object cache = lfuCache.get(key);
@@ -124,10 +109,7 @@ public class TypeService extends BaseCpService {
         return model;
     }
 
-    /**
-     * 查询所有
-     * @return
-     */
+    
     public CloudPlatformPageResult<TypeItemNameModel> findIdStringByType(String type, Boolean isAll){
         String key = cache_prefix_model + type + ":" + isAll +  ServletUtils.getAcceptLanguage();
         Object cache = lfuCache.get(key);
@@ -143,11 +125,7 @@ public class TypeService extends BaseCpService {
         return model;
     }
 
-    /**
-     * 根据Type查询
-     * @param type hw_disk_bus hw_vif_model hw_video_model
-     * @return
-     */
+    
     public CloudPlatformPageResult<String> findItemsByType(String type){
         String key = cache_prefix_model + type + ServletUtils.getAcceptLanguage();
         Object cache = lfuCache.get(key);

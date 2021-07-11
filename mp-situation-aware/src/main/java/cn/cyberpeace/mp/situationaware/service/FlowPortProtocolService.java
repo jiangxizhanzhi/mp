@@ -39,10 +39,7 @@ public class FlowPortProtocolService {
         this.flowPortProtocolMapper = flowPortProtocolMapper;
     }
 
-    /**
-     * 查询所有端口与协议
-     * @return
-     */
+    
     public List<FlowPortProtocolModel> findAll(){
         String key = cache_prefix_model + "flow:port:protocol:" + ServletUtils.getAcceptLanguage();
         Object cache = lfuCache.get(key);
@@ -54,10 +51,7 @@ public class FlowPortProtocolService {
         return modelList;
     }
 
-    /**
-     * 转成Map格式
-     * @return
-     */
+    
     public Map<String,String> convertToMap(){
         List<FlowPortProtocolModel> modelList = this.findAll();
         if (CollectionUtils.isEmpty(modelList)){

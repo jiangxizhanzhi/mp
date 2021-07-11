@@ -6,11 +6,7 @@ import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.cscene.model.ScreenshotModel;
 import org.springframework.stereotype.Component;
 
-/**
- * @Description 截屏文件管理Fields
- * @Author qiaokang
- * @Date 2021-09-13 11:05:18
- */
+
 @Component
 public class ScreenshotFields extends BaseModelFields {
     public static final DynamicFields allFields = new DynamicFields(ClassUtils.getBeanClassFields(ScreenshotModel.class));

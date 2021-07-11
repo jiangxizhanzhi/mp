@@ -68,9 +68,7 @@ public class RealEquipmentController {
     @Resource(name = "sysOptionServiceImpl")
     private OptionService optionService;
 
-    /**
-     * 分页查询
-     */
+    
     @ApiOperation("分页查询")
     @GetMapping("/page")
     public PageResult<RealEquipmentPageVO> page(RealEquipmentPageRequest request){
@@ -191,9 +189,7 @@ public class RealEquipmentController {
         return new Result(response);
     }
 
-    /**
-     * 新增
-     */
+    
     @ApiOperation("新增")
     @ApiImplicitParam(name = "request", value = "新增实装设备请求体", dataTypeClass = RealEquipmentRequest.class)
     @PostMapping("/add")
@@ -203,9 +199,7 @@ public class RealEquipmentController {
         return ResultCommon.success();
     }
 
-    /**
-     * 更新
-     */
+    
     @ApiOperation("更新")
     @ApiImplicitParam(name = "request", value = "更新数据请求体", dataTypeClass = RealEquipmentRequest.class)
     @PutMapping("/update")
@@ -218,9 +212,7 @@ public class RealEquipmentController {
         return ResultCommon.success();
     }
 
-    /**
-     * 删除
-     */
+    
     @ApiOperation("删除")
     @ApiImplicitParam(name = "request", value = "删除数据请求体", dataTypeClass = RealEquipmentDeleteRequest.class)
     @DeleteMapping("/delete")
@@ -422,20 +414,14 @@ public class RealEquipmentController {
         return optionService.getIntOptions(DevopsClusterConstant.MP_COMMON_OPTION_TYPE_DEVOPS_CLUSTER_USE);
     }
 
-    /**
-     * 获取服务器列表
-     * @return
-     */
+    
     @ApiOperation("获取服务器列表")
     @GetMapping("/hypervisor_list")
     public ServiceResult<List<Hypervisor>> hypervisorList() {
         return new ServiceResult<>(realEquipmentService.hypervisorList()).asResult();
     }
 
-    /**
-     * 根据hostName查询usb列表
-     * @return
-     */
+    
     @ApiOperation("根据hostName查询usb列表")
     @ApiImplicitParam(name = "hostName", value = "服务器主机名", dataTypeClass = String.class)
     @GetMapping("/usb_list")

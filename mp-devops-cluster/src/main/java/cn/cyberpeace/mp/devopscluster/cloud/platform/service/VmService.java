@@ -11,10 +11,7 @@ import cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatform
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-/**
- * 虚拟机
- * @author wanggang
- */
+
 @Service
 @Slf4j
 public class VmService extends BaseCpService {
@@ -25,31 +22,19 @@ public class VmService extends BaseCpService {
         super(devopsClusterConfig);
     }
 
-    /**
-     * 分页查询虚拟机信息
-     * @param getParams
-     * @return
-     */
+    
     public CloudPlatformPageResult<InstanceModel> page(String getParams){
         return super.page(BaseCloudPlatformConstant.URL_VERSION + INSTANCES + getParams, InstanceModel.class);
     }
 
-    /**
-     * 操作
-     * @param model
-     * @param uuid
-     * @return
-     */
+    
     public BaseCloudPlatformResult action(VmActionCloudPlatformModel model, String uuid){
         BaseCloudPlatformResult result = super.sendPost(BaseCloudPlatformConstant.URL_VERSION + INSTANCES + "/" + uuid  + "/action", JsonUtils.toUnderlineJSONString(model), BaseCloudPlatformResult.class);
         super.checkResult(result);
         return result;
     }
 
-    /**
-     *
-     * @return
-     */
+    
     public CloudPlatformPageResult<InstanceOsServiceModel> osServicesStateFromInstances(){
         return super.page(BaseCloudPlatformConstant.URL_VERSION + INSTANCES + "/os-services", InstanceOsServiceModel.class);
     }

@@ -6,11 +6,7 @@ import cn.cyberpeace.mp.base.util.define.SerializableFunction;
 
 import java.util.function.Function;
 
-/**
- * @Description
- * @Author shgang
- * @Date 2022/11/2
- */
+
 public class GroupConcat extends Aggregation<GroupConcat> {
     public static Function<String, String> genDistinct() {
         return column -> String.format("distinct (%s)", column);

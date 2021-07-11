@@ -34,9 +34,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-/**
- * 虚拟机管理类
- */
+
 @Validated
 @Slf4j
 @RestController
@@ -53,12 +51,7 @@ public class DynamipsController {
 
     private final DeviceTargetMapper deviceTargetMapper;
 
-    /**
-     * 分页查询dynamips信息
-     *
-     * @param request
-     * @return //
-     */
+    
     @ApiOperation("分页查询dynamips信息")
     @GetMapping("/page")
     public PageResult<InstancePageVO> page(DynamipsInstancePageRequest request) {
@@ -67,12 +60,7 @@ public class DynamipsController {
         return new PageResult<>(pageVos, result.getTotal());
     }
 
-    /**
-     * 转换BO to VO
-     *
-     * @param model
-     * @return
-     */
+    
     private List<InstancePageVO> convertBOToPageVO(BasePageBO<InstanceBO> model) {
         List<InstanceBO> instances = model.getList();
         List<String> instanceNames = instances.stream().map(InstanceBO::getName).collect(Collectors.toList());
@@ -91,7 +79,7 @@ public class DynamipsController {
                 }
             }
         }
-        // 镜像管理实例的创建用户
+        
         if (CollectionUtils.isNotEmpty(devopsResult)) {
             List<String> userIdList = devopsResult.stream().filter(deviceTargetPO -> StringUtils.isNotEmpty(deviceTargetPO.getInstanceCreateUser())).map(DeviceTargetPO::getInstanceCreateUser).collect(Collectors.toList());
             uuid2UserId = devopsResult.stream().filter(deviceTargetPO -> StringUtils.isNotEmpty(deviceTargetPO.getInstanceCreateUser())).collect(Collectors.toMap(DeviceTargetPO::getUuid, DeviceTargetPO::getInstanceCreateUser));

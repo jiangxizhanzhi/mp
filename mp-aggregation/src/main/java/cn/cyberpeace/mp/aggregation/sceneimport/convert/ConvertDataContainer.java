@@ -24,35 +24,31 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2021/10/12
- */
+
 @Getter
 class ConvertDataContainer {
     private static Logger logger = LoggerFactory.getLogger(ConvertDataContainer.class);
 
     private static String CLOUD_PLUGIN_KEY = cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY;
 
-    // 存主表信息
+    
     private SceneConfigBO sceneConfigBO;
     private List<SceneConfigElementBO> networkElements = new ArrayList<>();
     private List<SceneConfigElementBO> nodeElements = new ArrayList<>();
 
-    // 存云平台插件信息
+    
     private CloudPluginSceneConfigBO cloudPluginConfig;
     private Map<String, CloudPluginSceneConfigElementBO> cloudPluginElements = new HashMap<>();
     private Map<String, CloudPluginSceneConfigElementPortBO> cloudPluginPorts = new HashMap<>();
 
-    // 用于连线
+    
     private Map<String, Map<String, SceneConfigElementPortBO>> node2NetworkPorts = new HashMap<>();
     private List<SceneConfigElementPortConnectionBO> connections = new ArrayList<>();
 
-    // 未连接任何网络的节点
+    
     private List<SceneConfigElementBO> noNetworkNodeElements = new ArrayList<>();
 
-    // 存区域信息
+    
     private List<SceneConfigAreaBO> areaBOS = new ArrayList<>();
 
     private Map<String, ImageInfoParseResult> imageInfos = new HashMap<>();
@@ -155,14 +151,14 @@ class ConvertDataContainer {
 
         Map<String, Map<String, Object>> mapPluginElements = new HashMap<>();
         for (Map.Entry<String, CloudPluginSceneConfigElementBO> entry : this.cloudPluginElements.entrySet()) {
-            // TODO: 去除snake依赖
+            
             mapPluginElements.put(entry.getKey(), JsonCommon.beanToSnakeMap(entry.getValue()));
         }
         scenePluginDataBO.setElements(mapPluginElements);
 
         Map<String, Map<String, Object>> mapPluginPorts = new HashMap<>();
         for (Map.Entry<String, CloudPluginSceneConfigElementPortBO> entry : this.cloudPluginPorts.entrySet()) {
-            // TODO: 去除snake依赖
+            
             mapPluginPorts.put(entry.getKey(), JsonCommon.beanToSnakeMap(entry.getValue()));
         }
         scenePluginDataBO.setElementPorts(mapPluginPorts);

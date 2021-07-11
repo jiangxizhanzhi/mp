@@ -17,11 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/3/24
- */
+
 @Slf4j
 public abstract class AbstractClearJob<Q> {
     private static final String PREFIX = CloudSingleton.cloudAppConfig.getCpcloudResourceGroup();

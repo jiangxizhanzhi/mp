@@ -9,11 +9,7 @@ import lombok.NoArgsConstructor;
 import javax.validation.constraints.NotEmpty;
 import java.util.List;
 
-/**
- * @Description: 删除流量分类请求
- * @Author: guquan
- * @Date：2023/5/6 10:54
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

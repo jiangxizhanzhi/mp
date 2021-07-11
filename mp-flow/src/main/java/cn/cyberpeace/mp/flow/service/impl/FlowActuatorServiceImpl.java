@@ -17,11 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 
-/**
- * @Description: 流量执行器service
- * @Author qiaokang
- * @Date：2021/6/10 10:31
- */
+
 @Service
 @Slf4j
 public class FlowActuatorServiceImpl extends BaseModelServiceImpl<FlowActuatorModel, FlowActuatorMapper, FlowActuatorFields, QueryParams> implements FlowActuatorService {
@@ -34,10 +30,7 @@ public class FlowActuatorServiceImpl extends BaseModelServiceImpl<FlowActuatorMo
         setModelMapper(stuMapper);
     }
 
-    /**
-     * 删除虚拟机实例
-     * @param actuatorId
-     */
+    
     @Override
     public void delExecutor(String actuatorId) {
         FlowActuatorModel flowActuatorModel = this.getModelMapper().get(actuatorId);

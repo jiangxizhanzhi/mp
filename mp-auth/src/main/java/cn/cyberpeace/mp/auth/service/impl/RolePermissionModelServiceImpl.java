@@ -30,11 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Service
 @CacheConfig(cacheManager = AuthCacheConfig.CACHE_MANAGER_NORMAL)
 public class RolePermissionModelServiceImpl extends BaseModelServiceImpl<RolePermissionModel, RolePermissionMapper, RolePermissionFields, QueryParams>
@@ -123,7 +119,7 @@ public class RolePermissionModelServiceImpl extends BaseModelServiceImpl<RolePer
         ResultUtils.throwExceptionIfError(result, AuthErrorCode.ROLE_NOT_EXISTED);
 
         if (cleanOldTargets) {
-            // 清除角色绑定的权限
+            
             boolean success = deleteByRoleId(roleId);
             if (!success) {
                 throw new MpRuntimeException(AuthErrorCode.ROLE_TARGET_DELETE_ERROR);
@@ -131,14 +127,14 @@ public class RolePermissionModelServiceImpl extends BaseModelServiceImpl<RolePer
         }
 
         if (CollUtil.isEmpty(targetIds)) {
-            // 完成，直接返回
+            
             return true;
         }
 
-        // 添加角色权限
+        
         List<RolePermissionModel> rolePerms = new ArrayList<>();
         targetIds.forEach(tid -> {
-            // todo 校验权限是否存在
+            
             RolePermissionModel rolePerm = new RolePermissionModel();
             rolePerm.setOwner(roleId);
             rolePerm.setTarget(tid);

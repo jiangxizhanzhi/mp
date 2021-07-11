@@ -22,16 +22,7 @@ public class StatCommon {
 
     private StatCommon() {}
 
-    /**
-     * 分组查询指定字段的聚合count数量
-     * @param mapper 数据mapper对象
-     * @param condition 已完成设置的HumanCondition查询条件（如关联查询需要已指向字段对应的表）
-     * @param groupFieldName 分组字段
-     * @param countFieldNames 统计字段
-     * @param distinct 是否去重
-     * @param <T> 分组聚合字段的值类型
-     * @return 字段的聚合count数量 Map<字段名, Map<分组字段值, 该字段值聚合结果>>
-     */
+    
     public static <T> Map<String, Map<T, Long>> groupCount(BaseModelMapper<?> mapper, HumanCondition condition,
                                                            String groupFieldName, List<String> countFieldNames,
                                                            boolean distinct) {
@@ -41,16 +32,7 @@ public class StatCommon {
         return statResult.getCountResult();
     }
 
-    /**
-     * 分组查询指定字段的聚合count数量
-     * @param mapper 数据mapper对象
-     * @param condition 已完成设置的HumanCondition查询条件（如关联查询需要已指向字段对应的表）
-     * @param groupFieldName 分组字段
-     * @param sumFieldNames 统计字段
-     * @param <T> 分组聚合字段的值类型
-     * @param <S> 统计值类型
-     * @return 字段的聚合count数量 Map<字段名, Map<分组字段值, 该字段值聚合结果>>
-     */
+    
     public static <T, S extends Number> Map<String, Map<T, S>> groupSum(
             BaseModelMapper<?> mapper, HumanCondition condition, String groupFieldName, List<String> sumFieldNames) {
         List<AggStatField> sumFields = sumFieldNames.stream().map(SumField::f).collect(Collectors.toList());
@@ -58,16 +40,7 @@ public class StatCommon {
         return statResult.getSumResult();
     }
 
-    /**
-     * 分组聚合统计指定字段结果
-     * @param mapper 数据mapper对象
-     * @param condition 已完成设置的HumanCondition查询条件（如关联查询需要已指向字段对应的表）
-     * @param groupFieldName 分组字段
-     * @param statFields 统计字段
-     * @param <T> 分组字段的值类型
-     * @param <S> sum统计结果类型
-     * @return 字段的聚合结果
-     */
+    
     public static <T, S extends Number> GroupStatResult<T, S> groupAggStat(
             BaseModelMapper<?> mapper, HumanCondition condition, String groupFieldName, List<AggStatField> statFields) {
         condition.selectAs(groupFieldName, groupFieldName).groupBy(groupFieldName);
@@ -106,15 +79,7 @@ public class StatCommon {
         return statResult;
     }
 
-    /**
-     * 分组查询指定字段的聚合计算结果，对于无法直接聚合统计的内容
-     * @param mapper 数据mapper对象
-     * @param condition 已完成设置的HumanCondition查询条件（如关联查询需要已指向字段对应的表）
-     * @param groupFieldName 分组聚合字段
-     * @param fieldCalcMap 统计字段对应的计算方法
-     * @param <T> 分组聚合分组字段的值类型
-     * @return 字段的聚合count数量 Map<字段名, Map<分组字段值, 该字段值聚合结果>>
-     */
+    
     public static <T> Map<String, Map<T, Object>> groupCalc(
             BaseModelMapper<?> mapper, HumanCondition condition, String groupFieldName,
             Map<String, Function<List<Object>, Object>> fieldCalcMap) {
@@ -150,14 +115,7 @@ public class StatCommon {
         return fieldGroupCalcValueMap;
     }
 
-    /**
-     * 查询指定字段的聚合count数量
-     * @param mapper 数据mapper对象
-     * @param condition 已完成设置的HumanCondition查询条件（如关联查询需要已指向字段对应的表）
-     * @param fieldNames 统计字段名称列表
-     * @param distinct 是否去重
-     * @return 字段的聚合count数量 Map<字段名, 该字段值统计数量>
-     */
+    
     public static Map<String, Long> count(BaseModelMapper<?> mapper, HumanCondition condition,
                                           List<String> fieldNames, boolean distinct) {
         List<AggStatField> countFields = fieldNames.stream()
@@ -166,14 +124,7 @@ public class StatCommon {
         return statResult.getCountResult();
     }
 
-    /**
-     * 查询指定字段的聚合sum数量
-     * @param mapper 数据mapper对象
-     * @param condition 已完成设置的HumanCondition查询条件（如关联查询需要已指向字段对应的表）
-     * @param fieldNames 统计字段名称列表
-     * @param <S> 统计值类型
-     * @return 字段的聚合sum数量 Map<字段名, 该字段值统计数量>
-     */
+    
     public static <S extends Number> Map<String, S> sum(
             BaseModelMapper<?> mapper, HumanCondition condition, List<String> fieldNames) {
         List<AggStatField> sumFields = fieldNames.stream().map(SumField::f).collect(Collectors.toList());
@@ -181,14 +132,7 @@ public class StatCommon {
         return statResult.getSumResult();
     }
 
-    /**
-     * 聚合统计指定字段结果
-     * @param mapper 数据mapper对象
-     * @param condition 已完成设置的HumanCondition查询条件（如关联查询需要已指向字段对应的表）
-     * @param statFields 统计字段
-     * @param <S> sum统计结果类型
-     * @return 字段的聚合结果
-     */
+    
     public static <S extends Number> StatResult<S> aggStat(
             BaseModelMapper<?> mapper, HumanCondition condition, List<AggStatField> statFields) {
         Map<String, Long> countResult = new HashMap<>();
@@ -223,13 +167,7 @@ public class StatCommon {
         return statResult;
     }
 
-    /**
-     * 分组查询指定字段的聚合计算结果，对于无法直接聚合统计的内容
-     * @param mapper 数据mapper对象
-     * @param condition 已完成设置的HumanCondition查询条件（如关联查询需要已指向字段对应的表）
-     * @param fieldCalcMap 统计字段对应的计算方法
-     * @return 字段的聚合count数量 Map<字段名, 该字段值聚合结果>
-     */
+    
     public static Map<String, Object> calc(BaseModelMapper<?> mapper, HumanCondition condition,
                                            Map<String, Function<List<Object>, Object>> fieldCalcMap) {
         var fieldNames = fieldCalcMap.keySet();

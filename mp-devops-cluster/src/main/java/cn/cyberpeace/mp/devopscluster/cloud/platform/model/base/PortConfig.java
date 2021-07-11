@@ -9,31 +9,22 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 import java.util.List;
 
-/**
- * 端口配置
- * @author wanggang
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel("端口配置")
 public class PortConfig implements Serializable {
 
-    /**
-     * 管理口/Wan口/Lan口
-     */
+    
     @ApiModelProperty("配置类型")
     private Integer portType;
 
-    /**
-     * 端口名称
-     */
+    
     @ApiModelProperty("端口名称")
     private String portName;
 
-    /**
-     * 端口网段
-     */
+    
     @ApiModelProperty("端口网段")
     private String portIps;
 

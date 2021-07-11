@@ -14,25 +14,17 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/5/13 11:57
- */
+
 @Slf4j
 @Service
 public class OperatePermissionService {
 
 
-    /**
-     * 登录用户是否是普通管理员
-     * client认证的用户都有管理员权限
-     * @return
-     */
+    
     public boolean isLoginUserAdmin() {
         UserBo currentUserBo = UserUtils.getLoginUserDtoWithoutOrg();
         if (Objects.nonNull(currentUserBo)) {
-            // 超级用户拥有管理员权限
+            
             if (Objects.equals(1, currentUserBo.getIsAdmin()) || Objects.equals(1, currentUserBo.getIsSuperUser())) {
                 return true;
             }
@@ -40,18 +32,14 @@ public class OperatePermissionService {
 
         String userType = UserUtils.getLoginUserType();
         if (Objects.equals(LogConstant.USER_TYPE_CLIENT, userType)) {
-            // client类型的认证，默认拥有管理员，超级用户权限
+            
             return true;
         }
 
         return false;
     }
 
-    /**
-     * 登录用户是否是超级用户
-     * client认证的用户都有超级用户权限
-     * @return
-     */
+    
     public boolean isLoginUserSuperUser() {
         UserBo currentUserBo = UserUtils.getLoginUserDtoWithoutOrg();
         if (Objects.nonNull(currentUserBo)) {
@@ -62,21 +50,15 @@ public class OperatePermissionService {
 
         String userType = UserUtils.getLoginUserType();
         if (Objects.equals(LogConstant.USER_TYPE_CLIENT, userType)) {
-            // client类型的认证，默认拥有管理员，超级用户权限
+            
             return true;
         }
 
-        // client认证的用户都有超级用户权限
+        
         return false;
     }
 
-    /**
-     * 针对查询用户操作，对操作对象的所有角色id集合检查权限
-     * 超级用户不受限制
-     * 管理员可以查询管理员和普通用户，但是不能修改
-     * 普通用户可以查普通用户
-     * @param targetRoleIds
-     */
+    
     public void checkByTargetRoleIdsForSearching(List<String> targetRoleIds) {
         if (CollectionUtil.isEmpty(targetRoleIds)) {
             return;
@@ -85,14 +67,14 @@ public class OperatePermissionService {
         boolean isSupserUser = isLoginUserSuperUser();
         boolean isAdmin = isLoginUserAdmin();
 
-        // 超级用户,管理员不受限制
+        
         if (isSupserUser || isAdmin) {
             return;
         }
 
         UserModel currentUser = UserUtils.getLoginUser();
 
-        // 普通用户不允许查管理员角色以上用户
+        
         if (hasAdminRole(targetRoleIds)) {
             if (Objects.nonNull(currentUser)) {
                 log.error("permission denied! Cause target role is admin or superuser! " +
@@ -102,13 +84,7 @@ public class OperatePermissionService {
         }
     }
 
-    /**
-     * 针对修改用户操作，对操作对象的所有角色id集合检查权限
-     * 超级用户不受限制
-     * 管理员可以修改普通用户，不能修改管理员
-     * 普通用户无修改权限
-     * @param targetRoleIds
-     */
+    
     public void checkByTargetRoleIds(List<String> targetRoleIds) {
         if (CollectionUtil.isEmpty(targetRoleIds)) {
             return;
@@ -117,17 +93,17 @@ public class OperatePermissionService {
         boolean isSupserUser = isLoginUserSuperUser();
         boolean isAdmin = isLoginUserAdmin();
 
-        // 超级用户不限制
+        
         if (isSupserUser) {
             return;
         }
 
         UserModel currentUser = UserUtils.getLoginUser();
 
-        // 自身是非超级用户的管理员
+        
         if (isAdmin) {
-            // 管理员不可操作拥有管理员，超级用户角色的账号，但是可以操作普通用户
-            // 管理员甚至无权修改自己的信息
+            
+            
             if (hasAdminRole(targetRoleIds)) {
                 if (Objects.nonNull(currentUser)) {
                     log.error("permission denied! Cause target role is admin or superuser! " +
@@ -138,7 +114,7 @@ public class OperatePermissionService {
             return;
         }
 
-        // 普通用户不允许操作
+        
         if (Objects.nonNull(currentUser)) {
             log.error("permission denied for normal user! " +
                     "current username:{}, isAdmin:{}, isSuperUser:{}", currentUser.getUsername(), isAdmin, isSupserUser);
@@ -148,11 +124,7 @@ public class OperatePermissionService {
     }
 
 
-    /**
-     * 判断角色id集合中有无管理员
-     * @param roleIds
-     * @return
-     */
+    
     private boolean hasAdminRole(List<String> roleIds) {
         return roleIds.stream()
                 .filter(r -> Objects.equals(r.trim(), AuthConstant.ROLE_ADMIN_ID))

@@ -18,11 +18,7 @@ import java.util.stream.Collectors;
 
 import static cn.cyberpeace.mp.scene.util.CommandUtils.WINDOWS_LINE_BREAK;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/4/6
- */
+
 public class CloudInitConfigCommon {
     private static final String SSH_PWAUTH = "ssh_pwauth: true";
     private static final String DISABLE_ROOT = "disable_root: 0";

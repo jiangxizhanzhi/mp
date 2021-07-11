@@ -10,11 +10,7 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @Description: 服务器监控对象
- * @Author qiaokang
- * @Date：2022/7/16 16:48
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

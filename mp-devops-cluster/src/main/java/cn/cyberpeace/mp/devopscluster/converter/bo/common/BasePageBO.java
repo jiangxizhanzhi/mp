@@ -7,59 +7,43 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * 基础模型，对应云平台接口返回信息
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class BasePageBO<T> extends ListResult<T> {
 
-    /**
-     * 是否成功
-     */
+    
     @ApiModelProperty(hidden = true)
     @JsonIgnore
     private boolean success;
 
-    /**
-     * 总数据大小
-     */
+    
     @ApiModelProperty(hidden = true)
     @JsonIgnore
     private Integer total = 0;
 
-    /**
-     * 消息体
-     */
+    
     @ApiModelProperty(hidden = true)
     @JsonIgnore
     private String message;
 
-    /**
-     * 错误信息
-     */
+    
     @ApiModelProperty(hidden = true)
     @JsonIgnore
     private String messageZh;
 
-    /**
-     * 错误信息
-     */
+    
     @ApiModelProperty(hidden = true)
     @JsonIgnore
     private String errorMessage;
 
-    /**
-     * 消息体
-     */
+    
     @ApiModelProperty(hidden = true)
     @JsonIgnore
     private String msg;
 
-    /**
-     * 消息体
-     */
+    
     @ApiModelProperty(hidden = true)
     @JsonIgnore
     private String msgZh;

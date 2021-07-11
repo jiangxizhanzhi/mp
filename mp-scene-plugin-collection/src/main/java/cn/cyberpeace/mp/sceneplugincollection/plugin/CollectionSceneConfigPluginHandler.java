@@ -41,7 +41,7 @@ public class CollectionSceneConfigPluginHandler extends SceneConfigPluginHandler
                 var nodeId = entry.getKey();
                 var node = entry.getValue();
                 if (node.getVirtualType() != null && node.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER) {
-                    // 和容器相连的非网络节点 最多只能设置超过一个的采集插件
+                    
                     var connects = getElementConnectedSrcElements(nodeId);
                     if (CollectionUtils.isNotEmpty(connects) && connects.size() > 1) {
                         Set<String> connectMachineNodes = new HashSet<>();
@@ -55,7 +55,7 @@ public class CollectionSceneConfigPluginHandler extends SceneConfigPluginHandler
                                 }
                             }
                         }
-                        // 移除自己
+                        
                         connectMachineNodes.remove(nodeId);
                         int nums = 0;
                         for (String connectMachineNodeId : connectMachineNodes) {
@@ -87,27 +87,27 @@ public class CollectionSceneConfigPluginHandler extends SceneConfigPluginHandler
 
     @Override
     public void correctData() {
-        //根据探针不同类型设置五种执行类型
+        
         if (getElementMap() != null && !getElementMap().isEmpty()) {
             getElementMap().values().forEach(e -> {
                 if (e.getProbes() == null || e.getProbes().isEmpty()) {
                     return;
                 }
                 e.getProbes().forEach(probe -> {
-                    //有脚本，脚本驱动类型
+                    
                     if (probe.getScriptUrl() != null) {
                         probe.setExecType(Probe.ExecType.SCRIPT_PROBE);
                     } else if (ProbeConstant.ProbeId.REGISTRY_MODIFY.equals(probe.getId())) {
-                        //注册表变更类型
+                        
                         probe.setExecType(Probe.ExecType.REGISTRY_PROBE);
                     } else if (ProbeConstant.ProbeId.FILE_MODIFY.equals(probe.getId())) {
-                        //文件变更类型
+                        
                         probe.setExecType(Probe.ExecType.FILE_PROBE);
                     } else if (probe.getCommon() && ProbeConstant.ProbeType.LOG_TYPE.equals(probe.getType())) {
-                        //日志采集类型
+                        
                         probe.setExecType(Probe.ExecType.LOG_PROBE);
                     } else {
-                        //基础类型
+                        
                         probe.setExecType(Probe.ExecType.BASE_PROBE);
                     }
                 });

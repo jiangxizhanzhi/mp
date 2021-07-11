@@ -9,9 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-/**
- * 公告分页请求信息
- */
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -24,8 +22,8 @@ public class SysNoticePageRequest extends PageRequest {
     @ApiModelProperty(value = "组织ids")
     private List<String> orgIds;
 
-    //@ApiModelProperty(value = "用户ids")
-    //private List<String> userIds;
+    
+    
 
     @ApiModelProperty(value = "角色ids")
     private List<String> roleIds;

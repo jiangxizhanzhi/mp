@@ -33,9 +33,9 @@ public class SystemTypeUtils {
             new SystemTypeItem("99", "Windows8", BaseSceneElementModel.SystemType.WINDOWS_8),
             new SystemTypeItem("100", "Windows-Server2008", BaseSceneElementModel.SystemType.WINDOWS_SERVER_2008),
             new SystemTypeItem("101", "Windows-Server2003", BaseSceneElementModel.SystemType.WINDOWS_SERVER_2003),
-            new SystemTypeItem("102", "Windows Visita", BaseSceneElementModel.SystemType.WINDOWS_VISTA), // 兼容错误
+            new SystemTypeItem("102", "Windows Visita", BaseSceneElementModel.SystemType.WINDOWS_VISTA), 
             new SystemTypeItem("102", "Windows Vista", BaseSceneElementModel.SystemType.WINDOWS_VISTA),
-            new SystemTypeItem("103", "Windows-Server2019", BaseSceneElementModel.SystemType.WINDOWS_SERVER_2019),
+            new SystemTypeItem("103", "Windows-Server2018", BaseSceneElementModel.SystemType.WINDOWS_SERVER_2018),
             new SystemTypeItem("104", "Windows-Server2012", BaseSceneElementModel.SystemType.WINDOWS_SERVER_2012),
             new SystemTypeItem("105", "Windows-Server2010", BaseSceneElementModel.SystemType.WINDOWS_SERVER_2010),
             new SystemTypeItem("106", "Windows10", BaseSceneElementModel.SystemType.WINDOWS_10),
@@ -65,7 +65,7 @@ public class SystemTypeUtils {
             new SystemTypeItem("401", "IOS", BaseSceneElementModel.SystemType.OTHER),
             new SystemTypeItem("402", "MacOS", BaseSceneElementModel.SystemType.OTHER),
 
-            // 这个Other要放在枚举的最后
+            
             new SystemTypeItem("314", "Other", BaseSceneElementModel.SystemType.OTHER)
     ));
 

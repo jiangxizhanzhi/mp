@@ -6,15 +6,11 @@ import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.hutool.core.util.StrUtil;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Data
 public class OrgUserPageRequest extends PageRequest {
 
-    // 注意 后台会匹配 username 或者 name
+    
     @ApiModelProperty(value = "用户名")
     private String username;
 
@@ -30,7 +26,7 @@ public class OrgUserPageRequest extends PageRequest {
     @ApiModelProperty(value = "1: 正常 0：禁用")
     private Integer isEnabled;
 
-    // 1：已审核 0：待审核
+    
     @ApiModelProperty(value = "1：已审核 0：待审核")
     private Integer isAudited;
 

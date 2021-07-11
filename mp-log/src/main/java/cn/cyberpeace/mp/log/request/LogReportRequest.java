@@ -8,11 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-/**
- * @description:
- * @author：Geek Wang
- * @date: 2022/6/15
- */
+
 @Data
 @NoArgsConstructor
 public class LogReportRequest {

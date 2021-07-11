@@ -33,7 +33,7 @@ public interface BaseModelUpdateBOController<T extends ModelBO<M, T>, M extends 
     @ApiImplicitParams({
             @ApiImplicitParam(name = "fields", value = "需要返回的字段", dataTypeClass = String[].class),
     })
-//    @PatchMapping
+
     default ObjServiceResult<T> update(@RequestBody T bo,
                                        @RequestParam(required = false) String[] fields) {
         return getModelService().<T>updateBO(bo, ControllerCommon.convertValidFields(fields), ControllerCommon.getModelBOClass(getClass())).asResult();
@@ -44,7 +44,7 @@ public interface BaseModelUpdateBOController<T extends ModelBO<M, T>, M extends 
             @ApiImplicitParam(name = "id", value = "数据id", dataTypeClass = String.class),
             @ApiImplicitParam(name = "fields", value = "需要返回的字段", dataTypeClass = String[].class),
     })
-//    @PatchMapping(params = "id")
+
     default ObjServiceResult<T> updateByParam(@RequestParam String id, @RequestBody T bo,
                                               @RequestParam(required = false) String[] fields) {
         bo.setId(id);

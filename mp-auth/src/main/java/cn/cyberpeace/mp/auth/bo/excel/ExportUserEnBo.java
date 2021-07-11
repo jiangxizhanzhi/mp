@@ -6,11 +6,7 @@ import com.alibaba.excel.annotation.write.style.HeadRowHeight;
 import lombok.Builder;
 import lombok.Data;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Data
 @HeadRowHeight(20)
 @Builder

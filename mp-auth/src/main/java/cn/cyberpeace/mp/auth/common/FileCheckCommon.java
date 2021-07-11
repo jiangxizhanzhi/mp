@@ -16,17 +16,13 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * @Description
- * @Author shgang
- * @Date 2022/10/26
- */
+
 public class FileCheckCommon {
 
     public static ServiceResult<Boolean> checkFile(MultipartFile file, FileCheckRequest fileCheckRequest) {
         boolean match = true;
         if (Objects.nonNull(fileCheckRequest.getMaxSize())) {
-            // 校验图片大小
+            
             Long maxSize = fileCheckRequest.getMaxSize();
             match = checkSize(file, maxSize);
             if (!match) {
@@ -36,7 +32,7 @@ public class FileCheckCommon {
         }
 
         if (CollUtil.isNotEmpty(fileCheckRequest.getSuffixList())) {
-            // 校验文件后缀类型
+            
             List<String> suffixList = fileCheckRequest.getSuffixList();
             match = checkSuffix(file, suffixList);
             if (!match) {
@@ -46,7 +42,7 @@ public class FileCheckCommon {
         }
 
         if (CollUtil.isNotEmpty(fileCheckRequest.getMagicHeaderList())) {
-            // 根据文件头判断文件类型
+            
             List<String> magicHeaderList = fileCheckRequest.getMagicHeaderList();
             match = checkMagicHeader(file, magicHeaderList);
             if (!match) {
@@ -74,7 +70,7 @@ public class FileCheckCommon {
     public static boolean checkMagicHeader(InputStream inputStream, List<String> magicHeaderList) {
         String type = FileTypeUtil.getType(inputStream);
         if (StringUtils.isBlank(type)) {
-            // 无法获取文件头信息，直接返回true
+            
             return true;
         }
         return magicHeaderList.stream().anyMatch(x -> x.equalsIgnoreCase(type));

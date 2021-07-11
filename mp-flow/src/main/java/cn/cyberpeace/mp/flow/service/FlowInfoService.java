@@ -8,11 +8,7 @@ import java.util.List;
 
 public interface FlowInfoService extends BaseModelService<FlowInfoModel, FlowInfoQueryParams>  {
 
-    /**
-     * 根据id集合查询列表
-     * @param idList
-     * @return
-     */
+    
     List<FlowInfoModel> findByIds(List<String> idList);
 
 }

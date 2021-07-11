@@ -23,11 +23,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.function.Function;
 
-/**
- * @Description
- * @author: shgang
- * @Date: 2022/7/28
- */
+
 @Service
 @Slf4j
 public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionMapper, OptionFields, OptionQueryParams>
@@ -42,11 +38,7 @@ public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionM
         setModelMapper(optionMapper);
     }
 
-    /**
-     * 补充list查询条件
-     * @param humanCondition
-     * @param queryParams
-     */
+    
     @Override
     public void loadListFilterCondition(HumanCondition humanCondition, OptionQueryParams queryParams) {
         if (StringUtils.isNotEmpty(queryParams.getType())) {
@@ -57,12 +49,7 @@ public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionM
         }
     }
 
-    /**
-     *
-     * @param type
-     * @param intFlag bo中code字段是否转为int类型
-     * @return
-     */
+    
     private List<OptionBO> getOptionsByType(String type, boolean intFlag) {
         List<OptionModel> models = findByType(type);
         Function<String, ?> function = null;
@@ -96,11 +83,7 @@ public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionM
         return new ServiceResult<>(getOptionsByType(type, true)).asResult();
     }
 
-    /**
-     * 分页查询OptionModel列表
-     * @param queryParams
-     * @return
-     */
+    
     @Override
     public ListObjServiceResult<OptionModelBO> page(OptionQueryParams queryParams) {
         log.info("OptionServiceImpl.page begin. queryParams:{}", queryParams);
@@ -124,58 +107,37 @@ public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionM
         return result;
     }
 
-    /**
-     * 新增选项
-     * @param optionModelBO
-     */
+    
     @Override
     public void addOption(OptionModelBO optionModelBO) {
 
     }
 
-    /**
-     * 编辑选项
-     * @param optionModelBO
-     */
+    
     @Override
     public void editOption(OptionModelBO optionModelBO) {
 
     }
 
-    /**
-     * 删除选项
-     * @param ids
-     */
+    
     @Override
     public void deleteOptions(List<String> ids) {
 
     }
 
-    /**
-     * 根据id查询
-     * @param id
-     * @return
-     */
+    
     @Override
     public OptionModelBO findById(String id) {
         return null;
     }
 
-    /**
-     * 根据ids查询列表
-     * @param ids
-     * @return
-     */
+    
     @Override
     public List<OptionModel> findByIds(List<String> ids) {
         return null;
     }
 
-    /**
-     * 根据type类型获取最大的code值（只对数字类型的code有效）
-     * @param type
-     * @return
-     */
+    
     @Override
     public Integer getMaxCode(String type) {
         log.info("SysOptionServiceImpl.getMaxCode begin. type:{}", type);
@@ -185,11 +147,7 @@ public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionM
         return result;
     }
 
-    /**
-     * 根据type类型获取最大的sort值
-     * @param type
-     * @return
-     */
+    
     @Override
     public Integer getMaxSort(String type) {
         log.info("SysOptionServiceImpl.getMaxSort begin. type:{}", type);

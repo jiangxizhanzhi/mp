@@ -8,10 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
-/**
- * 扩展镜像信息
- * @author wanggang
- */
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
@@ -21,45 +18,33 @@ public class ExtImageInfo implements Serializable {
     @ApiModelProperty("UUID")
     private String uuid;
 
-    /**
-     * 基础镜像
-     */
+    
     @ApiModelProperty("基础镜像名称")
     private String baseImageName;
 
-    /**
-     * 是否支持基础镜像
-     */
+    
     @ApiModelProperty("是否支持基础镜像")
     private Boolean baseImageSupport;
 
     @ApiModelProperty("元数据")
     private ImageMetaData metaData;
 
-    /**
-     * 0：待编辑，1：创建中，2：已创建，3：错误
-     */
+    
     @ApiModelProperty("镜像状态")
     private Integer imageStatus;
 
     @ApiModelProperty("错误信息")
     private String error;
 
-    /**
-     * 系统镜像类型，1：基础镜像，2：CP-CLOUD已有镜像，3：自定义上传
-     */
+    
     @ApiModelProperty("系统镜像类型，1：基础镜像，2：CP-CLOUD已有镜像，3：自定义上传")
     private Integer imageSource;
 
-    /**
-     * 上传方式
-     */
+    
     @ApiModelProperty("上传方式，http or ftp")
     private String uploadType;
 
-    /**
-     * 磁盘格式
-     */
+    
     @ApiModelProperty("磁盘格式")
     private String diskFormat;
 

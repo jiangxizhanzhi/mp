@@ -41,11 +41,7 @@ import java.util.stream.Collectors;
 import static cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatformConstant.CPCLOUD_DEVICE;
 import static cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatformConstant.URL_VERSION;
 
-/**
- * @Description: 虚拟USB服务
- * @Author: guquan
- * @Date：2023/4/17 10:28
- */
+
 @Service
 @Slf4j
 public class VirtualUsbServiceImpl extends BaseCpService implements VirtualUsbService {
@@ -61,11 +57,7 @@ public class VirtualUsbServiceImpl extends BaseCpService implements VirtualUsbSe
     @Autowired
     private CsceneSpecialService csceneSpecialService;
 
-    /**
-     * 分页查询虚拟USB列表
-     * @param queryParams
-     * @return
-     */
+    
     @Override
     public ListObjServiceResult<VirtualUsbVO> virtualUsbPage(VirtualUsbQueryParams queryParams) {
         log.info("VirtualUsbServiceImpl.virtualUsbPage begin. queryParams:{}", queryParams);
@@ -98,11 +90,7 @@ public class VirtualUsbServiceImpl extends BaseCpService implements VirtualUsbSe
         return new ListObjServiceResult(new ListObjResult<>(responseList, count)).asResult();
     }
 
-    /**
-     * 根据uuid查询虚拟USB信息
-     * @param uuid
-     * @return
-     */
+    
     @Override
     public VirtualUsbVO findByUuid(String uuid) {
         log.info("VirtualUsbServiceImpl.findByUuid begin. uuid:{}", uuid);
@@ -114,10 +102,7 @@ public class VirtualUsbServiceImpl extends BaseCpService implements VirtualUsbSe
         return virtualUsbVO;
     }
 
-    /**
-     * 新增虚拟USB信息
-     * @param virtualUsbVO
-     */
+    
     @Override
     public void add(VirtualUsbVO virtualUsbVO) {
         log.info("VirtualUsbServiceImpl.add begin. virtualUsbVO:{}", virtualUsbVO);
@@ -136,10 +121,7 @@ public class VirtualUsbServiceImpl extends BaseCpService implements VirtualUsbSe
         log.info("VirtualUsbServiceImpl.add end.");
     }
 
-    /**
-     * 编辑虚拟USB信息
-     * @param virtualUsbVO
-     */
+    
     @Override
     public void update(VirtualUsbVO virtualUsbVO) {
         log.info("VirtualUsbServiceImpl.update begin. virtualUsbVO:{}", virtualUsbVO);
@@ -150,10 +132,7 @@ public class VirtualUsbServiceImpl extends BaseCpService implements VirtualUsbSe
         log.info("VirtualUsbServiceImpl.update end.");
     }
 
-    /**
-     * 删除虚拟USB
-     * @param request
-     */
+    
     @Override
     public void delete(VirtualUsbDeleteRequest request) {
         log.info("VirtualUsbServiceImpl.delete begin. request:{}", request);
@@ -169,11 +148,7 @@ public class VirtualUsbServiceImpl extends BaseCpService implements VirtualUsbSe
         log.info("VirtualUsbServiceImpl.delete end.");
     }
 
-    /**
-     * 根据UUID查询虚拟USB文件列表
-     * @param uuid
-     * @return
-     */
+    
     @Override
     public VirtualUsbStorage fileListByUuid(String uuid) {
         log.info("VirtualUsbServiceImpl.fileListByUuid begin. uuid:{}", uuid);
@@ -183,11 +158,7 @@ public class VirtualUsbServiceImpl extends BaseCpService implements VirtualUsbSe
         return virtualUsbStorage;
     }
 
-    /**
-     * 上传文件到虚拟USB
-     * @param file
-     * @param uuid
-     */
+    
     @Override
     public BaseCloudPlatformResult upload(MultipartFile file, String uuid) {
         log.info("VirtualUsbServiceImpl.upload begin. uuid:{}", uuid);
@@ -208,11 +179,7 @@ public class VirtualUsbServiceImpl extends BaseCpService implements VirtualUsbSe
         return null;
     }
 
-    /**
-     * 虚拟USB删除文件
-     * @param uuid
-     * @param fileName
-     */
+    
     @Override
     public void deleteFile(String uuid, String fileName) {
         log.info("VirtualUsbServiceImpl.deleteFile begin. uuid:{}, fileName:{}", uuid, fileName);
@@ -225,10 +192,7 @@ public class VirtualUsbServiceImpl extends BaseCpService implements VirtualUsbSe
         log.info("VirtualUsbServiceImpl.deleteFile end.");
     }
 
-    /**
-     * 虚拟USB格式化
-     * @param uuid
-     */
+    
     @Override
     public void deleteAllFiles(String uuid) {
         log.info("VirtualUsbServiceImpl.deleteAllFiles begin. uuid:{}", uuid);
@@ -241,12 +205,7 @@ public class VirtualUsbServiceImpl extends BaseCpService implements VirtualUsbSe
         log.info("VirtualUsbServiceImpl.deleteAllFiles end.");
     }
 
-    /**
-     * 虚拟USB下载文件
-     * @param uuid
-     * @param fileName
-     * @return
-     */
+    
     @Override
     public String downloadFile(String uuid, String fileName) {
         log.info("VirtualUsbServiceImpl.downloadFile begin. uuid:{}", uuid);
@@ -256,10 +215,7 @@ public class VirtualUsbServiceImpl extends BaseCpService implements VirtualUsbSe
         return virtualUsbDownload.getNginxFileUrl();
     }
 
-    /**
-     * 验证sub是否可删除
-     * @param uuids
-     */
+    
     private void validUsbCanDelete(List<String> uuids) {
         for (String uuid : uuids) {
             ServiceResult<List<DeviceReferCsceneStat>> referStateServiceResult = csceneSpecialService.statVirtualUsbReferCscenes(uuid);

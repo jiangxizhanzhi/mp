@@ -2,9 +2,7 @@ package cn.cyberpeace.mp.flow.enums;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
-/**
- * 流量发生平台枚举类：0 通用，1 Trex流量发生器
- */
+
 public enum FlowPlatformEnum {
 
     COMMON("COMMON"),

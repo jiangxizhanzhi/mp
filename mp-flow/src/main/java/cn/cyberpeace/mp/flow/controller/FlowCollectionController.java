@@ -39,11 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * @Description: 流量集合控制器
- * @Author qiaokang
- * @Date：2021/8/31 17:17
- */
+
 @Slf4j
 @Api(tags = "流量集合管理接口")
 @RestController
@@ -58,16 +54,12 @@ public class FlowCollectionController extends BaseModelController<FlowCollection
     @Autowired
     private FlowCollectionServiceImpl flowCollectionService;
 
-    /**
-     * 分页查询流量集合信息
-     * @param queryParams
-     * @return
-     */
+    
     @ApiOperation("分页查询流量集合信息")
     @GetMapping("/page")
     public ListObjServiceResult<FlowCollectionResponse> pageFlowCollection(FlowCollectionQueryParams queryParams) {
         if (Objects.isNull(queryParams.getOrders()) && Objects.isNull(queryParams.getSort())) {
-            // 默认按时间降序
+            
             queryParams.setOrders(new String[]{"-createTime"});
         }
 
@@ -78,7 +70,7 @@ public class FlowCollectionController extends BaseModelController<FlowCollection
         listResult.getData().getList().forEach(flowCollectionModel -> {
             FlowCollectionResponse collectionResponse = new FlowCollectionResponse();
             BeanUtils.copyProperties(flowCollectionModel, collectionResponse);
-            // 兼容前端，冗余描述信息，和流量信息描述字段保持一致
+            
             collectionResponse.setIntroduction(flowCollectionModel.getDescription());
             responseList.add(collectionResponse);
         });
@@ -128,7 +120,7 @@ public class FlowCollectionController extends BaseModelController<FlowCollection
         }
 
         if (Objects.isNull(queryParams.getOrders()) && Objects.isNull(queryParams.getSort())) {
-            // 默认按时间降序
+            
             queryParams.setOrders(new String[]{"-createTime"});
         }
         handleQueryParams(BaseConstants.STR_LIST, queryParams);

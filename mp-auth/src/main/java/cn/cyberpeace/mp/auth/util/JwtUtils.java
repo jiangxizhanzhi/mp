@@ -39,11 +39,7 @@ import java.util.Objects;
 
 import static cn.cyberpeace.mp.auth.constant.AuthConstant.FAIL_VERIFY_JWT_TOKEN;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Slf4j
 @Component
 public class JwtUtils {
@@ -53,7 +49,7 @@ public class JwtUtils {
     @Autowired
     private AuthConfig authConfig;
 
-    //private static final long JWT_EXPIRATION = 24 * 3600 * 1000L * 7;
+    
 
     private JwtUtils() {}
 
@@ -69,7 +65,7 @@ public class JwtUtils {
             secret = user.getLatestTokenSecret();
         }
         if (StringUtils.isBlank(secret)) {
-            //secret = AuthConstant.JWT_SECRET;
+            
             secret = jwtUtils.authConfig.getAuthenticateJwtSecret();
         }
         return secret;
@@ -80,7 +76,7 @@ public class JwtUtils {
         final Mac mac;
         try {
             mac = Mac.getInstance(AuthConstant.JWT_ALGORITHM);
-            //mac.init(new SecretKeySpec(AuthConstant.JWT_SECRET_KEY.getBytes(StandardCharsets.UTF_8), algorithm));
+            
             mac.init(new SecretKeySpec(jwtUtils.authConfig.getAuthenticateJwtSecret().getBytes(StandardCharsets.UTF_8), AuthConstant.JWT_ALGORITHM));
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
             log.error("Generate Jwt Secret error: {}", ExceptionUtils.getStackTrace(e));

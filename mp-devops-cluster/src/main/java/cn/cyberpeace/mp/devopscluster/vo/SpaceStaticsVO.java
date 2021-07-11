@@ -7,11 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * @Description: 资源用量情况返回
- * @Author qiaokang
- * @Date：2021/9/13 19:55
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

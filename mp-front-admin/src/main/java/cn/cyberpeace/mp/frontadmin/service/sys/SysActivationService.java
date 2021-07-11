@@ -53,11 +53,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-/**
- * @Description: 系统激活相关service
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Service
 @Slf4j
 public class SysActivationService {
@@ -72,11 +68,11 @@ public class SysActivationService {
 
     public static final String TRIAL_USE_SYS_CONFIG = "trial_use_sys_config";
 
-    // 竞赛相关激活项目
+    
     private static List<String> AD_MODULE_KEYS = Arrays.asList(ActivationItemKeyEnums.JINGSAI.getCode(), ActivationItemKeyEnums.SHENTOUSAI.getCode(), ActivationItemKeyEnums.YUNWEISAI.getCode());
-    // 实训相关激活项
+    
     private static List<String> OJ_MODULE_KEYS = Arrays.asList(ActivationItemKeyEnums.SHIXUN.getCode());
-    // 靶场相关激活项
+    
     private static List<String> CR_MODULE_KEYS = Arrays.asList(ActivationItemKeyEnums.HUOTILOUDONG.getCode(),ActivationItemKeyEnums.ZHISHIKU.getCode(),ActivationItemKeyEnums.ZONGHEXUNLIAN.getCode(),ActivationItemKeyEnums.HONGLANDUIKANG.getCode(),ActivationItemKeyEnums.CEPING.getCode());
 
     @Autowired
@@ -97,11 +93,7 @@ public class SysActivationService {
     @Autowired
     private SysConfigMapper sysConfigMapper;
 
-    /**
-     * 激活
-     *
-     * @param activationRequest
-     */
+    
     public void activate(ActivationRequest activationRequest) {
         ActivationResponse content = status();
         boolean isSysActivited = false;
@@ -136,19 +128,19 @@ public class SysActivationService {
                 throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_SYSUUID_NOTMATCH);
             }
 
-            // 拼接json串，调用licenseService验证
+            
             ActivationVerifyInfo verifyInfo = new ActivationVerifyInfo();
             verifyInfo.setDeadline(activationRequest.getDeadline());
             verifyInfo.setMachinecode(activationRequest.getMachineCode());
 
-            // 自定义信息
+            
             Map<String, String> infoMap = convertActivationItems2CustomVerifyInfoMap(activationRequest.getItems());
             verifyInfo.setInfo(infoMap);
 
             String verifyStr = JSON.toJSONString(verifyInfo);
             String verifyCode = activationRequest.getVerifyCode();
 
-            // 校验激活码和激活配置项，是否匹配
+            
             boolean success = false;
             if (activationRequest.getTrialFlag()) {
                 HumanCondition condition = new HumanCondition().filterEqual(SysConfigModel::getKeyName, TRIAL_USE_SYS_CONFIG);
@@ -170,11 +162,11 @@ public class SysActivationService {
             }
 
             if (success) {
-                // 校验通过，生成加密文件存储磁盘
+                
                 ACTIVATION_CONTENT = null;
                 generateEncryptedFile(activationRequest);
 
-                // 更新数据库激活限制配置
+                
                 processActivCtlAfterActivationSuccess(activationRequest);
 
                 ACTIVATION_CONTENT = status();
@@ -196,10 +188,7 @@ public class SysActivationService {
     }
 
 
-    /**
-     * 查询系统激活状态
-     * @return
-     */
+    
     public ActivationResponse status() {
 
         if (Objects.isNull(ACTIVATION_CONTENT)) {
@@ -241,11 +230,7 @@ public class SysActivationService {
     }
 
 
-    /**
-     * 查询系统UUID
-     *
-     * @return
-     */
+    
     public String querySysUUID() {
         status();
         SysActivCtlModel sysActivCtlModel = null;
@@ -261,7 +246,7 @@ public class SysActivationService {
         String suffix = sysActivCtlModel.getSuffix();
 
         String uuid = "";
-        // If root privileges this will work
+        
         for (String checkLine : ExecutingCommand.runNative("dmidecode -s system-uuid")) {
             if (StringUtils.isNotBlank(checkLine)) {
                 uuid = checkLine;
@@ -269,8 +254,8 @@ public class SysActivationService {
             }
         }
 
-        // todo
-        //uuid = "aaaa-bbbb-cccc-dddd";
+        
+        
         uuid = uuid + "-" + suffix;
         return uuid;
     }
@@ -304,18 +289,16 @@ public class SysActivationService {
         return jsonStr;
     }
 
-    /**
-     * 判断是否过期有两种方法，1. 过期日期超限  2.系统运行时长超限
-     */
+    
     private void processActivedStatus() {
         if (Objects.nonNull(ACTIVATION_CONTENT)) {
-            //默认状态为未激活
+            
             LocalDate expireDate = LocalDate.parse(ACTIVATION_CONTENT.getExpiredDate(), dateFormatter);
             expireDate = expireDate.plusDays(1);
 
-            // 运行时长超限
+            
             boolean isRunSecondsExceeded = false;
-            // 过期日期到期
+            
             boolean isExpiredDateExceeded = !LocalDate.now().isBefore(expireDate);
 
             SysActivCtlModel validActivCtlModel = sysCtlService.getValidCtlModel();
@@ -326,10 +309,10 @@ public class SysActivationService {
             }
 
             if (!isExpiredDateExceeded) {
-                // 过期日期未到，继续判断运行时长
+                
                 if (StringUtils.isBlank(validActivCtlModel.getFirstActiveDate())) {
                     log.info("System is not activated right now!");
-                    // 未激活，但是CONTENT有值，说明是升级的场景，则还是以CONTENT内容为主
+                    
                 } else {
                     String sysLifeTimeSecondsStr = validActivCtlModel.getSysLifetime();
                     String currentRunSecondsStr = validActivCtlModel.getSysRunSeconds();
@@ -349,7 +332,7 @@ public class SysActivationService {
                 log.info("isExpiredDateExceeded:{}, isRunSecondsExceeded:{}", isExpiredDateExceeded, isRunSecondsExceeded);
                 ACTIVATION_CONTENT.setIsActived(AdminConstant.STATUS_NOT_ACTIVITED);
 
-                // 过期状态，更新激活限制项配置
+                
                 SysActivCtlModel updateActivCtlModel = new SysActivCtlModel();
                 updateActivCtlModel.setId(validActivCtlModel.getId());
                 updateActivCtlModel.setStatus(SysActivCtlModel.STATUS_INVALID);
@@ -360,10 +343,7 @@ public class SysActivationService {
         }
     }
 
-    /**
-     * 生成加密文件，存磁盘
-     * @param activationRequest
-     */
+    
     private void generateEncryptedFile(ActivationRequest activationRequest) {
         String verifyCode = activationRequest.getVerifyCode();
         String encryptedVerifyCode = EncryptUtils.desEncrypt(verifyCode);
@@ -441,16 +421,13 @@ public class SysActivationService {
         return expiredDate;
     }
 
-    /**
-     * 激活成功，变更数据库激活限制相关配置信息
-     * @param activationRequest
-     */
+    
     private void processActivCtlAfterActivationSuccess(ActivationRequest activationRequest) {
         SysActivCtlModel oldSysActivCtlModel = sysCtlService.getUnusedActivCtlModel();
         SysActivCtlModel updateSysActivCtlModel = new SysActivCtlModel();
         updateSysActivCtlModel.setId(oldSysActivCtlModel.getId());
 
-        // 考虑用时间戳替代
+        
         LocalDateTime expiredTime = null;
         if (activationRequest.getTrialFlag()) {
             expiredTime = LocalDateTime.now().plusDays(TRIAL_DAYS).plusDays(1);
@@ -471,44 +448,34 @@ public class SysActivationService {
         String encryptedLicenseCode = EncryptUtils.desEncrypt(activationRequest.getVerifyCode());
 
         if (StringUtils.isNotBlank(oldSysActivCtlModel.getLicenseCode())) {
-            // 不是首次激活
+            
             String oldLicenseCode = oldSysActivCtlModel.getLicenseCode();
 
-            // 1. 相同激活码 last_active_date，active_count变动
+            
             if (Objects.equals(oldLicenseCode, encryptedLicenseCode)) {
                 updateSysActivCtlModel.setActiveCount(oldSysActivCtlModel.getActiveCount() + 1);
                 processActivCtlWhenReActiveWithOldLicense(updateSysActivCtlModel, activeDateStr);
             } else {
-                // 2. 不同激活码，当做一次全新的激活，先将其他激活状态都设置成status=0
+                
                 processActivCtlWhenReActiveWithNewLicense(activeDateStr, expiredDateStr, encryptedLicenseCode);
             }
         } else {
-            // 首次激活，添加first_active_date, last_active_date, expire_date, active_count;
+            
             sysActivCtlService.invalidOtherExceptOne(updateSysActivCtlModel.getId());
             processActivCtlWhenFirstActiveWithNewLicense(updateSysActivCtlModel, activeDateStr, expiredDateStr, encryptedLicenseCode);
         }
     }
 
-    /**
-     * 用旧的license再次激活
-     * last_active_date，active_count变动
-     *
-     * @param activeDateStr
-     */
+    
     private void processActivCtlWhenReActiveWithOldLicense(SysActivCtlModel updateSysActivCtlModel, String activeDateStr) {
-        // 不更新first_active_date
+        
         updateSysActivCtlModel.setFirstActiveDate(null);
         updateSysActivCtlModel.setLastActiveDate(EncryptUtils.desEncrypt(activeDateStr));
         sysActivCtlService.update(updateSysActivCtlModel);
     }
 
 
-    /**
-     * 用新的license再次激活
-     * 当做一次全新的激活，先将其他激活状态都设置成status=0
-     * @param activeDateStr
-     * @param expiredDateStr
-     */
+    
     private void processActivCtlWhenReActiveWithNewLicense(String activeDateStr, String expiredDateStr, String encryptedLicenseCode) {
         SysActivCtlModel newSysActivCtlModel = new SysActivCtlModel();
         Long currTs = System.currentTimeMillis();
@@ -529,12 +496,7 @@ public class SysActivationService {
         }
     }
 
-    /**
-     * 用新的license第一次激活
-     * @param updateSysActivCtlModel
-     * @param activeDateStr
-     * @param expiredDateStr
-     */
+    
     private void processActivCtlWhenFirstActiveWithNewLicense(SysActivCtlModel updateSysActivCtlModel, String activeDateStr, String expiredDateStr, String encryptedLicenseCode) {
         updateSysActivCtlModel.setFirstActiveDate(EncryptUtils.desEncrypt(activeDateStr));
         updateSysActivCtlModel.setLastActiveDate(EncryptUtils.desEncrypt(activeDateStr));
@@ -547,10 +509,7 @@ public class SysActivationService {
     }
 
 
-    /**
-     * 查询模块激活信息
-     * @return
-     */
+    
     public List<ModuleInfoResponse> getModuleInfoList() {
         var content = status();
         List<ModuleInfoResponse> moduleInfoList = new ArrayList<>();
@@ -558,17 +517,17 @@ public class SysActivationService {
             return moduleInfoList;
         }
         var items = content.getItems();
-        // 竞赛
+        
         ModuleInfoResponse ad = ModuleInfoResponse.builder().moduleName(ModuleEnums.AD.getCode()).isActived(AdminConstant.STATUS_NOT_ACTIVITED).build();
-        // 实训
+        
         ModuleInfoResponse oj = ModuleInfoResponse.builder().moduleName(ModuleEnums.OJ.getCode()).isActived(AdminConstant.STATUS_NOT_ACTIVITED).build();
-        // 靶场
+        
         ModuleInfoResponse cr = ModuleInfoResponse.builder().moduleName(ModuleEnums.CR.getCode()).isActived(AdminConstant.STATUS_NOT_ACTIVITED).build();
         moduleInfoList.addAll(Arrays.asList(ad, oj, cr));
 
         Map<String, ActivationItem> key2ItemMap = items.stream().collect(Collectors.toMap(ActivationItem::getKey, Function.identity()));
 
-        // 任意一项激活项勾选，则该模块被激活
+        
         for (String key : AD_MODULE_KEYS) {
             if (Objects.equals(key2ItemMap.get(key).getValue(), String.valueOf(AdminConstant.STATUS_ACTIVITED))) {
                 ad.setIsActived(1);
@@ -592,86 +551,6 @@ public class SysActivationService {
 
 
 
-    @Deprecated
-    private ActivationResponse mockActivationContent() {
-        ActivationResponse content = new ActivationResponse();
-        content.setExpiredDate("2022-05-26");
-        content.setIsActived(AdminConstant.STATUS_ACTIVITED);
-        content.setEdition(1);
-
-
-        List<ActivationItem> list = new ArrayList<>();
-        ActivationItem item1 = new ActivationItem();
-        item1.setKey("LCS-FUNC-CR-SHIXUN");
-        item1.setValue("1");
-        item1.setType(1);
-        list.add(item1);
-
-        ActivationItem item2 = new ActivationItem();
-        item2.setKey("LCS-FUNC-CR-JINGSAI");
-        item2.setValue("0");
-        item2.setType(1);
-        list.add(item2);
-
-        ActivationItem item3 = new ActivationItem();
-        item3.setKey("LCS-FUNC-CR-HUOTILOUDONG");
-        item3.setValue("0");
-        item3.setType(1);
-        list.add(item3);
-
-        ActivationItem item4 = new ActivationItem();
-        item4.setKey("LCS-FUNC-CR-ZHISHIKU");
-        item4.setValue("0");
-        item4.setType(1);
-        list.add(item4);
-
-        ActivationItem item5 = new ActivationItem();
-        item5.setKey("LCS-FUNC-CR-ZONGHEXUNLIAN");
-        item5.setValue("0");
-        item5.setType(1);
-        list.add(item5);
-
-        ActivationItem item6 = new ActivationItem();
-        item6.setKey("LCS-FUNC-CR-HONGLANDUIKANG");
-        item6.setValue("0");
-        item6.setType(1);
-        list.add(item6);
-
-        ActivationItem item7 = new ActivationItem();
-        item7.setKey("LCS-FUNC-CR-SHENTOUSAI");
-        item7.setValue("0");
-        item7.setType(1);
-        list.add(item7);
-
-        ActivationItem item8 = new ActivationItem();
-        item8.setKey("LCS-FUNC-CR-YUNWEISAI");
-        item8.setValue("0");
-        item8.setType(1);
-        list.add(item8);
-
-        ActivationItem item9 = new ActivationItem();
-        item9.setKey("LCS-FUNC-CR-CEPING");
-        item9.setValue("1");
-        item9.setType(1);
-        list.add(item9);
-
-        ActivationItem item10 = new ActivationItem();
-        item10.setKey("LCS-RES-CR-ACTIVENODES");
-        item10.setValue("1000");
-        item10.setType(2);
-        list.add(item10);
-
-        ActivationItem item11 = new ActivationItem();
-        item11.setKey("LCS-RES-CR-EDITNODES");
-        item11.setValue("100");
-        item11.setType(2);
-        list.add(item11);
-
-        content.setItems(list);
-
-        return content;
-
-    }
 
 
 }

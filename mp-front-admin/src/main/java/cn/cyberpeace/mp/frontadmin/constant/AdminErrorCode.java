@@ -2,11 +2,7 @@ package cn.cyberpeace.mp.frontadmin.constant;
 
 import cn.cyberpeace.mp.base.service.code.ErrorCode;
 
-/**
- * @Description: 全局错误枚举
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 public enum AdminErrorCode implements ErrorCode {
     PARAMS_ERROR("MP-110020", "params_error"),
     SYS_CONFIG_CANNOT_CLOSE_AUDIT("MP-110021", "sys_config_cannot_close_audit"),

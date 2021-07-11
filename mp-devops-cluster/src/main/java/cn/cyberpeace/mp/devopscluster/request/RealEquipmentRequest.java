@@ -20,81 +20,55 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 public class RealEquipmentRequest extends BaseRequest{
 
-    /**
-     * uuid
-     */
+    
     @ApiModelProperty("uuid")
     private String uuid;
 
-    /**
-     * 名称
-     */
+    
     @ApiModelProperty("名称")
     private String name;
 
-    /**
-     * logo文件流
-     */
+    
     @ApiModelProperty(value = "logo文件流",hidden = true)
     private MultipartFile logoFile;
 
-    /**
-     * 图标
-     */
+    
     @ApiModelProperty("图标")
     private String logo;
 
-    /**
-     * 角色
-     */
+    
     @ApiModelProperty("角色")
     private Integer role;
 
-    /**
-     * 分类
-     */
+    
     @ApiModelProperty("一级分类")
     private Integer mainCategory;
 
-    /**
-     * 子分类
-     */
+    
     @ApiModelProperty("二级分类")
     private Integer subCategory;
 
-    /**
-     * 子分类
-     */
+    
     @ApiModelProperty("三级分类")
     private Integer thirdCategory;
 
-    /**
-     * 系统信息
-     */
+    
     @ApiModelProperty("系统信息")
     private ExtSystemInfo systemInfo;
 
-    /**
-     * 实体信息
-     */
+    
     @ApiModelProperty("实体信息")
     private ExtEntity extEntity;
 
-    /**
-     * 实体USB信息
-     */
+    
     @ApiModelProperty("实体USB信息")
     private EntityUsb extEntityUsb;
 
-    /**
-     * 交换机
-     */
+    
     @ApiModelProperty("交换机接入配置")
     private List<ExtEntityAccess> extEntityAccess;
 
-    /**
-     * 描述
-     */
+    
     @ApiModelProperty("描述")
     private String description;
 }

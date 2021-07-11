@@ -8,10 +8,7 @@ import cn.hutool.http.HttpResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-/**
- * 基础对接接口层
- * @author wanggang
- */
+
 @Slf4j
 @Service
 public class BaseHttpService {
@@ -33,14 +30,7 @@ public class BaseHttpService {
         return result;
     }
 
-    /**
-     * 通过Post方式查询信息
-     * @param url
-     * @param body
-     * @param valueType
-     * @param <T>
-     * @return
-     */
+    
     protected <T extends BaseModel> T sendPost(String url, String body, Class<T> valueType) {
         T model = null;
         String result = "";

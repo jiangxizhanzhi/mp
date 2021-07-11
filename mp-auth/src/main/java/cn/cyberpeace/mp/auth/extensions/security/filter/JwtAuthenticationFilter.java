@@ -34,11 +34,7 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.Objects;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Component
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -78,7 +74,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         return;
                     }
                     if (Objects.nonNull(user)) {
-                        // 第一步就要将请求类型塞入request attribute，否则后面的loadAuthorities()就可能出问题，参见浙能定制版commit id:f7cdf17f6c7e0bbc36e771a79db981a0ffd4990f
+                        
                         UserUtils.setLoginUser2RequestAttr(request, user.getId(), user.getUsername(), LogConstant.USER_TYPE_USER);
 
                         LoginUserContext loginUserContext = new LoginUserContext();
@@ -111,7 +107,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         if (StringUtils.isNotBlank(newJwt)) {
-            // 后端回塞一个新的token
+            
             setCookie(response, "cr_jwttoken", newJwt, "/", null, Integer.MAX_VALUE);
 
             response.setHeader(AuthConstant.JWT_HEADER_KEY, newJwt);
@@ -127,7 +123,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             cookie.setDomain(domain);
         }
         cookie.setMaxAge(maxAge);
-        // httponly = false
+        
         cookie.setHttpOnly(false);
         try {
             cookie.setValue(URLEncoder.encode(value, "utf-8"));

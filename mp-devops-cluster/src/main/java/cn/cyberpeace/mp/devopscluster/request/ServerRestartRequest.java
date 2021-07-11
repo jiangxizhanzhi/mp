@@ -7,11 +7,7 @@ import lombok.Data;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
-/**
- * @Description: 服务重启请求
- * @Author qiaokang
- * @Date：2021/9/14 10:50
- */
+
 @Data
 @ApiModel("服务重启请求")
 public class ServerRestartRequest {

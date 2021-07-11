@@ -71,16 +71,12 @@ public abstract class BaseServer {
         return serverSessionMap.get(this.getClass());
     }
 
-    /**
-     * 从session获取唯一标识, 对session索引，重写本方法添加自定义的session key取值方式
-     */
+    
     protected String retrieveSessionKey(Session session) {
         return session.getId();
     }
 
-    /**
-     * 验证session合法性，重写本方法添加自定义的验证逻辑
-     */
+    
     protected void validateSession(Session session) throws ValidateException {
         var sessionKey = retrieveSessionKey(session);
         if (StringUtils.isEmpty(sessionKey)) {

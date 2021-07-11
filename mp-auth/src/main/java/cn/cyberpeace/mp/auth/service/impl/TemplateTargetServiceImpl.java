@@ -34,11 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Service("templateTargetServiceImpl")
 @Slf4j
 public class TemplateTargetServiceImpl implements TargetService {
@@ -79,11 +75,11 @@ public class TemplateTargetServiceImpl implements TargetService {
     @Override
     public List<TargetBo> getTree(String parentId, Integer type) {
         if (Objects.isNull(type)) {
-            // 默认查询菜单树
+            
             type = 1;
         }
         if (StringUtils.isBlank(parentId)) {
-            // parent为空，则查询所有权限
+            
             List<MenuTemplateModel> targets = listAll(AuthConstant.DEFAULT_TENANT, type);
             if (CollectionUtil.isEmpty(targets)) {
                 return new ArrayList<>();
@@ -92,7 +88,7 @@ public class TemplateTargetServiceImpl implements TargetService {
             sortTree(tree);
             return tree;
         } else {
-            // 根据parentId查询单个权限树
+            
             MenuTemplateModel parentTarget = getModelMapper().get(parentId);
             if (parentTarget == null) {
                 log.info("target:{} not existed!", parentId);
@@ -172,7 +168,7 @@ public class TemplateTargetServiceImpl implements TargetService {
         Map<String, List<MenuTemplateModel>> map = new HashMap<>();
         Map<String, TargetBo> mapTmp = new HashMap<>();
 
-        //Save all nodes to a map
+        
         for (MenuTemplateModel targetm : targets) {
             TargetBo targetBo = new TargetBo();
             BeanUtils.copyProperties(targetm, targetBo);
@@ -180,7 +176,7 @@ public class TemplateTargetServiceImpl implements TargetService {
             mapTmp.put(targetBo.getId(), targetBo);
         }
 
-        //loop and assign parent/child relationships
+        
         for (Map.Entry<String, TargetBo> entry : mapTmp.entrySet()) {
             TargetBo current = entry.getValue();
             String parentId = current.getParent();
@@ -188,7 +184,7 @@ public class TemplateTargetServiceImpl implements TargetService {
             if (StringUtils.isNotBlank(parentId)) {
                 TargetBo parent = mapTmp.get(parentId);
                 if (parent != null) {
-                    //                    current.(parent);
+                    
                     if (parent.getChildren() == null) {
                         parent.setChildren(new ArrayList<>());
                     }
@@ -200,7 +196,7 @@ public class TemplateTargetServiceImpl implements TargetService {
         }
 
         List<TargetBo> parentTargets = new ArrayList<>();
-        //get the root
+        
         for (TargetBo node : mapTmp.values()) {
             if (StringUtils.isBlank(node.getParent())) {
                 parentTargets.add(node);
@@ -210,7 +206,7 @@ public class TemplateTargetServiceImpl implements TargetService {
         return parentTargets;
     }
 
-    // 权限树排序
+    
     private void sortTree(List<TargetBo> targets) {
         targets.forEach(t -> {
             if (CollectionUtil.isNotEmpty(t.getChildren())) {

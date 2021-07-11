@@ -12,11 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/12/9 17:34
- */
+
 @Slf4j
 @Service
 public class SysConfigCheckService {

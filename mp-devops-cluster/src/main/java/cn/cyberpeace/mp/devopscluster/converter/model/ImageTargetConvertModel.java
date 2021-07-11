@@ -11,14 +11,10 @@ import lombok.NoArgsConstructor;
 @Data
 public class ImageTargetConvertModel{
 
-    /**
-     * UUID
-     */
+    
     private String uuid;
 
-    /**
-     * 名称
-     */
+    
     private String name;
 
 }

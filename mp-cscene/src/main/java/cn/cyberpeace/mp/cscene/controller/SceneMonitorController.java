@@ -30,11 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/11/22 10:15
- */
+
 @Api(value = "场景监控", tags = "场景监控")
 @Slf4j
 @RestController
@@ -138,12 +134,12 @@ public class SceneMonitorController {
         return ResultCommon.success(result);
     }
 
-//    @ApiOperation(value = "查询场景所有主机信息，不含实时内存，cpu等数据")
-//    @GetMapping("/all_hosts/{sceneId}")
-//    public ServiceResult<List<ElementMonitorBasicInfo>> getSceneAllHosts(@PathVariable String sceneId) {
-//        List<ElementMonitorBasicInfo> basicInfoList = sceneMonitorService.getAllSceneElements(sceneId);
-//        return ServiceResult.success(basicInfoList);
-//    }
+
+
+
+
+
+
 
 
 }

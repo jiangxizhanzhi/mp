@@ -5,11 +5,7 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/12/1 17:21
- */
+
 @Data
 public class FlowTrend {
 

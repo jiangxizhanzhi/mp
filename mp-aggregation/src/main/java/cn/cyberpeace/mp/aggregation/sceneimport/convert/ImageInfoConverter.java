@@ -22,11 +22,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/**
- * @Description 写入images目录中解析出来的镜像信息
- * @Author maojun
- * @Date 2021/10/12
- */
+
 class ImageInfoConverter implements IConverter {
 
     public void convert2BO(ConvertDataContainer container) {
@@ -50,7 +46,7 @@ class ImageInfoConverter implements IConverter {
             }
             ImageInfoParseResult imageInfo = imageInfos.get(cloudPluginElement.getImage());
             if (imageInfo == null) {
-                // 无镜像信息 增加role init_support proxy的默认值
+                
                 if (cloudPluginElement.getRole() == null) {
                     cloudPluginElement.setRole(BaseCloudPluginSceneElementModel.Role.VIRTUAL_TERMINAL);
                 }
@@ -80,7 +76,7 @@ class ImageInfoConverter implements IConverter {
                     });
                 }
             } else {
-                // 有镜像信息 增加role init_support proxy的默认值,还要读取其他值
+                
                 if (CollectionUtils.isNotEmpty(imageInfo.getInitCommands())) {
                     if (element.getInitCommands() == null) {
                         element.setInitCommands(imageInfo.getInitCommands());

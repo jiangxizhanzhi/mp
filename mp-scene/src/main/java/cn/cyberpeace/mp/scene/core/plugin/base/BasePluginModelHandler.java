@@ -22,20 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * 场景插件model实现处理基类
- *
- * @param <S0> 表模型类   场景模板/场景实例
- * @param <E0> 表模型类   网元节点
- * @param <P0> 表模型类   网元端口
- * @param <S> 业务模型类   场景模板/场景实例
- * @param <E> 业务模型类   网元节点
- * @param <P> 业务模型类   网元端口
- * @param <M1> mapper类  场景模板/场景实例
- * @param <M2> mapper类  网元节点
- * @param <M3> mapper类  网元端口
- * @param <H> 场景插件处理类
- */
+
 @ClassFieldNames({
     "pluginSceneBOClass",
     "pluginSceneElementBOClass",
@@ -65,7 +52,7 @@ public class BasePluginModelHandler<
         H extends BasePluginHandler<S, E, P, ?>> {
     private H scenePluginHandler;
 
-    // 通过ClassFieldNames注解和实现类ClassFieldClasses注解，初始化调用ClassUtils.loadClassFields(this)设置
+    
     private Class<S> pluginSceneBOClass;
     private Class<E> pluginSceneElementBOClass;
     private Class<P> pluginSceneElementPortBOClass;
@@ -73,15 +60,12 @@ public class BasePluginModelHandler<
     private Class<E0> pluginSceneElementModelClass;
     private Class<P0> pluginSceneElementPortModelClass;
 
-    // 通过BeanFieldNames注解和实现类BeanFieldClasses注解，初始化调用BeanUtils.loadBeanFields(this)设置
+    
     private M1 pluginSceneMapper;
     private M2 pluginSceneElementMapper;
     private M3 pluginSceneElementPortMapper;
 
-    /**
-     * 载入场景基础
-     * @param scene 表模型-场景基础
-     */
+    
     public void loadScene(S0 scene) {
         if (scene == null) {
             return;
@@ -91,10 +75,7 @@ public class BasePluginModelHandler<
         scenePluginHandler.setScene(sceneBO);
     }
 
-    /**
-     * 载入网元节点
-     * @param elements 表模型-网元节点
-     */
+    
     public void loadElements(List<E0> elements) {
         if (elements == null) {
             return;
@@ -107,10 +88,7 @@ public class BasePluginModelHandler<
         });
     }
 
-    /**
-     * 载入网元端口数据
-     * @param elementPorts 表模型-网元端口
-     */
+    
     public void loadElementPorts(List<P0> elementPorts) {
         if (elementPorts == null) {
             return;
@@ -123,20 +101,13 @@ public class BasePluginModelHandler<
         });
     }
 
-    /**
-     * 从数据库读取场景
-     * @return 表模型-场景对象
-     */
+    
     public S0 readScene() {
         var sceneId = scenePluginHandler.getSourceSceneId();
         return pluginSceneMapper.first(new HumanCondition().filterEqual(BasePluginSceneModel::getScene, sceneId));
     }
 
-    /**
-     * 从数据库读取网元节点
-     * @param elementIds 网元节点id
-     * @return 表模型-网元节点
-     */
+    
     public List<E0> readElements(String... elementIds) {
         if (elementIds.length == 0) {
             return new ArrayList<>();
@@ -148,11 +119,7 @@ public class BasePluginModelHandler<
                 .filterIn(BasePluginSceneElementModel::getSceneElement, elementIds));
     }
 
-    /**
-     * 从数据库读取网元端口
-     * @param elementPortIds 网元节点端口id
-     * @return 表模型-网元端口
-     */
+    
     public List<P0> readElementPorts(String... elementPortIds) {
         if (elementPortIds.length == 0) {
             return new ArrayList<>();
@@ -164,9 +131,7 @@ public class BasePluginModelHandler<
                 .filterIn(BasePluginSceneElementPortModel::getSceneElementPort, elementPortIds));
     }
 
-    /**
-     * 保存场景属性数据
-     */
+    
     public boolean saveScene() {
         var scene = scenePluginHandler.getScene();
         if (scene == null) {
@@ -185,9 +150,7 @@ public class BasePluginModelHandler<
         return result;
     }
 
-    /**
-     * 删除场景属性数据
-     */
+    
     public boolean deleteScene() {
         var scene = scenePluginHandler.getScene();
         if (scene == null) {
@@ -203,17 +166,14 @@ public class BasePluginModelHandler<
         return result > 0;
     }
 
-    /**
-     * 创建网元节点
-     * @param elementIds 网元节点id
-     */
+    
     public int createElements(String... elementIds) {
         var sceneId = scenePluginHandler.getSourceSceneId();
 
-        // 删除存在的
+        
         deleteElements(elementIds);
 
-        // 创建
+        
         var elementMap = scenePluginHandler.getElementMap();
         List<E0> elements = new ArrayList<>();
         for (String elementId : elementIds) {
@@ -230,15 +190,12 @@ public class BasePluginModelHandler<
         return pluginSceneElementMapper.bulkCreate(elements).getSuccessCount();
     }
 
-    /**
-     * 更新网元节点
-     * @param elementIds 网元节点id
-     */
+    
     public int updateElements(String... elementIds) {
         var elementMap = scenePluginHandler.getElementMap();
         List<E0> updatingElements = new ArrayList<>();
         List<String> creatingElementIds = new ArrayList<>(Arrays.asList(elementIds));
-        // 更新已存在的
+        
         List<E0> existElements = readElements(elementIds);
         existElements.forEach(existElement -> {
             var elementId = existElement.getSceneElement();
@@ -253,16 +210,13 @@ public class BasePluginModelHandler<
         });
         var updateCount = pluginSceneElementMapper.bulkUpdate(updatingElements).getSuccessCount();
 
-        // 创建不存在的
+        
         var createCount = createElements(creatingElementIds.toArray(new String[0]));
 
         return updateCount + createCount;
     }
 
-    /**
-     * 删除网元节点
-     * @param elementIds 网元节点id
-     */
+    
     public int deleteElements(String... elementIds) {
         if (elementIds.length == 0) {
             return 0;
@@ -273,17 +227,14 @@ public class BasePluginModelHandler<
                 .filterIn(BasePluginSceneElementModel::getSceneElement, elementIds));
     }
 
-    /**
-     * 创建网元端口
-     * @param elementPortIds 网元端口id
-     */
+    
     public int createElementPorts(String... elementPortIds) {
         var sceneId = scenePluginHandler.getSourceSceneId();
 
-        // 删除存在的
+        
         deleteElementPorts(elementPortIds);
 
-        // 创建
+        
         var elementPortMap = scenePluginHandler.getElementPortMap();
         List<P0> elementPorts = new ArrayList<>();
         for (String elementPortId : elementPortIds) {
@@ -300,15 +251,12 @@ public class BasePluginModelHandler<
         return pluginSceneElementPortMapper.bulkCreate(elementPorts).getSuccessCount();
     }
 
-    /**
-     * 更新网元端口
-     * @param elementPortIds 网元端口id
-     */
+    
     public int updateElementPorts(String... elementPortIds) {
         var elementPortMap = scenePluginHandler.getElementPortMap();
         List<P0> updatingElementPorts = new ArrayList<>();
         List<String> creatingElementPortIds = new ArrayList<>(Arrays.asList(elementPortIds));
-        // 更新已存在的
+        
         List<P0> existElementPorts = readElementPorts(elementPortIds);
         existElementPorts.forEach(existElementPort -> {
             var elementPortId = existElementPort.getSceneElementPort();
@@ -323,16 +271,13 @@ public class BasePluginModelHandler<
         });
         var updateCount = pluginSceneElementPortMapper.bulkUpdate(updatingElementPorts).getSuccessCount();
 
-        // 创建不存在的
+        
         var createCount = createElementPorts(creatingElementPortIds.toArray(new String[0]));
 
         return updateCount + createCount;
     }
 
-    /**
-     * 删除网元端口
-     * @param elementPortIds 网元端口id
-     */
+    
     public int deleteElementPorts(String... elementPortIds) {
         if (elementPortIds.length == 0) {
             return 0;
@@ -344,9 +289,7 @@ public class BasePluginModelHandler<
                 .filterIn(BasePluginSceneElementPortModel::getSceneElementPort, elementPortIds));
     }
 
-    /**
-     * 初始化
-     */
+    
     public void init(H scenePluginHandler) {
         ClassUtils.loadClassFields(this);
         BeanCommon.loadBeanFields(this);

@@ -49,11 +49,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-/**
- * @Description: 场景监控Service
- * @Author zhouxinghuai
- * @Date：2021/11/23 14:45
- */
+
 @Slf4j
 @Service
 public class SceneMonitorService {
@@ -81,11 +77,7 @@ public class SceneMonitorService {
     @Resource
     private CloudPluginSceneConnectionMapper cloudPluginSceneConnectionMapper;
 
-    /**
-     * CsceneInstanceBO转为SceneMonitorInfo
-     *
-     * @return
-     */
+    
     public SceneMonitorInfo getSceneMonitorInfo(String sceneId) {
         log.info("query scene monitor info, sceneId:{}", sceneId);
         var result = csceneInstanceService.getById(sceneId, null);
@@ -129,37 +121,37 @@ public class SceneMonitorService {
         if (CollectionUtil.isNotEmpty(pluginElements)) {
             pluginElements.forEach((k, v) -> {
                 CloudPluginSceneElementBO elementBO = JsonCommon.snakeMapToBean(v, CloudPluginSceneElementBO.class);
-                // 虚拟机
+                
                 if (Objects.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE, elementBO.getVirtualType())) {
                     sceneMonitorInfo.setVirtualMachineCount(sceneMonitorInfo.getVirtualMachineCount() + 1);
                 }
-                // 容器
+                
                 if (Objects.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER, elementBO.getVirtualType())) {
                     sceneMonitorInfo.setContainerCount(sceneMonitorInfo.getContainerCount() + 1);
                 }
-                // 实体设备
+                
                 if (Objects.equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE, elementBO.getVirtualType())) {
                     sceneMonitorInfo.setEntityCount(sceneMonitorInfo.getEntityCount() + 1);
                 }
 
-                // todo 弹性IP 暂时没有
+                
 
-                // 路由
+                
                 if (Objects.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER, elementBO.getVirtualType())) {
                     sceneMonitorInfo.setRouterCount(sceneMonitorInfo.getRouterCount() + 1);
                 }
 
 
-                // 防火墙规则
+                
                 if (Objects.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_FIREWALL, elementBO.getVirtualType())) {
                     sceneMonitorInfo.setFirewallCount(sceneMonitorInfo.getFirewallCount() + 1);
                 }
 
-                // todo 流表规则 暂时没有
+                
 
             });
 
-            // 网络数量
+            
             Set<String> networkIds = new HashSet<>();
             if (CollectionUtil.isNotEmpty(scenePluginDataBO.getElementPorts())) {
                 scenePluginDataBO.getElementPorts().values().forEach(p -> {
@@ -191,7 +183,7 @@ public class SceneMonitorService {
                 if (element.getVirtualType() == null) {
                     return false;
                 }
-                // 容器  非核心路由器的虚拟机支持采集
+                
                 boolean isVm = element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE;
                 boolean isContainer = element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER;
                 boolean isCoreRouter = ElementTypeUtils.isCoreRouter(element.getImageName());
@@ -214,12 +206,7 @@ public class SceneMonitorService {
         return basicInfos;
     }
 
-    /**
-     * 查询场景中所有的节点列表
-     *
-     * @param sceneId
-     * @return
-     */
+    
     public List<ElementMonitorBasicInfo> getAllSceneElements(String sceneId, Boolean fetchRealTimeHostState, SceneAllElementsQueryRequest request) {
         log.info("sceneId:{}, fetchRealTimeHostState:{}", sceneId, fetchRealTimeHostState);
         if (Objects.isNull(fetchRealTimeHostState)) {
@@ -237,7 +224,7 @@ public class SceneMonitorService {
         SceneHandler sceneHandler = new SceneHandler(sceneInstanceId, null, null);
         CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
 
-        // 根据名称模糊筛选
+        
         var stream = sceneHandler.getElementMap().values().stream();
         if (Objects.nonNull(request) && StringUtils.isNotEmpty(request.getName())) {
             stream = stream.filter(e -> e.getName().toLowerCase().contains(request.getName().toLowerCase()));
@@ -246,7 +233,7 @@ public class SceneMonitorService {
                 .filter(n -> !Boolean.TRUE.equals(n.getIsAuxiliary()))
                 .map(SceneElementBO::getId)
                 .collect(Collectors.toList());
-        // 根据节点id筛选
+        
         if (Objects.nonNull(request) && CollectionUtils.isNotEmpty(request.getElementIds())) {
             nodeIds.retainAll(request.getElementIds());
         }
@@ -254,7 +241,7 @@ public class SceneMonitorService {
         List<ElementMonitorBasicInfo> basicInfos = new ArrayList<>();
         List<CompletableFuture<ElementMonitorBasicInfo>> cfList = new ArrayList<>();
         for (String nodeId : nodeIds) {
-            // 此处fetchRealTimeHostState设定为false，因为后面会统一查询一次
+            
             var cf = CompletableFuture.supplyAsync(() -> processElementBasicInfo(csceneInstanceBO, sceneId, nodeId, false, isAll));
             cfList.add(cf);
         }
@@ -289,16 +276,16 @@ public class SceneMonitorService {
 
         }
 
-        // 根据设备类型筛选
+        
         if (Objects.nonNull(request) && Objects.nonNull(request.getCategory())) {
             basicInfos = basicInfos.stream().filter(b -> b.getCategory().equals(request.getCategory())).collect(Collectors.toList());
         }
-        // 根据操作系统名称筛选
+        
         if (Objects.nonNull(request) && StringUtils.isNotEmpty(request.getSystemTypeName())) {
             basicInfos = basicInfos.stream().filter(b -> b.getSystemTypeName().equals(request.getSystemTypeName())).collect(Collectors.toList());
         }
 
-        // 添加云插件端口接入方式
+        
         if (CollectionUtils.isNotEmpty(basicInfos)) {
             for (var basicInfo : basicInfos) {
                 if (CollectionUtils.isEmpty(basicInfo.getPorts())) {
@@ -312,7 +299,7 @@ public class SceneMonitorService {
         }
 
         if (fetchRealTimeHostState && CollectionUtil.isNotEmpty(basicInfos)) {
-            // 查询实时主机状态
+            
             var agentNames = csceneCommonService.getAgentNamesBySceneIdAndElementIds(sceneId, null);
             if (CollectionUtil.isNotEmpty(agentNames)) {
                 AgentNameBasedRequest agentNameBasedRequest = new AgentNameBasedRequest();
@@ -328,7 +315,7 @@ public class SceneMonitorService {
                 });
             }
 
-            // 查询用户连接信息
+            
             var connections = cloudPluginSceneConnectionMapper.list(new HumanCondition()
                     .select(CloudPluginSceneConnectionModel::getSceneElement)
                     .select(CloudPluginSceneConnectionModel::getAccessUser)
@@ -355,7 +342,7 @@ public class SceneMonitorService {
             basicInfos.forEach(basicInfo -> basicInfo.setAccessUsers(nodeId2Users.getOrDefault(basicInfo.getId(), new ArrayList<>())
                     .stream().distinct().collect(Collectors.toList())));
 
-            // 添加定时上报任务
+            
             SceneHostStateReportScheduleService.addCsceneInstance(sceneId);
         }
         return basicInfos;
@@ -370,7 +357,7 @@ public class SceneMonitorService {
         SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(sceneConfigId, null, null);
         CloudSceneConfigPluginHandler cloudConfigPlugin = sceneConfigHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         var stream = sceneConfigHandler.getElementMap().values().stream();
-        // 根据名称模糊筛选
+        
         if (StringUtils.isNotEmpty(request.getName())) {
             stream = stream.filter(e -> e.getName().toLowerCase().contains(request.getName().toLowerCase()));
         }
@@ -417,7 +404,7 @@ public class SceneMonitorService {
             res.add(basicInfo);
         });
         List<ElementMonitorBasicInfo> result;
-        // 根据设备类型筛选
+        
         if (Objects.nonNull(request.getCategory())) {
             result = res.stream().filter(b -> b.getCategory().equals(request.getCategory())).collect(Collectors.toList());
         } else {
@@ -439,12 +426,7 @@ public class SceneMonitorService {
     }
 
 
-    /**
-     * 查询场景IP
-     *
-     * @param request
-     * @return
-     */
+    
     public List<String> listIps(BaseSceneElementRequest request) {
         BaseRequestUtil.checkBaseRequestWithSceneId(request);
 
@@ -455,11 +437,7 @@ public class SceneMonitorService {
         return scenePluginCollectionSceneService.listIPs(translatedSceneIds.get(0), request.getElementIds()).getSource();
     }
 
-    /**
-     * 列出场景所有录屏的用户
-     * @param request
-     * @return
-     */
+    
     public List<UserModel> listSceneRecordingUsers(BaseSceneElementRequest request) {
         List<String> translatedSceneIds = csceneCommonService.translateSceneIds(CollectionUtil.toList(request.getSceneId()));
         if (CollectionUtil.isEmpty(translatedSceneIds)) {
@@ -471,9 +449,7 @@ public class SceneMonitorService {
     }
 
 
-    /**
-     * 查看top N的节点状态
-     */
+    
     public Map<String, List<ElementMonitorBasicInfo>> topAggrByHoststates(String sceneId, Integer topCount) {
         if (Objects.isNull(topCount)) {
             topCount = 5;
@@ -485,7 +461,7 @@ public class SceneMonitorService {
 
         List<ElementMonitorBasicInfo> list = getAllSceneElements(sceneId, true, new SceneAllElementsQueryRequest());
 
-        // cpu
+        
         Comparator<ElementMonitorBasicInfo> sortByCpu = Comparator.comparing(e -> {
             HostState hostState = e.getHostState();
             return hostState != null ? hostState.getCpuPercent() : null;
@@ -511,11 +487,7 @@ public class SceneMonitorService {
     }
 
 
-    /**
-     * 是否是需要的节点
-     * @param virtualType
-     * @return
-     */
+    
     private boolean isSupportedVirtualType(Integer virtualType) {
         if (Objects.isNull(virtualType)) {
             return false;

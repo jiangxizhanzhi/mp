@@ -3,11 +3,7 @@ package cn.cyberpeace.mp.cscene.dto.element;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/11/29 20:14
- */
+
 @Data
 public class ProcessState {
 

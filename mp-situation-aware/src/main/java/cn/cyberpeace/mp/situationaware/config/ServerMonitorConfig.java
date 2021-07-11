@@ -20,10 +20,10 @@ public class ServerMonitorConfig {
 
     private static final Integer PART_SIZE = 30;
 
-    // 云平台服务监控
+    
     public static List<MonitorProbe> cpCloudSrvMonitors;
 
-    // 业务服务监控
+    
     public static List<MonitorProbe> businessSrvMonitors;
 
     @PostConstruct
@@ -53,7 +53,7 @@ public class ServerMonitorConfig {
 
         cpCloudSrvMonitors = new ArrayList<>();
         businessSrvMonitors = new ArrayList<>();
-        //  云平台服务每30个截一次
+        
         int size = cpCloudMonitor.getServiceList().size();
         List<List<String>> cpCloudServers = new ArrayList<>();
         if (size > PART_SIZE) {
@@ -91,14 +91,10 @@ public class ServerMonitorConfig {
 
         private String interval;
 
-        /**
-         * 服务列表
-         */
+        
         private List<String> serviceList;
 
-        /**
-         * 该列表中的服务：正常状态下不允许重启，异常状态下才允许重启
-         */
+        
         private List<String> restartRestrictList;
     }
 }

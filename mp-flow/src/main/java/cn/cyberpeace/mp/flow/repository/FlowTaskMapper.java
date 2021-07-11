@@ -14,32 +14,16 @@ import java.util.List;
 @ModelClass(FlowTaskModel.class)
 public interface FlowTaskMapper extends BaseModelMapper<FlowTaskModel> {
 
-    /**
-     * 根据流量id查询流量任务
-     * @param flowIds
-     * @return
-     */
+    
     List<FlowTaskModel> listByFlowIds(@Param("flowIds") List<String> flowIds);
 
-    /**
-     * 增加实际运行次数
-     * @param taskId
-     * @return
-     */
+    
     int increaseRunningCount(@Param("taskId") String taskId);
 
-    /**
-     * 更新流量任务
-     * @param flowTaskModel
-     * @return
-     */
+    
     int updateTaskInfo(FlowTaskModel flowTaskModel);
 
-    /**
-     * 批量更新流量任务信息
-     * @param taskIds
-     * @return
-     */
+    
     int batchUpdateTaskStatus(@Param("taskStatus") Integer taskStatus, @Param("runCount") Boolean runCount, @Param("taskIds") List<String> taskIds);
 
 }

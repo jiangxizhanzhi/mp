@@ -6,11 +6,7 @@ import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.flow.model.FlowTaskPortModel;
 import org.springframework.stereotype.Component;
 
-/**
- * @Description 流量任务网口Fields
- * @Author qiaokang
- * @Date 2023-04-27 09:21:37
- */
+
 @Component
 public class FlowTaskPortFields extends BaseModelFields {
     public static final DynamicFields allFields = new DynamicFields(ClassUtils.getBeanClassFields(FlowTaskPortModel.class));

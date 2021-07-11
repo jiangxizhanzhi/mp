@@ -36,11 +36,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/8/20
- */
+
 public class BaseSceneParseResourceCenter {
 
     public static String SPECIAL_STR_ON = "mp_special_str_on";
@@ -55,7 +51,7 @@ public class BaseSceneParseResourceCenter {
         for (var node : nodes) {
             if (StringUtils.isNotEmpty(node.getFile())) {
                 String file = node.getFile();
-                // 获取name
+                
                 int fileNameIndex = node.getFile().lastIndexOf("=");
                 if (fileNameIndex > -1) {
                     node.setFile(StringUtils.substring(file, fileNameIndex, file.length()));
@@ -96,7 +92,7 @@ public class BaseSceneParseResourceCenter {
                 device.setImage(node.getImage());
                 device.setImageType(node.getImageType());
                 device.setAccessModes(new ArrayList<>());
-                // 虚拟机导出时才有自定义的flavor信息
+                
                 if (BaseCloudPluginSceneElementModel.ImageType.VM.equals(node.getImageType())) {
                     device.setCpu(node.getSrcElement().getCpu());
                     device.setRam(node.getSrcElement().getRam());

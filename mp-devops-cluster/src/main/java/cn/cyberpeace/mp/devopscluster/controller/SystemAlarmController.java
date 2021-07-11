@@ -39,11 +39,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * @Description 告警信息controller
- * @Author qiaokang
- * @Date 2022-07-18 17:35:04
- */
+
 @Slf4j
 @Api(tags = "告警信息接口")
 @RestController
@@ -61,22 +57,18 @@ public class SystemAlarmController extends BaseModelController<SystemAlarmModel,
     @Autowired
     private AlarmStatisticsService alarmStatisticsService;
 
-    /**
-     * 分页查询告警信息
-     * @param queryParams
-     * @return
-     */
+    
     @ApiOperation("分页查询告警信息")
     @GetMapping("/page")
     public ListObjServiceResult<SystemAlarmModel> page(AlarmQueryParams queryParams) {
         queryParams.ensure();
         if (Objects.isNull(queryParams.getOrders()) && Objects.isNull(queryParams.getSort())) {
-            // 默认按时间降序
+            
             String updateTime = BeanUtils.getBeanGetterFieldName(SystemAlarmModel::getUpdateTime);
             updateTime = StrUtil.toUnderlineCase(updateTime);
             queryParams.setOrders(new String[]{"-" + updateTime});
         }
-        // 默认只查询生效中的告警
+        
         if (ArrayUtil.isEmpty(queryParams.getAlarmStatus())) {
             queryParams.setAlarmStatus(new Integer[]{AlarmStatusEnum.ENABLED.toValue()});
         }
@@ -87,10 +79,7 @@ public class SystemAlarmController extends BaseModelController<SystemAlarmModel,
         return listResult;
     }
 
-    /**
-     * 替换服务名称
-     * @param systemAlarmModels
-     */
+    
     private void changeServiceName(List<SystemAlarmModel> systemAlarmModels) {
         if (CollectionUtils.isNotEmpty(systemAlarmModels)) {
             systemAlarmModels.forEach(model -> {
@@ -102,10 +91,7 @@ public class SystemAlarmController extends BaseModelController<SystemAlarmModel,
         }
     }
 
-    /**
-     * 系统告警统计信息
-     * @return
-     */
+    
     @ApiOperation("系统告警统计信息")
     @GetMapping("/statistics")
     public ServiceResult<SystemAlarmVO> getSystemAlarm(@RequestParam(required = false) Integer days) {
@@ -115,13 +101,13 @@ public class SystemAlarmController extends BaseModelController<SystemAlarmModel,
             days = 30;
         }
 
-        // 服务告警
+        
         List<AlarmStatisticsVO> serviceAlarmList = alarmStatisticsService.serviceAlarmStatistics(days);
         if (CollectionUtils.isNotEmpty(serviceAlarmList)) {
             systemAlarm.setServiceAlarmList(serviceAlarmList);
         }
 
-        // 设备告警
+        
         List<AlarmStatisticsVO> serverAlarmList = alarmStatisticsService.serverAlarmStatistics(days);
         if (CollectionUtils.isNotEmpty(serverAlarmList)) {
             systemAlarm.setServerAlarmList(serverAlarmList);
@@ -130,10 +116,7 @@ public class SystemAlarmController extends BaseModelController<SystemAlarmModel,
     }
 
 
-    /**
-     * 系统告警统计信息
-     * @return
-     */
+    
     @ApiOperation("系统告警趋势")
     @GetMapping("/trend")
     public ServiceResult<List<AlarmStatisticsTrendVO>> getSystemAlarmTrend(AlarmTrendRequest trendRequest) {
@@ -142,16 +125,13 @@ public class SystemAlarmController extends BaseModelController<SystemAlarmModel,
         return ResultCommon.success(result);
     }
 
-    /**
-     * 系统告警分布
-     * @return
-     */
+    
     @ApiOperation("系统告警分布")
     @GetMapping("/distribution")
     public ServiceResult<AlarmDistributionVo> getSystemAlarmDistribution(AlarmDistributionRequest request) {
-        // 检验参数
-        // 如果没有传结束时间，默认为当前日期24:59:59
-        // 如果没有传开始时间，默认为结束时间往前推7天
+        
+        
+        
         if (Objects.isNull(request.getEndTime())) {
             LocalDateTime now = LocalDateTime.of(LocalDate.now(), LocalTime.MAX);
             request.setEndTime(now);

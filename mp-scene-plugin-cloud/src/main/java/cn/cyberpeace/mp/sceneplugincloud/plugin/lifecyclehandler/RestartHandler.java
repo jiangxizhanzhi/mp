@@ -15,11 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2021/10/28
- */
+
 @Slf4j
 public class RestartHandler extends HandlerCommon {
     private final VirtualMachine virtualMachine = new VirtualMachine();
@@ -49,7 +45,7 @@ public class RestartHandler extends HandlerCommon {
             getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.RESTART, Arrays.asList(ElementProcess.RESTART_VIRTUAL_MACHINE));
             runElementProgress(nodeId, SceneElementModel.Event.RESTART, ElementProcess.RESTART_VIRTUAL_MACHINE, () -> {
                 closeAccessModes(element);
-                // 先判断下虚拟机的真实状态
+                
                 var info = virtualMachine.getConsoleInfo(instanceId, element.getHost());
                 if (StringUtils.isNotEmpty(info.getPort()) && Integer.parseInt(info.getPort()) < 0) {
                     virtualMachine.stop(instanceId);

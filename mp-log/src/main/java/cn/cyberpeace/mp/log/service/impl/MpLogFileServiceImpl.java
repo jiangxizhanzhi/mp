@@ -31,12 +31,7 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-/**
- * MP中台日志模块
- * @description:
- * @author：Geek Wang
- * @date: 2022/6/15
- */
+
 @Service
 @Slf4j
 public class MpLogFileServiceImpl implements LogFileService {

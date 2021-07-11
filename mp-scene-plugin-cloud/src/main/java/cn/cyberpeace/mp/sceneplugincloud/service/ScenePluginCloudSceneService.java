@@ -455,11 +455,11 @@ public class ScenePluginCloudSceneService {
     public ServiceResult<NodeConnectionBO> disableRemoteRecording(String sceneId, String nodeId, String userId, String connectionId) {
         var connectionLinkInfoMap = collectConnectionLinkInfo(sceneId, List.of(nodeId), List.of(userId));
         if (!connectionLinkInfoMap.containsKey(connectionId)) {
-            // 不再抛出异常
+            
             return new ServiceResult<>(new NodeConnectionBO());
         }
         var connectionLinkInfo = connectionLinkInfoMap.get(connectionId);
-//        CloudSceneConnectionCommon.disableRecording(connectionLinkInfo.getSceneConnection());
+
         CloudSceneConnectionCommon.convertRecording(connectionLinkInfo.getSceneConnection());
         return new ServiceResult<>(connectionLinkInfo.toNewNodeConnection());
     }
@@ -568,13 +568,7 @@ public class ScenePluginCloudSceneService {
         return formatUrl;
     }
 
-    /**
-     * 查询网元指定字段的聚合统计数量
-     * @param sceneIds 场景id列表，不传默认为全部
-     * @param nodeIds 节点id列表，不传默认为全部
-     * @param fieldNames 聚合统计字段  有效字段 COUNT_ELEMENT_FIELDS
-     * @return 字段的聚合统计数量 Map<字段名称, Map<字段值, 该字段统计数量>>
-     */
+    
     public ServiceResult<Map<String, Map<Object, Long>>> groupCountElement(
             List<String> sceneIds, List<String> nodeIds, List<String> fieldNames) {
         List<String> countFieldNames = new ArrayList<>();
@@ -595,13 +589,7 @@ public class ScenePluginCloudSceneService {
         return new ServiceResult<>(result);
     }
 
-    /**
-     * 查询网元指定字段的聚合统计数量
-     * @param sceneIds 场景id列表，不传默认为全部
-     * @param nodeIds 节点id列表，不传默认为全部
-     * @param fieldNames 聚合统计字段  有效字段 COUNT_ELEMENT_FIELDS + CALC_COUNT_ELEMENT_FIELDS
-     * @return 字段的聚合统计数量 Map<字段名称, 该字段统计数量>
-     */
+    
     public ServiceResult<Map<String, Long>> countElement(
             List<String> sceneIds, List<String> nodeIds, List<String> fieldNames) {
         List<String> countFieldNames = new ArrayList<>();
@@ -625,13 +613,7 @@ public class ScenePluginCloudSceneService {
         return new ServiceResult<>(result);
     }
 
-    /**
-     * 查询端口指定字段的聚合统计数量
-     * @param sceneIds 场景id列表，不传默认为全部
-     * @param nodeIds 节点id列表，不传默认为全部
-     * @param fieldNames 聚合统计字段  有效字段 COUNT_PORT_FIELDS + CALC_COUNT_PORT_FIELDS
-     * @return 字段的聚合统计数量 Map<字段名称, 该字段统计数量>
-     */
+    
     public ServiceResult<Map<String, Long>> countPort(
             List<String> sceneIds, List<String> nodeIds, List<String> fieldNames) {
         List<String> countFieldNames = new ArrayList<>();
@@ -692,7 +674,7 @@ public class ScenePluginCloudSceneService {
             if (StringUtils.isEmpty(vlanRange)) {
                 return;
             }
-            // 转换格式
+            
             String formatVlanRange = vlanRange.replace("-", ":");
             boolean result = new Remote().changeVlanRange(formatVlanRange);
             if (!result) {
@@ -851,7 +833,7 @@ public class ScenePluginCloudSceneService {
                     uploadInfoData.setDestPath(destPath + SystemTypeCommandUtils.getPathDelimiter(standardSystemType) + filename);
                     VirtualMachine virtualMachine = new VirtualMachine();
                     virtualMachine.uploadFile(uploadInfoData);
-                    // todo 报错信息处理下
+                    
                     return new ServiceResult<>(true);
                 }
             }
@@ -1038,12 +1020,7 @@ public class ScenePluginCloudSceneService {
         return connectionIdSessionMap;
     }
 
-    /**
-     * 获取统计环境总速率信息
-     * @param portIds
-     * @param totalSecond
-     * @return
-     */
+    
     public NetworkFlowRateResult networkFlowRate(List<String> portIds, Long totalSecond) {
         log.info("ScenePluginCloudSceneService.networkFlowRate begin. portIds:{}", portIds);
         NetworkFlowRateResult result = new Remote().networkFlowRate(portIds, totalSecond);

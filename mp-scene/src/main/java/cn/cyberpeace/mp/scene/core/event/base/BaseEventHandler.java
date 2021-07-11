@@ -13,14 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * 事件处理
- * @param <M> 事件目标模型类
- * @param <E> 事件模型类
- *           1.不做特殊处理
- *           2.当前最新事件状态存储到缓存（TODO）
- *           3.事件每一个状态变化都持久化（暂不实现）
- */
+
 @ClassFieldNames({
         "eventModelClass",
 })
@@ -30,43 +23,35 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
 
     public static final String EVENT_NAME_PREFIX = "scene.event.";
 
-    /** 事件目标 */
+    
     private M target;
 
-    /** 事件模型类 */
+    
     private Class<E> eventModelClass;
 
-    /** 当前管理事件 */
+    
     private Integer event;
 
-    /** 当前管理事件名称 */
+    
     private String eventName;
 
-    /** 事件转移表 */
+    
     private Map<String, List<Integer>> eventTransition;
 
-    /** 进程表 */
+    
     private Map<String, EventProcess> eventProcessMap;
 
-    /**
-     * 获取事件锁
-     */
+    
     protected boolean acquireEventLock(int event, int eventStatus, String process, int processStatus) {
         return true;
     }
 
-    /**
-     * 释放事件锁
-     */
+    
     protected boolean releaseEventLock(int event, int eventStatus, String process, int processStatus) {
         return true;
     }
 
-    /**
-     * 保存事件状态信息
-     * 1.即时同步到事件目标上
-     * 2.存储事件状态（TODO）
-     */
+    
     private E saveEvent(int event, int eventStatus, String process, int processStatus, String processMessage) {
         target.setEvent(event);
         target.setEventStatus(eventStatus);
@@ -81,19 +66,11 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
         eventObj.setProcess(process);
         eventObj.setProcessStatus(processStatus);
         eventObj.setProcessMessage(processMessage);
-        // TODO: 缓存eventObj
+        
         return eventObj;
     }
 
-    /**
-     * 触发事件
-     * @param event 事件
-     * @param eventStatus 事件状态
-     * @param process 事件进程
-     * @param processStatus 事件进程状态
-     * @param processMessage 事件进程描述
-     * @return 事件触发结果
-     */
+    
     private int triggerEvent(int event, int eventStatus, String process, int processStatus, String processMessage) {
         if (acquireEventLock(event, eventStatus, process, processStatus)) {
             var eventObj = saveEvent(event, eventStatus, process, processStatus, processMessage);
@@ -127,11 +104,7 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
         return StringUtils.joinWith(" ", getTargetName(), processMessage);
     }
 
-    /**
-     * 初始化
-     * @param target 事件目标
-     * @param event 当前管理事件
-     */
+    
     public void init(M target, int event, String eventName, Map<String, List<Integer>> eventTransition) {
         ClassUtils.loadClassFields(this);
         this.target = target;
@@ -164,36 +137,28 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
         eventProcesses.forEach(this::addProcess);
     }
 
-    /**
-     * 开始事件
-     */
+    
     public int startEvent() {
         var processMessage = MessageCommon.get("scene.event.start_message", MessageCommon.get(eventName));
         return triggerEvent(event, EventStatus.START, target.getProcess(), ProcessStatus.START,
                 formatProcessMessage(processMessage));
     }
 
-    /**
-     * 开始进程
-     */
+    
     public int startProcess(String process) {
         var processMessage = MessageCommon.get("scene.event.start_message", getProcessName(process));
         return triggerEvent(event, EventStatus.IN_PROGRESS, process, ProcessStatus.START,
                 formatProcessMessage(processMessage));
     }
 
-    /**
-     * 进行中事件进程
-     */
+    
     public int progressProcess(String process) {
         var processMessage = MessageCommon.get("scene.event.start_message", getProcessName(process));
         return triggerEvent(event, EventStatus.IN_PROGRESS, process, ProcessStatus.IN_PROGRESS,
                 formatProcessMessage(processMessage));
     }
 
-    /**
-     * 暂停事件
-     */
+    
     public int pauseProcess() {
         var processMessage = MessageCommon.get("scene.event.pause_message",
                 getProcessName(target.getProcess()));
@@ -201,9 +166,7 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
                 formatProcessMessage(processMessage));
     }
 
-    /**
-     * 结束事件进程
-     */
+    
     public int overProcess() {
         var processMessage = MessageCommon.get("scene.event.over_message",
                 getProcessName(target.getProcess()));
@@ -211,18 +174,14 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
                 formatProcessMessage(processMessage));
     }
 
-    /**
-     * 结束事件
-     */
+    
     public int overEvent() {
         var processMessage = MessageCommon.get("scene.event.over_message", MessageCommon.get(eventName));
         return triggerEvent(event, EventStatus.OVER, target.getProcess(), target.getProcessStatus(),
                 formatProcessMessage(processMessage));
     }
 
-    /**
-     * 异常
-     */
+    
     public int error(String errorMessage) {
         var processName = getProcessName(target.getProcess());
         if (StringUtils.isEmpty(processName)) {

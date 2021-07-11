@@ -6,17 +6,13 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-/**
- * 容器分页请求信息
- */
+
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class ContainerPageDTO extends BasePageDTO {
 
-    /**
-     * 主机名/节点名称
-     */
+    
     @ApiModelProperty(value = "主机名/节点名称")
     private String host;
 

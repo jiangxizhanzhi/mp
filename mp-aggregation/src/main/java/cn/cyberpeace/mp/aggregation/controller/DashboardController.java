@@ -29,11 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-/**
- * @Description: Dashboard相关统计接口
- * @Author zhouxinghuai
- * @Date：2021/9/13 10:32
- */
+
 @Api(value = "仪表盘统计接口", tags = "仪表盘统计接口")
 @Slf4j
 @RestController

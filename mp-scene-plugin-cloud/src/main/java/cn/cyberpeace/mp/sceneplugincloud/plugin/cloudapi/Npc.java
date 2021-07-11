@@ -24,7 +24,7 @@ public class Npc extends CloudClient {
         CloudResponse<Object> result = cloudPost(CloudUrlConstant.CREATE_NPC_URL, createData, null,
                 new TypeReference<CloudResponse<Object>>() {
                 }, true);
-        // todo
+        
         return null;
     }
 

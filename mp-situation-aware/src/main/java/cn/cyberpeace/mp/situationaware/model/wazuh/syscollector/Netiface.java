@@ -5,11 +5,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/5/18 10:58
- */
+
 @Data
 @ApiModel("网卡信息")
 public class Netiface {
@@ -45,9 +41,7 @@ public class Netiface {
     @ApiModelProperty(value = "IP地址")
     private String ip;
 
-    /**
-     * 接收或者发送的包
-     */
+    
     @Data
     @ApiModel("X")
     public static class X {

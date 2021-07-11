@@ -61,11 +61,7 @@ import java.util.Objects;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Service
 @Slf4j
 @CacheConfig(cacheManager = AuthCacheConfig.CACHE_MANAGER_NORMAL)
@@ -81,7 +77,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
     @Autowired
     @Qualifier("targetServiceImpl")
-//    @Qualifier("templateTargetServiceImpl")
+
     private TargetService targetService;
 
     @Autowired
@@ -276,7 +272,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         createCheck(roleModel);
 
         if (StringUtils.isBlank(roleModel.getIdentifier())) {
-            // 如果ident为空，则随机生成一个
+            
             roleModel.setIdentifier(IdUtils.globalId());
         }
 
@@ -287,10 +283,10 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         String roleId = roleCreated.getId();
         log.info("role created id:{}", roleId);
 
-        // 保存角色-权限关系
+        
         List<String> targetIds = createRequest.getTargetIds();
         if (CollUtil.isNotEmpty(targetIds)) {
-            // 对 targetIds 去重
+            
             TreeSet<String> set = new TreeSet<>(targetIds);
 
             set.forEach(id -> {
@@ -302,7 +298,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
                 RolePermissionModel rolePermissionModel = new RolePermissionModel();
                 rolePermissionModel.setOwner(roleId);
                 rolePermissionModel.setTarget(id);
-                // 如果保存错误，抛出异常
+                
                 ObjServiceResult re = rolePermissionService.create(rolePermissionModel);
                 ResultUtils.throwExceptionIfError(re, AuthErrorCode.ROLE_TARGET_ADD_ERROR);
             });
@@ -329,13 +325,13 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         ResultUtils.throwExceptionIfError(updateResult, AuthErrorCode.OP_ERROR);
 
 
-        // todo 清除原来角色绑定的权限？
+        
         boolean cleanSuccess = rolePermissionService.deleteByRoleId(roleId);
         if (!cleanSuccess) {
             throw new MpRuntimeException(AuthErrorCode.ROLE_TARGET_DELETE_ERROR);
         }
 
-        // 保存角色-权限关系
+        
         if (CollUtil.isNotEmpty(modifyRequest.getTargetIds())) {
             modifyRequest.getTargetIds().forEach(id -> {
                 boolean isTargetExist = targetService.exists(id);
@@ -346,7 +342,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
                 RolePermissionModel rolePermissionModel = new RolePermissionModel();
                 rolePermissionModel.setOwner(roleId);
                 rolePermissionModel.setTarget(id);
-                // 如果保存错误，抛出异常
+                
                 ObjServiceResult re = rolePermissionService.create(rolePermissionModel);
                 ResultUtils.throwExceptionIfError(re, AuthErrorCode.ROLE_TARGET_ADD_ERROR);
             });
@@ -400,7 +396,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     private List<TargetModel> getRoleTargets(RoleModel roleModel) {
         List<TargetModel> targets = new ArrayList<>();
         if (Objects.equals(roleModel.getId(), AuthConstant.ROLE_ADMIN_ID)) {
-            // 管理员特殊处理 直接查询该租户下所有权限返回
+            
             targets = targetService.listAll(AuthConstant.DEFAULT_TENANT, null);
         } else {
             targets = rolePermissionService.listTargetsByRoleIds(Arrays.asList(roleModel.getId()));
@@ -426,13 +422,13 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
             return;
         }
 
-        // 管理员角色不能删除
+        
         if (Objects.equals(AuthConstant.ROLE_ADMIN_ID, roleId)) {
             log.info("ADMIN ROLE can not delete！");
             throw new MpRuntimeException(AuthErrorCode.ROLE_CANNOT_DELETE_ADMIN);
         }
 
-        // 在系统配置中设置了默认注册用户的角色不能删
+        
         if (Objects.equals(roleId, adminConfigService.getRegisterDefaultRoleId())) {
             log.info("Register default role can not delete！");
             throw new MpRuntimeException(AuthErrorCode.ROLE_CANNOT_DELETE_FOR_REGISTER_DEFAULT);

@@ -12,10 +12,7 @@ import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-/**
- * 云平台监控
- * @author wanggang
- */
+
 @Service
 @Slf4j
 public class HypervisorService extends BaseCpService {
@@ -26,10 +23,7 @@ public class HypervisorService extends BaseCpService {
         super(devopsClusterConfig);
     }
 
-    /**
-     * 资源统计
-     * @return
-     */
+    
     public HypervisorStatisticsCloudPlatformResult statistics(){
         CloudPlatformResult result = super.sendGet(BaseCloudPlatformConstant.URL_VERSION + HYPERVISORS + "/statistics", CloudPlatformResult.class);
         super.checkResult(result);
@@ -40,26 +34,17 @@ public class HypervisorService extends BaseCpService {
         return model;
     }
 
-    /**
-     * 分页查询节点管理信息
-     * @param getParams
-     * @return
-     */
+    
     public CloudPlatformPageResult<Hypervisor> page(String getParams){
         return super.page(BaseCloudPlatformConstant.URL_VERSION + HYPERVISORS + getParams, Hypervisor.class);
     }
 
-    /**
-     * 获取虚拟机数量限制
-     * @return
-     */
+    
     public HypervisorWeightAndMaxInstanceCloudPlatformResult getWeightAndMaxInstances(String getParams){
         return super.sendGet(BaseCloudPlatformConstant.CPCLOUD_INFO_URL + BaseCloudPlatformConstant.URL_VERSION + "/vm_status" + getParams, HypervisorWeightAndMaxInstanceCloudPlatformResult.class);
     }
 
-    /**
-     * 节点管理-重启/关机
-     */
+    
     public void rebootOrPowerOff(String json){
         super.sendPost(BaseCloudPlatformConstant.CPCLOUD_INFO_URL + BaseCloudPlatformConstant.URL_VERSION + "/compute_control", json);
     }

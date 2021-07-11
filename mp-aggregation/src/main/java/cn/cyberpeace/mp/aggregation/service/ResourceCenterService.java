@@ -28,11 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2021/10/11
- */
+
 @Slf4j
 @Service
 public class ResourceCenterService {
@@ -53,16 +49,16 @@ public class ResourceCenterService {
     private ResourceCenterConverter cSceneBoConverter;
 
     public ServiceResult<CsceneBO> importByYmlConfig(String ymlFilePath, String imageFilePath, List<String> imageFilePathList, String sceneFilePath) {
-        // 解析 topo.yml
+        
         YmlParseResult ymlParseResult = ResourceCenterYmlParser.parseTopoYml(ymlFilePath);
-        // 解析 image/services.yml
+        
         List<ImageParseResult> imageInfos = null;
         if (StringUtils.isNotEmpty(imageFilePath)) {
             imageInfos = ResourceCenterYmlParser.parseImageServicesYml(ymlFilePath, imageFilePath);
         } else {
             imageInfos = ResourceCenterYmlParser.parseImageServicesYml(ymlFilePath, imageFilePathList);
         }
-        // 处理附件
+        
         String fdfsSceneFilePath = null;
         if (StringUtils.isNotEmpty(sceneFilePath)) {
             if (FileUtil.exist(sceneFilePath)) {
@@ -74,7 +70,7 @@ public class ResourceCenterService {
             }
         }
         String logoPath = ymlFilePath + "/" + LOGO_NAME;
-        // 处理logo
+        
         String fdfsLogoFilePath = null;
         File logo = new File(logoPath);
         if (logo.exists()) {
@@ -83,10 +79,10 @@ public class ResourceCenterService {
         } else {
             log.info("import logo , no logo file for path {}", sceneFilePath);
         }
-        // 转换bo
+        
         CsceneBO csceneBO = cSceneBoConverter.convert(ymlParseResult, imageInfos, fdfsSceneFilePath);
         csceneBO.setLogo(fdfsLogoFilePath);
-        // 保存
+        
         return csceneService.syncWithoutCheckLimit(csceneBO, new CsceneContextBO());
     }
 
@@ -98,7 +94,7 @@ public class ResourceCenterService {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST, detail);
         }
         String logo = cscene.getSource().getObj().getLogo();
-        //存在logo图片则导出
+        
         if (StringUtils.isNotEmpty(logo)) {
             String logoPath = StringUtils.replaceOnce(logo, LOGO_FILE_SUFFIX, "");
             try {

@@ -12,11 +12,7 @@ import java.util.List;
 
 public class EntityNode extends CloudClient {
 
-    /**
-     * @description: 配置实装设备接口参数
-     * @param createData
-     * @return EntityNodeCreateData
-     */
+    
     public EntityNodeCreateData create(EntityNodeCreateData createData) {
         heavyConcurrentWait();
 
@@ -26,22 +22,14 @@ public class EntityNode extends CloudClient {
         return result.getData();
     }
 
-    /**
-     * @description: 实装上传文件
-     * @param data
-     * @return List<EntityNodeMibFileResult>
-     */
+    
     public CloudResponse<List<EntityNodeMibFileResult>> uploadAndParseMibFile(EntityNodeMibUploadData data,EntityNodeMibUploadParam param) {
         return cloudPost(CloudUrlConstant.ENTITY_NODE_MIB_UPLOAD_URL, data, param,
             new TypeReference<CloudResponse<List<EntityNodeMibFileResult>>>() {
             }, true);
     }
 
-    /**
-     * @description: 实装mib节点信息
-     * @param param
-     * @return List<MibResultData>
-     */
+    
     public List<MibResultData> getMibNodeInfo(MibNodeQueryParam param) {
         try {
             CloudResponse<List<MibResultData>> result = cloudGet(CloudUrlConstant.ENTITY_NODE_MIB_NODE_INFO_URL, param,
@@ -56,11 +44,7 @@ public class EntityNode extends CloudClient {
         }
     }
 
-    /**
-     * @description: 删除实装设备接口配置
-     * @param deleteData
-     * @return boolean
-     */
+    
     public boolean delete(EntityNodeDeleteData deleteData) {
         heavyConcurrentWait();
 

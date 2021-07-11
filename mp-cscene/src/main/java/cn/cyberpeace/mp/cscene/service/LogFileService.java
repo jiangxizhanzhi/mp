@@ -46,11 +46,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/5/6 15:29
- */
+
 @Slf4j
 @Service
 public class LogFileService {
@@ -78,12 +74,7 @@ public class LogFileService {
     @Autowired
     private CsceneInstanceMapper csceneInstanceMapper;
 
-    /**
-     * 分页查询日志文件列表
-     * （假分页）
-     * @param pageRequest
-     * @return
-     */
+    
     public ListObjServiceResult<LogFileVO> pageByElementId(BaseSceneElementPageRequest pageRequest) {
         pageRequest.ensure();
         if (StringUtils.isBlank(pageRequest.getSceneId())) {
@@ -117,10 +108,10 @@ public class LogFileService {
         for (ElementMonitorBasicInfo element : allElements) {
             elementIdOrderMap.put(element.getId(), order++);
         }
-        // 按照节点排序
+        
         allLogFileVOs.sort(Comparator.comparing(f -> elementIdOrderMap.get(f.getElementId())));
 
-        // 假分页处理
+        
         int skip = (pageRequest.getPage() - 1) * pageRequest.getPageSize();
         List<LogFileVO> pagedLogFileVOs = allLogFileVOs.stream()
                 .skip(skip)
@@ -186,10 +177,7 @@ public class LogFileService {
     }
 
 
-    /**
-     * 根据systemType查询节点osType
-     * @return
-     */
+    
     private String getOsType(String systemType) {
         ServiceResult<Map<String, Object>> result = cloudCommonConfigService.getSystemTypeToAgentSupport();
         Map<String, Object> map = result.getSource();
@@ -202,11 +190,7 @@ public class LogFileService {
     }
 
 
-    /**
-     * 触发自定义探针脚本，执行上传指定日志文件到文件服务器
-     * 并生成下载url返回
-     * @return
-     */
+    
     public List<LogFileDownloadUrlDto> getDownloadUrls(LogFileDownloadUrlRequest request) {
         log.info("downloadurl request:{}", request);
         if (Objects.isNull(request) || CollectionUtil.isEmpty(request.getPaths())) {
@@ -250,13 +234,7 @@ public class LogFileService {
     }
 
 
-    /**
-     * 转换WazuhControl.QueryLogCollectFileData到LogFileDto
-     * @param logFiles
-     * @param elementId
-     * @param agentName
-     * @return
-     */
+    
     private List<LogFileVO> convertLogFiles(List<WazuhControl.QueryLogCollectFileData> logFiles, String elementId, String agentName, String osType) {
         if (CollectionUtil.isEmpty(logFiles)) {
             return Collections.emptyList();

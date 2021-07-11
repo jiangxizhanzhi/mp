@@ -10,11 +10,7 @@ import javax.annotation.Resource;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
-/**
- * @Description:
- * @Author hewei
- * @Date：2022/3/9 16:37
- */
+
 @Component
 @Slf4j
 public class ScenePluginCloudSceneCronService {
@@ -33,7 +29,7 @@ public class ScenePluginCloudSceneCronService {
     public void action() {
         log.info("start cloud plugin scene correct job");
 
-        // 内存和数据库中节点数量保持同步 凌晨同步即可,
+        
         try {
             GregorianCalendar calendar = new GregorianCalendar();
             int hour = calendar.get(Calendar.HOUR_OF_DAY);
@@ -45,21 +41,21 @@ public class ScenePluginCloudSceneCronService {
             log.error("failed to refresh node limit count", e);
         }
 
-        // 启动耗时很长的场景,状态置为异常
+        
         try {
             sceneCorrectService.correctErrorStatusScene();
         } catch (Exception e) {
             log.error("failed to correct error status scene", e);
         }
 
-        // 纠正cscene和scene快照表的数据
+        
         try {
             csceneSnapshotService.correctSnapshotRelativeInfo();
         } catch (Exception e) {
             log.error("failed to corrcet snapshot relative info", e);
         }
 
-        // 清理未正常释放的资源
+        
         clearService.clearUselessResource();
         log.info("end cloud plugin scene correct job");
     }

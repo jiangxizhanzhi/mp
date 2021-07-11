@@ -2,11 +2,7 @@ package cn.cyberpeace.mp.situationaware.constant;
 
 import cn.cyberpeace.mp.base.service.code.ErrorCode;
 
-/**
-  *@Desciption 
-  *@Author zhangjin
-  *@Date 9/3/21 10:22 上午
-**/
+
 public enum SituationalAwareErrorCode implements ErrorCode {
     PROBE_MANAGER_ADD_ERROR("MP-110404", "probe_manager_add_script_error"),
     PROBE_NAME_EXIST("MP-110405", "probe_name_already_exit"),

@@ -49,7 +49,7 @@ public class BaseSceneElementModel extends BaseSceneNodeModel {
         public static final String WINDOWS_7 = "windows7";
         public static final String WINDOWS_XP = "windowsxp";
         public static final String WINDOWS_VISTA = "windows_vista";
-        public static final String WINDOWS_SERVER_2019 = "windows-server2019";
+        public static final String WINDOWS_SERVER_2018 = "windows-server2018";
         public static final String WINDOWS_SERVER_2016 = "windows-server2016";
         public static final String WINDOWS_SERVER_2012 = "windows-server2012";
         public static final String WINDOWS_SERVER_2010 = "windows-server2010";

@@ -18,10 +18,7 @@ import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConfigElemen
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConfigMapper;
 
 
-/**
- * 场景实例的处理
- * 场景实例的功能由本类对外提供
- */
+
 @ClassFieldClasses({
         CloudPluginSceneConfigBO.class,
         CloudPluginSceneConfigElementBO.class,

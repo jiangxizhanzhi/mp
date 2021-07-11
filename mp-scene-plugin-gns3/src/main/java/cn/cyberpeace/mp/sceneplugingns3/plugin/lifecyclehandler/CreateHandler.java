@@ -44,7 +44,7 @@ public class CreateHandler extends HandlerCommon {
         prepareEventProcess(SceneModel.Event.CREATE, SceneProcess.class, ElementProcess.class);
         Set<String> nodeIds = new HashSet<>(getPluginHandler().getElementIds());
 
-        // 创建网关节点
+        
         CloudScenePluginHandler cloudScenePluginHandler = getPluginHandler().getSceneHandler().getPluginHandler(PluginConstant.PLUGIN_KEY);
         var createGatewayTasks = cloudScenePluginHandler.getGatewayElementMap().values().stream()
                 .filter(c -> nodeIds.contains(c.getSrcElement().getId()))
@@ -63,9 +63,9 @@ public class CreateHandler extends HandlerCommon {
     private void createRouter(Gns3PluginSceneElementBO e) {
         CloudScenePluginHandler cloudScenePluginHandler = getPluginHandler().getSceneHandler().getPluginHandler(PluginConstant.PLUGIN_KEY);
         var networks = cloudScenePluginHandler.getElement(e.getSrcElement().getId()).getDeriveNetworks();
-        // 调用底层接口 创建gns节点
-        // 下发网络配置
-        // 下发静态路由配置
+        
+        
+        
     }
 
 }

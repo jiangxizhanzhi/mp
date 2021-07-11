@@ -5,7 +5,7 @@ import cn.cyberpeace.mp.base.annotation.SwaggerDisplayEnum;
 @SwaggerDisplayEnum
 public enum EventsCatagory {
 
-    // 操作系统日志
+    
     WINDOWS("windows"),
     LINUX("linux"),
     CISCO("cisco"),
@@ -13,7 +13,7 @@ public enum EventsCatagory {
     FREEBSD("freebsd"),
     JUNOS("junos"),
 
-    // 应用系统日志
+    
     MAIL_SERVER("mail_server"),
     WEB_SERVER("web_server"),
     DATABASE("database"),
@@ -23,7 +23,7 @@ public enum EventsCatagory {
     LOAD_BALANCER("load_balancer"),
     APP_FRAMEWORK("app_framework"),
 
-    // 安全软件日志
+    
     AV("av"),
     FW("fw"),
     IDS("ids/ips"),

@@ -7,11 +7,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-/**
- * @Description: 日志采集地址配置类
- * @Author： hewei
- * @Date： 2022.8.3 18:57
- */
+
 @Component
 public class WazuhLogProbeLocationConfig {
     private static List<ProbeLocation> locations;

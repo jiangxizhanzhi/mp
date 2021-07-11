@@ -11,11 +11,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2021/10/9
- */
+
 @Getter
 @Setter
 public class YmlParseResultV2 {

@@ -25,9 +25,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-/**
- * 路由管理类
- */
+
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/router")
@@ -39,11 +37,7 @@ public class RouterController {
 
     private final SceneInfoService sceneInfoService;
 
-    /**
-     * 分页查询路由信息
-     * @param request
-     * @return
-     */
+    
     @ApiOperation("分页查询路由信息")
     @GetMapping("/page")
     public PageResult<RouterPageVO> page(RouterPageRequest request){
@@ -53,7 +47,7 @@ public class RouterController {
                         .status(routerModel.getStatus()).createdAt(routerModel.getCreatedAt()).build()
         ).collect(Collectors.toList());
 
-        // 处理场景信息
+        
         List<String> routerNames = routerList.stream().map(RouterPageVO::getName).collect(Collectors.toList());
         Consumer<Map<String, CsceneNodeInfoBO>> consumer = (map) -> {
             routerList.forEach(rout -> {

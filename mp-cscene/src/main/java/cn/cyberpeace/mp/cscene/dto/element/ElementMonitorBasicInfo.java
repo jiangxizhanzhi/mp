@@ -9,13 +9,9 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-/**
- * @Description: 节点监控统计信息
- * @Author zhouxinghuai
- * @Date：2021/11/22 14:03
- */
+
 @Data
-//@Builder
+
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(value = "节点基本信息")
@@ -68,7 +64,7 @@ public class ElementMonitorBasicInfo {
     private String host;
 
     @ApiModelProperty(value = "节点基本信息-实例类型  1: 交换机, 2: 路由器, 3: 防火墙, 4: 虚拟机, 5: 容器, 6: 实体设备")
-    // Ref: BaseCloudPluginSceneElementModel.VirtualType 中的枚举
+    
     private Integer virtualType;
 
     @ApiModelProperty(value = "节点基本信息-实例类型  1: 交换机, 2: 路由器, 3: 防火墙, 4: 终端")

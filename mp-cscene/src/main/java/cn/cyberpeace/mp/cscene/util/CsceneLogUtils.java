@@ -26,11 +26,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/6/23
- */
+
 @Slf4j
 public class CsceneLogUtils {
 
@@ -73,7 +69,7 @@ public class CsceneLogUtils {
             if (logModel == null) {
                 return;
             }
-            // 记录登录日志
+            
             var operationLogService = BeanCommon.getBean(OperateLogService.class);
             operationLogService.create(logModel);
         } catch (Exception e) {
@@ -89,7 +85,7 @@ public class CsceneLogUtils {
             if (logModel == null) {
                 return;
             }
-            // 记录登录日志
+            
             var operationLogService = BeanCommon.getBean(OperateLogService.class);
             operationLogService.create(logModel);
         } catch (Exception e) {
@@ -105,7 +101,7 @@ public class CsceneLogUtils {
             if (logModel == null) {
                 return;
             }
-            // 记录登录日志
+            
             var operationLogService = BeanCommon.getBean(OperateLogService.class);
             operationLogService.create(logModel);
         } catch (Exception e) {
@@ -133,7 +129,7 @@ public class CsceneLogUtils {
             if (logModel == null) {
                 return;
             }
-            // 记录登录日志
+            
             var operationLogService = BeanCommon.getBean(OperateLogService.class);
             operationLogService.create(logModel);
         } catch (Exception e) {
@@ -149,7 +145,7 @@ public class CsceneLogUtils {
             if (logModel == null) {
                 return;
             }
-            // 记录登录日志
+            
             var operationLogService = BeanCommon.getBean(OperateLogService.class);
             operationLogService.create(logModel);
         } catch (Exception e) {
@@ -165,7 +161,7 @@ public class CsceneLogUtils {
             if (logModel == null) {
                 return;
             }
-            // 记录登录日志
+            
             var operationLogService = BeanCommon.getBean(OperateLogService.class);
             operationLogService.create(logModel);
         } catch (Exception e) {
@@ -181,7 +177,7 @@ public class CsceneLogUtils {
             if (logModel == null) {
                 return;
             }
-            // 记录登录日志
+            
             var operationLogService = BeanCommon.getBean(OperateLogService.class);
             operationLogService.create(logModel);
         } catch (Exception e) {
@@ -214,7 +210,7 @@ public class CsceneLogUtils {
         }
         logModel.setUserId(user.getId());
         logModel.setUserName(user.getUsername());
-        //操作类型
+        
         logModel.setOpModule(OpModuleEnums.SCENES.ordinal());
         logModel.setUserType(LogConstant.USER_TYPE_USER);
         logModel.setOpIp(getIp());
@@ -240,7 +236,7 @@ public class CsceneLogUtils {
         }
         logModel.setUserId(user.getId());
         logModel.setUserName(user.getUsername());
-        //操作类型
+        
         logModel.setOpModule(OpModuleEnums.SCENES.ordinal());
         logModel.setUserType(LogConstant.USER_TYPE_USER);
         logModel.setOpIp(getIp());
@@ -259,12 +255,12 @@ public class CsceneLogUtils {
     }
 
     private static String getUserName() {
-        // todo
+        
         return "admin";
     }
 
     private static String getUserId() {
-        // todo
+        
         return "admin";
     }
 }

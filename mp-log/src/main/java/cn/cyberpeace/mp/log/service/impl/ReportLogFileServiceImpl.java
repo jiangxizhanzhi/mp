@@ -13,12 +13,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.List;
 
-/**
- * MP中台日志模块
- * @description:
- * @author：Geek Wang
- * @date: 2022/6/15
- */
+
 @Service
 @Slf4j
 @RequiredArgsConstructor

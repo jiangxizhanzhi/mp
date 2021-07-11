@@ -13,11 +13,7 @@ import org.springframework.context.annotation.Configuration;
 
 import javax.servlet.DispatcherType;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/12/10 21:15
- */
+
 @Configuration
 public class FrontBusinessConfiguration {
 

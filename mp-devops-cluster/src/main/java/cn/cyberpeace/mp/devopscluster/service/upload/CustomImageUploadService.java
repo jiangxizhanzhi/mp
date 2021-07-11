@@ -15,17 +15,13 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * 自定义上传镜像
- */
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class CustomImageUploadService extends BaseUploadService {
 
-    /**
-     * 文件上传客户端
-     */
+    
     private final ImagesService imagesService;
 
     public CustomImageUploadService build(MultipartFile file) {

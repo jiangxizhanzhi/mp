@@ -2,9 +2,7 @@ package cn.cyberpeace.mp.devopscluster.enums;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
-/**
- * 告警状态：0 生效， 1失效
- */
+
 public enum AlarmStatusEnum {
 
     ENABLED("ENABLED"),

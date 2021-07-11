@@ -12,11 +12,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashSet;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/5/16
- */
+
 @Service
 public class CsceneFileService extends BaseRemoteFileServiceImpl {
 

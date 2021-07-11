@@ -17,13 +17,7 @@ public class IpUtils {
 
     private static final Random Random = new Random();
 
-    /**
-     * 随机网段 0/24
-     * @param allCidrs cidr池
-     * @param count 随机数量
-     * @param excludeCidrs 排除的网段
-     * @return 随机网段列表
-     */
+    
     public static List<String> randomCidrs(List<String> allCidrs, int count, List<String> excludeCidrs) {
         List<String> cidrPool;
         if (excludeCidrs == null) {
@@ -36,15 +30,7 @@ public class IpUtils {
         return RandomUtils.sample(cidrPool, count);
     }
 
-    /**
-     * 随机ip
-     * @param cidr 网段
-     * @param count 随机数量
-     * @param excludeIps 排除的ip
-     * @param allocationPools 地址池
-     * @param abandonDhcp 是否去除dhcp地址
-     * @return 随机ip列表
-     */
+    
     public static List<String> newRandomIps(String cidr, int count, List<String> excludeIps,
                                             List<AllocationPool> allocationPools, boolean abandonDhcp) {
         List<String> ips = new ArrayList<>();
@@ -62,7 +48,7 @@ public class IpUtils {
         long beginIpLong = Ipv4Util.ipv4ToLong(beginIp);
         long size = Ipv4Util.ipv4ToLong(previousIp(lastIp)) - beginIpLong;
 
-        // dhcp情况，默认地址池
+        
         if (allocationPools == null || allocationPools.isEmpty()) {
             if (abandonDhcp) {
                 beginIp = nextIp(beginIp);
@@ -178,14 +164,7 @@ public class IpUtils {
         return ips;
     }
 
-    /**
-     * 分配默认路由ip，默认路由ip有特殊限制，必须在地址池外
-     * @param cidr 网段
-     * @param count 随机数量
-     * @param excludeIps 排除的ip
-     * @param allocationPools 地址池
-     * @return 随机ip列表
-     */
+    
     public static List<String> newAllocateDefaultRouterIps(String cidr, int count, List<String> excludeIps,
                                                            List<AllocationPool> allocationPools) {
         if (allocationPools == null) {
@@ -228,48 +207,31 @@ public class IpUtils {
         return ips;
     }
 
-    /**
-     * 获取cidr段可用ip列表
-     * @param cidr cidr
-     * @return ip列表
-     */
+    
     public static List<String> getAvailableCidrIps(String cidr) {
         List<String> ips = getCidrIps(cidr);
-        // 移除第一个网络自身地址
+        
         if (!ips.isEmpty()) {
             ips.remove(0);
         }
-        // 移除最后一个地址
+        
         if (!ips.isEmpty()) {
             ips.remove(ips.size() - 1);
         }
         return ips;
     }
 
-    /**
-     * 获取cidr段ip列表
-     * @param cidr cidr
-     * @return ip列表
-     */
+    
     public static List<String> getCidrIps(String cidr) {
         return Ipv4Util.list(cidr, true);
     }
 
-    /**
-     * 获取范围可用ip列表
-     * @param ipFrom 开始ip
-     * @param ipTo 结束ip
-     * @return ip列表
-     */
+    
     public static List<String> getRangeIps(String ipFrom, String ipTo) {
         return Ipv4Util.list(ipFrom, ipTo);
     }
 
-    /**
-     * 获取地址池ips列表
-     * @param allocationPools 地址池
-     * @return ips列表
-     */
+    
     public static List<String> getAllocationPoolsIps(List<AllocationPool> allocationPools, boolean abandonDhcp) {
         List<String> ips = new ArrayList<>();
         if (allocationPools == null) {
@@ -279,7 +241,7 @@ public class IpUtils {
         for (var allocationPool : allocationPools) {
             List<String> allocationPoolIps = getRangeIps(allocationPool.getStart(), allocationPool.getEnd());
             if (abandonDhcp && !allocationPoolIps.isEmpty()) {
-                // 移除第一个默认的dhcp地址
+                
                 allocationPoolIps.remove(0);
             }
             ips.addAll(allocationPoolIps);
@@ -288,11 +250,7 @@ public class IpUtils {
         return ips;
     }
 
-    /**
-     * 获取ip地址的下一个地址
-     * @param ip ip地址
-     * @return 下一个ip地址
-     */
+    
     public static String nextIp(String ip) {
         var ipLong = Ipv4Util.ipv4ToLong(ip);
         var nextIpLong = ipLong + 1L;
@@ -305,12 +263,7 @@ public class IpUtils {
         return nextIp;
     }
 
-    /**
-     * 判断ip是否在cidr内
-     * @param ip ip地址
-     * @param cidr cidr
-     * @return ip是否在cidr内
-     */
+    
     public static boolean newIsInCidr(String ip, String cidr) {
         String beginIp = null;
         String lastIp = null;
@@ -344,21 +297,13 @@ public class IpUtils {
         return ipLong >= cidrStart && ipLong <= cidrEnd;
     }
 
-    /**
-     * 获取cidr段最后一个ip地址
-     * @param cidr cidr
-     * @return 最后一个ip地址
-     */
+    
     private static String lastIp(String cidr) {
         String[] param = StrUtil.split(cidr, Ipv4Util.IP_MASK_SPLIT_MARK);
         return Ipv4Util.getEndIpStr(param[0], Integer.parseInt(param[1]));
     }
 
-    /**
-     * 获取ip地址的上一个地址
-     * @param ip ip地址
-     * @return 上一个ip地址
-     */
+    
     private static String previousIp(String ip) {
         var ipLong = Ipv4Util.ipv4ToLong(ip);
         var previousIpLong = ipLong - 1L;
@@ -371,11 +316,7 @@ public class IpUtils {
         return previousIp;
     }
 
-    /**
-     * 获取cidr段第一个ip地址
-     * @param cidr cidr
-     * @return 第一个ip地址
-     */
+    
     public static String beginIp(String cidr) {
         String[] param = StrUtil.split(cidr, Ipv4Util.IP_MASK_SPLIT_MARK);
         return Ipv4Util.getBeginIpStr(param[0], Integer.parseInt(param[1]));
@@ -391,31 +332,18 @@ public class IpUtils {
         return Ipv4Util.ipv4ToLong(ip) & Ipv4Util.ipv4ToLong(Ipv4Util.getMaskByMaskBit(maskBit));
     }
 
-    /**
-     * 获取地址段内随机ip
-     * @param begin 第一个ip地址long
-     * @param size 地址段大小
-     * @return 随机ip地址
-     */
+    
     private static String randomIp(long begin, long size) {
         long randomData = Random.nextInt((int) size + 1);
         return Ipv4Util.longToIpv4(randomData + begin);
     }
 
-    /**
-     *
-     * @param size 地址池大小
-     * @return 随机地址池序号
-     */
+    
     private static int randomPool(int size) {
         return Random.nextInt(size);
     }
 
-    /**
-     * 获取地址池Ip总数
-     * @param allocationPools 地址池集合
-     * @return 地址池Ip总数
-     */
+    
     private static int getAllocationPoolIpSize(List<AllocationPool> allocationPools) {
         int size;
         allocationPools.sort(Comparator.comparing(allocationPool -> Ipv4Util.ipv4ToLong(allocationPool.getEnd())));
@@ -438,14 +366,7 @@ public class IpUtils {
         return size;
     }
 
-    /**
-     *
-     * @param begin 开始ip long
-     * @param last 结束ip long
-     * @param excludeIps 排除的ip集合
-     * @param allocationPools ip地址池
-     * @return 默认路由可分配ip大小
-     */
+    
     private static int getAvailableDefaultRouterIpSize(long begin, long last, List<String> excludeIps, List<AllocationPool> allocationPools) {
         int size = (int) (last - begin) + 1;
         int excludeSize = 0;
@@ -470,13 +391,7 @@ public class IpUtils {
         return size;
     }
 
-    /**
-     *
-     * @param allocationPools 地址池集合
-     * @param begin cidr开始ip long
-     * @param last cidr结束ip long
-     * @return 地址池与cidr交集大小
-     */
+    
     private static int getAvailableAllocationPoolIpSize(List<AllocationPool> allocationPools, long begin, long last) {
         int allocationPoolIpSize = getAllocationPoolIpSize(allocationPools);
         List<AllocationPool> newAllocationPools = getAvailableAllocationPool(allocationPools, begin, last);
@@ -493,13 +408,7 @@ public class IpUtils {
         return allocationPoolIpSize;
     }
 
-    /**
-     *
-     * @param allocationPools 地址池集合
-     * @param begin cidr开始ip long
-     * @param last cidr结束ip long
-     * @return 与cidr有交集的地址池集合
-     */
+    
     private static List<AllocationPool> getAvailableAllocationPool(List<AllocationPool> allocationPools, long begin, long last) {
         List<AllocationPool> newAllocationPools = new ArrayList<>();
         for (AllocationPool allocationPool : allocationPools) {
@@ -514,12 +423,7 @@ public class IpUtils {
         return newAllocationPools;
     }
 
-    /**
-     *
-     * @param allocationPools 地址池
-     * @param ip ip地址
-     * @return ip是否在地址池内
-     */
+    
     private static boolean isInPools(List<AllocationPool> allocationPools, String ip) {
         long ipLong = Ipv4Util.ipv4ToLong(ip);
         for (AllocationPool allocationPool : allocationPools) {
@@ -533,25 +437,14 @@ public class IpUtils {
         return false;
     }
 
-    /**
-     *
-     * @param ip 需要判断的地址 long
-     * @param start 地址段起始ip long
-     * @param end 地址段结束ip long
-     * @return ip是否在地址段内
-     */
+    
     private static boolean isInRange(long ip, long start, long end) {
         boolean isOverStart = (ip >= start);
         boolean isBeyondEnd = (ip <= end);
         return (isOverStart && isBeyondEnd);
     }
 
-    /**
-     * 通过掩码位数格式化ip地址
-     * 192.168.10.254/24 -> 192.168.10.0/24
-     * @param cidrIp
-     * @return
-     */
+    
     public static String getFormatCidrIp(String cidrIp) {
         String[] info = cidrIp.split("/");
         String ip = info[0];

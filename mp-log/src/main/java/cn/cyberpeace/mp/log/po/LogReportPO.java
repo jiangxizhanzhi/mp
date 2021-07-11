@@ -14,29 +14,19 @@ import lombok.NoArgsConstructor;
 @Table("mp_log_report")
 public class LogReportPO extends BaseModel {
 
-    /**
-     * 文件名称
-     */
+    
     private String fileName;
 
-    /**
-     * 文件大小
-     */
+    
     private Long fileSize;
 
-    /**
-     * 下载地址
-     */
+    
     private String downloadUrl;
 
-    /**
-     * 节点ip
-     */
+    
     @DefaultStr
     private String hostIp;
 
-    /**
-     * 日志类型（mp/cr）
-     */
+    
     private LogReportTypeEnum type;
 }

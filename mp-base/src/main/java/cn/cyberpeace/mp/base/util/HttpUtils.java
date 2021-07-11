@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.base.util;
 
+import cn.cyberpeace.mp.base.util.http.HttpDeleteWithBody;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
@@ -24,22 +25,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
-/**
- * @Deprecated
- *
- * http工具类
- */
+
 @Slf4j
 public class HttpUtils {
 
-    /**
-     * 发送一个Post请求
-     *
-     * @param url
-     * @param content
-     * @return
-     * @throws IOException
-     */
+    
     public static String sendPost(String url, String content) throws IOException {
         HttpClient client = HttpClientBuilder.create().build();
         return doPost(url, content, client);
@@ -50,89 +40,65 @@ public class HttpUtils {
         log.info("请求参数================>{}", content);
         HttpPost httpPost = new HttpPost(url);
 
-        // 解决中文乱码问题
+        
         StringEntity entity = new StringEntity(content, StandardCharsets.UTF_8);
         entity.setContentType(ContentType.APPLICATION_JSON.getMimeType());
         httpPost.setEntity(entity);
 
         HttpResponse resp = client.execute(httpPost);
-        // 设置请求和传输超时时间
+        
         RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
         httpPost.setConfig(requestConfig);
-        // 获得返回值
+        
         return EntityUtils.toString(resp.getEntity(), StandardCharsets.UTF_8);
     }
 
-    /**
-     * patch 请求
-     * @param url
-     * @param content
-     * @return
-     * @throws IOException
-     */
+    
     public static String sendPatch(String url, String content) throws IOException {
         HttpClient client = HttpClientBuilder.create().build();
         log.info("请求地址================>{}", url);
         log.info("请求参数================>{}", content);
         HttpPatch httpPatch = new HttpPatch(url);
-        // 解决中文乱码问题
+        
         StringEntity entity = new StringEntity(content, StandardCharsets.UTF_8);
         entity.setContentType(ContentType.APPLICATION_JSON.getMimeType());
         httpPatch.setEntity(entity);
 
         HttpResponse resp = client.execute(httpPatch);
-        // 设置请求和传输超时时间
+        
         RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
         httpPatch.setConfig(requestConfig);
-        // 获得返回值
+        
         return EntityUtils.toString(resp.getEntity(), StandardCharsets.UTF_8);
     }
 
 
-    /**
-     * get请求
-     *
-     * @param url
-     * @return
-     * @throws IOException
-     */
+    
     public static String sendGet(String url) throws IOException {
         HttpClient client = HttpClientBuilder.create().build();
         return doGetRequest(url, client);
     }
 
 
-    /**
-     * get请求
-     *
-     * @param url
-     * @return
-     * @throws IOException
-     */
+    
     public static String sendGet(String url, String userName, String password) throws IOException {
         HttpClient client = withDigestAuth(userName, password);
         return doGetRequest(url, client);
     }
 
     private static String doGetRequest(String url, HttpClient client) throws IOException {
-        // 替换url中的空格
+        
         url = url.replace(" ", "%20");
         HttpGet httpget = new HttpGet(url);
         HttpResponse resp = client.execute(httpget);
-        // 设置请求和传输超时时间
+        
         RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
         httpget.setConfig( requestConfig);
-        // 获得返回值
+        
         return EntityUtils.toString(resp.getEntity(), StandardCharsets.UTF_8);
     }
 
-    /**
-     * 删除请求
-     *
-     * @param url
-     * @return
-     * @throws IOException
-     */
+    
     public static String sendDelete(String url) throws IOException {
         log.info("请求地址================>{}", url);
         HttpClient client = HttpClientBuilder.create().build();
@@ -144,13 +110,7 @@ public class HttpUtils {
     }
 
 
-    /**
-     * 删除请求
-     *
-     * @param url
-     * @return
-     * @throws IOException
-     */
+    
     public static String sendDelete(String url, String content) throws IOException {
         log.info("请求地址================>{}", url);
         log.info("请求参数================>{}", content);
@@ -165,13 +125,7 @@ public class HttpUtils {
         return EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
     }
 
-    /**
-     * get请求下载文件
-     *
-     * @param url
-     * @return HttpResponse
-     * @throws IOException
-     */
+    
     public static HttpResponse sendGetDownLoadWithDigestAuth(String url, String userName,
                                                              String password) throws IOException {
         var credentialsProvider = new BasicCredentialsProvider();
@@ -195,19 +149,10 @@ public class HttpUtils {
         return client;
     }
 
-    /**
-     * 发送文件
-     *
-     * @param url
-     * @param fileByte
-     * @param jsonObj
-     * @param fileField
-     * @return
-     */
     public static String postFile(String url, byte[] fileByte, String fileField, JSONObject jsonObj) {
         log.info("请求地址================>{}", url);
         String result = StringUtils.EMPTY;
-        // 向流量发生平台导入pcap包
+        
         Response response = null;
         try {
             OkHttpClient client = new OkHttpClient().newBuilder().connectTimeout(60, TimeUnit.SECONDS).readTimeout(60
@@ -215,7 +160,7 @@ public class HttpUtils {
             MultipartBody.Builder builder = new MultipartBody.Builder();
             String fileName = "";
 
-            // 请求参数
+            
             if (Objects.nonNull(jsonObj)) {
                 log.info("请求参数================>{}", jsonObj.toJSONString());
                 fileName = jsonObj.getString("fileName");
@@ -226,7 +171,7 @@ public class HttpUtils {
                 log.info("请求参数================>{}", jsonObj);
             }
 
-            // 文件对象
+            
             RequestBody body = builder.setType(MultipartBody.FORM)
                     .addFormDataPart(fileField, fileName,
                             RequestBody.create(MediaType.parse(ContentType.APPLICATION_OCTET_STREAM.getMimeType()),

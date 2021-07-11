@@ -9,11 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.Collection;
 import java.util.Objects;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/12/20 19:23
- */
+
 public class ParamCheck {
 
     public static void notNull(Object param, String code) {

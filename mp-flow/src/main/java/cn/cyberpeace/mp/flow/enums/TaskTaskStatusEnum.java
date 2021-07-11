@@ -2,11 +2,7 @@ package cn.cyberpeace.mp.flow.enums;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
-/**
- * @Description: 流量任务状态枚举类
- * @Author: guquan
- * @Date：2023/6/2 18:06
- */
+
 public enum TaskTaskStatusEnum {
 
     INIT("INIT"),
@@ -21,9 +17,7 @@ public enum TaskTaskStatusEnum {
 
     PREPARING("PREPARING"),
 
-    /**
-     * 初始化中，不能执行
-     */
+    
     INITING("INITING");
 
     private final String status;

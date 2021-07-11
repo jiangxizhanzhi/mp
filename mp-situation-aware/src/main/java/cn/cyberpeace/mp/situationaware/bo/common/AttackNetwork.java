@@ -9,9 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AttackNetwork{
 
-    /**
-     * 流量大小
-     */
+    
     private Long bytes;
 
 }

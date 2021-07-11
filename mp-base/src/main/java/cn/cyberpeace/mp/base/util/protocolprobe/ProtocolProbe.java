@@ -12,11 +12,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/1/14
- */
+
 @Slf4j
 public abstract class ProtocolProbe {
     private String protocol;
@@ -30,7 +26,7 @@ public abstract class ProtocolProbe {
     }
 
     public boolean probe() {
-        // 建立socket连接
+        
         Socket socket = null;
         InputStream inputStream = null;
         OutputStream outputStream = null;
@@ -39,11 +35,11 @@ public abstract class ProtocolProbe {
             socket.setSoTimeout(2000);
             socket.connect(new InetSocketAddress(host, port));
             inputStream = socket.getInputStream();
-            // 和服务端交换数据
+            
             outputStream = socket.getOutputStream();
             outputStream.write(this.getClientInfo());
             outputStream.flush();
-            // 对交换得到的数据进行校验
+            
             byte[] result = new byte[this.getServerInfoByteNum()];
             inputStream.read(result);
             return this.checkServerInfo(result);
@@ -65,23 +61,13 @@ public abstract class ProtocolProbe {
         }
     }
 
-    /**
-     * 建立socket连接之后,给服务端发送的信息
-     * @return
-     */
+    
     protected abstract byte[] getClientInfo();
 
-    /**
-     * 校验从服务端得到的信息
-     * @param serverInfo
-     * @return
-     */
+    
     protected abstract boolean checkServerInfo(byte[] serverInfo);
 
-    /**
-     * 从返回数据中取出用于结果判断的字节数量
-     * @return
-     */
+    
     protected int getServerInfoByteNum() {
         return 20;
     }

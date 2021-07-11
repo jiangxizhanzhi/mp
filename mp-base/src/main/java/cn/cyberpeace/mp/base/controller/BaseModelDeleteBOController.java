@@ -31,12 +31,12 @@ public interface BaseModelDeleteBOController<T extends ModelBO<M, T>, M extends 
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "数据id", dataTypeClass = String.class),
     })
-//    @DeleteMapping(params = "id")
+
     default ServiceResult<Boolean> deleteByParam(@RequestParam String id) {
         return getModelService().<T>deleteBO(id, ControllerCommon.getModelBOClass(getClass())).asResult();
     }
 
-//    @DeleteMapping
+
     default ServiceResult<Boolean> deleteByData(@RequestBody BaseDeleteData deleteData) {
         return getModelService().<T>deleteBO(deleteData.getId(), ControllerCommon.getModelBOClass(getClass())).asResult();
     }

@@ -13,11 +13,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.List;
 
-/**
-  *@Desciption 数据采集流表管理
-  *@Author zhangjin
-  *@Date 11/22/21 10:54 上午
-**/
+
 @Service
 @Slf4j
 public class DataCollectionFlowTableService{
@@ -26,10 +22,7 @@ public class DataCollectionFlowTableService{
     private SituationAwareConfig situationAwareConfig;
 
 
-    /**
-     * 批量创建流表
-     * @param agentInstanceIds agentInstanceIds
-     */
+    
     public void createDataCollectionFlow(List<String> agentInstanceIds) {
         String createUrl = situationAwareConfig.getWazuhFlowTableUrl() + "/probe/flows";
         var param = new JSONObject();
@@ -45,10 +38,7 @@ public class DataCollectionFlowTableService{
     }
 
 
-    /**
-     * 根据agentInstanceId删除流表
-     * @param agentInstanceIds agentInstanceIds
-     */
+    
     public void deleteDataCollectionFlow(List<String> agentInstanceIds) {
         String deleteUrl = situationAwareConfig.getWazuhFlowTableUrl() + "/probe/flows";
         var param = new JSONObject();

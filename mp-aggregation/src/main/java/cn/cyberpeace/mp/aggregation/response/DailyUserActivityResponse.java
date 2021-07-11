@@ -5,11 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Builder;
 import lombok.Data;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/9/13 11:03
- */
+
 @Data
 @Builder
 @ApiModel("每日用户活动响应")

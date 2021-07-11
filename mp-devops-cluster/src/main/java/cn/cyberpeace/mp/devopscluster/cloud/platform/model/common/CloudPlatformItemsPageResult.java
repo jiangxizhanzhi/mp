@@ -8,10 +8,7 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * 分页
- * @author wanggang
- */
+
 @EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor

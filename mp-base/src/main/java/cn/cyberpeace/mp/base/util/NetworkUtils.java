@@ -23,13 +23,7 @@ public class NetworkUtils {
         return checkPortConnectable(host, port, 0);
     }
 
-    /**
-     * 检查端口是否可连接
-     * @param host 主机地址
-     * @param port 主机端口
-     * @param timeout 超时时间
-     * @return 是否可连接
-     */
+    
     public static boolean checkPortConnectable(String host, int port, int timeout) {
         try (var socket = new Socket()) {
             socket.connect(new InetSocketAddress(host, port), timeout);
@@ -60,12 +54,7 @@ public class NetworkUtils {
         return checkHostReachable(host, 0);
     }
 
-    /**
-     * 检查主机是否可达
-     * @param host 主机地址
-     * @param timeout 超时时间
-     * @return 是否可达
-     */
+    
     public static boolean checkHostReachable(String host, int timeout) {
         try {
             return InetAddress.getByName(host).isReachable(timeout);
@@ -86,9 +75,7 @@ public class NetworkUtils {
         probePort(protocol, host, port, 0, 0, 0, null, 0, callback, timeoutCallback);
     }
 
-    /**
-     * 探测目标端口直到连通,可区分协议(目前支持ssh)
-     */
+    
     public static void probePort(String protocol, String host, int port, int perCheckTimeout, int stepTime, int timeout,
                                  Callable<Boolean> stopCheck, int stopCheckIntervalCount,
                                  Runnable callback, Runnable timeoutCallback) {
@@ -99,9 +86,7 @@ public class NetworkUtils {
                 String.format("host port[%s:%d]", host, port));
     }
 
-    /**
-     * 探测目标端口直到连通
-     */
+    
     public static void probePort(String host, int port, int perCheckTimeout, int stepTime, int timeout,
                           Callable<Boolean> stopCheck, int stopCheckIntervalCount,
                           Runnable callback, Runnable timeoutCallback) {
@@ -120,9 +105,7 @@ public class NetworkUtils {
         probeHost(host, 0, 0, timeout, null, 0, callback, timeoutCallback);
     }
 
-    /**
-     * 探测目标地址直到连通
-     */
+    
     public static void probeHost(String host, int perCheckTimeout, int stepTime, int timeout,
                           Callable<Boolean> stopCheck, int stopCheckIntervalCount,
                           Runnable callback, Runnable timeoutCallback) {

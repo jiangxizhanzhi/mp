@@ -69,11 +69,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Service
 @Slf4j
 @CacheConfig(cacheManager = AuthCacheConfig.CACHE_MANAGER_NORMAL)
@@ -177,10 +173,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return userModels;
     }
 
-    /**
-     * 判断是否有头像，没有则设置为默认头像
-     * @param userModel
-     */
+    
     public void setDefaultIfNoAvatar(UserModel userModel) {
         if (Objects.nonNull(userModel)) {
             if (StringUtils.isEmpty(userModel.getAvatar())) {
@@ -191,10 +184,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         }
     }
 
-    /**
-     * 批量转换头像路径为fdfs地址
-     * @param userBos
-     */
+    
     public void batchSetDefaultIfNoAvatar(List<UserBo> userBos) {
         if (CollectionUtils.isNotEmpty(userBos)) {
             List<LocalFileMappingModel> mappingModelList =
@@ -234,7 +224,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         List<UserModel> users = listObjSrvResult.getSource().getObjs();
         users.stream().forEach(userModel -> setDefaultIfNoAvatar(userModel));
         if (CollectionUtil.isNotEmpty(users)) {
-            // 转换
+            
             ListObjServiceResult<UserModel> result = new ListObjServiceResult<>();
             BeanUtils.copyProperties(listObjSrvResult, result);
             result.getSource().setObjs(users);
@@ -330,7 +320,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         ParamCheck.notNull(createRequest, AuthBasei18nCode.REQUEST_PARAMS);
         opUserPermCheckService.checkByTargetRoleIds(createRequest.getRoleIds());
 
-        // 保存用户
+        
         UserModel userModel = new UserModel();
         BeanUtils.copyProperties(createRequest, userModel);
 
@@ -339,7 +329,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         userModel.setTokenSecret(null);
         userModel.setId(null);
         if (StringUtils.isBlank(userModel.getIdentifier())) {
-            // 如果ident为空，设置为null
+            
             userModel.setIdentifier(null);
         }
         if (StringUtils.isNotBlank(userModel.getAvatar())) {
@@ -348,7 +338,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
         createCheckService.check(userModel);
 
-        // create中会对密码加密，外层不需要再次加密
+        
         ObjServiceResult<UserModel> result = create(userModel);
         ResultUtils.throwExceptionIfError(result, AuthErrorCode.USER_ADD_ERROR);
 
@@ -356,7 +346,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         String userId = userCreated.getId();
         log.info("user create success id:{}", userId);
 
-        // 保存组织-用户关系
+        
         if (CollectionUtil.isNotEmpty(createRequest.getOrgIds())) {
             createRequest.getOrgIds().forEach(id -> {
                 boolean isOrgExist = orgService.exists(id);
@@ -370,7 +360,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             });
         }
 
-        // 保存角色-用户关系
+        
         if (CollectionUtil.isNotEmpty(createRequest.getRoleIds())) {
             createRequest.getRoleIds().forEach(id -> {
                 boolean isRoleExist = roleService.exists(id);
@@ -392,11 +382,11 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Transactional(rollbackFor = Exception.class)
     public UserModel modify(UserRequest modifyRequest) {
         if (!opUserPermCheckService.isOperateSelf(Arrays.asList(modifyRequest.getId()))) {
-            // 如果操作的对象不是自己，则进行权限校验
+            
             opUserPermCheckService.checkByTargetRoleIds(modifyRequest.getRoleIds());
         }
 
-        // 保存用户
+        
         UserModel userModel = new UserModel();
         org.springframework.beans.BeanUtils.copyProperties(modifyRequest, userModel);
 
@@ -413,10 +403,10 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             userModel.setAvatar(DefaultImgUtil.fdfsUrlToPath(userModel.getAvatar()));
         }
         if (StringUtils.isBlank(userModel.getIdentifier())) {
-            // 若identifier为空，则设置identifier为null @See http://10.10.10.10/biz/bug-view-2390.html
+            
             userModel.setIdentifier("");
         }
-        // udpate中会对密码加密，外层不需要再次加密
+        
         ObjServiceResult<UserModel> result = update(userModel);
 
         if (Objects.isNull(result.getSource()) || Objects.isNull(result.getSource().getObj())) {
@@ -427,9 +417,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         UserModel userModified = result.getSource().getObj();
         String userId = userModified.getId();
 
-        // 保存组织-用户关系
+        
         if (CollectionUtil.isNotEmpty(modifyRequest.getOrgIds())) {
-            // 清除原来所有用户关联的组织
+            
             tenantUserService.deleteByUserId(userId);
 
             modifyRequest.getOrgIds().forEach(id -> {
@@ -445,9 +435,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         }
 
 
-        // 保存角色-用户关系
+        
         if (CollectionUtil.isNotEmpty(modifyRequest.getRoleIds())) {
-            // 清除原来所有用户关联的角色
+            
             userRoleService.deleteByUserId(userId);
 
             modifyRequest.getRoleIds().forEach(id -> {
@@ -506,14 +496,14 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             throw new MpRuntimeException(AuthErrorCode.ACCOUNT_NOT_LOGIN);
         }
 
-        // 旧密码是否正确
+        
         boolean isOldPwdMatch = PasswordUtils.getPasswordEncoder().matches(oldPwd, currentUser.getPassword());
         if (!isOldPwdMatch) {
             log.error("old password not match！");
             throw new MpRuntimeException(AuthErrorCode.INCORRECT_OLD_CREDENTIALS);
         }
 
-        // 检查新密码强度是否合法
+        
         if (PasswordUtils.isPasswordInvalid(newPwd)) {
             throw new MpRuntimeException(AuthErrorCode.PASSWORD_STRENGTH_INVALID);
         }
@@ -526,7 +516,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     public boolean resetPwd(String userId, String newPwd) {
-        // 密码是否合法
+        
         if (PasswordUtils.isPasswordInvalid(newPwd)) {
             throw new MpRuntimeException(AuthErrorCode.PASSWORD_STRENGTH_INVALID);
         }
@@ -558,7 +548,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             UserModel userModel = userOptional.get();
             if (Objects.equals(userModel.getIsEnabled(), UserModel.Status.ENABLED)) {
                 UserModel updateUser = UserModel.builder().id(userId).isEnabled(UserModel.Status.DISABLED).build();
-                // 禁用之后立即使登录的token失效
+                
                 updateUser.initDefault("tokenSecret");
                 return getModelMapper().update(updateUser);
             }
@@ -728,9 +718,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             byte[] buffer = new byte[fis.available()];
             fis.read(buffer);
             fis.close();
-            // 清空response
+            
             response.reset();
-            // 设置response的Header
+            
             response.addHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes("UTF-8"), "ISO8859-1"));
             OutputStream toClient = new BufferedOutputStream(response.getOutputStream());
             response.setContentType("application/octet-stream");
@@ -749,9 +739,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         List<UserModel> userModels = new ArrayList<>();
         List<UserRoleModel> userRoleModels = new ArrayList<>();
         List<TenantUserModel> tenantUserModels = new ArrayList<>();
-        // 初始化默认头像信息
+        
         for (ImportUserBo importUserBo : list) {
-            // 1.保存用户信息
+            
             UserModel userModel = importUser2UserModel(importUserBo);
             if (Objects.isNull(userModel)) {
                 continue;
@@ -761,8 +751,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             userModel.setId(userId);
             userModels.add(userModel);
 
-            // http://10.10.10.10/biz/bug-view-4861.html
-            // 2. 保存用户-角色关系 之前的步骤已经处理过roleIdList了
+            
+            
             if (CollectionUtil.isNotEmpty(importUserBo.getRoleIdList())) {
                 List<UserRoleModel> userRoles = importUserBo.getRoleIdList().stream().map(rid -> UserRoleModel.builder().user(userId).role(rid).build()).collect(Collectors.toList());
                 if (CollectionUtil.isNotEmpty(userRoles)) {
@@ -770,8 +760,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                 }
             }
 
-            // 3. 保存组织-用户关系
-            // http://10.10.10.10/biz/bug-view-4861.html
+            
+            
             if (CollectionUtil.isNotEmpty(importUserBo.getOrgIdList())) {
                 List<TenantUserModel> orgUsers = importUserBo.getOrgIdList().stream().map(oid -> TenantUserModel.builder().user(userId).org(oid).build()).collect(Collectors.toList());
                 if (CollectionUtil.isNotEmpty(orgUsers)) {
@@ -803,7 +793,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
         Optional<UserModel> userOptional = Optional.ofNullable(getModelMapper().get(userId));
         if (userOptional.isPresent()) {
-            // 上传服务器
+            
             String filepath = null;
             try {
                 String suffix = FileUtil.getSuffix(multipartFile.getOriginalFilename());
@@ -833,11 +823,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
 
-    /**
-     * 处理用户过期状态，只有当用户状态为正常状态，且过期时间已到的时候，才会更改为过期状态
-     *
-     * @param user
-     */
+    
     @Override
     public void processExpiredStatus(UserBo user) {
         if (Objects.isNull(user) || Objects.isNull(user.getExpiredTime())) {
@@ -882,13 +868,13 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         for (UserOrgRoleBo userOrgRoleBo : userOrgRoleBos) {
             UserBo userBo = new UserBo();
             cn.cyberpeace.mp.base.util.basic.BeanUtils.copyProperties(userOrgRoleBo, userBo);
-            // 过期状态处理
+            
             processExpiredStatus(userBo);
 
             if (StringUtils.isNotBlank(userOrgRoleBo.getOrgs())) {
                 List<String> userOrgIds = Arrays.asList(userOrgRoleBo.getOrgs().split(","));
                 List<OrgBO> userOrgModels = allOrgs.stream().filter(o -> userOrgIds.contains(o.getId())).collect(Collectors.toList());
-                //List<List<String>> allorgpath = orgService.getBathPathToList(userOrgModels);
+                
                 List<List<String>> allorgpath = userOrgModels.stream().map(o -> CollectionUtil.toList(StringUtils.split(o.getPath(), AuthConstant.ORG_PATH_SEPARATOR))).collect(Collectors.toList());
                 userBo.setOrgs(userOrgModels);
                 userBo.setOrgIds(userOrgIds);
@@ -926,14 +912,14 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
         UserBo userBo = new UserBo();
         BeanUtils.copyProperties(userModel, userBo);
-        // 过期状态处理
+        
         processExpiredStatus(userBo);
 
         if (needOrg) {
             List<OrgBO> orgBOS = tenantUserService.listOrgsByUserId(userModel.getId());
             List<String> orgIds = orgBOS.stream().map(BaseModel::getId).collect(Collectors.toList());
 
-            //List<List<String>> allorgpath = orgService.getBathPathToList(orgs);
+            
             List<List<String>> allorgpath = orgBOS.stream().map(o -> CollectionUtil.toList(StringUtils.split(o.getPath(), AuthConstant.ORG_PATH_SEPARATOR))).collect(Collectors.toList());
             userBo.setOrgs(orgBOS);
             userBo.setOrgIds(orgIds);
@@ -956,10 +942,10 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
 
 
-//    @Override
-//    public PageInfo onlineReport(UserOnlineReportPageRequest pageRequest) {
-//        return userOnlineReportService.page(pageRequest);
-//    }
+
+
+
+
 
     @Override
     public List<UserModel> listNotAudited() {
@@ -1021,7 +1007,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         UserModel userModel =
                 UserModel.builder().username(importUserBo.getUsername())
                         .name(importUserBo.getName())
-                        // 此处不需要加密，后面的create()方法会加密
+                        
                         .password(importUserBo.getPassword())
                         .build();
         if (StringUtils.isNotBlank(importUserBo.getExpiredTime())) {
@@ -1041,9 +1027,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         }
         ExportUserBo exportUserBo = ExportUserBo.builder().username(user.getUsername()).name(user.getName()).build();
 
-        // org path
+        
         List<OrgBO> orgList = tenantUserService.listOrgsByUserId(user.getId());
-        // 调整为跟前端逻辑一样，如果存在多个组织，则选择主键最大的一个
+        
         Optional<OrgBO> optional = orgList.stream().max(Comparator.comparing(OrgBO::getPk));
         optional.ifPresent(o -> exportUserBo.setOrg(orgService.getPath(o)));
 
@@ -1052,23 +1038,23 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         String statusExpired = MessageCommon.get(AuthBasei18nCode.USER_STATUS_EXPIRED);
         String statusNotAudit = MessageCommon.get(AuthBasei18nCode.USER_STATUS_NOT_AUDIT);
         exportUserBo.setStat(statusNormal);
-        // 状态展示优先级 禁用 > 过期 > 待审核
+        
         if (user.getIsAudited().equals(UserModel.Status.NOT_AUDITED)) {
             exportUserBo.setStat(statusNotAudit);
         }
 
-        // 过期
+        
         LocalDateTime now = LocalDateTime.now();
         if (Objects.nonNull(user.getExpiredTime()) && now.isAfter(user.getExpiredTime())) {
             exportUserBo.setStat(statusExpired);
         }
 
-        // 禁用
+        
         if (user.getIsEnabled().equals(UserModel.Status.DISABLED)) {
             exportUserBo.setStat(statusForbidden);
         }
 
-        // role
+        
         List<RoleModel> roleList = userRoleService.listByUserId(user.getId());
         String roles = roleList.stream().map(RoleModel::getName).collect(Collectors.joining("/"));
         log.info("roles:{}", roles);

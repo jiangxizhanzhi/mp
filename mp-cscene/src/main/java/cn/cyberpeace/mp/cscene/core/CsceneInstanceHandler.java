@@ -30,9 +30,7 @@ import java.util.List;
 import java.util.Objects;
 
 
-/**
- * 综合场景实例处理
- */
+
 @ClassFieldClasses({
         CsceneInstanceModel.class,
         CsceneInstanceRoleModel.class,
@@ -100,7 +98,7 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
             csceneInstanceUserCountService.increaseCount(getContext().getAccessUserId());
         }
         var cscene = getCscene();
-        // 先保存设置id
+        
         save();
         cscene.setScene(sceneService.create(cscene.getScene(), generateSceneContext(), Boolean.TRUE.equals(getCscene().getSupportPartialStart()), () -> {
             LogFileUtil.getLogFile(cscene.getId());
@@ -157,7 +155,7 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         }
         final String sid = sceneId;
         cscene.setScene(sceneService.modify(sid, cscene.getScene(), generateSceneContext(), ()->{
-            //W:Refresh scene after running
+            
             SceneInstanceLinkCacheUtil.refresh(sid);
         }).getSource());
 
@@ -199,11 +197,7 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         return this.sceneService.resume(sceneId, generateSceneContext()).getSource();
     }
 
-    /**
-     * @description: 启动节点
-     * @param nodeId
-     * @return boolean
-     */
+    
     public boolean startElement(String nodeId) {
         String sceneId = this.getSceneId();
         if (sceneId == null) {
@@ -212,12 +206,7 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         return this.sceneService.startElement(sceneId, nodeId, generateSceneContext()).getSource();
     }
 
-    /**
-     * @description: 关闭节点
-     * @param nodeId
-     * @throws
-     * @return boolean
-     */
+    
     public boolean stopElement(String nodeId) {
         String sceneId = this.getSceneId();
         if (sceneId == null) {
@@ -320,7 +309,7 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
 
     @Override
     public CsceneInstanceBO toData() {
-        // 深拷贝一下 (createHandler是多线程处理的,CsceneInstanceBO有可能是共用的)
+        
         CsceneInstanceBO csceneInstanceBO = JsonCommon.mapToBean(JsonCommon.beanToMap(super.toData()), CsceneInstanceBO.class);
         CsceneDataModifier.correctReturnCsceneData(csceneInstanceBO);
         String message = null;
@@ -339,7 +328,7 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
     }
 
     public CsceneInstanceBO toDataWithHidden() {
-        // 深拷贝一下 (createHandler是多线程处理的,CsceneInstanceBO有可能是共用的)
+        
         CsceneInstanceBO csceneInstanceBO = JsonCommon.mapToBean(JsonCommon.beanToMap(super.toData()), CsceneInstanceBO.class);
         CsceneDataModifier.correctReturnCsceneData(csceneInstanceBO, false);
         String message = null;

@@ -17,11 +17,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsChecker;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Slf4j
 public class MobilePasswordAuthenticationProvider implements AuthenticationProvider {
 
@@ -53,18 +49,13 @@ public class MobilePasswordAuthenticationProvider implements AuthenticationProvi
         MobilePasswordAuthenticationToken authenticationToken = (MobilePasswordAuthenticationToken) authentication;
 
         String mobile = (String) authenticationToken.getPrincipal();
-        /*
-        // todo 国际化手机号校验
-        if (!PhoneUtil.isMobile(mobile)) {
-            throw new MpRuntimeException(AuthErrorCode.MOBILE_INVALID);
-        }
-        */
+        
 
         UserDetails userDetails = retrieveUser(mobile, null);
         preAuthenticationChecks.check(userDetails);
         additionalAuthenticationChecks(userDetails, (MobilePasswordAuthenticationToken) authentication);
 
-        // 此时鉴权成功后，应当重新 new 一个拥有鉴权的 authenticationResult 返回
+        
         MobilePasswordAuthenticationToken authenticationResult = new MobilePasswordAuthenticationToken(userDetails, authentication.getCredentials(), userDetails.getAuthorities());
 
         authenticationResult.setDetails(authenticationToken.getDetails());

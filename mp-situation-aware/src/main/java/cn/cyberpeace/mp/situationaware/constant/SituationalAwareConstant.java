@@ -5,36 +5,24 @@ import com.google.common.collect.Lists;
 
 import java.util.List;
 
-/**
- * 态势感知全局缓存
- */
+
 public class SituationalAwareConstant {
-    /**
-     * 分组id url 分组
-     */
+    
     public static LoadingCache<String, String> groupIdSessionUrlCache;
 
-    /**
-     * 分组id
-     */
+    
     public static LoadingCache<String, String> wazuhToken;
 
-    /**
-     * openstack network查询
-     */
+    
     public static String ArkimeNetworkId;
 
     public static String ERROR_CODE_PREFIX = "situationaware.error_code.";
 
     public static List<String> monitorRuleIds = Lists.newArrayList("5715", "5502");
 
-    /**
-     * 后台系统管理-探针管理-自定义探针-系统类型
-     */
+    
     public static final String MP_COMMON_OPTION_TYPE_SITUATION_OS_TYPE = "os_type";
-    /**
-     * 后台系统管理-探针管理-自定义探针-类型
-     */
+    
     public static final String MP_COMMON_OPTION_TYPE_SITUATION_PROBE_TYPE = "probe_type";
 
     public static final String ES_TIMESTAMP_FIELD = "timestamp";

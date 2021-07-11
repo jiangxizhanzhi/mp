@@ -5,21 +5,13 @@ import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import javax.annotation.concurrent.NotThreadSafe;
 import java.net.URI;
 
-/**
- * @Description: 重写HttpDelete
- * @Author qiaokang
- * @Date：2021/8/11 16:24
- */
+
 @NotThreadSafe
 public class HttpDeleteWithBody extends HttpEntityEnclosingRequestBase {
 
     public static final String METHOD_NAME = "DELETE";
 
-    /**
-     * 获取方法（必须重载）
-     *
-     * @return
-     */
+    
     @Override
     public String getMethod() {
         return METHOD_NAME;

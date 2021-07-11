@@ -25,10 +25,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * 流量分析Controller
- * @author wanggang
- */
+
 @Slf4j
 @RestController
 @RequestMapping("/flow/analysis")
@@ -42,7 +39,7 @@ public class FlowAnalysisController {
     @ApiOperation("初始化攻击分类")
     @GetMapping("/init-classification")
     public void initClassification() throws IOException {
-        //初始化分类数据
+        
         flowAnalysisService.initClassification();
     }
 

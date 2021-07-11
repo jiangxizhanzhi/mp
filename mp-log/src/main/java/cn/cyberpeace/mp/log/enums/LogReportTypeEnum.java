@@ -8,22 +8,20 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * 日志上报类型
- */
+
 @SwaggerDisplayEnum
 public enum LogReportTypeEnum {
 
     REPORT("report_"),
-    // 中台
+    
     MP("mp_"),
-    // 靶场
+    
     BC("cr_"),
-    // 云平台
+    
     CP("cp_"),
-    // 竞赛
+    
     AD("ad_"),
-    // 实训
+    
     OJ("oj_");
 
     private String prefix;

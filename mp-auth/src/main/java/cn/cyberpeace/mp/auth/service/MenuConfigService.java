@@ -26,11 +26,7 @@ import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Service
 @Slf4j
 public class MenuConfigService {
@@ -103,7 +99,7 @@ public class MenuConfigService {
         Map<String, List<TargetModel>> map = new HashMap<>();
         Map<String, TargetBo> mapTmp = new HashMap<>();
 
-        //Save all nodes to a map
+        
         Locale locale = LocaleContextHolder.getLocale();
         for (MenuTemplateModel targetm : targets) {
             TargetBo targetBo = new TargetBo();
@@ -115,7 +111,7 @@ public class MenuConfigService {
             mapTmp.put(targetBo.getId(), targetBo);
         }
 
-        //loop and assign parent/child relationships
+        
         for (Map.Entry<String, TargetBo> entry : mapTmp.entrySet()) {
             TargetBo current = entry.getValue();
             String parentId = current.getParent();
@@ -123,7 +119,7 @@ public class MenuConfigService {
             if (StringUtils.isNotBlank(parentId)) {
                 TargetBo parent = mapTmp.get(parentId);
                 if (parent != null) {
-                    //                    current.(parent);
+                    
                     if (parent.getChildren() == null) {
                         parent.setChildren(new ArrayList<>());
                     }
@@ -135,7 +131,7 @@ public class MenuConfigService {
         }
 
         List<TargetBo> parentTargets = new ArrayList<>();
-        //get the root
+        
         for (TargetBo node : mapTmp.values()) {
             if (StringUtils.isBlank(node.getParent())) {
                 parentTargets.add(node);

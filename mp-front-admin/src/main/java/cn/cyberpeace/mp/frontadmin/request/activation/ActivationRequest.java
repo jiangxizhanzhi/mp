@@ -9,11 +9,7 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
-/**
- * @Description: 激活请求体
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Data
 public class ActivationRequest {
 
@@ -34,7 +30,7 @@ public class ActivationRequest {
     private List<ActivationItem> items;
 
     @ApiModelProperty(value = "校验码，des加密")
-//    @NotBlank
+
     private String verifyCode;
 
     @ApiModelProperty(value = "试用7天标志")

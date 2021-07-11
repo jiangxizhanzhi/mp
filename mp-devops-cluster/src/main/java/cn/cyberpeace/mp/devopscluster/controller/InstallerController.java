@@ -48,9 +48,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 
-/**
- * 服务管理
- */
+
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/service")
@@ -63,9 +61,7 @@ public class InstallerController {
     @NonNull
     private InstallerDockerUploadService installerDockerUploadService;
 
-    /**
-     * 分页查询
-     */
+    
     @ApiOperation("分页查询")
     @GetMapping("/page")
     public PageResult<InstallerPageVO> page(InstallerPageRequest request){
@@ -102,9 +98,7 @@ public class InstallerController {
         return new Result<>(response);
     }
 
-    /**
-     * 新增
-     */
+    
     @ApiOperation("新增")
     @ApiImplicitParam(name = "request", value = "新增数据请求体", dataTypeClass = InstallerRequest.class)
     @PostMapping
@@ -114,9 +108,7 @@ public class InstallerController {
         return ResultCommon.success();
     }
 
-    /**
-     * 更新
-     */
+    
     @ApiOperation("更新")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "request", value = "更新数据请求体", dataTypeClass = InstallerRequest.class),
@@ -134,9 +126,7 @@ public class InstallerController {
         return ResultCommon.success();
     }
 
-    /**
-     * 删除
-     */
+    
     @ApiOperation("删除")
     @ApiImplicitParam(name = "request", value = "删除数据请求体", dataTypeClass = InstallerDeleteRequest.class)
     @DeleteMapping
@@ -146,13 +136,7 @@ public class InstallerController {
         return ResultCommon.success();
     }
 
-    /**
-     * 自定义上传Docker文件方法
-     *
-     * @param file
-     * @param request
-     * @return 返回文件路径等信息
-     */
+    
     @ApiOperation("自定义上传Docker文件方法")
     @PostMapping(value = "/upload/docker")
     @ResponseBody

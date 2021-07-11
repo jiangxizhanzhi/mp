@@ -4,11 +4,7 @@ import lombok.Data;
 
 import java.util.List;
 
-/**
- * @Description
- * @Author zhanglin
- * @Date 2023/3/21
- */
+
 @Data
 public class CsceneInstanceClearAllRequest {
     private Controller controller;

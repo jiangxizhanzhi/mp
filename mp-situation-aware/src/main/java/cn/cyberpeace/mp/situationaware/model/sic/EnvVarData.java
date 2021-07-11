@@ -5,11 +5,7 @@ import lombok.Data;
 
 import java.util.Map;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/04/11 10:41
- */
+
 @Data
 public class EnvVarData {
 

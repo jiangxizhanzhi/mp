@@ -15,21 +15,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/12/3 10:40
- */
+
 @Slf4j
 @Service
 public class DefaultImgService {
 
-    /**
-     * 获取单个指定目录下的默认图片
-     *
-     * @param defaultImgDirEnum
-     * @return
-     */
+    
     public List<String> getFileByDefaultImgDirEnum(DefaultImgDirEnum defaultImgDirEnum) {
         String endPathName = defaultImgDirEnum.getEndPathName();
         String startWithFile = "file:";

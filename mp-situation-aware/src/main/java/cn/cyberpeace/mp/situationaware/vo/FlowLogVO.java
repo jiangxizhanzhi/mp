@@ -12,43 +12,30 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-/**
- * 流量日志
- * @author wanggang
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class FlowLogVO {
 
-    /**
-     * 来源
-     */
+    
     @ApiModelProperty(value = "源信息")
     private AttackSource source;
 
-    /**
-     * 目的地
-     */
+    
     @ApiModelProperty(value = "目标信息")
     private AttackDestination destination;
 
-    /**
-     * 网络
-     */
+    
     @ApiModelProperty(value = "网络信息")
     private AttackNetwork network;
 
-    /**
-     * suricata信息
-     */
+    
     @ApiModelProperty(value = "攻击信息")
     private AttackSuricata suricata;
 
-    /**
-     * 创建时间
-     */
+    
     @ApiModelProperty(value = "创建时间")
     private LocalDateTime timestamp;
 

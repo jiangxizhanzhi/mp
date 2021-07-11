@@ -27,11 +27,7 @@ public class SituationAwareEsConfig {
         return new RestHighLevelClient(RestClient.builder(this.createArkimeHttpHost()));
     }
 
-    /**cn.cyberpeace.mp.situationaware
-     * 创建 HttpHost 对象
-     *
-     * @return 返回 HttpHost 对象数组
-     */
+    
     private HttpHost[] createWazuHttpHost() {
         String wazuhEsNodes = situationAwareConfig.getWazuhEsNodes();
         Asserts.check(!ObjectUtils.isEmpty(wazuhEsNodes), "ElasticSearch cluster ip address cannot empty");
@@ -47,11 +43,7 @@ public class SituationAwareEsConfig {
         return httpHosts;
     }
 
-    /**cn.cyberpeace.mp.situationaware
-     * 创建 HttpHost 对象
-     *
-     * @return 返回 HttpHost 对象数组
-     */
+    
     private HttpHost[] createArkimeHttpHost() {
         String elasticsearchNodes = situationAwareConfig.getArkimeEsNodes();
         Asserts.check(!ObjectUtils.isEmpty(elasticsearchNodes), "ElasticSearch cluster ip address cannot empty");

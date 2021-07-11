@@ -9,23 +9,19 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @Description: 定时任务，用于更新用于在线记录表中的状态
- * @Author zhouxinghuai
- * @Date：2021/10/22 11:13
- */
+
 @Slf4j
 public class UserOnlineRecordStatusCheckTask implements Runnable {
 
     @Override
     public void run() {
-        // 更新用户在线记录信息
-        // 1. 查找end_time超过5分钟，且status还是0的记录
+        
+        
         UserOnlineRecordService userOnlineRecordService = BeanCommon.getBean(UserOnlineRecordService.class);
         List<UserOnlineRecordModel> offlineList = userOnlineRecordService.listCurrentOfflined(null);
 
         if (CollectionUtil.isNotEmpty(offlineList)) {
-            // 2. 更改为已下线，即status改为1
+            
             List<UserOnlineRecordModel> bulkUpdateList = new ArrayList<>();
             for (UserOnlineRecordModel model : offlineList) {
                 UserOnlineRecordModel updateRecord = UserOnlineRecordModel.builder()

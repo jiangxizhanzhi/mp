@@ -14,13 +14,7 @@ import lombok.Data;
 import java.util.List;
 
 
-/**
- * 场景实例插件基础类，场景实例的插件通过继承本类拓展插件功能
- * @param <S> 插件对应配置类
- * @param <E> 网元节点的插件对应配置类
- * @param <P> 网元端口的插件对应配置类
- * @param <C> 插件上下文类
- */
+
 @Data
 public abstract class ScenePluginHandler<S extends BasePluginSceneBO<?, S, SceneBO>,
         E extends BasePluginSceneElementBO<?, E, SceneElementBO>,
@@ -124,9 +118,7 @@ public abstract class ScenePluginHandler<S extends BasePluginSceneBO<?, S, Scene
 
     }
 
-    /**
-     * TODO: 修改场景
-     */
+    
     public void modify(SceneHandler updatedSceneHandler, List<String> updateElementIds) {
 
     }

@@ -27,10 +27,10 @@ public class InitiateHandler extends HandlerCommon {
     public void initiate() {
         prepareEventProcess(SceneModel.Event.INITIATE, SceneProcess.class, ElementProcess.class);
 
-        // 初始化gns3的节点
+        
         runSceneProgress(SceneProcess.INIT_GNS3NODES, () -> {
             CloudScenePluginHandler cloudPlugin = getPluginHandler().getSceneHandler().getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
-            // 对于cloud而言,gns3节点是外部节点
+            
             getPluginHandler().getElementMap().values().forEach(e -> {
                 var cloudElement = cloudPlugin.getElement(e.getSrcElement().getId());
                 cloudElement.setExternal(true);

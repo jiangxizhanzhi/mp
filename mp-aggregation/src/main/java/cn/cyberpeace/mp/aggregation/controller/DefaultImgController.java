@@ -28,9 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/**
- * @author wanggang
- */
+
 @Api(value = "默认图片接口", tags = "默认图片接口")
 @Slf4j
 @RestController
@@ -41,12 +39,7 @@ public class DefaultImgController {
     private DefaultImgService defaultImgService;
 
 
-    /**
-     * 获取默认图片
-     *
-     * @param request
-     * @return
-     */
+    
     @ApiOperation("获取默认图片")
     @GetMapping("/get-default-img")
     public ServiceResult<List<String>> getDefaultImg(DefaultImgRequest request){
@@ -78,11 +71,7 @@ public class DefaultImgController {
         return ResultCommon.success(urlMap);
     }
 
-    /**
-     * 获取多个指定目录下的默认图片
-     * @param defaultImgDirEnums
-     * @return
-     */
+    
     private List<String> getFileByDefaultImgDirEnums(List<DefaultImgDirEnum> defaultImgDirEnums){
         return defaultImgDirEnums.stream().map(v -> defaultImgService.getFileByDefaultImgDirEnum(v)).flatMap(List::stream).collect(Collectors.toList());
     }

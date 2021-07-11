@@ -7,11 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.Objects;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -26,15 +22,11 @@ public class PageRequest {
     @ApiModelProperty(value = "分页每页条数(兼容)")
     private Integer perPage;
 
-    /**
-     * 排序字段
-     */
+    
     @ApiModelProperty(value = "排序字段")
     private String[] orders;
 
-    /**
-     * @Deprecated 排序字段
-     */
+    
     @ApiModelProperty(value = "排序字段(兼容)")
     private String[] sort;
 
@@ -44,7 +36,7 @@ public class PageRequest {
             pageSize = perPage;
         }
 
-        // 默认值
+        
         if (Objects.isNull(page) || page <= 1) {
             page = 1;
         }

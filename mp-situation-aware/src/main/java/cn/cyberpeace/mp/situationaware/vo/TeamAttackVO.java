@@ -13,15 +13,11 @@ import java.util.List;
 @NoArgsConstructor
 public class TeamAttackVO extends BaseVO{
 
-    /**
-     * 战队名称
-     */
+    
     @ApiModelProperty("战队名称")
     private String teamName;
 
-    /**
-     * 攻击手法列表
-     */
+    
     @ApiModelProperty("攻击手法占比top5")
     private List<AttackWayAggregationBO> attackWayList;
 }

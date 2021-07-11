@@ -5,9 +5,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
-/**
- * 靶标-图标上传方法
- */
+
 @Service
 public class TargetIconUploadService extends BaseUploadService {
 

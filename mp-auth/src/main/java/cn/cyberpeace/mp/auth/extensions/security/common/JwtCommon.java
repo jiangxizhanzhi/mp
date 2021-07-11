@@ -14,19 +14,12 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 public class JwtCommon {
 
     private JwtCommon() {}
 
-    /**
-     * 获取登录token
-     * @return
-     */
+    
     public static String getToken() {
         String token = getRequest().getHeader(AuthConstant.JWT_HEADER_KEY);
         return token;
@@ -55,18 +48,12 @@ public class JwtCommon {
         return JwtCommon.verifyToken(token);
     }
 
-    /**
-     * 获取当前HTTP请求对象
-     * @return
-     */
+    
     public static HttpServletRequest getRequest() {
         return ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
     }
 
-    /**
-     * 获取token header
-     * @return
-     */
+    
     public static Map<String,String> getTokenHeader(){
         Map<String,String> headers = Maps.newHashMap();
         headers.put("Authorization", JwtCommon.getToken());

@@ -30,10 +30,7 @@ import java.net.URLEncoder;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * 靶标
- * @author wanggang
- */
+
 @Service
 @RequiredArgsConstructor
 public class TargetConverter{
@@ -46,11 +43,7 @@ public class TargetConverter{
 
     private final DevopsTargetService devopsTargetService;
 
-    /**
-     * 分页查询
-     * @param dto
-     * @return
-     */
+    
     public BasePageBO<DeviceTargetPO> page(ImagePageDTO dto) {
         Integer total = devopsTargetService.totalCount(dto);
         BasePageBO<DeviceTargetPO> targetPageModel = new BasePageBO<>();
@@ -65,11 +58,7 @@ public class TargetConverter{
         return targetPageModel;
     }
 
-    /**
-     * 查询所有靶标数据
-     * @param dto
-     * @return
-     */
+    
     public BasePageBO<Device> allTarget(ImagePageDTO dto) {
         BasePageBO<DeviceTargetPO> targetPageModel = this.page(dto);
 
@@ -105,20 +94,13 @@ public class TargetConverter{
         return sceneConvertModel;
     }
 
-    /**
-     * 查询匹配的镜像名称
-     * @param dto
-     * @return
-     */
+    
     public List<String> findByImagePageDTO(ImagePageDTO dto){
         BasePageBO<DeviceTargetPO> targetPageModel = this.page(dto);
         return targetPageModel.getList().stream().map(DeviceTargetPO::getName).collect(Collectors.toList());
     }
 
-    /**
-     * 查询常用靶标信息,支持通过名称查询
-     * @return
-     */
+    
     public List<Device> getCommonTargets(String name) {
         CloudPlatformPageResult<Device> model = null;
         try {
@@ -131,10 +113,7 @@ public class TargetConverter{
         return deviceList;
     }
 
-    /**
-     * 验证靶标是否可删除
-     * @param uuids
-     */
+    
     public void validTargetCanDelete(List<String> uuids) {
 
         List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.findByUuids(uuids);
@@ -144,7 +123,7 @@ public class TargetConverter{
             }
         });
         String[] imageNames = deviceTargetPOS.stream().map(DeviceTargetPO::getName).toArray(String[]::new);
-        //引用
+        
         ServiceResult<Map<String, List<DeviceReferCsceneStat>>> referStateServiceResult = csceneSpecialService.statDeviceReferCscenes(imageNames);
         Map<String, List<DeviceReferCsceneStat>> referStateMap = referStateServiceResult.getSource();
 
@@ -165,7 +144,7 @@ public class TargetConverter{
             }
             throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_REFERENCED_SCENE.format(sceneName));
         }
-        //使用
+        
         ServiceResult<Map<String, List<DeviceReferCsceneInstanceStat>>> useStateServiceResult = csceneSpecialService.statDeviceReferCsceneInstances(imageNames);
         Map<String, List<DeviceReferCsceneInstanceStat>> useStateMap = useStateServiceResult.getSource();
 
@@ -201,7 +180,7 @@ public class TargetConverter{
 
         List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.findByUuids(uuids);
         String[] imageNames = deviceTargetPOS.stream().map(DeviceTargetPO::getName).toArray(String[]::new);
-        //引用
+        
         ServiceResult<Map<String, List<DeviceReferCsceneStat>>> referStateServiceResult = csceneSpecialService.statDeviceReferCscenes(imageNames);
         Map<String, List<DeviceReferCsceneStat>> referStateMap = referStateServiceResult.getSource();
 
@@ -222,7 +201,7 @@ public class TargetConverter{
             }
             throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_REFERENCED_SCENE.format(sceneName));
         }
-        //使用
+        
         ServiceResult<Map<String, List<DeviceReferCsceneInstanceStat>>> useStateServiceResult = csceneSpecialService.statDeviceReferCsceneInstances(imageNames);
         Map<String, List<DeviceReferCsceneInstanceStat>> useStateMap = useStateServiceResult.getSource();
 
@@ -243,11 +222,7 @@ public class TargetConverter{
     }
 
 
-    /**
-     * 获取需同步的靶标ID集合
-     * @param deviceIds
-     * @return DeviceAsyncBO
-     */
+    
     public DeviceAsyncBO getAsyncDeviceIds(List<Integer> deviceIds){
         DeviceAsyncBO bo = new DeviceAsyncBO();
         if (CollectionUtils.isEmpty(deviceIds)){
@@ -270,22 +245,13 @@ public class TargetConverter{
         return bo;
     }
 
-    /**
-     * 分页查询靶标数据
-     * @param offset
-     * @param limit
-     * @return
-     */
+    
     public List<Device> multiAsync(Integer offset,Integer limit){
         CloudPlatformPageResult<Device> model = deviceService.page("?offset=" + offset + "&limit=" + limit);
         return model.getList();
     }
 
-    /**
-     * 根据UUID查询靶标信息
-     * @param uuid
-     * @return
-     */
+    
     public Device findByUuid(String uuid){
         Device device = deviceService.findByUuid(uuid);
         device.setLogo(DefaultImgUtil.pathToFdfsUrl(device.getLogo()));

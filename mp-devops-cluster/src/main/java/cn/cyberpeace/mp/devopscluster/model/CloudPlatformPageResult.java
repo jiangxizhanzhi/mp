@@ -6,9 +6,7 @@ import lombok.*;
 
 import java.util.List;
 
-/**
- * 分页基础模型，对应云平台接口返回信息
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,9 +15,7 @@ import java.util.List;
 @ApiModel
 public class CloudPlatformPageResult<T> extends BaseCloudPlatformResult {
 
-    /**
-     * 数据列表
-     */
+    
     private List<T> list;
 
 

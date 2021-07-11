@@ -6,11 +6,7 @@ import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
-/**
- * @Description 流量包mapper
- * @Author qiaokang
- * @Date 2023-04-27 09:21:37
- */
+
 @Mapper
 @Repository
 @ModelClass(FlowPcapModel.class)

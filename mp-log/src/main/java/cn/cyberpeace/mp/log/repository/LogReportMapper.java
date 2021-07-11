@@ -6,9 +6,7 @@ import cn.cyberpeace.mp.log.po.LogReportPO;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
-/**
- * 日志上报管理
- */
+
 @Mapper
 @Repository
 @ModelClass(LogReportPO.class)

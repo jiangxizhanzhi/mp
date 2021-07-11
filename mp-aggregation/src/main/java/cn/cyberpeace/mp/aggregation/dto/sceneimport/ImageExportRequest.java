@@ -4,11 +4,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
 
-/**
- * @Description
- * @Author zhanglin
- * @Date 2022/09/19
- */
+
 @Getter
 @Setter
 public class ImageExportRequest {

@@ -4,11 +4,7 @@ import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.SceneElementParseRe
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigBO;
 
-/**
- * @Description 将解析出的scene节点转成BO
- * @Author maojun
- * @Date 2021/10/12
- */
+
 class SceneElementConverter implements IConverter {
 
     private SceneElementParseResult parseResult;
@@ -32,7 +28,7 @@ class SceneElementConverter implements IConverter {
         SceneConfigBO sceneConfigBO = new SceneConfigBO();
         sceneConfigBO.setName(scene.getName());
         sceneConfigBO.setDescription(scene.getDesc());
-        // 传递场景信息
+        
         sceneConfigBO.setDisplayContext(scene.getDisplayContext());
         return sceneConfigBO;
     }

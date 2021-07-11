@@ -8,13 +8,7 @@ import lombok.Data;
 
 import java.util.List;
 
-/**
- * @BelongsPackage: cn.cyberpeace.mp.cscene.dto.protocolcollection
- * @Author: hhuang
- * @CreateTime: 2023/05/15  09:44
- * @Description: mib信息
- * @Version: 1.0
- */
+
 @Data
 public class MibFileInfo extends EntityNodeMibFileResult {
 

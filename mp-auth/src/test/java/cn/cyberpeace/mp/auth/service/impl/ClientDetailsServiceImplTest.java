@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
-//@SpringBootTest(classes = {Application.class})
+
 public class ClientDetailsServiceImplTest {
 
     @Mock
@@ -23,14 +23,14 @@ public class ClientDetailsServiceImplTest {
         MockitoAnnotations.initMocks(this);
     }
 
-//    @Test
+
     public void testGetClient() {
         when(clientDetailsService.getByClientId("abc")).thenReturn(createClientDetailsModel());
         ClientDetailsModel model = clientDetailsService.getByClientId("abc");
         ClientDetailsModel model1 = clientDetailsService.getByClientId("abc");
         assertEquals("123456", model.getClientSecret());
         assertEquals("123456", model1.getClientSecret());
-//        verify(clientDetailsService).getByClientId("abc1");
+
         verify(clientDetailsService, times(2)).getByClientId("abc");
     }
 

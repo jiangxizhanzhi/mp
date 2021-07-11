@@ -11,11 +11,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 public interface UserHeartbeatService extends BaseModelService<UserHeartbeatModel, QueryParams> {
 
     void heartbeat();

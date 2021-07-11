@@ -5,11 +5,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/5/18 10:58
- */
+
 @Data
 @ApiModel("网卡信息")
 public class NetAddr {

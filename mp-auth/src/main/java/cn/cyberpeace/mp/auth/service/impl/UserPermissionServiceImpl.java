@@ -33,11 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Service
 public class UserPermissionServiceImpl
         extends BaseModelServiceImpl<UserPermissionModel, UserPermissionMapper, UserPermissionFields, QueryParams>
@@ -54,7 +50,7 @@ public class UserPermissionServiceImpl
 
     @Autowired
     @Qualifier("targetServiceImpl")
-//    @Qualifier("templateTargetServiceImpl")
+
     private TargetService targetService;
 
     @Autowired
@@ -78,18 +74,18 @@ public class UserPermissionServiceImpl
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
         Set<TargetModel> authorizedTargetsSet = new HashSet<>();
 
-        // 用户绑定的所有角色
+        
         List<RoleModel> roles = userRoleService.listByUserId(userId);
 
-        // 是否是管理员
+        
         boolean isAdmin = hasAdminRole(roles);
         if (isAdmin) {
-            // 直接查询该租户下所有权限返回
+            
             List<TargetModel> allTargets = targetService.listAll(AuthConstant.DEFAULT_TENANT, null);
             return allTargets;
         }
 
-        // 角色绑定的target
+        
         List<String> roleIds = roles.stream().map(RoleModel::getId).collect(Collectors.toList());
         List<TargetModel> roleTargets = new ArrayList<>();
         if (CollectionUtil.isNotEmpty(roleIds)) {
@@ -97,18 +93,18 @@ public class UserPermissionServiceImpl
         }
         authorizedTargetsSet.addAll(roleTargets);
 
-        // 用户直接绑定的target
-        //List<TargetModel> userTargets = getModelMapper().listTargetsByUserId(userId);
-        //authorizedTargetsSet.addAll(userTargets);
+        
+        
+        
 
-        // 用户所在组织绑定的target
-        //List<OrgModel> userOrgs = orgUserService.listOrgsByUserId(userId);
-        //Set<TargetModel> allTargetsByOrgSet = new HashSet<>();
-        //userOrgs.forEach(o -> {
-        //    Set<TargetModel> tset = orgPermissionService.listTargetsByOrgIdIncludeAllParentsOrg(o.getId());
-        //    allTargetsByOrgSet.addAll(tset);
-        //});
-        //authorizedTargetsSet.addAll(allTargetsByOrgSet);
+        
+        
+        
+        
+        
+        
+        
+        
 
         List<TargetModel> targetModelList = authorizedTargetsSet.stream().collect(Collectors.toList());
         return targetModelList;
@@ -153,7 +149,7 @@ public class UserPermissionServiceImpl
         ResultUtils.throwExceptionIfError(result, AuthErrorCode.ACCOUNT_NOT_EXISTED);
 
         if (cleanOldTargets) {
-            // 清除用户原来的权限
+            
             boolean success = deleteByUserId(userId);
             if (!success) {
                 throw new MpRuntimeException(AuthErrorCode.USER_TARGET_DELETE_ERROR);
@@ -161,13 +157,13 @@ public class UserPermissionServiceImpl
         }
 
         if (CollectionUtil.isEmpty(targetIds)) {
-            // 完成，直接返回
+            
             return true;
         }
 
-        // 添加用户角色
+        
         targetIds.forEach(tid -> {
-            // todo 校验权限是否存在
+            
             UserPermissionModel userPerm = new UserPermissionModel();
             userPerm.setOwner(userId);
             userPerm.setTarget(tid);
@@ -185,14 +181,14 @@ public class UserPermissionServiceImpl
         Map<String, List<TargetModel>> map = new HashMap<>();
         Map<String, TargetBo> mapTmp = new HashMap<>();
 
-        //Save all nodes to a map
+        
         for (TargetModel targetModel : targets) {
             TargetBo targetBo = new TargetBo();
             BeanUtils.copyProperties(targetModel, targetBo);
             mapTmp.put(targetBo.getId(), targetBo);
         }
 
-        //loop and assign parent/child relationships
+        
         for (Map.Entry<String, TargetBo> entry : mapTmp.entrySet()) {
             TargetBo current = entry.getValue();
             String parentId = current.getParent();
@@ -200,20 +196,20 @@ public class UserPermissionServiceImpl
             if (StringUtils.isNotBlank(parentId)) {
                 TargetBo parent = mapTmp.get(parentId);
                 if (parent != null) {
-                    //                    current.(parent);
+                    
                     if (parent.getChildren() == null) {
                         parent.setChildren(new ArrayList<>());
                     }
                     parent.getChildren().add(current);
                     mapTmp.put(parentId, parent);
-//                    mapTmp.put(entry.getId(), current);
+
                 }
             }
 
         }
 
         List<TargetBo> parentMenus = new ArrayList<>();
-        //get the root
+        
         for (TargetBo node : mapTmp.values()) {
             if(StringUtils.isBlank(node.getParent())) {
                 parentMenus.add(node);

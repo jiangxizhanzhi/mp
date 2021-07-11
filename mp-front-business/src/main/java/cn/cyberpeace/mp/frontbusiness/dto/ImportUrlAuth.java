@@ -2,11 +2,7 @@ package cn.cyberpeace.mp.frontbusiness.dto;
 
 import lombok.Data;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/5/19 09:42
- */
+
 @Data
 public class ImportUrlAuth {
 

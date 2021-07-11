@@ -8,10 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
-/**
- * 网络端口详细信息
- * @author wanggang
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

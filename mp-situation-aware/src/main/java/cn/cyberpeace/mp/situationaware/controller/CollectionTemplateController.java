@@ -21,11 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/4/25 17:08
- */
+
 @RestController
 @RequestMapping("/collection/template")
 @Api(value = "采集模板管理", tags = "采集模板管理")
@@ -66,12 +62,7 @@ public class CollectionTemplateController {
         return ResultCommon.success(tempProbeDto);
     }
 
-    /**
-     *
-     * @param category
-     * @param name
-     * @return
-     */
+    
     @GetMapping("/probes_to_import")
     @ApiOperation(value = "查询可以导入的自定义探针列表")
     @ApiImplicitParams({
@@ -86,12 +77,7 @@ public class CollectionTemplateController {
         return ResultCommon.success(probes);
     }
 
-    /**
-     * 新增采集模板
-     *
-     * @param addRequest 新增采集模板请求体
-     * @return ServiceResult
-     */
+    
     @PostMapping
     @ApiOperation(value = "新增采集模板")
     @ApiImplicitParam(name = "addRequest", value = "采集模板新增请求体")
@@ -100,11 +86,7 @@ public class CollectionTemplateController {
         return ResultCommon.success(id);
     }
 
-    /**
-     * 修改采集模板
-     *
-     * @return ServiceResult<Void>
-     */
+    
     @PatchMapping
     @ApiOperation(value = "修改采集模板")
     @ApiImplicitParam(name = "updateRequest", value = "采集模板修改请求体")

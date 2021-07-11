@@ -7,11 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * @Description: 节点实时状态信息
- * @Author zhouxinghuai
- * @Date：2021/11/22 14:03
- */
+
 @Data
 @Builder
 @NoArgsConstructor

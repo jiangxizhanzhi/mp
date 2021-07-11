@@ -2,9 +2,7 @@ package cn.cyberpeace.mp.situationaware.model.enums;
 
 import java.util.Objects;
 
-/**
- * 探针osType 0:windows, 1:Unix, 2:Linux, 3:BSD, 4:Other
- */
+
 public enum ProbeOSType {
     WINDOWS(0),
     UNIX(1),

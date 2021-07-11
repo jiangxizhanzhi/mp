@@ -20,11 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Objects;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Component
 @Slf4j
 public class ClientAuthenticationFilter extends OncePerRequestFilter {
@@ -47,8 +43,8 @@ public class ClientAuthenticationFilter extends OncePerRequestFilter {
         if(StringUtils.isNotBlank(clientId) && StringUtils.isNotBlank(clientSecret)) {
             ClientDetailsModel clientDetails = clientDetailsService.getByClientId(clientId);
             if (Objects.nonNull(clientDetails) && Objects.equals(clientDetails.getType(), ClientDetailsModel.CLIENT_TYPE_UNAUTH)) {
-                // 第一步就要将请求类型塞入request attribute，否则后面的loadAuthorities()就可能出问题，参见浙能定制版commit id:f7cdf17f6c7e0bbc36e771a79db981a0ffd4990f
-                // 后台接口操作统一当做admin操作
+                
+                
                 var result = userService.get(AuthConstant.ROOT_USER_ID);
                 if (Objects.nonNull(result.getSource()) && Objects.nonNull(result.getSource().getObj())) {
                     UserModel rootUser = result.getSource().getObj();

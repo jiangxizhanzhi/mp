@@ -7,11 +7,7 @@ import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.common.model.OptionModel;
 import org.springframework.stereotype.Component;
 
-/**
- * @Description
- * @author: shgang
- * @Date: 2022/7/28
- */
+
 @Component
 public class OptionFields extends BaseModelFields {
     public static final DynamicFields allFields = new DynamicFields(ClassUtils.getBeanClassFields(OptionModel.class));

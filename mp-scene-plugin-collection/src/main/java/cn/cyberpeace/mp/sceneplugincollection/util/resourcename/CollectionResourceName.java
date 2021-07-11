@@ -5,12 +5,8 @@ import cn.cyberpeace.mp.sceneplugincloud.util.resourcename.RsourceNameParams;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/5/20
- */
-// 删除arkime时对arkime的name有依赖,先不使用
+
+
 @Component
 public class CollectionResourceName implements ICollectionResourceName<RsourceNameParams> {
     @Override
@@ -20,13 +16,13 @@ public class CollectionResourceName implements ICollectionResourceName<RsourceNa
 
     @Override
     public ResourceParseWrapper<RsourceNameParams> parse(String name) {
-//        if (StringUtils.isNotEmpty(name) && name.startsWith(this.getPrefix())) {
-//            String sceneId = StringUtils.replace(name, this.getPrefix(), "");
-//            RsourceNameParams params = new RsourceNameParams();
-//            params.setSceneId(sceneId);
-//            return new ResourceParseWrapper<>(params);
-//        }
-//        return new ResourceParseWrapper<>();
+
+
+
+
+
+
+
         if (StringUtils.isNotEmpty(name) && name.endsWith("collection")) {
             String sceneId = StringUtils.replace(name, "_collection", "");
             sceneId = StringUtils.replace(sceneId, "MP_SCENE_", "");

@@ -32,11 +32,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/5/19 19:52
- */
+
 @Slf4j
 @Service
 @CacheConfig(cacheManager = AuthCacheConfig.CACHE_MANAGER_LONG)
@@ -58,11 +54,7 @@ public class UrlACService {
     private UrlACTargetService urlACTargetService;
 
 
-    /**
-     * 根据targetId批量查询
-     * @param targetIds
-     * @return
-     */
+    
     public List<UrlAccessCtlDto> listByTargetIds(List<String> targetIds) {
         if (CollUtil.isEmpty(targetIds)) {
             return Collections.emptyList();
@@ -80,10 +72,7 @@ public class UrlACService {
         return dtos;
     }
 
-    /**
-     * 根据url模糊查询
-     * @return
-     */
+    
     public List<UrlAccessCtlDto> listByUrlFuzzyQuery(String url) {
         if (StringUtils.isBlank(url)) {
             return Collections.emptyList();
@@ -91,10 +80,7 @@ public class UrlACService {
         return listByUrl(url);
     }
 
-    /**
-     * 根据 group 查询
-     * @return
-     */
+    
     public List<UrlAcCtlGroupBo> listByGroupQuery(String group) {
         if (StringUtils.isBlank(group)) {
             return Collections.emptyList();
@@ -146,10 +132,10 @@ public class UrlACService {
     @Transactional(rollbackFor = Exception.class)
     public String modify(UrlAccessCtlRequest updateReq) {
         String urlacId = updateReq.getId();
-        //UrlAccessCtlDto urlAccessCtlDto = urlACMapper.getById(urlacId);
-        //if (Objects.isNull(urlAccessCtlDto)) {
-        //    throw new MpRuntimeException("Not exist");
-        //}
+        
+        
+        
+        
 
         UrlACModel urlACModel = UrlACModel.builder()
                 .url(updateReq.getUrl())
@@ -193,10 +179,7 @@ public class UrlACService {
         return cnt;
     }
 
-    /**
-     * 查询所有的urlac不包括pattern
-     * @return
-     */
+    
     @Cacheable(value = CACHE_VAL_ALL_URLAC)
     public List<UrlAccessCtlDto> listAllUrlAccessCtlDtos() {
         List<UrlAccessCtlDto> dtos = urlACMapper.listAllUrlAccessCtlDtos();
@@ -214,10 +197,7 @@ public class UrlACService {
     }
 
 
-    /**
-     * 查询所有的pattern
-     * @return
-     */
+    
     @Cacheable(value = CACHE_VAL_ALL_URLAC_PATTERN)
     public List<UrlAccessCtlDto> listAllUrlACPatternDtos() {
         List<UrlAccessCtlDto> dtos = urlACMapper.listAllUrlAccessCtlPatternDtos();
@@ -235,14 +215,11 @@ public class UrlACService {
     }
 
 
-    /**
-     * 查询所有的
-     * @return
-     */
+    
     @Cacheable(value = CACHE_VAL_ALL_URLAC)
     public List<UrlAccessCtlDto> pageUrlAccessCtlDtos() {
         List<UrlAccessCtlDto> dtos = urlACMapper.listAllUrlAccessCtlDtos();
-        //Map<String, List<UrlAccessCtlDto>> urlAcDtoMap = new HashMap<>();
+        
 
         dtos.forEach(d -> {
             if (StringUtils.isNotBlank(d.getTargetsStr())) {

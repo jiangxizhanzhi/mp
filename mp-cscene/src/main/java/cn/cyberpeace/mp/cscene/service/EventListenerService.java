@@ -11,11 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/4/1
- */
+
 @Component
 @Slf4j
 public class EventListenerService {

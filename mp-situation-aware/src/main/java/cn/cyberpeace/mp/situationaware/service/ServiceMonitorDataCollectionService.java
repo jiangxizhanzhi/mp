@@ -14,11 +14,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/7/14 20:49
- */
+
 @Slf4j
 @Service
 public class ServiceMonitorDataCollectionService extends CollectionBaseService {
@@ -28,11 +24,7 @@ public class ServiceMonitorDataCollectionService extends CollectionBaseService {
 
 
 
-    /**
-     * 查询平台服务状态列表
-     * @param hostnames
-     * @return
-     */
+    
     public List<ServiceMonitorDto> queryCPServiceMonitorData(List<String> hostnames) {
         List<String> launchIds = ServerMonitorConfig.cpCloudSrvMonitors.stream().map(ServerMonitorConfig.MonitorProbe::getLaunchId).collect(Collectors.toList());
         List<ServiceMonitorDto> dtos = new ArrayList<>();
@@ -44,11 +36,7 @@ public class ServiceMonitorDataCollectionService extends CollectionBaseService {
     }
 
 
-    /**
-     * 查询业务服务状态列表
-     * @param hostnames
-     * @return
-     */
+    
     public List<ServiceMonitorDto> queryBizServiceMonitorData(List<String> hostnames) {
         List<String> launchIds = ServerMonitorConfig.businessSrvMonitors.stream().map(ServerMonitorConfig.MonitorProbe::getLaunchId).collect(Collectors.toList());
         List<ServiceMonitorDto> dtos = new ArrayList<>();
@@ -58,11 +46,7 @@ public class ServiceMonitorDataCollectionService extends CollectionBaseService {
         return dtos;
     }
 
-    /**
-     * 查询服务监控
-     * @param
-     * @return
-     */
+    
     public List<ServiceMonitorDto> queryServiceMonitorData(WazuhMonitorEventsRequest wazuhMonitorEventsRequest, List<String> launchIds) {
         if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return Collections.emptyList();

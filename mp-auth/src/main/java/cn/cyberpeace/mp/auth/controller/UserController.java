@@ -37,11 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * @Description: 用户管理接口
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Api(value = "用户管理接口", tags = "AUTH-用户管理接口")
 @Slf4j
 @RestController
@@ -62,11 +58,7 @@ public class UserController {
         return userService.delete(id);
     }
 
-    /**
-     * 批量删除
-     * @param ids 数据id集
-     * @return 成功数量
-     */
+    
     @ApiOperation("批量删除用户")
     @ApiImplicitParam(name="ids", value="用户id列表",dataTypeClass = String[].class)
     @DeleteMapping("/bulk_delete")
@@ -148,7 +140,7 @@ public class UserController {
     @PostMapping("/modify")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "更新用户", target = OpTargetEnums.USER)
     public ServiceResult<UserModel> modify(@RequestBody UserRequest modifyRequest) {
-//        modifyRequest.setAvatar(FsCommon.getFileKey(modifyRequest.getAvatar()));
+
         UserModel userModel = userService.modify(modifyRequest);
         return ResultCommon.success(userModel);
     }

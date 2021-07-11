@@ -41,10 +41,7 @@ import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
-/**
- * 实装管理
- * @author wanggang
- */
+
 @Service
 @RequiredArgsConstructor
 public class RealEquipmentConverter implements BaseConverter{
@@ -64,22 +61,14 @@ public class RealEquipmentConverter implements BaseConverter{
 
     private final CsceneSpecialService csceneSpecialService;
 
-    /**
-     * 获取实装总数
-     * @param request
-     * @return
-     */
+    
     public Integer getTotalRealEquipment(RealEquipmentPageRequest request) {
         String getParams = ParamUtils.wrapperGetParamsByObject(request,this.getTotalPageIgnoreField());
         CloudPlatformPageResult<Device> page = realEquipmentService.page(getParams);
         return page.getTotal();
     }
 
-    /**
-     * 分页查询实装列表
-     * @param dto
-     * @return
-     */
+    
     public BasePageBO<RealEquipmentBO> page(ImagePageDTO dto) {
         this.refreshIfNecessary();
         Integer total = devopsTargetService.totalCount(dto);
@@ -129,21 +118,13 @@ public class RealEquipmentConverter implements BaseConverter{
     }
 
 
-    /**
-     * 根据ID查询实装信息
-     * @param uuid
-     * @return
-     */
+    
     public RealEquipmentBO findByUuid(String uuid) {
         Device device = deviceService.findByUuid(uuid);
         return convertDevice(device);
     }
 
-    /**
-     * 新增实装设备
-     * @param request
-     * @return
-     */
+    
     @Transactional
     public Device add(RealEquipmentRequest request) {
         validRealEquipmentRequest(request);
@@ -159,11 +140,7 @@ public class RealEquipmentConverter implements BaseConverter{
         return result;
     }
 
-    /**
-     * 更新实装设备信息
-     * @param request
-     * @return
-     */
+    
     @Transactional
     public Device update(RealEquipmentRequest request) {
         validRealEquipmentRequest(request);
@@ -173,11 +150,7 @@ public class RealEquipmentConverter implements BaseConverter{
         return result;
     }
 
-    /**
-     * 批量删除实装设备信息
-     * @param request
-     * @return
-     */
+    
     @Transactional
     public BaseCloudPlatformResult delete(RealEquipmentDeleteRequest request) {
         targetConverter.validTargetCanDelete(request.getUuids());
@@ -191,11 +164,7 @@ public class RealEquipmentConverter implements BaseConverter{
         return result;
     }
 
-    /**
-     * 转换Device对象
-     * @param device
-     * @return RealEquipment
-     */
+    
     protected RealEquipmentBO convertDevice(Device device){
         if (Objects.isNull(device)){
             return new RealEquipmentBO();
@@ -218,11 +187,7 @@ public class RealEquipmentConverter implements BaseConverter{
         return convertModel;
     }
 
-    /**
-     * 转换Request对象
-     * @param request
-     * @return
-     */
+    
     protected Device convertRequest(RealEquipmentRequest request){
         Device device = new Device();
         device.setName(request.getName());
@@ -240,10 +205,7 @@ public class RealEquipmentConverter implements BaseConverter{
     }
 
 
-    /**
-     * 验证请求参数
-     * @param request
-     */
+    
     private void validRealEquipmentRequest(RealEquipmentRequest request) {
         if (StringUtils.isNotEmpty(request.getName()) && request.getName().length() > 126) {
             throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_NAME_EXCEED_MAX_LENGTH);
@@ -254,12 +216,12 @@ public class RealEquipmentConverter implements BaseConverter{
     }
 
     private void refreshIfNecessary() {
-        // 20秒没更新 尝试更新
+        
         if (System.currentTimeMillis() - IN_POSITION_UPDATE_TIME > 20000) {
-            //  拿到锁就更新下,没拿到就使用旧的数据
+            
             if (IN_POSITION_UPDATE_TIME_LOCK.tryLock()) {
                 try {
-                    // 刷新一下在位状态
+                    
                     ImagePageDTO refreshDto = new ImagePageDTO();
                     refreshDto.setLimit(50);
                     refreshDto.setImageType(ImageTypeEnum.ENTITY.toValue());

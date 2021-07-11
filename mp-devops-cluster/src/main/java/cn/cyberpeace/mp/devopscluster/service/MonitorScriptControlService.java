@@ -40,11 +40,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/7/13 16:16
- */
+
 @Slf4j
 @Service
 public class MonitorScriptControlService {
@@ -58,7 +54,7 @@ public class MonitorScriptControlService {
     @Autowired
     private AgentService agentService;
 
-    // expires in 20 minutes
+    
     private TimedCache<String, ServiceRestartStatusDto> SRV_STATUS_CACHE = CacheUtil.newTimedCache(20 * 60 * 1000);
 
 
@@ -66,7 +62,7 @@ public class MonitorScriptControlService {
         serviceMonitorScriptInit(mappings);
     }
 
-    // 定时调度，查询脚本是否安装成功
+    
     public void schedule() {
 
     }
@@ -82,7 +78,7 @@ public class MonitorScriptControlService {
 
 
     public void restart(String hostname, List<String> serviceList) {
-        // 如果某个服务的状态还在重启中，则忽略该服务的重启
+        
         TimedCache<String, ServiceRestartStatusDto> timedCache = getStatusCache();
         log.info("restart serviceList:{}, timedCache keySet:{}", serviceList, timedCache.keySet());
         Iterator<String> iterator = serviceList.iterator();
@@ -120,7 +116,7 @@ public class MonitorScriptControlService {
             WazuhControlCommon.wazuhControl.getWazuhLauncher().runCommand(List.of(runCommandItem));
         }
 
-        // 保存服务重启中的状态一段时间，等到下一次查询的时候再考虑是否删除该状态
+        
         for (String srv : serviceList) {
             String cacheKey = hostname + "_" + srv;
             ServiceRestartStatusDto statusDto = ServiceRestartStatusDto.builder().restartTime(LocalDateTime.now()).status(MonitorStateEnum.RESTARTING.getDesc()).build();
@@ -177,17 +173,17 @@ public class MonitorScriptControlService {
         List<String> hostNameList = hypervisorBOs.stream().map(HypervisorBO::getName).collect(Collectors.toList());
 
         List<String> toInstallList = new ArrayList<>();
-        // 判断节点是否需要安装（重装）脚本，比如增加了计算节点，修改了节点hostName，再比如yaml配置有变化（interval，scriptUrl等）
+        
         if (CollectionUtils.isEmpty(configedNodeList)) {
             toInstallList = hostNameList;
         } else {
-            // 本次新增或者节点名称修改了的节点
+            
             List<String> configedNodeNames = configedNodeList.stream().map(CpNodeMonitorScriptConfigModel::getAgentName).collect(Collectors.toList());
             List<String> newAddedNodes = hostNameList.stream().filter(host -> !configedNodeNames.contains(host)).collect(Collectors.toList());
             log.info("newAddedNodes:{}", newAddedNodes);
             toInstallList.addAll(newAddedNodes);
 
-            // 上次脚本安装失败，或者配置有变更的节点
+            
             for (String nodeName : hostNameList) {
                 for (CpNodeMonitorScriptConfigModel configedNodeModel : configedNodeList) {
                     if (configedNodeModel.getAgentName().equals(nodeName)) {
@@ -201,9 +197,9 @@ public class MonitorScriptControlService {
 
         if (CollectionUtils.isNotEmpty(toInstallList)) {
             log.info("toInstallList:{}", toInstallList);
-            // 发送安装指令
+            
             toInstallList.forEach(hostName -> {
-                // 未安装探针的节点，或者探针不是active的节点不发送指令
+                
                 AgentRequest agentRequest = new AgentRequest();
                 agentRequest.setName(hostName);
                 agentRequest.setStatus("active");
@@ -217,7 +213,7 @@ public class MonitorScriptControlService {
             });
         }
 
-        // 给所有不在此次安装之列的服务发送status命令
+        
         for (String hostName : hostNameList) {
             if (!toInstallList.contains(hostName)) {
                 statusManually(hostName);
@@ -242,7 +238,7 @@ public class MonitorScriptControlService {
         }
 
         configParam.setProbeParams(controlProbeParams);
-        // 控制节点和计算节点，hostname = agentName
+        
         WazuhControlCommon.wazuhControl.controlConfigOld(hostname, MonitorConstant.OS_TYPE_LINUX, configParam);
     }
 
@@ -271,7 +267,7 @@ public class MonitorScriptControlService {
 
         CpNodeMonitorScriptConfigModel scriptConfigModel = getByAgentName(hostName);
         if (Objects.isNull(scriptConfigModel)) {
-            // create
+            
             CpNodeMonitorScriptConfigModel toAdd = new CpNodeMonitorScriptConfigModel();
             toAdd.setAgentName(hostName);
             toAdd.setHostname(hostName);
@@ -279,7 +275,7 @@ public class MonitorScriptControlService {
             toAdd.setConfig(configStr);
             monitorScriptConfigMapper.save(toAdd);
         } else {
-            // update
+            
             CpNodeMonitorScriptConfigModel toUpdate = new CpNodeMonitorScriptConfigModel();
             toUpdate.setId(scriptConfigModel.getId());
             toUpdate.setAgentName(hostName);
@@ -296,13 +292,7 @@ public class MonitorScriptControlService {
         return SRV_STATUS_CACHE;
     }
 
-    /**
-     * 查看yaml或者scriptUrl中的配置，跟已保存到数据库中的配置，是否有变化
-     * 如果有，则需要重新发送安装指令，重新安装监控脚本
-     * @param configFromDB
-     * @param nameFileMap
-     * @return
-     */
+    
     private boolean isConfigChanged(String configFromDB, Map<String, String> nameFileMap) {
         if (StringUtils.isBlank(configFromDB)) {
             return true;
@@ -344,7 +334,7 @@ public class MonitorScriptControlService {
             config.setInterval(monitorProbe.getInterval());
             configs.add(config);
         }
-        //String jsonStr = JsonCommon.stringify(configs);
+        
         return configs;
     }
 

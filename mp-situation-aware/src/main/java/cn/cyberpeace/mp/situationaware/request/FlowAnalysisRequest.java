@@ -15,10 +15,7 @@ import java.util.List;
 import java.util.Objects;
 
 
-/**
- * 流量分析Request
- * @author wanggang
- */
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -31,104 +28,72 @@ public class FlowAnalysisRequest {
     @ApiModelProperty("分页大小")
     private Integer pageSize;
 
-    /**
-     * Top数量
-     */
+    
     @ApiModelProperty("Top数量")
     private Integer topSize;
 
-    /**
-     * 开始日期 yyyy-MM-dd HH:mm:ss
-     */
+    
     @ApiModelProperty("开始日期：yyyy-MM-dd HH:mm:ss")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime startDateTime;
 
-    /**
-     * 结束日期 yyyy-MM-dd HH:mm:ss
-     */
+    
     @ApiModelProperty("结束日期：yyyy-MM-dd HH:mm:ss")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime endDateTime;
 
-    /**
-     * 查询条件需要的分组,场景分组
-     */
+    
     @ApiModelProperty("查询条件需要的分组,场景分组")
     private List<String> groupList;
 
     @ApiModelProperty("目的端口或源端口")
     private String port ;
 
-    /**
-     * 源IP集合
-     */
+    
     @ApiModelProperty("源IP集合")
     private List<String> sourceIps;
 
-    /**
-     * 源端口
-     */
+    
     @ApiModelProperty("源端口")
     private String sourcePort;
 
-    /**
-     * 源Mac地址集合
-     */
+    
     @ApiModelProperty("源Mac地址集合")
     private List<String> sourceMacs;
 
-    /**
-     * 目标IP集合
-     */
+    
     @ApiModelProperty("目标IP集合")
     private List<String> destinationIps;
 
-    /**
-     * 主机IP集合
-     */
+    
     @ApiModelProperty("主机IP集合")
     private List<String> hosts;
 
-    /**
-     * 主机Mac集合
-     */
+    
     @ApiModelProperty("主机Mac集合")
     private List<String> hostMacs;
 
-    /**
-     * 强制过滤的目标IP集合
-     */
+    
     @ApiModelProperty("强制过滤的目标IP集合")
     private List<String> filterDestinationIps;
 
-    /**
-     * 支持多协议
-     */
+    
     @ApiModelProperty("多协议")
     private List<String> protocols;
 
-    /**
-     * 目标端口
-     */
+    
     @ApiModelProperty("目标端口")
     private String destinationPort;
 
-    /**
-     * 时间窗口间隔周期,单位：秒
-     */
+    
     @ApiModelProperty("时间窗口间隔周期,单位：秒")
     private Integer secondsInterval;
 
-    /**
-     * 严重性，1：高，2：中，3：中，4：低
-     */
+    
     @ApiModelProperty("严重性，1：高，2：中，3：低，4：低")
     private SeverityEnum severityEnum;
 
-    /**
-     * 聚合类型
-     */
+    
     @ApiModelProperty("聚合类型")
     private AggregationTypeEnum aggregationTypeEnum;
 

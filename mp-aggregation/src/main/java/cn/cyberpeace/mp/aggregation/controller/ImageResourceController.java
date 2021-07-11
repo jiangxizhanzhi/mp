@@ -16,11 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 
-/**
- * @Description
- * @Author zhanglin
- * @Date 2022/09/19
- */
+
 @Api(value = "镜像导入导出相关接口", tags = "镜像导入导出相关接口")
 @Slf4j
 @RestController

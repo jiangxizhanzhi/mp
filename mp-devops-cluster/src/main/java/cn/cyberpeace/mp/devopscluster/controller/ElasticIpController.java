@@ -19,9 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * 弹性IP管理类
- */
+
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/elasticip")
@@ -31,11 +29,7 @@ public class ElasticIpController {
 
     private final ElasticIpConverter elasticIpConverter;
 
-    /**
-     * 分页查询弹性IP信息
-     * @param request
-     * @return
-     */
+    
     @ApiOperation("分页查询弹性IP信息")
     @GetMapping("/page")
     public PageResult<ElasticIpVO> page(ElasticIpPageRequest request){
@@ -45,11 +39,7 @@ public class ElasticIpController {
         return new PageResult<>(elasticIpList, model.getTotal());
     }
 
-    /**
-     * 转换BO to VO
-     * @param model
-     * @return
-     */
+    
     private List<ElasticIpVO> convertBOToPageVO(BasePageBO<ElasticIpBO> model){
         return model.getList().stream().map(elasticIpModel ->
                 ElasticIpVO.builder().floatIpAddress(elasticIpModel.getFloatIpAddress())

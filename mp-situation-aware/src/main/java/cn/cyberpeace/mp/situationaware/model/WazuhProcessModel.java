@@ -60,9 +60,7 @@ public class WazuhProcessModel {
 
     private LocalDateTime time;
 
-    /**
-     * 级别
-     */
+    
     @JSONField(name = "level")
     private int level;
 

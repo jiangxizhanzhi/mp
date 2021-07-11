@@ -13,11 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Component
 @Scope("prototype")
 public class QueryChildOrgDtoOperation implements OrgDtoOperation<OrgDto> {
@@ -37,9 +33,9 @@ public class QueryChildOrgDtoOperation implements OrgDtoOperation<OrgDto> {
 
     @Override
     public OrgDto doExecute(OrgDto orgDto) {
-//        if (StringUtils.isBlank(orgDto.getParent())) {
-//            return orgDto;
-//        }
+
+
+
 
         var list = orgService.listByParent(orgDto.getId());
         var childList = new ArrayList();

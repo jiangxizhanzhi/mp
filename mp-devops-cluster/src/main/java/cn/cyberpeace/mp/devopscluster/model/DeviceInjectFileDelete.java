@@ -9,13 +9,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class DeviceInjectFileDelete {
 
-    /**
-     * 镜像ID
-     */
+    
     private String deviceUuid;
 
-    /**
-     * 文件uuid
-     */
+    
     private String fileUuid;
 }

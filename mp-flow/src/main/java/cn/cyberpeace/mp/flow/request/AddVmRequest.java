@@ -6,11 +6,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-/**
- * @Description: 新增虚拟机请求
- * @Author qiaokang
- * @Date：2021/8/23 10:36
- */
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

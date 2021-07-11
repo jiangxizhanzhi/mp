@@ -11,69 +11,43 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class NetworkAgentModel implements Serializable {
 
-    /**
-     * ID
-     */
+    
     private String id;
 
-    /**
-     * agent_type
-     */
+    
     private String agentType;
 
-    /**
-     * binary
-     */
+    
     private String binary;
 
-    /**
-     * topic
-     */
+    
     private String topic;
 
-    /**
-     * host
-     */
+    
     private String host;
 
-    /**
-     * admin_state_up
-     */
+    
     private Boolean adminStateUp;
 
-    /**
-     *
-     */
+    
     private String createdAt;
 
-    /**
-     *
-     */
+    
     private String startedAt;
 
-    /**
-     *
-     */
+    
     private String heartbeatTimestamp;
 
-    /**
-     * 描述
-     */
+    
     private String description;
 
-    /**
-     * resources_synced
-     */
+    
     private Object resourcesSynced;
 
-    /**
-     *
-     */
+    
     private String availabilityZone;
 
-    /**
-     *
-     */
+    
     private Boolean alive;
 
     private Object configurations;

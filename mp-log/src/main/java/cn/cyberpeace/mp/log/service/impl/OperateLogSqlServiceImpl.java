@@ -34,11 +34,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * @Description
- * @Author shgang
- * @Date 2022/9/13
- */
+
 @Slf4j
 @Component
 @ConditionalOnProperty(prefix = "mp.log", name = "log-db", havingValue = LogConstant.LOG_DB_SQL)
@@ -76,39 +72,39 @@ public class OperateLogSqlServiceImpl extends BaseModelServiceImpl<OperateLogSql
         if (Objects.nonNull(userType)) {
             model.setUserType(userType.toString());
         }
-        //站点类型
+        
         model.setSiteType(SiteTypeEnums.MP.toValue());
         if (Objects.nonNull(operateLog.module())) {
-            //操作模块
+            
             model.setOpModule(getlocalizedMessage(locale, operateLog.module().getCode()));
-            //操作模块ID
+            
             model.setOpModuleId(operateLog.module().ordinal());
         }
         if (Objects.nonNull(operateLog.type())) {
-            //操作类型
+            
             model.setOpType(getlocalizedMessage(locale, operateLog.type().getCode()));
-            //操作类型ID
+            
             model.setOpTypeId(operateLog.type().ordinal());
         }
         if (Objects.nonNull(operateLog.target())) {
-            //操作对象
+            
             model.setOpTarget(getlocalizedMessage(locale, operateLog.target().getCode()));
-            //操作ID
+            
             model.setOpTargetId(operateLog.target().ordinal());
         }
-        //操作主题
+        
         model.setTitle(operateLog.title());
-        //操作描述
+        
         model.setDescription(operateLog.desc());
-        //记录操作时间
+        
         model.setOpTime(LocalDateTime.now());
-        //请求IP
+        
         model.setOpIp(SnUtils.getRealRemoteIp(request));
-        // 操作类型
+        
         model.setLogType(operateLog.type().ordinal());
-        // 操作来源
+        
         model.setFrom(request.getRequestURI());
-        // 操作内容
+        
         processDefaultContent(model);
         if (StringUtils.isBlank(model.getUserName())) {
             log.error("operationlog, username cannot be null. {}", model);
@@ -155,11 +151,11 @@ public class OperateLogSqlServiceImpl extends BaseModelServiceImpl<OperateLogSql
         if (Objects.nonNull(request.getEndDate())) {
             humanCondition.filterLessThanOrEqual(createTime, request.getEndDate());
         }
-        // 查询符合条件的条数
+        
         int total = getModelMapper().total(humanCondition);
         humanCondition.orderBy("-" + createTime);
 
-        // 设置分页条件、查询
+        
         humanCondition.setLimit(request.getPerPage());
         humanCondition.setOffset((request.getPage() - 1) * request.getPerPage());
         List<OperateLogSqlModel> models = getModelMapper().list(humanCondition);
@@ -209,7 +205,7 @@ public class OperateLogSqlServiceImpl extends BaseModelServiceImpl<OperateLogSql
             }
         }
         model.setOpTarget(request.getOpTarget());
-        //model.setOpTargetId(getTidFromTarget(model.getOpTarget(), locale));
+        
         model.setTitle(request.getTitle());
         model.setUserId(request.getUserId());
         model.setUserName(request.getUserName());

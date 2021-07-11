@@ -10,11 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/5/19 19:50
- */
+
 @Mapper
 @Repository
 @ModelClass(UrlACModel.class)

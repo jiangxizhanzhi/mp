@@ -10,11 +10,7 @@ import lombok.Setter;
 
 import java.util.List;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/7/21
- */
+
 public class ForceReleaseResourceUtils {
     public static void forceDeleteVm(List<String> resourceIds) {
         VmParam param = new VmParam();

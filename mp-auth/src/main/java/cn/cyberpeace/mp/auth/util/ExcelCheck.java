@@ -9,15 +9,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/12/22 13:57
- */
+
 @Slf4j
 public class ExcelCheck {
 
-    // 最大100MB
+    
     public static final long MAX_SIZE = 100 * 1024 * 1024;
 
     public static final String[] EXCEL_TYPES = {"xls", "xlsx"};

@@ -21,10 +21,7 @@ import cn.cyberpeace.mp.sceneplugingns3.repository.Gns3PluginSceneConfigElementP
 import cn.cyberpeace.mp.sceneplugingns3.repository.Gns3PluginSceneConfigMapper;
 
 
-/**
- * 场景实例的处理
- * 场景实例的功能由本类对外提供
- */
+
 @ClassFieldClasses({
         Gns3PluginSceneConfigBO.class,
         Gns3PluginSceneConfigElementBO.class,

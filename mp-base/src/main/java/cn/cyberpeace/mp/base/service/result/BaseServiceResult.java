@@ -10,10 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * 统一服务返回结果
- * @param <T> 返回结果数据源对象类型
- */
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -59,9 +56,7 @@ public class BaseServiceResult<T, R> {
         return BaseErrorCode.SUCCESS.getCode().equals(getServiceCode().getCode());
     }
 
-    /**
-     * @Deprecated use judgeSuccess
-     */
+    
     public boolean isSuccess() {
         return BaseErrorCode.SUCCESS.getCode().equals(getServiceCode().getCode());
     }
@@ -74,10 +69,7 @@ public class BaseServiceResult<T, R> {
         return (R) source;
     }
 
-    /**
-     * service code获取最终message
-     * @return this
-     */
+    
     public String calcMessage() {
         ServiceCode actualServiceCode = getServiceCode();
         if (actualServiceCode != null) {
@@ -90,10 +82,7 @@ public class BaseServiceResult<T, R> {
         return null;
     }
 
-    /**
-     * 从数据源加载最终序列化数据
-     * @return this
-     */
+    
     public BaseServiceResult<T, R> asResult() {
         setData(sourceToData(getSource()));
 

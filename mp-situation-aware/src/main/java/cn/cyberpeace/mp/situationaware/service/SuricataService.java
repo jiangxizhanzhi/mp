@@ -27,13 +27,7 @@ import java.util.stream.Collectors;
 
 import static cn.cyberpeace.mp.situationaware.constant.SuricataConstant.*;
 
-/*
- * @BelongsPackage: cn.cyberpeace.mp.situationaware.service
- * @Author: hhuang
- * @CreateTime: 2023/04/21  09:40
- * @Description: Suricata处理service
- * @Version: 1.0
- */
+
 @Slf4j
 @Service
 public class SuricataService {
@@ -43,13 +37,9 @@ public class SuricataService {
     private SuricataRuleMapper suricataRuleMapper;
 
     
-    /**
-     * @description: 处理规则文件
-     * @param file
-     * @return boolean
-     */
+    
     public boolean handlerRuleFile(MultipartFile file) {
-        // 校验文件格式
+        
         String originalFileName = file.getOriginalFilename();
         String fileType = originalFileName.substring(Objects.requireNonNull(originalFileName).lastIndexOf("."));
         if (!".rules".equals(fileType)) {
@@ -57,11 +47,11 @@ public class SuricataService {
             return false;
         }
         List<String> ruleStrList = queryRulesString(file);
-        //解析处理
+        
         List<SuricataData> ruleList = parse(ruleStrList);
-        //转换
+        
         List<SuricataRuleModel> convertRuleList = convertRuleList(ruleList);
-        //入库
+        
         return importData(convertRuleList);
     }
 
@@ -72,7 +62,7 @@ public class SuricataService {
         log.info("delete suricataRule result num is {}",num);
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        //批量新增
+        
         BaseModelMapper.BulkResult<SuricataRuleModel> bulkResult =
             suricataRuleMapper.bulkCreate(convertRuleList,1000,true);
         stopWatch.stop();
@@ -80,12 +70,7 @@ public class SuricataService {
         return bulkResult.getSuccessCount() > 0;
     }
 
-    /**
-     * @description: 对象SuricataData list转换
-     * @param ruleList
-     * @throws
-     * @return List<SuricataRuleModel>
-     */
+    
     private List<SuricataRuleModel> convertRuleList(List<SuricataData> ruleList){
         return ruleList.stream().map(rule -> {
             return SuricataRuleModel.builder().action(rule.getAction()).protocol(rule.getProtocol())
@@ -98,62 +83,53 @@ public class SuricataService {
     }
 
 
-    /**
-     * @description: 解析规则数据为规则数据对象
-     * @param ruleStrList
-     * @return List<SuricataData>
-     */
+    
     public List<SuricataData> parse(List<String> ruleStrList){
         System.out.println(ruleStrList.size());
         if(CollectionUtils.isEmpty(ruleStrList)){
             return Collections.emptyList();
         }
-        //过滤开头是#的数据
+        
         ruleStrList = ruleStrList.stream().filter(rule -> !rule.startsWith(STARTWITH_STR)).collect(Collectors.toList());
         List<SuricataData> ruleList = new ArrayList<>();
         ruleStrList.stream().forEach(rule->{
             int msgIndex = rule.indexOf(MSG_FLAG_STR);
-            //主要信息
+            
             String aStr = rule.substring(0, msgIndex);
             String[] split = aStr.split(SPACE_REGEX);
-            //msg结构体信息
+            
             String ruleMsg = rule.substring(msgIndex);
-            //msgFlagStr前面的部分处理
+            
             SuricataData suricataData = SuricataData.builder().action(split[SURICATA_FIELD.ACTION.ordinal()])
                 .protocol(split[SURICATA_FIELD.PROTOCOL.ordinal()]).source(split[SURICATA_FIELD.SOURCE.ordinal()])
                 .sourcePorts(split[SURICATA_FIELD.SOURCE_PORTS.ordinal()])
                 .direction(split[SURICATA_FIELD.DIRECTION.ordinal()])
                 .destination(split[SURICATA_FIELD.DESTINATION.ordinal()])
                 .destinationPorts(split[SURICATA_FIELD.DESTINATION_PORTS.ordinal()]).ruleMsg(ruleMsg).build();
-            //解析处理规则结构体
+            
             parseMsg(suricataData,ruleMsg);
             ruleList.add(suricataData);
         });
         return ruleList;
     }
 
-    /**
-     * @description: 解析处理规则的msg结构体
-     * @param suricataData
-     * @param ruleMsg
-     * @return void
-     */
+    
     public void parseMsg(SuricataData suricataData,String ruleMsg){
         if(StringUtils.isEmpty(ruleMsg)){
             return;
         }
         String[] msgSplit = ruleMsg.split(MSG_SEPERATOR);
-        //获取先获取rulename，sid
+        
         Arrays.stream(msgSplit).forEach(msg -> {
             if(msg.startsWith(MSG_FLAG_STR)){
                 String name = StringUtils.stripStart(msg, MSG_FLAG_STR);
-                //去除引号
+                
                 suricataData.setRuleName(name.replace("\"",""));
             } else if (msg.startsWith(SID_PREFIX)) {
                 String sid = StringUtils.stripStart(msg, SID_PREFIX);
                 suricataData.setSid(sid);
             } else if (msg.startsWith(METADATA_PREFIX)) {
-                //元数据信息处理获取ATT&ck
+                
                 String metadata = StringUtils.stripStart(msg, METADATA_PREFIX);
                 String[] metainfos = metadata.split(METADATA_SEPERATOR);
                 Arrays.stream(metainfos).forEach(meta->{
@@ -167,11 +143,7 @@ public class SuricataService {
     }
 
 
-    /**
-     * @description: 从上传文件中获取所有规则
-     * @param file
-     * @return List<String>
-     */
+    
     public List<String> queryRulesString(MultipartFile file){
         BufferedReader bufferedReader = null;
         try {
@@ -196,14 +168,10 @@ public class SuricataService {
     }
 
 
-    /**
-     * @description: 分页查询流量规则信息
-     * @param suricataQueryRequest
-     * @return ServiceResult<List<SuricataData>>
-     */
+    
     public ServiceResult<List<SuricataData>> queryPage(SuricataQueryRequest suricataQueryRequest) {
         suricataQueryRequest.ensure();
-        //构建查询参数
+        
         HumanCondition condition = new HumanCondition();
         if(StringUtils.isNotEmpty(suricataQueryRequest.getProtocol())){
             condition.filterEqual(SuricataRuleModel::getProtocol, suricataQueryRequest.getProtocol());
@@ -214,16 +182,16 @@ public class SuricataService {
         if(StringUtils.isNotEmpty(suricataQueryRequest.getAttck())){
             condition.filterContains(SuricataRuleModel::getAttck, suricataQueryRequest.getAttck());
         }
-        //查询结果总数
+        
         int total = suricataRuleMapper.total(condition);
         if(total == 0){
             return new ListObjServiceResult(new ListObjResult(Collections.emptyList(), total)).asResult();
         }
-        //添加分页信息
+        
         condition.pagination(suricataQueryRequest.getPage(), suricataQueryRequest.getPageSize());
-        //执行查询
+        
         List<SuricataRuleModel> suricataRuleModelList = suricataRuleMapper.list(condition);
-        //转换响应为业务数据
+        
         List<SuricataData> result = suricataRuleModelList.stream().map(rule -> {
             return SuricataData.builder().action(rule.getAction()).protocol(rule.getProtocol()).source(rule.getSource())
                 .sourcePorts(rule.getSourcePorts()).direction(rule.getDirection()).destination(rule.getDestination())
@@ -233,14 +201,11 @@ public class SuricataService {
         return new ListObjServiceResult(new ListObjResult(result, total)).asResult();
     }
 
-    /**
-     * @description: 查询规则所有的协议类型
-     * @return ServiceResult<List<String>>
-     */
+    
     public ServiceResult<List<String>> queryAllProtocols() {
-        //构建查询条件
+        
         HumanCondition condition = new HumanCondition();
-        //查询协议类型
+        
         condition.select(SuricataRuleModel::getProtocol).distinct();
         List<SuricataRuleModel> ruleModels = suricataRuleMapper.list(condition);
         List<String> result = ruleModels.stream().filter(rule -> StringUtils.isNotEmpty(rule.getProtocol()))

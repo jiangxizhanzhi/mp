@@ -8,9 +8,7 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 
-/**
- * 镜像文件注入请求信息
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

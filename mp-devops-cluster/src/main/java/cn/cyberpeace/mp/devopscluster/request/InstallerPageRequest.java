@@ -10,21 +10,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class InstallerPageRequest extends BasePageRequest {
 
-    /**
-     * 名称
-     */
+    
     @ApiModelProperty(value = "名称")
     private String name;
 
-    /**
-     * 分类
-     */
+    
     @ApiModelProperty(value = "分类")
     private String categories;
 
-    /**
-     * 服务类型：windows服务/docker服务
-     */
+    
     @ApiModelProperty(value = "服务类型")
     private Integer deployType;
 

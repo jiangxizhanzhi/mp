@@ -165,14 +165,14 @@ public class FlowExecutor {
         FlowCacheUtil.taskRunnableCache.put(FlowCacheUtil.RUNNABLE_PREFIX + taskId, stopCallback);
         FlowCacheUtil.taskConsumerCache.put(FlowCacheUtil.CONSUMER_PREFIX + taskId, errorCallback);
         var result = flowService1.startTask(taskId, sourceIp);
-//        var result = flowService3.actuator(taskId, TaskActionEnum.START.toValue(), stopCallback, errorCallback);
+
         if (!result.judgeSuccess()) {
             throw new MpRuntimeException(result.getServiceCode());
         }
     }
 
     public void stopFlow(String taskId) {
-//        var result = flowService3.actuator(taskId, TaskActionEnum.STOP.toValue(), null, null);
+
         var result = flowService1.stopTask(taskId);
         if (!result.judgeSuccess()) {
             throw new MpRuntimeException(result.getServiceCode());
@@ -180,11 +180,11 @@ public class FlowExecutor {
     }
 
     public void startFlows(BatchStartTaskBO batchStartTaskBO, Consumer<BatchActuatorCallbackResponse> callbackConsumer, int runType) {
-//        BatchActuatorTaskRequest request = new BatchActuatorTaskRequest();
-//        request.setTaskIds(taskIds);
-//        request.setRunType(runType);
-//        request.setTaskAction(TaskActionEnum.START.toValue());
-//        request.setCallbackConsumer(callbackConsumer);
+
+
+
+
+
         var result = flowService1.batchStartTasks(null, batchStartTaskBO);
         if (!result.judgeSuccess()) {
             throw new MpRuntimeException(result.getServiceCode());
@@ -192,9 +192,9 @@ public class FlowExecutor {
     }
 
     public void stopFlows(List<String> taskIds) {
-//        BatchActuatorTaskRequest request = new BatchActuatorTaskRequest();
-//        request.setTaskAction(TaskActionEnum.STOP.toValue());
-//        request.setTaskIds(taskIds);
+
+
+
         var result = flowService1.batchStopTasks(taskIds);
         if (!result.judgeSuccess()) {
             throw new MpRuntimeException(result.getServiceCode());

@@ -6,11 +6,7 @@ import org.springframework.security.core.SpringSecurityCoreVersion;
 
 import java.util.Collection;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 public class ClientAuthenticationToken extends AbstractAuthenticationToken {
 
     private static final long serialVersionUID = SpringSecurityCoreVersion.SERIAL_VERSION_UID;
@@ -26,12 +22,7 @@ public class ClientAuthenticationToken extends AbstractAuthenticationToken {
         setAuthenticated(false);
     }
 
-    /**
-     * Creates a token with the supplied array of authorities.
-     *
-     * @param authorities the collection of <tt>GrantedAuthority</tt>s for the principal
-     *                    represented by this authentication object.
-     */
+    
     public ClientAuthenticationToken(Object principal, Object credentials, Collection<? extends GrantedAuthority> authorities) {
         super(authorities);
         this.principal = principal;

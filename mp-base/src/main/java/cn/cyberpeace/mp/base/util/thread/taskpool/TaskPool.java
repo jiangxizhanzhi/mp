@@ -27,15 +27,10 @@ public class TaskPool {
         return (ThreadPoolExecutor)executor;
     }
 
-    /**
-     * @description: 线程工厂
-     * @param: threadName
-     * @return: java.util.concurrent.ThreadFactory
-     * @date: 2023/6/29
-     */
+    
     public ThreadFactory createNameThreadFactory(String threadName){
         if(StringUtils.isEmpty(threadName)){
-            //如果不传，使用当前调用类名作为线程池前缀
+            
             threadName = this.getClass().getName().toLowerCase().concat("-");
         }
         if(!threadName.endsWith("-")){
@@ -71,13 +66,7 @@ public class TaskPool {
         }
     }
 
-    /**
-     * 批量运行任务，多个任务为一个整体
-     * @param poolTasks 任务
-     * @param independent 任务间是否独立，false情况下任意一个任务的异常会取消掉所有队列任务
-     * @param format 是否格式化标准任务
-     * @return 任务执行结果
-     */
+    
     private  <C, T, R, T1 extends BasePoolTask<C, T, R>> List<T1> invokePoolTasks(List<T1> poolTasks,
                                                                                   boolean independent, boolean format) {
         var latch = new CountDownLatch(poolTasks.size());
@@ -107,14 +96,7 @@ public class TaskPool {
         return poolTasks;
     }
 
-    /**
-     * 批量运行任务，多个任务为一个整体
-     * @param tasks 任务
-     * @param independent 任务间是否独立，false情况下任意一个任务的异常会取消掉所有队列任务
-     * @param format 是否格式化标准任务
-     * @param poolTaskClass 任务类型
-     * @return 任务执行结果
-     */
+    
     private <C, T, R, T1 extends BasePoolTask<C, T, R>> List<T1> invokeTasks(List<T> tasks, boolean independent,
                                                                              boolean format, Class<T1> poolTaskClass) {
         List<T1> poolTasks = tasks.stream()

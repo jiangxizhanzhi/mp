@@ -28,11 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/12/16 19:02
- */
+
 @Api(value = "SYS-ADMIN", tags = "ADMIN")
 @Slf4j
 @RestController
@@ -58,7 +54,7 @@ public class ActivMenuController {
     public ServiceResult getTree(@RequestParam(required = false) List<String> actives) {
         Set<String> visibleMenuIds = null;
         if (CollectionUtils.isEmpty(actives)) {
-//            visibleMenuIds = menuSetService.getSystemAllVisibleMenuIds();
+
             return new ServiceResult(new ArrayList<>()).asResult();
         } else {
             visibleMenuIds = menuSetService.getVisibleMenuIdsBy(actives);

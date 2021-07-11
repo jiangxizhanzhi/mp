@@ -8,9 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-/**
- * 镜像同步请求信息
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

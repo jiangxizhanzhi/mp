@@ -9,11 +9,7 @@ import lombok.Data;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/9/13 11:09
- */
+
 @Data
 @ApiModel("用户资源")
 public class SceneBusinessSummary {

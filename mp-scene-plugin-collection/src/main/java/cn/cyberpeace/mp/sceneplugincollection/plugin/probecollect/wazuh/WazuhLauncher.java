@@ -127,7 +127,7 @@ public class WazuhLauncher {
             runCommandCallbackSelf = this.callbackSelf;
         }
         if (Boolean.TRUE.equals(runCommandCallbackSelf)) {
-            // 轮询runCommandResultPool
+            
             long timeout = runCommandItem.getCheckOutputTime() * (long) runCommandItem.getCheckOutputInterval();
             long checkConsumeMillis = 0;
             var step = 250;
@@ -145,12 +145,12 @@ public class WazuhLauncher {
                 }
             }
 
-            // 本地查不到，最后查一遍db
+            
             if (launchAlert == null) {
                 launchAlert = queryCommandLaunchAlert(runCommandItem.getAgentId(), runCommandItem.getRunId());
             }
         } else {
-            // 轮询db
+            
             for (var i = 0; i < runCommandItem.getCheckOutputTime(); i++) {
                 try {
                     Thread.sleep(runCommandItem.getCheckOutputInterval());
@@ -368,11 +368,11 @@ public class WazuhLauncher {
 
     @Data
     public static class RunCommandItem {
-        /** required */
+        
         private String agentName;
-        /** required */
+        
         private String osType;
-        /** required */
+        
         private String command;
         private String outputFormat;
         private Boolean exile;

@@ -45,9 +45,7 @@ public class HostEventQueryParams extends QueryParams {
     @ApiModelProperty(value = "文件或注册表路径 模糊查询")
     private String path;
 
-    /**
-     * 是否是滚动分页请求
-     */
+    
     @ApiModelProperty(value = "是否是滚动分页请求")
     private Boolean scroll;
 }

@@ -32,11 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * @Description 将解析出的node节点转成BO
- * @Author maojun
- * @Date 2021/10/12
- */
+
 @Slf4j
 class NodeElementConverter implements IConverter {
 
@@ -55,7 +51,7 @@ class NodeElementConverter implements IConverter {
     }
 
     private void createElementAndPort(NodeElementParseResult node, ConvertDataContainer container) {
-        // 主表
+        
         SceneConfigElementBO sceneConfigElementBO = new SceneConfigElementBO();
         sceneConfigElementBO.setSystemType("306");
         sceneConfigElementBO.setSystemArchitecture(BaseSceneElementModel.SystemArchitecture.BIT_64);
@@ -83,13 +79,13 @@ class NodeElementConverter implements IConverter {
         } else {
             sceneConfigElementBO.setType(BaseSceneElementModel.Type.ROUTER);
         }
-        // 传递节点的前端属性
+        
         sceneConfigElementBO.setDisplayContext(node.getDisplayContext());
         List<SceneConfigElementPortBO> portBOS = new ArrayList<>();
         sceneConfigElementBO.setPorts(portBOS);
-        // 处理节点附件
+        
         if (StringUtils.isNotEmpty(node.getFile())) {
-            // 处理附件
+            
             if (FileUtil.exist(node.getFile())) {
                 String fdfsPath = FsCommon.upload(node.getFile());
                 String fileName = FileUtil.getName(node.getFile());
@@ -100,10 +96,10 @@ class NodeElementConverter implements IConverter {
             }
         }
 
-        // 插件表
+        
         CloudPluginSceneConfigElementBO pluginElement = new CloudPluginSceneConfigElementBO();
         pluginElement.setImage(node.getImage());
-        // 初步加载role imageType (部分简单靶标不会导入), 这里不一定准确
+        
         if (node.getId().toLowerCase().startsWith("router")) {
             sceneConfigElementBO.setIcon2(DefaultImgUtil.pathToFdfsUrl(CommonConstant.DefaultImageUrl.ROUTER));
             pluginElement.setRole(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER);
@@ -129,7 +125,7 @@ class NodeElementConverter implements IConverter {
         }
         container.putPluginElement(sceneConfigElementBO.getId(), pluginElement);
 
-        // 路由器加入 static-routes
+        
         if (CollectionUtils.isNotEmpty(node.getUsedStaticRoutes())) {
             List<StaticRoute> routes = node.getUsedStaticRoutes().stream()
                     .map(s -> {
@@ -147,7 +143,7 @@ class NodeElementConverter implements IConverter {
         }
 
         if (CollectionUtils.isEmpty(node.getNet())) {
-            // 节点未连接任何网络
+            
             container.addNoNetworkNodeElements(sceneConfigElementBO);
         } else {
             for (NetElementParseResult ymlNetParseResult : node.getNet()) {
@@ -174,12 +170,12 @@ class NodeElementConverter implements IConverter {
     private List<FirewallRule> buildFirewallRules(List<AclsInfo> aclsInfos) {
         return aclsInfos.stream().map(aclsInfo -> {
             FirewallRule firewallRule = new FirewallRule();
-            // ip与端口
+            
             firewallRule.setSourceIpAddress(aclsInfo.getSourceIP());
             firewallRule.setSourcePort(aclsInfo.getSourcePort());
             firewallRule.setDestinationIpAddress(aclsInfo.getTargetIP());
             firewallRule.setDestinationPort(aclsInfo.getTargetPort());
-            // 协议
+            
             firewallRule.setProtocol(aclsInfo.getProtocol());
             String ipStr = StringUtils.isNotEmpty(aclsInfo.getSourceIP()) ? aclsInfo.getSourceIP() : aclsInfo.getTargetIP();
             if (StringUtils.isEmpty(ipStr) || ipStr.length() <= 15) {
@@ -187,7 +183,7 @@ class NodeElementConverter implements IConverter {
             } else {
                 firewallRule.setIpVersion(IpVersion.IPV6);
             }
-            // 方向
+            
             if ("up".equals(aclsInfo.getDirection())) {
                 firewallRule.setDirection(FirewallRuleDirection.EGRESS);
             } else if ("down".equals(aclsInfo.getDirection())) {
@@ -195,7 +191,7 @@ class NodeElementConverter implements IConverter {
             } else if ("two-way".equals(aclsInfo.getDirection())) {
                 firewallRule.setDirection(FirewallRuleDirection.BOTH);
             }
-            // 规则
+            
             if ("deny".equals(aclsInfo.getAction())) {
                 firewallRule.setAction(FirewallRuleAction.DENY);
             } else if ("allow".equals(aclsInfo.getAction())) {

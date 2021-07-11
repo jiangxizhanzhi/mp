@@ -6,11 +6,7 @@ import lombok.Data;
 
 import java.util.List;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/5/18 17:02
- */
+
 @Data
 @ApiModel
 public class CollectionAppRequest extends BaseTimeRangeRequest {

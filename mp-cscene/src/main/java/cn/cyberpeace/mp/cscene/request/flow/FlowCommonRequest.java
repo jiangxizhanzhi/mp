@@ -11,11 +11,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/11/22 17:58
- */
+
 @EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
@@ -30,9 +26,7 @@ public class FlowCommonRequest extends BaseSceneElementRequest {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime endTime;
 
-    /**
-     * 源IP集合
-     */
+    
     @ApiModelProperty("源IP集合")
     private List<String> sourceIps;
 

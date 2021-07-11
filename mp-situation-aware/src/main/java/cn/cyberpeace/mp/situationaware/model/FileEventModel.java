@@ -17,13 +17,11 @@ import java.util.List;
 @NoArgsConstructor
 public class FileEventModel {
 
-    /**
-     * 文件路径
-     */
+    
     @ApiModelProperty("文件路径")
     private String filePath;
 
-    //文件大小
+    
     @ApiModelProperty("文件大小")
     private String size;
 
@@ -33,22 +31,18 @@ public class FileEventModel {
     @ApiModelProperty("变更后md5值")
     private String md5After;
 
-    //文件的时间
+    
     @ApiModelProperty("文件时间")
     private LocalDateTime updateTime;
 
     @ApiModelProperty("用户")
     private String user;
 
-    /**
-     * 文件事件类型
-     */
+    
     @ApiModelProperty("变更描述")
     private String action;
 
-    /**
-     * 文件事件类型
-     */
+    
     @ApiModelProperty("文件事件类型")
     private FileEventType fileEventType;
 

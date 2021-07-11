@@ -9,22 +9,12 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/12/6 13:51
- */
+
 @Slf4j
 public class SegmentCount2IntervalSecondsUtil {
 
 
-    /**
-     * 按照给定分段数平均切分时间段，并计算分段之后的秒数
-     * @param start
-     * @param end
-     * @param segmentCount
-     * @return
-     */
+    
     public static Long calculateIntervalSeconds(LocalDateTime start, LocalDateTime end, int segmentCount) {
         if (segmentCount < 1) {
             log.error("segmentCount should not less than 1! {}", segmentCount);
@@ -38,21 +28,11 @@ public class SegmentCount2IntervalSecondsUtil {
 
         Duration duration = Duration.between(start, end);
         Long millis = duration.toMillis();
-        // 时间间隔(segmentCount -1)，为确保余数，再加上1
+        
         Long intervalMilis = millis / (segmentCount - 1);
         Long intervalSeconds = intervalMilis / 1000;
 
-        /*List<LocalDateTime> timeSegs = new ArrayList<>();
-        for (int i = 0; i < segmentCount - 1; i++) {
-            timeSegs.add(start);
-            start = start.plusSeconds(intervalSeconds);
-        }
-
-        timeSegs.add(end);
-
-        for (int i = 0; i < timeSegs.size(); i++) {
-            log.info(" i:{}, intervalSeconds:{}, timeSegs:{}", i, intervalSeconds, timeSegs.get(i));
-        }*/
+        
 
         if (intervalSeconds == 0) {
             return 1L;

@@ -16,11 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2021/10/12
- */
+
 class Node2NodeConnectConverter implements IConverter {
 
     private List<NodeElementParseResult> nodes;
@@ -42,7 +38,7 @@ class Node2NodeConnectConverter implements IConverter {
                 continue;
             }
             for (var net : node.getNet()) {
-                // 和网络的连接已由 NetworkElementConverter 处理
+                
                 if (networkIds.contains(net.getId())) {
                     continue;
                 }
@@ -62,12 +58,12 @@ class Node2NodeConnectConverter implements IConverter {
             String to = node2Node.getTo();
             var portFrom = node2NodePort.get(from + "_" + to);
             var portTo = node2NodePort.get(to + "_" + from);
-            // 创建连线
+            
             SceneConfigElementPortConnectionBO connectionBO = new SceneConfigElementPortConnectionBO();
             connectionBO.setId(TextUtils.uuid());
             connectionBO.setSource(portFrom.getId());
             connectionBO.setTarget(portTo.getId());
-            // 传递连线的前端属性
+            
             if (container.getPortId2Protocol().get(portFrom.getId()) != null) {
                 var vertices = container.getPortId2Protocol().get(portFrom.getId()).getVertices();
                 if (StringUtils.isNotEmpty(vertices)) {

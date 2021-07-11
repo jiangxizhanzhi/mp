@@ -12,15 +12,11 @@ import java.util.List;
 @AllArgsConstructor
 public class ISOUploadVO {
 
-    /**
-     * 临时文件UUID
-     */
+    
     @ApiModelProperty("临时文件UUID")
     private String tmpdirUuid;
 
-    /**
-     * 上传云平台生成的文件名
-     */
+    
     @ApiModelProperty("上传云平台生成的文件名")
     private String fileName;
 }

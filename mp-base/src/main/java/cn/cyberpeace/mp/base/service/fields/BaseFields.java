@@ -10,21 +10,19 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * 定义对model业务处理字段，实现类只需要具体定义对应的静态字段
- */
+
 public abstract class BaseFields {
-    /** 全部字段 */
+    
     public static final DynamicFields allFields = null;
-    /** 业务可见字段 */
+    
     public static final DynamicFields availableFields = null;
-    /** 业务隐藏字段 */
+    
     public static final DynamicFields hiddenFields = null;
-    /** 业务只读字段 */
+    
     public static final DynamicFields readonlyFields = null;
-    /** 业务可搜索字段 */
+    
     public static final DynamicFields searchFields = null;
-    /** 业务可排序字段 */
+    
     public static final DynamicFields orderFields = null;
 
     private DynamicFields getDefinedFields(String fieldName) {
@@ -71,38 +69,22 @@ public abstract class BaseFields {
         return getDefinedFields("orderFields");
     }
 
-    /**
-     * 获取预期的有效字段
-     * @param uncertainFields 预期字段
-     * @return 有效字段
-     */
+    
     public DynamicFields getValidFields(String[] uncertainFields) {
         return getIntersectionFields("availableFields", uncertainFields);
     }
 
-    /**
-     * 获取预期的有效搜索字段
-     * @param uncertainFields 预期字段
-     * @return 有效字段
-     */
+    
     public DynamicFields getValidSearchFields(String[] uncertainFields) {
         return getIntersectionFields("searchFields", uncertainFields);
     }
 
-    /**
-     * 获取预期的有效排序字段
-     * @param uncertainFields 预期字段
-     * @return 有效字段
-     */
+    
     public DynamicFields getValidOrderFields(String[] uncertainFields) {
         return getIntersectionFields("orderFields", uncertainFields);
     }
 
-    /**
-     * 获取预期的有效排序字段
-     * @param uncertainOrders 预期字段
-     * @return 有效字段
-     */
+    
     public String[] getValidOrders(String[] uncertainOrders) {
         String[] validOrders = null;
         if (uncertainOrders != null && uncertainOrders.length > 0) {
@@ -131,10 +113,7 @@ public abstract class BaseFields {
         return validOrders;
     }
 
-    /**
-     * 清理只读字段值
-     * @param obj 数据对象
-     */
+    
     public void clearNotWritableFields(Object obj) {
         DynamicFields actualReadonlyFields = ClassUtils.getStaticFieldValue(getClass(), "readonlyFields",
                 DynamicFields.class);

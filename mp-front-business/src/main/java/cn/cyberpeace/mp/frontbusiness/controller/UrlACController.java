@@ -28,11 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/5/23 10:43
- */
+
 @Api(value = "接口访问控制", tags = "接口访问控制")
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/urlac")

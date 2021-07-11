@@ -39,11 +39,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * @Description: 系统配置管理接口
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Api(value = "配置管理接口", tags = "AUTH-配置管理接口")
 @Slf4j
 @RestController
@@ -57,9 +53,7 @@ public class SysConfigController {
     @Autowired
     private SysConfigCheckService checkService;
 
-    /**
-     * 文件上传客户端
-     */
+    
     @Qualifier("fastDfsFileServiceImpl")
     @Autowired
     private FileService fileService;
@@ -106,7 +100,7 @@ public class SysConfigController {
     @PostMapping("/updateall")
     @OperateLog(module = OpModuleEnums.SYSTEM, type = OpTypeEnums.UPDATE, title = "更新系统配置", target = OpTargetEnums.SYS_CONFIG)
     public ServiceResult updateAll(@RequestBody @NotEmpty List<SysConfigModel> configs) {
-        // 更新规则，如果key存在，就修改value值，如果key不存在，就忽略不改
+        
         checkService.updateCheck(configs);
 
         boolean success = sysConfigService.batchUpdateByKeyname(configs);
@@ -119,12 +113,7 @@ public class SysConfigController {
         }
     }
 
-    /**
-     * 系统logo导入
-     *
-     * @param file
-     * @return
-     */
+    
     @ApiOperation("系统logo导入")
     @ApiImplicitParam(name = "file", value = "logo图片", dataTypeClass = MultipartFile.class)
     @PostMapping(value = "/logo/upload")
@@ -137,12 +126,7 @@ public class SysConfigController {
         return fileService.uploadFile(file);
     }
 
-    /**
-     * VPN软件包导入
-     *
-     * @param file
-     * @return
-     */
+    
     @ApiOperation("VPN软件包导入")
     @ApiImplicitParam(name = "file", value = "vpn软件包", dataTypeClass = MultipartFile.class)
     @PostMapping(value = "/vpn/upload")

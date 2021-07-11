@@ -37,11 +37,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * @Description: 服务监控服务类
- * @Author qiaokang
- * @Date：2022/7/15 14:27
- */
+
 @Service
 @RequiredArgsConstructor
 public class ServiceMonitorService {
@@ -59,11 +55,7 @@ public class ServiceMonitorService {
     private final ImagesConverter imagesConverter;
 
 
-    /**
-     * 分页查询业务服务监控数据
-     * @param request
-     * @return
-     */
+    
     public ListObjResult<ServiceMonitorDto> bizServicePage(BizServicePageRequest request) {
         List<String> hostNameList = getActiveHostNameList(request.getHostName());
         if (CollectionUtils.isEmpty(hostNameList)) {
@@ -71,9 +63,9 @@ public class ServiceMonitorService {
         }
 
         List<ServiceMonitorDto> serviceMonitorDtos = serviceMonitorDataCollectionService.queryBizServiceMonitorData(hostNameList);
-        // 处理重启状态
+        
         processRestartingStatus(serviceMonitorDtos);
-        // 处理重启禁用状态
+        
         processRestartRestrict(serviceMonitorDtos, ServerMonitorConfig.businessSrvMonitors);
         this.changeServiceName(serviceMonitorDtos);
 
@@ -88,11 +80,7 @@ public class ServiceMonitorService {
         }
     }
 
-    /**
-     * 分页查询云平台服务监控数据
-     * @param request
-     * @return
-     */
+    
     public ListObjResult<ServiceMonitorDto> cpPage(CloudPlatformPageRequest request) {
         List<String> hostNameList = getActiveHostNameList(request.getHostName());
         if (CollectionUtils.isEmpty(hostNameList)) {
@@ -100,9 +88,9 @@ public class ServiceMonitorService {
         }
 
         List<ServiceMonitorDto> serviceMonitorDtos = serviceMonitorDataCollectionService.queryCPServiceMonitorData(hostNameList);
-        // 处理重启状态
+        
         processRestartingStatus(serviceMonitorDtos);
-        // 处理重启禁用状态
+        
         processRestartRestrict(serviceMonitorDtos, ServerMonitorConfig.cpCloudSrvMonitors);
         this.changeServiceName(serviceMonitorDtos);
 
@@ -117,26 +105,20 @@ public class ServiceMonitorService {
         }
     }
 
-    /**
-     * 替换服务名称
-     * @param serviceMonitorDtos
-     */
+    
     private void changeServiceName(List<ServiceMonitorDto> serviceMonitorDtos) {
         if (CollectionUtils.isNotEmpty(serviceMonitorDtos)) {
             serviceMonitorDtos.forEach(dto -> dto.setName(MessageCommon.get(dto.getName())));
         }
     }
 
-    /**
-     * 系统告警
-     * @return
-     */
+    
     public SystemAlarmVO getSystemAlarm() {
         CloudPlatformMonitorVO cloudPlatformMonitorVO = new CloudPlatformMonitorVO();
         BizServiceMonitorVO bizServiceMonitorVO = new BizServiceMonitorVO();
         ServerMonitorVO serverMonitorVO = new ServerMonitorVO();
 
-        // 查询当前生效的告警信息
+        
         List<SystemAlarmModel> enabledAlarms =
                 systemAlarmMapper.list(new HumanCondition().filterEqual(SystemAlarmModel::getAlarmStatus,
                         AlarmStatusEnum.ENABLED.toValue()));
@@ -149,14 +131,14 @@ public class ServiceMonitorService {
             serverMonitorVO.setAlarmCount(serverAlarmCount.intValue());
         }
 
-        // 服务器监控
+        
         List<String> hostNameList = new ArrayList<>();
         BasePageBO<HypervisorBO> modelPage = hypervisorConverter.page(new BasePageDTO());
         if (CollectionUtils.isNotEmpty(modelPage.getList())) {
-            // 获取所有物理主机服务状态
+            
             CloudPlatformPageResult<ServiceStatus> serviceStatusModel = imagesConverter.listServiceStatus();
             modelPage.getList().forEach(model -> {
-                // 忽略DOWN状态的节点查询
+                
                 if (Objects.equals(CloudPlatformEnum.UP.getState(), model.getState())) {
                     hostNameList.add(model.getName());
                 }
@@ -175,7 +157,7 @@ public class ServiceMonitorService {
             serverMonitorVO.setErrorCount(errorCount);
             serverMonitorVO.setTotalCount(totalCount);
 
-            // 云平台服务监控
+            
             List<ServiceMonitorDto> cpMonitorDtos = serviceMonitorDataCollectionService.queryCPServiceMonitorData(hostNameList);
             processRestartingStatus(cpMonitorDtos);
 
@@ -187,7 +169,7 @@ public class ServiceMonitorService {
                 cloudPlatformMonitorVO.setErrorCount(cpErrorCount);
             }
 
-            // 业务服务监控
+            
             List<ServiceMonitorDto> bizMonitorDtos = serviceMonitorDataCollectionService.queryBizServiceMonitorData(hostNameList);
             processRestartingStatus(bizMonitorDtos);
 
@@ -205,10 +187,7 @@ public class ServiceMonitorService {
 
 
 
-    /**
-     * 如果在重启有效期内，状态为不正常的状态的，统一替换为重启状态
-     * @param serviceMonitorDtos
-     */
+    
     private void processRestartingStatus(List<ServiceMonitorDto> serviceMonitorDtos) {
         TimedCache<String, ServiceRestartStatusDto> timedCache = monitorScriptControlService.getStatusCache();
         if (CollUtil.isEmpty(timedCache)) {
@@ -224,10 +203,10 @@ public class ServiceMonitorService {
             if (Objects.nonNull(dto.getScanTime()) && Objects.nonNull(statusDto.getRestartTime())) {
 
                 if (dto.getScanTime().isAfter(statusDto.getRestartTime().plusSeconds(5)) && Objects.equals(dto.getState(), MonitorStateEnum.RUNNING.getDesc())) {
-                    // 重启之后的状态（重启时间延迟5秒，给脚本反应时间），且为RUNNING状态，则清除缓存
+                    
                     timedCache.remove(cacheKey);
                 } else {
-                    // 否则替换状态为RESTARTING
+                    
                     dto.setState(MonitorStateEnum.RESTARTING.getDesc());
                     dto.setUptime(0L);
                 }
@@ -240,7 +219,7 @@ public class ServiceMonitorService {
         List<String> hostNameList = new ArrayList<>();
 
         BasePageBO<HypervisorBO> modelPage = hypervisorConverter.page(new BasePageDTO());
-        // 忽略DOWN状态的节点查询
+        
         List<String> activeHostNames = modelPage.getList().stream()
                 .filter(m -> Objects.equals(CloudPlatformEnum.UP.getState(), m.getState()))
                 .map(HypervisorBO::getName)
@@ -260,12 +239,7 @@ public class ServiceMonitorService {
     }
 
 
-    /**
-     * 判断是否禁用重启按钮，该方法需要在processRestartingStatus()方法之后调用
-     * 如果某个服务在限制列表中，且状态为RUNNING或者RESTARTING，则禁止重启，既disableRestart=true
-     * @param serviceMonitorDtos
-     * @param monitorProbes
-     */
+    
     private void processRestartRestrict(List<ServiceMonitorDto> serviceMonitorDtos, List<ServerMonitorConfig.MonitorProbe> monitorProbes) {
         List<String> allRestrictSrvs = new ArrayList<>();
         monitorProbes.forEach(p -> {
@@ -278,13 +252,13 @@ public class ServiceMonitorService {
             dto.setDisableRestart(Boolean.FALSE);
 
             if (Objects.equals(MonitorStateEnum.RESTARTING.getDesc(), dto.getState())) {
-                // 重启中，重启按钮置灰
+                
                 dto.setDisableRestart(Boolean.TRUE);
             }
 
             if (CollUtil.isNotEmpty(allRestrictSrvs)) {
                 if (Objects.equals(MonitorStateEnum.RUNNING.getDesc(), dto.getState()) && allRestrictSrvs.contains(dto.getName())) {
-                    // 状态为RUNNING，且在限制列表中，则禁止重启，既disableRestart=true
+                    
                     dto.setDisableRestart(Boolean.TRUE);
                 }
             }
@@ -295,19 +269,16 @@ public class ServiceMonitorService {
         if (StringUtils.isBlank(sort)) {
             normalSort(serviceMonitorDtos);
         } else {
-            //customSort(serviceMonitorDtos, sort);
+            
         }
     }
 
-    /**
-     * 普通排序
-     * @param serviceMonitorDtos
-     */
+    
     private void normalSort(List<ServiceMonitorDto> serviceMonitorDtos) {
-        // 1. 不能重启的置后
+        
         serviceMonitorDtos.sort(Comparator.comparing(ServiceMonitorDto::getDisableRestart));
 
-        // 2. 状态为重启的置前
+        
         serviceMonitorDtos.sort(new Comparator<ServiceMonitorDto>() {
             @Override
             public int compare(ServiceMonitorDto o1, ServiceMonitorDto o2) {
@@ -315,7 +286,7 @@ public class ServiceMonitorService {
             }
         });
 
-        // 3. 如果同样是重启状态，则后重启的置前
+        
         serviceMonitorDtos.sort(new Comparator<ServiceMonitorDto>() {
             @Override
             public int compare(ServiceMonitorDto o1, ServiceMonitorDto o2) {

@@ -9,10 +9,7 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 import java.util.List;
 
-/**
- * 扩展虚拟机信息
- * @author wanggang
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,38 +19,26 @@ public class ExtVm implements Serializable {
     @ApiModelProperty("flavor信息")
     private String flavor;
 
-    /**
-     * 支持初始化
-     */
+    
     @ApiModelProperty("支持初始化")
     private Boolean initSupport;
 
-    /**
-     * 支持快速创建
-     */
+    
     @ApiModelProperty("支持快速创建")
     private Boolean quickCreateSupport;
 
-    /**
-     * 接入方式
-     */
+    
     @ApiModelProperty("接入方式")
     private List<AccessProtocol> accessProtocols;
 
-    /**
-     * 快速构建
-     */
+    
     private List<QuickCreateParam> quickCreateParams;
 
-    /**
-     * 额外信息
-     */
+    
     @ApiModelProperty("扩展信息")
     private Object extInfo;
 
-    /**
-     * 实例是否存在
-     */
+    
     @ApiModelProperty("实例是否存在")
     private Boolean instanceExist;
 
@@ -63,9 +48,7 @@ public class ExtVm implements Serializable {
     @ApiModelProperty("实例ID")
     private String instanceUuid;
 
-    /**
-     * 镜像状态 0:没有实例，1：创建中，2创建成功，3创建失败
-     */
+    
     @ApiModelProperty("实例状态")
     private Integer instanceState;
 

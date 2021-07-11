@@ -6,11 +6,7 @@ import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.devopscluster.model.SystemAlarmModel;
 import org.springframework.stereotype.Component;
 
-/**
- * @Description 告警信息Fields
- * @Author qiaokang
- * @Date 2022-07-18 17:35:04
- */
+
 @Component
 public class SystemAlarmFields extends BaseModelFields {
     public static final DynamicFields allFields = new DynamicFields(ClassUtils.getBeanClassFields(SystemAlarmModel.class));

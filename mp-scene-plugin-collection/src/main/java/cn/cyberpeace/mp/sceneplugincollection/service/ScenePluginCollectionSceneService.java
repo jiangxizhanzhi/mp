@@ -184,7 +184,7 @@ public class ScenePluginCollectionSceneService {
         if (CollectionUtils.isNotEmpty(queryParams.getSourceIps())) {
             request.setSourceIps(queryParams.getSourceIps());
         } else {
-//            request.setSourceMacs(batchSceneHandler.getFlowCollectedMacAddrs());
+
         }
 
         if (CollectionUtils.isNotEmpty(queryParams.getTargetIps())) {
@@ -194,7 +194,7 @@ public class ScenePluginCollectionSceneService {
         }
 
         request.setSecondsInterval(queryParams.getInterval());
-        // 查询时间段 默认使用场景创建到当前时间
+        
         if (StringUtils.isBlank(queryParams.getStartTime())) {
             request.setStartDateTime(batchSceneHandler.getEarliestStartTime());
         } else {
@@ -274,12 +274,12 @@ public class ScenePluginCollectionSceneService {
 
     public ListObjServiceResult<CollectionHostStateBO> listHostStates(String sceneId, HostStateQueryParams queryParams) {
         var sceneHandler = new SceneHandler(sceneId, null, false, null);
-        // 没有采集插件
+        
         CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         if (pluginHandler == null) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
-        // 构建探针名和节点的映射
+        
         List<SceneElementBO> srcElements = getSrcElements(sceneHandler, queryParams.getNodeIds());
         Map<String, SceneElementBO> agentName2Element = new HashMap<>();
         srcElements.forEach(srcElement -> {
@@ -292,59 +292,59 @@ public class ScenePluginCollectionSceneService {
             }
             agentName2Element.put(srcElement.getEid(), srcElement);
         });
-        // 没有探针
+        
         if (agentName2Element.isEmpty()) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
-        // 构建查询参数
+        
         var request = new WazuhMonitorEventsRequest();
         request.setPageNum(queryParams.getPage());
-        // todo 暂时最多取 1000 条
+        
         request.setPageSize(Optional.ofNullable(queryParams.getPageSize()).orElse(1000));
         request.setAgentNames(new ArrayList<>(agentName2Element.keySet()));
-        // 开始时间,默认为场景创建时间
+        
         request.setStartTime(Optional.ofNullable(queryParams.getStartTime()).orElse(sceneHandler.getScene().getCreateTime()));
-        // 结束时间,默认为当前时间
+        
         request.setEndTime(Optional.ofNullable(queryParams.getEndTime()).orElse(LocalDateTime.now()));
         return doQueryHostStateEventsWithTimeRange(sceneId, agentName2Element, request);
     }
 
 
     public ListObjServiceResult<CollectionHostStateBO> listHostStatesByAgentNames(List<String> agentNames, HostStateQueryParams queryParams) {
-        // 没有探针
+        
         if (CollectionUtil.isEmpty(agentNames)) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
-        // 构建查询参数
+        
         var request = new WazuhMonitorEventsRequest();
         request.setPageNum(queryParams.getPage());
         request.setPageSize(Optional.ofNullable(queryParams.getPageSize()).orElse(1000));
         request.setAgentNames(agentNames);
-        // 开始时间,默认为场景创建时间
+        
         request.setStartTime(Optional.ofNullable(queryParams.getStartTime()).orElse(LocalDateTime.now().minusHours(24)));
-        // 结束时间,默认为当前时间
+        
         request.setEndTime(Optional.ofNullable(queryParams.getEndTime()).orElse(LocalDateTime.now()));
         return doQueryHostStateEventsWithTimeRange(null, null, request);
     }
 
     public Map<String, List<CollectionHostStateBO>> mapHostStatesByAgentNames(List<String> agentNames, HostStateQueryParams queryParams) {
-        // 没有探针
+        
         if (CollectionUtil.isEmpty(agentNames)) {
             return Collections.emptyMap();
         }
-        // 构建查询参数
+        
         var request = new WazuhMonitorEventsRequest();
         int topSize = queryParams.getPageSize();
         request.setAgentNames(agentNames);
-        // 开始时间,默认为场景创建时间
+        
         request.setStartTime(Optional.ofNullable(queryParams.getStartTime()).orElse(LocalDateTime.now().minusHours(24)));
-        // 结束时间,默认为当前时间
+        
         request.setEndTime(Optional.ofNullable(queryParams.getEndTime()).orElse(LocalDateTime.now()));
         return doMapHostStateEventsWithTimeRange(null, null, request, queryParams.getPageSize());
     }
 
     private ListObjServiceResult<CollectionHostStateBO> doQueryHostStateEventsWithTimeRange(String sceneId, Map<String, SceneElementBO> agentName2Element, WazuhMonitorEventsRequest request) {
-        // 执行查询
+        
         List<WazuhHostStateModel> result = dataCollectionService.queryHostStateEventsWithTimeRange(request);
         List<CollectionHostStateBO> hostStates = result.stream().map(srcHostState -> {
             return hostStateModel2BO(sceneId, agentName2Element, srcHostState);
@@ -354,7 +354,7 @@ public class ScenePluginCollectionSceneService {
 
 
     private Map<String, List<CollectionHostStateBO>> doMapHostStateEventsWithTimeRange(String sceneId, Map<String, SceneElementBO> agentName2Element, WazuhMonitorEventsRequest request, int topSize) {
-        // 执行查询
+        
         Map<String, List<WazuhHostStateModel>> map = dataCollectionService.mapHostStatesByAgentNamesWithTimeRange(request, topSize);
         Map<String, List<CollectionHostStateBO>> convertedMap = new HashMap<>();
         map.forEach((agentName, result) -> {
@@ -376,17 +376,17 @@ public class ScenePluginCollectionSceneService {
         hostState.setCpuFreq(srcHostState.getCpuFreq());
         hostState.setCpuCount(srcHostState.getCpuCount());
         hostState.setCpuPercent(srcHostState.getCpuTotalPercent());
-        // 内存统一使用单位M
+        
         hostState.setMemoryTotal(this.byte2MB(srcHostState.getMemoryTotal()));
         hostState.setMemoryFree(this.byte2MB(srcHostState.getMemoryFree()));
         hostState.setMemoryPercent(srcHostState.getMemoryPercent());
-        // 磁盘统一使用单位G
+        
         hostState.setDiskSpace(this.byte2GB(srcHostState.getDiskTotal()));
         hostState.setDiskPercent(srcHostState.getDiskPercent());
         hostState.setDiskUsed(this.byte2GB(srcHostState.getDiskUsed()));
         hostState.setDiskUnused(this.byte2GB(srcHostState.getDiskUnused()));
         hostState.setTime(srcHostState.getTime());
-        // 网速
+        
         hostState.setDownloadSpeed(srcHostState.getDownloadSpeed());
         hostState.setUploadSpeed(srcHostState.getUploadSpeed());
         hostState.setDiskReadBytes(srcHostState.getDiskReadBytes());
@@ -395,7 +395,7 @@ public class ScenePluginCollectionSceneService {
         hostState.setMaxDownloadSpeed(srcHostState.getMaxDownloadSpeed());
         hostState.setMaxUploadSpeed(srcHostState.getMaxUploadSpeed());
         hostState.setMaxNetSpeed(srcHostState.getMaxNetSpeed());
-        // todo 进程，端口，网络连接，磁盘使用率
+        
         if (CollectionUtil.isNotEmpty(agentName2Element)) {
             var srcElement = agentName2Element.getOrDefault(srcHostState.getAgentName(), null);
             if (srcElement != null) {
@@ -407,13 +407,7 @@ public class ScenePluginCollectionSceneService {
         return hostState;
     }
 
-    /**
-     * 事件列表
-     *
-     * @param sceneId
-     * @param queryParams
-     * @return
-     */
+    
     public ListObjServiceResult<CollectionHostEventBO> listHostEvents(String sceneId, HostEventQueryParams queryParams) {
         log.info("sceneId:{}, scroll:{}", sceneId, queryParams.getScroll());
         var sceneHandler = new SceneHandler(sceneId, null, false, null);
@@ -438,7 +432,7 @@ public class ScenePluginCollectionSceneService {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
 
-        // catagories -> rule id set
+        
         List<String> ruleIdsByCatagories = new ArrayList<>();
         Map<String, String> ruleId2File = getRuleId2FileByCodes(queryParams.getCatagories()).getSource();
         if (CollectionUtils.isNotEmpty(ruleId2File.keySet())) {
@@ -446,7 +440,7 @@ public class ScenePluginCollectionSceneService {
             ruleIdsByCatagories.addAll(ruleIds);
         }
 
-        // appNames -> rule id set
+        
         List<String> ruleIdsByAppNames = new ArrayList<>();
         Map<String, String> ruleId2AppNames = getRuleId2FileByFiles(queryParams.getAppNames());
         if (CollectionUtils.isNotEmpty(ruleId2AppNames.keySet())) {
@@ -459,7 +453,7 @@ public class ScenePluginCollectionSceneService {
 
         WazuhEventRequest request = genWazuhEventRequest(queryParams, sceneHandler.getScene().getCreateTime(), new ArrayList<>(agentNameElementMap.keySet()));
         if (CollectionUtils.isNotEmpty(ruleIdsByCatagories) && CollectionUtils.isNotEmpty(ruleIdsByAppNames)) {
-            // 取交集
+            
             List<String> intersectionRuleIds = ruleIdsByCatagories.stream().filter(item -> ruleIdsByAppNames.contains(item)).distinct().collect(Collectors.toList());
             request.setRuleIds(intersectionRuleIds);
         } else {
@@ -516,21 +510,14 @@ public class ScenePluginCollectionSceneService {
         return new ListObjServiceResult<>(new ListObjResult<>(hostEvents, result.getTotal()));
     }
 
-    /**
-     * 生成Wazuh时间查询请求参数
-     *
-     * @param queryParams
-     * @param sceneCreateTime
-     * @param agentNames
-     * @return
-     */
+    
     public WazuhEventRequest genWazuhEventRequest(HostEventQueryParams queryParams, LocalDateTime sceneCreateTime, List<String> agentNames) {
         WazuhEventRequest request = new WazuhEventRequest();
         request.setPageNum(queryParams.getPage());
         request.setPageSize(queryParams.getPageSize());
         request.setAgentNames(agentNames);
 
-        // 查询时间段 默认使用场景创建到当前时间
+        
         if (StringUtils.isBlank(queryParams.getStartTime())) {
             request.setStartTime(sceneCreateTime);
         } else {
@@ -563,12 +550,7 @@ public class ScenePluginCollectionSceneService {
         return request;
     }
 
-    /**
-     * 滚动分页列表
-     *
-     * @param scrollId
-     * @return
-     */
+    
     public ListObjServiceResult<CollectionHostEventBO> scrollHostEvents(String sceneId, String scrollId, HostEventQueryParams queryParams) {
         log.info("sceneId:{}, scrollId:{}", sceneId, scrollId);
         var sceneHandler = new SceneHandler(sceneId, null, false, null);
@@ -631,82 +613,33 @@ public class ScenePluginCollectionSceneService {
         return new ListObjServiceResult<>(new ListObjResult<>(hostEvents, result.getTotal()));
     }
 
-    /**
-     * 安全等级分组查询采集流量的聚合统计数量
-     *
-     * @param sceneIds  场景id列表，不传默认为全部
-     * @param nodeIds   节点id列表，不传默认为全部
-     * @param startTime 开始时间
-     * @param endTime   结束时间
-     * @return 字段的聚合统计数量 Map<安全等级, 该字段值统计数量>
-     */
+    
     public ServiceResult<Map<String, Integer>> groupCountFlowByLevel(List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime) {
         return groupCountFlow(sceneIds, nodeIds, GroupCountFlowField.LEVEL, startTime, endTime, null, null);
     }
 
-    /**
-     * 安全类型分组查询采集流量的聚合统计数量
-     *
-     * @param sceneIds  场景id列表，不传默认为全部
-     * @param nodeIds   节点id列表，不传默认为全部
-     * @param startTime 开始时间
-     * @param endTime   结束时间
-     * @return 字段的聚合统计数量 Map<安全等级, 该字段值统计数量>
-     */
+    
     public ServiceResult<Map<String, Integer>> groupCountFlowByType(List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime, List<String> sourceIps, Integer topSize) {
         return groupCountFlow(sceneIds, nodeIds, GroupCountFlowField.TYPE, startTime, endTime, sourceIps, topSize);
     }
 
 
-    /**
-     * 事件类型分组查询主机事件的聚合统计数量
-     *
-     * @param sceneIds  场景id列表，不传默认为全部
-     * @param nodeIds   节点id列表，不传默认为全部
-     * @param startTime 开始时间
-     * @param endTime   结束时间
-     * @return 字段的聚合统计数量 Map<事件类型, 该字段值统计数量>
-     */
+    
     public ServiceResult<Map<String, Integer>> groupCountHostEventByEventType(List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime) {
         return groupCountHostEvent(sceneIds, nodeIds, GroupCountHostEventField.EVENT_TYPE, startTime, endTime);
     }
 
-    /**
-     * 节点名称分组查询主机事件的聚合统计数量
-     *
-     * @param sceneIds  场景id列表，不传默认为全部
-     * @param nodeIds   节点id列表，不传默认为全部
-     * @param startTime 开始时间
-     * @param endTime   结束时间
-     * @return 字段的聚合统计数量 Map<节点名称, 该字段值统计数量>
-     */
+    
     public ServiceResult<Map<String, Integer>> groupCountHostEventByNodeName(List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime) {
         return groupCountHostEvent(sceneIds, nodeIds, GroupCountHostEventField.NODE_NAME, startTime, endTime);
     }
 
-    /**
-     * 时间区间统计流量次数
-     *
-     * @param sceneIds  场景id列表，不传默认为全部
-     * @param nodeIds   节点id列表，不传默认为全部
-     * @param startTime 开始时间
-     * @param endTime   结束时间
-     * @return 聚合统计结果
-     */
+    
     public ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> timeIntervalCountFlow(List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime) {
         return new ServiceResult<>(new ArrayList<>());
     }
 
-    /**
-     * 时间区间统计流量大小
-     *
-     * @param sceneIds        场景id列表，不传默认为全部
-     * @param nodeIds         节点id列表，不传默认为全部
-     * @param startTime       开始时间
-     * @param endTime         结束时间
-     * @param intervalSeconds 每{intervalSeconds}秒统计一条数据
-     * @return 聚合统计结果
-     */
+    
     public ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> timeIntervalSumFlowSize(List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime, int intervalSeconds, List<String> sourceIps, Integer type) {
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIds, nodeIds);
         if (CollectionUtils.isEmpty(batchSceneHandler.getFlowCollectors())) {
@@ -717,11 +650,11 @@ public class ScenePluginCollectionSceneService {
             log.info("{} query time interval sum flow size,sceneIds:{},nodeIds:{},no enabled macAddr", LOG_PREFIX, JsonCommon.stringify(sceneIds), JsonCommon.stringify(nodeIds));
             return new ServiceResult<>(new ArrayList<>());
         }
-        // 构造参数
+        
         FlowAnalysisRequest request = new FlowAnalysisRequest();
         request.setGroupList(batchSceneHandler.getFlowCollectors());
         if (CollectionUtils.isEmpty(sourceIps)) {
-//            request.setSourceMacs(batchSceneHandler.getFlowCollectedMacAddrs());
+
         } else {
             request.setSourceIps(sourceIps);
         }
@@ -730,7 +663,7 @@ public class ScenePluginCollectionSceneService {
         request.setEndDateTime(Optional.ofNullable(endTime).orElse(LocalDateTime.now()));
         request.setSecondsInterval(intervalSeconds);
         request.setSeverityEnum(SeverityEnum.ALL);
-        // 执行查询
+        
         List<AttackDateHistogramNetworkBytesBO> bos;
         if (Objects.isNull(type) || NumberUtils.INTEGER_ZERO.equals(type)) {
             bos = flowAnalysisService.sumNetworkBytesByDateHistogramTimestamp(request);
@@ -749,12 +682,7 @@ public class ScenePluginCollectionSceneService {
         return new ServiceResult<>(result);
     }
 
-    /**
-     * 模拟流量
-     *
-     * @param params
-     * @return
-     */
+    
     public ServiceResult simulation(FlowSimulationParams params) {
         List<String> sceneIds = params.getSceneIds();
 
@@ -777,7 +705,7 @@ public class ScenePluginCollectionSceneService {
             return new ServiceResult<>(new ArrayList<>());
         }
 
-        // 构造参数
+        
         FlowSimulationRequest request = new FlowSimulationRequest();
         request.setGroup(flowCollectors.get(0));
         request.setSourceIp(sourceIp);
@@ -805,12 +733,7 @@ public class ScenePluginCollectionSceneService {
         return new ServiceResult<>();
     }
 
-    /**
-     * 统计受攻击端口信息
-     *
-     * @param params
-     * @return
-     */
+    
     public ServiceResult<List<FlowGroupPortWithProtocolBO>> groupByDestinationPortWithProtocol(FlowGroupByDestinationPortParams params) {
         List<String> sceneIds = params.getSceneIds();
 
@@ -831,11 +754,11 @@ public class ScenePluginCollectionSceneService {
             log.info("{} query time interval sum flow size,sceneIds:{},nodeIds:{},no enabled macAddr", LOG_PREFIX, JsonCommon.stringify(sceneIds), JsonCommon.stringify(nodeIds));
             return new ServiceResult<>(new ArrayList<>());
         }
-        // 构造参数
+        
         FlowAnalysisRequest request = new FlowAnalysisRequest();
         request.setGroupList(batchSceneHandler.getFlowCollectors());
         if (CollectionUtils.isEmpty(sourceIps)) {
-//            request.setSourceMacs(batchSceneHandler.getFlowCollectedMacAddrs());
+
         } else {
             request.setSourceIps(sourceIps);
         }
@@ -844,7 +767,7 @@ public class ScenePluginCollectionSceneService {
         request.setEndDateTime(Optional.ofNullable(endTime).orElse(LocalDateTime.now()));
         request.setSeverityEnum(SeverityEnum.ALL);
         request.setTopSize(params.getTopSize());
-        // 执行查询
+        
         List<AttackPortAggregationBO> boList = flowAnalysisService.groupByDestinationPortWithProtocol(request);
 
         List<FlowGroupPortWithProtocolBO> result = boList.stream().map(v -> {
@@ -858,12 +781,7 @@ public class ScenePluginCollectionSceneService {
         return new ServiceResult<>(result);
     }
 
-    /**
-     * 统计主机状态
-     *
-     * @param params
-     * @return
-     */
+    
     public ServiceResult<List<FlowGroupByDestinationIpAndSeverityBO>> groupByDestinationIpAndSeverity(FlowGroupByDestinationPortParams params) {
         List<String> sceneIds = params.getSceneIds();
 
@@ -884,7 +802,7 @@ public class ScenePluginCollectionSceneService {
             log.info("{} query time interval sum flow size,sceneIds:{},nodeIds:{},no enabled macAddr", LOG_PREFIX, JsonCommon.stringify(sceneIds), JsonCommon.stringify(nodeIds));
             return new ServiceResult<>(new ArrayList<>());
         }
-        // 构造参数
+        
         FlowAnalysisRequest request = new FlowAnalysisRequest();
         request.setGroupList(batchSceneHandler.getFlowCollectors());
         if (CollectionUtils.isNotEmpty(sourceIps)) {
@@ -894,7 +812,7 @@ public class ScenePluginCollectionSceneService {
         request.setStartDateTime(Optional.ofNullable(startTime).orElse(batchSceneHandler.getEarliestStartTime()));
         request.setEndDateTime(Optional.ofNullable(endTime).orElse(LocalDateTime.now()));
         request.setSeverityEnum(SeverityEnum.ALL);
-        // 执行查询
+        
         List<AttackSeverityAndDestinationIpAggregationBO> boList = flowAnalysisService.groupByDestinationIpAndSeverity(request);
 
         List<AttackSeverityAndDestinationIpAggregationBO> sortedList = boList.stream().sorted(Comparator.comparing(AttackSeverityAndDestinationIpAggregationBO::getSeverity)).collect(Collectors.toList());
@@ -919,16 +837,7 @@ public class ScenePluginCollectionSceneService {
         return new ServiceResult<>(resultList);
     }
 
-    /**
-     * 时间区间统计主机cpu占用平均值
-     *
-     * @param sceneIds        场景id列表，不传默认为全部
-     * @param nodeIds         节点id列表，不传默认为全部
-     * @param startTime       开始时间
-     * @param endTime         结束时间
-     * @param intervalSeconds 每{intervalSeconds}秒统计一条数据
-     * @return 聚合统计结果
-     */
+    
     public ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> timeIntervalAvgHostCpuPercent(List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime, int intervalSeconds) {
         List<IntervalSizeBO<LocalDateTime, Double>> result = this.timeIntervalAvgBy(sceneIds, nodeIds, startTime, endTime, intervalSeconds, (state) -> state.getCpuPercent());
         return new ServiceResult<>(result);
@@ -939,16 +848,7 @@ public class ScenePluginCollectionSceneService {
         return new ServiceResult<>(result);
     }
 
-    /**
-     * 时间区间统计主机内存占用平均值
-     *
-     * @param sceneIds       场景id列表，不传默认为全部
-     * @param nodeIds        节点id列表，不传默认为全部
-     * @param startTime      开始时间
-     * @param endTime        结束时间
-     * @param intervalNumber 间隔数量
-     * @return 聚合统计结果
-     */
+    
     public ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> timeIntervalAvgHostMemoryPercent(List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime, int intervalNumber) {
         List<IntervalSizeBO<LocalDateTime, Double>> result = this.timeIntervalAvgBy(sceneIds, nodeIds, startTime, endTime, intervalNumber, (state) -> state.getMemoryPercent());
         return new ServiceResult<>(result);
@@ -959,77 +859,42 @@ public class ScenePluginCollectionSceneService {
         return new ServiceResult<>(result);
     }
 
-    /**
-     * 时间区间统计主机磁盘占用平均值
-     *
-     * @param sceneIds       场景id列表，不传默认为全部
-     * @param nodeIds        节点id列表，不传默认为全部
-     * @param startTime      开始时间
-     * @param endTime        结束时间
-     * @param intervalNumber 间隔数量
-     * @return 聚合统计结果
-     */
+    
     public ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> timeIntervalAvgHostDiskPercent(List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime, int intervalNumber) {
-        // todo 主机磁盘使用率
+        
         List<IntervalSizeBO<LocalDateTime, Double>> result = this.timeIntervalAvgBy(sceneIds, nodeIds, startTime, endTime, intervalNumber, (state) -> state.getDiskPercent());
         return new ServiceResult<>(result);
     }
 
     public ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> timeIntervalLatestHostDiskPercent(List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime, int intervalNumber) {
-        // todo 主机磁盘使用率
+        
         List<IntervalSizeBO<LocalDateTime, Double>> result = this.timeIntervalLatestBy(sceneIds, nodeIds, startTime, endTime, intervalNumber, (state) -> state.getDiskPercent());
         return new ServiceResult<>(result);
     }
 
-    /**
-     * 根据agentNames查询资源使用率
-     *
-     * @param agentNames
-     * @param startTime
-     * @param endTime
-     * @param intervalNumber
-     * @param execCal
-     * @return
-     */
+    
     public ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> timeIntervalAvgPercentByAgentNames(List<String> agentNames, LocalDateTime startTime, LocalDateTime endTime, int intervalNumber, Function<CollectionHostStateBO, Double> execCal) {
         List<IntervalSizeBO<LocalDateTime, Double>> result = this.timeIntervalAvgByAgentNames(agentNames, startTime, endTime, intervalNumber, execCal);
         return new ServiceResult<>(result);
     }
 
-    /**
-     * @param sceneIds        场景id列表，不传默认为全部
-     * @param nodeIds         节点id列表，不传默认为全部
-     * @param startTime       开始时间
-     * @param endTime         结束时间
-     * @param intervalSeconds 间隔数量
-     * @param execCal         查询使用的数据
-     * @return
-     */
+    
     public List<IntervalSizeBO<LocalDateTime, Double>> timeIntervalAvgBy(List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime, int intervalSeconds, Function<CollectionHostStateBO, Double> execCal) {
-        //todo 暂时先支持一个场景的查询
+        
         HostStateQueryParams params = new HostStateQueryParams();
         params.setNodeIds(nodeIds);
-        // 为计算平均值,往前多取一个周期的数据
+        
         params.setStartTime(startTime.minus(intervalSeconds, ChronoUnit.SECONDS));
         params.setEndTime(endTime);
         var queryResult = this.listHostStates(sceneIds.get(0), params).getSource();
         return processIntervalSizeBOS(startTime, intervalSeconds, execCal, queryResult, false);
     }
 
-    /**
-     * 查询每个周期内最新的数据
-     * @param sceneIds
-     * @param nodeIds
-     * @param startTime
-     * @param endTime
-     * @param intervalSeconds
-     * @param execCal
-     * @return
-     */
+    
     public List<IntervalSizeBO<LocalDateTime, Double>> timeIntervalLatestBy(List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime, int intervalSeconds, Function<CollectionHostStateBO, Double> execCal) {
         HostStateQueryParams params = new HostStateQueryParams();
         params.setNodeIds(nodeIds);
-        // 为计算平均值,往前多取一个周期的数据
+        
         params.setStartTime(startTime.minus(intervalSeconds, ChronoUnit.SECONDS));
         params.setEndTime(endTime);
         var queryResult = this.listHostStates(sceneIds.get(0), params).getSource();
@@ -1038,9 +903,9 @@ public class ScenePluginCollectionSceneService {
 
 
     public List<IntervalSizeBO<LocalDateTime, Double>> timeIntervalAvgByAgentNames(List<String> agentNames, LocalDateTime startTime, LocalDateTime endTime, int intervalSeconds, Function<CollectionHostStateBO, Double> execCal) {
-        //todo 暂时先支持一个场景的查询
+        
         HostStateQueryParams params = new HostStateQueryParams();
-        // 为计算平均值,往前多取一个周期的数据
+        
         params.setStartTime(startTime.minus(intervalSeconds, ChronoUnit.SECONDS));
         params.setEndTime(endTime);
         var queryResult = this.listHostStatesByAgentNames(agentNames, params).getSource();
@@ -1052,7 +917,7 @@ public class ScenePluginCollectionSceneService {
             return new ArrayList<>();
         }
         List<CollectionHostStateBO> list = queryResult.getObjs();
-        // 按时间升序排列
+        
         Collections.sort(list, Comparator.comparing(CollectionHostStateBO::getTime));
         LocalDateTime tmpMaxTime = startTime;
         BigDecimal tmpValue = null;
@@ -1064,7 +929,7 @@ public class ScenePluginCollectionSceneService {
         while (index < list.size()) {
             CollectionHostStateBO state = list.get(index);
             if (state.getTime().isBefore(tmpMaxTime)) {
-                // 数据属于当前周期,计算结果并指向下一个数据
+                
                 index++;
                 double value = execCal.apply(state);
                 if (Boolean.TRUE.equals(latestData)) {
@@ -1075,14 +940,14 @@ public class ScenePluginCollectionSceneService {
                     tmpSize = Optional.ofNullable(tmpSize).orElse(BigDecimal.ZERO).add(BigDecimal.ONE);
                 }
             } else {
-                // 数据不属于当前周期,记录当前周期结果,并指向下一个周期
-                // 当前周期有数据则记录
+                
+                
                 if (tmpValue != null) {
                     result.add(new IntervalSizeBO<LocalDateTime, Double>(tmpMaxTime, tmpMaxTime, tmpValue.divide(tmpSize, 10, RoundingMode.HALF_DOWN).doubleValue()));
                 } else if (tmpLastValue != null) {
                     result.add(new IntervalSizeBO<LocalDateTime, Double>(tmpMaxTime, tmpMaxTime, tmpLastValue.divide(tmpLastSize, 10, RoundingMode.HALF_DOWN).doubleValue()));
                 }
-                // 进入下一个周期
+                
                 tmpMaxTime = tmpMaxTime.plus(intervalSeconds, ChronoUnit.SECONDS);
                 tmpLastSize = tmpSize;
                 tmpLastValue = tmpValue;
@@ -1090,7 +955,7 @@ public class ScenePluginCollectionSceneService {
                 tmpValue = null;
             }
         }
-        // 记录最后一个数据
+        
         if (tmpValue != null) {
             result.add(new IntervalSizeBO<LocalDateTime, Double>(tmpMaxTime, tmpMaxTime, tmpValue.divide(tmpSize, 10, RoundingMode.HALF_DOWN).doubleValue()));
         }
@@ -1140,17 +1005,17 @@ public class ScenePluginCollectionSceneService {
                 flowBO.setTargetNodeName(ipElementMap.get(ip).getName());
                 flowBO.setSceneId(mac2SceneId.get(ip));
             }
-//            if (CollectionUtils.isNotEmpty(flowLogBO.getDestination().getMac())) {
-//                for (int i = 0; i < flowLogBO.getDestination().getMac().size(); i++) {
-//                    String mac = flowLogBO.getDestination().getMac().get(i);
-//                    if (mac2ElementMap.containsKey(mac)) {
-//                        flowBO.setTargetNodeId(mac2ElementMap.get(mac).getId());
-//                        flowBO.setTargetNodeName(mac2ElementMap.get(mac).getName());
-//                        flowBO.setSceneId(mac2SceneId.get(mac));
-//                        break;
-//                    }
-//                }
-//            }
+
+
+
+
+
+
+
+
+
+
+
         }
         if (flowLogBO.getSuricata() != null) {
             List<String> category = flowLogBO.getSuricata().getCategory();
@@ -1194,30 +1059,12 @@ public class ScenePluginCollectionSceneService {
         return enableMac;
     }
 
-    /**
-     * TODO 分组查询主机事件的聚合统计数量
-     *
-     * @param sceneIds   场景id列表，不传默认为全部
-     * @param nodeIds    节点id列表，不传默认为全部
-     * @param groupField 分组聚合字段类型
-     * @param startTime  开始时间
-     * @param endTime    结束时间
-     * @param <T>        分组聚合字段的值类型
-     * @return 字段的聚合统计数量 Map<字段值, 该字段值统计数量>
-     */
+    
     private <T> ServiceResult<Map<T, Integer>> groupCountHostEvent(List<String> sceneIds, List<String> nodeIds, String groupField, LocalDateTime startTime, LocalDateTime endTime) {
         return new ServiceResult<>(new HashMap<>());
     }
 
-    /**
-     * TODO 分组查询采集流量的聚合统计数量
-     *
-     * @param sceneIds  场景id列表，不传默认为全部
-     * @param nodeIds   节点id列表，不传默认为全部
-     * @param startTime 开始时间
-     * @param endTime   结束时间
-     * @return 字段的聚合统计数量 Map<字段值, 该字段值统计数量>
-     */
+    
     private <T> ServiceResult<Map<T, Integer>> groupCountFlow(List<String> sceneIds, List<String> nodeIds, String groupField, LocalDateTime startTime, LocalDateTime endTime, List<String> sourceIps, Integer topSize) {
         FlowAnalysisRequest request = new FlowAnalysisRequest();
         if (GroupCountFlowField.LEVEL.equals(groupField)) {
@@ -1236,7 +1083,7 @@ public class ScenePluginCollectionSceneService {
         if (CollectionUtils.isNotEmpty(sourceIps)) {
             request.setSourceIps(sourceIps);
         } else {
-//            request.setSourceMacs(batchSceneHandler.getFlowCollectedMacAddrs());
+
         }
         request.setDestinationIps(batchSceneHandler.getAllIpAddrs());
         request.setTopSize(topSize);
@@ -1262,19 +1109,19 @@ public class ScenePluginCollectionSceneService {
 
     public ServiceResult<List<FlowAttackCountBO>> groupCountFlowAndNodeInfo(List<String> sceneIds, FlowGroupCountParams params) {
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIds, null);
-        // 场景均未开启流量采集
+        
         if (CollectionUtils.isEmpty(batchSceneHandler.getFlowCollectors())) {
             return new ServiceResult<>(new ArrayList<>());
         }
-        // 拼接参数
+        
         FlowAnalysisRequest request = new FlowAnalysisRequest();
         request.setGroupList(batchSceneHandler.getFlowCollectors());
-        // 起止时间参数
+        
         LocalDateTime fStartTime = Optional.ofNullable(params.getStartTime()).orElse(batchSceneHandler.getEarliestStartTime());
         LocalDateTime fEndTime = Optional.ofNullable(params.getEndTime()).orElse(LocalDateTime.now());
         request.setStartDateTime(fStartTime);
         request.setEndDateTime(fEndTime);
-        // 数据过滤地址参数
+        
         List<String> paramsAddress = params.getQueryAddress();
         Integer queryTopSize = null;
         if (GroupCountFlowField.SOURCE_IP.equals(params.getQueryType())) {
@@ -1293,7 +1140,7 @@ public class ScenePluginCollectionSceneService {
             log.error("wrong params for groupCountFlowAndNodeInfo , params is {}", JsonCommon.stringify(params));
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
-        // topN 参数,上一层指定的优先
+        
         queryTopSize = Optional.ofNullable(params.getTopSize()).orElse(queryTopSize);
         request.setTopSize(queryTopSize);
         List<AttackWayAggregationBO> aggregationBOS = flowAnalysisService.topByAggregationTypeEnum(request);
@@ -1386,7 +1233,7 @@ public class ScenePluginCollectionSceneService {
         WazuhMonitorEventsRequest wazuhRequest = new WazuhMonitorEventsRequest();
         wazuhRequest.setAgentNames(Lists.newArrayList(nodeId2Eidmap.get(listPageInfoQueryParams.getNodeIds().get(0))));
         wazuhRequest.setPageSize(1);
-        // 默认24小时
+        
         LocalDateTime endTime = LocalDateTime.now();
         if (StringUtils.isNotEmpty(listPageInfoQueryParams.getStartTime())) {
             wazuhRequest.setStartTime(TimeUtils.stringToLocalDateTime(listPageInfoQueryParams.getStartTime()));
@@ -1429,7 +1276,7 @@ public class ScenePluginCollectionSceneService {
         WazuhMonitorEventsRequest wazuhRequest = new WazuhMonitorEventsRequest();
         wazuhRequest.setAgentNames(Lists.newArrayList(nodeId2Eidmap.get(listPageInfoQueryParams.getNodeIds().get(0))));
         wazuhRequest.setPageSize(1);
-        // 默认24小时
+        
         LocalDateTime endTime = LocalDateTime.now();
         wazuhRequest.setStartTime(endTime.minusHours(collectionAppConfig.getHoursRange()));
         wazuhRequest.setEndTime(endTime);
@@ -1480,8 +1327,8 @@ public class ScenePluginCollectionSceneService {
         if (Objects.isNull(collectorBaseRequest.getAgentName())) {
             return new ListObjServiceResult(new ListObjResult<>(Collections.emptyList(), 0).asResult()).asResult();
         }
-        //pageInfo = sysCollectorService.pageNetifaces(collectorBaseRequest);
-        //return new ListObjServiceResult<>(new ListObjResult<>(pageInfo.getList(), (int) pageInfo.getTotal()).asResult()).asResult();
+        
+        
         return sysCollectorService.pageNetifaces(collectorBaseRequest);
     }
 
@@ -1496,7 +1343,7 @@ public class ScenePluginCollectionSceneService {
         WazuhMonitorEventsRequest wazuhRequest = new WazuhMonitorEventsRequest();
         wazuhRequest.setAgentNames(Lists.newArrayList(nodeId2Eidmap.get(listPageInfoQueryParams.getNodeIds().get(0))));
         wazuhRequest.setPageSize(1);
-        // 默认24小时
+        
         LocalDateTime endTime = LocalDateTime.now();
         wazuhRequest.setStartTime(endTime.minusHours(collectionAppConfig.getHoursRange()));
         wazuhRequest.setEndTime(endTime);
@@ -1534,19 +1381,14 @@ public class ScenePluginCollectionSceneService {
         return new ServiceResult<>(changedCount);
     }
 
-    /**
-     * 查询场景中所有启动探针的节点列表
-     *
-     * @param sceneId
-     * @return
-     */
+    
     public ServiceResult<List<SceneElementBO>> listProbeEnabledElementBOs(String sceneId) {
         log.info("sceneId:{}", sceneId);
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(CollectionUtil.toList(sceneId), null);
-        // 查询场景中所有开启探针的agentNames集合
+        
         Map<String, String> nodeId2Eidmap = batchSceneHandler.getProbeEnabledNodeId2EidMap();
 
-        // 根据每一个有效的eid(agentName)查询ElementBO
+        
         List<SceneElementBO> elementBOS = nodeId2Eidmap.values().stream().map(eid -> batchSceneHandler.getNodeByEid(eid)).collect(Collectors.toList());
         return new ServiceResult<>(elementBOS);
     }
@@ -1591,16 +1433,12 @@ public class ScenePluginCollectionSceneService {
         return new ServiceResult<>(sceneConfigAsset);
     }
 
-    /**
-     * 清楚探针采集和流量采集的数据
-     *
-     * @param sceneId
-     */
+    
     public void asyncCleanProbeData(String sceneId) {
         TaskCommon.executeTask(() -> {
             BatchSceneHandler batchSceneHandler = new BatchSceneHandler(Arrays.asList(sceneId), null);
 
-            //删除流量采集数据
+            
             List<String> flowCollectors = batchSceneHandler.getFlowCollectors();
             if (CollectionUtils.isNotEmpty(flowCollectors)) {
                 flowAnalysisService.delete(flowCollectors);
@@ -1611,7 +1449,7 @@ public class ScenePluginCollectionSceneService {
                 }
             }
 
-            // 删除采集的数据
+            
             List<String> probeEnabledEid = new ArrayList<>(batchSceneHandler.getProbeEnabledNodeId2EidMap().values());
             if (CollectionUtils.isNotEmpty(probeEnabledEid)) {
                 probeService.cleanProbeData(probeEnabledEid, batchSceneHandler.getEarliestStartTime());
@@ -1620,48 +1458,28 @@ public class ScenePluginCollectionSceneService {
         });
     }
 
-    /**
-     * 根据规则类型名称获取类型id
-     *
-     * @param types 类型集合
-     * @return 类型id集合
-     */
+    
     private List<String> getTypeIds(List<String> types) {
         HumanCondition humanCondition = new HumanCondition().currentLink(CollectionPluginWazuhRuleTypeModel.class).filterIn(CollectionPluginWazuhRuleTypeModel::getType, types.toArray());
         var typeModels = collectionPluginWazuhRuleTypeMapper.list(humanCondition);
         return typeModels.stream().map(t -> t.getId()).collect(Collectors.toList());
     }
 
-    /**
-     * 根据规则类型code获取类型id
-     *
-     * @param codes code集合
-     * @return 类型id集合
-     */
+    
     private List<String> getTypeIdsByCodes(List<String> codes) {
         HumanCondition humanCondition = new HumanCondition().currentLink(CollectionPluginWazuhRuleTypeModel.class).filterIn(CollectionPluginWazuhRuleTypeModel::getCode, codes.toArray());
         var typeModels = collectionPluginWazuhRuleTypeMapper.list(humanCondition);
         return typeModels.stream().map(t -> t.getId()).collect(Collectors.toList());
     }
 
-    /**
-     * 根据类型id获取类型名称
-     *
-     * @param typeIds
-     * @return 类型名称集合
-     */
+    
     private List<String> getTypes(List<String> typeIds) {
         HumanCondition humanCondition = new HumanCondition().currentLink(CollectionPluginWazuhRuleTypeModel.class).filterIn(CollectionPluginWazuhRuleTypeModel::getId, typeIds.toArray());
         var typeModels = collectionPluginWazuhRuleTypeMapper.list(humanCondition);
         return typeModels.stream().map(t -> t.getType()).collect(Collectors.toList());
     }
 
-    /**
-     * 规则文件名称转化成appName
-     *
-     * @param ruleFileName
-     * @return
-     */
+    
     public ServiceResult<String> ruleFile2AppName(String ruleFileName) {
         if (StringUtils.isBlank(ruleFileName)) {
             return new ServiceResult<>(null);
@@ -1672,12 +1490,7 @@ public class ScenePluginCollectionSceneService {
         return new ServiceResult<>(ruleFileName);
     }
 
-    /**
-     * 根据规则id获取规则id2file map
-     *
-     * @param ruleIds 规则id集合
-     * @return 规则id2file map
-     */
+    
     public ServiceResult<Map<String, String>> getRuleId2FileByIds(List<String> ruleIds) {
         if (CollectionUtils.isEmpty(ruleIds)) {
             return new ServiceResult<>(new HashMap<>());
@@ -1687,12 +1500,7 @@ public class ScenePluginCollectionSceneService {
         return new ServiceResult<>(ruleModels.stream().collect(Collectors.toMap(r -> r.getId(), r -> r.getFile())));
     }
 
-    /**
-     * 根据规则文件名获取规则id2filemap
-     *
-     * @param files 文件名集合
-     * @return 规则id2file map
-     */
+    
     private Map<String, String> getRuleId2FileByFiles(List<String> files) {
         if (CollectionUtils.isEmpty(files)) {
             return new HashMap<>();
@@ -1710,12 +1518,7 @@ public class ScenePluginCollectionSceneService {
         return ruleModels.stream().collect(Collectors.toMap(r -> r.getId(), r -> r.getFile()));
     }
 
-    /**
-     * 根据规则类型code获取规则id2file map
-     *
-     * @param codes 类型集合
-     * @return 规则id2file map
-     */
+    
     public ServiceResult<Map<String, String>> getRuleId2FileByCodes(List<String> codes) {
         if (CollectionUtils.isEmpty(codes)) {
             return new ServiceResult<>(new HashMap<>());
@@ -1762,7 +1565,7 @@ public class ScenePluginCollectionSceneService {
     }
 
     public ServiceResult<String> exportFlowPcap(String sceneId, String containName, String taskId) {
-        // containerName -> containerId
+        
         Container container = new Container();
         var containerResult = container.getContainerByName(containName);
         if (containerResult == null) {
@@ -1772,7 +1575,7 @@ public class ScenePluginCollectionSceneService {
         String containerId = containerResult.getId();
         String host = containerResult.getHost();
 
-        // execute cmd
+        
         ContainerExecuteResult result = container.executeCommand(containerId, String.format("ls /opt/arkime/raw"));
         if (result.getExitCode() != 0) {
             log.error("exec ls cmd fail,sceneId is {}, exit code {}, msg {}", sceneId, result.getExitCode(), result.getOutput());
@@ -1786,11 +1589,11 @@ public class ScenePluginCollectionSceneService {
 
         FlowPcapExportUtil.updateProcess(taskId, 5);
 
-        // 建立本次下载的临时目录 所有的临时文件都放在该目录下
+        
         String dirName = TextUtils.uuid();
         String dir = "/opt/arkime/" + dirName;
         container.executeCommand(containerId, "mkdir -p " + dir);
-        // 创建生成zip文件需要的命令
+        
         List<String> commands = new ArrayList<>();
 
         String[] files = StringUtils.split(result.getOutput(), "\n");
@@ -1801,25 +1604,25 @@ public class ScenePluginCollectionSceneService {
             String pcapFile = files[i];
             String newFileName = (i + 1) + ".pcap";
             String newFile = dir + "/" + newFileName;
-            // 复制文件
+            
             commands.add(String.format("cd /opt/arkime/raw && cp %s %s ", pcapFile, newFile));
             stepEcho = stepEcho + step;
             commands.add(String.format("echo %s >> %s", stepEcho, stepFile));
-            // 压缩文件
+            
             commands.add(String.format("cd %s && zip %s flow.zip %s ", dir, i == 0 ? "" : "-g", newFileName));
             stepEcho = stepEcho + step * 2;
             commands.add(String.format("echo %s >> %s", stepEcho, stepFile));
-            // 删除临时文件避免空间占用
+            
             commands.add(String.format("rm -rf %s ", newFileName));
         }
         commands.add(String.format("echo success >> %s", stepFile));
-        // 将命令组成脚本文件
+        
         File zipSh = null;
         try {
             zipSh = new File(dirName + ".sh");
             FileUtils.writeStringToFile(zipSh, StringUtils.join(commands, "&&"), Charset.defaultCharset());
             container.copyFile(containerId, zipSh.getPath(), dir);
-            // 执行命令脚本
+            
             TaskCommon.executeTask(() -> {
                 try {
                     container.executeCommand(containerId, String.format("sh %s/%s.sh", dir, dirName));
@@ -1827,7 +1630,7 @@ public class ScenePluginCollectionSceneService {
                     log.error("failed to get command result , container id is ", containerId);
                 }
             });
-            // 轮询查询进度
+            
             int times = 0;
             int maxTimes = 180;
             int lastStep = -1;
@@ -1877,12 +1680,7 @@ public class ScenePluginCollectionSceneService {
         return new ServiceResult<>(null);
     }
 
-    /**
-     * 根据规则类型获取规则id2file map
-     *
-     * @param types 类型集合
-     * @return 规则id2file Map
-     */
+    
     private Map<String, String> getRuleId2FileByTypes(List<String> types) {
         if (CollectionUtils.isEmpty(types)) {
             return new HashMap<>();
@@ -1897,12 +1695,7 @@ public class ScenePluginCollectionSceneService {
         return getRuleId2FileByIds(ruleIds).getSource();
     }
 
-    /**
-     * 根据规则id集合获取类型集合
-     *
-     * @param ruleIds
-     * @return 类型集合
-     */
+    
     private List<String> getTypesByRuleIds(List<String> ruleIds) {
         if (CollectionUtils.isEmpty(ruleIds)) {
             return new ArrayList<>();

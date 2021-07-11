@@ -15,9 +15,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 public class RealEquipmentDeleteRequest extends BaseRequest{
 
-    /**
-     * ID
-     */
+    
     @ApiModelProperty(value = "UUIDS")
     private List<String> uuids;
 

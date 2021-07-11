@@ -71,7 +71,7 @@ public class DeleteHandler extends HandlerCommon {
         var scene = getPluginHandler().getScene();
         var flowCollectorId = scene.getFlowCollector();
         if (!StringUtils.isEmpty(flowCollectorId)) {
-            // 先保存流量数据
+            
             BeanCommon.getBean(ScenePluginCollectionSceneService.class).saveFlowPcap(getPluginHandler().getSourceSceneId(), flowCollectorId);
             List<String> flowCollectMacAddrs = new ArrayList<>();
             getPluginHandler().getElementPortMap().forEach((portId, collectionPort) -> {
@@ -88,7 +88,7 @@ public class DeleteHandler extends HandlerCommon {
             });
 
 
-            // TODO 流量镜像应该是基于网络端口的, 这里是基于节点的
+            
             Set<String> collectorVmInstanceIds = new HashSet<>();
             Set<String> collectorContainerInstanceIds = new HashSet<>();
             Set<String> mirrorVmInstanceIds = new HashSet<>();
@@ -141,17 +141,17 @@ public class DeleteHandler extends HandlerCommon {
 
         var probeCollectorId = scene.getProbeCollector();
         if (!StringUtils.isEmpty(probeCollectorId)) {
-//            var probeCollectionElements = getPluginHandler().getElementMap().values()
-//                    .stream()
-//                    .filter(collectionElement -> !CollectionUtils.isEmpty(collectionElement.getProbes()))
-//                    .collect(Collectors.toList());
-//            var unbindProbeCollectAgentTasks = probeCollectionElements.stream()
-//                    .map(collectionElement -> (Runnable)() -> unbindProbeCollectAgentProcess(collectionElement,
-//                            probeCollectorId))
-//                    .collect(Collectors.toList());
-//            if (!unbindProbeCollectAgentTasks.isEmpty()) {
-//                runSceneProgress(SceneProcess.UNBIND_PROBE_COLLECT_AGENTS, () -> runTasks(unbindProbeCollectAgentTasks));
-//            }
+
+
+
+
+
+
+
+
+
+
+
             runSceneProgress(SceneProcess.DELETE_PROBE_COLLECTOR, () -> {
                 getProbeCollector().deleteCollector(probeCollectorId);
             });

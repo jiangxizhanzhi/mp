@@ -18,117 +18,79 @@ import java.util.Objects;
 @ApiModel(value = "节点管理分页返回信息")
 public class HypervisorPageVO extends BaseVO {
 
-    /**
-     * 节点名称
-     */
+    
     @ApiModelProperty("节点名称")
     private String name;
 
-    /**
-     * 节点IP
-     */
+    
     @ApiModelProperty("节点IP")
     private String ip;
 
-    /**
-     * 物理主机服务状态
-     */
+    
     @ApiModelProperty("物理主机服务状态")
     private boolean serviceStatus;
 
-    /**
-     * 计算节点服务状态
-     */
+    
     @ApiModelProperty("计算节点服务状态")
     private String status;
 
-    /**
-     * 节点管理
-     */
+    
     @ApiModelProperty("节点管理")
     private String state;
 
-    /**
-     * CPU核数
-     */
+    
     @ApiModelProperty("CPU核数")
     private Integer cpu;
 
-    /**
-     * 内存大小
-     */
+    
     @ApiModelProperty("内存大小")
     private Long ram;
 
-    /**
-     * 磁盘大小
-     */
+    
     @ApiModelProperty("磁盘大小")
     private Long disk;
 
-    /**
-     * 已使用CPU核数
-     */
+    
     @ApiModelProperty("已使用CPU核数")
     private Integer cpuUsed;
 
-    /**
-     * 已使用内存大小
-     */
+    
     @ApiModelProperty("已使用内存大小")
     private Long ramUsed;
 
-    /**
-     * 已使用磁盘大小
-     */
+    
     @ApiModelProperty("已使用磁盘大小")
     private Long diskUsed;
 
-    /**
-     * CPU使用率
-     */
+    
     @ApiModelProperty("CPU使用率")
     private BigDecimal cpuPercent;
 
-    /**
-     * 内存使用率
-     */
+    
     @ApiModelProperty("内存使用率")
     private BigDecimal ramPercent;
 
-    /**
-     * 磁盘使用率
-     */
+    
     @ApiModelProperty("磁盘使用率")
     private BigDecimal diskPercent;
 
-    /**
-     * 虚拟机数量
-     */
+    
     @ApiModelProperty("虚拟机数量")
     private Integer totalInstances;
 
-    /**
-     * 容器数量
-     */
+    
     @ApiModelProperty("容器数量")
     private Integer totalContainers;
 
-    /**
-     * dynamips数量
-     */
+    
     @ApiModelProperty("dynamips数量")
     private Integer totalDynamips;
 
-    /**
-     * 权重
-     */
+    
     @ApiModelProperty("权重")
     private Integer weight;
 
-    /**
-     * 虚拟机数量限制
-     */
+    
     @ApiModelProperty("虚拟机数量限制")
     private Integer maxInstances;
 

@@ -2,9 +2,7 @@ package cn.cyberpeace.mp.flow.enums;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
-/**
- * 参数类型枚举类：0 String, 1 IP, 2 Number, 3 Bool
- */
+
 public enum ParamTypeEnum {
 
     STRING("String"),

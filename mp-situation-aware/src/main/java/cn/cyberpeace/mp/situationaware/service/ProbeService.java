@@ -35,11 +35,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-/**
-  *@Desciption
-  *@Author zhangjin
-  *@Date 9/10/21 11:12 上午
-**/
+
 @Service
 @Slf4j
 public class ProbeService {
@@ -59,18 +55,13 @@ public class ProbeService {
     @Autowired
     private ProbeParamService probeParamService;
 
-    /**
-     * 新增探针
-     *
-     * @param probeRequest
-     * @return probeId
-     */
+    
     @Transactional(rollbackFor = Exception.class)
     public String addProbe(ProbeRequest probeRequest) {
         addProbeCheck(probeRequest);
         ProbeModel probeModel = new ProbeModel();
         BeanUtils.copyProperties(probeRequest, probeModel);
-        //新增探针，默认为自定义探针
+        
         probeModel.setType(ProbeModel.TYPE_CUSTOM);
 
         String osTypes = probeRequest.getOsTypes().stream().filter(Objects::nonNull).map(t -> String.valueOf(t)).collect(Collectors.joining(","));
@@ -155,8 +146,8 @@ public class ProbeService {
 
         ProbeModel probeModelToUpdate = new ProbeModel();
         BeanUtils.copyProperties(probeRequest, probeModelToUpdate);
-        //新增探针，默认为自定义探针
-        //probeModelToUpdate.setType(ProbeModel.TYPE_CUSTOM);
+        
+        
 
         if (CollectionUtil.isNotEmpty(probeRequest.getOsTypes())) {
             String osTypes = probeRequest.getOsTypes().stream().filter(Objects::nonNull).map(t -> String.valueOf(t)).collect(Collectors.joining(","));
@@ -236,11 +227,7 @@ public class ProbeService {
         return probeMapper.delete(id);
     }
 
-    /**
-     * 分页查询探针列表
-     *
-     * @return
-     */
+    
     public PageInfo<ProbeDto> page(ProbePageQueryRequest pageQueryRequest) {
         pageQueryRequest.ensure();
 
@@ -256,16 +243,12 @@ public class ProbeService {
                 processInternationalMessage(p);
             }
         });
-        // 分页查询不附带参数
+        
         PageInfo pageInfo = new PageInfo(probeDtos);
         return pageInfo;
     }
 
-    /**
-     * 根据ids查询列表，包含脚本内容，参数
-     * @param ids
-     * @return
-     */
+    
     public List<ProbeDto> listByIds(List<String> ids) {
         ProbeSearchCondition condition = new ProbeSearchCondition();
         condition.setIds(ids.toArray(new String[0]));
@@ -292,11 +275,7 @@ public class ProbeService {
         return probeDtos;
     }
 
-    /**
-     * 根据ids逻辑删除
-     * @param ids
-     * @return
-     */
+    
     public int deleteByIds(List<String> ids) {
         List<ProbeModel> probesToUpdate =
             ids.stream().map(id -> {
@@ -311,11 +290,7 @@ public class ProbeService {
     }
 
 
-    /**
-     * 清除探针数据，包括表，es索引，doc等
-     * @param agentNames
-     * @param sceneInstanceStartTime
-     */
+    
     public void cleanProbeData(List<String> agentNames, LocalDateTime sceneInstanceStartTime) {
         if (Objects.isNull(sceneInstanceStartTime)) {
             log.error("scene instance startTime should not be null!");
@@ -326,15 +301,15 @@ public class ProbeService {
         wazuhEventRequest.setStartTime(sceneInstanceStartTime);
         wazuhEventRequest.setEndTime(LocalDateTime.now());
 
-        // 1. 清除es 文档数据
+        
         Long deletedCount = dataCollectionService.deleteDocByAgentNames(wazuhEventRequest);
         log.info("deletedCount:{}", deletedCount);
 
-        // 2. 清除es索引?
+        
 
-        // 3. wazuh api清除agent数据
+        
 
-        // 4. 表数据？
+        
     }
 
     public ProbeModel getByName(String name) {
@@ -357,10 +332,7 @@ public class ProbeService {
         probeDto.setParameter(paramStr);
     }
 
-    /**
-     * 国际化转换
-     * @param dto
-     */
+    
     private void processInternationalMessage(ProbeDto dto) {
         String name = MessageCommonUtil.convertMessage(SituationBase18nCode.SITUATION_AWARE_I18N_NAME_PREFIX + dto.getId());
         String description = MessageCommonUtil.convertMessage(SituationBase18nCode.SITUATION_AWARE_I18N_DESCRIPTION_PREFIX + dto.getId());
@@ -384,11 +356,7 @@ public class ProbeService {
         }
     }
 
-    /**
-     * 创建探针检查
-     *
-     * @param addRequest
-     */
+    
     private void addProbeCheck(ProbeRequest addRequest) {
         check(addRequest);
         ProbeModel oldModel = getByName(addRequest.getName());
@@ -399,11 +367,7 @@ public class ProbeService {
     }
 
 
-    /**
-     * 修改探针检查
-     *
-     * @param modifyRequest
-     */
+    
     private void modifyProbeCheck(ProbeRequest modifyRequest) {
         check(modifyRequest);
         String probeId = modifyRequest.getId();
@@ -414,7 +378,7 @@ public class ProbeService {
         }
 
         ProbeModel oldModel = getByName(modifyRequest.getName());
-        // 名称已被占用，且不是被修改的这个探针
+        
         if (Objects.nonNull(oldModel) && !Objects.equals(oldModel.getId(), probeId)) {
             log.error("probe name:{} already existed!", modifyRequest.getName());
             throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_NAME_EXISTED);
@@ -422,175 +386,25 @@ public class ProbeService {
     }
 
 
-    /*@Transactional(rollbackFor = Exception.class, readOnly = true)
-    public ListObjServiceResult<ProbeResult> queryProbeListWithPageable(ProbeSearchRequest probeSearchRequest) {
-        int count = probeModelMapper.countQuery(probeSearchRequest);
-        List<ProbeModel> probeModelList = probeModelMapper.queryListWithPage(probeSearchRequest, (probeSearchRequest.getPage() - 1) * probeSearchRequest.getPerPage());
-        List<ProbeResult> probeResults = probeModelList.stream().map((model -> {
-            var probeResult = new ProbeResult();
-            BeanUtils.copyProperties(model, probeResult);
-            probeResult.setScriptContent(new String(model.getScriptContent(), StandardCharsets.UTF_8));
-            probeResult.setProbeStatus(model.getProbeStatus().ordinal());
-            List<ProbeParamsResult> probeParamsResults = probeParamModelMapper.queryProbeParamList(model.getId()).stream()
-                .map(paramModel -> {
-                    var paramsResult = new ProbeParamsResult();
-                    BeanUtils.copyProperties(paramModel, paramsResult);
-                    return paramsResult;
-                }).collect(Collectors.toList());
-            probeResult.setParamsResultList(probeParamsResults);
-            return probeResult;
-        })).collect(Collectors.toList());
+    
 
-        return new ListObjServiceResult<ProbeResult>(new ListObjResult<>(probeResults, count));
-    }*/
-
-    /*@Transactional(rollbackFor = Exception.class, readOnly = true)
-    public ProbeResult queryProbeDetail(String probeId) {
-        var probeResult = new ProbeResult();
-        var probeModel = probeModelMapper.queryByProbeId(probeId);
-        if (Objects.isNull(probeModel)) {
-            return null;
-        }
-        BeanUtils.copyProperties(probeModel, probeResult);
-        List<ProbeParamsResult> probeParamsResults = probeParamModelMapper.queryProbeParamList(probeId).stream()
-            .map(paramModel -> {
-                ProbeParamsResult paramsResult = new ProbeParamsResult();
-                BeanUtils.copyProperties(paramModel, paramsResult);
-                return paramsResult;
-            }).collect(Collectors.toList());
-        probeResult.setParamsResultList(probeParamsResults);
-        probeResult.setScriptContent(new String(probeModel.getScriptContent(), StandardCharsets.UTF_8));
-        probeResult.setProbeStatus(probeModel.getProbeStatus().ordinal());
-        probeResult.setCommandInterval(Integer.parseInt(probeModel.getCommandInterval().replace("m", "")));
-        return probeResult;
-    }*/
+    
 
 
 
-    /**
-     * 修改探针参数
-     * @param probeRequest probeRequest
-     */
-    /*private void modifyProbeParams(ProbeRequest probeRequest) {
-        probeParamModelMapper.deleteParamByProbeId(probeRequest.getProbeId());
-        if (CollectionUtils.isEmpty(probeRequest.getParams())) {
-            return;
-        }
-        insertProbeParams(probeRequest, probeRequest.getProbeId());
-    }*/
+    
+    
 
 
-    /**
-     * 构造patch merge 请求参数
-     * @param probeRequest probeRequest
-     * @return ProbeRequest
-     */
-    /*private ProbeRequest buildMergedRequest(ProbeRequest probeRequest) {
-        var queryModel = probeModelMapper.queryByProbeId(probeRequest.getProbeId());
-        var mergedRequest = new ProbeRequest();
+    
+    
 
-        mergedRequest.setProbeId(queryModel.getId());
-        mergedRequest.setProbeName(queryModel.getProbeName());
-        mergedRequest.setOsType(OsType.values()[queryModel.getOsType()]);
-        mergedRequest.setDes(queryModel.getDes());
-        mergedRequest.setCommandInterval(Integer.parseInt(queryModel.getCommandInterval().replace("m", "")));
-        mergedRequest.setProbeCategory(queryModel.getProbeCategory());
-        mergedRequest.setScriptType(ScriptType.values()[queryModel.getScriptType()]);
-        mergedRequest.setScriptContent(new String(queryModel.getScriptContent(), StandardCharsets.UTF_8));
-        mergedRequest.setOutputFormat(queryModel.getOutputFormat());
-        return mergedRequest;
-    }
+    
+   
 
-    @Transactional(rollbackFor = Exception.class)
-    public int modifyProbeStatus(String probeId, ProbeStatus status) {
-        return probeModelMapper.updateProbeStatus(probeId, status);
-    }
+    
+    
 
-    private void insertProbeParams(ProbeRequest probeRequest, String probeId) {
-        if (CollectionUtils.isEmpty(probeRequest.getParams())) {
-            return;
-        }
-        List<ProbeParamModel> probeParamModels = probeRequest.getParams().stream()
-            .map((probeParamRequest -> {
-                var probeParamModel = new ProbeParamModel();
-                BeanUtils.copyProperties(probeParamRequest, probeParamModel);
-                probeParamModel.setProbeId(probeId);
-                probeParamModel.setCreateTime(new Date());
-                probeParamModel.setUpdateTime(new Date());
-                probeParamModel.setId(TextUtils.uuid());
-                return probeParamModel;
-            })).collect(Collectors.toList());
-        probeParamModelMapper.batchInsert(probeParamModels);
-    }*/
-
-    /**
-     * 替换参数
-     *
-     * @param probeRequest probeRequest
-     * @return 脚本内容
-     */
-   /* private String buildScriptContent(ProbeRequest probeRequest) {
-        if (CollectionUtils.isEmpty(probeRequest.getParams())) {
-            return probeRequest.getScriptContent();
-        }
-        var scriptContent = probeRequest.getScriptContent();
-        for (ProbeParamsRequest param : probeRequest.getParams()) {
-            scriptContent = scriptContent.replace("$" + param.getParamName() + "$", param.getDefaultVal());
-        }
-        return scriptContent;
-    }*/
-
-    /**
-     * 根据probeId删除探针
-     *
-     * @param probeIds probeIds
-     * @return 是否删除成功
-     */
-    /*
-    @Transactional(rollbackFor = Exception.class)
-    public boolean deleteProbeById(List<String> probeIds) {
-        if (CollectionUtils.isEmpty(probeIds) || probeIds.stream().anyMatch(ObjectUtils::isEmpty)) {
-            throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_MANAGER_DELETE_PARAM_ERROR);
-        }
-        String[] probeIdArray = probeIds.toArray(new String[0]);
-        probeParamMapper.bulkDelete(probeIdArray);
-
-        return false;
-
-//        return probeModelMapper.deleteByProbeIds(probeIds) > 0;
-
-    }
-    */
-
-     /*  @Transactional(rollbackFor = Exception.class)
-        public int modifyProbe(ProbeRequest probeRequest) {
-        ProbeRequest mergedRequest = buildMergedRequest(probeRequest);
-        try {
-            cn.cyberpeace.mp.base.util.basic.BeanUtils.copyPropertiesIgnoreNull(probeRequest, mergedRequest);
-        } catch (Exception e) {
-            log.error("patch probe error probeId : {}", mergedRequest.getProbeId());
-            throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_MODIFY_FAIL);
-        }
-
-        //修改探针参数
-        modifyProbeParams(probeRequest);
-        //修改探针参数
-        var probeModel = new ProbeModel();
-        BeanUtils.copyProperties(mergedRequest, probeModel);
-        probeModel.setUpdateTime(new Date());
-        probeModel.setId(mergedRequest.getProbeId());
-        probeModel.setScriptContent(buildScriptContent(mergedRequest).getBytes(StandardCharsets.UTF_8));
-        probeModel.setOsType(mergedRequest.getOsType().getTypeVal());
-        probeModel.setScriptType(mergedRequest.getScriptType().getTypeVal());
-        probeModel.setCommandInterval(mergedRequest.getCommandInterval() + "m");
-        probeModel.setOutputFormat(mergedRequest.getOutputFormat());
-        //是否存在保证name去重
-        var probeExist = probeModelMapper.countQueryModifyByProbeName(mergedRequest.getProbeName(), probeModel.getId()) > 0;
-        if (Boolean.TRUE.equals(probeExist)) {
-            throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_NAME_EXIST);
-        }
-
-        return probeModelMapper.updateByProbeId(probeModel);
-    }*/
+     
 
 }

@@ -10,20 +10,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
-/**
- * 通用的基于单表的具有批量更新能力的controller
- * @param <M> 数据model
- * @param <S> 数据model对应的service
- */
+
 public interface BaseModelBulkUpdateController<M extends BaseModel, S extends BaseModelService<M, ?>> {
 
     S getModelService();
 
-    /**
-     * 通用批量更新
-     * @param objs 更新对象集，需要更新的字段必须一致
-     * @return 成功数量
-     */
+    
     @ApiOperation("批量更新数据")
     @ApiImplicitParam(name = "objs", value = "更新数据请求体", dataTypeClass = List.class)
     @PatchMapping("/bulk_update")

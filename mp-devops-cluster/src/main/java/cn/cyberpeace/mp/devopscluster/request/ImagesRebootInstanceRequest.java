@@ -6,9 +6,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-/**
- * 镜像构建请求信息
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,15 +14,11 @@ import lombok.NoArgsConstructor;
 public class ImagesRebootInstanceRequest extends BaseRequest {
 
 
-    /**
-     * 实例ID
-     */
+    
     @ApiModelProperty("实例ID")
     private String instanceId;
 
-    /**
-     * 镜像类型
-     */
+    
     @ApiModelProperty("镜像类型")
     private String imageType;
 }

@@ -40,9 +40,7 @@ public class TargetAggregationService {
         this.deviceTargetMapper = deviceTargetMapper;
     }
 
-    /**
-     * 更新实装的引用以及使用状态
-     */
+    
     public void updateReferenceAndUseStatus(){
         TargetSceneRequest request = new TargetSceneRequest();
         request.setImageType(ImageTypeEnum.ENTITY);
@@ -57,11 +55,11 @@ public class TargetAggregationService {
         List<DeviceTargetPO> deviceTargetPOS =  targetPageModel.getList();
         String[] imageNames = deviceTargetPOS.stream().map(DeviceTargetPO::getName).toArray(String[]::new);
 
-        //引用
+        
         ServiceResult<Map<String, List<DeviceReferCsceneStat>>> referStateServiceResult = csceneSpecialService.statDeviceReferCscenes(imageNames);
         Map<String, List<DeviceReferCsceneStat>> referStateMap = referStateServiceResult.getSource();
 
-        //使用
+        
         ServiceResult<Map<String, List<DeviceReferCsceneInstanceStat>>>  useStateServiceResult = csceneSpecialService.statDeviceReferCsceneInstances(imageNames);
         Map<String, List<DeviceReferCsceneInstanceStat>> useStateMap = useStateServiceResult.getSource();
 

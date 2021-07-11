@@ -12,11 +12,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import java.util.List;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/5/19 19:53
- */
+
 @Data
 @Builder
 @AllArgsConstructor

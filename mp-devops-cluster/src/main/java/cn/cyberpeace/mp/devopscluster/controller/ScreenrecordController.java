@@ -28,11 +28,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * @Description 录屏文件管理controller
- * @Author qiaokang
- * @Date 2021-09-13 11:05:18
- */
+
 @Slf4j
 @Api(tags = "录屏文件管理接口")
 @RestController

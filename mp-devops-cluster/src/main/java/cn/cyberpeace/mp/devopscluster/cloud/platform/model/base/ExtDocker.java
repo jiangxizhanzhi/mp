@@ -8,10 +8,7 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 import java.util.List;
 
-/**
- * 扩展容器信息
- * @author wanggang
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -29,27 +26,19 @@ public class ExtDocker implements Serializable {
     @ApiModelProperty("磁盘大小")
     private Integer disk;
 
-    /**
-     * 文件地址
-     */
+    
     @ApiModelProperty(value = "文件地址")
     private String file;
 
-    /**
-     * 启动参数
-     */
+    
     @ApiModelProperty(value = "启动参数",hidden = true)
     private String settings;
 
-    /**
-     * 状态
-     */
+    
     @ApiModelProperty(value = "状态")
     private Integer syncStatus;
 
-    /**
-     * 临时文件ID
-     */
+    
     @ApiModelProperty("临时文件ID")
     private String tmpdirUuid;
 
@@ -61,37 +50,27 @@ public class ExtDocker implements Serializable {
     @ApiModelProperty("实例ID")
     private String instanceUuid;
 
-    /**
-     * 镜像状态 0:没有实例，1：创建中，2创建成功，3创建失败
-     */
+    
     @ApiModelProperty("实例状态")
     private Integer instanceState;
 
-    /**
-     * 支持初始化
-     */
+    
     @ApiModelProperty("支持初始化")
     private Boolean initSupport;
 
-    /**
-     * 支持快速创建
-     */
+    
     @ApiModelProperty("支持快速创建")
     private Boolean quickCreateSupport;
 
     @ApiModelProperty("快照数量")
     private Integer snapshotCount;
 
-    /**
-     * 额外信息
-     */
+    
     @ApiModelProperty("扩展信息")
     private Object extInfo;
 
 
-    /**
-     * 接入方式
-     */
+    
     @ApiModelProperty("接入方式")
     private List<AccessProtocol> accessProtocols;
 }

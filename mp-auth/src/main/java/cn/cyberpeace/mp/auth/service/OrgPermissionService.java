@@ -8,11 +8,7 @@ import cn.cyberpeace.mp.base.service.param.QueryParams;
 import java.util.List;
 import java.util.Set;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 public interface OrgPermissionService extends BaseModelService<OrgPermissionModel, QueryParams> {
 
     Set<TargetModel> listTargetsByOrgId(String orgId);

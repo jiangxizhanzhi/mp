@@ -11,58 +11,29 @@ import com.github.pagehelper.PageInfo;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 public interface UserOnlineRecordService extends BaseModelService<UserOnlineRecordModel, QueryParams> {
 
     PageInfo<UserOnlineReportBo> recordSummaryPage(UserOnlineRecordSummaryPageRequest req);
 
-    /**
-     * 判断在线的依据：
-     * end_time > (now() - 5m) && status = 0
-     *
-     * @return
-     */
+    
     List<UserOnlineRecordModel> listCurrentOnlined(List<String> userIds);
 
-    /**
-     * 判断离线的依据:
-     * end_time <= (now() - 5m) && status = 0
-     *
-     * @return
-     */
+    
     List<UserOnlineRecordModel> listCurrentOfflined(List<String> userIds);
 
 
-    /**
-     * 当前离线用户
-     *
-     * @return
-     */
-    //List<UserOnlineRecordModel> listCurrentOnlinedUser();
+    
+    
 
-    /**
-     * 当前在线用户数
-     * @return
-     */
-    //int cntCurrentOnlinedUser();
+    
+    
 
-    /**
-     * 根据时间段查找在线用户
-     *
-     * @return
-     */
-    //List<UserOnlineRecordModel> listOnlinedUserByPeriod();
+    
+    
 
 
-    /**
-     * 根据时间段查找在线用户数量
-     *
-     * @return
-     */
+    
     Integer getOnlinedUserCntByPeriod(LocalDateTime startTime, LocalDateTime endTime);
 
     UserOnlineCntBo onlineUserCnt();

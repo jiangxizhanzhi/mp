@@ -6,11 +6,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 
-/**
- * @Description: 基础时间范围请求
- * @Author zhouxinghuai
- * @Date：2022/03/14 14:22
- */
+
 @Data
 public class BaseTimeRangeRequest extends BaseSceneElementRequest {
 

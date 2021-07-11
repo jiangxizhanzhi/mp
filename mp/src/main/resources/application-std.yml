@@ -14,7 +14,6 @@ spring:
 #      db-port: ${MP_DB_PORT:9306}
 #      db-database: ${MP_DB_DATABASE:mp}
 #      username: ${MP_DB_USERNAME:root}
-#      password: ${MP_DB_PASSWORD:cyberpeace@2020}
     url: jdbc:mysql://${spring.datasource.ext-var.db-ip}:${spring.datasource.ext-var.db-port}/${spring.datasource.ext-var.db-database}?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&createDatabaseIfNotExist=true&allowMultiQueries=true
     username: ${spring.datasource.ext-var.username}
     password: ${spring.datasource.ext-var.password}

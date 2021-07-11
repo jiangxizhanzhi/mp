@@ -2,9 +2,7 @@ package cn.cyberpeace.mp.devopscluster.enums;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
-/**
- * 监控服务状态：0 ERROR, 1 DOWN 2 RUNNING
- */
+
 public enum MonitorStateEnum {
 
     RESTARTING("RESTARTING"),

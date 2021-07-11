@@ -33,10 +33,7 @@ public class MarkdownFileController {
         setMarkdownFileService(markdownFileService);
     }
 
-    /**
-     * markdown上传图片
-     * @return 文件id
-     */
+    
     @ApiOperation("上传图片")
     @PostMapping("/image_upload")
     public ServiceResult<FsFileUploadResponse> uploadImage(@RequestParam(value = "file") MultipartFile file)
@@ -47,10 +44,7 @@ public class MarkdownFileController {
                 .asResult();
     }
 
-    /**
-     * markdown上传文件
-     * @return 文件id
-     */
+    
     @ApiOperation("上传文件")
     @PostMapping("/file_upload")
     public ServiceResult<FsFileUploadResponse> uploadFile(@RequestParam(value = "file") MultipartFile file)

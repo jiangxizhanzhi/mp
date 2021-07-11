@@ -1,13 +1,9 @@
 package cn.cyberpeace.mp.auth.constant;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/12/20 17:20
- */
+
 public class AuthBasei18nCode {
 
-    // USER
+    
     public static final String USER_ID = "auth.base.user.id";
     public static final String USER_PASSWORD = "auth.base.user.password";
     public static final String USER_NAME = "auth.base.user.name";
@@ -24,16 +20,16 @@ public class AuthBasei18nCode {
     public static final String USER_STATUS_EXPIRED = "auth.base.user.status.expired";
     public static final String USER_STATUS_NOT_AUDIT = "auth.base.user.status.not_audit";
 
-    // Excel
+    
     public static final String EXCEL_EXPORT_NAME = "auth.base.excel.export_excel_name";
 
-    // ROLE
+    
     public static final String ROLE_ID = "auth.base.role.id";
     public static final String ROLE_IDENTIFIER = "auth.base.role.identifier";
     public static final String ROLE_NAME = "auth.base.role.name";
     public static final String ROLE_LIST = "auth.base.role.list";
 
-    // ORG
+    
     public static final String ORG_ID = "auth.base.org.id";
     public static final String ORG_IDENTIFIER = "auth.base.org.identifier";
     public static final String ORG_NAME = "auth.base.org.name";
@@ -41,7 +37,7 @@ public class AuthBasei18nCode {
     public static final String ORG_PARENT = "auth.base.org.parent";
     public static final String ORG_LIST = "auth.base.org.list";
 
-    // TARGET
+    
     public static final String TARGET_ID = "auth.base.target.id";
     public static final String TARGET_IDENTIFIER = "auth.base.target.identifier";
     public static final String TARGET_NAME = "auth.base.target.name";
@@ -50,16 +46,16 @@ public class AuthBasei18nCode {
     public static final String TARGET_PARENT = "auth.base.target.parent";
     public static final String TARGET_LIST = "auth.base.target.list";
 
-    // TENANT
+    
     public static final String TENANT_ID = "auth.base.tenant.id";
 
-    // OPERATION
+    
     public static final String LOGIN = "auth.base.op.login";
     public static final String LOGIN_USERNAME_PASSWORD = "auth.base.op.login_username_password";
     public static final String LOGIN_MOBILE_PASSWORD = "auth.base.op.login_mobile_password";
     public static final String LOGOUT = "auth.base.op.logout";
 
-    // COMMON
+    
     public static final String REQUEST_PARAMS = "auth.base.request.params";
 
 

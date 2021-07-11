@@ -4,11 +4,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/2/24 09:50
- */
+
 @Data
 @ApiModel("操作系统")
 public class OS {

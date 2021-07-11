@@ -15,10 +15,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-/**
- * 基础Service
- * @author wanggang
- */
+
 @Slf4j
 public abstract class AbstractBaseService {
 
@@ -29,12 +26,7 @@ public abstract class AbstractBaseService {
     @Autowired
     private MessageSource messageSource;
 
-    /**
-     * 索引
-     * @param startDate
-     * @param endDate
-     * @return
-     */
+    
     protected String[] indices(List<String> groupList,LocalDateTime startDate, LocalDateTime endDate){
         if (CollectionUtils.isEmpty(groupList)){
             return new String[]{};
@@ -44,11 +36,7 @@ public abstract class AbstractBaseService {
         return indexList.toArray(indexArray);
     }
 
-    /**
-     * 构造查询需要的索引
-     *
-     * @return List<IndexBoost>
-     */
+    
     protected List<String> indexListBuilder(List<String> groupList, LocalDateTime startTime, LocalDateTime endTime) {
         if (CollectionUtils.isEmpty(groupList)) {
             return Lists.newArrayList();
@@ -65,12 +53,7 @@ public abstract class AbstractBaseService {
     }
 
 
-    /**
-     * 构造流量索引
-     * @param groupId
-     * @param dateString dateString
-     * @return indexString
-     */
+    
     protected String sessionIndexFormatter(String groupId,String dateString) {
         StringBuilder sessionIndexBuilder = new StringBuilder();
         sessionIndexBuilder.append(groupId).append("_").append(SESSION3).append("-")
@@ -78,13 +61,7 @@ public abstract class AbstractBaseService {
         return sessionIndexBuilder.toString();
     }
 
-    /**
-     *
-     * @param locale
-     * @param msgKey
-     * @param params
-     * @return
-     */
+    
     protected String getLocalMessage(Locale locale, String msgKey, String... params) {
         if (Objects.isNull(locale) || locale.toLanguageTag().equals("und")) {
             locale = Locale.forLanguageTag(DEFAULT_LANGUAGE_TAG);

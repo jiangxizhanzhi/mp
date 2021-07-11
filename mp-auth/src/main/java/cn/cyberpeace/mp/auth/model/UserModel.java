@@ -25,11 +25,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -73,12 +69,12 @@ public class UserModel extends BaseModel implements Serializable {
     private String username;
 
     @ApiModelProperty(value = "密码")
-    // 该字段对读屏蔽，对写不屏蔽
+    
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
     @DefaultGen(UuidGenerator.class)
-    // 该字段对读屏蔽，对写不屏蔽
+    
     @ApiModelProperty(value = "token秘钥")
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private String tokenSecret;
@@ -112,12 +108,12 @@ public class UserModel extends BaseModel implements Serializable {
     @DefaultStr
     private String description;
 
-    // 1：正常， 0：禁用
+    
     @ApiModelProperty(value = "1: 正常 0：禁用")
     @DefaultInt(1)
     private Integer isEnabled;
 
-    // 1：已审核 0：待审核
+    
     @ApiModelProperty(value = "1：已审核 0：待审核")
     @DefaultInt(1)
     private Integer isAudited;
@@ -160,15 +156,15 @@ public class UserModel extends BaseModel implements Serializable {
     }
 
     public static class Status {
-        // 启用与否
+        
         public static final Integer ENABLED = 1;
         public static final Integer DISABLED = 0;
 
-        // 审核与否
+        
         public static final Integer AUDITED = 1;
         public static final Integer NOT_AUDITED = 0;
 
-        // 过期与否
+        
         public static final Integer EXPIRED = 1;
         public static final Integer NOT_EXPIRED = 0;
 
@@ -182,12 +178,7 @@ public class UserModel extends BaseModel implements Serializable {
         }
     }
 
-   /* 删除这部分逻辑 @see http://10.10.10.10/biz/bug-view-3522.html
-    public void initDefaultIdentifier() {
-        if (StringUtils.isEmpty(identifier) && !StringUtils.isEmpty(username)) {
-            identifier = username;
-        }
-    }*/
+   
 
     public void initDefaultExpiredTime() {
         if (expiredTime == null) {

@@ -25,11 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2021/10/12
- */
+
 class NetworkElementConverter implements IConverter {
 
     private List<NetworkElementParseResult> results;
@@ -39,7 +35,7 @@ class NetworkElementConverter implements IConverter {
     }
 
     public void convert2BO(ConvertDataContainer container) {
-        // 处理下外部网络
+        
         this.prepareExternalNetwork(container);
         if (CollectionUtils.isNotEmpty(results)) {
             results.stream().forEach(network -> this.createElementAndPort(network, container));
@@ -48,10 +44,10 @@ class NetworkElementConverter implements IConverter {
 
     private void prepareExternalNetwork(ConvertDataContainer container) {
         if (CollectionUtils.isEmpty(container.getNoNetworkNodeElements())) {
-            // 不存在未连接的节点,不需要单独处理外部网络
+            
             return;
         } else {
-            // 未连接的节点 无需处理
+            
         }
     }
 
@@ -76,7 +72,7 @@ class NetworkElementConverter implements IConverter {
         pluginElement.setCidr(network.getCidr());
         pluginElement.setGateway(network.getGateway());
         if (network.getDhcp() == null) {
-            // dhcp 默认开启
+            
             pluginElement.setDhcp(true);
         } else {
             pluginElement.setDhcp("on".equals(network.getDhcp()) || "true".equals(network.getDhcp()));
@@ -109,7 +105,7 @@ class NetworkElementConverter implements IConverter {
         }
         pluginElement.setGateway(network.getGateway());
         if (network.getId().toLowerCase().startsWith("internet")) {
-            // id以internet开头,则是外部网络
+            
             pluginElement.setRole(BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK);
             pluginElement.setImage(TargetConstant.DefaultTargetName.NETWORK_EXTERNAL);
         } else {
@@ -123,15 +119,15 @@ class NetworkElementConverter implements IConverter {
         }
         container.putPluginElement(sceneConfigElementBO.getId(), pluginElement);
 
-        // 判断和其他节点是否有连线
+        
         for (Map<String, SceneConfigElementPortBO> portsMap : container.getNode2NetworkPorts().values()) {
             SceneConfigElementPortBO connectPort = portsMap.get(network.getId());
-            // 不存在连线
+            
             if (connectPort == null) {
                 continue;
             }
 
-            // 存在连线 先创建端口
+            
             SceneConfigElementPortBO newPort = new SceneConfigElementPortBO();
             newPort.setId(IConverter.getPortId(sceneConfigElementBO.getId(), sceneConfigElementBO.getType(), ports.size()));
             newPort.setGateway(network.getGateway());
@@ -143,12 +139,12 @@ class NetworkElementConverter implements IConverter {
             CloudPluginSceneConfigElementPortBO pluginPort = new CloudPluginSceneConfigElementPortBO();
             container.putPluginElementPort(newPort.getId(), pluginPort);
 
-            // 创建连线
+            
             SceneConfigElementPortConnectionBO connection = new SceneConfigElementPortConnectionBO();
             connection.setId(TextUtils.uuid());
             connection.setSource(newPort.getId());
             connection.setTarget(connectPort.getId());
-            // todo
+            
             connection.setName(newPort.getName() + "_" + connectPort.getName());
             container.addConnection(connection);
         }

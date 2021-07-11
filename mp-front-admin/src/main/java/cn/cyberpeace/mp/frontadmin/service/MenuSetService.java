@@ -70,11 +70,7 @@ public class MenuSetService {
     private SysActivationService activationService;
 
 
-    /**
-     * 查看系统可见的所有菜单
-     *
-     * @return
-     */
+    
     public Set<String> getSystemAllVisibleMenuIds() {
         var activationResponse = activationService.status();
         List<String> allPositiveKeys = this.getPositiveKeys(activationResponse);
@@ -82,12 +78,7 @@ public class MenuSetService {
     }
 
 
-    /**
-     * 根据激活项查看可见的菜单
-     *
-     * @param positiveKeys
-     * @return
-     */
+    
     public Set<String> getVisibleMenuIdsBy(List<String> positiveKeys) {
         var activationResponse = activationService.status();
         String edition = String.valueOf(activationResponse.getEdition());
@@ -105,7 +96,7 @@ public class MenuSetService {
 
             boolean editionMatch = checkEditionMatch(mi, edition);
             boolean itemMatch = checkItemMatch(mi, positiveKeys);
-            // 版本匹配，激活项匹配
+            
             if (editionMatch && itemMatch) {
                 TargetModel targetModel = targetModelOptional.get();
                 visibleMenuIds.add(targetModel.getIdentifier());
@@ -237,7 +228,7 @@ public class MenuSetService {
         Map<String, List<TargetModel>> map = new HashMap<>();
         Map<String, TargetBo> mapTmp = new HashMap<>();
 
-        //Save all nodes to a map
+        
         for (MenuTemplateModel targetm : targets) {
             TargetBo targetBo = new TargetBo();
             BeanUtils.copyProperties(targetm, targetBo);
@@ -245,7 +236,7 @@ public class MenuSetService {
             mapTmp.put(targetBo.getId(), targetBo);
         }
 
-        //loop and assign parent/child relationships
+        
         for (Map.Entry<String, TargetBo> entry : mapTmp.entrySet()) {
             TargetBo current = entry.getValue();
             String parentId = current.getParent();
@@ -253,7 +244,7 @@ public class MenuSetService {
             if (StringUtils.isNotBlank(parentId)) {
                 TargetBo parent = mapTmp.get(parentId);
                 if (parent != null) {
-                    //                    current.(parent);
+                    
                     if (parent.getChildren() == null) {
                         parent.setChildren(new ArrayList<>());
                     }
@@ -265,7 +256,7 @@ public class MenuSetService {
         }
 
         List<TargetBo> parentTargets = new ArrayList<>();
-        //get the root
+        
         for (TargetBo node : mapTmp.values()) {
             if (StringUtils.isBlank(node.getParent())) {
                 parentTargets.add(node);
@@ -275,7 +266,7 @@ public class MenuSetService {
         return parentTargets;
     }
 
-    // 权限树排序
+    
     private void sortTree(List<TargetBo> targets) {
         targets.forEach(t -> {
             if (CollectionUtil.isNotEmpty(t.getChildren())) {
@@ -334,14 +325,14 @@ public class MenuSetService {
         if (StringUtils.isNotEmpty(mi.getActivKeys())) {
             List<String> activKeys = Arrays.asList(mi.getActivKeys().split(","));
             for (String activKey : activKeys) {
-                // 包含no_auth的菜单
+                
                 if (Objects.equals(activKey.trim(), TargetActivBo.NO_AUTH)) {
                     itemMatch = true;
                     break;
                 }
             }
             if (!itemMatch) {
-                // 包含激活项中value为1的
+                
                 for (String activKey : activKeys) {
                     for (String positiveKey : positiveKeys) {
                         if (Objects.equals(activKey.trim(), positiveKey.trim())) {

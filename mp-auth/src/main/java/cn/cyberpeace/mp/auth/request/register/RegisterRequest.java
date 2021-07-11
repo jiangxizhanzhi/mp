@@ -5,17 +5,13 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @ApiModel(value = "注册请求")
 @Data
 public class RegisterRequest {
 
     @ApiModelProperty(value = "用户名", example = "")
-//    @NotBlank(message = "auth.validation.register.username")
+
     @NotBlank
     private String username;
 

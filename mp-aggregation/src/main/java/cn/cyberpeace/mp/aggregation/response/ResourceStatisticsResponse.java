@@ -15,11 +15,7 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/9/13 11:06
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -39,15 +35,11 @@ public class ResourceStatisticsResponse {
     @ApiModelProperty(value = "虚拟靶标")
     private VirtualTargetSummary virtualTargetSummary;
 
-    /**
-     * 靶标类型统计/虚拟靶标/实体靶标统计
-     */
+    
     @ApiModelProperty("靶标类型统计/虚拟靶标/实体靶标统计")
     private Map<String, Map<String,Object>> targetStatics;
 
-    /**
-     * 场景统计
-     */
+    
     @ApiModelProperty("场景统计")
     private List<CsceneInstanceCountByReferenceTypeBO> sceneStatics;
 

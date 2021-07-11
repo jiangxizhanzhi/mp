@@ -11,18 +11,12 @@ import lombok.NoArgsConstructor;
 @Builder
 public class RouterBO {
 
-    /**
-     * 网络名称
-     */
+    
     private String name;
 
-    /**
-     * 状态
-     */
+    
     private String status;
 
-    /**
-     * 创建时间
-     */
+    
     private String createdAt;
 }

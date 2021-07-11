@@ -16,11 +16,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- * @author litian
- * 接口访问黑名单配置
- * 应用启动后读取${home}/.mp/resources/blacklist.txt，作为黑名单，禁止用户访问
- */
+
 @Slf4j
 @Component
 public class BlacklistConfig implements ApplicationRunner {
@@ -48,7 +44,7 @@ public class BlacklistConfig implements ApplicationRunner {
 
             String context = appConfig.getServerProperties().getServlet().getContextPath();
 
-            // 将配置的访问路径转换为Pattern对象存储，提高过滤匹配性能
+            
             Set<BlacklistModel.AccessItem> patterns = new HashSet<>();
             items.forEach(item -> {
                 String[] splits = item.trim().split(" +");
@@ -63,7 +59,7 @@ public class BlacklistConfig implements ApplicationRunner {
             });
             blacklistModel.setPatterns(patterns);
 
-            // 如果黑名单列表中有内容，则默认开启黑名单控制
+            
             if(!patterns.isEmpty()){
                 blacklistModel.setEnabled(true);
             }

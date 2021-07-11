@@ -5,11 +5,7 @@ import cn.cyberpeace.mp.base.message.rabbitmq.SimpleMessageConfig;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * @Description: 全局变量
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 public class AuthConstant {
 
     public static final String ROOT_USER_ID = "3f655d87112f4ae094bbaf70830e20aa";
@@ -47,9 +43,7 @@ public class AuthConstant {
 
     public static final String DEFAULT_IMAGE_PREFIX = "/api/mp";
 
-    /**
-     * 逗号
-     */
+    
     public static final String COMMA = ",";
 
     public static final Integer TARGET_FIELD_VALUE_PK_0 = 0;
@@ -72,23 +66,17 @@ public class AuthConstant {
     public static final String SEPARATOR_CHAR_DOT = ".";
     public static final String JOIN_TYPES_DELIMITER = ",";
 
-    /**
-     * 导入用户头像max size：20M
-     */
+    
     public static final long UPLOAD_AVATAR_MAX_SIZE = 20 * 1024 * 1024L;
 
-    /**
-     * 导入用户头像支持后缀类型：png，jpeg，jpg
-     */
+    
     public static final List<String> UPLOAD_AVATAR_SUFFIX_TYPE = Arrays.asList("png", "jpeg", "jpg");
 
-    /**
-     * 导入用户头像支持魔术头类型：png，jpg（对应后缀为：jpg和jpeg）
-     */
+    
     public static final List<String> UPLOAD_AVATAR_MAGIC_HEADER_TYPE = Arrays.asList("png", "jpg");
 
 
-    // MQ
+    
     public static final String AUTH_EXCHANGE_NAME = SimpleMessageConfig.GROUP_NAME + ".auth";
 
     public static final String ROUTING_KEY_USER_DELETE = AUTH_EXCHANGE_NAME + ".user.delete";

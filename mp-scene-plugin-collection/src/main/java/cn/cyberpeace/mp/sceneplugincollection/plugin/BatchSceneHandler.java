@@ -16,11 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/2/23
- */
+
 public class BatchSceneHandler {
     private List<String> sceneIds;
 
@@ -80,34 +76,22 @@ public class BatchSceneHandler {
         return this.allMac2ElementMap.get(macAddr);
     }
 
-    /**
-     * 根据构造时指定的节点创建的数据
-     * @return
-     */
+    
     public Map<String, SceneElementBO> getAllMac2ElementMapForNodes() {
         return allMac2ElementMap;
     }
 
-    /**
-     * 根据构造时指定的节点创建的数据
-     * @return
-     */
+    
     public Map<String, SceneElementBO> getAllIp2ElementMapForNodes() {
         return allIp2ElementMap;
     }
 
-    /**
-     * 根据场景中所有节点创建的数据
-     * @return
-     */
+    
     public Map<String, SceneElementBO> getAllMac2ElementMapForScene() {
         return allMac2ElementMapForScene;
     }
 
-    /**
-     * 根据场景中所有节点创建的数据
-     * @return
-     */
+    
     public Map<String, SceneElementBO> getAllIp2ElementMapForScene() {
         return allIp2ElementMapForScene;
     }

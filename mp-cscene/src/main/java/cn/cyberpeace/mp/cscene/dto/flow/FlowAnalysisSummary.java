@@ -4,11 +4,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Builder;
 import lombok.Data;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/3/16 09:55
- */
+
 @Data
 @Builder
 public class FlowAnalysisSummary {

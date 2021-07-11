@@ -13,11 +13,7 @@ import org.springframework.cglib.proxy.MethodProxy;
 
 import java.lang.reflect.Method;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/6/10
- */
+
 @Slf4j
 public class CloudApiProxy<T> implements MethodInterceptor {
     private Integer retryTimes;
@@ -46,7 +42,7 @@ public class CloudApiProxy<T> implements MethodInterceptor {
                 break;
             } else {
                 try {
-                    // 删除失败等待1秒再次尝试
+                    
                     Thread.sleep(1000);
                 } catch (Exception e) {
 
@@ -100,7 +96,7 @@ public class CloudApiProxy<T> implements MethodInterceptor {
             return true;
         }
         if (StringUtils.isNotEmpty(runtimeException.getMessage()) && runtimeException.getMessage().contains("could not be found")) {
-            // 删除时已不存在的错误可以视为删除成功
+            
             return true;
         }
         return false;

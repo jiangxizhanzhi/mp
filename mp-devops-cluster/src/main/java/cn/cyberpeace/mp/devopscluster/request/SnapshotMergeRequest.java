@@ -12,30 +12,22 @@ import javax.validation.constraints.NotBlank;
 @AllArgsConstructor
 public class SnapshotMergeRequest {
 
-    /**
-     * 镜像ID
-     */
+    
     @ApiModelProperty(value = "镜像ID",required = true)
     @NotBlank
     private String uuid;
 
-    /**
-     * 镜像类型
-     */
+    
     @ApiModelProperty(value = "镜像类型",required = true)
     @NotBlank
     private String imageType;
 
-    /**
-     * 最新一条的快照名称
-     */
+    
     @ApiModelProperty(value = "最新一条的快照名称",required = true)
     @NotBlank
     private String snapshotName;
 
-    /**
-     * 新的快照名称
-     */
+    
     @ApiModelProperty("新的快照名称")
     private String newName;
 }

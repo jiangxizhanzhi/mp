@@ -8,10 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 
-/**
- * 靶标导入相关服务
- * @author wanggang
- */
+
 @Service
 @Slf4j
 public class ImportService extends BaseCpService {
@@ -22,10 +19,7 @@ public class ImportService extends BaseCpService {
         super(devopsClusterConfig);
     }
 
-    /**
-     * 获取磁盘剩余空间
-     * @return
-     */
+    
     public ImportDiskSpaceCloudPlatformResult getDiskSpace(){
         ImportDiskSpaceCloudPlatformResult diskSpaceModel = super.sendGet(BaseCloudPlatformConstant.CPCLOUD_DEVICE + BaseCloudPlatformConstant.URL_VERSION + IMPORT + "/disk_free", ImportDiskSpaceCloudPlatformResult.class);
         if (Objects.isNull(diskSpaceModel) || Objects.isNull(diskSpaceModel.getData()) || !diskSpaceModel.isSuccess()){

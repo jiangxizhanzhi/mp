@@ -33,7 +33,7 @@ public class CustomWebMvcConfigurer implements WebMvcConfigurer {
         registry.addResourceHandler(baseAppConfig.getLfsUrlPattern())
                 .addResourceLocations(String.format("file:%s%s", LfsCommon.lfsClient.getGroupDir(), FileUtil.FILE_SEPARATOR));
 
-        //W:add swagger resource mapping
+        
         registry.addResourceHandler("doc.html")
                 .addResourceLocations("classpath:/META-INF/resources/");
         registry.addResourceHandler("/webjars/**")

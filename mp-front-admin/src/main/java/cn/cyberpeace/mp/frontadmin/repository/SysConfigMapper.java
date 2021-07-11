@@ -6,11 +6,7 @@ import cn.cyberpeace.mp.frontadmin.model.SysConfigModel;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Mapper
 @Repository
 @ModelClass(SysConfigModel.class)

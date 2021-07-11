@@ -7,9 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * 查询参数定义
- */
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -19,14 +17,7 @@ public class CsceneInstanceStatQueryParams extends QueryParams {
     private Integer type;
     @ApiModelProperty(value = "引用类型")
     private String[] referenceTypes;
-    /**
-     * 正在创建 1
-     * 队列中 2
-     * 运行中 3
-     * 暂停 4
-     * 已删除 0
-     * 错误 5
-     */
+    
     @ApiModelProperty(value = "场景实例状态")
     private Integer sceneStatus;
     @ApiModelProperty(value = "是否只显示活动状态")

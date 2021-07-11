@@ -29,11 +29,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Service
 public class OrgPermissionServiceImpl
         extends BaseModelServiceImpl<OrgPermissionModel, OrgPermissionMapper, OrgPermissionFields, QueryParams>
@@ -97,7 +93,7 @@ public class OrgPermissionServiceImpl
         ResultUtils.throwExceptionIfError(result, AuthErrorCode.ORG_NOT_EXISTED);
 
         if (cleanOldTargets) {
-            // 清除组织权限
+            
             boolean success = deleteByOrgId(orgId);
             if (!success) {
                 throw new MpRuntimeException(AuthErrorCode.ORG_TARGET_DELETE_ERROR);
@@ -105,13 +101,13 @@ public class OrgPermissionServiceImpl
         }
 
         if (CollectionUtil.isEmpty(targetIds)) {
-            // 完成，直接返回
+            
             return true;
         }
 
-        // 添加组织权限
+        
         targetIds.forEach(tid -> {
-            // todo 校验权限是否存在
+            
             OrgPermissionModel orgPerm = new OrgPermissionModel();
             orgPerm.setOwner(orgId);
             orgPerm.setTarget(tid);
@@ -145,7 +141,7 @@ public class OrgPermissionServiceImpl
     }
 
 
-    // 递归查询组织绑定的权限（如果有父级组织，则继续查找）
+    
     private void recursionTargetsByOrgDto(Set<TargetModel> set, OrgDto orgDto) {
         if (orgDto == null || StringUtils.isBlank(orgDto.getParent())) {
             return;

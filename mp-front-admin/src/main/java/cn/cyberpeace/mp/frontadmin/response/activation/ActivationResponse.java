@@ -5,11 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-/**
- * @Description: 激活响应
- * @Author zhouxinghuai
- * @Date：2021/09/07 11:13
- */
+
 @Data
 public class ActivationResponse extends ActivationRequest {
 

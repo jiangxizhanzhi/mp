@@ -42,11 +42,7 @@ public class DynamicFields {
         }
     }
 
-    /**
-     * 过滤数据对象字段, 核心数据对象返回过滤后的map
-     * @param obj 数据对象
-     * @return 过滤后的数据对象
-     */
+    
     public Object apply(Object obj) {
         if (obj == null || fieldsMap == null) {
             return obj;
@@ -72,7 +68,7 @@ public class DynamicFields {
             if (obj instanceof Map) {
                 fieldValue = ((Map<?, ?>) obj).getOrDefault(fieldName, null);
             } else {
-                // 未注入jackson注解
+                
                 final BeanWrapper objWrapper = new BeanWrapperImpl(obj);
                 fieldValue = objWrapper.getPropertyValue(fieldName);
             }
@@ -86,11 +82,7 @@ public class DynamicFields {
         return resultMap;
     }
 
-    /**
-     * 过滤数据对象字段, 只是把不需要的字段设置成null
-     * @param obj 数据对象
-     * @return 过滤后的数据对象
-     */
+    
     @SuppressWarnings("unchecked")
     public <T> T applyWithNull(T obj) {
         if (obj == null || fieldsMap == null) {

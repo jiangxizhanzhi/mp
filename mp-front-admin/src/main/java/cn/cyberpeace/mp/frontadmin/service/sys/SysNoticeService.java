@@ -11,11 +11,7 @@ import cn.cyberpeace.mp.frontadmin.request.notice.SysNoticeRequest;
 
 import java.util.List;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 public interface SysNoticeService extends BaseModelService<SysNoticeModel, QueryParams> {
 
 
@@ -29,19 +25,10 @@ public interface SysNoticeService extends BaseModelService<SysNoticeModel, Query
 
     SysNoticeModel modify(String id, SysNoticeRequest sysNoticeRequest);
 
-    /**
-     * 分页查询所有公告
-     * @param pageRequest
-     * @return
-     */
+    
     ServiceResult page(SysNoticePageRequest pageRequest);
 
-    /**
-     * 分页查询当前用户有权看到的公告消息列表
-     *
-     * @param
-     * @return
-     */
+    
     ListObjServiceResult getCurrentUserNoticeMessagesPage(SysNoticePageRequest pageRequest);
 
     int getCurrentUserNoticeMessagesUnreadCount();

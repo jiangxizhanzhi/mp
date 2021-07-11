@@ -8,11 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-/**
- * @Description: 监控指标返回结果
- * @Author qiaokang
- * @Date：2021/6/22 17:20
- */
+
 @Data
 @Builder
 @AllArgsConstructor

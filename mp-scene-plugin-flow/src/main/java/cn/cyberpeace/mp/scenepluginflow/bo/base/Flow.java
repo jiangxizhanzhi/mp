@@ -46,7 +46,7 @@ public class Flow {
     }
 
     public Integer getInteractiveType() {
-        // 针对没有interactiveType的老数据，暂时给个默认值
+        
         if (Objects.isNull(interactiveType)) {
             interactiveType = InteractiveTypeEnum.BACKGROUND.toValue();
         }
@@ -55,7 +55,7 @@ public class Flow {
 
     public Integer getCategory() {
         if (Objects.isNull(category)) {
-            // 针对老数据，流量分类给个默认值
+            
             category = 0;
         }
         return category;

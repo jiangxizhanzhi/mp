@@ -7,10 +7,7 @@ import cn.cyberpeace.mp.devopscluster.model.common.ComputeStatusModel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-/**
- * 运维管控-系统运维-网络实例管理-网络
- * @author wanggang
- */
+
 @Service
 @Slf4j
 public class ComputeStatusService extends BaseCpService {
@@ -22,11 +19,7 @@ public class ComputeStatusService extends BaseCpService {
         super(devopsClusterConfig);
     }
 
-    /**
-     * 查询
-     * @param getParams
-     * @return
-     */
+    
     public CloudPlatformResult<ComputeStatusModel> getComputeStatus(String getParams){
         return super.sendGet(BaseCloudPlatformConstant.CPCLOUD_INFO_URL + BaseCloudPlatformConstant.URL_VERSION + COMPUTE_STATUS + getParams, CloudPlatformResult.class);
     }

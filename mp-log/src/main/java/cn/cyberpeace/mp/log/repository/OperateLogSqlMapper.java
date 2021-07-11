@@ -6,11 +6,7 @@ import cn.cyberpeace.mp.log.model.OperateLogSqlModel;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
-/**
- * @Description
- * @Author shgang
- * @Date 2022/9/13
- */
+
 @Mapper
 @Repository
 @ModelClass(OperateLogSqlModel.class)

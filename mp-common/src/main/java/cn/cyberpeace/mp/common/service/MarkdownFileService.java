@@ -20,7 +20,7 @@ public class MarkdownFileService extends BaseRemoteFileServiceImpl {
     }
 
     public ServiceResult<Boolean> validateUploadImageInput(InputStream is, String fileSuffix) {
-        // MD上传图片支持类型校验
+        
         if (!SuffixCheckUtil.checkBySuffix(fileSuffix, FileSuffixConstant.MD_UPLOAD_IMAGE_LIST)) {
             return new ServiceResult<>(false, CommonErrorCode.UPLOAD_FILE_TYPE_ERROR);
         }
@@ -28,7 +28,7 @@ public class MarkdownFileService extends BaseRemoteFileServiceImpl {
     }
 
     public ServiceResult<Boolean> validateUploadFileInput(InputStream is, String fileSuffix) {
-        // MD上传文件支持类型校验
+        
         if (!SuffixCheckUtil.checkBySuffix(fileSuffix, FileSuffixConstant.MD_UPLOAD_FILE_LIST)) {
             return new ServiceResult<>(false, CommonErrorCode.UPLOAD_FILE_TYPE_ERROR);
         }

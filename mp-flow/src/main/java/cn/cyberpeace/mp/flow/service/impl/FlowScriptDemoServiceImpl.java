@@ -20,11 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * @Description: 流量脚本模板service
- * @Author qiaokang
- * @Date：2021/6/10 10:31
- */
+
 @Service
 @Slf4j
 public class FlowScriptDemoServiceImpl extends BaseModelServiceImpl<FlowScriptDemoModel, FlowScriptDemoMapper,
@@ -38,18 +34,12 @@ public class FlowScriptDemoServiceImpl extends BaseModelServiceImpl<FlowScriptDe
         setModelMapper(stuMapper);
     }
 
-    /**
-     * 查询所有脚本模板
-     * @return
-     */
+    
     public List<FlowScriptDemoModel> listAll(Integer type) {
         return getModelMapper().listAll(type);
     }
 
-    /**
-     * 查询脚本模板信息
-     * @return
-     */
+    
     public ServiceResult<QueryFlowScriptDemoResponse> listScriptDemos(Integer type) {
         QueryFlowScriptDemoResponse response = new QueryFlowScriptDemoResponse();
         List<QueryFlowScriptDemoResponse.ScriptDemo> scriptDemoList = new ArrayList<>();

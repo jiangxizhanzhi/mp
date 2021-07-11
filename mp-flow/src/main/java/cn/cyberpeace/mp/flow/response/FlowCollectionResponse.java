@@ -10,32 +10,22 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-/**
- * @Description:
- * @Author qiaokang
- * @Date：2022/5/10 10:38
- */
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @ApiModel(value = "流量集合返回信息")
 public class FlowCollectionResponse extends FlowCollectionModel {
 
-    /**
-     * 交互类型：0 背景流量，1 攻击流量，2 全流量，3 流量集合
-     */
+    
     @ApiModelProperty(value = "交互类型：0 背景流量，1 攻击流量，2 全流量，3 流量集合")
     private Integer interactiveType = 3;
 
-    /**
-     * 描述(兼容前端修改)
-     */
+    
     @ApiModelProperty(value = "描述")
     private String introduction;
 
-    /**
-     * 流量信息
-     */
+    
     @ApiModelProperty(value = "流量信息")
     private List<FlowInfoModel> flowInfoList;
 

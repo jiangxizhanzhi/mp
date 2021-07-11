@@ -5,11 +5,7 @@ import cn.cyberpeace.mp.scene.core.event.dispatch.SceneHandlerProxyBuilder;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 
-/**
- * @Description 执行下一个场景事件
- * @Author maojun
- * @Date 2022/5/12
- */
+
 public class DoNextStrategy implements InterruptedStrategy {
     @Override
     public void action(String sceneId, SceneHandler sceneHandler) {

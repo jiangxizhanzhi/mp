@@ -25,28 +25,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
-/**
- * 例子:
- *
- * @Slf4j
- * @Component
- * @LocalCallServer
- * public class TestLocalCallServer {
- *
- *     @LocalCallFunc
- *     public void test(String param) {
- *         log.info("TestLocalCallServer test: {}", param);
- *     }
- *
- * }
- *
- * 调用:
- * 使用生成的local_call.sh/local_call.bat调用，第一个参数方法，后续参数为方法参数，方法参数不能带空格
- *     local_call.sh/local_call.bat 包名.类名::方法名 方法参数
- * 调用例子:
- *     local_call.sh com.test.test.TestLocalCallServer::test 123
- *
- */
+
 @Slf4j
 public class LocalCallServerListener extends FileModifyListener {
 
@@ -61,9 +40,7 @@ public class LocalCallServerListener extends FileModifyListener {
         super(filepath);
     }
 
-    /**
-     * run this method after bean initiated
-     */
+    
     public static void initStart(BaseAppConfig baseAppConfig, ApplicationContext context) {
         var messageFilepath = StringUtils.joinWith(FileUtil.FILE_SEPARATOR,
                 FileUtil.getTmpDirPath(), baseAppConfig.getProjectName(), "local_call_message_file");

@@ -22,9 +22,7 @@ import java.util.Set;
 @Data
 public class CsceneAppConfig {
 
-    /**
-     * 云平台适配层接口地址和端口
-     */
+    
     private String cpIp;
     private String cpPort;
 
@@ -40,9 +38,7 @@ public class CsceneAppConfig {
     @Value("${mp.cscene.scene-using-node-limit-key:LCS-RES-CR-ACTIVENODES}")
     private String sceneUsingNodeLimitKey;
 
-    /**
-     * TODO: 正确的key
-     */
+    
     @Value("${mp.cscene.scene-enable-recording-key:screen_recording}")
     private String sceneEnableRecordingKey;
 

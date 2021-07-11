@@ -28,7 +28,7 @@ public class SystemTypeCommandUtils {
             put(BaseSceneElementModel.SystemType.WINDOWS_7, OS_TYPE_WINDOWS);
             put(BaseSceneElementModel.SystemType.WINDOWS_XP, OS_TYPE_WINDOWS);
             put(BaseSceneElementModel.SystemType.WINDOWS_VISTA, OS_TYPE_WINDOWS);
-            put(BaseSceneElementModel.SystemType.WINDOWS_SERVER_2019, OS_TYPE_WINDOWS);
+            put(BaseSceneElementModel.SystemType.WINDOWS_SERVER_2018, OS_TYPE_WINDOWS);
             put(BaseSceneElementModel.SystemType.WINDOWS_SERVER_2016, OS_TYPE_WINDOWS);
             put(BaseSceneElementModel.SystemType.WINDOWS_SERVER_2012, OS_TYPE_WINDOWS);
             put(BaseSceneElementModel.SystemType.WINDOWS_SERVER_2010, OS_TYPE_WINDOWS);

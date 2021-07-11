@@ -3,11 +3,7 @@ package cn.cyberpeace.mp.scene.core.event.dispatch;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * @Description 场景事件调度的入口类
- * @Author maojun
- * @Date 2022/5/11
- */
+
 public class SceneEventControllerUtils {
     private static Object lock = new Object();
 
@@ -26,7 +22,7 @@ public class SceneEventControllerUtils {
 
     public static void releaseEventLock(String sceneId) {
         var scene = sceneEventControllers.get(sceneId);
-        // todo 极端并发下可能有问题
+        
         if (scene != null && scene.releaseEventLock()) {
             sceneEventControllers.remove(sceneId);
         }

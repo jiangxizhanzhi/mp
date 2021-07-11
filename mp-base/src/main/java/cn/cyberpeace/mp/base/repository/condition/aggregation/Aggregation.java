@@ -5,10 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.function.Function;
 
-/**
- * 标记聚合函数
- * 约定：子类通过静态方法f载入聚合字段
- */
+
 @Data
 public abstract class Aggregation<T extends Aggregation<T>> {
 
@@ -44,14 +41,10 @@ public abstract class Aggregation<T extends Aggregation<T>> {
         return (T) this;
     }
 
-    /** 聚合函数sql名称 */
+    
     public abstract String getFuncName();
 
-    /**
-     * 构建sql聚合字段
-     * @param columnName 列名称
-     * @return sql聚合字段
-     */
+    
     public String toSqlField(String columnName) {
         return StringUtils.join(getFuncName(), "(", calc == null ? columnName : calc.apply(columnName), ")");
     }

@@ -80,7 +80,7 @@ public class ScenePluginCloudSwagger2Config implements ApplicationListener<Appli
                         }
                     }
                 } catch (Exception e) {
-                    // do nothing
+                    
                 }
             }
         }, 30, TimeUnit.SECONDS);

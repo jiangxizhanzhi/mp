@@ -77,7 +77,7 @@ public abstract class CloudClient {
             return true;
         }
         if (StringUtils.isNotEmpty(runtimeException.getMessage()) && runtimeException.getMessage().contains("could not be found")) {
-            // 删除时已不存在的错误可以视为删除成功
+            
             return true;
         }
         return false;

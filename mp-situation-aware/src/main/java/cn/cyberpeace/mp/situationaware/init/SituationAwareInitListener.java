@@ -14,9 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.concurrent.TimeUnit;
 
-/**
- * 启动完后生命周期进行
- */
+
 @Order(1)
 @Component
 @Slf4j
@@ -32,7 +30,7 @@ public class SituationAwareInitListener implements ApplicationListener<Applicati
     public void onApplicationEvent(ApplicationReadyEvent event) {
         log.info("prepare init actions for mp system");
 
-        //定时更新token初始化
+        
         SituationalAwareConstant.wazuhToken = CacheBuilder.newBuilder()
                 .maximumSize(1)
                 .expireAfterWrite(14, TimeUnit.MINUTES)

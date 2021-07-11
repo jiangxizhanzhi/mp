@@ -7,9 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * 根据ID查询返回信息
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,15 +15,11 @@ import lombok.NoArgsConstructor;
 @ApiModel(description = "根据UUID集合查询返回信息")
 public class ImagesByUuidsVO {
 
-    /**
-     * UUID
-     */
+    
     @ApiModelProperty(value = "UUID")
     private String uuid;
 
-    /**
-     * 名称
-     */
+    
     @ApiModelProperty(value = "名称")
     private String name;
 

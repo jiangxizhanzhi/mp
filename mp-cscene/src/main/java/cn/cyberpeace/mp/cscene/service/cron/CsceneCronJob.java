@@ -13,11 +13,7 @@ import org.springframework.scheduling.support.CronTrigger;
 
 import javax.annotation.Resource;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/7/22
- */
+
 @Slf4j
 @Configuration
 @EnableScheduling
@@ -44,7 +40,7 @@ public class CsceneCronJob implements SchedulingConfigurer {
         }
         taskRegistrar.addTriggerTask(new TriggerTask(() -> {
             try {
-                // 停一秒 避免定时任务太快不停的跑
+                
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
             }

@@ -16,11 +16,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/6/22
- */
+
 @Service
 @Slf4j
 public class SceneCorrectService {
@@ -61,7 +57,7 @@ public class SceneCorrectService {
                 try {
                     var createTime = creatingScene.getCreateTime();
                     if (createTime.plusSeconds(csceneAppConfig.getSceneErrorCreatingSeconds()).isBefore(LocalDateTime.now())) {
-                        // 超过预留时间未启动完成
+                        
                         int counts = sceneElementMapper.total(new HumanCondition()
                                 .filterEqual(SceneElementModel::getScene, creatingScene.getId())
                         );
@@ -96,7 +92,7 @@ public class SceneCorrectService {
                 try {
                     var createTime = creatingScene.getUpdateTime();
                     if (createTime.plusSeconds(csceneAppConfig.getSceneErrorCreatingSeconds()).isBefore(LocalDateTime.now())) {
-                        // 超过预留时间未删除完成
+                        
                         int counts = sceneElementMapper.total(new HumanCondition()
                                 .filterEqual(SceneElementModel::getScene, creatingScene.getId())
                         );

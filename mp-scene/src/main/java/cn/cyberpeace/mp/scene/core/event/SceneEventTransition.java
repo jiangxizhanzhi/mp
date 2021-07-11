@@ -52,7 +52,7 @@ public class SceneEventTransition {
                             SceneModel.Event.DELETE, SceneModel.Event.MODIFY, SceneModel.Event.SUSPEND, SceneModel.Event.RESUME
                     ),
 
-                    // 初始化事件
+                    
                     EventTransition.genKey(SceneModel.Event.INITIATE, EventStatus.INITIAL), List.of(
                             SceneModel.Event.DELETE
                     ),
@@ -72,7 +72,7 @@ public class SceneEventTransition {
                             SceneModel.Event.INITIATE, SceneModel.Event.DELETE
                     ),
 
-                    // 创建事件
+                    
                     EventTransition.genKey(SceneModel.Event.CREATE, EventStatus.INITIAL), List.of(
                             SceneModel.Event.DELETE
                     ),
@@ -94,7 +94,7 @@ public class SceneEventTransition {
                             SceneModel.Event.CREATE, SceneModel.Event.DELETE, SceneModel.Event.MODIFY
                     ),
 
-                    // 启动事件
+                    
                     EventTransition.genKey(SceneModel.Event.START, EventStatus.INITIAL), List.of(
                             SceneModel.Event.DELETE
                     ),
@@ -116,7 +116,7 @@ public class SceneEventTransition {
                             SceneModel.Event.START, SceneModel.Event.DELETE
                     ),
 
-                    // 关闭事件
+                    
                     EventTransition.genKey(SceneModel.Event.STOP, EventStatus.INITIAL), List.of(
                             SceneModel.Event.DELETE
                     ),
@@ -136,7 +136,7 @@ public class SceneEventTransition {
                             SceneModel.Event.STOP, SceneModel.Event.DELETE
                     ),
 
-                    // 重启事件
+                    
                     EventTransition.genKey(SceneModel.Event.RESTART, EventStatus.INITIAL), List.of(
                             SceneModel.Event.DELETE
                     ),
@@ -158,7 +158,7 @@ public class SceneEventTransition {
                             SceneModel.Event.RESTART, SceneModel.Event.DELETE
                     ),
 
-                    // 暂停事件
+                    
                     EventTransition.genKey(SceneModel.Event.PAUSE, EventStatus.INITIAL), List.of(
                             SceneModel.Event.DELETE
                     ),
@@ -178,7 +178,7 @@ public class SceneEventTransition {
                             SceneModel.Event.PAUSE, SceneModel.Event.DELETE, SceneModel.Event.PAUSE
                     ),
 
-                    // 暂停恢复事件
+                    
                     EventTransition.genKey(SceneModel.Event.UNPAUSE, EventStatus.INITIAL), List.of(
                             SceneModel.Event.DELETE
                     ),
@@ -200,7 +200,7 @@ public class SceneEventTransition {
                             SceneModel.Event.UNPAUSE, SceneModel.Event.DELETE, SceneModel.Event.UNPAUSE
                     ),
 
-                    // 挂起事件
+                    
                     EventTransition.genKey(SceneModel.Event.SUSPEND, EventStatus.INITIAL), List.of(
                             SceneModel.Event.DELETE
                     ),
@@ -220,7 +220,7 @@ public class SceneEventTransition {
                             SceneModel.Event.SUSPEND, SceneModel.Event.DELETE, SceneModel.Event.SUSPEND
                     ),
 
-                    // 挂起恢复事件
+                    
                     EventTransition.genKey(SceneModel.Event.RESUME, EventStatus.INITIAL), List.of(
                             SceneModel.Event.DELETE
                     ),
@@ -242,7 +242,7 @@ public class SceneEventTransition {
                             SceneModel.Event.RESUME, SceneModel.Event.DELETE, SceneModel.Event.RESUME
                     ),
 
-                    // 快照事件
+                    
                     EventTransition.genKey(SceneModel.Event.SNAPSHOT, EventStatus.INITIAL), List.of(
                             SceneModel.Event.DELETE
                     ),
@@ -264,7 +264,7 @@ public class SceneEventTransition {
                             SceneModel.Event.SNAPSHOT, SceneModel.Event.DELETE
                     ),
 
-                    // 删除事件
+                    
                     EventTransition.genKey(SceneModel.Event.DELETE, EventStatus.INITIAL), List.of(
                             SceneModel.Event.DELETE
                     ),
@@ -284,7 +284,7 @@ public class SceneEventTransition {
                             SceneModel.Event.DELETE
                     ),
 
-                    // 修改事件
+                    
                     EventTransition.genKey(SceneModel.Event.MODIFY, EventStatus.INITIAL), List.of(
                             SceneModel.Event.DELETE
                     ),

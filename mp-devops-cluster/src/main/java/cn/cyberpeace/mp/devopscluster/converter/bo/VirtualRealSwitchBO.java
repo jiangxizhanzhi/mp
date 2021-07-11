@@ -11,28 +11,18 @@ import lombok.NoArgsConstructor;
 @Builder
 public class VirtualRealSwitchBO {
 
-    /**
-     * 名称
-     */
+    
     private String name;
 
-    /**
-     * 管理IP
-     */
+    
     private String managementIp;
 
-    /**
-     * 节点管理
-     */
+    
     private String state;
 
-    /**
-     * 端口总数
-     */
+    
     private Integer ports;
 
-    /**
-     * 已使用端口数
-     */
+    
     private Integer usedPorts;
 }

@@ -32,10 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * 容器管理类
- * @author wanggang
- */
+
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/container")
@@ -49,11 +46,7 @@ public class ContainerController {
 
     private final UserService userService;
 
-    /**
-     * 重启
-     * @param request
-     * @return
-     */
+    
     @ApiOperation("重启容器")
     @PostMapping("/restart")
     public ServiceResult<Boolean> restart(@RequestBody ReviseContainerOrVmRequest request) {
@@ -64,11 +57,7 @@ public class ContainerController {
         return new ServiceResult<>(container.restart(request.getId())).asResult();
     }
 
-    /**
-     * 暂停
-     * @param request
-     * @return
-     */
+    
     @ApiOperation("暂停容器")
     @PostMapping("/pause")
     public ServiceResult<Boolean> pause(@RequestBody ReviseContainerOrVmRequest request) {
@@ -79,11 +68,7 @@ public class ContainerController {
         return new ServiceResult<>(container.pause(request.getId())).asResult();
     }
 
-    /**
-     * 恢复
-     * @param request
-     * @return
-     */
+    
     @ApiOperation("恢复容器")
     @PostMapping("/unpause")
     public ServiceResult<Boolean> unpause(@RequestBody ReviseContainerOrVmRequest request) {
@@ -94,11 +79,7 @@ public class ContainerController {
         return new ServiceResult<>(container.unPause(request.getId())).asResult();
     }
 
-    /**
-     * 开启
-     * @param request
-     * @return
-     */
+    
     @ApiOperation("开启容器")
     @PostMapping("/start")
     public ServiceResult<Boolean> start(@RequestBody ReviseContainerOrVmRequest request) {
@@ -109,11 +90,7 @@ public class ContainerController {
         return new ServiceResult<>(container.start(request.getId())).asResult();
     }
 
-    /**
-     * 关闭
-     * @param request
-     * @return
-     */
+    
     @ApiOperation("关闭容器")
     @PostMapping("/stop")
     public ServiceResult<Boolean> stop(@RequestBody ReviseContainerOrVmRequest request) {
@@ -124,11 +101,7 @@ public class ContainerController {
         return new ServiceResult<>(container.stop(request.getId())).asResult();
     }
 
-    /**
-     * 分页查询容器列表
-     * @param request
-     * @return
-     */
+    
     @ApiOperation("分页查询容器列表")
     @GetMapping("/page")
     public PageResult<ContainerPageVO> page(ContainerPageRequest request){
@@ -137,11 +110,7 @@ public class ContainerController {
         return new PageResult<>(list, model.getTotal());
     }
 
-    /**
-     * 转换BO to VO
-     * @param model
-     * @return
-     */
+    
     private List<ContainerPageVO> convertBOToPageVO(BasePageBO<ContainerBO> model){
         final List<ContainerBO> modelList = model.getList();
         List<String> nameList = modelList.stream().map(ContainerBO::getName).collect(Collectors.toList());

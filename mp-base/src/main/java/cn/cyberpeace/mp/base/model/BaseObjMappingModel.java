@@ -6,9 +6,7 @@ import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import lombok.Data;
 
-/**
- * 对象映射模型基类
- */
+
 @Data
 public abstract class BaseObjMappingModel extends BaseModel {
     @DefaultStr

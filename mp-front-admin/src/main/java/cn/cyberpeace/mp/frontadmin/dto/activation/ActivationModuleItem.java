@@ -3,11 +3,7 @@ package cn.cyberpeace.mp.frontadmin.dto.activation;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-/**
- * @Description: 授权功能项
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Data
 public class ActivationModuleItem {
 

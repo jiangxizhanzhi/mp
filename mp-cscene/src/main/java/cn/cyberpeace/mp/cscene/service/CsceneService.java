@@ -145,7 +145,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         try {
             elementCount = csceneBO.getSceneConfig().getTopology().getElements().size();
         } catch (NullPointerException e) {
-            // do nothing
+            
         } catch (Exception e) {
             log.error("Get element count error: ", e);
         }
@@ -170,7 +170,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
             var sceneConfigId = getSceneConfigId(csceneId);
             elementCount = getSceneConfigVirtualDeviceCount(sceneConfigId);
         } else {
-            // TODO 获取需要虚拟化的节点数量
+            
             try {
                 var pluginElements = cscene.getSceneConfig().getPlugins().get(PluginConstant.PLUGIN_KEY).getElements();
                 if (pluginElements != null) {
@@ -188,7 +188,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                     }
                 }
             } catch (NullPointerException e) {
-                // do nothing
+                
             } catch (Exception e) {
                 log.error("Get element count error: ", e);
             }
@@ -236,7 +236,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         CsceneAuthorizeBO csceneAuthorizeBO = new CsceneAuthorizeBO();
         csceneAuthorizeBO.setAuthType(getModelMapper().get(csceneId).getAuthType());
         csceneAuthorizeBO.setSharedUsers(new ArrayList<>());
-        // 授权所有和私有无共享用户
+        
         if (csceneAuthorizeBO.getAuthType() == CsceneModel.AuthType.PRIVATE || csceneAuthorizeBO.getAuthType() == CsceneModel.AuthType.PUBLIC) {
             return new ServiceResult<>(csceneAuthorizeBO);
         }
@@ -258,7 +258,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
             var user = userId2User.get(userId);
             sharedUser.setId(userId);
             sharedUser.setName(user.getName());
-            // 目前用户只会有一个组织
+            
             sharedUser.setOrganization(user.getOrgIds().get(0));
             sharedUser.setOrganizationNameAll(StringUtils.join(user.getOrgpaths().get(0), "/"));
             sharedUser.setUsername(user.getUsername());
@@ -275,13 +275,13 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         if (CollectionUtils.isEmpty(csceneIds)) {
             return new ServiceResult<>(true);
         }
-        // 用户id为空且授权类型不为所有时 授权类型为私有
+        
         if (CollectionUtils.isEmpty(userIds) && authType != CsceneModel.AuthType.PUBLIC) {
             authType = CsceneModel.AuthType.PRIVATE;
         }
-        // 先删除之前的授权信息
+        
         deleteCsceneAuthByIds(csceneIds);
-        // 所有授权均需要更新场景模板授权类型
+        
         List<CsceneModel> csceneModels = new ArrayList<>();
         for (String id : csceneIds) {
             CsceneModel csceneModel = new CsceneModel();
@@ -290,9 +290,9 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
             csceneModels.add(csceneModel);
         }
         getModelMapper().bulkUpdate(csceneModels);
-        // 自定义授权 每个用户生成一条授权信息
+        
         if (CsceneModel.AuthType.SHARED == authType) {
-            // 用户id去重
+            
             userIds = userIds.stream().distinct().collect(Collectors.toList());
             List<CsceneAuthModel> csceneAuthModels = new ArrayList<>();
             for (String userId : userIds) {
@@ -311,7 +311,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     public ListObjServiceResult<CsceneBO> listCsceneBO(CsceneQueryParams queryParams, boolean withInstance,
                                                        CsceneContextBO context) {
         ListObjServiceResult<CsceneModel> listResult = null;
-        // 查询场景模板的授权信息
+        
         if (Objects.nonNull(queryParams.getType()) && queryParams.getType() == CsceneModel.Type.TEMPLATE) {
             List<String> ids = getCsceneIds();
             if (CollectionUtils.isEmpty(ids)) {
@@ -325,11 +325,11 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                 queryParams.setIds(ids.toArray(new String[0]));
             }
         }
-        // 未指定排序方式时默认按创建时间倒序排列
+        
         if (queryParams.getOrders() == null || queryParams.getOrders().length == 0) {
             queryParams.setOrders(new String[]{"-createTime"});
         }
-        // 指定模糊查询但是未指定查询字段时默认查询字段为name和referenceMetaData
+        
         if (queryParams.getSearch() != null && queryParams.getSearchFields() == null) {
             queryParams.setSearchFields(new String[]{"name", "referenceMetaData"});
         }
@@ -349,7 +349,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
             var csceneHandler = new CsceneHandler(csceneObj, roleObjs, context);
             csceneBOMap.put(csceneId, csceneHandler.toData(withInstance));
         });
-        // 转为Map后顺序被打乱，此时再次排序
+        
         listResult.getSource().getObjs().forEach(m -> csceneBOs.add(csceneBOMap.get(m.getId())));
         return new ListObjServiceResult<>(new ListObjResult<>(csceneBOs, listResult.getSource().getTotal(),
                 listResult.getSource().getFields()));
@@ -359,7 +359,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         if (CollectionUtils.isEmpty(csceneBOs)) {
             return;
         }
-        // 设置场景模板授权用户列表
+        
         if (Objects.nonNull(queryParams.getType()) && queryParams.getType() == CsceneModel.Type.TEMPLATE) {
             HumanCondition humanCondition = new HumanCondition()
                     .filterIn(CsceneAuthModel::getTarget, csceneBOs.stream().map(BaseCsceneBO::getId).toArray());
@@ -399,9 +399,9 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
             checkSceneEditNodeLimit(csceneBO);
         }
         if (csceneBO.getSceneConfig() == null && StringUtils.isNotEmpty(csceneBO.getId())) {
-            // 更新name
+            
             var serviceResult = update(csceneBO.toModel());
-            // 更新录屏开关
+            
             if (csceneBO.getEnableRecording() != null) {
                 String sceneConfigId = getSceneConfigId(csceneBO.getId());
                 if (sceneConfigId != null) {
@@ -419,7 +419,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         } else {
             handlerEnableRate(csceneBO);
             var csceneHandler = new CsceneHandler(csceneBO, context);
-            // 以前没有 cscene.name , 目前都和 scene.name 保持一致
+            
             String sceneName = getSceneName(csceneBO.getSceneConfig());
             csceneBO.setName(sceneName == null ? StringUtils.EMPTY : sceneName);
             csceneHandler.save();
@@ -470,7 +470,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         var csceneHandler = new CsceneHandler(id, context);
         var flag = csceneHandler.delete(logic, withInstance);
         if (flag) {
-            // 尝试该场景模板建立的快照
+            
             CsceneSnapshotDeleteTaskPool.getInstance().executeTask(() -> {
                 csceneSnapshotService.deleteSceneSnapshots(id);
             });
@@ -627,16 +627,16 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     }
 
     private boolean need2UseSystemEnableRecording(int testType, Integer referenceType) {
-        // 使用数据库模板配置的, 根据其他字段判断是否需要使用系统的录屏开关
+        
         if (CsceneInstanceModel.Type.TEST == testType) {
-            // 后台测试启动,全部都需要用系统的录屏开关
+            
             return true;
         } else {
-            // 前台启动
+            
             if (referenceType == null) {
                 return false;
             } else {
-                // 没有独立开关配置的,需要使用系统的录屏开关
+                
                 return !csceneAppConfig.getHasOwnRecordingSet().contains(referenceType);
             }
         }

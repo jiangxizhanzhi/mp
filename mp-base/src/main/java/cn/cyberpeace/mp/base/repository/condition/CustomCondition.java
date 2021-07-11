@@ -10,19 +10,12 @@ import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 
-/**
- * 自定义业务条件
- */
+
 @Data
 @AllArgsConstructor
 public class CustomCondition implements BaseCondition {
 
-    /**
-     * 自定义业务条件默认载入方法
-     * 默认载入字段名称匹配以及字段值类型匹配的变量
-     * @param params 原始业务条件参数
-     * @return 自定义条件
-     */
+    
     public CustomCondition loadFromParams(Map<String, Object> params) {
         String[] fieldNames = ClassUtils.getBeanClassFields(this.getClass());
         final BeanWrapper objWrapper = new BeanWrapperImpl(this);

@@ -15,23 +15,23 @@ import java.util.List;
 @Repository
 @ModelClass(ProbeModel.class)
 public interface ProbeMapper extends BaseModelMapper<ProbeModel> {
-//    int deleteByPrimaryKey(Integer pk);
-//
-//    int insert(ProbeModel record);
-//
-//    int insertSelective(ProbeModel record);
-//
-//    ProbeModel selectByPrimaryKey(Integer pk);
-//
+
+
+
+
+
+
+
+
     int updateByPrimaryKeySelective(ProbeModel record);
-//
-//    int updateByPrimaryKey(ProbeModel record);
+
+
 
     ProbeDto getById(@Param("id") String id);
 
-//    List<ProbeDto> listProbes(@Param("name") String name, @Param("types") List<Integer> types,
-//                                 @Param("osTypes") List<Integer> osTypes, @Param("catagories") List<String> catagories,
-//                                 @Param("scriptTypes") List<Integer> scriptTypes);
+
+
+
 
     List<ProbeDto> listProbeDtos(@Param("condition") ProbeSearchCondition condition);
 

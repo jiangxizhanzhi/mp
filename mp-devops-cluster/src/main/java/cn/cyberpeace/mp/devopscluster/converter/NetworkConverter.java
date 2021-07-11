@@ -23,22 +23,14 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-/**
- * 网络管理
- * @author wanggang
- */
+
 @Service
 @RequiredArgsConstructor
 public class NetworkConverter implements BaseConverter{
 
     private final NetworkService networkService;
 
-    /**
-     * 分页查询网络信息
-     * @param dto
-     * @param ignoreFields 不需要传递给云平台接口的参数,默认过滤page与perPage,此参数已转化成limit与offset这两个参数
-     * @return
-     */
+    
     public BasePageBO<NetworkBO> page(NetworkPageDTO dto, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         String getParams = ParamUtils.wrapperGetParamsByObject(dto,ignoreFields);
@@ -63,10 +55,7 @@ public class NetworkConverter implements BaseConverter{
         return convertModel;
     }
 
-    /**
-     * 查询vlanstock信息
-     * @return
-     */
+    
     public VlanIpStockBO vlanIpStock() {
         CloudPlatformResult<VlanIpStockModel> result = networkService.vlanIpStock("");
         VlanIpStockModel model = result.getData();
@@ -76,10 +65,7 @@ public class NetworkConverter implements BaseConverter{
     }
 
 
-    /**
-     * 获取网络总数
-     * @return
-     */
+    
     public Integer getTotalNetwork(NetworkPageDTO dto) {
         dto.setLimit(NumberUtils.INTEGER_ONE);
         BasePageBO<NetworkBO> page = this.page(dto, this.getTotalPageIgnoreField());

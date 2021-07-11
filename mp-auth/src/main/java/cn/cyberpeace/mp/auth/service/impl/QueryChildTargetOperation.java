@@ -12,11 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Component
 @Scope("prototype")
 public class QueryChildTargetOperation implements TargetOperation<TargetBo> {
@@ -28,9 +24,9 @@ public class QueryChildTargetOperation implements TargetOperation<TargetBo> {
 
     @Override
     public TargetBo doExecute(TargetBo targetBo) {
-//        if (StringUtils.isBlank(targetDto.getParent())) {
-//            return targetDto;
-//        }
+
+
+
 
         var list = targetService.listByParent(targetBo.getId());
         var childList = new ArrayList();

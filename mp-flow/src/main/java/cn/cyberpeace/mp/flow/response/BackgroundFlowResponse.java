@@ -14,38 +14,26 @@ import java.io.File;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * @Description: 背景流量返回信息
- * @Author qiaokang
- * @Date：2021/8/10 16:57
- */
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @ApiModel(value = "背景流量返回信息")
 public class BackgroundFlowResponse extends FlowInfoResponse {
 
-    /**
-     * 流量文件名称
-     */
+    
     @ApiModelProperty(value = "流量文件名称")
     private String fileName;
 
-    /**
-     * 流量文件路径(不带ip)
-     */
+    
     @ApiModelProperty(value = "流量文件路径(不带ip)")
     private String pcapFile;
 
-    /**
-     * 流量文件地址(全地址)
-     */
+    
     @ApiModelProperty(value = "流量文件地址(全地址)")
     private String pcapFilePath;
 
-    /**
-     * pcap包含的协议
-     */
+    
     @ApiModelProperty(value = "pcap包含协议集合")
     private List<ProtocolBO> protocolList;
 

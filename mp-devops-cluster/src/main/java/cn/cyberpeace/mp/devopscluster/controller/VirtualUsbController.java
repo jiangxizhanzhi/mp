@@ -25,11 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-/**
- * @Description: 靶标管理-USB仿真
- * @Author: guquan
- * @Date：2023/4/17 10:39
- */
+
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/virtual_usb")
@@ -39,11 +35,7 @@ public class VirtualUsbController {
     @Autowired
     private VirtualUsbService usbServicesbService;
 
-    /**
-     * 分页查询虚拟USB信息
-     * @param queryParams
-     * @return
-     */
+    
     @ApiOperation("分页查询虚拟USB信息")
     @GetMapping("/page")
     public ListObjServiceResult<VirtualUsbVO> page(VirtualUsbQueryParams queryParams) {
@@ -52,11 +44,7 @@ public class VirtualUsbController {
         return result;
     }
 
-    /**
-     * 根据UUID查询虚拟USB信息
-     * @param uuid
-     * @return
-     */
+    
     @ApiOperation("根据UUID查询虚拟USB信息")
     @ApiImplicitParam(name = "uuid", value = "虚拟USB的uuid", dataTypeClass = String.class)
     @GetMapping("/find_by_uuid")
@@ -65,11 +53,7 @@ public class VirtualUsbController {
         return new Result<>(virtualUsbVO);
     }
 
-    /**
-     * 新增虚拟USB
-     * @param virtualUsbVO
-     * @return
-     */
+    
     @ApiOperation("新增虚拟USB")
     @PostMapping("/add")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.CREATE, title = "新增虚拟USB", target = OpTargetEnums.VIRTUAL_USB)
@@ -78,11 +62,7 @@ public class VirtualUsbController {
         return ResultCommon.success();
     }
 
-    /**
-     * 编辑虚拟USB
-     * @param virtualUsbVO
-     * @return
-     */
+    
     @ApiOperation("编辑虚拟USB")
     @PostMapping("/update")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.UPDATE, title = "编辑虚拟USB", target = OpTargetEnums.VIRTUAL_USB)
@@ -91,11 +71,7 @@ public class VirtualUsbController {
         return ResultCommon.success();
     }
 
-    /**
-     * 删除虚拟USB
-     * @param request
-     * @return
-     */
+    
     @ApiOperation("删除虚拟USB")
     @ApiImplicitParam(name = "request", value = "删除虚拟USB请求体", dataTypeClass = VirtualUsbDeleteRequest.class)
     @DeleteMapping("/delete")
@@ -105,11 +81,7 @@ public class VirtualUsbController {
         return ResultCommon.success();
     }
 
-    /**
-     * 根据UUID查询虚拟USB文件列表
-     * @param uuid
-     * @return
-     */
+    
     @ApiOperation("根据UUID查询虚拟USB文件列表")
     @ApiImplicitParam(name = "uuid", value = "虚拟USB的uuid", dataTypeClass = String.class)
     @GetMapping("/file_list_by_uuid")
@@ -118,12 +90,7 @@ public class VirtualUsbController {
         return new Result<>(virtualUsbStorage);
     }
 
-    /**
-     * 上传文件到虚拟USB
-     * @param file
-     * @param uuid
-     * @return
-     */
+    
     @ApiOperation("上传文件到虚拟USB")
     @ApiImplicitParam(name = "uuid", value = "虚拟USB的uuid", dataTypeClass = String.class)
     @PostMapping(value = "/upload")
@@ -133,12 +100,7 @@ public class VirtualUsbController {
         return new Result(new TargetUploadVO(result.getTmpdirUuid(),result.getFileNames()));
     }
 
-    /**
-     * 虚拟USB删除文件
-     * @param uuid
-     * @param fileName
-     * @return
-     */
+    
     @ApiOperation("虚拟USB删除文件")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "uuid", value = "虚拟USB的uuid", dataTypeClass = String.class),
@@ -151,11 +113,7 @@ public class VirtualUsbController {
         return ResultCommon.success();
     }
 
-    /**
-     * 虚拟USB格式化
-     * @param uuid
-     * @return
-     */
+    
     @ApiOperation("虚拟USB格式化")
     @ApiImplicitParam(name = "uuid", value = "虚拟USB的uuid", dataTypeClass = String.class)
     @DeleteMapping("/delete_all_files")
@@ -165,12 +123,7 @@ public class VirtualUsbController {
         return ResultCommon.success();
     }
 
-    /**
-     * 虚拟USB下载文件
-     * @param uuid
-     * @param fileName
-     * @return
-     */
+    
     @ApiOperation("虚拟USB下载文件")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "uuid", value = "虚拟USB的uuid", dataTypeClass = String.class),

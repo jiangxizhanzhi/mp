@@ -49,11 +49,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-/**
- * @Description: 流量任务异步执行服务类
- * @Author qiaokang
- * @Date：2021/8/20 09:56
- */
+
 @Service
 @Slf4j
 public class AsyncPlatFlowTaskService {
@@ -91,29 +87,22 @@ public class AsyncPlatFlowTaskService {
     @Autowired
     private FlowTaskRecordService flowTaskRecordService;
 
-    /**
-     * tgn代码目录
-     */
+    
     private static final String TGN_PATH = "/root/.mp/resources/flows/traffic_generators.zip";
 
-    /**
-     * 保存流量发生平台任务
-     *
-     * @param request
-     * @param isUpdate
-     */
-//    @Async
+    
+
     public void savePlatFlowTask(AddFlowTaskRequest request, boolean isUpdate) {
         log.info("start to " + (isUpdate ? "update" : "add") + "platform flow task");
 
         FlowTaskModel flowTaskModel = request;
-        // 流量任务存在校验
+        
         if (Objects.isNull(flowTaskModel)) {
             log.error("flow task not exist");
             return;
         }
 
-        // 流量平台任务是否已创建校验
+        
         if (isUpdate) {
             if (StringUtils.isBlank(flowTaskModel.getThirdTaskId())) {
                 log.error("third flow task is not exist");
@@ -126,12 +115,12 @@ public class AsyncPlatFlowTaskService {
             }
         }
 
-        // 是否自定义流量
+        
         Boolean isCustom = StringUtils.isNotBlank(flowTaskModel.getFlowProtocol());
         FlowInfoModel flowInfoModel = new FlowInfoModel();
         if (!isCustom) {
             flowTaskModel.setCustomFlag(CustomFlagEnum.NO.toValue());
-            // 流量信息存在校验
+            
             flowInfoModel = flowInfoMapper.get(flowTaskModel.getFlowId());
             if (Objects.isNull(flowInfoModel)) {
                 log.error("flow info in task not exist:{}", flowTaskModel.getFlowId());
@@ -143,17 +132,17 @@ public class AsyncPlatFlowTaskService {
             flowInfoModel.setResourceType(ResourceTypeEnum.PACP.toValue());
         }
 
-        // 流量执行器信息查询
+        
         String actuatorId = flowTaskModel.getActuatorId();
         FlowActuatorModel flowActuatorModel = this.getFlowActuatorModel(actuatorId);
         if (Objects.isNull(flowActuatorModel)) {
             return;
         }
 
-        // 获取网口信息
+        
         FlowPortModel flowPortModel = null;
         if (isUpdate) {
-            // 更新时，查询之前记录
+            
             flowPortModel = flowPortMapper.get(flowTaskModel.getFlowPortId());
             if (Objects.isNull(flowPortModel)) {
                 log.error("update flow port info error");
@@ -176,17 +165,17 @@ public class AsyncPlatFlowTaskService {
 
         String thirdTaskId = "";
         if (isCustom || ResourceTypeEnum.PACP.toValue() == flowInfoModel.getResourceType()) {
-            // 构建保存app任务请求
+            
             AddAppTaskRequest appTaskRequest = new AddAppTaskRequest(flowTaskModel, flowPortModel);
 
             try {
                 String saveAppTaskRsp = null;
                 if (isUpdate) {
-                    // 更新
+                    
                     saveAppTaskRsp = HttpUtils.sendPatch(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks/app/"
                                     + flowTaskModel.getThirdTaskId(), JsonUtils.snakeStringify(appTaskRequest));
                 } else {
-                    // 新增
+                    
                     saveAppTaskRsp = HttpUtils.sendPost(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks/app",
                             JsonUtils.snakeStringify(appTaskRequest));
                 }
@@ -194,7 +183,7 @@ public class AsyncPlatFlowTaskService {
                 JSONObject saveAppTaskObj = JSONObject.parseObject(saveAppTaskRsp);
                 log.info("save app task response:{}", saveAppTaskObj.toJSONString());
                 if (ResponseUtils.checkResponse(saveAppTaskObj)) {
-                    // 第三方任务id
+                    
                     thirdTaskId = saveAppTaskObj.getJSONObject(BaseConstants.STR_DATA).getString("uuid");
                 } else {
                     log.error("save app task failed");
@@ -205,7 +194,7 @@ public class AsyncPlatFlowTaskService {
             }
         } else {
             try {
-                // 封装请求参数
+                
                 AddStandardsTaskRequest standTaskRequest = new AddStandardsTaskRequest(flowTaskModel);
                 standTaskRequest.setPort(flowPortModel.getServerMac());
                 String saveStandTaskRsp = null;
@@ -220,7 +209,7 @@ public class AsyncPlatFlowTaskService {
                 JSONObject saveStandTaskObj = JSONObject.parseObject(saveStandTaskRsp);
                 log.info("save standard task response:{}", saveStandTaskObj.toJSONString());
                 if (ResponseUtils.checkResponse(saveStandTaskObj)) {
-                    // 第三方任务id
+                    
                     thirdTaskId = saveStandTaskObj.getString(BaseConstants.STR_DATA);
                 } else {
                     log.error("save standard task failed");
@@ -231,7 +220,7 @@ public class AsyncPlatFlowTaskService {
             }
         }
 
-        // 更新第三方任务id
+        
         if (StringUtils.isNotBlank(thirdTaskId)) {
             flowTaskModel.setThirdTaskId(thirdTaskId);
             flowTaskMapper.update(flowTaskModel);
@@ -239,11 +228,7 @@ public class AsyncPlatFlowTaskService {
 
     }
 
-    /**
-     * 批量新增流量任务
-     * @param addTaskRequestList
-     * @return
-     */
+    
     public List<FlowTaskModel> batchSavePlatFlowTask(List<AddFlowTaskRequest> addTaskRequestList) {
         log.info("start to batch save platform flow task");
         List<FlowTaskModel> flowTaskModelList = new ArrayList<>();
@@ -252,37 +237,37 @@ public class AsyncPlatFlowTaskService {
             return flowTaskModelList;
         }
 
-        // 遍历封装所有流量任务
+        
         for (AddFlowTaskRequest request : addTaskRequestList) {
             FlowTaskModel flowTaskModel = request;
             flowTaskModelList.add(flowTaskModel);
-            // 流量任务存在校验
+            
             if (Objects.isNull(flowTaskModel)) {
                 log.error("flow task not exist");
                 throw new MpRuntimeException(FlowErrorCode.ADD_TASK_ERROR);
             }
 
-            // 流量平台任务是否已创建校验
+            
             if (StringUtils.isNotBlank(flowTaskModel.getId())) {
                 log.info("third flow task is already exist");
                 continue;
             }
 
             FlowInfoModel flowInfoModel = new FlowInfoModel();
-            // 流量信息存在校验
+            
             flowInfoModel = flowInfoMapper.get(flowTaskModel.getFlowId());
             if (Objects.isNull(flowInfoModel)) {
                 log.error("flow info in task not exist:{}", flowTaskModel.getFlowId());
                 throw new MpRuntimeException(FlowErrorCode.ADD_TASK_ERROR);
             }
 
-            // 上传流量文件
+            
             if (!uploadFlowInfo(flowInfoModel, flowTaskModel, request)) {
                 log.error("upload flow file info error");
                 throw new MpRuntimeException(FlowErrorCode.ADD_TASK_ERROR);
             }
 
-            // 流量执行器信息查询
+            
             String actuatorId = flowTaskModel.getActuatorId();
             FlowActuatorModel flowActuatorModel = this.getFlowActuatorModel(actuatorId);
             if (Objects.isNull(flowActuatorModel)) {
@@ -291,7 +276,7 @@ public class AsyncPlatFlowTaskService {
             }
 
             String thirdTaskId = "";
-            // 获取网口信息
+            
             FlowPortModel flowPortModel = null;
             List<FlowPortModel> flowPorts =
                     flowPortMapper.list(new HumanCondition()
@@ -303,22 +288,22 @@ public class AsyncPlatFlowTaskService {
                 log.error("batch get flow port info error");
                 throw new MpRuntimeException(FlowErrorCode.ADD_TASK_ERROR);
             }
-            // 设置网口id
+            
             flowTaskModel.setFlowPortId(flowPortModel.getId());
 
             if (ResourceTypeEnum.PACP.toValue() == flowInfoModel.getResourceType()) {
-                // 构建保存背景任务请求
+                
                 try {
                     AddAppTaskRequest appTaskRequest = new AddAppTaskRequest(flowTaskModel, flowPortModel);
                     String saveAppTaskRsp = null;
-                    // 新增
+                    
                     saveAppTaskRsp = HttpUtils.sendPost(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks/app",
                             JsonUtils.snakeStringify(appTaskRequest));
 
                     JSONObject saveAppTaskObj = JSONObject.parseObject(saveAppTaskRsp);
                     log.info("save background task response:{}", saveAppTaskObj.toJSONString());
                     if (ResponseUtils.checkResponse(saveAppTaskObj)) {
-                        // 第三方任务id
+                        
                         thirdTaskId = saveAppTaskObj.getJSONObject(BaseConstants.STR_DATA).getString("uuid");
                     } else {
                         log.error("save background task failed");
@@ -329,7 +314,7 @@ public class AsyncPlatFlowTaskService {
                 }
             } else {
                 try {
-                    // 封装请求参数
+                    
                     AddStandardsTaskRequest standTaskRequest = new AddStandardsTaskRequest(flowTaskModel);
                     standTaskRequest.setPort(flowPortModel.getServerMac());
                     String saveStandTaskRsp = null;
@@ -339,7 +324,7 @@ public class AsyncPlatFlowTaskService {
                     JSONObject saveStandTaskObj = JSONObject.parseObject(saveStandTaskRsp);
                     log.info("save attack task response:{}", saveStandTaskObj.toJSONString());
                     if (ResponseUtils.checkResponse(saveStandTaskObj)) {
-                        // 第三方任务id
+                        
                         thirdTaskId = saveStandTaskObj.getString(BaseConstants.STR_DATA);
                     } else {
                         log.error("save attack task failed");
@@ -350,7 +335,7 @@ public class AsyncPlatFlowTaskService {
                 }
             }
 
-            // 更新第三方任务id
+            
             if (StringUtils.isNotBlank(thirdTaskId)) {
                 flowTaskModel.setThirdTaskId(thirdTaskId);
             }
@@ -360,12 +345,7 @@ public class AsyncPlatFlowTaskService {
         return flowTaskModelList;
     }
 
-    /**
-     * 异步删除流量发生平台任务
-     *
-     * @param resourceType
-     * @param flowTaskModels
-     */
+    
     @Async
     public void deletePlatFlowTask(int resourceType, List<FlowTaskModel> flowTaskModels) {
         if (CollectionUtils.isEmpty(flowTaskModels)) {
@@ -373,7 +353,7 @@ public class AsyncPlatFlowTaskService {
             return;
         }
 
-        // 流量执行器信息查询
+        
         String actuatorId = flowTaskModels.get(0).getActuatorId();
         FlowActuatorModel flowActuatorModel = this.getFlowActuatorModel(actuatorId);
         if (Objects.isNull(flowActuatorModel)) {
@@ -385,11 +365,11 @@ public class AsyncPlatFlowTaskService {
         String delUrl = "";
         if (ResourceTypeEnum.PACP.toValue() == resourceType) {
             log.info("start to delete app task");
-            // 删除pcap包任务地址
+            
             delUrl = "/tasks/app";
         } else {
             log.info("start to delete standard task");
-            // 删除脚本文件任务地址
+            
             delUrl = "/tasks/standards";
         }
 
@@ -414,55 +394,40 @@ public class AsyncPlatFlowTaskService {
                 log.error("delete flow task response error");
             }
 
-            // 删除网口信息
+            
             this.delPorts(flowActuatorModel, flowPortIds);
 
-            // 删除流量网口信息
+            
             flowPortMapper.bulkDelete(flowPortIds.toArray(new String[0]));
         } catch (Exception e) {
             log.error("delete task from flow actuator platform error, {}", ExceptionUtils.getStackTrace(e));
         }
     }
 
-    /**
-     * 同步新增流量执行器
-     * @param trexName
-     * @param networkInfos
-     * @return
-     */
+    
     public String addExecutorSync(String trexName, List<FlowNetworkInfo> networkInfos) {
         String uuid = TextUtils.uuid();
         this.addFlowExecutor(uuid, trexName, networkInfos);
         return uuid;
     }
 
-    /**
-     * 同步启动流量执行器
-     * @param trexName
-     * @return
-     */
+    
     public String syncStartExecutor(String trexName) {
         String uuid = TextUtils.uuid();
         this.startExecutor(uuid, trexName);
         return uuid;
     }
 
-    /**
-     * 异步新增虚拟机、添加网口
-     *
-     */
+    
     @Async
     public void addExecutor(String uuid, List<FlowNetworkInfo> networkInfos) {
         this.addFlowExecutor(uuid, String.valueOf(System.currentTimeMillis()), networkInfos);
     }
 
-    /**
-     * 新增流量执行器
-     * @param uuid
-     */
+    
     private void addFlowExecutor(String uuid, String trexName, List<FlowNetworkInfo> networkInfos) {
         log.info("addFlowExecutor networkInfos:{}", networkInfos);
-        // 获取外部networkId，用于管理端口
+        
         String externalNetId = "";
         try {
             String getNetworkRsp = HttpUtils.sendPost(flowConfig.getCpUrl() + "/v1/scenarios/virtual_internet", new JSONObject().toJSONString());
@@ -490,7 +455,7 @@ public class AsyncPlatFlowTaskService {
         addVmRequest.setNetworks(Collections.singletonList(networks));
 
         try {
-            // 创建trex虚拟机
+            
             String addVmRsp = HttpUtils.sendPost(flowConfig.getCpUrl() + "/v1/scenarios/vm",
                     JsonUtils.snakeStringify(addVmRequest));
             JSONObject addVmObj = JSONObject.parseObject(addVmRsp);
@@ -508,12 +473,12 @@ public class AsyncPlatFlowTaskService {
                 String clientIp = fixedIp;
                 String clientPortId = netWorkObj.getString("port_id");
 
-                // pcap使用无状态模式，客户端和服务端共用一个网口
+                
                 String serverMac = clientMac;
                 String serverIp = clientIp;
                 String serverPortId = clientPortId;
 
-                // 新增流量执行器信息
+                
                 flowActuatorModel.setId(uuid);
                 flowActuatorModel.setTitle(addVmRequest.getName());
                 flowActuatorModel.setInstanceId(instanceId);
@@ -521,16 +486,16 @@ public class AsyncPlatFlowTaskService {
                 flowActuatorModel.setNetworkId(externalNetId);
                 flowActuatorMapper.create(flowActuatorModel);
 
-                // 添加外网网口信息
+                
                 FlowPortModel flowPortModel = FlowPortModel.builder()
                         .serverIp(serverIp)
                         .serverMac(serverMac)
                         .serverPortId(serverPortId)
-                        .serverGateway(fixedIp) // Trex的ip作为网关地址
+                        .serverGateway(fixedIp) 
                         .clientIp(clientIp)
                         .clientMac(clientMac)
                         .clientPortId(clientPortId)
-                        .clientGateway(fixedIp) // Trex的ip作为网关地址
+                        .clientGateway(fixedIp) 
                         .networkId(externalNetId)
                         .actuatorId(flowActuatorModel.getId())
                         .portType(PortTypeEnum.SCRIPT.toValue())
@@ -538,7 +503,7 @@ public class AsyncPlatFlowTaskService {
                 flowPortMapper.create(flowPortModel);
 
                 String extNetId = externalNetId;
-                // 轮询流量发生器端口，直到端口可访问才返回（轮询10分钟）
+                
                 String finalFixedIp = fixedIp;
                 NetworkUtils.probePort(fixedIp, 22, 1000, 1000, 1000 * 60 * 10,
                         null, 0, () -> checkTrexServer(finalFixedIp, networkInfos, flowActuatorModel, extNetId)
@@ -558,14 +523,10 @@ public class AsyncPlatFlowTaskService {
     }
 
 
-    /**
-     * 启动trex虚拟机
-     * @param uuid
-     * @param trexName
-     */
+    
     private void startExecutor(String uuid, String trexName) {
         log.info("addFlowExecutor name:{}", trexName);
-        // 获取外部networkId，用于管理端口
+        
         String externalNetId = "";
         try {
             String getNetworkRsp = HttpUtils.sendPost(flowConfig.getCpUrl() + "/v1/scenarios/virtual_internet", new JSONObject().toJSONString());
@@ -593,7 +554,7 @@ public class AsyncPlatFlowTaskService {
         addVmRequest.setNetworks(Collections.singletonList(networks));
 
         try {
-            // 创建trex虚拟机
+            
             String addVmRsp = HttpUtils.sendPost(flowConfig.getCpUrl() + "/v1/scenarios/vm",
                     JsonUtils.snakeStringify(addVmRequest));
             JSONObject addVmObj = JSONObject.parseObject(addVmRsp);
@@ -609,7 +570,7 @@ public class AsyncPlatFlowTaskService {
 
                 String mac = netWorkObj.getString("mac_address");
 
-                // 新增流量执行器信息
+                
                 flowActuatorModel.setId(uuid);
                 flowActuatorModel.setTitle(addVmRequest.getName());
                 flowActuatorModel.setInstanceId(instanceId);
@@ -617,14 +578,14 @@ public class AsyncPlatFlowTaskService {
                 flowActuatorModel.setNetworkId(externalNetId);
                 flowActuatorMapper.create(flowActuatorModel);
 
-                // 添加流量任务网口信息
+                
                 FlowTaskPortModel flowTaskPortModel = new FlowTaskPortModel();
                 flowTaskPortModel.setActuatorId(uuid);
                 flowTaskPortModel.setNetworkId(externalNetId);
                 flowTaskPortModel.setMac(mac);
                 flowTaskPortService.create(flowTaskPortModel);
 
-                // 轮询流量发生器端口，直到端口可访问才返回（轮询10分钟）
+                
                 String finalFixedIp = fixedIp;
                 NetworkUtils.probePort(fixedIp, 22, 1000, 1000, 1000 * 60 * 10,
                         null, 0, () -> checkStartTrex(finalFixedIp),
@@ -643,20 +604,16 @@ public class AsyncPlatFlowTaskService {
         }
     }
 
-    /**
-     * 单个启动流量任务
-     * @param taskId
-     * @return
-     */
+    
     public ServiceResult<Boolean> startTask(String taskId, String sourceIp) {
-        // 任务存在校验
+        
         ObjServiceResult<FlowTaskTaskModel> taskServiceResult = flowTaskTaskService.get(taskId);
         if (Objects.isNull(taskServiceResult.getSource()) || Objects.isNull(taskServiceResult.getSource().getObj())) {
             log.error("task is not exist for {}", taskId);
             throw new MpRuntimeException(FlowErrorCode.TASK_NOT_EXIST);
         }
 
-        // 任务状态校验
+        
         FlowTaskTaskModel flowTaskTaskModel = taskServiceResult.getSource().getObj();
         if (TaskTaskStatusEnum.RUNNING.toValue() == flowTaskTaskModel.getTaskStatus() || TaskTaskStatusEnum.PREPARING.toValue()== flowTaskTaskModel.getTaskStatus()) {
             log.error("task is running for {}", taskId);
@@ -667,29 +624,29 @@ public class AsyncPlatFlowTaskService {
             throw new MpRuntimeException(FlowErrorCode.TASK_IS_RUNNING);
         }
 
-        // 任务配置校验
+        
         FlowTaskConfModel flowTaskConfModel = flowTaskConfService.findByTaskId(taskId);
         if (Objects.isNull(flowTaskConfModel)) {
             log.error("task config error for {}", taskId);
             throw new MpRuntimeException(FlowErrorCode.TASK_INFO_ERROR);
         }
 
-        // 流量执行器校验
+        
         FlowActuatorModel flowActuatorModel = flowActuatorMapper.get(flowTaskTaskModel.getActuatorId());
         if (Objects.isNull(flowActuatorModel)) {
             log.error("start task error, flowActuator not exist for {}", taskId);
             throw new MpRuntimeException(FlowErrorCode.TASK_INFO_ERROR);
         }
 
-        // 将之前流量记录状态设为无效
+        
         flowTaskRecordService.batchUpdateStatus(0, Collections.singletonList(taskId));
 
-        // 解析任务配置
+        
         FlowTaskConf flowTaskConf = JSONObject.parseObject(flowTaskConfModel.getConf(), FlowTaskConf.class);
         if (StringUtils.isNotBlank(sourceIp)) {
-            // 有sourceIp，是靶场测评，不支持持续运行
+            
             flowTaskConfModel.setKeepRunning(0);
-            // 兼容旧版，有sourceIp设置源ip
+            
             if ("127.0.0.1".equals(sourceIp)) {
                 sourceIp = "";
             }
@@ -720,7 +677,7 @@ public class AsyncPlatFlowTaskService {
                 flowTaskConf.setCommonConf(commonConf);
             }
         }
-        // 封装流量任务配置参数
+        
         FlowTaskStart flowTaskStart = FlowTaskStart.builder()
                 .taskId(flowTaskTaskModel.getId())
                 .flowId(flowTaskTaskModel.getFlowId())
@@ -747,16 +704,16 @@ public class AsyncPlatFlowTaskService {
             if (ResponseUtils.checkResponse(startTaskObj)) {
                 log.info("start task success for {}", taskId);
 
-                // 跟流量执行器建立ws连接，用于接收任务状态信息
+                
                 FlowWebSocketClientUtil wsClient = FlowWebSocketClientUtil.getWebSocketClient(flowActuatorModel.getIp().split(BaseConstants.COLON)[0]);
                 wsClient.sendMessage(taskId);
 
-                // 更新任务状态为运行中
+                
                 flowTaskTaskService.updateTaskStatus(taskId, TaskStatusEnum.RUNNING.toValue());
                 return ResultCommon.success(true);
             } else {
                 if (ResponseUtils.checkRunning(startTaskObj)) {
-                    // 更新任务状态为运行中
+                    
                     flowTaskTaskService.updateTaskStatus(taskId, TaskStatusEnum.RUNNING.toValue());
                     return ResultCommon.success(true);
                 }
@@ -772,27 +729,23 @@ public class AsyncPlatFlowTaskService {
         }
     }
 
-    /**
-     * 批量启动流量任务
-     * @param taskIds
-     * @return
-     */
+    
     public ServiceResult<Boolean> batchStartTasks(List<String> taskIds, BatchStartTaskBO batchStartTaskBO) {
         Integer runType = null;
         if (Objects.nonNull(batchStartTaskBO)) {
-            // 有batchStartTaskBO，是靶场测评调用
+            
             runType = batchStartTaskBO.getRunType();
             taskIds = batchStartTaskBO.getTaskSipList().stream().map(TaskSipBO::getTaskId).collect(Collectors.toList());
         }
 
-        // 任务存在校验
+        
         List<FlowTaskTaskModel> flowTaskTaskModels = flowTaskTaskService.listByTaskIds(taskIds);
         if (CollectionUtils.isEmpty(flowTaskTaskModels) || flowTaskTaskModels.size() != taskIds.size()) {
             log.error("tasks are not all exist");
             throw new MpRuntimeException(FlowErrorCode.TASK_NOT_EXIST);
         }
 
-        // 任务状态校验
+        
         List<String> notRunningTaskIds = new ArrayList<>();
         List<FlowTaskTaskModel> notRunningTasks = flowTaskTaskModels.stream().filter(flowTaskTaskModel ->
                 TaskTaskStatusEnum.RUNNING.toValue() != flowTaskTaskModel.getTaskStatus() && TaskTaskStatusEnum.INITING.toValue() != flowTaskTaskModel.getTaskStatus() && TaskTaskStatusEnum.PREPARING.toValue() != flowTaskTaskModel.getTaskStatus()).collect(Collectors.toList());
@@ -804,37 +757,37 @@ public class AsyncPlatFlowTaskService {
             flowTaskTaskModels = flowTaskTaskService.listByTaskIds(notRunningTaskIds);
         }
 
-        // 任务配置校验
+        
         List<FlowTaskConfModel> flowTaskConfModels = flowTaskConfService.listByTaskIds(notRunningTaskIds);
         if (CollectionUtils.isEmpty(flowTaskConfModels) || flowTaskConfModels.size() != notRunningTaskIds.size()) {
             log.error("not all tasks config exist");
             throw new MpRuntimeException(FlowErrorCode.TASK_INFO_ERROR);
         }
 
-        // 流量执行器校验
+        
         FlowActuatorModel flowActuatorModel = flowActuatorMapper.get(flowTaskTaskModels.get(0).getActuatorId());
         if (Objects.isNull(flowActuatorModel)) {
             log.error("batch start tasks error, flowActuator not exist");
             throw new MpRuntimeException(FlowErrorCode.TASK_INFO_ERROR);
         }
 
-        // 批量更新任务之前记录状态为无效
+        
         flowTaskRecordService.batchUpdateStatus(0, taskIds);
 
         List<FlowTaskStart> flowTaskStartList = new ArrayList<>();
         flowTaskTaskModels.forEach(flowTaskTaskModel -> {
-            // 解析任务配置
+            
             FlowTaskConfModel flowTaskConfModel = flowTaskConfModels.stream().filter(taskConfModel ->
                     taskConfModel.getTaskId().equals(flowTaskTaskModel.getId())).findFirst().get();
             FlowTaskConf flowTaskConf = JSONObject.parseObject(flowTaskConfModel.getConf(), FlowTaskConf.class);
 
             if (Objects.nonNull(batchStartTaskBO)) {
-                // 靶场测评，不支持持续运行
+                
                 flowTaskConfModel.setKeepRunning(0);
                 TaskSipBO sipBO = batchStartTaskBO.getTaskSipList().stream().filter(taskSipBO ->
                         flowTaskTaskModel.getId().equals(taskSipBO.getTaskId())).findFirst().get();
 
-                // 设置源ip
+                
                 String sourceIp = sipBO.getSourceIp();
                 FlowTaskFlowConf flowConf = flowTaskConf.getFlowConf();
                 if (Objects.nonNull(flowConf)) {
@@ -864,7 +817,7 @@ public class AsyncPlatFlowTaskService {
                 }
             }
 
-            // 封装流量任务配置参数
+            
             FlowTaskStart flowTaskStart = FlowTaskStart.builder()
                     .taskId(flowTaskTaskModel.getId())
                     .flowId(flowTaskTaskModel.getFlowId())
@@ -895,11 +848,11 @@ public class AsyncPlatFlowTaskService {
             if (ResponseUtils.checkResponse(batchStartTaskObj)) {
                 log.info("batch start task success");
 
-                // 跟流量执行器建立ws连接，用于接收任务状态信息
+                
                 FlowWebSocketClientUtil wsClient = FlowWebSocketClientUtil.getWebSocketClient(flowActuatorModel.getIp().split(BaseConstants.COLON)[0]);
                 wsClient.sendMessage(String.join(BaseConstants.COMMA, notRunningTaskIds));
 
-                // 批量更新任务状态为运行中
+                
                 flowTaskTaskService.batchUpdateTaskStatus(notRunningTaskIds, TaskStatusEnum.RUNNING.toValue());
                 return ResultCommon.success(true);
             } else {
@@ -915,28 +868,24 @@ public class AsyncPlatFlowTaskService {
         }
     }
 
-    /**
-     * 单个停止流量任务
-     * @param taskId
-     * @return
-     */
+    
     public ServiceResult<Boolean> stopTask(String taskId) {
         log.info("AsyncPlatFlowTaskService.stopTask begin. taskId:{}", taskId);
-        // 任务存在校验
+        
         ObjServiceResult<FlowTaskTaskModel> taskServiceResult = flowTaskTaskService.get(taskId);
         if (Objects.isNull(taskServiceResult.getSource()) || Objects.isNull(taskServiceResult.getSource().getObj())) {
             log.error("task is not exist for {}", taskId);
             throw new MpRuntimeException(FlowErrorCode.TASK_NOT_EXIST);
         }
 
-        // 任务状态校验
+        
         FlowTaskTaskModel flowTaskTaskModel = taskServiceResult.getSource().getObj();
         if (TaskStatusEnum.RUNNING.toValue() != flowTaskTaskModel.getTaskStatus()) {
             log.error("task is not running for {}", taskId);
             throw new MpRuntimeException(FlowErrorCode.NO_RUNNING_TASK_TO_STOP);
         }
 
-        // 流量执行器校验
+        
         FlowActuatorModel flowActuatorModel = flowActuatorMapper.get(flowTaskTaskModel.getActuatorId());
         if (Objects.isNull(flowActuatorModel)) {
             log.error("stop task error, flowActuator not exist for {}", taskId);
@@ -955,11 +904,11 @@ public class AsyncPlatFlowTaskService {
             if (ResponseUtils.checkResponse(stopTaskObj)) {
                 log.info("stop task success for {}", taskId);
 
-                // 更新任务状态为已停止
+                
                 flowTaskTaskModel.setTaskStatus(TaskStatusEnum.STOPED.toValue());
                 flowTaskTaskModel.setSuccessCount(flowTaskTaskModel.getSuccessCount() + 1);
                 flowTaskTaskService.update(flowTaskTaskModel);
-//                flowTaskTaskService.updateTaskStatus(taskId, TaskStatusEnum.STOPED.toValue());
+
                 log.info("AsyncPlatFlowTaskService.stopTask end.");
                 return ResultCommon.success(true);
             } else {
@@ -973,27 +922,23 @@ public class AsyncPlatFlowTaskService {
             }
             return ResultCommon.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
         } finally {
-            // 清除任务回调缓存
+            
             FlowCacheUtil.taskRunnableCache.invalidate(FlowCacheUtil.RUNNABLE_PREFIX + taskId);
             FlowCacheUtil.taskConsumerCache.invalidate(FlowCacheUtil.CONSUMER_PREFIX + taskId);
         }
     }
 
-    /**
-     * 批量停止流量任务
-     * @param taskIds
-     * @return
-     */
+    
     public ServiceResult<Boolean> batchStopTasks(List<String> taskIds) {
         log.info("AsyncPlatFlowTaskService.batchStopTasks begin. taskIds:{}", taskIds);
-        // 任务存在校验
+        
         List<FlowTaskTaskModel> flowTaskTaskModels = flowTaskTaskService.listByTaskIds(taskIds);
         if (CollectionUtils.isEmpty(flowTaskTaskModels) || flowTaskTaskModels.size() != taskIds.size()) {
             log.error("tasks are not all exist");
             throw new MpRuntimeException(FlowErrorCode.TASK_NOT_EXIST);
         }
 
-        // 流量执行器校验
+        
         FlowActuatorModel flowActuatorModel = flowActuatorMapper.get(flowTaskTaskModels.get(0).getActuatorId());
         if (Objects.isNull(flowActuatorModel)) {
             log.error("batch stop tasks error, flowActuator not exist");
@@ -1001,7 +946,7 @@ public class AsyncPlatFlowTaskService {
         }
 
         List<String> runningTaskIds = new ArrayList<>();
-        // 任务状态校验
+        
         List<FlowTaskTaskModel> runningTasks = flowTaskTaskModels.stream().filter(flowTaskTaskModel ->
                 TaskStatusEnum.RUNNING.toValue() == flowTaskTaskModel.getTaskStatus()).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(runningTasks)) {
@@ -1024,14 +969,14 @@ public class AsyncPlatFlowTaskService {
             if (ResponseUtils.checkResponse(batchStopTaskObj)) {
                 log.info("batch stop task success");
 
-                // 批量更新任务状态为已停止
+                
                 List<FlowTaskTaskModel> runningFlowTaskTaskModels = flowTaskTaskService.listByTaskIds(runningTaskIds);
                 for (FlowTaskTaskModel flowTaskTaskModel : runningFlowTaskTaskModels) {
                     flowTaskTaskModel.setTaskStatus(TaskStatusEnum.STOPED.toValue());
                     flowTaskTaskModel.setSuccessCount(flowTaskTaskModel.getSuccessCount() + 1);
                 }
                 flowTaskTaskService.bulkUpdate(runningFlowTaskTaskModels);
-//                flowTaskTaskService.batchUpdateTaskStatus(runningTaskIds, TaskStatusEnum.STOPED.toValue());
+
 
                 log.info("AsyncPlatFlowTaskService.batchStopTasks end.");
                 return ResultCommon.success(true);
@@ -1046,15 +991,12 @@ public class AsyncPlatFlowTaskService {
             }
             return ResultCommon.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
         } finally {
-            // 清除任务回调缓存
+            
             FlowCacheUtil.taskConsumerCache.invalidate(FlowCacheUtil.CONSUMER_PREFIX + flowTaskTaskModels.get(0).getSceneId());
         }
     }
 
-    /**
-     * 重启trex服务
-     * @param trexIp
-     */
+    
     private void reloadTrex(String trexIp) {
         log.info("reload trex server");
         String command = "python3 /opt/project_dirs/traffic_generators/utils/trex_reload.py";
@@ -1065,13 +1007,7 @@ public class AsyncPlatFlowTaskService {
         SshUtil.execCommand(serverInfo, command);
     }
 
-    /**
-     * 校验trex服务状态
-     * @param fixedIp
-     * @param networkInfos
-     * @param flowActuatorModel
-     * @param extNetId
-     */
+    
     private void checkTrexServer(String fixedIp, List<FlowNetworkInfo> networkInfos, FlowActuatorModel flowActuatorModel, String extNetId) {
         String commands = "./init.sh";
         SshUtil.ServerInfo serverInfo = new SshUtil.ServerInfo();
@@ -1085,10 +1021,7 @@ public class AsyncPlatFlowTaskService {
                         extNetId), () -> log.error("Trex vm start error:{}", fixedIp));
     }
 
-    /**
-     * 校验trex启动状态
-     * @param fixedIp
-     */
+    
     private void checkStartTrex(String fixedIp) {
         String commands = "./init.sh";
         SshUtil.ServerInfo serverInfo = new SshUtil.ServerInfo();
@@ -1101,17 +1034,12 @@ public class AsyncPlatFlowTaskService {
                 null, 0, null, () -> log.error("Trex vm start error:{}", fixedIp));
     }
 
-    /**
-     * 删除网口信息
-     *
-     * @param flowActuatorModel
-     * @param flowPortIds
-     */
+    
     private void delPorts(FlowActuatorModel flowActuatorModel, List<String> flowPortIds) {
         List<FlowPortModel> flowPortModels = flowPortMapper.selectByPortIds(flowPortIds);
         flowPortModels.forEach(flowPortModel -> {
             try {
-                // 删除网口信息
+                
                 if (StringUtils.isNotBlank(flowPortModel.getServerPortId())) {
                     String delServerPortRsp =
                             HttpUtils.sendDelete(flowConfig.getCpUrl() + "/v1/instances/" + flowActuatorModel.getInstanceId() +
@@ -1139,12 +1067,7 @@ public class AsyncPlatFlowTaskService {
         });
     }
 
-    /**
-     * 查询执行器信息
-     *
-     * @param actuatorId
-     * @return
-     */
+    
     public FlowActuatorModel getFlowActuatorModel(String actuatorId) {
         if (StringUtils.isBlank(actuatorId)) {
             log.error("actuatorId in task is empty");
@@ -1159,10 +1082,7 @@ public class AsyncPlatFlowTaskService {
         return flowActuatorModel;
     }
 
-    /**
-     * 异步删除流量文件
-     * @param infoModelList
-     */
+    
     @Async
     public void deleteFlowFile(List<FlowInfoModel> infoModelList) {
         try {
@@ -1177,14 +1097,7 @@ public class AsyncPlatFlowTaskService {
         }
     }
 
-    /**
-     * 2秒一次轮询任务状态，当任务结束时执行回调方法
-     * @param taskId
-     * @param flowActuatorModel
-     * @param callback
-     * @param errorCallback
-     * @throws InterruptedException
-     */
+    
     public void refreshTaskStatus(String taskId, FlowActuatorModel flowActuatorModel, Runnable callback, Consumer<String> errorCallback) {
         String host = flowActuatorModel.getIp();
         FlowTaskModel flowTaskModel = flowTaskMapper.get(taskId);
@@ -1193,31 +1106,22 @@ public class AsyncPlatFlowTaskService {
             return;
         }
 
-        // 轮询校验任务是否跑完，完成时调用回调方法，最多轮询24小时
+        
         CheckUtils.loopCheck(() -> checkTaskJobStopped(flowTaskModel, host, errorCallback), 2000, 1000 * 60 * 60 * 24,
                 () -> refreshTaskStatusStopCheck(flowTaskModel.getId()), 1, () -> taskJobStoppedCallback(flowTaskModel.getId(), callback), () -> log.error("task job running status get failed：[{}]", taskId), "CheckTaskJobStopped");
     }
 
 
-    /**
-     * 2秒一次批量轮询任务状态，当所有任务结束时执行回调方法
-     * @param flowTaskModels
-     * @param flowActuatorModel
-     * @param consumer
-     */
+    
     public void batchRefreshTaskStatus(List<FlowTaskModel> flowTaskModels, FlowActuatorModel flowActuatorModel, Consumer<BatchActuatorCallbackResponse> consumer) {
         String host = flowActuatorModel.getIp();
-        // 轮询校验批量任务是否跑完，完成时调用回调方法，最多轮询60分钟
+        
         CheckUtils.loopCheck(() -> batchCheckTaskJobStopped(flowTaskModels, host, consumer), 2000, 1000 * 60 * 60,
                 null, 1, null, () -> log.error("batch get task job running status failed"), "BatchCheckTaskJobStopped");
 
     }
 
-    /**
-     * 刷新任务状态停止校验方法
-     * @param taskId
-     * @return
-     */
+    
     private Boolean refreshTaskStatusStopCheck(String taskId) {
         FlowTaskModel flowTaskModel = flowTaskMapper.get(taskId);
         if (Objects.isNull(flowTaskModel)) {
@@ -1228,11 +1132,7 @@ public class AsyncPlatFlowTaskService {
         return TaskStatusEnum.STOPED.toValue() == flowTaskModel.getTaskStatus();
     }
 
-    /**
-     * 流量任务停止时回调方法
-     * @param taskId
-     * @param call
-     */
+    
     private void taskJobStoppedCallback(String taskId, Runnable call) {
         FlowTaskModel oldFlowTaskModel = flowTaskMapper.get(taskId);
         if (Objects.isNull(oldFlowTaskModel)) {
@@ -1245,17 +1145,17 @@ public class AsyncPlatFlowTaskService {
         flowTaskModel.setTaskStatus(TaskStatusEnum.STOPED.toValue());
         flowTaskModel.setUpdateTime(LocalDateTime.now());
 
-        // 更新本地任务状态
+        
         flowTaskMapper.updateTaskInfo(flowTaskModel);
 
-        // 执行回调通知方法
+        
         if (Objects.nonNull(call)) {
             log.info("start to run callback function");
             call.run();
         }
 
         if (Objects.equals(CustomFlagEnum.YES.toValue(), oldFlowTaskModel.getCustomFlag())) {
-            // 自定义流量，运行后直接删除网口
+            
             String actuatorId = oldFlowTaskModel.getActuatorId();
             FlowActuatorModel flowActuatorModel = this.getFlowActuatorModel(actuatorId);
             if (Objects.isNull(flowActuatorModel)) {
@@ -1267,17 +1167,13 @@ public class AsyncPlatFlowTaskService {
             this.delPorts(flowActuatorModel, flowPortIds);
 
             flowTaskModel.setFlowPortId(Strings.EMPTY);
-            // 删除任务关联网口
+            
             flowTaskMapper.updateTaskInfo(flowTaskModel);
         }
 
     }
 
-    /**
-     * 流量任务停止时回调方法
-     * @param taskId
-     * @param call
-     */
+    
     private void jobStoppedCallback(String taskId, Consumer<String> call, String errMsg) {
         FlowTaskModel oldFlowTaskModel = flowTaskMapper.get(taskId);
         if (Objects.isNull(oldFlowTaskModel)) {
@@ -1290,17 +1186,17 @@ public class AsyncPlatFlowTaskService {
         flowTaskModel.setTaskStatus(TaskStatusEnum.STOPED.toValue());
         flowTaskModel.setUpdateTime(LocalDateTime.now());
 
-        // 更新本地任务状态
+        
         flowTaskMapper.updateTaskInfo(flowTaskModel);
 
-        // 执行回调通知方法
+        
         if (Objects.nonNull(call)) {
             log.info("start to run callback function");
             call.accept(errMsg);
         }
 
         if (Objects.equals(CustomFlagEnum.YES.toValue(), oldFlowTaskModel.getCustomFlag())) {
-            // 自定义流量，运行后直接删除网口
+            
             String actuatorId = oldFlowTaskModel.getActuatorId();
             FlowActuatorModel flowActuatorModel = this.getFlowActuatorModel(actuatorId);
             if (Objects.isNull(flowActuatorModel)) {
@@ -1312,19 +1208,13 @@ public class AsyncPlatFlowTaskService {
             this.delPorts(flowActuatorModel, flowPortIds);
 
             flowTaskModel.setFlowPortId(Strings.EMPTY);
-            // 删除任务关联网口
+            
             flowTaskMapper.updateTaskInfo(flowTaskModel);
         }
 
     }
 
-    /**
-     * 校验任务状态是否已停止
-     * @param flowTaskModel
-     * @param hostUrl
-     * @param errorCallback
-     * @return
-     */
+    
     private Boolean checkTaskJobStopped(FlowTaskModel flowTaskModel, String hostUrl, Consumer<String> errorCallback) {
         Boolean result = false;
         if (StringUtils.isBlank(flowTaskModel.getThirdTaskId())) {
@@ -1351,19 +1241,19 @@ public class AsyncPlatFlowTaskService {
                 JSONArray rows = statusRspObj.getJSONObject(BaseConstants.STR_DATA).getJSONArray("rows");
                 if (Objects.nonNull(rows)) {
                     Integer taskStatus = rows.getJSONObject(0).getInteger("status");
-                    // 任务状态为已停止或者停止中，表示任务运行结束
+                    
                     if (TaskStatusEnum.STOPED.toValue() == taskStatus || TaskStatusEnum.STOPING.toValue() == taskStatus) {
-                        // 判断任务是否运行成功
+                        
                         Integer isSuccess = rows.getJSONObject(0).getInteger("result");
                         if (Objects.nonNull(isSuccess) && 1 == isSuccess) {
                             log.info("flow execute success:[{}]", flowTaskModel.getId());
                             result = true;
                         } else {
                             FlowInfoModel flowInfoModel = flowInfoMapper.get(flowTaskModel.getFlowId());
-                            // 运行失败，更新任务状态为已停止，调用失败回调方法
+                            
                             String errMsg = rows.getJSONObject(0).getString("result_detail");
                             if (Objects.nonNull(flowInfoModel) && flowInfoModel.getResourceType() == ResourceTypeEnum.SCRIPT.toValue()) {
-                                // 脚本执行报错，添加前缀
+                                
                                 errMsg = MessageCommonUtil.convertMessage("scriptFlowError").concat(errMsg).replace("\\n\'", "");
                             }
                             log.error("flow [{}] execute error for: {}", flowTaskModel.getId(), errMsg);
@@ -1382,13 +1272,7 @@ public class AsyncPlatFlowTaskService {
         return result;
     }
 
-    /**
-     * 批量校验任务状态是否已停止
-     * @param flowTaskModels
-     * @param hostUrl
-     * @param consumer
-     * @return
-     */
+    
     private Boolean batchCheckTaskJobStopped(List<FlowTaskModel> flowTaskModels, String hostUrl, Consumer<BatchActuatorCallbackResponse> consumer) {
         if (StringUtils.isBlank(hostUrl)) {
             log.error("hostUrl is empty");
@@ -1410,7 +1294,7 @@ public class AsyncPlatFlowTaskService {
             if (ResponseUtils.checkResponse(statusRspObj)) {
                 JSONArray rows = statusRspObj.getJSONObject(BaseConstants.STR_DATA).getJSONArray("rows");
                 if (Objects.nonNull(rows)) {
-                    // 校验是否有运行中的任务
+                    
                     long count = rows.stream().filter(row ->
                             TaskStatusEnum.INIT.toValue() == ((JSONObject) row).getInteger("status")
                                     || TaskStatusEnum.RUNNING.toValue() == ((JSONObject) row).getInteger("status")).count();
@@ -1426,19 +1310,19 @@ public class AsyncPlatFlowTaskService {
                         String thirdTaskId = resultObj.getString("uuid");
                         FlowTaskModel taskModel = flowTaskModels.stream().filter(task -> Objects.equals(task.getThirdTaskId(), thirdTaskId)).findFirst().get();
 
-                        // 判断任务是否运行成功
+                        
                         Integer isSuccess = resultObj.getInteger("result");
                         if (Objects.nonNull(isSuccess) && 1 == isSuccess) {
                             log.info("flow execute success:[{}]", taskModel.getId());
                             successTaskModels.add(taskModel);
                         } else {
-                            // 运行失败，更新任务状态为已停止，调用失败回调方法
+                            
                             log.info("flow execute error:[{}]", taskModel.getId());
                             errorTaskModels.add(taskModel);
                         }
                     });
 
-                    // 批量更新流量任务状态为停止
+                    
                     flowTaskMapper.batchUpdateTaskStatus(TaskStatusEnum.STOPED.toValue(), null, taskIds);
 
                     if (Objects.nonNull(consumer)) {
@@ -1461,14 +1345,7 @@ public class AsyncPlatFlowTaskService {
     }
 
 
-    /**
-     * 上传流量文件
-     *
-     * @param flowInfoModel
-     * @param flowTaskModel
-     * @param addFlowTaskRequest
-     * @return
-     */
+    
     public boolean uploadFlowInfo(FlowInfoModel flowInfoModel, FlowTaskModel flowTaskModel, AddFlowTaskRequest addFlowTaskRequest) {
         if (Objects.isNull(flowInfoModel) || Objects.isNull(flowTaskModel)) {
             return false;
@@ -1480,11 +1357,11 @@ public class AsyncPlatFlowTaskService {
             FlowActuatorModel flowActuatorModel = this.getFlowActuatorModel(actuatorId);
             String resourceUrl = CommonUtil.getResourcetUrl(flowActuatorModel.getIp());
 
-            // 判断是pcap包还是脚本
+            
             if (ResourceTypeEnum.PACP.toValue() == flowInfoModel.getResourceType()) {
-                // 获取pcap流量包
+                
                 byte[] fileByte = FsCommon.downloadRawContent(flowInfoModel.getPcapFile());
-                // 先向流量发生平台导入pcap包
+                
                 JSONObject object = new JSONObject();
                 object.put("fileName",
                         flowInfoModel.getTitle() + System.currentTimeMillis() + "." + flowInfoModel.getPcapFile().split(BaseConstants.SPOT)[1]);
@@ -1493,11 +1370,11 @@ public class AsyncPlatFlowTaskService {
                 log.info("upload pcap file response:{}", jsonObject.toJSONString());
 
                 if (ResponseUtils.checkResponse(jsonObject)) {
-                    // 解析返回的名称
+                    
                     String fileName = jsonObject.getJSONObject(BaseConstants.STR_DATA).getString("file_name");
                     flowTaskModel.setThirdFlowName(fileName);
 
-                    // 再向流量发生平台创建pcap管理
+                    
                     AddPcapRequest addPcapRequest = new AddPcapRequest();
                     addPcapRequest.setFileName(fileName);
                     String addPcapRsp = HttpUtils.sendPost(resourceUrl + "/pcap",
@@ -1506,7 +1383,7 @@ public class AsyncPlatFlowTaskService {
                     JSONObject addPcapObj = JSONObject.parseObject(addPcapRsp);
                     log.info("add pcap file response:{}", addPcapObj.toJSONString());
                     if (ResponseUtils.checkResponse(addPcapObj)) {
-                        // 获取返回的uuid
+                        
                         String uuid = addPcapObj.getJSONObject(BaseConstants.STR_DATA).getString("uuid");
                         flowTaskModel.setThirdFlowId(uuid);
                     } else {
@@ -1518,17 +1395,17 @@ public class AsyncPlatFlowTaskService {
                     isSuccess = false;
                 }
             } else {
-                // 获取script流量脚本
+                
                 byte[] fileByte = FsCommon.downloadRawContent(flowInfoModel.getScriptFile());
-                // 获取替换脚本参数后的脚本内容
+                
                 String code = replaceCode(fileByte, flowInfoModel.getId(), addFlowTaskRequest);
 
                 AddScriptsRequest scriptsRequest = new AddScriptsRequest();
-                // 流量执行平台名称不能重复，名称后加上时间戳
+                
                 String flowName =
                         flowInfoModel.getTitle() + System.currentTimeMillis() + "." + flowInfoModel.getScriptFile().split(BaseConstants.SPOT)[1];
                 scriptsRequest.setName(flowName);
-                // 默认执行脚本命令
+                
                 String runCmd = "";
 
                 if (flowName.endsWith(".py")) {
@@ -1544,14 +1421,14 @@ public class AsyncPlatFlowTaskService {
                 JSONObject object = JSONObject.parseObject(JsonUtils.snakeStringify(scriptsRequest));
                 object.put("fileName", flowName);
 
-                // 先向流量发生平台新增资源文件
+                
                 String scriptRsp = HttpUtils.postFile(resourceUrl + "/scripts", code.getBytes(StandardCharsets.UTF_8), "run_image_script",
                         object);
                 JSONObject scriptObj = JSONObject.parseObject(scriptRsp);
                 log.info("add script file response:{}", scriptObj.toJSONString());
 
                 if (ResponseUtils.checkResponse(scriptObj)) {
-                    // 解析返回的uuid
+                    
                     String uuid = scriptObj.getJSONObject(BaseConstants.STR_DATA).getString("uuid");
                     flowTaskModel.setThirdFlowId(uuid);
                 } else {
@@ -1567,31 +1444,25 @@ public class AsyncPlatFlowTaskService {
         return isSuccess;
     }
 
-    /**
-     * 脚本内容替换
-     * @param fileByte
-     * @param flowId
-     * @param addFlowTaskRequest
-     * @return
-     */
+    
     private String replaceCode(byte[] fileByte, String flowId, AddFlowTaskRequest addFlowTaskRequest) {
         String code = new String(fileByte, StandardCharsets.UTF_8);
         List<FlowScriptParamModel> replaceScriptParamModels;
         if (Objects.nonNull(addFlowTaskRequest) && CollectionUtils.isNotEmpty(addFlowTaskRequest.getScriptParamModels())) {
-            // 有传脚本参数过来，直接用传过来的去替换脚本内容
+            
             replaceScriptParamModels = addFlowTaskRequest.getScriptParamModels();
             log.info("replace script params:{}", replaceScriptParamModels.toString());
         } else {
-            // 没有传脚本参数，直接查询默认脚本参数
+            
             replaceScriptParamModels = flowScriptParamService.selectByFlowId(flowId);
             log.info("default script params:{}", replaceScriptParamModels.toString());
         }
 
         if (CollectionUtils.isNotEmpty(replaceScriptParamModels)) {
-            // 根据脚本key替换脚本参数值
+            
             for (FlowScriptParamModel replaceScriptParamModel : replaceScriptParamModels) {
                 if (ParamTypeEnum.IP.toString().equalsIgnoreCase(replaceScriptParamModel.getParamKey())) {
-                    // ip替换兼容大小写
+                    
                     code = code.replace("$" + ParamTypeEnum.IP.name().toUpperCase(), replaceScriptParamModel.getParamValue());
                     code = code.replace("$" + ParamTypeEnum.IP.name().toLowerCase(), replaceScriptParamModel.getParamValue());
                 } else {

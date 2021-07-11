@@ -11,12 +11,7 @@ import java.io.InputStreamReader;
 
 public class FileUtils {
 
-    /**
-     * 逐行读取资源文件
-     * @param resources
-     * @return
-     * @throws IOException
-     */
+    
     public static String readLine(Resource[] resources) throws IOException {
         String json = "";
         for (Resource resource : resources){

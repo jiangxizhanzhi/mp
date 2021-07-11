@@ -134,7 +134,7 @@ public class DeleteHandler extends HandlerCommon {
     private boolean deleteAuxiliaryNetwork(CloudPluginSceneElementBO cloudElement) {
         var flag = true;
         cloudElement.getDeriveNetworks().forEach(n -> {
-            // 先删除辅助路由 再删除网络
+            
             if (StringUtils.isNotEmpty(n.network.getAuxiliaryNetworkRouterResourceId())) {
                 var virtualRouterDeleteData = new VirtualRouterDeleteData();
                 virtualRouterDeleteData.setIds(List.of(n.network.getAuxiliaryNetworkRouterResourceId()));
@@ -147,15 +147,15 @@ public class DeleteHandler extends HandlerCommon {
                 vsClient.delete(deleteData);
             }
         });
-//        var resourceId = cloudElement.getAuxiliaryNetworkId();
-//        if (!StringUtils.isEmpty(resourceId)) {
-//            var deleteData = new VirtualSwitchDeleteData();
-//            deleteData.setEntityNetwork(cloudElement.getAuxiliaryNetworkVlan());
-//            deleteData.setIds(List.of(resourceId));
-//            flag = vsClient.delete(deleteData);
-//        }
-//
-//        flag = flag && deleteAuxiliaryNetworkRouter(cloudElement);
+
+
+
+
+
+
+
+
+
         return flag;
     }
 
@@ -224,11 +224,11 @@ public class DeleteHandler extends HandlerCommon {
             return true;
         }
 
-        // 卸载虚拟usb
+        
         if (CollectionUtils.isNotEmpty(cloudElement.getVirtualUsbs())) {
             this.deleteVirtualUsbs(cloudElement);
         }
-        // 卸载实体usb
+        
         if (CollectionUtils.isNotEmpty(cloudElement.getEntityUsbs())) {
             this.deleteEntityUsbs(cloudElement);
         }
@@ -328,7 +328,7 @@ public class DeleteHandler extends HandlerCommon {
 
     protected void syncFlowPortInfo() {
         log.info("DeleteHandler.syncFlowPortInfo.");
-        //通知云平台需要统计环境总速率的端口
+        
         if (Boolean.TRUE.equals(getPluginHandler().getScene().getEnableRate())) {
             List<String> portIds = new ArrayList<>();
             Map<String, CloudPluginSceneElementPortBO> portMap = getPluginHandler().getElementPortMap();
@@ -343,19 +343,19 @@ public class DeleteHandler extends HandlerCommon {
 
     public void delete() {
         prepareEventProcess();
-        //通知云平台需要统计环境总速率的端口
+        
         syncFlowPortInfo();
-//        if (Boolean.TRUE.equals(getPluginHandler().getScene().getEnableRate())) {
-//            List<String> portIds = new ArrayList<>();
-//            Map<String, CloudPluginSceneElementPortBO> portMap = getPluginHandler().getElementPortMap();
-//            portMap.forEach((key, value) -> {
-//                if (StringUtils.isNotEmpty(value.getResourceId())) {
-//                    portIds.add(value.getResourceId());
-//                }
-//            });
-//            vpClient.syncFlowPortInfo(portIds, "delete");
-//        }
-        // 优先删除实体设备
+
+
+
+
+
+
+
+
+
+
+        
         List<CloudPluginSceneElementBO> entities = new ArrayList<>();
         getPluginHandler().getElementMap().values().forEach(e -> {
             if (e.getVirtualType() != null && e.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE) {
@@ -370,7 +370,7 @@ public class DeleteHandler extends HandlerCommon {
             runSceneProgress(SceneProcess.DELETE_ENTITIES, () -> runTasks(deleteEntities));
         }
 
-        // 删除终端
+        
         var terminals = getPluginHandler().getTerminalElementMap().values().stream()
                 .filter(t -> !deletedNodeIds.contains(t.getSrcElement().getId()))
                 .collect(Collectors.toList());
@@ -380,12 +380,12 @@ public class DeleteHandler extends HandlerCommon {
             runSceneProgress(SceneProcess.DELETE_TERMINALS, () -> runTasks(deleteTerminalTasks));
         }
 
-        // 删除npc节点
+        
         if (network2Info.values().size() > 0) {
             runSceneProgress(SceneProcess.DELETE_NPCS, () -> deleteNpcElements(new ArrayList<>(network2Info.values())));
         }
 
-        // 删除防火墙
+        
         var firewalls = getPluginHandler().getFirewallElementMap().values().stream()
                 .filter(f -> !deletedNodeIds.contains(f.getSrcElement().getId()))
                 .collect(Collectors.toList());
@@ -395,7 +395,7 @@ public class DeleteHandler extends HandlerCommon {
             runSceneProgress(SceneProcess.DELETE_FIREWALLS, () -> runTasks(deleteFirewallTasks));
         }
 
-        // 删除网关
+        
         var gateways = getPluginHandler().getGatewayElementMap().values().stream()
                 .filter(g -> !deletedNodeIds.contains(g.getSrcElement().getId()))
                 .collect(Collectors.toList());
@@ -404,19 +404,19 @@ public class DeleteHandler extends HandlerCommon {
         if (!deleteGatewayTasks.isEmpty()) {
             runSceneProgress(SceneProcess.DELETE_GATEWAYS, () -> runTasks(deleteGatewayTasks));
         }
-        // 删除dynamips节点
+        
         if (!this.dynamipsIds.isEmpty()) {
             this.deleteVirtualDynamips(new ArrayList<>(this.dynamipsIds));
         }
 
-        // 删除辅助网络(包含虚拟交换机)
+        
         var deleteAuxiliaryNetworkTasks = getPluginHandler().getElementMap().values().stream()
                 .filter(cloudElement -> {
                     if (cloudElement.getDeriveNetworks().isEmpty()) {
                         return false;
                     }
 
-                    // 外部虚拟交换机不能删除
+                    
                     Integer virtualType = cloudElement.getVirtualType();
                     if (virtualType != null
                             && virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH)

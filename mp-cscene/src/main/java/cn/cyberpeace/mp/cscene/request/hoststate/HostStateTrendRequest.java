@@ -7,11 +7,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 
-/**
- * @Description: 资源使用请求体
- * @Author zhouxinghuai
- * @Date：2021/11/24 14:22
- */
+
 @Data
 public class HostStateTrendRequest extends BaseSceneElementRequest {
 

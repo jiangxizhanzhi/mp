@@ -4,9 +4,7 @@ import lombok.*;
 
 import java.io.Serializable;
 
-/**
- * 虚拟机模型，对应云平台接口返回信息
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

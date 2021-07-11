@@ -95,11 +95,7 @@ public class PluginSceneEventHandlerCommon<H extends ScenePluginHandler<?, ?, ?,
         getPluginHandler().overElementProcess(nodeId, event);
     }
 
-    /**
-     * 处理一些特定的异常
-     * @param e
-     * @return 返回值为处理后的异常 , null表示未处理
-     */
+    
     protected <E extends BasePluginSceneElementBO> MpRuntimeException handlerSpecialException(E element, Exception e) {
         return null;
     }

@@ -2,11 +2,7 @@ package cn.cyberpeace.mp.auth.constant;
 
 import cn.cyberpeace.mp.base.service.code.ErrorCode;
 
-/**
- * @Description: 全局错误枚举
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 public enum AuthErrorCode implements ErrorCode {
     OP_ERROR("MP-110000", "op_error"),
     NOT_CERTIFIED("MP-110001", "not_certified"),
@@ -14,7 +10,7 @@ public enum AuthErrorCode implements ErrorCode {
     BAD_CREDENTIALS("MP-110003", "bad_credentials"),
     NEED_VERIFY_CODE("MP-110004", "need_verify_code"),
 
-    // verify token jwt error
+    
     ALGORITHM_MISMATCH("MP-110110", "token_algorithm_mismatch"),
     SIGNATURE_VERIFICATION("MP-110111", "token_signature_verification"),
     TOKEN_EXPIRED("MP-110112", "token_token_expired"),
@@ -68,7 +64,7 @@ public enum AuthErrorCode implements ErrorCode {
     PASSWORD_DECODE_ERROR("MP-110051", "password_decode_error"),
 
 
-    // org
+    
     ORG_NOT_EXISTED("MP-110070", "org_not_existed"),
     ORG_CHILD_ALREADY_EXISTED("MP-110071", "org_child_already_existed"),
     ORG_CANNOT_DELETE_WITH_CHILD_EXISTED("MP-110072", "org_cannot_delete_with_child_existed"),
@@ -80,7 +76,7 @@ public enum AuthErrorCode implements ErrorCode {
     ORG_MODIFY_ERROR("MP-110078", "org_modify_error"),
 
 
-    // role
+    
     ROLE_NOT_EXISTED("MP-110080", "role_not_existed"),
     ROLE_IDENT_CANNOT_BE_ADMIN("MP-110081", "role_ident_cannot_be_admin"),
     ROLE_CANNOT_DELETE_WITH_USER_EXISTED("MP-110082", "role_cannot_delete_with_user_existed"),
@@ -94,17 +90,17 @@ public enum AuthErrorCode implements ErrorCode {
     ROLE_CANNOT_DELETE_FOR_REGISTER_DEFAULT("MP-110090", "role_cannot_delete_for_register_default"),
 
 
-    // target
+    
     TARGET_NOT_EXISTED("MP-110095", "target_not_existed"),
     TARGET_TYPE_NOT_SUPPORT("MP-110096", "target_type_not_support"),
 
 
-    // validation-api params
+    
     PARAMS_SHOULD_NOT_NULL("MP-110100", "params_should_not_null"),
     PARAMS_SHOULD_NOT_EMPTY("MP-110101", "params_should_not_empty"),
 
 
-    // EXCEL
+    
     EXCEL_EXCEED_SIZE("MP-110118", "excel_exceed_size"),
     EXCEL_FORMAT_ERROR("MP-110119", "excel_format_error"),
     EXCEL_NOT_EXCEL("MP-110120", "excel_not_excel"),
@@ -140,7 +136,7 @@ public enum AuthErrorCode implements ErrorCode {
     VERIFY_CODE_EXPIRE("MP-110161", "verify_code_expire"),
     VERIFY_CODE_EMPTY("MP-110162", "verify_code_empty"),
 
-    // 演示环境禁止访问某些操作
+    
     DEMO_ACCESS_ERROR("MP-110163", "demo_access_error");
 
 

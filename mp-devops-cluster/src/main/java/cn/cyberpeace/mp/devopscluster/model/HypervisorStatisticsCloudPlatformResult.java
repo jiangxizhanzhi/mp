@@ -11,9 +11,7 @@ import lombok.*;
 @EqualsAndHashCode(callSuper = true)
 public class HypervisorStatisticsCloudPlatformResult extends BaseCloudPlatformResult {
 
-    /**
-     * 资源统计
-     */
+    
     private HypervisorStatistics hypervisorStatistics;
 
 

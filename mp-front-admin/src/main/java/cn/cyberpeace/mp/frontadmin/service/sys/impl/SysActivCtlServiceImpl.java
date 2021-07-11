@@ -13,11 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/2/15 11:13
- */
+
 @Service
 @Slf4j
 public class SysActivCtlServiceImpl extends BaseModelServiceImpl<SysActivCtlModel, SysActivCtlMapper, SysActivCtlFields, QueryParams>

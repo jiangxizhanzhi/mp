@@ -6,11 +6,7 @@ import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceUserCountModel;
 import org.springframework.stereotype.Component;
 
-/**
- * @Description 用户场景统计Fields
- * @Author qiaokang
- * @Date 2023-06-20 14:26:35
- */
+
 @Component
 public class CsceneInstanceUserCountFields extends BaseModelFields {
     public static final DynamicFields allFields = new DynamicFields(ClassUtils.getBeanClassFields(CsceneInstanceUserCountModel.class));

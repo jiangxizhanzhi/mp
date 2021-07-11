@@ -2,9 +2,7 @@ package cn.cyberpeace.mp.devopscluster.enums;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
-/**
- * 字体颜色枚举信息
- */
+
 public enum FontColorEnum {
 
     RED("红色"),

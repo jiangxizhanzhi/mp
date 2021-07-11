@@ -9,11 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/11/22 11:36
- */
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -32,13 +28,13 @@ public class SceneMonitorInfo {
 
     @ApiModelProperty(value = "创建者")
     private String createUsername;
-    //
+    
     @ApiModelProperty(value = "创建时间")
     private LocalDateTime createTime;
-    //
+    
     @ApiModelProperty(value = "运行时间（分钟）")
     private Long runMinutes;
-    //
+    
     @ApiModelProperty(value = "场景属性 0:无隔离 1:个人隔离 2:团队隔离")
     private Integer sceneAttr;
 
@@ -50,7 +46,7 @@ public class SceneMonitorInfo {
     @Builder.Default
     private int containerCount = 0;
 
-    // 实体设备
+    
     @ApiModelProperty(value = "运行节点统计-实体设备总数")
     @Builder.Default
     private int entityCount = 0;

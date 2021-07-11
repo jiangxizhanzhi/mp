@@ -13,7 +13,7 @@ public class VirtualDynamicCreateData implements CloudHttpData {
     private Integer portSum;
     private List<Network> networks;
 
-    // 返回值
+    
     private String platform;
     private String deviceUuid;
     private String id;

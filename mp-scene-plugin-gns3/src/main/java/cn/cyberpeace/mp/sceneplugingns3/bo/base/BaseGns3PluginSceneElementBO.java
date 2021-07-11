@@ -33,7 +33,7 @@ public abstract class BaseGns3PluginSceneElementBO<M extends BaseGns3PluginScene
     @ApiModelProperty(value = "disk")
     private Integer disk;
 
-    // 虚拟路由属性
+    
     @ApiModelProperty(value = "虚拟路由静态路由")
     @Valid
     private List<StaticRoute> staticRoutes;

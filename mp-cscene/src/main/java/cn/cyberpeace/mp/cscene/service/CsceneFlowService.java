@@ -64,11 +64,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/**
- * @Description: 场景流量服务
- * @Author: guquan
- * @Date：2023/5/8 15:25
- */
+
 @Slf4j
 @Service
 @Data
@@ -101,10 +97,7 @@ public class CsceneFlowService {
     @Autowired
     private FlowInfoMapper flowInfoMapper;
 
-    /**
-     * 新增流量任务
-     * @param request
-     */
+    
     public void addTask(AddFlowTaskTaskRequest request) {
         log.info("CsceneFlowService.addTask begin. request:{}", request);
         var sceneId = csceneInstanceService.getSceneId(request.getId());
@@ -112,7 +105,7 @@ public class CsceneFlowService {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_STARTED);
         }
 
-        // 过滤未添加流量的节点
+        
         request.setDetails(request.getDetails().stream().filter(detail -> CollectionUtils.isNotEmpty(detail.getFlowInfos())).collect(Collectors.toList()));
 
         List<FlowTaskTaskModel> flowTaskTaskModelList = new ArrayList<FlowTaskTaskModel>();
@@ -122,7 +115,7 @@ public class CsceneFlowService {
             Map<String, AddFlowTaskFlowInfo> addFlowTaskFlowInfoMap = detail.getFlowInfos().stream().collect(Collectors.toMap(addFlowTaskFlowInfo -> addFlowTaskFlowInfo.getFlowId(), addFlowTaskFlowInfo -> addFlowTaskFlowInfo));
             condition.filterIn(FlowInfoModel::getId, flowIds.toArray());
             List<FlowInfoModel> flowInfoModelList = flowInfoMapper.list(condition);
-            //保存流量任务信息
+            
             for (FlowInfoModel flowInfoModel : flowInfoModelList) {
                 FlowTaskTaskModel flowTaskTaskModel = new FlowTaskTaskModel();
                 flowTaskTaskModel.setSceneId(sceneId);
@@ -144,7 +137,7 @@ public class CsceneFlowService {
     public void asyncAddTask(String sceneId, List<AddFlowTaskTaskDetail> addFlowTaskTaskDetails, List<FlowTaskTaskModel> flowTaskTaskModelList) {
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
         FlowScenePluginHandler flowScenePluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.scenepluginflow.constant.PluginConstant.PLUGIN_KEY);
-        //如果没有flowplugin，则初始化flowplugin
+        
         if (flowScenePluginHandler == null) {
             ScenePluginDataBO scenePluginDataBO = new ScenePluginDataBO();
             scenePluginDataBO.setScene(new HashMap<>());
@@ -163,7 +156,7 @@ public class CsceneFlowService {
             flowScenePluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.scenepluginflow.constant.PluginConstant.PLUGIN_KEY);
         }
         String actuatorId = flowScenePluginHandler.getScene().getExecutor();
-        //流量执行器不存在则创建流量执行器
+        
         if (StringUtils.isEmpty(actuatorId)) {
             String trexName = StringUtils.joinWith("_", FlowPlatformEnum.TREX, sceneId);
             actuatorId = asyncPlatFlowTaskService.syncStartExecutor(trexName);
@@ -172,7 +165,7 @@ public class CsceneFlowService {
             flowScenePluginHandler.saveScene();
         }
         List<AddFlowTaskTaskInfo> addFlowTaskTaskInfoList = new ArrayList<>();
-        //遍历任务详情，初始化节点参数
+        
         for (AddFlowTaskTaskDetail detail : addFlowTaskTaskDetails) {
             String nodeName = sceneHandler.getElement(detail.getNodeId()).getName();
             String nodeIp = "";
@@ -202,16 +195,13 @@ public class CsceneFlowService {
             addFlowTaskTaskInfo.setNetworkId(networkId);
             addFlowTaskTaskInfoList.add(addFlowTaskTaskInfo);
         }
-        //新增流量执行任务
+        
         if (CollectionUtils.isNotEmpty(addFlowTaskTaskInfoList)) {
             flowTaskTaskService.addTask(addFlowTaskTaskInfoList, sceneId, actuatorId, true, flowTaskTaskModelList);
         }
     }
 
-    /**
-     * 删除流量任务
-     * @param id
-     */
+    
     @Transactional
     public void deleteTask(String id) {
         log.info("CsceneFlowService.deleteTask begin. id:{}", id);
@@ -224,18 +214,15 @@ public class CsceneFlowService {
         log.info("CsceneFlowService.deleteTask end.");
     }
 
-    /**
-     * 编辑流量任务配置
-     * @param request
-     */
+    
     public void editTaskConf(EditFlowTaskConfRequest request) {
         log.info("CsceneFlowService.editTaskConf begin. request:{}", request);
 
-        // 根据 config 字段调整下 replay 和 rate_unlimited
+        
         if (request.getConfig() == null || request.getConfig() == 0) {
-            // config 配置关闭时 ：
-            //      直接使用pcap重放，所以replay = 1
-            //      速率使用默认配置，所以rate_unlimited = 1
+            
+            
+            
             request.setReplay(1);
             request.setRateUnlimited(1);
         } else {
@@ -254,11 +241,7 @@ public class CsceneFlowService {
         log.info("CsceneFlowService.editTaskConf end.");
     }
 
-    /**
-     * 流量任务列表查询
-     * @param request
-     * @return
-     */
+    
     public ListObjServiceResult<FlowTaskPageResponse>  taskList(FlowTaskPageQueryParams request) {
         log.info("CsceneFlowService.taskList begin. request:{}", request);
         String sceneId = csceneInstanceService.getSceneId(request.getId());
@@ -267,10 +250,10 @@ public class CsceneFlowService {
         }
         request.setOffset((request.getPage() - 1) * request.getPerPage());
         request.setSceneId(sceneId);
-        // 查询符合条件的条数
+        
         int total = flowTaskTaskMapper.countBySceneId(request);
         List<FlowTaskPageResponse> flowTaskPageResponseList = flowTaskTaskMapper.pageBySceneId(request);
-        //统计实时速率
+        
         if (CollectionUtils.isNotEmpty(flowTaskPageResponseList)) {
             List<String> ids = flowTaskPageResponseList.stream().map(FlowTaskPageResponse::getId).collect(Collectors.toList());
             List<FlowStatisticalCondition> conditions = this.getRealTimeCondition();
@@ -284,11 +267,7 @@ public class CsceneFlowService {
         return result;
     }
 
-    /**
-     * 条件查询任务id集合
-     * @param request
-     * @return
-     */
+    
     public ServiceResult<List<String>> getTaskIds(FlowTaskPageQueryParams request) {
         String sceneId = csceneInstanceService.getSceneId(request.getId());
         if (StringUtils.isEmpty(sceneId)) {
@@ -304,11 +283,7 @@ public class CsceneFlowService {
         return ResultCommon.success(taskIds);
     }
 
-    /**
-     * 流量任务配置查询
-     * @param taskId
-     * @return
-     */
+    
     public QueryFlowTaskConfResponse queryConfByTaskId(String taskId) {
         log.info("CsceneFlowService.queryConfByTaskId begin. taskId:{}", taskId);
         QueryFlowTaskConfResponse result = new QueryFlowTaskConfResponse();
@@ -320,11 +295,7 @@ public class CsceneFlowService {
         return result;
     }
 
-    /**
-     * 流量仿真概况
-     * @param id
-     * @return
-     */
+    
     public FlowSummary queryFlowSummary(String id) {
         log.info("CsceneFlowService.queryFlowSummary begin. id:{}", id);
         String sceneId = csceneInstanceService.getSceneId(id);
@@ -336,11 +307,7 @@ public class CsceneFlowService {
         return flowSummary;
     }
 
-    /**
-     * top5实时速率
-     * @param id
-     * @return
-     */
+    
     public List<FlowNodeTxBps> top5NodeTxBps(String id) {
         log.info("CsceneFlowService.top5NodeTxBps begin. id:{}", id);
         String sceneId = csceneInstanceService.getSceneId(id);
@@ -355,11 +322,7 @@ public class CsceneFlowService {
         return flowNodeTxBpsList;
     }
 
-    /**
-     * TOP5流量协议
-     * @param id
-     * @return
-     */
+    
     public JSONArray top5Protocols(String id) {
         log.info("CsceneFlowService.top5Protocols begin. id:{}", id);
         JSONArray protocols = new JSONArray();
@@ -396,11 +359,7 @@ public class CsceneFlowService {
         return protocols;
     }
 
-    /**
-     * 流量仿真统计
-     * @param id
-     * @return
-     */
+    
     public FlowStatisticsInfo flowStatistics(String id) {
         log.info("CsceneFlowService.flowStatistics begin. id:{}", id);
         String sceneId = csceneInstanceService.getSceneId(id);
@@ -412,11 +371,7 @@ public class CsceneFlowService {
         return flowStatisticsInfo;
     }
 
-    /**
-     * 流量仿真统计(所有)
-     * @param id
-     * @return
-     */
+    
     public FlowStatisticsAll flowStatisticsAll(String id) {
         log.info("CsceneFlowService.flowStatisticsAll begin. id:{}", id);
         String sceneId = csceneInstanceService.getSceneId(id);
@@ -433,51 +388,35 @@ public class CsceneFlowService {
         return flowStatisticsAll;
     }
 
-    /**
-     * 流量任务启动
-     * @param taskId
-     */
+    
     public void startTask(String taskId) {
         log.info("CsceneFlowService.startTask begin. taskId:{}", taskId);
         asyncPlatFlowTaskService.startTask(taskId, null);
         log.info("CsceneFlowService.startTask end.");
     }
 
-    /**
-     * 流量任务启动
-     * @param taskIds
-     */
+    
     public void batchStartTasks(List<String> taskIds) {
         log.info("CsceneFlowService.batchStartTasks begin. taskIds:{}", taskIds);
         asyncPlatFlowTaskService.batchStartTasks(taskIds, null);
         log.info("CsceneFlowService.batchStartTasks end.");
     }
 
-    /**
-     * 流量任务停止
-     * @param taskId
-     */
+    
     public void stopTask(String taskId) {
         log.info("CsceneFlowService.stopTask begin. taskId:{}", taskId);
         asyncPlatFlowTaskService.stopTask(taskId);
         log.info("CsceneFlowService.stopTask end.");
     }
 
-    /**
-     * 流量任务批量停止
-     * @param taskIds
-     */
+    
     public void batchStopTasks(List<String> taskIds) {
         log.info("CsceneFlowService.batchStopTasks begin. taskIds:{}", taskIds);
         asyncPlatFlowTaskService.batchStopTasks(taskIds);
         log.info("CsceneFlowService.batchStopTasks end.");
     }
 
-    /**
-     * 根据场景id查询带有流量的节点id
-     * @param id
-     * @return
-     */
+    
     public List<FlowTaskNode> nodeOption(String id) {
         log.info("CsceneFlowService.nodeOption begin. id:{}", id);
         var sceneId = csceneInstanceService.getSceneId(id);
@@ -486,10 +425,7 @@ public class CsceneFlowService {
         return nodeList;
     }
 
-    /**
-     * 根据场景id查询环境总速率
-     * @return
-     */
+    
     public List<FlowStatisticsDetail> totalRate(String id) {
         log.info("CsceneFlowService.totalRate begin. id:{}", id);
         var sceneId = csceneInstanceService.getSceneId(id);
@@ -532,10 +468,7 @@ public class CsceneFlowService {
         return result;
     }
 
-    /**
-     * 获取实时速率统计条件
-     * @return
-     */
+    
     private List<FlowStatisticalCondition> getRealTimeCondition() {
         log.info("CsceneFlowService.getRealTimeCondition begin.");
         LocalDateTime endTime = LocalDateTime.now();

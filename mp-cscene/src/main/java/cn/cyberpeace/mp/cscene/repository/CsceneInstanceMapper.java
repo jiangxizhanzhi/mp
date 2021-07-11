@@ -19,25 +19,13 @@ import java.util.List;
 @ModelClass(CsceneInstanceModel.class)
 public interface CsceneInstanceMapper extends BaseCsceneMapper<CsceneInstanceModel> {
 
-    /**
-     * 根据引用类型分组统计
-     * @param events 排除的event
-     * @return
-     */
+    
     List<CsceneInstanceCountByReferenceTypeModel> countGroupByReferenceType(@Param("events") List<Integer> events);
 
-    /**
-     * 统计活动场景总数和场景总数
-     * @return
-     */
+    
     CsceneInstanceCountActivitySceneModel countActivityScene();
 
-    /**
-     * 统计一段时间区间内活跃过的场景数(活跃数 = 区间内启动过的(不管有没有关闭) + 之前启动的而且未关闭的)
-     * @param startTime
-     * @param endTime
-     * @return
-     */
+    
     Integer countActivitySceneByTime(LocalDateTime startTime, LocalDateTime endTime);
 
     List<CloudPluginSceneElementModel> getVlanUsedInstance(List<Integer> vlanId);

@@ -21,11 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Service
 @Slf4j
 public class RegisterService {
@@ -54,7 +50,7 @@ public class RegisterService {
     @Transactional(rollbackFor = Exception.class)
     public ObjServiceResult<UserModel> register(RegisterRequest req) {
 
-        // 查看系统设置，是否开放注册
+        
         if (!adminConfigService.isPublicRegisterAvailable()) {
             log.info("public registration not available...");
             throw new MpRuntimeException(AuthErrorCode.REGISTER_NOT_AVAILABLE);
@@ -72,13 +68,13 @@ public class RegisterService {
 
         createCheckService.check(user);
 
-        // 查看系统设置，注册用户是否需要审核
+        
         if (adminConfigService.isNewUserNeedAudit()) {
-            // 需要审核，设置待审核状态
+            
             log.info("need registration audit...");
             user.setIsAudited(UserModel.Status.NOT_AUDITED);
         } else {
-            // 不需要审核，设置默认角色
+            
             String roleId = adminConfigService.getRegisterDefaultRoleId();
             RoleModel roleModel = null;
             if (StringUtils.isNotBlank(roleId)) {

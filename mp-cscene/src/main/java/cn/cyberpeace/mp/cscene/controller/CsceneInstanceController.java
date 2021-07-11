@@ -611,7 +611,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             try {
                 request = formatActionRequest(request, id);
                 var result = modelService.pause(request.getId(), request.getContext()).asResult();
-//        CsceneLogUtils.recordSceneInstanceLog(request.getId(), OpTypeEnums.PAUSE, CsceneLogUtils.SCENE_PAUSE, request.getContext());
+
                 return result;
             } finally {
                 ReentrantLockUtils.unLock("pause" + id);
@@ -633,7 +633,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             try {
                 request = formatActionRequest(request, id);
                 var result = modelService.unpause(request.getId(), request.getContext()).asResult();
-//        CsceneLogUtils.recordSceneInstanceLog(request.getId(), OpTypeEnums.RECOVER, CsceneLogUtils.SCENE_UNPAUSE, request.getContext());
+
                 return result;
             } finally {
                 ReentrantLockUtils.unLock("pause" + id);
@@ -653,7 +653,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                                @RequestBody(required = false) CsceneInstanceActionRequest request) {
         request = formatActionRequest(request, id);
         var result = modelService.suspend(request.getId(), request.getContext()).asResult();
-//        CsceneLogUtils.recordSceneInstanceLog(request.getId(), OpTypeEnums.PAUSE, CsceneLogUtils.SCENE_SUSPEND, request.getContext());
+
         return result;
     }
 
@@ -667,7 +667,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                               @RequestBody(required = false) CsceneInstanceActionRequest request) {
         request = formatActionRequest(request, id);
         var result = modelService.resume(request.getId(), request.getContext()).asResult();
-//        CsceneLogUtils.recordSceneInstanceLog(request.getId(), OpTypeEnums.RECOVER, CsceneLogUtils.SCENE_RESUME, request.getContext());
+
         return result;
     }
 
@@ -684,7 +684,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         request = formatNodeActionRequest(request, id, nodeId);
         modelService.unSupportedOperation(request.getId(), request.getNodeId());
         var result = modelService.restartElement(request.getId(), request.getNodeId(), request.getContext()).asResult();
-//        CsceneLogUtils.recordSceneNodeLog(request.getId(), request.getNodeId(), OpTypeEnums.UPDATE, CsceneLogUtils.SCENE_ELEMENT_RESTART, request.getContext());
+
         return result;
     }
 
@@ -724,7 +724,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                                @RequestBody(required = false) CsceneInstanceNodeActionRequest request) {
         request = formatNodeActionRequest(request, id, nodeId);
         var result = modelService.pauseElement(request.getId(), request.getNodeId(), request.getContext()).asResult();
-//        CsceneLogUtils.recordSceneNodeLog(request.getId(), request.getNodeId(), OpTypeEnums.PAUSE, CsceneLogUtils.SCENE_ELEMENT_PAUSE, request.getContext());
+
         return result;
     }
 
@@ -740,7 +740,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                                  @RequestBody(required = false) CsceneInstanceNodeActionRequest request) {
         request = formatNodeActionRequest(request, id, nodeId);
         var result = modelService.unpauseElement(request.getId(), request.getNodeId(), request.getContext()).asResult();
-//        CsceneLogUtils.recordSceneNodeLog(request.getId(), request.getNodeId(), OpTypeEnums.RECOVER, CsceneLogUtils.SCENE_ELEMENT_UNPAUSE, request.getContext());
+
         return result;
     }
 
@@ -756,7 +756,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                                   @RequestBody(required = false) CsceneInstanceNodeActionRequest request) {
         request = formatNodeActionRequest(request, id, nodeId);
         var result = modelService.createElement(request.getId(), request.getNodeId(), request.getContext()).asResult();
-//        CsceneLogUtils.recordSceneNodeLog(request.getId(), request.getNodeId(), OpTypeEnums.UPDATE, CsceneLogUtils.SCENE_ELEMENT_RECREATE, request.getContext());
+
         return result;
     }
 
@@ -774,7 +774,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         modelService.unSupportedOperation(request.getId(), request.getNodeId());
         var result =
                 modelService.recreateElement(request.getId(), request.getNodeId(), request.getImage(), request.getContext()).asResult();
-//        CsceneLogUtils.recordSceneNodeLog(request.getId(), request.getNodeId(), OpTypeEnums.UPDATE, CsceneLogUtils.SCENE_ELEMENT_RECREATE, request.getContext());
+
         return result;
     }
 
@@ -806,7 +806,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                                  @RequestBody(required = false) CsceneInstanceNodeActionRequest request) {
         request = formatNodeActionRequest(request, id, nodeId);
         var result = modelService.suspendElement(request.getId(), request.getNodeId(), request.getContext()).asResult();
-//        CsceneLogUtils.recordSceneNodeLog(request.getId(), request.getNodeId(), OpTypeEnums.PAUSE, CsceneLogUtils.SCENE_ELEMENT_SUSPEND, request.getContext());
+
         return result;
     }
 
@@ -823,7 +823,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                                 @RequestBody(required = false) CsceneInstanceNodeActionRequest request) {
         request = formatNodeActionRequest(request, id, nodeId);
         var result = modelService.resumeElement(request.getId(), request.getNodeId(), request.getContext()).asResult();
-//        CsceneLogUtils.recordSceneNodeLog(request.getId(), request.getNodeId(), OpTypeEnums.RECOVER, CsceneLogUtils.SCENE_ELEMENT_RESUME, request.getContext());
+
         return result;
     }
 
@@ -844,7 +844,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             request.setSnapshotName(request.getSnapshotName().trim());
         }
         var result = modelService.snapshotElement(request.getId(), request.getNodeId(), request.getSnapshotName(), request.getDescription(), request.getContext()).asResult();
-//        CsceneLogUtils.recordSceneNodeLog(request.getId(), request.getNodeId(), OpTypeEnums.UPDATE, CsceneLogUtils.SCENE_ELEMENT_SNAPSHOT, request.getContext());
+
         return result;
     }
 
@@ -900,7 +900,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
     private void checkBlackList() {
         if (BeanCommon.getBean(BlacklistModel.class).isEnabled()) {
-            // 开启演示模式 而且 不存在clientId(认为是来自页面的直接请求,比如靶场实例监控的关闭)
+            
             var request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
             if (request.getHeader("clientId") == null) {
                 throw new MpRuntimeException(AuthErrorCode.DEMO_ACCESS_ERROR);

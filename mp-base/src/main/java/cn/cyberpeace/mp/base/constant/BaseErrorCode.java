@@ -2,9 +2,7 @@ package cn.cyberpeace.mp.base.constant;
 
 import cn.cyberpeace.mp.base.service.code.ErrorCode;
 
-/**
- * base模块的错误码定义
- */
+
 public enum BaseErrorCode implements ErrorCode {
     SUCCESS("MP-000000", "success"),
     ERROR("MP-099999", "error"),

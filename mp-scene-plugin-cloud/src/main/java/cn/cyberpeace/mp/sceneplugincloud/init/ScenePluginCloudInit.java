@@ -37,7 +37,7 @@ public class ScenePluginCloudInit implements ApplicationRunner {
 
         cloudAppConfig.init();
 
-        // 可串行执行的任务
+        
         List<AbstractInitJob> syncJobs = new ArrayList<>();
         syncJobs.add(cloudMessageConvertInitJob);
         syncJobs.add(cloudInstanceLinkInitJob);
@@ -49,7 +49,7 @@ public class ScenePluginCloudInit implements ApplicationRunner {
             }
         }
 
-        // 异步触发的任务
+        
         FileUtil.mkdir(cloudAppConfig.getContainerHelpInstallerDir());
         TaskCommon.executeTask(() -> {
             cloudLocalFileMappingInitJob.executed();

@@ -18,11 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 
-/**
- * @Description 用于动态更新topo和插件结构
- * @Author maojun
- * @Date 2022/5/9
- */
+
 public class TopoReformUtils {
 
     private CloudScenePluginHandler pluginHandler;
@@ -31,10 +27,7 @@ public class TopoReformUtils {
         this.pluginHandler = pluginHandler;
     }
 
-    /**
-     * 为实现某些功能(比如核心路由器配置下发),增加辅助交换机节点
-     * @return
-     */
+    
     public ElementWrapper addAuxiliarySwitchNode() {
         ElementWrapper wrapper = createAuxiliarySwitchNode();
         String nodeId = wrapper.getSceneElement().getId();
@@ -44,11 +37,7 @@ public class TopoReformUtils {
         return wrapper;
     }
 
-    /**
-     * 为实现某些功能(比如核心路由器配置下发),增加辅助端口
-     * @param element
-     * @return
-     */
+    
     public PortWrapper addAuxiliaryPort(CloudPluginSceneElementBO element) {
         PortWrapper wrapper = createAuxiliaryPort(element.getSrcElement());
         String portId = wrapper.getScenePort().getId();
@@ -59,11 +48,7 @@ public class TopoReformUtils {
         return wrapper;
     }
 
-    /**
-     * 增加一个接入协议
-     * @param port
-     * @param protocol
-     */
+    
     public void addAuxiliaryAccessMode(CloudPluginSceneElementPortBO port, String protocol) {
         if (port.getSrcPort().getAccessModes() == null) {
             port.getSrcPort().setAccessModes(new ArrayList<>());
@@ -84,11 +69,7 @@ public class TopoReformUtils {
         port.getAccessModes().add(pluginMode);
     }
 
-    /**
-     * 增加连线关系
-     * @param from
-     * @param to
-     */
+    
     public void addConnect(SceneElementPortBO from, SceneElementPortBO to) {
         this.pluginHandler.getSceneHandler().getPortIdConnectedPortIdMap().put(from.getId(), to.getId());
         this.pluginHandler.getSceneHandler().getPortIdConnectedPortIdMap().put(to.getId(), from.getId());
@@ -121,7 +102,7 @@ public class TopoReformUtils {
         SceneElementPortBO port = new SceneElementPortBO();
         port.setElement(element);
         port.setId(TextUtils.uuid());
-        // todo
+        
         port.setOrder(0);
         port.setIsAuxiliary(true);
 

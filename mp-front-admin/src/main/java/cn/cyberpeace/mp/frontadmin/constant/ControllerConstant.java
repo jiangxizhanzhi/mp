@@ -1,10 +1,6 @@
 package cn.cyberpeace.mp.frontadmin.constant;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 public class ControllerConstant {
 
     @SuppressWarnings("java:S1075")

@@ -6,11 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2023/1/17 16:55
- */
+
 @Data
 @Builder
 @NoArgsConstructor

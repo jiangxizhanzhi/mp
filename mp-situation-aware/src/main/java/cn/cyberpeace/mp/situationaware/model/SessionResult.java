@@ -12,9 +12,7 @@ import java.util.List;
 @Builder
 public class SessionResult {
 
-    /**
-     * 分组id
-     */
+    
     @ApiModelProperty("分组id")
     private String groupId;
 
@@ -36,9 +34,7 @@ public class SessionResult {
     @ApiModelProperty("目的端口")
     private String dstPort;
 
-    /**
-     * 协议类型
-     */
+    
     @ApiModelProperty("协议类型")
     private List<String> protocolType;
 

@@ -78,10 +78,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-/**
- * 云平台监控
- * @author wanggang
- */
+
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/monitor")
@@ -117,10 +114,7 @@ public class CloudPlatformMonitorController {
 
     private final HostStateService hostStateService;
 
-    /**
-     * 资源统计
-     * @return
-     */
+    
     @ApiOperation("资源统计")
     @GetMapping("/resources/statistics")
     public Result<HypervisorStatisticsVO> statistics(){
@@ -129,21 +123,21 @@ public class CloudPlatformMonitorController {
         response.setDiskIo(BigDecimal.ZERO);
         response.setNetIo(BigDecimal.ZERO);
 
-        //虚拟机个数
+        
         HypervisorStatisticsVO finalResponse = response;
         CompletableFuture totalInstanceCf = CompletableFuture.runAsync(() -> {
             Integer totalInstances = vmConverter.getTotalInstances(new InstancePageDTO());
             finalResponse.setTotalInstances(totalInstances);
         });
 
-        //容器个数
+        
         HypervisorStatisticsVO finalResponse1 = response;
         CompletableFuture totalContainersCf = CompletableFuture.runAsync(() -> {
             Integer totalContainers =  containerConverter.getTotalContainers(new ContainerPageDTO());
             finalResponse1.setTotalContainers(totalContainers);
         });
 
-        //实装设备个数
+        
         RealEquipmentPageRequest realEquipmentPageRequest = new RealEquipmentPageRequest();
         realEquipmentPageRequest.setPerPage(NumberUtils.INTEGER_ONE);
 
@@ -153,35 +147,35 @@ public class CloudPlatformMonitorController {
             finalResponse2.setTotalRealEquipments(totalRealEquipments);
         });
 
-        //路由个数
+        
         HypervisorStatisticsVO finalResponse3 = response;
         CompletableFuture totalRoutersCf = CompletableFuture.runAsync(() -> {
             Integer totalRouters = routerConverter.getTotalRouters(new RouterPageDTO());
             finalResponse3.setTotalRouters(totalRouters);
         });
 
-        //NPC个数
+        
         HypervisorStatisticsVO finalResponse4 = response;
         CompletableFuture totalNpcsCf = CompletableFuture.runAsync(() -> {
             Integer totalNpcs = npcConverter.getTotalNpcs(new BasePageDTO());
             finalResponse4.setTotalNpc(totalNpcs);
         });
 
-        // 防火墙个数
+        
         HypervisorStatisticsVO finalResponse5 = response;
         CompletableFuture totalFirewallsCf = CompletableFuture.runAsync(() -> {
             Integer totalFirewalls = firewallConverter.getTotalFirewall(new BasePageDTO());
             finalResponse5.setTotalFireWall(totalFirewalls);
         });
 
-        // 交换机个数 -> 替换为网络个数
+        
         HypervisorStatisticsVO finalResponse6 = response;
         CompletableFuture totalNetworksCf = CompletableFuture.runAsync(() -> {
             Integer totalNetworks = networkConverter.getTotalNetwork(new NetworkPageDTO());
             finalResponse6.setTotalSwitch(totalNetworks);
         });
 
-        // dynamips个数
+        
         HypervisorStatisticsVO finalResponse7 = response;
         CompletableFuture totalDynamipsCf = CompletableFuture.runAsync(() -> {
             var result = new VirtualDynamips().statistics();
@@ -209,10 +203,7 @@ public class CloudPlatformMonitorController {
         return new Result<>(response);
     }
 
-    /**
-     * 节点管理
-     * @return
-     */
+    
     @ApiOperation("节点管理")
     @GetMapping("/hypervisor/page")
     public PageResult<HypervisorPageVO> page(BasePageRequest request){
@@ -228,14 +219,14 @@ public class CloudPlatformMonitorController {
                         .diskUsed(hypervisor.getDiskUsed()).build()
         ).collect(Collectors.toList());
 
-        // 获取所有物理主机服务状态
+        
         CloudPlatformPageResult<ServiceStatus> serviceStatusModel = imagesConverter.listServiceStatus();
 
         hypervisorPageRespons.forEach(v -> {
             String name = v.getName();
             Optional<ServiceStatus> serviceStatus =
                     serviceStatusModel.getList().stream().filter(statusModel -> name.equals(statusModel.getHost())).findFirst();
-            // 设置物理主机服务状态
+            
             v.setServiceStatus(serviceStatus.isPresent() && serviceStatus.get().isStatus());
 
             HypervisorWeightAndMaxInstanceConvertModel weightAndMaxInstances = hypervisorConverter.getWeightAndMaxInstances(new HypervisorWeightAndMaxInstanceDTO(name));
@@ -247,7 +238,7 @@ public class CloudPlatformMonitorController {
             }
         });
 
-        // 获取 dynamips 数量
+        
         VirtualDynamips virtualDynamips = new VirtualDynamips();
         var result = virtualDynamips.statistics();
         hypervisorPageRespons.forEach(v -> {
@@ -256,11 +247,7 @@ public class CloudPlatformMonitorController {
         return new PageResult<>(hypervisorPageRespons, model.getTotal());
     }
 
-    /**
-     * 节点管理-关机/重启
-     * @param request
-     * @return
-     */
+    
     @ApiOperation("节点管理-关机/重启")
     @GetMapping("/hypervisor/reboot-poweroff")
     public ServiceResult rebootOrPowerOff(HypervisorRequest request){
@@ -274,10 +261,7 @@ public class CloudPlatformMonitorController {
         return ResultCommon.success();
     }
 
-    /**
-     * 服务状态监控
-     * @return
-     */
+    
     @ApiOperation("服务状态监控")
     @GetMapping("/service-state")
     public Result<List<HypervisorServiceStateVO>> serviceState(){
@@ -287,10 +271,7 @@ public class CloudPlatformMonitorController {
         return new Result<>(result);
     }
 
-    /**
-     * 虚实结合交换机状态
-     * @return
-     */
+    
     @ApiOperation("虚实结合交换机状态")
     @GetMapping("/virtual-real-switch-state")
     public Result<List<VirtualRealSwitchStatusVO>> virtualRealSwitchStatus(){
@@ -305,10 +286,7 @@ public class CloudPlatformMonitorController {
         return new Result<>(list);
     }
 
-    /**
-     * 释放无效资源
-     * @return
-     */
+    
     @ApiOperation("释放无效资源")
     @GetMapping("/release_resource")
     public ServiceResult<Boolean> releaseResource() {
@@ -316,10 +294,7 @@ public class CloudPlatformMonitorController {
         return new ServiceResult<>(true);
     }
 
-    /**
-     * 云平台服务状态监控
-     * @return
-     */
+    
     @ApiOperation("云平台服务状态监控")
     @GetMapping("/cp_page")
     public ServiceResult<ListObjResult<ServiceMonitorDto>> page(CloudPlatformPageRequest request) {
@@ -327,11 +302,7 @@ public class CloudPlatformMonitorController {
         return ResultCommon.success(result);
     }
 
-    /**
-     * 服务重启
-     * @param serverRestartRequest
-     * @return
-     */
+    
     @ApiOperation("服务重启")
     @ApiImplicitParam(name = "serverRestartRequest", value = "服务重启请求体", dataTypeClass = ServerRestartRequest.class)
     @PostMapping("/restart")
@@ -340,11 +311,7 @@ public class CloudPlatformMonitorController {
         return new ServiceResult<>(true);
     }
 
-    /**
-     * 设备运行监控
-     * @param request
-     * @return
-     */
+    
     @ApiOperation("设备运行监控")
     @GetMapping("/server/state")
     public ServiceResult<List<HypervisorPageVO>> page(AgentNameBasedRequest request){
@@ -354,7 +321,7 @@ public class CloudPlatformMonitorController {
         List<HypervisorPageVO> hypervisorPageVOList = new ArrayList<>();
         hostStates.forEach(hostState -> {
 
-            // todo 上下行带宽占比
+            
             Double downloadPercent = 0.00;
             Double uploadPercent = 0.00;
             Long maxNetSpeed = hostState.getMaxNetSpeed();

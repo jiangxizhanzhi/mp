@@ -7,10 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
-/**
- * 访问协议端口
- * @author wanggang
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

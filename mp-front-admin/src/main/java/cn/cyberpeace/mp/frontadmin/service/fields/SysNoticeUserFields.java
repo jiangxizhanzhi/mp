@@ -6,11 +6,7 @@ import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.frontadmin.model.SysNoticeUserModel;
 import org.springframework.stereotype.Component;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/9/20 11:13
- */
+
 @Component
 public class SysNoticeUserFields extends BaseModelFields {
     public static final DynamicFields allFields = new DynamicFields(ClassUtils.getBeanClassFields(SysNoticeUserModel.class));

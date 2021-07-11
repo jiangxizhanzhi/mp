@@ -13,11 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/2/14 18:07
- */
+
 @Slf4j
 @Service
 public class SysCtlService {
@@ -27,30 +23,26 @@ public class SysCtlService {
 
     private volatile boolean isSystemTimestampRollback = false;
 
-    /**
-     * 定时任务调度，刷新系统时间，同时更新系统运行时长 sys_run_seconds
-     * 每30分钟执行一次
-     * @return
-     */
+    
     @Scheduled(initialDelay = 1, fixedRate = 30, timeUnit = TimeUnit.MINUTES)
     public boolean updateSysTs() {
 
-//        if (isSystemTimestampRollback) {
-//            // 发生时间回拨，停止变更
-//            log.error("time rollback occured!");
-//            return false;
-//        }
 
-        // update system timestamp
+
+
+
+
+
+        
         SysActivCtlModel oldActivCtlModel = getValidCtlModel();
         log.info("updateSysTs, oldActivCtlModel:{}", oldActivCtlModel);
-        // 判断系统是否已经注册，未激活不统计运行时长
+        
         if (Objects.nonNull(oldActivCtlModel) && StringUtils.isNotBlank(oldActivCtlModel.getFirstActiveDate())) {
-            // not null, to update  example: oldTs 1644778431000
+            
             Long currTs = System.currentTimeMillis();
             Long oldTs = oldActivCtlModel.getSysTimestamp();
             if (Objects.nonNull(oldTs) && oldTs > 0 && currTs >= oldTs) {
-                // 更新数据库系统时间戳，同时累加run_seconds
+                
                 Long diff = currTs - oldTs;
                 Long diffSeconds = diff / 1000;
                 String oldRunSecondsStr = oldActivCtlModel.getSysRunSeconds();
@@ -66,12 +58,12 @@ public class SysCtlService {
                 log.info("newRunSeconds:{}, diffSeconds:{}, oldRunSeconds:{}", newRunSeconds, diffSeconds, oldRunSeconds);
 
                 newActivCtlModel.setSysRunSeconds(EncryptUtils.desEncrypt(String.valueOf(newRunSeconds)));
-                // update sysActivCtlModel
+                
                 sysActivCtlService.update(newActivCtlModel);
                 log.info("update sysTs success! {}", newActivCtlModel);
                 return true;
             } else {
-                // 直接更新系统时间戳，不累加run_seconds
+                
                 SysActivCtlModel newActivCtlModel = new SysActivCtlModel();
                 newActivCtlModel.setId(oldActivCtlModel.getId());
                 newActivCtlModel.setSysTimestamp(currTs);
@@ -92,23 +84,20 @@ public class SysCtlService {
         return sysActivCtlModel;
     }
 
-    /**
-     * generate a default with current timestamp as system_ts and activ_ts;
-     * @return
-     */
+    
     synchronized public SysActivCtlModel generateOrGetUnusedActivCtlModel() {
         SysActivCtlModel sysActivCtlModel = sysActivCtlService.selectUnused();
         if (Objects.isNull(sysActivCtlModel)) {
             sysActivCtlModel = new SysActivCtlModel();
-            // 只有在一个新的license第一次激活的时候才会写入系统时间戳
+            
             String suffix = RandomUtil.randomString(6);
             sysActivCtlModel.setSuffix(suffix);
             sysActivCtlModel.setStatus(SysActivCtlModel.STATUS_UNUSED);
 
             ObjServiceResult<SysActivCtlModel> objResult  = sysActivCtlService.create(sysActivCtlModel);
 
-            // todo 将其他状态为1的记录，全更新为0
-            //sysActivCtlService.invalidOtherExceptOne("-1");
+            
+            
 
             if (Objects.nonNull(objResult.getSource())) {
                 log.info("Generate default activCtlModel success! {}", objResult.getSource().getObj());
@@ -122,10 +111,7 @@ public class SysCtlService {
     }
 
 
-    /**
-     * generate a default with current timestamp as system_ts and activ_ts;
-     * @return
-     */
+    
     public SysActivCtlModel getValidCtlModel() {
         SysActivCtlModel sysActivCtlModel = sysActivCtlService.selectValid();
         return sysActivCtlModel;

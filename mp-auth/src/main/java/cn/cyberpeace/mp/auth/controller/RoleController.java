@@ -36,11 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * @Description: 角色管理接口
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Api(value = "角色管理接口", tags = "AUTH-角色管理接口")
 @Slf4j
 @RestController
@@ -66,11 +62,7 @@ public class RoleController {
         return roleService.delete(id);
     }
 
-    /**
-     * 批量删除
-     * @param ids 数据id集
-     * @return 成功数量
-     */
+    
     @ApiOperation("批量删除角色")
     @ApiImplicitParam(name="ids", value="角色ID列表",dataTypeClass = String[].class)
     @DeleteMapping("/bulk_delete")

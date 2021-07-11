@@ -4,19 +4,10 @@ import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.flow.model.FlowTaskPortModel;
 
-/**
- * @Description 流量任务网口service
- * @Author qiaokang
- * @Date 2023-04-27 09:21:37
- */
+
 public interface FlowTaskPortService extends BaseModelService<FlowTaskPortModel, QueryParams> {
 
-    /**
-     * 根据网络id和流量执行器id查询网口信息
-     * @param networkId
-     * @param actuatorId
-     * @return
-     */
+    
     FlowTaskPortModel findByNetworkIdAndActuatorId(String networkId, String actuatorId);
 
 }

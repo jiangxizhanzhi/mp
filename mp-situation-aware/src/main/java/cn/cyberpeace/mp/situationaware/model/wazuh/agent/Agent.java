@@ -8,11 +8,7 @@ import lombok.Data;
 import java.util.Date;
 import java.util.List;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/2/24 09:48
- */
+
 @Data
 @ApiModel("wazuh代理")
 public class Agent {

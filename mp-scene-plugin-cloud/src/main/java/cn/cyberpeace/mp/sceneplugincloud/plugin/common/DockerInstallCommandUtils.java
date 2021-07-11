@@ -7,11 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/5/6
- */
+
 public class DockerInstallCommandUtils {
     private static final String DOCKER_RUN_DEFAULT = "docker run -d %s %s $repo_tag %s";
 

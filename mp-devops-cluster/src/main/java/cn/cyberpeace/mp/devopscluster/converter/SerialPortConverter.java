@@ -17,10 +17,7 @@ public class SerialPortConverter {
 
     private final SerialPortService serialPortService;
 
-    /**
-     * 查询串口列表
-     * @return
-     */
+    
     public List<SerialPortConvertModel> list() {
         SerialPortCloudPlatform model = serialPortService.list();
         if (Objects.isNull(model) || !model.isSuccess()){

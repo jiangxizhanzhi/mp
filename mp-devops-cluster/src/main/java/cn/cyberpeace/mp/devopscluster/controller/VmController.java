@@ -36,9 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * 虚拟机管理类
- */
+
 @Validated
 @Slf4j
 @RestController
@@ -55,11 +53,7 @@ public class VmController {
 
     private final DeviceTargetMapper deviceTargetMapper;
 
-    /**
-     * 重启
-     * @param request
-     * @return
-     */
+    
     @ApiOperation("重启虚拟机")
     @PostMapping("/restart")
     public ServiceResult<Boolean> restart(@RequestBody ReviseContainerOrVmRequest request) {
@@ -70,11 +64,7 @@ public class VmController {
         return new ServiceResult<>(virtualMachine.restart(request.getId())).asResult();
     }
 
-    /**
-     * 暂停
-     * @param request
-     * @return
-     */
+    
     @ApiOperation("暂停虚拟机")
     @PostMapping("/pause")
     public ServiceResult<Boolean> pause(@RequestBody ReviseContainerOrVmRequest request) {
@@ -85,11 +75,7 @@ public class VmController {
         return new ServiceResult<>(virtualMachine.pause(request.getId())).asResult();
     }
 
-    /**
-     * 恢复
-     * @param request
-     * @return
-     */
+    
     @ApiOperation("恢复虚拟机")
     @PostMapping("/unpause")
     public ServiceResult<Boolean> unpause(@RequestBody ReviseContainerOrVmRequest request) {
@@ -100,11 +86,7 @@ public class VmController {
         return new ServiceResult<>(virtualMachine.unpause(request.getId())).asResult();
     }
 
-    /**
-     * 开启
-     * @param request
-     * @return
-     */
+    
     @ApiOperation("开启虚拟机")
     @PostMapping("/start")
     public ServiceResult<Boolean> start(@RequestBody ReviseContainerOrVmRequest request) {
@@ -115,11 +97,7 @@ public class VmController {
         return new ServiceResult<>(virtualMachine.start(request.getId())).asResult();
     }
 
-    /**
-     * 关闭
-     * @param request
-     * @return
-     */
+    
     @ApiOperation("关闭虚拟机")
     @PostMapping("/stop")
     public ServiceResult<Boolean> stop(@RequestBody ReviseContainerOrVmRequest request) {
@@ -130,11 +108,7 @@ public class VmController {
         return new ServiceResult<>(virtualMachine.stop(request.getId())).asResult();
     }
 
-    /**
-     * 分页查询虚拟机信息
-     * @param request
-     * @return
-     */
+    
     @ApiOperation("分页查询虚拟机信息")
     @GetMapping("/page")
     public PageResult<InstancePageVO> page(InstancePageRequest request) {
@@ -143,11 +117,7 @@ public class VmController {
         return new PageResult<>(list, model.getTotal());
     }
 
-    /**
-     * 转换BO to VO
-     * @param model
-     * @return
-     */
+    
     private List<InstancePageVO> convertBOToPageVO(BasePageBO<InstanceBO> model){
         List<InstanceBO> instances = model.getList();
         List<String> instanceNames = instances.stream().map(InstanceBO::getName).collect(Collectors.toList());
@@ -169,7 +139,7 @@ public class VmController {
                 }
             }
         }
-        // 镜像管理实例的创建用户
+        
         if (CollectionUtils.isNotEmpty(devopsResult)) {
             List<String> userIdList = devopsResult.stream()
                     .filter(deviceTargetPO -> StringUtils.isNotEmpty(deviceTargetPO.getInstanceCreateUser()))

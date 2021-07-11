@@ -1,10 +1,6 @@
 package cn.cyberpeace.mp.aggregation.constant;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2021/12/18
- */
+
 public final class CommonConstant {
 
     public interface DefaultImageUrl {

@@ -11,11 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/3/24
- */
+
 public class VrClearJob extends AbstractClearJob<VirtualRouterGetData> {
 
     private VirtualRouter vrClient = new VirtualRouter();

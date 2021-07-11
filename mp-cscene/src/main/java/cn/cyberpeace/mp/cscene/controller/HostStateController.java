@@ -27,11 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/11/22 11:22
- */
+
 @Api(value = "主机状态监控", tags = "主机状态监控")
 @Slf4j
 @RestController
@@ -41,13 +37,7 @@ public class HostStateController {
     @Autowired
     private HostStateService hostStateService;
 
-    /**
-     * 默认查询场景所有节点
-     * 忽略elementIds的值
-     *
-     * @param hostStateTrendRequest
-     * @return
-     */
+    
     @ApiOperation(value = "场景主机状态趋势图")
     @GetMapping("/scene_trend")
     public ServiceResult<List<HostState>> getSceneHostStateTrend(HostStateTrendRequest hostStateTrendRequest) {
@@ -64,11 +54,7 @@ public class HostStateController {
     }
 
 
-    /**
-     * 集群状态趋势
-     * @param hostStateTrendRequest
-     * @return
-     */
+    
     @ApiOperation(value = "集群状态趋势图")
     @GetMapping("/cluster_trend")
     public ServiceResult<List<HostState>> getClusterHostStateTrend(HostStateTrendRequest hostStateTrendRequest) {
@@ -80,12 +66,7 @@ public class HostStateController {
     }
 
 
-    /**
-     * elementIds若为多值，则只取第一个值
-     *
-     * @param hostStateTrendRequest
-     * @return
-     */
+    
     @ApiOperation(value = "节点主机状态趋势图")
     @GetMapping("/element_trend")
     public ServiceResult<List<HostState>> getElementHostStateTrend(HostStateTrendRequest hostStateTrendRequest) {
@@ -95,11 +76,7 @@ public class HostStateController {
     }
 
 
-    /**
-     * 查询节点当前状态信息
-     *
-     * @return
-     */
+    
     @ApiOperation(value = "节点主机状态")
     @GetMapping()
     public ServiceResult<List<HostState>> getElementHostState(BaseSceneElementPageRequest pageRequest) {
@@ -109,11 +86,7 @@ public class HostStateController {
         return ResultCommon.success(hostStates);
     }
 
-    /**
-     * 查询节点当前状态信息
-     *
-     * @return
-     */
+    
     @ApiOperation(value = "节点主机状态")
     @GetMapping("/by_agent_name")
     public ServiceResult<List<HostState>> getHostStateByAgentName(AgentNameBasedRequest request) {

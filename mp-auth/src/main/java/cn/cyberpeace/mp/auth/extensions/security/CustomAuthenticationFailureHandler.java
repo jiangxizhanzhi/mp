@@ -27,11 +27,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Objects;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Component
 public class CustomAuthenticationFailureHandler extends SimpleUrlAuthenticationFailureHandler {
     private final ObjectMapper mapper;
@@ -69,7 +65,7 @@ public class CustomAuthenticationFailureHandler extends SimpleUrlAuthenticationF
             result = ServiceResult.builder().serviceCode(AuthErrorCode.BAD_CREDENTIALS).build().asResult();
         }
 
-        // 弃用，因为无法控制异常状态顺序：状态优先级 禁用 > 过期 > 待审核
+        
         if (exception instanceof AccountStatusException) {
             response.setStatus(HttpServletResponse.SC_OK);
 

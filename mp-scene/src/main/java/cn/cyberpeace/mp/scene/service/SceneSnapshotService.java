@@ -9,11 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/7/28
- */
+
 @Service
 public class SceneSnapshotService {
     private SceneElementSnapshotMapper snapshotMapper;

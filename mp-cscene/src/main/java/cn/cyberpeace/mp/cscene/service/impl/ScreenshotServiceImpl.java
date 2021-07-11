@@ -66,13 +66,9 @@ public class ScreenshotServiceImpl extends BaseModelServiceImpl<ScreenshotModel,
         }
     }
 
-    /**
-     * 上传截屏文件
-     * @param request
-     * @return
-     */
+    
     public ServiceResult<ScreenshotModel> screenshotUpload(ScreenshotUploadRequest request) {
-        // 上传截屏文件
+        
         String suffix = FileUtil.getSuffix(request.getFile().getOriginalFilename());
         String filePath = null;
         try {
@@ -89,44 +85,41 @@ public class ScreenshotServiceImpl extends BaseModelServiceImpl<ScreenshotModel,
         model.setNodeId(request.getNodeId());
         model.setScene(request.getScene());
 
-        // 获取当前用户信息
+        
         UserModel loginUser = UserUtils.getLoginUser();
         if (Objects.isNull(loginUser)) {
             return ResultCommon.fail("Get login user info error");
         }
-        // 用户id
+        
         model.setUserId(loginUser.getId());
         UserBo userBo = userService.getUserDto(loginUser.getId());
-        // 姓名
+        
         if (StringUtils.isEmpty(userBo.getName())) {
-            // 姓名为空时，使用用户名
+            
             model.setUserName(userBo.getUsername());
         } else {
             model.setUserName(userBo.getName());
         }
 
         if (CollectionUtils.isNotEmpty(userBo.getOrgs())) {
-            // 封装组织名称，多个以逗号分隔
+            
             List<String> nameList = userBo.getOrgs().stream().map(OrgModel::getName).collect(Collectors.toList());
             String userOrgName = Joiner.on(",").join(nameList);
             model.setUserOrgName(userOrgName);
         }
 
-        // 新增截屏文件
+        
         this.create(model);
-        // 返回前端地址加上 /fdfs 前缀
+        
         model.setFile(FsCommon.genHttpUrl(filePath));
 
         return ResultCommon.success(model);
     }
 
-    /**
-     * 查询已用空间
-     * @return
-     */
+    
     @Override
     public ServiceResult<ScreenshotUsedSpaceResponse> queryUsedSpace() {
-        // 查询已占用空间
+        
         Long usedSpace = this.getModelMapper().queryUsedSpace();
         if (Objects.isNull(usedSpace)) {
             usedSpace = 0L;
@@ -135,30 +128,26 @@ public class ScreenshotServiceImpl extends BaseModelServiceImpl<ScreenshotModel,
         return ResultCommon.success(response);
     }
 
-    /**
-     * 按时间删除截屏文件
-     * @param request 1: 6个月之前，2：3个月之前
-     * @return
-     */
+    
     public ServiceResult<Integer> timeDelete(ScreenshotDeleteRequest request) {
         Integer deleteCount = 0;
         Long deleteMonth;
         if (2 == request.getRecordTime()) {
-            // 减3个月
+            
             deleteMonth = 3L;
         } else {
-            // 减6个月
+            
             deleteMonth = 6L;
         }
 
-        // 查询删除日期之前的数据
+        
         String deleteTime = DateUtil.format(LocalDateTime.now().minusMonths(deleteMonth), "yyyy-MM-dd") + " 00:00:00";
         List<ScreenshotModel> screenshotModels = this.getModelMapper().queryByCreateTime(deleteTime);
         if (CollectionUtils.isNotEmpty(screenshotModels)) {
-            // 异步删除文件服务器上文件
+            
             asyncScreenshotModelService.batchDeleteScreenshot(screenshotModels);
 
-            // 删除数据库中文件
+            
             String[] ids = screenshotModels.stream().map(ScreenshotModel::getId).toArray(String[]::new);
             this.bulkDelete(ids);
             deleteCount = ids.length;
@@ -167,16 +156,12 @@ public class ScreenshotServiceImpl extends BaseModelServiceImpl<ScreenshotModel,
         return ResultCommon.success(deleteCount);
     }
 
-    /**
-     * 批量删除截屏文件
-     * @param request
-     * @return
-     */
+    
     public ServiceResult<Integer> batchDelete(ScreenshotBatchDeleteRequest request) {
         List<ScreenshotModel> screenshotModels = this.getModelMapper().selectByIds(request.getIds());
 
         if (CollectionUtils.isNotEmpty(screenshotModels)) {
-            // 异步删除文件服务器上文件
+            
             asyncScreenshotModelService.batchDeleteScreenshot(screenshotModels);
             bulkDelete(request.getIds().toArray(new String[0]));
             return ResultCommon.success(screenshotModels.size());
@@ -187,18 +172,14 @@ public class ScreenshotServiceImpl extends BaseModelServiceImpl<ScreenshotModel,
 
     }
 
-    /**
-     * 根据场景实例id批量删除截屏文件
-     * @param csceneId
-     * @return
-     */
+    
     public ServiceResult<Integer> batchDeleteBySceneId(String csceneId) {
         HumanCondition condition = new HumanCondition().filterEqual(ScreenshotModel::getScene, csceneId);
         List<ScreenshotModel> screenshotModels = this.getModelMapper().list(condition);
 
         if (CollectionUtils.isNotEmpty(screenshotModels)) {
             List<String> idList = screenshotModels.stream().map(ScreenshotModel::getId).collect(Collectors.toList());
-            // 异步删除文件服务器上文件
+            
             asyncScreenshotModelService.batchDeleteScreenshot(screenshotModels);
             bulkDelete(idList.toArray(new String[0]));
             return ResultCommon.success(screenshotModels.size());

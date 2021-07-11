@@ -13,11 +13,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * @Description
- * @Author hewei
- * @Date 2022/8/3
- */
+
 public class SceneStatusUtil {
     private static Map<Integer, String> en;
     private static Map<Integer, String> zh;
@@ -33,12 +29,12 @@ public class SceneStatusUtil {
                 en.put(status, optionModel.getEnName());
                 zh.put(status, optionModel.getZhName());
             });
-            // 添加删除中的场景实例状态
+            
             en.put(CsceneInstanceStatQueryParams.SceneStatus.DELETING, "Deleting");
             zh.put(CsceneInstanceStatQueryParams.SceneStatus.DELETING, "正在删除");
         }
         Integer sceneStatus;
-        // 修正场景删除中状态
+        
         if (Boolean.TRUE.equals(deleted) && SceneModel.Event.DELETE != event) {
             sceneStatus = CsceneInstanceStatQueryParams.SceneStatus.DELETING;
         } else {
@@ -53,13 +49,7 @@ public class SceneStatusUtil {
         return new SceneStatus(sceneStatus, sceneStatusDesc);
     }
 
-    /**
-     * 转换场景实例状态
-     *
-     * @param event
-     * @param eventStatus
-     * @return 场景实例状态
-     */
+    
     private static Integer eventStatus2SceneStatus(Integer event, Integer eventStatus) {
         if (EventStatus.ABNORMAL == eventStatus) {
             return CsceneInstanceStatQueryParams.SceneStatus.ERROR;

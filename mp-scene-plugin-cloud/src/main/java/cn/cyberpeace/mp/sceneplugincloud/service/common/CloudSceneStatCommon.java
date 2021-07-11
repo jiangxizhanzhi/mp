@@ -79,12 +79,7 @@ public class CloudSceneStatCommon extends CloudSceneStatCommonBase<CloudPluginSc
         setCloudElementPortMapper(cloudPluginSceneElementPortMapper);
     }
 
-    /**
-     * 简单从聚合统计数据源计算计数统计结果
-     * @param collectedStatData 聚合统计数据源
-     * @param distinct 是否去重
-     * @return 字段的聚合统计数量 Map<key, 计数统计结果>
-     */
+    
     public Map<String, Long> countCollectedStatData(Map<String, List<Object>> collectedStatData, boolean distinct) {
         Map<String, Long> result = new HashMap<>();
         collectedStatData.forEach((key, values) -> {
@@ -99,13 +94,7 @@ public class CloudSceneStatCommon extends CloudSceneStatCommonBase<CloudPluginSc
         return result;
     }
 
-    /**
-     * 分组搜集网元指定字段的聚合统计数据源
-     * @param sceneDataBOs 场景列表
-     * @param nodeIds 节点id列表，不传默认为全部
-     * @param groupFieldName 分组聚合字段
-     * @return 字段的聚合统计数据源 Map<统计字段名称, Map<分组字段值, 该统计字段值列表>>
-     */
+    
     public Map<String, Map<String, List<Object>>> collectGroupStatElementFromData(
             List<SceneDataBO> sceneDataBOs, List<String> nodeIds, String groupFieldName, List<String> statFieldNames) {
         if (nodeIds != null && nodeIds.isEmpty()) {
@@ -140,13 +129,7 @@ public class CloudSceneStatCommon extends CloudSceneStatCommonBase<CloudPluginSc
         return fieldGroupValuesMap;
     }
 
-    /**
-     * 搜集网元指定字段的聚合统计数据源
-     * @param sceneDataBOs 场景列表
-     * @param nodeIds 节点id列表，不传默认为全部
-     * @param fieldNames 聚合统计字段
-     * @return 字段的聚合统计数据源 Map<统计字段名称, 该字段值列表>
-     */
+    
     public Map<String, List<Object>> collectStatElementFromData(List<SceneDataBO> sceneDataBOs, List<String> nodeIds,
                                                                 List<String> fieldNames) {
         if (nodeIds != null && nodeIds.isEmpty()) {
@@ -174,13 +157,7 @@ public class CloudSceneStatCommon extends CloudSceneStatCommonBase<CloudPluginSc
         return fieldNameValuesMap;
     }
 
-    /**
-     * 搜集端口指定字段的聚合统计数据源
-     * @param sceneDataBOs 场景列表
-     * @param nodeIds 节点id列表，不传默认为全部
-     * @param fieldNames 聚合统计字段
-     * @return 字段的聚合统计数据源 Map<统计字段名称, 该字段值列表>
-     */
+    
     public Map<String, List<Object>> collectStatPortFromData(List<SceneDataBO> sceneDataBOs, List<String> nodeIds,
                                                              List<String> fieldNames) {
         if (nodeIds != null && nodeIds.isEmpty()) {

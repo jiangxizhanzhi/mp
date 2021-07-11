@@ -16,11 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2021/10/28
- */
+
 @Slf4j
 public class UnpauseHandler extends HandlerCommon {
     private final VirtualMachine virtualMachine = new VirtualMachine();
@@ -60,7 +56,7 @@ public class UnpauseHandler extends HandlerCommon {
             return;
         }
         if (element.getSrcElement().getEvent() != null && element.getSrcElement().getEvent() == SceneElementModel.Event.DEFAULT) {
-            // 未启动状态无需暂停
+            
             return;
         }
         String instanceId = element.getResourceId();

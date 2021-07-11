@@ -5,18 +5,12 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-/**
- * @Description: 选项
- * @Author: guquan
- * @Date：2023/6/6 9:30
- */
+
 @Data
 @ApiModel(value = "选项")
 public class OptionModelBO extends OptionModel {
 
-    /**
-     * 名称
-     */
+    
     @ApiModelProperty(value = "名称")
     private String name;
 }

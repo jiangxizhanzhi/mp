@@ -178,12 +178,12 @@ public class Gns3HttpClient {
 
     private Map<String, String> getHeaders() {
         Map<String, String> headers = new HashMap<>();
-        // 国际化header的处理
+        
         Locale locale = LocaleContextHolder.getLocale();
         if (locale != null) {
             headers.put("Accept-Language", locale.getLanguage());
         }
-        // 调用链id
+        
         String traceId = SysContextHolder.getCallChainId();
         headers.put("X-Request-Id", traceId);
         return headers;

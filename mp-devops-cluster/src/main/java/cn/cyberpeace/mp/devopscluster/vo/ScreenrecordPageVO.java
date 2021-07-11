@@ -8,11 +8,7 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 import java.util.List;
 
-/**
- * @Description: 录屏分页查询返回结果
- * @Author qiaokang
- * @Date：2021/9/13 16:29
- */
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -29,49 +25,31 @@ public class ScreenrecordPageVO extends BaseCloudPlatformResult {
     @Data
     public static final class Record implements Serializable {
 
-        /**
-         * 用户名
-         */
+        
         private String username;
 
-        /**
-         * 组织
-         */
+        
         private String department;
 
-        /**
-         * 场景
-         */
+        
         private String scene;
 
-        /**
-         * 录屏文件名
-         */
+        
         private String recordingFile;
 
-        /**
-         * 截屏文件大小，单位:字节(B)
-         */
+        
         private Long fileSize;
 
-        /**
-         * 录屏时间
-         */
+        
         private String recordate;
 
-        /**
-         * 录屏时长
-         */
+        
         private Double recortime;
 
-        /**
-         * 节点名称
-         */
+        
         private String host;
 
-        /**
-         * 节点id
-         */
+        
         private String hostId;
     }
 

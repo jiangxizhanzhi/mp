@@ -15,17 +15,13 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * 服务管理-Docker文件上传
- */
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class InstallerDockerUploadService extends BaseUploadService {
 
-    /**
-     * 文件上传客户端
-     */
+    
     private final ImagesService imagesService;
 
     public InstallerDockerUploadService build(MultipartFile file) {

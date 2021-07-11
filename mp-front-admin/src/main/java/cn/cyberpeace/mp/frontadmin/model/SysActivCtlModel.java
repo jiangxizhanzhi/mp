@@ -11,24 +11,20 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Table("mp_front_admin_activ_ctl")
 public class SysActivCtlModel extends BaseModel {
 
-    // 无效状态
+    
     public static final Integer STATUS_INVALID = 0;
 
-    // 有效状态
+    
     public static final Integer STATUS_VALID = 1;
 
-    // 未使用
+    
     public static final Integer STATUS_UNUSED = 2;
 
 

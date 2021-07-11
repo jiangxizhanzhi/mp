@@ -15,17 +15,13 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * 上传ISO文件
- */
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class ISOUploadService extends BaseUploadService {
 
-    /**
-     * iso文件上传客户端
-     */
+    
     private final ISOService isoService;
 
     @Override

@@ -9,20 +9,14 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
 
-/**
- * 网络管理
- * @author wanggang
- */
+
 @Service
 @RequiredArgsConstructor
 public class NpcConverter implements BaseConverter{
 
     private final NpcService npcService;
 
-    /**
-     * 获取NPC总数
-     * @return
-     */
+    
     public Integer getTotalNpcs(BasePageDTO dto) {
         dto.setLimit(NumberUtils.INTEGER_ONE);
         String getParams = ParamUtils.wrapperGetParamsByObject(dto,this.getTotalPageIgnoreField());

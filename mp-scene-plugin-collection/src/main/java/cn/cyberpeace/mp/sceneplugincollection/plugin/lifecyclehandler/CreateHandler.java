@@ -69,7 +69,7 @@ public class CreateHandler extends HandlerCommon {
         var routerPorts = getSceneProbeRouterPortMapper().list(
                 new HumanCondition().filterEqual(CollectionPluginSceneProbeRouterPortModel::getScene, sceneId));
         var vrClient = new VirtualRouter();
-        // 创建辅助路由
+        
         var createData = new VirtualRouterCreateData();
         createData.setName(HandlerUtils.genResourceName(sceneId));
         List<VirtualNic> virtualNics = new ArrayList<>();
@@ -107,7 +107,7 @@ public class CreateHandler extends HandlerCommon {
     public void create() {
         prepareEventProcess(SceneModel.Event.CREATE, SceneProcess.class, ElementProcess.class);
 
-        // TODO 流量镜像应该是基于网络端口的, 这里是基于节点的
+        
         Set<String> collectorVmInstanceIds = new HashSet<>();
         Set<String> collectorContainerInstanceIds = new HashSet<>();
         Set<String> mirrorVmInstanceIds = new HashSet<>();
@@ -150,7 +150,7 @@ public class CreateHandler extends HandlerCommon {
         boolean enableMirror = !mirrorVmInstanceIds.isEmpty() || !mirrorContainerInstanceIds.isEmpty();
         if (enableCollector) {
             var sceneId = getPluginHandler().getSrcScene().getEid();
-            // 创建流量采集器
+            
             runSceneProgress(SceneProcess.CREATE_FLOW_COLLECTOR, () -> {
                 var flowCollectorId = getFlowCollector().createCollector();
                 getPluginHandler().getScene().setFlowCollector(flowCollectorId);
@@ -158,31 +158,31 @@ public class CreateHandler extends HandlerCommon {
 
             var flowCollectorId = getPluginHandler().getScene().getFlowCollector();
             runSceneProgress(SceneProcess.BIND_FLOW_COLLECT_PORTS, () -> {
-                // 绑定网络端口到流量采集器
+                
                 getFlowCollector().bindNetworkPorts(sceneId, flowCollectorId, new ArrayList<>(collectorVmInstanceIds),
                         new ArrayList<>(collectorContainerInstanceIds), enableMirror);
             });
         } else if (enableMirror) {
-            // 镜像流量
+            
             var sceneId = getPluginHandler().getSrcScene().getEid();
-            // 绑定网络端口到流量采集器
+            
             getFlowCollector().bindEntityNetworkPorts(sceneId, new ArrayList<>(mirrorVmInstanceIds),
                     new ArrayList<>(mirrorContainerInstanceIds));
         } else if (creatFlowCollector) {
-            // 只创建流量采集器
+            
             runSceneProgress(SceneProcess.CREATE_FLOW_COLLECTOR, () -> {
                 var flowCollectorId = getFlowCollector().createCollector();
                 getPluginHandler().getScene().setFlowCollector(flowCollectorId);
             });
         }
 
-        // 绑定探针agent到探针采集器
+        
         var probeCollectorId = getPluginHandler().getScene().getProbeCollector();
         if (!StringUtils.isEmpty(probeCollectorId)) {
             var containerElements = getPluginHandler().getElementMap().values().stream()
                     .filter(e -> Boolean.TRUE.equals(e.getEnableProbeCollect()))
                     .filter(e -> {
-                        // 非macvlan模式下的容器 且 有探针安装需要的可以加路由
+                        
                         var cloudElement = cloudPluginHandler.getElement(e.getSrcElement().getId());
                         if (cloudElement == null || cloudElement.getVirtualType() == null) {
                             return false;
@@ -223,17 +223,17 @@ public class CreateHandler extends HandlerCommon {
             }
 
             runSceneProgress(SceneProcess.CREATE_PROBE_ROUTER, this::createProbeRouter);
-//            var probeCollectionElements = getPluginHandler().getElementMap().values()
-//                    .stream()
-//                    .filter(collectionElement -> !CollectionUtils.isEmpty(collectionElement.getProbes()))
-//                    .collect(Collectors.toList());
-//            var bindProbeCollectAgentTasks = probeCollectionElements.stream()
-//                    .map(collectionElement -> (Runnable)() -> bindProbeCollectAgentProcess(collectionElement,
-//                            probeCollectorId))
-//                    .collect(Collectors.toList());
-//            if (!bindProbeCollectAgentTasks.isEmpty()) {
-//                runSceneProgress(SceneProcess.BIND_PROBE_COLLECT_AGENTS, () -> runTasks(bindProbeCollectAgentTasks));
-//            }
+
+
+
+
+
+
+
+
+
+
+
         }
     }
 

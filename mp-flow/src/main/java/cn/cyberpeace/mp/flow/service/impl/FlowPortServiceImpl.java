@@ -31,11 +31,7 @@ import java.util.List;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-/**
- * @Description: 流量网口service
- * @Author qiaokang
- * @Date：2021/6/10 10:31
- */
+
 @Service
 @Slf4j
 public class FlowPortServiceImpl extends BaseModelServiceImpl<FlowPortModel, FlowPortMapper, FlowPortFields, QueryParams> implements FlowPortService {
@@ -51,12 +47,7 @@ public class FlowPortServiceImpl extends BaseModelServiceImpl<FlowPortModel, Flo
         setModelMapper(stuMapper);
     }
 
-    /**
-     * 异步批量新增网口
-     * @param networkInfos
-     * @param flowActuatorModel
-     * @param externalNetId
-     */
+    
     @Async
     public void batchCreatePorts(List<FlowNetworkInfo> networkInfos, FlowActuatorModel flowActuatorModel, String externalNetId) {
         if (CollectionUtils.isEmpty(networkInfos)) {
@@ -67,8 +58,8 @@ public class FlowPortServiceImpl extends BaseModelServiceImpl<FlowPortModel, Flo
         List<FlowNetworkInfo> createNetworkinfos = networkInfos.stream().collect(
                 Collectors.collectingAndThen(Collectors.toCollection(() -> new TreeSet<>(
                         Comparator.comparing(FlowNetworkInfo::getNetworkId))), ArrayList::new));
-//        // 过滤外部网络id
-//        createNetworkinfos = createNetworkinfos.stream().filter(networkInfo -> !networkInfo.getNetworkId().equals(externalNetId)).collect(Collectors.toList());
+
+
 
         List<FlowPortModel> flowPortModels = new ArrayList<>();
         createNetworkinfos.forEach(networkInfo -> {
@@ -86,7 +77,7 @@ public class FlowPortServiceImpl extends BaseModelServiceImpl<FlowPortModel, Flo
                     String clientIp = "";
                     String clientPortId = "";
 
-                    // pcap需要给trex虚拟机添加client网口
+                    
                     String addTrexClientPortRsp = HttpUtils.sendPost(flowConfig.getCpUrl() + "/v1/instances/" +
                             flowActuatorModel.getInstanceId() + "/interfaces", addPortReq.toJSONString());
                     JSONObject addTrexClientObj = JSONObject.parseObject(addTrexClientPortRsp);
@@ -97,7 +88,7 @@ public class FlowPortServiceImpl extends BaseModelServiceImpl<FlowPortModel, Flo
                         clientIp = clientDataObj.getString("fixed_ip");
                         clientPortId = clientDataObj.getString("port_id");
 
-                        // 客户端和服务端共用一个网口
+                        
                         serverMac = clientMac;
                         serverIp = clientIp;
                         serverPortId = clientPortId;
@@ -111,11 +102,11 @@ public class FlowPortServiceImpl extends BaseModelServiceImpl<FlowPortModel, Flo
                             .serverIp(serverIp)
                             .serverMac(serverMac)
                             .serverPortId(serverPortId)
-                            .serverGateway(networkInfo.getIp()) // 目标ip作为网关地址
+                            .serverGateway(networkInfo.getIp()) 
                             .clientIp(clientIp)
                             .clientMac(clientMac)
                             .clientPortId(clientPortId)
-                            .clientGateway(networkInfo.getIp()) // 目标ip作为网关地址
+                            .clientGateway(networkInfo.getIp()) 
                             .networkId(networkId)
                             .actuatorId(flowActuatorModel.getId())
                             .build();
@@ -128,10 +119,10 @@ public class FlowPortServiceImpl extends BaseModelServiceImpl<FlowPortModel, Flo
             }
         });
 
-        // 批量新增网口信息
+        
         getModelMapper().bulkCreate(flowPortModels);
         String outIp = cpIp.substring(0, cpIp.lastIndexOf(".")).concat(".254");
-        // 流量发生器初始化网口信息
+        
         networkInfos.forEach(networkInfo -> {
             createNetworkinfos.forEach(createNetworkinfo -> {
                 if (networkInfo.getNetworkId().equals(createNetworkinfo.getNetworkId())) {

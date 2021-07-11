@@ -15,9 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 public class DockerInstallerData implements Serializable {
 
-    /**
-     * 启动参数（包装对象）
-     */
+    
     @ApiModelProperty(value = "启动参数")
     private List<StartUpParameter> startUpParameterList;
 
@@ -33,15 +31,11 @@ public class DockerInstallerData implements Serializable {
         this.userFilename = userFilename;
     }
 
-    /**
-     * 文件地址
-     */
+    
     @ApiModelProperty(value = "文件地址路径")
     private String file;
 
-    /**
-     * 临时文件ID
-     */
+    
     @ApiModelProperty("临时文件ID")
     private String tmpdirUuid;
 

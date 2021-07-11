@@ -6,11 +6,7 @@ import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/11/01 14:13
- */
+
 @Mapper
 @Repository
 @ModelClass(TargetDataModel.class)

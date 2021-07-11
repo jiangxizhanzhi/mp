@@ -19,11 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/7/7 17:14
- */
+
 @Slf4j
 @Service
 public class UserImportService {
@@ -41,12 +37,7 @@ public class UserImportService {
     private UserCacheService userCacheService;
 
 
-    /**
-     * 导入用户
-     * @param userModels
-     * @param userRoleModels
-     * @param tenantUserModels
-     */
+    
     @Transactional(rollbackFor = Exception.class)
     public void doImport(List<UserModel> userModels, List<UserRoleModel> userRoleModels, List<TenantUserModel> tenantUserModels) {
         if (CollectionUtil.isNotEmpty(userModels)) {

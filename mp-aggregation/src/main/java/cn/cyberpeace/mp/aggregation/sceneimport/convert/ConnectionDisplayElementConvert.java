@@ -9,11 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @Description 传递前端连线的属性
- * @Author maojun
- * @Date 2021/10/12
- */
+
 class ConnectionDisplayElementConvert implements IConverter {
 
     public void convert2BO(ConvertDataContainer container) {

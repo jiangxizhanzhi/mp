@@ -7,11 +7,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-/**
- * @Description: 默认自定义探针配置类
- * @Author： hewei
- * @Date： 2022.3.23 15:49
- */
+
 @Component
 public class WazuhProbeConfig {
     private static DefaultProbe defaultProbe;

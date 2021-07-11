@@ -12,19 +12,13 @@ import java.util.List;
 @AllArgsConstructor
 public class DeviceQuickCreateCloudPlatformModel {
 
-    /**
-     * 名称
-     */
+    
     private String name;
 
-    /**
-     * 镜像名称
-     */
+    
     private String quickName;
 
-    /**
-     * 快速构建
-     */
+    
     private List<QuickCreateParam> quickCreateParams;
 
 

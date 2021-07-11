@@ -9,13 +9,9 @@ import lombok.NoArgsConstructor;
 @Data
 public class HypervisorWeightAndMaxInstanceConvertModel {
 
-    /**
-     * 权重
-     */
+    
     private Integer weight;
 
-    /**
-     * 虚拟机数量限制
-     */
+    
     private Integer maxInstances;
 }

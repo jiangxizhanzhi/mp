@@ -20,9 +20,7 @@ public class ActivationLocalCallService {
     @Autowired
     private ActivMenuService activMenuService;
 
-    /**
-     * 根据激活项重置菜单visible属性
-     */
+    
     @LocalCallFunc
     public void resetMenus() {
         log.info("local-call resetMenus");

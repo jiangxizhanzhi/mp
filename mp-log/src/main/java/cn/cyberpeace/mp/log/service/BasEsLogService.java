@@ -13,21 +13,14 @@ import org.elasticsearch.rest.RestStatus;
 import javax.annotation.Resource;
 import java.io.IOException;
 
-/**
- * 基础ES操作接口
- * @author wanggang
- */
+
 @Slf4j
 public abstract class BasEsLogService {
 
     @Resource(name = "logRestHighLevelClient")
     private RestHighLevelClient restHighLevelClient;
 
-    /**
-     * 创建索引并新增数据
-     * @param indexRequest
-     * @return
-     */
+    
     protected IndexResponse create(IndexRequest indexRequest) {
         try {
             IndexResponse response = restHighLevelClient.index(indexRequest, RequestOptions.DEFAULT);
@@ -40,11 +33,7 @@ public abstract class BasEsLogService {
         return null;
     }
 
-    /**
-     * 查询
-     * @param searchRequest
-     * @return
-     */
+    
     protected SearchResponse search(SearchRequest searchRequest){
         try {
             return restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);

@@ -41,11 +41,7 @@ import java.io.PrintWriter;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Slf4j
 @Component
 public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
@@ -101,32 +97,23 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
                 loginResp.setUser(userBo);
                 loginResp.setToken(jwt);
 
-                // 角色
-//                List<RoleModel> roles = userRoleService.listByUserId(user.getId());
-//                loginResp.setRoles(roles);
+                
 
-                // 权限 暂时不用返回
-                /*
-                List<TargetModel> targets = userPermissionService.listByUserId(user.getId());
-                loginResp.setTargets(targets);
-                */
 
-                // 菜单 暂时不用返回
-                /*
-                List<TargetModel> menuTargets = new ArrayList<>();
-                if (CollectionUtil.isNotEmpty(targets)) {
-                    menuTargets = targets.stream().filter(t -> Objects.equals(t.getType(), TargetModel.TYPE_MENU)).collect(Collectors.toList());
-                }
-                loginResp.setMenus(menuTargets);
-                */
 
-                // 组织
-//                List<OrgDto> orgDtos = orgUserService.listHierarchicalOrgsByUserId(user.getId());
-//                loginResp.setOrgs(orgDtos);
+                
+                
+
+                
+                
+
+                
+
+
 
                 result = ServiceResult.builder().source(loginResp).build();
 
-                // 首次登陆，需要修改密码, 返回code:MP-110005 提示前端弹出修改初始密码的页面
+                
                 if (user.getInitCheck() == UserModel.INT_CHECK_YES) {
                     result = ServiceResult.builder().source(loginResp).serviceCode(AuthErrorCode.NEED_UPDATE_CREDENTIALS).build();
                 }
@@ -147,20 +134,20 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
         String errorStatusMsg = null;
         AuthErrorCode errorCode = null;
 
-        // 状态优先级 禁用 > 过期 > 待审核
+        
         if (Objects.equals(user.getIsAudited(), UserModel.Status.NOT_AUDITED)) {
             errorStatusMsg = "user not audited!";
             errorCode = AuthErrorCode.ACCOUNT_NOT_AUDITED;
         }
 
-        // 过期
+        
         LocalDateTime now = LocalDateTime.now();
         if (Objects.nonNull(user.getExpiredTime()) && now.isAfter(user.getExpiredTime())) {
             errorStatusMsg = "user expired!";
             errorCode = AuthErrorCode.ACCOUNT_EXPIRED;
         }
 
-        // 禁用
+        
         if (Objects.equals(user.getIsEnabled(), UserModel.Status.DISABLED)) {
             errorStatusMsg = "user is forbidend!";
             errorCode = AuthErrorCode.ACCOUNT_DISABLED;
@@ -170,38 +157,34 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
         return errorCode;
     }
 
-    /**
-     * 检查系统激活状态
-     *
-     * @return
-     */
+    
     private boolean checkSysActivationStatus() {
-        // 通过spring事件机制，检测系统激活状态
-        // 固定每天晚上24时检查激活状态，提前15天，7天，3天，1天提醒，如果过期，则不再允许登录系统，同时考虑撤销所有用户的token授权
-        // todo
+        
+        
+        
         return false;
     }
 
 
     private void recordLoginLog(UserModel user, HttpServletRequest request) {
         OperationLogRequest logModel = new OperationLogRequest();
-        //操作类型
+        
         logModel.setOpModule(OpModuleEnums.ACCOUNT.ordinal());
         logModel.setOpType(OpTypeEnums.LOGIN.ordinal());
         logModel.setOpTarget(MessageCommon.get(OpTargetEnums.USER.getCode()));
-        //操作主题
+        
         logModel.setTitle(MessageCommon.get(AuthBasei18nCode.LOGIN));
-        //操作描述
+        
         logModel.setDescription(MessageCommon.get(AuthBasei18nCode.LOGIN_USERNAME_PASSWORD));
 
-        //操作用户
+        
         logModel.setUserId(user.getId());
         logModel.setUserName(user.getUsername());
         logModel.setUserType(LogConstant.USER_TYPE_USER);
         logModel.setOpIp(SnUtils.getRealRemoteIp(request));
 
-        // 记录登录日志
-//        operateLogServiceFactory.create(logModel, LocaleContextHolder.getLocale());
+        
+
         operateLogService.create(logModel);
     }
 

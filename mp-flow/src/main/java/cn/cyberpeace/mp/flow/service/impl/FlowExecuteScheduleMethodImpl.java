@@ -14,11 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
-/**
- * @Description: 流量执行实现类
- * @Author qiaokang
- * @Date：2021/6/16 15:51
- */
+
 @Service
 @Slf4j
 public class FlowExecuteScheduleMethodImpl implements ScheduleMethod {
@@ -30,7 +26,7 @@ public class FlowExecuteScheduleMethodImpl implements ScheduleMethod {
     public void execute(FlowBaseModel model) {
         FlowExecuteRequest request = (FlowExecuteRequest) model;
         try {
-            // 执行任务参数
+            
             JSONObject object = new JSONObject();
             object.put("uuid", request.getUuid());
             object.put("action", request.getAction());
@@ -43,7 +39,7 @@ public class FlowExecuteScheduleMethodImpl implements ScheduleMethod {
             if (ResponseUtils.checkResponse(actuatorTaskObj)) {
                 log.info("actuator task success");
 
-                // 流量任务执行次数加1
+                
                 flowTaskService.increaseRunningCount(request.getTaskId());
             } else {
                 log.error("actuator task failed:[{}]", request.getTaskId());

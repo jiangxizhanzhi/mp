@@ -11,9 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-/**
- * ProbeAbilityMapper继承基类
- */
+
 @Mapper
 @Repository
 @ModelClass(ProbeAbilityModel.class)

@@ -15,11 +15,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/2/16
- */
+
 @Slf4j
 public final class NodeLimitUtils {
     private static int NODE_COUNT = 0;
@@ -33,31 +29,19 @@ public final class NodeLimitUtils {
 
     private static CsceneAppConfig csceneAppConfig;
 
-    /**
-     * 增加被限制的节点数量
-     * @param instance
-     * @return
-     */
+    
     public static UpdateResult addLimitedNodeCount(CsceneInstanceHandler instance) {
         int limitedNodeCount = countVirtualElement(instance);
         return addLimitedNodeCount(limitedNodeCount);
     }
 
-    /**
-     * 减小被限制的节点数量
-     * @param instance
-     * @return
-     */
+    
     public static void substractLimitedNodeCount(CsceneInstanceHandler instance) {
         int limitedNodeCount = countVirtualElement(instance);
         substractLimitedNodeCount(limitedNodeCount);
     }
 
-    /**
-     * 增加被限制的节点数量
-     * @param count
-     * @return
-     */
+    
     public static UpdateResult addLimitedNodeCount(int count) {
         if (csceneAppConfig == null) {
             csceneAppConfig = BeanCommon.getBean(CsceneAppConfig.class);
@@ -97,11 +81,7 @@ public final class NodeLimitUtils {
         return updateResult;
     }
 
-    /**
-     * 减小被限制的节点数量
-     * @param count
-     * @return
-     */
+    
     private static void substractLimitedNodeCount(int count) {
         if (csceneAppConfig == null) {
             csceneAppConfig = BeanCommon.getBean(CsceneAppConfig.class);
@@ -109,11 +89,7 @@ public final class NodeLimitUtils {
         updateElementCount(-1 * Math.abs(count));
     }
 
-    /**
-     * 计算限制的数量
-     * @param handler
-     * @return
-     */
+    
     private static int countVirtualElement(CsceneInstanceHandler handler) {
         if (handler == null || handler.getCscene() == null || handler.getCscene().getScene() == null) {
             return 0;

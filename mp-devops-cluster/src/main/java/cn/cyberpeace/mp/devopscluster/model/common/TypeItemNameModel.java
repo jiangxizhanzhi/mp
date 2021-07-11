@@ -9,13 +9,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class TypeItemNameModel {
 
-    /**
-     * ID
-     */
+    
     private String id;
 
-    /**
-     * 名称
-     */
+    
     private String name;
 }

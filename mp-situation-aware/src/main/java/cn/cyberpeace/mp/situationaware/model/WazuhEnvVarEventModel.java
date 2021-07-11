@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class WazuhEnvVarEventModel {
 
-    // 是否有变动，综合
+    
     @JSONField(name = "has_changed")
     private Boolean hasChanged;
 

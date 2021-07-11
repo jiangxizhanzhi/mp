@@ -8,11 +8,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/3/21
- */
+
 @Component("sceneStatusReporter")
 public class SceneStatusReporter implements StatusReporter<CollectedSceneStatusBO> {
     public static final String MESSAGE_TYPE_SCENE = "scene_status_change";

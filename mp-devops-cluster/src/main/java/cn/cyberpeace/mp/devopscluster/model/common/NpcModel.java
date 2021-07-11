@@ -11,18 +11,12 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class NpcModel implements Serializable {
 
-    /**
-     * 节点名称
-     */
+    
     private String nodeName;
 
-    /**
-     * 网口IP
-     */
+    
     private String nodeIp;
 
-    /**
-     * 控制节点/计算节点
-     */
+    
     private String hostname;
 }

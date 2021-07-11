@@ -7,11 +7,7 @@ import cn.cyberpeace.mp.sceneplugingns3.plugin.gns3api.param.LinkNodeParams;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/9/6
- */
+
 public class Link extends Gns3Client {
     public void link(String projectId, String fromNode, Integer fromPort, String toNode, Integer toPort) {
         LinkNodeParams.LinkNode from = new LinkNodeParams.LinkNode();

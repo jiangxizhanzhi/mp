@@ -18,11 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 
-/**
- * @Description
- * @Author zhanglin
- * @Date 2023/3/22
- */
+
 @Api(value = "重置云平台ip接口", tags = "重置云平台ip接口")
 @Slf4j
 @RestController
@@ -44,7 +40,7 @@ public class RestCpcloudAllIpsController {
     @ApiOperation("重新设置环境所有Ip")
     @PostMapping("/reset_all_ip")
     public ServiceResult<Boolean> resetAllIp(@RequestBody ResetCplcoudAllIpsData request) {
-        // 单ip模式下 不支持修改
+        
         if(Boolean.TRUE.equals(config.getPublicNetProxy())){
             return new ServiceResult<>(false);
         }

@@ -17,17 +17,17 @@ import java.util.List;
 @Repository
 @ModelClass(CollectionTemplateProbeModel.class)
 public interface CollectionTemplateProbeMapper extends BaseModelMapper<CollectionTemplateProbeModel> {
-    //    int deleteByPrimaryKey(Integer pk);
-//
-//    int insert(CollectionTemplateProbeModel record);
-//
-//    int insertSelective(CollectionTemplateProbeModel record);
-//
-//    CollectionTemplateProbeModel selectByPrimaryKey(Integer pk);
-//
-//    int updateByPrimaryKeySelective(CollectionTemplateProbeModel record);
-//
-//    int updateByPrimaryKey(CollectionTemplateProbeModel record);
+    
+
+
+
+
+
+
+
+
+
+
     int deleteByTemplateId(@Param("templateId") String templateId);
 
     int deleteByTemplateIds(@Param("templateIds") String[] templateIds);
@@ -37,15 +37,10 @@ public interface CollectionTemplateProbeMapper extends BaseModelMapper<Collectio
 
     List<CollectionTemplateProbeModel> listCollectionTemplateProbeModels(@Param("templateId") String templateId, @Param("probeCondition") ProbeSearchCondition probeCondition);
 
-    /**
-     *
-     * @param templateId
-     * @param type 探针类型
-     * @return
-     */
+    
     int countByTemplateId(@Param("templateId") String templateId, @Param("type") Integer type);
 
-//    List<CollectionTemplateProbeDto> listByCondition();
+
 
     List<ProbeModel> listCustomProbesNotInTemplate(@Param("templateId") String templateId, @Param("category") Integer category, @Param("probeName") String probeName);
 

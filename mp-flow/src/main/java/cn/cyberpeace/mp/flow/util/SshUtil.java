@@ -14,23 +14,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.concurrent.*;
 
-/**
- * @Description: ssh工具类
- * @Author qiaokang
- * @Date：2022/12/3 09:37
- */
+
 @Slf4j
 public class SshUtil {
 
     private static final int TIME_OUT = 30000;
 
-    /**
-     * 刷新目录
-     * @param serverInfo
-     * @param commands
-     * @param srcFilePath
-     * @param destFilePath
-     */
+    
     public static void refreshDir(ServerInfo serverInfo, String commands, String srcFilePath, String destFilePath) {
         JSch jsch = new JSch();
         Session session = null;
@@ -43,19 +33,19 @@ public class SshUtil {
                 return;
             }
 
-            // 1.创建session
+            
             session = JschUtil.createSession(jsch, serverInfo.getHost(), serverInfo.getPort(), serverInfo.getUser());
-            // 2.密码登录
+            
             session.setPassword(serverInfo.getPassword());
-            // 3.连接
+            
             session.connect(TIME_OUT);
 
             log.info("open sftp channel");
             sftpChannel = (ChannelSftp) session.openChannel("sftp");
-            // 4.建立sftp通道连接
+            
             sftpChannel.connect(TIME_OUT);
 
-            // 5. 上传代码
+            
             sftpChannel.put(srcFilePath, destFilePath + "/" + file.getName(), ChannelSftp.OVERWRITE);
             log.info("put file [{}] from [{}] to [{}] success", file.getName(), srcFilePath, destFilePath);
 
@@ -68,7 +58,7 @@ public class SshUtil {
             ExecutorService executorService = Executors.newSingleThreadExecutor();
             try {
                 Future<String> future = executorService.submit(task);
-                execResult = future.get(1000 * 10, TimeUnit.MILLISECONDS); //任务处理超时时间设为10秒
+                execResult = future.get(1000 * 10, TimeUnit.MILLISECONDS); 
                 log.info("exec shell task result: {}", execResult);
             } catch (TimeoutException ex) {
                 log.error("exec shell task timeout", ex);
@@ -81,14 +71,14 @@ public class SshUtil {
                 IOUtils.closeQuietly(finalOutputStream);
             }
 
-            // 执行失败时execResult返回null
+            
             if (StrUtil.isEmpty(execResult)) {
                 log.info("exec shell script error:{}", outputStream.toString(CharsetUtil.CHARSET_UTF_8));
             } else {
                 log.info("exec shell script success");
             }
         } catch (Exception e) {
-            //设置执行失败的响应内容
+            
             log.error("refresh dir error", e);
         } finally {
             JschUtil.close(sftpChannel);
@@ -97,22 +87,18 @@ public class SshUtil {
         }
     }
 
-    /**
-     * 执行命令
-     * @param serverInfo
-     * @param commands
-     */
+    
     public static void execCommand(ServerInfo serverInfo, String commands) {
         JSch jsch = new JSch();
         Session session = null;
         ChannelSftp sftpChannel = null;
         ByteArrayOutputStream outputStream = null;
         try {
-            // 1.创建session
+            
             session = JschUtil.createSession(jsch, serverInfo.getHost(), serverInfo.getPort(), serverInfo.getUser());
-            // 2.密码登录
+            
             session.setPassword(serverInfo.getPassword());
-            // 3.连接
+            
             session.connect(TIME_OUT);
 
             outputStream = new ByteArrayOutputStream();
@@ -124,7 +110,7 @@ public class SshUtil {
             ExecutorService executorService = Executors.newSingleThreadExecutor();
             try {
                 Future<String> future = executorService.submit(task);
-                execResult = future.get(1000 * 10, TimeUnit.MILLISECONDS); //任务处理超时时间设为10秒
+                execResult = future.get(1000 * 10, TimeUnit.MILLISECONDS); 
                 log.info("exec shell commands result: {}", execResult);
             } catch (TimeoutException ex) {
                 log.error("exec shell commands timeout", ex);
@@ -137,14 +123,14 @@ public class SshUtil {
                 IOUtils.closeQuietly(finalOutputStream);
             }
 
-            // 执行失败时execResult返回null
+            
             if (StrUtil.isEmpty(execResult)) {
                 log.info("exec shell commands error:{}", outputStream.toString(CharsetUtil.CHARSET_UTF_8));
             } else {
                 log.info("exec shell commands success");
             }
         } catch (Exception e) {
-            //设置执行失败的响应内容
+            
             log.error("exec shell commands error", e);
         } finally {
             JschUtil.close(sftpChannel);

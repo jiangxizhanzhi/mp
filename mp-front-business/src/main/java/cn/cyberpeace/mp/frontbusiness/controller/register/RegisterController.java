@@ -32,11 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 
-/**
- * @Description: 注册接口
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Api(value = "注册接口", tags = "AUTH-注册接口")
 @Slf4j
 @RestController

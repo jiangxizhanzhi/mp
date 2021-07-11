@@ -3,11 +3,7 @@ package cn.cyberpeace.mp.situationaware.model;
 import com.alibaba.fastjson.annotation.JSONField;
 import java.util.Date;
 
-/**
-  *@Desciption 数据采集agent
-  *@Author zhangjin
-  *@Date 11/30/21 2:16 下午
-**/
+
 public class WazuhAgentModel {
     private String ip;
     @JSONField(name = "node_name")

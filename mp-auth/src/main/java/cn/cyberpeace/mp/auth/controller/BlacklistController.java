@@ -16,10 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 
-/**
- * @author litian
- * @date 2023年09月25 13:54
- */
+
 @Api(value = "访问黑名单开关", tags = "AUTH-访问黑名单开关")
 @Slf4j
 @RestController
@@ -34,7 +31,7 @@ public class BlacklistController {
     })
     @OperateLog(module = OpModuleEnums.SYSTEM, type = OpTypeEnums.UPDATE, title = "更新黑名单开关", target = OpTargetEnums.SYS_CONFIG)
     @PutMapping("/enabled/{flag}")
-    // @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
+    
     public ObjServiceResult<Boolean> setBlacklistFlag(@PathVariable(value = "flag") boolean flag) {
         blacklistModel.setEnabled(flag);
         return new ObjServiceResult<>(true).asResult();

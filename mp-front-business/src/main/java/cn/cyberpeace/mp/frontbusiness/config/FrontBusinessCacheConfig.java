@@ -8,11 +8,7 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.concurrent.TimeUnit;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/5/16 11:05
- */
+
 @Configuration
 public class FrontBusinessCacheConfig {
 

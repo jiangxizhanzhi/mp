@@ -27,24 +27,15 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-/**
- * @Description: 模板的读取类
- * 有个很重要的点 DemoDataListener 不能被spring管理，要每次读取excel都要new,然后里面用到spring可以构造方法传进去
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Slf4j
 public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
 
-    /**
-     * 每隔5条存储数据库，实际使用中可以3000条，然后清理list ，方便内存回收
-     */
+    
     private static final int BATCH_COUNT = 100;
 
     List<ImportUserBo> list = new ArrayList<ImportUserBo>();
-    /**
-     * 假设这个是一个DAO，当然有业务逻辑这个也可以是一个service。当然如果不用存储这个对象没用。
-     */
+    
     private UserService userService;
 
     private RoleService roleService;
@@ -55,11 +46,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
 
     private AuthConfig authConfig;
 
-    /**
-     * 如果使用了spring,请使用这个构造方法。每次创建Listener的时候需要把spring管理的类传进来
-     *
-     * @param userService
-     */
+    
     public UploadDataListener(UserService userService, RoleService roleService, OrgService orgService,
                               OperateUserPermissionService opUserPermCheckService, AuthConfig authConfig) {
         this.userService = userService;
@@ -69,46 +56,28 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
         this.authConfig = authConfig;
     }
 
-    /**
-     * 这个每一条数据解析都会来调用
-     *
-     * @param data
-     *            one row value. Is is same as {@link AnalysisContext#readRowHolder()}
-     * @param context
-     */
+    
     @Override
     public void invoke(ImportUserBo data, AnalysisContext context) {
         list.add(data);
     }
 
-    /**
-     * 所有数据解析完成了 都会来调用
-     *
-     * @param context
-     */
+    
     @Override
     public void doAfterAllAnalysed(AnalysisContext context) {
-        // 这里也要保存数据，确保最后遗留的数据也存储到数据库
+        
         saveData();
         log.info("all data saved success！");
     }
 
-    /**
-     * 加上存储数据库
-     * http://10.10.10.10/biz/bug-view-4861.html
-     *
-     * 当前导入模板里面说明的必填项是用户名、姓名、密码， 其他的组织、角色、电话号码没有在导入模板中说必填，
-     * 组织不填的话导入后要有默认值。
-     * 组织：可以不填， 不填的话默认根组织
-     * 角色：必填， 属于已有角色可以导入，不属于已有角色导入失败。
-     */
+    
     private void saveData() {
         if (list.size() > authConfig.getMaxImportUserSize()) {
             log.error("size exceed the limit:{}！", list.size());
             throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_SIZE_OVER.format(authConfig.getMaxImportUserSize().toString()));
         }
 
-        // 校验字段是否合法
+        
         checkImportUsers(list);
         preProcessOrgsAndRoles(list);
         preProcessPwd(list);
@@ -136,7 +105,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
             }
         }
 
-        // 表格内用户名重复内容校验
+        
         var duplicateElements = getDuplicateElements(users);
         if (CollectionUtils.isNotEmpty(duplicateElements)) {
             String duplicatedUserNames = duplicateElements.stream().map(Map.Entry::getKey).collect(Collectors.joining(","));
@@ -144,15 +113,11 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
             throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_USERNAME_DUPLICATED.format(duplicatedUserNames));
         }
 
-        // 校验用户名
+        
         checkUserNameFromDB(userName2IndexBoMap);
     }
 
-    /**
-     * 校验简介是否合法
-     * @param description
-     * @param index
-     */
+    
     private void checkDescription(String description, int index) {
         if (StringUtils.isNotBlank(description) && StringUtils.length(description) > 1000) {
             String shortDesc = description.substring(0, 20) + "...";
@@ -163,11 +128,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
 
 
 
-    /**
-     * 校验用户名
-     *
-     * @param
-     */
+    
     private void checkUserName(String username, int index) {
         if (StringUtils.isBlank(username)) {
             log.error("No {} row error! username {} should not be empty!", index, username);
@@ -180,11 +141,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
         }
     }
 
-    /**
-     * 校验用户名
-     *
-     * @param userName2IndexBoMap
-     */
+    
     private void checkUserNameFromDB(Map<String, Integer> userName2IndexBoMap) {
         List<String> userNames = userName2IndexBoMap.keySet().stream().collect(Collectors.toList());
         List<String> existedUserNames = userService.listExistedUserNames(userNames, 1);
@@ -195,12 +152,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
         }
     }
 
-    /**
-     * 校验名称
-     *
-     * @param name
-     * @param index
-     */
+    
     private void checkName(String name, int index) {
         if (StringUtils.isBlank(name)) {
             log.error("No {} row error! name {} should not be empty!", index, name);
@@ -215,32 +167,22 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
     }
 
 
-    /**
-     * 校验密码
-     *
-     * @param password
-     * @param index
-     */
+    
     private void checkPwd(String password, int index) {
         if (StringUtils.isBlank(password)) {
             log.error("No {} row error! name {} should not be empty!", index, password);
             throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_PWD_EMPTY.format(String.valueOf(index)));
         }
-        // 密码是否合法
+        
         if (PasswordUtils.isPasswordInvalid(password)) {
             log.error("No {} row error! password has illegal strength!", index);
             throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_PWD_INVALID.format(String.valueOf(index)));
         }
     }
 
-    /**
-     * 校验过期日期格式
-     *
-     * @param expiredTime
-     * @param index
-     */
+    
     private void checkExpiredTime(String expiredTime, int index) {
-        // 过期时间格式是否合法
+        
         if (StringUtils.isNotBlank(expiredTime)) {
             try {
                 TimeUtils.stringToLocalDate(expiredTime);
@@ -252,12 +194,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
     }
 
 
-    /**
-     * 校验角色是否存在，如果存在则查出id留待后面绑定的时候用
-     *
-     * @param
-     * @param index
-     */
+    
     private void checkRole(ImportUserBo user, int index) {
         String roles = user.getRoles();
         if (StringUtils.isBlank(roles)) {
@@ -265,17 +202,17 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
             throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_ROLE_EMPTY.format(String.valueOf(index)));
         }
 
-        // 清空roleIdList
+        
         user.setRoleIdList(new ArrayList<>());
         String[] roleNameArr = StringUtils.split(roles, ",");
 
-        //try {
+        
             opUserPermCheckService.checkByTargetRoleNames(Arrays.asList(roleNameArr));
-        //} catch (MpRuntimeException me) {
-        //    if (me.getServiceCode().equals(AuthErrorCode.PERMISSION_DENIED)) {
-        //        throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_ROLE_NOT_EXISTED.format(String.valueOf(index), roleName.trim()));
-        //    }
-        //}
+        
+        
+        
+        
+        
 
         for (String roleName : roleNameArr) {
             RoleModel roleModel = roleService.getByName(roleName.trim());
@@ -288,17 +225,12 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
         }
     }
 
-    /**
-     * 校验组织是否存在，如果存在则查出id留待后面绑定的时候用
-     *
-     * @param
-     * @param index
-     */
+    
     private void checkOrgs(ImportUserBo user, int index) {
         String orgPaths = user.getOrgpath();
         if (StringUtils.isBlank(orgPaths)) {
-            // 组织路径不存在，默认都存一级组织
-            // 组织为空则默认一级组织
+            
+            
             List<OrgBO> orgBOS = orgService.listParents();
             OrgBO defaultTopOrg = orgBOS.get(0);
             if (Objects.isNull(defaultTopOrg)) {
@@ -329,10 +261,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
     }
 
 
-    /**
-     * 导入excel对密码进行预处理
-     * 预处理密码
-     */
+    
     private void preProcessPwd(List<ImportUserBo> users) {
         List<List<ImportUserBo>> parentList = Lists.partition(users, 20);
         List<CompletableFuture<List<ImportUserBo>>> cfList = new ArrayList<>();
@@ -360,9 +289,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
     }
 
 
-    /**
-     * 预处理组织
-     */
+    
     private void preProcessOrgs(List<ImportUserBo> users) {
         Map<String, OrgBO> orgPath2ModelMap = new HashMap<>();
         List<OrgBO> orgBOS = orgService.listParents();
@@ -376,8 +303,8 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
             int index = i + 1;
             String orgPaths = user.getOrgpath();
             if (StringUtils.isBlank(orgPaths)) {
-                // 组织路径不存在，默认都存一级组织
-                // 组织为空则默认一级组织
+                
+                
                 user.setOrgIdList(CollectionUtil.toList(defaultTopOrg.getId()));
                 continue;
             }
@@ -412,7 +339,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
                 throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_ROLE_EMPTY.format(String.valueOf(index)));
             }
 
-            // 清空roleIdList
+            
             user.setRoleIdList(new ArrayList<>());
             String[] roleNameArr = StringUtils.split(roles, ",");
             allRoleNames.addAll(Arrays.asList(roleNameArr));
@@ -420,7 +347,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
             for (String roleName : roleNameArr) {
                 RoleModel roleModel = roleName2ModelMap.get(roleName.trim());
                 if (Objects.isNull(roleModel)) {
-                    // roleService.getByName方法有缓存
+                    
                     roleModel = roleService.getByName(roleName.trim());
                     roleName2ModelMap.put(roleName.trim(), roleModel);
                 }

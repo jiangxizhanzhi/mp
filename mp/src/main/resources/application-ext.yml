@@ -10,7 +10,7 @@ spring:
       db-port: ${MP_DB_PORT:9306}
       db-database: ${MP_DB_DATABASE:mp}
       username: ${MP_DB_USERNAME:root}
-      password: ${MP_DB_PASSWORD:cyberpeace@2020}
+      password: ${MP_DB_PASSWORD:cyberpeace}
       maximum-pool-size: ${MP_DB_MAX_POOL_SIZE:10}
       minimum-idle: ${MP_DB_MIN_POOL_SIZE:10}
 

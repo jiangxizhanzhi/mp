@@ -13,11 +13,7 @@ import java.util.List;
 @Slf4j
 public class POLogoUtils {
 
-    /**
-     * 对象path批量转fdfs地址
-     * @param targetList
-     * @param <T>
-     */
+    
     public static <T> void changeLogoPathToUrl(List<T> targetList) {
         if (CollectionUtils.isNotEmpty(targetList)) {
             List<LocalFileMappingModel> mappingModelList = DefaultImgUtil.listByGroups(Collections.singletonList(DefaultImgDirEnum.TARGET.getGroup()));

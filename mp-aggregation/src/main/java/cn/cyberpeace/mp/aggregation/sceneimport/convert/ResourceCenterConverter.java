@@ -12,18 +12,14 @@ import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2021/10/12
- */
+
 @Component
 public class ResourceCenterConverter {
     @Resource
     private TargetConverter targetConverter;
 
     public CsceneBO convert(YmlParseResult parseResult, List<ImageParseResult> imageInfos, String sceneFilePath) {
-        // 构建用于存储数据的容器
+        
         ConvertDataContainer container = new ConvertDataContainer();
         container.setSceneFilePath(sceneFilePath);
         if (CollectionUtils.isNotEmpty(imageInfos)) {
@@ -36,9 +32,9 @@ public class ResourceCenterConverter {
             });
         }
 
-        // 构建转换的责任链路
+        
         List<IConverter> converters = new ArrayList<>();
-        // 解析scene -> 解析node,创建端口 -> 解析network,创建端口,创建连线 -> 加载其余靶标信息 -> 加载来yml解析出的镜像信息
+        
         converters.add(new PrepareConverter(parseResult));
         converters.add(new SceneElementConverter(parseResult.getScene()));
         converters.add(new NodeElementConverter(parseResult.getNodes()));
@@ -52,7 +48,7 @@ public class ResourceCenterConverter {
         converters.add(new SceneElementShapeConverter(parseResult.getShape()));
         converters.add(new NetConfigElementConvert());
         converters.add(new ConnectionDisplayElementConvert());
-        // 依次执行链路
+        
         converters.forEach(converter -> converter.convert2BO(container));
 
         var csceneBO = container.toCsceneBO();

@@ -16,11 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2021/10/25
- */
+
 @Slf4j
 public class RecreateHandler extends HandlerCommon {
 
@@ -92,7 +88,7 @@ public class RecreateHandler extends HandlerCommon {
                         cloudElement.getSrcElement().getId());
                 return;
             }
-            //通知云平台需要统计环境总速率的端口
+            
             if (Boolean.TRUE.equals(getPluginHandler().getScene().getEnableRate())) {
                 List<String> portIds = new ArrayList<>();
                 if (CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
@@ -218,7 +214,7 @@ public class RecreateHandler extends HandlerCommon {
                         } );
             }
 
-            //通知云平台需要统计环境总速率的端口
+            
             if (Boolean.TRUE.equals(getPluginHandler().getScene().getEnableRate())) {
                 List<String> portIds = new ArrayList<>();
                 if (CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {

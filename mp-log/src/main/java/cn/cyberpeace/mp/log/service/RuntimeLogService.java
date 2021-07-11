@@ -17,9 +17,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-/**
- *
- **/
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -29,16 +27,12 @@ public class RuntimeLogService {
 
     private final RunTimeLogDTOConverter runTimeLogDTOConverter;
 
-    /**
-     * 分页查询
-     * @param basePageRequest
-     * @return
-     */
+    
     public ListObjResult<RunTimeLogDTO> page(BasePageRequest basePageRequest) {
         List<LogReportDTO> allLogReportDTOList = Lists.newArrayList();
         List<LogReportDTO> mpAndCpLogList = logFileServiceFactory.listAll(basePageRequest);
         allLogReportDTOList.addAll(mpAndCpLogList);
-        // 时间过滤
+        
         if (CollectionUtil.isNotEmpty(allLogReportDTOList)) {
             if (Objects.nonNull(basePageRequest.getStartDate()) && Objects.nonNull(basePageRequest.getEndDate())) {
                 allLogReportDTOList = allLogReportDTOList.stream().filter(logReportDTO ->
@@ -51,7 +45,7 @@ public class RuntimeLogService {
         }
 
         List<RunTimeLogDTO> runTimeLogDTOS = runTimeLogDTOConverter.targetToSource(allLogReportDTOList);
-        // 添加临时返回id
+        
         if (CollectionUtil.isNotEmpty(runTimeLogDTOS)) {
             runTimeLogDTOS.forEach(dto -> {
                 dto.setId(TextUtils.uuid());

@@ -5,18 +5,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * 聚合攻击方式
- * @author wanggang
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class AttackDateHistogramNetworkBytesBO extends BaseBO{
 
-   /**
-    * 自 1970-01-01T00:00:00Z 纪元以来的毫秒数
-    */
+   
    private String time;
 }

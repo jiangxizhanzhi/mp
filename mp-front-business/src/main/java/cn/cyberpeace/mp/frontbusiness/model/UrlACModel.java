@@ -12,11 +12,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/5/19 19:15
- */
+
 @Data
 @Builder
 @AllArgsConstructor

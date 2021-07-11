@@ -40,11 +40,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Service
 @Slf4j
 public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, OrgFields, QueryParams>
@@ -87,7 +83,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
                 throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED.format(obj.getParent()));
             }
 
-            // 校验组织是否重复
+            
             if (this.checkExist(obj)) {
                 log.info("org child already exited! {}", obj.getName());
                 throw new MpRuntimeException(AuthErrorCode.ORG_CHILD_ALREADY_EXISTED);
@@ -113,10 +109,10 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         if (StringUtils.isBlank(obj.getIdentifier())) {
             obj.setIdentifier(null);
         }
-        // 是否需要更新组织名称
+        
         boolean needUpdateName = StringUtils.isNotBlank(obj.getName()) && !Objects.equals(obj.getName(), oldOrg.getName());
 
-        // 查看组织path是否重复
+        
         if (needUpdateName) {
             obj.setParent(oldOrg.getParent());
             if (this.checkExist(obj)) {
@@ -125,7 +121,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
             }
         }
 
-        // 1.先更新OrgModel信息
+        
         ObjServiceResult<OrgModel> result = super.update(obj, fields);
         userCacheService.evictAllUserCache();
         return result;
@@ -145,11 +141,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         return getModelMapper().get(id);
     }
 
-    /**
-     * 校验组织是否重复
-     * @param obj
-     * @return
-     */
+    
     private boolean checkExist(OrgModel obj) {
         String parentId = obj.getParent();
         String name = obj.getName();
@@ -157,7 +149,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         List<OrgModel> orgModelList = listByParentIdAndName(parentId, name);
         if (CollectionUtil.isNotEmpty(orgModelList)) {
             if (StringUtils.isNotBlank(obj.getId())) {
-                // 判断是否当前组织
+                
                 for (OrgModel orgModel : orgModelList) {
                     if (orgModel.getId().equals(obj.getId())) {
                         return false;
@@ -255,7 +247,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
 
     @Override
     public ServiceResult<Integer> bulkUpdate(List<OrgModel> objs) {
-//        return super.bulkUpdate(objs);
+
         throw new MpRuntimeException(AuthErrorCode.OP_ERROR);
     }
 
@@ -347,7 +339,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     @Override
     public List<OrgDto> getTree(String parentOrgId) {
         if (StringUtils.isBlank(parentOrgId)) {
-            // 查询所有组织树
+            
             List<OrgBO> orgBOS = listAll(AuthConstant.DEFAULT_TENANT);
             if (CollectionUtil.isEmpty(orgBOS)) {
                 return new ArrayList<>();
@@ -359,7 +351,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
             return tree;
         }
 
-        // 根据parentId查询单个组织树
+        
         OrgBO pOrgBO = getOrgBO(parentOrgId);
         if (pOrgBO == null) {
             log.info("org:{} not existed!", parentOrgId);
@@ -429,7 +421,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
                     tmpModel = orgModelList.get(0);
                     parentId = tmpModel.getId();
 
-                    // 最后一个，获取组织
+                    
                     if (i == (pathArray.length - 1)) {
                         orgModel = tmpModel;
                         OrgBO orgBO = new OrgBO();
@@ -452,14 +444,10 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     }
 
 
-    /**
-     * 列出所有的子组织，忽略层级限制
-     * 注意！不包括传入的org本身
-     * @param orgId
-     */
+    
     @Override
     public List<OrgDto> listAllChildIgnoreLevelExcludeSelf(String orgId) {
-        // 展示所有层级的子组织，不包括自己
+        
         ObjServiceResult<OrgModel> result = get(orgId);
         if (Objects.nonNull(result.getSource())) {
             OrgModel parentOrg = result.getSource().getObj();
@@ -479,7 +467,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
 
     @Override
     public List<OrgDto> listAllParentIgnoreLevelExcludeSelf(String orgId) {
-        // 展示所有层级的父组织，不包括自己
+        
         OrgDto orgDto = getHierarchicalOrgsByOrgId(orgId);
 
         if (Objects.nonNull(orgDto)) {
@@ -501,7 +489,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         ParamCheck.notEmpty(orgs, AuthBasei18nCode.ORG_LIST);
         Map<String, OrgDto> mapTmp = new HashMap<>();
 
-        //Save all nodes to a map
+        
         for (OrgModel orgModel : orgs) {
             OrgDto targetDto = new OrgDto();
             BeanUtils.copyProperties(orgModel, targetDto);
@@ -510,7 +498,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
             mapTmp.put(targetDto.getId(), targetDto);
         }
 
-        //loop and assign parent/child relationships
+        
         for (Map.Entry<String, OrgDto> entry : mapTmp.entrySet()) {
             OrgDto current = entry.getValue();
             String parentId = current.getParent();
@@ -529,7 +517,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         }
 
         List<OrgDto> parentOrgs = new ArrayList<>();
-        //get the root
+        
         for (OrgDto node : mapTmp.values()) {
             if(StringUtils.isBlank(node.getParent())) {
                 parentOrgs.add(node);
@@ -540,16 +528,13 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     }
 
 
-    /**
-     * 删除组织-权限，组织-人员的关系
-     * @param orgId
-     */
+    
     private void deleteReleated(String orgId) {
         if (StringUtils.isBlank(orgId)) {
             return;
         }
 
-        // 如果组织下有人员，不允许删除
+        
         List<UserModel> users = tenantUserService.listUsersByOrgIdNoRestrict(orgId);
         if (CollectionUtil.isNotEmpty(users)) {
             throw new MpRuntimeException(AuthErrorCode.ORG_CANNOT_DELETE_WITH_USER_EXISTED);
@@ -564,7 +549,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         }
     }
 
-    // 组织树排序
+    
     private void sortTree(List<OrgDto> orgs) {
         orgs.forEach(o -> {
             if (CollectionUtil.isNotEmpty(o.getChildren())) {

@@ -30,9 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Arrays;
 import java.util.Objects;
 
-/**
- * WS通知管理
- */
+
 @Validated
 @Slf4j
 @RestController

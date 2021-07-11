@@ -37,7 +37,7 @@ public class SceneHostStateReportScheduleService {
     @Resource
     private RabbitmqCsceneReporter csceneReporter;
 
-    // 每2分钟上报一次
+    
     public static final long REFRESH_RATE = 2;
 
     private static final Set<String> csceneInstanceIds = new ConcurrentHashSet<>();

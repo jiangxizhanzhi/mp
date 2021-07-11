@@ -3,11 +3,7 @@ package cn.cyberpeace.mp.auth.bo.user;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/10/26 10:32
- */
+
 @Data
 public class UserOnlineReportBo {
 

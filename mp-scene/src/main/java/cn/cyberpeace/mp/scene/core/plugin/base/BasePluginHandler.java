@@ -18,14 +18,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-/**
- * 基础的场景插件处理类
- * 场景插件处理目前只对网元节点和网元端口做插件配置处理
- *
- * @param <S> 插件对应配置类
- * @param <E> 网元节点的插件对应配置类
- * @param <P> 网元端口的插件对应配置类
- */
+
 @Slf4j
 @ClassFieldNames({
         "sceneBOClass",
@@ -40,7 +33,7 @@ public abstract class BasePluginHandler<S, E, P, C> {
 
     private C context;
 
-    // 源场景索引数据
+    
     private String sourceSceneId;
     private final List<String> elementIds = new CopyOnWriteArrayList<>();
     private final List<String> elementPortIds = new CopyOnWriteArrayList<>();
@@ -49,7 +42,7 @@ public abstract class BasePluginHandler<S, E, P, C> {
     private final Map<String, E> elementMap = new ConcurrentHashMap<>();
     private final Map<String, P> elementPortMap = new ConcurrentHashMap<>();
 
-    // 通过ClassFieldNames注解和实现类ClassFieldClasses注解，初始化调用ClassUtils.loadClassFields(this)设置
+    
     private Class<S> sceneBOClass;
     private Class<E> elementBOClass;
     private Class<P> elementPortBOClass;
@@ -64,7 +57,7 @@ public abstract class BasePluginHandler<S, E, P, C> {
             if (contextClass.equals(context.getClass())) {
                 this.context = (C) context;
             } else if (context instanceof Map) {
-                // TODO: 去除snake依赖
+                
                 this.context = JsonCommon.snakeMapToBean((Map<String, Object>) context, contextClass);
             } else {
                 this.context = (C) context;
@@ -74,10 +67,7 @@ public abstract class BasePluginHandler<S, E, P, C> {
         }
     }
 
-    /**
-     * 从场景插件业务数据载入 TODO: 去除snake依赖
-     * @param pluginData 场景插件业务数据
-     */
+    
     public void fromData(ScenePluginDataBO pluginData) {
         var sceneSrc = pluginData.getScene();
         if (sceneSrc != null) {
@@ -98,7 +88,7 @@ public abstract class BasePluginHandler<S, E, P, C> {
             });
         }
 
-        // 验证数据字段
+        
         var validateData = new BaseScenePluginDataBO<S, E, P>();
         validateData.setScene(scene);
         validateData.setElements(elementMap);
@@ -111,20 +101,13 @@ public abstract class BasePluginHandler<S, E, P, C> {
         ValidationCommon.handleValidateResult(validateResult);
     }
 
-    /**
-     * 纠正场景插件数据
-     */
+    
     public void correctData() {}
 
-    /**
-     * 验证场景插件
-     */
+    
     public void validate() {}
 
-    /**
-     * 转出场景插件业务数据 TODO: 去除snake依赖
-     * @return 场景插件业务数据
-     */
+    
     public ScenePluginDataBO toData() {
         var pluginData = new ScenePluginDataBO();
         if (scene != null) {
@@ -155,11 +138,7 @@ public abstract class BasePluginHandler<S, E, P, C> {
         priority = pluginKeyAnnotation.priority();
     }
 
-    /**
-     * 从场景插件业务数据初始化
-     * @param sceneId 场景ID
-     * @param pluginDataBO 场景插件业务数据
-     */
+    
     public void init(String sceneId, ScenePluginDataBO pluginDataBO, Object context) {
         initBase();
         loadContext(context);
@@ -169,12 +148,7 @@ public abstract class BasePluginHandler<S, E, P, C> {
         }
     }
 
-    /**
-     * 从场景插件索引数据初始化
-     * @param sceneId 场景ID
-     * @param elementIds 网元ID
-     * @param elementPortIds 端口ID
-     */
+    
     public void init(String sceneId, List<String> elementIds, List<String> elementPortIds, Object context) {
         initBase();
         loadContext(context);

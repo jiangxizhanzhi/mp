@@ -8,11 +8,7 @@ import cn.cyberpeace.mp.log.response.OperationLogPageResponse;
 
 import javax.servlet.http.HttpServletRequest;
 
-/**
- * @Description
- * @Author shgang
- * @Date 2022/9/14
- */
+
 public interface OperateLogService {
 
     void create(OperationLogRequest request);

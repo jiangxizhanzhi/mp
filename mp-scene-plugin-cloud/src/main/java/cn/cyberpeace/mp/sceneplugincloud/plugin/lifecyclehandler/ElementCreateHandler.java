@@ -20,11 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2021/10/25
- */
+
 @Slf4j
 public class ElementCreateHandler extends HandlerCommon {
 
@@ -97,7 +93,7 @@ public class ElementCreateHandler extends HandlerCommon {
             subnet.setCidr(connectedNetwork.network.getCidr());
             subnet.setGatewayIp(TextUtils.emptyNull(connectedNetwork.network.getGateway()));
             subnet.setDhcpPortIp(TextUtils.emptyNull(connectedNetwork.network.getDhcpIp()));
-            // 默认开启dhcp
+            
             var dhcp = connectedNetwork.network.getDhcp();
             subnet.setEnableDhcp(dhcp == null || dhcp);
 
@@ -129,7 +125,7 @@ public class ElementCreateHandler extends HandlerCommon {
             if (cloudElement.getVirtualType() != null && cloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH) {
                 cloudElement.setResourceId(virtualSwitch.getId());
             }
-            // 向端口回写网络id
+            
             connectedNetwork.getFromPorts().forEach(p -> {
                 var pluginPort = getPluginHandler().getPort(p.getId());
                 if (pluginPort != null) {

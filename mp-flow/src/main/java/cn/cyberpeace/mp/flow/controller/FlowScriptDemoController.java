@@ -18,11 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * @Description: 流量模板控制器
- * @Author qiaokang
- * @Date：2021/8/31 17:17
- */
+
 @Slf4j
 @Api(tags = "流量脚本模板接口")
 @RestController

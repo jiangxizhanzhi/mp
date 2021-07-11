@@ -59,11 +59,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/11/29 20:19
- */
+
 @Slf4j
 @Service
 public class HostStateService {
@@ -110,14 +106,14 @@ public class HostStateService {
             hs.setCpuPercent(Objects.nonNull(hostStateBO.getCpuPercent()) ? NumberUtil.round(hostStateBO.getCpuPercent(), 2).doubleValue() : hostStateBO.getCpuPercent());
             hs.setMemoryFree(hostStateBO.getMemoryFree());
             hs.setMemoryTotal(hostStateBO.getMemoryTotal());
-            // todo 节点内存利用率 统一为Double？
-//            hs.setMemoryPercent(Objects.nonNull(hostStateBO.getMemoryPercent() ? NumberUtil.round(hostStateBO.getMemoryPercent(), 2).doubleValue() : hostStateBO.getMemoryPercent()));
+            
+
             hs.setDiskSpace(hostStateBO.getDiskSpace());
             hs.setDiskPercent(hostStateBO.getDiskPercent());
-            //hs.setDiskUsed(hostStateBO.getDiskUsed());
+            
             hs.setDiskUnused(hostStateBO.getDiskUnused());
             hs.setSceneId(sceneId);
-//            hs.setElementId(hostStateBO.getNodeId());
+
             hs.setTime(hostStateBO.getTime());
             return hs;
         }).collect(Collectors.toList());
@@ -127,36 +123,36 @@ public class HostStateService {
 
 
     private List<CollectionHostStateBO> foo(String agentName, LocalDateTime startTime, LocalDateTime endTime) {
-        // 构建查询参数
+        
         var request = new WazuhMonitorEventsRequest();
         request.setPageNum(1);
-        // todo 设置最多读取最大条数
+        
         request.setPageSize(situationAwareConfig.getWazuhEsMaxPageSize());
         request.setAgentNames(Arrays.asList(agentName));
-        // 开始时间,默认为场景创建时间
+        
         request.setStartTime(startTime);
-        // 结束时间,默认为当前时间
+        
         request.setEndTime(endTime);
 
-        // 执行查询
+        
         List<WazuhHostStateModel> result = dataCollectionService.queryHostStateEventsWithTimeRange(request);
         List<CollectionHostStateBO> hostStateBOs = result.stream().map(srcHostState -> {
             CollectionHostStateBO hostStateBO = new CollectionHostStateBO();
             hostStateBO.setCpuCount(srcHostState.getCpuCount());
             hostStateBO.setCpuPercent(srcHostState.getCpuTotalPercent());
-            // 内存统一使用单位M
+            
             hostStateBO.setMemoryTotal(this.byte2MB(srcHostState.getMemoryTotal()));
             hostStateBO.setMemoryFree(this.byte2MB(srcHostState.getMemoryFree()));
-            // 磁盘统一使用单位G
+            
             hostStateBO.setDiskSpace(this.byte2GB(srcHostState.getDiskTotal()));
             hostStateBO.setMemoryPercent(srcHostState.getMemoryPercent());
             hostStateBO.setTime(srcHostState.getTime());
-            // todo 进程，端口，网络连接，磁盘使用率
-//            var srcElement = agentName2Element.getOrDefault(srcHostState.getAgentName(), null);
-//            if (srcElement != null) {
-//                hostState.setNodeId(srcElement.getId());
-//                hostState.setNodeName(srcElement.getName());
-//            }
+            
+
+
+
+
+
             return hostStateBO;
         }).collect(Collectors.toList());
 
@@ -171,12 +167,7 @@ public class HostStateService {
         return num >> 30;
     }
 
-    /**
-     * 查询单个节点机器状态趋势
-     *
-     * @param trendRequest
-     * @return
-     */
+    
     public List<HostState> getElementHostStateTrend(HostStateTrendRequest trendRequest) {
         BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(trendRequest);
         List<String> sceneIds = CollectionUtil.toList(trendRequest.getSceneId());
@@ -186,12 +177,7 @@ public class HostStateService {
     }
 
 
-    /**
-     * 查询场景机器状态趋势
-     *
-     * @param trendRequest
-     * @return
-     */
+    
     public List<HostState> getSceneHostStateTrend(HostStateTrendRequest trendRequest) {
         BaseRequestUtil.checkBaseRequestWithSceneId(trendRequest);
         List<String> sceneIds = CollectionUtil.toList(trendRequest.getSceneId());
@@ -200,12 +186,7 @@ public class HostStateService {
     }
 
 
-    /**
-     * 查询场景机器状态趋势
-     *
-     * @param trendRequest
-     * @return
-     */
+    
     public List<HostState> getClusterHostStateTrend(HostStateTrendRequest trendRequest) {
         if (StringUtils.isBlank(csceneAppConfig.getCpIp()) || StringUtils.isBlank(csceneAppConfig.getCpPort())) {
             log.error("cp cloud ip or port is null...");
@@ -216,7 +197,7 @@ public class HostStateService {
     }
 
     private List<HostState> processHostStateTrend(List<String> sceneIds, List<String> elementIds, LocalDateTime startTime, LocalDateTime endTime, Integer segmentCount) {
-        // 默认值
+        
         LocalDateTime sceneStartTime = null ;
         if (Objects.isNull(endTime)) {
             endTime = LocalDateTime.now();
@@ -232,7 +213,7 @@ public class HostStateService {
         }
 
         if (Objects.isNull(startTime)) {
-            // todo 默认时间间隔24小时
+            
             startTime = endTime.minusHours(hoursRange);
             if (sceneStartTime != null && sceneStartTime.isAfter(startTime)) {
                 startTime = sceneStartTime;
@@ -255,13 +236,13 @@ public class HostStateService {
     }
 
     private List<HostState> processHostStateTrendByAgentNames(List<String> agentNames, LocalDateTime startTime, LocalDateTime endTime, Integer segmentCount) {
-        // 默认值
+        
         if (Objects.isNull(endTime)) {
             endTime = LocalDateTime.now();
         }
 
         if (Objects.isNull(startTime)) {
-            // todo 默认时间间隔24小时
+            
             startTime = endTime.minusHours(hoursRange);
         }
 
@@ -280,12 +261,8 @@ public class HostStateService {
     }
 
 
-    /**
-     * 查询单个节点机器当前状态
-     *
-     * @return
-     */
-    // todo 老方法，待优化
+    
+    
     public List<HostState> listHostStates(BaseSceneElementPageRequest pageRequest) {
         pageRequest.ensure();
         BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(pageRequest);
@@ -295,7 +272,7 @@ public class HostStateService {
         queryParams.setNodeIds(elementIds);
         queryParams.setPage(pageRequest.getPage());
         queryParams.setPageSize(pageRequest.getPageSize());
-//
+
         ListObjServiceResult<CollectionHostStateBO> listObjServiceResult = csceneInstanceService.listHostStates(sceneId, queryParams);
 
         List<CollectionHostStateBO> hostStateBOS = listObjServiceResult.getSource().getObjs();
@@ -311,7 +288,7 @@ public class HostStateService {
         HostStateQueryParams queryParams = new HostStateQueryParams();
         queryParams.setPage(request.getPage());
         queryParams.setPageSize(request.getPageSize());
-//
+
         ListObjServiceResult<CollectionHostStateBO> listObjServiceResult = csceneInstanceService.listHostStatesByAgentNames(request.getAgentNames(), queryParams);
 
         List<CollectionHostStateBO> hostStateBOS = listObjServiceResult.getSource().getObjs();
@@ -352,7 +329,7 @@ public class HostStateService {
 
             hs.setDiskSpace(hostStateBO.getDiskSpace());
             hs.setDiskPercent(hostStateBO.getDiskPercent());
-            //hs.setDiskUsed(hostStateBO.getDiskUsed());
+            
             hs.setDiskUnused(hostStateBO.getDiskUnused());
 
             hs.setSceneId(hostStateBO.getSceneId());
@@ -382,16 +359,16 @@ public class HostStateService {
         Map<LocalDateTime, HostState> hostStateMap = new LinkedHashMap<>();
         for (LocalDateTime time : timeList) {
             HostState hostState = new HostState();
-            // 初始化
+            
             hostState.setTime(time);
             hostState.setCpuPercent(0.0);
             hostState.setMemoryPercent(0.0);
-            // todo diskPercent
+            
             hostState.setDiskPercent(0.0);
             hostStateMap.put(time, hostState);
         }
 
-        // cpu
+        
         if (Objects.nonNull(intervalCpuPercentBOs)) {
             for (IntervalSizeBO<LocalDateTime, Double> bo : intervalCpuPercentBOs) {
                 if (Objects.nonNull(hostStateMap.get(bo.getStart()))) {
@@ -400,7 +377,7 @@ public class HostStateService {
             }
         }
 
-        // 内存
+        
         if (Objects.nonNull(intervalMemPercentBOs)) {
             for (IntervalSizeBO<LocalDateTime, Double> bo : intervalMemPercentBOs) {
                 if (Objects.nonNull(hostStateMap.get(bo.getStart()))) {
@@ -409,7 +386,7 @@ public class HostStateService {
             }
         }
 
-        // 磁盘
+        
         if (Objects.nonNull(intervalDiskPercentBOs)) {
             for (IntervalSizeBO<LocalDateTime, Double> bo : intervalDiskPercentBOs) {
                 if (Objects.nonNull(hostStateMap.get(bo.getStart()))) {
@@ -472,7 +449,7 @@ public class HostStateService {
         listPageInfoQueryParams.setSceneIds(csceneCommonService.translateSceneIds(listPageInfoQueryParams.getSceneIds()));
         ListObjServiceResult<Process> listResult = scenePluginCollectionSceneService.listPageProcess(listPageInfoQueryParams).asResult();
         List<Process> processes = listResult.getSource().getList();
-        // KB -> MB
+        
         processes.forEach(p -> {
             if (Objects.nonNull(p.getSize())) {
                 Long megabytes = DataSize.ofKilobytes(p.getSize()).toMegabytes();
@@ -504,12 +481,7 @@ public class HostStateService {
     }
 
 
-    /**
-     * 分页查询网卡信息
-     *
-     * @param listPageInfoQueryParams
-     * @return
-     */
+    
     public ListObjServiceResult<Netiface> pageNetifaces(TimeListPageInfoQueryParams listPageInfoQueryParams) {
         listPageInfoQueryParams.ensure();
         checkListPageParams(listPageInfoQueryParams);
@@ -573,12 +545,7 @@ public class HostStateService {
         return agentNames;
     }
 
-    /**
-     * 包装请求头信息
-     *
-     * @param headers
-     * @return
-     */
+    
     private Map<String, String> wrapperHeaders(Map<String, String> headers) {
         if (MapUtils.isEmpty(headers)) {
             headers = new HashMap<>();

@@ -7,11 +7,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/3/11
- */
+
 public class ConnectedNetworkBO {
     CloudPluginSceneElementNetworkBO network;
 

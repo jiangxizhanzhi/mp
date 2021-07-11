@@ -18,91 +18,67 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 
-// TODO: 调用CommandUtils优化操作命令
+
 @Slf4j
 @Component
 public class InstallerUtils {
 
-    /**
-     * windows创建基础目录
-     */
+    
     public static final String[] WINDOWS_BASE_DIR_CREATE = {
             "mkdir %s",
             "mkdir %s\\custom_install",
     };
 
-    /**
-     * windows自定义安装
-     */
+    
     public static final String[] WINDOWS_CUSTOM_NORMAL_INSTALL = {
             "cd %s",
             "%s",
     };
 
-    /**
-     * windows自定义解压安装
-     */
+    
     public static final String[] WINDOWS_CUSTOM_UNZIP_INSTALL = {
             "mkdir %s\\custom_install\\%s",
             "unzip -o \"%s\" -d \"%s\\custom_install\\%s\"",
             "call \"%s\\custom_install\\%s\\%s\"",
     };
 
-    /**
-     * windows安装脚本安装
-     */
+    
     public static final String[] WINDOWS_MAKE_SCRIPT_INSTALL = {
             "curl -o \"%s\\custom_install\\install.bat\" %s",
             "call \"%s\\custom_install\\install.bat\"",
     };
 
-    /**
-     * windows校验脚本安装
-     */
+    
     public static final String[] WINDOWS_CHECK_SCRIPT_INSTALL = {
             "curl -o \"%s\\custom_install\\check.bat\" %s",
             "call \"%s\\custom_install\\check.bat\"",
     };
 
-    /**
-     * windows文件下载
-     */
+    
     public static final String WINDOWS_FILE_DOWNLOAD = "curl -o \"%s\" %s";
 
-    /**
-     * windows默认安装
-     */
+    
     public static final String WINDOWS_DEFAULT_INSTALL_SOFTWARE = "start /b %s";
 
-    /**
-     * windows特殊默认安装
-     */
+    
     public static final String WINDOWS_SPECIAL_DEFAULT_INSTALL_SOFTWARE = "echo %s>>%s\\file.txt";
 
-    /**
-     * windows特殊默认安装 启动
-     */
+    
     public static final String WINDOWS_SPECIAL_DEFAULT_INSTALL_SOFTWARE_START = "start /b %s\\start.exe";
 
-    /**
-     * linux创建基础目录
-     */
+    
     public static final String[] LINUX_BASE_DIR_CREATE = {
             "mkdir -p %s",
             "mkdir -p %s/custom_install",
     };
 
-    /**
-     * linux自定义安装
-     */
+    
     public static final String[] LINUX_CUSTOM_NORMAL_INSTALL = {
             "cd %s",
             "%s",
     };
 
-    /**
-     * linux自定义解压安装
-     */
+    
     public static final String[] LINUX_CUSTOM_UNZIP_INSTALL = {
             "mkdir -p %s/custom_install/%s",
             "unzip -o %s -d %s/custom_install/%s",
@@ -133,14 +109,10 @@ public class InstallerUtils {
      */
     public static final String LINUX_FILE_DOWNLOAD = "curl -o \"%s\" %s";
 
-    /**
-     * linux rpm默认安装
-     */
+    
     public static final String LINUX_RPM_DEFAULT_INSTALL_SOFTWARE = "rpm -ivh %s";
 
-    /**
-     * linux deb默认安装
-     */
+    
     public static final String LINUX_DEB_DEFAULT_INSTALL_SOFTWARE = "apt-get install %s";
 
     public static final String INSTALLER_REPLACEMENT = "{this}";
@@ -160,7 +132,7 @@ public class InstallerUtils {
                 || BaseSceneElementModel.SystemType.WINDOWS_8.equals(systemType)
                 || BaseSceneElementModel.SystemType.WINDOWS_7.equals(systemType)
                 || BaseSceneElementModel.SystemType.WINDOWS_VISTA.equals(systemType)
-                || BaseSceneElementModel.SystemType.WINDOWS_SERVER_2019.equals(systemType)
+                || BaseSceneElementModel.SystemType.WINDOWS_SERVER_2018.equals(systemType)
                 || BaseSceneElementModel.SystemType.WINDOWS_SERVER_2016.equals(systemType)
                 || BaseSceneElementModel.SystemType.WINDOWS_SERVER_2012.equals(systemType)
                 || BaseSceneElementModel.SystemType.WINDOWS_SERVER_2010.equals(systemType)
@@ -186,11 +158,7 @@ public class InstallerUtils {
         return StringUtils.joinWith("\\.", name, suffix);
     }
 
-    /**
-     * 生成基础目录创建命令
-     * @param systemType 系统类型
-     * @return 基础目录创建命令
-     */
+    
     public static String generateBaseDirCreateCommand(String systemType) {
         var installerDir = getDefaultInstallDir(systemType);
         if (SystemTypeCommandUtils.isWindows(systemType)) {
@@ -202,13 +170,7 @@ public class InstallerUtils {
         }
     }
 
-    /**
-     * 生成文件下载命令
-     * @param systemType 系统类型
-     * @param fileUrl 文件url
-     * @param fileName 文件名称
-     * @return 文件下载命令
-     */
+    
     public static FileDownloadInfo generateFileDownloadCommand(String systemType, String fileUrl, String fileName) {
         if (StringUtils.isEmpty(fileName)) {
             fileName = FileUtil.getName(fileUrl);
@@ -227,12 +189,7 @@ public class InstallerUtils {
         return new FileDownloadInfo(filePath, downloadCommand);
     }
 
-    /**
-     * 生成默认的安装脚本
-     * @param systemType 系统详细类型
-     * @param filePath 文件路径
-     * @return 默认的安装脚本
-     */
+    
     public static String generateDefaultInstallCommand(String systemType, String filePath) {
         var installerDir = getDefaultInstallDir(systemType);
         systemType = systemType.toLowerCase();
@@ -250,13 +207,7 @@ public class InstallerUtils {
         }
     }
 
-    /**
-     * 生成默认自定义安装命令
-     * @param systemType 系统类型
-     * @param filePath 文件路径
-     * @param installCommand 安装命令
-     * @return 默认自定义安装命令
-     */
+    
     public static String generateDefaultCustomInstallCommand(String systemType, String filePath,
                                                              String installCommand) {
         String filePathLower = filePath.toLowerCase();
@@ -291,18 +242,12 @@ public class InstallerUtils {
         return StringUtils.EMPTY;
     }
 
-    /**
-     * 生成docker服务安装命令
-     * @param systemType 系统类型
-     * @param filePath 文件路径
-     * @param installCommand 安装命令
-     * @return 默认自定义安装命令
-     */
+    
     public static String generateDockerCommand(String systemType, String filePath, String imageName, String installCommand) {
         String filePathLower = filePath.toLowerCase();
         var installerDir = getDefaultInstallDir(systemType);
         if (SystemTypeCommandUtils.isWindows(systemType)) {
-            // todo 暂不支持 windows 的docker 服务
+            
         } else {
             if (filePathLower.endsWith(".zip")) {
                 var installFolder = TextUtils.uuid();
@@ -325,10 +270,7 @@ public class InstallerUtils {
         return StringUtils.EMPTY;
     }
 
-    /**
-     * 获取windows安装工具
-     * @return windows安装工具
-     */
+    
     private static List<Installer> getWindowsInstallerTools() {
         var mappings = LocalFileMappingCommon.getMappings(WINDOWS_HELP_INSTALLER_GROUP);
         return mappings.stream().map(mapping -> {
@@ -339,11 +281,7 @@ public class InstallerUtils {
         }).collect(Collectors.toList());
     }
 
-    /**
-     * 生成安装命令
-     * @param systemType 系统类型
-     * @return 安装命令
-     */
+    
     public static List<String> generateInstallerInstallCommand(String systemType, List<Installer> installers) {
         List<String> installCommands = new ArrayList<>();
         installCommands.add(generateBaseDirCreateCommand(systemType));
@@ -434,7 +372,7 @@ public class InstallerUtils {
         }
 
         if (isWindowsOS) {
-            // windows做成脚本文件安装
+            
             var subInstallCommand = SystemTypeCommandUtils.joinCommands(systemType,
                     subInstallCommands.toArray(new String[0]));
             String tmpFile = null;

@@ -11,11 +11,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * @Description: 系统公告消息(已读/删除)统计表
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -38,7 +34,7 @@ public class SysNoticeReadModel extends BaseModel {
     @ApiModelProperty(value = "公告ID")
     private String noticeId;
 
-    // 读者
+    
     @ApiModelProperty(value = "读者")
     private String user;
 
@@ -50,7 +46,7 @@ public class SysNoticeReadModel extends BaseModel {
     @DefaultInt(1)
     private Integer isNeedPush;
 
-    // 阅读次数
+    
     @ApiModelProperty(value = "阅读次数")
     @DefaultInt(0)
     private Integer readCount;

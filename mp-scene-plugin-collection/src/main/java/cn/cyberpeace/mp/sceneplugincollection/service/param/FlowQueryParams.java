@@ -50,21 +50,15 @@ public class FlowQueryParams extends QueryParams {
     @ApiModelProperty("攻击等级")
     private List<Integer> severity;
 
-    /**
-     * 源IP集合
-     */
+    
     @ApiModelProperty("源IP集合")
     private List<String> sourceIps;
 
-    /**
-     * 目的IP集合
-     */
+    
     @ApiModelProperty("目的IP集合")
     private List<String> targetIps;
 
-    /**
-     * 强制过滤的目标IP集合
-     */
+    
     @ApiModelProperty("强制过滤的目标IP集合")
     private List<String> filterDestinationIps;
 }

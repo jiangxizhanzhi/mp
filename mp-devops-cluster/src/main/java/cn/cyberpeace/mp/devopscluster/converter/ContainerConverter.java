@@ -27,12 +27,7 @@ public class ContainerConverter implements BaseConverter {
 
     private final ContainerService containerService;
 
-    /**
-     * 分页查询容器列表
-     * @param dto
-     * @param ignoreFields
-     * @return
-     */
+    
     public BasePageBO<ContainerBO> page(ContainerPageDTO dto, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         String getParams = ParamUtils.wrapperGetParamsByObject(dto,ignoreFields);
@@ -43,22 +38,14 @@ public class ContainerConverter implements BaseConverter {
         return convertModel;
     }
 
-    /**
-     * 获取容器总数量
-     * @param dto
-     * @return
-     */
+    
     public Integer getTotalContainers(ContainerPageDTO dto) {
         dto.setLimit(NumberUtils.INTEGER_ONE);
         BasePageBO<ContainerBO> page = this.page(dto,this.getTotalPageIgnoreField());
         return page.getTotal();
     }
 
-    /**
-     * 转换List<ContainerModel>集合对象
-     * @param containers
-     * @return
-     */
+    
     private List<ContainerBO> convertContainerModelList(List<ContainerModel> containers){
         if (CollectionUtils.isEmpty(containers)){
             return Lists.newArrayList();

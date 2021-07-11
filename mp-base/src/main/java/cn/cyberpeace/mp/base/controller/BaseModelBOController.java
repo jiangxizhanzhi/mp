@@ -14,7 +14,7 @@ public abstract class BaseModelBOController<T extends ModelBO<M, T>, M extends B
         BaseModelBulkCreateBOController<T, M, S>, BaseModelUpdateBOController<T, M, S>, BaseModelBulkUpdateBOController<T, M, S>,
         BaseModelDeleteBOController<T, M, S>, BaseModelBulkDeleteBOController<T, M, S> {
 
-    /** 在实现类注入 */
+    
     private S modelService;
 
 }

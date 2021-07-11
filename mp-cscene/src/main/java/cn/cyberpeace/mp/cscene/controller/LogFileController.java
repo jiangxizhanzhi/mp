@@ -30,11 +30,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/5/6 15:27
- */
+
 @Api(value = "节点日志文件Api", tags = "节点日志文件Api")
 @Slf4j
 @RestController
@@ -50,12 +46,7 @@ public class LogFileController {
     @Autowired
     private CscenePluginDataRecordService dataRecordService;
 
-    /**
-     * elementIds不能为空，如果为多个值，默认只取第一个
-     *
-     * @param pageRequest
-     * @return
-     */
+    
     @ApiOperation(value = "分页查询日志文件")
     @GetMapping("/page")
     public ListObjServiceResult<LogFileVO> pageLogFiles(LogFileSceneElementPageRequest pageRequest) {
@@ -98,11 +89,7 @@ public class LogFileController {
     }
 
 
-    /**
-     * elementIds不能为空，如果为多个值，默认只取第一个
-     *
-     * @return
-     */
+    
     @ApiOperation(value = "查询日志原始文件下载地址")
     @GetMapping("/download_urls")
     public ListObjServiceResult<LogFileDownloadUrlDto> getDownloadUrl(LogFileDownloadUrlRequest request) {

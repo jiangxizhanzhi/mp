@@ -5,11 +5,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-/**
- * @Description: 查询流量任务列表请求体
- * @Author: guquan
- * @Date：2023/6/2 14:52
- */
+
 @Data
 @ApiModel("查询流量任务列表请求体")
 public class FlowTaskPageQueryParams extends QueryParams {

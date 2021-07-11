@@ -1,10 +1,6 @@
 package cn.cyberpeace.mp.devopscluster.constant;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/7/14 16:26
- */
+
 public class MonitorConstant {
 
     public static final String OP_STATUS = "status";

@@ -52,9 +52,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-/**
- * @author wanggang
- */
+
 @Service
 @Slf4j
 public class DashboardService {
@@ -93,9 +91,7 @@ public class DashboardService {
         this.devopsTargetService = devopsTargetService;
     }
 
-    /**
-     * 最近一周用户活动轨迹
-     */
+    
     public DailyUserActivityResponse dailyUserActivity() {
 
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -114,22 +110,19 @@ public class DashboardService {
             return cnt;
         }).toArray(Integer[]::new);
 
-        // 每日活跃场景数量 todo,性能可优化
+        
         Integer[] sceneCount = daylist.stream().map(day -> csceneSpecialService.countActivitySceneByTime(day.atStartOfDay(), day.plusDays(1).atStartOfDay())).toArray(Integer[]::new);
 
         DailyUserActivityResponse response = DailyUserActivityResponse.builder().xAxis(xAxis).userCount(userCount).sceneCount(sceneCount).build();
         return response;
     }
 
-    /**
-     * 仪表盘-资源统计
-     * @return
-     */
+    
     public ResourceStatisticsResponse resourceStatistics() {
         ResourceStatisticsResponse response = new ResourceStatisticsResponse();
         Map<String, Map<String, Object>> targetStatics = new HashMap<>();
         var all = devopsTargetService.countTarget();
-        // npc暂时只有1个
+        
         all.put("npc", 1);
         targetStatics.put("all", all);
         int npc = all.get("npc") == null ? 0 : Integer.parseInt(all.get("npc").toString());
@@ -143,10 +136,7 @@ public class DashboardService {
         return response;
     }
 
-    /**
-     * 统计活动场景总数和场景占比
-     * @return
-     */
+    
     public UserSummarySceneResponse countActivityScene() {
         CsceneInstanceCountActivitySceneBO bo = csceneSpecialService.countActivityScene();
 
@@ -233,7 +223,7 @@ public class DashboardService {
         sceneBusinessSummary.setNpcCount(this.groupSummary(SceneBusinessSummary.npcType(), result));
         sceneBusinessSummary.setSwitchCount(this.groupSummary(SceneBusinessSummary.switchType(), result));
         sceneBusinessSummary.setRouterCount(this.groupSummary(SceneBusinessSummary.routerType(), result));
-        // todo 快速统计出各类虚拟资源的数量
+        
         sceneBusinessSummary.setVmCount(this.countByVirtualTypeAndRole(sceneIds,
                 List.of(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE),
                 List.of(BaseCloudPluginSceneElementModel.Role.VIRTUAL_TERMINAL)));
@@ -243,14 +233,12 @@ public class DashboardService {
         return new ServiceResult<>(sceneBusinessSummary);
     }
 
-    /**
-     * 整合在线报告和节点监控
-     */
+    
     public PageInfo<UserOnlineReportMonitorBo> getUserOnlineMonitorRecords(UserOnlineRecordSummaryPageRequest pageRequest) {
         PageInfo<UserOnlineReportBo> pageInfo = userOnlineRecordService.recordSummaryPage(pageRequest);
         List<UserOnlineReportBo> userOnlineReportBoList = pageInfo.getList();
 
-        //List<String> onlinedUserIds = userOnlineReportDtoList.stream().filter(dto -> Objects.equals(dto.getIsOnline(), 1)).map(UserOnlineReportDto::getUser).collect(Collectors.toList());
+        
         List<String> onlinedUserIds = userOnlineReportBoList.stream().map(UserOnlineReportBo::getUser).collect(Collectors.toList());
         List<UserConnectionNumBO> userConnectionNumBOList = new ArrayList<>();
         if (CollectionUtil.isNotEmpty(onlinedUserIds)) {
@@ -283,11 +271,7 @@ public class DashboardService {
         return newPageInfo;
     }
 
-    /**
-     * 查询用户会话
-     * @param userId
-     * @return
-     */
+    
     public ServiceResult<List<NodeSessionBO>> getUserNodeSessions(String userId) {
         ServiceResult<List<NodeSessionBO>> serviceResult = csceneSpecialService.getUserNodeSessions(userId, true, false);
         return serviceResult.asResult();

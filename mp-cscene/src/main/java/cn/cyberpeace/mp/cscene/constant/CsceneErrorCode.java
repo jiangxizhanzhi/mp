@@ -26,7 +26,7 @@ public enum CsceneErrorCode implements ErrorCode {
     NETWORKID_NOT_EXIST("MP-110211", "networkid_not_exist"),
     FLOW_NOT_EXIST("MP-110212", "flow_not_exist"),
 
-    // validation-api params
+    
     PARAMS_SHOULD_NOT_NULL("MP-110281", "params_should_not_null"),
     PARAMS_SHOULD_NOT_EMPTY("MP-110282", "params_should_not_empty"),
     PARAMS_FLOWS_DATA_TOO_LONG("MP-110283", "params_flows_data_too_long"),

@@ -7,9 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 
-/**
- * 文件操作接口
- */
+
 public interface FileService {
 
     ServiceResult<FileResponseData> uploadFile(MultipartFile file);

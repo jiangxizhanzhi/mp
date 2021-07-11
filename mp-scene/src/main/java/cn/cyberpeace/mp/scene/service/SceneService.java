@@ -116,8 +116,8 @@ public class SceneService {
     public ServiceResult<Boolean> delete(String id, boolean logic, SceneContextBO context) {
         SceneHandler sceneHandler;
         try {
-//            sceneHandler = new SceneHandler(id, null, false, context);
-//            sceneHandler.setRealTimeUpdate(true);
+
+
             sceneHandler = SceneHandlerProxyBuilder.build(id, null, false, context, true);
             if (logic) {
                 SceneTaskPool.getInstance().executeTask(() -> sceneHandler.logicDelete());
@@ -155,7 +155,7 @@ public class SceneService {
 
     public ServiceResult<SceneDataBO> modify(String sceneId, SceneDataBO updatedSceneData, SceneContextBO context, Runnable runner) {
         SceneHandler originSceneHandler = new SceneHandler(sceneId, null, false, context);
-        // 场景信息目前只更新显示参数
+        
         String newDisplayContext = updatedSceneData.getTopology().getScene().getDisplayContext();
         updatedSceneData.getTopology().setScene(originSceneHandler.getScene());
         updatedSceneData.getTopology().getScene().setDisplayContext(newDisplayContext);
@@ -186,7 +186,7 @@ public class SceneService {
             updatedSceneHandler.getScene().setCreateTime(null);
         }
         updatedSceneHandler.save();
-        // 获取配置更新的节点
+        
         List<String> updateElementIds = new ArrayList<>();
         originSceneHandler.getElementMap().values().forEach(e -> {
             if (e.getEvent() == SceneModel.Event.MODIFY && e.getEventStatus() == EventStatus.ABNORMAL) {
@@ -213,15 +213,15 @@ public class SceneService {
             SceneHandlerProxyBuilder.build(updatedSceneHandler);
             SceneHandler proxy = SceneHandlerProxyBuilder.build(updatedSceneHandler);
             proxy.modify(originSceneHandler, updateElementIds);
-            //W:Refresh scene after updating
+            
             runner.run();
         });
         return new ServiceResult<>(updatedSceneHandler.toData());
     }
 
     public ServiceResult<Boolean> pause(String id, SceneContextBO context) {
-//        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
-//        sceneHandler.setRealTimeUpdate(true);
+
+
         if (SceneEventUtils.hasProcessingScene(SceneModel.Event.UNPAUSE, id)) {
             throw new MpRuntimeException(SceneErrorCode.ENTER_EVENT_FAILED);
         }
@@ -243,8 +243,8 @@ public class SceneService {
     }
 
     public ServiceResult<Boolean> unpause(String id, SceneContextBO context) {
-//        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
-//        sceneHandler.setRealTimeUpdate(true);
+
+
         if (SceneEventUtils.hasProcessingScene(SceneModel.Event.PAUSE, id)) {
             throw new MpRuntimeException(SceneErrorCode.ENTER_EVENT_FAILED);
         }
@@ -266,8 +266,8 @@ public class SceneService {
     }
 
     public ServiceResult<Boolean> suspend(String id, SceneContextBO context) {
-//        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
-//        sceneHandler.setRealTimeUpdate(true);
+
+
         SceneHandler sceneHandler = SceneHandlerProxyBuilder.build(id, null, false, context, true);
         sceneHandler.getElementMap().values().forEach(e -> {
             var validEvents = SceneElementEventTransition.SCENE_ELEMENT_EVENT_TRANSITION.getOrDefault(
@@ -282,39 +282,27 @@ public class SceneService {
     }
 
     public ServiceResult<Boolean> resume(String id, SceneContextBO context) {
-//        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
-//        sceneHandler.setRealTimeUpdate(true);
+
+
         SceneHandler sceneHandler = SceneHandlerProxyBuilder.build(id, null, false, context, true);
         SceneTaskPool.getInstance().executeTask(() -> sceneHandler.resume());
         return new ServiceResult<>(true);
     }
 
-    /**
-     * @description: 启动节点
-     * @param id
-     * @param nodeId
-     * @param context
-     * @return ServiceResult<Boolean>
-     */
+    
     public ServiceResult<Boolean> startElement(String id, String nodeId, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
         sceneHandler.setRealTimeUpdate(true);
-        //执行任务启动节点
+        
         ElementTaskPool.getInstance().executeTask(() -> sceneHandler.startElement(nodeId));
         return new ServiceResult<>(true);
     }
 
-    /**
-     * @description: 关闭节点
-     * @param id
-     * @param nodeId
-     * @param context
-     * @return ServiceResult<Boolean>
-     */
+    
     public ServiceResult<Boolean> stopElement(String id, String nodeId, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
         sceneHandler.setRealTimeUpdate(true);
-        //执行任务关闭节点
+        
         ElementTaskPool.getInstance().executeTask(() -> sceneHandler.stopElement(nodeId));
         return new ServiceResult<>(true);
     }

@@ -11,11 +11,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 
 import java.util.List;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 public interface UserRoleService extends BaseModelService<UserRoleModel, QueryParams> {
 
     List<RoleModel> listByUserId(String userId);
@@ -28,23 +24,20 @@ public interface UserRoleService extends BaseModelService<UserRoleModel, QueryPa
 
     ListObjServiceResult pageByRoleId(UserRolePageRequest pageRequest);
 
-    // 绑定一个用户，多个角色 会清除用户原来绑定的角色
+    
     boolean bindUserRoles(String userId, List<String> roleIds, boolean cleanOldRoles);
 
-    // 绑定一个角色，多个用户
+    
     boolean bindRoleUsers(String roleId, List<String> userIds);
 
-    // 解绑一个角色，多个用户
+    
     boolean deleteByRoleIdAndUserIds(String roleId, List<String> userIds);
 
     boolean deleteByUserId(String userId);
 
     boolean deleteByRoleId(String roleId);
 
-    /**
-     * 统计每个角色的用户数量
-     * @return
-     */
+    
     List<UserRoleStatisticBo> getUserRoleStatistics();
 
 }

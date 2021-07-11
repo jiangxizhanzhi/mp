@@ -12,34 +12,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * 镜像的连接信息WS
- */
+
 @Slf4j
 @Component
 @ServerEndpoint("/ws"+ ControllerConstant.BASE_API_PATH +"/images-connect/{uuid}")
 public class ImagesConnectSocketServer {
 
-    /**
-     * KEY:Session，value:连接实例
-     */
+    
     private static final Map<Session, ImagesConnectSocketServer> websocketMap = new ConcurrentHashMap<>();
 
-    /**
-     * 与客户端建立的连接session
-     */
+    
     private Session session;
 
-    /**
-     * 镜像ID
-     */
+    
     private String uuid = "";
 
-    /**
-     * 建立连接触发
-     * @param session
-     * @param uuid
-     */
+    
     @OnOpen
     public void onOpen(Session session, @PathParam("uuid") String uuid) {
         try {
@@ -53,49 +41,32 @@ public class ImagesConnectSocketServer {
         }
     }
 
-    /**
-     * 关闭连接触发
-     */
+    
     @OnClose
     public void onClose() {
         websocketMap.remove(this.session);
         log.info("查看机器Close websocket : {}", this.uuid);
     }
 
-    /**
-     * 接收到客户端消息触发
-     * @param message
-     */
+    
     @OnMessage
     public void onMessage(String message) {
         log.info("查看机器websocket 来自客户端{}的消息:{}", this.uuid, message);
     }
 
-    /**
-     * 发送异常时触发
-     * @param error
-     */
+    
     @OnError
     public void onError(Throwable error) {
         log.info("查看机器websocket 发生错误,移除当前websocket:{},err:{}", this.uuid, error.getMessage());
         websocketMap.remove(this.session);
     }
 
-    /**
-     * 发送消息 (异步发送)
-     *
-     * @param message 消息主题
-     */
+    
     private void sendMessage(String message) {
         this.session.getAsyncRemote().sendText(message);
     }
 
-    /**
-     * 向指定镜像ID发送信息
-     *
-     * @param uuid 镜像ID
-     * @param wsInfo 信息
-     */
+    
     public void sendInfo(String uuid, String wsInfo) {
         if (MapUtils.isEmpty(websocketMap)){
             return;
@@ -107,16 +78,12 @@ public class ImagesConnectSocketServer {
         });
     }
 
-    /**
-     * 批量发给指定UUID
-     */
+    
     public void batchSendInfo(String json, List<String> uuids) {
         uuids.forEach(uuid -> sendInfo(uuid, json));
     }
 
-    /**
-     * 群发
-     */
+    
     public void batchSendInfo(String json) {
         if (MapUtils.isEmpty(websocketMap)){
             return;

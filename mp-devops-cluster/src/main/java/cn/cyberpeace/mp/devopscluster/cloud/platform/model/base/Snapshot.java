@@ -12,34 +12,22 @@ import lombok.Setter;
 @AllArgsConstructor
 public class Snapshot extends BaseCloudPlatformResult {
 
-    /**
-     * UUID
-     */
+    
     private String uuid;
 
-    /**
-     * 真实快照名称
-     */
+    
     private String name;
 
-    /**
-     * 用户快照名称
-     */
+    
     private String userSnapshotName;
 
-    /**
-     * 设备ID
-     */
+    
     private String deviceUuid;
 
-    /**
-     * 描述
-     */
+    
     private String description;
 
-    /**
-     * 创建时间
-     */
+    
     private String createdAt;
 
     private String imageName;

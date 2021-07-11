@@ -8,18 +8,13 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
-/**
- * 扩展服务信息
- * @author wanggang
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class ExtNormal implements Serializable {
 
-    /**
-     * 资源列表
-     */
+    
     @ApiModelProperty(value = "资源列表",hidden = true)
     private String resources;
 }

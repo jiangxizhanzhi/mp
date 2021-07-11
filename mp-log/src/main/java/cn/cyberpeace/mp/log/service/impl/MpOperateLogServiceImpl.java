@@ -21,10 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
-/**
- * MP中台的操作日志
- * @author wanggang
- */
+
 @Slf4j
 @Service
 public class MpOperateLogServiceImpl extends BasEsLogService implements MpOperateLogService {

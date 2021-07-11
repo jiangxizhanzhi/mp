@@ -21,21 +21,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-/**
- * @Description: FastDFS文件操作实现类
- *               trackerServers每个接口初始化一次，便于不同业务对接不同集群的FastDFS
- * @Author qiaokang
- * @Date：2021/7/29 14:47
- */
+
 @Slf4j
 @Service
 public class FastDfsFileServiceImpl implements FileService {
 
-    /**
-     * 文件上传
-     * @param file
-     * @return
-     */
+    
     @Override
     public ServiceResult<FileResponseData> uploadFile(MultipartFile file) {
         FileResponseData responseData = uploadSample(file);
@@ -47,12 +38,7 @@ public class FastDfsFileServiceImpl implements FileService {
 
     }
 
-    /**
-     * 文件下载
-     * @param filePath
-     * @param response
-     * @throws MpRuntimeException
-     */
+    
     @Override
     public void downloadFile(String filePath, HttpServletResponse response) throws MpRuntimeException {
         InputStream is = null;
@@ -80,11 +66,7 @@ public class FastDfsFileServiceImpl implements FileService {
         }
     }
 
-    /**
-     * 文件删除
-     * @param filePath
-     * @return
-     */
+    
     @Override
     public ServiceResult<Void> deleteFile(String filePath) {
         try {
@@ -96,16 +78,11 @@ public class FastDfsFileServiceImpl implements FileService {
         return ResultCommon.success();
     }
 
-    /**
-     * 上传通用方法，只上传到服务器，不保存记录到数据库
-     *
-     * @param file
-     * @return
-     */
+    
     private FileResponseData uploadSample(MultipartFile file) {
         FileResponseData responseData = new FileResponseData();
         try {
-            // 上传到服务器
+            
             String suffix = FileUtil.getSuffix(file.getOriginalFilename());
             String filepath = FsCommon.upload(file.getInputStream(), suffix);
             responseData.setFileName(file.getOriginalFilename());

@@ -58,7 +58,7 @@ public class TargetSceneReferController {
         }
         Integer to = (page * perPage) > list.size() ? list.size() : page * perPage;
         List<DeviceReferCsceneStat> result = list.subList((page - 1) * perPage, to);
-        // 处理状态 todo 可优化
+        
         List<DeviceReferCsceneInstanceStat> finalResult = result.stream().map(csceneStat -> {
             DeviceReferCsceneInstanceStat instanceStat = new DeviceReferCsceneInstanceStat();
             instanceStat.setCreateUser(csceneStat.getCreateUser());

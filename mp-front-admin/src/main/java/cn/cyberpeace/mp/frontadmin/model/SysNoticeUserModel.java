@@ -9,11 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * @Description: 公告-用户表
- * @Author zhouxinghuai
- * @Date：2022/9/20 11:13
- */
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

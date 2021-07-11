@@ -23,19 +23,15 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Service
 @Slf4j
 public class UserOnlineRecordScheduleService {
 
-    // 每2分钟统计一次
+    
     public static final long REFRESH_RATE = 2;
 
-    // 两分钟内，心跳次数大于1
+    
     public static final int HEARTBEAT_COUNT_THRESHOLD = 1;
 
     public static final int BATCH_TASK_USER_SIZE = 10;
@@ -45,9 +41,7 @@ public class UserOnlineRecordScheduleService {
     @Autowired
     private UserHeartbeatService heartbeatService;
 
-    /**
-     * 创建或者更新用户在线记录
-     */
+    
     @Scheduled(initialDelay = REFRESH_RATE, fixedRate = REFRESH_RATE, timeUnit = TimeUnit.MINUTES)
     public void scheduleUserOlRecord() {
         LocalDateTime begin = LocalDateTime.now();
@@ -63,7 +57,7 @@ public class UserOnlineRecordScheduleService {
             UserModel userModel = entry.getKey();
             CopyOnWriteArrayList<LocalDateTime> timestampList = entry.getValue();
             if (timestampList.size() >= HEARTBEAT_COUNT_THRESHOLD) {
-                // 一段时间内，心跳次数超过阈值，更新在线记录表
+                
                 if (i % BATCH_TASK_USER_SIZE == 0) {
                     map = new HashMap<>();
                     userModel2LastTsMapList.add(map);
@@ -94,9 +88,7 @@ public class UserOnlineRecordScheduleService {
     }
 
 
-    /**
-     * 检查状态是否过期，过期状态更新
-     */
+    
     @Scheduled(initialDelay = 1, fixedRate = 5, timeUnit = TimeUnit.MINUTES)
     public void checkUserOlRecord() {
         if (threadPool == null) {
@@ -106,11 +98,7 @@ public class UserOnlineRecordScheduleService {
         threadPool.submit(recordStatusCheckTask);
     }
 
-    /**
-     * 静态内部类的单例模式
-     *
-     * @return
-     */
+    
     public static ExecutorService getSingletonThreadPool() {
         return ThreadPoolHolder.threadPoolExecutor;
     }

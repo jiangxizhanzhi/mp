@@ -16,11 +16,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.util.Objects;
 
-/**
- * @Description: Auth模块异常统一处理
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @ControllerAdvice(basePackages = {"cn.cyberpeace.mp.auth", "cn.cyberpeace.mp.front", "cn.cyberpeace.mp.frontadmin"})
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @Slf4j

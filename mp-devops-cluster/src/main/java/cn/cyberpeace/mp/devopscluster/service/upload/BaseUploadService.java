@@ -16,22 +16,16 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * 基础的上传方法
- */
+
 @Service
 public class BaseUploadService extends BaseAbstractUploadService{
 
-    /**
-     * 文件上传客户端
-     */
+    
     @Qualifier("fastDfsFileServiceImpl")
     @Autowired
     private FileService fileService;
 
-    /**
-     * 存放上传文件后的返回结果
-     */
+    
     ServiceResult serviceResult;
 
     BaseUploadService() {
@@ -42,12 +36,7 @@ public class BaseUploadService extends BaseAbstractUploadService{
         return this;
     }
 
-    /**
-     * 验证上传文件格式
-     *
-     * @param file
-     * @return
-     */
+    
     @Override
     protected Boolean validUploadType(MultipartFile file) {
         if (Objects.isNull(file)){
@@ -73,40 +62,30 @@ public class BaseUploadService extends BaseAbstractUploadService{
         return Boolean.TRUE;
     }
 
-    /**
-     * 默认支持所有类型
-     * @return
-     */
+    
     @Override
     protected List<String> supportUploadType() {
         return Lists.newArrayList();
     }
 
-    /**
-     * 默认上传到fastDFS文件服务器
-     */
+    
     @Override
     protected void uploadFile() {
         this.serviceResult = fileService.uploadFile(file);
     }
 
-    /**
-     * 获取上传文件后的返回结果
-     * @return
-     */
+    
     protected ServiceResult getServiceResult(){
         return serviceResult;
     }
 
-    /**
-     * 上传文件
-     */
+    
     public ServiceResult upload() {
-        //验证上传文件格式
+        
         this.validUploadType(file);
-        //上传文件
+        
         this.uploadFile();
-        //获取返回结果
+        
         return this.getServiceResult();
     }
 

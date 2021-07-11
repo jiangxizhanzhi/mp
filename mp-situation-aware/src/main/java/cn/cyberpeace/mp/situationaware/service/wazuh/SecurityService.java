@@ -8,11 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/2/23 10:29
- */
+
 @Service
 @Slf4j
 public class SecurityService {
@@ -20,12 +16,7 @@ public class SecurityService {
     @Autowired
     private SituationAwareConfig situationAwareConfig;
 
-    /**
-     * 查询wazuhToken防止token失效
-     *
-     * @return
-     * @throws IOException
-     */
+    
     public String authenticate() {
         log.info("retrieve wazuh token...");
         var requestUrl = situationAwareConfig.getWazuhBaseUrl() + "/security/user/authenticate?raw=true";

@@ -14,12 +14,7 @@ import java.util.Set;
 import java.util.concurrent.ThreadFactory;
 import java.util.stream.Collectors;
 
-/**
- * @author wangssh
- * @version 1.0
- * @description TODO
- * @date 2023/6/29
- **/
+
 @Slf4j
 @Lazy
 @Service
@@ -56,11 +51,11 @@ public class SystemStatusInfoImpl implements ISystemStatusInfo {
                 this.setCurrentThreadSize(currentSize);
                 this.setActiveThreadSize(activeSize);
                 this.setMaxThreadSize(maxSize);
-                //峰值线程数
+                
                 this.setLargestPoolSize(largestPoolSize);
-                //任务队列数
+                
                 this.setTaskQueueSize(taskQueueSize);
-                //总任务数
+                
                 this.setTaskCount(taskCount);
             }
         }).collect(Collectors.toList());

@@ -13,11 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/3/1
- */
+
 public class SceneFlowCacheUtil {
     private static LoadingCache<String, List<Flow>> cache = CacheBuilder.newBuilder()
             .maximumSize(300)

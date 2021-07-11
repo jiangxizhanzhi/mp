@@ -8,11 +8,7 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/7/8
- */
+
 @Getter
 @Setter
 public class NodeLinkStatusBO {

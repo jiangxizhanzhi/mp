@@ -27,11 +27,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.function.Function;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/8/15 15:57
- */
+
 @Slf4j
 @Service
 public class SysOptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionMapper, OptionFields, OptionQueryParams>
@@ -46,11 +42,7 @@ public class SysOptionServiceImpl extends BaseModelServiceImpl<OptionModel, Opti
         setModelMapper(optionMapper);
     }
 
-    /**
-     * 补充list查询条件
-     * @param humanCondition
-     * @param queryParams
-     */
+    
     @Override
     public void loadListFilterCondition(HumanCondition humanCondition, OptionQueryParams queryParams) {
         if (StringUtils.isNotEmpty(queryParams.getType())) {
@@ -61,12 +53,7 @@ public class SysOptionServiceImpl extends BaseModelServiceImpl<OptionModel, Opti
         }
     }
 
-    /**
-     *
-     * @param type
-     * @param intFlag bo中code字段是否转为int类型
-     * @return
-     */
+    
     private List<OptionBO> getOptionsByType(String type, boolean intFlag, boolean filterByMetaVisible) {
         List<OptionModel> models = findByType(type);
         Function<String, ?> function = null;
@@ -105,11 +92,7 @@ public class SysOptionServiceImpl extends BaseModelServiceImpl<OptionModel, Opti
         return new ServiceResult<>(getOptionsByType(type, true, true)).asResult();
     }
 
-    /**
-     * 分页查询OptionModel列表
-     * @param queryParams
-     * @return
-     */
+    
     @Override
     public ListObjServiceResult<OptionModelBO> page(OptionQueryParams queryParams) {
         log.info("SysOptionServiceImpl.page begin. queryParams:{}", queryParams);
@@ -133,10 +116,7 @@ public class SysOptionServiceImpl extends BaseModelServiceImpl<OptionModel, Opti
         return result;
     }
 
-    /**
-     * 新增选项
-     * @param optionModelBO
-     */
+    
     @Override
     public void addOption(OptionModelBO optionModelBO) {
         log.info("SysOptionServiceImpl.addOption begin. optionModelBO:{}", optionModelBO);
@@ -158,10 +138,7 @@ public class SysOptionServiceImpl extends BaseModelServiceImpl<OptionModel, Opti
         log.info("SysOptionServiceImpl.addOption end.");
     }
 
-    /**
-     * 编辑选项
-     * @param optionModelBO
-     */
+    
     @Override
     public void editOption(OptionModelBO optionModelBO) {
         log.info("SysOptionServiceImpl.editOption begin. optionModelBO:{}", optionModelBO);
@@ -183,10 +160,7 @@ public class SysOptionServiceImpl extends BaseModelServiceImpl<OptionModel, Opti
         log.info("SysOptionServiceImpl.editOption end.");
     }
 
-    /**
-     * 删除选项
-     * @param ids
-     */
+    
     @Override
     public void deleteOptions(List<String> ids) {
         log.info("SysOptionServiceImpl.deleteOptions begin. ids:{}", ids);
@@ -194,11 +168,7 @@ public class SysOptionServiceImpl extends BaseModelServiceImpl<OptionModel, Opti
         log.info("SysOptionServiceImpl.deleteOptions end.");
     }
 
-    /**
-     * 根据id查询
-     * @param id
-     * @return
-     */
+    
     @Override
     public OptionModelBO findById(String id) {
         log.info("SysOptionServiceImpl.findById begin. id:{}", id);
@@ -215,11 +185,7 @@ public class SysOptionServiceImpl extends BaseModelServiceImpl<OptionModel, Opti
         return optionModelBO;
     }
 
-    /**
-     * 根据ids查询列表
-     * @param ids
-     * @return
-     */
+    
     @Override
     public List<OptionModel> findByIds(List<String> ids) {
         log.info("SysOptionServiceImpl.findByIds begin. ids:{}", ids);
@@ -231,11 +197,7 @@ public class SysOptionServiceImpl extends BaseModelServiceImpl<OptionModel, Opti
         return optionModels;
     }
 
-    /**
-     * 根据type类型获取最大的code值（只对数字类型的code有效）
-     * @param type
-     * @return
-     */
+    
     @Override
     public Integer getMaxCode(String type) {
         log.info("SysOptionServiceImpl.getMaxCode begin. type:{}", type);
@@ -245,11 +207,7 @@ public class SysOptionServiceImpl extends BaseModelServiceImpl<OptionModel, Opti
         return result;
     }
 
-    /**
-     * 根据type类型获取最大的sort值
-     * @param type
-     * @return
-     */
+    
     @Override
     public Integer getMaxSort(String type) {
         log.info("SysOptionServiceImpl.getMaxSort begin. type:{}", type);
@@ -302,12 +260,7 @@ public class SysOptionServiceImpl extends BaseModelServiceImpl<OptionModel, Opti
         return rootBos;
     }
 
-    /**
-     * 检查是否存在重名
-     * @param optionModelBO
-     * @param exceptOwn
-     * @return
-     */
+    
     private boolean checkNameExist(OptionModelBO optionModelBO, boolean exceptOwn) {
         log.info("SysOptionServiceImpl.checkNameExist begin. optionModelBO:{}, exceptOwn:{}", optionModelBO, exceptOwn);
         if (StringUtils.isEmpty(optionModelBO.getType()) || StringUtils.isEmpty(optionModelBO.getName())) {

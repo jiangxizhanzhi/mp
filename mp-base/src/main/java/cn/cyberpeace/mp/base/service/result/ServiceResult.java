@@ -5,10 +5,7 @@ import cn.cyberpeace.mp.base.service.code.ServiceCode;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-/**
- * 统一服务返回结果
- * @param <T> 返回结果数据源对象类型
- */
+
 @Data
 @AllArgsConstructor
 public class ServiceResult<T> extends BaseServiceResult<T, T> {

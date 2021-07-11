@@ -30,14 +30,14 @@ public class LicenseFilter extends OncePerRequestFilter {
 
     private ObjectMapper mapper = null;
 
-//    @Autowired
-    // todo 通过构造方法传入
+
+    
     private SysActivationService sysActivationService;
     private FrontAdminConfig frontAdminConfig;
 
 
-//    @Autowired
-    // todo 通过构造方法传入
+
+    
     private MappingJackson2HttpMessageConverter converter;
 
     public LicenseFilter(FrontAdminConfig frontAdminConfig) {
@@ -60,7 +60,7 @@ public class LicenseFilter extends OncePerRequestFilter {
                     activationFailed = true;
                 }
 
-                // 校验激活状态，日期等
+                
                 DateTime expiredDate = DateTime.parse(activationResponse.getExpiredDate(), DateTimeFormat.forPattern("yyyy-MM-dd"));
                 DateTime now = DateTime.now();
                 if (expiredDate.compareTo(now) >= 0) {
@@ -71,7 +71,7 @@ public class LicenseFilter extends OncePerRequestFilter {
                 if(activationFailed) {
                     log.error("Activation status is error！");
                     response.setStatus(HttpServletResponse.SC_OK);
-                    // todo message format
+                    
                     ServiceResult serviceResult = ResultCommon.fail(AdminErrorCode.SYS_ACTIVATION_ERROR);
                     mapper = converter.getObjectMapper();
 

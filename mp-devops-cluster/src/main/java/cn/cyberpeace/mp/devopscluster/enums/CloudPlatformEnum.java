@@ -9,9 +9,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-/**
- * 云平台枚举信息
- */
+
 public enum CloudPlatformEnum{
 
     UP("up","正常"),

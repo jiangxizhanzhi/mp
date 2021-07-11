@@ -35,11 +35,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/3/1
- */
+
 @Slf4j
 public class SceneInstanceLinkCacheUtil {
 
@@ -96,7 +92,7 @@ public class SceneInstanceLinkCacheUtil {
 
     public static void refresh(String sceneId) {
         cache.refresh(sceneId);
-        // 10s之后再刷一次缓存 避免并发刷新时刷到旧的数据
+        
         refreshExecutor.schedule(() -> {
             cache.refresh(sceneId);
         }, 10, TimeUnit.SECONDS);
@@ -133,7 +129,7 @@ public class SceneInstanceLinkCacheUtil {
                 if (CollectionUtils.isNotEmpty(e.getPorts())) {
                     for (var p : e.getPorts()) {
                         if (StringUtils.isEmpty(nodeStatus.getDefaultNetworkId())) {
-                            // 设置一个默认网络,如果没有连线,则使用该网络查询状态
+                            
                             var cloudPort = handler.getPort(p.getId());
                             if (cloudPort != null && cloudPort.getAuxiliaryNetworkId() != null) {
                                 nodeStatus.setDefaultNetworkId(cloudPort.getAuxiliaryNetworkId());
@@ -169,7 +165,7 @@ public class SceneInstanceLinkCacheUtil {
                 if (CollectionUtils.isNotEmpty(n.getConnectionStatusList())) {
                     for (var p : n.getConnectionStatusList()) {
                         String taskKey = getKey(n.getResourceId(), p.getNetworkId());
-                        // 已有相同任务,则不处理
+                        
                         if (!existsNodeTask.contains(taskKey)) {
                             tasks.add(() -> {
                                 try {
@@ -229,12 +225,12 @@ public class SceneInstanceLinkCacheUtil {
                 }
             }
             if (CollectionUtils.isNotEmpty(tasks)) {
-                //避免极端情况下 部分节点不刷新
+                
                 Collections.shuffle(tasks);
                 taskPool.runTasks(tasks);
             }
         } catch (RejectedExecutionException e) {
-            // do nothing
+            
         } catch (Exception e) {
             log.error("failed to load status for scene {}, message is {}", sceneId, ExceptionUtils.getStackTrace(e));
         }

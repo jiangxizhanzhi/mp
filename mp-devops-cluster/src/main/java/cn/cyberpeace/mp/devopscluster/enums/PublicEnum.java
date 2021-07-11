@@ -4,13 +4,13 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum PublicEnum {
 
-    //私有
+    
     PRIVATE,
 
-    //自定义
+    
     CUSTOMIZE,
 
-    //授权所有
+    
     ALL_PUBLIC;
 
 

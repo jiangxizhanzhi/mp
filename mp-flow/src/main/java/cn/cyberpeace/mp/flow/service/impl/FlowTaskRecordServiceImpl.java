@@ -39,11 +39,7 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
         setModelMapper(stuMapper);
     }
 
-    /**
-     * 根据taskId查询流量任务记录
-     * @param taskId
-     * @return
-     */
+    
     @Override
     public List<FlowTaskRecordModel> findByTaskId(String taskId) {
         log.info("FlowTaskRecordServiceImpl.findByTaskId begin. taskId:{}", taskId);
@@ -55,10 +51,7 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
         return flowTaskConfModelList;
     }
 
-    /**
-     * 根据taskId删除
-     * @param taskId
-     */
+    
     @Override
     public void deleteByTaskId(String taskId) {
         log.info("FlowTaskRecordServiceImpl.deleteByTaskId begin. taskId:{}", taskId);
@@ -68,12 +61,7 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
         log.info("FlowTaskRecordServiceImpl.deleteByTaskId end.");
     }
 
-    /**
-     * 批量统计每一个流量任务的实时速率
-     * @param taskIds
-     * @param conditions
-     * @return
-     */
+    
     @Override
     public Map<String, List<FlowRealTimeRate>> realTimeRate(List<String> taskIds, List<FlowStatisticalCondition> conditions) {
         log.info("FlowTaskRecordServiceImpl.realTimeRate begin. taskIds:{}, condition:{}", taskIds, conditions);
@@ -102,11 +90,7 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
         return result;
     }
 
-    /**
-     * 仿真概况
-     * @param sceneId
-     * @return
-     */
+    
     @Override
     public FlowSummary queryFlowSummary(String sceneId) {
         log.info("FlowTaskRecordServiceImpl.queryFlowSummary begin. id:{}", sceneId);
@@ -115,11 +99,7 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
         return flowSummary;
     }
 
-    /**
-     * 根据节点统计实时速率
-     * @param sceneId
-     * @return
-     */
+    
     @Override
     public List<FlowNodeTxBps> queryNodeTxBps(String sceneId) {
         log.info("FlowTaskRecordServiceImpl.queryNodeTxBps begin. id:{}", sceneId);
@@ -128,11 +108,7 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
         return flowNodeTxBpsList;
     }
 
-    /**
-     * 仿真统计
-     * @param sceneId
-     * @return
-     */
+    
     @Override
     public FlowStatisticsInfo flowStatistics(String sceneId) {
         log.info("FlowTaskRecordServiceImpl.flowStatistics begin. id:{}", sceneId);
@@ -224,10 +200,7 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
         return flowStatisticsInfo;
     }
 
-    /**
-     * 同步执行记录
-     * @param jsonMessage
-     */
+    
     @Override
     public void syncRecord(JSONObject jsonMessage) {
         log.info("FlowTaskRecordServiceImpl.syncRecord start. jsonMessage:{}", jsonMessage);
@@ -241,7 +214,7 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
         FlowTaskTaskModel flowTaskTaskModel = flowTaskTaskMapper.get(taskId);
         Integer oldStatus = flowTaskTaskModel.getTaskStatus();
         flowTaskTaskModel.setTaskStatus(status);
-        //防止多次推送次数多加，防止手动停止后多加次数
+        
         if (TaskTaskStatusEnum.STOPPED.toValue() == status && TaskTaskStatusEnum.STOPPED.toValue() != oldStatus) {
             flowTaskTaskModel.setSuccessCount(flowTaskTaskModel.getSuccessCount() + 1);
         } else if (TaskTaskStatusEnum.ERROR.toValue() == status && TaskTaskStatusEnum.ERROR.toValue() != oldStatus) {
@@ -269,20 +242,16 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
             flowTaskRecordModel.setRecordStatus(1);
             LocalDateTime localDateTime = LocalDateTime.now().withNano(0);
             flowTaskRecordModel.setCreateTime(localDateTime);
-            //flowTaskRecordModel.setCreateTime(StringUtils.isEmpty(data.getString("record_time")) ? null : LocalDateTime.parse(data.getString("record_time"), df));
+            
             this.getModelMapper().save(flowTaskRecordModel);
         }
 
-        // 任务回调处理
+        
         this.taskCallback(flowTaskTaskModel, msg);
         log.info("FlowTaskRecordServiceImpl.syncRecord end.");
     }
 
-    /**
-     * 任务回调
-     * @param flowTaskTaskModel
-     * @param msg
-     */
+    
     private void taskCallback(FlowTaskTaskModel flowTaskTaskModel, String msg) {
         String taskId = flowTaskTaskModel.getId();
         Runnable taskRunnable = FlowCacheUtil.taskRunnableCache.getIfPresent(FlowCacheUtil.RUNNABLE_PREFIX + taskId);
@@ -293,7 +262,7 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
         }
 
         if (StringUtils.isNotBlank(msg)) {
-            // 有错误信息，代表执行异常
+            
             Consumer taskConsumer = FlowCacheUtil.taskConsumerCache.getIfPresent(FlowCacheUtil.CONSUMER_PREFIX + taskId);
             if (Objects.nonNull(taskConsumer)) {
                 log.info("call task consumer for: {}", taskId);
@@ -302,13 +271,13 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
             }
         }
 
-        // 批量执行校验
+        
         String sceneId = flowTaskTaskModel.getSceneId();
         String nodeId = flowTaskTaskModel.getNodeId();
         log.info("batch tasks run for sceneId: {}", sceneId);
         Consumer batchTaskConsumer = FlowCacheUtil.taskConsumerCache.getIfPresent(FlowCacheUtil.CONSUMER_PREFIX + sceneId);
         if (Objects.nonNull(batchTaskConsumer)) {
-            // 判断任务是否都结束
+            
             HumanCondition condition = new HumanCondition();
             condition.filterEqual(FlowTaskTaskModel::getSceneId, sceneId);
             condition.filterEqual(FlowTaskTaskModel::getNodeId, nodeId);
@@ -316,7 +285,7 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
             if (CollectionUtils.isNotEmpty(taskTaskModels)) {
                 int runningCount = (int) taskTaskModels.stream().filter(taskTaskModel -> taskTaskModel.getTaskStatus() == TaskTaskStatusEnum.RUNNING.toValue()).count();
                 if (runningCount == 0) {
-                    // 回调参数封装
+                    
                     BatchActuatorCallbackResponse batchActuatorCallbackResponse= new BatchActuatorCallbackResponse();
                     List<FlowTaskModel> successTaskModels = new ArrayList<>();
                     List<FlowTaskModel> errorTaskModels = new ArrayList<>();
@@ -352,10 +321,7 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
         }
     }
 
-    /**
-     * 获取统计条件
-     * @return
-     */
+    
     private List<FlowStatisticalCondition> getCondition(String sceneId) {
         log.info("FlowTaskRecordServiceImpl.getCondition begin. sceneId:{}", sceneId);
         LocalDateTime startTime = this.getModelMapper().getFirstTime(sceneId);

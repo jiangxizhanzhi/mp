@@ -14,25 +14,13 @@ import java.util.List;
 @ModelClass(FlowInfoModel.class)
 public interface FlowInfoMapper extends BaseModelMapper<FlowInfoModel> {
 
-    /**
-     * 批量查询流量信息
-     * @param flowIds
-     * @return
-     */
+    
     List<FlowInfoModel> selectByFlowIds(@Param("flowIds") List<String> flowIds);
 
-    /**
-     * 根据名称查询
-     * @param title
-     * @return
-     */
+    
     FlowInfoModel selectByTitle(@Param("title") String title);
 
-    /**
-     * 根据名称批量查询流量
-     * @param titleList
-     * @return
-     */
+    
     List<FlowInfoModel> selectByTitles(@Param("titleList") List<String> titleList);
 
 }

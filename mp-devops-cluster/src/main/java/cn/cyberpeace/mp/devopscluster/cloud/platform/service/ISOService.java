@@ -10,10 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-/**
- * 镜像管理底层接口
- * @author wanggang
- */
+
 @Service
 @Slf4j
 public class ISOService extends BaseCpService {
@@ -22,11 +19,7 @@ public class ISOService extends BaseCpService {
         super(devopsClusterConfig);
     }
 
-    /**
-     * 上传iso文件
-     * @param files
-     * @return
-     */
+    
     public BaseCloudPlatformResult upload(List<File> files) {
         BaseCloudPlatformResult result = null;
         try {

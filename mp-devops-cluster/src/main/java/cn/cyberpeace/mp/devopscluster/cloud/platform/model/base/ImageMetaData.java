@@ -11,32 +11,22 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * 镜像元数据
- *
- * @author wanggang
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel
 public class ImageMetaData implements Serializable {
 
-    /**
-     * 磁盘控制器类型
-     */
+    
     @ApiModelProperty("磁盘控制器类型")
     private String hwDiskBus;
 
-    /**
-     * 虚拟网卡型号
-     */
+    
     @ApiModelProperty("虚拟网卡型号")
     private String hwVifModel;
 
-    /**
-     * 视频图像驱动
-     */
+    
     @ApiModelProperty("视频图像驱动")
     private String hwVideoModel;
 

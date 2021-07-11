@@ -16,11 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * @Description: 角色管理接口(业务)
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Api(value = "角色管理接口(业务)", tags = "AUTH-角色管理接口(业务)")
 @Slf4j
 @RestController("roleFrontController")

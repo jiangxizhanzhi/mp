@@ -5,11 +5,7 @@ import cn.hutool.core.util.NumberUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/5/18
- */
+
 @Component
 public class CpCloudResourceNameUtil implements ICloudResourceName<RsourceNameParams> {
     @Override

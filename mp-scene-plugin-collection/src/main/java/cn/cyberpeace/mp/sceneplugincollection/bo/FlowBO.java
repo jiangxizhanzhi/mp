@@ -6,11 +6,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/12/1 17:10
- */
+
 @Data
 public class FlowBO {
 

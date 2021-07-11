@@ -10,11 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2021/11/2
- */
+
 @Setter
 @Getter
 public class ImageInfoParseResult {

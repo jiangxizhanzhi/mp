@@ -17,13 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 
-/*
- * @BelongsPackage: cn.cyberpeace.mp.situationaware.controller
- * @Author: hhuang
- * @CreateTime: 2023/04/21  09:25
- * @Description: Arkime使用的Suricata规则控制器
- * @Version: 1.0
- */
+
 @Api(value = "流量分析规则", tags = "流量分析规则")
 @Slf4j
 @RestController

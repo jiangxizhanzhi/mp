@@ -5,11 +5,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
-  *@Desciption 数据采集
-  *@Author zhangjin
-  *@Date 12/2/21 9:49 上午
-**/
+
 public enum DataCollectionType {
     LOGINSUCCESS("5715", "登录成功"),
     LOGOUT("5502", "退出登录"),

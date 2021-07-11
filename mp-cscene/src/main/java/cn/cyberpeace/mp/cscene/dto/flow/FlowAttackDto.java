@@ -5,11 +5,7 @@ import cn.cyberpeace.mp.sceneplugincollection.bo.FlowBO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/12/1 19:04
- */
+
 @Data
 public class FlowAttackDto extends FlowBO {
 

@@ -23,11 +23,7 @@ public class InjectFileConverter {
 
     private final ScenariosService scenariosService;
 
-    /**
-     * 查询注入文件列表
-     * @param deviceUuid
-     * @return
-     */
+    
     public BasePageBO<InjectFileConvertModel> list(String deviceUuid) {
         CloudPlatformPageResult<InjectFile> model = injectFileService.list(deviceUuid);
         List<InjectFileConvertModel> list = model.getList().stream().map(item ->
@@ -39,11 +35,7 @@ public class InjectFileConverter {
         return convertModel;
     }
 
-    /**
-     * 删除注入文件
-     * @param dto
-     * @return
-     */
+    
     public BaseCloudPlatformResult delete(ImageInjectFileDeleteDTO dto) {
         return scenariosService.deleteInjectFile(new DeviceInjectFileDelete(dto.getDeviceUuid(),dto.getInjectUuid()));
     }

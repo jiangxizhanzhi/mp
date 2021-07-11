@@ -7,11 +7,7 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/2/24 14:15
- */
+
 @Data
 @ApiModel("进程信息")
 public class Process {
@@ -92,7 +88,7 @@ public class Process {
     @ApiModelProperty(value = "会话")
     private Integer session;
 
-    //
+    
     private Integer nice;
 
     @ApiModelProperty(value = "轻量级进程数")

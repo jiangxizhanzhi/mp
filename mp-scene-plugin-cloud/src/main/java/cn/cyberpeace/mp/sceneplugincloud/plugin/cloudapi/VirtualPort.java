@@ -57,12 +57,7 @@ public class VirtualPort extends CloudClient {
         }, true);
     }
 
-    /**
-     * 同步需要统计流量的网口信息
-     * @param portIds 网口列表
-     * @param syncType 同步类型 add：新增 delete：删除
-     * @return
-     */
+    
     public boolean syncFlowPortInfo(List<String> portIds, String syncType) {
         log.info("VirtualPort.syncFlowPortInfo begin. portIds:{}, syncType:{}", portIds, syncType);
         boolean result = true;

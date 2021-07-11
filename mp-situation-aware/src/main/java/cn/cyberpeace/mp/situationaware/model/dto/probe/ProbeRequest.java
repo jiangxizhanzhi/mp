@@ -49,9 +49,7 @@ public class ProbeRequest {
     @ApiModelProperty(value = "集合类型，操作系统类型 0:windows, 1:Unix, 2:Linux, 3:BSD, 4:Other")
     private List<Integer> osTypes;
 
-    /**
-     * 0:shell 1:python 2:bat
-     */
+    
     @ApiModelProperty(value = "脚本类型0:shell 1:python 2:bat")
     @NotNull(groups = {AddGroup.class})
     private Integer scriptType;
@@ -66,12 +64,10 @@ public class ProbeRequest {
     @ApiModelProperty(value = "脚本内容校验码", hidden = true)
     private String scriptChecksum;
 
-//    @ApiModelProperty(value = "脚本参数列表")
-//    private List<ProbeParamsRequest> params;
 
-    /**
-     * 脚本参数(JSON)
-     */
+
+
+    
     @ApiModelProperty(value = "脚本参数")
     private String parameter;
 

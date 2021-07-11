@@ -28,10 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-/**
- * 基础对接云平台接口层
- * @author wanggang
- */
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -49,13 +46,7 @@ public class BaseCpService {
 
     private final DevopsClusterConfig devopsClusterConfig;
 
-    /**
-     * 通过Get方式查询信息
-     * @param api
-     * @param valueType
-     * @param <T>
-     * @return
-     */
+    
     protected <T extends BaseModel> T sendGet(String api, Class<T> valueType){
         String url = this.buildUrl(api);
         String result = "";
@@ -69,13 +60,7 @@ public class BaseCpService {
         return this.buildSnakeObject(result, valueType);
     }
 
-    /**
-     * 通过Get方式查询信息
-     * @param api
-     * @param valueType
-     * @param <T>
-     * @return
-     */
+    
     protected <T extends BaseModel> T sendGet(String api,int timeout, Class<T> valueType){
         String url = this.buildUrl(api);
         String result = "";
@@ -89,14 +74,7 @@ public class BaseCpService {
         return this.buildSnakeObject(result, valueType);
     }
 
-    /**
-     * 通过Post方式查询信息
-     * @param api
-     * @param body
-     * @param valueType
-     * @param <T>
-     * @return
-     */
+    
     protected <T extends BaseModel> T sendPost(String api,String body,Class<T> valueType){
         String url = this.buildUrl(api);
         T model = null;
@@ -112,12 +90,7 @@ public class BaseCpService {
         return model;
     }
 
-    /**
-     * 通过Post方式查询信息
-     * @param api
-     * @param body
-     * @return
-     */
+    
     protected String sendPost(String api,String body){
         String url = this.buildUrl(api);
         String result = "";
@@ -131,14 +104,7 @@ public class BaseCpService {
         return result;
     }
 
-    /**
-     * 通过PUT方式查询信息
-     * @param api
-     * @param body
-     * @param valueType
-     * @param <T>
-     * @return
-     */
+    
     protected <T extends BaseModel> T sendPut(String api,String body,Class<T> valueType){
         String url = this.buildUrl(api);
         T model = null;
@@ -154,12 +120,7 @@ public class BaseCpService {
         return model;
     }
 
-    /**
-     * 通过Delete方式删除数据
-     * @param api
-     * @param body
-     * @return
-     */
+    
     protected <T extends BaseModel> T sendDelete(String api, String body,Class<T> valueType){
         String url = this.buildUrl(api);
 
@@ -177,12 +138,7 @@ public class BaseCpService {
         return model;
     }
 
-    /**
-     * 上传文件
-     * @param api
-     * @param formMap
-     * @return
-     */
+    
     protected <T extends BaseModel> T sendFormDataPost(String api, Map<String, Object> formMap , Class<T> valueType) throws IOException {
         String url = this.buildUrl(api);
         String result = HttpUtil.createPost(url).form(formMap).addHeaders(wrapperHeaders(new HashMap<>())).execute().body();
@@ -193,12 +149,7 @@ public class BaseCpService {
         return model;
     }
 
-    /**
-     * 上传文件
-     * @param api
-     * @param fileList
-     * @return
-     */
+    
     protected <T extends BaseModel> T sendFormDataPost(String api, List<File> fileList , Class<T> valueType) throws IOException {
         String url = this.buildUrl(api);
         String result = HttpUtil.createPost(url).addHeaders(wrapperHeaders(new HashMap<>())).form("file",fileList.toArray(File[]::new)).execute().body();
@@ -209,12 +160,7 @@ public class BaseCpService {
         return model;
     }
 
-    /**
-     * 上传文件
-     * @param api
-     * @param formMap
-     * @return
-     */
+    
     protected <T extends BaseModel> T sendFormDataPut(String api, Map<String, Object> formMap ,Class<T> valueType) throws IOException {
         String url = this.buildUrl(api);
         String result = HttpRequest.put(url).form(formMap).addHeaders(wrapperHeaders(new HashMap<>())).execute().body();
@@ -224,13 +170,7 @@ public class BaseCpService {
         return this.buildSnakeObject(result, valueType);
     }
 
-    /**
-     * 通用分页接口
-     * @param url 请求URL 例如：/abc/page?name=test&type=1
-     * @param tClass 数据转换类
-     * @param <T>
-     * @return
-     */
+    
     protected <T> CloudPlatformPageResult<T> page(String url, Class<T> tClass) {
         CloudPlatformCommonPageResult pageResult = this.sendGet(url, CloudPlatformCommonPageResult.class);
         this.checkResult(pageResult);
@@ -243,11 +183,7 @@ public class BaseCpService {
         return model;
     }
 
-    /**
-     * 检查请求云平台接口
-     * @param t
-     * @param <T>
-     */
+    
     protected <T extends BaseCloudPlatformResult> void checkResult(T t) {
         if (Objects.isNull(t) || (!BaseCloudPlatformConstant.CODE.equals(t.getCode()) && !t.isSuccess())) {
             String message = CloudMessageConvertUtil.getMessage(t.getMessage());
@@ -276,12 +212,7 @@ public class BaseCpService {
         }
     }
 
-    /**
-     * 包装请求头信息
-     *
-     * @param headers
-     * @return
-     */
+    
     private Map<String, String> wrapperHeaders(Map<String, String> headers) {
         if (MapUtils.isEmpty(headers)) {
             headers = new HashMap<>();
@@ -290,22 +221,12 @@ public class BaseCpService {
         return headers;
     }
 
-    /**
-     * 获取请求链接URL
-     * @param api 接口URL
-     * @return
-     */
+    
     private String buildUrl(String api){
         return devopsClusterConfig.getCpUrl().concat(api);
     }
 
-    /**
-     * 构建驼峰对象
-     * @param result
-     * @param tClass
-     * @param <T>
-     * @return
-     */
+    
     private <T extends BaseModel> T buildSnakeObject(String result, Class<T> tClass){
         T toSnakeObject;
         try {

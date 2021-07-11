@@ -6,9 +6,7 @@ import cn.cyberpeace.mp.situationaware.model.FlowPortProtocolModel;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
-/**
- * @author wanggang
- */
+
 @Mapper
 @Repository
 @ModelClass(FlowPortProtocolModel.class)

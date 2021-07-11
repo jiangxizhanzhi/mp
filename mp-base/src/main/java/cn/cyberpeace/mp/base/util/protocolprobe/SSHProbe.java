@@ -1,12 +1,6 @@
 package cn.cyberpeace.mp.base.util.protocolprobe;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/1/14
- *         探测ssh服务是否准备好
- *         主要原理: 建立TCP连接之后,给服务端发送客户端的协议版本号,服务端要能返回一个SSH协议版本号
- */
+
 public class SSHProbe extends ProtocolProbe {
     private final static String PROTOCOL = "ssh";
 

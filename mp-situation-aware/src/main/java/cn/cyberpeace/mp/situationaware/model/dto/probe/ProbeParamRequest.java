@@ -7,11 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * 探针参数 请求体， 跟探针一对多关系
- * mp_situation_probe_param
- * @author 
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,27 +15,19 @@ import lombok.NoArgsConstructor;
 @ApiModel("探针参数请求体")
 public class ProbeParamRequest {
 
-    /**
-     * 参数名称
-     */
+    
     @ApiModelProperty(value = "参数名称")
     private String name;
 
-    /**
-     * 0:number 1:string 2:bool 3:ip
-     */
+    
     @ApiModelProperty(value = "0:number 1:string 2:bool 3:ip")
     private Integer type;
 
-    /**
-     * 默认值
-     */
+    
     @ApiModelProperty(value = "默认值")
     private String defaultValue;
 
-    /**
-     * 参数说明
-     */
+    
     @ApiModelProperty(value = "参数说明")
     private String description;
 

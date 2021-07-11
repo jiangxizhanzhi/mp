@@ -7,9 +7,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-/**
- * 镜像构建请求信息
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,15 +16,11 @@ import lombok.NoArgsConstructor;
 public class ImagesDeleteInstanceRequest extends BaseRequest {
 
 
-    /**
-     * 名称
-     */
+    
     @ApiModelProperty(value = "UUID")
     private String uuid;
 
-    /**
-     * 镜像名称
-     */
+    
     @ApiModelProperty(value = "镜像名称")
     private String imageType;
 

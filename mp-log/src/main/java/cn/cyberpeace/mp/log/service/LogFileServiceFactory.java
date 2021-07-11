@@ -26,11 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-/**
- * @description:
- * @author：Geek Wang
- * @date: 2022/6/15
- */
+
 @Component
 @RequiredArgsConstructor
 public class LogFileServiceFactory {
@@ -47,10 +43,7 @@ public class LogFileServiceFactory {
         logFileServiceMap = fileServiceList.stream().collect(Collectors.toMap(LogFileService::logReportType, Function.identity()));
     }
 
-    /**
-     * 查询全部日志上报数据
-     * @return
-     */
+    
     public List<LogReportDTO> listAll(BasePageRequest basePageRequest) {
         List<LogReportDTO> result = Lists.newArrayList();
         if (Objects.nonNull(basePageRequest.getType())) {
@@ -71,7 +64,7 @@ public class LogFileServiceFactory {
 
             List<LogFileService> logFileServices = new ArrayList<>();
             CollectionUtil.addAll(logFileServices, fileServiceList);
-            //processVisibleLogFileServices(logFileServices);
+            
 
             for (LogFileService logFileService : fileServiceList) {
                 if (isReportTypeMatch(logFileService.logReportType(), codes)) {
@@ -97,10 +90,7 @@ public class LogFileServiceFactory {
         return false;
     }
 
-    /**
-     * 下载日志
-     * @param downloadDTO
-     */
+    
     public LogFileDownloadBO downLoad(LogDownloadDTO downloadDTO) throws IOException {
         String logReportType = downloadDTO.getType();
         LogFileService logFileService = logFileServiceMap.get(logReportType);

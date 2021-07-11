@@ -6,11 +6,7 @@ import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.flow.model.FlowProtocolModel;
 import org.springframework.stereotype.Component;
 
-/**
- * @Description 流量协议Fields
- * @Author qiaokang
- * @Date 2023-04-27 09:22:12
- */
+
 @Component
 public class FlowProtocolFields extends BaseModelFields {
     public static final DynamicFields allFields = new DynamicFields(ClassUtils.getBeanClassFields(FlowProtocolModel.class));

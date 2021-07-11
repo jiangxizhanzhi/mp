@@ -13,11 +13,7 @@ import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/8/5
- */
+
 @Slf4j
 @Component
 public class CronInit {

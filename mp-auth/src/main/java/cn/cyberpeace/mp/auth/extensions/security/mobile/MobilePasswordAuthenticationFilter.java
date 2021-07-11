@@ -20,11 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
+
 @Slf4j
 public class MobilePasswordAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
@@ -77,7 +73,7 @@ public class MobilePasswordAuthenticationFilter extends AbstractAuthenticationPr
             String originPwd = PasswordUtils.desDecrypt(decryptedPwd);
             var authRequest = new MobilePasswordAuthenticationToken(mobile, originPwd);
             setDetails(request, authRequest);
-            // 认证
+            
             return getAuthenticationManager().authenticate(authRequest);
         } else {
             throw new AuthenticationServiceException("ContentType not supported: " + request.getContentType());

@@ -33,11 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2022/8/20
- */
+
 public class SceneParseResourceCenterV2 extends BaseSceneParseResourceCenter {
 
     public Result parseAndLoadInfo(String sceneId) {
@@ -48,11 +44,11 @@ public class SceneParseResourceCenterV2 extends BaseSceneParseResourceCenter {
         ymlParseResult.setNetworks(new ArrayList<>());
         ymlParseResult.setShape(new ArrayList<>());
 
-        // 解析节点
+        
         Map<String, NetworkElementParseResultV2> id2Network = new HashMap<>();
         Map<String, NodeElementParseResult> id2Node = new HashMap<>();
         this.parseNodeAndNet(sceneConfigHandler, ymlParseResult.getNetworks(), ymlParseResult.getNodes(), id2Network, id2Node);
-        // 建立nodeId和转换成yml之后id的映射关系 先node 后 net
+        
         Map<String, String> idConvert = new HashMap<>();
         for (String nodeId : id2Node.keySet()) {
             idConvert.put(nodeId, id2Node.get(nodeId).getId());
@@ -61,17 +57,17 @@ public class SceneParseResourceCenterV2 extends BaseSceneParseResourceCenter {
             idConvert.put(nodeId, id2Network.get(nodeId).getId());
         }
 
-        // 处理连线
+        
         this.addConnect(sceneConfigHandler, id2Network, id2Node);
 
-        // 处理区域信息
+        
         this.handlerShapes(sceneConfigHandler, ymlParseResult.getShape(), idConvert);
 
-        // 处理节点附件
+        
         Map<String, String> file2Download = new HashMap<>();
         this.handleNodeFile(ymlParseResult.getNodes(), file2Download);
 
-        // 处理节点镜像
+        
         List<Device> devices = new ArrayList<>();
         this.handleNodeImage(sceneConfigHandler, id2Node, devices);
 
@@ -147,7 +143,7 @@ public class SceneParseResourceCenterV2 extends BaseSceneParseResourceCenter {
                         }
                     }
                 } catch (Exception exception) {
-                    // do nothing
+                    
                 }
 
                 id2Network.put(e.getId(), networkElementParseResult);
@@ -170,7 +166,7 @@ public class SceneParseResourceCenterV2 extends BaseSceneParseResourceCenter {
                             }
                         }
                     } catch (Exception exception) {
-                        // do nothing
+                        
                     }
 
                     id2Network.put(e.getId(), networkElementParseResult);
@@ -195,7 +191,7 @@ public class SceneParseResourceCenterV2 extends BaseSceneParseResourceCenter {
                             }
                         }
                     } catch (Exception exception) {
-                        // do nothing
+                        
                     }
                     nodeElementParseResult.setId("server-" + serverIndex++);
                     id2Node.put(e.getId(), nodeElementParseResult);
@@ -212,7 +208,7 @@ public class SceneParseResourceCenterV2 extends BaseSceneParseResourceCenter {
                         }
                     }
                 } catch (Exception exception) {
-                    // do nothing
+                    
                 }
 
                 if (role == BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER) {
@@ -319,7 +315,7 @@ public class SceneParseResourceCenterV2 extends BaseSceneParseResourceCenter {
         nodeElementParseResult.setImage(pluginElement.getImage());
         nodeElementParseResult.setName(e.getName());
         nodeElementParseResult.setInitCommands(new ArrayList<>());
-        // 设置下节点的前端展示属性
+        
         nodeElementParseResult.setDisplayContext(e.getDisplayContext());
         if (CollectionUtils.isNotEmpty(e.getInitCommands())) {
             e.getInitCommands().forEach(c -> {
@@ -348,15 +344,15 @@ public class SceneParseResourceCenterV2 extends BaseSceneParseResourceCenter {
 
                 String netxtHopNode = null;
                 if (StringUtils.isNotEmpty(s.getNexthopPortId())) {
-                    // 下一跳指定了端口,导出时需要记录这个信息,导入之后要恢复指定端口
-                    // 所以需要找到该端口连接的对端节点,下一跳其实就是和对端节点连接的端口
+                    
+                    
                     var connectElement = sceneHandler.getPortConnectedElement(s.getNexthopPortId());
                     if (connectElement != null) {
                         netxtHopNode = connectElement.getId();
                     }
                 }
 
-                // staticRoutes 和 staticRouters不能有相同对象,否则生成yml会多出特殊字符
+                
                 StaticRoutesResult resulta = new StaticRoutesResult();
                 resulta.setGateway(s.getNexthop());
                 resulta.setDestination(s.getDestination());
@@ -379,7 +375,7 @@ public class SceneParseResourceCenterV2 extends BaseSceneParseResourceCenter {
             for (var p : e.getPorts()) {
                 var cloudPort = cloudSceneConfigPluginHandler.getPort(p.getId());
                 ExtNodeInfo.PortProtocolExportInfo exportInfo = new ExtNodeInfo.PortProtocolExportInfo();
-                // 设置下连线的属性信息
+                
                 var connection = sceneHandler.getPortBelongConnection(p.getId());
                 if (connection != null) {
                     exportInfo.setVertices(JsonCommon.stringify(connection.getVertices()));

@@ -7,18 +7,14 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-/**
- * 路由分页请求信息
- */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class RouterPageDTO extends BasePageDTO {
 
-    /**
-     * 路由名称
-     */
+    
     @ApiModelProperty(value = "路由名称")
     private String name;
 

@@ -41,9 +41,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-/**
- * @author wanggang
- */
+
 @Slf4j
 @Component
 @ConditionalOnProperty(prefix = "mp.log", name = "log-db", havingValue = LogConstant.LOG_DB_ES)
@@ -68,11 +66,7 @@ public class OperateLogEsServiceImpl implements OperateLogDbService {
         this.mpOperateLogServiceList = mpOperateLogServiceList;
     }
 
-    /**
-     * 创建日志
-     * @param request
-     * @return
-     */
+    
     @Async
     public void create(OperationLogRequest request, Locale locale){
         OperationLogModel model = new OperationLogModel();
@@ -110,11 +104,7 @@ public class OperateLogEsServiceImpl implements OperateLogDbService {
         this.create(model);
     }
 
-    /**
-     * 创建日志
-     * @param operateLog
-     * @return
-     */
+    
     @Async
     public void create(OperateLog operateLog, HttpServletRequest request, Locale locale) {
         Object userId = request.getAttribute(LogConstant.USER_ID_KEY);
@@ -130,35 +120,35 @@ public class OperateLogEsServiceImpl implements OperateLogDbService {
         if (Objects.nonNull(userType)) {
             model.setUserType(userType.toString());
         }
-        //站点类型
+        
         model.setSiteType(SiteTypeEnums.MP);
         if (Objects.nonNull(operateLog.module())) {
-            //操作模块
+            
             model.setOpModule(getlocalizedMessage(locale, operateLog.module().getCode()));
-            //操作模块ID
+            
             model.setOpModuleID(operateLog.module().ordinal());
         }
         if (Objects.nonNull(operateLog.type())) {
-            //操作类型
+            
             model.setOpType(getlocalizedMessage(locale, operateLog.type().getCode()));
-            //操作类型ID
+            
             model.setOpTypeID(operateLog.type().ordinal());
         }
         if (Objects.nonNull(operateLog.target())) {
-            //操作对象
+            
             model.setOpTarget(getlocalizedMessage(locale, operateLog.target().getCode()));
-            //操作ID
+            
             model.setOpTargetID(operateLog.target().ordinal());
         }
-        //操作主题
+        
         model.setTitle(operateLog.title());
-        //操作描述
+        
         model.setDescription(operateLog.desc());
-        //记录操作时间
+        
         model.setOpTime(LocalDateTime.now());
-        //请求IP
+        
         model.setOpIp(SnUtils.getRealRemoteIp(request));
-        //操作内容
+        
         processDefaultContent(model);
         if (StringUtils.isBlank(model.getUserName())) {
             log.error("operationlog, username cannot be null. {}", model);
@@ -168,19 +158,12 @@ public class OperateLogEsServiceImpl implements OperateLogDbService {
     }
 
 
-    /**
-     * 创建日志
-     * @param operationLogModel
-     */
+    
     private IndexResponse create(OperationLogModel operationLogModel){
        return operateLogServiceMap.get(operationLogModel.getSiteType()).create(operationLogModel);
     }
 
-    /**
-     * 查询日志
-     * @param request
-     * @return
-     */
+    
     public SearchResponse search(OperationLogPageRequest request){
        return operateLogServiceMap.get(request.getSiteType()).search(request);
     }
