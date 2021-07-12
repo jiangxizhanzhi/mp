@@ -55,6 +55,7 @@ mp:
   devops:
     cp-url: http://10.100.7.5:11111
     mg-url: ${mp.base.mg-url}
+    hostname: controller  #主机名称
   datasandtable:
     group-url: http://10.100.7.104:5079/v1/scenes
     moloch:

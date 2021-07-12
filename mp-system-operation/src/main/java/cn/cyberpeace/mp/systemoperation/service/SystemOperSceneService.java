@@ -48,10 +48,10 @@ public class SystemOperSceneService {
             // 拼接分页信息
             urlBuffer.append("?")
                     .append("page=")
-                    .append(Objects.nonNull(request.getPage()) ? request.getPage() : BaseConstants.defaultPage);
+                    .append(Objects.nonNull(request.getPage()) ? request.getPage() : BaseConstants.DEFAULTPAGE);
             urlBuffer.append("&")
                     .append("per_page=")
-                    .append(Objects.nonNull(request.getPerPage()) ? request.getPerPage() : BaseConstants.defaultPageSize);
+                    .append(Objects.nonNull(request.getPerPage()) ? request.getPerPage() : BaseConstants.DEFAULTPAGESIZE);
 
             res = HttpUtils.sendGet(urlBuffer.toString());
         } catch (IOException e) {

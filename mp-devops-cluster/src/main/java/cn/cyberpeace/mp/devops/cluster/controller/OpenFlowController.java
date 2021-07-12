@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
+import cn.cyberpeace.mp.base.constant.BaseConstants;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.request.OpenflowActionRequest;
@@ -9,6 +10,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -22,20 +24,21 @@ import javax.validation.Valid;
 @Api(tags = "流表监控")
 public class OpenFlowController {
 
+    @Value("${mp.devops.hostname}")
+    private String hostname;
+
     @Autowired
     private OpenFlowService openFlowService;
 
     /**
      * 流表操作查询
-     * @param method
-     * @param hostname
      * @return
      */
     @ApiOperation("流表操作查询")
     @GetMapping("/action")
-    public ServiceResult<OpenflowActionResponse> queryOpenFlowAction(@RequestParam String method, @RequestParam String hostname) {
+    public ServiceResult<OpenflowActionResponse> queryOpenFlowAction() {
         OpenflowActionRequest request = OpenflowActionRequest.builder()
-                .method(method)
+                .method(BaseConstants.OPENFLOW_ACTION_METHOD)
                 .hostname(hostname)
                 .build();
         OpenflowActionResponse response = openFlowService.queryOpenFlowAction(request);

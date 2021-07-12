@@ -20,11 +20,16 @@ public interface BaseConstants {
     /**
      * 默认页数
      */
-    int defaultPage = 1;
+    int DEFAULTPAGE = 1;
 
     /**
      * 默认每页数量
      */
-    int defaultPageSize = 10;
+    int DEFAULTPAGESIZE = 10;
+
+    /**
+     * 流表监控操作
+     */
+    String OPENFLOW_ACTION_METHOD = "list";
 
 }
