@@ -69,7 +69,7 @@ public class AuthTestController {
 
 
     @GetMapping("/tmpmenu")
-    @ApiIgnore
+//    @ApiIgnore
     public void testTmpMenu() {
 //        tmpMenuService.process();
     }
