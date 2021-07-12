@@ -30,11 +30,11 @@ public interface BaseConstants {
     /**
      * 默认页数
      */
-    int DEFAULTPAGE = 1;
+    int DEFAULT_PAGE = 1;
 
     /**
      * 默认每页数量
      */
-    int DEFAULTPAGESIZE = 10;
+    int DEFAULT_PAGE_SIZE = 10;
 
 }

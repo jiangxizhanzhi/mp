@@ -15,9 +15,9 @@ import lombok.Data;
 public class SceneBaseRequest {
 
     @ApiModelProperty("页码")
-    private int page = BaseConstants.DEFAULTPAGE;
+    private int page = BaseConstants.DEFAULT_PAGE;
 
     @ApiModelProperty("每页数量")
-    private int per_page = BaseConstants.DEFAULTPAGESIZE;
+    private int per_page = BaseConstants.DEFAULT_PAGE_SIZE;
 
 }
