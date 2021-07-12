@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.auth.controller.register;
 
 
+import cn.cyberpeace.mp.auth.constant.AuthLogConstant;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.register.RegisterRequest;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -11,6 +12,7 @@ import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +42,7 @@ public class RegisterController {
 
     @ApiOperation(value = "注册接口", notes = "")
     @PostMapping
+    @OperateLog(module = AuthLogConstant.MODULE, type = AuthLogConstant.TYPE_REGISTER, title = "注册新用户")
     public ServiceResult register(@RequestBody @Validated RegisterRequest req) {
         log.info("req:{}", req);
         String encryptedPwd = req.getPassword();
