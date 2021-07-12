@@ -21,9 +21,8 @@ import javax.validation.constraints.NotEmpty;
 @ApiModel("节点监控请求")
 public class HostMonitorRequest extends SceneBaseRequest {
 
-    @ApiModelProperty("场景id")
+    @ApiModelProperty(value = "场景id", required = true)
     @NotEmpty(message = "场景id不能为空")
     private String sceneId;
-
 
 }

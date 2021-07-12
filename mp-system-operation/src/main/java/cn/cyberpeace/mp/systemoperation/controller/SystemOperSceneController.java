@@ -37,9 +37,9 @@ public class SystemOperSceneController {
      */
     @ApiOperation("场景节点监控分页查询")
     @GetMapping("/pageHostMonitor")
-    public ServiceResult pageHostMonitor(HostMonitorRequest request) {
+    public ServiceResult<HostMonitorResponse> pageHostMonitor(HostMonitorRequest request) {
         SceneBaseResponse<HostMonitorResponse> response = systemOperSceneService.pageHostMonitor(request);
-        if (Objects.nonNull(response.getData()) && Objects.nonNull(response.getLinks())) {
+        if (Objects.nonNull(response.getList()) && Objects.nonNull(response.getLinks())) {
             return ServiceResult.success(response);
         } else {
             return ServiceResult.fail("场景节点监控信息查询异常");
@@ -53,9 +53,9 @@ public class SystemOperSceneController {
      */
     @ApiOperation("场景流量监控分页查询")
     @GetMapping("/pageFlowMonitor")
-    public ServiceResult pageFlowMonitor(FlowMonitorRequest request) {
+    public ServiceResult<FlowMonitorResponse> pageFlowMonitor(FlowMonitorRequest request) {
         SceneBaseResponse<FlowMonitorResponse> response = systemOperSceneService.pageFlowMonitor(request);
-        if (Objects.nonNull(response.getData()) && Objects.nonNull(response.getLinks())) {
+        if (Objects.nonNull(response.getList()) && Objects.nonNull(response.getLinks())) {
             return ServiceResult.success(response);
         } else {
             return ServiceResult.fail("场景流量监控信息查询异常");
@@ -69,9 +69,9 @@ public class SystemOperSceneController {
      */
     @ApiOperation("场景事件监控分页查询")
     @GetMapping("/pageEventMonitor")
-    public ServiceResult pageFlowMonitor(EventMonitorRequest request) {
+    public ServiceResult<EventMonitorResponse> pageFlowMonitor(EventMonitorRequest request) {
         SceneBaseResponse<EventMonitorResponse> response = systemOperSceneService.pageEventMonitor(request);
-        if (Objects.nonNull(response.getData()) && Objects.nonNull(response.getLinks())) {
+        if (Objects.nonNull(response.getList()) && Objects.nonNull(response.getLinks())) {
             return ServiceResult.success(response);
         } else {
             return ServiceResult.fail("事件流量监控信息查询异常");

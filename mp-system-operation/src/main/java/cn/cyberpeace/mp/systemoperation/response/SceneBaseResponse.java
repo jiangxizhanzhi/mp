@@ -29,7 +29,7 @@ public class SceneBaseResponse<T> {
     private Links links;
 
     @ApiModelProperty("数据")
-    private List<T> data;
+    private List<T> list;
 
     /**
      * 结果解析
@@ -47,7 +47,7 @@ public class SceneBaseResponse<T> {
                 Links links = JSONObject.toJavaObject(linkObj, Links.class);
                 JSONArray dataArray = jsonObject.getJSONArray("data");
                 List<T> monitorResponseList = JSONArray.parseArray(dataArray.toJSONString(), clazz);
-                this.setData(monitorResponseList);
+                this.setList(monitorResponseList);
                 this.setLinks(links);
                 // TODO
 //            }

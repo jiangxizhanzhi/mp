@@ -45,7 +45,7 @@ public class SystemOperSceneService {
             urlBuffer.append(ControllerConstant.SCENE_API_URL)
                     .append(request.getSceneId())
                     .append("/host_collections");
-            // 拼接分页信息
+            // 拼接参数信息
             urlBuffer.append(BeanUtils.wrapperGetParamsByObject(request, "sceneId"));
             // TODO test
 //            res = HttpUtils.sendGet(urlBuffer.toString());
@@ -76,7 +76,7 @@ public class SystemOperSceneService {
             urlBuffer.append(ControllerConstant.SCENE_API_URL)
                     .append(request.getSceneId())
                     .append("/flow_collections");
-            // 拼接分页信息
+            // 拼接参数信息
             urlBuffer.append(BeanUtils.wrapperGetParamsByObject(request, "sceneId"));
             // TODO test
 //            res = HttpUtils.sendGet(urlBuffer.toString());
@@ -107,7 +107,7 @@ public class SystemOperSceneService {
             urlBuffer.append(ControllerConstant.SCENE_API_URL)
                     .append(request.getSceneId())
                     .append("/flow_collections");
-            // 拼接分页信息
+            // 拼接参数信息
             urlBuffer.append(BeanUtils.wrapperGetParamsByObject(request, "sceneId"));
            // TODO  test
 //            res = HttpUtils.sendGet(urlBuffer.toString());
