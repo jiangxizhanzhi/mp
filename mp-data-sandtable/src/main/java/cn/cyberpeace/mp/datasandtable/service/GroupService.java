@@ -107,7 +107,8 @@ public class GroupService {
         jsonObject.put("scene_id", groupModel.getGroupId());
         jsonObject.put("macs", groupModel.getMacIds());
         try {
-            HttpUtils.sendPost(sandTableConfig.getGroupUrl(), jsonObject.toJSONString());
+            String res = HttpUtils.sendPost(sandTableConfig.getGroupUrl(), jsonObject.toJSONString());
+            log.info("add group res: {}", res);
         } catch (IOException e) {
             log.error("删除分组失败:"+ e);
             throw new MpRuntimeException("删除分组失败:"+ e);
