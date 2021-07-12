@@ -121,7 +121,7 @@ windows agent测跟linux一样，只是windows可执行命令是 monitor.exe,配
        <wodle name="command">
            <disabled>no</disabled>
            <tag>system-monitor</tag>
-           <command>C:\Program Files (x86)\ossec-agent\monitor.exe</command>
+           <command>C:\ossec-agent\monitor.exe</command>
            <interval>1m</interval>
            <run_on_start>yes</run_on_start>
            <timeout>10</timeout>
