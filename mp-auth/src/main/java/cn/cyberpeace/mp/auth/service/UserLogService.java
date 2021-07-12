@@ -68,7 +68,12 @@ public class UserLogService {
         }
 
 
-        operateLogServiceFactory.create(logModel);
+        try {
+            operateLogServiceFactory.create(logModel);
+        } catch (Exception e) {
+            log.error("{}", ExceptionUtil.stacktraceToString(e));
+
+        }
     }
 
 
