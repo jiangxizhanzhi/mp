@@ -37,6 +37,11 @@ public interface BaseCloudPlatformService {
     String URL_VERSION = "/v1";
 
     /**
+     * 流表监控操作
+     */
+    String OPENFLOW_ACTION_METHOD = "list";
+
+    /**
      * 获取默认的分页忽略参数
      * @return
      */

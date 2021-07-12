@@ -1,19 +1,19 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
-import cn.cyberpeace.mp.base.constant.BaseConstants;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.request.OpenflowActionRequest;
 import cn.cyberpeace.mp.devops.cluster.response.OpenflowActionResponse;
+import cn.cyberpeace.mp.devops.cluster.service.BaseCloudPlatformService;
 import cn.cyberpeace.mp.devops.cluster.service.impl.OpenFlowService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 流表监控类
@@ -38,7 +38,7 @@ public class OpenFlowController {
     @GetMapping("/action")
     public ServiceResult<OpenflowActionResponse> queryOpenFlowAction() {
         OpenflowActionRequest request = OpenflowActionRequest.builder()
-                .method(BaseConstants.OPENFLOW_ACTION_METHOD)
+                .method(BaseCloudPlatformService.OPENFLOW_ACTION_METHOD)
                 .hostname(hostname)
                 .build();
         OpenflowActionResponse response = openFlowService.queryOpenFlowAction(request);
