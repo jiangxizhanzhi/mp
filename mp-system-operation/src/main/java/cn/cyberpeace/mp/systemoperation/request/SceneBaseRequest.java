@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.systemoperation.request;
 
+import cn.cyberpeace.mp.base.constant.BaseConstants;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -14,9 +15,9 @@ import lombok.Data;
 public class SceneBaseRequest {
 
     @ApiModelProperty("页码")
-    private int page;
+    private int page = BaseConstants.DEFAULTPAGE;
 
     @ApiModelProperty("每页数量")
-    private int perPage;
+    private int per_page = BaseConstants.DEFAULTPAGESIZE;
 
 }
