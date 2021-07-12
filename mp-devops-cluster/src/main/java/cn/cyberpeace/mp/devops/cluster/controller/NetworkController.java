@@ -12,6 +12,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,7 +48,7 @@ public class NetworkController {
     public ListObjServiceResult<NetworkPageResponse> page(NetworkPageRequest request){
         NetworkCloudPlatformModel model = networkService.page(request);
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getNetworks())){
-            return new ListObjServiceResult(Lists.newArrayList(),0);
+            return new ListObjServiceResult(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
         }
         List<NetworkCloudPlatformModel.NetworkModel> networks = model.getNetworks();
         List<NetworkPageResponse> list = networks.stream().map(networkModel -> {

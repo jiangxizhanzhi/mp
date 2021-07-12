@@ -29,14 +29,14 @@ public class TmpMenuService {
     private TargetService targetService;
 
     public void process() {
-        String path = "/Users/sternberg/work/saining/all_permissions_json.json";
+        String path = "/Users/sternberg/work/saining/all_permissions_json_0712_96.240.json";
         String s = readJsonFile(path);
         List<TmpMenuDTO> menus = JSON.parseArray(s, TmpMenuDTO.class);
         List<TargetModel> targets = new ArrayList<>();
 
         for (TmpMenuDTO menu : menus) {
-            String id = IdGenerator.generateUUID();
-            menu.setId(id);
+//            String id = IdGenerator.generateUUID();
+            menu.setId(menu.getAuthority());
             // 一开始parentid为null
             recursion(targets, menu, "");
         }
@@ -65,8 +65,8 @@ public class TmpMenuService {
         List<TmpMenuDTO> children = menu.getChildren();
         if (CollectionUtil.isNotEmpty(children)) {
             for (TmpMenuDTO child : children) {
-                String id = IdGenerator.generateUUID();
-                child.setId(id);
+//                String id = IdGenerator.generateUUID();
+                child.setId(child.getAuthority());
                 recursion(targets, child, menu.getId());
             }
         }

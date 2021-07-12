@@ -33,7 +33,7 @@ public class InstanceServiceImpl extends BaseOpenStackServiceImpl implements Ins
 
     @Override
     public String[] getTotalPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldName(InstancePageRequest::getLimit,InstancePageRequest::getOffset,
+        return BeanUtils.getBeanGetterFieldName(InstancePageRequest::getOffset,
                 InstancePageRequest::getPage,InstancePageRequest::getPerPage);
     }
 

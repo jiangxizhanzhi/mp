@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Objects;
 
 @Data
 @NoArgsConstructor
@@ -128,15 +129,17 @@ public class HypervisorPageResponse extends BaseCloudPlatformResponse {
 
 
     public BigDecimal getRamPercent() {
-        return BigDecimal.valueOf(this.ramUsed).divide(BigDecimal.valueOf(this.ram),2, RoundingMode.DOWN).multiply(BigDecimal.valueOf(100));
-
+        return Objects.isNull(this.ram) || Objects.isNull(this.ramUsed) ?
+                BigDecimal.ZERO : BigDecimal.valueOf(this.ramUsed).divide(BigDecimal.valueOf(this.ram),2, RoundingMode.DOWN).multiply(BigDecimal.valueOf(100));
     }
 
     public BigDecimal getCpuPercent() {
-        return BigDecimal.valueOf(this.cpuUsed).divide(BigDecimal.valueOf(this.cpu),2,RoundingMode.DOWN).multiply(BigDecimal.valueOf(100));
+        return Objects.isNull(this.cpu) || Objects.isNull(this.cpuUsed) ?
+                BigDecimal.ZERO : BigDecimal.valueOf(this.cpuUsed).divide(BigDecimal.valueOf(this.cpu),2,RoundingMode.DOWN).multiply(BigDecimal.valueOf(100));
     }
 
     public BigDecimal getDiskPercent() {
-        return BigDecimal.valueOf(this.diskUsed).divide(BigDecimal.valueOf(this.disk),2,RoundingMode.DOWN).multiply(BigDecimal.valueOf(100));
+        return Objects.isNull(this.disk) || Objects.isNull(this.diskUsed) ?
+                BigDecimal.ZERO : BigDecimal.valueOf(this.diskUsed).divide(BigDecimal.valueOf(this.disk),2,RoundingMode.DOWN).multiply(BigDecimal.valueOf(100));
     }
 }

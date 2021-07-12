@@ -209,6 +209,12 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         var result = get(roleId);
         ResultUtils.throwExceptionIfError(result, AuthConstant.ERROR_CODE_PREFIX + "role_not_existed");
 
+        RoleModel roleModel = result.getSource().getObj();
+        if (Objects.equals(AuthConstant.ROLE_ADMIN, roleModel.getIdentifier())) {
+            log.info("管理员角色不需要更新！");
+            return roleModel;
+        }
+
         RoleModel roleUpdate = new RoleModel();
         BeanUtils.copyProperties(modifyRequest, roleUpdate);
         ObjServiceResult<RoleModel> updateResult = update(roleUpdate);
@@ -299,6 +305,14 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         if (StringUtils.isBlank(roleId)) {
             return;
         }
+
+        // 管理员角色不能删除
+        RoleModel roleModel = getModelMapper().get(roleId);
+        if (Objects.equals(AuthConstant.ROLE_ADMIN, roleModel.getIdentifier())) {
+            log.info("管理员角色不能删除！");
+            throw new MpRuntimeException("管理员角色不能删除！");
+        }
+
         boolean deleteRolePermissionSuccess = rolePermissionService.deleteByRoleId(roleId);
         boolean deleteUserRoleSuccess = userRoleService.deleteByRoleId(roleId);
 
@@ -313,6 +327,10 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
             if (getByName(roleModel.getName()) != null) {
                 throw new MpRuntimeException("角色名已存在！[" + roleModel.getName() + "]");
             }
+        }
+
+        if (Objects.equals(AuthConstant.ROLE_ADMIN, roleModel.getIdentifier())) {
+            throw new MpRuntimeException("角色编号不能是ADMIN");
         }
     }
 

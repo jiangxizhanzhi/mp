@@ -12,6 +12,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -50,7 +51,7 @@ public class InstanceController {
     public ListObjServiceResult<InstancePageResponse> page(@Valid InstancePageRequest request){
         InstanceCloudPlatformModel model = instanceService.page(request);
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getInstances())){
-            return new ListObjServiceResult(Lists.newArrayList(),0);
+            return new ListObjServiceResult(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
         }
         List<InstanceCloudPlatformModel.InstanceModel> instances = model.getInstances();
         List<InstancePageResponse> list = instances.stream().map(instanceModel ->

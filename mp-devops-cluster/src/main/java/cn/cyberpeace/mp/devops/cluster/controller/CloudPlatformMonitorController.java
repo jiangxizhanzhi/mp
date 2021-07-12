@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
-import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.model.HypervisorCloudPlatformModel;
@@ -19,6 +18,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -74,24 +74,30 @@ public class CloudPlatformMonitorController {
     public ServiceResult<HypervisorStatisticsResponse> statistics(){
 
         //虚拟机个数
-        CompletableFuture<Integer> totalInstances = CompletableFuture.supplyAsync(() ->
-                instanceService.getTotalInstances(new InstancePageRequest())).handle((result, throwable) -> {
+        CompletableFuture<Integer> totalInstances = CompletableFuture.supplyAsync(() ->{
+                    InstancePageRequest request = new InstancePageRequest();
+                    request.setPerPage(NumberUtils.INTEGER_ONE);
+                    return instanceService.getTotalInstances(request);
+                }).handle((result, throwable) -> {
             // 如果异常存在,打印异常，并且返回默认值
             if (throwable != null) {
                 log.info("=======statistics方法:getTotalInstances获取虚拟机个数异常信息：{}",throwable.getMessage());
-                return 0;
+                return NumberUtils.INTEGER_ZERO;
             } else {
                 return result;
             }
         });
 
         //容器个数
-        CompletableFuture<Integer> totalContainers = CompletableFuture.supplyAsync(() ->
-                containerService.getTotalContainers(new ContainerPageRequest())).handle((result,throwable) -> {
+        CompletableFuture<Integer> totalContainers = CompletableFuture.supplyAsync(() ->{
+                    ContainerPageRequest request = new ContainerPageRequest();
+                    request.setPerPage(NumberUtils.INTEGER_ONE);
+                    return containerService.getTotalContainers(request);
+                }).handle((result,throwable) -> {
             // 如果异常存在,打印异常，并且返回默认值
             if (throwable != null) {
                 log.info("========statistics方法:getTotalContainers获取容器个数异常信息：{}",throwable.getMessage());
-                return 0;
+                return NumberUtils.INTEGER_ZERO;
             } else {
                 return result;
             }
@@ -106,19 +112,22 @@ public class CloudPlatformMonitorController {
             // 如果异常存在,打印异常，并且返回默认值
             if (throwable != null) {
                 log.info("========statistics方法:getTotalNPCs获取NPC个数异常信息：{}",throwable.getMessage());
-                return 0;
+                return NumberUtils.INTEGER_ZERO;
             } else {
                 return result;
             }
         });
 
         //路由个数
-        CompletableFuture<Integer> totalRouters = CompletableFuture.supplyAsync(() ->
-                routerService.getTotalRouters(new RouterPageRequest())).handle((result,throwable) -> {
+        CompletableFuture<Integer> totalRouters = CompletableFuture.supplyAsync(() ->{
+                    RouterPageRequest request = new RouterPageRequest();
+                    request.setPerPage(NumberUtils.INTEGER_ONE);
+                    return routerService.getTotalRouters(request);
+                }).handle((result,throwable) -> {
             // 如果异常存在,打印异常，并且返回默认值
             if (throwable != null) {
                 log.info("========statistics方法:getTotalRouters获取路由个数异常信息：{}",throwable.getMessage());
-                return 0;
+                return NumberUtils.INTEGER_ZERO;
             } else {
                 return result;
             }
@@ -148,7 +157,7 @@ public class CloudPlatformMonitorController {
             response = HypervisorStatisticsResponse.builder().diskIo(diskIo).netIo(netIo)
                     .totalNpc(totalNPCs.get()).totalInstances(totalInstances.get())
                     .totalContainers(totalContainers.get()).totalRealEquipments(totalRealEquipments).totalRouters(totalRouters.get()).build();
-            if(Objects.isNull(model) || Objects.isNull(model.get().getHypervisor_statistics())){
+            if(Objects.isNull(model) || Objects.isNull(model.get()) || Objects.isNull(model.get().getHypervisor_statistics())){
                 return new ServiceResult(response);
             }
 
@@ -175,7 +184,7 @@ public class CloudPlatformMonitorController {
     public ListObjServiceResult<HypervisorPageResponse> page(HypervisorPageRequest request){
         HypervisorCloudPlatformModel model = hypervisorService.pageHypervisors(request);
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getHypervisors())){
-            return new ListObjServiceResult(Lists.newArrayList(),0);
+            return new ListObjServiceResult(Lists.newArrayList(),NumberUtils.INTEGER_ZERO);
         }
         List<HypervisorCloudPlatformModel.Hypervisor> hypervisorList = model.getHypervisors();
         List<HypervisorPageResponse> hypervisorPageResponses = hypervisorList.stream().map(hypervisor ->
@@ -209,9 +218,9 @@ public class CloudPlatformMonitorController {
      */
     @ApiOperation("节点管理-关机/重启")
     @GetMapping("/hypervisor/reboot-poweroff")
-    public ObjServiceResult rebootOrPowerOff(@Valid HypervisorRequest request){
+    public ServiceResult rebootOrPowerOff(@Valid HypervisorRequest request){
         hypervisorService.rebootOrPowerOff(request);
-        return new ObjServiceResult();
+        return ServiceResult.successful();
     }
 
     /**

@@ -15,6 +15,7 @@ import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.service.fields.UserFields;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.service.code.ErrorCode;
 import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.log.constant.LogConstant;
@@ -23,6 +24,7 @@ import cn.cyberpeace.mp.devops.log.utils.SnUtils;
 import cn.hutool.core.collection.CollectionUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.core.Authentication;
@@ -33,6 +35,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -73,53 +76,81 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
             user = ((AuthUserDetails) principal).getUser();
         }
 
-        if (user != null) {
-//            if (!Objects.equals(user.getStatus(), UserModel.Status.NORMAL)) {
-//
-//            }
-
-            String jwt = JwtUtils.generateToken(new JwtUtils.UserInfo(user.getId(), user.getUsername(), user.getTokenSecret()));
-            ObjResult<UserModel> userResult = new ObjResult(user, new UserFields().getAvailableFields());
-            LoginResp loginResp = new LoginResp();
-            loginResp.setUser(userResult.asResult());
-            loginResp.setToken(jwt);
-
-            // 角色
-            List<RoleModel> roles = userRoleService.listByUserId(user.getId());
-            loginResp.setRoles(roles);
-
-            // 权限
-            List<TargetModel> targets = userPermissionService.listByUserId(user.getId());
-            loginResp.setTargets(targets);
-
-            // 菜单
-            List<TargetModel> menuTargets = new ArrayList<>();
-            if (CollectionUtil.isNotEmpty(targets)) {
-                menuTargets = targets.stream().filter(t -> Objects.equals(t.getType(), TargetModel.TYPE_MENU)).collect(Collectors.toList());
-            }
-            loginResp.setMenus(menuTargets);
-
-            // 组织
-            List<OrgDto> orgDtos = orgUserService.listHierarchicalOrgsByUserId(user.getId());
-            loginResp.setOrgs(orgDtos);
-
-            result = ServiceResult.builder().source(loginResp).build();
-
-            // 首次登陆，需要修改密码
-            if (user.getInitCheck() == UserModel.INT_CHECK_YES) {
-                result = ServiceResult.builder().source(loginResp).serviceCode(AuthErrorCode.NEED_UPDATE_CREDENTIALS).build();
-            }
-
-        } else {
+        if (Objects.isNull(user)) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             result = new ServiceResult<>(null, BaseErrorCode.ERROR);
-        }
+        } else {
+            recordLoginLog(user, request);
+            AuthErrorCode errorCode = checkUserErrorStatus(user);
+            if (Objects.nonNull(errorCode)) {
+                response.setStatus(HttpServletResponse.SC_OK);
+                result = new ServiceResult<>(null, errorCode);
+            } else {
+                String jwt = JwtUtils.generateToken(new JwtUtils.UserInfo(user.getId(), user.getUsername(), user.getTokenSecret()));
+                ObjResult<UserModel> userResult = new ObjResult(user, new UserFields().getAvailableFields());
+                LoginResp loginResp = new LoginResp();
+                loginResp.setUser(userResult.asResult());
+                loginResp.setToken(jwt);
 
-        recordLoginLog(user, request);
+                // 角色
+                List<RoleModel> roles = userRoleService.listByUserId(user.getId());
+                loginResp.setRoles(roles);
+
+                // 权限
+                List<TargetModel> targets = userPermissionService.listByUserId(user.getId());
+                loginResp.setTargets(targets);
+
+                // 菜单
+                List<TargetModel> menuTargets = new ArrayList<>();
+                if (CollectionUtil.isNotEmpty(targets)) {
+                    menuTargets = targets.stream().filter(t -> Objects.equals(t.getType(), TargetModel.TYPE_MENU)).collect(Collectors.toList());
+                }
+                loginResp.setMenus(menuTargets);
+
+                // 组织
+                List<OrgDto> orgDtos = orgUserService.listHierarchicalOrgsByUserId(user.getId());
+                loginResp.setOrgs(orgDtos);
+
+                result = ServiceResult.builder().source(loginResp).build();
+
+                // 首次登陆，需要修改密码
+                if (user.getInitCheck() == UserModel.INT_CHECK_YES) {
+                    result = ServiceResult.builder().source(loginResp).serviceCode(AuthErrorCode.NEED_UPDATE_CREDENTIALS).build();
+                }
+            }
+        }
 
         PrintWriter writer = response.getWriter();
         mapper.writeValue(writer, result.asResult());
         writer.flush();
+    }
+
+
+    private AuthErrorCode checkUserErrorStatus(UserModel user) {
+        String errorStatusMsg = null;
+        AuthErrorCode errorCode = null;
+
+        // 状态优先级 禁用 > 过期 > 待审核
+        if (Objects.equals(user.getIsAudited(), UserModel.Status.NOT_AUDITED)) {
+            errorStatusMsg = "用户未审核，不能登录！";
+            errorCode = AuthErrorCode.ACCOUNT_NOT_AUDITED;
+        }
+
+        // 过期
+        LocalDateTime now = LocalDateTime.now();
+        if (Objects.nonNull(user.getExpiredTime()) && now.isAfter(user.getExpiredTime())) {
+            errorStatusMsg = "用户已过期，不能登录！";
+            errorCode = AuthErrorCode.ACCOUNT_EXPIRED;
+        }
+
+        // 禁用
+        if (Objects.equals(user.getIsEnabled(), UserModel.Status.DISABLED)) {
+            errorStatusMsg = "用户已被禁用，不能登录！";
+            errorCode = AuthErrorCode.ACCOUNT_DISABLED;
+        }
+
+        log.info("Login blocked! {}", errorStatusMsg);
+        return errorCode;
     }
 
 

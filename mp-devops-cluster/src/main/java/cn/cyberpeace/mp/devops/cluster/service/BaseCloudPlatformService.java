@@ -27,9 +27,19 @@ public interface BaseCloudPlatformService {
     String CPCLOUD_SWITCH_URL = CPCLOUD_URL + "/switch";
 
     /**
+     * cpcloud平台流控模块URL前缀
+     */
+    String CPCLOUD_OPENFLOW = CPCLOUD_URL + "/sdn_app";
+
+    /**
      * 版本
      */
     String URL_VERSION = "/v1";
+
+    /**
+     * 流表监控操作
+     */
+    String OPENFLOW_ACTION_METHOD = "list";
 
     /**
      * 获取默认的分页忽略参数
