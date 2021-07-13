@@ -85,7 +85,7 @@ public class WazuhService {
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             List<WazuhFileRoot> wazuhFileRootList = Arrays.stream(response.getHits().getHits()).map(hit -> JSONObject.parseObject(hit.getSourceAsString(), WazuhFileRoot.class)).collect(Collectors.toList());
-            List<FileEventModel> fileEventModelList = wazuhFileRootList.stream().map((root -> this.getFileEventModel(root,multiValueMap, wazuhEventRequest))).collect(Collectors.toList());
+            List<FileEventModel> fileEventModelList = wazuhFileRootList.stream().map((root -> this.getFileEventModel(root, multiValueMap, wazuhEventRequest))).collect(Collectors.toList());
             return new ListObjResult<>(fileEventModelList, total);
         } catch (IOException e) {
             log.error("es 查询文件事件分页 {}", e);
@@ -147,10 +147,12 @@ public class WazuhService {
 
     /**
      * 根据agent查询
+     *
      * @param agentId
      * @param macIds
      */
-    private String queryMacIdByAgentId(String agentId, List<String> macIds, MultiValueMap<String, String> multiValueMap) {
+    private String queryMacIdByAgentId(String agentId, List<String> macIds,
+        MultiValueMap<String, String> multiValueMap) {
         List<String> ids = multiValueMap.get(agentId);
         var currentMacId = Sets.intersection(Sets.newHashSet(macIds), Sets.newHashSet(ids));
         return currentMacId.iterator().next();
@@ -162,7 +164,8 @@ public class WazuhService {
      * @param wazuhEventRequest wazuhEventRequest
      * @param boolQueryBuilder boolQueryBuilder
      */
-    private void buildMonitorEventsBuilder(WazuhMonitorEventsRequest wazuhEventRequest, BoolQueryBuilder boolQueryBuilder, MultiValueMap<String, String> allAgentMacAddr) {
+    private void buildMonitorEventsBuilder(WazuhMonitorEventsRequest wazuhEventRequest,
+        BoolQueryBuilder boolQueryBuilder, MultiValueMap<String, String> allAgentMacAddr) {
         //构造查询条件
         boolQueryBuilder.must(QueryBuilders.termQuery("rule.id", "900002"));
         buildAgentIdQuery(wazuhEventRequest.getMacIds(), boolQueryBuilder, allAgentMacAddr);
@@ -215,14 +218,15 @@ public class WazuhService {
      * @param wazuhFileRoot
      * @return
      */
-    private FileEventModel getFileEventModel(WazuhFileRoot wazuhFileRoot, MultiValueMap<String, String> multiValueMap, WazuhEventRequest wazuhEventRequest) {
+    private FileEventModel getFileEventModel(WazuhFileRoot wazuhFileRoot, MultiValueMap<String, String> multiValueMap,
+        WazuhEventRequest wazuhEventRequest) {
         return FileEventModel.builder()
             .filePath(wazuhFileRoot.getSyscheck().getPath())
             .size(wazuhFileRoot.getSyscheck().getSizeAfter())
             .updateTime(LocalDateTimeUtils.dateToLocalDateTime(wazuhFileRoot.getTimestamp()))
             .user(wazuhFileRoot.getSyscheck().getUnameAfter())
             .action(wazuhFileRoot.getSyscheck().getEvent())
-            .macId(queryMacIdByAgentId(wazuhFileRoot.getAgent().getId(),wazuhEventRequest.getMacIds(), multiValueMap))
+            .macId(queryMacIdByAgentId(wazuhFileRoot.getAgent().getId(), wazuhEventRequest.getMacIds(), multiValueMap))
             //区分文件还是注册表
             .fileEventType(wazuhFileRoot.getRule().getGroups().stream().anyMatch("syscheck_registry"::equals) ? FileEventType.REGISTRY : FileEventType.FILE)
             .build();
@@ -251,17 +255,17 @@ public class WazuhService {
 
     /**
      * 构造请求的索引
+     *
      * @param start
      * @param end
      * @return
      */
-    private String[] buildRequestIndex(LocalDateTime start , LocalDateTime end) {
+    private String[] buildRequestIndex(LocalDateTime start, LocalDateTime end) {
         List<String> indexList = indexListBuilder(start, end);
         var indexArray = new String[indexList.size()];
         indexList.toArray(indexArray);
         return indexArray;
     }
-
 
     private void buildFileEventBoolQueryBuilder(WazuhEventRequest wazuhEventRequest,
         BoolQueryBuilder boolQueryBuilder, MultiValueMap<String, String> allAgentMacAddr) {
@@ -279,11 +283,13 @@ public class WazuhService {
 
     /**
      * 构造agentIdQuery
+     *
      * @param macIds
      * @param boolQueryBuilder
      * @param allAgentMacAddr
      */
-    private void buildAgentIdQuery(List<String> macIds, BoolQueryBuilder boolQueryBuilder, MultiValueMap<String, String> allAgentMacAddr) {
+    private void buildAgentIdQuery(List<String> macIds, BoolQueryBuilder boolQueryBuilder,
+        MultiValueMap<String, String> allAgentMacAddr) {
         boolQueryBuilder.filter(QueryBuilders.termsQuery("agent.id", this.queryAgentIdsByMac(macIds, allAgentMacAddr)));
     }
 
@@ -314,7 +320,7 @@ public class WazuhService {
      * @return List<IndexBoost>
      */
     @VisibleForTesting
-    protected List<String> indexListBuilder(LocalDateTime start , LocalDateTime end) {
+    protected List<String> indexListBuilder(LocalDateTime start, LocalDateTime end) {
         List<String> dateStringList = fetchFormatterTime(start, end);
         return dateStringList.stream().map(dateString -> wazuhAlertIndexPrefix + dateString).collect(Collectors.toList());
     }
@@ -334,7 +340,7 @@ public class WazuhService {
             return IntStream.range(0, days + 1).boxed().map(startTime::plusDays).map((time) -> time.format(DateTimeFormatter.ofPattern("yyyy.MM.*")))
                 .distinct().collect(Collectors.toList());
         }
-        return  IntStream.range(0, days + 1).boxed().map(startTime::plusDays).map((time) -> time.format(DateTimeFormatter.ofPattern("yyyy.MM.dd")))
+        return IntStream.range(0, days + 1).boxed().map(startTime::plusDays).map((time) -> time.format(DateTimeFormatter.ofPattern("yyyy.MM.dd")))
             .distinct().collect(Collectors.toList());
     }
 }
