@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -183,6 +184,9 @@ public class WazuhService {
     public MultiValueMap<String, String> queryAllAgentMacAddr() {
         MultiValueMap<String, String> responseMultiMap = new LinkedMultiValueMap<>();
         var wazuhNetifaceRoot = wazuhDao.queryAllAgentMac();
+        if (Objects.isNull(wazuhNetifaceRoot.getData())) {
+            return responseMultiMap;
+        }
         wazuhNetifaceRoot.getData().getAffectedItems().forEach(item -> {
             responseMultiMap.add(item.getAgentId(), item.getMac());
         });
