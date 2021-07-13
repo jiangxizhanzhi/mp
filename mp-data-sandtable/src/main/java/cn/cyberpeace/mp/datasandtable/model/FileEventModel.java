@@ -39,4 +39,7 @@ public class FileEventModel {
      */
     @ApiModelProperty("文件事件类型")
     private FileEventType fileEventType;
+
+    @ApiModelProperty("文件事件类型")
+    private String macId;
 }

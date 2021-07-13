@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.datasandtable.service;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
-import cn.cyberpeace.mp.base.util.IteratorUtils;
 import cn.cyberpeace.mp.base.util.LocalDateTimeUtils;
 import cn.cyberpeace.mp.datasandtable.dao.WazuhDao;
 import cn.cyberpeace.mp.datasandtable.model.FileEventModel;
@@ -22,8 +21,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -76,8 +73,9 @@ public class WazuhService {
         var boolQueryBuilder = QueryBuilders.boolQuery();
         var sourceBuilder = new SearchSourceBuilder();
 
+        MultiValueMap<String, String> multiValueMap = this.queryAllAgentMacAddr();
         //构造查询条件
-        buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, this.queryAllAgentMacAddr());
+        buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, multiValueMap);
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
         //配置索引为空
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
@@ -87,7 +85,7 @@ public class WazuhService {
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             List<WazuhFileRoot> wazuhFileRootList = Arrays.stream(response.getHits().getHits()).map(hit -> JSONObject.parseObject(hit.getSourceAsString(), WazuhFileRoot.class)).collect(Collectors.toList());
-            List<FileEventModel> fileEventModelList = wazuhFileRootList.stream().map(this::getFileEventModel).collect(Collectors.toList());
+            List<FileEventModel> fileEventModelList = wazuhFileRootList.stream().map((root -> this.getFileEventModel(root,multiValueMap, wazuhEventRequest))).collect(Collectors.toList());
             return new ListObjResult<>(fileEventModelList, total);
         } catch (IOException e) {
             log.error("es 查询文件事件分页 {}", e);
@@ -130,7 +128,7 @@ public class WazuhService {
                     var monitorMessage = model.getFullLog().substring("MonitorMessage:".length());
                     var result = JSONObject.parseObject(monitorMessage, WazuhModel.class);
                     result.setAgentId(model.getAgent().getId());
-                    result.setMacId(findMacIdByAgentId(model.getAgent().getId(), wazuhMonitorEventsRequest.getMacIds(), multiValueMap));
+                    result.setMacId(queryMacIdByAgentId(model.getAgent().getId(), wazuhMonitorEventsRequest.getMacIds(), multiValueMap));
                     return result;
                 }).collect(Collectors.toList());
 
@@ -152,7 +150,7 @@ public class WazuhService {
      * @param agentId
      * @param macIds
      */
-    private String findMacIdByAgentId(String agentId, List<String> macIds, MultiValueMap<String, String> multiValueMap) {
+    private String queryMacIdByAgentId(String agentId, List<String> macIds, MultiValueMap<String, String> multiValueMap) {
         List<String> ids = multiValueMap.get(agentId);
         var currentMacId = Sets.intersection(Sets.newHashSet(macIds), Sets.newHashSet(ids));
         return currentMacId.iterator().next();
@@ -217,13 +215,14 @@ public class WazuhService {
      * @param wazuhFileRoot
      * @return
      */
-    private FileEventModel getFileEventModel(WazuhFileRoot wazuhFileRoot) {
+    private FileEventModel getFileEventModel(WazuhFileRoot wazuhFileRoot, MultiValueMap<String, String> multiValueMap, WazuhEventRequest wazuhEventRequest) {
         return FileEventModel.builder()
             .filePath(wazuhFileRoot.getSyscheck().getPath())
             .size(wazuhFileRoot.getSyscheck().getSizeAfter())
             .updateTime(LocalDateTimeUtils.dateToLocalDateTime(wazuhFileRoot.getTimestamp()))
             .user(wazuhFileRoot.getSyscheck().getUnameAfter())
             .action(wazuhFileRoot.getSyscheck().getEvent())
+            .macId(queryMacIdByAgentId(wazuhFileRoot.getAgent().getId(),wazuhEventRequest.getMacIds(), multiValueMap))
             //区分文件还是注册表
             .fileEventType(wazuhFileRoot.getRule().getGroups().stream().anyMatch("syscheck_registry"::equals) ? FileEventType.REGISTRY : FileEventType.FILE)
             .build();
