@@ -63,13 +63,16 @@ mp:
       password: api
     es-nodes: 10.100.7.50:9200
     wazuh:
-      base-url: https://192.168.5.125:55000
-      username: wazuh
-      password: wazuh
-      es-url: 192.168.5.125
+      #wazuh 开放接口地址
+      base-url: https://10.100.14.106/:55000
+      #wazuh 开放接口用户名密码
+      username: acme-user
+      password: MyS3cr37P450r.*-
+      #wazuh es地址用户名密码
+      es-url: 10.100.14.106
       es-port: 9200
       es-username: admin
-      es-password: admin
+      es-password: SecretPassword
   log:
     exclude-uri: /login
     exclude-method: OPTIONS
