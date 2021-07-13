@@ -1,0 +1,50 @@
+package cn.cyberpeace.mp.auth.service.impl;
+
+import cn.cyberpeace.mp.auth.dto.OrgDto;
+import cn.cyberpeace.mp.auth.model.OrgModel;
+import cn.cyberpeace.mp.auth.service.OrgOperation;
+import cn.cyberpeace.mp.auth.service.OrgService;
+import org.aspectj.weaver.ast.Or;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+
+@Component
+@Scope("prototype")
+public class UpdateChildOrgPathOperation implements OrgOperation<OrgDto> {
+
+    @Autowired
+    private OrgService orgService;
+
+
+    @Override
+    public OrgDto doExecute(OrgDto orgDto) {
+//        if (StringUtils.isBlank(orgDto.getParent())) {
+//            return orgDto;
+//        }
+
+        var childlist = orgService.listByParent(orgDto.getId());
+//        var childList = new ArrayList();
+        for (OrgModel child : childlist) {
+            OrgDto childDto = new OrgDto();
+            BeanUtils.copyProperties(child, childDto);
+            String newPath = orgService.calculatePathByOrgId(child.getId());
+
+            OrgModel updateChild = new OrgModel();
+            updateChild.setPath(newPath);
+            updateChild.setId(child.getId());
+            orgService.update(updateChild);
+
+            childDto.execute(this);
+//            OrgDto orgDto1 = new OrgDto();
+//            BeanUtils.copyProperties(child, orgDto1);
+//            childList.add(childDto);
+        }
+//        orgDto.setChildren(childList);
+
+        return orgDto;
+    }
+}

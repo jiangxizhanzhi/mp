@@ -9,3 +9,15 @@ INSERT INTO mp_auth_user_role (pk, id, tenant, user, role, create_time, update_t
 
 -- 客户端授权
 INSERT INTO mp_auth_client_details (pk, client_id, resource_ids, client_secret, type, scope, authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity, refresh_token_validity, additional_information, autoapprove) VALUES (1, '84261d495c414e', 'all', '2112f4b855264ad7b1a4209737fc7836', 2, 'all', 'all', null, null, null, null, null, null);
+
+
+-- 默认头像
+INSERT INTO mp_auth_avatar (pk, id, url, create_time, update_time) VALUES (1, '1', '/fdfs/group1/M00/01/55/CmQO_GDtBPaAIqetAADFmq1O8YE839.png', '2021-07-03 10:09:05.000000', '2021-07-03 10:09:07.000000');
+INSERT INTO mp_auth_avatar (pk, id, url, create_time, update_time) VALUES (2, '2', '/fdfs/group1/M00/01/55/CmQO_GDtBSuAZ9XXAACIQD_kUto650.png', '2021-07-03 10:09:05.000000', '2021-07-03 10:09:07.000000');
+INSERT INTO mp_auth_avatar (pk, id, url, create_time, update_time) VALUES (3, '3', '/fdfs/group1/M00/01/55/CmQO_GDtBUaANenKAACvtHWZ1-g540.png', '2021-07-03 10:09:05.000000', '2021-07-03 10:09:07.000000');
+INSERT INTO mp_auth_avatar (pk, id, url, create_time, update_time) VALUES (4, '4', '/fdfs/group1/M00/01/55/CmQO_GDtBYSAd6J6AAC3Z_Sm84k252.png', '2021-07-03 10:09:05.000000', '2021-07-03 10:09:07.000000');
+INSERT INTO mp_auth_avatar (pk, id, url, create_time, update_time) VALUES (5, '5', '/fdfs/group1/M00/01/55/CmQO_GDtBZyAUZqgAADRF7kKXkQ783.png', '2021-07-03 10:09:05.000000', '2021-07-03 10:09:07.000000');
+INSERT INTO mp_auth_avatar (pk, id, url, create_time, update_time) VALUES (6, '6', '/fdfs/group1/M00/01/55/CmQO_GDtBcOAAHg9AADCu1xFRVY798.png', '2021-07-03 10:09:05.000000', '2021-07-03 10:09:07.000000');
+INSERT INTO mp_auth_avatar (pk, id, url, create_time, update_time) VALUES (7, '7', '/fdfs/group1/M00/01/55/CmQO_GDtBdyAXp1-AAC_trViz9A182.png', '2021-07-03 10:09:05.000000', '2021-07-03 10:09:07.000000');
+INSERT INTO mp_auth_avatar (pk, id, url, create_time, update_time) VALUES (8, '8', '/fdfs/group1/M00/01/55/CmQO_GDtBfeAYTqrAADEtkPKBzM983.png', '2021-07-03 10:09:05.000000', '2021-07-03 10:09:07.000000');
+INSERT INTO mp_auth_avatar (pk, id, url, create_time, update_time) VALUES (9, '9', '/fdfs/group1/M00/01/55/CmQO_GDtBgqAW3jAAADZj_AdtGM862.png', '2021-07-03 10:09:05.000000', '2021-07-03 10:09:07.000000');

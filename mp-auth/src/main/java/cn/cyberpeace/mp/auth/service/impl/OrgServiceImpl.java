@@ -41,6 +41,9 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     private QueryChildOrgOperation queryChildOrgOperation;
 
     @Autowired
+    private UpdateChildOrgPathOperation updateChildOrgPathOperation;
+
+    @Autowired
     private OrgPermissionService orgPermissionService;
 
     @Autowired
@@ -67,19 +70,24 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ObjServiceResult<OrgModel> update(OrgModel obj, String[] fields) {
         // 如果更新parent，则重新计算path
         if (StringUtils.isNotBlank(obj.getParent())) {
-            OrgModel orgModel = getModelMapper().get(obj.getParent());
-            if (orgModel == null) {
+            OrgModel parentOrg = getModelMapper().get(obj.getParent());
+            if (parentOrg == null) {
                 throw new IllegalArgumentException("id为"+ obj.getParent() + "的组织不存在");
             }
-            String path = calculatePathByOrgId(orgModel.getId());
+            String path = calculatePathByOrgId(parentOrg.getId());
             path = path + AuthConstant.ORG_PATH_SEPARATOR + obj.getName();
             obj.setPath(path);
+
         }
 
         // todo 如果更新组织名称，则递归更新所有关联组织的path
+        OrgDto orgDto = new OrgDto();
+        BeanUtils.copyProperties(obj, orgDto);
+        updateChildOrgPathOperation.doExecute(orgDto);
 
         return super.update(obj, fields);
     }

@@ -22,6 +22,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Set;
 
 @Component
@@ -42,7 +43,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             UserModel user = JwtCommon.verifyToken(token);
             UsernamePasswordAuthenticationToken authenticationToken = null;
             if (user != null) {
-                Set<GrantedAuthority> authoritySet = authUserDetailsService.loadAuthorities(user.getId());
+//                Set<GrantedAuthority> authoritySet = authUserDetailsService.loadAuthorities(user.getId());
+                Set<GrantedAuthority> authoritySet = new HashSet<>();
 
                 authenticationToken = new UsernamePasswordAuthenticationToken(new AuthUserDetails(user, authoritySet), token,
                         null);
