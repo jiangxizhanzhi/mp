@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.AuthLogConstant;
 import cn.cyberpeace.mp.auth.dto.OrgDto;
 import cn.cyberpeace.mp.auth.dto.login.LoginResp;
+import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetails;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
@@ -12,6 +13,7 @@ import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.service.UserLogService;
 import cn.cyberpeace.mp.auth.service.UserPermissionService;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.UserFields;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
@@ -59,6 +61,9 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
     private UserLogService userLogService;
 
     @Autowired
+    private UserService userService;
+
+    @Autowired
     public CustomAuthenticationSuccessHandler(MappingJackson2HttpMessageConverter messageConverter) {
         this.mapper = messageConverter.getObjectMapper();
     }
@@ -88,28 +93,33 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
             } else {
                 String jwt = JwtUtils.generateToken(new JwtUtils.UserInfo(user.getId(), user.getUsername(), user.getTokenSecret()));
                 ObjResult<UserModel> userResult = new ObjResult(user, new UserFields().getAvailableFields());
+                UserDto userDto = userService.userModel2UserDto(userResult.getObj());
                 LoginResp loginResp = new LoginResp();
-                loginResp.setUser(userResult.asResult());
+                loginResp.setUser(userDto);
                 loginResp.setToken(jwt);
 
                 // 角色
-                List<RoleModel> roles = userRoleService.listByUserId(user.getId());
-                loginResp.setRoles(roles);
+//                List<RoleModel> roles = userRoleService.listByUserId(user.getId());
+//                loginResp.setRoles(roles);
 
-                // 权限
+                // 权限 暂时不用返回
+                /*
                 List<TargetModel> targets = userPermissionService.listByUserId(user.getId());
                 loginResp.setTargets(targets);
+                */
 
-                // 菜单
+                // 菜单 暂时不用返回
+                /*
                 List<TargetModel> menuTargets = new ArrayList<>();
                 if (CollectionUtil.isNotEmpty(targets)) {
                     menuTargets = targets.stream().filter(t -> Objects.equals(t.getType(), TargetModel.TYPE_MENU)).collect(Collectors.toList());
                 }
                 loginResp.setMenus(menuTargets);
+                */
 
                 // 组织
-                List<OrgDto> orgDtos = orgUserService.listHierarchicalOrgsByUserId(user.getId());
-                loginResp.setOrgs(orgDtos);
+//                List<OrgDto> orgDtos = orgUserService.listHierarchicalOrgsByUserId(user.getId());
+//                loginResp.setOrgs(orgDtos);
 
                 result = ServiceResult.builder().source(loginResp).build();
 
