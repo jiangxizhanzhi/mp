@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.auth.service.impl;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.dto.OrgDto;
+import cn.cyberpeace.mp.auth.dto.target.TargetDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.repository.OrgMapper;
 import cn.cyberpeace.mp.auth.service.OrgPermissionService;
@@ -141,6 +142,9 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
                 return new ArrayList<>();
             }
             List<OrgDto> tree = toTree(orgs);
+
+            sortTree(tree);
+
             return tree;
         }
 
@@ -267,5 +271,16 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
             log.info("deleteOrgPermissionSuccess:{}, deleteOrgUserSuccess:{}", deleteOrgPermissionSuccess, deleteOrgUserSuccess);
             throw new MpRuntimeException("删除失败！");
         }
+    }
+
+    // 组织树排序
+    private void sortTree(List<OrgDto> orgs) {
+        orgs.forEach(o -> {
+            if (CollectionUtil.isNotEmpty(o.getChildren())) {
+                sortTree(o.getChildren());
+            }
+        });
+
+        orgs.sort((o1, o2) -> o1.getPk() - o2.getPk());
     }
 }

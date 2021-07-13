@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -119,6 +120,11 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
                 return new ArrayList<>();
             }
             List<TargetDto> tree = toTree(targets);
+
+            // 父节点根据pk做排序
+//            tree.sort((o1, o2) -> o1.getPk() - o2.getPk());
+            sortTree(tree);
+
             return tree;
         }
 
@@ -222,7 +228,17 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
         if(!deleteUserPermissionSuccess || !deleteOrgPermissionSuccess || !deleteRolePermissionSuccess) {
             throw new MpRuntimeException("删除失败！");
         }
-
-
     }
+
+    // 权限树排序
+    private void sortTree(List<TargetDto> targets) {
+        targets.forEach(t -> {
+            if (CollectionUtil.isNotEmpty(t.getChildren())) {
+                sortTree(t.getChildren());
+            }
+        });
+
+        targets.sort((t1, t2) -> t1.getPk() - t2.getPk());
+    }
+
 }

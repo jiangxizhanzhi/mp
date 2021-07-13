@@ -33,7 +33,7 @@ public class HostMonitorResponse {
     @ApiModelProperty("cpu利用率")
     private BigDecimal cpu_total_percent;
 
-    @ApiModelProperty("cpu利用率")
+    @ApiModelProperty("磁盘空间")
     private BigDecimal disk_space;
 
     @ApiModelProperty("总内存")
