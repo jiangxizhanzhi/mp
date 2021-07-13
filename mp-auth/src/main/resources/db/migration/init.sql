@@ -21,3 +21,4 @@ INSERT INTO mp_auth_avatar (pk, id, url, create_time, update_time) VALUES (6, '6
 INSERT INTO mp_auth_avatar (pk, id, url, create_time, update_time) VALUES (7, '7', '/fdfs/group1/M00/01/55/CmQO_GDtBdyAXp1-AAC_trViz9A182.png', '2021-07-03 10:09:05.000000', '2021-07-03 10:09:07.000000');
 INSERT INTO mp_auth_avatar (pk, id, url, create_time, update_time) VALUES (8, '8', '/fdfs/group1/M00/01/55/CmQO_GDtBfeAYTqrAADEtkPKBzM983.png', '2021-07-03 10:09:05.000000', '2021-07-03 10:09:07.000000');
 INSERT INTO mp_auth_avatar (pk, id, url, create_time, update_time) VALUES (9, '9', '/fdfs/group1/M00/01/55/CmQO_GDtBgqAW3jAAADZj_AdtGM862.png', '2021-07-03 10:09:05.000000', '2021-07-03 10:09:07.000000');
+

@@ -21,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -72,6 +73,12 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     @Override
     @Transactional(rollbackFor = Exception.class)
     public ObjServiceResult<OrgModel> update(OrgModel obj, String[] fields) {
+
+        OrgModel oldOrg = getModelMapper().get(obj.getId());
+        Assert.notNull(oldOrg, "组织不存在! id:" + obj.getId());
+        // 不允许直接更新path
+        obj.setPath(null);
+
         // 如果更新parent，则重新计算path
         if (StringUtils.isNotBlank(obj.getParent())) {
             OrgModel parentOrg = getModelMapper().get(obj.getParent());
@@ -81,23 +88,49 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
             String path = calculatePathByOrgId(parentOrg.getId());
             path = path + AuthConstant.ORG_PATH_SEPARATOR + obj.getName();
             obj.setPath(path);
-
         }
 
-        // todo 如果更新组织名称，则递归更新所有关联组织的path
-        OrgDto orgDto = new OrgDto();
-        BeanUtils.copyProperties(obj, orgDto);
-        updateChildOrgPathOperation.doExecute(orgDto);
+        // 是否需要更新组织名称
+        boolean needUpdateName = StringUtils.isNotBlank(obj.getName()) && !Objects.equals(obj.getName(), oldOrg.getName());
 
-        return super.update(obj, fields);
+        if (needUpdateName) {
+            // 更新自身的path
+            String oldpath = oldOrg.getPath();
+            String newPath = "";
+            if (oldpath.contains(AuthConstant.ORG_PATH_SEPARATOR)) {
+                newPath = oldpath.substring(0, oldpath.lastIndexOf(AuthConstant.ORG_PATH_SEPARATOR) + 1) + obj.getName();
+            } else {
+                // 不含/，说明是一级组织
+                newPath = obj.getName();
+            }
+            obj.setPath(newPath);
+        }
+
+        // 1.先更新OrgModel信息
+        ObjServiceResult<OrgModel> result = super.update(obj, fields);
+        OrgModel orgUpdated = result.getSource().getObj();
+
+        // 2.再更新orgpath信息，这样可以查询到前面未提交sql更新的内容
+        if (needUpdateName) {
+            // 如果更新组织名称，则递归更新所有下级组织的path
+            OrgDto orgDto = new OrgDto();
+            BeanUtils.copyProperties(orgUpdated, orgDto);
+            updateChildOrgPathOperation.doExecute(orgDto);
+        }
+
+        return result;
+    }
+
+    @Override
+    public ServiceResult<Integer> bulkUpdate(List<OrgModel> objs) {
+//        return super.bulkUpdate(objs);
+        throw new MpRuntimeException("暂不支持此操作！");
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public ServiceResult<Boolean> delete(String orgId) {
         Assert.notBlank(orgId, "orgId不能为空！");
-        // todo 删除组织-权限，组织-用户关联关系
-        // todo 或者，如果存在绑定关系，是否允许删除？
         List<OrgModel> children = listByParent(orgId);
         if (CollectionUtil.isNotEmpty(children)) {
             throw new MpRuntimeException("该组织下有子组织，不能删除！");
@@ -267,6 +300,10 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     }
 
 
+    /**
+     * 删除组织-权限，组织-人员的关系
+     * @param orgId
+     */
     private void deleteReleated(String orgId) {
         if (StringUtils.isBlank(orgId)) {
             return;

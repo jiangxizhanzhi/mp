@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Result;
 import org.apache.ibatis.annotations.Results;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -28,4 +29,7 @@ public interface OrgMapper extends BaseModelMapper<OrgModel> {
 
     @Select("SELECT * FROM mp_auth_org where path = #{path}")
     OrgModel getByPath(@Param("path") String path);
+
+    @Update("update mp_auth_org set path = #{path} where id = #{id}")
+    int updatePath(@Param("id") String id, @Param("path") String path);
 }

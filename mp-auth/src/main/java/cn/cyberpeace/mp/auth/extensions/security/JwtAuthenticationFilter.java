@@ -43,7 +43,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             UserModel user = JwtCommon.verifyToken(token);
             UsernamePasswordAuthenticationToken authenticationToken = null;
             if (user != null) {
-//                Set<GrantedAuthority> authoritySet = authUserDetailsService.loadAuthorities(user.getId());
+                // 暂时不用加载权限信息
+                // Set<GrantedAuthority> authoritySet = authUserDetailsService.loadAuthorities(user.getId());
                 Set<GrantedAuthority> authoritySet = new HashSet<>();
 
                 authenticationToken = new UsernamePasswordAuthenticationToken(new AuthUserDetails(user, authoritySet), token,
