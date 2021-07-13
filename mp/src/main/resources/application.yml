@@ -34,7 +34,7 @@ mybatis:
 mp:
   base:
     mg-url: http://10.100.2.21
-    fdfs-url: 192.168.5.68  # fdfs服务器地址
+    fdfs-url: 10.100.14.252  # fdfs服务器地址
     # fastdfs配置
     fastdfs:
       max-storage-connection: 8   # 最大连接数
@@ -46,8 +46,8 @@ mp:
         # 集群配置：每增加一个集群，参考下例添加相应配置即可，同时在FdfsGroupEnum.java枚举类中添加该集群名称
         - group-name: DEFAULT    # 集群名称
           tracker-servers: ${mp.base.fdfs-url}:22122
-          file-server-addr: http://192.168.5.68:80    # 外部文件服务器地址
-          inner-file-server-addr: http://${mp.base.fdfs-url}:80    # 内部文件服务器地址
+          file-server-addr: /fdfs    # 外部文件服务器地址
+          inner-file-server-addr: http://${mp.base.fdfs-url}:8888   # 内部文件服务器地址
   auth:
     needRegistrationAudit: true
     excel-template-name: 用户列表.xls
