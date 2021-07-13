@@ -88,7 +88,7 @@ public class WazuhService {
             List<FileEventModel> fileEventModelList = wazuhFileRootList.stream().map((root -> this.getFileEventModel(root, multiValueMap, wazuhEventRequest))).collect(Collectors.toList());
             return new ListObjResult<>(fileEventModelList, total);
         } catch (IOException e) {
-            log.error("es 查询文件事件分页 {} ", e);
+            log.error("es 查询文件事件分页 {}", e);
             throw new MpRuntimeException(BaseErrorCode.ERROR, e.toString());
         }
     }
