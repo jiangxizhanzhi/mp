@@ -19,8 +19,8 @@ public class DevopsConfig {
     private String cp_url;
 
     /**
-     * mg中台接口地址
+     * cr接口地址
      */
-    private String mg_url;
+    private String cr_url;
 
 }
