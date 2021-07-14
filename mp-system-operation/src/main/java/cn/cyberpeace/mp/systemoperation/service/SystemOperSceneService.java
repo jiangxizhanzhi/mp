@@ -91,7 +91,7 @@ public class SystemOperSceneService {
 
         // 结果解析
         SceneBaseResponse<FlowMonitorResponse> baseResponse = new SceneBaseResponse();
-        String result = baseResponse.parseResult(res, HostMonitorResponse.class);
+        String result = baseResponse.parseResult(res, FlowMonitorResponse.class);
         if (!BaseConstants.STR_SUCCESS.equals(result)) {
             return ServiceResult.fail("场景流量监控信息查询异常: " + result);
         }
@@ -99,12 +99,6 @@ public class SystemOperSceneService {
         return ServiceResult.success(baseResponse);
     }
 
-    public static void main(String[] args) {
-        var date = LocalDateTime.now().toString();
-        System.out.println(date);
-
-
-    }
 
     /**
      * 场景事件监控分页查询
