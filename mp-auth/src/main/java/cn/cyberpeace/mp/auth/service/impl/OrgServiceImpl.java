@@ -95,12 +95,10 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
 
         if (needUpdateName) {
             // 更新自身的path
-            String oldpath = oldOrg.getPath();
             String newPath = "";
-            if (oldpath.contains(AuthConstant.ORG_PATH_SEPARATOR)) {
-                newPath = oldpath.substring(0, oldpath.lastIndexOf(AuthConstant.ORG_PATH_SEPARATOR) + 1) + obj.getName();
+            if (StringUtils.isNotBlank(oldOrg.getParent())) {
+                newPath = calculatePathByOrgId(oldOrg.getParent()) + AuthConstant.ORG_PATH_SEPARATOR + obj.getName();
             } else {
-                // 不含/，说明是一级组织
                 newPath = obj.getName();
             }
             obj.setPath(newPath);
