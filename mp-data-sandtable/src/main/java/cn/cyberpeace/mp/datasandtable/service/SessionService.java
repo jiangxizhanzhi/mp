@@ -150,6 +150,7 @@ public class SessionService {
 
         var countRequest = new CountRequest(indexArray);
         countRequest.query(boolQueryBuilder);
+        countRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
 
         var total = 0;
 
