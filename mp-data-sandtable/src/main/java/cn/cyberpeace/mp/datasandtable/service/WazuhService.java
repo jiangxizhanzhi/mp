@@ -136,9 +136,10 @@ public class WazuhService {
             //process page
             int offset = (wazuhMonitorEventsRequest.getPageNum()-1) * wazuhMonitorEventsRequest.getPageSize();
             if (offset < wazuhModelList.size()) {
-                return new ListObjResult<>(wazuhModelList.subList(offset, offset + wazuhMonitorEventsRequest.getPageSize()), wazuhModelList.size());
+                int toIndex = Math.min(offset + wazuhMonitorEventsRequest.getPageSize(), wazuhModelList.size());
+                return new ListObjResult<>(wazuhModelList.subList(offset, toIndex), wazuhModelList.size());
             }else {
-                return new ListObjResult<>();
+                return new ListObjResult<>(Lists.newArrayList(), wazuhModelList.size());
             }
         } catch (IOException e) {
             log.error("es 查询监控事件分页失败 {}", e);
