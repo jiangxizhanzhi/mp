@@ -33,7 +33,7 @@ mybatis:
 # 请求云平台组信息的url配置，必需填写
 mp:
   base:
-    mg-url: http://10.100.2.21
+    mg-url: http://10.100.14.252:8077
     fdfs-url: 10.100.14.252  # fdfs服务器地址
     # fastdfs配置
     fastdfs:
@@ -53,8 +53,8 @@ mp:
     excel-template-name: 用户列表.xls
     excel-template-path: group1/M00/01/55/CmQO_GDtB9CAPqrsAABcAHh-_NU922.xls
   devops:
-    cp-url: http://10.100.7.5:11111
-    mg-url: ${mp.base.mg-url}
+    cp-url: http://10.100.14.252:11111 #云平台地址
+    cr-url: http://10.100.2.21 #
     hostname: controller  #主机名称
   datasandtable:
     group-url: http://10.100.14.107:5079/v1/scenes

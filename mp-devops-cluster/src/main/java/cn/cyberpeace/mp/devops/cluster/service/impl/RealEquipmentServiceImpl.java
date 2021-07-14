@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.service.impl;
 
+import cn.cyberpeace.mp.auth.extensions.security.common.JwtCommon;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.RealEquipmentOpenStackModel;
 import cn.cyberpeace.mp.devops.cluster.service.RealEquipmentService;
@@ -31,7 +32,7 @@ public class RealEquipmentServiceImpl extends BaseServiceImpl implements RealEqu
 
     @Override
     public RealEquipmentOpenStackModel page() {
-        return super.sendGet(devopsConfig.getMg_url().concat("/api/cr/api/admin/scene/devices/?entity=true&per_page=1"),getToken(),RealEquipmentOpenStackModel.class);
+        return super.sendGet(devopsConfig.getCr_url().concat("/api/cr/api/admin/scene/devices/?entity=true&per_page=1"), JwtCommon.getTokenHeader(),RealEquipmentOpenStackModel.class);
     }
 
     @Override

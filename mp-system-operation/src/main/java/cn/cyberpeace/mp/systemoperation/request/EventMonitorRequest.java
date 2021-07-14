@@ -26,9 +26,11 @@ public class EventMonitorRequest extends SceneBaseRequest {
     private String sceneId;
 
     @ApiModelProperty(value = "开始时间", required = true)
+    @NotEmpty(message = "开始时间不能为空")
     private String start_time;
 
     @ApiModelProperty(value = "结束时间", required = true)
+    @NotEmpty(message = "结束时间不能为空")
     private String end_time;
 
 }
