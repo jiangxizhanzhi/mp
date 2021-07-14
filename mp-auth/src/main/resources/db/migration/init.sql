@@ -22,3 +22,13 @@ INSERT INTO mp_auth_avatar (pk, id, url, create_time, update_time) VALUES (7, '7
 INSERT INTO mp_auth_avatar (pk, id, url, create_time, update_time) VALUES (8, '8', '/fdfs/group1/M00/01/55/CmQO_GDtBfeAYTqrAADEtkPKBzM983.png', '2021-07-03 10:09:05.000000', '2021-07-03 10:09:07.000000');
 INSERT INTO mp_auth_avatar (pk, id, url, create_time, update_time) VALUES (9, '9', '/fdfs/group1/M00/01/55/CmQO_GDtBgqAW3jAAADZj_AdtGM862.png', '2021-07-03 10:09:05.000000', '2021-07-03 10:09:07.000000');
 
+
+-- 系统配置
+INSERT INTO mp_sys_config (pk, id, tenant, key_name, value, create_time, update_time) VALUES (62, 'ec8bda8f239d4967b9ace3d425c829fb', 'default', 'system_name', '浙江能源', '2021-07-05 11:41:29.435932', '2021-07-05 11:41:29.435944');
+INSERT INTO mp_sys_config (pk, id, tenant, key_name, value, create_time, update_time) VALUES (63, '4a3d2ecc528e4b77b3d518a81bd01335', 'default', 'copyright', '@2021-2023，南京赛宁信息技术有限公司，版权所有', '2021-07-05 11:41:29.436008', '2021-07-05 11:41:29.436010');
+INSERT INTO mp_sys_config (pk, id, tenant, key_name, value, create_time, update_time) VALUES (64, 'bbd330a0fa7646fc937c8a875996ee8c', 'default', 'env_per_person', '12', '2021-07-05 11:41:29.436067', '2021-07-05 11:41:29.436070');
+INSERT INTO mp_sys_config (pk, id, tenant, key_name, value, create_time, update_time) VALUES (65, '9efaf1686331402f814e266f740cba74', 'default', 'public_register', '3', '2021-07-05 11:41:29.436128', '2021-07-07 17:33:35.000000');
+INSERT INTO mp_sys_config (pk, id, tenant, key_name, value, create_time, update_time) VALUES (66, 'b64cfb718fe64d7797d361aa8f806743', 'default', 'user_audit', '1', '2021-07-05 11:41:29.436235', '2021-07-14 15:13:46.000000');
+INSERT INTO mp_sys_config (pk, id, tenant, key_name, value, create_time, update_time) VALUES (67, '3c20e18b430c4387aa3ac98dd0bebbfe', 'default', 'flag_length', '8', '2021-07-05 11:41:29.436292', '2021-07-05 11:41:29.436295');
+INSERT INTO mp_sys_config (pk, id, tenant, key_name, value, create_time, update_time) VALUES (68, 'ecf0293f69d84dbdb430ebf96e323404', 'default', 'flag_prefix', '12345', '2021-07-05 11:41:29.436337', '2021-07-05 11:41:29.436339');
+INSERT INTO mp_sys_config (pk, id, tenant, key_name, value, create_time, update_time) VALUES (69, '308666a1b1614a0bae80f838f35fff97', 'default', 'vlan_bucket', '100-200', '2021-07-05 11:41:29.436392', '2021-07-14 15:22:20.320849');
