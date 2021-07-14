@@ -241,7 +241,7 @@ public class SessionService {
             boolQueryBuilder.must(QueryBuilders.wildcardQuery("protocol","*" +sessionRequest.getProtocol() + "*"));
         }
         if (!ObjectUtils.isEmpty(sessionRequest.getMacIds())) {
-            boolQueryBuilder.filter(QueryBuilders.termsQuery("srcMacCnt.srcMac", sessionRequest.getMacIds()));
+            boolQueryBuilder.filter(QueryBuilders.termsQuery("srcMac", sessionRequest.getMacIds()));
         }
     }
 
