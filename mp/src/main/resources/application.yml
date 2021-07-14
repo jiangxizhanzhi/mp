@@ -53,7 +53,7 @@ mp:
     excel-template-name: 用户列表.xls
     excel-template-path: group1/M00/01/55/CmQO_GDtB9CAPqrsAABcAHh-_NU922.xls
   devops:
-    cp-url: http://10.100.7.5:11111
+    cp-url: http://10.100.14.252:11111
     mg-url: ${mp.base.mg-url}
     hostname: controller  #主机名称
   datasandtable:
