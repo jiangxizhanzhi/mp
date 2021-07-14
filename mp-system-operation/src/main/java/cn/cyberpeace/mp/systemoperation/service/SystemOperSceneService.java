@@ -116,7 +116,7 @@ public class SystemOperSceneService {
             // 拼接参数信息
             urlBuffer.append(BeanUtils.wrapperGetParamsByObject(request, ControllerConstant.STR_SCENE_ID));
             // 替换url中的空格
-            res = HttpUtils.sendGet(urlBuffer.toString().replace(" ", "%20"), JwtCommon.getTokenHeader());
+            res = HttpUtils.sendGet(urlBuffer.toString(), JwtCommon.getTokenHeader());
         } catch (IOException e) {
             log.error("事件监控查询异常:" + e);
             throw new MpRuntimeException("事件监控查询异常");
