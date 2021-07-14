@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @Description: 场景通用返回体
@@ -27,8 +28,8 @@ import java.util.List;
 @ApiModel("场景通用返回体")
 public class SceneBaseResponse<T> {
 
-    @ApiModelProperty("关联关系")
-    private Links links;
+    @ApiModelProperty("总数")
+    private int total;
 
     @ApiModelProperty("数据")
     private List<T> list;
@@ -52,7 +53,7 @@ public class SceneBaseResponse<T> {
             JSONArray dataArray = jsonObject.getJSONArray(BaseConstants.STR_DATA);
             List<T> monitorResponseList = JSONArray.parseArray(dataArray.toJSONString(), clazz);
             this.setList(monitorResponseList);
-            this.setLinks(links);
+            this.setTotal(Objects.nonNull(links.getPagination()) ? links.getPagination().getTotal() : 0);
         } catch (Exception e) {
             log.error("结果解析异常", e);
             return "parseResult error";
