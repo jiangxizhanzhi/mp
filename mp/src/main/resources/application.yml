@@ -61,7 +61,7 @@ mp:
     moloch:
       username: api
       password: api
-    es-nodes: 10.100.7.50:9200
+    es-nodes: 10.100.14.107:9200
     wazuh:
       #wazuh 开放接口地址
       base-url: https://10.100.14.106:55000
