@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.datasandtable.model.WazuhMonitorRoot;
 import cn.cyberpeace.mp.datasandtable.model.emum.FileEventType;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -133,12 +134,12 @@ public class WazuhService {
                 }).collect(Collectors.toList());
 
             //process page
-            int offset = wazuhMonitorEventsRequest.getPageNum() * wazuhMonitorEventsRequest.getPageSize();
+            int offset = (wazuhMonitorEventsRequest.getPageNum()-1) * wazuhMonitorEventsRequest.getPageSize();
             if (offset < wazuhModelList.size()) {
                 return new ListObjResult<>(wazuhModelList.subList(offset, offset + wazuhMonitorEventsRequest.getPageSize()), wazuhModelList.size());
+            }else {
+                return new ListObjResult<>();
             }
-
-            return new ListObjResult<>(wazuhModelList, wazuhModelList.size());
         } catch (IOException e) {
             log.error("es 查询监控事件分页失败 {}", e);
             throw new MpRuntimeException(BaseErrorCode.ERROR, e.toString());
