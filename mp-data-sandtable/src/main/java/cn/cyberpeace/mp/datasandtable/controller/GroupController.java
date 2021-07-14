@@ -47,7 +47,7 @@ public class GroupController {
     public ServiceResult addGroup(@RequestBody @Valid GroupRequest groupRequest) {
         var groupModel = new GroupModel();
         BeanUtils.copyProperties(groupRequest, groupModel);
-        groupService.addGroup(groupModel);
-        return ServiceResult.successful();
+        String res = groupService.addGroup(groupModel);
+        return ServiceResult.builder().detail(res).build();
     }
 }
