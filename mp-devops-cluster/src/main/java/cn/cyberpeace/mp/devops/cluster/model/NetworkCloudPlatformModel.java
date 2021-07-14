@@ -128,7 +128,7 @@ public class NetworkCloudPlatformModel extends BaseCloudPlatformModel implements
             /**
              * IP版本
              */
-            private String ip_version;
+            private Integer ip_version;
 
             /**
              * 网关ip
@@ -148,12 +148,12 @@ public class NetworkCloudPlatformModel extends BaseCloudPlatformModel implements
             /**
              * DNS域名服务器列表
              */
-            private List<String> dns_nameservers;
+            private List<Object> dns_nameservers;
 
             /**
              * 主机路由
              */
-            private List<String> host_routes;
+            private List<Object> host_routes;
 
             @Data
             @NoArgsConstructor
