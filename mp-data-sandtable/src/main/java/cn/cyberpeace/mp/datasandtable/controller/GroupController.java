@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.datasandtable.controller;
 
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.datasandtable.model.GroupModel;
@@ -48,6 +49,6 @@ public class GroupController {
         var groupModel = new GroupModel();
         BeanUtils.copyProperties(groupRequest, groupModel);
         String res = groupService.addGroup(groupModel);
-        return ServiceResult.builder().detail(res).build();
+        return ServiceResult.builder().detail(res).serviceCode(BaseErrorCode.SUCCESS).build();
     }
 }
