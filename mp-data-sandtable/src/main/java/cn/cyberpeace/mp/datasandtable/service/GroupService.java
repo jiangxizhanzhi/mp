@@ -98,7 +98,7 @@ public class GroupService {
      * 新增分组
      * @param groupModel
      */
-    public void addGroup(GroupModel groupModel) {
+    public String addGroup(GroupModel groupModel) {
         var jsonObject = new JSONObject();
         if (ObjectUtils.isEmpty(groupModel.getGroupId()) || CollectionUtils.isEmpty(groupModel.getMacIds())) {
             log.error("新增分组参数为空");
@@ -109,6 +109,7 @@ public class GroupService {
         try {
             String res = HttpUtils.sendPost(sandTableConfig.getGroupUrl(), jsonObject.toJSONString());
             log.info("add group res: {}", res);
+            return res;
         } catch (IOException e) {
             log.error("删除分组失败:"+ e);
             throw new MpRuntimeException("删除分组失败:"+ e);
