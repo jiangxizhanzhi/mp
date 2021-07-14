@@ -44,6 +44,7 @@ public class ServiceResult<T> extends BaseServiceResult<T, T> {
         this();
         setSource(source);
         setServiceCode(code);
+        this.asResult();
     }
 
     public ServiceResult(T source, ServiceCode code, String detail) {
@@ -51,6 +52,7 @@ public class ServiceResult<T> extends BaseServiceResult<T, T> {
         setSource(source);
         setServiceCode(code);
         setDetail(detail);
+        this.asResult();
     }
 
     @Override
