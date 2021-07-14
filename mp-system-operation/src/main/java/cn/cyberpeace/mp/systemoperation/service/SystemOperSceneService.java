@@ -6,7 +6,6 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.base.util.HttpUtils;
-import cn.cyberpeace.mp.base.util.LocalDateTimeUtils;
 import cn.cyberpeace.mp.systemoperation.constant.ControllerConstant;
 import cn.cyberpeace.mp.systemoperation.request.EventMonitorRequest;
 import cn.cyberpeace.mp.systemoperation.request.FlowMonitorRequest;
@@ -18,12 +17,9 @@ import cn.cyberpeace.mp.systemoperation.response.SceneBaseResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.yaml.snakeyaml.util.UriEncoder;
 
 import java.io.IOException;
-import java.net.URLEncoder;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 /**
  * @Description: 场景监控服务类
@@ -125,8 +121,8 @@ public class SystemOperSceneService {
                     .append("/host_event_collections/");
             // 拼接参数信息
             urlBuffer.append(BeanUtils.wrapperGetParamsByObject(request, ControllerConstant.STR_SCENE_ID));
-            String url = UriEncoder.encode(urlBuffer.toString());
-            res = HttpUtils.sendGet(url, JwtCommon.getTokenHeader());
+            // 替换url中的空格
+            res = HttpUtils.sendGet(urlBuffer.toString().replace(" ", "%20"), JwtCommon.getTokenHeader());
         } catch (IOException e) {
             log.error("事件监控查询异常:" + e);
             throw new MpRuntimeException("事件监控查询异常");
@@ -134,7 +130,7 @@ public class SystemOperSceneService {
 
         // 结果解析
         SceneBaseResponse<EventMonitorResponse> baseResponse = new SceneBaseResponse();
-        String result = baseResponse.parseResult(res, HostMonitorResponse.class);
+        String result = baseResponse.parseResult(res, EventMonitorResponse.class);
         if (!BaseConstants.STR_SUCCESS.equals(result)) {
             return ServiceResult.fail("场景事件监控信息查询异常: " + result);
         }
