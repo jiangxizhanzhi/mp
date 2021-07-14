@@ -138,13 +138,4 @@ public class BaseServiceImpl {
         return model;
     }
 
-    /**
-     * 组装token
-     * @return
-     */
-    protected Map<String,String> getToken(){
-        Map<String,String> headers = Maps.newHashMap();
-        headers.put("Authorization", JwtCommon.getToken());
-        return headers;
-    }
 }

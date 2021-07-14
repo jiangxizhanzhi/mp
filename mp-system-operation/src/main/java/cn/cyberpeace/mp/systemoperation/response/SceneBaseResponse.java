@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.systemoperation.response;
 
+import cn.cyberpeace.mp.base.constant.BaseConstants;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.ApiModel;
@@ -9,6 +10,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 
@@ -22,7 +24,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Slf4j
-@ApiModel("节点监控返回")
+@ApiModel("场景通用返回体")
 public class SceneBaseResponse<T> {
 
     @ApiModelProperty("关联关系")
@@ -37,26 +39,26 @@ public class SceneBaseResponse<T> {
      * @param clazz
      * @return
      */
-    public SceneBaseResponse<T> parseResult(String res, Class clazz) {
+    public String parseResult(String res, Class clazz) {
         try {
             // 结果解析
             JSONObject jsonObject = JSONObject.parseObject(res);
-            // TODO
-//            if (jsonObject.getBoolean("success")) {
-                JSONObject linkObj = jsonObject.getJSONObject("links");
-                Links links = JSONObject.toJavaObject(linkObj, Links.class);
-                JSONArray dataArray = jsonObject.getJSONArray("data");
-                List<T> monitorResponseList = JSONArray.parseArray(dataArray.toJSONString(), clazz);
-                this.setList(monitorResponseList);
-                this.setLinks(links);
-                // TODO
-//            }
+            if (StringUtils.isNotBlank(jsonObject.getString(BaseConstants.STR_DETAIL))) {
+                return jsonObject.getString(BaseConstants.STR_DETAIL);
+            }
+
+            JSONObject linkObj = jsonObject.getJSONObject(BaseConstants.STR_LINKS);
+            Links links = JSONObject.toJavaObject(linkObj, Links.class);
+            JSONArray dataArray = jsonObject.getJSONArray(BaseConstants.STR_DATA);
+            List<T> monitorResponseList = JSONArray.parseArray(dataArray.toJSONString(), clazz);
+            this.setList(monitorResponseList);
+            this.setLinks(links);
         } catch (Exception e) {
             log.error("结果解析异常", e);
-            return new SceneBaseResponse();
+            return "parseResult error";
         }
 
-        return this;
+        return BaseConstants.STR_SUCCESS;
     }
 
 }

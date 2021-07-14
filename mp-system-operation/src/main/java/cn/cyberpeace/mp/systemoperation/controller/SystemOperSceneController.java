@@ -9,7 +9,6 @@ import cn.cyberpeace.mp.systemoperation.request.HostMonitorRequest;
 import cn.cyberpeace.mp.systemoperation.response.EventMonitorResponse;
 import cn.cyberpeace.mp.systemoperation.response.FlowMonitorResponse;
 import cn.cyberpeace.mp.systemoperation.response.HostMonitorResponse;
-import cn.cyberpeace.mp.systemoperation.response.SceneBaseResponse;
 import cn.cyberpeace.mp.systemoperation.service.SystemOperSceneService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -19,7 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Objects;
+import javax.validation.Valid;
 
 @Slf4j
 @Api(tags = "场景管理接口")
@@ -37,13 +36,8 @@ public class SystemOperSceneController {
      */
     @ApiOperation("场景节点监控分页查询")
     @GetMapping("/pageHostMonitor")
-    public ServiceResult<HostMonitorResponse> pageHostMonitor(HostMonitorRequest request) {
-        SceneBaseResponse<HostMonitorResponse> response = systemOperSceneService.pageHostMonitor(request);
-        if (Objects.nonNull(response.getList()) && Objects.nonNull(response.getLinks())) {
-            return ServiceResult.success(response);
-        } else {
-            return ServiceResult.fail("场景节点监控信息查询异常");
-        }
+    public ServiceResult<HostMonitorResponse> pageHostMonitor(@Valid HostMonitorRequest request) {
+        return systemOperSceneService.pageHostMonitor(request);
     }
 
     /**
@@ -53,13 +47,8 @@ public class SystemOperSceneController {
      */
     @ApiOperation("场景流量监控分页查询")
     @GetMapping("/pageFlowMonitor")
-    public ServiceResult<FlowMonitorResponse> pageFlowMonitor(FlowMonitorRequest request) {
-        SceneBaseResponse<FlowMonitorResponse> response = systemOperSceneService.pageFlowMonitor(request);
-        if (Objects.nonNull(response.getList()) && Objects.nonNull(response.getLinks())) {
-            return ServiceResult.success(response);
-        } else {
-            return ServiceResult.fail("场景流量监控信息查询异常");
-        }
+    public ServiceResult<FlowMonitorResponse> pageFlowMonitor(@Valid FlowMonitorRequest request) {
+        return systemOperSceneService.pageFlowMonitor(request);
     }
 
     /**
@@ -69,13 +58,8 @@ public class SystemOperSceneController {
      */
     @ApiOperation("场景事件监控分页查询")
     @GetMapping("/pageEventMonitor")
-    public ServiceResult<EventMonitorResponse> pageFlowMonitor(EventMonitorRequest request) {
-        SceneBaseResponse<EventMonitorResponse> response = systemOperSceneService.pageEventMonitor(request);
-        if (Objects.nonNull(response.getList()) && Objects.nonNull(response.getLinks())) {
-            return ServiceResult.success(response);
-        } else {
-            return ServiceResult.fail("事件流量监控信息查询异常");
-        }
+    public ServiceResult<EventMonitorResponse> pageFlowMonitor(@Valid EventMonitorRequest request) {
+        return systemOperSceneService.pageEventMonitor(request);
     }
 
 

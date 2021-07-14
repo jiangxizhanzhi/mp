@@ -37,4 +37,24 @@ public interface BaseConstants {
      */
     int DEFAULT_PAGE_SIZE = 10;
 
+    /**
+     * SUCCESS常量
+     */
+    String STR_SUCCESS = "SUCCESS";
+
+    /**
+     * detail常量
+     */
+    String STR_DETAIL = "detail";
+
+    /**
+     * links常量
+     */
+    String STR_LINKS = "links";
+
+    /**
+     * data常量
+     */
+    String STR_DATA = "data";
+
 }

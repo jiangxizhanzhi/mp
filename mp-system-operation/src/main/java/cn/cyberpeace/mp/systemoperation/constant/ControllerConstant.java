@@ -7,5 +7,7 @@ public class ControllerConstant {
 
     public static final String SCENE_API_URL = "/api/sv_scene/scenes/";
 
+    public static final String STR_SCENE_ID = "sceneId";
+
     private ControllerConstant() {}
 }

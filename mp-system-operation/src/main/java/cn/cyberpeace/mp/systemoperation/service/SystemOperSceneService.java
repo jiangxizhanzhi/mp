@@ -1,8 +1,12 @@
 package cn.cyberpeace.mp.systemoperation.service;
 
+import cn.cyberpeace.mp.auth.extensions.security.common.JwtCommon;
+import cn.cyberpeace.mp.base.constant.BaseConstants;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.base.util.HttpUtils;
+import cn.cyberpeace.mp.base.util.LocalDateTimeUtils;
 import cn.cyberpeace.mp.systemoperation.constant.ControllerConstant;
 import cn.cyberpeace.mp.systemoperation.request.EventMonitorRequest;
 import cn.cyberpeace.mp.systemoperation.request.FlowMonitorRequest;
@@ -14,8 +18,12 @@ import cn.cyberpeace.mp.systemoperation.response.SceneBaseResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.yaml.snakeyaml.util.UriEncoder;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.time.LocalDateTime;
+import java.util.Date;
 
 /**
  * @Description: 场景监控服务类
@@ -37,29 +45,30 @@ public class SystemOperSceneService {
      * @param request
      * @return
      */
-    public SceneBaseResponse<HostMonitorResponse> pageHostMonitor(HostMonitorRequest request) {
+    public ServiceResult pageHostMonitor(HostMonitorRequest request) {
         String res;
         try {
             // 拼接url
             StringBuffer urlBuffer = new StringBuffer(mgUrl);
             urlBuffer.append(ControllerConstant.SCENE_API_URL)
                     .append(request.getSceneId())
-                    .append("/host_collections");
+                    .append("/host_collections/");
             // 拼接参数信息
-            urlBuffer.append(BeanUtils.wrapperGetParamsByObject(request, "sceneId"));
-            // TODO test
-//            res = HttpUtils.sendGet(urlBuffer.toString());
-            res = HttpUtils.sendGet("http://10.100.3.4:3000/mock/181/api/sv_scene/scenes/%7Bscene_id%7D/host_collections/");
+            urlBuffer.append(BeanUtils.wrapperGetParamsByObject(request, ControllerConstant.STR_SCENE_ID));
+            res = HttpUtils.sendGet(urlBuffer.toString(), JwtCommon.getTokenHeader());
         } catch (IOException e) {
             log.error("节点监控查询异常:" + e);
-            throw new MpRuntimeException("节点监控查询异常:" + e);
+            throw new MpRuntimeException("节点监控查询异常");
         }
 
         // 结果解析
         SceneBaseResponse<HostMonitorResponse> baseResponse = new SceneBaseResponse();
-        baseResponse.parseResult(res, HostMonitorResponse.class);
+        String result = baseResponse.parseResult(res, HostMonitorResponse.class);
+        if (!BaseConstants.STR_SUCCESS.equals(result)) {
+            return ServiceResult.fail("场景节点监控信息查询异常: " + result);
+        }
 
-        return baseResponse;
+        return ServiceResult.success(baseResponse);
 
     }
 
@@ -68,29 +77,36 @@ public class SystemOperSceneService {
      * @param request
      * @return
      */
-    public SceneBaseResponse<FlowMonitorResponse> pageFlowMonitor(FlowMonitorRequest request) {
+    public ServiceResult pageFlowMonitor(FlowMonitorRequest request) {
         String res;
         try {
             // 拼接url
             StringBuffer urlBuffer = new StringBuffer(mgUrl);
             urlBuffer.append(ControllerConstant.SCENE_API_URL)
                     .append(request.getSceneId())
-                    .append("/flow_collections");
+                    .append("/flow_collections/");
             // 拼接参数信息
-            urlBuffer.append(BeanUtils.wrapperGetParamsByObject(request, "sceneId"));
-            // TODO test
-//            res = HttpUtils.sendGet(urlBuffer.toString());
-            res = HttpUtils.sendGet("http://10.100.3.4:3000/mock/181/api/sv_scene/scenes/%7Bscene_id%7D/flow_collections/");
+            urlBuffer.append(BeanUtils.wrapperGetParamsByObject(request, ControllerConstant.STR_SCENE_ID));
+            res = HttpUtils.sendGet(urlBuffer.toString(), JwtCommon.getTokenHeader());
         } catch (IOException e) {
             log.error("流量监控查询异常:" + e);
-            throw new MpRuntimeException("流量监控查询异常:" + e);
+            throw new MpRuntimeException("流量监控查询异常");
         }
 
         // 结果解析
         SceneBaseResponse<FlowMonitorResponse> baseResponse = new SceneBaseResponse();
-        baseResponse.parseResult(res, FlowMonitorResponse.class);
+        String result = baseResponse.parseResult(res, HostMonitorResponse.class);
+        if (!BaseConstants.STR_SUCCESS.equals(result)) {
+            return ServiceResult.fail("场景流量监控信息查询异常: " + result);
+        }
 
-        return baseResponse;
+        return ServiceResult.success(baseResponse);
+    }
+
+    public static void main(String[] args) {
+        var date = LocalDateTime.now().toString();
+        System.out.println(date);
+
 
     }
 
@@ -99,29 +115,31 @@ public class SystemOperSceneService {
      * @param request
      * @return
      */
-    public SceneBaseResponse<EventMonitorResponse> pageEventMonitor(EventMonitorRequest request) {
+    public ServiceResult pageEventMonitor(EventMonitorRequest request) {
         String res;
         try {
             // 拼接url
             StringBuffer urlBuffer = new StringBuffer(mgUrl);
             urlBuffer.append(ControllerConstant.SCENE_API_URL)
                     .append(request.getSceneId())
-                    .append("/flow_collections");
+                    .append("/host_event_collections/");
             // 拼接参数信息
-            urlBuffer.append(BeanUtils.wrapperGetParamsByObject(request, "sceneId"));
-           // TODO  test
-//            res = HttpUtils.sendGet(urlBuffer.toString());
-            res = HttpUtils.sendGet("http://10.100.3.4:3000/mock/181/api/sv_scene/scenes/%7Bscene_id%7D/host_event_collections/");
+            urlBuffer.append(BeanUtils.wrapperGetParamsByObject(request, ControllerConstant.STR_SCENE_ID));
+            String url = UriEncoder.encode(urlBuffer.toString());
+            res = HttpUtils.sendGet(url, JwtCommon.getTokenHeader());
         } catch (IOException e) {
             log.error("事件监控查询异常:" + e);
-            throw new MpRuntimeException("事件监控查询异常:" + e);
+            throw new MpRuntimeException("事件监控查询异常");
         }
 
         // 结果解析
         SceneBaseResponse<EventMonitorResponse> baseResponse = new SceneBaseResponse();
-        baseResponse.parseResult(res, EventMonitorResponse.class);
+        String result = baseResponse.parseResult(res, HostMonitorResponse.class);
+        if (!BaseConstants.STR_SUCCESS.equals(result)) {
+            return ServiceResult.fail("场景事件监控信息查询异常: " + result);
+        }
 
-        return baseResponse;
+        return ServiceResult.success(baseResponse);
 
     }
 
