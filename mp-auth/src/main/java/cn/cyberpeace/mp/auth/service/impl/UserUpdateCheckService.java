@@ -46,7 +46,7 @@ public class UserUpdateCheckService implements UserCheckService {
             UserModel userByMobile = userService.getByMobile(user.getMobile());
 
             if (userByMobile != null && !Objects.equals(userByMobile.getId(), oldUser.getId())) {
-                throw new MpRuntimeException("mobile已存在！" + user.getMobile());
+                throw new MpRuntimeException("该手机号码已存在！" + user.getMobile() + "，请确认用户手机号码是否正确");
             }
         }
 
@@ -55,7 +55,7 @@ public class UserUpdateCheckService implements UserCheckService {
             UserModel userByUserName = userService.getByUserName(user.getUsername());
 
             if (userByUserName != null && !Objects.equals(userByUserName.getId(), oldUser.getId())) {
-                throw new MpRuntimeException("username已存在！" + user.getUsername());
+                throw new MpRuntimeException("用户名已存在！" + user.getUsername());
             }
         }
 
@@ -64,7 +64,7 @@ public class UserUpdateCheckService implements UserCheckService {
             UserModel userByIdent = userService.getByIdent(user.getIdentifier());
 
             if (userByIdent != null && !Objects.equals(userByIdent.getId(), oldUser.getId())) {
-                throw new MpRuntimeException("identifier已存在！" + user.getIdentifier());
+                throw new MpRuntimeException("用户编号已存在！" + user.getIdentifier());
             }
         }
 
