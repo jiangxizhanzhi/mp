@@ -96,7 +96,7 @@ public class ContainerCloudPlatformModel extends BaseCloudPlatformModel implemen
         /**
          * 命令
          */
-        private List<String> command;
+        private Object command;
 
         /**
          * 工作目录
