@@ -126,6 +126,8 @@ public class HttpUtils {
     }
 
     private static String doGetRequest(String url, HttpClient client) throws IOException {
+        // 替换url中的空格
+        url = url.replace(" ", "%20");
         HttpGet httpget = new HttpGet(url);
         HttpResponse resp = client.execute(httpget);
         // 设置请求和传输超时时间
@@ -136,6 +138,8 @@ public class HttpUtils {
     }
 
     private static String doGetRequest(String url, Map<String,String> headerMap, HttpClient client) throws IOException {
+        // 替换url中的空格
+        url = url.replace(" ", "%20");
         HttpGet httpget = new HttpGet(url);
         if (MapUtils.isNotEmpty(headerMap)) {
             Header[] headers = headerMap.entrySet().stream().map(v ->
