@@ -13,7 +13,10 @@ import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
+import cn.hutool.core.exceptions.ExceptionUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.config.web.servlet.headers.HttpPublicKeyPinningDsl;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,6 +25,7 @@ import java.io.File;
 import java.util.List;
 
 @Service
+@Slf4j
 public class AvatarServiceImpl extends BaseModelServiceImpl<AvatarModel, AvatarMapper, AvatarFields, QueryParams> implements AvatarService {
 
     @Autowired
@@ -42,6 +46,11 @@ public class AvatarServiceImpl extends BaseModelServiceImpl<AvatarModel, AvatarM
         return getModelMapper().listAll();
     }
 
+    @Override
+    public boolean deleteAll() {
+        getModelMapper().deleteAll();
+        return true;
+    }
 
     public FileResponseData upload(MultipartFile file) {
         // todo 判断是否是图片
@@ -66,5 +75,24 @@ public class AvatarServiceImpl extends BaseModelServiceImpl<AvatarModel, AvatarM
         }
 
         return responseData;
+    }
+
+
+    @Override
+    public String uploadByPath(String filePath) {
+        String httpUrl = "";
+        try {
+            // 上传到服务器
+            String filepath = fastDFSClient.uploadFileWithFilepath(filePath, FdfsGroupEnum.DEFAULT.toString());
+
+            // 获取当前集群配置
+            FastDfsConfig.Group group = fastDfsConfig.getGroupByName(FdfsGroupEnum.DEFAULT);
+//
+            httpUrl = group.getFileServerAddr() + File.separator + filepath;
+            return httpUrl;
+        } catch (MpRuntimeException e) {
+            log.error(ExceptionUtil.stacktraceToString(e));
+            throw e;
+        }
     }
 }

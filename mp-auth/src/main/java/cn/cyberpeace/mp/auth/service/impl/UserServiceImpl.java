@@ -45,6 +45,8 @@ import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Assert;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -54,8 +56,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -527,8 +531,35 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public void downloadExcelTemplate() {
         try {
             HttpServletResponse response = ServletUtils.getResponse();
-            fastDFSClient.downloadFile(authConfig.getExcelTemplatePath(), authConfig.getExcelTemplateName(), response, FdfsGroupEnum.DEFAULT.toString());
-        } catch (MpRuntimeException e) {
+//            fastDFSClient.downloadFile(authConfig.getExcelTemplatePath(), authConfig.getExcelTemplateName(), response, FdfsGroupEnum.DEFAULT.toString());
+
+            String path = Objects.requireNonNull(this.getClass().getClassLoader().getResource("excel/import_template.xls")).getPath();
+            String fileName = "用户列表.xls";
+            // 创建输出流对象
+            ServletOutputStream outputStream = response.getOutputStream();
+
+            //以字节数组的形式读取文件
+            byte[] bytes = FileUtil.readBytes(path);
+
+            // 设置返回内容格式
+            response.setContentType("application/vnd.ms-excel");
+
+            // 把文件名按UTF-8取出并按ISO8859-1编码，保证弹出窗口中的文件名中文不乱码
+            // 中文不要太多，最多支持17个中文，因为header有150个字节限制。
+            // 这一步一定要在读取文件之后进行，否则文件名会乱码，找不到文件
+            fileName = new String(fileName.getBytes("UTF-8"),"ISO8859-1");
+
+            // 设置下载弹窗的文件名和格式（文件名要包括名字和文件格式）
+            response.setHeader("Content-Disposition", "attachment;filename=" + fileName);
+
+
+            // 返回数据到输出流对象中
+            outputStream.write(bytes);
+
+            // 关闭流对象
+            IoUtil.close(outputStream);
+
+        } catch (MpRuntimeException | IOException e) {
             throw new MpRuntimeException("下载模板错误！");
         }
     }

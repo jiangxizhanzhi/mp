@@ -23,4 +23,11 @@ public interface SysConfigService extends BaseModelService<SysConfigModel, Query
      */
     boolean isUserAudit();
 
+
+    /**
+     * 系统初始化（加载默认头像，默认下载模板等）
+     * @return
+     */
+    boolean init();
+
 }

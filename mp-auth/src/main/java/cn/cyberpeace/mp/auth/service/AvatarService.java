@@ -12,6 +12,10 @@ public interface AvatarService extends BaseModelService<AvatarModel, QueryParams
 
     List<AvatarModel> listAll();
 
+    boolean deleteAll();
+
     FileResponseData upload(MultipartFile file);
+
+    String uploadByPath(String filePath);
 
 }
