@@ -555,6 +555,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             toClient.close();
 
         } catch (IOException e) {
+            log.error("{}", ExceptionUtil.stacktraceToString(e));
             throw new MpRuntimeException("下载模板错误！");
         }
     }
