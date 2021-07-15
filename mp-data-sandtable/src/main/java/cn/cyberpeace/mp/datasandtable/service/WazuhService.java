@@ -339,10 +339,10 @@ public class WazuhService {
         long month = ChronoUnit.MONTHS.between(startTime, endTime);
         int days = (int) betweenDay;
         if (month > 1) {
-            return IntStream.range(0, days + 1).boxed().map(startTime::plusDays).map((time) -> time.format(DateTimeFormatter.ofPattern("yyyy.MM.*")))
+            return IntStream.range(0, days + 2).boxed().map(startTime::plusDays).map((time) -> time.format(DateTimeFormatter.ofPattern("yyyy.MM.*")))
                 .distinct().collect(Collectors.toList());
         }
-        return IntStream.range(0, days + 1).boxed().map(startTime::plusDays).map((time) -> time.format(DateTimeFormatter.ofPattern("yyyy.MM.dd")))
+        return IntStream.range(0, days + 2).boxed().map(startTime::plusDays).map((time) -> time.format(DateTimeFormatter.ofPattern("yyyy.MM.dd")))
             .distinct().collect(Collectors.toList());
     }
 }
