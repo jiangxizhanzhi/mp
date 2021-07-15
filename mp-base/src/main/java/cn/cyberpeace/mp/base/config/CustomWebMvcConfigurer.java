@@ -12,7 +12,7 @@ import java.util.List;
  * 统一返回结果风格，例如：驼峰命名字段转换成蛇形命名；字段值为null的字段不进行返回
  */
 @Configuration
-public class CustomWebMvcConfigurationSupport implements WebMvcConfigurer {
+public class CustomWebMvcConfigurer implements WebMvcConfigurer {
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
