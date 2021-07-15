@@ -536,10 +536,11 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public void downloadExcelTemplate() {
         try {
             HttpServletResponse response = ServletUtils.getResponse();
-            String path = Objects.requireNonNull(this.getClass().getClassLoader().getResource("excel/import_template.xls")).getPath();
+//            String path = Objects.requireNonNull(this.getClass().getClassLoader().getResource("excel/import_template.xls")).getPath();
+            InputStream is = this.getClass().getClassLoader().getResourceAsStream("excel/import_template.xls");
             String fileName = "用户列表.xls";
 
-            InputStream fis = new BufferedInputStream(new FileInputStream(path));
+            InputStream fis = new BufferedInputStream(is);
             byte[] buffer = new byte[fis.available()];
             fis.read(buffer);
             fis.close();

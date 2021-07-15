@@ -129,29 +129,25 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean init() {
-//        avatarService.deleteAll();
-
-//        String avatar01 = ResourceUtil.getResource("avatar/1.png", this.getClass()).getPath();
+        avatarService.deleteAll();
 
         // 默认头像
-//        String avatar01 = Objects.requireNonNull(this.getClass().getResource("avatar/1.png")).getPath();
+        InputStream avatar01 = Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("avatar/1.png"));
+        InputStream avatar02 = Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("avatar/2.png"));
+        InputStream avatar03 = Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("avatar/3.png"));
+        InputStream avatar04 = Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("avatar/4.png"));
+        InputStream avatar05 = Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("avatar/5.png"));
+        InputStream avatar06 = Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("avatar/6.png"));
+        InputStream avatar07 = Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("avatar/7.png"));
+        InputStream avatar08 = Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("avatar/8.png"));
+        InputStream avatar09 = Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("avatar/9.png"));
 
-        InputStream avatar02 = Objects.requireNonNull(SysConfigServiceImpl.class.getClassLoader().getResourceAsStream("avatar/2.png"));
-//        String avatar03 = Objects.requireNonNull(this.getClass().getClassLoader().getResource("avatar/3.png")).getPath();
-//        String avatar04 = Objects.requireNonNull(this.getClass().getClassLoader().getResource("avatar/4.png")).getPath();
-//        String avatar05 = Objects.requireNonNull(this.getClass().getClassLoader().getResource("avatar/5.png")).getPath();
-//        String avatar06 = Objects.requireNonNull(this.getClass().getClassLoader().getResource("avatar/6.png")).getPath();
-//        String avatar07 = Objects.requireNonNull(this.getClass().getClassLoader().getResource("avatar/7.png")).getPath();
-//        String avatar08 = Objects.requireNonNull(this.getClass().getClassLoader().getResource("avatar/8.png")).getPath();
-//        String avatar09 = Objects.requireNonNull(this.getClass().getClassLoader().getResource("avatar/9.png")).getPath();
 
+        List<InputStream> avatarlist = Arrays.asList(avatar01, avatar02, avatar03, avatar04, avatar05, avatar06, avatar07, avatar08, avatar09);
 
-        log.info("avatar02:{}", avatar02);
-        List<InputStream> avatarlist = Arrays.asList(avatar02);
-//        List<String> avatarlist = Arrays.asList(avatar01, avatar02, avatar03, avatar04, avatar05, avatar06, avatar07, avatar08, avatar09);
-
-        for (InputStream ava : avatarlist) {
-            String url = avatarService.uploadIs(ava, "2.png", null);
+        for (int i = 0; i < avatarlist.size(); i++) {
+            InputStream ava = avatarlist.get(i);
+            String url = avatarService.uploadIs(ava, i + ".png", null);
             AvatarModel avatarModel = new AvatarModel();
             avatarModel.setUrl(url);
             avatarService.create(avatarModel);

@@ -101,7 +101,12 @@ public class AvatarServiceImpl extends BaseModelServiceImpl<AvatarModel, AvatarM
     @Override
     public String uploadIs(InputStream is, String fileName, Map<String, String> desc) {
 
+        String httpUrl = "";
+        // 获取当前集群配置
+        FastDfsConfig.Group group = fastDfsConfig.getGroupByName(FdfsGroupEnum.DEFAULT);
+
         String filepath = fastDFSClient.upload(is, fileName, desc, FdfsGroupEnum.DEFAULT.toString());
-        return filepath;
+        httpUrl = group.getFileServerAddr() + File.separator + filepath;
+        return httpUrl;
     }
 }
