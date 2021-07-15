@@ -22,7 +22,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
+import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -94,5 +96,12 @@ public class AvatarServiceImpl extends BaseModelServiceImpl<AvatarModel, AvatarM
             log.error(ExceptionUtil.stacktraceToString(e));
             throw e;
         }
+    }
+
+    @Override
+    public String uploadIs(InputStream is, String fileName, Map<String, String> desc) {
+
+        String filepath = fastDFSClient.upload(is, fileName, desc, FdfsGroupEnum.DEFAULT.toString());
+        return filepath;
     }
 }
