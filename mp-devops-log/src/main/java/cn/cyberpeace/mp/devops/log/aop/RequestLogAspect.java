@@ -182,7 +182,7 @@ public class RequestLogAspect {
             operateLogServiceFactory.create(operationLogModel);
 
         } catch (Exception e) {
-            log.info("======");
+            log.info("====插入操作日志异常==");
         }
     }
 
