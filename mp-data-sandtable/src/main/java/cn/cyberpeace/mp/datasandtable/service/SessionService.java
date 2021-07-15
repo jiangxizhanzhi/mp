@@ -314,7 +314,12 @@ public class SessionService {
     private List<String> fetchFormatterTime(LocalDateTime startTime, LocalDateTime endTime) {
         var formatter = DateTimeFormatter.ofPattern("yyMMdd");
         long betweenDay = ChronoUnit.DAYS.between(startTime, endTime);
+        long month = ChronoUnit.MONTHS.between(startTime, endTime);
         int days = (int) betweenDay;
+        if (month > 1) {
+            return IntStream.range(0, days + 2).boxed().map(startTime::plusDays).map((time) -> time.format(DateTimeFormatter.ofPattern("yyMM*")))
+                .distinct().collect(Collectors.toList());
+        }
         return IntStream.range(0, days + 2).boxed().map(startTime::plusDays).map((time) -> time.format(formatter))
             .collect(Collectors.toList());
     }
