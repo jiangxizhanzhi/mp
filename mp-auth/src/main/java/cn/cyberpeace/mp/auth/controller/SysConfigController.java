@@ -71,7 +71,7 @@ public class SysConfigController extends BaseModelController<SysConfigModel, Que
     public ServiceResult init() {
         // 更新规则，如果key存在，就修改value值，如果key不存在，就忽略不改
         boolean success = getModelService().init();
-        return ResultUtils.commonResult(true, null);
+        return ResultUtils.commonResult(success, null);
     }
 
 

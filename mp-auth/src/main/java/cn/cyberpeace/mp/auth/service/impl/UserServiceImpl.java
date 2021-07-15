@@ -58,8 +58,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -531,35 +536,25 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public void downloadExcelTemplate() {
         try {
             HttpServletResponse response = ServletUtils.getResponse();
-//            fastDFSClient.downloadFile(authConfig.getExcelTemplatePath(), authConfig.getExcelTemplateName(), response, FdfsGroupEnum.DEFAULT.toString());
-
             String path = Objects.requireNonNull(this.getClass().getClassLoader().getResource("excel/import_template.xls")).getPath();
             String fileName = "用户列表.xls";
-            // 创建输出流对象
-            ServletOutputStream outputStream = response.getOutputStream();
 
-            //以字节数组的形式读取文件
-            byte[] bytes = FileUtil.readBytes(path);
+            InputStream fis = new BufferedInputStream(new FileInputStream(path));
+            byte[] buffer = new byte[fis.available()];
+            fis.read(buffer);
+            fis.close();
+            // 清空response
+            response.reset();
+            // 设置response的Header
+            response.addHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes("UTF-8"),"ISO8859-1"));
+//            response.addHeader("Content-Length", "" + file.length());
+            OutputStream toClient = new BufferedOutputStream(response.getOutputStream());
+            response.setContentType("application/octet-stream");
+            toClient.write(buffer);
+            toClient.flush();
+            toClient.close();
 
-            // 设置返回内容格式
-            response.setContentType("application/vnd.ms-excel");
-
-            // 把文件名按UTF-8取出并按ISO8859-1编码，保证弹出窗口中的文件名中文不乱码
-            // 中文不要太多，最多支持17个中文，因为header有150个字节限制。
-            // 这一步一定要在读取文件之后进行，否则文件名会乱码，找不到文件
-            fileName = new String(fileName.getBytes("UTF-8"),"ISO8859-1");
-
-            // 设置下载弹窗的文件名和格式（文件名要包括名字和文件格式）
-            response.setHeader("Content-Disposition", "attachment;filename=" + fileName);
-
-
-            // 返回数据到输出流对象中
-            outputStream.write(bytes);
-
-            // 关闭流对象
-            IoUtil.close(outputStream);
-
-        } catch (MpRuntimeException | IOException e) {
+        } catch (IOException e) {
             throw new MpRuntimeException("下载模板错误！");
         }
     }
