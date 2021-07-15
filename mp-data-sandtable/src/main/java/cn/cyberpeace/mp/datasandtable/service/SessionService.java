@@ -270,14 +270,18 @@ public class SessionService {
             .groupId(model.getIndex().substring(0, model.getIndex().indexOf("_sessions2")))
             .sourceIp(model.getSrcIp())
             .targetIp(model.getDstIp())
-            .sourceMac(model.getSrcMac())
-            .targetMac(model.getDstMac())
-            .protocolType(model.getProtocol())
+            .sourceMac(filterEsChars(model.getSrcMac()))
+            .targetMac(filterEsChars(model.getDstMac()))
+            .protocolType(filterEsChars(model.getProtocol()))
             .srcPort(model.getSrcPort())
             .dstPort(model.getDstPort())
             .totalBytes(model.getTotBytes())
             .timestamp(model.getTimestamp().toString())
             .build();
+    }
+
+    private String filterEsChars(String targetString) {
+        return targetString.replace("[", "").replace("]", "").replace("\"", "");
     }
 
     /**
