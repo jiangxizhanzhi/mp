@@ -92,6 +92,46 @@ CREATE TABLE mp_auth_tenant_user (
     UNIQUE (`tenant`, `user`)
 );
 
+
+# 用户心跳表
+CREATE TABLE mp_auth_user_heartbeat (
+     `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
+     `id` varchar(64)  NOT NULL COMMENT 'id',
+     `user` varchar(64)  NOT NULL COMMENT '用户id',
+     `tenant` varchar(64)  NOT NULL COMMENT '所属租户',
+     `create_time` datetime(6) NOT NULL COMMENT '创建时间',
+     `update_time` datetime(6) NOT NULL COMMENT '更新时间',
+     PRIMARY KEY (`pk`),
+     UNIQUE (`id`)
+);
+create index idx_user_hb_uid on mp_auth_user_heartbeat (user);
+create index idx_user_hb_time on mp_auth_user_heartbeat (create_time);
+
+
+# 用户在线状态统计表
+CREATE TABLE mp_auth_user_online_report (
+    `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `id` varchar(64)  NOT NULL COMMENT 'id',
+    `user` varchar(64)  NOT NULL COMMENT '用户id',
+    `tenant` varchar(64)  NOT NULL COMMENT '所属租户',
+    `username` varchar(64) NOT NULL COMMENT '用户名',
+    `name` varchar(64) NOT NULL COMMENT '用户姓名',
+    `org` varchar(200) NOT NULL COMMENT '组织',
+    `action` varchar(64) NOT NULL COMMENT '动作',
+    `subject` varchar(64) NOT NULL COMMENT '对象',
+    `total_online_hours` float NOT NULL DEFAULT 0 COMMENT '累计在线时长',
+    `monitor` varchar(64) NOT NULL COMMENT '监控',
+    `is_online` int DEFAULT 0 COMMENT '是否在线 0:不在线 1:在线',
+    `create_time` datetime(6) NOT NULL COMMENT '创建时间',
+    `update_time` datetime(6) NOT NULL COMMENT '更新时间',
+    PRIMARY KEY (`pk`),
+    UNIQUE (`id`),
+    UNIQUE (`user`)
+);
+create index idx_user_olrpt_uname on mp_auth_user_online_report (username);
+
+
+
 # 用户角色表
 CREATE TABLE mp_auth_user_role (
     `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',

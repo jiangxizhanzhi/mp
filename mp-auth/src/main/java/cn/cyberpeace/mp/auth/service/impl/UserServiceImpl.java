@@ -4,11 +4,14 @@ import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
+import cn.cyberpeace.mp.auth.dto.user.UserHeartbeatRequest;
+import cn.cyberpeace.mp.auth.dto.user.UserOnlineReportPageRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.OrgUserModel;
 import cn.cyberpeace.mp.auth.model.RoleModel;
+import cn.cyberpeace.mp.auth.model.UserHeartbeatModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
@@ -17,6 +20,8 @@ import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.service.RoleService;
 import cn.cyberpeace.mp.auth.service.SysConfigService;
 import cn.cyberpeace.mp.auth.service.TenantUserService;
+import cn.cyberpeace.mp.auth.service.UserHeartbeatService;
+import cn.cyberpeace.mp.auth.service.UserOnlineReportService;
 import cn.cyberpeace.mp.auth.service.UserPermissionService;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.service.UserService;
@@ -41,6 +46,7 @@ import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.lang.Assert;
+import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,6 +103,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Autowired
     private UserUpdateCheckService updateCheckService;
+
+    @Autowired
+    private UserHeartbeatService userHeartbeatService;
+
+    @Autowired
+    private UserOnlineReportService userOnlineReportService;
 
     @Autowired
     public UserServiceImpl(UserMapper modelMapper, UserFields modelFields) {
@@ -625,6 +637,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
 
+    @Override
     public UserDto userModel2UserDto(UserModel userModel) {
         if (Objects.isNull(userModel)) {
             return null;
@@ -664,6 +677,20 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return userDto;
     }
 
+    @Override
+    public void heartbeat(UserHeartbeatRequest hbrequest) {
+        UserModel userModel = UserUtils.getLoginUser();
+
+        UserHeartbeatModel heartbeat = new UserHeartbeatModel();
+        heartbeat.setUser(userModel.getId());
+
+        userHeartbeatService.create(heartbeat);
+    }
+
+    @Override
+    public PageInfo onlineReport(UserOnlineReportPageRequest pageRequest) {
+        return userOnlineReportService.page(pageRequest);
+    }
 
     private UserModel importUser2UserModel(ImportUser importUser) {
         if (Objects.isNull(importUser)) {

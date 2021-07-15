@@ -4,18 +4,16 @@ import cn.cyberpeace.mp.auth.constant.AuthLogConstant;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.ResetPwdRequest;
 import cn.cyberpeace.mp.auth.dto.ResetSelfPwdRequest;
-import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
-import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
-import cn.cyberpeace.mp.auth.dto.user.UserExportRequest;
+import cn.cyberpeace.mp.auth.dto.user.UserHeartbeatRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserLogPageRequest;
+import cn.cyberpeace.mp.auth.dto.user.UserOnlineReportPageRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserRequest;
 import cn.cyberpeace.mp.auth.dto.validate.AddGroup;
 import cn.cyberpeace.mp.auth.dto.validate.UpdateGroup;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.service.UserLogService;
-import cn.cyberpeace.mp.auth.service.UploadDataListener;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
@@ -26,8 +24,6 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
-import cn.cyberpeace.mp.devops.log.model.OperationLogModel;
-import com.alibaba.excel.EasyExcel;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -45,14 +41,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
 
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.net.URLEncoder;
 import java.util.List;
 
 @Api(value = "用户管理接口", tags = "AUTH-用户管理接口")
@@ -218,6 +210,25 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
         boolean success = getModelService().updateAvatar(userId, file);
         return ResultUtils.commonResult(success, null);
     }
+
+
+    @ApiOperation(value = "用户心跳-统计在线用户信息", notes = "")
+    @PostMapping("/heartbeat")
+    public ServiceResult heartbeat(@RequestBody(required = false) UserHeartbeatRequest heartbeat) throws MpRuntimeException {
+        getModelService().heartbeat(heartbeat);
+        return ResultUtils.commonResult(true, null);
+    }
+
+
+    @ApiOperation(value = "用户在线报告", notes = "")
+    @GetMapping("/olreport")
+    public ServiceResult onlineReport(UserOnlineReportPageRequest pageRequest) {
+        pageRequest.ensure();
+        PageInfo pageInfo = getModelService().onlineReport(pageRequest);
+        return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
+    }
+
+
 
     @ApiOperation(value = "查询用户操作日志", notes = "")
     @GetMapping("/log")
