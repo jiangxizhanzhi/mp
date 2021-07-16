@@ -34,19 +34,19 @@ public class UserCreateCheckService implements UserCheckService {
         if (StringUtils.isNotBlank(user.getMobile())) {
             Assert.isTrue(PhoneUtil.isMobile(user.getMobile()), AuthConstant.ERROR_CODE_PREFIX + "mobile_invalid");
             if (userService.getByMobile(user.getMobile()) != null) {
-                throw new MpRuntimeException("mobile已存在！" + user.getMobile());
+                throw new MpRuntimeException("该手机号码已存在！" + user.getMobile() + "，请确认用户手机号码是否正确");
             }
         }
 
         if (StringUtils.isNotBlank(user.getUsername())) {
             if (userService.getByUserName(user.getUsername()) != null) {
-                throw new MpRuntimeException("username已存在！" + user.getUsername());
+                throw new MpRuntimeException("用户名已存在！" + user.getUsername());
             }
         }
 
         if (StringUtils.isNotBlank(user.getIdentifier())) {
             if (userService.getByIdent(user.getIdentifier()) != null) {
-                throw new MpRuntimeException("identifier已存在！" + user.getIdentifier());
+                throw new MpRuntimeException("用户编号已存在！" + user.getIdentifier());
             }
         }
 

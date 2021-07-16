@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.auth.dto.user.UserRequest;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.SysConfigModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.service.AvatarService;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.SysConfigService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
@@ -42,7 +43,6 @@ public class SysConfigController extends BaseModelController<SysConfigModel, Que
         setModelService(modelService);
     }
 
-
     @ApiOperation(value = "查询所有系统设置", notes = "")
     @GetMapping("/all")
     public ServiceResult getall() {
@@ -65,6 +65,14 @@ public class SysConfigController extends BaseModelController<SysConfigModel, Que
         return ResultUtils.commonResult(success, null);
     }
 
+
+    @ApiOperation(value = "系统配置 初始化", notes = "")
+    @PostMapping("/init")
+    public ServiceResult init() {
+        // 更新规则，如果key存在，就修改value值，如果key不存在，就忽略不改
+        boolean success = getModelService().init();
+        return ResultUtils.commonResult(success, null);
+    }
 
 
     @Override

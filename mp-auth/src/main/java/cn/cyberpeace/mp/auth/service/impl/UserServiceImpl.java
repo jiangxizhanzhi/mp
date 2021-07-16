@@ -4,11 +4,14 @@ import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
+import cn.cyberpeace.mp.auth.dto.user.UserHeartbeatRequest;
+import cn.cyberpeace.mp.auth.dto.user.UserOnlineReportPageRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.OrgUserModel;
 import cn.cyberpeace.mp.auth.model.RoleModel;
+import cn.cyberpeace.mp.auth.model.UserHeartbeatModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
@@ -17,6 +20,8 @@ import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.service.RoleService;
 import cn.cyberpeace.mp.auth.service.SysConfigService;
 import cn.cyberpeace.mp.auth.service.TenantUserService;
+import cn.cyberpeace.mp.auth.service.UserHeartbeatService;
+import cn.cyberpeace.mp.auth.service.UserOnlineReportService;
 import cn.cyberpeace.mp.auth.service.UserPermissionService;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.service.UserService;
@@ -40,7 +45,10 @@ import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Assert;
+import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,8 +56,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -97,6 +112,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Autowired
     private UserUpdateCheckService updateCheckService;
+
+    @Autowired
+    private UserHeartbeatService userHeartbeatService;
+
+    @Autowired
+    private UserOnlineReportService userOnlineReportService;
 
     @Autowired
     public UserServiceImpl(UserMapper modelMapper, UserFields modelFields) {
@@ -515,8 +536,27 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public void downloadExcelTemplate() {
         try {
             HttpServletResponse response = ServletUtils.getResponse();
-            fastDFSClient.downloadFile(authConfig.getExcelTemplatePath(), authConfig.getExcelTemplateName(), response, FdfsGroupEnum.DEFAULT.toString());
-        } catch (MpRuntimeException e) {
+//            String path = Objects.requireNonNull(this.getClass().getClassLoader().getResource("excel/import_template.xls")).getPath();
+            InputStream is = this.getClass().getClassLoader().getResourceAsStream("excel/import_template.xls");
+            String fileName = "用户列表.xls";
+
+            InputStream fis = new BufferedInputStream(is);
+            byte[] buffer = new byte[fis.available()];
+            fis.read(buffer);
+            fis.close();
+            // 清空response
+            response.reset();
+            // 设置response的Header
+            response.addHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes("UTF-8"),"ISO8859-1"));
+//            response.addHeader("Content-Length", "" + file.length());
+            OutputStream toClient = new BufferedOutputStream(response.getOutputStream());
+            response.setContentType("application/octet-stream");
+            toClient.write(buffer);
+            toClient.flush();
+            toClient.close();
+
+        } catch (IOException e) {
+            log.error("{}", ExceptionUtil.stacktraceToString(e));
             throw new MpRuntimeException("下载模板错误！");
         }
     }
@@ -625,6 +665,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
 
+    @Override
     public UserDto userModel2UserDto(UserModel userModel) {
         if (Objects.isNull(userModel)) {
             return null;
@@ -664,6 +705,20 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return userDto;
     }
 
+    @Override
+    public void heartbeat(UserHeartbeatRequest hbrequest) {
+        UserModel userModel = UserUtils.getLoginUser();
+
+        UserHeartbeatModel heartbeat = new UserHeartbeatModel();
+        heartbeat.setUser(userModel.getId());
+
+        userHeartbeatService.create(heartbeat);
+    }
+
+    @Override
+    public PageInfo onlineReport(UserOnlineReportPageRequest pageRequest) {
+        return userOnlineReportService.page(pageRequest);
+    }
 
     private UserModel importUser2UserModel(ImportUser importUser) {
         if (Objects.isNull(importUser)) {
