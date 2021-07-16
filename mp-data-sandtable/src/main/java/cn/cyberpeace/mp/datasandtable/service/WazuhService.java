@@ -43,6 +43,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -131,6 +132,7 @@ public class WazuhService {
                     var monitorMessage = model.getFullLog().substring("MonitorMessage:".length());
                     var result = JSONObject.parseObject(monitorMessage, WazuhModel.class);
                     result.setAgentId(model.getAgent().getId());
+                    result.setAgentName(model.getAgent().getName());
                     result.setMacId(queryMacIdByAgentId(model.getAgent().getId(), wazuhMonitorEventsRequest.getMacIds(), multiValueMap));
                     return result;
                 }).collect(Collectors.toList());
@@ -173,6 +175,11 @@ public class WazuhService {
         //构造查询条件
         boolQueryBuilder.must(QueryBuilders.termQuery("rule.id", "900002"));
         buildAgentIdQuery(wazuhEventRequest.getMacIds(), boolQueryBuilder, allAgentMacAddr);
+
+        if (!CollectionUtils.isEmpty(wazuhEventRequest.getAgentNames())) {
+            buildAgentNameQuery(wazuhEventRequest.getAgentNames(), boolQueryBuilder);
+        }
+
         //构造事件条件
         var end = LocalDateTime.now();
         var start = end.minusMinutes(5L);
@@ -233,6 +240,8 @@ public class WazuhService {
             .macId(queryMacIdByAgentId(wazuhFileRoot.getAgent().getId(), wazuhEventRequest.getMacIds(), multiValueMap))
             //区分文件还是注册表
             .fileEventType(wazuhFileRoot.getRule().getGroups().stream().anyMatch("syscheck_registry"::equals) ? FileEventType.REGISTRY : FileEventType.FILE)
+            .agentName(wazuhFileRoot.getAgent().getName())
+            .agentId(wazuhFileRoot.getAgent().getId())
             .build();
     }
 
@@ -279,10 +288,18 @@ public class WazuhService {
         //构造agentId
         buildAgentIdQuery(wazuhEventRequest.getMacIds(), boolQueryBuilder, allAgentMacAddr);
 
+        if (!CollectionUtils.isEmpty(wazuhEventRequest.getAgentNames())) {
+            buildAgentNameQuery(wazuhEventRequest.getAgentNames(), boolQueryBuilder);
+        }
+
         //时间查询
         boolQueryBuilder.must(QueryBuilders.rangeQuery("timestamp")
             .from(LocalDateTimeUtils.localDateTimeToString(wazuhEventRequest.getStartTime(), LocalDateTimeUtils.esdateTimeFormatter))
             .to(LocalDateTimeUtils.localDateTimeToString(wazuhEventRequest.getEndTime(), LocalDateTimeUtils.esdateTimeFormatter)));
+    }
+
+    private void buildAgentNameQuery(List<String> names, BoolQueryBuilder boolQueryBuilder) {
+        boolQueryBuilder.filter(QueryBuilders.termsQuery("agent.name", names));
     }
 
     /**

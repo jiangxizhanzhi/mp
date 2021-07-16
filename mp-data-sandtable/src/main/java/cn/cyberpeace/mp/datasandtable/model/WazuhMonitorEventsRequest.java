@@ -25,4 +25,7 @@ public class WazuhMonitorEventsRequest {
      */
     @ApiModelProperty(value = "macId集合", required = true)
     private List<String> macIds;
+
+    @ApiModelProperty(value = "agentName列表", required = false)
+    private List<String> agentNames;
 }

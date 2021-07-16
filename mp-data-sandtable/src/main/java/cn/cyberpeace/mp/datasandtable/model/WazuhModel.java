@@ -37,6 +37,9 @@ public class WazuhModel {
     @ApiModelProperty("agentId")
     private String agentId;
 
+    @ApiModelProperty("agentName")
+    private String agentName;
+
     @ApiModelProperty("macId")
     private String macId;
 }

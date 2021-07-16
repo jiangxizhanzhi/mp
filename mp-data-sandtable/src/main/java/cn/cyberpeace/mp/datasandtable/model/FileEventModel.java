@@ -42,4 +42,11 @@ public class FileEventModel {
 
     @ApiModelProperty("文件事件类型")
     private String macId;
+
+    @ApiModelProperty("wazuhAgentId")
+    private String agentId;
+
+    @ApiModelProperty("wazuh AgentName")
+    private String agentName;
+
 }
