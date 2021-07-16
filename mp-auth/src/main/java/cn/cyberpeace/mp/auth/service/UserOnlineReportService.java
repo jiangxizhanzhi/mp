@@ -11,4 +11,6 @@ public interface UserOnlineReportService extends BaseModelService<UserOnlineRepo
 
     PageInfo page(UserOnlineReportPageRequest req);
 
+    boolean createOrUpdate(String userId, boolean isOnline);
+
 }
