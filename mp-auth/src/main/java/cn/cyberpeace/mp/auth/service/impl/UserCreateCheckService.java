@@ -40,13 +40,13 @@ public class UserCreateCheckService implements UserCheckService {
 
         if (StringUtils.isNotBlank(user.getUsername())) {
             if (userService.getByUserName(user.getUsername()) != null) {
-                throw new MpRuntimeException("用户名已存在！" + user.getUsername());
+                throw new MpRuntimeException("用户名已存在！" + user.getUsername() + "，请确认用户名是否正确");
             }
         }
 
         if (StringUtils.isNotBlank(user.getIdentifier())) {
             if (userService.getByIdent(user.getIdentifier()) != null) {
-                throw new MpRuntimeException("用户编号已存在！" + user.getIdentifier());
+                throw new MpRuntimeException("用户编号已存在！" + user.getIdentifier() + "，请确认用户编号是否正确");
             }
         }
 
