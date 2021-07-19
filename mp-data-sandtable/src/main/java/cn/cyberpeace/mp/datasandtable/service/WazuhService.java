@@ -160,6 +160,8 @@ public class WazuhService {
     private String queryMacIdByAgentId(String agentId, List<String> macIds,
         MultiValueMap<String, String> multiValueMap) {
         List<String> ids = multiValueMap.get(agentId);
+        // macId集合都转换成小写
+        macIds = macIds.stream().map(String::toLowerCase).collect(Collectors.toList());
         var currentMacId = Sets.intersection(Sets.newHashSet(macIds), Sets.newHashSet(ids));
         return currentMacId.iterator().next();
     }
@@ -200,7 +202,8 @@ public class WazuhService {
             return responseMultiMap;
         }
         wazuhNetifaceRoot.getData().getAffectedItems().forEach(item -> {
-            responseMultiMap.add(item.getAgentId(), item.getMac());
+            // 所有的macId都以小写保存
+            responseMultiMap.add(item.getAgentId(), item.getMac().toLowerCase());
         });
 
         return responseMultiMap;
@@ -213,9 +216,11 @@ public class WazuhService {
      * @return agentSet
      */
     public Set<String> queryAgentIdsByMac(List<String> macs, MultiValueMap<String, String> allAgentMacAddr) {
+        // 转小写macId集合
+        List<String> lowerMacs = macs.stream().map(String::toLowerCase).collect(Collectors.toList());
         Set<String> agentSet = Sets.newHashSet();
         allAgentMacAddr.forEach((key, macList) -> {
-            if (macList.stream().anyMatch(macs::contains)) {
+            if (macList.stream().anyMatch(lowerMacs::contains)) {
                 agentSet.add(key);
             }
         });
