@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
+import cn.cyberpeace.mp.auth.constant.SysConfigConstant;
 import cn.cyberpeace.mp.auth.model.AvatarModel;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.SysConfigModel;
@@ -9,6 +10,7 @@ import cn.cyberpeace.mp.auth.repository.SysConfigMapper;
 import cn.cyberpeace.mp.auth.service.AvatarService;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.SysConfigService;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.OrgFields;
 import cn.cyberpeace.mp.auth.service.fields.SysConfigFields;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -16,6 +18,7 @@ import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.lang.Assert;
@@ -49,6 +52,9 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
     @Autowired
     private AvatarService avatarService;
 
+    @Autowired
+    private UserService userService;
+
     @Override
     public ObjServiceResult<SysConfigModel> create(SysConfigModel obj, String[] fields) {
         throw new MpRuntimeException("不允许新增操作");
@@ -74,6 +80,14 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
     public boolean updateByKeyName(SysConfigModel sysConfigModel) {
         Assert.notBlank(sysConfigModel.getKeyName(), "key不能为空！");
         Assert.notNull(sysConfigModel.getValue(), "value不能为null！");
+
+        if (sysConfigModel.getKeyName().equals(SysConfigConstant.KEY_USER_AUDIT) && sysConfigModel.getValue().equals("0")) {
+            // 如果要关闭审核功能，需要检查用户中有没有处于待审核状态的
+            List<UserModel> list = userService.listNotAudited();
+            if (CollectionUtil.isNotEmpty(list)) {
+                throw new MpRuntimeException("有待审核的用户！不能关闭审核功能！");
+            }
+        }
 
         int cnt = getModelMapper().updateByKeyName(sysConfigModel.getKeyName(), sysConfigModel.getValue());
 
@@ -117,9 +131,10 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
     }
 
     @Override
-    public boolean isUserAudit() {
-        SysConfigModel config = getByKeyName("user_audit");
+    public boolean isNewUserNeedAudit() {
+        SysConfigModel config = getByKeyName(SysConfigConstant.KEY_USER_AUDIT);
         if (Objects.nonNull(config) && Objects.equals("1", config.getValue())) {
+            // 新用户需要审核
             return true;
         }
         return false;
