@@ -1,9 +1,14 @@
 package cn.cyberpeace.mp.auth.extensions.security;
 
+import cn.cyberpeace.mp.auth.constant.AuthLogConstant;
 import cn.cyberpeace.mp.auth.extensions.security.common.JwtCommon;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.service.UserLogService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.devops.log.constant.LogConstant;
+import cn.cyberpeace.mp.devops.log.model.OperationLogModel;
+import cn.cyberpeace.mp.devops.log.utils.SnUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -23,6 +28,9 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
     private final UserService userService;
 
     @Autowired
+    private UserLogService userLogService;
+
+    @Autowired
     public HttpLogoutSuccessHandler(MappingJackson2HttpMessageConverter messageConverter, UserService userService) {
         this.mapper = messageConverter.getObjectMapper();
         this.userService = userService;
@@ -37,6 +45,7 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
             updateUser.setId(user.getId());
             updateUser.initDefault("tokenSecret");
             userService.update(updateUser);
+            recordLogoutLog(user, request);
         }
 
         response.setContentType("application/json;charset=UTF-8");
@@ -46,5 +55,25 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
         PrintWriter writer = response.getWriter();
         mapper.writeValue(writer, result.asResult());
         writer.flush();
+    }
+
+    private void recordLogoutLog(UserModel user, HttpServletRequest request) {
+        OperationLogModel logModel = new OperationLogModel();
+        //操作类型
+        logModel.setOpType(AuthLogConstant.TYPE_LOGOUT);
+        //操作主题
+        logModel.setTitle("登出");
+        //操作描述
+        logModel.setDescription("登出");
+
+        //操作用户
+        logModel.setUserId(user.getId());
+        logModel.setUserName(user.getUsername());
+        logModel.setUserType(LogConstant.USER_TYPE_USER);
+
+        logModel.setOpIp(SnUtils.getRealRemoteIp(request));
+
+        // 记录登出日志
+        userLogService.record(logModel);
     }
 }
