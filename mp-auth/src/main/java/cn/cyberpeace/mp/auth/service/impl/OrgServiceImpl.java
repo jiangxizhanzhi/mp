@@ -59,12 +59,17 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     @Override
     public ObjServiceResult<OrgModel> create(OrgModel obj, String[] fields) {
         if (StringUtils.isNotBlank(obj.getParent())) {
-            OrgModel orgModel = getModelMapper().get(obj.getParent());
-            if (orgModel == null) {
+            OrgModel parentOrg = getModelMapper().get(obj.getParent());
+            if (parentOrg == null) {
                 throw new IllegalArgumentException("id为"+ obj.getParent() + "的组织不存在");
             }
-            String path = calculatePathByOrgId(orgModel.getId());
+            String path = calculatePathByOrgId(parentOrg.getId());
             path = path + AuthConstant.ORG_PATH_SEPARATOR + obj.getName();
+
+            if (Objects.nonNull(getByPath(path))) {
+                throw new MpRuntimeException("同一父级组织下，已有同名的子组织存在！");
+            }
+
             obj.setPath(path);
         }
         return super.create(obj, fields);
