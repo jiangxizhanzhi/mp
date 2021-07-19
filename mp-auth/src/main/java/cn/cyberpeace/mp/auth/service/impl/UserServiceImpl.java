@@ -45,8 +45,6 @@ import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
-import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Assert;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -56,12 +54,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -174,7 +170,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public ObjServiceResult<UserModel> create(UserModel obj, String[] fields) {
         obj.encodePassword();
         // 查看系统设置，注册用户是否需要审批
-        if (sysConfigService.isUserAudit()) {
+        if (sysConfigService.isNewUserNeedAudit()) {
             log.info("need registration audit...");
             obj.setIsAudited(UserModel.Status.NOT_AUDITED);
         }
@@ -191,7 +187,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public ServiceResult<Integer> bulkCreate(List<UserModel> objs) {
         objs.forEach(UserModel::encodePassword);
         // 查看系统设置，注册用户是否需要审批
-        if (sysConfigService.isUserAudit()) {
+        if (sysConfigService.isNewUserNeedAudit()) {
             log.info("need registration audit...");
             objs.forEach(o -> o.setIsAudited(UserModel.Status.NOT_AUDITED));
         }
@@ -718,6 +714,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     public PageInfo onlineReport(UserOnlineReportPageRequest pageRequest) {
         return userOnlineReportService.page(pageRequest);
+    }
+
+    @Override
+    public List<UserModel> listNotAudited() {
+        List<UserModel> userModels = getModelMapper().list(new HumanCondition().filterEqual("is_audited", "0"));
+        return userModels;
     }
 
     private UserModel importUser2UserModel(ImportUser importUser) {

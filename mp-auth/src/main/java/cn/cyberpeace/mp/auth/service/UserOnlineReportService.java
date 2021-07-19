@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.service;
 
+import cn.cyberpeace.mp.auth.dto.user.UserOlReportCntDto;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineReportPageRequest;
 import cn.cyberpeace.mp.auth.model.SysConfigModel;
 import cn.cyberpeace.mp.auth.model.UserOnlineReportModel;
@@ -11,6 +12,6 @@ public interface UserOnlineReportService extends BaseModelService<UserOnlineRepo
 
     PageInfo page(UserOnlineReportPageRequest req);
 
-    boolean createOrUpdate(String userId, boolean isOnline);
+    boolean createOrUpdate(UserOlReportCntDto userOlReportCntDto);
 
 }

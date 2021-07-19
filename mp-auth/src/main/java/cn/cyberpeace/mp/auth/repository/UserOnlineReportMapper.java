@@ -16,7 +16,7 @@ import java.util.List;
 @ModelClass(UserOnlineReportModel.class)
 public interface UserOnlineReportMapper extends BaseModelMapper<UserOnlineReportModel> {
 
-    @Select("select * from mp_auth_user_online_report order by username")
+    @Select("select * from mp_auth_user_online_report order by is_online desc, username")
     List<UserOnlineReportModel> listAll();
 
 
