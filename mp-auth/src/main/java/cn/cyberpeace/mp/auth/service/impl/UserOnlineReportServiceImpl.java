@@ -67,7 +67,7 @@ public class UserOnlineReportServiceImpl extends BaseModelServiceImpl<UserOnline
 
 
     @Scheduled(initialDelay = REFRESH_RATE, fixedRate = REFRESH_RATE)
-    public void initSchedule() {
+    public void scheduleUserOlReport() {
         if (threadPool == null) {
             threadPool = getSingletonThreadPool();
         }
@@ -103,6 +103,7 @@ public class UserOnlineReportServiceImpl extends BaseModelServiceImpl<UserOnline
         onlineReportNew.setName(userOlReportCntDto.getUname());
         onlineReportNew.setOrg(allorgPath);
 
+        // 查看10分钟内，收到的心跳次数，如果大于阈值，表示这10分钟内用户处于在线状态
         boolean isOnline = userOlReportCntDto.getCnt() > CNT_PER_RATE;
 
         if (isOnline) {

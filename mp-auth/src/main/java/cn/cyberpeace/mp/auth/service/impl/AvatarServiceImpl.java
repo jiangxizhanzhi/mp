@@ -18,13 +18,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.config.web.servlet.headers.HttpPublicKeyPinningDsl;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -108,5 +111,36 @@ public class AvatarServiceImpl extends BaseModelServiceImpl<AvatarModel, AvatarM
         String filepath = fastDFSClient.upload(is, fileName, desc, FdfsGroupEnum.DEFAULT.toString());
         httpUrl = group.getFileServerAddr() + File.separator + filepath;
         return httpUrl;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean initDefaultAvatars() {
+        log.info("uploading default avatar manually!");
+        deleteAll();
+
+        // 默认头像
+        InputStream avatar01 = Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("avatar/1.png"));
+        InputStream avatar02 = Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("avatar/2.png"));
+        InputStream avatar03 = Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("avatar/3.png"));
+        InputStream avatar04 = Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("avatar/4.png"));
+        InputStream avatar05 = Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("avatar/5.png"));
+        InputStream avatar06 = Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("avatar/6.png"));
+        InputStream avatar07 = Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("avatar/7.png"));
+        InputStream avatar08 = Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("avatar/8.png"));
+        InputStream avatar09 = Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("avatar/9.png"));
+
+
+        List<InputStream> avatarlist = Arrays.asList(avatar01, avatar02, avatar03, avatar04, avatar05, avatar06, avatar07, avatar08, avatar09);
+
+        for (int i = 0; i < avatarlist.size(); i++) {
+            InputStream ava = avatarlist.get(i);
+            String url = uploadIs(ava, i + ".png", null);
+            AvatarModel avatarModel = new AvatarModel();
+            avatarModel.setUrl(url);
+            create(avatarModel);
+        }
+
+        return true;
     }
 }

@@ -1,14 +1,7 @@
 package cn.cyberpeace.mp.auth.controller;
 
-import cn.cyberpeace.mp.auth.constant.AuthLogConstant;
-import cn.cyberpeace.mp.auth.constant.ControllerConstant;
-import cn.cyberpeace.mp.auth.dto.ConfigReq;
-import cn.cyberpeace.mp.auth.dto.user.UserRequest;
-import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.SysConfigModel;
-import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.AvatarService;
-import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.SysConfigService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
@@ -17,7 +10,6 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +29,9 @@ import java.util.List;
 @RequestMapping("/sys/config")
 @UnlimitPagination("list")
 public class SysConfigController extends BaseModelController<SysConfigModel, QueryParams, SysConfigService> {
+
+    @Autowired
+    private AvatarService avatarService;
 
     @Autowired
     public SysConfigController(SysConfigService modelService) {
@@ -70,7 +65,7 @@ public class SysConfigController extends BaseModelController<SysConfigModel, Que
     @PostMapping("/init")
     public ServiceResult init() {
         // 更新规则，如果key存在，就修改value值，如果key不存在，就忽略不改
-        boolean success = getModelService().init();
+        boolean success = avatarService.initDefaultAvatars();
         return ResultUtils.commonResult(success, null);
     }
 
