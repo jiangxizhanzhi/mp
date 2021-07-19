@@ -287,9 +287,17 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         UserModel userModel = new UserModel();
         org.springframework.beans.BeanUtils.copyProperties(modifyRequest, userModel);
 
+        if (StringUtils.isNotBlank(modifyRequest.getPassword())) {
+            String decryptedPwd = PasswordUtils.desDecrypt(modifyRequest.getPassword());
+            userModel.setPassword(decryptedPwd);
+        } else {
+            userModel.setPassword(null);
+        }
+
+
         updateCheckService.check(userModel);
 
-        // create中会对密码加密，外层不需要再次加密
+        // udpate中会对密码加密，外层不需要再次加密
         ObjServiceResult<UserModel> result = update(userModel);
 
         if (Objects.isNull(result.getSource()) || Objects.isNull(result.getSource().getObj())) {

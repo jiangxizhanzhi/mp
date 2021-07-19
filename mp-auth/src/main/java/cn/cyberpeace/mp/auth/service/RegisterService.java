@@ -20,7 +20,7 @@ public class RegisterService {
     private AuthConfig authConfig;
 
     @Autowired
-    private UserCreateCheckService checkService;
+    private UserCreateCheckService createCheckService;
 
     @Autowired
     private SysConfigService sysConfigService;
@@ -42,7 +42,7 @@ public class RegisterService {
             user.setIsAudited(UserModel.Status.NOT_AUDITED);
         }
 
-        checkService.check(user);
+        createCheckService.check(user);
 
         ObjServiceResult<UserModel> result = userService.create(user);
         return result;

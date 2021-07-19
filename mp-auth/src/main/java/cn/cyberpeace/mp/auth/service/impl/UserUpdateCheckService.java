@@ -31,8 +31,12 @@ public class UserUpdateCheckService implements UserCheckService {
         }
         UserModel oldUser = result.getSource().getObj();
 
-        // 修改操作不允许直接修改密码
-        user.setPassword(null);
+//        user.setPassword(null);
+        // 修改操作允许直接修改密码
+        // 密码是否合法
+        if (StringUtils.isNotBlank(user.getPassword())) {
+            Assert.isFalse(PasswordUtils.isPasswordStrengthLowLevel(user.getPassword()), AuthConstant.ERROR_CODE_PREFIX + "password_strength_invalid");
+        }
 
         // 邮箱是否合法
         if (StringUtils.isNotBlank(user.getEmail())) {
