@@ -4,6 +4,8 @@ import com.alibaba.fastjson.annotation.JSONField;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -42,4 +44,8 @@ public class WazuhModel {
 
     @ApiModelProperty("macId")
     private String macId;
+
+    @JSONField(name = "timestamp")
+    @ApiModelProperty("时间")
+    private LocalDateTime time;
 }

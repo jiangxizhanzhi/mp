@@ -41,6 +41,7 @@ import org.elasticsearch.client.core.CountResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -110,6 +111,8 @@ public class WazuhService {
 
         MultiValueMap<String, String> multiValueMap = this.queryAllAgentMacAddr();
         buildMonitorEventsBuilder(wazuhMonitorEventsRequest, boolQueryBuilder, multiValueMap);
+        // 按时间降序
+        sourceBuilder.sort("timestamp", SortOrder.DESC);
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
         //配置索引为空
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
@@ -134,6 +137,7 @@ public class WazuhService {
                     result.setAgentId(model.getAgent().getId());
                     result.setAgentName(model.getAgent().getName());
                     result.setMacId(queryMacIdByAgentId(model.getAgent().getId(), wazuhMonitorEventsRequest.getMacIds(), multiValueMap));
+                    result.setTime(LocalDateTimeUtils.dateToLocalDateTime(model.getTimestamp()));
                     return result;
                 }).collect(Collectors.toList());
 
@@ -183,11 +187,11 @@ public class WazuhService {
         }
 
         //构造事件条件
-        var end = LocalDateTime.now();
-        var start = end.minusMinutes(5L);
-        boolQueryBuilder.must(QueryBuilders.rangeQuery("timestamp")
-            .from(LocalDateTimeUtils.localDateTimeToString(start, LocalDateTimeUtils.esdateTimeFormatter))
-            .to(LocalDateTimeUtils.localDateTimeToString(end, LocalDateTimeUtils.esdateTimeFormatter)));
+//        var end = LocalDateTime.now();
+//        var start = end.minusMinutes(5L);
+//        boolQueryBuilder.must(QueryBuilders.rangeQuery("timestamp")
+//            .from(LocalDateTimeUtils.localDateTimeToString(start, LocalDateTimeUtils.esdateTimeFormatter))
+//            .to(LocalDateTimeUtils.localDateTimeToString(end, LocalDateTimeUtils.esdateTimeFormatter)));
     }
 
     /**
