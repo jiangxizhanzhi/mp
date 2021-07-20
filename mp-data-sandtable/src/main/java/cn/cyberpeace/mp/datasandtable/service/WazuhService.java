@@ -5,31 +5,13 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.util.LocalDateTimeUtils;
 import cn.cyberpeace.mp.datasandtable.dao.WazuhDao;
-import cn.cyberpeace.mp.datasandtable.model.FileEventModel;
-import cn.cyberpeace.mp.datasandtable.model.WazuhEventRequest;
-import cn.cyberpeace.mp.datasandtable.model.WazuhFileRoot;
-import cn.cyberpeace.mp.datasandtable.model.WazuhModel;
-import cn.cyberpeace.mp.datasandtable.model.WazuhMonitorEventsRequest;
-import cn.cyberpeace.mp.datasandtable.model.WazuhMonitorRoot;
+import cn.cyberpeace.mp.datasandtable.model.*;
 import cn.cyberpeace.mp.datasandtable.model.emum.FileEventType;
+import cn.hutool.core.util.NumberUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import javax.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
@@ -47,6 +29,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+
+import javax.annotation.Resource;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * wazuh对接
@@ -110,9 +101,12 @@ public class WazuhService {
         var sourceBuilder = new SearchSourceBuilder();
 
         MultiValueMap<String, String> multiValueMap = this.queryAllAgentMacAddr();
-        buildMonitorEventsBuilder(wazuhMonitorEventsRequest, boolQueryBuilder, multiValueMap);
+        int agentSize = buildMonitorEventsBuilder(wazuhMonitorEventsRequest, boolQueryBuilder, multiValueMap);
         // 按时间降序
         sourceBuilder.sort("timestamp", SortOrder.DESC);
+        // 监控数据每个agent一条，所以这里分页大小设为agent数量的2倍
+        sourceBuilder.from(0);
+        sourceBuilder.size(NumberUtil.equals(agentSize, 0) ? 10 : agentSize * 2);
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
         //配置索引为空
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
@@ -176,15 +170,18 @@ public class WazuhService {
      * @param wazuhEventRequest wazuhEventRequest
      * @param boolQueryBuilder boolQueryBuilder
      */
-    private void buildMonitorEventsBuilder(WazuhMonitorEventsRequest wazuhEventRequest,
+    private int buildMonitorEventsBuilder(WazuhMonitorEventsRequest wazuhEventRequest,
         BoolQueryBuilder boolQueryBuilder, MultiValueMap<String, String> allAgentMacAddr) {
         //构造查询条件
         boolQueryBuilder.must(QueryBuilders.termQuery("rule.id", "900002"));
-        buildAgentIdQuery(wazuhEventRequest.getMacIds(), boolQueryBuilder, allAgentMacAddr);
+        int agentSize = buildAgentIdQuery(wazuhEventRequest.getMacIds(), boolQueryBuilder, allAgentMacAddr);
 
         if (!CollectionUtils.isEmpty(wazuhEventRequest.getAgentNames())) {
             buildAgentNameQuery(wazuhEventRequest.getAgentNames(), boolQueryBuilder);
         }
+
+        // 返回agent数量
+        return agentSize;
 
         //构造事件条件
 //        var end = LocalDateTime.now();
@@ -318,9 +315,11 @@ public class WazuhService {
      * @param boolQueryBuilder
      * @param allAgentMacAddr
      */
-    private void buildAgentIdQuery(List<String> macIds, BoolQueryBuilder boolQueryBuilder,
+    private int buildAgentIdQuery(List<String> macIds, BoolQueryBuilder boolQueryBuilder,
         MultiValueMap<String, String> allAgentMacAddr) {
-        boolQueryBuilder.filter(QueryBuilders.termsQuery("agent.id", this.queryAgentIdsByMac(macIds, allAgentMacAddr)));
+        Set<String> agentSet = this.queryAgentIdsByMac(macIds, allAgentMacAddr);
+        boolQueryBuilder.filter(QueryBuilders.termsQuery("agent.id", agentSet));
+        return agentSet.size();
     }
 
     /**
