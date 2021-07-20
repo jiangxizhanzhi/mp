@@ -1,8 +1,14 @@
 package cn.cyberpeace.mp.systemoperation.response;
 
+import cn.cyberpeace.mp.base.serializer.CustomLocalDateTimeDeserializer;
+import cn.cyberpeace.mp.base.serializer.CustomLocalDateTimeSerializer;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+
+import java.time.LocalDateTime;
 
 /**
  * @Description: 事件监控返回
@@ -28,8 +34,10 @@ public class EventMonitorResponse {
     @ApiModelProperty("文件大小")
     private String size;
 
+    @JsonSerialize(using = CustomLocalDateTimeSerializer.class)
+    @JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)
     @ApiModelProperty("文件时间")
-    private String update_time;
+    private LocalDateTime update_time;
 
     @ApiModelProperty("用户")
     private String user;

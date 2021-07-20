@@ -1,8 +1,14 @@
 package cn.cyberpeace.mp.systemoperation.response;
 
+import cn.cyberpeace.mp.base.serializer.CustomLocalDateTimeDeserializer;
+import cn.cyberpeace.mp.base.serializer.CustomLocalDateTimeSerializer;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+
+import java.time.LocalDateTime;
 
 /**
  * @Description: 监控返回
@@ -34,8 +40,10 @@ public class FlowMonitorResponse {
     @ApiModelProperty("目标端口")
     private String dst_port;
 
+    @JsonSerialize(using = CustomLocalDateTimeSerializer.class)
+    @JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)
     @ApiModelProperty("时间")
-    private String timestamp;
+    private LocalDateTime timestamp;
 
     @ApiModelProperty("流量大小")
     private double total_bytes;
