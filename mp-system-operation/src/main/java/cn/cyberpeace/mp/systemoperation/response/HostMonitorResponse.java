@@ -45,4 +45,7 @@ public class HostMonitorResponse {
     @ApiModelProperty("内存利用率")
     private BigDecimal memory_percent;
 
+    @ApiModelProperty("时间")
+    private String time;
+
 }
