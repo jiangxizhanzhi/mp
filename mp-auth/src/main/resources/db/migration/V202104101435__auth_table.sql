@@ -257,8 +257,8 @@ CREATE TABLE mp_auth_avatar (
        `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
        `id` varchar(64)  NOT NULL COMMENT 'id',
        `url` varchar(1024)  NULL COMMENT '头像url',
-       `create_time` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-       `update_time` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+       `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+       `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
        PRIMARY KEY (`pk`),
        UNIQUE (`id`)
 ) COMMENT '默认头像';
@@ -271,8 +271,8 @@ CREATE TABLE mp_sys_config (
      `tenant` varchar(64) NOT NULL COMMENT '租户',
      `key_name` varchar(100)  NULL COMMENT '键',
      `value` varchar(1024)  NULL COMMENT '值',
-     `create_time` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-     `update_time` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+     `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+     `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
      PRIMARY KEY (`pk`),
      UNIQUE (`id`),
      UNIQUE (`tenant`, `key_name`)
