@@ -8,12 +8,13 @@ import cn.cyberpeace.mp.datasandtable.model.WazuhMonitorEventsRequest;
 import cn.cyberpeace.mp.datasandtable.service.WazuhService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/wazuh")
@@ -34,4 +35,10 @@ public class WazuhController {
     public ListObjServiceResult<WazuhModel> queryMonitorEvents(@RequestBody @Valid WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
         return new ListObjServiceResult<>(wazuhService.queryMonitorEvents(wazuhMonitorEventsRequest)).asResult();
     }
+
+//    @PostMapping("/monitor_agent_mac")
+//    @ApiOperation(value = "查询场景系统指标信息信息", notes = "")
+//    public ServiceResult<MultiValueMap<String, String>> queryAllAgentMacAddr() {
+//        return ServiceResult.success((wazuhService.queryAllAgentMacAddr()));
+//    }
 }
