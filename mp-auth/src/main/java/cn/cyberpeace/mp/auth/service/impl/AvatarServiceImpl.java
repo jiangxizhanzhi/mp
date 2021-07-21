@@ -49,7 +49,7 @@ public class AvatarServiceImpl extends BaseModelServiceImpl<AvatarModel, AvatarM
     @Autowired
     private UserService userService;
 
-    private static final String DEFAULT_USER_ID = "3f655d87112f4ae094bbaf70830e20aa";
+    private static final String DEFAULT_USER_ID = "defaultuserid";
 
     @Override
     public List<AvatarModel> listAll() {
