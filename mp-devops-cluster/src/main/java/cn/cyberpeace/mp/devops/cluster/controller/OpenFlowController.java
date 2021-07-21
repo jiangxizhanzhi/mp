@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.devops.cluster.request.OpenflowActionRequest;
 import cn.cyberpeace.mp.devops.cluster.response.OpenflowActionResponse;
 import cn.cyberpeace.mp.devops.cluster.service.BaseCloudPlatformService;
 import cn.cyberpeace.mp.devops.cluster.service.impl.OpenFlowService;
+import io.micrometer.core.instrument.util.StringUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -36,10 +38,13 @@ public class OpenFlowController {
      */
     @ApiOperation("流表操作查询")
     @GetMapping("/action")
-    public ServiceResult<OpenflowActionResponse> queryOpenFlowAction() {
+    public ServiceResult<OpenflowActionResponse> queryOpenFlowAction(@RequestParam(required = false) String reqHostName) {
+        if (StringUtils.isBlank(reqHostName)) {
+            reqHostName = hostname;
+        }
         OpenflowActionRequest request = OpenflowActionRequest.builder()
                 .method(BaseCloudPlatformService.OPENFLOW_ACTION_METHOD)
-                .hostname(hostname)
+                .hostname(reqHostName)
                 .build();
         OpenflowActionResponse response = openFlowService.queryOpenFlowAction(request);
 
