@@ -4,8 +4,6 @@ import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.role.RoleUsersRequest;
 import cn.cyberpeace.mp.auth.dto.role.UserRolePageRequest;
 import cn.cyberpeace.mp.auth.dto.role.UserRolesRequest;
-import cn.cyberpeace.mp.auth.dto.user.UserDto;
-import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
@@ -23,10 +21,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @Api(value = "用户-角色管理接口", tags = "AUTH-用户-角色管理接口")
 @Slf4j

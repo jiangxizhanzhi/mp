@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.auth.service.impl;
 
 import cn.cyberpeace.mp.auth.dto.OrgDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
-import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.OrgOperation;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.base.service.result.ObjResult;

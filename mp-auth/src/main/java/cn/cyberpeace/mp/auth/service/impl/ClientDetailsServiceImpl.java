@@ -1,11 +1,8 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
 import cn.cyberpeace.mp.auth.model.ClientDetailsModel;
-import cn.cyberpeace.mp.auth.model.OrgUserModel;
 import cn.cyberpeace.mp.auth.repository.ClientDetailsMapper;
-import cn.cyberpeace.mp.auth.repository.OrgUserMapper;
 import cn.cyberpeace.mp.auth.service.ClientDetailsService;
-import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.service.fields.ClientDetailsFields;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;

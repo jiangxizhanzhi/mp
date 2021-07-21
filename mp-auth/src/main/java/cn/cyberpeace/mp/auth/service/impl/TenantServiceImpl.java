@@ -7,7 +7,6 @@ import cn.cyberpeace.mp.auth.service.fields.TenantFields;
 import cn.cyberpeace.mp.auth.service.param.TenantQueryParams;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
-import cn.cyberpeace.mp.base.service.param.QueryParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

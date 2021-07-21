@@ -29,7 +29,8 @@ public class TmpMenuService {
     private TargetService targetService;
 
     public void process() {
-        String path = "/Users/sternberg/work/saining/all_permissions_json_0712_96.240.json";
+//        String path = "/Users/sternberg/work/saining/all_permissions_json_0712_96.240.json";
+        String path = "";
         String s = readJsonFile(path);
         List<TmpMenuDTO> menus = JSON.parseArray(s, TmpMenuDTO.class);
         List<TargetModel> targets = new ArrayList<>();

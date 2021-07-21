@@ -1,23 +1,16 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
-import ch.qos.logback.core.joran.conditional.IfAction;
-import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.dto.user.UserOlReportCntDto;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineReportPageRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineReportTask;
-import cn.cyberpeace.mp.auth.model.OrgModel;
-import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserOnlineReportModel;
 import cn.cyberpeace.mp.auth.repository.UserOnlineReportMapper;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.service.UserHeartbeatService;
 import cn.cyberpeace.mp.auth.service.UserOnlineReportService;
-import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.UserOnlineReportFields;
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
-import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.hutool.core.lang.Assert;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -29,24 +22,24 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 public class UserOnlineReportServiceImpl extends BaseModelServiceImpl<UserOnlineReportModel, UserOnlineReportMapper, UserOnlineReportFields, QueryParams> implements UserOnlineReportService {
 
-    // 每10分钟统计一次
-    public static final long REFRESH_RATE = 60000 * 10;
+    // 每15分钟统计一次
+    public static final long REFRESH_RATE_MINUTES = 15;
 
-    // 每次间隔的次数
-    public static final int CNT_PER_RATE = 8;
+    public static final long REFRESH_RATE_MILLISECONDS = 60000 * REFRESH_RATE_MINUTES;
+
+    // 每次间隔的次数(每分钟一次，15分钟就是15次，80% 就是12次）
+    public static final double HEARTBEAT_PER_RATE = 0.8 * 15;
 
     @Autowired
     public UserOnlineReportServiceImpl(UserOnlineReportMapper modelMapper, UserOnlineReportFields modelFields) {
@@ -66,14 +59,14 @@ public class UserOnlineReportServiceImpl extends BaseModelServiceImpl<UserOnline
     private OrgUserService orgUserService;
 
 
-    @Scheduled(initialDelay = REFRESH_RATE, fixedRate = REFRESH_RATE)
+    @Scheduled(initialDelay = REFRESH_RATE_MILLISECONDS, fixedRate = REFRESH_RATE_MILLISECONDS)
     public void scheduleUserOlReport() {
         if (threadPool == null) {
             threadPool = getSingletonThreadPool();
         }
 
         log.info("schedule user online report task...");
-        List<UserOlReportCntDto> list = heartbeatService.groupCntByUserId(LocalDateTime.now().minusMinutes(360L));
+        List<UserOlReportCntDto> list = heartbeatService.groupCntByUserId(LocalDateTime.now().minusMinutes(REFRESH_RATE_MINUTES));
         log.info("{}", list);
         for (UserOlReportCntDto userOlReportCntDto : list) {
             UserOnlineReportTask task = new UserOnlineReportTask(userOlReportCntDto, userOnlineReportService);
@@ -103,8 +96,8 @@ public class UserOnlineReportServiceImpl extends BaseModelServiceImpl<UserOnline
         onlineReportNew.setName(userOlReportCntDto.getUname());
         onlineReportNew.setOrg(allorgPath);
 
-        // 查看10分钟内，收到的心跳次数，如果大于阈值，表示这10分钟内用户处于在线状态
-        boolean isOnline = userOlReportCntDto.getCnt() > CNT_PER_RATE;
+        // 查看15分钟内，收到的心跳次数，如果大于阈值，表示这15分钟内用户处于在线状态
+        boolean isOnline = userOlReportCntDto.getCnt() > HEARTBEAT_PER_RATE;
 
         if (isOnline) {
             onlineReportNew.setIsOnline(1);
@@ -114,18 +107,17 @@ public class UserOnlineReportServiceImpl extends BaseModelServiceImpl<UserOnline
 
         UserOnlineReportModel onlineReportOld = getModelMapper().getByUserId(userOlReportCntDto.getUid());
         if (Objects.nonNull(onlineReportOld)) {
-            // 更新
-            // todo 更新在线时常 每6分钟检测一次？
+            // 更新在线时常 每15分钟统计一次，在线时长增加0.25小时
             if (isOnline) {
-                onlineReportNew.setTotalOnlineHours(onlineReportOld.getTotalOnlineHours() + 0.1);
+                onlineReportNew.setTotalOnlineHours(onlineReportOld.getTotalOnlineHours() + 0.25);
             }
             onlineReportNew.setId(onlineReportOld.getId());
             onlineReportNew.setUpdateTime(LocalDateTime.now());
             getModelMapper().update(onlineReportNew);
         } else {
-            // 新增
+            // 新增 在线时常 每15分钟统计一次，在线时长增加0.25小时
             if (isOnline) {
-                onlineReportNew.setTotalOnlineHours(0.1);
+                onlineReportNew.setTotalOnlineHours(0.25);
             } else {
                 onlineReportNew.setTotalOnlineHours(0.0);
             }
