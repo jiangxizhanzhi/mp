@@ -1,9 +1,11 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
 import cn.cyberpeace.mp.auth.model.AvatarModel;
+import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.repository.AvatarMapper;
 import cn.cyberpeace.mp.auth.repository.SysConfigMapper;
 import cn.cyberpeace.mp.auth.service.AvatarService;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.AvatarFields;
 import cn.cyberpeace.mp.auth.service.fields.SysConfigFields;
 import cn.cyberpeace.mp.base.config.FastDfsConfig;
@@ -11,10 +13,12 @@ import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.config.web.servlet.headers.HttpPublicKeyPinningDsl;
 import org.springframework.stereotype.Service;
@@ -45,6 +49,11 @@ public class AvatarServiceImpl extends BaseModelServiceImpl<AvatarModel, AvatarM
 
     @Autowired
     private FastDfsConfig fastDfsConfig;
+
+    @Autowired
+    private UserService userService;
+
+    private static final String DEFAULT_USER_ID = "3f655d87112f4ae094bbaf70830e20aa";
 
     @Override
     public List<AvatarModel> listAll() {
@@ -139,8 +148,26 @@ public class AvatarServiceImpl extends BaseModelServiceImpl<AvatarModel, AvatarM
             AvatarModel avatarModel = new AvatarModel();
             avatarModel.setUrl(url);
             create(avatarModel);
+
+            if(i == 0) {
+                updateDefaultUserAvatar(url);
+            }
         }
 
         return true;
+    }
+
+    // 更新默认用户的头像
+    private void updateDefaultUserAvatar(String avatarUrl) {
+        ObjServiceResult<UserModel> result = userService.get(DEFAULT_USER_ID);
+        if (Objects.nonNull(result.getSource())) {
+            UserModel old = result.getSource().getObj();
+            if (StringUtils.isBlank(old.getAvatar())) {
+                UserModel userUpdate = new UserModel();
+                userUpdate.setId(DEFAULT_USER_ID);
+                userUpdate.setAvatar(avatarUrl);
+                userService.update(userUpdate);
+            }
+        }
     }
 }
