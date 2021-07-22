@@ -12,4 +12,7 @@ public class UserExportRequest {
     @ApiModelProperty(value = "组织id")
     private String org;
 
+    @ApiModelProperty(value = "用户id列表")
+    private String[] ids;
+
 }

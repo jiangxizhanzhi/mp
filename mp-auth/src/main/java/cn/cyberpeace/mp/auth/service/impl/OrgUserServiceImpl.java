@@ -62,9 +62,9 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
     }
 
     @Override
-    public List<UserModel> listUsersByOrgAndUname(String orgId, String uname) {
+    public List<UserModel> listUsersByOrgAndUname(String orgId, String uname, List<String> userIds) {
         log.info("orgId:{}, uname:{}", orgId, uname);
-        List<UserModel> users = getModelMapper().listUsers(orgId, uname, null);
+        List<UserModel> users = getModelMapper().listUsers(orgId, uname, userIds);
         return users;
     }
 

@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.auth.service.UploadDataListener;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.excel.EasyExcel;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -28,6 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.List;
+import java.util.Objects;
 
 @Api(value = "用户导入导出Excel管理接口", tags = "AUTH-用户导入导出Excel接口")
 @Slf4j
@@ -44,8 +46,13 @@ public class UserExcelController {
     @ApiOperation(value = "导出用户数据excel", notes = "")
     @PostMapping("/excel/export")
     public void exportExcel(HttpServletResponse response, @RequestBody UserExportRequest exportRequest) throws IOException {
+        String[] ids = exportRequest.getIds();
+        List<String> userIds = null;
+        if (Objects.nonNull(ids) && ids.length > 0) {
+            userIds = CollectionUtil.toList(ids);
+        }
 
-        List<UserModel> users =  orgUserService.listUsersByOrgAndUname(exportRequest.getOrg(), exportRequest.getUsername());
+        List<UserModel> users =  orgUserService.listUsersByOrgAndUname(exportRequest.getOrg(), exportRequest.getUsername(), userIds);
         List<ExportUser> exportUserList = userService.exportExcel(users);
 
         response.setContentType("application/vnd.ms-excel");

@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.SysConfigConstant;
 import cn.cyberpeace.mp.auth.model.AvatarModel;
 import cn.cyberpeace.mp.auth.model.SysConfigModel;
@@ -81,7 +82,7 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
             // 如果要关闭审核功能，需要检查用户中有没有处于待审核状态的
             List<UserModel> list = userService.listNotAudited();
             if (CollectionUtil.isNotEmpty(list)) {
-                throw new MpRuntimeException("有待审核的用户！不能关闭审核功能！");
+                throw new MpRuntimeException(AuthErrorCode.SYS_CONFIG_CANNOT_CLOSE_AUDIT);
             }
         }
 

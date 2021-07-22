@@ -16,7 +16,7 @@ public interface OrgUserService extends BaseModelService<OrgUserModel, QueryPara
 
     List<UserModel> listUsersByOrgId(String orgId);
 
-    List<UserModel> listUsersByOrgAndUname(String orgId, String uname);
+    List<UserModel> listUsersByOrgAndUname(String orgId, String uname, List<String> userIds);
 
     List<OrgModel> listOrgsByUserId(String userId);
 
