@@ -740,7 +740,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         UserModel userModel =
                 UserModel.builder().username(importUser.getUsername())
                         .name(importUser.getName())
-                        .password(PasswordUtils.getPasswordEncoder().encode(importUser.getPassword()))
+                        // 此处不需要加密，后面的create()方法会加密
+                        .password(importUser.getPassword())
                         .build();
 
         userModel.setIdentifier(IdGenerator.generateGlobalId() + "");
