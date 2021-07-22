@@ -1,8 +1,3 @@
-CREATE DATABASE `mp` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
-
-
-use mp;
 # 租户表
 CREATE TABLE mp_auth_tenant (
     `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
