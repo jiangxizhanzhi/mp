@@ -36,7 +36,7 @@ public class RegisterService {
                 .name(req.getName())
                 .avatar(req.getAvatar()).build();
 
-        // 查看系统设置，注册用户是否需要审批
+        // 查看系统设置，注册用户是否需要审核
         if (sysConfigService.isNewUserNeedAudit()) {
             log.info("need registration audit...");
             user.setIsAudited(UserModel.Status.NOT_AUDITED);

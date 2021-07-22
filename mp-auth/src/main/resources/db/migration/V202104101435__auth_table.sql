@@ -64,7 +64,7 @@ CREATE TABLE mp_auth_user (
     `id_card` varchar(64) NOT NULL COMMENT '身份证号',
     `address` varchar(255) NOT NULL COMMENT '地址',
     `is_enabled` int NOT NULL COMMENT '1:启用 0：禁用',
-    `is_audited` int NOT NULL COMMENT '1:已审批 0：未审批',
+    `is_audited` int NOT NULL COMMENT '1:已审核 0：待审核',
     `init_check` int NOT NULL DEFAULT 0 COMMENT '是否首次登陆需要强制修改密码 0:否，1:是',
     `description` varchar(1024) NULL COMMENT '描述',
     `date_joined` datetime(6) NOT NULL COMMENT '加入时间',
