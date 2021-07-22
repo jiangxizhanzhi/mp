@@ -54,7 +54,7 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
     String batchEnable(List<String> userIds);
 
     /**
-     * 审批user
+     * 审核user
      * @param userId
      * @return
      */

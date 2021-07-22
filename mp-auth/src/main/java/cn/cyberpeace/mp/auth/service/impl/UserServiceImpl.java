@@ -169,11 +169,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     public ObjServiceResult<UserModel> create(UserModel obj, String[] fields) {
         obj.encodePassword();
-        // 查看系统设置，注册用户是否需要审批
-        if (sysConfigService.isNewUserNeedAudit()) {
-            log.info("need registration audit...");
-            obj.setIsAudited(UserModel.Status.NOT_AUDITED);
-        }
+
         return super.create(obj, fields);
     }
 
@@ -189,11 +185,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     public ServiceResult<Integer> bulkCreate(List<UserModel> objs) {
         objs.forEach(UserModel::encodePassword);
-        // 查看系统设置，注册用户是否需要审批
-        if (sysConfigService.isNewUserNeedAudit()) {
-            log.info("need registration audit...");
-            objs.forEach(o -> o.setIsAudited(UserModel.Status.NOT_AUDITED));
-        }
+
         return super.bulkCreate(objs);
     }
 
@@ -770,13 +762,13 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
         // 状态展示优先级 禁用 > 过期 > 待审核
         if (user.getIsAudited().equals(UserModel.Status.NOT_AUDITED)) {
-            exportUser.setStat("未审批");
+            exportUser.setStat("待审核");
         }
 
         // 过期
         LocalDateTime now = LocalDateTime.now();
         if (Objects.nonNull(user.getExpiredTime()) && now.isAfter(user.getExpiredTime())) {
-            exportUser.setStat("过期");
+            exportUser.setStat("已过期");
         }
 
         // 禁用

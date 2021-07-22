@@ -191,9 +191,9 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
     }
 
 
-    @ApiOperation(value = "审批用户", notes = "")
+    @ApiOperation(value = "审核用户", notes = "")
     @PostMapping("/approve")
-    @OperateLog(module = AuthLogConstant.MODULE, type = AuthLogConstant.TYPE_UPDATE, title = "审批用户")
+    @OperateLog(module = AuthLogConstant.MODULE, type = AuthLogConstant.TYPE_UPDATE, title = "审核用户")
     public ServiceResult approve(@RequestBody List<String> userIds) {
         String errMsg = getModelService().batchApprove(userIds);
         if (StringUtils.isBlank(errMsg)) {

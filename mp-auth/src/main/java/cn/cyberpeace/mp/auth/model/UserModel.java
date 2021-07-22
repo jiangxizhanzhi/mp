@@ -104,8 +104,8 @@ public class UserModel extends BaseModel implements Serializable {
     @DefaultInt(1)
     private Integer isEnabled;
 
-    // 1：已审批 0：待审批
-    @ApiModelProperty(value = "1：已审批 0：未审批")
+    // 1：已审核 0：待审核
+    @ApiModelProperty(value = "1：已审核 0：待审核")
     @DefaultInt(1)
     private Integer isAudited;
 
@@ -156,7 +156,7 @@ public class UserModel extends BaseModel implements Serializable {
         public static final Integer ENABLED = 1;
         public static final Integer DISABLED = 0;
 
-        // 审批与否
+        // 审核与否
         public static final Integer AUDITED = 1;
         public static final Integer NOT_AUDITED = 0;
 

@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.service.impl;
 
+import cn.cyberpeace.mp.base.constant.BaseConstants;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.request.OpenflowActionRequest;
 import cn.cyberpeace.mp.devops.cluster.response.OpenflowActionResponse;
@@ -10,9 +11,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @Description: 流表监控service
@@ -42,37 +42,23 @@ public class OpenFlowService extends BaseOpenStackServiceImpl {
         OpenflowActionResponse response = JSONObject.toJavaObject(resultObj, OpenflowActionResponse.class);
 
         List<OpenflowActionResponse.Action> actionList = new ArrayList<>();
-        // 分别获取各网桥的数据，合并成一个list
-        JSONArray brExArray = resultObj.getJSONArray("br-ex");
-        if (Objects.nonNull(brExArray)) {
-            List<OpenflowActionResponse.Action> brExList = JSONArray.parseArray(brExArray.toJSONString(), OpenflowActionResponse.Action.class);
-            actionList.addAll(brExList);
-        }
 
-        JSONArray brIntArray = resultObj.getJSONArray("br-int");
-        if (Objects.nonNull(brIntArray)) {
-            List<OpenflowActionResponse.Action> brIntList = JSONArray.parseArray(brIntArray.toJSONString(), OpenflowActionResponse.Action.class);
-            actionList.addAll(brIntList);
+        // 判断查询结果是否成功
+        if (Objects.nonNull(resultObj.getBoolean(BaseConstants.STR_LOWER_SUCCESS)) && resultObj.getBoolean(BaseConstants.STR_LOWER_SUCCESS)) {
+            Set<String> keySets = resultObj.keySet();
+            // 过滤key为success、request_id的键
+            keySets = keySets.stream().filter(key -> !key.equals(BaseConstants.STR_LOWER_SUCCESS) && !key.equals("request_id")).collect(Collectors.toSet());
+            keySets.forEach(key -> {
+                // 分别获取各网桥的数据，合并成一个list
+                JSONArray array = resultObj.getJSONArray(key);
+                if (Objects.nonNull(array)) {
+                    List<OpenflowActionResponse.Action> brExList = JSONArray.parseArray(array.toJSONString(), OpenflowActionResponse.Action.class);
+                    actionList.addAll(brExList);
+                }
+            });
+        } else {
+            log.error("流表操作查询失败：{}", resultObj);
         }
-
-        JSONArray brMirrorArray = resultObj.getJSONArray("br-mirror");
-        if (Objects.nonNull(brMirrorArray)) {
-            List<OpenflowActionResponse.Action> brMirrorList = JSONArray.parseArray(brMirrorArray.toJSONString(), OpenflowActionResponse.Action.class);
-            actionList.addAll(brMirrorList);
-        }
-
-        JSONArray brVlanArray = resultObj.getJSONArray("br-vlan");
-        if (Objects.nonNull(brVlanArray)) {
-            List<OpenflowActionResponse.Action> brVlanList = JSONArray.parseArray(brVlanArray.toJSONString(), OpenflowActionResponse.Action.class);
-            actionList.addAll(brVlanList);
-        }
-
-        JSONArray ovsVpnArray = resultObj.getJSONArray("ovs-vpn");
-        if (Objects.nonNull(ovsVpnArray)) {
-            List<OpenflowActionResponse.Action> brOvsVpnList = JSONArray.parseArray(ovsVpnArray.toJSONString(), OpenflowActionResponse.Action.class);
-            actionList.addAll(brOvsVpnList);
-        }
-
         response.setList(actionList);
         response.setTotal(actionList.size());
 
