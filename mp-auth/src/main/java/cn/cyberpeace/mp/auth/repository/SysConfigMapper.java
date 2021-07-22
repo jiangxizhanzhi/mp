@@ -1,8 +1,6 @@
 package cn.cyberpeace.mp.auth.repository;
 
-import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.SysConfigModel;
-import cn.cyberpeace.mp.auth.service.impl.SysConfigServiceImpl;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import org.apache.ibatis.annotations.Mapper;

@@ -4,7 +4,6 @@ import cn.cyberpeace.mp.auth.model.AvatarModel;
 import cn.cyberpeace.mp.base.repository.fields.DynamicFields;
 import cn.cyberpeace.mp.base.service.fields.BaseModelFields;
 import cn.cyberpeace.mp.base.util.ClassUtils;
-import cn.cyberpeace.mp.base.util.ClassUtils;
 import org.springframework.stereotype.Component;
 
 @Component

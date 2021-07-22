@@ -1,8 +1,6 @@
 package cn.cyberpeace.mp.auth.model;
 
-import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.base.model.BaseModel;
-import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;

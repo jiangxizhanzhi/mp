@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.auth.repository;
 
 import cn.cyberpeace.mp.auth.dto.role.RoleDto;
-import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;

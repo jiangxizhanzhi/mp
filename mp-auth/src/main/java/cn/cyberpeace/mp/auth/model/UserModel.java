@@ -17,7 +17,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
-import java.beans.Transient;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;

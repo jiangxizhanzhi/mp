@@ -1,10 +1,8 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
-import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.SysConfigConstant;
 import cn.cyberpeace.mp.auth.model.AvatarModel;
 import cn.cyberpeace.mp.auth.model.SysConfigModel;
-import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.repository.SysConfigMapper;
 import cn.cyberpeace.mp.auth.service.AvatarService;
 import cn.cyberpeace.mp.auth.service.SysConfigService;
@@ -77,14 +75,6 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
     public boolean updateByKeyName(SysConfigModel sysConfigModel) {
         Assert.notBlank(sysConfigModel.getKeyName(), "key不能为空！");
         Assert.notNull(sysConfigModel.getValue(), "value不能为null！");
-
-        if (sysConfigModel.getKeyName().equals(SysConfigConstant.KEY_USER_AUDIT) && sysConfigModel.getValue().equals("0")) {
-            // 如果要关闭审核功能，需要检查用户中有没有处于待审核状态的
-            List<UserModel> list = userService.listNotAudited();
-            if (CollectionUtil.isNotEmpty(list)) {
-                throw new MpRuntimeException(AuthErrorCode.SYS_CONFIG_CANNOT_CLOSE_AUDIT);
-            }
-        }
 
         int cnt = getModelMapper().updateByKeyName(sysConfigModel.getKeyName(), sysConfigModel.getValue());
 

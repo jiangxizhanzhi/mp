@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.auth.repository;
 
-import cn.cyberpeace.mp.auth.model.UserHeartbeatModel;
 import cn.cyberpeace.mp.auth.model.UserOnlineReportModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;

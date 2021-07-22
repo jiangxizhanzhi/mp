@@ -1,22 +1,16 @@
 package cn.cyberpeace.mp.auth.repository;
 
 import cn.cyberpeace.mp.auth.dto.user.UserOlReportCntDto;
-import cn.cyberpeace.mp.auth.model.SysConfigModel;
 import cn.cyberpeace.mp.auth.model.UserHeartbeatModel;
-import cn.cyberpeace.mp.auth.model.UserOnlineReportModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Result;
-import org.apache.ibatis.annotations.Results;
 import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 @Mapper
 @Repository

@@ -1,8 +1,12 @@
 package cn.cyberpeace.mp.auth.controller;
 
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
+import cn.cyberpeace.mp.auth.constant.SysConfigConstant;
 import cn.cyberpeace.mp.auth.model.SysConfigModel;
+import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.AvatarService;
 import cn.cyberpeace.mp.auth.service.SysConfigService;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.controller.stereotype.UnlimitPagination;
@@ -10,6 +14,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.hutool.core.collection.CollectionUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +39,9 @@ public class SysConfigController extends BaseModelController<SysConfigModel, Que
     private AvatarService avatarService;
 
     @Autowired
+    private UserService userService;
+
+    @Autowired
     public SysConfigController(SysConfigService modelService) {
         setModelService(modelService);
     }
@@ -48,6 +56,16 @@ public class SysConfigController extends BaseModelController<SysConfigModel, Que
     @ApiOperation(value = "根据keyname更新单条sysconfig", notes = "")
     @PostMapping("/update/bykeyname")
     public ServiceResult updateByKeyName(@RequestBody SysConfigModel updateConfig) {
+
+        if (updateConfig.getKeyName().equals(SysConfigConstant.KEY_USER_AUDIT) && updateConfig.getValue().equals("0")) {
+            // 如果要关闭审核功能，需要检查用户中有没有处于待审核状态的
+            List<UserModel> list = userService.listNotAudited();
+            if (CollectionUtil.isNotEmpty(list)) {
+//                throw new MpRuntimeException(AuthErrorCode.SYS_CONFIG_CANNOT_CLOSE_AUDIT);
+                return ServiceResult.builder().serviceCode(AuthErrorCode.SYS_CONFIG_CANNOT_CLOSE_AUDIT).build().asResult();
+            }
+        }
+
         boolean success = getModelService().updateByKeyName(updateConfig);
         return ResultUtils.commonResult(success, null);
     }
