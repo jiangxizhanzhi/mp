@@ -180,6 +180,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     public ObjServiceResult<UserModel> update(UserModel obj, String[] fields) {
         obj.encodePassword();
+        if (StringUtils.isBlank(obj.getIdentifier())) {
+            obj.setIdentifier(null);
+        }
         return super.update(obj, fields);
     }
 

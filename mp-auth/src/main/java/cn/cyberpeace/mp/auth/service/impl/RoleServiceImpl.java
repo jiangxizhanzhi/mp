@@ -80,6 +80,14 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     }
 
     @Override
+    public ObjServiceResult<RoleModel> update(RoleModel obj, String[] fields) {
+        if (StringUtils.isBlank(obj.getIdentifier())) {
+            obj.setIdentifier(null);
+        }
+        return super.update(obj, fields);
+    }
+
+    @Override
     public List<RoleModel> listByTenantId(String tenantId) {
         Assert.notBlank(tenantId, "tenantId不能为空！");
         List<RoleModel> roles = getModelMapper().listByTenantId(tenantId);

@@ -74,6 +74,14 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
     }
 
     @Override
+    public ObjServiceResult<TargetModel> update(TargetModel obj, String[] fields) {
+        if (StringUtils.isBlank(obj.getIdentifier())) {
+            obj.setIdentifier(null);
+        }
+        return super.update(obj, fields);
+    }
+
+    @Override
     public TargetModel getByIdentifier(String identifier) {
         Assert.notBlank(identifier);
         return getModelMapper().first(new HumanCondition().filterEqual("identifier", identifier));

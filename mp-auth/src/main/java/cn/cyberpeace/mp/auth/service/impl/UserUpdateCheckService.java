@@ -30,7 +30,6 @@ public class UserUpdateCheckService implements UserCheckService {
         }
         UserModel oldUser = result.getSource().getObj();
 
-//        user.setPassword(null);
         // 修改操作允许直接修改密码
         // 密码是否合法
         if (StringUtils.isNotBlank(user.getPassword())) {

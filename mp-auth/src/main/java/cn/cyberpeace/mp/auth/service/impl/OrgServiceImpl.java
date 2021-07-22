@@ -82,6 +82,10 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         // 不允许直接更新path
         obj.setPath(null);
 
+        if (StringUtils.isBlank(obj.getIdentifier())) {
+            obj.setIdentifier(null);
+        }
+
         // 如果更新parent，则重新计算path
         if (StringUtils.isNotBlank(obj.getParent())) {
             OrgModel parentOrg = getModelMapper().get(obj.getParent());
