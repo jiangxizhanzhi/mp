@@ -9,6 +9,8 @@ import cn.cyberpeace.mp.flow.model.FlowModel;
 import cn.cyberpeace.mp.flow.service.FlowService;
 import cn.cyberpeace.mp.flow.service.impl.FlowExecuteScheduleMethodImpl;
 import cn.cyberpeace.mp.flow.util.FlowExecuteScheduleUtil;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
+@Api(tags = "流量管理接口")
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/info")
 public class FlowController extends BaseModelController<FlowModel, QueryParams, FlowService> {
@@ -31,6 +34,7 @@ public class FlowController extends BaseModelController<FlowModel, QueryParams, 
      * @param request
      * @return
      */
+    @ApiOperation("定时执行流量发生任务")
     @PostMapping("/execute")
     public ServiceResult flowExecuteSchedule(@RequestBody FlowExecuteRequest request) {
         FlowExecuteScheduleUtil util = FlowExecuteScheduleUtil.builder().build();
