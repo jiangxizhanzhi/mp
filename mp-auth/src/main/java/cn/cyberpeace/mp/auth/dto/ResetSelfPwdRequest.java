@@ -8,7 +8,7 @@ import lombok.Data;
 
 import javax.validation.constraints.NotEmpty;
 
-@ApiModel(value = "修改密码请求体")
+@ApiModel(value = "修改本人密码请求体")
 @Data
 public class ResetSelfPwdRequest {
 
