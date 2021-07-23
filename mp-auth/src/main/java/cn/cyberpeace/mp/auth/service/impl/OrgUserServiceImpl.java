@@ -45,7 +45,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
     private UserRoleService userRoleService;
 
     @Autowired
-    private QueryParentOrgOperation queryParentOrgOperation;
+    private QueryParentOrgDtoOperation queryParentOrgOperation;
 
     @Autowired
     public OrgUserServiceImpl(OrgUserMapper modelMapper, OrgUserFields modelFields) {
@@ -138,6 +138,13 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
         List<String> idsList = null;
         if (Objects.nonNull(req.getIds()) && req.getIds().length > 0) {
             idsList = Arrays.asList(req.getIds());
+        }
+
+        if (req.isShowAllUnderLevel()) {
+            // 展示所有层级的用户
+            log.info("展示组织下所有层级的用户... orgId:{}", req.getOrg());
+            // todo
+
         }
 
         List<UserModel> users = getModelMapper().listUsers(req.getOrg(), req.getUsername(), idsList);

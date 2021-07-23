@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.auth.service.impl;
 import cn.cyberpeace.mp.auth.dto.OrgDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.repository.OrgMapper;
-import cn.cyberpeace.mp.auth.service.OrgOperation;
+import cn.cyberpeace.mp.auth.service.OrgDtoOperation;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Scope("prototype")
-public class UpdateChildOrgPathOperation implements OrgOperation<OrgDto> {
+public class UpdateChildOrgDtoPathDtoOperation implements OrgDtoOperation<OrgDto> {
 
     @Autowired
     private OrgService orgService;

@@ -18,4 +18,7 @@ public class OrgUserPageRequest extends PageRequest {
     @ApiModelProperty(value = "用户id列表")
     private String[] ids;
 
+    @ApiModelProperty(value = "是否展示该组织以下所有层级的用户，默认为true")
+    private boolean showAllUnderLevel = true;
+
 }

@@ -34,13 +34,13 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         implements OrgService {
 
     @Autowired
-    private QueryParentOrgOperation queryParentOrgOperation;
+    private QueryParentOrgDtoOperation queryParentOrgOperation;
 
     @Autowired
-    private QueryChildOrgOperation queryChildOrgOperation;
+    private QueryChildOrgDtoDtoOperation queryChildOrgDtoOperation;
 
     @Autowired
-    private UpdateChildOrgPathOperation updateChildOrgPathOperation;
+    private UpdateChildOrgDtoPathDtoOperation updateChildOrgPathOperation;
 
     @Autowired
     private OrgPermissionService orgPermissionService;
@@ -174,6 +174,14 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     }
 
     @Override
+    public List<OrgModel> listAllByParentIgnoreDepth(String parentId) {
+        // todo
+
+
+        return null;
+    }
+
+    @Override
     public List<OrgModel> listAll(String tenantId) {
         List<OrgModel> orgs = getModelMapper().listAll(tenantId);
         return orgs;
@@ -203,8 +211,8 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
 
         OrgDto orgDto = new OrgDto();
         BeanUtils.copyProperties(parentOrg, orgDto);
-        log.warn("queryChildOrgOperation:{}", queryChildOrgOperation);
-        orgDto.execute(queryChildOrgOperation);
+        log.warn("queryChildOrgOperation:{}", queryChildOrgDtoOperation);
+        orgDto.execute(queryChildOrgDtoOperation);
 
         return CollectionUtil.toList(orgDto);
     }
