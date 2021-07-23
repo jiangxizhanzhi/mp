@@ -28,6 +28,8 @@ public class ServiceResult<T> extends BaseServiceResult<T, T> {
     private String message;
     @ApiModelProperty(value = "错误详细说明")
     private String detail;
+    @ApiModelProperty(value = "服务器时间UTC毫秒")
+    private Long serverTime;
     @JsonIgnore
     @Builder.Default
     private ServiceCode serviceCode = BaseErrorCode.SUCCESS;
@@ -37,6 +39,7 @@ public class ServiceResult<T> extends BaseServiceResult<T, T> {
     public ServiceResult(T source) {
         this();
         setSource(source);
+        setServerTime(System.currentTimeMillis());
         this.asResult();
     }
 
@@ -44,6 +47,7 @@ public class ServiceResult<T> extends BaseServiceResult<T, T> {
         this();
         setSource(source);
         setServiceCode(code);
+        setServerTime(System.currentTimeMillis());
         this.asResult();
     }
 
@@ -52,6 +56,7 @@ public class ServiceResult<T> extends BaseServiceResult<T, T> {
         setSource(source);
         setServiceCode(code);
         setDetail(detail);
+        setServerTime(System.currentTimeMillis());
         this.asResult();
     }
 
@@ -82,6 +87,7 @@ public class ServiceResult<T> extends BaseServiceResult<T, T> {
                 .code(BaseErrorCode.SUCCESS.getCode())
                 .message(BaseErrorCode.SUCCESS.toString())
                 .data(source)
+                .serverTime(System.currentTimeMillis())
                 .build();
     }
 

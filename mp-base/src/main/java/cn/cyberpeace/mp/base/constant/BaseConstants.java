@@ -43,6 +43,11 @@ public interface BaseConstants {
     String STR_SUCCESS = "SUCCESS";
 
     /**
+     * success常量
+     */
+    String STR_LOWER_SUCCESS = "success";
+
+    /**
      * detail常量
      */
     String STR_DETAIL = "detail";
