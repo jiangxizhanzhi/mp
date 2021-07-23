@@ -38,7 +38,7 @@ public interface TargetMapper extends BaseModelMapper<TargetModel> {
     @Select("<script>" +
             "SELECT * FROM mp_auth_target " +
             "<where>" +
-            "  <if test=\"types != null\"> " +
+            "  <if test=\"types != null and types.length > 0\"> " +
             "    AND type IN " +
             "    <foreach item=\"type\" index=\"index\" collection=\"types\" open=\"(\" separator=\",\" close=\")\"> " +
             "      #{type} " +
@@ -49,4 +49,5 @@ public interface TargetMapper extends BaseModelMapper<TargetModel> {
             "  </if>" +
             "</where></script>")
     List<TargetModel> listByMultiTypes(@Param("tenantId") String tenantId, @Param("types") Integer[] types);
+
 }

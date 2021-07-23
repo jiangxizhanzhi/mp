@@ -15,11 +15,13 @@ import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.OrgUserFields;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.lang.Assert;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -48,6 +50,12 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
     private QueryParentOrgDtoOperation queryParentOrgOperation;
 
     @Autowired
+    private QueryChildOrgDtoDtoOperation queryChildOrgDtoDtoOperation;
+
+//    @Autowired
+//    private QueryChildOrgModelListOperation queryChildOrgModelListOperation;
+
+    @Autowired
     public OrgUserServiceImpl(OrgUserMapper modelMapper, OrgUserFields modelFields) {
         setModelMapper(modelMapper);
         setModelFields(modelFields);
@@ -64,7 +72,14 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
     @Override
     public List<UserModel> listUsersByOrgAndUname(String orgId, String uname, List<String> userIds) {
         log.info("orgId:{}, uname:{}", orgId, uname);
-        List<UserModel> users = getModelMapper().listUsers(orgId, uname, userIds);
+
+        // 默认查出orgId下所有子组织的用户
+        List<String> orgIds = new ArrayList<>();
+        orgIds.add(orgId);
+        List<OrgDto> childOrgDtos = listAllChildIgnoreLevel(orgId);
+        orgIds.addAll(childOrgDtos.stream().map(OrgDto::getId).collect(Collectors.toList()));
+
+        List<UserModel> users = getModelMapper().listUsers(orgIds, uname, userIds);
         return users;
     }
 
@@ -133,21 +148,28 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
 
     @Override
     public PageInfo<UserDto> pageUsersByOrg(OrgUserPageRequest req) {
-        PageHelper.startPage(req.getPage(), req.getPageSize());
+
 
         List<String> idsList = null;
         if (Objects.nonNull(req.getIds()) && req.getIds().length > 0) {
             idsList = Arrays.asList(req.getIds());
         }
 
-        if (req.isShowAllUnderLevel()) {
-            // 展示所有层级的用户
-            log.info("展示组织下所有层级的用户... orgId:{}", req.getOrg());
-            // todo
-
+        List<String> orgIds = new ArrayList<>();
+        if (StringUtils.isNotBlank(req.getOrg())) {
+            // 添加父级org
+            orgIds.add(req.getOrg());
+            if (req.isShowAllUnderLevel()) {
+                List<OrgDto> childOrgDtos = listAllChildIgnoreLevel(req.getOrg());
+                if (CollectionUtil.isNotEmpty(childOrgDtos)) {
+                    orgIds.addAll(childOrgDtos.stream().map(OrgDto::getId).collect(Collectors.toList()));
+                }
+            }
         }
 
-        List<UserModel> users = getModelMapper().listUsers(req.getOrg(), req.getUsername(), idsList);
+        log.info("orgIds: {}", orgIds);
+        PageHelper.startPage(req.getPage(), req.getPageSize());
+        List<UserModel> users = getModelMapper().listUsers(orgIds, req.getUsername(), idsList);
         PageInfo pageInfo = new PageInfo(users);
 
         List<UserDto> userDtos = users.stream().map(u -> {
@@ -157,6 +179,30 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
 
         pageInfo.setList(userDtos);
         return pageInfo;
+    }
+
+    /**
+     * 列出所有的子组织，忽略层级限制
+     * 注意！不包括传入的org本身
+     * @param orgId
+     */
+    private List<OrgDto> listAllChildIgnoreLevel(String orgId) {
+        // 展示所有层级的用户
+        log.info("展示组织下所有层级的用户... orgId:{}", orgId);
+        ObjServiceResult<OrgModel> result = orgService.get(orgId);
+        if (Objects.nonNull(result.getSource())) {
+            OrgModel parentOrg = result.getSource().getObj();
+            OrgDto parentOrgDto = new OrgDto();
+            BeanUtils.copyProperties(parentOrg, parentOrgDto);
+            queryChildOrgDtoDtoOperation.setOrgDtoList(new ArrayList<>());
+            parentOrgDto.execute(queryChildOrgDtoDtoOperation);
+
+            List<OrgDto> orgDtos = queryChildOrgDtoDtoOperation.getOrgDtoList();
+
+            return orgDtos;
+        }
+
+        return new ArrayList<>();
     }
 
     @Override

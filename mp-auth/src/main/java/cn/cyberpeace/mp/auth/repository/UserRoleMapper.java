@@ -36,7 +36,7 @@ public interface UserRoleMapper extends BaseModelMapper<UserRoleModel> {
 
     @Delete("<script>" +
             "delete from mp_auth_user_role where role = #{roleId} " +
-            "  <if test=\"userIds != null\"> " +
+            "  <if test=\"userIds != null and userIds.size() > 0\"> " +
             "    AND user IN " +
             "    <foreach item=\"userId\" index=\"index\" collection=\"userIds\" open=\"(\" separator=\",\" close=\")\"> " +
             "      #{userId} " +

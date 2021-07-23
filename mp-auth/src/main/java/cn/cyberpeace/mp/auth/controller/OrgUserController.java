@@ -40,7 +40,8 @@ public class OrgUserController extends BaseModelController<OrgUserModel, QueryPa
     }
 
 
-    @ApiOperation(value = "分页查询组织下所有用户信息，附带组织，角色信息", notes = "")
+    @ApiOperation(value = "分页查询组织下所有用户信息（默认查询组织下所有层级子组织的用户，" +
+            "可以通过设置showAllUnderLevel=false来关闭默认，只显示当前组织绑定的用户），附带组织，角色信息", notes = "")
     @GetMapping("/page/byorg")
     public ListObjServiceResult<Object> getPageByOrg(OrgUserPageRequest req) {
         req.ensure();

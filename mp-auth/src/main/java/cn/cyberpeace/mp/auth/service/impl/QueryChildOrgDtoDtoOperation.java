@@ -10,6 +10,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 @Component
 @Scope("prototype")
@@ -18,6 +20,15 @@ public class QueryChildOrgDtoDtoOperation implements OrgDtoOperation<OrgDto> {
     @Autowired
     private OrgService orgService;
 
+    private List<OrgDto> orgDtoList;
+
+    public List<OrgDto> getOrgDtoList() {
+        return orgDtoList;
+    }
+
+    public void setOrgDtoList(List<OrgDto> orgDtoList) {
+        this.orgDtoList = orgDtoList;
+    }
 
     @Override
     public OrgDto doExecute(OrgDto orgDto) {
@@ -34,7 +45,9 @@ public class QueryChildOrgDtoDtoOperation implements OrgDtoOperation<OrgDto> {
             childList.add(childDto);
         }
         orgDto.setChildren(childList);
-
+        if (Objects.nonNull(orgDtoList)) {
+            orgDtoList.addAll(childList);
+        }
         return orgDto;
     }
 }

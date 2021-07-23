@@ -36,12 +36,16 @@ public interface OrgUserMapper extends BaseModelMapper<OrgUserModel> {
      * @return
      */
     @Select("<script>" +
-            "select * from mp_auth_user " +
+            "select distinct * from mp_auth_user " +
             "<where>" +
-            "  <if test=\"orgId != null and orgId != ''\">" +
-            "    AND id in (select user from mp_auth_org_user where org = #{orgId})" +
+            "  <if test=\"orgIds != null and orgIds.size() > 0\">" +
+            "    AND id in (select user from mp_auth_org_user where org in " +
+            "    <foreach item=\"orgId\" index=\"index\" collection=\"orgIds\" open=\"(\" separator=\",\" close=\")\"> " +
+            "      #{orgId} " +
+            "    </foreach>" +
+            " )" +
             "  </if>" +
-            "  <if test=\"userIds != null\"> " +
+            "  <if test=\"userIds != null and userIds.size() > 0\"> " +
             "    AND id in " +
             "    <foreach item=\"userId\" index=\"index\" collection=\"userIds\" open=\"(\" separator=\",\" close=\")\"> " +
             "      #{userId} " +
@@ -53,7 +57,7 @@ public interface OrgUserMapper extends BaseModelMapper<OrgUserModel> {
             "</where> " +
             "order by username " +
             "</script>")
-    List<UserModel> listUsers(@Param("orgId") String orgId, @Param("username") String username, @Param("userIds") List<String> userIds);
+    List<UserModel> listUsers(@Param("orgIds") List<String> orgIds, @Param("username") String username, @Param("userIds") List<String> userIds);
 
 
     @Delete("delete from mp_auth_org_user where user = #{userId}")
