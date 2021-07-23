@@ -11,6 +11,12 @@ public interface UserOnlineReportService extends BaseModelService<UserOnlineRepo
 
     PageInfo page(UserOnlineReportPageRequest req);
 
+    /**
+     * 在线用户数
+     * @return
+     */
+    int onlineUserCnt();
+
     boolean createOrUpdate(UserOlReportCntDto userOlReportCntDto);
 
 }

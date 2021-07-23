@@ -78,7 +78,9 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
 
     void heartbeat(UserHeartbeatRequest heartbeat);
 
-    PageInfo onlineReport(UserOnlineReportPageRequest pageRequest);
+//    PageInfo onlineReport(UserOnlineReportPageRequest pageRequest);
 
     List<UserModel> listNotAudited();
+
+//    int onlineUserCnt();
 }

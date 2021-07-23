@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.service.UserHeartbeatService;
 import cn.cyberpeace.mp.auth.service.UserOnlineReportService;
 import cn.cyberpeace.mp.auth.service.fields.UserOnlineReportFields;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.hutool.core.lang.Assert;
@@ -82,6 +83,13 @@ public class UserOnlineReportServiceImpl extends BaseModelServiceImpl<UserOnline
 
         return pageInfo;
     }
+
+    @Override
+    public int onlineUserCnt() {
+        int cnt = getModelMapper().total(new HumanCondition().filterEqual("is_online", UserOnlineReportModel.ONLINE));
+        return cnt;
+    }
+
 
     @Override
     public boolean createOrUpdate(UserOlReportCntDto userOlReportCntDto) {

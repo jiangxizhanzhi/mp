@@ -112,8 +112,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Autowired
     private UserHeartbeatService userHeartbeatService;
 
-    @Autowired
-    private UserOnlineReportService userOnlineReportService;
+//    @Autowired
+//    private UserOnlineReportService userOnlineReportService;
 
     @Autowired
     public UserServiceImpl(UserMapper modelMapper, UserFields modelFields) {
@@ -714,16 +714,21 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         userHeartbeatService.create(heartbeat);
     }
 
-    @Override
-    public PageInfo onlineReport(UserOnlineReportPageRequest pageRequest) {
-        return userOnlineReportService.page(pageRequest);
-    }
+//    @Override
+//    public PageInfo onlineReport(UserOnlineReportPageRequest pageRequest) {
+//        return userOnlineReportService.page(pageRequest);
+//    }
 
     @Override
     public List<UserModel> listNotAudited() {
         List<UserModel> userModels = getModelMapper().list(new HumanCondition().filterEqual("is_audited", "0"));
         return userModels;
     }
+
+//    @Override
+//    public int onlineUserCnt() {
+//        return userOnlineReportService.onlineUserCnt();
+//    }
 
     private UserModel importUser2UserModel(ImportUser importUser) {
         if (Objects.isNull(importUser)) {

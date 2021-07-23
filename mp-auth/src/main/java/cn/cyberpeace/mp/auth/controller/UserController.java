@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.auth.dto.validate.UpdateGroup;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.service.UserLogService;
+import cn.cyberpeace.mp.auth.service.UserOnlineReportService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
@@ -58,6 +59,9 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
 
     @Autowired
     private OrgUserService orgUserService;
+
+    @Autowired
+    private UserOnlineReportService userOnlineReportService;
 
     @Autowired
     public UserController(UserService modelService) {
@@ -224,8 +228,15 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
     @GetMapping("/olreport")
     public ServiceResult onlineReport(UserOnlineReportPageRequest pageRequest) {
         pageRequest.ensure();
-        PageInfo pageInfo = getModelService().onlineReport(pageRequest);
+        PageInfo pageInfo = userOnlineReportService.page(pageRequest);
         return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
+    }
+
+    @ApiOperation(value = "在线用户数量", notes = "")
+    @GetMapping("/olUserCnt")
+    public ServiceResult onlineUserCnt() {
+        int cnt = userOnlineReportService.onlineUserCnt();
+        return ResultUtils.commonResult(true, cnt);
     }
 
 

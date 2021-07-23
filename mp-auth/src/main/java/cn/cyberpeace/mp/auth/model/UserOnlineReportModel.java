@@ -15,6 +15,10 @@ import lombok.NoArgsConstructor;
 @Table("mp_auth_user_online_report")
 public class UserOnlineReportModel extends BaseModel {
 
+    public static final Integer ONLINE = 1;
+
+    public static final Integer OFFLINE = 0;
+
     @ApiModelProperty(value = "用户id")
     private String user;
 
