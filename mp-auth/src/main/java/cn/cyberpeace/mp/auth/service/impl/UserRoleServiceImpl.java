@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.auth.service.impl;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.dto.role.UserRolePageRequest;
+import cn.cyberpeace.mp.auth.dto.role.UserRoleStatistic;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -166,6 +167,12 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         getModelMapper().deleteByRoleId(roleId);
 
         return true;
+    }
+
+    @Override
+    public List<UserRoleStatistic> getUserRoleStatistics() {
+        List<UserRoleStatistic> statistics = getModelMapper().getUserRoleStatistics();
+        return statistics;
     }
 
     @Override

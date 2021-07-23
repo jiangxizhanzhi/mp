@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.repository;
 
+import cn.cyberpeace.mp.auth.dto.role.UserRoleStatistic;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserRoleModel;
@@ -26,6 +27,13 @@ public interface UserRoleMapper extends BaseModelMapper<UserRoleModel> {
     @Select("select distinct * from mp_auth_user where id in " +
             "(select user from mp_auth_user_role where role = #{roleId})")
     List<UserModel> listByRoleId(@Param("roleId") String roleId);
+
+
+    @Select("select tabA.rid roleId, tabR.name roleName, tabA.cnt userCnt " +
+            "from (select role rid, count(user) cnt from mp_auth_user_role group by role) as tabA " +
+            "         left join mp_auth_role tabR on tabA.rid = tabR.id " +
+            "order by userCnt desc")
+    List<UserRoleStatistic> getUserRoleStatistics();
 
 
     @Delete("delete from mp_auth_user_role where user = #{userId}")

@@ -3,12 +3,14 @@ package cn.cyberpeace.mp.auth.controller;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.role.RoleUsersRequest;
 import cn.cyberpeace.mp.auth.dto.role.UserRolePageRequest;
+import cn.cyberpeace.mp.auth.dto.role.UserRoleStatistic;
 import cn.cyberpeace.mp.auth.dto.role.UserRolesRequest;
 import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import com.github.pagehelper.PageInfo;
@@ -22,6 +24,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @Api(value = "用户-角色管理接口", tags = "AUTH-用户-角色管理接口")
 @Slf4j
@@ -47,6 +51,13 @@ public class UserRoleController extends BaseModelController<UserRoleModel, Query
     public ListObjServiceResult getUsersByRole(UserRolePageRequest pageRequest) {
         PageInfo pageInfo = getModelService().pageByRoleId(pageRequest);
         return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
+    }
+
+    @ApiOperation(value = "查询所有角色以及绑定的用户数量", notes = "")
+    @GetMapping("/statistics")
+    public ServiceResult<List<UserRoleStatistic>> getUserRoleStatistics() {
+        List statistics = getModelService().getUserRoleStatistics();
+        return ResultUtils.objList2ListObjServiceResult(statistics, statistics.size());
     }
 
 

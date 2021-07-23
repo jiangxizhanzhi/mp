@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.auth.dto.role.UserRolePageRequest;
+import cn.cyberpeace.mp.auth.dto.role.UserRoleStatistic;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.base.service.BaseModelService;
@@ -29,4 +30,10 @@ public interface UserRoleService extends BaseModelService<UserRoleModel, QueryPa
     boolean deleteByUserId(String userId);
 
     boolean deleteByRoleId(String roleId);
+
+    /**
+     * 统计每个角色的用户数量
+     * @return
+     */
+    List<UserRoleStatistic> getUserRoleStatistics();
 }
