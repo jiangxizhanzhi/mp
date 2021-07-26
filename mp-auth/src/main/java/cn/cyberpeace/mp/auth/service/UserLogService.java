@@ -115,7 +115,6 @@ public class UserLogService {
             throw new MpRuntimeException(e.getMessage());
         }
 
-
     }
 
 

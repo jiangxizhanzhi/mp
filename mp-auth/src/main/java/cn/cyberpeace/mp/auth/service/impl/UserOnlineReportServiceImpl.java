@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
+import cn.cyberpeace.mp.auth.constant.AuthLogConstant;
+import cn.cyberpeace.mp.auth.dto.user.UserLogPageRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserOlReportCntDto;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineReportPageRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineReportTask;
@@ -7,11 +9,14 @@ import cn.cyberpeace.mp.auth.model.UserOnlineReportModel;
 import cn.cyberpeace.mp.auth.repository.UserOnlineReportMapper;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.service.UserHeartbeatService;
+import cn.cyberpeace.mp.auth.service.UserLogService;
 import cn.cyberpeace.mp.auth.service.UserOnlineReportService;
 import cn.cyberpeace.mp.auth.service.fields.UserOnlineReportFields;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.devops.log.model.OperationLogModel;
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.lang.Assert;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -59,6 +64,9 @@ public class UserOnlineReportServiceImpl extends BaseModelServiceImpl<UserOnline
     @Autowired
     private OrgUserService orgUserService;
 
+    @Autowired
+    private UserLogService userLogService;
+
 
     @Scheduled(initialDelay = REFRESH_RATE_MILLISECONDS, fixedRate = REFRESH_RATE_MILLISECONDS)
     public void scheduleUserOlReport() {
@@ -79,14 +87,29 @@ public class UserOnlineReportServiceImpl extends BaseModelServiceImpl<UserOnline
     public PageInfo page(UserOnlineReportPageRequest req) {
         PageHelper.startPage(req.getPage(), req.getPageSize());
         List<UserOnlineReportModel> onlineReportModels = getModelMapper().listAll();
-        PageInfo pageInfo = new PageInfo(onlineReportModels);
+        PageInfo<UserOnlineReportModel> pageInfo = new PageInfo(onlineReportModels);
+
+        List<UserOnlineReportModel> reports = pageInfo.getList();
+        reports.forEach(r -> {
+            UserLogPageRequest logPageRequest = new UserLogPageRequest();
+            logPageRequest.setUsername(r.getUsername());
+            logPageRequest.setPage(1);
+            logPageRequest.setPageSize(1);
+            PageInfo<OperationLogModel> logPage = userLogService.getUserLog(logPageRequest);
+            List<OperationLogModel> logs = logPage.getList();
+            if (CollectionUtil.isNotEmpty(logs) && Objects.nonNull(logs.get(0))) {
+                // 动作
+                r.setAction(convertOpType2Desc(logs.get(0).getOpType()));
+                // 对象
+                r.setSubject(logs.get(0).getOpTarget());
+            }
+        });
 
         return pageInfo;
     }
 
     @Override
-    public int onlineUserCnt() {
-        int cnt = getModelMapper().total(new HumanCondition().filterEqual("is_online", UserOnlineReportModel.ONLINE));
+    public int onlineUserCnt() {int cnt = getModelMapper().total(new HumanCondition().filterEqual("is_online", UserOnlineReportModel.ONLINE));
         return cnt;
     }
 
@@ -150,4 +173,40 @@ public class UserOnlineReportServiceImpl extends BaseModelServiceImpl<UserOnline
         private static ExecutorService threadPoolExecutor = new ThreadPoolExecutor(20, 100, 20, TimeUnit.SECONDS,
                 new ArrayBlockingQueue(100), namedThreadFactory, new ThreadPoolExecutor.DiscardOldestPolicy());
     }
+
+
+    private String convertOpType2Desc(String opType) {
+        if(Objects.equals(opType, AuthLogConstant.TYPE_LOGIN)) {
+            return "登录";
+        }
+        if(Objects.equals(opType, AuthLogConstant.TYPE_LOGOUT)) {
+            return "登出";
+        }
+        if(Objects.equals(opType, AuthLogConstant.TYPE_ADD)) {
+            return "添加";
+        }
+        if(Objects.equals(opType, AuthLogConstant.TYPE_REGISTER)) {
+            return "注册";
+        }
+        if(Objects.equals(opType, AuthLogConstant.TYPE_UPDATE)) {
+            return "更新";
+        }
+        if(Objects.equals(opType, AuthLogConstant.TYPE_DELETE)) {
+            return "删除";
+        }
+        if(Objects.equals(opType, AuthLogConstant.TYPE_BATCH_ADD)) {
+            return "批量添加";
+        }
+        if(Objects.equals(opType, AuthLogConstant.TYPE_BATCH_UPDATE)) {
+            return "批量更新";
+        }
+        if(Objects.equals(opType, AuthLogConstant.TYPE_BATCH_DELETE)) {
+            return "批量删除";
+        }
+
+        log.info("opType: {}", opType);
+        return opType;
+    }
+
+
 }

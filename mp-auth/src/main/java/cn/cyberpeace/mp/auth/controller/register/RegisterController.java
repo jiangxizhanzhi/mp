@@ -47,7 +47,7 @@ public class RegisterController {
 
     @ApiOperation(value = "注册接口", notes = "")
     @PostMapping
-    @OperateLog(module = AuthLogConstant.MODULE, type = AuthLogConstant.TYPE_REGISTER, title = "注册新用户")
+    @OperateLog(module = AuthLogConstant.MODULE, type = AuthLogConstant.TYPE_REGISTER, title = "注册新用户", target = AuthLogConstant.TARGET_USER)
     public ServiceResult register(@RequestBody @Validated RegisterRequest req) {
         log.info("req:{}", req);
         String encryptedPwd = req.getPassword();
