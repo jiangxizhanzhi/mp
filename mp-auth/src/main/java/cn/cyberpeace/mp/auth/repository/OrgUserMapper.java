@@ -20,11 +20,13 @@ public interface OrgUserMapper extends BaseModelMapper<OrgUserModel> {
 
 
     @Select("select distinct * from mp_auth_user where id in " +
-            "(select user from mp_auth_org_user where org = #{orgId})")
+            "(select user from mp_auth_org_user where org = #{orgId}) " +
+            "order by mp_auth_user.username")
     List<UserModel> listUsersByOrgId(@Param("orgId") String orgId);
 
     @Select("select distinct * from mp_auth_org where id in " +
-            "(select org from mp_auth_org_user where user = #{userId})")
+            "(select org from mp_auth_org_user where user = #{userId}) " +
+            "order by mp_auth_org.pk")
     List<OrgModel> listOrgsByUserId(@Param("userId") String userId);
 
 
