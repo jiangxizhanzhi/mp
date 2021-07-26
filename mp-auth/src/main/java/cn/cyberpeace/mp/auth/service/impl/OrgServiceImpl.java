@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.auth.service.impl;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.dto.OrgDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
+import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.repository.OrgMapper;
 import cn.cyberpeace.mp.auth.service.OrgPermissionService;
 import cn.cyberpeace.mp.auth.service.OrgService;
@@ -320,6 +321,12 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     private void deleteReleated(String orgId) {
         if (StringUtils.isBlank(orgId)) {
             return;
+        }
+
+        // 如果组织下有人员，不允许删除
+        List<UserModel> users = orgUserService.listUsersByOrgId(orgId);
+        if (CollectionUtil.isNotEmpty(users)) {
+            throw new MpRuntimeException("该组织下有用户，不允许删除！");
         }
 
         boolean deleteOrgPermissionSuccess = orgPermissionService.deleteByOrgId(orgId);

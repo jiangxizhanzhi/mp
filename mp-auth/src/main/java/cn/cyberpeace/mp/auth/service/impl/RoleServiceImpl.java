@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.auth.dto.target.PermissionDto;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.RolePermissionModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
+import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.repository.RoleMapper;
 import cn.cyberpeace.mp.auth.service.RolePermissionService;
 import cn.cyberpeace.mp.auth.service.RoleService;
@@ -320,6 +321,12 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
             log.info("管理员角色不能删除！");
             throw new MpRuntimeException("管理员角色不能删除！");
         }
+
+        List<UserModel> users = userRoleService.listUsersByRoleId(roleId);
+        if (CollectionUtil.isNotEmpty(users)) {
+            throw new MpRuntimeException("当前角色下有用户，不允许删除！");
+        }
+
 
         boolean deleteRolePermissionSuccess = rolePermissionService.deleteByRoleId(roleId);
         boolean deleteUserRoleSuccess = userRoleService.deleteByRoleId(roleId);

@@ -50,6 +50,13 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     }
 
     @Override
+    public List<UserModel> listUsersByRoleId(String roleId) {
+        Assert.notBlank(roleId, "roleId不能为空！");
+        List<UserModel> users = getModelMapper().listByRoleId(roleId);
+        return users;
+    }
+
+    @Override
     public PageInfo pageByUserId(UserRolePageRequest pageRequest) {
         pageRequest.ensure();
         Assert.notBlank(pageRequest.getUserId(), "userId不能为空！");
