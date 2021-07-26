@@ -167,6 +167,8 @@ public class RequestLogAspect {
             operationLogModel.setOpModule(operateLog.module());
             //操作类型
             operationLogModel.setOpType(operateLog.type());
+            //操作对象
+            operationLogModel.setOpTarget(operateLog.target());
             //操作主题
             operationLogModel.setTitle(operateLog.title());
             //操作描述

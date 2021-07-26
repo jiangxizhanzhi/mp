@@ -37,6 +37,11 @@ public class OperationLogModel {
     private String opType;
 
     /**
+     * 操作对象
+     */
+    private String opTarget;
+
+    /**
      * 操作主题
      */
     private String title;

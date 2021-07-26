@@ -24,6 +24,12 @@ public @interface OperateLog {
     String type() default "";
 
     /**
+     * 操作对象
+     * @return
+     */
+    String target() default "";
+
+    /**
      * 操作标题，例如：新增用户
      */
     String title() default "";
