@@ -15,7 +15,7 @@ import java.util.Objects;
 
 @Component
 @Scope("prototype")
-public class QueryChildOrgDtoDtoOperation implements OrgDtoOperation<OrgDto> {
+public class QueryChildOrgDtoOperation implements OrgDtoOperation<OrgDto> {
 
     @Autowired
     private OrgService orgService;

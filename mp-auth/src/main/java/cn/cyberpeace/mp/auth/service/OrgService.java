@@ -14,13 +14,6 @@ public interface OrgService extends BaseModelService<OrgModel, QueryParams> {
 
     List<OrgModel> listByParent(String parentId);
 
-    /**
-     * 查询组织下所有子组织，子子组织...
-     * @param parentId
-     * @return
-     */
-    List<OrgModel> listAllByParentIgnoreDepth(String parentId);
-
     List<OrgModel> listAll(String tenantId);
 
     List<OrgDto> getTree(String orgId);
@@ -35,6 +28,13 @@ public interface OrgService extends BaseModelService<OrgModel, QueryParams> {
     OrgModel getByPath(String path);
 
     boolean exists(String id);
+
+    /**
+     * 列出所有的子组织，忽略层级限制
+     * 注意！不包括传入的org本身
+     * @param orgId
+     */
+    List<OrgDto> listAllChildIgnoreLevel(String orgId);
 
     @Override
     default ObjServiceResult<OrgModel> update(OrgModel obj, String[] fields) {

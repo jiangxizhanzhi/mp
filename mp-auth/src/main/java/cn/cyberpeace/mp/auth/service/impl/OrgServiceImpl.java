@@ -38,7 +38,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     private QueryParentOrgDtoOperation queryParentOrgOperation;
 
     @Autowired
-    private QueryChildOrgDtoDtoOperation queryChildOrgDtoOperation;
+    private QueryChildOrgDtoOperation queryChildOrgDtoOperation;
 
     @Autowired
     private UpdateChildOrgDtoPathDtoOperation updateChildOrgPathOperation;
@@ -175,14 +175,6 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     }
 
     @Override
-    public List<OrgModel> listAllByParentIgnoreDepth(String parentId) {
-        // todo
-
-
-        return null;
-    }
-
-    @Override
     public List<OrgModel> listAll(String tenantId) {
         List<OrgModel> orgs = getModelMapper().listAll(tenantId);
         return orgs;
@@ -268,6 +260,32 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         Assert.notBlank(id, "id不能为空！");
         OrgModel orgModel = getModelMapper().get(id);
         return Objects.nonNull(orgModel);
+    }
+
+
+    /**
+     * 列出所有的子组织，忽略层级限制
+     * 注意！不包括传入的org本身
+     * @param orgId
+     */
+    @Override
+    public List<OrgDto> listAllChildIgnoreLevel(String orgId) {
+        // 展示所有层级的用户
+        log.info("展示组织下所有层级的用户... orgId:{}", orgId);
+        ObjServiceResult<OrgModel> result = get(orgId);
+        if (Objects.nonNull(result.getSource())) {
+            OrgModel parentOrg = result.getSource().getObj();
+            OrgDto parentOrgDto = new OrgDto();
+            BeanUtils.copyProperties(parentOrg, parentOrgDto);
+            queryChildOrgDtoOperation.setOrgDtoList(new ArrayList<>());
+            parentOrgDto.execute(queryChildOrgDtoOperation);
+
+            List<OrgDto> orgDtos = queryChildOrgDtoOperation.getOrgDtoList();
+
+            return orgDtos;
+        }
+
+        return new ArrayList<>();
     }
 
 

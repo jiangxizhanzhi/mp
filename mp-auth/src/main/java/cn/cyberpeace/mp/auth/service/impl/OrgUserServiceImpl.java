@@ -15,7 +15,6 @@ import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.OrgUserFields;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
-import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.lang.Assert;
 import com.github.pagehelper.PageHelper;
@@ -50,7 +49,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
     private QueryParentOrgDtoOperation queryParentOrgOperation;
 
     @Autowired
-    private QueryChildOrgDtoDtoOperation queryChildOrgDtoDtoOperation;
+    private QueryChildOrgDtoOperation queryChildOrgDtoOperation;
 
 //    @Autowired
 //    private QueryChildOrgModelListOperation queryChildOrgModelListOperation;
@@ -75,8 +74,9 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
 
         // 默认查出orgId下所有子组织的用户
         List<String> orgIds = new ArrayList<>();
+        // 先添加父级id
         orgIds.add(orgId);
-        List<OrgDto> childOrgDtos = listAllChildIgnoreLevel(orgId);
+        List<OrgDto> childOrgDtos = orgService.listAllChildIgnoreLevel(orgId);
         orgIds.addAll(childOrgDtos.stream().map(OrgDto::getId).collect(Collectors.toList()));
 
         List<UserModel> users = getModelMapper().listUsers(orgIds, uname, userIds);
@@ -149,7 +149,6 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
     @Override
     public PageInfo<UserDto> pageUsersByOrg(OrgUserPageRequest req) {
 
-
         List<String> idsList = null;
         if (Objects.nonNull(req.getIds()) && req.getIds().length > 0) {
             idsList = Arrays.asList(req.getIds());
@@ -160,7 +159,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
             // 添加父级org
             orgIds.add(req.getOrg());
             if (req.isShowAllUnderLevel()) {
-                List<OrgDto> childOrgDtos = listAllChildIgnoreLevel(req.getOrg());
+                List<OrgDto> childOrgDtos = orgService.listAllChildIgnoreLevel(req.getOrg());
                 if (CollectionUtil.isNotEmpty(childOrgDtos)) {
                     orgIds.addAll(childOrgDtos.stream().map(OrgDto::getId).collect(Collectors.toList()));
                 }
@@ -179,30 +178,6 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
 
         pageInfo.setList(userDtos);
         return pageInfo;
-    }
-
-    /**
-     * 列出所有的子组织，忽略层级限制
-     * 注意！不包括传入的org本身
-     * @param orgId
-     */
-    private List<OrgDto> listAllChildIgnoreLevel(String orgId) {
-        // 展示所有层级的用户
-        log.info("展示组织下所有层级的用户... orgId:{}", orgId);
-        ObjServiceResult<OrgModel> result = orgService.get(orgId);
-        if (Objects.nonNull(result.getSource())) {
-            OrgModel parentOrg = result.getSource().getObj();
-            OrgDto parentOrgDto = new OrgDto();
-            BeanUtils.copyProperties(parentOrg, parentOrgDto);
-            queryChildOrgDtoDtoOperation.setOrgDtoList(new ArrayList<>());
-            parentOrgDto.execute(queryChildOrgDtoDtoOperation);
-
-            List<OrgDto> orgDtos = queryChildOrgDtoDtoOperation.getOrgDtoList();
-
-            return orgDtos;
-        }
-
-        return new ArrayList<>();
     }
 
     @Override
