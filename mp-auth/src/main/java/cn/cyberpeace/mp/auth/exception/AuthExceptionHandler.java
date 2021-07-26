@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.constant.CustomAuthErrorCode;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import com.alibaba.excel.exception.ExcelCommonException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AccountStatusException;
@@ -52,6 +53,18 @@ public class AuthExceptionHandler {
         log.error(errorMsg);
         CustomAuthErrorCode customAuthErrorCode = new CustomAuthErrorCode();
         customAuthErrorCode.setCode(BaseErrorCode.PARAMS_INVALID.getCode(), errorMsg);
+        return ServiceResult.<String>builder().serviceCode(customAuthErrorCode).build().asResult();
+    }
+
+
+    @ExceptionHandler({ExcelCommonException.class})
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public ServiceResult<String> excelExceptionHandle(ExcelCommonException ex) {
+        String errorMsg = ex.getMessage();
+        log.error(errorMsg);
+        CustomAuthErrorCode customAuthErrorCode = new CustomAuthErrorCode();
+        customAuthErrorCode.setCode(BaseErrorCode.PARAMS_INVALID.getCode(), "Excel格式错误!");
         return ServiceResult.<String>builder().serviceCode(customAuthErrorCode).build().asResult();
     }
 
