@@ -75,9 +75,11 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
         // 默认查出orgId下所有子组织的用户
         List<String> orgIds = new ArrayList<>();
         // 先添加父级id
-        orgIds.add(orgId);
-        List<OrgDto> childOrgDtos = orgService.listAllChildIgnoreLevel(orgId);
-        orgIds.addAll(childOrgDtos.stream().map(OrgDto::getId).collect(Collectors.toList()));
+        if (StringUtils.isNotBlank(orgId)) {
+            orgIds.add(orgId);
+            List<OrgDto> childOrgDtos = orgService.listAllChildIgnoreLevel(orgId);
+            orgIds.addAll(childOrgDtos.stream().map(OrgDto::getId).collect(Collectors.toList()));
+        }
 
         List<UserModel> users = getModelMapper().listUsers(orgIds, uname, userIds);
         return users;
