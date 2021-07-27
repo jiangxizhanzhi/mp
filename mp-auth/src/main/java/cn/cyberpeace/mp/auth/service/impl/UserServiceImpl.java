@@ -62,6 +62,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -752,19 +753,15 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             return null;
         }
         ExportUser exportUser = ExportUser.builder().username(user.getUsername()).name(user.getName()).build();
+
         // org path
         List<OrgModel> orgList = orgUserService.listOrgsByUserId(user.getId());
-//        List<String> orgList = new ArrayList<>();
-//        for (OrgModel org : orgs) {
-//            orgList.add(orgService.getPathByOrgId(org.getId()));
-//        }
-
-        String paths = orgList.stream().map(o -> orgService.calculatePathByOrgId(o.getId())).collect(Collectors.joining(","));
-        log.info("paths:{}", paths);
-        exportUser.setOrg(paths);
+        // 调整为跟前端逻辑一样，如果存在多个组织，则选择主键最大的一个
+//        String paths = orgList.stream().map(o -> orgService.calculatePathByOrgId(o.getId())).collect(Collectors.joining(","));
+        Optional<OrgModel> optional = orgList.stream().max(Comparator.comparing(OrgModel::getPk));
+        optional.ifPresent(o -> exportUser.setOrg(o.getPath()));
 
         exportUser.setStat("正常");
-
         // 状态展示优先级 禁用 > 过期 > 待审核
         if (user.getIsAudited().equals(UserModel.Status.NOT_AUDITED)) {
             exportUser.setStat("待审核");
