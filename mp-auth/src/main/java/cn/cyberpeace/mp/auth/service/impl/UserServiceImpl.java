@@ -6,8 +6,8 @@ import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.dto.user.UserHeartbeatRequest;
-import cn.cyberpeace.mp.auth.dto.user.UserOnlineReportPageRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserRequest;
+import cn.cyberpeace.mp.auth.model.AvatarModel;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.OrgUserModel;
 import cn.cyberpeace.mp.auth.model.RoleModel;
@@ -15,13 +15,13 @@ import cn.cyberpeace.mp.auth.model.UserHeartbeatModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
+import cn.cyberpeace.mp.auth.service.AvatarService;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.service.RoleService;
 import cn.cyberpeace.mp.auth.service.SysConfigService;
 import cn.cyberpeace.mp.auth.service.TenantUserService;
 import cn.cyberpeace.mp.auth.service.UserHeartbeatService;
-import cn.cyberpeace.mp.auth.service.UserOnlineReportService;
 import cn.cyberpeace.mp.auth.service.UserPermissionService;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.service.UserService;
@@ -46,7 +46,6 @@ import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.lang.Assert;
-import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -112,8 +111,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Autowired
     private UserHeartbeatService userHeartbeatService;
 
-//    @Autowired
-//    private UserOnlineReportService userOnlineReportService;
+    @Autowired
+    private AvatarService avatarService;
 
     @Autowired
     public UserServiceImpl(UserMapper modelMapper, UserFields modelFields) {
@@ -198,7 +197,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     @Transactional(rollbackFor = Exception.class)
     public ServiceResult<Boolean>  delete(String userId) {
-        // todo 删除用户-组织，用户-角色关联关系 用户-权限关系 租户-用户关系
         deleteReleated(userId);
 
         return super.delete(userId);
@@ -235,6 +233,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
         createCheckService.check(userModel);
 
+        chooseDefaultAvatar(userModel);
         // create中会对密码加密，外层不需要再次加密
         ObjServiceResult<UserModel> result = create(userModel);
         ResultUtils.throwExceptionIfError(result, "创建用户失败！");
@@ -572,6 +571,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 //            String userId = IdGenerator.generateUUID();
 //            log.warn("userId:{}", userId);
 //            userModel.setId(userId);
+            chooseDefaultAvatar(userModel);
             var result = create(userModel);
             ResultUtils.throwExceptionIfError(result, "创建用户失败！");
             UserModel userCreated = result.getSource().getObj();
@@ -804,6 +804,16 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         if(!cleanUserRolesSuccess || !cleanUserOrgsSuccess || !cleanUserTargetsSuccess || !cleanUserTenantsSuccess) {
             log.info("cleanUserRolesSuccess:{}, cleanUserOrgsSuccess:{}, cleanUserTargetsSuccess:{}, cleanUserTenantsSuccess:{}", cleanUserRolesSuccess, cleanUserOrgsSuccess, cleanUserTargetsSuccess, cleanUserTenantsSuccess);
             throw new MpRuntimeException("删除失败！");
+        }
+    }
+
+    private void chooseDefaultAvatar(UserModel userModel) {
+        if (Objects.isNull(userModel) || StringUtils.isNotBlank(userModel.getAvatar())) {
+            return;
+        }
+        List<AvatarModel> avatarModels = avatarService.listAll();
+        if (CollectionUtil.isNotEmpty(avatarModels)) {
+            userModel.setAvatar(avatarModels.get(0).getUrl());
         }
     }
 
