@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.auth.dto.ResetSelfPwdRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.dto.user.UserHeartbeatRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserLogPageRequest;
+import cn.cyberpeace.mp.auth.dto.user.UserOnlineCntDto;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineReportPageRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserRequest;
 import cn.cyberpeace.mp.auth.dto.validate.AddGroup;
@@ -234,9 +235,9 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
 
     @ApiOperation(value = "在线用户数量", notes = "")
     @GetMapping("/olUserCnt")
-    public ServiceResult onlineUserCnt() {
-        int cnt = userOnlineReportService.onlineUserCnt();
-        return ResultUtils.commonResult(true, cnt);
+    public ServiceResult<UserOnlineCntDto> onlineUserCnt() {
+        UserOnlineCntDto userOnlineCntDto = userOnlineReportService.onlineUserCnt();
+        return ResultUtils.commonResult(true, userOnlineCntDto);
     }
 
 

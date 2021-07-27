@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.auth.service.impl;
 import cn.cyberpeace.mp.auth.constant.AuthLogConstant;
 import cn.cyberpeace.mp.auth.dto.user.UserLogPageRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserOlReportCntDto;
+import cn.cyberpeace.mp.auth.dto.user.UserOnlineCntDto;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineReportPageRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineReportTask;
 import cn.cyberpeace.mp.auth.model.OrgModel;
@@ -12,6 +13,7 @@ import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.service.UserHeartbeatService;
 import cn.cyberpeace.mp.auth.service.UserLogService;
 import cn.cyberpeace.mp.auth.service.UserOnlineReportService;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.UserOnlineReportFields;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
@@ -30,6 +32,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -70,6 +73,9 @@ public class UserOnlineReportServiceImpl extends BaseModelServiceImpl<UserOnline
     @Autowired
     private UserLogService userLogService;
 
+    @Autowired
+    private UserService userService;
+
 
     @Scheduled(initialDelay = REFRESH_RATE_MILLISECONDS, fixedRate = REFRESH_RATE_MILLISECONDS)
     public void scheduleUserOlReport() {
@@ -94,6 +100,7 @@ public class UserOnlineReportServiceImpl extends BaseModelServiceImpl<UserOnline
 
         List<UserOnlineReportModel> reports = pageInfo.getList();
         reports.forEach(r -> {
+            // 只获取最新的一条日志
             UserLogPageRequest logPageRequest = new UserLogPageRequest();
             logPageRequest.setUsername(r.getUsername());
             logPageRequest.setPage(1);
@@ -112,8 +119,15 @@ public class UserOnlineReportServiceImpl extends BaseModelServiceImpl<UserOnline
     }
 
     @Override
-    public int onlineUserCnt() {int cnt = getModelMapper().total(new HumanCondition().filterEqual("is_online", UserOnlineReportModel.ONLINE));
-        return cnt;
+    public UserOnlineCntDto onlineUserCnt() {
+        int olcnt = getModelMapper().total(new HumanCondition().filterEqual("is_online", UserOnlineReportModel.ONLINE));
+        int totalUser = userService.totalUserCnt();
+
+        UserOnlineCntDto userOnlineCntDto = new UserOnlineCntDto();
+        userOnlineCntDto.setOnlineUser(olcnt);
+        userOnlineCntDto.setTotalUser(totalUser);
+
+        return userOnlineCntDto;
     }
 
 
@@ -138,9 +152,9 @@ public class UserOnlineReportServiceImpl extends BaseModelServiceImpl<UserOnline
         boolean isOnline = userOlReportCntDto.getCnt() > HEARTBEAT_PER_RATE;
 
         if (isOnline) {
-            onlineReportNew.setIsOnline(1);
+            onlineReportNew.setIsOnline(UserOnlineReportModel.ONLINE);
         } else {
-            onlineReportNew.setIsOnline(0);
+            onlineReportNew.setIsOnline(UserOnlineReportModel.OFFLINE);
         }
 
         UserOnlineReportModel onlineReportOld = getModelMapper().getByUserId(userOlReportCntDto.getUid());

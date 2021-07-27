@@ -82,5 +82,6 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
 
     List<UserModel> listNotAudited();
 
-//    int onlineUserCnt();
+    int totalUserCnt();
+
 }

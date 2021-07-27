@@ -726,10 +726,10 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return userModels;
     }
 
-//    @Override
-//    public int onlineUserCnt() {
-//        return userOnlineReportService.onlineUserCnt();
-//    }
+    @Override
+    public int totalUserCnt() {
+        return getModelMapper().getUserCnt();
+    }
 
     private UserModel importUser2UserModel(ImportUser importUser) {
         if (Objects.isNull(importUser)) {
