@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.auth.dto.user.UserLogPageRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserOlReportCntDto;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineReportPageRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineReportTask;
+import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.UserOnlineReportModel;
 import cn.cyberpeace.mp.auth.repository.UserOnlineReportMapper;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
@@ -27,8 +28,10 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadFactory;
@@ -118,14 +121,18 @@ public class UserOnlineReportServiceImpl extends BaseModelServiceImpl<UserOnline
     public boolean createOrUpdate(UserOlReportCntDto userOlReportCntDto) {
         Assert.notNull(userOlReportCntDto, "userOlReportCntDto不能为空！");
 
-        String allorgPath = orgUserService.getAllOrgPathByUserId(userOlReportCntDto.getUid());
+        UserOnlineReportModel onlineReportNew = new UserOnlineReportModel();
+
+        // 只选出组织ID最大的一个
+//        String allorgPath = orgUserService.getAllOrgPathByUserId(userOlReportCntDto.getUid());
+        List<OrgModel> orgs = orgUserService.listOrgsByUserId(userOlReportCntDto.getUid());
+        Optional<OrgModel> optional = orgs.stream().max(Comparator.comparing(OrgModel::getPk));
+        optional.ifPresent(o -> onlineReportNew.setOrg(o.getPath()));
 
         // 更新
-        UserOnlineReportModel onlineReportNew = new UserOnlineReportModel();
         onlineReportNew.setUser(userOlReportCntDto.getUid());
         onlineReportNew.setUsername(userOlReportCntDto.getUsername());
         onlineReportNew.setName(userOlReportCntDto.getUname());
-        onlineReportNew.setOrg(allorgPath);
 
         // 查看15分钟内，收到的心跳次数，如果大于阈值，表示这15分钟内用户处于在线状态
         boolean isOnline = userOlReportCntDto.getCnt() > HEARTBEAT_PER_RATE;
