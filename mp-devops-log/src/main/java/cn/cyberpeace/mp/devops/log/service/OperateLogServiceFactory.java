@@ -3,6 +3,8 @@ package cn.cyberpeace.mp.devops.log.service;
 import cn.cyberpeace.mp.devops.log.enums.SiteTypeEnums;
 import cn.cyberpeace.mp.devops.log.model.OperationLogModel;
 import cn.cyberpeace.mp.devops.log.request.OperationLogPageRequest;
+import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.action.search.SearchResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -34,14 +36,19 @@ public class OperateLogServiceFactory {
     }
 
     /**
-     * 创建操作日志
+     * 创建日志
      * @param operationLogModel
      */
-    public Object create(OperationLogModel operationLogModel){
+    public IndexResponse create(OperationLogModel operationLogModel){
        return operateLogServiceMap.get(operationLogModel.getSiteType()).create(operationLogModel);
     }
 
-    public void search(OperationLogPageRequest request){
-        operateLogServiceMap.get(request.getSiteType()).search(request);
+    /**
+     * 查询日志
+     * @param request
+     * @return
+     */
+    public SearchResponse search(OperationLogPageRequest request){
+       return operateLogServiceMap.get(request.getSiteType()).search(request);
     }
 }

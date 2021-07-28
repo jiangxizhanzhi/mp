@@ -32,12 +32,12 @@ public class OperationLogModel {
     private Integer logType;
 
     /**
-     * 操作模块
+     * 操作模块，模块,0:系统，1：工具，2:课程，3：资源，4：账号，5：场景，6：职业体系，7：考试，8：习题集管理，9：夺旗解题，10：理论基础，11：试卷，12：任务，13：流量，14：探针，15：靶标
      */
     private String opModule;
 
     /**
-     * 操作类型：新增、更新、查询、删除
+     * 操作类型，0:创建，1：更新，2：删除，3：登录登出
      */
     private String opType;
 

@@ -31,14 +31,14 @@ public class OperationLogRequest {
     /**
      * 操作模块
      */
-    @ApiModelProperty(value = "操作模块，例如权限、运维等")
-    private String opModule;
+    @ApiModelProperty(value = "模块",notes = "cn.cyberpeace.mp.devops.log.enums.OpModuleEnums")
+    private Integer opModule;
 
     /**
      * 操作类型：新增、更新、查询、删除
      */
-    @ApiModelProperty(value = "操作动作，例如：登录、登出等")
-    private String opType;
+    @ApiModelProperty(value = "操作类型",notes = "cn.cyberpeace.mp.devops.log.enums.OpTypeEnums")
+    private Integer opTypeEnums;
 
     /**
      * 操作对象
