@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.devops.log.controller;
 
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.devops.log.constant.ControllerConstant;
-import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devops.log.model.OperationLogModel;
 import cn.cyberpeace.mp.devops.log.request.OperationLogPageRequest;
 import cn.cyberpeace.mp.devops.log.request.OperationLogRequest;
@@ -40,19 +39,8 @@ public class OperateLogController {
     @ApiOperation(value = "新增操作日志")
     @PostMapping("/add")
     public Object add(@RequestBody OperationLogRequest request, HttpServletRequest httpServletRequest){
-        OperationLogModel model = new OperationLogModel();
-        model.setFrom(request.getFrom());
-        model.setLogType(request.getLogType());
-        model.setOpModule(OpModuleEnums.fromValue(request.getOpModule()).getDesc());
-        model.setOpType(OpModuleEnums.fromValue(request.getOpType()).getDesc());
-        model.setOpTarget(request.getOpTarget());
-        model.setTitle(request.getTitle());
-        model.setUserId(request.getUserId());
-        model.setUserName(request.getUserName());
-        model.setUserType(request.getUserType());
-        model.setDescription(request.getDescription());
-        model.setOpIp(SnUtils.getRealRemoteIp(httpServletRequest));
-        return operateLogServiceFactory.create(model);
+        request.setOpIp(SnUtils.getRealRemoteIp(httpServletRequest));
+        return operateLogServiceFactory.create(request);
     }
 
 
