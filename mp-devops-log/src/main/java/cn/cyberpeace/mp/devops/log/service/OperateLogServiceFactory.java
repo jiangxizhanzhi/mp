@@ -1,8 +1,10 @@
 package cn.cyberpeace.mp.devops.log.service;
 
+import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devops.log.enums.SiteTypeEnums;
 import cn.cyberpeace.mp.devops.log.model.OperationLogModel;
 import cn.cyberpeace.mp.devops.log.request.OperationLogPageRequest;
+import cn.cyberpeace.mp.devops.log.request.OperationLogRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +36,28 @@ public class OperateLogServiceFactory {
     public OperateLogServiceFactory(List<OperateLogService> operateLogServiceList) {
         this.operateLogServiceList = operateLogServiceList;
     }
+
+    /**
+     * 创建日志
+     * @param request
+     * @return
+     */
+    public IndexResponse create(OperationLogRequest request){
+        OperationLogModel model = new OperationLogModel();
+        model.setFrom(request.getFrom());
+        model.setLogType(request.getLogType());
+        model.setOpModule(OpModuleEnums.fromValue(request.getOpModule()).getDesc());
+        model.setOpType(OpModuleEnums.fromValue(request.getOpType()).getDesc());
+        model.setOpTarget(request.getOpTarget());
+        model.setTitle(request.getTitle());
+        model.setUserId(request.getUserId());
+        model.setUserName(request.getUserName());
+        model.setUserType(request.getUserType());
+        model.setDescription(request.getDescription());
+        model.setOpIp(request.getOpIp());
+        return this.create(model);
+    }
+
 
     /**
      * 创建日志
