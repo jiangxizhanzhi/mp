@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.auth.util.UserUtils;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import io.swagger.annotations.Api;
@@ -26,18 +27,18 @@ public class AuthenticateController {
 
     @ApiOperation(value = "检查是否是有效token", notes = "")
     @GetMapping
-    public ServiceResult authenticate(@RequestParam String token) {
+    public ServiceResult<UserModel> authenticate(@RequestParam String token) {
 
         JwtUtils.UserInfo user;
         try {
             user = JwtUtils.validateToken(token);
         } catch (TokenExpiredException e) {
             log.info("token已经过期");
-            return ServiceResult.builder().serviceCode(AuthErrorCode.TOKEN_EXPIRED).build().asResult();
+            throw new MpRuntimeException(AuthErrorCode.TOKEN_EXPIRED);
         }
         if (user == null) {
             log.info("user is null");
-            return ServiceResult.builder().serviceCode(AuthErrorCode.AUTHENTICATION_FAILED).build().asResult();
+            throw new MpRuntimeException(AuthErrorCode.AUTHENTICATION_FAILED);
         }
 
         UserModel userModel = UserUtils.getUser(user.getId());
