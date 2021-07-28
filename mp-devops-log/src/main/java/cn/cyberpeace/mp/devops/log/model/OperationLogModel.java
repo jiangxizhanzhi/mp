@@ -19,12 +19,17 @@ public class OperationLogModel {
     /**
      * 站点类型：应用、中台、前端、平台
      */
-    private SiteTypeEnums siteType;
+    private SiteTypeEnums siteType = SiteTypeEnums.MP;
+
+    /**
+     * 日志来源,例如
+     */
+    private String from;
 
     /**
      * 日志类型：设备日志、系统日志、业务日志、用户日志、场景日志
      */
-    private String logType;
+    private Integer logType;
 
     /**
      * 操作模块

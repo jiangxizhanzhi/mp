@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.devops.log.service;
 
 import cn.cyberpeace.mp.devops.log.enums.SiteTypeEnums;
 import cn.cyberpeace.mp.devops.log.model.OperationLogModel;
+import cn.cyberpeace.mp.devops.log.request.OperationLogPageRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -40,7 +41,7 @@ public class OperateLogServiceFactory {
        return operateLogServiceMap.get(operationLogModel.getSiteType()).create(operationLogModel);
     }
 
-    public void search(SiteTypeEnums siteTypeEnums){
-        operateLogServiceMap.get(siteTypeEnums).search();
+    public void search(OperationLogPageRequest request){
+        operateLogServiceMap.get(request.getSiteType()).search(request);
     }
 }

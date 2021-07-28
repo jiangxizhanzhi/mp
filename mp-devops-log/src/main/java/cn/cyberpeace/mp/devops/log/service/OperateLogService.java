@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.devops.log.service;
 
 import cn.cyberpeace.mp.devops.log.enums.SiteTypeEnums;
 import cn.cyberpeace.mp.devops.log.model.OperationLogModel;
+import cn.cyberpeace.mp.devops.log.request.OperationLogPageRequest;
 
 /**
  * @author wanggang
@@ -23,6 +24,6 @@ public interface OperateLogService {
     /**
      * 查询日志
      */
-    void search();
+    void search(OperationLogPageRequest request);
 
 }

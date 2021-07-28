@@ -9,14 +9,8 @@ import com.fasterxml.jackson.annotation.JsonValue;
  */
 public enum SiteTypeEnums {
 
-    //平台
-    PLATFORM,
-
-    //中台
-    MP,
-
-    //应用
-    APPLICATION;
+    //MP中台
+    MP;
 
     @JsonCreator
     public static SiteTypeEnums fromValue(int value) {
