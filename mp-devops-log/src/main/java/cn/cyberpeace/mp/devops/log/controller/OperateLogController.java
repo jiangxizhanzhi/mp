@@ -44,7 +44,7 @@ public class OperateLogController {
         model.setFrom(request.getFrom());
         model.setLogType(request.getLogType());
         model.setOpModule(OpModuleEnums.fromValue(request.getOpModule()).getDesc());
-        model.setOpType(OpModuleEnums.fromValue(request.getOpTypeEnums()).getDesc());
+        model.setOpType(OpModuleEnums.fromValue(request.getOpType()).getDesc());
         model.setOpTarget(request.getOpTarget());
         model.setTitle(request.getTitle());
         model.setUserId(request.getUserId());

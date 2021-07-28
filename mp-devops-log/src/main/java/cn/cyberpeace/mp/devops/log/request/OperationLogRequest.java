@@ -38,7 +38,7 @@ public class OperationLogRequest {
      * 操作类型：新增、更新、查询、删除
      */
     @ApiModelProperty(value = "操作类型",notes = "cn.cyberpeace.mp.devops.log.enums.OpTypeEnums")
-    private Integer opTypeEnums;
+    private Integer opType;
 
     /**
      * 操作对象
