@@ -55,13 +55,13 @@ public class OperationLogRequest {
     /**
      * 用户ID
      */
-    @ApiModelProperty(value = "用户ID")
+    @ApiModelProperty(value = "用户ID",required = true)
     private String userId;
 
     /**
      * 用户名称
      */
-    @ApiModelProperty(value = "用户名称")
+    @ApiModelProperty(value = "用户名称",required = true)
     private String userName;
 
     /**
