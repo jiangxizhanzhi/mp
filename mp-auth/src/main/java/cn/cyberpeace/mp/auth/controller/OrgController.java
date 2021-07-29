@@ -90,7 +90,7 @@ public class OrgController extends BaseModelController<OrgModel, QueryParams, Or
     }
 
 
-    @ApiOperation(value = "查询所有组织树形结构", notes = "")
+    @ApiOperation(value = "查询组织（树形结构，orgId为空就是查所有组织树形结构）", notes = "")
     @GetMapping("/tree")
     public ServiceResult getOrgTree(@RequestParam(required = false) String orgId) {
         List<OrgDto> tree = getModelService().getTree(orgId);
@@ -98,7 +98,7 @@ public class OrgController extends BaseModelController<OrgModel, QueryParams, Or
     }
 
 
-    @ApiOperation(value = "根据orgId查询所在组织信息（按照层级排列）", notes = "")
+    @ApiOperation(value = "根据orgId查询所在组织信息（按照层级排列，直到顶级组织）", notes = "")
     @GetMapping("/hierarchical")
     public ServiceResult listHierarchicalOrgs(@RequestParam String orgId) {
         OrgDto orgDto = getModelService().getHierarchicalOrgsByOrgId(orgId);
