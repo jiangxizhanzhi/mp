@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -46,8 +47,8 @@ public class OperateLogServiceFactory {
         OperationLogModel model = new OperationLogModel();
         model.setFrom(request.getFrom());
         model.setLogType(request.getLogType());
-        model.setOpModule(OpModuleEnums.fromValue(request.getOpModule()).getDesc());
-        model.setOpType(OpModuleEnums.fromValue(request.getOpType()).getDesc());
+        model.setOpModule(Objects.nonNull(request.getOpModule()) ? OpModuleEnums.fromValue(request.getOpModule()).getDesc() : "");
+        model.setOpType(Objects.nonNull(request.getOpType()) ? OpModuleEnums.fromValue(request.getOpType()).getDesc() : "");
         model.setOpTarget(request.getOpTarget());
         model.setTitle(request.getTitle());
         model.setUserId(request.getUserId());

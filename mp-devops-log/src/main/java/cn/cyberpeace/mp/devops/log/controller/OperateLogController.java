@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devops.log.controller;
 
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.log.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.log.model.OperationLogModel;
 import cn.cyberpeace.mp.devops.log.request.OperationLogPageRequest;
@@ -38,9 +39,10 @@ public class OperateLogController {
 
     @ApiOperation(value = "新增操作日志")
     @PostMapping("/add")
-    public Object add(@RequestBody OperationLogRequest request, HttpServletRequest httpServletRequest){
+    public ServiceResult add(@RequestBody OperationLogRequest request, HttpServletRequest httpServletRequest){
         request.setOpIp(SnUtils.getRealRemoteIp(httpServletRequest));
-        return operateLogServiceFactory.create(request);
+        operateLogServiceFactory.create(request);
+        return ServiceResult.successful();
     }
 
 
