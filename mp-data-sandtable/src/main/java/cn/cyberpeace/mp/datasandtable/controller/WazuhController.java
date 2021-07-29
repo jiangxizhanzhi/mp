@@ -31,13 +31,13 @@ public class WazuhController {
     }
 
     @PostMapping("/monitor_events")
-    @ApiOperation(value = "查询场景系统指标信息信息", notes = "")
+    @ApiOperation(value = "查询场景系统指标信息", notes = "")
     public ListObjServiceResult<WazuhModel> queryMonitorEvents(@RequestBody @Valid WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
         return new ListObjServiceResult<>(wazuhService.queryMonitorEvents(wazuhMonitorEventsRequest)).asResult();
     }
 
 //    @PostMapping("/monitor_agent_mac")
-//    @ApiOperation(value = "查询场景系统指标信息信息", notes = "")
+//    @ApiOperation(value = "查询场景agent和mac信息", notes = "")
 //    public ServiceResult<MultiValueMap<String, String>> queryAllAgentMacAddr() {
 //        return ServiceResult.success((wazuhService.queryAllAgentMacAddr()));
 //    }

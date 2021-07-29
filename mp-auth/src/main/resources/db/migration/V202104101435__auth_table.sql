@@ -9,7 +9,7 @@ CREATE TABLE mp_auth_tenant (
     PRIMARY KEY (`pk`),
     UNIQUE (`id`),
     UNIQUE (`identifier`)
-);
+) comment '租户表';
 
 # 组织表
 CREATE TABLE mp_auth_org (
@@ -27,7 +27,7 @@ CREATE TABLE mp_auth_org (
     UNIQUE (`id`),
     UNIQUE (`tenant`, `identifier`),
     UNIQUE (`path`)
-);
+) comment '组织表';
 
 # 角色表
 CREATE TABLE mp_auth_role (
@@ -44,7 +44,7 @@ CREATE TABLE mp_auth_role (
     UNIQUE (`id`),
     UNIQUE (`tenant`, `identifier`),
     UNIQUE (`tenant`, `name`)
-);
+) comment '角色表';
 
 # 用户表
 CREATE TABLE mp_auth_user (
@@ -76,7 +76,7 @@ CREATE TABLE mp_auth_user (
     UNIQUE (`id`),
     UNIQUE (`identifier`),
     UNIQUE (`username`)
-);
+) comment '用户表';
 
 # 租户用户
 CREATE TABLE mp_auth_tenant_user (
@@ -90,7 +90,7 @@ CREATE TABLE mp_auth_tenant_user (
     PRIMARY KEY (`pk`),
     UNIQUE (`id`),
     UNIQUE (`tenant`, `user`)
-);
+) comment '租户用户表';
 
 
 # 用户心跳表
@@ -103,12 +103,12 @@ CREATE TABLE mp_auth_user_heartbeat (
      `update_time` datetime(6) NOT NULL COMMENT '更新时间',
      PRIMARY KEY (`pk`),
      UNIQUE (`id`)
-);
+) comment '用户心跳表';
 create index idx_user_hb_uid on mp_auth_user_heartbeat (user);
 create index idx_user_hb_time on mp_auth_user_heartbeat (create_time);
 
 
-# 用户在线状态统计表
+# 用户在线报告统计表
 CREATE TABLE mp_auth_user_online_report (
     `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
     `id` varchar(64)  NOT NULL COMMENT 'id',
@@ -127,7 +127,7 @@ CREATE TABLE mp_auth_user_online_report (
     PRIMARY KEY (`pk`),
     UNIQUE (`id`),
     UNIQUE (`user`)
-);
+) comment '用户在线报告统计表';
 create index idx_user_olrpt_uname on mp_auth_user_online_report (username);
 
 
@@ -144,7 +144,7 @@ CREATE TABLE mp_auth_user_role (
     PRIMARY KEY (`pk`),
     UNIQUE (`id`),
     UNIQUE (`tenant`, `user`, `role`)
-);
+) comment '用户角色表';
 
 # 资源目标表(有哪些资源)
 CREATE TABLE mp_auth_target (
@@ -161,7 +161,7 @@ CREATE TABLE mp_auth_target (
    PRIMARY KEY (`pk`),
    UNIQUE (`id`),
    UNIQUE (`identifier`)
-);
+) comment '权限（资源）表';
 
 # 组织资源权限表
 CREATE TABLE mp_auth_org_permission (
@@ -179,7 +179,7 @@ CREATE TABLE mp_auth_org_permission (
     PRIMARY KEY (`pk`),
     UNIQUE (`id`),
     UNIQUE (`tenant`, `owner`, `target`)
-);
+) comment '组织权限表';
 
 # 角色资源权限表
 CREATE TABLE mp_auth_role_permission (
@@ -197,7 +197,7 @@ CREATE TABLE mp_auth_role_permission (
     PRIMARY KEY (`pk`),
     UNIQUE (`id`),
     UNIQUE (`tenant`, `owner`, `target`)
-);
+) comment '角色权限表';
 
 # 用户资源权限表
 CREATE TABLE mp_auth_user_permission (
@@ -215,7 +215,7 @@ CREATE TABLE mp_auth_user_permission (
     PRIMARY KEY (`pk`),
     UNIQUE (`id`),
     UNIQUE (`tenant`, `owner`, `target`)
-);
+) comment '用户权限表';
 
 
 
@@ -230,7 +230,7 @@ CREATE TABLE mp_auth_org_user (
      `update_time` datetime(6) NOT NULL COMMENT '更新时间',
      PRIMARY KEY (`pk`),
      UNIQUE (`id`)
-);
+) comment '组织用户表';
 
 
 create table mp_auth_client_details (
@@ -249,7 +249,7 @@ create table mp_auth_client_details (
     autoapprove VARCHAR(256) comment '设置用户是否自动approve操作',
     PRIMARY KEY (`pk`),
     UNIQUE (`client_id`)
-) COMMENT '渠道认证配置表';
+) comment '客户端认证配置表';
 
 
 # 用户默认头像
@@ -261,7 +261,7 @@ CREATE TABLE mp_auth_avatar (
        `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
        PRIMARY KEY (`pk`),
        UNIQUE (`id`)
-) COMMENT '默认头像';
+) COMMENT '头像表';
 
 
 # 系统配置信息表
@@ -276,7 +276,7 @@ CREATE TABLE mp_sys_config (
      PRIMARY KEY (`pk`),
      UNIQUE (`id`),
      UNIQUE (`tenant`, `key_name`)
-) COMMENT '其他配置信息表';
+) COMMENT '系统配置信息表';
 
 
 
@@ -289,7 +289,7 @@ CREATE TABLE mp_sys_config (
 
 
 -- 默认管理员用户，首次登陆需修改密码
-INSERT INTO mp_auth_user (id, tenant, identifier, username, password, token_secret, name, nickname, avatar, birthday, email, mobile, id_card, address, is_enabled, is_audited, init_check, description, date_joined, expired_time, last_login, create_time, update_time) VALUES ('defaultuserid', 'default', 'admin', 'admin', '1f670a02678a6cbcc9d38ce57f97f4a3724574dfa3a69b73f2930586110b4619265c87c9874df4cc', '351672ff8854438eaaa48c46efdfa947', '管理员', '管理员', '', '2021-06-23', 'example@123.com', '13988888888', '', '北京路101号', 1, 1, 1, '', '2021-06-23 09:37:29.084709', '2021-07-29 00:00:00.000000', '2021-06-23 09:37:29.084667', '2021-06-23 09:37:29.084805', '2021-07-08 20:16:47.878994');
+INSERT INTO mp_auth_user (id, tenant, identifier, username, password, token_secret, name, nickname, avatar, birthday, email, mobile, id_card, address, is_enabled, is_audited, init_check, description, date_joined, expired_time, last_login, create_time, update_time) VALUES ('defaultuserid', 'default', 'admin', 'admin', '1f670a02678a6cbcc9d38ce57f97f4a3724574dfa3a69b73f2930586110b4619265c87c9874df4cc', '351672ff8854438eaaa48c46efdfa947', '管理员', '管理员', '', '2021-06-23', 'example@123.com', '13988888888', '', '北京路101号', 1, 1, 1, '', '2021-06-23 09:37:29.084709', '2121-07-29 00:00:00.000000', '2021-06-23 09:37:29.084667', '2021-06-23 09:37:29.084805', '2021-07-08 20:16:47.878994');
 
 -- 默认管理员角色
 INSERT INTO mp_auth_role (id, tenant, org, identifier, name, description, create_time, update_time) VALUES ('adminid', 'default', 'default', 'ADMIN', '管理员', '管理员角色', '2021-06-23 06:20:05.000000', '2021-07-08 20:59:14.037209');
