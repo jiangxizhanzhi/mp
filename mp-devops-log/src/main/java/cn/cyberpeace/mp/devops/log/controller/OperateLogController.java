@@ -3,9 +3,9 @@ package cn.cyberpeace.mp.devops.log.controller;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.log.constant.ControllerConstant;
-import cn.cyberpeace.mp.devops.log.model.OperationLogModel;
 import cn.cyberpeace.mp.devops.log.request.OperationLogPageRequest;
 import cn.cyberpeace.mp.devops.log.request.OperationLogRequest;
+import cn.cyberpeace.mp.devops.log.response.OperationLogPageResponse;
 import cn.cyberpeace.mp.devops.log.service.OperateLogServiceFactory;
 import cn.cyberpeace.mp.devops.log.utils.SnUtils;
 import com.alibaba.fastjson.JSON;
@@ -48,12 +48,12 @@ public class OperateLogController {
 
     @ApiOperation(value = "查询操作日志")
     @GetMapping("/page")
-    public ListObjServiceResult<OperationLogModel> page(OperationLogPageRequest request) {
+    public ListObjServiceResult<OperationLogPageResponse> page(OperationLogPageRequest request) {
         SearchResponse searchResponse = operateLogServiceFactory.search(request);
         SearchHits searchHits = searchResponse.getHits();
-        List<OperationLogModel> list = new ArrayList<>(searchHits.getHits().length);
+        List<OperationLogPageResponse> list = new ArrayList<>(searchHits.getHits().length);
         for (SearchHit hit : searchHits.getHits()) {
-            OperationLogModel operationLog = JSON.parseObject(hit.getSourceAsString(), OperationLogModel.class);
+            OperationLogPageResponse operationLog = JSON.parseObject(hit.getSourceAsString(), OperationLogPageResponse.class);
             list.add(operationLog);
         }
         return new ListObjServiceResult(list,Integer.valueOf(String.valueOf(searchHits.getTotalHits().value)));

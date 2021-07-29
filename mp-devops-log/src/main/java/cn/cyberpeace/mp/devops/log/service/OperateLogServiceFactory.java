@@ -56,6 +56,7 @@ public class OperateLogServiceFactory {
         model.setUserType(request.getUserType());
         model.setDescription(request.getDescription());
         model.setOpIp(request.getOpIp());
+        model.setContent(request.getContent());
         return this.create(model);
     }
 

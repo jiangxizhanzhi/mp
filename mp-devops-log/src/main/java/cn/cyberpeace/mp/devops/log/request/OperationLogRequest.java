@@ -71,6 +71,12 @@ public class OperationLogRequest {
     private String userType;
 
     /**
+     * 内容
+     */
+    @ApiModelProperty(value = "内容")
+    private String content;
+
+    /**
      * 描述
      */
     @ApiModelProperty(value = "描述")

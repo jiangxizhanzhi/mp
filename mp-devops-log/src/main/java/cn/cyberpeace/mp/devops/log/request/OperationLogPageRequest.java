@@ -81,26 +81,40 @@ public class OperationLogPageRequest extends BasePageRequest{
         }
 
         if (StringUtils.isNotBlank(userName)) {
-            boolBuilder.must(QueryBuilders.termQuery("userName.keyword", userName));
+            boolBuilder.must(QueryBuilders.wildcardQuery("userName.keyword", concat("*",userName,"*")));
         }
         if (StringUtils.isNotBlank(opType)) {
             boolBuilder.must(QueryBuilders.termQuery("opType.keyword", opType));
         }
         if (StringUtils.isNotBlank(userNameOrOpTarget)){
             BoolQueryBuilder orQuery = QueryBuilders.boolQuery();
-            orQuery.should(QueryBuilders.termQuery("userName.keyword", userNameOrOpTarget));
-            orQuery.should(QueryBuilders.termQuery("opTarget.keyword", userNameOrOpTarget));
+            orQuery.should(QueryBuilders.wildcardQuery("userName.keyword", concat("*",userNameOrOpTarget,"*")));
+            orQuery.should(QueryBuilders.wildcardQuery("opTarget.keyword", concat("*",userNameOrOpTarget,"*")));
             boolBuilder.must(orQuery);
         }
 
         return boolBuilder;
     }
 
+    /**
+     * 构建SearchSourceBuilder对象
+     * @return
+     */
     public SearchSourceBuilder buildSearchSourceBuilder(){
         return SearchSourceBuilder.searchSource().query(this.buildBoolQueryBuilder())
                 .sort("opTime", SortOrder.DESC)
-                .from(this.getLimit() * this.getOffset())
+                .from(this.getOffset() - 1 > 0 ? this.getOffset() - 1 : 0)
                 .size(this.getLimit());
     }
 
+    /**
+     * 拼接字符串
+     * @param prefix
+     * @param middle
+     * @param suffix
+     * @return
+     */
+    private String concat(String prefix,String middle,String suffix){
+        return prefix.concat(middle).concat(suffix);
+    }
 }

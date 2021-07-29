@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devops.log.model;
 
 import cn.cyberpeace.mp.devops.log.enums.SiteTypeEnums;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -65,6 +66,11 @@ public class OperationLogModel {
      * 用户类型（用户，客户端）
      */
     private String userType;
+
+    /**
+     * 内容
+     */
+    private String content;
 
     /**
      * 描述
