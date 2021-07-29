@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.datasandtable.model;
 
 import cn.cyberpeace.mp.datasandtable.model.emum.FileEventType;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
@@ -40,8 +41,8 @@ public class FileEventModel {
     @ApiModelProperty("文件事件类型")
     private FileEventType fileEventType;
 
-    @ApiModelProperty("文件事件类型")
-    private String macId;
+    @ApiModelProperty("macId集合")
+    private List<String> macIds;
 
     @ApiModelProperty("wazuhAgentId")
     private String agentId;

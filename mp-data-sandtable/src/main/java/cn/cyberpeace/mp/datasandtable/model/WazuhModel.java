@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -43,7 +44,7 @@ public class WazuhModel {
     private String agentName;
 
     @ApiModelProperty("macId")
-    private String macId;
+    private List<String> macIds;
 
     @JSONField(name = "timestamp")
     @ApiModelProperty("时间")

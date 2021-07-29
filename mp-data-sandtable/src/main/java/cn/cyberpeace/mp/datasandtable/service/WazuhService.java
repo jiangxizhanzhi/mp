@@ -130,7 +130,7 @@ public class WazuhService {
                     var result = JSONObject.parseObject(monitorMessage, WazuhModel.class);
                     result.setAgentId(model.getAgent().getId());
                     result.setAgentName(model.getAgent().getName());
-                    result.setMacId(queryMacIdByAgentId(model.getAgent().getId(), wazuhMonitorEventsRequest.getMacIds(), multiValueMap));
+                    result.setMacIds(multiValueMap.get(model.getAgent().getId()));
                     result.setTime(LocalDateTimeUtils.dateToLocalDateTime(model.getTimestamp()));
                     return result;
                 }).collect(Collectors.toList());
@@ -174,10 +174,15 @@ public class WazuhService {
         BoolQueryBuilder boolQueryBuilder, MultiValueMap<String, String> allAgentMacAddr) {
         //构造查询条件
         boolQueryBuilder.must(QueryBuilders.termQuery("rule.id", "900002"));
-        int agentSize = buildAgentIdQuery(wazuhEventRequest.getMacIds(), boolQueryBuilder, allAgentMacAddr);
+        int agentSize = 0;
+        
+        if (!CollectionUtils.isEmpty(wazuhEventRequest.getMacIds())) {
+            agentSize = buildAgentIdQuery(wazuhEventRequest.getMacIds(), boolQueryBuilder, allAgentMacAddr);
+        }
 
         if (!CollectionUtils.isEmpty(wazuhEventRequest.getAgentNames())) {
             buildAgentNameQuery(wazuhEventRequest.getAgentNames(), boolQueryBuilder);
+            agentSize = wazuhEventRequest.getAgentNames().size();
         }
 
         // 返回agent数量
@@ -243,7 +248,7 @@ public class WazuhService {
             .updateTime(LocalDateTimeUtils.dateToLocalDateTime(wazuhFileRoot.getTimestamp()))
             .user(wazuhFileRoot.getSyscheck().getUnameAfter())
             .action(wazuhFileRoot.getSyscheck().getEvent())
-            .macId(queryMacIdByAgentId(wazuhFileRoot.getAgent().getId(), wazuhEventRequest.getMacIds(), multiValueMap))
+            .macIds(multiValueMap.get(wazuhFileRoot.getAgent().getId()))
             //区分文件还是注册表
             .fileEventType(wazuhFileRoot.getRule().getGroups().stream().anyMatch("syscheck_registry"::equals) ? FileEventType.REGISTRY : FileEventType.FILE)
             .agentName(wazuhFileRoot.getAgent().getName())
@@ -291,8 +296,10 @@ public class WazuhService {
         //构造查询条件
         boolQueryBuilder.must(QueryBuilders.boolQuery().must(QueryBuilders.termQuery("rule.groups", "syscheck")));
 
-        //构造agentId
-        buildAgentIdQuery(wazuhEventRequest.getMacIds(), boolQueryBuilder, allAgentMacAddr);
+        if (!CollectionUtils.isEmpty(wazuhEventRequest.getMacIds())) {
+            //构造agentId
+            buildAgentIdQuery(wazuhEventRequest.getMacIds(), boolQueryBuilder, allAgentMacAddr);
+        }
 
         if (!CollectionUtils.isEmpty(wazuhEventRequest.getAgentNames())) {
             buildAgentNameQuery(wazuhEventRequest.getAgentNames(), boolQueryBuilder);

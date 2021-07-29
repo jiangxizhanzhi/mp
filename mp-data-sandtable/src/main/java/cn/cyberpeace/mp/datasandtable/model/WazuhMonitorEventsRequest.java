@@ -23,7 +23,7 @@ public class WazuhMonitorEventsRequest {
     /**
      * wazuh macIds
      */
-    @ApiModelProperty(value = "macId集合", required = true)
+    @ApiModelProperty(value = "macId集合", required = false)
     private List<String> macIds;
 
     @ApiModelProperty(value = "agentName列表", required = false)
