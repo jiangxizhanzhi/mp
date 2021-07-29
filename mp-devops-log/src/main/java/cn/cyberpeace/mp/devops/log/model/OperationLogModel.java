@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.devops.log.model;
 
 import cn.cyberpeace.mp.devops.log.enums.SiteTypeEnums;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
