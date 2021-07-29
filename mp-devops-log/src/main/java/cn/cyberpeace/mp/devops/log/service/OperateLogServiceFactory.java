@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devops.log.service;
 
 import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
+import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.devops.log.enums.SiteTypeEnums;
 import cn.cyberpeace.mp.devops.log.model.OperationLogModel;
 import cn.cyberpeace.mp.devops.log.request.OperationLogPageRequest;
@@ -48,7 +49,7 @@ public class OperateLogServiceFactory {
         model.setFrom(request.getFrom());
         model.setLogType(request.getLogType());
         model.setOpModule(Objects.nonNull(request.getOpModule()) ? OpModuleEnums.fromValue(request.getOpModule()).getDesc() : "");
-        model.setOpType(Objects.nonNull(request.getOpType()) ? OpModuleEnums.fromValue(request.getOpType()).getDesc() : "");
+        model.setOpType(Objects.nonNull(request.getOpType()) ? OpTypeEnums.fromValue(request.getOpType()).getDesc() : "");
         model.setOpTarget(request.getOpTarget());
         model.setTitle(request.getTitle());
         model.setUserId(request.getUserId());
