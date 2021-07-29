@@ -1,17 +1,15 @@
-package cn.cyberpeace.mp.base.controller;
+package cn.cyberpeace.mp.base.service.impl;
 
 import cn.cyberpeace.mp.base.config.FastDfsConfig;
 import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.service.FileService;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
@@ -19,14 +17,14 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 
 /**
- * @Description: FastDFS控制层
+ * @Description: FastDFS文件操作实现类
  *               trackerServers每个接口初始化一次，便于不同业务对接不同集群的FastDFS
  * @Autho qiaokang
- * @Date：2021/6/21 15:01
+ * @Date：2021/7/29 14:47
  */
-@RestController
 @Slf4j
-public class FastDfsController {
+@Service
+public class FastDfsFileServiceImpl implements FileService {
 
     @Autowired
     private FastDFSClient fastDFSClient;
@@ -35,26 +33,24 @@ public class FastDfsController {
     private FastDfsConfig fastDfsConfig;
 
     /**
-     * 上传文件通用，只上传文件到服务器
-     *
+     * 文件上传
      * @param file
      * @param request
-     * @return 返回文件路径等信息
+     * @return
      */
-    @PostMapping(value = "/file/upload")
-    @ResponseBody
+    @Override
     public ServiceResult uploadFile(MultipartFile file, HttpServletRequest request) {
         FileResponseData responseData = uploadSample(file, request);
         return ServiceResult.success(responseData);
     }
 
     /**
-     * 以附件形式下载文件
-     *
-     * @param filePath 文件地址
+     * 文件下载
+     * @param filePath
      * @param response
+     * @throws MpRuntimeException
      */
-    @PostMapping("/file/download")
+    @Override
     public void downloadFile(String filePath, HttpServletResponse response) throws MpRuntimeException {
         try {
             fastDFSClient.downloadFile(filePath, response, FdfsGroupEnum.DEFAULT.toString());
@@ -64,13 +60,12 @@ public class FastDfsController {
         }
     }
 
-
     /**
-     * 根据指定的路径删除服务器文件
-     *
+     * 文件删除
      * @param filePath
+     * @return
      */
-    @DeleteMapping("/file/delete")
+    @Override
     public ServiceResult deleteFile(String filePath) {
         try {
             fastDFSClient.deleteFile(filePath, FdfsGroupEnum.DEFAULT.toString());
@@ -88,7 +83,7 @@ public class FastDfsController {
      * @param request
      * @return
      */
-    public FileResponseData uploadSample(MultipartFile file, HttpServletRequest request) {
+    private FileResponseData uploadSample(MultipartFile file, HttpServletRequest request) {
         FileResponseData responseData = new FileResponseData();
         try {
             // 上传到服务器
