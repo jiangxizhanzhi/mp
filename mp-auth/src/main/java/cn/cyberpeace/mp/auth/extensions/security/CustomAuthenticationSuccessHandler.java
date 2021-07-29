@@ -21,6 +21,8 @@ import cn.cyberpeace.mp.base.service.code.ErrorCode;
 import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.log.constant.LogConstant;
+import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
+import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.devops.log.model.OperationLogModel;
 import cn.cyberpeace.mp.devops.log.utils.SnUtils;
 import cn.hutool.core.collection.CollectionUtil;
@@ -167,7 +169,8 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
     private void recordLoginLog(UserModel user, HttpServletRequest request) {
         OperationLogModel logModel = new OperationLogModel();
         //操作类型
-        logModel.setOpType(AuthLogConstant.TYPE_LOGIN);
+        logModel.setOpModule(OpModuleEnums.ACCOUNT.getDesc());
+        logModel.setOpType(OpTypeEnums.LOGIN_IN_OUT.getDesc());
         logModel.setOpTarget(AuthLogConstant.TARGET_USER);
         //操作主题
         logModel.setTitle("登录");

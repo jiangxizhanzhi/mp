@@ -109,7 +109,7 @@ public class UserOnlineReportServiceImpl extends BaseModelServiceImpl<UserOnline
             List<OperationLogModel> logs = logPage.getList();
             if (CollectionUtil.isNotEmpty(logs) && Objects.nonNull(logs.get(0))) {
                 // 动作
-                r.setAction(convertOpType2Desc(logs.get(0).getOpType()));
+                r.setAction(logs.get(0).getOpType());
                 // 对象
                 r.setSubject(logs.get(0).getOpTarget());
             }
@@ -196,7 +196,7 @@ public class UserOnlineReportServiceImpl extends BaseModelServiceImpl<UserOnline
     }
 
 
-    private String convertOpType2Desc(String opType) {
+    /*private String convertOpType2Desc(String opType) {
         if(Objects.equals(opType, AuthLogConstant.TYPE_LOGIN)) {
             return "登录";
         }
@@ -227,7 +227,7 @@ public class UserOnlineReportServiceImpl extends BaseModelServiceImpl<UserOnline
 
         log.info("opType: {}", opType);
         return opType;
-    }
+    }*/
 
 
 }

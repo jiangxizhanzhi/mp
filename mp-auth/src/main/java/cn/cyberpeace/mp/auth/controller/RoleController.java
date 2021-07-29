@@ -14,6 +14,8 @@ import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
+import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
+import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -78,7 +80,7 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
             @ApiImplicitParam(name="id", paramType="path", value="id",dataTypeClass = String.class),
     })
     @DeleteMapping("/{id}")
-    @OperateLog(module = AuthLogConstant.MODULE, type = AuthLogConstant.TYPE_DELETE, title = "删除角色", target = AuthLogConstant.TARGET_ROLE)
+    @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.DELETE, title = "删除角色", target = AuthLogConstant.TARGET_ROLE)
     public ServiceResult<Boolean> delete(@PathVariable String id) {
         return super.delete(id);
     }
@@ -104,7 +106,7 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
 
     @ApiOperation(value = "创建角色，同时完成角色-权限绑定关系", notes = "")
     @PostMapping("/add")
-    @OperateLog(module = AuthLogConstant.MODULE, type = AuthLogConstant.TYPE_ADD, title = "新增角色", target = AuthLogConstant.TARGET_ROLE)
+    @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.CREATE, title = "新增角色", target = AuthLogConstant.TARGET_ROLE)
     public ServiceResult add(@RequestBody @Validated RoleRequest createRequest) {
         RoleModel roleModel = getModelService().add(createRequest);
         return ResultUtils.commonResult(true, roleModel);
@@ -113,7 +115,7 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
 
     @ApiOperation(value = "更新角色，同时完成角色-权限绑定关系", notes = "")
     @PostMapping("modify")
-    @OperateLog(module = AuthLogConstant.MODULE, type = AuthLogConstant.TYPE_UPDATE, title = "修改角色", target = AuthLogConstant.TARGET_ROLE)
+    @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "修改角色", target = AuthLogConstant.TARGET_ROLE)
     public ServiceResult modify(@RequestBody @Validated RoleRequest modifyRequest) {
         RoleModel roleModel = getModelService().modify(modifyRequest);
         return ResultUtils.commonResult(true, roleModel);

@@ -4,6 +4,8 @@ import cn.cyberpeace.mp.auth.constant.AuthLogConstant;
 import cn.cyberpeace.mp.auth.dto.user.UserLogPageRequest;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.ServletUtils;
+import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
+import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.devops.log.enums.SiteTypeEnums;
 import cn.cyberpeace.mp.devops.log.model.OperationLogModel;
 import cn.cyberpeace.mp.devops.log.service.OperateLogServiceFactory;
@@ -47,7 +49,7 @@ public class UserLogService {
         //站点类型
         logModel.setSiteType(SiteTypeEnums.MP);
         //操作模块
-        logModel.setOpModule(AuthLogConstant.MODULE);
+        logModel.setOpModule(OpModuleEnums.ACCOUNT.getDesc());
         //记录操作时间
         logModel.setOpTime(LocalDateTime.now());
 

@@ -7,6 +7,8 @@ import cn.cyberpeace.mp.auth.service.UserLogService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.log.constant.LogConstant;
+import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
+import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.devops.log.model.OperationLogModel;
 import cn.cyberpeace.mp.devops.log.utils.SnUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -60,7 +62,8 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
     private void recordLogoutLog(UserModel user, HttpServletRequest request) {
         OperationLogModel logModel = new OperationLogModel();
         //操作类型
-        logModel.setOpType(AuthLogConstant.TYPE_LOGOUT);
+        logModel.setOpModule(OpModuleEnums.ACCOUNT.getDesc());
+        logModel.setOpType(OpTypeEnums.LOGIN_IN_OUT.getDesc());
         logModel.setOpTarget(AuthLogConstant.TARGET_USER);
         //操作主题
         logModel.setTitle("登出");

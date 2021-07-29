@@ -10,6 +10,8 @@ import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
+import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
+import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -44,7 +46,7 @@ public class OrgController extends BaseModelController<OrgModel, QueryParams, Or
     @ApiImplicitParams({
             @ApiImplicitParam(name="fields", value="需要返回的字段",dataTypeClass = String[].class),
     })
-    @OperateLog(module = AuthLogConstant.MODULE, type = AuthLogConstant.TYPE_ADD, title = "创建组织", target = AuthLogConstant.TARGET_ORG)
+    @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.CREATE, title = "创建组织", target = AuthLogConstant.TARGET_ORG)
     @PostMapping
     public ObjServiceResult create(@RequestBody OrgModel obj, @RequestParam(required = false) String[] fields) {
         return super.create(obj, fields);
@@ -56,7 +58,7 @@ public class OrgController extends BaseModelController<OrgModel, QueryParams, Or
             @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class),
             @ApiImplicitParam(name="fields", value="需要返回的字段",dataTypeClass = String[].class),
     })
-    @OperateLog(module = AuthLogConstant.MODULE, type = AuthLogConstant.TYPE_UPDATE, title = "更新组织", target = AuthLogConstant.TARGET_ORG)
+    @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "更新组织", target = AuthLogConstant.TARGET_ORG)
     @PatchMapping("/{id}")
     public ObjServiceResult update(@PathVariable String id, @RequestBody OrgModel obj,
                                       @RequestParam(required = false) String[] fields) {
@@ -69,7 +71,7 @@ public class OrgController extends BaseModelController<OrgModel, QueryParams, Or
             @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class),
     })
     @DeleteMapping("/{id}")
-    @OperateLog(module = AuthLogConstant.MODULE, type = AuthLogConstant.TYPE_DELETE, title = "删除组织", target = AuthLogConstant.TARGET_ORG)
+    @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.DELETE, title = "删除组织", target = AuthLogConstant.TARGET_ORG)
     public ServiceResult<Boolean> delete(@PathVariable String id) {
         return super.delete(id);
     }
