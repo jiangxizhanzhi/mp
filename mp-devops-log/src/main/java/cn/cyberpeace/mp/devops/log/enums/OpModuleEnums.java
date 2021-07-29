@@ -37,7 +37,9 @@ public enum OpModuleEnums {
 
     PROBE("探针"),
 
-    TARGET("靶标");
+    TARGET("靶标"),
+
+    DEFAULT("");
 
     private String desc;
 

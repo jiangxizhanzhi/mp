@@ -1,5 +1,8 @@
 package cn.cyberpeace.mp.devops.log.annotation;
 
+import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
+import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
+
 import java.lang.annotation.*;
 
 /**
@@ -15,13 +18,13 @@ public @interface OperateLog {
      * 操作模块，例如：用户模块
      * @return
      */
-    String module() default "";
+    OpModuleEnums module() default OpModuleEnums.DEFAULT;
 
     /**
      * 操作类型，例如：查询、新增、更新、删除、登录登出
      * @return
      */
-    String type() default "";
+    OpTypeEnums type() default OpTypeEnums.DEFAULT;
 
     /**
      * 操作对象

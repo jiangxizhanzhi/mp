@@ -164,9 +164,9 @@ public class RequestLogAspect {
             //站点类型
             operationLogModel.setSiteType(SiteTypeEnums.MP);
             //操作模块
-            operationLogModel.setOpModule(operateLog.module());
+            operationLogModel.setOpModule(operateLog.module().getDesc());
             //操作类型
-            operationLogModel.setOpType(operateLog.type());
+            operationLogModel.setOpType(operateLog.type().getDesc());
             //操作对象
             operationLogModel.setOpTarget(operateLog.target());
             //操作主题

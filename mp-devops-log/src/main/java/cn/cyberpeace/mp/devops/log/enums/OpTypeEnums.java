@@ -12,7 +12,9 @@ public enum OpTypeEnums {
 
     DELETE("删除"),
 
-    LOGIN_IN_OUT("登录登出");
+    LOGIN_IN_OUT("登录登出"),
+
+    DEFAULT("");
 
 
     private String desc;
