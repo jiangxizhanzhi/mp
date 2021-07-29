@@ -71,7 +71,7 @@ public class OperationLogPageResponse {
      * 操作时间
      */
     @ApiModelProperty(value = "操作时间/创建时间")
-    private LocalDateTime opTime = LocalDateTime.now();
+    private LocalDateTime opTime;
 
     /**
      * 操作人IP

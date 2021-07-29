@@ -2,9 +2,6 @@ package cn.cyberpeace.mp.devops.log.aop;
 
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
-import cn.cyberpeace.mp.devops.log.constant.LogConstant;
-import cn.cyberpeace.mp.devops.log.enums.SiteTypeEnums;
-import cn.cyberpeace.mp.devops.log.model.OperationLogModel;
 import cn.cyberpeace.mp.devops.log.service.OperateLogServiceFactory;
 import cn.cyberpeace.mp.devops.log.utils.SnUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,7 +27,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -160,31 +156,10 @@ public class RequestLogAspect {
                 return;
             }
 
-            OperationLogModel operationLogModel = new OperationLogModel();
-            //站点类型
-            operationLogModel.setSiteType(SiteTypeEnums.MP);
-            //操作模块
-            operationLogModel.setOpModule(operateLog.module().getDesc());
-            //操作类型
-            operationLogModel.setOpType(operateLog.type().getDesc());
-            //操作对象
-            operationLogModel.setOpTarget(operateLog.target());
-            //操作主题
-            operationLogModel.setTitle(operateLog.title());
-            //操作描述
-            operationLogModel.setDescription(operateLog.desc());
-            //记录操作时间
-            operationLogModel.setOpTime(LocalDateTime.now());
-            //请求IP
-            operationLogModel.setOpIp(SnUtils.getRealRemoteIp(request));
-
-            //操作用户
-            handleOperationUser(operationLogModel);
-
-            operateLogServiceFactory.create(operationLogModel);
+            operateLogServiceFactory.create(operateLog);
 
         } catch (Exception e) {
-            log.info("====插入操作日志异常==");
+            log.error("====插入操作日志异常:{}==",e.getMessage());
         }
     }
 
@@ -259,23 +234,5 @@ public class RequestLogAspect {
     }
 
 
-    private void handleOperationUser(OperationLogModel operationLogModel) {
-        HttpServletRequest request = ServletUtils.getRequest();
-        Object userId = request.getAttribute(LogConstant.USER_ID_KEY);
-        Object userName = request.getAttribute(LogConstant.USER_NAME_KEY);
-        Object userType = request.getAttribute(LogConstant.USER_TYPE_KEY);
-
-        if (Objects.nonNull(userId)) {
-            operationLogModel.setUserId(userId.toString());
-        }
-
-        if (Objects.nonNull(userName)) {
-            operationLogModel.setUserName(userName.toString());
-        }
-
-        if (Objects.nonNull(userType)) {
-            operationLogModel.setUserType(userType.toString());
-        }
-    }
 
 }

@@ -1,17 +1,24 @@
 package cn.cyberpeace.mp.devops.log.service;
 
+import cn.cyberpeace.mp.base.util.ServletUtils;
+import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
+import cn.cyberpeace.mp.devops.log.constant.LogConstant;
 import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.devops.log.enums.SiteTypeEnums;
 import cn.cyberpeace.mp.devops.log.model.OperationLogModel;
 import cn.cyberpeace.mp.devops.log.request.OperationLogPageRequest;
 import cn.cyberpeace.mp.devops.log.request.OperationLogRequest;
+import cn.cyberpeace.mp.devops.log.utils.SnUtils;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -60,6 +67,54 @@ public class OperateLogServiceFactory {
         model.setContent(request.getContent());
         return this.create(model);
     }
+
+    /**
+     * 创建日志
+     * @param operateLog
+     * @return
+     */
+    @Async
+    public IndexResponse create(OperateLog operateLog) {
+
+        HttpServletRequest request = ServletUtils.getRequest();
+
+        Object userId = request.getAttribute(LogConstant.USER_ID_KEY);
+        Object userName = request.getAttribute(LogConstant.USER_NAME_KEY);
+        Object userType = request.getAttribute(LogConstant.USER_TYPE_KEY);
+
+        OperationLogModel model = new OperationLogModel();
+        if (Objects.nonNull(userId)) {
+            model.setUserId(userId.toString());
+        }
+
+        if (Objects.nonNull(userName)) {
+            model.setUserName(userName.toString());
+        }
+
+        if (Objects.nonNull(userType)) {
+            model.setUserType(userType.toString());
+        }
+
+        //站点类型
+        model.setSiteType(SiteTypeEnums.MP);
+        //操作模块
+        model.setOpModule(operateLog.module().getDesc());
+        //操作类型
+        model.setOpType(operateLog.type().getDesc());
+        //操作对象
+        model.setOpTarget(operateLog.target());
+        //操作主题
+        model.setTitle(operateLog.title());
+        //操作描述
+        model.setDescription(operateLog.desc());
+        //记录操作时间
+        model.setOpTime(LocalDateTime.now());
+        //请求IP
+        model.setOpIp(SnUtils.getRealRemoteIp(request));
+
+        return this.create(model);
+    }
+
 
 
     /**
