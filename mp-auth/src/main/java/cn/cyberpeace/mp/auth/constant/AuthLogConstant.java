@@ -1,7 +1,8 @@
 package cn.cyberpeace.mp.auth.constant;
 
 public class AuthLogConstant {
-    public static final String MODULE = "AUTH";
+    // 账号模块
+    public static final String MODULE = "4";
 
     public static final String TYPE_LOGIN = "LOGIN";
     public static final String TYPE_LOGOUT = "LOGOUT";
