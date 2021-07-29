@@ -1,12 +1,14 @@
 package cn.cyberpeace.mp.auth.dto.user;
 
 import cn.cyberpeace.mp.auth.dto.common.PageRequest;
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.util.Objects;
 
 @Data
+@ApiModel
 public class UserLogPageRequest extends PageRequest {
 
     @ApiModelProperty(value = "username")

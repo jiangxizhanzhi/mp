@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.auth.dto.user;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -10,6 +11,7 @@ import java.beans.Transient;
 import java.util.List;
 
 @Data
+@ApiModel
 public class UserDto extends UserModel {
 
 
