@@ -156,7 +156,7 @@ public class RequestLogAspect {
                 return;
             }
 
-            operateLogServiceFactory.create(operateLog);
+            operateLogServiceFactory.create(operateLog,request);
 
         } catch (Exception e) {
             log.error("====插入操作日志异常:{}==",e.getMessage());

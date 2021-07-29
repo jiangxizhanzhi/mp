@@ -2,33 +2,24 @@ package cn.cyberpeace.mp.auth.extensions.security;
 
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.AuthLogConstant;
-import cn.cyberpeace.mp.auth.dto.OrgDto;
 import cn.cyberpeace.mp.auth.dto.login.LoginResp;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetails;
-import cn.cyberpeace.mp.auth.model.RoleModel;
-import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
-import cn.cyberpeace.mp.auth.service.OrgUserService;
-import cn.cyberpeace.mp.auth.service.UserLogService;
-import cn.cyberpeace.mp.auth.service.UserPermissionService;
-import cn.cyberpeace.mp.auth.service.UserRoleService;
-import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.auth.service.*;
 import cn.cyberpeace.mp.auth.service.fields.UserFields;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
-import cn.cyberpeace.mp.base.service.code.ErrorCode;
 import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.log.constant.LogConstant;
 import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
-import cn.cyberpeace.mp.devops.log.model.OperationLogModel;
+import cn.cyberpeace.mp.devops.log.request.OperationLogRequest;
+import cn.cyberpeace.mp.devops.log.service.OperateLogServiceFactory;
 import cn.cyberpeace.mp.devops.log.utils.SnUtils;
-import cn.hutool.core.collection.CollectionUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.core.Authentication;
@@ -40,10 +31,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -60,7 +48,7 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
     private OrgUserService orgUserService;
 
     @Autowired
-    private UserLogService userLogService;
+    private OperateLogServiceFactory operateLogServiceFactory;
 
     @Autowired
     private UserService userService;
@@ -167,10 +155,10 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
 
 
     private void recordLoginLog(UserModel user, HttpServletRequest request) {
-        OperationLogModel logModel = new OperationLogModel();
+        OperationLogRequest logModel = new OperationLogRequest();
         //操作类型
-        logModel.setOpModule(OpModuleEnums.ACCOUNT.getDesc());
-        logModel.setOpType(OpTypeEnums.LOGIN_IN_OUT.getDesc());
+        logModel.setOpModule(OpModuleEnums.ACCOUNT.ordinal());
+        logModel.setOpType(OpTypeEnums.LOGIN_IN_OUT.ordinal());
         logModel.setOpTarget(AuthLogConstant.TARGET_USER);
         //操作主题
         logModel.setTitle("登录");
@@ -185,7 +173,7 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
         logModel.setOpIp(SnUtils.getRealRemoteIp(request));
 
         // 记录登录日志
-        userLogService.record(logModel);
+        operateLogServiceFactory.create(logModel);
     }
 
 

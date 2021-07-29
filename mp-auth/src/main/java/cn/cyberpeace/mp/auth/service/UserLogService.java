@@ -1,13 +1,11 @@
 package cn.cyberpeace.mp.auth.service;
 
-import cn.cyberpeace.mp.auth.constant.AuthLogConstant;
 import cn.cyberpeace.mp.auth.dto.user.UserLogPageRequest;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
-import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
-import cn.cyberpeace.mp.devops.log.enums.SiteTypeEnums;
 import cn.cyberpeace.mp.devops.log.model.OperationLogModel;
+import cn.cyberpeace.mp.devops.log.request.OperationLogRequest;
 import cn.cyberpeace.mp.devops.log.service.OperateLogServiceFactory;
 import cn.cyberpeace.mp.devops.log.utils.SnUtils;
 import cn.hutool.core.exceptions.ExceptionUtil;
@@ -30,7 +28,6 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,14 +41,10 @@ public class UserLogService {
     @Resource(name = "logRestHighLevelClient")
     private RestHighLevelClient restHighLevelClient;
 
-    public void record(OperationLogModel logModel) {
+    public void record(OperationLogRequest logModel) {
 
-        //站点类型
-        logModel.setSiteType(SiteTypeEnums.MP);
         //操作模块
-        logModel.setOpModule(OpModuleEnums.ACCOUNT.getDesc());
-        //记录操作时间
-        logModel.setOpTime(LocalDateTime.now());
+        logModel.setOpModule(OpModuleEnums.ACCOUNT.ordinal());
 
         if (StringUtils.isBlank(logModel.getOpIp())) {
             // todo 异步处理的时候request外部传入

@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.devops.log.service;
 
-import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
 import cn.cyberpeace.mp.devops.log.constant.LogConstant;
 import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
@@ -51,6 +50,7 @@ public class OperateLogServiceFactory {
      * @param request
      * @return
      */
+    @Async
     public IndexResponse create(OperationLogRequest request){
         OperationLogModel model = new OperationLogModel();
         model.setFrom(request.getFrom());
@@ -74,9 +74,7 @@ public class OperateLogServiceFactory {
      * @return
      */
     @Async
-    public IndexResponse create(OperateLog operateLog) {
-
-        HttpServletRequest request = ServletUtils.getRequest();
+    public IndexResponse create(OperateLog operateLog,HttpServletRequest request) {
 
         Object userId = request.getAttribute(LogConstant.USER_ID_KEY);
         Object userName = request.getAttribute(LogConstant.USER_NAME_KEY);
@@ -116,12 +114,11 @@ public class OperateLogServiceFactory {
     }
 
 
-
     /**
      * 创建日志
      * @param operationLogModel
      */
-    public IndexResponse create(OperationLogModel operationLogModel){
+    private IndexResponse create(OperationLogModel operationLogModel){
        return operateLogServiceMap.get(operationLogModel.getSiteType()).create(operationLogModel);
     }
 
