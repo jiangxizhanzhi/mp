@@ -70,6 +70,8 @@ public class WazuhService {
         MultiValueMap<String, String> multiValueMap = this.queryAllAgentMacAddr();
         //构造查询条件
         buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, multiValueMap);
+        // 按时间降序
+        sourceBuilder.sort("timestamp", SortOrder.DESC);
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
         //配置索引为空
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
