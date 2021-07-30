@@ -1,16 +1,18 @@
 package cn.cyberpeace.mp.auth.config.security;
 
-import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
-import cn.cyberpeace.mp.auth.extensions.security.*;
-import cn.cyberpeace.mp.auth.extensions.security.client.ClientAuthentication2Filter;
+import cn.cyberpeace.mp.auth.extensions.security.ClientAuthenticationFilter;
+import cn.cyberpeace.mp.auth.extensions.security.CustomAuthenticationFailureHandler;
+import cn.cyberpeace.mp.auth.extensions.security.CustomAuthenticationSuccessHandler;
+import cn.cyberpeace.mp.auth.extensions.security.CustomUsernamePasswordAuthenticationFilter;
+import cn.cyberpeace.mp.auth.extensions.security.HttpAuthenticationEntryPoint;
+import cn.cyberpeace.mp.auth.extensions.security.HttpLogoutSuccessHandler;
+import cn.cyberpeace.mp.auth.extensions.security.JwtAuthenticationFilter;
 import cn.cyberpeace.mp.auth.extensions.security.mobile.MobilePasswordAuthenticationFilter;
 import cn.cyberpeace.mp.auth.extensions.security.mobile.MobilePasswordAuthenticationProvider;
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetailsService;
-import cn.cyberpeace.mp.auth.service.ClientDetailsService;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;

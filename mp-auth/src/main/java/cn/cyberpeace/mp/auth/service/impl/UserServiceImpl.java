@@ -373,7 +373,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         if (!isOldPwdMatch) {
             log.warn("旧密码不正确！");
         }
-        Assert.isTrue(isOldPwdMatch, AuthConstant.ERROR_CODE_PREFIX + "bad_credentials");
+        Assert.isTrue(isOldPwdMatch, AuthConstant.ERROR_CODE_PREFIX + "incorrect_old_credentials");
 
         // 检查新密码强度是否合法
         Assert.isFalse(PasswordUtils.isPasswordStrengthLowLevel(newPwd), AuthConstant.ERROR_CODE_PREFIX + "password_strength_invalid");
