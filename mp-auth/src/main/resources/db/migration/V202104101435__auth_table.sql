@@ -289,24 +289,24 @@ CREATE TABLE mp_sys_config (
 
 
 -- 默认管理员用户，首次登陆需修改密码
-INSERT INTO mp_auth_user (id, tenant, identifier, username, password, token_secret, name, nickname, avatar, birthday, email, mobile, id_card, address, is_enabled, is_audited, init_check, description, date_joined, expired_time, last_login, create_time, update_time) VALUES ('defaultuserid', 'default', 'admin', 'admin', '1f670a02678a6cbcc9d38ce57f97f4a3724574dfa3a69b73f2930586110b4619265c87c9874df4cc', '351672ff8854438eaaa48c46efdfa947', '管理员', '管理员', '', '2021-06-23', 'example@123.com', '13988888888', '', '北京路101号', 1, 1, 1, '', '2021-06-23 09:37:29.084709', '2121-07-29 00:00:00.000000', '2021-06-23 09:37:29.084667', '2021-06-23 09:37:29.084805', '2021-07-08 20:16:47.878994');
+INSERT INTO mp_auth_user (id, tenant, identifier, username, password, token_secret, name, nickname, avatar, birthday, email, mobile, id_card, address, is_enabled, is_audited, init_check, description, date_joined, expired_time, last_login, create_time, update_time) VALUES ('3f655d87112f4ae094bbaf70830e20aa', 'default', 'admin', 'admin', '1f670a02678a6cbcc9d38ce57f97f4a3724574dfa3a69b73f2930586110b4619265c87c9874df4cc', '351672ff8854438eaaa48c46efdfa947', '管理员', '管理员', '', '2021-06-23', 'example@123.com', '13988888888', '', '北京路101号', 1, 1, 1, '', '2021-06-23 09:37:29.084709', '2121-07-29 00:00:00.000000', '2021-06-23 09:37:29.084667', '2021-06-23 09:37:29.084805', '2021-07-08 20:16:47.878994');
 
 -- 默认管理员角色
-INSERT INTO mp_auth_role (id, tenant, org, identifier, name, description, create_time, update_time) VALUES ('adminid', 'default', 'default', 'ADMIN', '管理员', '管理员角色', '2021-06-23 06:20:05.000000', '2021-07-08 20:59:14.037209');
-INSERT INTO mp_auth_role (id, tenant, org, identifier, name, description, create_time, update_time) VALUES ('superuserid', 'default', 'default', 'SUPERUSER', '超级用户', '超级用户角色', '2021-06-23 06:20:05.000000', '2021-07-08 20:59:14.037209');
+INSERT INTO mp_auth_role (id, tenant, org, identifier, name, description, create_time, update_time) VALUES ('5827ff7847504ffd806e0a85c417228d', 'default', 'default', 'ADMIN', '管理员', '管理员角色', '2021-06-23 06:20:05.000000', '2021-07-08 20:59:14.037209');
+INSERT INTO mp_auth_role (id, tenant, org, identifier, name, description, create_time, update_time) VALUES ('e12bb08a9bc545bbba46a2fb3c92533a', 'default', 'default', 'SUPERUSER', '超级用户', '超级用户角色', '2021-06-23 06:20:05.000000', '2021-07-08 20:59:14.037209');
 
 -- 用户-角色关系
-INSERT INTO mp_auth_user_role (id, tenant, user, role, create_time, update_time) VALUES ('791088e33dd44de3899f3c105597c354', 'default', 'defaultuserid', 'adminid', '2021-07-08 20:16:47.896726', '2021-07-08 20:16:47.896733');
-INSERT INTO mp_auth_user_role (id, tenant, user, role, create_time, update_time) VALUES ('088e79133dd44de105597c3543899f3c', 'default', 'defaultuserid', 'superuserid', '2021-07-08 20:16:47.896726', '2021-07-08 20:16:47.896733');
+INSERT INTO mp_auth_user_role (id, tenant, user, role, create_time, update_time) VALUES ('791088e33dd44de3899f3c105597c354', 'default', '3f655d87112f4ae094bbaf70830e20aa', '5827ff7847504ffd806e0a85c417228d', '2021-07-08 20:16:47.896726', '2021-07-08 20:16:47.896733');
+INSERT INTO mp_auth_user_role (id, tenant, user, role, create_time, update_time) VALUES ('088e79133dd44de105597c3543899f3c', 'default', '3f655d87112f4ae094bbaf70830e20aa', 'e12bb08a9bc545bbba46a2fb3c92533a', '2021-07-08 20:16:47.896726', '2021-07-08 20:16:47.896733');
 
 -- 客户端授权
 INSERT INTO mp_auth_client_details (client_id, resource_ids, client_secret, type, scope, authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity, refresh_token_validity, additional_information, autoapprove) VALUES ('84261d495c414e', 'all', '2112f4b855264ad7b1a4209737fc7836', 2, 'all', 'all', null, null, null, null, null, null);
 
 -- 组织
-INSERT INTO mp_auth_org (id, tenant, parent, identifier, name, path, description, create_time, update_time) VALUES ('defaultorgid', 'default', '', 'default-org', '一级组织', '一级组织', '一级组织', '2021-07-21 09:36:33.835950', '2021-07-21 10:13:33.281078');
+INSERT INTO mp_auth_org (id, tenant, parent, identifier, name, path, description, create_time, update_time) VALUES ('a13262d600fe40c799d63dce5c1485af', 'default', '', 'default-org', '一级组织', '一级组织', '一级组织', '2021-07-21 09:36:33.835950', '2021-07-21 10:13:33.281078');
 
 -- 用户-组织
-INSERT INTO mp_auth_org_user (id, tenant, org, user, create_time, update_time) VALUES ('06c3e74d568a4937812c8f9ba6ef5df9', 'default', 'defaultorgid', 'defaultuserid', '2021-07-21 21:47:14.517567', '2021-07-21 21:47:14.517572');
+INSERT INTO mp_auth_org_user (id, tenant, org, user, create_time, update_time) VALUES ('06c3e74d568a4937812c8f9ba6ef5df9', 'default', 'a13262d600fe40c799d63dce5c1485af', '3f655d87112f4ae094bbaf70830e20aa', '2021-07-21 21:47:14.517567', '2021-07-21 21:47:14.517572');
 
 -- 租户
 INSERT INTO mp_auth_tenant (id, identifier, name, create_time, update_time) VALUES ('defaulttenantid', 'default', '默认租户', '2021-06-23 07:14:03.000000', '2021-06-23 07:14:05.000000');
