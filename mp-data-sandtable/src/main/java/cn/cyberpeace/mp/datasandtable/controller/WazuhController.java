@@ -47,9 +47,9 @@ public class WazuhController {
         return new ListObjServiceResult<>(wazuhService.queryMonitorEvents(wazuhMonitorEventsRequest)).asResult();
     }
 
-//    @PostMapping("/monitor_agent_mac")
-//    @ApiOperation(value = "查询场景agent和mac信息", notes = "")
-//    public ServiceResult<MultiValueMap<String, String>> queryAllAgentMacAddr() {
-//        return ServiceResult.success((wazuhService.queryAllAgentMacAddr()));
-//    }
+    @PostMapping("/monitor_agent_mac")
+    @ApiOperation(value = "查询场景agent和mac信息", notes = "")
+    public ServiceResult<MultiValueMap<String, String>> queryAllAgentMacAddr() {
+        return ServiceResult.success((wazuhService.queryAllAgentMacAddr()));
+    }
 }
