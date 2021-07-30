@@ -49,6 +49,7 @@
             <fileNamePattern>${LOG_HOME}/%d{yyyy-MM-dd}/mp-%d{HHmmss.SSS}.%i.log</fileNamePattern>
             <!--日志文件保留天数-->
             <maxHistory>${LOG_FILE_MAX_HISTORY}</maxHistory>
+            <cleanHistoryOnStart>true</cleanHistoryOnStart>
             <TimeBasedFileNamingAndTriggeringPolicy
                     class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                 <MaxFileSize>${LOG_FILE_MAX_SIZE}</MaxFileSize>
