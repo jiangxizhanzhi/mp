@@ -39,14 +39,14 @@ public class UserRoleController extends BaseModelController<UserRoleModel, Query
     }
 
 
-    @ApiOperation(value = "分页 根据userId查询用户所有角色", notes = "")
+    @ApiOperation(value = "分页查询 根据userId查询用户所有角色", notes = "")
     @GetMapping("/roles/page/byuser")
     public ListObjServiceResult getRolesByUser(UserRolePageRequest pageRequest) {
         PageInfo pageInfo = getModelService().pageByUserId(pageRequest);
         return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
     }
 
-    @ApiOperation(value = "分页 根据roleId查询角色绑定的所有用户", notes = "")
+    @ApiOperation(value = "分页查询 根据roleId查询角色绑定的所有用户", notes = "")
     @GetMapping("/users/page/byrole")
     public ListObjServiceResult getUsersByRole(UserRolePageRequest pageRequest) {
         PageInfo pageInfo = getModelService().pageByRoleId(pageRequest);

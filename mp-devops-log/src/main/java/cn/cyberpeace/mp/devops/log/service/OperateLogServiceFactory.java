@@ -9,6 +9,8 @@ import cn.cyberpeace.mp.devops.log.model.OperationLogModel;
 import cn.cyberpeace.mp.devops.log.request.OperationLogPageRequest;
 import cn.cyberpeace.mp.devops.log.request.OperationLogRequest;
 import cn.cyberpeace.mp.devops.log.utils.SnUtils;
+import com.alibaba.fastjson.JSON;
+import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +67,8 @@ public class OperateLogServiceFactory {
         model.setDescription(request.getDescription());
         model.setOpIp(request.getOpIp());
         model.setContent(request.getContent());
+
+        processDefaultContent(model);
         return this.create(model);
     }
 
@@ -129,5 +133,14 @@ public class OperateLogServiceFactory {
      */
     public SearchResponse search(OperationLogPageRequest request){
        return operateLogServiceMap.get(request.getSiteType()).search(request);
+    }
+
+    private void processDefaultContent(OperationLogModel model) {
+        if (StringUtils.isNotBlank(model.getContent())) {
+            return;
+        }
+
+        String content = JSON.toJSONString(model);
+        model.setContent(content);
     }
 }

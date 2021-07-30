@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devops.log.service;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
@@ -16,6 +17,7 @@ import java.io.IOException;
  * 基础ES操作接口
  * @author wanggang
  */
+@Slf4j
 public abstract class BasEsLogService {
 
     @Resource(name = "logRestHighLevelClient")
@@ -33,7 +35,7 @@ public abstract class BasEsLogService {
                 return response;
             }
         } catch (IOException e) {
-            throw new MpRuntimeException("restHighLevelClient.create.error");
+            log.error("restHighLevelClient.create.error {}", e.getMessage());
         }
         return null;
     }
@@ -47,7 +49,8 @@ public abstract class BasEsLogService {
         try {
             return restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
         } catch (IOException e) {
-            throw new MpRuntimeException("restHighLevelClient.search.error");
+            log.error("restHighLevelClient.search.error {}", e.getMessage());
+            return null;
         }
     }
 

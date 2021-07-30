@@ -2,10 +2,14 @@ package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.auth.dto.user.UserLogPageRequest;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.util.ServletUtils;
+import cn.cyberpeace.mp.devops.log.controller.OperateLogController;
 import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devops.log.model.OperationLogModel;
+import cn.cyberpeace.mp.devops.log.request.OperationLogPageRequest;
 import cn.cyberpeace.mp.devops.log.request.OperationLogRequest;
+import cn.cyberpeace.mp.devops.log.response.OperationLogPageResponse;
 import cn.cyberpeace.mp.devops.log.service.OperateLogServiceFactory;
 import cn.cyberpeace.mp.devops.log.utils.SnUtils;
 import cn.hutool.core.exceptions.ExceptionUtil;
@@ -30,6 +34,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -37,6 +42,9 @@ public class UserLogService {
 
     @Autowired
     private OperateLogServiceFactory operateLogServiceFactory;
+
+    @Autowired
+    private OperateLogController operateLogController;
 
     @Resource(name = "logRestHighLevelClient")
     private RestHighLevelClient restHighLevelClient;
@@ -55,7 +63,6 @@ public class UserLogService {
             logModel.setOpIp(request == null ? "" : SnUtils.getRealRemoteIp(request));
         }
 
-
         try {
             operateLogServiceFactory.create(logModel);
         } catch (Exception e) {
@@ -64,52 +71,13 @@ public class UserLogService {
         }
     }
 
-
-    public PageInfo getUserLog(UserLogPageRequest logPageRequest) {
-        logPageRequest.ensure();
-        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-
-        if (logPageRequest.getPage() * logPageRequest.getPageSize() > 10000) {
-            throw new MpRuntimeException("不支持深度分页查询！");
+    public List<OperationLogPageResponse> listOpLog(OperationLogPageRequest request) {
+        ListObjServiceResult<OperationLogPageResponse> response = operateLogController.page(request);
+        if (Objects.nonNull(response.getData().getList())) {
+            List<OperationLogPageResponse> list = response.getData().getList();
+            return list;
         }
-
-        BoolQueryBuilder boolBuilder = QueryBuilders.boolQuery();
-        if (StringUtils.isNotBlank(logPageRequest.getModule())) {
-            boolBuilder.must(QueryBuilders.termQuery("opModule.keyword", logPageRequest.getModule()));
-        }
-        if (StringUtils.isNotBlank(logPageRequest.getUserid())) {
-            boolBuilder.must(QueryBuilders.termQuery("userId.keyword", logPageRequest.getUserid()));
-        }
-        if (StringUtils.isNotBlank(logPageRequest.getUsername())) {
-            boolBuilder.must(QueryBuilders.termQuery("userName.keyword", logPageRequest.getUsername()));
-        }
-        if (StringUtils.isNotBlank(logPageRequest.getType())) {
-            boolBuilder.must(QueryBuilders.termQuery("opType.keyword", logPageRequest.getType()));
-        }
-
-        sourceBuilder.query(boolBuilder).sort("opTime", SortOrder.DESC).from(logPageRequest.getPage() * logPageRequest.getPageSize()).size(logPageRequest.getPageSize());
-
-        SearchRequest searchRequest = new SearchRequest("mp_operate_log");
-        searchRequest.source(sourceBuilder);
-
-        try {
-            SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
-            SearchHits hits = searchResponse.getHits();
-            List<OperationLogModel> logList = new ArrayList<>(hits.getHits().length);
-            for (SearchHit hit : hits.getHits()) {
-                OperationLogModel operationLog = JSON.parseObject(hit.getSourceAsString(), OperationLogModel.class);
-                logList.add(operationLog);
-            }
-
-            PageInfo page = new PageInfo();
-            page.setList(logList);
-            page.setTotal(hits.getTotalHits().value);
-            return page;
-        } catch (Exception e) {
-            log.error("{}", ExceptionUtil.stacktraceToString(e));
-            throw new MpRuntimeException(e.getMessage());
-        }
-
+        return new ArrayList<>();
     }
 
 

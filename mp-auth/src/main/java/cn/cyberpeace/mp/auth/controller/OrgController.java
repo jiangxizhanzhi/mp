@@ -66,7 +66,7 @@ public class OrgController extends BaseModelController<OrgModel, QueryParams, Or
     }
 
     @Override
-    @ApiOperation("删除指定id组织，如果改组织下有子组织，则不允许删除")
+    @ApiOperation("删除指定id组织")
     @ApiImplicitParams({
             @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class),
     })

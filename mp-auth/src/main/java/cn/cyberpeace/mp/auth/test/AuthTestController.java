@@ -99,11 +99,4 @@ public class AuthTestController {
     }
 
 
-    @ApiOperation("查询用户日志")
-    @GetMapping("/userlog")
-    public ListObjServiceResult userlog(UserLogPageRequest logPageRequest) {
-        PageInfo pageInfo = userLogService.getUserLog(logPageRequest);
-        return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
-    }
-
 }

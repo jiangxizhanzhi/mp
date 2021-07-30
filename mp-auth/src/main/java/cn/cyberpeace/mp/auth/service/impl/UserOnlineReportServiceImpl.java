@@ -19,6 +19,9 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.devops.log.model.OperationLogModel;
+import cn.cyberpeace.mp.devops.log.request.OperationLogPageRequest;
+import cn.cyberpeace.mp.devops.log.request.OperationLogRequest;
+import cn.cyberpeace.mp.devops.log.response.OperationLogPageResponse;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.lang.Assert;
 import com.github.pagehelper.PageHelper;
@@ -101,12 +104,11 @@ public class UserOnlineReportServiceImpl extends BaseModelServiceImpl<UserOnline
         List<UserOnlineReportModel> reports = pageInfo.getList();
         reports.forEach(r -> {
             // 只获取最新的一条日志
-            UserLogPageRequest logPageRequest = new UserLogPageRequest();
-            logPageRequest.setUsername(r.getUsername());
+            OperationLogPageRequest logPageRequest = new OperationLogPageRequest();
+            logPageRequest.setUserName(r.getUsername());
             logPageRequest.setPage(1);
-            logPageRequest.setPageSize(1);
-            PageInfo<OperationLogModel> logPage = userLogService.getUserLog(logPageRequest);
-            List<OperationLogModel> logs = logPage.getList();
+            logPageRequest.setPerPage(1);
+            List<OperationLogPageResponse> logs = userLogService.listOpLog(logPageRequest);
             if (CollectionUtil.isNotEmpty(logs) && Objects.nonNull(logs.get(0))) {
                 // 动作
                 r.setAction(logs.get(0).getOpType());

@@ -92,7 +92,7 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
         return ResultUtils.obj2ObjServiceResult(roleDto);
     }
 
-    @ApiOperation("获取指定id RolePermDto 数据")
+    @ApiOperation("查询指定id角色（附带权限、用户数）")
     @ApiImplicitParams({
             @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class),
             @ApiImplicitParam(name="fields", value="需要返回的字段",dataTypeClass = String[].class),

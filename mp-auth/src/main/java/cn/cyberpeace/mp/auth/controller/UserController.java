@@ -247,8 +247,9 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
     @ApiOperation(value = "查询用户操作日志", notes = "")
     @GetMapping("/log")
     public ListObjServiceResult userlog(UserLogPageRequest logPageRequest) {
-        PageInfo pageInfo = userLogService.getUserLog(logPageRequest);
-        return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
+//        PageInfo pageInfo = userLogService.getUserLog(logPageRequest);
+//        return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
+        throw new MpRuntimeException("Not Support Method!");
     }
 
 
