@@ -11,7 +11,9 @@ import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.devops.log.request.OperationLogRequest;
 import cn.cyberpeace.mp.devops.log.service.OperateLogServiceFactory;
 import cn.cyberpeace.mp.devops.log.utils.SnUtils;
+import cn.hutool.core.exceptions.ExceptionUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.core.Authentication;
@@ -23,6 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+@Slf4j
 @Component
 public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
     private final ObjectMapper mapper;
@@ -78,6 +81,10 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
         logModel.setOpIp(SnUtils.getRealRemoteIp(request));
 
         // 记录登出日志
-        operateLogServiceFactory.create(logModel);
+        try {
+            operateLogServiceFactory.create(logModel);
+        } catch (Exception e) {
+            log.error("{}", ExceptionUtil.stacktraceToString(e));
+        }
     }
 }

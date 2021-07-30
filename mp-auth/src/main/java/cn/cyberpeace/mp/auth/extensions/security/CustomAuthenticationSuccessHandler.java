@@ -18,6 +18,7 @@ import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.devops.log.request.OperationLogRequest;
 import cn.cyberpeace.mp.devops.log.service.OperateLogServiceFactory;
 import cn.cyberpeace.mp.devops.log.utils.SnUtils;
+import cn.hutool.core.exceptions.ExceptionUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -173,7 +174,11 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
         logModel.setOpIp(SnUtils.getRealRemoteIp(request));
 
         // 记录登录日志
-        operateLogServiceFactory.create(logModel);
+        try {
+            operateLogServiceFactory.create(logModel);
+        } catch (Exception e) {
+            log.error("{}", ExceptionUtil.stacktraceToString(e));
+        }
     }
 
 
