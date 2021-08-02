@@ -32,7 +32,7 @@ public class AvatarController extends BaseModelController<AvatarModel, QueryPara
         setModelService(modelService);
     }
 
-    @ApiOperation(value = "查询所有默认头像", notes = "")
+    @ApiOperation(value = "查询所有头像", notes = "")
     @GetMapping("/all")
     public ServiceResult getAll() {
         List<AvatarModel> avatars = getModelService().listAll();
@@ -40,7 +40,7 @@ public class AvatarController extends BaseModelController<AvatarModel, QueryPara
     }
 
 
-    @ApiOperation(value = "上传用户头像，返回url", notes = "")
+    @ApiOperation(value = "上传头像，返回url", notes = "")
     @PostMapping("/upload")
     @ResponseBody
     public ServiceResult upload(MultipartFile file) {

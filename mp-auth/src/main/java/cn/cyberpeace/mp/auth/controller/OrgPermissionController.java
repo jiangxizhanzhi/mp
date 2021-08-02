@@ -43,7 +43,7 @@ public class OrgPermissionController extends BaseModelController<OrgPermissionMo
     }
 
 
-    @ApiOperation(value = "查询当前组织所有权限")
+    @ApiOperation(value = "查询组织所有权限")
     @GetMapping("/byorg")
     public ServiceResult getOrgPermissions(@RequestParam String orgId) {
         Set<TargetModel> targets = getModelService().listTargetsByOrgId(orgId);
@@ -51,7 +51,7 @@ public class OrgPermissionController extends BaseModelController<OrgPermissionMo
     }
 
 
-    @ApiOperation(value = "查询当前组织所有权限（继承上级组织权限）")
+    @ApiOperation(value = "查询组织所有权限（继承上级组织权限）")
     @GetMapping("/byorg/includeparent")
     public ServiceResult getOrgPermission(@RequestParam String orgId) {
         Set<TargetModel> targets = getModelService().listTargetsByOrgIdIncludeAllParentsOrg(orgId);

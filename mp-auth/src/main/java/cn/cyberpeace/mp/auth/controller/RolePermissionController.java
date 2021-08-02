@@ -34,7 +34,7 @@ public class RolePermissionController extends BaseModelController<RolePermission
         setModelService(modelService);
     }
 
-    @ApiOperation(value = "根据roleId查询权限", notes = "")
+    @ApiOperation(value = "查询角色权限", notes = "")
     @GetMapping("/byrole")
     public ServiceResult getTargetsByRole(@RequestParam String roleId) {
         List<TargetModel> targets = getModelService().listTargetsByRoleId(roleId);
