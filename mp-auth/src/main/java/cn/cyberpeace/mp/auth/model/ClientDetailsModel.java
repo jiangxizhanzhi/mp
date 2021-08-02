@@ -37,7 +37,7 @@ public class ClientDetailsModel extends BaseModel implements Serializable {
     @ApiModelProperty("跳转地址")
     private String webServerRedirectUri;
     @ApiModelProperty("权限集合")
-    private String Authorities;
+    private String authorities;
     @ApiModelProperty("accesstoken有效期")
     private Integer accessTokenValidity;
     @ApiModelProperty("refreshtoken有效期")

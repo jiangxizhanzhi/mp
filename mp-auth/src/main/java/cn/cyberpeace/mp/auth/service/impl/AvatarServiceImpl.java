@@ -157,13 +157,10 @@ public class AvatarServiceImpl extends BaseModelServiceImpl<AvatarModel, AvatarM
     private void updateDefaultUserAvatar(String avatarUrl) {
         ObjServiceResult<UserModel> result = userService.get(DEFAULT_USER_ID);
         if (Objects.nonNull(result.getSource())) {
-            UserModel old = result.getSource().getObj();
-            if (StringUtils.isBlank(old.getAvatar())) {
-                UserModel userUpdate = new UserModel();
-                userUpdate.setId(DEFAULT_USER_ID);
-                userUpdate.setAvatar(avatarUrl);
-                userService.update(userUpdate);
-            }
+            UserModel userUpdate = new UserModel();
+            userUpdate.setId(DEFAULT_USER_ID);
+            userUpdate.setAvatar(avatarUrl);
+            userService.update(userUpdate);
         }
     }
 }
