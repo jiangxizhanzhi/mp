@@ -6,7 +6,10 @@ import cn.cyberpeace.mp.auth.dto.login.LoginResp;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetails;
 import cn.cyberpeace.mp.auth.model.UserModel;
-import cn.cyberpeace.mp.auth.service.*;
+import cn.cyberpeace.mp.auth.service.OrgUserService;
+import cn.cyberpeace.mp.auth.service.UserPermissionService;
+import cn.cyberpeace.mp.auth.service.UserRoleService;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.UserFields;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
@@ -18,7 +21,6 @@ import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.devops.log.request.OperationLogRequest;
 import cn.cyberpeace.mp.devops.log.service.OperateLogServiceFactory;
 import cn.cyberpeace.mp.devops.log.utils.SnUtils;
-import cn.hutool.core.exceptions.ExceptionUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -174,11 +176,7 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
         logModel.setOpIp(SnUtils.getRealRemoteIp(request));
 
         // 记录登录日志
-        try {
-            operateLogServiceFactory.create(logModel);
-        } catch (Exception e) {
-            log.error("{}", ExceptionUtil.stacktraceToString(e));
-        }
+        operateLogServiceFactory.create(logModel);
     }
 
 

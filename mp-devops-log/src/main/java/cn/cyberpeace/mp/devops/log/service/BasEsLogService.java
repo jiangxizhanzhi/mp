@@ -32,8 +32,8 @@ public abstract class BasEsLogService {
             if (response.status() == RestStatus.CREATED) {
                 return response;
             }
-        } catch (IOException e) {
-            throw new MpRuntimeException("restHighLevelClient.create.error");
+        } catch (Exception e) {
+            throw new MpRuntimeException(e.getMessage());
         }
         return null;
     }
@@ -47,7 +47,7 @@ public abstract class BasEsLogService {
         try {
             return restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
         } catch (IOException e) {
-            throw new MpRuntimeException("restHighLevelClient.search.error");
+            throw new MpRuntimeException(e.getMessage());
         }
     }
 

@@ -6,6 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
 /**
  * 操作日志实体类
  * @author wanggang
@@ -31,7 +34,8 @@ public class OperationLogRequest {
     /**
      * 操作模块
      */
-    @ApiModelProperty(value = "模块",notes = "cn.cyberpeace.mp.devops.log.enums.OpModuleEnums")
+    @ApiModelProperty(value = "模块",notes = "cn.cyberpeace.mp.devops.log.enums.OpModuleEnums",required = true)
+    @NotNull
     private Integer opModule;
 
     /**
@@ -56,12 +60,14 @@ public class OperationLogRequest {
      * 用户ID
      */
     @ApiModelProperty(value = "用户ID",required = true)
+    @NotBlank
     private String userId;
 
     /**
      * 用户名称
      */
     @ApiModelProperty(value = "用户名称",required = true)
+    @NotBlank
     private String userName;
 
     /**
