@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.systemoperation.service;
+package cn.cyberpeace.mp.devops.cluster.service.impl;
 
 import cn.cyberpeace.mp.auth.extensions.security.common.JwtCommon;
 import cn.cyberpeace.mp.base.constant.BaseConstants;
@@ -6,20 +6,20 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.base.util.HttpUtils;
-import cn.cyberpeace.mp.systemoperation.constant.ControllerConstant;
-import cn.cyberpeace.mp.systemoperation.request.EventMonitorRequest;
-import cn.cyberpeace.mp.systemoperation.request.FlowMonitorRequest;
-import cn.cyberpeace.mp.systemoperation.request.HostMonitorRequest;
-import cn.cyberpeace.mp.systemoperation.response.EventMonitorResponse;
-import cn.cyberpeace.mp.systemoperation.response.FlowMonitorResponse;
-import cn.cyberpeace.mp.systemoperation.response.HostMonitorResponse;
-import cn.cyberpeace.mp.systemoperation.response.SceneBaseResponse;
+import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
+import cn.cyberpeace.mp.devops.cluster.request.EventMonitorRequest;
+import cn.cyberpeace.mp.devops.cluster.request.FlowMonitorRequest;
+import cn.cyberpeace.mp.devops.cluster.request.HostMonitorRequest;
+import cn.cyberpeace.mp.devops.cluster.response.EventMonitorResponse;
+import cn.cyberpeace.mp.devops.cluster.response.FlowMonitorResponse;
+import cn.cyberpeace.mp.devops.cluster.response.HostMonitorResponse;
+import cn.cyberpeace.mp.devops.cluster.response.SceneBaseResponse;
+import cn.cyberpeace.mp.devops.cluster.service.SceneMonitorService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 
 /**
  * @Description: 场景监控服务类
@@ -28,7 +28,7 @@ import java.time.LocalDateTime;
  */
 @Service
 @Slf4j
-public class SystemOperSceneService {
+public class SceneMonitorServiceImpl implements SceneMonitorService {
 
     /**
      * 老中台url
@@ -41,6 +41,7 @@ public class SystemOperSceneService {
      * @param request
      * @return
      */
+    @Override
     public ServiceResult pageHostMonitor(HostMonitorRequest request) {
         String res;
         try {
@@ -50,18 +51,19 @@ public class SystemOperSceneService {
                     .append(request.getSceneId())
                     .append("/host_collections/");
             // 拼接参数信息
-            urlBuffer.append(BeanUtils.wrapperGetParamsByObject(request, ControllerConstant.STR_SCENE_ID));
+            urlBuffer.append(BeanUtils.wrapperGetParamsByObject(request, ControllerConstant.STR_SCENE_ID, "perPage"));
+            urlBuffer.append(request.getUrlParam());
             res = HttpUtils.sendGet(urlBuffer.toString(), JwtCommon.getTokenHeader());
         } catch (IOException e) {
-            log.error("节点监控查询异常:" + e);
-            throw new MpRuntimeException("节点监控查询异常");
+            log.error("pageHostMonitor error:" + e);
+            throw new MpRuntimeException("Host monitor error");
         }
 
         // 结果解析
-        SceneBaseResponse<HostMonitorResponse> baseResponse = new SceneBaseResponse();
+        SceneBaseResponse<HostMonitorResponse> baseResponse = new SceneBaseResponse<>();
         String result = baseResponse.parseResult(res, HostMonitorResponse.class);
         if (!BaseConstants.STR_SUCCESS.equals(result)) {
-            return ServiceResult.fail("场景节点监控信息查询异常: " + result);
+            return ServiceResult.fail("pageHostMonitor error: " + result);
         }
 
         return ServiceResult.success(baseResponse);
@@ -73,6 +75,7 @@ public class SystemOperSceneService {
      * @param request
      * @return
      */
+    @Override
     public ServiceResult pageFlowMonitor(FlowMonitorRequest request) {
         String res;
         try {
@@ -82,18 +85,19 @@ public class SystemOperSceneService {
                     .append(request.getSceneId())
                     .append("/flow_collections/");
             // 拼接参数信息
-            urlBuffer.append(BeanUtils.wrapperGetParamsByObject(request, ControllerConstant.STR_SCENE_ID));
+            urlBuffer.append(BeanUtils.wrapperGetParamsByObject(request, ControllerConstant.STR_SCENE_ID, "perPage", "startTime", "endTime"));
+            urlBuffer.append(request.getUrlParam());
             res = HttpUtils.sendGet(urlBuffer.toString(), JwtCommon.getTokenHeader());
         } catch (IOException e) {
-            log.error("流量监控查询异常:" + e);
-            throw new MpRuntimeException("流量监控查询异常");
+            log.error("pageFlowMonitor:" + e);
+            throw new MpRuntimeException("Flow monitor error");
         }
 
         // 结果解析
-        SceneBaseResponse<FlowMonitorResponse> baseResponse = new SceneBaseResponse();
+        SceneBaseResponse<FlowMonitorResponse> baseResponse = new SceneBaseResponse<>();
         String result = baseResponse.parseResult(res, FlowMonitorResponse.class);
         if (!BaseConstants.STR_SUCCESS.equals(result)) {
-            return ServiceResult.fail("场景流量监控信息查询异常: " + result);
+            return ServiceResult.fail("pageFlowMonitor: " + result);
         }
 
         return ServiceResult.success(baseResponse);
@@ -105,6 +109,7 @@ public class SystemOperSceneService {
      * @param request
      * @return
      */
+    @Override
     public ServiceResult pageEventMonitor(EventMonitorRequest request) {
         String res;
         try {
@@ -114,18 +119,19 @@ public class SystemOperSceneService {
                     .append(request.getSceneId())
                     .append("/host_event_collections/");
             // 拼接参数信息
-            urlBuffer.append(BeanUtils.wrapperGetParamsByObject(request, ControllerConstant.STR_SCENE_ID));
+            urlBuffer.append(BeanUtils.wrapperGetParamsByObject(request, ControllerConstant.STR_SCENE_ID, "perPage", "startTime", "endTime"));
+            urlBuffer.append(request.getUrlParam());
             res = HttpUtils.sendGet(urlBuffer.toString(), JwtCommon.getTokenHeader());
         } catch (IOException e) {
-            log.error("事件监控查询异常:" + e);
-            throw new MpRuntimeException("事件监控查询异常");
+            log.error("pageEventMonitor:" + e);
+            throw new MpRuntimeException("Event monitor error");
         }
 
         // 结果解析
-        SceneBaseResponse<EventMonitorResponse> baseResponse = new SceneBaseResponse();
+        SceneBaseResponse<EventMonitorResponse> baseResponse = new SceneBaseResponse<>();
         String result = baseResponse.parseResult(res, EventMonitorResponse.class);
         if (!BaseConstants.STR_SUCCESS.equals(result)) {
-            return ServiceResult.fail("场景事件监控信息查询异常: " + result);
+            return ServiceResult.fail("pageEventMonitor: " + result);
         }
 
         return ServiceResult.success(baseResponse);

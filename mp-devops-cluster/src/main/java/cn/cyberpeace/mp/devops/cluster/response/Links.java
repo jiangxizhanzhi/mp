@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.systemoperation.response;
+package cn.cyberpeace.mp.devops.cluster.response;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

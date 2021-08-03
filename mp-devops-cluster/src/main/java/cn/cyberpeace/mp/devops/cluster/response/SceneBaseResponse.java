@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.systemoperation.response;
+package cn.cyberpeace.mp.devops.cluster.response;
 
 import cn.cyberpeace.mp.base.constant.BaseConstants;
 import com.alibaba.fastjson.JSONArray;

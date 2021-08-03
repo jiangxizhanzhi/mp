@@ -23,6 +23,11 @@ public interface BaseConstants {
     String CONNECTOR = "&";
 
     /**
+     * 等号
+     */
+    String EQUAL = "=";
+
+    /**
      * 问号
      */
     String QUESTION_MARK = "?";
