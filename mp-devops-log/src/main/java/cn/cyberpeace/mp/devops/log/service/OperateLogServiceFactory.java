@@ -142,6 +142,5 @@ public class OperateLogServiceFactory {
 
         String content = model.getOpType() + ":" + model.getOpModule() + ", IP地址: " + model.getOpIp();
         model.setContent(content);
-        model.setOpType(OpTypeEnums.EXAM.getDesc());
     }
 }
