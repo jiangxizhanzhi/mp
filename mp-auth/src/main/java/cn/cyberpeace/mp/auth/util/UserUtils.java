@@ -34,7 +34,7 @@ public class UserUtils {
     }
 
 
-    public static void setLoginUser2RequestAttr(HttpServletRequest request, String id, String name, String userType) {
+    public static void setLoginUser2RequestAttr(HttpServletRequest request, String id, String username, String userType) {
         if (Objects.isNull(request)) {
             request = ServletUtils.getRequest();
         }
@@ -42,7 +42,7 @@ public class UserUtils {
             return;
         }
         request.setAttribute(LogConstant.USER_ID_KEY, id);
-        request.setAttribute(LogConstant.USER_NAME_KEY, name);
+        request.setAttribute(LogConstant.USER_NAME_KEY, username);
         request.setAttribute(LogConstant.USER_TYPE_KEY, userType);
     }
 
