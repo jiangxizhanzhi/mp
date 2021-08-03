@@ -6,13 +6,28 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 @SwaggerDisplayEnum
 public enum OpTypeEnums {
+
+    LOGIN("登入"),
+
+    LOGOUT("登出"),
+
     CREATE("创建"),
 
     UPDATE("更新"),
 
     DELETE("删除"),
 
-    LOGIN_IN_OUT("登录登出"),
+    LEARN("学习"),
+
+    EXERCISE("练习"),
+
+    EXAM("考试"),
+
+    TRAIN("训练"),
+
+    EVAL("测评"),
+
+    CONTEST("参赛"),
 
     DEFAULT("");
 

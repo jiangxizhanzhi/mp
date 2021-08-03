@@ -53,7 +53,7 @@ public class OperationLogPageRequest extends BasePageRequest{
     /**
      * 操作类型
      */
-    @ApiModelProperty(value = "操作类型 (0:创建; 1:更新; 2:删除; 3:登录登出)")
+    @ApiModelProperty(value = "操作类型 (0:登入 1:登出 2:创建 3:更新 4:删除 5:学习 6:练习 7:考试 8:训练 9:测评 10:参赛)")
     private Integer opType;
 
     /**

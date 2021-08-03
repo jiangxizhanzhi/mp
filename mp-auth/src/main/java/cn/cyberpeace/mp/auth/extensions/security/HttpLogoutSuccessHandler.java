@@ -65,7 +65,7 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
         OperationLogRequest logModel = new OperationLogRequest();
         //操作类型
         logModel.setOpModule(OpModuleEnums.ACCOUNT.ordinal());
-        logModel.setOpType(OpTypeEnums.LOGIN_IN_OUT.ordinal());
+        logModel.setOpType(OpTypeEnums.LOGOUT.ordinal());
         logModel.setOpTarget(AuthLogConstant.TARGET_USER);
         //操作主题
         logModel.setTitle("登出");
