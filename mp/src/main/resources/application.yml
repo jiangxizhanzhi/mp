@@ -48,10 +48,6 @@ mp:
           tracker-servers: ${mp.base.fdfs-url}:22122
           file-server-addr: /fdfs    # 外部文件服务器地址
           inner-file-server-addr: http://${mp.base.fdfs-url}:8888   # 内部文件服务器地址
-  auth:
-    needRegistrationAudit: true
-    excel-template-name: 用户列表.xls
-    excel-template-path: group1/M00/01/55/CmQO_GDtB9CAPqrsAABcAHh-_NU922.xls
   devops:
     cp-url: http://10.100.7.5:11111 #云平台地址
     cr-url: http://10.100.2.21 #

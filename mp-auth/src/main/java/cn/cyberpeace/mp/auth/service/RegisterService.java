@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.auth.service;
 
-import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.dto.register.RegisterRequest;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.impl.UserCreateCheckService;
@@ -15,9 +14,6 @@ public class RegisterService {
 
     @Autowired
     private UserService userService;
-
-    @Autowired
-    private AuthConfig authConfig;
 
     @Autowired
     private UserCreateCheckService createCheckService;

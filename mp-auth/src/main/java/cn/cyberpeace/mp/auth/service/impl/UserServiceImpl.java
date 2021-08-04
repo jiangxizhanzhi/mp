@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
-import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
@@ -19,7 +18,6 @@ import cn.cyberpeace.mp.auth.service.AvatarService;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.service.RoleService;
-import cn.cyberpeace.mp.auth.service.SysConfigService;
 import cn.cyberpeace.mp.auth.service.TenantUserService;
 import cn.cyberpeace.mp.auth.service.UserHeartbeatService;
 import cn.cyberpeace.mp.auth.service.UserPermissionService;
@@ -72,12 +70,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper, UserFields, UserQueryParams>
         implements UserService {
-
-    @Autowired
-    private AuthConfig authConfig;
-
-    @Autowired
-    private SysConfigService sysConfigService;
 
     @Autowired
     private FastDFSClient fastDFSClient;
