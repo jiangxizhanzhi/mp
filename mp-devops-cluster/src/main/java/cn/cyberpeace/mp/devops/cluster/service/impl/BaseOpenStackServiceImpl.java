@@ -28,7 +28,7 @@ public class BaseOpenStackServiceImpl extends BaseServiceImpl {
      */
     @Override
     protected <T extends BaseModel> T sendGet(String api, Class<T> valueType){
-        return super.sendGet(devopsConfig.getCp_url().concat(api),valueType);
+        return super.sendGet(devopsConfig.getCpUrl().concat(api),valueType);
     }
 
     /**
@@ -40,7 +40,7 @@ public class BaseOpenStackServiceImpl extends BaseServiceImpl {
      */
     @Override
     protected <T extends BaseModel> T sendGet(String api,Map<String,String> headers, Class<T> valueType){
-        return super.sendGet(devopsConfig.getCp_url().concat(api),valueType);
+        return super.sendGet(devopsConfig.getCpUrl().concat(api),valueType);
     }
 
     /**
@@ -53,7 +53,7 @@ public class BaseOpenStackServiceImpl extends BaseServiceImpl {
      */
     @Override
     protected <T extends BaseModel> T sendPost(String api,String body,Class<T> valueType){
-        return super.sendPost(devopsConfig.getCp_url().concat(api),body,valueType);
+        return super.sendPost(devopsConfig.getCpUrl().concat(api),body,valueType);
     }
 
     /**
@@ -64,6 +64,6 @@ public class BaseOpenStackServiceImpl extends BaseServiceImpl {
      */
     @Override
     protected String sendPost(String api,String body){
-        return super.sendPost(devopsConfig.getCp_url().concat(api),body);
+        return super.sendPost(devopsConfig.getCpUrl().concat(api),body);
     }
 }

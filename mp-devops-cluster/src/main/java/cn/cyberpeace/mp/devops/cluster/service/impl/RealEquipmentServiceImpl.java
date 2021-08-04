@@ -21,18 +21,8 @@ public class RealEquipmentServiceImpl extends BaseServiceImpl implements RealEqu
     }
 
     @Override
-    public String[] getDefaultPageIgnoreField() {
-        return new String[0];
-    }
-
-    @Override
-    public String[] getTotalPageIgnoreField() {
-        return new String[0];
-    }
-
-    @Override
     public RealEquipmentOpenStackModel page() {
-        return super.sendGet(devopsConfig.getCr_url().concat("/api/cr/api/admin/scene/devices/?entity=true&per_page=1"), JwtCommon.getTokenHeader(),RealEquipmentOpenStackModel.class);
+        return super.sendGet(devopsConfig.getCpUrl().concat("/api/cr/api/admin/scene/devices/?entity=true&per_page=1"), JwtCommon.getTokenHeader(),RealEquipmentOpenStackModel.class);
     }
 
     @Override

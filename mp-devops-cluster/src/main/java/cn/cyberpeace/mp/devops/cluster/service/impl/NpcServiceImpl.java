@@ -23,16 +23,6 @@ public class NpcServiceImpl extends BaseOpenStackServiceImpl implements NpcServi
     }
 
     @Override
-    public String[] getDefaultPageIgnoreField() {
-        return new String[0];
-    }
-
-    @Override
-    public String[] getTotalPageIgnoreField() {
-        return new String[0];
-    }
-
-    @Override
     public Integer getTotalNPCs() {
         NpcCloudPlatformModel npcOpenStackModel =  super.sendGet(CPCLOUD_NPC_URL + URL_VERSION + "/bulk_create" , NpcCloudPlatformModel.class);
         return Objects.isNull(npcOpenStackModel) || Objects.isNull(npcOpenStackModel.getTotal()) ? NumberUtils.INTEGER_ZERO : npcOpenStackModel.getTotal();
