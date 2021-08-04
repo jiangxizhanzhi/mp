@@ -3,17 +3,21 @@ package cn.cyberpeace.mp.devops.log.request;
 import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.devops.log.enums.SiteTypeEnums;
+import cn.hutool.core.collection.CollectionUtil;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Objects;
 
 /**
@@ -63,6 +67,18 @@ public class OperationLogPageRequest extends BasePageRequest{
     private String userNameOrOpTarget;
 
     /**
+     * 排除某些模块
+     */
+    @ApiModelProperty(value = "排除某些模块 (例如不查询'资源'跟'账号'模块的日志，传参为3,4")
+    private Integer[] modulesIgnored;
+
+    /**
+     * 排除某些模块
+     */
+    @ApiModelProperty(value = "排除某些操作类型 (例如不查询'登入'操作的日志，传参为0")
+    private Integer[] opTypesIgnored;
+
+    /**
      * 构造BoolQueryBuilder
      * @return
      */
@@ -92,6 +108,21 @@ public class OperationLogPageRequest extends BasePageRequest{
             orQuery.should(QueryBuilders.wildcardQuery("opTarget.keyword", concat("*",userNameOrOpTarget,"*")));
             boolBuilder.must(orQuery);
         }
+
+        if (Objects.nonNull(modulesIgnored) && modulesIgnored.length > 0) {
+            for (Integer m : modulesIgnored) {
+                String moduleIgnored = Objects.nonNull(m) ? OpModuleEnums.fromValue(m).getDesc() : null;
+                boolBuilder.mustNot(QueryBuilders.termQuery("opModule.keyword", moduleIgnored));
+            }
+        }
+
+        if (Objects.nonNull(opTypesIgnored) && opTypesIgnored.length > 0) {
+            for (Integer t : opTypesIgnored) {
+                String typeIgnored = Objects.nonNull(t) ? OpTypeEnums.fromValue(t).getDesc() : null;
+                boolBuilder.mustNot(QueryBuilders.termQuery("opType.keyword", typeIgnored));
+            }
+        }
+
 
         return boolBuilder;
     }
