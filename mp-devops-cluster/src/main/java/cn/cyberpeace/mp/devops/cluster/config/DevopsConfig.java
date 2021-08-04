@@ -16,11 +16,11 @@ public class DevopsConfig {
     /**
      * 云平台接口地址
      */
-    private String cp_url;
+    private String cpUrl;
 
     /**
      * cr接口地址
      */
-    private String cr_url;
+    private String crUrl;
 
 }
