@@ -15,7 +15,4 @@ import java.io.Serializable;
 @ApiModel(description = "NPC模型，对应云平台接口返回信息")
 public class NpcCloudPlatformModel extends BaseCloudPlatformModel implements Serializable {
 
-//    private Integer npc_nums;
-
-//    private List<Object> ip_list;
 }
