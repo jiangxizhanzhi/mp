@@ -10,6 +10,8 @@ import cn.cyberpeace.mp.base.model.stereotype.DefaultGen;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -51,13 +53,12 @@ public class UserModel extends BaseModel implements Serializable {
     private String username;
 
     @ApiModelProperty(value = "密码")
-//    @JsonIgnore
-    // todo 后续该字段对查询屏蔽
+    // 该字段对读屏蔽，对写不屏蔽
     private String password;
 
     @ApiModelProperty(value = "token秘钥")
     @DefaultGen(UuidGenerator.class)
-    // todo 后续该字段对查询屏蔽
+    // 该字段对读屏蔽，对写不屏蔽
     private String tokenSecret;
 
     @ApiModelProperty(value = "用户姓名")
@@ -123,10 +124,6 @@ public class UserModel extends BaseModel implements Serializable {
     @DefaultGen(DateTimeGenerator.class)
     private LocalDateTime lastLogin;
 
-//    public UserModel(String id, LocalDateTime createTime, LocalDateTime updateTime) {
-//        super(id, createTime, updateTime);
-//    }
-
 
     @Builder
     public UserModel(String id, LocalDateTime createTime, LocalDateTime updateTime, String tenant, String identifier, String username, String password, String tokenSecret, String name, String nickname, String avatar, LocalDate birthday, String email, String mobile, String idCard, String address, Integer initCheck, String description, Integer isEnabled, Integer isAudited, LocalDateTime dateJoined, LocalDateTime expiredTime, LocalDateTime lastLogin) {
@@ -188,6 +185,25 @@ public class UserModel extends BaseModel implements Serializable {
         }
     }
 
+    @JsonIgnore
+    public String getPassword() {
+        return password;
+    }
+
+    @JsonProperty
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    @JsonIgnore
+    public String getTokenSecret() {
+        return tokenSecret;
+    }
+
+    @JsonProperty
+    public void setTokenSecret(String tokenSecret) {
+        this.tokenSecret = tokenSecret;
+    }
 
     @Override
     public boolean equals(Object o) {
