@@ -2,11 +2,10 @@ package cn.cyberpeace.mp.devops.cluster.controller;
 
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
-import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
-import cn.cyberpeace.mp.devops.cluster.model.RouterCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.converter.RouterConverter;
+import cn.cyberpeace.mp.devops.cluster.converter.model.RouterPageConverterModel;
 import cn.cyberpeace.mp.devops.cluster.request.RouterPageRequest;
 import cn.cyberpeace.mp.devops.cluster.response.RouterPageResponse;
-import cn.cyberpeace.mp.devops.cluster.service.RouterService;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -31,11 +30,11 @@ import java.util.stream.Collectors;
 @Api(tags = "网络实例管理-路由")
 public class RouterController {
 
-    private RouterService routerService;
+    private RouterConverter routerConverter;
 
     @Autowired
-    public RouterController(RouterService routerService) {
-        this.routerService = routerService;
+    public RouterController(RouterConverter routerConverter) {
+        this.routerConverter = routerConverter;
     }
 
     /**
@@ -46,16 +45,15 @@ public class RouterController {
     @ApiOperation("分页查询路由信息")
     @GetMapping("/page")
     public ListObjServiceResult<RouterPageResponse> page(RouterPageRequest request){
-        RouterCloudPlatformModel model = routerService.page(request);
-        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getRouters())){
-            return new ListObjServiceResult(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
+        RouterPageConverterModel model = routerConverter.page(request);
+        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getModelList())){
+            return new ListObjServiceResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
         }
-        List<RouterCloudPlatformModel.RouterModel> routers = model.getRouters();
-        List<RouterPageResponse> list = routers.stream().map(routerModel ->
+        List<RouterPageResponse> list =  model.getModelList().stream().map(routerModel ->
                 RouterPageResponse.builder().name(routerModel.getName())
-                        .status(CloudPlatformEnum.fromValue(routerModel.getStatus())).createdAt(routerModel.getCreated_at()).build()
+                        .status(routerModel.getStatus()).createdAt(routerModel.getCreatedAt()).build()
         ).collect(Collectors.toList());
-        return new ListObjServiceResult(list,model.getTotal());
+        return new ListObjServiceResult<>(list,model.getTotal());
     }
 
 }

@@ -2,11 +2,10 @@ package cn.cyberpeace.mp.devops.cluster.controller;
 
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
-import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
-import cn.cyberpeace.mp.devops.cluster.model.NetworkCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.converter.NetworkConverter;
+import cn.cyberpeace.mp.devops.cluster.converter.model.NetworkPageConverterModel;
 import cn.cyberpeace.mp.devops.cluster.request.NetworkPageRequest;
 import cn.cyberpeace.mp.devops.cluster.response.NetworkPageResponse;
-import cn.cyberpeace.mp.devops.cluster.service.NetworkService;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -31,11 +30,11 @@ import java.util.stream.Collectors;
 @Api(tags = "网络实例管理-网络")
 public class NetworkController {
 
-    private NetworkService networkService;
+    private NetworkConverter networkConverter;
 
     @Autowired
-    public NetworkController(NetworkService networkService) {
-        this.networkService = networkService;
+    public NetworkController(NetworkConverter networkConverter) {
+        this.networkConverter = networkConverter;
     }
 
     /**
@@ -46,23 +45,22 @@ public class NetworkController {
     @ApiOperation("分页查询网络信息")
     @GetMapping("/page")
     public ListObjServiceResult<NetworkPageResponse> page(NetworkPageRequest request){
-        NetworkCloudPlatformModel model = networkService.page(request);
-        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getNetworks())){
-            return new ListObjServiceResult(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
+        NetworkPageConverterModel model = networkConverter.page(request);
+        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getModelList())){
+            return new ListObjServiceResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
         }
-        List<NetworkCloudPlatformModel.NetworkModel> networks = model.getNetworks();
+        List<NetworkPageConverterModel.Model> networks = model.getModelList();
         List<NetworkPageResponse> list = networks.stream().map(networkModel -> {
-            NetworkCloudPlatformModel.NetworkModel.Subnet subnet = networkModel.getSubnet();
+            List<NetworkPageConverterModel.Model.Subnet> subnetList = networkModel.getSubnets();
             List<NetworkPageResponse.Subnet> subnets = Lists.newArrayList();
-            if (Objects.nonNull(subnet)) {
-                subnets = List.of(new NetworkPageResponse.Subnet(subnet.getId(), subnet.getCidr(), subnet.getGateway_ip()));
+            if (CollectionUtils.isNotEmpty(subnetList)) {
+                subnets = subnetList.stream().map(subnet -> new NetworkPageResponse.Subnet(subnet.getId(), subnet.getCidr(), subnet.getGatewayIp())).collect(Collectors.toList());
             }
-            return  NetworkPageResponse.builder().name(networkModel.getName()).networkType(networkModel.getNetwork_type())
-                .status(CloudPlatformEnum.fromValue(networkModel.getStatus()))
-                        .subnets(subnets).createdAt(networkModel.getCreated_at()).build();
+            return  NetworkPageResponse.builder().name(networkModel.getName()).networkType(networkModel.getNetworkType())
+                    .status(networkModel.getStatus()).subnets(subnets).createdAt(networkModel.getCreatedAt()).build();
                 }
         ).collect(Collectors.toList());
-        return new ListObjServiceResult(list,model.getTotal());
+        return new ListObjServiceResult<>(list,model.getTotal());
     }
 
 }

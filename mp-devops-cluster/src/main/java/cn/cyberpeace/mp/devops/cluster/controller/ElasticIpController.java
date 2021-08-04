@@ -2,11 +2,10 @@ package cn.cyberpeace.mp.devops.cluster.controller;
 
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
-import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
-import cn.cyberpeace.mp.devops.cluster.model.ElasticIpCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.converter.ElasticIpConverter;
+import cn.cyberpeace.mp.devops.cluster.converter.model.ElasticIpConvertModel;
 import cn.cyberpeace.mp.devops.cluster.request.ElasticIpPageRequest;
 import cn.cyberpeace.mp.devops.cluster.response.ElasticIpResponse;
-import cn.cyberpeace.mp.devops.cluster.service.ElasticIpService;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -31,11 +30,11 @@ import java.util.stream.Collectors;
 @Api(tags = "网络实例管理-弹性IP")
 public class ElasticIpController {
 
-    private ElasticIpService elasticIpService;
+    private ElasticIpConverter elasticIpConverter;
 
     @Autowired
-    public ElasticIpController(ElasticIpService elasticIpService) {
-        this.elasticIpService = elasticIpService;
+    public ElasticIpController(ElasticIpConverter elasticIpConverter) {
+        this.elasticIpConverter = elasticIpConverter;
     }
 
     /**
@@ -46,18 +45,17 @@ public class ElasticIpController {
     @ApiOperation("分页查询弹性IP信息")
     @GetMapping("/page")
     public ListObjServiceResult<ElasticIpResponse> page(ElasticIpPageRequest request){
-        ElasticIpCloudPlatformModel model = elasticIpService.page(request);
-        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getFloatingips())){
-            return new ListObjServiceResult(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
+        ElasticIpConvertModel model = elasticIpConverter.page(request);
+        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getModelList())){
+            return new ListObjServiceResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
         }
-        List<ElasticIpCloudPlatformModel.ElasticIpModel> floatingips = model.getFloatingips();
-        List<ElasticIpResponse> list = floatingips.stream().map(elasticIpModel ->
-              ElasticIpResponse.builder().floatIpAddress(elasticIpModel.getFloating_ip_address())
-                      .fixedIpAddress(elasticIpModel.getFixed_ip_address())
-                      .status(CloudPlatformEnum.fromValue(elasticIpModel.getStatus()))
-               .createdAt(elasticIpModel.getCreated_at()).build()
+        List<ElasticIpResponse> list = model.getModelList().stream().map(elasticIpModel ->
+              ElasticIpResponse.builder().floatIpAddress(elasticIpModel.getFloatIpAddress())
+                      .fixedIpAddress(elasticIpModel.getFixedIpAddress())
+                      .status(elasticIpModel.getStatus())
+               .createdAt(elasticIpModel.getCreatedAt()).build()
         ).collect(Collectors.toList());
-        return new ListObjServiceResult(list, model.getTotal());
+        return new ListObjServiceResult<>(list, model.getTotal());
     }
 
 }

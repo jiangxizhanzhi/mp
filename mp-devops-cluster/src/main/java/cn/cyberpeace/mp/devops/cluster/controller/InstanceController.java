@@ -2,11 +2,10 @@ package cn.cyberpeace.mp.devops.cluster.controller;
 
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
-import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
-import cn.cyberpeace.mp.devops.cluster.model.InstanceCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.converter.InstanceConverter;
+import cn.cyberpeace.mp.devops.cluster.converter.model.InstanceConvertModel;
 import cn.cyberpeace.mp.devops.cluster.request.InstancePageRequest;
 import cn.cyberpeace.mp.devops.cluster.response.InstancePageResponse;
-import cn.cyberpeace.mp.devops.cluster.service.InstanceService;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -34,11 +33,11 @@ import java.util.stream.Collectors;
 @Api(tags = "计算实例管理-虚拟机")
 public class InstanceController {
 
-    private InstanceService instanceService;
+    private InstanceConverter instanceConverter;
 
     @Autowired
-    public InstanceController(InstanceService instanceService) {
-        this.instanceService = instanceService;
+    public InstanceController(InstanceConverter instanceConverter) {
+        this.instanceConverter = instanceConverter;
     }
 
     /**
@@ -49,18 +48,18 @@ public class InstanceController {
     @ApiOperation("分页查询虚拟机信息")
     @GetMapping("/page")
     public ListObjServiceResult<InstancePageResponse> page(@Valid InstancePageRequest request){
-        InstanceCloudPlatformModel model = instanceService.page(request);
-        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getInstances())){
-            return new ListObjServiceResult(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
+        InstanceConvertModel model = instanceConverter.page(request);
+        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getModelList())){
+            return new ListObjServiceResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
         }
-        List<InstanceCloudPlatformModel.InstanceModel> instances = model.getInstances();
+        List<InstanceConvertModel.Model> instances = model.getModelList();
         List<InstancePageResponse> list = instances.stream().map(instanceModel ->
-            InstancePageResponse.builder().name(instanceModel.getName()).node(instanceModel.getHostname())
-                    .addressList(instanceModel.getAddresses().stream().map(InstanceCloudPlatformModel.InstanceModel.Address::getIp).collect(Collectors.toList()))
-                    .status(CloudPlatformEnum.fromValue(instanceModel.getStatus())).createTime(instanceModel.getCreated_at()).build()
+            InstancePageResponse.builder().name(instanceModel.getName()).node(instanceModel.getNode())
+                    .addressList(instanceModel.getAddressList())
+                    .status(instanceModel.getStatus()).createTime(instanceModel.getCreateTime()).build()
         ).collect(Collectors.toList());
 
-        return new ListObjServiceResult(list, model.getTotal());
+        return new ListObjServiceResult<>(list, model.getTotal());
     }
 
 }

@@ -2,18 +2,15 @@ package cn.cyberpeace.mp.devops.cluster.controller;
 
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
-import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
-import cn.cyberpeace.mp.devops.cluster.model.ContainerCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.converter.ContainerConverter;
+import cn.cyberpeace.mp.devops.cluster.converter.model.ContainerConvertModel;
 import cn.cyberpeace.mp.devops.cluster.request.ContainerPageRequest;
 import cn.cyberpeace.mp.devops.cluster.response.ContainerPageResponse;
-import cn.cyberpeace.mp.devops.cluster.service.ContainerService;
-import com.alibaba.fastjson.JSONArray;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -34,11 +30,11 @@ import java.util.stream.Collectors;
 @Api(tags = "计算实例管理-容器")
 public class ContainerController {
 
-    private ContainerService containerService;
+    private ContainerConverter containerConverter;
 
     @Autowired
-    public ContainerController(ContainerService containerService) {
-        this.containerService = containerService;
+    public ContainerController(ContainerConverter containerConverter) {
+        this.containerConverter = containerConverter;
     }
 
     /**
@@ -49,26 +45,17 @@ public class ContainerController {
     @ApiOperation("分页查询容器列表")
     @GetMapping("/page")
     public ListObjServiceResult<ContainerPageResponse> page(ContainerPageRequest request){
-        ContainerCloudPlatformModel model = containerService.page(request);
-        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getContainers())){
-            return new ListObjServiceResult(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
+        ContainerConvertModel model = containerConverter.page(request);
+        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getModelList())){
+            return new ListObjServiceResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
         }
-        List<ContainerCloudPlatformModel.ContainerModel> containers = model.getContainers();
+        List<ContainerPageResponse> list = model.getModelList().stream().map(containerModel ->
+                ContainerPageResponse.builder().name(containerModel.getName())
+                .image(containerModel.getImage()).node(containerModel.getNode())
+                .status(containerModel.getStatus()).addressList(containerModel.getAddressList()).build())
+                .collect(Collectors.toList());
 
-        List<ContainerPageResponse> list = containers.stream().map(containerModel -> {
-            ContainerPageResponse response = ContainerPageResponse.builder().name(containerModel.getName()).image(containerModel.getImage())
-                    .node(containerModel.getHost()).status(CloudPlatformEnum.fromValue(containerModel.getStatus())).build();
-            Map<String,Object> addresses = containerModel.getAddresses();
-            if (MapUtils.isNotEmpty(addresses)){
-                List<ContainerCloudPlatformModel.ContainerModel.Address> addressList = addresses.values().stream()
-                        .map(v -> JSONArray.parseArray(JSONArray.toJSONString(v), ContainerCloudPlatformModel.ContainerModel.Address.class))
-                        .flatMap(v -> v.stream()).collect(Collectors.toList());
-                response.setAddressList(addressList.stream().map(ContainerCloudPlatformModel.ContainerModel.Address::getAddr).collect(Collectors.toList()));
-            }
-            return response;
-        }).collect(Collectors.toList());
-
-        return new ListObjServiceResult(list,model.getTotal());
+        return new ListObjServiceResult<>(list,model.getTotal());
     }
 
 }
