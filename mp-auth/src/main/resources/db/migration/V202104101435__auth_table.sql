@@ -51,7 +51,7 @@ CREATE TABLE mp_auth_user (
     `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
     `id` varchar(64)  NOT NULL COMMENT 'id',
     `tenant` varchar(64)  NOT NULL COMMENT '原生租户' default '',
-    `identifier` varchar(64)  NOT NULL COMMENT '编号',
+    `identifier` varchar(64)  NULL COMMENT '编号',
     `username` varchar(64) NOT NULL COMMENT '用户名',
     `password` varchar(128) NOT NULL COMMENT '密码',
     `token_secret` varchar(128) NOT NULL COMMENT 'token密钥',

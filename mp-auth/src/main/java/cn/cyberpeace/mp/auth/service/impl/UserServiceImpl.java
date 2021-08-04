@@ -228,8 +228,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         userModel.setPassword(decryptedPwd);
 
         if (StringUtils.isBlank(userModel.getIdentifier())) {
-            // 如果ident为空，则随机生成一个
-            userModel.setIdentifier(String.valueOf(IdGenerator.generateGlobalId()));
+            // 如果ident为空，设置为null
+            userModel.setIdentifier(null);
         }
 
         createCheckService.check(userModel);
@@ -302,6 +302,11 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         UserModel userModified = result.getSource().getObj();
         String userId = userModified.getId();
         log.info("user modified id:{}", userId);
+
+        if (StringUtils.isBlank(userModel.getIdentifier())) {
+            // 若identifier为空，则设置identifier为null @See http://10.10.10.10/biz/bug-view-2390.html
+            getModelMapper().updateIdentToNull(userId);
+        }
 
         // 保存组织-用户关系
         if (CollectionUtil.isNotEmpty(modifyRequest.getOrgIds())) {
