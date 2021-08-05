@@ -28,7 +28,6 @@ import java.util.Objects;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-//@Builder
 @Table("mp_auth_user")
 @ApiModel("用户信息")
 public class UserModel extends BaseModel implements Serializable {

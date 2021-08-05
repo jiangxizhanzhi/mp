@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.base.util.ClassUtils;
 import cn.cyberpeace.mp.base.util.ModelUtils;
 import cn.cyberpeace.mp.base.util.SerializableFunction;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -35,10 +36,12 @@ public class BaseModel {
 
     @ApiModelProperty(value = "创建时间")
     @DefaultGen(DateTimeGenerator.class)
+    @JsonIgnore
     private LocalDateTime createTime;
 
     @ApiModelProperty(value = "更新时间")
     @DefaultGen(DateTimeGenerator.class)
+    @JsonIgnore
     private LocalDateTime updateTime;
 
     public BaseModel(String id, LocalDateTime createTime, LocalDateTime updateTime) {
