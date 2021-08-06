@@ -2,5 +2,12 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.security:spring-security-test'
     implementation 'com.auth0:java-jwt:3.15.0'
+    implementation 'com.github.jsqlparser:jsqlparser:0.9.5'
+    implementation 'com.github.jsqlparser:jsqlparser:0.9.5'
+    implementation 'com.alibaba:easyexcel:2.2.6'
+    implementation 'com.github.pagehelper:pagehelper-spring-boot-starter:1.2.5'
     implementation project(':mp-base')
+    implementation project(':mp-devops-log')
+
+
 }

@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.base.model;
 
-import cn.cyberpeace.mp.base.model.generator.DateGenerator;
+import cn.cyberpeace.mp.base.model.generator.DateTimeGenerator;
 import cn.cyberpeace.mp.base.model.generator.Generator;
 import cn.cyberpeace.mp.base.model.generator.UuidGenerator;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultGen;
@@ -8,27 +8,47 @@ import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.base.util.ClassUtils;
 import cn.cyberpeace.mp.base.util.ModelUtils;
 import cn.cyberpeace.mp.base.util.SerializableFunction;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.Map;
 
 @Slf4j
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class BaseModel {
+
+    @ApiModelProperty(value = "自增ID(只读)")
+    private Integer pk;
+
+    @ApiModelProperty(value = "ID")
     @DefaultGen(UuidGenerator.class)
     private String id;
 
-    @DefaultGen(DateGenerator.class)
-    private Date createTime;
+    @ApiModelProperty(value = "创建时间")
+    @DefaultGen(DateTimeGenerator.class)
+    @JsonIgnore
+    private LocalDateTime createTime;
 
-    @DefaultGen(DateGenerator.class)
-    private Date updateTime;
+    @ApiModelProperty(value = "更新时间")
+    @DefaultGen(DateTimeGenerator.class)
+    @JsonIgnore
+    private LocalDateTime updateTime;
+
+    public BaseModel(String id, LocalDateTime createTime, LocalDateTime updateTime) {
+        this.id = id;
+        this.createTime = createTime;
+        this.updateTime = updateTime;
+    }
 
     private void initDefault(String fieldName, Map<String, Object[]> initDefaultFields) {
         Object[] value = initDefaultFields.getOrDefault(fieldName, null);

@@ -4,7 +4,7 @@ import cn.cyberpeace.mp.scene.core.bo.base.ModelBO;
 import cn.cyberpeace.mp.scene.model.SceneElementSnapshotModel;
 import lombok.Data;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Data
 public class SceneElementSnapshotBO extends ModelBO<SceneElementSnapshotModel> {
@@ -12,8 +12,8 @@ public class SceneElementSnapshotBO extends ModelBO<SceneElementSnapshotModel> {
     private String name;
     private String description;
     private String address;
-    private Date createTime;
-    private Date updateTime;
+    private LocalDateTime createTime;
+    private LocalDateTime updateTime;
 
     @Override
     public SceneElementSnapshotModel createModel() {

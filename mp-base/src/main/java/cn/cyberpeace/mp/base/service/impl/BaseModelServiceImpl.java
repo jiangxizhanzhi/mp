@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.base.service.impl;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.condition.CustomCondition;
@@ -8,8 +9,10 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.repository.fields.DynamicFields;
 import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.fields.BaseModelFields;
+import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.*;
 import cn.cyberpeace.mp.base.service.stereotype.CustomConditionClass;
+import cn.cyberpeace.mp.base.util.JsonUtils;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -18,11 +21,18 @@ import org.springframework.dao.DuplicateKeyException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
+/**
+ * 单表通用服务实现类，包含通用的增删改查能力
+ * @param <M> 数据model
+ * @param <P> 数据mapper接口
+ * @param <F> 业务处理字段
+ */
 @Slf4j
 @Data
-public abstract class BaseModelServiceImpl<M extends BaseModel,
-        P extends BaseModelMapper<M>, F extends BaseModelFields> implements BaseModelService<M> {
+public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseModelMapper<M>, F extends BaseModelFields,
+        Q extends QueryParams> implements BaseModelService<M, Q> {
 
     private P modelMapper;
 
@@ -61,9 +71,12 @@ public abstract class BaseModelServiceImpl<M extends BaseModel,
     }
 
 
-    public HumanCondition getHumanCondition(String[] selectFields, String search, String[] searchFields,
+    public HumanCondition getHumanCondition(String[] selectFields, String[] ids, String search, String[] searchFields,
                                             String[] orders, int page, int pageSize) {
         var humanCondition = getHumanCondition(selectFields);
+        if (ids != null && ids.length > 0) {
+            humanCondition.filterIn(BaseModel::getId, ids);
+        }
         humanCondition.pagination(page, pageSize);
         handleSearchCondition(humanCondition, search, searchFields);
         F actualModelFields = getModelFields();
@@ -97,17 +110,20 @@ public abstract class BaseModelServiceImpl<M extends BaseModel,
         return customCondition.loadFromParams(params);
     }
 
-    public void loadListFilterCondition(HumanCondition humanCondition, Map<String, Object> params) {}
+    public void loadListFilterCondition(HumanCondition humanCondition, Q queryParams) {}
 
     @Override
-    public ListObjServiceResult<M> list(Map<String, Object> params, String search, String[] searchFields,
-                                        String[] orders, int page, int pageSize, String[] fields) {
+    public ListObjServiceResult<M> list(Q queryParams) {
         F actualModelFields = getModelFields();
-        DynamicFields validModelFields = actualModelFields != null ? actualModelFields.getValidFields(fields) : null;
+        DynamicFields validModelFields = actualModelFields != null ?
+                actualModelFields.getValidFields(queryParams.getFields()) : null;
         String[] selectFields = validModelFields != null ? validModelFields.getFields() : null;
-        var humanCondition = getHumanCondition(selectFields, search, searchFields, orders, page, pageSize);
-        loadListFilterCondition(humanCondition, params);
-        humanCondition.setCustomCondition(getCustomCondition(params, CustomConditionClass.class));
+        var humanCondition = getHumanCondition(selectFields, queryParams.getIds(),
+                queryParams.getSearch(), queryParams.getSearchFields(), queryParams.getOrders(), queryParams.getPage(),
+                queryParams.getPageSize());
+        loadListFilterCondition(humanCondition, queryParams);
+        humanCondition.setCustomCondition(getCustomCondition(JsonUtils.beanToMap(queryParams),
+                CustomConditionClass.class));
 
         List<M> data;
         int total;
@@ -291,4 +307,5 @@ public abstract class BaseModelServiceImpl<M extends BaseModel,
             return new ServiceResult<>(result);
         }
     }
+
 }

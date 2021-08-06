@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.scene.service;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.fields.BaseModelFields;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
+import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
@@ -17,7 +18,8 @@ import java.util.Arrays;
 
 @Slf4j
 @Service
-public class SceneConfigService extends BaseModelServiceImpl<SceneConfigModel, SceneConfigMapper, BaseModelFields> {
+public class SceneConfigService extends BaseModelServiceImpl<SceneConfigModel, SceneConfigMapper, BaseModelFields,
+        QueryParams> {
 
     public ServiceResult<SceneConfigDataBO> sync(SceneConfigDataBO sceneConfigDataBO, boolean isAreaMode) {
         SceneConfigHandler sceneConfigHandler;

@@ -14,9 +14,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -24,12 +30,15 @@ import java.util.Date;
 
 @Slf4j
 public class JwtUtils {
-    private static final long JWT_EXPIRATION = 24 * 3600 * 1000L;
+    private static final long JWT_EXPIRATION = 24 * 3600 * 1000L * 7;
 
     private JwtUtils() {}
 
-    private static String generateJwtSecret() {
-        String secret = AuthConstant.JWT_SECRET;
+    private static String generateJwtSecret(UserInfo user) {
+        String secret = user.getLatestTokenSecret();
+        if (secret == null) {
+            secret = AuthConstant.JWT_SECRET;
+        }
         var algorithm = "HmacSHA256";
         final Mac mac;
         try {
@@ -68,16 +77,37 @@ public class JwtUtils {
     }
 
     public static String generateToken(UserInfo user) {
-        String jwtSecret = generateJwtSecret();
+        String jwtSecret = generateJwtSecret(user);
         var expireDate = new Date(System.currentTimeMillis() + JWT_EXPIRATION);
         try {
             var algorithm = Algorithm.HMAC256(jwtSecret);
             return JWT.create().withExpiresAt(expireDate).withClaim("id", user.getId())
-                    .withClaim("username", user.getUsername()).sign(algorithm);
+                    .withClaim("username", user.getUsername()).withClaim("key", user.getTokenSecret()).sign(algorithm);
         } catch (JWTCreationException e) {
             log.error("Create jwt token error: {}", e.getMessage());
             return null;
         }
+    }
+
+
+    @Deprecated
+    public static boolean addResponseHeaderWithJWT(UserModel user) {
+        if (user == null) {
+            return false;
+        }
+
+        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+        ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) requestAttributes;
+        HttpServletResponse response = servletRequestAttributes.getResponse();
+
+        String jwt = JwtUtils.generateToken(new JwtUtils.UserInfo(user.getId(), user.getUsername(), user.getTokenSecret()));
+
+        if (StringUtils.isBlank(jwt)) {
+            return false;
+        }
+
+        response.setHeader(AuthConstant.JWT_HEADER_KEY, AuthConstant.JWT_PREFIX + jwt);
+        return true;
     }
 
     public static UserInfo validateToken(String token) throws TokenExpiredException {
@@ -86,7 +116,7 @@ public class JwtUtils {
             return null;
         }
 
-        String jwtSecret = generateJwtSecret();
+        String jwtSecret = generateJwtSecret(user);
         try {
             var algorithm = Algorithm.HMAC256(jwtSecret);
             JWTVerifier verifier = JWT.require(algorithm).build();
@@ -116,5 +146,7 @@ public class JwtUtils {
         user.setTokenSecret(jwt.getClaim("key").asString());
         return user;
     }
+
+
 
 }

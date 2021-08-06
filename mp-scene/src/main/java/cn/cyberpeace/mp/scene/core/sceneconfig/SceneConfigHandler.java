@@ -5,9 +5,14 @@ import cn.cyberpeace.mp.base.annotation.ClassFieldClasses;
 import cn.cyberpeace.mp.scene.core.base.BaseSceneHandler;
 import cn.cyberpeace.mp.scene.core.bo.*;
 import cn.cyberpeace.mp.scene.core.exception.SceneNotExistException;
+import cn.cyberpeace.mp.scene.core.plugin.SceneConfigPluginHandler;
 import cn.cyberpeace.mp.scene.model.*;
 import cn.cyberpeace.mp.scene.repository.*;
 
+/**
+ * 场景模板的处理
+ * 场景模板的功能由本类对外提供
+ */
 @ClassFieldClasses({
         SceneConfigDataBO.class,
         SceneConfigTopologyBO.class,
@@ -22,6 +27,7 @@ import cn.cyberpeace.mp.scene.repository.*;
         SceneConfigElementPortModel.class,
         SceneConfigElementPortConnectionModel.class,
         SceneConfigPluginHandler.class,
+        SceneConfigHandler.class,
 })
 @BeanFieldClasses({
         SceneConfigMapper.class,
@@ -29,6 +35,7 @@ import cn.cyberpeace.mp.scene.repository.*;
         SceneConfigElementMapper.class,
         SceneConfigElementPortMapper.class,
         SceneConfigElementPortConnectionMapper.class,
+        SceneConfigElementPluginMapper.class,
 })
 public class SceneConfigHandler extends BaseSceneHandler<
         SceneConfigModel,
@@ -36,6 +43,7 @@ public class SceneConfigHandler extends BaseSceneHandler<
         SceneConfigElementModel,
         SceneConfigElementPortModel,
         SceneConfigElementPortConnectionModel,
+        SceneConfigElementPluginModel,
         SceneConfigBO,
         SceneConfigAreaBO,
         SceneConfigElementPortBO,
@@ -48,7 +56,9 @@ public class SceneConfigHandler extends BaseSceneHandler<
         SceneConfigElementMapper,
         SceneConfigElementPortMapper,
         SceneConfigElementPortConnectionMapper,
-        SceneConfigPluginHandler> {
+        SceneConfigElementPluginMapper,
+        SceneConfigPluginHandler<?, ?>,
+        SceneConfigHandler> {
 
     public SceneConfigHandler(SceneConfigDataBO sceneConfigDataBO) throws SceneNotExistException {
         init(sceneConfigDataBO, false);

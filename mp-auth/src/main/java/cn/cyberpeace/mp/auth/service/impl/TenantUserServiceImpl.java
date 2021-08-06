@@ -5,12 +5,13 @@ import cn.cyberpeace.mp.auth.repository.TenantUserMapper;
 import cn.cyberpeace.mp.auth.service.TenantUserService;
 import cn.cyberpeace.mp.auth.service.fields.TenantUserFields;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
+import cn.cyberpeace.mp.base.service.param.QueryParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class TenantUserServiceImpl
-        extends BaseModelServiceImpl<TenantUserModel, TenantUserMapper, TenantUserFields>
+        extends BaseModelServiceImpl<TenantUserModel, TenantUserMapper, TenantUserFields, QueryParams>
         implements TenantUserService {
 
     @Autowired
@@ -19,4 +20,15 @@ public class TenantUserServiceImpl
         setModelFields(modelFields);
     }
 
+    @Override
+    public boolean deleteByUserId(String userId) {
+        // todo 
+        return true;
+    }
+
+    @Override
+    public boolean deleteByTenantId(String tenantId) {
+        // todo
+        return true;
+    }
 }

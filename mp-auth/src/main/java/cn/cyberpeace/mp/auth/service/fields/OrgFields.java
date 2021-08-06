@@ -11,7 +11,7 @@ public class OrgFields extends BaseModelFields {
     public static final DynamicFields allFields = new DynamicFields(ClassUtils.getBeanClassFields(OrgModel.class));
 
     public static final DynamicFields availableFields = new DynamicFields(OrgModel::getTenant, OrgModel::getParent,
-            OrgModel::getIdentifier, OrgModel::getName
+            OrgModel::getIdentifier, OrgModel::getName, OrgModel::getPath
     ).merge(BaseModelFields.availableFields);
 
     public static final DynamicFields hiddenFields = allFields.subtract(availableFields);

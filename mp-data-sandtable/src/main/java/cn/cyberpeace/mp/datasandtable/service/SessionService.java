@@ -1,10 +1,13 @@
 package cn.cyberpeace.mp.datasandtable.service;
 
-import cn.cyberpeace.mp.base.exception.MqRuntimeException;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.util.HttpUtils;
+import cn.cyberpeace.mp.base.util.LocalDateTimeUtils;
 import cn.cyberpeace.mp.datasandtable.config.SandTableConfig;
 import cn.cyberpeace.mp.datasandtable.constant.DataSandtableConstant;
+import cn.cyberpeace.mp.datasandtable.model.SPIViewRequest;
 import cn.cyberpeace.mp.datasandtable.model.SessionModel;
 import cn.cyberpeace.mp.datasandtable.model.SessionRequest;
 import cn.cyberpeace.mp.datasandtable.model.SessionResult;
@@ -20,10 +23,14 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import javax.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.http.HttpResponse;
+import org.elasticsearch.ElasticsearchStatusException;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.support.IndicesOptions;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.core.CountRequest;
@@ -43,7 +50,7 @@ import org.springframework.util.ObjectUtils;
 @Slf4j
 public class SessionService {
 
-    @Autowired
+    @Resource(name = "datasandtableRestHighLevelClient")
     private RestHighLevelClient restHighLevelClient;
 
     @Autowired
@@ -76,7 +83,7 @@ public class SessionService {
         buildDynamicQuery(sessionRequest, boolQueryBuilder);
         searchRequest.source(sourceBuilder.query(boolQueryBuilder.must(rangeQueryBuilder)));
 
-        CountRequest countRequest = new CountRequest(indexArray);
+        var countRequest = new CountRequest(indexArray);
         countRequest.query(boolQueryBuilder);
 
         log.info("Search JSON query: {}", searchRequest.source().toString());
@@ -114,12 +121,14 @@ public class SessionService {
         sourceBuilder.size(sessionRequest.getPageSize());
         var boolQueryBuilder = QueryBuilders.boolQuery();
         //时间查询
-        var rangeQueryBuilder = QueryBuilders.rangeQuery("timestamp")
-            .from(sessionRequest.getStartTime().toString()).to(sessionRequest.getEndTime().toString());
+        boolQueryBuilder.must(QueryBuilders.rangeQuery("timestamp")
+            .from(LocalDateTimeUtils.localDateTimeToString(sessionRequest.getStartTime(), LocalDateTimeUtils.esdateTimeFormatter))
+            .to(LocalDateTimeUtils.localDateTimeToString(sessionRequest.getEndTime(), LocalDateTimeUtils.esdateTimeFormatter)));
 
         //构造动态条件查询
         buildDynamicQuery(sessionRequest, boolQueryBuilder);
-        searchRequest.source(sourceBuilder.query(boolQueryBuilder.must(rangeQueryBuilder)));
+        searchRequest.source(sourceBuilder.query(boolQueryBuilder));
+        searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
 
         //处理分页
         int  offset = (sessionRequest.getPageNum() -1) * (sessionRequest.getPageSize());
@@ -141,14 +150,16 @@ public class SessionService {
 
         var countRequest = new CountRequest(indexArray);
         countRequest.query(boolQueryBuilder);
+        countRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
 
         var total = 0;
 
         try {
             CountResponse totalSize = restHighLevelClient.count(countRequest, RequestOptions.DEFAULT);
             total = (int) totalSize.getCount();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException | ElasticsearchStatusException exception) {
+            log.error("query session error macIds{} error{}", sessionRequest.getMacIds(), ExceptionUtils.getStackTrace(exception));
+            throw new MpRuntimeException(BaseErrorCode.DATA_NOT_EXIST, ExceptionUtils.getStackTrace(exception));
         }
 
         return new ListObjResult<>(sessionResults, total);
@@ -165,21 +176,52 @@ public class SessionService {
             molochUrl = DataSandtableConstant.groupIdSessionUrlCache.get(groupId);
         } catch (ExecutionException e) {
             log.error("查询缓存异常 groupId {}" + e, groupId);
-            throw new MqRuntimeException("查询缓存异常 groupId: "+ groupId);
+            throw new MpRuntimeException("查询缓存异常 groupId: "+ groupId);
         }
 
-        //todo 为了调试
-        molochUrl = "http://10.100.7.50:8005" + "/sessions.pcap?ids=" + sessionId;
+        molochUrl = molochUrl + "/sessions.pcap?ids=" + sessionId;
 
         try {
             httpResponse =  HttpUtils.sendGetDownLoadWithDigestAuth(molochUrl,
                 sandTableConfig.getUserName(), sandTableConfig.getPassword());
         } catch (IOException e) {
             log.error("查询缓存异常 groupId {}" + e, groupId);
-            throw new MqRuntimeException("查询缓存异常 groupId: "+ groupId);
+            throw new MpRuntimeException("查询缓存异常 groupId: "+ groupId);
         }
         return httpResponse;
     }
+
+    /**
+     * 查询spiView数据
+     * @param spiViewRequest spiViewRequest
+     * @return String
+     */
+    public String querySPIView(SPIViewRequest spiViewRequest) {
+        String molochUrl;
+        try {
+            molochUrl = DataSandtableConstant.groupIdSessionUrlCache.get(spiViewRequest.getGroupId());
+        } catch (ExecutionException e) {
+            log.error("查询缓存异常 groupId {}" + e, spiViewRequest.getGroupId());
+            throw new MpRuntimeException("查询缓存异常 groupId: "+ spiViewRequest.getGroupId());
+        }
+
+        molochUrl = molochUrl + "/spiview.json";
+        var spiMolochUrlBuilder = new StringBuilder();
+        spiMolochUrlBuilder.append(molochUrl)
+            .append("?facets=").append(1)
+            .append("&spi=").append("srcIp,dstIp,ipProtocol")
+            .append("&startTime=").append(spiViewRequest.getStartTime())
+            .append("&stopTime=").append(spiViewRequest.getStopTime())
+            .append("&interval").append("auto")
+        ;
+        try {
+           return HttpUtils.sendGet(spiMolochUrlBuilder.toString(), sandTableConfig.getUserName(), sandTableConfig.getPassword());
+        } catch (Exception e) {
+            log.error("查询spi视图异常 groupId {}" + e, spiViewRequest.getGroupId());
+            throw new MpRuntimeException("查询spi视图异常 groupId: " + spiViewRequest.getGroupId());
+        }
+    }
+
 
 
     /**
@@ -195,6 +237,12 @@ public class SessionService {
         if (!ObjectUtils.isEmpty(sessionRequest.getTargetIp())) {
             boolQueryBuilder.must(QueryBuilders.termQuery("dstIp", sessionRequest.getTargetIp()));
         }
+        if (!ObjectUtils.isEmpty(sessionRequest.getProtocol())) {
+            boolQueryBuilder.must(QueryBuilders.wildcardQuery("protocol","*" +sessionRequest.getProtocol() + "*"));
+        }
+        if (!ObjectUtils.isEmpty(sessionRequest.getMacIds())) {
+            boolQueryBuilder.filter(QueryBuilders.termsQuery("srcMac", sessionRequest.getMacIds()));
+        }
     }
 
     /**
@@ -205,7 +253,7 @@ public class SessionService {
      */
     public List<SessionResult> querySessionAllList(SessionRequest sessionRequest) {
         if (CollectionUtils.isEmpty(sessionRequest.getGroupList())) {
-            throw new MqRuntimeException("分组id列表必须传");
+            throw new MpRuntimeException("分组id列表必须传");
         }
         return querySessionListWithGroup(sessionRequest);
     }
@@ -222,10 +270,18 @@ public class SessionService {
             .groupId(model.getIndex().substring(0, model.getIndex().indexOf("_sessions2")))
             .sourceIp(model.getSrcIp())
             .targetIp(model.getDstIp())
-            .sourceMac(model.getSrcMac())
-            .targetMac(model.getDstMac())
-            .protocalType(model.getProtocol())
+            .sourceMac(filterEsChars(model.getSrcMac()))
+            .targetMac(filterEsChars(model.getDstMac()))
+            .protocolType(filterEsChars(model.getProtocol()))
+            .srcPort(model.getSrcPort())
+            .dstPort(model.getDstPort())
+            .totalBytes(model.getTotBytes())
+            .timestamp(model.getTimestamp().toString())
             .build();
+    }
+
+    private String filterEsChars(String targetString) {
+        return targetString.replace("[", "").replace("]", "").replace("\"", "");
     }
 
     /**
@@ -258,8 +314,13 @@ public class SessionService {
     private List<String> fetchFormatterTime(LocalDateTime startTime, LocalDateTime endTime) {
         var formatter = DateTimeFormatter.ofPattern("yyMMdd");
         long betweenDay = ChronoUnit.DAYS.between(startTime, endTime);
+        long month = ChronoUnit.MONTHS.between(startTime, endTime);
         int days = (int) betweenDay;
-        return IntStream.range(0, days + 1).boxed().map(startTime::plusDays).map((time) -> time.format(formatter))
+        if (month > 1) {
+            return IntStream.range(0, days + 2).boxed().map(startTime::plusDays).map((time) -> time.format(DateTimeFormatter.ofPattern("yyMM*")))
+                .distinct().collect(Collectors.toList());
+        }
+        return IntStream.range(0, days + 2).boxed().map(startTime::plusDays).map((time) -> time.format(formatter))
             .collect(Collectors.toList());
     }
 

@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.base.util;
 
 import cn.cyberpeace.mp.base.annotation.ClassFieldClasses;
 import cn.cyberpeace.mp.base.annotation.ClassFieldNames;
-import cn.cyberpeace.mp.base.exception.MqRuntimeException;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanWrapper;
@@ -14,12 +14,16 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Slf4j
 public class ClassUtils {
 
     private static final Map<Class<?>, String[]> beanClassFieldsCache = new HashMap<>();
+
+    private static final Map<Class<?>, Map<String, Class<?>>> beanClassFieldTypesCache = new ConcurrentHashMap<>();
+
 
     private ClassUtils() {}
 
@@ -171,11 +175,32 @@ public class ClassUtils {
         return Arrays.asList(fields).stream().filter(field -> field.isAnnotationPresent(annotation)).map(Field::getName).collect(Collectors.toList());
     }
 
+    public static Map<String, Class<?>> getBeanClassFieldTypes(Class<?> clazz) {
+        Map<String, Class<?>> fieldTypes = beanClassFieldTypesCache.getOrDefault(clazz, null);
+        if (fieldTypes != null) {
+            return fieldTypes;
+        }
+
+        final BeanWrapper clazzWrapper = new BeanWrapperImpl(clazz);
+        var propertyDescriptors = clazzWrapper.getPropertyDescriptors();
+        fieldTypes = new HashMap<>();
+        for (java.beans.PropertyDescriptor propertyDescriptor : propertyDescriptors) {
+            String fieldName = propertyDescriptor.getName();
+            if (!StringUtils.equals("class", fieldName)) {
+                fieldTypes.put(fieldName, propertyDescriptor.getPropertyType());
+            }
+        }
+
+        beanClassFieldTypesCache.put(clazz, fieldTypes);
+
+        return fieldTypes;
+    }
+
     public static <T> T createInstance(Class<T> clazz) {
         try {
             return clazz.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
-            throw new MqRuntimeException(clazz.getName() + " create simple instance failed: " + e.getMessage());
+            throw new MpRuntimeException(clazz.getName() + " create simple instance failed: " + e.getMessage());
         }
     }
 
@@ -221,7 +246,7 @@ public class ClassUtils {
                 }
             } catch (NoSuchMethodException ignored) {
             } catch (IllegalAccessException | InvocationTargetException | SecurityException e) {
-                throw new MqRuntimeException(e.getMessage());
+                throw new MpRuntimeException(e.getMessage());
             }
         }
 
