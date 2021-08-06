@@ -185,16 +185,6 @@ public class UserModel extends BaseModel implements Serializable {
     }
 
     @JsonIgnore
-    public String getPassword() {
-        return password;
-    }
-
-    @JsonProperty
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    @JsonIgnore
     public String getTokenSecret() {
         return tokenSecret;
     }
