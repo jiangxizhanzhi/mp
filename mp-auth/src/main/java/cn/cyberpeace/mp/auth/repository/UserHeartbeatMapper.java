@@ -24,20 +24,13 @@ public interface UserHeartbeatMapper extends BaseModelMapper<UserHeartbeatModel>
      * @param time
      * @return
      */
-    @Select("select count(*) from mp_auth_user_heartbeat where user = #{userId} and create_time > #{time}")
     int getCntByUserId(@Param("userId") String userId, @Param("time") LocalDateTime time);
-
 
     /**
      * 一定时间内的心跳次数
      * @param time
      * @return
      */
-    @Select("select u.id uid, u.username username, u.name uname, count(h.id) cnt " +
-            "from mp_auth_user u " +
-            "         left join " +
-            "     (select * from mp_auth_user_heartbeat where create_time > #{time}) h on h.user = u.id " +
-            "group by u.id")
     List<UserOlReportCntDto> groupCntByUserId(@Param("time") LocalDateTime time);
 
 

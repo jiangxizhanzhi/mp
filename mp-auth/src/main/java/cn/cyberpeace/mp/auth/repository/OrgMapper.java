@@ -16,18 +16,13 @@ import java.util.List;
 @ModelClass(OrgModel.class)
 public interface OrgMapper extends BaseModelMapper<OrgModel> {
 
-    @Select("SELECT * FROM mp_auth_org where parent = '' or parent is null")
     List<OrgModel> listParents();
 
-    @Select("SELECT * FROM mp_auth_org where parent = #{parentId}")
     List<OrgModel> listByParentId(@Param("parentId") String parentId);
 
-    @Select("SELECT * FROM mp_auth_org where tenant = #{tenantId}")
     List<OrgModel> listAll(@Param("tenantId") String tenantId);
 
-    @Select("SELECT * FROM mp_auth_org where path = #{path}")
     OrgModel getByPath(@Param("path") String path);
 
-    @Update("update mp_auth_org set path = #{path} where id = #{id}")
     int updatePath(@Param("id") String id, @Param("path") String path);
 }

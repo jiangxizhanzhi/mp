@@ -3,7 +3,11 @@ package cn.cyberpeace.mp.auth.test;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.user.UserLogPageRequest;
+import cn.cyberpeace.mp.auth.dto.user.UserOlReportCntDto;
 import cn.cyberpeace.mp.auth.model.TargetModel;
+import cn.cyberpeace.mp.auth.repository.OrgMapper;
+import cn.cyberpeace.mp.auth.repository.SysConfigMapper;
+import cn.cyberpeace.mp.auth.service.UserHeartbeatService;
 import cn.cyberpeace.mp.auth.service.UserLogService;
 import cn.cyberpeace.mp.auth.service.TargetService;
 import cn.cyberpeace.mp.auth.util.PasswordStrengthChecker;
@@ -27,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,10 +51,19 @@ public class AuthTestController {
     @Autowired
     private TargetService targetService;
 
+    @Autowired
+    private OrgMapper orgMapper;
+
+    @Autowired
+    private SysConfigMapper sysConfigMapper;
+
+    @Autowired
+    private UserHeartbeatService heartbeatService;
+
     @ApiOperation("DES加密")
     @PostMapping("/desEncryptPwd")
     @ApiImplicitParams({
-            @ApiImplicitParam(name="pwd", value="密码字段（明文）",dataTypeClass = String[].class),
+            @ApiImplicitParam(name = "pwd", value = "密码字段（明文）", dataTypeClass = String[].class),
     })
     public String desEncryptPwd(@RequestParam String pwd) {
         return PasswordUtils.desEncrypt(pwd);
@@ -58,7 +72,7 @@ public class AuthTestController {
     @ApiOperation("DES解密")
     @PostMapping("/desDecryptPwd")
     @ApiImplicitParams({
-            @ApiImplicitParam(name="pwd", value="密码字段（密文）",dataTypeClass = String[].class),
+            @ApiImplicitParam(name = "pwd", value = "密码字段（密文）", dataTypeClass = String[].class),
     })
     public String desDecryptPwd(@RequestParam String pwd) {
         return PasswordUtils.desDecrypt(pwd);
@@ -66,7 +80,7 @@ public class AuthTestController {
 
     @ApiOperation("spring security密码加密")
     @ApiImplicitParams({
-            @ApiImplicitParam(name="pwd", value="密码字段（明文）",dataTypeClass = String[].class),
+            @ApiImplicitParam(name = "pwd", value = "密码字段（明文）", dataTypeClass = String[].class),
     })
     @PostMapping("/encryptPwd")
     public String encryptPwd(@RequestParam String pwd) {
@@ -76,7 +90,7 @@ public class AuthTestController {
 
     @ApiOperation("密码强度查询")
     @ApiImplicitParams({
-            @ApiImplicitParam(name="pwd", value="密码字段（明文）",dataTypeClass = String[].class),
+            @ApiImplicitParam(name = "pwd", value = "密码字段（明文）", dataTypeClass = String[].class),
     })
     @PostMapping("/pwdscore")
     public Map<String, Object> pwdScore(@RequestParam String pwd) {
@@ -98,5 +112,13 @@ public class AuthTestController {
 //        tmpMenuService.process();
     }
 
+    @GetMapping("testmapper")
+    public void testmapper() {
+//        orgMapper.updatePath("c2e06974488b86f1b126740b242", "123");
+//        int res = sysConfigMapper.updateByKeyName("flag_length", "8");
+//        log.info("{}", res);
 
+        List<UserOlReportCntDto> list = heartbeatService.groupCntByUserId(LocalDateTime.now().minusMinutes(100L));
+        log.info("{}", list);
+    }
 }

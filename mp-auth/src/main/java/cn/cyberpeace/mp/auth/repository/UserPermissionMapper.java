@@ -17,15 +17,10 @@ import java.util.List;
 @ModelClass(UserPermissionModel.class)
 public interface UserPermissionMapper extends BaseModelMapper<UserPermissionModel> {
 
-    @Select("select distinct * from mp_auth_target where id in " +
-            "(select target from mp_auth_user_permission where owner = #{userId})")
     List<TargetModel> listByUserId(@Param("userId") String userId);
 
-
-    @Delete("delete from mp_auth_user_permission where owner = #{userId}")
     void deleteByUserId(@Param("userId") String userId);
 
-    @Delete("delete from mp_auth_user_permission where target = #{targetId}")
     void deleteByTargetId(@Param("targetId") String targetId);
 
 }

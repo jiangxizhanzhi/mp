@@ -45,14 +45,14 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     @Override
     public List<RoleModel> listByUserId(String userId) {
         Assert.notBlank(userId, "userId不能为空！");
-        List<RoleModel> roles = getModelMapper().listByUserId(userId);
+        List<RoleModel> roles = getModelMapper().listRolesByUserId(userId);
         return roles;
     }
 
     @Override
     public List<UserModel> listUsersByRoleId(String roleId) {
         Assert.notBlank(roleId, "roleId不能为空！");
-        List<UserModel> users = getModelMapper().listByRoleId(roleId);
+        List<UserModel> users = getModelMapper().listUsersByRoleId(roleId);
         return users;
     }
 
@@ -62,7 +62,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         Assert.notBlank(pageRequest.getUserId(), "userId不能为空！");
         PageHelper.startPage(pageRequest.getPage(), pageRequest.getPageSize());
         // 查询user直接绑定的角色
-        List<RoleModel> roles = getModelMapper().listByUserId(pageRequest.getUserId());
+        List<RoleModel> roles = getModelMapper().listRolesByUserId(pageRequest.getUserId());
         PageInfo pageInfo = new PageInfo(roles);
         // todo 查询用户所在组织（上级组织）的角色  暂无此功能
         return pageInfo;
@@ -73,7 +73,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         pageRequest.ensure();
         Assert.notBlank(pageRequest.getRoleId(), "roleId不能为空！");
         PageHelper.startPage(pageRequest.getPage(), pageRequest.getPageSize());
-        List<UserModel> userModels = getModelMapper().listByRoleId(pageRequest.getRoleId());
+        List<UserModel> userModels = getModelMapper().listUsersByRoleId(pageRequest.getRoleId());
         PageInfo pageInfo = new PageInfo(userModels);
         List<UserDto> userDtos = new ArrayList<>();
         if (CollectionUtil.isNotEmpty(userModels)) {

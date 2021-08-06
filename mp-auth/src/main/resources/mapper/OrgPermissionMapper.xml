@@ -1,4 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="cn.cyberpeace.mp.auth.repository.OrgPermissionMapper">
+
+    <select id="listByOrgId" resultType="cn.cyberpeace.mp.auth.model.OrgPermissionModel">
+        select distinct * from mp_auth_target where id in
+            (select target from mp_auth_org_permission where owner = #{orgId})
+    </select>
+
+    <select id="deleteByOrgId">
+        delete from mp_auth_org_permission where owner = #{orgId}
+    </select>
+    
+    <delete id="deleteByTargetId">
+        delete from mp_auth_org_permission where target = #{targetId}
+    </delete>
+
 </mapper>
