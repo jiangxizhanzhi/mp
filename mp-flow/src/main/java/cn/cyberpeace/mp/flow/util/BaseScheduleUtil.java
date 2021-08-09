@@ -2,11 +2,13 @@ package cn.cyberpeace.mp.flow.util;
 
 import cn.cyberpeace.mp.flow.model.base.FlowBaseModel;
 import cn.cyberpeace.mp.flow.service.ScheduleMethod;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -39,15 +41,16 @@ public class BaseScheduleUtil<B extends FlowBaseModel, M extends ScheduleMethod>
         long delay = flowBaseModel.getDelay();
         long interval = flowBaseModel.getInterval() <= 0 ? 1L : flowBaseModel.getInterval();
         int count = flowBaseModel.getCount();
-        log.info("开始执行任务==> 延迟时间：{}，执行间隔：{}，执行次数：{}", delay, interval, count);
+        log.info("start task==> delay：{}，interval：{}，count：{}", delay, interval, count);
 
         if (count > 0) {
-            this.scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(3);
-            this.scheduledThreadPoolExecutor.scheduleAtFixedRate(
+            ThreadFactory namedThreadFactory = new ThreadFactoryBuilder().setNameFormat("scheduled-thread-pool-%d").build();
+            this.scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(2, namedThreadFactory);
+            this.scheduledThreadPoolExecutor.scheduleAtFixedRate (
                     () -> executor(), delay, interval, TimeUnit.SECONDS
             );
         } else {
-            log.warn("无需执行任务");
+            log.warn("no need to run task");
         }
     }
 
@@ -61,18 +64,18 @@ public class BaseScheduleUtil<B extends FlowBaseModel, M extends ScheduleMethod>
 
         if (currentAtomicInteger.get() < (count + 1)) {
             //需要处理的逻辑
-            log.info("当前执行次数：{}，间隔时间：{}秒", currentAtomicInteger.get(), interval);
+            log.info("current count：{}，delay：{} second", currentAtomicInteger.get(), interval);
             // 调用流量发生接口
             getMethod().execute(getFlowBaseModel());
             //当满足条件时，停止任务
             if (currentAtomicInteger.get() == count) {
                 // 停止任务
                 this.scheduledThreadPoolExecutor.shutdownNow();
-                log.info("停止任务");
+                log.info("task stop");
             } else {
                 // 执行次数加1
                 currentAtomicInteger.getAndIncrement();
-                log.info("执行下次任务");
+                log.info("execute next task");
             }
         } else {
             this.scheduledThreadPoolExecutor.shutdownNow();

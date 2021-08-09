@@ -30,6 +30,9 @@ public class FlowController extends BaseModelController<FlowModel, QueryParams, 
         setModelService(flowService);
     }
 
+    @Autowired
+    private FlowExecuteScheduleMethodImpl flowExecuteScheduleMethod;
+
     /**
      * 定时执行流量发生任务
      * @param request
@@ -40,7 +43,7 @@ public class FlowController extends BaseModelController<FlowModel, QueryParams, 
     public ServiceResult flowExecuteSchedule(@RequestBody @Validated FlowExecuteRequest request) {
         FlowExecuteScheduleUtil util = FlowExecuteScheduleUtil.builder().build();
         util.setFlowBaseModel(request);
-        util.setMethod(new FlowExecuteScheduleMethodImpl());
+        util.setMethod(flowExecuteScheduleMethod);
         util.schedule();
 
         return ServiceResult.successful();

@@ -147,7 +147,7 @@ public class TrackerServerPool {
                 Properties props = initConfigProps();
                 ClientGlobal.initByProperties(props);
             } catch (Exception e) {
-                log.error("加载FDFS配置文件失败", e);
+                log.error("load FDFS config file failed", e);
             }
 
             log.info("ClientGlobal configInfo: {}", ClientGlobal.configInfo());
