@@ -1,14 +1,12 @@
 package cn.cyberpeace.mp.flow.util;
 
+import cn.cyberpeace.mp.base.util.ScheduledThreadPoolUtils;
 import cn.cyberpeace.mp.flow.model.base.FlowBaseModel;
 import cn.cyberpeace.mp.flow.service.ScheduleMethod;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -26,7 +24,7 @@ public class BaseScheduleUtil<B extends FlowBaseModel, M extends ScheduleMethod>
 
     private M method;
 
-    private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = null;
+    private ScheduledFuture<?> future;
 
     /**
      * 当前执行点
@@ -44,9 +42,7 @@ public class BaseScheduleUtil<B extends FlowBaseModel, M extends ScheduleMethod>
         log.info("start task==> delay：{}，interval：{}，count：{}", delay, interval, count);
 
         if (count > 0) {
-            ThreadFactory namedThreadFactory = new ThreadFactoryBuilder().setNameFormat("scheduled-thread-pool-%d").build();
-            this.scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(2, namedThreadFactory);
-            this.scheduledThreadPoolExecutor.scheduleAtFixedRate (
+            future = ScheduledThreadPoolUtils.getInstance().scheduleAtFixedRate (
                     () -> executor(), delay, interval, TimeUnit.SECONDS
             );
         } else {
@@ -70,7 +66,7 @@ public class BaseScheduleUtil<B extends FlowBaseModel, M extends ScheduleMethod>
             //当满足条件时，停止任务
             if (currentAtomicInteger.get() == count) {
                 // 停止任务
-                this.scheduledThreadPoolExecutor.shutdownNow();
+                future.cancel(false);
                 log.info("task stop");
             } else {
                 // 执行次数加1
@@ -78,8 +74,8 @@ public class BaseScheduleUtil<B extends FlowBaseModel, M extends ScheduleMethod>
                 log.info("execute next task");
             }
         } else {
-            this.scheduledThreadPoolExecutor.shutdownNow();
-            this.scheduledThreadPoolExecutor = null;
+            future.cancel(false);
+            log.info("task finished");
         }
     }
 
