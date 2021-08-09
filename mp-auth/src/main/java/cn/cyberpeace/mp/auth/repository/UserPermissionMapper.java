@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.auth.repository;
 
 import cn.cyberpeace.mp.auth.model.TargetModel;
+import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserPermissionModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
@@ -17,7 +18,9 @@ import java.util.List;
 @ModelClass(UserPermissionModel.class)
 public interface UserPermissionMapper extends BaseModelMapper<UserPermissionModel> {
 
-    List<TargetModel> listByUserId(@Param("userId") String userId);
+    List<TargetModel> listTargetsByUserId(@Param("userId") String userId);
+
+    List<UserModel> listUsersByTargetId(@Param("targetId") String targetId);
 
     void deleteByUserId(@Param("userId") String userId);
 
