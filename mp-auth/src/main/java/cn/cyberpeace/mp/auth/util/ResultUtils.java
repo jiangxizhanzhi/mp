@@ -23,6 +23,7 @@ import java.util.Objects;
 
 public class ResultUtils {
 
+    @Deprecated
     public static ServiceResult commonResult(boolean success, Object source) {
         if (success) {
             if (source != null) {
