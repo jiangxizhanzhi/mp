@@ -28,7 +28,6 @@ import java.util.Objects;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-//@Builder
 @Table("mp_auth_user")
 @ApiModel("用户信息")
 public class UserModel extends BaseModel implements Serializable {
@@ -183,16 +182,6 @@ public class UserModel extends BaseModel implements Serializable {
         if (expiredTime == null) {
             expiredTime = LocalDateTime.now().plusYears(99L);
         }
-    }
-
-    @JsonIgnore
-    public String getPassword() {
-        return password;
-    }
-
-    @JsonProperty
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     @JsonIgnore
