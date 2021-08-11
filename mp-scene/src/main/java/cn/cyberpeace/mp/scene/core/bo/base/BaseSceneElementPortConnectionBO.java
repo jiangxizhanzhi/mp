@@ -5,6 +5,7 @@ import lombok.Data;
 
 @Data
 public abstract class BaseSceneElementPortConnectionBO<M extends BaseSceneElementPortConnectionModel> extends EidBO<M> {
+    private String id;
     private String source;
     private String target;
     private String name;
@@ -13,6 +14,7 @@ public abstract class BaseSceneElementPortConnectionBO<M extends BaseSceneElemen
     @Override
     public void fromModel(M obj, String... ignoreFields) {
         super.fromModel(obj, ignoreFields);
+        setId(obj.getConnectionId());
         setSource(obj.getSourcePortId());
         setTarget(obj.getTargetPortId());
     }
@@ -20,6 +22,7 @@ public abstract class BaseSceneElementPortConnectionBO<M extends BaseSceneElemen
     @Override
     public M toModel(String... ignoreFields) {
         var obj = super.toModel(ignoreFields);
+        obj.setConnectionId(id);
         obj.setSourcePortId(source);
         obj.setTargetPortId(target);
         return obj;

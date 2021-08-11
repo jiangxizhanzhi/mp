@@ -400,6 +400,11 @@ public abstract class BaseSceneHandler<
             var elementPortBO = ClassUtils.createInstance(sceneElementPortBOClass);
             elementPortBO.fromModel(elementPort);
             elementPortMap.put(elementPortBO.getId(), elementPortBO);
+
+            if (elementBO.getPorts() == null) {
+                elementBO.setPorts(new ArrayList<>());
+            }
+            elementBO.getPorts().add(elementPortBO);
         });
     }
 
@@ -502,15 +507,18 @@ public abstract class BaseSceneHandler<
      * @return 表模型-网元端口
      */
     private List<P0> readElementPorts(String... areaIds) {
-        var condition = new HumanCondition()
-                .link(sceneElementPortModelClass, sceneElementModelClass)
-                .filterLink(sceneElementPortModelClass, BaseSceneElementPortModel::getSceneElement,
-                        sceneElementModelClass, BaseSceneElementModel::getId)
-                .currentLink(sceneElementModelClass)
-                .filterEqual(BaseSceneElementModel::getScene, scene.getEid());
+        var condition = new HumanCondition();
         if (areaIds.length > 0) {
-            condition.currentLink(sceneElementModelClass)
+            condition = condition
+                    .link(sceneElementPortModelClass, sceneElementModelClass)
+                    .filterLink(sceneElementPortModelClass, BaseSceneElementPortModel::getSceneElement,
+                            sceneElementModelClass, BaseSceneElementModel::getId)
+                    .currentLink(sceneElementPortModelClass)
+                    .filterEqual(BaseSceneElementPortModel::getScene, scene.getEid())
+                    .currentLink(sceneElementModelClass)
                     .filterIn(BaseSceneElementModel::getArea, areaIds);
+        } else {
+            condition = condition.filterEqual(BaseSceneElementPortModel::getScene, scene.getEid());
         }
         return sceneElementPortMapper.list(condition);
     }
@@ -521,21 +529,22 @@ public abstract class BaseSceneHandler<
      * @return 表模型-网元端口连接
      */
     private List<C0> readElementPortConnections(String... areaIds) {
-        var condition = new HumanCondition()
-                .link(sceneElementPortConnectionModelClass, sceneElementPortModelClass, sceneElementModelClass)
-                .filterOrStart()
-                .orLink(sceneElementPortConnectionModelClass, BaseSceneElementPortConnectionModel::getSourcePort,
-                        sceneElementPortModelClass, BaseSceneElementPortModel::getId)
-                .orLink(sceneElementPortConnectionModelClass, BaseSceneElementPortConnectionModel::getTargetPort,
-                        sceneElementPortModelClass, BaseSceneElementPortModel::getId)
-                .filterOrEnd()
-                .filterLink(sceneElementPortModelClass, BaseSceneElementPortModel::getSceneElement,
-                        sceneElementModelClass, BaseSceneElementModel::getId)
-                .currentLink(sceneElementPortConnectionModelClass)
-                .filterEqual(BaseSceneElementPortConnectionModel::getScene, scene.getEid());
+        var condition = new HumanCondition();
         if (areaIds.length > 0) {
-            condition.currentLink(sceneElementModelClass)
+            condition = condition
+                    .link(sceneElementPortConnectionModelClass, sceneElementModelClass)
+                    .filterOrStart()
+                    .orLink(sceneElementPortConnectionModelClass, BaseSceneElementPortConnectionModel::getSourceElement,
+                            sceneElementModelClass, BaseSceneElementModel::getId)
+                    .orLink(sceneElementPortConnectionModelClass, BaseSceneElementPortConnectionModel::getTargetElement,
+                            sceneElementModelClass, BaseSceneElementModel::getId)
+                    .filterOrEnd()
+                    .currentLink(sceneElementPortConnectionModelClass)
+                    .filterEqual(BaseSceneElementPortConnectionModel::getScene, scene.getEid())
+                    .currentLink(sceneElementModelClass)
                     .filterIn(BaseSceneElementModel::getArea, areaIds);
+        } else {
+            condition = condition.filterEqual(BaseSceneElementPortConnectionModel::getScene, scene.getEid());
         }
         return sceneElementPortConnectionMapper.list(condition);
     }
@@ -694,10 +703,23 @@ public abstract class BaseSceneHandler<
         Map<String, P0> outerElementPortMap = new HashMap<>();
         if (!outerConnectionPortIds.isEmpty()) {
             sceneElementPortMapper.list(new HumanCondition()
-                    .select("id", "portId")
-                    .filterIn("portId", outerConnectionPortIds.toArray(new String[0])))
+                    .select(BaseSceneElementPortModel::getId, BaseSceneElementPortModel::getSceneElement,
+                            BaseSceneElementPortModel::getPortId)
+                    .filterIn(BaseSceneElementPortModel::getPortId, outerConnectionPortIds.toArray(new String[0])))
                     .forEach(elementPort -> outerElementPortMap.put(elementPort.getPortId(), elementPort));
         }
+
+        Map<String, E> portIdElementMap = new HashMap<>();
+        elementMap.forEach((elementId, elementBO) -> {
+            List<P> elementPorts = elementBO.getPorts();
+            if (elementPorts == null) {
+                return;
+            }
+            elementPorts.forEach(elementPort -> {
+                portIdElementMap.put(elementPort.getId(), elementBO);
+            });
+        });
+
         String sceneId = scene.getEid();
         Map<String, C0> savingElementPortConnectionMap = new HashMap<>();
         elementPortConnectionMap.forEach((key, elementPortConnectionBO) -> {
@@ -705,23 +727,33 @@ public abstract class BaseSceneHandler<
             elementPortConnection.setScene(sceneId);
             var sourcePortBO = elementPortMap.getOrDefault(elementPortConnection.getSourcePortId(), null);
             String sourcePortId;
+            String sourceElementId;
             if (sourcePortBO == null) {
                 P0 sourcePort = outerElementPortMap.getOrDefault(elementPortConnection.getSourcePortId(), null);
                 sourcePortId = sourcePort == null ? null : sourcePort.getId();
+                sourceElementId = sourcePort == null ? null : sourcePort.getSceneElement();
             } else {
                 sourcePortId = sourcePortBO.getEid();
+                var sourceElement = portIdElementMap.getOrDefault(sourcePortBO.getId(), null);
+                sourceElementId = sourceElement == null ? null : sourceElement.getEid();
             }
             var targetPortBO = elementPortMap.getOrDefault(elementPortConnection.getTargetPortId(), null);
             String targetPortId;
+            String targetElementId;
             if (targetPortBO == null) {
                 P0 targetPort = outerElementPortMap.getOrDefault(elementPortConnection.getTargetPortId(), null);
                 targetPortId = targetPort == null ? null : targetPort.getId();
+                targetElementId = targetPort == null ? null : targetPort.getSceneElement();
             } else {
                 targetPortId = targetPortBO.getEid();
+                var targetElement = portIdElementMap.getOrDefault(targetPortBO.getId(), null);
+                targetElementId = targetElement == null ? null : targetElement.getEid();
             }
             if (sourcePortId == null || targetPortId == null) {
                 return;
             }
+            elementPortConnection.setSourceElement(sourceElementId);
+            elementPortConnection.setTargetElement(targetElementId);
             elementPortConnection.setSourcePort(sourcePortId);
             elementPortConnection.setTargetPort(targetPortId);
 
