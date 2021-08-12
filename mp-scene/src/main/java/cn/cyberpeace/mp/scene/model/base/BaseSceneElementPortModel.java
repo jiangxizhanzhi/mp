@@ -37,8 +37,9 @@ public class BaseSceneElementPortModel extends BaseModel {
     private Integer loss;
 
     public static class Type {
-        public static final Integer NETWORK_PORT = 1;
-        public static final Integer SERIAL_PORT = 2;
+        public static final Integer IP_PORT = 1;
+        public static final Integer MAC_PORT = 2;
+        public static final Integer SERIAL_PORT = 3;
 
         private Type() {}
     }

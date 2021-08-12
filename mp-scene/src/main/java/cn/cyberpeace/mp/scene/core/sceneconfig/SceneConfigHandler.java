@@ -57,7 +57,7 @@ public class SceneConfigHandler extends BaseSceneHandler<
         SceneConfigElementPortMapper,
         SceneConfigElementPortConnectionMapper,
         SceneConfigElementPluginMapper,
-        SceneConfigPluginHandler<?, ?>,
+        SceneConfigPluginHandler<?, ?, ?>,
         SceneConfigHandler> {
 
     public SceneConfigHandler(SceneConfigDataBO sceneConfigDataBO) throws SceneNotExistException {

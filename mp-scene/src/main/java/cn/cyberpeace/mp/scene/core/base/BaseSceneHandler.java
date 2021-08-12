@@ -95,7 +95,7 @@ public abstract class BaseSceneHandler<
         M4 extends BaseSceneElementPortMapper<P0>,
         M5 extends BaseSceneElementPortConnectionMapper<C0>,
         M6 extends BaseSceneElementPluginMapper<P1>,
-        P2 extends BaseScenePluginHandler<?, ?>,
+        P2 extends BaseScenePluginHandler<?, ?, ?>,
         H extends BaseSceneHandler<S0, A0, E0, P0, C0, P1, S, A, P, E, C, T, D, M1, M2, M3, M4, M5, M6, P2, H>> {
 
     /** 是否区域模式 */
@@ -151,7 +151,8 @@ public abstract class BaseSceneHandler<
      * 初始化插件集合
      */
     @SuppressWarnings("unchecked")
-    private void initPluginMap() {
+    private void initPluginMap(Map<String, ScenePluginDataBO> scenePluginData) {
+        String sceneId = scene.getEid();
         Map<String, P2> pluginKeyMap = new HashMap<>();
         BeanUtils.getBeanType(scenePluginHandlerInterface).forEach((name, pluginInstance) -> {
             Class<?> pluginClass = pluginInstance.getClass();
@@ -159,10 +160,45 @@ public abstract class BaseSceneHandler<
             if (pluginKeyAnnotation == null) {
                 return;
             }
+
             String pluginKey = pluginKeyAnnotation.value();
-            P2 plugin = (P2) ClassUtils.createInstance(pluginClass);
             ScenePluginDataBO pluginData = scenePluginData.getOrDefault(pluginKey, null);
-            plugin.init(pluginData);
+            if (pluginData == null) {
+                return;
+            }
+
+            P2 plugin = (P2) ClassUtils.createInstance(pluginClass);
+            plugin.init(sceneId, pluginData);
+            pluginKeyMap.put(pluginKey, plugin);
+        });
+        pluginMap = pluginKeyMap;
+    }
+
+    /**
+     * 初始化插件集合
+     */
+    @SuppressWarnings("unchecked")
+    private void initPluginMap(Map<String, List<String>> pluginKeyElementIds,
+                               Map<String, List<String>> pluginKeyElementPortIds) {
+        String sceneId = scene.getEid();
+        Map<String, P2> pluginKeyMap = new HashMap<>();
+        BeanUtils.getBeanType(scenePluginHandlerInterface).forEach((name, pluginInstance) -> {
+            Class<?> pluginClass = pluginInstance.getClass();
+            var pluginKeyAnnotation = pluginClass.getAnnotation(PluginKey.class);
+            if (pluginKeyAnnotation == null) {
+                return;
+            }
+
+            String pluginKey = pluginKeyAnnotation.value();
+            List<String> elementIds = pluginKeyElementIds.getOrDefault(pluginKey, null);
+            List<String> elementPortIds = pluginKeyElementPortIds.getOrDefault(pluginKey, null);
+            if (elementIds == null && elementPortIds == null) {
+                return;
+            }
+
+            P2 plugin = (P2) ClassUtils.createInstance(pluginClass);
+            plugin.init(sceneId, elementIds, elementPortIds);
+            scenePluginData.put(pluginKey, plugin.toData());
             pluginKeyMap.put(pluginKey, plugin);
         });
         pluginMap = pluginKeyMap;
@@ -264,12 +300,21 @@ public abstract class BaseSceneHandler<
 
     /**
      * 网元节点插件的唯一标识 网元id:插件代号
+     * @param sceneElement 网元节点id
+     * @param pluginKey 插件代号
+     * @return 网元节点插件的唯一标识
+     */
+    private String elementPluginKey(String sceneElement, String pluginKey) {
+        return StringUtils.joinWith(":", sceneElement, pluginKey);
+    }
+
+    /**
+     * 网元节点插件的唯一标识 网元id:插件代号
      * @param elementPlugin 表模型-网元节点插件
      * @return 网元节点插件的唯一标识
      */
     private String elementPluginKey(P1 elementPlugin) {
-        return StringUtils.joinWith(":", elementPlugin.getSceneElement(),
-                elementPlugin.getPluginKey());
+        return elementPluginKey(elementPlugin.getSceneElement(), elementPlugin.getPluginKey());
     }
 
     /**
@@ -709,17 +754,7 @@ public abstract class BaseSceneHandler<
                     .forEach(elementPort -> outerElementPortMap.put(elementPort.getPortId(), elementPort));
         }
 
-        Map<String, E> portIdElementMap = new HashMap<>();
-        elementMap.forEach((elementId, elementBO) -> {
-            List<P> elementPorts = elementBO.getPorts();
-            if (elementPorts == null) {
-                return;
-            }
-            elementPorts.forEach(elementPort -> {
-                portIdElementMap.put(elementPort.getId(), elementBO);
-            });
-        });
-
+        Map<String, E> portIdElementMap = getPortIdElementMap();
         String sceneId = scene.getEid();
         Map<String, C0> savingElementPortConnectionMap = new HashMap<>();
         elementPortConnectionMap.forEach((key, elementPortConnectionBO) -> {
@@ -774,32 +809,71 @@ public abstract class BaseSceneHandler<
      * @return 更新的网元插件关系，包含添加的、更新属性的、删除的
      */
     private DiffTargets<P1> saveElementPlugins(Map<String, P1> existElementPluginMap) {
+        Map<String, E> portIdElementMap = getPortIdElementMap();
         Map<String, P1> savingElementPluginMap = new HashMap<>();
         String sceneId = scene.getEid();
         scenePluginData.forEach((pluginKey, pluginData) -> {
             Map<String, Map<String, Object>> pluginElements = pluginData.getElements();
-            if (pluginElements == null) {
-                return;
+            if (pluginElements != null) {
+                pluginElements.forEach((nodeId, nodePluginData) -> {
+                    var element = elementMap.getOrDefault(nodeId, null);
+                    if (element == null) {
+                        return;
+                    }
+
+                    String key = elementPluginKey(element.getEid(), pluginKey);
+                    if (!savingElementPluginMap.containsKey(key)) {
+                        P1 elementPlugin = ClassUtils.createInstance(sceneElementPluginModelClass);
+                        elementPlugin.setScene(sceneId);
+                        elementPlugin.setSceneElement(element.getEid());
+                        elementPlugin.setPluginKey(pluginKey);
+                        savingElementPluginMap.put(key, elementPlugin);
+                    }
+                });
             }
 
-            pluginElements.forEach((nodeId, nodePluginData) -> {
-                var element = elementMap.getOrDefault(nodeId, null);
-                if (element == null) {
-                    return;
-                }
+            Map<String, Map<String, Object>> pluginElementPorts = pluginData.getElementPorts();
+            if (pluginElementPorts != null) {
+                pluginElementPorts.forEach((portId, portPluginData) -> {
+                    var element = portIdElementMap.getOrDefault(portId, null);
+                    if (element == null) {
+                        return;
+                    }
 
-                P1 elementPlugin = ClassUtils.createInstance(sceneElementPluginModelClass);
-                elementPlugin.setScene(sceneId);
-                elementPlugin.setSceneElement(element.getEid());
-                elementPlugin.setPluginKey(pluginKey);
-                savingElementPluginMap.put(elementPluginKey(elementPlugin), elementPlugin);
-            });
+                    String key = elementPluginKey(element.getEid(), pluginKey);
+                    if (!savingElementPluginMap.containsKey(key)) {
+                        P1 elementPlugin = ClassUtils.createInstance(sceneElementPluginModelClass);
+                        elementPlugin.setScene(sceneId);
+                        elementPlugin.setSceneElement(element.getEid());
+                        elementPlugin.setPluginKey(pluginKey);
+                        savingElementPluginMap.put(key, elementPlugin);
+                    }
+                });
+            }
         });
 
         DiffTargets<P1> diff = diffTargets(savingElementPluginMap, existElementPluginMap);
         saveDiff(sceneElementPluginMapper, diff);
         loadElementPlugin(ListUtils.union(diff.getAddingTargets(), diff.getUpdatingTargets()));
         return diff;
+    }
+
+    /**
+     * 获取端口id和端口所属网元映射
+     * @return 端口id和端口所属网元映射
+     */
+    private Map<String, E> getPortIdElementMap() {
+        Map<String, E> portIdElementMap = new HashMap<>();
+        elementMap.forEach((elementId, elementBO) -> {
+            List<P> elementPorts = elementBO.getPorts();
+            if (elementPorts == null) {
+                return;
+            }
+            elementPorts.forEach(elementPort -> {
+                portIdElementMap.put(elementPort.getId(), elementBO);
+            });
+        });
+        return portIdElementMap;
     }
 
     /**
@@ -831,7 +905,7 @@ public abstract class BaseSceneHandler<
         if (!StringUtils.isEmpty(sceneId) && readScene(sceneId) == null) {
             throw new SceneNotExistException("Scene " + sceneId + " not exist");
         }
-        initPluginMap();
+        initPluginMap(scenePluginData);
     }
 
     /**
@@ -875,7 +949,6 @@ public abstract class BaseSceneHandler<
         this.areaId = areaId;
         this.isAreaMode = isAreaMode;
         reload();
-        initPluginMap();
     }
 
     /**
@@ -931,7 +1004,37 @@ public abstract class BaseSceneHandler<
         loadElementPorts(readElementPorts(filterAreaIds));
         loadConnections(readElementPortConnections(filterAreaIds));
         loadElementPlugin(readElementPlugins(elements.stream().map(BaseModel::getId).toArray(String[]::new)));
-        // TODO 从插件加载scenePluginData数据
+        Map<String, List<String>> pluginKeyElementIds = new HashMap<>();
+        Map<String, List<String>> pluginKeyElementPortIds = new HashMap<>();
+        Map<String, E> elementEidElementBOMap = new HashMap<>();
+        elementMap.forEach((elementBOId, elementBO) -> {
+            elementEidElementBOMap.put(elementBO.getEid(), elementBO);
+        });
+        elementIdPluginsMap.forEach((elementId, elementPlugins) -> {
+            var element = elementEidElementBOMap.getOrDefault(elementId, null);
+            if (element == null) {
+                return;
+            }
+
+            var elementPorts = element.getPorts();
+
+            elementPlugins.forEach(elementPlugin -> {
+                String pluginKey = elementPlugin.getPluginKey();
+
+                List<String> elementIds = pluginKeyElementIds.getOrDefault(pluginKey, new ArrayList<>());
+                elementIds.add(elementId);
+                pluginKeyElementIds.put(pluginKey, elementIds);
+
+                if (elementPorts != null) {
+                    elementPorts.forEach(elementPort -> {
+                        List<String> elementPortIds = pluginKeyElementPortIds.getOrDefault(pluginKey, new ArrayList<>());
+                        elementPortIds.add(elementPort.getId());
+                        pluginKeyElementPortIds.put(pluginKey, elementPortIds);
+                    });
+                }
+            });
+        });
+        initPluginMap(pluginKeyElementIds, pluginKeyElementPortIds);
     }
 
     /**

@@ -5,7 +5,9 @@ import cn.cyberpeace.mp.base.util.ClassUtils;
 import cn.cyberpeace.mp.base.util.JsonUtils;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -16,14 +18,22 @@ import java.util.Map;
  * @param <P> 网元端口的插件对应配置类
  */
 @ClassFieldNames({
+        "sceneBOClass",
         "elementBOClass",
         "elementPortBOClass",
 })
-public abstract class BaseScenePluginHandler<E, P> {
+public abstract class BaseScenePluginHandler<S, E, P> {
+    // 源场景索引数据
+    private String sourceSceneId;
+    private List<String> elementIds = new ArrayList<>();
+    private List<String> elementPortIds = new ArrayList<>();
+
+    private S scene;
     private Map<String, E> elementMap = new HashMap<>();
     private Map<String, P> elementPortMap = new HashMap<>();
 
     // 通过ClassFieldNames注解和实现类ClassFieldClasses注解，初始化调用ClassUtils.loadClassFields(this)设置
+    private Class<S> sceneBOClass;
     private Class<E> elementBOClass;
     private Class<P> elementPortBOClass;
 
@@ -32,6 +42,11 @@ public abstract class BaseScenePluginHandler<E, P> {
      * @param pluginData 场景插件业务数据
      */
     private void fromData(ScenePluginDataBO pluginData) {
+        var sceneSrc = pluginData.getScene();
+        if (sceneSrc != null) {
+            scene = JsonUtils.mapToBean(sceneSrc, sceneBOClass);
+        }
+
         var elementMapSrc = pluginData.getElements();
         if (elementMapSrc != null) {
             elementMapSrc.forEach((nodeId, elementData) -> {
@@ -53,15 +68,21 @@ public abstract class BaseScenePluginHandler<E, P> {
      */
     public ScenePluginDataBO toData() {
         var pluginData = new ScenePluginDataBO();
+        if (scene != null) {
+            pluginData.setScene(JsonUtils.beanToMap(scene));
+        }
+
         Map<String, Map<String, Object>> elements = new HashMap<>();
         elementMap.forEach((nodeId, elementBO) -> {
             elements.put(nodeId, JsonUtils.beanToMap(elementBO));
+            elementIds.add(nodeId);
         });
         pluginData.setElements(elements);
 
         Map<String, Map<String, Object>> elementPorts = new HashMap<>();
-        elementPortMap.forEach((nodeId, elementPortBO) -> {
-            elementPorts.put(nodeId, JsonUtils.beanToMap(elementPortBO));
+        elementPortMap.forEach((portId, elementPortBO) -> {
+            elementPorts.put(portId, JsonUtils.beanToMap(elementPortBO));
+            elementPortIds.add(portId);
         });
         pluginData.setElementPorts(elementPorts);
 
@@ -72,12 +93,27 @@ public abstract class BaseScenePluginHandler<E, P> {
      * 从场景插件业务数据初始化
      * @param pluginDataBO 场景插件业务数据
      */
-    public void init(ScenePluginDataBO pluginDataBO) {
+    public void init(String sceneId, ScenePluginDataBO pluginDataBO) {
         ClassUtils.loadClassFields(this);
+        sourceSceneId = sceneId;
         if (pluginDataBO != null) {
             fromData(pluginDataBO);
         }
     }
+
+    /**
+     * 从场景插件索引数据初始化
+     * @param sceneId 场景ID
+     */
+    public void init(String sceneId, List<String> elementIds, List<String> elementPortIds) {
+        ClassUtils.loadClassFields(this);
+        sourceSceneId = sceneId;
+        this.elementIds.addAll(elementIds);
+        this.elementPortIds.addAll(elementPortIds);
+        reload();
+    }
+
+    public abstract void reload();
 
     public abstract void save();
 }
