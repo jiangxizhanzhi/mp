@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
+import cn.cyberpeace.mp.auth.dto.OrgDto;
 import cn.cyberpeace.mp.auth.dto.notice.SysNoticePageRequest;
 import cn.cyberpeace.mp.auth.dto.notice.SysNoticeRequest;
 import cn.cyberpeace.mp.auth.model.OrgModel;
@@ -8,6 +9,7 @@ import cn.cyberpeace.mp.auth.model.SysNoticeModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.repository.SysNoticeGroupMapper;
 import cn.cyberpeace.mp.auth.repository.SysNoticeMapper;
+import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.service.SysNoticeService;
 import cn.cyberpeace.mp.auth.service.fields.SysNoticeFields;
@@ -46,6 +48,9 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
     @Autowired
     private OrgUserService orgUserService;
+
+    @Autowired
+    private OrgService orgService;
 
     @Autowired
     public SysNoticeServiceImpl(SysNoticeMapper modelMapper, SysNoticeFields modelFields) {
@@ -143,10 +148,15 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
             return new PageInfo<>();
         }
         List<OrgModel> orgModels = orgUserService.listOrgsByUserId(userModel.getId());
-        List<String> orgIds = orgModels.stream().map(OrgModel::getId).collect(Collectors.toList());
+        List<String> allOrgIds = new ArrayList<>();
+        orgModels.forEach(o -> {
+            allOrgIds.add(o.getId()); // 添加自己的id
+            List<OrgDto> orgDtos = orgService.listAllParentIgnoreLevelExcludeSelf(o.getId());
+            allOrgIds.addAll(orgDtos.stream().map(OrgDto::getId).collect(Collectors.toList()));
+        });
 
         PageHelper.startPage(req.getPage(), req.getPageSize());
-        List<SysNoticeModel> notices = getModelMapper().listNotices(null, null, orgIds, null, null);
+        List<SysNoticeModel> notices = getModelMapper().listNotices(null, null, allOrgIds, null, null);
         PageInfo pageInfo = new PageInfo(notices);
 
         return pageInfo;
