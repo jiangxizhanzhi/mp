@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.auth.dto.validate.AddGroup;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,20 +26,25 @@ public class TargetModel extends BaseModel {
     public static Integer TYPE_API = 2;
     public static Integer TYPE_DATA = 3;
 
-
+    @ApiModelProperty(value = "上级权限")
     private String parent;
 
+    @ApiModelProperty(value = "编号")
     @NotBlank(groups = AddGroup.class)
     private String identifier;
 
+    @ApiModelProperty(value = "租户")
     @DefaultStr(AuthConstant.DEFAULT_TENANT)
     private String tenant;
 
+    @ApiModelProperty(value = "名称")
     @NotBlank(groups = AddGroup.class)
     private String name;
 
+    @ApiModelProperty(value = "路径")
     private String path;
 
+    @ApiModelProperty(value = "类型 1：菜单 2：API")
     @NotNull(groups = AddGroup.class)
     private Integer type;
 
