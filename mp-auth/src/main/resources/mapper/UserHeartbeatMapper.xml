@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.cyberpeace.mp.auth.repository.UserHeartbeatMapper">
+
+    <select id="getCntByUserId" resultType="int">
+        select count(*) from mp_auth_user_heartbeat where user = #{userId} and create_time > #{time}
+    </select>
+
+    <select id="groupCntByUserId" resultType="cn.cyberpeace.mp.auth.dto.user.UserOlReportCntDto">
+        select u.id uid, u.username username, u.name uname, count(h.id) cnt
+        from mp_auth_user u
+                 left join
+                 (select * from mp_auth_user_heartbeat where create_time > #{time}) h on h.user = u.id
+        group by u.id
+    </select>
+
+</mapper>

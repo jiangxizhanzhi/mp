@@ -1,4 +1,35 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="cn.cyberpeace.mp.auth.repository.RoleMapper">
+
+
+    <select id="listByTenantId" resultType="cn.cyberpeace.mp.auth.model.RoleModel">
+        select * from mp_auth_role where tenant = #{tenantId}
+    </select>
+    
+    <select id="listAll" resultType="cn.cyberpeace.mp.auth.model.RoleModel">
+        select * from mp_auth_role
+    </select>
+    
+    <select id="listByOrgId" resultType="cn.cyberpeace.mp.auth.model.RoleModel">
+        select * from mp_auth_role where org = #{orgId}
+    </select>
+
+    <select id="selectByIdent" resultType="cn.cyberpeace.mp.auth.model.RoleModel">
+        select * from mp_auth_role where identifier = #{ident}
+    </select>
+
+    <select id="selectByName" resultType="cn.cyberpeace.mp.auth.model.RoleModel">
+        select * from mp_auth_role where name = #{name}
+    </select>
+
+    <select id="listWithUserCnt" resultType="cn.cyberpeace.mp.auth.dto.role.RoleDto">
+        select r.*, (select count(distinct user) from mp_auth_user_role ru where r.id = ru.role) userCnt from mp_auth_role r
+        <where>
+            <if test="roleName != null and roleName != ''">
+                AND r.name like CONCAT('%', #{roleName}, '%')
+            </if>
+        </where>
+    </select>
+
 </mapper>

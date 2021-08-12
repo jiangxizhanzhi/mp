@@ -129,26 +129,26 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
 
     @ApiOperation(value = "查询当前登录用户信息 附带组织，角色信息", notes = "")
     @GetMapping("/current")
-    public ObjServiceResult getCurrentUser() {
+    public ServiceResult<UserDto> getCurrentUser() {
         UserDto userDto = getModelService().getCurrentUserDto();
-        return ResultUtils.obj2ObjServiceResult(userDto);
+        return ServiceResult.success(userDto);
     }
 
 
     @ApiOperation(value = "创建用户，同时完成组织，角色绑定关系", notes = "")
     @PostMapping("/add")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.CREATE, title = "新增用户", target = AuthLogConstant.TARGET_USER)
-    public ServiceResult add(@RequestBody UserRequest createRequest) {
+    public ServiceResult<UserModel> add(@RequestBody UserRequest createRequest) {
         UserModel userModel = getModelService().add(createRequest);
-        return ResultUtils.commonResult(true, userModel);
+        return ServiceResult.success(userModel);
     }
 
     @ApiOperation(value = "修改用户，同时完成组织，角色绑定关系", notes = "")
     @PostMapping("/modify")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "更新用户", target = AuthLogConstant.TARGET_USER)
-    public ServiceResult modify(@RequestBody UserRequest modifyRequest) {
+    public ServiceResult<UserModel> modify(@RequestBody UserRequest modifyRequest) {
         UserModel userModel = getModelService().modify(modifyRequest);
-        return ResultUtils.commonResult(true, userModel);
+        return ServiceResult.success(userModel);
     }
 
 
@@ -158,7 +158,7 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
     public ServiceResult resetPwd(@Validated(AddGroup.class) @RequestBody ResetPwdRequest resetPwdRequest) {
         String decryptedPwd = PasswordUtils.desDecrypt(resetPwdRequest.getNewPwd());
         boolean success = getModelService().resetPwd(resetPwdRequest.getUserId(), decryptedPwd);
-        return ResultUtils.commonResult(success, null);
+        return ServiceResult.successful();
     }
 
     @ApiOperation(value = "修改自己的密码", notes = "")
@@ -168,45 +168,43 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
         String decryptedOldPwd = PasswordUtils.desDecrypt(req.getOldPwd());
         String decryptedNewPwd = PasswordUtils.desDecrypt(req.getNewPwd());
         boolean success = getModelService().resetSelfPwd(decryptedOldPwd, decryptedNewPwd);
-        return ResultUtils.commonResult(success, null);
+        return ServiceResult.successful();
     }
 
 
     @ApiOperation(value = "禁用用户", notes = "")
     @PostMapping("/disable")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "禁用用户", target = AuthLogConstant.TARGET_USER)
-    public ServiceResult disable(@RequestBody List<String> userIds) {
+    public ServiceResult<String> disable(@RequestBody List<String> userIds) {
         String errMsg = getModelService().batchDisable(userIds);
         if (StringUtils.isBlank(errMsg)) {
-            return ResultUtils.commonResult(true, null);
+            return ServiceResult.successful();
         }
-//        ModuleEnums mo = ModuleEnums.AUTH.getCode();
-//        mo.getCode();
-        return ResultUtils.commonResult(true, errMsg);
+        return ServiceResult.success(errMsg);
     }
 
 
     @ApiOperation(value = "启用用户", notes = "")
     @PostMapping("/enable")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "启用用户", target = AuthLogConstant.TARGET_USER)
-    public ServiceResult enable(@RequestBody List<String> userIds) {
+    public ServiceResult<String> enable(@RequestBody List<String> userIds) {
         String errMsg = getModelService().batchEnable(userIds);
         if (StringUtils.isBlank(errMsg)) {
-            return ResultUtils.commonResult(true, null);
+            return ServiceResult.successful();
         }
-        return ResultUtils.commonResult(true, errMsg);
+        return ServiceResult.success(errMsg);
     }
 
 
     @ApiOperation(value = "审核用户", notes = "")
     @PostMapping("/approve")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "审核用户", target = AuthLogConstant.TARGET_USER)
-    public ServiceResult approve(@RequestBody List<String> userIds) {
+    public ServiceResult<String> approve(@RequestBody List<String> userIds) {
         String errMsg = getModelService().batchApprove(userIds);
         if (StringUtils.isBlank(errMsg)) {
-            return ResultUtils.commonResult(true, null);
+            return ServiceResult.successful();
         }
-        return ResultUtils.commonResult(true, errMsg);
+        return ServiceResult.success(errMsg);
     }
 
 
@@ -215,7 +213,7 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "更改头像", target = AuthLogConstant.TARGET_USER)
     public ServiceResult updateAvatar(@RequestParam String userId, MultipartFile file) throws MpRuntimeException {
         boolean success = getModelService().updateAvatar(userId, file);
-        return ResultUtils.commonResult(success, null);
+        return ServiceResult.successful();
     }
 
 
@@ -223,7 +221,7 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
     @PostMapping("/heartbeat")
     public ServiceResult heartbeat(@RequestBody(required = false) UserHeartbeatRequest heartbeat) throws MpRuntimeException {
         getModelService().heartbeat(heartbeat);
-        return ResultUtils.commonResult(true, null);
+        return ServiceResult.successful();
     }
 
 
@@ -239,7 +237,7 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
     @GetMapping("/olUserCnt")
     public ServiceResult<UserOnlineCntDto> onlineUserCnt() {
         UserOnlineCntDto userOnlineCntDto = userOnlineReportService.onlineUserCnt();
-        return ResultUtils.commonResult(true, userOnlineCntDto);
+        return ServiceResult.success(userOnlineCntDto);
     }
 
 

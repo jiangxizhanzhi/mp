@@ -98,7 +98,7 @@ public class AuthUserDetailsService implements UserDetailsService {
 
 
         // 加载权限
-        List<TargetModel> targets = userPermissionService.listByUserId(userId);
+        List<TargetModel> targets = userPermissionService.listTargetsByUserId(userId);
         targets.forEach(t -> {
             authoritySet.add(new SimpleGrantedAuthority(t.getIdentifier()));
         });

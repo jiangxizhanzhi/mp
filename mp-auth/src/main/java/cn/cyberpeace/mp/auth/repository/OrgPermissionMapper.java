@@ -17,15 +17,9 @@ import java.util.List;
 @ModelClass(OrgPermissionModel.class)
 public interface OrgPermissionMapper extends BaseModelMapper<OrgPermissionModel> {
 
-
-    @Select("select distinct * from mp_auth_target where id in " +
-            "(select target from mp_auth_org_permission where owner = #{orgId})")
     List<TargetModel> listByOrgId(@Param("orgId") String orgId);
 
-
-    @Delete("delete from mp_auth_org_permission where owner = #{orgId}")
     void deleteByOrgId(@Param("orgId") String orgId);
 
-    @Delete("delete from mp_auth_org_permission where target = #{targetId}")
     void deleteByTargetId(@Param("targetId") String targetId);
 }
