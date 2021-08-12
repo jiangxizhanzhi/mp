@@ -38,7 +38,7 @@ public class SysNoticeController {
     @Autowired
     private SysNoticeService sysNoticeService;
 
-    @ApiOperation("分页查询公告")
+    @ApiOperation("查询单个公告")
     @GetMapping("/{id}")
     public ServiceResult<SysNoticeModel> get(@PathVariable String id) {
         ObjServiceResult<SysNoticeModel> result = sysNoticeService.get(id);
@@ -51,11 +51,21 @@ public class SysNoticeController {
     }
 
 
-    @ApiOperation("分页查询公告")
+    @ApiOperation("分页查询所有公告")
     @GetMapping("/page")
-    public ServiceResult<PageInfo<SysNoticeModel>> page(SysNoticePageRequest pageRequest) {
+    public ServiceResult<SysNoticeModel> page(SysNoticePageRequest pageRequest) {
         pageRequest.ensure();
         PageInfo<SysNoticeModel> pageInfo = sysNoticeService.page(pageRequest);
+
+        return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
+    }
+
+
+    @ApiOperation("分页查询当前用户有权看到的公告")
+    @GetMapping("/currentuser/page")
+    public ServiceResult<SysNoticeModel> currentUserPage(SysNoticePageRequest pageRequest) {
+        pageRequest.ensure();
+        PageInfo<SysNoticeModel> pageInfo = sysNoticeService.currentUserPage(pageRequest);
 
         return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
     }

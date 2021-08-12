@@ -2,14 +2,17 @@ package cn.cyberpeace.mp.auth.service.impl;
 
 import cn.cyberpeace.mp.auth.dto.notice.SysNoticePageRequest;
 import cn.cyberpeace.mp.auth.dto.notice.SysNoticeRequest;
+import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.SysNoticeGroupModel;
 import cn.cyberpeace.mp.auth.model.SysNoticeModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.repository.SysNoticeGroupMapper;
 import cn.cyberpeace.mp.auth.repository.SysNoticeMapper;
+import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.service.SysNoticeService;
 import cn.cyberpeace.mp.auth.service.fields.SysNoticeFields;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
+import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
@@ -21,7 +24,6 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.common.util.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,6 +34,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -40,6 +43,9 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
     @Autowired
     private SysNoticeGroupMapper noticeGroupMapper;
+
+    @Autowired
+    private OrgUserService orgUserService;
 
     @Autowired
     public SysNoticeServiceImpl(SysNoticeMapper modelMapper, SysNoticeFields modelFields) {
@@ -124,6 +130,23 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
         PageHelper.startPage(req.getPage(), req.getPageSize());
         List<SysNoticeModel> notices = getModelMapper().listNotices(req.getTitle(), ids, orgs, null, null);
+        PageInfo pageInfo = new PageInfo(notices);
+
+        return pageInfo;
+    }
+
+    @Override
+    public PageInfo<SysNoticeModel> currentUserPage(SysNoticePageRequest req) {
+        // 根据当前登录用户查出所有的组织，包括组织的上级，直到顶级组织
+        UserModel userModel = UserUtils.getLoginUser();
+        if(Objects.isNull(userModel)) {
+            return new PageInfo<>();
+        }
+        List<OrgModel> orgModels = orgUserService.listOrgsByUserId(userModel.getId());
+        List<String> orgIds = orgModels.stream().map(OrgModel::getId).collect(Collectors.toList());
+
+        PageHelper.startPage(req.getPage(), req.getPageSize());
+        List<SysNoticeModel> notices = getModelMapper().listNotices(null, null, orgIds, null, null);
         PageInfo pageInfo = new PageInfo(notices);
 
         return pageInfo;

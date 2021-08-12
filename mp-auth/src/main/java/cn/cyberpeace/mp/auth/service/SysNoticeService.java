@@ -14,5 +14,17 @@ public interface SysNoticeService extends BaseModelService<SysNoticeModel, Query
 
     SysNoticeModel modify(SysNoticeRequest sysNoticeRequest);
 
+    /**
+     * 分页查询所有公告
+     * @param pageRequest
+     * @return
+     */
     PageInfo page(SysNoticePageRequest pageRequest);
+
+    /**
+     * 分页查询当前用户有权看到的公告
+     * @param pageRequest
+     * @return
+     */
+    PageInfo currentUserPage(SysNoticePageRequest pageRequest);
 }
