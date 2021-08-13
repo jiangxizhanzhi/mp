@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.base.service.param;
 
+import cn.cyberpeace.mp.base.constant.BaseConstants;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;

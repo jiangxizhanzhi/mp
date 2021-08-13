@@ -11,8 +11,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table("mp_flow")
-public class FlowModel extends BaseModel {
+@Table("mp_flow_flow_info")
+public class FlowInfoModel extends BaseModel {
 
     /**
      * 流量标题
@@ -28,15 +28,29 @@ public class FlowModel extends BaseModel {
     private String flowDesc;
 
     /**
+     * 第三方id
+     */
+    @ApiModelProperty(value = "第三方id")
+    private String thirdId;
+
+    /**
+     * 第三方文件名称
+     */
+    @ApiModelProperty(value = "第三方文件名称")
+    @DefaultStr
+    private String thirdName;
+
+    /**
      * 交互类型：0 背景流量，1 攻击流量，2 全流量
      */
     @ApiModelProperty(value = "交互类型：0 背景流量，1 攻击流量，2 全流量")
+    @DefaultStr
     private int interactiveType;
 
     /**
-     * 流量发生平台：0 通用，1 北京流量发生器
+     * 流量发生平台：0 通用，1 Trex流量发生器
      */
-    @ApiModelProperty(value = "流量发生平台：0 通用，1 北京流量发生器")
+    @ApiModelProperty(value = "流量发生平台：0 通用，1 Trex流量发生器")
     private int flowPlatform;
 
     /**
