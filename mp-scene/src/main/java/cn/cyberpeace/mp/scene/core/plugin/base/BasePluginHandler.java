@@ -118,5 +118,19 @@ public abstract class BasePluginHandler<S, E, P> {
 
     public abstract void reload();
 
-    public abstract void save();
+    public abstract void saveScene();
+
+    public abstract void deleteScene();
+
+    public abstract void createElements(String... elementIds);
+
+    public abstract void updateElements(String... elementIds);
+
+    public abstract void deleteElements(String... elementIds);
+
+    public abstract void createElementPorts(String... elementPortIds);
+
+    public abstract void updateElementPorts(String... elementPortIds);
+
+    public abstract void deleteElementPorts(String... elementPortIds);
 }

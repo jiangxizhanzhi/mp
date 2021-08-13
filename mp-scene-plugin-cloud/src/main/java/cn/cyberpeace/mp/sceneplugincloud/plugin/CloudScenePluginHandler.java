@@ -37,8 +37,43 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
     }
 
     @Override
-    public void save() {
+    public void saveScene() {
+        pluginModelHandler.saveScene();
+    }
 
+    @Override
+    public void deleteScene() {
+        pluginModelHandler.deleteScene();
+    }
+
+    @Override
+    public void createElements(String... elementIds) {
+        pluginModelHandler.createElements(elementIds);
+    }
+
+    @Override
+    public void updateElements(String... elementIds) {
+        pluginModelHandler.updateElements(elementIds);
+    }
+
+    @Override
+    public void deleteElements(String... elementIds) {
+        pluginModelHandler.deleteElements(elementIds);
+    }
+
+    @Override
+    public void createElementPorts(String... elementPortIds) {
+        pluginModelHandler.createElementPorts(elementPortIds);
+    }
+
+    @Override
+    public void updateElementPorts(String... elementPortIds) {
+        pluginModelHandler.updateElementPorts(elementPortIds);
+    }
+
+    @Override
+    public void deleteElementPorts(String... elementPortIds) {
+        pluginModelHandler.deleteElementPorts(elementPortIds);
     }
 
 }

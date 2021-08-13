@@ -25,10 +25,10 @@ public class SceneConfigService extends BaseModelServiceImpl<SceneConfigModel, S
         SceneConfigHandler sceneConfigHandler;
         try {
             sceneConfigHandler = new SceneConfigHandler(sceneConfigDataBO, isAreaMode);
+            sceneConfigHandler.save();
         } catch (SceneNotExistException e) {
             return new ServiceResult<>(null, SceneErrorCode.SCENE_NOT_EXIST);
         }
-        sceneConfigHandler.save();
         return new ServiceResult<>(sceneConfigHandler.toData());
     }
 
@@ -37,10 +37,10 @@ public class SceneConfigService extends BaseModelServiceImpl<SceneConfigModel, S
         SceneConfigHandler sceneConfigHandler;
         try {
             sceneConfigHandler = new SceneConfigHandler(id, null, false);
+            sceneConfigHandler.delete();
         } catch (SceneNotExistException e) {
             return new ServiceResult<>(false, SceneErrorCode.SCENE_NOT_EXIST);
         }
-        sceneConfigHandler.delete();
         return new ServiceResult<>(true);
     }
 
