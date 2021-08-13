@@ -8,7 +8,7 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.base.util.ClassUtils;
 import cn.cyberpeace.mp.base.util.ListTreeNode;
-import cn.cyberpeace.mp.scene.core.plugin.base.BaseScenePluginHandler;
+import cn.cyberpeace.mp.scene.core.plugin.base.BasePluginHandler;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
 import cn.cyberpeace.mp.scene.core.bo.base.*;
 import cn.cyberpeace.mp.scene.core.exception.SceneNotExistException;
@@ -95,7 +95,7 @@ public abstract class BaseSceneHandler<
         M4 extends BaseSceneElementPortMapper<P0>,
         M5 extends BaseSceneElementPortConnectionMapper<C0>,
         M6 extends BaseSceneElementPluginMapper<P1>,
-        P2 extends BaseScenePluginHandler<?, ?, ?>,
+        P2 extends BasePluginHandler<?, ?, ?>,
         H extends BaseSceneHandler<S0, A0, E0, P0, C0, P1, S, A, P, E, C, T, D, M1, M2, M3, M4, M5, M6, P2, H>> {
 
     /** 是否区域模式 */
@@ -487,7 +487,7 @@ public abstract class BaseSceneHandler<
      * 载入网元插件关系数据
      * @param elementPlugins 表模型-网元插件关系
      */
-    private void loadElementPlugin(List<P1> elementPlugins) {
+    private void loadElementPlugins(List<P1> elementPlugins) {
         elementPlugins.forEach(elementPlugin -> {
             String elementId = elementPlugin.getSceneElement();
             List<P1> plugins = elementIdPluginsMap.getOrDefault(elementId, new ArrayList<>());
@@ -854,7 +854,7 @@ public abstract class BaseSceneHandler<
 
         DiffTargets<P1> diff = diffTargets(savingElementPluginMap, existElementPluginMap);
         saveDiff(sceneElementPluginMapper, diff);
-        loadElementPlugin(ListUtils.union(diff.getAddingTargets(), diff.getUpdatingTargets()));
+        loadElementPlugins(ListUtils.union(diff.getAddingTargets(), diff.getUpdatingTargets()));
         return diff;
     }
 
@@ -1003,7 +1003,7 @@ public abstract class BaseSceneHandler<
         loadElements(elements);
         loadElementPorts(readElementPorts(filterAreaIds));
         loadConnections(readElementPortConnections(filterAreaIds));
-        loadElementPlugin(readElementPlugins(elements.stream().map(BaseModel::getId).toArray(String[]::new)));
+        loadElementPlugins(readElementPlugins(elements.stream().map(BaseModel::getId).toArray(String[]::new)));
         Map<String, List<String>> pluginKeyElementIds = new HashMap<>();
         Map<String, List<String>> pluginKeyElementPortIds = new HashMap<>();
         Map<String, E> elementEidElementBOMap = new HashMap<>();
@@ -1022,7 +1022,7 @@ public abstract class BaseSceneHandler<
                 String pluginKey = elementPlugin.getPluginKey();
 
                 List<String> elementIds = pluginKeyElementIds.getOrDefault(pluginKey, new ArrayList<>());
-                elementIds.add(elementId);
+                elementIds.add(element.getId());
                 pluginKeyElementIds.put(pluginKey, elementIds);
 
                 if (elementPorts != null) {

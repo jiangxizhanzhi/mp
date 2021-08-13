@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.annotation.ClassFieldNames;
 import cn.cyberpeace.mp.base.util.ClassUtils;
 import cn.cyberpeace.mp.base.util.JsonUtils;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
+import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,6 +15,7 @@ import java.util.Map;
  * 基础的场景插件处理类
  * 场景插件处理目前只对网元节点和网元端口做插件配置处理
  *
+ * @param <S> 插件对应配置类
  * @param <E> 网元节点的插件对应配置类
  * @param <P> 网元端口的插件对应配置类
  */
@@ -22,15 +24,16 @@ import java.util.Map;
         "elementBOClass",
         "elementPortBOClass",
 })
-public abstract class BaseScenePluginHandler<S, E, P> {
+@Data
+public abstract class BasePluginHandler<S, E, P> {
     // 源场景索引数据
     private String sourceSceneId;
-    private List<String> elementIds = new ArrayList<>();
-    private List<String> elementPortIds = new ArrayList<>();
+    private final List<String> elementIds = new ArrayList<>();
+    private final List<String> elementPortIds = new ArrayList<>();
 
     private S scene;
-    private Map<String, E> elementMap = new HashMap<>();
-    private Map<String, P> elementPortMap = new HashMap<>();
+    private final Map<String, E> elementMap = new HashMap<>();
+    private final Map<String, P> elementPortMap = new HashMap<>();
 
     // 通过ClassFieldNames注解和实现类ClassFieldClasses注解，初始化调用ClassUtils.loadClassFields(this)设置
     private Class<S> sceneBOClass;
