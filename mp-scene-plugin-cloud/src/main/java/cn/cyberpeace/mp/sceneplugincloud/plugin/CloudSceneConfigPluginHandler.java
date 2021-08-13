@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin;
 
-import cn.cyberpeace.mp.base.util.ClassUtils;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.plugin.SceneConfigPluginHandler;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;

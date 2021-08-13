@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.sceneplugincloud.repository;
 
-import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import cn.cyberpeace.mp.scene.core.plugin.repository.BasePluginSceneElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigElementModel;
