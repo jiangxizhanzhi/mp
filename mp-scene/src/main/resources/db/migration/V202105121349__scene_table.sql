@@ -90,8 +90,11 @@ CREATE TABLE mp_scene_scene_config_element_port_connection (
     `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
     `id` varchar(64)  NOT NULL COMMENT 'id',
     `scene` varchar(64) NOT NULL COMMENT '场景模板id',
+    `source_element` varchar(64) NOT NULL COMMENT '源端口所属网元id',
+    `target_element` varchar(64) NOT NULL COMMENT '目标端口所属网元id',
     `source_port` varchar(64) NOT NULL COMMENT '源端口id',
     `target_port` varchar(64) NOT NULL COMMENT '目标端口id',
+    `connection_id` varchar(64) NOT NULL COMMENT '连接id',
     `source_port_id` varchar(64) NOT NULL COMMENT '源端口id(port_id)',
     `target_port_id` varchar(64) NOT NULL COMMENT '目标端口id(port_id)',
     `name` varchar(64) NOT NULL COMMENT '名称',
@@ -189,7 +192,6 @@ CREATE TABLE mp_scene_scene_element (
     UNIQUE (`scene`, `node_id`)
 );
 
-
 CREATE TABLE mp_scene_scene_element_port (
     `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
     `id` varchar(64)  NOT NULL COMMENT 'id',
@@ -219,8 +221,11 @@ CREATE TABLE mp_scene_scene_element_port_connection (
     `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
     `id` varchar(64)  NOT NULL COMMENT 'id',
     `scene` varchar(64) NOT NULL COMMENT '场景实例id',
+    `source_element` varchar(64) NOT NULL COMMENT '源端口所属网元id',
+    `target_element` varchar(64) NOT NULL COMMENT '目标端口所属网元id',
     `source_port` varchar(64) NOT NULL COMMENT '源端口id',
     `target_port` varchar(64) NOT NULL COMMENT '目标端口id',
+    `connection_id` varchar(64) NOT NULL COMMENT '连接id',
     `source_port_id` varchar(64) NOT NULL COMMENT '源端口id(port_id)',
     `target_port_id` varchar(64) NOT NULL COMMENT '目标端口id(port_id)',
     `name` varchar(64) NOT NULL COMMENT '名称',
