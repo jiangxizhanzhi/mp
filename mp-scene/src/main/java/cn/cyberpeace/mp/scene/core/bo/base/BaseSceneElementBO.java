@@ -19,25 +19,19 @@ public abstract class BaseSceneElementBO<M extends BaseSceneElementModel, P exte
     private String systemArchitecture;
     private String systemLanguage;
     private String flavor;
-    private List<AccessMode> accessModes;
     private List<String> initCommands;
     private List<P> ports;
 
     @Override
     public void fromModel(M obj, String... ignoreFields) {
-        super.fromModel(obj, ArrayUtils.addAll(ignoreFields, "accessModes", "initCommands"));
-        accessModes = StringUtils.isEmpty(obj.getAccessModes()) ? new ArrayList<>()
-                : JsonUtils.parse(obj.getAccessModes(), new TypeReference<List<AccessMode>>(){});
+        super.fromModel(obj, ArrayUtils.addAll(ignoreFields, "initCommands"));
         initCommands = StringUtils.isEmpty(obj.getInitCommands()) ? new ArrayList<>()
                 : JsonUtils.parse(obj.getInitCommands(), new TypeReference<List<String>>(){});
     }
 
     @Override
     public M toModel(String... ignoreFields) {
-        var obj = super.toModel(ArrayUtils.addAll(ignoreFields, "accessModes", "initCommands"));
-        if (accessModes != null) {
-            obj.setAccessModes(JsonUtils.toJsonString(accessModes));
-        }
+        var obj = super.toModel(ArrayUtils.addAll(ignoreFields, "initCommands"));
         if (initCommands != null) {
             obj.setInitCommands(JsonUtils.toJsonString(initCommands));
         }

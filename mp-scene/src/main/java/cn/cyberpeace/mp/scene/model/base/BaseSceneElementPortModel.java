@@ -35,6 +35,8 @@ public class BaseSceneElementPortModel extends BaseModel {
     private Integer delay;
     @DefaultInt
     private Integer loss;
+    @DefaultStr
+    private String accessModes;
 
     public static class Type {
         public static final Integer IP_PORT = 1;
