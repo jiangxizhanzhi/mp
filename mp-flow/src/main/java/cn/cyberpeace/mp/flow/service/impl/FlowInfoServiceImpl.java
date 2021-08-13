@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.JsonUtils;
+import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
 import cn.cyberpeace.mp.flow.enums.ResourceTypeEnum;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
@@ -35,6 +36,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.File;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -48,9 +50,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
-public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, FlowInfoMapper, FlowInfoFields,
-        QueryParams>
-        implements FlowInfoService {
+public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, FlowInfoMapper, FlowInfoFields, QueryParams> implements FlowInfoService {
 
     @Value("${mp.flow.actuator-url}")
     private String actuatorUrl;
@@ -59,9 +59,21 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
     @Qualifier("fastDfsFileServiceImpl")
     private FileService fileService;
 
+    @Autowired
+    private FastDFSClient fastDFSClient;
+
     public FlowInfoServiceImpl(FlowInfoMapper stuMapper, FlowInfoFields stuFields) {
         setModelFields(stuFields);
         setModelMapper(stuMapper);
+    }
+
+    public void pageFlowInfoModel(FlowInfoModel flowInfoModel) {
+        byte[] fileByte = fastDFSClient.download(flowInfoModel.getPcapFile(), null);
+        JSONObject object = new JSONObject();
+        object.put("fileName", flowInfoModel.getTitle());
+        String rsp = HttpUtils.postFile(actuatorUrl + "/pcap/import", fileByte, object);
+        JSONObject rspObjet = JSONObject.parseObject(rsp);
+        log.info("=============> {}", rspObjet.toJSONString());
     }
 
     /**

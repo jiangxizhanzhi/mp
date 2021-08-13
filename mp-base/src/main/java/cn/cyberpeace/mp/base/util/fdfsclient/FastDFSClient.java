@@ -84,6 +84,11 @@ public class FastDFSClient {
         // 音频
         EXT_MAPS.put("mp4", "video/mp4");
         EXT_MAPS.put("flv", "video/x-flv");
+
+        // 流量文件
+        EXT_MAPS.put("pcap", "application/x-download");
+        EXT_MAPS.put("sh", "application/x-download");
+        EXT_MAPS.put("py", "application/x-download");
     }
 
     /**
@@ -417,7 +422,6 @@ public class FastDFSClient {
 
         TrackerServer trackerServer = TrackerServerPool.borrowObject(groupName);
         StorageClient1 storageClient = new StorageClient1(trackerServer, null);
-        InputStream is = null;
         byte[] fileByte = null;
         try {
             fileByte = storageClient.download_file1(filepath);

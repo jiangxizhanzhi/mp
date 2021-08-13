@@ -2,7 +2,9 @@ package cn.cyberpeace.mp.base.util.fdfsclient;
 
 import cn.cyberpeace.mp.base.config.FastDfsConfig;
 import cn.cyberpeace.mp.base.constant.BaseConstants;
+import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.pool2.impl.GenericObjectPool;
@@ -166,6 +168,11 @@ public class TrackerServerPool {
                 trackerServerPoolMap.put(group.getGroupName(), trackerServerPool);
             });
 
+        }
+
+        if (StringUtils.isBlank(groupName)) {
+            // 默认集群名称
+            groupName = FdfsGroupEnum.DEFAULT.toString();
         }
 
         return trackerServerPoolMap.get(groupName);

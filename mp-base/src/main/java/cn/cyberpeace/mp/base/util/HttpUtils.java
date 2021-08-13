@@ -1,7 +1,5 @@
 package cn.cyberpeace.mp.base.util;
 
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
@@ -9,7 +7,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.HttpClient;
@@ -17,23 +14,22 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.impl.client.*;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * http工具类
@@ -245,7 +241,48 @@ public class HttpUtils {
                 result = EntityUtils.toString(responseEntity, StandardCharsets.UTF_8);
             }
         } catch (Exception e) {
-            log.error("postFile error", e);
+            log.error("post file error", e);
+        }
+
+        return result;
+    }
+
+    /**
+     * 发送文件
+     * @param url
+     * @param fileByte
+     * @param jsonObj
+     * @return
+     */
+    public static String postFile(String url, byte[] fileByte, JSONObject jsonObj) {
+        String result = StringUtils.EMPTY;
+        // 向流量发生平台导入pcap包
+        HttpClient httpClient = HttpClientBuilder.create().build();
+        try {
+            HttpPost httpPost = new HttpPost(url);
+            MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+            String fileName = "";
+            // 填充请求参数
+            if (Objects.nonNull(jsonObj)) {
+                fileName = jsonObj.getString("fileName");
+                for (Object key : jsonObj.keySet()) {
+                    builder.addTextBody(key.toString(), jsonObj.getString(key.toString()));
+                }
+            }
+            // binFile参数-服务端通过此参数获取文件
+            builder.addBinaryBody("file", new ByteArrayInputStream(fileByte), ContentType.MULTIPART_FORM_DATA, fileName);
+
+            HttpEntity entity = builder.build();
+            httpPost.setEntity(entity);
+            // 执行提交
+            HttpResponse response = httpClient.execute(httpPost);
+            HttpEntity responseEntity = response.getEntity();
+            if (Objects.nonNull(responseEntity)) {
+                // 将响应内容转换为字符串
+                result = EntityUtils.toString(responseEntity, StandardCharsets.UTF_8);
+            }
+        } catch (Exception e) {
+            log.error("post file by byte error", e);
         }
 
         return result;

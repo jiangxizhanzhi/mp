@@ -41,6 +41,13 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, Query
     }
 
 
+
+//    @GetMapping("/page")
+//    public ServiceResult<FlowInfoUploadResponse> pageFlowInfo(FlowInfoModel flowInfoModel) {
+//        flowServiceImpl.pageFlowInfoModel(flowInfoModel);
+//        return ServiceResult.successful();
+//    }
+
     /**
      * 上传流量文件
      * @param resourceType
