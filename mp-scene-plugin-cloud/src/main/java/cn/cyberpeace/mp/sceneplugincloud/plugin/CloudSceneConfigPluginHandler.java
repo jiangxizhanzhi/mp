@@ -36,6 +36,11 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
         setScene(null);
         getElementMap().clear();
         getElementPortMap().clear();
+
+        pluginModelHandler.loadScene(pluginModelHandler.readScene());
+        pluginModelHandler.loadElements(pluginModelHandler.readElements(getElementIds().toArray(new String[0])));
+        pluginModelHandler.loadElementPorts(pluginModelHandler.readElementPorts(getElementPortIds()
+                .toArray(new String[0])));
     }
 
     @Override

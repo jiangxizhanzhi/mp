@@ -73,6 +73,19 @@ public class BasePluginModelHandler<
     private M3 pluginSceneElementPortMapper;
 
     /**
+     * 载入场景基础
+     * @param scene 表模型-场景基础
+     */
+    public void loadScene(S0 scene) {
+        if (scene == null) {
+            return;
+        }
+        var sceneBO = ClassUtils.createInstance(pluginSceneBOClass);
+        sceneBO.fromModel(scene);
+        scenePluginHandler.setScene(sceneBO);
+    }
+
+    /**
      * 载入网元节点
      * @param elements 表模型-网元节点
      */
