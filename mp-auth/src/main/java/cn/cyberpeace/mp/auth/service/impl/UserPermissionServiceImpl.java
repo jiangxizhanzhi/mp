@@ -10,7 +10,7 @@ import cn.cyberpeace.mp.auth.model.UserPermissionModel;
 import cn.cyberpeace.mp.auth.repository.UserPermissionMapper;
 import cn.cyberpeace.mp.auth.service.OrgPermissionService;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
-import cn.cyberpeace.mp.auth.service.RolePermissionService;
+import cn.cyberpeace.mp.auth.service.RolePermissionModelService;
 import cn.cyberpeace.mp.auth.service.TargetService;
 import cn.cyberpeace.mp.auth.service.UserPermissionService;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
@@ -48,7 +48,7 @@ public class UserPermissionServiceImpl
     private UserRoleService userRoleService;
 
     @Autowired
-    private RolePermissionService rolePermissionService;
+    private RolePermissionModelService rolePermissionService;
 
     @Autowired
     private TargetService targetService;

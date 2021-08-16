@@ -6,7 +6,7 @@ import cn.cyberpeace.mp.auth.dto.target.TargetType;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.repository.TargetMapper;
 import cn.cyberpeace.mp.auth.service.OrgPermissionService;
-import cn.cyberpeace.mp.auth.service.RolePermissionService;
+import cn.cyberpeace.mp.auth.service.RolePermissionModelService;
 import cn.cyberpeace.mp.auth.service.TargetService;
 import cn.cyberpeace.mp.auth.service.UserPermissionService;
 import cn.cyberpeace.mp.auth.service.fields.TargetFields;
@@ -49,7 +49,7 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
     private OrgPermissionService orgPermissionService;
 
     @Autowired
-    private RolePermissionService rolePermissionService;
+    private RolePermissionModelService rolePermissionService;
 
     @Autowired
     public TargetServiceImpl(TargetMapper modelMapper, TargetFields modelFields) {
