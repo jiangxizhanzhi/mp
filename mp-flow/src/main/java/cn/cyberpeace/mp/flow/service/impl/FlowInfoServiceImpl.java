@@ -36,8 +36,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.File;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -139,31 +137,30 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                 }
             } else {
                 AddScriptsRequest scriptsRequest = new AddScriptsRequest();
-                scriptsRequest.setName(file.getOriginalFilename());
+                // 流量执行平台名称不能重复，名称后加上时间戳
+                scriptsRequest.setName(file.getOriginalFilename() + System.currentTimeMillis());
                 // 先向流量发生平台新增资源文件
                 String scriptRsp = HttpUtils.sendPost(actuatorUrl + "/scripts",
-                        JsonUtils.toUnderlineJSONString(scriptsRequest));
+                        (JSONObject) JSONObject.toJSON(scriptsRequest));
                 JSONObject scriptObj = JSONObject.parseObject(scriptRsp);
                 log.info("add script file response:{}", scriptObj.toJSONString());
 
                 if (ResponseUtils.checkResponse(scriptObj)) {
                     // 解析返回的uuid
-                    String uuid = scriptObj.getJSONObject(BaseConstants.STR_DATA).getString("script_uuid");
+                    String uuid = scriptObj.getString(BaseConstants.STR_DATA);
                     response.setThirdId(uuid);
 
                     // 再向流量发生平台上传资源文件
                     JSONObject jsonObj = new JSONObject();
-                    // 文件类型，1：攻击脚本 2：恶意文件
-                    jsonObj.put("type", 1);
                     // 文件的uuid
-                    jsonObj.put("uuid", uuid);
-                    String uploadRsp = HttpUtils.postFile(actuatorUrl + "/scripts/upload", file, jsonObj);
+                    jsonObj.put("file_uuid", uuid);
+                    String uploadRsp = HttpUtils.postFile(actuatorUrl + "/upload", file, jsonObj);
                     JSONObject pcapObject = JSONObject.parseObject(uploadRsp);
                     log.info("upload script file response:{}", pcapObject.toJSONString());
 
                     if (ResponseUtils.checkResponse(pcapObject)) {
                         // 获取文件名称
-                        String fileName = scriptObj.getJSONObject(BaseConstants.STR_DATA).getString("file_name");
+                        String fileName = scriptObj.getString("file_name");
                         response.setThirdName(fileName);
                     } else {
                         log.error("upload script file error");
