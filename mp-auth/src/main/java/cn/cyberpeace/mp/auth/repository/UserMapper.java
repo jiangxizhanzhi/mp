@@ -14,11 +14,8 @@ import org.springframework.stereotype.Repository;
 @ModelClass(UserModel.class)
 public interface UserMapper extends BaseModelMapper<UserModel> {
 
-    @Select("select count(id) from mp_auth_user")
     int getUserCnt();
 
-
-    @Update("update mp_auth_user set identifier = null where id = #{id}")
     int updateIdentToNull(@Param("id") String id);
 
 }

@@ -16,13 +16,10 @@ import java.util.List;
 @ModelClass(SysConfigModel.class)
 public interface SysConfigMapper extends BaseModelMapper<SysConfigModel> {
 
-    @Select("select * from mp_sys_config")
     List<SysConfigModel> selectAll();
 
-    @Select("select * from mp_sys_config where key_name = #{keyName}")
     SysConfigModel selectByKey(@Param("keyName") String keyName);
 
-    @Update("update mp_sys_config set value = #{value}, update_time = CURRENT_TIMESTAMP where key_name = #{key}")
     int updateByKeyName(@Param("key") String key, @Param("value") String value);
 
 

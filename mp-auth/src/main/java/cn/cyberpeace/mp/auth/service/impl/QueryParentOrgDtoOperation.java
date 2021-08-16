@@ -28,10 +28,10 @@ public class QueryParentOrgDtoOperation implements OrgDtoOperation<OrgDto> {
         var objSrvResult = orgService.get(orgDto.getParent());
         ObjResult<OrgModel> result = objSrvResult.getSource();
         if (result != null) {
-            OrgModel org = result.getObj();
-            if (org != null) {
+            OrgModel parentOrgModel = result.getObj();
+            if (parentOrgModel != null) {
                 OrgDto parentOrgDto = new OrgDto();
-                BeanUtils.copyProperties(org, parentOrgDto);
+                BeanUtils.copyProperties(parentOrgModel, parentOrgDto);
                 orgDto.setParentOrg(parentOrgDto);
                 parentOrgDto.execute(this);
             }

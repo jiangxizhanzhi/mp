@@ -35,7 +35,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         implements OrgService {
 
     @Autowired
-    private QueryParentOrgDtoOperation queryParentOrgOperation;
+    private QueryParentOrgDtoOperation queryParentOrgDtoOperation;
 
     @Autowired
     private QueryChildOrgDtoOperation queryChildOrgDtoOperation;
@@ -223,8 +223,8 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
 
         OrgDto orgDto = new OrgDto();
         BeanUtils.copyProperties(orgModel, orgDto);
-        log.warn("queryParentOrgOperation:{}", queryParentOrgOperation);
-        orgDto.execute(queryParentOrgOperation);
+        log.warn("queryParentOrgDtoOperation:{}", queryParentOrgDtoOperation);
+        orgDto.execute(queryParentOrgDtoOperation);
 
         return orgDto;
     }
@@ -269,9 +269,9 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
      * @param orgId
      */
     @Override
-    public List<OrgDto> listAllChildIgnoreLevel(String orgId) {
-        // 展示所有层级的用户
-        log.info("展示组织下所有层级的用户... orgId:{}", orgId);
+    public List<OrgDto> listAllChildIgnoreLevelExcludeSelf(String orgId) {
+        // 展示所有层级的子组织，不包括自己
+        log.info("show all child orgs ignore level, orgId:{}", orgId);
         ObjServiceResult<OrgModel> result = get(orgId);
         if (Objects.nonNull(result.getSource())) {
             OrgModel parentOrg = result.getSource().getObj();
@@ -288,6 +288,27 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         return new ArrayList<>();
     }
 
+
+    @Override
+    public List<OrgDto> listAllParentIgnoreLevelExcludeSelf(String orgId) {
+        // 展示所有层级的父组织，不包括自己
+        log.info("show all parent orgs ignore level, orgId:{}", orgId);
+        OrgDto orgDto = getHierarchicalOrgsByOrgId(orgId);
+
+        if (Objects.nonNull(orgDto)) {
+            List<OrgDto> parentOrgDtos = new ArrayList<>();
+            while (true) {
+                if ((orgDto = orgDto.getParentOrg()) != null) {
+                    parentOrgDtos.add(orgDto);
+                } else {
+                    break;
+                }
+            }
+            return parentOrgDtos;
+        }
+
+        return new ArrayList<>();
+    }
 
     private List<OrgDto> toTree(List<OrgModel> orgs) {
         Assert.notEmpty(orgs, "orgs should not be empty!");

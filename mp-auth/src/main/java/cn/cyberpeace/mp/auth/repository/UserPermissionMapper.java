@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.auth.repository;
 
 import cn.cyberpeace.mp.auth.model.TargetModel;
+import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserPermissionModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
@@ -17,15 +18,12 @@ import java.util.List;
 @ModelClass(UserPermissionModel.class)
 public interface UserPermissionMapper extends BaseModelMapper<UserPermissionModel> {
 
-    @Select("select distinct * from mp_auth_target where id in " +
-            "(select target from mp_auth_user_permission where owner = #{userId})")
-    List<TargetModel> listByUserId(@Param("userId") String userId);
+    List<TargetModel> listTargetsByUserId(@Param("userId") String userId);
 
+    List<UserModel> listUsersByTargetId(@Param("targetId") String targetId);
 
-    @Delete("delete from mp_auth_user_permission where owner = #{userId}")
     void deleteByUserId(@Param("userId") String userId);
 
-    @Delete("delete from mp_auth_user_permission where target = #{targetId}")
     void deleteByTargetId(@Param("targetId") String targetId);
 
 }
