@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.cyberpeace.mp.auth.repository.AvatarMapper">
+
+    <select id="listAll" resultType="cn.cyberpeace.mp.auth.model.AvatarModel">
+        select * from mp_auth_avatar
+    </select>
+
+    <delete id="deleteAll">
+        delete from mp_auth_avatar where pk > 0
+    </delete>
+
+</mapper>

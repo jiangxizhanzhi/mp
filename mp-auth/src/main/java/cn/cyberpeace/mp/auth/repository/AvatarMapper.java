@@ -14,9 +14,7 @@ import java.util.List;
 @ModelClass(AvatarModel.class)
 public interface AvatarMapper extends BaseModelMapper<AvatarModel> {
 
-    @Select("select * from mp_auth_avatar")
     List<AvatarModel> listAll();
 
-    @Select("delete from mp_auth_avatar where pk > 0")
     void deleteAll();
 }
