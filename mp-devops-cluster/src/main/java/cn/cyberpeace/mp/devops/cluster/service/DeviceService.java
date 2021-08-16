@@ -1,12 +1,33 @@
 package cn.cyberpeace.mp.devops.cluster.service;
 
-import cn.cyberpeace.mp.base.service.BaseModelService;
-import cn.cyberpeace.mp.base.service.param.QueryParams;
-import cn.cyberpeace.mp.devops.cluster.model.DeviceModel;
+import cn.cyberpeace.mp.devops.cluster.model.Device;
+import cn.cyberpeace.mp.devops.cluster.model.DeviceCloudPlatformModel;
+
+import java.util.List;
 
 /**
- * 运维管控-集群管理-计算节点-设备管理接口层
+ * 设备
  * @author wanggang
  */
-public interface DeviceService extends BaseModelService<DeviceModel, QueryParams> {
+public interface DeviceService extends BaseCloudPlatformService {
+
+    /**
+     * 分页查询
+     * @param getParams
+     * @return
+     */
+    DeviceCloudPlatformModel page(String getParams);
+
+    /**
+     * 根据ID查询
+     * @param id
+     * @return
+     */
+    Device findById(String id);
+
+    /**
+     * 批量删除
+     * @param ids
+     */
+    void deleteByIds(List<String> ids);
 }

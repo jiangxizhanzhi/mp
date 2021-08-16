@@ -8,12 +8,18 @@ public interface ImagesConverter {
      * 分页查询
      * @param request
      */
-    void page(ImagesPageRequest request);
+    void page(ImagePageRequest request);
 
     /**
      * 新增
      */
-    void add(ImagesAddRequest request);
+    void add(ImageAddRequest request);
+
+    /**
+     * 更新
+     * @param request
+     */
+    void update(ImageUpdateRequest request);
 
     /**
      * 预览

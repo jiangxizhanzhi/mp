@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.cyberpeace.mp.devops.cluster.repository.ImageMapper">
+
+    <resultMap id="BaseResultMap" type="cn.cyberpeace.mp.devops.cluster.model.ImagesModel">
+        <id column="pk" property="pk"/>
+        <result column="id"  property="id"/>
+        <result column="name"  property="name"/>
+        <result column="main_category"  property="mainCategory"/>
+        <result column="sub_category" property="subCategory"/>
+        <result column="type" property="type"/>
+    </resultMap>
+
+    <sql id="baseColumns">
+        id,name,main_category,sub_category,type
+    </sql>
+
+    <select id="page" parameterType="cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO" resultMap="BaseResultMap">
+        select
+            <include refid="baseColumns"/>
+        from
+            mp_devops_images
+        <where>
+            <if test=" name != null and name != ''">
+                and name like CONCAT('%',#{name},'%')
+            </if>
+            <if test=" mainCategory != null">
+                and main_category = #{mainCategory}
+            </if>
+            <if test=" subCategory != null">
+                and sub_category = #{subCategory}
+            </if>
+            <if test=" type != null">
+                and type = #{type}
+            </if>
+        </where>
+        limit #{offset}, #{limit}
+    </select>
+
+    <insert id="insert" parameterType="cn.cyberpeace.mp.devops.cluster.model.ImagesModel">
+        insert into mp_devops_images
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="name != null">
+                name,
+            </if>
+            <if test="mainCategory != null">
+                main_category,
+            </if>
+            <if test="subCategory != null">
+                sub_category,
+            </if>
+            <if test="type != null">
+                type,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+            <if test="updateTime != null">
+                update_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id},
+            </if>
+            <if test="name != null">
+                #{name},
+            </if>
+            <if test="mainCategory != null">
+                #{mainCategory},
+            </if>
+            <if test="subCategory != null">
+                #{subCategory},
+            </if>
+            <if test="type != null">
+                #{type},
+            </if>
+            <if test="createTime != null">
+                #{createTime},
+            </if>
+            <if test="updateTime != null">
+                #{updateTime},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateById"
+            parameterType="cn.cyberpeace.mp.devops.cluster.model.ImagesModel">
+        update mp_devops_images
+        <set>
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="mainCategory != null">
+                main_category = #{mainCategory},
+            </if>
+            <if test="subCategory != null">
+                sub_category = #{subCategory},
+            </if>
+            <if test="type != null">
+                type = #{type},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="cn.cyberpeace.mp.devops.cluster.dto.ImageDeleteDTO">
+        delete from mp_devops_images
+        <where>
+            <if test="ids != null and ids.size > 0">
+                 id in
+                <foreach collection="ids" item="item" index="index"  open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </delete>
+</mapper>

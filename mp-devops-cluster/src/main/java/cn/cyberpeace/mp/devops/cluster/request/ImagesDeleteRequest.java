@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /**
  * 镜像删除请求信息
  */
@@ -19,6 +21,6 @@ public class ImagesDeleteRequest extends BaseRequest {
     /**
      * 镜像ID
      */
-    private String imageId;
+    private List<String> imageIds;
 
 }

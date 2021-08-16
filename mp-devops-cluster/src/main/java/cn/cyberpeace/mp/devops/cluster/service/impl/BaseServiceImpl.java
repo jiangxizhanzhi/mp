@@ -1,11 +1,9 @@
 package cn.cyberpeace.mp.devops.cluster.service.impl;
 
-import cn.cyberpeace.mp.auth.extensions.security.common.JwtCommon;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.BaseModel;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -136,6 +134,23 @@ public class BaseServiceImpl {
             log.info("=====POST调用url：{},参数：{},对应返回结果信息：{},报错信息：{}",url,body,result,e.getMessage());
         }
         return model;
+    }
+
+    /**
+     * 通过Delete方式删除数据
+     * @param url
+     * @param body
+     * @return
+     */
+    protected String sendDelete(String url,String body){
+        String result = "";
+        try {
+            result = HttpUtils.getInstance().sendDelete(url,body);
+            log.info("=====DELETE调用url：{},参数：{},对应返回结果信息：{}",url,body,result);
+        } catch (IOException e) {
+            log.info("=====DELETE调用url：{},参数：{},对应返回结果信息：{},报错信息：{}",url,body,result,e.getMessage());
+        }
+        return result;
     }
 
 }

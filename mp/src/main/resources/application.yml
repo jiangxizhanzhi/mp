@@ -58,7 +58,7 @@ mp:
           file-server-addr: /fdfs    # 外部文件服务器地址
           inner-file-server-addr: http://${ip.fdfs}:8888   # 内部文件服务器地址
   devops:
-    cp-url: http://${ip.cp}:11111 #云平台地址
+    cp-url: http://10.100.7.5:9019 #云平台地址
     cr-url: http://${ip.cr} #
     hostname: controller  #主机名称
     es-nodes: ${ip.es}:9200

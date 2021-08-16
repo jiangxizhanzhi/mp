@@ -66,4 +66,15 @@ public class BaseOpenStackServiceImpl extends BaseServiceImpl {
     protected String sendPost(String api,String body){
         return super.sendPost(devopsConfig.getCpUrl().concat(api),body);
     }
+
+    /**
+     * 通过Delete方式删除数据
+     * @param api
+     * @param body
+     * @return
+     */
+    @Override
+    protected String sendDelete(String api, String body){
+        return super.sendDelete(devopsConfig.getCpUrl().concat(api),body);
+    }
 }

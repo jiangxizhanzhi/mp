@@ -1,20 +1,15 @@
-package cn.cyberpeace.mp.devops.cluster.request;
+package cn.cyberpeace.mp.devops.cluster.dto;
 
-import io.swagger.annotations.ApiModel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-/**
- * 镜像分页请求信息
- */
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-@ApiModel(value = "镜像分页请求信息")
-public class ImagesPageRequest extends BasePageRequest {
+public class ImagePageDTO extends BasePageDTO{
 
     /**
      * 角色
@@ -35,4 +30,6 @@ public class ImagesPageRequest extends BasePageRequest {
      * 镜像名称
      */
     private String name;
+
+
 }

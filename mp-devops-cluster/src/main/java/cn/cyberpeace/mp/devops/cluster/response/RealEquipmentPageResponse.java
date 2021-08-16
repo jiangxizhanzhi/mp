@@ -15,6 +15,12 @@ import lombok.NoArgsConstructor;
 public class RealEquipmentPageResponse  extends BaseCloudPlatformResponse{
 
     /**
+     * ID
+     */
+    @ApiModelProperty(value = "ID")
+    private String id;
+
+    /**
      * 名称
      */
     @ApiModelProperty(value = "名称")
@@ -24,19 +30,25 @@ public class RealEquipmentPageResponse  extends BaseCloudPlatformResponse{
      * 型号
      */
     @ApiModelProperty(value = "型号")
-    private String type;
+    private String model;
 
     /**
      * 参数
      */
     @ApiModelProperty(value = "参数")
-    private String parameter;
+    private String params;
 
     /**
      * 分类
      */
     @ApiModelProperty(value = "分类")
-    private String category;
+    private Integer category;
+
+    /**
+     * 子分类
+     */
+    @ApiModelProperty(value = "子分类")
+    private Integer subCategory;
 
     /**
      * 系统信息
@@ -66,5 +78,5 @@ public class RealEquipmentPageResponse  extends BaseCloudPlatformResponse{
      * 在位状态
      */
     @ApiModelProperty(value = "在位状态")
-    private String status;
+    private Boolean status;
 }

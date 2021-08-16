@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.devops.cluster.request;
 
 
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -15,12 +16,20 @@ import lombok.NoArgsConstructor;
 public class RealEquipmentPageRequest extends BasePageRequest{
 
     /**
-     * 系统类型
+     * 系统主类型
      */
-    private Integer systemType;
+    @ApiModelProperty(value = "系统主类型")
+    private Integer category;
+
+    /**
+     * 系统子类型
+     */
+    @ApiModelProperty(value = "系统子类型")
+    private Integer secondCategory;
 
     /**
      * 名称
      */
+    @ApiModelProperty(value = "名称")
     private String name;
 }

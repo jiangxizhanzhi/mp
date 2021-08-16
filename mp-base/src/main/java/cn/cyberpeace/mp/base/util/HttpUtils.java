@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.base.util;
 
+import cn.cyberpeace.mp.base.config.HttpDeleteWithBody;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.http.Header;
@@ -197,6 +198,20 @@ public class HttpUtils {
         credentialsProvider.setCredentials(AuthScope.ANY, usernamePasswordCredentials);
         CloseableHttpClient client = HttpClientBuilder.create().setDefaultCredentialsProvider(credentialsProvider).build();
         return client;
+    }
+
+    public static String sendDelete(String url,String json) throws IOException {
+        HttpClient client = HttpClientBuilder.create().build();
+        HttpDeleteWithBody httpDelete = new HttpDeleteWithBody(url);
+        StringEntity entity = new StringEntity(json, "utf-8");
+        entity.setContentType("application/json");
+        httpDelete.setEntity(entity);
+        HttpResponse resp = client.execute(httpDelete);
+        // 设置请求和传输超时时间
+        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
+        httpDelete.setConfig(requestConfig);
+        // 获得返回值
+        return EntityUtils.toString(resp.getEntity(), "UTF-8");
     }
 }
 
