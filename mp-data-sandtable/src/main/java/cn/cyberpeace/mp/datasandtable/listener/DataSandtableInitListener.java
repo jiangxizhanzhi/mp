@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.datasandtable.listener;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.datasandtable.constant.DataSandtableConstant;
-import cn.cyberpeace.mp.datasandtable.dao.WazuhDao;
+import cn.cyberpeace.mp.datasandtable.repository.WazuhDao;
 import cn.cyberpeace.mp.datasandtable.model.GroupModel;
 import cn.cyberpeace.mp.datasandtable.service.NetworkTrafficGroupService;
 import com.google.common.cache.CacheBuilder;

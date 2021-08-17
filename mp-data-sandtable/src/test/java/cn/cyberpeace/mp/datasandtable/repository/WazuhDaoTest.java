@@ -1,8 +1,7 @@
-package cn.cyberpeace.mp.datasandtable.dao;
+package cn.cyberpeace.mp.datasandtable.repository;
 
 import cn.cyberpeace.mp.datasandtable.TestDatasandtableApplciation;
 import cn.cyberpeace.mp.datasandtable.constant.DataSandtableConstant;
-import cn.cyberpeace.mp.datasandtable.model.WazuhFileRoot;
 import cn.cyberpeace.mp.datasandtable.model.WazuhNetifaceRoot;
 import cn.cyberpeace.mp.datasandtable.model.WazuhRamRoot;
 import java.io.IOException;
