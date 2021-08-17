@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.base.util.ClassUtils;
 import cn.cyberpeace.mp.base.util.ListTreeNode;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.base.*;
 import cn.cyberpeace.mp.scene.core.exception.SceneNotExistException;
 import cn.cyberpeace.mp.scene.core.exception.SceneUpdateException;
@@ -461,8 +462,10 @@ public abstract class BaseSceneHandler<
         if (elementPorts == null) {
             return;
         }
+        Map<String, E> elementIdElementBOMap = elementMap.values().stream().collect(
+                Collectors.toMap(EidBO::getEid, element -> element));
         elementPorts.forEach(elementPort -> {
-            var elementBO = elementMap.getOrDefault(elementPort.getSceneElement(), null);
+            var elementBO = elementIdElementBOMap.getOrDefault(elementPort.getSceneElement(), null);
             if (elementBO == null) {
                 return;
             }

@@ -111,8 +111,12 @@ public abstract class BasePluginHandler<S, E, P> {
     public void init(String sceneId, List<String> elementIds, List<String> elementPortIds) {
         ClassUtils.loadClassFields(this);
         sourceSceneId = sceneId;
-        this.elementIds.addAll(elementIds);
-        this.elementPortIds.addAll(elementPortIds);
+        if (elementIds != null) {
+            this.elementIds.addAll(elementIds);
+        }
+        if (elementPortIds != null) {
+            this.elementPortIds.addAll(elementPortIds);
+        }
         reload();
     }
 

@@ -21,6 +21,16 @@ import java.util.Arrays;
 public class SceneConfigService extends BaseModelServiceImpl<SceneConfigModel, SceneConfigMapper, BaseModelFields,
         QueryParams> {
 
+    public ServiceResult<SceneConfigDataBO> get(String id, boolean isAreaMode, String areaId) {
+        SceneConfigHandler sceneConfigHandler;
+        try {
+            sceneConfigHandler = new SceneConfigHandler(id, areaId, isAreaMode);
+        } catch (SceneNotExistException e) {
+            return new ServiceResult<>(null, SceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return new ServiceResult<>(sceneConfigHandler.toData());
+    }
+
     public ServiceResult<SceneConfigDataBO> sync(SceneConfigDataBO sceneConfigDataBO, boolean isAreaMode) {
         SceneConfigHandler sceneConfigHandler;
         try {
