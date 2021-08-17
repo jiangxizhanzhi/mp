@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.flow.config.HttpDeleteWithBody;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
@@ -29,7 +30,7 @@ public class HttpDeleteUtil {
         HttpClient httpClient = HttpClientBuilder.create().build();
         HttpDeleteWithBody httpDeleteWithBody = new HttpDeleteWithBody(url);
         //设置Content-Type
-        httpDeleteWithBody.setHeader("Content-Type", "application/json");
+        httpDeleteWithBody.setHeader("Content-Type", ContentType.APPLICATION_JSON.getMimeType());
         //写入JSON数据参数
         httpDeleteWithBody.setEntity(new StringEntity(content, StandardCharsets.UTF_8));
 

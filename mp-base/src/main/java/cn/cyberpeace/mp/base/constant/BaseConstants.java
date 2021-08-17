@@ -33,6 +33,11 @@ public interface BaseConstants {
     String QUESTION_MARK = "?";
 
     /**
+     * 点
+     */
+    String SPOT = "\\.";
+
+    /**
      * 默认页数
      */
     int DEFAULT_PAGE = 1;

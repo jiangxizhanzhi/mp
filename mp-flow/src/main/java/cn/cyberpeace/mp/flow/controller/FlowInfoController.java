@@ -2,13 +2,11 @@ package cn.cyberpeace.mp.flow.controller;
 
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
-import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.flow.constant.ControllerConstant;
+import cn.cyberpeace.mp.flow.model.FlowInfoModel;
 import cn.cyberpeace.mp.flow.request.BatchDeleteFlowInfoRequest;
 import cn.cyberpeace.mp.flow.request.FlowExecuteRequest;
-import cn.cyberpeace.mp.flow.model.FlowInfoModel;
-import cn.cyberpeace.mp.flow.response.FlowInfoUploadResponse;
 import cn.cyberpeace.mp.flow.service.FlowInfoService;
 import cn.cyberpeace.mp.flow.service.impl.FlowExecuteScheduleMethodImpl;
 import cn.cyberpeace.mp.flow.service.impl.FlowInfoServiceImpl;
@@ -16,13 +14,9 @@ import cn.cyberpeace.mp.flow.util.FlowExecuteScheduleUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import javax.servlet.http.HttpServletRequest;
 
 @Slf4j
 @Api(tags = "流量管理接口")
@@ -32,45 +26,13 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, Query
 
     @Autowired
     private FlowExecuteScheduleMethodImpl flowExecuteScheduleMethod;
+
     @Autowired
     private FlowInfoServiceImpl flowServiceImpl;
 
     @Autowired
     public FlowInfoController(FlowInfoService flowInfoService) {
         setModelService(flowInfoService);
-    }
-
-
-
-//    @GetMapping("/page")
-//    public ServiceResult<FlowInfoUploadResponse> pageFlowInfo(FlowInfoModel flowInfoModel) {
-//        flowServiceImpl.pageFlowInfoModel(flowInfoModel);
-//        return ServiceResult.successful();
-//    }
-
-    /**
-     * 上传流量文件
-     * @param resourceType
-     * @param file
-     * @param request
-     * @return
-     */
-    @ApiOperation("上传流量文件")
-    @PostMapping("/upload")
-    public ServiceResult<FlowInfoUploadResponse> uploadFlowInfo(@RequestParam int resourceType, MultipartFile file,
-                                                                HttpServletRequest request) {
-        return flowServiceImpl.uploadFlowInfo(resourceType, file, request);
-    }
-
-    /**
-     * 更新流量信息
-     * @param flowModel
-     * @return
-     */
-    @ApiOperation("更新流量信息")
-    @PatchMapping("/update")
-    public ServiceResult<FlowInfoModel> updateFlowInfo(@RequestBody @Validated FlowInfoModel flowModel) {
-        return flowServiceImpl.updateFlowInfo(flowModel);
     }
 
     /**
@@ -94,6 +56,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, Query
     public ServiceResult<Integer> batchDeleteFlowInfo(@Validated BatchDeleteFlowInfoRequest request) {
         return flowServiceImpl.batchDeleteFlowInfo(request);
     }
+
 
     /**
      * 定时执行流量发生任务

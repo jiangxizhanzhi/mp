@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.flow.request;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -45,13 +46,13 @@ public class AddScriptsRequest {
      * 资源文件的类别，1：攻击脚本，2：恶意文件
      */
     @ApiModelProperty("资源文件的类别，1：攻击脚本，2：恶意文件")
-    private Integer type = 1;
+    private Integer type;
 
     /**
      * 是否使用默认镜像
      */
     @ApiModelProperty("是否使用默认镜像")
-    private boolean isDefault = true;
+    private Boolean isDefault;
 
     /**
      * 镜像中使用的脚本上传的路径
@@ -71,4 +72,12 @@ public class AddScriptsRequest {
     @ApiModelProperty("如果是攻击脚本，需要填写如何获取返回结果的命令")
     private String getResultCmd;
 
+    @JsonProperty(value = "is_default")
+    public Boolean getIsDefault() {
+        return isDefault;
+    }
+
+    public void setIsDefault(Boolean isDefault) {
+        isDefault = isDefault;
+    }
 }

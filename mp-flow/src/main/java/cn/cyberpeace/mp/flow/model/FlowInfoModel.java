@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotBlank;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -18,6 +20,7 @@ public class FlowInfoModel extends BaseModel {
      * 流量标题
      */
     @ApiModelProperty(value = "流量标题")
+    @NotBlank(message = "title can not be empty")
     private String title;
 
     /**
@@ -28,19 +31,6 @@ public class FlowInfoModel extends BaseModel {
     private String flowDesc;
 
     /**
-     * 第三方id
-     */
-    @ApiModelProperty(value = "第三方id")
-    private String thirdId;
-
-    /**
-     * 第三方文件名称
-     */
-    @ApiModelProperty(value = "第三方文件名称")
-    @DefaultStr
-    private String thirdName;
-
-    /**
      * 交互类型：0 背景流量，1 攻击流量，2 全流量
      */
     @ApiModelProperty(value = "交互类型：0 背景流量，1 攻击流量，2 全流量")
@@ -48,15 +38,10 @@ public class FlowInfoModel extends BaseModel {
     private int interactiveType;
 
     /**
-     * 流量发生平台：0 通用，1 Trex流量发生器
-     */
-    @ApiModelProperty(value = "流量发生平台：0 通用，1 Trex流量发生器")
-    private int flowPlatform;
-
-    /**
      * 资源类型：0 pcap包，1 脚本
      */
     @ApiModelProperty(value = "资源类型：0 pcap包，1 脚本")
+    @NotBlank(message = "resourceType can not be empty")
     private int resourceType;
 
     /**
