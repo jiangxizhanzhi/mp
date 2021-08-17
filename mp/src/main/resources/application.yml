@@ -73,7 +73,8 @@ mp:
   log:
     exclude-uri: /login
     exclude-method: OPTIONS
-
+  auth:
+    activationFile: /home/mp/activation
 
 management:
   endpoints:

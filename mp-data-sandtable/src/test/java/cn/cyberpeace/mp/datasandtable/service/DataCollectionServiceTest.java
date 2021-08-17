@@ -8,7 +8,6 @@ import cn.cyberpeace.mp.datasandtable.model.WazuhEventRequest;
 import cn.cyberpeace.mp.datasandtable.model.WazuhModel;
 import cn.cyberpeace.mp.datasandtable.model.WazuhMonitorEventsRequest;
 import cn.cyberpeace.mp.datasandtable.model.emum.FileEventType;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import java.io.IOException;
@@ -32,10 +31,10 @@ import org.springframework.util.MultiValueMap;
 
 @SpringBootTest(classes = TestDatasandtableApplciation.class)
 @RunWith(SpringRunner.class)
-public class WazuhServiceTest {
+public class DataCollectionServiceTest {
 
     @Autowired
-    private WazuhService wazuhService;
+    private DataCollectionService dataCollectionService;
 
     @Resource(name = "wazuhRestHighLevelClient")
     private RestHighLevelClient restHighLevelClient;
@@ -48,7 +47,7 @@ public class WazuhServiceTest {
         wazuhEventRequest.setEndTime(LocalDateTime.now());
         wazuhEventRequest.setPageNum(1);
         wazuhEventRequest.setPageSize(10);
-        ListObjResult<FileEventModel> listObjResult =  wazuhService.queryFileEvents(wazuhEventRequest);
+        ListObjResult<FileEventModel> listObjResult =  dataCollectionService.queryFileEvents(wazuhEventRequest);
         Assert.isTrue(listObjResult.getObjs().size() >0, "查询文件监控分页有数据");
     }
 
@@ -61,7 +60,7 @@ public class WazuhServiceTest {
         wazuhEventRequest.setEndTime(LocalDateTime.now());
         wazuhEventRequest.setPageNum(1);
         wazuhEventRequest.setPageSize(10);
-        ListObjResult<FileEventModel> listObjResult =  wazuhService.queryFileEvents(wazuhEventRequest);
+        ListObjResult<FileEventModel> listObjResult =  dataCollectionService.queryFileEvents(wazuhEventRequest);
         Assert.isTrue(listObjResult.getObjs().get(0).getFileEventType().equals(FileEventType.REGISTRY), "查询文件监控分页有数据");
     }
 
@@ -81,14 +80,14 @@ public class WazuhServiceTest {
         WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
         wazuhEventRequest.setStartTime(LocalDateTime.now().minusMonths(7));
         wazuhEventRequest.setEndTime(LocalDateTime.now());
-        List<String> indexList= wazuhService.indexListBuilder(LocalDateTime.now().minusDays(7), LocalDateTime.now());
+        List<String> indexList= dataCollectionService.indexListBuilder(LocalDateTime.now().minusDays(7), LocalDateTime.now());
         System.out.println(indexList);
     }
 
 
     @Test
     public void testQueryAllAgentMacAddr() {
-        MultiValueMap multiValueMap = wazuhService.queryAllAgentMacAddr();
+        MultiValueMap multiValueMap = dataCollectionService.queryAllAgentMacAddr();
         Assert.isTrue(Objects.nonNull(multiValueMap), "查询到mac的关系");
     }
 
@@ -98,7 +97,7 @@ public class WazuhServiceTest {
         wazuhEventRequest.setMacIds(Lists.newArrayList("30:D0:42:E0:84:CC", "00:0c:29:22:d3:95"));
         wazuhEventRequest.setPageNum(1);
         wazuhEventRequest.setPageSize(10);
-        ListObjResult<WazuhModel> listObjResult= wazuhService.queryMonitorEvents(wazuhEventRequest);
+        ListObjResult<WazuhModel> listObjResult= dataCollectionService.queryMonitorEvents(wazuhEventRequest);
         Assert.isTrue(listObjResult.getObjs().size() > 1 , "查询文件监控分页有数据");
     }
 

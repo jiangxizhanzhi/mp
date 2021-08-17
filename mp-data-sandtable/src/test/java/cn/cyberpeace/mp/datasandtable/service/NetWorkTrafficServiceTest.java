@@ -13,10 +13,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @SpringBootTest(classes = TestDatasandtableApplciation.class)
 @RunWith(SpringRunner.class)
-public class SessionServiceTest {
+public class NetWorkTrafficServiceTest {
 
     @Autowired
-    private SessionService service;
+    private NetWorkTrafficService service;
 
     @Test
     public void testQuerySessionByGroup(){

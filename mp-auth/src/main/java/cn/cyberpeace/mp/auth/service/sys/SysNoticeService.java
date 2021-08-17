@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.auth.service;
+package cn.cyberpeace.mp.auth.service.sys;
 
 import cn.cyberpeace.mp.auth.dto.notice.SysNoticePageRequest;
 import cn.cyberpeace.mp.auth.dto.notice.SysNoticeRequest;

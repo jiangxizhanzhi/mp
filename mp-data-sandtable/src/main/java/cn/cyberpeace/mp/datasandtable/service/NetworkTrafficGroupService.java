@@ -22,7 +22,7 @@ import org.springframework.util.ObjectUtils;
  */
 @Service
 @Slf4j
-public class GroupService {
+public class NetworkTrafficGroupService {
 
     @Autowired
     private SandTableConfig sandTableConfig;

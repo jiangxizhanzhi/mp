@@ -13,6 +13,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.IndicesOptions;
@@ -44,7 +45,7 @@ import java.util.stream.IntStream;
  */
 @Service
 @Slf4j
-public class WazuhService {
+public class DataCollectionService {
 
     @Resource(name = "wazuhRestHighLevelClient")
     private RestHighLevelClient restHighLevelClient;
@@ -86,7 +87,7 @@ public class WazuhService {
             return new ListObjResult<>(fileEventModelList, total);
         } catch (IOException e) {
             log.error("es 查询文件事件分页 {} ", e);
-            throw new MpRuntimeException(BaseErrorCode.ERROR, e.toString());
+            throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
         }
     }
 
@@ -138,16 +139,16 @@ public class WazuhService {
                 }).collect(Collectors.toList());
 
             //process page
-            int offset = (wazuhMonitorEventsRequest.getPageNum()-1) * wazuhMonitorEventsRequest.getPageSize();
+            int offset = (wazuhMonitorEventsRequest.getPageNum() - 1) * wazuhMonitorEventsRequest.getPageSize();
             if (offset < wazuhModelList.size()) {
                 int toIndex = Math.min(offset + wazuhMonitorEventsRequest.getPageSize(), wazuhModelList.size());
                 return new ListObjResult<>(wazuhModelList.subList(offset, toIndex), wazuhModelList.size());
-            }else {
+            } else {
                 return new ListObjResult<>(Lists.newArrayList(), wazuhModelList.size());
             }
         } catch (IOException e) {
             log.error("es 查询监控事件分页失败 {}", e);
-            throw new MpRuntimeException(BaseErrorCode.ERROR, e.toString());
+            throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
         }
     }
 
@@ -177,7 +178,7 @@ public class WazuhService {
         //构造查询条件
         boolQueryBuilder.must(QueryBuilders.termQuery("rule.id", "900002"));
         int agentSize = 0;
-        
+
         if (!CollectionUtils.isEmpty(wazuhEventRequest.getMacIds())) {
             agentSize = buildAgentIdQuery(wazuhEventRequest.getMacIds(), boolQueryBuilder, allAgentMacAddr);
         }

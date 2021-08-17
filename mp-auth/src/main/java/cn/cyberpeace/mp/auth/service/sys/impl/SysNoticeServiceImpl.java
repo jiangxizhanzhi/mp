@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.auth.service.impl;
+package cn.cyberpeace.mp.auth.service.sys.impl;
 
 import cn.cyberpeace.mp.auth.dto.OrgDto;
 import cn.cyberpeace.mp.auth.dto.notice.SysNoticePageRequest;
@@ -11,7 +11,7 @@ import cn.cyberpeace.mp.auth.repository.SysNoticeGroupMapper;
 import cn.cyberpeace.mp.auth.repository.SysNoticeMapper;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
-import cn.cyberpeace.mp.auth.service.SysNoticeService;
+import cn.cyberpeace.mp.auth.service.sys.SysNoticeService;
 import cn.cyberpeace.mp.auth.service.fields.SysNoticeFields;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.auth.util.UserUtils;
