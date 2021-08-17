@@ -11,7 +11,7 @@ import cn.cyberpeace.mp.auth.model.RolePermissionModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.repository.RoleMapper;
-import cn.cyberpeace.mp.auth.service.RolePermissionService;
+import cn.cyberpeace.mp.auth.service.RolePermissionModelService;
 import cn.cyberpeace.mp.auth.service.RoleService;
 import cn.cyberpeace.mp.auth.service.TargetService;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
@@ -45,7 +45,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         implements RoleService {
 
     @Autowired
-    private RolePermissionService rolePermissionService;
+    private RolePermissionModelService rolePermissionService;
 
     @Autowired
     private TargetService targetService;

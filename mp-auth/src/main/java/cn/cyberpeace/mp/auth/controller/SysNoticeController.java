@@ -5,7 +5,7 @@ import cn.cyberpeace.mp.auth.dto.notice.SysNoticeRequest;
 import cn.cyberpeace.mp.auth.dto.validate.AddGroup;
 import cn.cyberpeace.mp.auth.dto.validate.UpdateGroup;
 import cn.cyberpeace.mp.auth.model.SysNoticeModel;
-import cn.cyberpeace.mp.auth.service.SysNoticeService;
+import cn.cyberpeace.mp.auth.service.sys.SysNoticeService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;

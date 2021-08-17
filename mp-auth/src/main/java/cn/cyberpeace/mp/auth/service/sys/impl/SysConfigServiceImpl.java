@@ -1,11 +1,11 @@
-package cn.cyberpeace.mp.auth.service.impl;
+package cn.cyberpeace.mp.auth.service.sys.impl;
 
 import cn.cyberpeace.mp.auth.constant.SysConfigConstant;
 import cn.cyberpeace.mp.auth.model.AvatarModel;
 import cn.cyberpeace.mp.auth.model.SysConfigModel;
 import cn.cyberpeace.mp.auth.repository.SysConfigMapper;
 import cn.cyberpeace.mp.auth.service.AvatarService;
-import cn.cyberpeace.mp.auth.service.SysConfigService;
+import cn.cyberpeace.mp.auth.service.sys.SysConfigService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.SysConfigFields;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -36,7 +36,6 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
         setModelMapper(modelMapper);
         setModelFields(modelFields);
     }
-
 
     @Autowired
     private AvatarService avatarService;

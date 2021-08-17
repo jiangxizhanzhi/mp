@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.auth.service;
+package cn.cyberpeace.mp.auth.service.sys;
 
 import cn.cyberpeace.mp.auth.model.SysConfigModel;
 import cn.cyberpeace.mp.base.service.BaseModelService;

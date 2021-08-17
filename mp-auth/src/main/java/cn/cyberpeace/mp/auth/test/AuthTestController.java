@@ -2,13 +2,16 @@ package cn.cyberpeace.mp.auth.test;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.OrgDto;
+import cn.cyberpeace.mp.auth.dto.activation.ActivationRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserOlReportCntDto;
 import cn.cyberpeace.mp.auth.repository.OrgMapper;
 import cn.cyberpeace.mp.auth.repository.SysConfigMapper;
+import cn.cyberpeace.mp.auth.service.sys.LicenseService;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.UserHeartbeatService;
 import cn.cyberpeace.mp.auth.service.UserLogService;
 import cn.cyberpeace.mp.auth.service.TargetService;
+import cn.cyberpeace.mp.auth.service.sys.SysActivationService;
 import cn.cyberpeace.mp.auth.util.PasswordStrengthChecker;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.hutool.system.oshi.OshiUtil;
@@ -60,6 +63,9 @@ public class AuthTestController {
 
     @Autowired
     private OrgService orgService;
+
+    @Autowired
+    private SysActivationService activationService;
 
     @ApiOperation("DES加密")
     @PostMapping("/desEncryptPwd")
@@ -126,6 +132,13 @@ public class AuthTestController {
     @GetMapping("/testlicense")
     public void testlicense() {
 //        licenseJdkDemo.testlicense();
+
+//        str.p = "{\"machinecode\": \"CHTF-12H1-34S8-HV23-123S\", \"deadline\": 1, \"info\": {\"thj\":2}}";
+        ActivationRequest activationRequest = new ActivationRequest();
+        activationRequest.setDeadline(1);
+        activationRequest.setMachinecode("CHTF-12H1-34S8-HV23-123S");
+
+        activationService.activate(activationRequest);
     }
 
     @GetMapping("/testos")
