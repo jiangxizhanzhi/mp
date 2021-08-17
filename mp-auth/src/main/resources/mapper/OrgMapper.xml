@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.cyberpeace.mp.auth.repository.OrgMapper">
+
+    <select id="listParents" resultType="cn.cyberpeace.mp.auth.model.OrgModel">
+        SELECT * FROM mp_auth_org where parent = '' or parent is null
+    </select>
+
+    <select id="listByParentId" resultType="cn.cyberpeace.mp.auth.model.OrgModel">
+        SELECT * FROM mp_auth_org where parent = #{parentId}
+    </select>
+
+    <select id="listAll" resultType="cn.cyberpeace.mp.auth.model.OrgModel">
+        SELECT * FROM mp_auth_org where tenant = #{tenantId}
+    </select>
+
+    <select id="getByPath" resultType="cn.cyberpeace.mp.auth.model.OrgModel">
+        SELECT * FROM mp_auth_org where path = #{path}
+    </select>
+
+    <update id="updatePath">
+        update mp_auth_org set path = #{path} where id = #{id}
+    </update>
+
+</mapper>

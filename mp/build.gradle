@@ -1,0 +1,19 @@
+apply from: 'config.gradle'
+
+bootJar {
+    enabled = true
+}
+
+dependencies {
+    gradle.ext.appmodules.each {
+        implementation project(":${it}")
+    }
+}
+
+flyway {
+    url = gradle.ext.flyway.url
+    user = gradle.ext.flyway.user
+    password = gradle.ext.flyway.password
+    cleanDisabled = true
+    locations = ['classpath:db/migration']
+}

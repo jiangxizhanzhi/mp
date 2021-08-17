@@ -1,0 +1,16 @@
+pluginManagement {
+    repositories {
+        maven { url 'https://repo.spring.io/release' }
+        gradlePluginPortal()
+    }
+}
+
+apply from: 'mp/config.gradle'
+rootProject.name = 'mp'
+
+include('mp-base')
+gradle.ext.appmodules.each {
+    include(it)
+}
+include('mp')
+

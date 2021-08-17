@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.cyberpeace.mp.auth.repository.UserRoleMapper">
+
+    <select id="listRolesByUserId" resultType="cn.cyberpeace.mp.auth.model.RoleModel">
+        select distinct * from mp_auth_role where id in
+            (select role from mp_auth_user_role where user = #{userId})
+    </select>
+
+
+    <select id="listUsersByRoleId" resultType="cn.cyberpeace.mp.auth.model.UserModel">
+        select distinct * from mp_auth_user where id in
+            (select user from mp_auth_user_role where role = #{roleId})
+    </select>
+
+
+    <select id="getUserRoleStatistics" resultType="cn.cyberpeace.mp.auth.dto.role.UserRoleStatistic">
+        select tabA.rid roleId, tabR.name roleName, tabA.cnt userCnt
+            from (select role rid, count(user) cnt from mp_auth_user_role group by role) as tabA
+                     left join mp_auth_role tabR on tabA.rid = tabR.id
+            order by userCnt desc
+    </select>
+
+    <delete id="deleteByUserId">
+        delete from mp_auth_user_role where user = #{userId}
+    </delete>
+
+    <delete id="deleteByRoleId">
+        delete from mp_auth_user_role where role = #{roleId}
+    </delete>
+
+    <delete id="deleteByRoleIdAndUserIds">
+        delete from mp_auth_user_role where role = #{roleId}
+        <if test="userIds != null and userIds.size() > 0">
+            AND user IN
+            <foreach item="userId" index="index" collection="userIds" open="(" separator="," close=")">
+                #{userId}
+            </foreach>
+        </if>
+    </delete>
+</mapper>

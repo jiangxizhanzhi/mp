@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.cyberpeace.mp.auth.repository.OrgUserMapper">
+
+
+    <select id="listUsersByOrgId" resultType="cn.cyberpeace.mp.auth.model.UserModel">
+        select distinct * from mp_auth_user where id in
+            (select user from mp_auth_org_user where org = #{orgId})
+            order by mp_auth_user.username
+    </select>
+
+    <select id="listOrgsByUserId" resultType="cn.cyberpeace.mp.auth.model.OrgModel">
+        select distinct * from mp_auth_org where id in
+            (select org from mp_auth_org_user where user = #{userId})
+            order by mp_auth_org.pk
+    </select>
+
+    <select id="listUsers" resultType="cn.cyberpeace.mp.auth.model.UserModel">
+        select distinct * from mp_auth_user
+        <where>
+            <if test="orgIds != null and orgIds.size() > 0">
+                AND id in (select user from mp_auth_org_user where org in
+                <foreach item="orgId" index="index" collection="orgIds" open="(" separator="," close=")">
+                    #{orgId}
+                </foreach>
+                )
+            </if>
+            <if test="userIds != null and userIds.size() > 0">
+                AND id in
+                <foreach item="userId" index="index" collection="userIds" open="(" separator="," close=")">
+                    #{userId}
+                </foreach>
+            </if>
+            <if test="username != null and username != ''">
+                AND ( username like CONCAT('%', #{username}, '%') or name like CONCAT('%', #{username}, '%'))
+            </if>
+        </where>
+        order by username
+    </select>
+
+    <delete id="deleteByUserId">
+        delete from mp_auth_org_user where user = #{userId}
+    </delete>
+
+    <delete id="deleteByOrgId">
+        delete from mp_auth_org_user where org = #{orgId}
+    </delete>
+
+</mapper>

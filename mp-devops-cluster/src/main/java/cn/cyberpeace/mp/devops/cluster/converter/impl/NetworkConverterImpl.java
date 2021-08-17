@@ -1,0 +1,64 @@
+package cn.cyberpeace.mp.devops.cluster.converter.impl;
+
+import cn.cyberpeace.mp.base.util.BeanUtils;
+import cn.cyberpeace.mp.devops.cluster.converter.NetworkConverter;
+import cn.cyberpeace.mp.devops.cluster.converter.model.NetworkPageConverterModel;
+import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
+import cn.cyberpeace.mp.devops.cluster.model.NetworkCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.request.NetworkPageRequest;
+import cn.cyberpeace.mp.devops.cluster.service.NetworkService;
+import com.google.common.collect.Lists;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+@Service
+public class NetworkConverterImpl implements NetworkConverter {
+
+    private NetworkService networkService;
+
+    @Autowired
+    public NetworkConverterImpl(NetworkService networkService) {
+        this.networkService = networkService;
+    }
+
+    @Override
+    public String[] getDefaultPageIgnoreField() {
+        return BeanUtils.getBeanGetterFieldName(NetworkPageRequest::getPage,NetworkPageRequest::getPerPage);
+    }
+
+    @Override
+    public String[] getTotalPageIgnoreField() {
+        return BeanUtils.getBeanGetterFieldName(NetworkPageRequest::getLimit,NetworkPageRequest::getOffset,
+                NetworkPageRequest::getPage,NetworkPageRequest::getPerPage);
+    }
+
+    @Override
+    public NetworkPageConverterModel page(NetworkPageRequest request, String... ignoreFields) {
+        ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
+        String getParams = BeanUtils.wrapperGetParamsByObject(request,ignoreFields);
+        NetworkCloudPlatformModel model = networkService.page(getParams);
+        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getNetworks())){
+            return null;
+        }
+        List<NetworkPageConverterModel.Model> list = model.getNetworks().stream().map(networkModel -> {
+            NetworkCloudPlatformModel.NetworkModel.Subnet subnet = networkModel.getSubnet();
+            List<NetworkPageConverterModel.Model.Subnet> subnets = Lists.newArrayList();
+            if (Objects.nonNull(subnet)) {
+                subnets = List.of(new NetworkPageConverterModel.Model.Subnet(subnet.getId(), subnet.getCidr(), subnet.getGateway_ip()));
+            }
+            return  NetworkPageConverterModel.Model.builder().name(networkModel.getName()).networkType(networkModel.getNetwork_type())
+                    .status(CloudPlatformEnum.fromValue(networkModel.getStatus()))
+                    .subnets(subnets).createdAt(networkModel.getCreated_at()).build();
+        }).collect(Collectors.toList());
+        NetworkPageConverterModel convertModel = new NetworkPageConverterModel();
+        convertModel.setModelList(list);
+        convertModel.setTotal(model.getTotal());
+        return convertModel;
+    }
+}

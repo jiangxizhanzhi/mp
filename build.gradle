@@ -1,0 +1,91 @@
+plugins {
+    id 'org.springframework.boot' version '2.4.4'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'org.asciidoctor.convert' version '1.5.8'
+    id 'java'
+    id 'application'
+    id 'org.flywaydb.flyway' version '7.7.3'
+}
+
+apply from: 'mp/config.gradle'
+
+subprojects {
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'org.asciidoctor.convert'
+    apply plugin: 'java'
+    apply plugin: 'application'
+    apply plugin: 'org.flywaydb.flyway'
+
+
+    group = 'cn.cyberpeace.mp'
+    version = gradle.ext.version
+    sourceCompatibility = '11'
+    mainClassName = 'cn.cyberpeace.mp.Application'
+
+    configurations {
+        compileOnly {
+            extendsFrom annotationProcessor
+        }
+    }
+
+    repositories {
+        maven { url 'https://repo.spring.io/release' }
+        mavenCentral()
+    }
+
+    ext {
+        set('snippetsDir', file("build/generated-snippets"))
+    }
+
+    dependencies {
+        implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+        implementation 'org.springframework.boot:spring-boot-starter-web'
+        implementation 'org.springframework.boot:spring-boot-starter-websocket'
+        implementation 'org.springframework.boot:spring-boot-starter-actuator'
+        implementation 'org.springframework.boot:spring-boot-starter-aop'
+        implementation 'org.springframework.boot:spring-boot-starter-validation:2.5.0'
+        implementation 'org.elasticsearch.client:elasticsearch-rest-high-level-client:7.7.1'
+        implementation 'com.google.guava:guava:30.1.1-jre'
+        implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.1.4'
+        implementation 'org.apache.commons:commons-lang3:3.11'
+        implementation 'com.alibaba:fastjson:1.2.76'
+        implementation 'org.apache.commons:commons-collections4:4.1'
+        implementation 'io.springfox:springfox-swagger2:3.0.0'
+        implementation 'com.github.xiaoymin:knife4j-spring-boot-starter:3.0.2'
+        implementation 'cn.hutool:hutool-all:5.6.6'
+        compileOnly 'org.projectlombok:lombok'
+        runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
+        annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+        annotationProcessor 'org.projectlombok:lombok'
+        asciidoctor 'org.springframework.restdocs:spring-restdocs-asciidoctor'
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+        testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
+        testImplementation 'junit:junit:4.13.2'
+        implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
+        implementation group: 'ch.qos.logback', name: 'logback-core', version: '1.2.3'
+    }
+
+    test {
+        outputs.dir snippetsDir
+        useJUnitPlatform()
+    }
+
+    asciidoctor {
+        inputs.dir snippetsDir
+        dependsOn test
+    }
+
+    bootJar {
+        enabled = false
+    }
+
+    jar {
+        enabled = true
+    }
+
+    bootBuildImage {
+        builder = 'paketobuildpacks/builder:tiny'
+        environment = ['BP_NATIVE_IMAGE': 'true']
+    }
+}

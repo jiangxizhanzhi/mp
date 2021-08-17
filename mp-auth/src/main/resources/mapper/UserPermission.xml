@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.cyberpeace.mp.auth.repository.UserPermissionMapper">
+
+    <select id="listTargetsByUserId" resultType="cn.cyberpeace.mp.auth.model.TargetModel">
+        select distinct * from mp_auth_target where id in
+            (select target from mp_auth_user_permission where owner = #{userId})
+    </select>
+
+    <select id="listUsersByTargetId" resultType="cn.cyberpeace.mp.auth.model.UserModel">
+        select distinct * from mp_auth_user where id in
+            (select owner from mp_auth_user_permission where target = #{targetId})
+    </select>
+
+
+    <delete id="deleteByUserId">
+        delete from mp_auth_user_permission where owner = #{userId}
+    </delete>
+
+    <delete id="deleteByTargetId">
+        delete from mp_auth_user_permission where target = #{targetId}
+    </delete>
+
+</mapper>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.cyberpeace.mp.auth.repository.TargetMapper">
+
+    <select id="listByTenantId" resultType="cn.cyberpeace.mp.auth.model.TargetModel">
+        select * from mp_auth_target where tenant = #{tenantId}
+    </select>
+
+    <select id="listByParent" resultType="cn.cyberpeace.mp.auth.model.TargetModel">
+        select * from mp_auth_target where parent = #{parentId}
+    </select>
+
+    <select id="listAll" resultType="cn.cyberpeace.mp.auth.model.TargetModel">
+        SELECT * FROM mp_auth_target
+        <where>
+          <if test="type != null">
+            AND type = #{type}
+          </if>
+          <if test="tenantId != null and tenantId != ''">
+            AND tenant = #{tenantId}
+          </if>
+        </where>
+    </select>
+
+    <select id="listByMultiTypes" resultType="cn.cyberpeace.mp.auth.model.TargetModel">
+        SELECT * FROM mp_auth_target
+        <where>
+            <if test="types != null and types.length > 0">
+                AND type IN
+                <foreach item="type" index="index" collection="types" open="(" separator="," close=")">
+                    #{type}
+                </foreach>
+            </if>
+            <if test="tenantId != null and tenantId != ''">
+                AND tenant = #{tenantId}
+            </if>
+        </where>
+    </select>
+
+
+</mapper>
