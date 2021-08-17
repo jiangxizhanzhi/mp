@@ -1,7 +1,9 @@
 package cn.cyberpeace.mp.scene.model.base;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
+import cn.cyberpeace.mp.base.model.generator.UuidGenerator;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultBool;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultGen;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import lombok.Data;
@@ -10,6 +12,7 @@ import lombok.Data;
 public class BaseSceneElementPortModel extends BaseModel {
     private String scene;
     private String sceneElement;
+    @DefaultGen(UuidGenerator.class)
     private String portId;
     @DefaultStr
     private String name;

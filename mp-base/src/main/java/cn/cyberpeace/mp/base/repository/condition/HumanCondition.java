@@ -33,6 +33,7 @@ import java.util.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class HumanCondition {
+    private Boolean distinct = false;
     private final Map<String, String> selectFields = new HashMap<>();
     private Integer limit;
     private Integer offset;
@@ -110,6 +111,7 @@ public class HumanCondition {
      */
     public Condition toCondition() {
         var condition = new Condition();
+        condition.setDistinct(distinct);
         condition.setPagination(new PaginationCondition(limit, offset));
         condition.setGroup(new GroupCondition(TextUtils.humpToLine(groupFields.toArray(new String[0]))));
         condition.setOrder(new OrderCondition(TextUtils.humpToLine(orders.toArray(new String[0]))));
@@ -243,6 +245,15 @@ public class HumanCondition {
             var outputFieldName = StringUtils.join(fieldName, outputFieldNameSuffix);
             selectFields.put(aggregation.toSqlField(currentFieldName(fieldName)), outputFieldName);
         }
+        return this;
+    }
+
+    /**
+     * select distinct
+     * @return this
+     */
+    public HumanCondition distinct() {
+        distinct = true;
         return this;
     }
 

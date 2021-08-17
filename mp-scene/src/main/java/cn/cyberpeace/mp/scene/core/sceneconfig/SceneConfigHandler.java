@@ -4,7 +4,6 @@ import cn.cyberpeace.mp.base.annotation.BeanFieldClasses;
 import cn.cyberpeace.mp.base.annotation.ClassFieldClasses;
 import cn.cyberpeace.mp.scene.core.base.BaseSceneHandler;
 import cn.cyberpeace.mp.scene.core.bo.*;
-import cn.cyberpeace.mp.scene.core.exception.SceneNotExistException;
 import cn.cyberpeace.mp.scene.core.plugin.SceneConfigPluginHandler;
 import cn.cyberpeace.mp.scene.model.*;
 import cn.cyberpeace.mp.scene.repository.*;
@@ -60,19 +59,21 @@ public class SceneConfigHandler extends BaseSceneHandler<
         SceneConfigPluginHandler<?, ?, ?>,
         SceneConfigHandler> {
 
-    public SceneConfigHandler(SceneConfigDataBO sceneConfigDataBO) throws SceneNotExistException {
+    public SceneConfigHandler() {}
+
+    public SceneConfigHandler(SceneConfigDataBO sceneConfigDataBO) {
         init(sceneConfigDataBO, false);
     }
 
-    public SceneConfigHandler(SceneConfigDataBO sceneConfigDataBO, boolean isAreaMode) throws SceneNotExistException {
+    public SceneConfigHandler(SceneConfigDataBO sceneConfigDataBO, boolean isAreaMode) {
         init(sceneConfigDataBO, isAreaMode);
     }
 
-    public SceneConfigHandler(String sceneId, String areaId) throws SceneNotExistException {
+    public SceneConfigHandler(String sceneId, String areaId) {
         init(sceneId, areaId, false);
     }
 
-    public SceneConfigHandler(String sceneId, String areaId, boolean isAreaMode) throws SceneNotExistException {
+    public SceneConfigHandler(String sceneId, String areaId, boolean isAreaMode) {
         init(sceneId, areaId, isAreaMode);
     }
 
