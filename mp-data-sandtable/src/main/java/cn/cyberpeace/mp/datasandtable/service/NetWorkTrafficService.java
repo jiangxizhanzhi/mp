@@ -48,7 +48,7 @@ import org.springframework.util.ObjectUtils;
  */
 @Service
 @Slf4j
-public class SessionService {
+public class NetWorkTrafficService {
 
     @Resource(name = "datasandtableRestHighLevelClient")
     private RestHighLevelClient restHighLevelClient;

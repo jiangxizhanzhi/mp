@@ -13,19 +13,19 @@ import org.springframework.util.Assert;
 
 @SpringBootTest(classes = TestDatasandtableApplciation.class)
 @RunWith(SpringRunner.class)
-public class GroupServiceTest {
+public class NetworkTrafficGroupServiceTest {
     @Autowired
-    private GroupService groupService;
+    private NetworkTrafficGroupService networkTrafficGroupService;
 
     @Test
     public void testGroupServiceQuery() {
-        List<GroupModel> list = groupService.queryAllGroups();
+        List<GroupModel> list = networkTrafficGroupService.queryAllGroups();
         Assert.isTrue(list.size() > 0, "123");
     }
 
     @Test
     public void testQueryGroupById() {
-        GroupModel groupModel = groupService.queryGroupById("9787c63b-d79f-4644-8027-b268f89aa8a9");
+        GroupModel groupModel = networkTrafficGroupService.queryGroupById("9787c63b-d79f-4644-8027-b268f89aa8a9");
         Assert.isTrue(groupModel.getGroupId().equals("9787c63b-d79f-4644-8027-b268f89aa8a9"), "is not equal");
     }
 
@@ -34,7 +34,7 @@ public class GroupServiceTest {
      */
     @Test
     public void testdeleteByGroupById() {
-        groupService.deleteByGroupId("9787c63b-d79f-4644-8027-b268f89aa8a9");
+        networkTrafficGroupService.deleteByGroupId("9787c63b-d79f-4644-8027-b268f89aa8a9");
     }
 
 
@@ -48,6 +48,6 @@ public class GroupServiceTest {
         macIds.add("fa:16:3e:00:00:02");
         macIds.add("fc:16:3e:00:00:02");
         GroupModel groupModel1 = GroupModel.builder().groupId("9787c63b-d79f-4644-8027-b268f89aa8a9").macIds(macIds).build();
-        groupService.addGroup(groupModel1);
+        networkTrafficGroupService.addGroup(groupModel1);
     }
 }

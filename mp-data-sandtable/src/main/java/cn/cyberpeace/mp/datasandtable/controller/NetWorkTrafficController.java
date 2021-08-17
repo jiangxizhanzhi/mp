@@ -1,13 +1,12 @@
 package cn.cyberpeace.mp.datasandtable.controller;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.datasandtable.model.SPIViewRequest;
 import cn.cyberpeace.mp.datasandtable.model.SessionRequest;
 import cn.cyberpeace.mp.datasandtable.model.SessionResult;
-import cn.cyberpeace.mp.datasandtable.service.SessionService;
+import cn.cyberpeace.mp.datasandtable.service.NetWorkTrafficService;
 import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -21,22 +20,21 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/sessions")
 @Api(value = "数据沙盘-流量接口", tags = "数据沙盘-流量接口")
-public class SessionController {
+public class NetWorkTrafficController {
 
     @Autowired
-    private SessionService sessionService;
+    private NetWorkTrafficService netWorkTrafficService;
 
     @GetMapping("/pcap/{groupId}/{sessionId}")
     @ApiOperation(value = "流量下载", notes = "")
     public ResponseEntity<Resource> downloadPcapFile(HttpServletResponse httpServletResponse,
         @PathVariable("sessionId") String sessionId, @PathVariable("groupId") String groupId) {
-        var httpResponse = sessionService.queryPcapFileByGroupId(groupId, sessionId);
+        var httpResponse = netWorkTrafficService.queryPcapFileByGroupId(groupId, sessionId);
         InputStreamResource resource = null;
         try {
             resource = new InputStreamResource(httpResponse.getEntity().getContent());
@@ -61,7 +59,7 @@ public class SessionController {
     @PostMapping
     public ServiceResult<List<SessionResult>> querySessionListWithGroup(
         @RequestBody @Valid SessionRequest sessionRequest) {
-        return ServiceResult.<List<SessionResult>>builder().data(sessionService.querySessionListWithGroup(sessionRequest)).build();
+        return ServiceResult.<List<SessionResult>>builder().data(netWorkTrafficService.querySessionListWithGroup(sessionRequest)).build();
     }
 
     /**
@@ -73,12 +71,12 @@ public class SessionController {
     @PostMapping("pageable")
     public ListObjServiceResult<SessionResult> querySessionListWithGroupWithPage(
         @RequestBody @Valid SessionRequest sessionRequest) {
-        return new ListObjServiceResult<>(sessionService.querySessionWithPage(sessionRequest));
+        return new ListObjServiceResult<>(netWorkTrafficService.querySessionWithPage(sessionRequest));
     }
 
     @PostMapping("spiview")
     public ServiceResult<JSONObject> querySessionSpiView(@RequestBody @Valid SPIViewRequest spiViewRequest) {
-        var spiView = sessionService.querySPIView(spiViewRequest);
+        var spiView = netWorkTrafficService.querySPIView(spiViewRequest);
         return ServiceResult.<JSONObject>builder().data(JSONObject.parseObject(spiView)).build();
     }
 }
