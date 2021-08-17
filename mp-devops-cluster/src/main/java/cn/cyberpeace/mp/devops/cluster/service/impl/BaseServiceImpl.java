@@ -2,9 +2,16 @@ package cn.cyberpeace.mp.devops.cluster.service.impl;
 
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
+import cn.cyberpeace.mp.devops.cluster.config.HttpDeleteWithBody;
 import cn.cyberpeace.mp.devops.cluster.model.BaseModel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -137,6 +144,43 @@ public class BaseServiceImpl {
     }
 
     /**
+     * 通过PUT方式更新信息
+     * @param url
+     * @param body
+     * @return
+     */
+    protected String sendPut(String url,String body){
+        String result = "";
+        try {
+            result = HttpUtils.getInstance().sendPut(url,body);
+            log.info("=====PUT调用url：{},参数：{},对应返回结果信息：{}",url,body,result);
+        } catch (IOException e) {
+            log.info("=====PUT调用url：{},参数：{},对应返回结果信息：{},报错信息：{}",url,body,result,e.getMessage());
+        }
+        return result;
+    }
+
+    /**
+     * 通过PUT方式更新信息
+     * @param url
+     * @param body
+     * @param valueType
+     * @param <T>
+     * @return
+     */
+    protected <T extends BaseModel> T sendPut(String url,String body,Class<T> valueType){
+        T model = null;
+        String result = "";
+        try {
+            result = this.sendPut(url,body);
+            model = objectMapper.readValue(result,valueType);
+        } catch (IOException e) {
+            log.info("=====PUT调用url：{},参数：{},对应返回结果信息：{},报错信息：{}",url,body,result,e.getMessage());
+        }
+        return model;
+    }
+
+    /**
      * 通过Delete方式删除数据
      * @param url
      * @param body
@@ -145,12 +189,20 @@ public class BaseServiceImpl {
     protected String sendDelete(String url,String body){
         String result = "";
         try {
-            result = HttpUtils.getInstance().sendDelete(url,body);
+            HttpClient client = HttpClientBuilder.create().build();
+            HttpDeleteWithBody httpDelete = new HttpDeleteWithBody(url);
+            StringEntity entity = new StringEntity(body, "utf-8");
+            entity.setContentType("application/json");
+            httpDelete.setEntity(entity);
+            HttpResponse resp = client.execute(httpDelete);
+            // 设置请求和传输超时时间
+            RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
+            httpDelete.setConfig(requestConfig);
+            result =  EntityUtils.toString(resp.getEntity(), "UTF-8");
             log.info("=====DELETE调用url：{},参数：{},对应返回结果信息：{}",url,body,result);
         } catch (IOException e) {
             log.info("=====DELETE调用url：{},参数：{},对应返回结果信息：{},报错信息：{}",url,body,result,e.getMessage());
         }
         return result;
     }
-
 }

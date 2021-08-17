@@ -23,7 +23,7 @@ public class DeviceServiceImpl extends BaseOpenStackServiceImpl implements Devic
 
     @Override
     public DeviceCloudPlatformModel page(String getParams) {
-        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + "/device/lists" + getParams, DeviceCloudPlatformModel.class);
+        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + "/entity/lists" + getParams, DeviceCloudPlatformModel.class);
     }
 
     @Override
@@ -35,6 +35,6 @@ public class DeviceServiceImpl extends BaseOpenStackServiceImpl implements Devic
     public void deleteByIds(List<String> ids) {
         var jsonObject = new JSONObject();
         jsonObject.put("uuids", ids);
-        super.sendDelete(CPCLOUD_DEVICE + URL_VERSION + "/device/lists",JSONObject.toJSONString(jsonObject));
+        super.sendDelete(CPCLOUD_DEVICE + URL_VERSION + "/device/batch_delete",JSONObject.toJSONString(jsonObject));
     }
 }

@@ -1,13 +1,15 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.RealEquipmentConverter;
-import cn.cyberpeace.mp.devops.cluster.converter.model.ExtEntity;
+import cn.cyberpeace.mp.devops.cluster.converter.model.common.ExtEntity;
 import cn.cyberpeace.mp.devops.cluster.converter.model.RealEquipment;
 import cn.cyberpeace.mp.devops.cluster.converter.model.RealEquipmentConvertModel;
-import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentAddRequest;
+import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentPageRequest;
 import cn.cyberpeace.mp.devops.cluster.response.RealEquipmentByIdResponse;
@@ -17,6 +19,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -68,7 +71,7 @@ public class RealEquipmentController {
 
     @ApiOperation("根据ID查询")
     @GetMapping("/{id}")
-    public ServiceResult getById(@PathVariable String id){
+    public ServiceResult<RealEquipmentByIdResponse> getById(@PathVariable String id){
         RealEquipment realEquipment = realEquipmentConverter.findById(id);
         RealEquipmentByIdResponse response = RealEquipmentByIdResponse.builder().id(realEquipment.getUuid())
                 .name(realEquipment.getName()).logo(realEquipment.getLogo()).role(realEquipment.getRole())
@@ -83,8 +86,21 @@ public class RealEquipmentController {
      */
     @ApiOperation("新增")
     @PostMapping("/add")
-    public void add(@RequestBody RealEquipmentAddRequest request){
-        realEquipmentConverter.add(request);
+    public ServiceResult<Boolean> add(@RequestBody RealEquipmentRequest request){
+        RealEquipment realEquipment = realEquipmentConverter.add(request);
+        return new ServiceResult<>(realEquipment.isSuccess());
+    }
+
+    /**
+     * 更新
+     */
+    @ApiOperation("更新")
+    @PutMapping("/update")
+    public void update(@RequestBody RealEquipmentRequest request){
+        if (StringUtils.isBlank(request.getUuid())){
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+        realEquipmentConverter.update(request);
     }
 
     /**

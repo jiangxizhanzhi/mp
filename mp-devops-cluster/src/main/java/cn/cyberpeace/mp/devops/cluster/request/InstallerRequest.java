@@ -12,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(value = "服务管理的新增请求参数")
-public class ServiceManageAddRequest extends BaseRequest {
+public class InstallerRequest extends BaseRequest {
 
     /**
      * 名称
@@ -71,11 +71,13 @@ public class ServiceManageAddRequest extends BaseRequest {
         /**
          * 平台
          */
+        @ApiModelProperty(value = "平台")
         private String platform;
 
         /**
          * 文件
          */
+        @ApiModelProperty(value = "文件")
         private String file;
     }
 

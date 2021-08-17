@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
-import cn.cyberpeace.mp.devops.cluster.request.ServiceManageAddRequest;
+import cn.cyberpeace.mp.devops.cluster.request.InstallerRequest;
 import cn.cyberpeace.mp.devops.cluster.request.ServiceManageDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.ServiceManagePageRequest;
 import io.swagger.annotations.Api;
@@ -33,7 +33,16 @@ public class ServiceManageController {
      */
     @ApiOperation("新增")
     @PostMapping("/add")
-    public void add(@RequestBody ServiceManageAddRequest request){
+    public void add(@RequestBody InstallerRequest request){
+
+    }
+
+    /**
+     * 更新
+     */
+    @ApiOperation("更新")
+    @PutMapping("/update")
+    public void update(@RequestBody InstallerRequest request){
 
     }
 

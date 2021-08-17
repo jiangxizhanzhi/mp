@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.model;
 
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -109,6 +110,11 @@ public class Device extends BaseCloudPlatformModel{
         private Integer id;
 
         /**
+         * UUID
+         */
+        private String uuid;
+
+        /**
          * 设备UUID
          */
         private String device_uuid;
@@ -197,73 +203,6 @@ public class Device extends BaseCloudPlatformModel{
          * 串口密码
          */
         private String ccm_password;
-
-
-        @Data
-        @NoArgsConstructor
-        @AllArgsConstructor
-        public static final class AccessProtocol{
-
-            /**
-             * 协议
-             */
-            private String protocol;
-
-            /**
-             * 端口
-             */
-            private Integer port;
-
-            /**
-             * 用户名
-             */
-            private String username;
-
-            /**
-             * 密码
-             */
-            private String password;
-
-        }
-    }
-
-    /**
-     * 扩展系统信息
-     */
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static final class ExtSystemInfo{
-
-        /**
-         * ID
-         */
-        private Integer id;
-
-        /**
-         * UUID
-         */
-        private String uuid;
-
-        /**
-         * 设备UUID
-         */
-        private String device_uuid;
-
-        /**
-         * 操作系统
-         */
-        private String system_type;
-
-        /**
-         * 系统架构
-         */
-        private String system_architecture;
-
-        /**
-         * 语言
-         */
-        private String language;
     }
 
     /**

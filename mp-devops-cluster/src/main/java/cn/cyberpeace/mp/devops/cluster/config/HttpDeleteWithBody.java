@@ -1,11 +1,9 @@
-package cn.cyberpeace.mp.base.config;
+package cn.cyberpeace.mp.devops.cluster.config;//package cn.cyberpeace.mp.base.config;
 
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 
-import javax.annotation.concurrent.NotThreadSafe;
 import java.net.URI;
 
-@NotThreadSafe
 public class HttpDeleteWithBody extends HttpEntityEnclosingRequestBase {
 
     public static final String METHOD_NAME = "DELETE";

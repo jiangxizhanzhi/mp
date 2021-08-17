@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.base.util;
 
-import cn.cyberpeace.mp.base.config.HttpDeleteWithBody;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.http.Header;
@@ -12,6 +11,7 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -200,18 +200,17 @@ public class HttpUtils {
         return client;
     }
 
-    public static String sendDelete(String url,String json) throws IOException {
+    public static String sendPut(String url,String content) throws IOException {
         HttpClient client = HttpClientBuilder.create().build();
-        HttpDeleteWithBody httpDelete = new HttpDeleteWithBody(url);
-        StringEntity entity = new StringEntity(json, "utf-8");
+        HttpPut httpPut = new HttpPut(url);
+        // 解决中文乱码问题
+        StringEntity entity = new StringEntity(content, "utf-8");
         entity.setContentType("application/json");
-        httpDelete.setEntity(entity);
-        HttpResponse resp = client.execute(httpDelete);
-        // 设置请求和传输超时时间
-        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
-        httpDelete.setConfig(requestConfig);
-        // 获得返回值
-        return EntityUtils.toString(resp.getEntity(), "UTF-8");
+        httpPut.setEntity(entity);
+        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(10000).setConnectTimeout(10000).build();
+        HttpResponse response = client.execute(httpPut);
+        httpPut.setConfig(requestConfig);
+        return EntityUtils.toString(response.getEntity(), "UTF-8");
     }
 }
 

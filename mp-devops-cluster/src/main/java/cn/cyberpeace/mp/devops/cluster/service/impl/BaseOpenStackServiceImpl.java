@@ -68,6 +68,30 @@ public class BaseOpenStackServiceImpl extends BaseServiceImpl {
     }
 
     /**
+     * 通过PUT方式查询信息
+     * @param api
+     * @param body
+     * @param valueType
+     * @param <T>
+     * @return
+     */
+    @Override
+    protected <T extends BaseModel> T sendPut(String api,String body,Class<T> valueType){
+        return super.sendPut(devopsConfig.getCpUrl().concat(api),body,valueType);
+    }
+
+    /**
+     * 通过PUT方式查询信息
+     * @param api
+     * @param body
+     * @return
+     */
+    @Override
+    protected String sendPut(String api,String body){
+        return super.sendPut(devopsConfig.getCpUrl().concat(api),body);
+    }
+
+    /**
      * 通过Delete方式删除数据
      * @param api
      * @param body

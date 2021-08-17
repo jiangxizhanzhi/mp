@@ -2,9 +2,10 @@ package cn.cyberpeace.mp.devops.cluster.converter;
 
 import cn.cyberpeace.mp.devops.cluster.converter.model.RealEquipment;
 import cn.cyberpeace.mp.devops.cluster.converter.model.RealEquipmentConvertModel;
-import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentAddRequest;
+import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentPageRequest;
+import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentUpdateRequest;
 
 public interface RealEquipmentConverter extends BaseConverter{
 
@@ -12,7 +13,7 @@ public interface RealEquipmentConverter extends BaseConverter{
      * 获取实装设备总数
      * @return
      */
-    Integer getTotalRealEquipment();
+    Integer getTotalRealEquipment(RealEquipmentPageRequest request);
 
     /**
      * 分页查询
@@ -31,7 +32,13 @@ public interface RealEquipmentConverter extends BaseConverter{
      * 新增
      * @param request
      */
-    void add(RealEquipmentAddRequest request);
+    RealEquipment add(RealEquipmentRequest request);
+
+    /**
+     * 更新
+     * @param request
+     */
+    void update(RealEquipmentRequest request);
 
     /**
      * 批量删除

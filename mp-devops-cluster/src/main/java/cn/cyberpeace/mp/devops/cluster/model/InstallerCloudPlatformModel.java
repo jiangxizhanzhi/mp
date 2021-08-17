@@ -5,10 +5,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
-@Table("mp_devops_services")
-public class ServicesManageModel {
+public class InstallerCloudPlatformModel extends BaseCloudPlatformModel {
 
-
+    private List<Installer> items;
 }

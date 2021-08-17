@@ -1,10 +1,10 @@
 package cn.cyberpeace.mp.devops.cluster.converter.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import cn.cyberpeace.mp.devops.cluster.converter.model.common.ExtEntity;
+import cn.cyberpeace.mp.devops.cluster.converter.model.common.SystemInfo;
+import lombok.*;
 
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
