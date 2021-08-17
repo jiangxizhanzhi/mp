@@ -25,6 +25,7 @@ import cn.cyberpeace.mp.scene.repository.*;
         SceneConfigElementModel.class,
         SceneConfigElementPortModel.class,
         SceneConfigElementPortConnectionModel.class,
+        SceneConfigElementPluginModel.class,
         SceneConfigPluginHandler.class,
         SceneConfigHandler.class,
 })

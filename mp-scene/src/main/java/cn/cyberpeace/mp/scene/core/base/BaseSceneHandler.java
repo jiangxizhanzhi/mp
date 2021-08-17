@@ -65,6 +65,7 @@ import java.util.stream.Collectors;
         "sceneElementModelClass",
         "sceneElementPortModelClass",
         "sceneElementPortConnectionModelClass",
+        "sceneElementPluginModelClass",
         "scenePluginHandlerInterface",
         "sceneHandlerClass",
 })
@@ -687,11 +688,17 @@ public abstract class BaseSceneHandler<
     /**
      * 保存场景属性数据
      */
-    private void saveScene() {
+    private boolean saveScene() {
         S0 sceneObj = scene.toModel();
-        sceneMapper.save(sceneObj);
+        var result = sceneMapper.save(sceneObj);
         sceneId = sceneObj.getId();
         scene.fromModel(sceneObj);
+
+        pluginMap.forEach((key, plugin) -> {
+            plugin.setSourceSceneId(sceneId);
+        });
+
+        return result;
     }
 
     /**
@@ -982,6 +989,7 @@ public abstract class BaseSceneHandler<
 
         var dataBO = ClassUtils.createInstance(sceneDataBOClass);
         dataBO.setTopology(topologyBO);
+        dataBO.setPlugins(scenePluginData);
         return dataBO;
     }
 
@@ -1168,8 +1176,8 @@ public abstract class BaseSceneHandler<
     /**
      * 逻辑删除场景数据
      */
-    public void logicDelete() {
-        sceneMapper.logicDelete(sceneId);
+    public boolean logicDelete() {
+        return sceneMapper.logicDelete(sceneId);
     }
 
 }

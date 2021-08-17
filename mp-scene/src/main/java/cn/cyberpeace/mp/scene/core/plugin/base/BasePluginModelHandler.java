@@ -132,6 +132,10 @@ public class BasePluginModelHandler<
      * @return 表模型-网元节点
      */
     public List<E0> readElements(String... elementIds) {
+        if (elementIds.length == 0) {
+            return new ArrayList<>();
+        }
+
         var sceneId = scenePluginHandler.getSourceSceneId();
         return pluginSceneElementMapper.list(new HumanCondition()
                 .filterEqual(BasePluginSceneElementModel::getScene, sceneId)
@@ -144,6 +148,10 @@ public class BasePluginModelHandler<
      * @return 表模型-网元端口
      */
     public List<P0> readElementPorts(String... elementPortIds) {
+        if (elementPortIds.length == 0) {
+            return new ArrayList<>();
+        }
+
         var sceneId = scenePluginHandler.getSourceSceneId();
         return pluginSceneElementPortMapper.list(new HumanCondition()
                 .filterEqual(BasePluginSceneElementPortModel::getScene, sceneId)
@@ -153,31 +161,35 @@ public class BasePluginModelHandler<
     /**
      * 保存场景属性数据
      */
-    public void saveScene() {
+    public boolean saveScene() {
         var sceneId = scenePluginHandler.getSourceSceneId();
         var scene = scenePluginHandler.getScene();
         S0 sceneObj = scene.toModel();
         sceneObj.setScene(sceneId);
-        pluginSceneMapper.save(sceneObj);
+        var result = pluginSceneMapper.save(sceneObj);
         scene.fromModel(sceneObj);
+        return result;
     }
 
     /**
      * 删除场景属性数据
      */
-    public void deleteScene() {
+    public boolean deleteScene() {
         var sceneId = scenePluginHandler.getSourceSceneId();
         var scene = scenePluginHandler.getScene();
         S0 sceneObj = scene.toModel();
         sceneObj.setScene(sceneId);
-        pluginSceneMapper.filterDelete(new HumanCondition().filterEqual(BasePluginSceneModel::getScene, sceneId));
+        var result = pluginSceneMapper.filterDelete(new HumanCondition()
+                .filterEqual(BasePluginSceneModel::getScene, sceneId));
+
+        return result > 0;
     }
 
     /**
      * 创建网元节点
      * @param elementIds 网元节点id
      */
-    public void createElements(String... elementIds) {
+    public int createElements(String... elementIds) {
         var sceneId = scenePluginHandler.getSourceSceneId();
 
         // 删除存在的
@@ -197,14 +209,14 @@ public class BasePluginModelHandler<
             element.setSceneElement(elementId);
             elements.add(element);
         }
-        pluginSceneElementMapper.bulkCreate(elements);
+        return pluginSceneElementMapper.bulkCreate(elements);
     }
 
     /**
      * 更新网元节点
      * @param elementIds 网元节点id
      */
-    public void updateElements(String... elementIds) {
+    public int updateElements(String... elementIds) {
         var elementMap = scenePluginHandler.getElementMap();
         List<E0> updatingElements = new ArrayList<>();
         List<String> creatingElementIds = Arrays.asList(elementIds);
@@ -221,19 +233,24 @@ public class BasePluginModelHandler<
             element.setId(existElement.getId());
             updatingElements.add(element);
         });
-        pluginSceneElementMapper.bulkUpdate(updatingElements);
+        var updateCount = pluginSceneElementMapper.bulkUpdate(updatingElements);
 
         // 创建不存在的
-        createElements(creatingElementIds.toArray(new String[0]));
+        var createCount = createElements(creatingElementIds.toArray(new String[0]));
+
+        return updateCount + createCount;
     }
 
     /**
      * 删除网元节点
      * @param elementIds 网元节点id
      */
-    public void deleteElements(String... elementIds) {
+    public int deleteElements(String... elementIds) {
+        if (elementIds.length == 0) {
+            return 0;
+        }
         var sceneId = scenePluginHandler.getSourceSceneId();
-        pluginSceneElementMapper.filterDelete(new HumanCondition()
+        return pluginSceneElementMapper.filterDelete(new HumanCondition()
                 .filterEqual(BasePluginSceneElementModel::getScene, sceneId)
                 .filterIn(BasePluginSceneElementModel::getSceneElement, elementIds));
     }
@@ -242,7 +259,7 @@ public class BasePluginModelHandler<
      * 创建网元端口
      * @param elementPortIds 网元端口id
      */
-    public void createElementPorts(String... elementPortIds) {
+    public int createElementPorts(String... elementPortIds) {
         var sceneId = scenePluginHandler.getSourceSceneId();
 
         // 删除存在的
@@ -262,14 +279,14 @@ public class BasePluginModelHandler<
             elementPort.setSceneElementPort(elementPortId);
             elementPorts.add(elementPort);
         }
-        pluginSceneElementPortMapper.bulkCreate(elementPorts);
+        return pluginSceneElementPortMapper.bulkCreate(elementPorts);
     }
 
     /**
      * 更新网元端口
      * @param elementPortIds 网元端口id
      */
-    public void updateElementPorts(String... elementPortIds) {
+    public int updateElementPorts(String... elementPortIds) {
         var elementPortMap = scenePluginHandler.getElementPortMap();
         List<P0> updatingElementPorts = new ArrayList<>();
         List<String> creatingElementPortIds = Arrays.asList(elementPortIds);
@@ -286,19 +303,25 @@ public class BasePluginModelHandler<
             elementPort.setId(existElementPort.getId());
             updatingElementPorts.add(elementPort);
         });
-        pluginSceneElementPortMapper.bulkUpdate(updatingElementPorts);
+        var updateCount = pluginSceneElementPortMapper.bulkUpdate(updatingElementPorts);
 
         // 创建不存在的
-        createElementPorts(creatingElementPortIds.toArray(new String[0]));
+        var createCount = createElementPorts(creatingElementPortIds.toArray(new String[0]));
+
+        return updateCount + createCount;
     }
 
     /**
      * 删除网元端口
      * @param elementPortIds 网元端口id
      */
-    public void deleteElementPorts(String... elementPortIds) {
+    public int deleteElementPorts(String... elementPortIds) {
+        if (elementPortIds.length == 0) {
+            return 0;
+        }
+
         var sceneId = scenePluginHandler.getSourceSceneId();
-        pluginSceneElementPortMapper.filterDelete(new HumanCondition()
+        return pluginSceneElementPortMapper.filterDelete(new HumanCondition()
                 .filterEqual(BasePluginSceneElementPortModel::getScene, sceneId)
                 .filterIn(BasePluginSceneElementPortModel::getSceneElementPort, elementPortIds));
     }

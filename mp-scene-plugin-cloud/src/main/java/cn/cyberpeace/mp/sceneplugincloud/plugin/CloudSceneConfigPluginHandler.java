@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin;
 
+import cn.cyberpeace.mp.base.annotation.ClassFieldClasses;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.plugin.SceneConfigPluginHandler;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
@@ -12,6 +13,12 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+
+@ClassFieldClasses({
+        CloudPluginSceneConfigBO.class,
+        CloudPluginSceneConfigElementBO.class,
+        CloudPluginSceneConfigElementPortBO.class,
+})
 @Component
 @PluginKey(PluginConstant.PLUGIN_KEY)
 public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<CloudPluginSceneConfigBO,
