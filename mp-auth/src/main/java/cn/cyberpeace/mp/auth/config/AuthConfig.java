@@ -11,8 +11,8 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "mp.auth")
 public class AuthConfig {
 
-    public static String DEFAULT_ACTIVATION_FILE = "/Users/sternberg/tmp/0811/activation";
+    public static String DEFAULT_ACTIVATION_DIR = "/Users/sternberg/tmp/0811";
 
-    private String activationFile = DEFAULT_ACTIVATION_FILE;
+    private String activationDir = DEFAULT_ACTIVATION_DIR;
 
 }

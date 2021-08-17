@@ -281,7 +281,6 @@ CREATE TABLE mp_sys_config (
 
 
 
-
 # 系统公告
 CREATE TABLE mp_sys_notice (
        `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
@@ -300,20 +299,34 @@ CREATE TABLE mp_sys_notice (
 
 
 
-# 系统公告-群组表
-CREATE TABLE mp_sys_notice_group (
+# 系统公告-组织表
+CREATE TABLE mp_sys_notice_org (
        `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
        `id` varchar(64)  NOT NULL COMMENT 'id',
        `tenant` varchar(64) NOT NULL COMMENT '租户',
        `notice_id` varchar(64) NOT NULL COMMENT '公告ID',
-       `owner` varchar(64) NULL COMMENT '组织或者是群组',
+       `org` varchar(64) NULL COMMENT '组织id',
        `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
        `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
        PRIMARY KEY (`pk`),
        UNIQUE (`id`),
-       KEY (`owner`, `notice_id`)
-) COMMENT '系统公告-群组表';
+       KEY (`org`, `notice_id`)
+) COMMENT '系统公告-组织表';
 
+
+# 系统公告-角色表
+CREATE TABLE mp_sys_notice_role (
+       `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
+       `id` varchar(64)  NOT NULL COMMENT 'id',
+       `tenant` varchar(64) NOT NULL COMMENT '租户',
+       `notice_id` varchar(64) NOT NULL COMMENT '公告ID',
+       `role` varchar(64) NULL COMMENT '角色id',
+       `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+       `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+       PRIMARY KEY (`pk`),
+       UNIQUE (`id`),
+       KEY (`role`, `notice_id`)
+) COMMENT '系统公告-角色表';
 
 
 # 系统公告已读统计表

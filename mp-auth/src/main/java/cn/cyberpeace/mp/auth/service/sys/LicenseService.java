@@ -1,12 +1,15 @@
 package cn.cyberpeace.mp.auth.service.sys;
 
+import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import com.sun.jna.Library;
 import com.sun.jna.Native;
 import com.sun.jna.Structure;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
@@ -14,7 +17,18 @@ import java.util.List;
 @Slf4j
 public class LicenseService {
 
+    public final String ACTIVATION_LICENSE = "license.so";
+
+    @Autowired
+    private AuthConfig authConfig;
+
     public interface Awesome extends Library {
+
+        String foo = null;
+
+        default void setFoo(String file) {
+        }
+
 //        Awesome INSTANCE = (Awesome) Native.loadLibrary("/home/tmp/license.so", Awesome.class);
         Awesome INSTANCE = (Awesome) Native.loadLibrary("classpath:/license/license.so", Awesome.class);
 
