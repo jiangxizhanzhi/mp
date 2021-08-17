@@ -15,7 +15,7 @@ import java.util.List;
 public interface SysNoticeMapper extends BaseModelMapper<SysNoticeModel> {
 
     List<SysNoticeModel> listNotices(@Param("title") String title, @Param("ids") List<String> ids,
-                                     @Param("orgs") List<String> orgs, @Param("publisher") String publisher,
-                                     @Param("type") Integer type);
+                                     @Param("orgs") List<String> orgs, @Param("roles") List<String> roles,
+                                     @Param("publisher") String publisher, @Param("type") Integer type);
 
 }

@@ -1,16 +1,21 @@
 package cn.cyberpeace.mp.auth.service.sys.impl;
 
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.dto.OrgDto;
 import cn.cyberpeace.mp.auth.dto.notice.SysNoticePageRequest;
 import cn.cyberpeace.mp.auth.dto.notice.SysNoticeRequest;
 import cn.cyberpeace.mp.auth.model.OrgModel;
-import cn.cyberpeace.mp.auth.model.SysNoticeGroupModel;
+import cn.cyberpeace.mp.auth.model.RoleModel;
+import cn.cyberpeace.mp.auth.model.SysNoticeOrgModel;
 import cn.cyberpeace.mp.auth.model.SysNoticeModel;
+import cn.cyberpeace.mp.auth.model.SysNoticeRoleModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
-import cn.cyberpeace.mp.auth.repository.SysNoticeGroupMapper;
+import cn.cyberpeace.mp.auth.repository.SysNoticeOrgMapper;
 import cn.cyberpeace.mp.auth.repository.SysNoticeMapper;
+import cn.cyberpeace.mp.auth.repository.SysNoticeRoleMapper;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
+import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.service.sys.SysNoticeService;
 import cn.cyberpeace.mp.auth.service.fields.SysNoticeFields;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
@@ -44,13 +49,19 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         implements SysNoticeService {
 
     @Autowired
-    private SysNoticeGroupMapper noticeGroupMapper;
+    private SysNoticeOrgMapper noticeOrgMapper;
+
+    @Autowired
+    private SysNoticeRoleMapper noticeRoleMapper;
 
     @Autowired
     private OrgUserService orgUserService;
 
     @Autowired
     private OrgService orgService;
+
+    @Autowired
+    private UserRoleService userRoleService;
 
     @Autowired
     public SysNoticeServiceImpl(SysNoticeMapper modelMapper, SysNoticeFields modelFields) {
@@ -65,22 +76,37 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         SysNoticeModel noticeModel = new SysNoticeModel();
         BeanUtils.copyProperties(sysNoticeRequest, noticeModel);
 
+        if (StringUtils.isBlank(noticeModel.getPublisher())) {
+            UserModel currentUser = UserUtils.getLoginUser();
+            noticeModel.setPublisher(currentUser.getId());
+        }
+
         ObjServiceResult<SysNoticeModel> result = create(noticeModel);
         ResultUtils.throwExceptionIfError(result, "保存公告失败！");
-
         SysNoticeModel resultModel = result.getSource().getObj();
-        List<SysNoticeGroupModel> noticeGroupModelList = new ArrayList<>();
+        // 组织
+        List<SysNoticeOrgModel> noticeGroupModelList = new ArrayList<>();
         if (CollectionUtil.isNotEmpty(sysNoticeRequest.getOrgIds())) {
-            sysNoticeRequest.getOrgIds().forEach(id -> {
-                SysNoticeGroupModel noticeGroupModel = new SysNoticeGroupModel();
-                noticeGroupModel.setOwner(id);
+            sysNoticeRequest.getOrgIds().forEach(orgId -> {
+                SysNoticeOrgModel noticeGroupModel = new SysNoticeOrgModel();
+                noticeGroupModel.setOrg(orgId);
                 noticeGroupModel.setNoticeId(resultModel.getId());
                 noticeGroupModelList.add(noticeGroupModel);
             });
         }
-        noticeGroupMapper.bulkCreate(noticeGroupModelList);
+        noticeOrgMapper.bulkCreate(noticeGroupModelList);
 
-        // todo 群组？
+        // 角色
+        List<SysNoticeRoleModel> noticeRoleModelList = new ArrayList<>();
+        if (CollectionUtil.isNotEmpty(sysNoticeRequest.getRoleIds())) {
+            sysNoticeRequest.getRoleIds().forEach(roleId -> {
+                SysNoticeRoleModel noticeRoleModel = new SysNoticeRoleModel();
+                noticeRoleModel.setRole(roleId);
+                noticeRoleModel.setNoticeId(resultModel.getId());
+                noticeRoleModelList.add(noticeRoleModel);
+            });
+        }
+        noticeRoleMapper.bulkCreate(noticeRoleModelList);
 
         return resultModel;
     }
@@ -102,21 +128,33 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         SysNoticeModel resultModel = result.getSource().getObj();
 
         // 清除之前的绑定关系
-        noticeGroupMapper.deleteByNoticeIds(CollectionUtil.toList(resultModel.getId()));
+        noticeOrgMapper.deleteByNoticeIds(CollectionUtil.toList(resultModel.getId()));
+        noticeRoleMapper.deleteByNoticeIds(CollectionUtil.toList(resultModel.getId()));
 
-        List<SysNoticeGroupModel> noticeGroupModelList = new ArrayList<>();
+        // 组织
+        List<SysNoticeOrgModel> noticeGroupModelList = new ArrayList<>();
         if (CollectionUtil.isNotEmpty(sysNoticeRequest.getOrgIds())) {
-            sysNoticeRequest.getOrgIds().forEach(id -> {
-                SysNoticeGroupModel noticeGroupModel = new SysNoticeGroupModel();
-                noticeGroupModel.setOwner(id);
+            sysNoticeRequest.getOrgIds().forEach(orgId -> {
+                SysNoticeOrgModel noticeGroupModel = new SysNoticeOrgModel();
+                noticeGroupModel.setOrg(orgId);
                 noticeGroupModel.setNoticeId(resultModel.getId());
                 noticeGroupModelList.add(noticeGroupModel);
+
             });
         }
+        noticeOrgMapper.bulkCreate(noticeGroupModelList);
 
-        noticeGroupMapper.bulkCreate(noticeGroupModelList);
-
-        // todo 群组？
+        // 角色
+        List<SysNoticeRoleModel> noticeRoleModelList = new ArrayList<>();
+        if (CollectionUtil.isNotEmpty(sysNoticeRequest.getRoleIds())) {
+            sysNoticeRequest.getRoleIds().forEach(roleId -> {
+                SysNoticeRoleModel noticeRoleModel = new SysNoticeRoleModel();
+                noticeRoleModel.setRole(roleId);
+                noticeRoleModel.setNoticeId(resultModel.getId());
+                noticeRoleModelList.add(noticeRoleModel);
+            });
+        }
+        noticeRoleMapper.bulkCreate(noticeRoleModelList);
 
         return resultModel;
     }
@@ -128,13 +166,8 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
             ids = Arrays.asList(req.getIds());
         }
 
-        List<String> orgs = null;
-        if (StringUtils.isNotBlank(req.getOrg())) {
-            orgs = Collections.singletonList(req.getOrg());
-        }
-
         PageHelper.startPage(req.getPage(), req.getPageSize());
-        List<SysNoticeModel> notices = getModelMapper().listNotices(req.getTitle(), ids, orgs, null, null);
+        List<SysNoticeModel> notices = getModelMapper().listNotices(req.getTitle(), ids, req.getOrgIds(), req.getRoleIds(), null, null);
         PageInfo pageInfo = new PageInfo(notices);
 
         return pageInfo;
@@ -142,23 +175,40 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
     @Override
     public PageInfo<SysNoticeModel> currentUserPage(SysNoticePageRequest req) {
-        // 根据当前登录用户查出所有的组织，包括组织的上级，直到顶级组织
         UserModel userModel = UserUtils.getLoginUser();
         if(Objects.isNull(userModel)) {
             return new PageInfo<>();
         }
-        List<OrgModel> orgModels = orgUserService.listOrgsByUserId(userModel.getId());
+
+        // 查找当前用户所有的角色
+        // 是否是管理员，管理员拥有所有公告权限
+        List<RoleModel> roleModels = userRoleService.listByUserId(userModel.getId());
+        boolean isAdmin = roleModels.stream().anyMatch(r -> r.getIdentifier().equals(AuthConstant.ROLE_ADMIN));
+
+        if (isAdmin) {
+            PageHelper.startPage(req.getPage(), req.getPageSize());
+            List<SysNoticeModel> notices = getModelMapper().listNotices(null, null, null, null,null, null);
+            PageInfo pageInfo = new PageInfo(notices);
+            return pageInfo;
+        }
+
+        // 非管理员...
+        List<String> allRoleIds = roleModels.stream().map(RoleModel::getId).collect(Collectors.toList());
+
+        // 根据当前登录用户查出所有的组织，包括组织的上级，直到顶级组织
         List<String> allOrgIds = new ArrayList<>();
+        List<OrgModel> orgModels = orgUserService.listOrgsByUserId(userModel.getId());
         orgModels.forEach(o -> {
-            allOrgIds.add(o.getId()); // 添加自己的id
+            // 添加自己的id
+            allOrgIds.add(o.getId());
+            // 查找所有上级组织id
             List<OrgDto> orgDtos = orgService.listAllParentIgnoreLevelExcludeSelf(o.getId());
             allOrgIds.addAll(orgDtos.stream().map(OrgDto::getId).collect(Collectors.toList()));
         });
 
         PageHelper.startPage(req.getPage(), req.getPageSize());
-        List<SysNoticeModel> notices = getModelMapper().listNotices(null, null, allOrgIds, null, null);
+        List<SysNoticeModel> notices = getModelMapper().listNotices(null, null, allOrgIds, allRoleIds,null, null);
         PageInfo pageInfo = new PageInfo(notices);
-
         return pageInfo;
     }
 
@@ -170,7 +220,8 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         if (Objects.nonNull(ids) && ids.length > 0) {
             result = super.bulkDelete(ids);
 
-            noticeGroupMapper.deleteByNoticeIds(CollectionUtil.toList(ids));
+            noticeOrgMapper.deleteByNoticeIds(CollectionUtil.toList(ids));
+            noticeRoleMapper.deleteByNoticeIds(CollectionUtil.toList(ids));
         }
         // todo 群组
 

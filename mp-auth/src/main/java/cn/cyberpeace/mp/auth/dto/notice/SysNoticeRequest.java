@@ -46,8 +46,8 @@ public class SysNoticeRequest {
     @ApiModelProperty(value = "1:系统  2:课程  3:练习  4:考试")
     private Integer type;
 
-    @ApiModelProperty(value = "群组id列表")
-    private List<String> groupIds;
+    @ApiModelProperty(value = "角色id列表")
+    private List<String> roleIds;
 
     @ApiModelProperty(value = "组织id列表")
     private List<String> orgIds;
