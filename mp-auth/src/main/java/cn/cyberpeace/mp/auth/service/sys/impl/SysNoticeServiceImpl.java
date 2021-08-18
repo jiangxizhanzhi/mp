@@ -1,9 +1,12 @@
 package cn.cyberpeace.mp.auth.service.sys.impl;
 
+import ch.qos.logback.core.joran.action.IADataForComplexProperty;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.dto.OrgDto;
+import cn.cyberpeace.mp.auth.dto.notice.SysNoticeDto;
 import cn.cyberpeace.mp.auth.dto.notice.SysNoticePageRequest;
 import cn.cyberpeace.mp.auth.dto.notice.SysNoticeRequest;
+import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.SysNoticeOrgModel;
@@ -16,6 +19,7 @@ import cn.cyberpeace.mp.auth.repository.SysNoticeRoleMapper;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.sys.SysNoticeService;
 import cn.cyberpeace.mp.auth.service.fields.SysNoticeFields;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
@@ -23,6 +27,7 @@ import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.hutool.core.collection.CollectionUtil;
@@ -64,6 +69,9 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
     private UserRoleService userRoleService;
 
     @Autowired
+    private UserService userService;
+
+    @Autowired
     public SysNoticeServiceImpl(SysNoticeMapper modelMapper, SysNoticeFields modelFields) {
         setModelMapper(modelMapper);
         setModelFields(modelFields);
@@ -96,17 +104,20 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         }
         noticeOrgMapper.bulkCreate(noticeGroupModelList);
 
-        // 角色
-        List<SysNoticeRoleModel> noticeRoleModelList = new ArrayList<>();
-        if (CollectionUtil.isNotEmpty(sysNoticeRequest.getRoleIds())) {
-            sysNoticeRequest.getRoleIds().forEach(roleId -> {
-                SysNoticeRoleModel noticeRoleModel = new SysNoticeRoleModel();
-                noticeRoleModel.setRole(roleId);
-                noticeRoleModel.setNoticeId(resultModel.getId());
-                noticeRoleModelList.add(noticeRoleModel);
-            });
+        // 角色，如果是公开的，则忽略角色字段内的值
+        if (noticeModel.getIsPublic().equals(SysNoticeModel.NOTICE_NOT_PUBLIC)) {
+            List<SysNoticeRoleModel> noticeRoleModelList = new ArrayList<>();
+            if (CollectionUtil.isNotEmpty(sysNoticeRequest.getRoleIds())) {
+                sysNoticeRequest.getRoleIds().forEach(roleId -> {
+                    SysNoticeRoleModel noticeRoleModel = new SysNoticeRoleModel();
+                    noticeRoleModel.setRole(roleId);
+                    noticeRoleModel.setNoticeId(resultModel.getId());
+                    noticeRoleModelList.add(noticeRoleModel);
+                });
+            }
+            noticeRoleMapper.bulkCreate(noticeRoleModelList);
         }
-        noticeRoleMapper.bulkCreate(noticeRoleModelList);
+
 
         return resultModel;
     }
@@ -144,17 +155,19 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         }
         noticeOrgMapper.bulkCreate(noticeGroupModelList);
 
-        // 角色
-        List<SysNoticeRoleModel> noticeRoleModelList = new ArrayList<>();
-        if (CollectionUtil.isNotEmpty(sysNoticeRequest.getRoleIds())) {
-            sysNoticeRequest.getRoleIds().forEach(roleId -> {
-                SysNoticeRoleModel noticeRoleModel = new SysNoticeRoleModel();
-                noticeRoleModel.setRole(roleId);
-                noticeRoleModel.setNoticeId(resultModel.getId());
-                noticeRoleModelList.add(noticeRoleModel);
-            });
+        // 角色，如果是公开的，则忽略角色字段内的值
+        if (noticeModel.getIsPublic().equals(SysNoticeModel.NOTICE_NOT_PUBLIC)) {
+            List<SysNoticeRoleModel> noticeRoleModelList = new ArrayList<>();
+            if (CollectionUtil.isNotEmpty(sysNoticeRequest.getRoleIds())) {
+                sysNoticeRequest.getRoleIds().forEach(roleId -> {
+                    SysNoticeRoleModel noticeRoleModel = new SysNoticeRoleModel();
+                    noticeRoleModel.setRole(roleId);
+                    noticeRoleModel.setNoticeId(resultModel.getId());
+                    noticeRoleModelList.add(noticeRoleModel);
+                });
+            }
+            noticeRoleMapper.bulkCreate(noticeRoleModelList);
         }
-        noticeRoleMapper.bulkCreate(noticeRoleModelList);
 
         return resultModel;
     }
@@ -169,6 +182,14 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         PageHelper.startPage(req.getPage(), req.getPageSize());
         List<SysNoticeModel> notices = getModelMapper().listNotices(req.getTitle(), ids, req.getOrgIds(), req.getRoleIds(), null, null);
         PageInfo pageInfo = new PageInfo(notices);
+
+
+//        List<UserDto> userDtos = notices.stream().map(n -> {
+//            UserDto userDto = userService.userModel2UserDto(u);
+//            return userDto;
+//        }).collect(Collectors.toList());
+//
+//        pageInfo.setList(userDtos);
 
         return pageInfo;
     }
@@ -226,6 +247,33 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         // todo 群组
 
         return result;
+    }
+
+
+    private SysNoticeDto noticeModel2NoticeDto(SysNoticeModel noticeModel) {
+        if (Objects.isNull(noticeModel)) {
+            return null;
+        }
+
+        SysNoticeDto noticeDto = new SysNoticeDto();
+        BeanUtils.copyProperties(noticeModel, noticeDto);
+
+        if (StringUtils.isNotBlank(noticeModel.getPublisher())) {
+            ObjServiceResult<UserModel> userResult = userService.get(noticeDto.getPublisher());
+            if (Objects.nonNull(userResult.getSource())) {
+                noticeDto.setPublisherUserName(userResult.getSource().getObj().getUsername());
+            }
+        }
+
+//        noticeOrgMapper
+//        if (StringUtils.isNotBlank(noticeModel))) {
+//            ObjServiceResult<UserModel> userResult = userService.get(noticeDto.getPublisher());
+//            if (Objects.nonNull(userResult.getSource())) {
+//                noticeDto.(userResult.getSource().getObj().getUsername());
+//            }
+//        }
+
+        return null;
     }
 
 

@@ -36,12 +36,10 @@ public class BaseModel {
 
     @ApiModelProperty(value = "创建时间")
     @DefaultGen(DateTimeGenerator.class)
-    @JsonIgnore
     private LocalDateTime createTime;
 
     @ApiModelProperty(value = "更新时间")
     @DefaultGen(DateTimeGenerator.class)
-    @JsonIgnore
     private LocalDateTime updateTime;
 
     public BaseModel(String id, LocalDateTime createTime, LocalDateTime updateTime) {
