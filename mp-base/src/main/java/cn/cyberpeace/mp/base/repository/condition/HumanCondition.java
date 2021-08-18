@@ -33,7 +33,7 @@ import java.util.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class HumanCondition {
-    private final Map<String, String> selectFields = new HashMap<>();
+    private Map<String, String> selectFields = new HashMap<>();
     private Integer limit;
     private Integer offset;
     private final List<String> groupFields = new ArrayList<>();

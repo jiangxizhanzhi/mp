@@ -17,7 +17,7 @@ import java.util.List;
 @Mapper
 @Repository
 @ModelClass(RolePermissionModel.class)
-public interface RolePermissionMapper extends BasePermissionMapper<RolePermissionModel>, BaseModelMapper {
+public interface RolePermissionMapper extends BasePermissionMapper<RolePermissionModel, TargetModel>, BaseModelMapper {
 
     List<TargetModel> listTargetsByRoleId(@Param("roleId") String roleId);
 

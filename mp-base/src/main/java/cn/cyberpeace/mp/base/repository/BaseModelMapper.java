@@ -77,7 +77,7 @@ public interface BaseModelMapper<M extends BaseModel> {
         return actualModelClass != null ? ModelUtils.getTableName(actualModelClass) : null;
     }
 
-    private String getTableName(HumanCondition humanCondition) {
+    default String getTableName(HumanCondition humanCondition) {
         String tableName = humanCondition.toTableName();
         if (tableName == null) {
             tableName = getTableName();
@@ -98,7 +98,7 @@ public interface BaseModelMapper<M extends BaseModel> {
         return mappedStatement;
     }
 
-    private String[] getSelectFields(HumanCondition humanCondition) {
+    default String[] getSelectFields(HumanCondition humanCondition) {
         String[] selectFields = humanCondition.toSelectFields();
         if (selectFields.length == 0) {
             selectFields = humanCondition.toDefaultSelectFields(getModelClass());
@@ -110,7 +110,7 @@ public interface BaseModelMapper<M extends BaseModel> {
         return selectFields;
     }
 
-    private Object handleRawFieldValue(Class<?> fieldType, Object fieldValue) {
+    default Object handleRawFieldValue(Class<?> fieldType, Object fieldValue) {
         if (fieldType == LocalDateTime.class && fieldValue instanceof java.sql.Timestamp) {
             return ((java.sql.Timestamp) fieldValue).toLocalDateTime();
         } else if (fieldType == LocalDate.class && fieldValue instanceof java.sql.Date) {
