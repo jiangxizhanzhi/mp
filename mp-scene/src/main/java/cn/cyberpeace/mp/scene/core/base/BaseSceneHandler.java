@@ -539,11 +539,16 @@ public abstract class BaseSceneHandler<
      */
     private List<A0> readAreas(String... areaIds) {
         var condition = new HumanCondition().filterEqual(BaseSceneAreaModel::getScene, sceneId);
-        if (areaIds.length > 0) {
-            condition.filterIn(BaseSceneAreaModel::getArea, areaIds);
-        } else if (isAreaMode && !StringUtils.isEmpty(areaId)) {
-            condition.filterEqual(BaseSceneAreaModel::getArea, areaId);
+
+        String[] filterAreaIds = areaIds;
+        if (filterAreaIds.length == 0 && isAreaMode) {
+            String currentAreaId = areaId == null ? StringUtils.EMPTY : areaId;
+            filterAreaIds = new String[]{currentAreaId};
         }
+        if (filterAreaIds.length > 0) {
+            condition.filterIn(BaseSceneAreaModel::getArea, filterAreaIds);
+        }
+
         List<A0> areas = sceneAreaMapper.list(condition);
 
         if (isAreaMode) {
@@ -568,9 +573,16 @@ public abstract class BaseSceneHandler<
         List<E0> elements;
         var condition = new HumanCondition()
                 .filterEqual(BaseSceneElementModel::getScene, sceneId);
-        if (areaIds.length > 0) {
-            condition.filterIn(BaseSceneElementModel::getArea, areaIds);
+
+        String[] filterAreaIds = areaIds;
+        if (filterAreaIds.length == 0 && isAreaMode) {
+            String currentAreaId = areaId == null ? StringUtils.EMPTY : areaId;
+            filterAreaIds = new String[]{currentAreaId};
         }
+        if (filterAreaIds.length > 0) {
+            condition.filterIn(BaseSceneElementModel::getArea, filterAreaIds);
+        }
+
         elements = sceneElementMapper.list(condition);
         return elements;
     }
@@ -582,14 +594,20 @@ public abstract class BaseSceneHandler<
      */
     private List<P0> readElementPorts(String... areaIds) {
         var condition = new HumanCondition();
-        if (areaIds.length > 0) {
+
+        String[] filterAreaIds = areaIds;
+        if (filterAreaIds.length == 0 && isAreaMode) {
+            String currentAreaId = areaId == null ? StringUtils.EMPTY : areaId;
+            filterAreaIds = new String[]{currentAreaId};
+        }
+        if (filterAreaIds.length > 0) {
             condition.link(sceneElementPortModelClass, sceneElementModelClass)
                     .filterLink(sceneElementPortModelClass, BaseSceneElementPortModel::getSceneElement,
                             sceneElementModelClass, BaseSceneElementModel::getId)
                     .currentLink(sceneElementPortModelClass)
                     .filterEqual(BaseSceneElementPortModel::getScene, sceneId)
                     .currentLink(sceneElementModelClass)
-                    .filterIn(BaseSceneElementModel::getArea, areaIds);
+                    .filterIn(BaseSceneElementModel::getArea, filterAreaIds);
         } else {
             condition.filterEqual(BaseSceneElementPortModel::getScene, sceneId);
         }
@@ -603,7 +621,13 @@ public abstract class BaseSceneHandler<
      */
     private List<C0> readElementPortConnections(String... areaIds) {
         var condition = new HumanCondition();
-        if (areaIds.length > 0) {
+
+        String[] filterAreaIds = areaIds;
+        if (filterAreaIds.length == 0 && isAreaMode) {
+            String currentAreaId = areaId == null ? StringUtils.EMPTY : areaId;
+            filterAreaIds = new String[]{currentAreaId};
+        }
+        if (filterAreaIds.length > 0) {
             condition.link(sceneElementPortConnectionModelClass, sceneElementModelClass)
                     .filterOrStart()
                     .orLink(sceneElementPortConnectionModelClass, BaseSceneElementPortConnectionModel::getSourceElement,
@@ -614,7 +638,7 @@ public abstract class BaseSceneHandler<
                     .currentLink(sceneElementPortConnectionModelClass)
                     .filterEqual(BaseSceneElementPortConnectionModel::getScene, sceneId)
                     .currentLink(sceneElementModelClass)
-                    .filterIn(BaseSceneElementModel::getArea, areaIds)
+                    .filterIn(BaseSceneElementModel::getArea, filterAreaIds)
                     .distinct();
         } else {
             condition.filterEqual(BaseSceneElementPortConnectionModel::getScene, sceneId);
@@ -624,15 +648,29 @@ public abstract class BaseSceneHandler<
 
     /**
      * 从数据库读取网元插件关系
-     * @param elementIds 网元节点id
+     * @param areaIds 父区域节点
      * @return 表模型-网元插件关系
      */
-    private List<P1> readElementPlugins(String... elementIds) {
-        var condition = new HumanCondition()
-                .filterEqual(BaseSceneElementPluginModel::getScene, sceneId);
-        if (elementIds.length > 0) {
-            condition.filterIn(BaseSceneElementPluginModel::getSceneElement, elementIds);
+    private List<P1> readElementPlugins(String... areaIds) {
+        var condition = new HumanCondition();
+
+        String[] filterAreaIds = areaIds;
+        if (filterAreaIds.length == 0 && isAreaMode) {
+            String currentAreaId = areaId == null ? StringUtils.EMPTY : areaId;
+            filterAreaIds = new String[]{currentAreaId};
         }
+        if (filterAreaIds.length > 0) {
+            condition.link(sceneElementPluginModelClass, sceneElementModelClass)
+                    .filterLink(sceneElementPluginModelClass, BaseSceneElementPluginModel::getSceneElement,
+                            sceneElementModelClass, BaseSceneElementModel::getId)
+                    .currentLink(sceneElementPluginModelClass)
+                    .filterEqual(BaseSceneElementPluginModel::getScene, sceneId)
+                    .currentLink(sceneElementModelClass)
+                    .filterIn(BaseSceneElementModel::getArea, filterAreaIds);
+        } else {
+            condition.filterEqual(BaseSceneElementPluginModel::getScene, sceneId);
+        }
+
         return sceneElementPluginMapper.list(condition);
     }
 
@@ -1021,11 +1059,10 @@ public abstract class BaseSceneHandler<
             filterAreaIds = ArrayUtils.addAll(areaMap.values().stream().filter(BaseSceneAreaBO::getOpen)
                     .map(BaseSceneAreaBO::getId).toArray(String[]::new), currentAreaId);
         }
-        var elements = readElements(filterAreaIds);
-        loadElements(elements);
+        loadElements(readElements(filterAreaIds));
         loadElementPorts(readElementPorts(filterAreaIds));
         loadConnections(readElementPortConnections(filterAreaIds));
-        loadElementPlugins(readElementPlugins(elements.stream().map(BaseModel::getId).toArray(String[]::new)));
+        loadElementPlugins(readElementPlugins(filterAreaIds));
         Map<String, List<String>> pluginKeyElementIds = new HashMap<>();
         Map<String, List<String>> pluginKeyElementPortIds = new HashMap<>();
         Map<String, E> elementEidElementBOMap = new HashMap<>();
@@ -1080,8 +1117,7 @@ public abstract class BaseSceneHandler<
                 .collect(Collectors.toMap(BaseSceneElementPortModel::getPortId, x -> x));
         Map<String, C0> existElementPortConnectionMap = isCreate ? new HashMap<>() : readElementPortConnections(filterAreaIds).stream()
                 .collect(Collectors.toMap(this::elementPortConnectionKey, x -> x));
-        Map<String, P1> existElementPluginMap = isCreate ? new HashMap<>() : readElementPlugins(existElementMap.values().stream()
-                .map(BaseModel::getId).toArray(String[]::new)).stream()
+        Map<String, P1> existElementPluginMap = isCreate ? new HashMap<>() : readElementPlugins(filterAreaIds).stream()
                 .collect(Collectors.toMap(this::elementPluginKey, x -> x));
 
         // 保存区域，可能会跨区域连接
@@ -1153,6 +1189,7 @@ public abstract class BaseSceneHandler<
         }
         List<E0> elements = readElements(filterAreaIds);
         List<P0> elementPorts = readElementPorts(filterAreaIds);
+        List<P1> elementPlugins = readElementPlugins(filterAreaIds);
         if (!areas.isEmpty()) {
             sceneAreaMapper.bulkDelete(areas.stream().map(BaseModel::getId).toArray(String[]::new));
         }
@@ -1161,6 +1198,9 @@ public abstract class BaseSceneHandler<
         }
         if (!elementPorts.isEmpty()) {
             sceneElementPortMapper.bulkDelete(elementPorts.stream().map(BaseModel::getId).toArray(String[]::new));
+        }
+        if (!elementPlugins.isEmpty()) {
+            sceneElementPluginMapper.bulkDelete(elementPlugins.stream().map(BaseModel::getId).toArray(String[]::new));
         }
 
         List<C0> elementPortConnections = readElementPortConnections(filterAreaIds);
