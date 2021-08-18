@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devops.cluster.model.ImagesModel;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
 import cn.cyberpeace.mp.devops.cluster.request.*;
+import cn.cyberpeace.mp.devops.cluster.service.DeviceService;
 import cn.cyberpeace.mp.devops.cluster.service.ImagesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,10 +21,13 @@ public class ImagesConverterImpl implements ImagesConverter {
 
     private ImageMapper imageMapper;
 
+    private DeviceService deviceService;
+
     @Autowired
-    public ImagesConverterImpl(ImagesService imagesService, ImageMapper imageMapper) {
+    public ImagesConverterImpl(ImagesService imagesService, ImageMapper imageMapper,DeviceService deviceService) {
         this.imagesService = imagesService;
         this.imageMapper = imageMapper;
+        this.deviceService = deviceService;
     }
 
     @Override
@@ -42,7 +46,7 @@ public class ImagesConverterImpl implements ImagesConverter {
     @Override
     @Transactional
     public void add(ImageAddRequest request) {
-        imagesService.add();
+//        imagesService.add();
         ImagesModel imagesModel = new ImagesModel();
         imagesModel.setName(request.getName());
         imagesModel.setRole(request.getRole());
@@ -54,7 +58,7 @@ public class ImagesConverterImpl implements ImagesConverter {
 
     @Override
     public void update(ImageUpdateRequest request) {
-        imagesService.update();
+//        imagesService.update();
         ImagesModel imagesModel = new ImagesModel();
         imagesModel.setId(request.getId());
         imagesModel.setName(request.getName());
@@ -77,7 +81,7 @@ public class ImagesConverterImpl implements ImagesConverter {
     @Override
     @Transactional
     public void delete(ImagesDeleteRequest request) {
-        imagesService.delete();
+        deviceService.deleteByIds(request.getImageIds());
         ImageDeleteDTO dto = new ImageDeleteDTO();
         dto.setIds(request.getImageIds());
         imageMapper.delete(dto);

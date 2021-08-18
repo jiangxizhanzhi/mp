@@ -1,5 +1,9 @@
 package cn.cyberpeace.mp.devops.cluster.service;
 
+import cn.cyberpeace.mp.devops.cluster.model.Device;
+import cn.cyberpeace.mp.devops.cluster.model.DeviceCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.ImageCloudPlatformModel;
+
 /**
  * 镜像管理底层接口
  */
@@ -8,33 +12,22 @@ public interface ImagesService extends BaseCloudPlatformService  {
     /**
      * 分页查询
      */
-    void page(String getParams);
+    DeviceCloudPlatformModel page(String getParams);
 
     /**
      * 新增
      */
-    void add();
+    Device add(Device device);
 
     /**
      * 更新
      */
-    void update();
+    String update(String uuid,Device device);
 
     /**
      * 构建
      */
     void build();
-
-
-    /**
-     * 删除
-     */
-    void delete();
-
-    /**
-     * 授权
-     */
-    void auth();
 
     /**
      * 导出

@@ -29,5 +29,5 @@ public interface DeviceService extends BaseCloudPlatformService {
      * 批量删除
      * @param ids
      */
-    void deleteByIds(List<String> ids);
+    Boolean deleteByIds(List<String> ids);
 }

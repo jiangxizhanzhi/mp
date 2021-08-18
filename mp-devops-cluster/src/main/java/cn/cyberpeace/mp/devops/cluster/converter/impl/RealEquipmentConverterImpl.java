@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.RealEquipmentConvertModel
 import cn.cyberpeace.mp.devops.cluster.converter.model.common.SystemInfo;
 import cn.cyberpeace.mp.devops.cluster.model.Device;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtGateway;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
 import cn.cyberpeace.mp.devops.cluster.request.*;
 import cn.cyberpeace.mp.devops.cluster.service.DeviceService;
@@ -87,14 +88,15 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
     }
 
     @Override
-    public void update(RealEquipmentRequest request) {
+    public RealEquipment update(RealEquipmentRequest request) {
         Device device = convertRequest(request);
-        realEquipmentService.update(request.getUuid(),device);
+        Device result = realEquipmentService.update(request.getUuid(),device);
+        return convertDevice(result);
     }
 
     @Override
-    public void delete(RealEquipmentDeleteRequest request) {
-        deviceService.deleteByIds(request.getUuids());
+    public Boolean delete(RealEquipmentDeleteRequest request) {
+        return deviceService.deleteByIds(request.getUuids());
     }
 
     /**
@@ -106,9 +108,11 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
         if (Objects.isNull(device)){
             return new RealEquipment();
         }
-        Device.ExtEntity extEntity = device.getExt_entity();
+        final Device.ExtEntity extEntity = device.getExt_entity();
 
-        ExtSystemInfo extSystemInfo = device.getExt_system_info();
+        final ExtSystemInfo extSystemInfo = device.getExt_system_info();
+
+        final ExtGateway extGateway = device.getExt_gateway();
 
         RealEquipment convertModel = RealEquipment.builder().uuid(device.getUuid())
                 .name(device.getName()).role(device.getRole()).logo(device.getLogo())
@@ -144,6 +148,10 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
                     .systemType(extSystemInfo.getSystem_type()).systemArchitecture(extSystemInfo.getSystem_architecture())
                     .language(extSystemInfo.getLanguage()).build();
             convertModel.setSystemInfo(systemInfo);
+        }
+
+        if (Objects.nonNull(extGateway)){
+
         }
         return convertModel;
     }

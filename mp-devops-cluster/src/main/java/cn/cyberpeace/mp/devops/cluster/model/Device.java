@@ -1,13 +1,16 @@
 package cn.cyberpeace.mp.devops.cluster.model;
 
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtGateway;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 /**
  * 设备信息
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -203,38 +206,5 @@ public class Device extends BaseCloudPlatformModel{
          * 串口密码
          */
         private String ccm_password;
-    }
-
-    /**
-     * 扩展网关信息
-     */
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static final class ExtGateway{
-
-        private Integer id;
-
-        private String uuid;
-
-        private String created_at;
-
-        private String updated_at;
-
-        private Boolean deleted;
-
-        private String deleted_at;
-
-        private String user;
-
-        private String project;
-
-        private String device_uuid;
-
-        private Integer port_configs;
-
-        private String port_name;
-
-        private String port_ips;
     }
 }

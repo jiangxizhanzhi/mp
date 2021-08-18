@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.devops.cluster.service;
 
 import cn.cyberpeace.mp.devops.cluster.model.Device;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.RealEquipmentOpenStackModel;
 
 import java.util.List;
 
@@ -31,5 +30,5 @@ public interface RealEquipmentService extends BaseCloudPlatformService {
      * @param device
      * @return
      */
-    String update(String uuid,Device device);
+    Device update(String uuid,Device device);
 }

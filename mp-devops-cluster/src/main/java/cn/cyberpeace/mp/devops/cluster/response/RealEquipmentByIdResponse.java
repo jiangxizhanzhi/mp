@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.response;
 
 import cn.cyberpeace.mp.devops.cluster.converter.model.common.ExtEntity;
+import cn.cyberpeace.mp.devops.cluster.converter.model.common.ExtGateway;
 import cn.cyberpeace.mp.devops.cluster.converter.model.common.SystemInfo;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -19,8 +20,8 @@ public class RealEquipmentByIdResponse extends BaseCloudPlatformResponse{
     /**
      * UUID
      */
-    @ApiModelProperty("ID")
-    private String id;
+    @ApiModelProperty("UUID")
+    private String uuid;
 
     /**
      * 名称
@@ -63,6 +64,11 @@ public class RealEquipmentByIdResponse extends BaseCloudPlatformResponse{
      */
     @ApiModelProperty("实体信息")
     private ExtEntity extEntity;
+
+    /**
+     * 扩展网关信息
+     */
+    private ExtGateway extGateway;
 
     /**
      * 描述

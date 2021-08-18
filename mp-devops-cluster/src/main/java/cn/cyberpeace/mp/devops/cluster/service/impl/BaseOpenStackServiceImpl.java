@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.service.impl;
 
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
+import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.BaseModel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -62,7 +63,6 @@ public class BaseOpenStackServiceImpl extends BaseServiceImpl {
      * @param body
      * @return
      */
-    @Override
     protected String sendPost(String api,String body){
         return super.sendPost(devopsConfig.getCpUrl().concat(api),body);
     }
@@ -98,7 +98,7 @@ public class BaseOpenStackServiceImpl extends BaseServiceImpl {
      * @return
      */
     @Override
-    protected String sendDelete(String api, String body){
-        return super.sendDelete(devopsConfig.getCpUrl().concat(api),body);
+    protected <T extends BaseModel> T sendDelete(String api, String body,Class<T> valueType){
+        return super.sendDelete(devopsConfig.getCpUrl().concat(api),body, valueType);
     }
 }

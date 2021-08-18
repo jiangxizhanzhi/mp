@@ -34,4 +34,14 @@ public class BaseCloudPlatformModel extends BaseModel {
      */
     private String message;
 
+    /**
+     *  中文提示
+     */
+    private String message_zh;
+
+    /**
+     * 错误信息
+     */
+    private String error_message;
+
 }

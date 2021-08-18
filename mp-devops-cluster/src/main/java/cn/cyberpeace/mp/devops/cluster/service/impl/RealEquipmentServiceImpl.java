@@ -4,7 +4,6 @@ import cn.cyberpeace.mp.auth.extensions.security.common.JwtCommon;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.Device;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.RealEquipmentOpenStackModel;
 import cn.cyberpeace.mp.devops.cluster.service.RealEquipmentService;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,7 +34,7 @@ public class RealEquipmentServiceImpl extends BaseOpenStackServiceImpl implement
     }
 
     @Override
-    public String update(String uuid,Device device) {
-        return super.sendPut(CPCLOUD_DEVICE + URL_VERSION + "/entity/" + uuid,JSONObject.toJSONString(device));
+    public Device update(String uuid,Device device) {
+        return super.sendPut(CPCLOUD_DEVICE + URL_VERSION + "/entity/" + uuid,JSONObject.toJSONString(device),Device.class);
     }
 }

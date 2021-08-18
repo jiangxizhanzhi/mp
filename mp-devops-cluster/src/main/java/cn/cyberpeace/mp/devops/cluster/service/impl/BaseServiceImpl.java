@@ -78,7 +78,7 @@ public class BaseServiceImpl {
         T model = null;
         String result = "";
         try {
-            result = this.sendGet(url);
+            result =  HttpUtils.getInstance().sendGet(url);
             model = objectMapper.readValue(result,valueType);
         } catch (IOException e) {
             log.info("=====GET调用url：{},对应返回结果信息：{},报错信息：{}",url,result,e.getMessage());
@@ -98,7 +98,7 @@ public class BaseServiceImpl {
         T model = null;
         String result = "";
         try {
-            result = this.sendGet(url,headers);
+            result =  HttpUtils.getInstance().sendGet(url,headers);
             model = objectMapper.readValue(result,valueType);
         } catch (IOException e) {
             log.info("=====GET调用url：{},对应返回结果信息：{},报错信息：{}",url,result,e.getMessage());
@@ -135,7 +135,7 @@ public class BaseServiceImpl {
         T model = null;
         String result = "";
         try {
-            result = this.sendPost(url,body);
+            result = HttpUtils.getInstance().sendPost(url,body);
             model = objectMapper.readValue(result,valueType);
         } catch (IOException e) {
             log.info("=====POST调用url：{},参数：{},对应返回结果信息：{},报错信息：{}",url,body,result,e.getMessage());
@@ -172,7 +172,7 @@ public class BaseServiceImpl {
         T model = null;
         String result = "";
         try {
-            result = this.sendPut(url,body);
+            result =  HttpUtils.getInstance().sendPut(url,body);
             model = objectMapper.readValue(result,valueType);
         } catch (IOException e) {
             log.info("=====PUT调用url：{},参数：{},对应返回结果信息：{},报错信息：{}",url,body,result,e.getMessage());
@@ -186,7 +186,7 @@ public class BaseServiceImpl {
      * @param body
      * @return
      */
-    protected String sendDelete(String url,String body){
+    private String sendDelete(String url,String body){
         String result = "";
         try {
             HttpClient client = HttpClientBuilder.create().build();
@@ -205,4 +205,29 @@ public class BaseServiceImpl {
         }
         return result;
     }
+
+    /**
+     * 删除
+     * @param url
+     * @param body
+     * @param valueType
+     * @param <T>
+     * @return
+     */
+    protected <T extends BaseModel> T sendDelete(String url,String body,Class<T> valueType){
+        T model = null;
+        String result = "";
+        try {
+            result = this.sendDelete(url,body);
+            model = objectMapper.readValue(result,valueType);
+        } catch (IOException e) {
+            log.info("=====DELETE调用url：{},参数：{},对应返回结果信息：{},报错信息：{}",url,body,result,e.getMessage());
+        }
+        return model;
+    }
+
+
+
+
+
 }

@@ -9,6 +9,7 @@ import java.util.List;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class InstallerCloudPlatformModel extends BaseCloudPlatformModel {
 
     private List<Installer> items;

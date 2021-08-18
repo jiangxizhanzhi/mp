@@ -38,11 +38,11 @@ public interface RealEquipmentConverter extends BaseConverter{
      * 更新
      * @param request
      */
-    void update(RealEquipmentRequest request);
+    RealEquipment update(RealEquipmentRequest request);
 
     /**
      * 批量删除
      * @param request
      */
-    void delete(RealEquipmentDeleteRequest request);
+    Boolean delete(RealEquipmentDeleteRequest request);
 }

@@ -77,7 +77,7 @@ public class HttpUtils {
     private static String doPost(String url, String content, HttpClient client) throws IOException {
         HttpPost httpPost = new HttpPost(url);
         // 解决中文乱码问题
-        StringEntity entity = new StringEntity(content, "utf-8");
+        StringEntity entity = new StringEntity(content, "UTF-8");
         entity.setContentType("application/json");
         httpPost.setEntity(entity);
 

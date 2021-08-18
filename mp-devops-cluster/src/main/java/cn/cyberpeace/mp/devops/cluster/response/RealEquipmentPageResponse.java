@@ -51,12 +51,6 @@ public class RealEquipmentPageResponse  extends BaseCloudPlatformResponse{
     private Integer subCategory;
 
     /**
-     * 系统信息
-     */
-    @ApiModelProperty(value = "系统信息")
-    private String systemInfo;
-
-    /**
      * 描述
      */
     @ApiModelProperty(value = "描述")

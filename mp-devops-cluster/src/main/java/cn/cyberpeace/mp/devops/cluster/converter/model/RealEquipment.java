@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.converter.model;
 
 import cn.cyberpeace.mp.devops.cluster.converter.model.common.ExtEntity;
+import cn.cyberpeace.mp.devops.cluster.converter.model.common.ExtGateway;
 import cn.cyberpeace.mp.devops.cluster.converter.model.common.SystemInfo;
 import lombok.*;
 
@@ -56,6 +57,8 @@ public class RealEquipment extends BasePageConvertModel{
      */
     private String description;
 
-
-
+    /**
+     * 网关信息
+     */
+    private ExtGateway extGateway;
 }

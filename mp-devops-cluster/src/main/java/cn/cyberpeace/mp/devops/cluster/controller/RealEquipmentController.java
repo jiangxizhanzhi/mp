@@ -73,7 +73,7 @@ public class RealEquipmentController {
     @GetMapping("/{id}")
     public ServiceResult<RealEquipmentByIdResponse> getById(@PathVariable String id){
         RealEquipment realEquipment = realEquipmentConverter.findById(id);
-        RealEquipmentByIdResponse response = RealEquipmentByIdResponse.builder().id(realEquipment.getUuid())
+        RealEquipmentByIdResponse response = RealEquipmentByIdResponse.builder().uuid(realEquipment.getUuid())
                 .name(realEquipment.getName()).logo(realEquipment.getLogo()).role(realEquipment.getRole())
                 .mainCategory(realEquipment.getMainCategory()).subCategory(realEquipment.getSubCategory())
                 .systemInfo(realEquipment.getSystemInfo()).extEntity(realEquipment.getExtEntity())
@@ -96,11 +96,12 @@ public class RealEquipmentController {
      */
     @ApiOperation("更新")
     @PutMapping("/update")
-    public void update(@RequestBody RealEquipmentRequest request){
+    public ServiceResult<Boolean> update(@RequestBody RealEquipmentRequest request){
         if (StringUtils.isBlank(request.getUuid())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
-        realEquipmentConverter.update(request);
+        RealEquipment realEquipment = realEquipmentConverter.update(request);
+        return new ServiceResult<>(realEquipment.isSuccess());
     }
 
     /**
@@ -108,8 +109,9 @@ public class RealEquipmentController {
      */
     @ApiOperation("删除")
     @DeleteMapping("/delete")
-    public void delete(@RequestBody RealEquipmentDeleteRequest request){
-        realEquipmentConverter.delete(request);
+    public ServiceResult<Boolean> delete(@RequestBody RealEquipmentDeleteRequest request){
+        Boolean result = realEquipmentConverter.delete(request);
+        return new ServiceResult<>(result);
     }
 
 
