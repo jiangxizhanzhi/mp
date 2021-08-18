@@ -13,7 +13,7 @@ public interface ImagesConverter {
     /**
      * 新增
      */
-    void add(ImageAddRequest request);
+    void add(ImageRequest request);
 
     /**
      * 更新

@@ -22,17 +22,17 @@ public class ExtSystemInfo {
     /**
      * 设备UUID
      */
-    private String device_uuid;
+    private String deviceUuid;
 
     /**
      * 操作系统
      */
-    private String system_type;
+    private String systemType;
 
     /**
      * 系统架构
      */
-    private String system_architecture;
+    private String systemArchitecture;
 
     /**
      * 语言

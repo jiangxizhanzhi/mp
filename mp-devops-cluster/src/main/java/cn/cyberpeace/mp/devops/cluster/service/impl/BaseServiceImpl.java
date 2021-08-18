@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.config.HttpDeleteWithBody;
 import cn.cyberpeace.mp.devops.cluster.model.BaseModel;
+import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
@@ -79,7 +80,7 @@ public class BaseServiceImpl {
         String result = "";
         try {
             result =  HttpUtils.getInstance().sendGet(url);
-            model = objectMapper.readValue(result,valueType);
+            model = JsonUtils.toSnakeObject(result,valueType);
         } catch (IOException e) {
             log.info("=====GET调用url：{},对应返回结果信息：{},报错信息：{}",url,result,e.getMessage());
         }
@@ -99,7 +100,7 @@ public class BaseServiceImpl {
         String result = "";
         try {
             result =  HttpUtils.getInstance().sendGet(url,headers);
-            model = objectMapper.readValue(result,valueType);
+            model = JsonUtils.toSnakeObject(result,valueType);
         } catch (IOException e) {
             log.info("=====GET调用url：{},对应返回结果信息：{},报错信息：{}",url,result,e.getMessage());
         }
@@ -136,7 +137,7 @@ public class BaseServiceImpl {
         String result = "";
         try {
             result = HttpUtils.getInstance().sendPost(url,body);
-            model = objectMapper.readValue(result,valueType);
+            model = JsonUtils.toSnakeObject(result,valueType);
         } catch (IOException e) {
             log.info("=====POST调用url：{},参数：{},对应返回结果信息：{},报错信息：{}",url,body,result,e.getMessage());
         }
@@ -173,7 +174,7 @@ public class BaseServiceImpl {
         String result = "";
         try {
             result =  HttpUtils.getInstance().sendPut(url,body);
-            model = objectMapper.readValue(result,valueType);
+            model = JsonUtils.toSnakeObject(result,valueType);
         } catch (IOException e) {
             log.info("=====PUT调用url：{},参数：{},对应返回结果信息：{},报错信息：{}",url,body,result,e.getMessage());
         }
@@ -219,7 +220,7 @@ public class BaseServiceImpl {
         String result = "";
         try {
             result = this.sendDelete(url,body);
-            model = objectMapper.readValue(result,valueType);
+            model = JsonUtils.toSnakeObject(result,valueType);
         } catch (IOException e) {
             log.info("=====DELETE调用url：{},参数：{},对应返回结果信息：{},报错信息：{}",url,body,result,e.getMessage());
         }

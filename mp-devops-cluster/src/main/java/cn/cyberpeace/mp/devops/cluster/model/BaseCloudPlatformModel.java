@@ -22,7 +22,7 @@ public class BaseCloudPlatformModel extends BaseModel {
     /**
      * 请求ID
      */
-    private String request_id;
+    private String requestId;
 
     /**
      * 总数据大小
@@ -37,11 +37,11 @@ public class BaseCloudPlatformModel extends BaseModel {
     /**
      *  中文提示
      */
-    private String message_zh;
+    private String messageZh;
 
     /**
      * 错误信息
      */
-    private String error_message;
+    private String errorMessage;
 
 }

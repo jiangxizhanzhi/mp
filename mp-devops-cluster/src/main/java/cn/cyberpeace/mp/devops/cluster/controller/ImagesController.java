@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/images")
-@Api(tags = "镜像管理")
+@Api(tags = "靶标管理-镜像管理")
 public class ImagesController {
 
     private ImagesConverter imagesConverter;
@@ -43,7 +43,7 @@ public class ImagesController {
      */
     @ApiOperation("新增")
     @PostMapping("/add")
-    public void add(@RequestBody ImageAddRequest request){
+    public void add(@RequestBody ImageRequest request){
         imagesConverter.add(request);
     }
 

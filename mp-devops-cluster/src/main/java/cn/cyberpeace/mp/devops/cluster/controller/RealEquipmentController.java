@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/real-equipment")
-@Api(tags = "实装管理")
+@Api(tags = "靶标管理-实装管理")
 public class RealEquipmentController {
 
     private RealEquipmentConverter realEquipmentConverter;

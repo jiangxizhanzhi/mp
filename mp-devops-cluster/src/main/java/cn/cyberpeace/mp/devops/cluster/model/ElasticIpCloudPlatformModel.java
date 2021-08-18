@@ -32,32 +32,32 @@ public class ElasticIpCloudPlatformModel extends BaseCloudPlatformModel {
         /**
          * 承租者ID
          */
-        private String tenant_id;
+        private String tenantId;
 
         /**
          * 弹性IP地址
          */
-        private String floating_ip_address;
+        private String floatingIpAddress;
 
         /**
          * 弹性网络ID
          */
-        private String floating_network_id;
+        private String floatingNetworkId;
 
         /**
          * 路由ID
          */
-        private String router_id;
+        private String routerId;
 
         /**
          * 端口
          */
-        private String port_id;
+        private String portId;
 
         /**
          * 固定IP地址
          */
-        private String fixed_ip_address;
+        private String fixedIpAddress;
 
         /**
          * 状态
@@ -72,7 +72,7 @@ public class ElasticIpCloudPlatformModel extends BaseCloudPlatformModel {
         /**
          * 端口详细
          */
-        private String port_details;
+        private String portDetails;
 
         /**
          *
@@ -82,20 +82,20 @@ public class ElasticIpCloudPlatformModel extends BaseCloudPlatformModel {
         /**
          * 修订号
          */
-        private Integer revision_number;
+        private Integer revisionNumber;
 
         /**
          * 项目ID
          */
-        private String project_id;
+        private String projectId;
 
         /**
          * 创建时间
          */
-        private String created_at;
+        private String createdAt;
         /**
          * 更新时间
          */
-        private String updated_at;
+        private String updatedAt;
     }
 }

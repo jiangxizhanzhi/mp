@@ -12,7 +12,7 @@ public class HypervisorStatisticsCloudPlatformModel extends BaseCloudPlatformMod
     /**
      * 资源统计
      */
-    private HypervisorStatistics hypervisor_statistics;
+    private HypervisorStatistics hypervisorStatistics;
 
     @Data
     @NoArgsConstructor
@@ -32,52 +32,52 @@ public class HypervisorStatisticsCloudPlatformModel extends BaseCloudPlatformMod
         /**
          * 内存总大小
          */
-        private Long memory_mb;
+        private Long memoryMb;
 
         /**
          * 磁盘总大小
          */
-        private Long local_gb;
+        private Long localGb;
 
         /**
          * 已使用CPU核数
          */
-        private Long vcpus_used;
+        private Long vcpusUsed;
 
         /**
          * 已使用内存大小
          */
-        private Long memory_mb_used;
+        private Long memoryMbUsed;
 
         /**
          * 已使用磁盘大小
          */
-        private Long local_gb_used;
+        private Long localGbUsed;
 
         /**
          * 空闲内存大小
          */
-        private Long free_ram_mb;
+        private Long freeRamMb;
 
         /**
          * 空闲磁盘大小
          */
-        private Long free_disk_gb;
+        private Long freeDiskGb;
 
         /**
          * 当前工作负载
          */
-        private Long current_workload;
+        private Long currentWorkload;
 
         /**
          * 运行中的虚拟机数量
          */
-        private Integer running_vms;
+        private Integer runningVms;
 
         /**
          * 真实的空闲磁盘大小
          */
-        private Long disk_available_least;
+        private Long diskAvailableLeast;
     }
 
     

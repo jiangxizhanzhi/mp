@@ -36,7 +36,7 @@ public class VirtualRealSwitchCloudPlatformModel extends BaseCloudPlatformModel 
         /**
          * 管理IP
          */
-        private String management_ip;
+        private String managementIp;
 
         /**
          * 节点管理
@@ -46,19 +46,19 @@ public class VirtualRealSwitchCloudPlatformModel extends BaseCloudPlatformModel 
         /**
          * 总端口数
          */
-        private String interfaces_summary;
+        private String interfacesSummary;
 
         /**
          * 已使用端口数
          */
-        private String interfaces_used;
+        private String interfacesUsed;
 
         public String getInterfaces_summary() {
-            return StringUtils.isBlank(interfaces_summary) ? "0" : interfaces_summary;
+            return StringUtils.isBlank(interfacesSummary) ? "0" : interfacesSummary;
         }
 
         public String getInterfaces_used() {
-            return StringUtils.isBlank(interfaces_used) ? "0" : interfaces_used;
+            return StringUtils.isBlank(interfacesUsed) ? "0" : interfacesUsed;
         }
     }
 }

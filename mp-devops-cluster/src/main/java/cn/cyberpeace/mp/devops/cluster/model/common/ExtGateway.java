@@ -13,23 +13,23 @@ public class ExtGateway {
 
     private String uuid;
 
-    private String created_at;
+    private String createdAt;
 
-    private String updated_at;
+    private String updatedAt;
 
     private Boolean deleted;
 
-    private String deleted_at;
+    private String deletedAt;
 
     private String user;
 
     private String project;
 
-    private String device_uuid;
+    private String deviceUuid;
 
-    private Integer port_configs;
+    private Integer portConfigs;
 
-    private String port_name;
+    private String portName;
 
-    private String port_ips;
+    private String portIps;
 }

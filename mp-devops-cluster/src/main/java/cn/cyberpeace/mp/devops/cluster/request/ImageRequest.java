@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.request;
 
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtVm;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -16,8 +17,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-@ApiModel(value = "镜像新增请求信息")
-public class ImageAddRequest extends BaseRequest {
+@ApiModel(value = "镜像新增/编辑请求信息")
+public class ImageRequest extends BaseRequest {
 
     /**
      * 名称
@@ -35,7 +36,7 @@ public class ImageAddRequest extends BaseRequest {
      * 图标
      */
     @ApiModelProperty(value = "图标",required = true)
-    private String imgIconUrl;
+    private String logo;
 
     /**
      * 角色：网络/网关/终端
@@ -62,15 +63,10 @@ public class ImageAddRequest extends BaseRequest {
     private Integer virtualType;
 
     /**
-     * 虚拟类型明细
+     * 扩展的虚拟机信息
      */
-    @ApiModelProperty(value = "虚拟类型明细")
-    private String virtualTypeDetail;
-
-    /**
-     * 端口信息
-     */
-    private List<PortsInfo> ports;
+    @ApiModelProperty(value = "虚拟类型")
+    private ExtVm extVm;
 
     /**
      * 系统信息
@@ -83,6 +79,17 @@ public class ImageAddRequest extends BaseRequest {
      */
     @ApiModelProperty(value = "系统镜像")
     private SystemImage systemImage;
+
+    /**
+     * 虚拟类型明细
+     */
+    @ApiModelProperty(value = "虚拟类型明细")
+    private String virtualTypeDetail;
+
+    /**
+     * 端口信息
+     */
+    private List<PortsInfo> ports;
 
     /**
      * 接入方式

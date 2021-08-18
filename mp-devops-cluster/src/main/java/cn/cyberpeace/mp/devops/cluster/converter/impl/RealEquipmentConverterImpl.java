@@ -108,44 +108,44 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
         if (Objects.isNull(device)){
             return new RealEquipment();
         }
-        final Device.ExtEntity extEntity = device.getExt_entity();
+        final Device.ExtEntity extEntity = device.getExtEntity();
 
-        final ExtSystemInfo extSystemInfo = device.getExt_system_info();
+        final ExtSystemInfo extSystemInfo = device.getExtSystemInfo();
 
-        final ExtGateway extGateway = device.getExt_gateway();
+        final ExtGateway extGateway = device.getExtGateway();
 
         RealEquipment convertModel = RealEquipment.builder().uuid(device.getUuid())
                 .name(device.getName()).role(device.getRole()).logo(device.getLogo())
-                .mainCategory(device.getCategory()).subCategory(device.getSecond_category())
+                .mainCategory(device.getCategory()).subCategory(device.getSecondCategory())
                 .description(device.getDescription()).build();
         convertModel.setSuccess(device.isSuccess());
         if (Objects.nonNull(extEntity)){
             ExtEntity entity = new ExtEntity();
             entity.setId(extEntity.getId());
-            entity.setDeviceUuid(extEntity.getDevice_uuid());
+            entity.setDeviceUuid(extEntity.getDeviceUuid());
             entity.setModel(extEntity.getStyle());
             entity.setParams(extEntity.getParams());
-            entity.setAccessType(extEntity.getAccess_type());
-            entity.setEntityStatus(extEntity.getEntity_status());
-            entity.setAccessSwitchPort(extEntity.getAccess_switch_port());
-            entity.setAccessSwitchPortName(extEntity.getAccess_switch_port_name());
-            entity.setAccessIpAddress(extEntity.getAccess_ip_address());
-            entity.setAccessMacAddress(extEntity.getAccess_mac_address());
-            entity.setSnmpVersion(extEntity.getSnmp_version());
-            entity.setSnmpConfig(extEntity.getSnmp_config());
-            entity.setSnmpCpuOid(extEntity.getSnmp_cpu_oid());
-            entity.setSnmpDiskOid(extEntity.getSnmp_disk_oid());
-            entity.setSnmpMemOid(extEntity.getSnmp_mem_oid());
-            entity.setCcmPort(extEntity.getCcm_port());
-            entity.setCcmName(extEntity.getCcm_name());
-            entity.setCcmPassword(extEntity.getCcm_password());
-            entity.setAccessProtocols(extEntity.getAccess_protocals());
-            entity.setAccessProtocolList(JSONArray.parseArray(extEntity.getAccess_protocals(), ExtEntity.AccessProtocol.class));
+            entity.setAccessType(extEntity.getAccessType());
+            entity.setEntityStatus(extEntity.getEntityStatus());
+            entity.setAccessSwitchPort(extEntity.getAccessSwitchPort());
+            entity.setAccessSwitchPortName(extEntity.getAccessSwitchPortName());
+            entity.setAccessIpAddress(extEntity.getAccessIpAddress());
+            entity.setAccessMacAddress(extEntity.getAccessMacAddress());
+            entity.setSnmpVersion(extEntity.getSnmpVersion());
+            entity.setSnmpConfig(extEntity.getSnmpConfig());
+            entity.setSnmpCpuOid(extEntity.getSnmpCpuOid());
+            entity.setSnmpDiskOid(extEntity.getSnmpDiskOid());
+            entity.setSnmpMemOid(extEntity.getSnmpMemOid());
+            entity.setCcmPort(extEntity.getCcmPort());
+            entity.setCcmName(extEntity.getCcmName());
+            entity.setCcmPassword(extEntity.getCcmPassword());
+            entity.setAccessProtocols(extEntity.getAccessProtocals());
+            entity.setAccessProtocolList(JSONArray.parseArray(extEntity.getAccessProtocals(), ExtEntity.AccessProtocol.class));
             convertModel.setExtEntity(entity);
         }
         if (Objects.nonNull(extSystemInfo)){
             SystemInfo systemInfo = SystemInfo.builder().uuid(extSystemInfo.getUuid())
-                    .systemType(extSystemInfo.getSystem_type()).systemArchitecture(extSystemInfo.getSystem_architecture())
+                    .systemType(extSystemInfo.getSystemType()).systemArchitecture(extSystemInfo.getSystemArchitecture())
                     .language(extSystemInfo.getLanguage()).build();
             convertModel.setSystemInfo(systemInfo);
         }
@@ -171,37 +171,37 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
         device.setLogo(request.getLogo());
         device.setRole(request.getRole());
         device.setCategory(request.getMainCategory());
-        device.setSecond_category(request.getSubCategory());
+        device.setSecondCategory(request.getSubCategory());
 
         final ExtEntity requestExtEntity = request.getExtEntity();
         if (Objects.nonNull(requestExtEntity)) {
             Device.ExtEntity extEntity = new Device.ExtEntity();
             extEntity.setStyle(requestExtEntity.getModel());
             extEntity.setParams(requestExtEntity.getParams());
-            extEntity.setAccess_type(requestExtEntity.getAccessType());
-            extEntity.setAccess_switch_port(requestExtEntity.getAccessSwitchPort());
-            extEntity.setAccess_switch_port_name(requestExtEntity.getAccessSwitchPortName());
-            extEntity.setAccess_ip_address(requestExtEntity.getAccessIpAddress());
-            extEntity.setAccess_mac_address(requestExtEntity.getAccessMacAddress());
-            extEntity.setSnmp_version(requestExtEntity.getSnmpVersion());
-            extEntity.setSnmp_config(requestExtEntity.getSnmpConfig());
-            extEntity.setSnmp_cpu_oid(requestExtEntity.getSnmpCpuOid());
-            extEntity.setSnmp_disk_oid(requestExtEntity.getSnmpDiskOid());
-            extEntity.setSnmp_mem_oid(requestExtEntity.getSnmpMemOid());
-            extEntity.setCcm_port(requestExtEntity.getCcmPort());
-            extEntity.setCcm_name(requestExtEntity.getCcmName());
-            extEntity.setCcm_password(requestExtEntity.getCcmPassword());
-            extEntity.setAccess_protocals(JSONArray.toJSONString(requestExtEntity.getAccessProtocolList()));
-            device.setExt_entity(extEntity);
+            extEntity.setAccessType(requestExtEntity.getAccessType());
+            extEntity.setAccessSwitchPort(requestExtEntity.getAccessSwitchPort());
+            extEntity.setAccessSwitchPortName(requestExtEntity.getAccessSwitchPortName());
+            extEntity.setAccessIpAddress(requestExtEntity.getAccessIpAddress());
+            extEntity.setAccessMacAddress(requestExtEntity.getAccessMacAddress());
+            extEntity.setSnmpVersion(requestExtEntity.getSnmpVersion());
+            extEntity.setSnmpConfig(requestExtEntity.getSnmpConfig());
+            extEntity.setSnmpCpuOid(requestExtEntity.getSnmpCpuOid());
+            extEntity.setSnmpDiskOid(requestExtEntity.getSnmpDiskOid());
+            extEntity.setSnmpMemOid(requestExtEntity.getSnmpMemOid());
+            extEntity.setCcmPort(requestExtEntity.getCcmPort());
+            extEntity.setCcmName(requestExtEntity.getCcmName());
+            extEntity.setCcmPassword(requestExtEntity.getCcmPassword());
+            extEntity.setAccessProtocals(JSONArray.toJSONString(requestExtEntity.getAccessProtocolList()));
+            device.setExtEntity(extEntity);
         }
 
         final SystemInfo reqSystemInfo = request.getSystemInfo();
         if (Objects.nonNull(reqSystemInfo)) {
             ExtSystemInfo extSystemInfo = new ExtSystemInfo();
-            extSystemInfo.setSystem_type(reqSystemInfo.getSystemType());
-            extSystemInfo.setSystem_architecture(reqSystemInfo.getSystemArchitecture());
+            extSystemInfo.setSystemType(reqSystemInfo.getSystemType());
+            extSystemInfo.setSystemArchitecture(reqSystemInfo.getSystemArchitecture());
             extSystemInfo.setLanguage(reqSystemInfo.getLanguage());
-            device.setExt_system_info(extSystemInfo);
+            device.setExtSystemInfo(extSystemInfo);
         }
         return device;
     }

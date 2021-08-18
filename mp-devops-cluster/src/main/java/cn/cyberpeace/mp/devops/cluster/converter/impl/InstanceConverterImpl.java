@@ -51,7 +51,7 @@ public class InstanceConverterImpl implements InstanceConverter {
                 InstanceConvertModel.Model.builder().name(instanceModel.getName()).node(instanceModel.getHostname())
                         .addressList(instanceModel.getAddresses().stream().map(InstanceCloudPlatformModel.InstanceModel.Address::getIp)
                                 .collect(Collectors.toList()))
-                        .status(CloudPlatformEnum.fromValue(instanceModel.getStatus())).createTime(instanceModel.getCreated_at()).build()
+                        .status(CloudPlatformEnum.fromValue(instanceModel.getStatus())).createTime(instanceModel.getCreatedAt()).build()
         ).collect(Collectors.toList());
         InstanceConvertModel convertModel = new InstanceConvertModel();
         convertModel.setModelList(list);

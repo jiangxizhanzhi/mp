@@ -9,13 +9,13 @@ import lombok.NoArgsConstructor;
 @Data
 public class ExtImageInfo {
 
-    private String base_image;
+    private String baseImage;
 
-    private Boolean base_image_support;
+    private Boolean baseImageSupport;
 
-    private String disk_format;
+    private String diskFormat;
 
-    private String meta_data;
+    private String metaData;
 
-    private Integer image_status;
+    private Integer imageStatus;
 }

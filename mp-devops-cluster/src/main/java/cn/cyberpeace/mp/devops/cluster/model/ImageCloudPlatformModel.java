@@ -43,30 +43,30 @@ public class ImageCloudPlatformModel extends BaseCloudPlatformModel {
     /**
      * 子分类
      */
-    private Integer second_category;
+    private Integer secondCategory;
 
     /**
      * 镜像类型
      */
-    private String image_type;
+    private String imageType;
 
     /**
      * 扩展虚拟机信息
      */
-    private ExtVm ext_vm;
+    private ExtVm extVm;
 
     /**
      * 系统信息
      */
-    private ExtSystemInfo ext_system_info;
+    private ExtSystemInfo extSystemInfo;
 
     /**
      * 扩展镜像信息
      */
-    private ExtImageInfo ext_image_info;
+    private ExtImageInfo extImageInfo;
 
     /**
      * 扩展网关信息
      */
-    private ExtGateway ext_gateway;
+    private ExtGateway extGateway;
 }

@@ -29,7 +29,7 @@ public class Device extends BaseCloudPlatformModel{
     /**
      * 更新时间
      */
-    private String updated_at;
+    private String updatedAt;
 
     /**
      * 删除标记
@@ -39,12 +39,12 @@ public class Device extends BaseCloudPlatformModel{
     /**
      * 创建时间
      */
-    private String created_at;
+    private String createdAt;
 
     /**
      * 删除时间
      */
-    private String deleted_at;
+    private String deletedAt;
 
     /**
      * 名称
@@ -64,7 +64,7 @@ public class Device extends BaseCloudPlatformModel{
     /**
      * 类型
      */
-    private String image_type;
+    private String imageType;
 
     /**
      *
@@ -84,23 +84,23 @@ public class Device extends BaseCloudPlatformModel{
     /**
      * 第二个分类
      */
-    private Integer second_category;
+    private Integer secondCategory;
 
     /**
      * 实体信息
      */
-    private ExtEntity ext_entity;
+    private ExtEntity extEntity;
 
 
     /**
      * 系统信息
      */
-    private ExtSystemInfo ext_system_info;
+    private ExtSystemInfo extSystemInfo;
 
     /**
      * 网关信息
      */
-    private ExtGateway ext_gateway;
+    private ExtGateway extGateway;
 
     @Data
     @NoArgsConstructor
@@ -120,12 +120,12 @@ public class Device extends BaseCloudPlatformModel{
         /**
          * 设备UUID
          */
-        private String device_uuid;
+        private String deviceUuid;
 
         /**
          * 实体状态
          */
-        private Boolean entity_status;
+        private Boolean entityStatus;
 
         /**
          * 型号
@@ -140,71 +140,71 @@ public class Device extends BaseCloudPlatformModel{
         /**
          * 接入类型
          */
-        private String access_type;
+        private String accessType;
 
         /**
          * 交换机端口
          */
-        private String access_switch_port;
+        private String accessSwitchPort;
 
         /**
          * 实体端口名
          */
-        private String access_switch_port_name;
+        private String accessSwitchPortName;
 
         /**
          * IP地址
          */
-        private String access_ip_address;
+        private String accessIpAddress;
 
         /**
          * IMAC地址
          */
-        private String access_mac_address;
+        private String accessMacAddress;
 
         /**
          * 管理协议列表
          */
-        private String access_protocals;
+        private String accessProtocals;
 
         /**
          * SNMP版本
          */
-        private String snmp_version;
+        private String snmpVersion;
 
         /**
          * SNMP配置
          */
-        private String snmp_config;
+        private String snmpConfig;
 
         /**
          * SNMP CPU占用率table根节点OID
          */
-        private String snmp_cpu_oid;
+        private String snmpCpuOid;
 
         /**
          * SNMP 内存占用率table根节点OID
          */
-        private String snmp_mem_oid;
+        private String snmpMemOid;
 
         /**
          * SNMP 磁盘占用率table根节点OID
          */
-        private String snmp_disk_oid;
+        private String snmpDiskOid;
 
         /**
          * 串口端口
          */
-        private String ccm_port;
+        private String ccmPort;
 
         /**
          * 串口用户名
          */
-        private String ccm_name;
+        private String ccmName;
 
         /**
          * 串口密码
          */
-        private String ccm_password;
+        private String ccmPassword;
     }
 }

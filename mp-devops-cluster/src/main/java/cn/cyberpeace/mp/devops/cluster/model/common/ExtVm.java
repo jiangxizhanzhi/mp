@@ -11,11 +11,13 @@ public class ExtVm {
 
     private String flavor;
 
-    private Boolean init_support;
+    private Boolean initSupport;
 
-    private Boolean quick_create_support;
+    private Boolean quickCreateSupport;
 
-    private String quick_create_params;
+    private String quickCreateParams;
 
-    private String access_protocals;
+    private String accessProtocols;
+
+    private String extInfo;
 }

@@ -24,12 +24,12 @@ public class Installer extends BaseCloudPlatformModel{
     /**
      * 创建时间
      */
-    private String created_at;
+    private String createdAt;
 
     /**
      * 更新时间
      */
-    private String updated_at;
+    private String updatedAt;
 
     /**
      * 是否删除
@@ -39,7 +39,7 @@ public class Installer extends BaseCloudPlatformModel{
     /**
      * 删除时间
      */
-    private String deleted_at;
+    private String deletedAt;
 
     /**
      * 名称
@@ -64,7 +64,7 @@ public class Installer extends BaseCloudPlatformModel{
     /**
      * 服务类型：windows服务/docker服务
      */
-    private Integer deploy_type;
+    private Integer deployType;
 
     /**
      * docker
@@ -84,7 +84,7 @@ public class Installer extends BaseCloudPlatformModel{
         /**
          * UUID
          */
-        private String installer_uuid;
+        private String installerUuid;
 
         /**
          * 文件地址
@@ -93,7 +93,7 @@ public class Installer extends BaseCloudPlatformModel{
 
         private String settings;
 
-        private Integer sync_status;
+        private Integer syncStatus;
 
     }
 }
