@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.scene.core.bo.base;
 
+import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.base.util.JsonUtils;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementPortModel;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -29,7 +30,8 @@ public abstract class BaseSceneElementPortBO<M extends BaseSceneElementPortModel
 
     @Override
     public void fromModel(M obj, String... ignoreFields) {
-        super.fromModel(obj, ArrayUtils.addAll(ignoreFields, "accessModes"));
+        super.fromModel(obj, ArrayUtils.addAll(ignoreFields,
+                BeanUtils.getBeanGetterFieldName(BaseSceneElementPortModel::getAccessModes)));
         setId(obj.getPortId());
         accessModes = StringUtils.isEmpty(obj.getAccessModes()) ? new ArrayList<>()
                 : JsonUtils.parse(obj.getAccessModes(), new TypeReference<List<AccessMode>>(){});
@@ -37,7 +39,8 @@ public abstract class BaseSceneElementPortBO<M extends BaseSceneElementPortModel
 
     @Override
     public M toModel(String... ignoreFields) {
-        var obj = super.toModel(ArrayUtils.addAll(ignoreFields, "accessModes"));
+        var obj = super.toModel(ArrayUtils.addAll(ignoreFields,
+                BeanUtils.getBeanGetterFieldName(BaseSceneElementPortModel::getAccessModes)));
         obj.setPortId(id);
         if (accessModes != null) {
             obj.setAccessModes(JsonUtils.toJsonString(accessModes));
