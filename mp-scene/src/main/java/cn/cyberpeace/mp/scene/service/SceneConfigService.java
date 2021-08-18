@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
 import cn.cyberpeace.mp.scene.model.SceneConfigModel;
 import cn.cyberpeace.mp.scene.repository.SceneConfigMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -20,6 +21,11 @@ import java.util.Arrays;
 @Service
 public class SceneConfigService extends BaseModelServiceImpl<SceneConfigModel, SceneConfigMapper, BaseModelFields,
         QueryParams> {
+
+    @Autowired
+    public SceneConfigService(SceneConfigMapper modelMapper) {
+        setModelMapper(modelMapper);
+    }
 
     public ServiceResult<SceneConfigDataBO> get(String id, boolean isAreaMode, String areaId) {
         SceneConfigHandler sceneConfigHandler;

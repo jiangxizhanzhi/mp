@@ -1,11 +1,8 @@
 package cn.cyberpeace.mp.scene.controller;
 
-import cn.cyberpeace.mp.base.controller.BaseModelController;
-import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.scene.constant.ControllerConstant;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
-import cn.cyberpeace.mp.scene.model.SceneConfigModel;
 import cn.cyberpeace.mp.scene.service.SceneConfigService;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -25,14 +22,14 @@ public class SceneConfigController {
         setSceneConfigService(sceneConfigService);
     }
 
-    @GetMapping("/{id}")
-    public ServiceResult<SceneConfigDataBO> get(@PathVariable String id) {
-        return sceneConfigService.get(id, false, null).asResult();
-    }
-
-    @GetMapping("/{id}/area/{areaId}")
-    public ServiceResult<SceneConfigDataBO> getArea(@PathVariable String id, @PathVariable String areaId) {
-        return sceneConfigService.get(id, true, areaId).asResult();
+    @GetMapping(params = "id")
+    public ServiceResult<SceneConfigDataBO> get(@RequestParam String id,
+                                                @RequestParam(required = false) String area) {
+        if (area == null) {
+            return sceneConfigService.get(id, false, null).asResult();
+        } else {
+            return sceneConfigService.get(id, true, area).asResult();
+        }
     }
 
     @PostMapping("/sync")
@@ -45,8 +42,8 @@ public class SceneConfigController {
         return sceneConfigService.sync(sceneConfigDataBO, true).asResult();
     }
 
-    @DeleteMapping("/{id}")
-    public ServiceResult<Boolean> delete(@PathVariable String id) {
+    @DeleteMapping(params = "id")
+    public ServiceResult<Boolean> delete(@RequestParam String id) {
         return sceneConfigService.delete(id).asResult();
     }
 

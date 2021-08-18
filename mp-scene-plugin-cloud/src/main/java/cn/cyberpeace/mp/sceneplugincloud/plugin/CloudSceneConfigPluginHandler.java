@@ -28,14 +28,14 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
 
     @Override
     public void init(String sceneId, ScenePluginDataBO pluginDataBO) {
-        super.init(sceneId, pluginDataBO);
         pluginModelHandler = new CloudSceneConfigPluginModelHandler(this);
+        super.init(sceneId, pluginDataBO);
     }
 
     @Override
     public void init(String sceneId, List<String> elementIds, List<String> elementPortIds) {
-        super.init(sceneId, elementIds, elementPortIds);
         pluginModelHandler = new CloudSceneConfigPluginModelHandler(this);
+        super.init(sceneId, elementIds, elementPortIds);
     }
 
     @Override
