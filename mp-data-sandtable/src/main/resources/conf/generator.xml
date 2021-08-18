@@ -51,11 +51,6 @@
                enableUpdateByExample="false">
         </table>
 
-        <table schema="mp" tableName="mp_situation_probe_param"
-               domainObjectName="ProbeParamModel" enableCountByExample="false"
-               enableDeleteByExample="false" enableSelectByExample="false"
-               enableUpdateByExample="false">
-        </table>
 
     </context>
 </generatorConfiguration>
