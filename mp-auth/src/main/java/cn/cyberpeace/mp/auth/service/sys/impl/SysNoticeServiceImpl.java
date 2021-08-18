@@ -105,7 +105,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         noticeOrgMapper.bulkCreate(noticeGroupModelList);
 
         // 角色，如果是公开的，则忽略角色字段内的值
-        if (noticeModel.getIsPublic().equals(SysNoticeModel.NOTICE_NOT_PUBLIC)) {
+        if (sysNoticeRequest.getIsPublic().equals(SysNoticeModel.NOTICE_NOT_PUBLIC)) {
             List<SysNoticeRoleModel> noticeRoleModelList = new ArrayList<>();
             if (CollectionUtil.isNotEmpty(sysNoticeRequest.getRoleIds())) {
                 sysNoticeRequest.getRoleIds().forEach(roleId -> {
@@ -156,7 +156,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         noticeOrgMapper.bulkCreate(noticeGroupModelList);
 
         // 角色，如果是公开的，则忽略角色字段内的值
-        if (noticeModel.getIsPublic().equals(SysNoticeModel.NOTICE_NOT_PUBLIC)) {
+        if (sysNoticeRequest.getIsPublic().equals(SysNoticeModel.NOTICE_NOT_PUBLIC)) {
             List<SysNoticeRoleModel> noticeRoleModelList = new ArrayList<>();
             if (CollectionUtil.isNotEmpty(sysNoticeRequest.getRoleIds())) {
                 sysNoticeRequest.getRoleIds().forEach(roleId -> {
@@ -182,15 +182,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         PageHelper.startPage(req.getPage(), req.getPageSize());
         List<SysNoticeModel> notices = getModelMapper().listNotices(req.getTitle(), ids, req.getOrgIds(), req.getRoleIds(), null, null);
         PageInfo pageInfo = new PageInfo(notices);
-
-
-//        List<UserDto> userDtos = notices.stream().map(n -> {
-//            UserDto userDto = userService.userModel2UserDto(u);
-//            return userDto;
-//        }).collect(Collectors.toList());
-//
-//        pageInfo.setList(userDtos);
-
+        convertPageInfo(pageInfo);
         return pageInfo;
     }
 
@@ -210,6 +202,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
             PageHelper.startPage(req.getPage(), req.getPageSize());
             List<SysNoticeModel> notices = getModelMapper().listNotices(null, null, null, null,null, null);
             PageInfo pageInfo = new PageInfo(notices);
+            convertPageInfo(pageInfo);
             return pageInfo;
         }
 
@@ -230,6 +223,8 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         PageHelper.startPage(req.getPage(), req.getPageSize());
         List<SysNoticeModel> notices = getModelMapper().listNotices(null, null, allOrgIds, allRoleIds,null, null);
         PageInfo pageInfo = new PageInfo(notices);
+
+        convertPageInfo(pageInfo);
         return pageInfo;
     }
 
@@ -250,7 +245,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
     }
 
 
-    private SysNoticeDto noticeModel2NoticeDto(SysNoticeModel noticeModel) {
+    public SysNoticeDto noticeModel2NoticeDto(SysNoticeModel noticeModel) {
         if (Objects.isNull(noticeModel)) {
             return null;
         }
@@ -258,6 +253,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         SysNoticeDto noticeDto = new SysNoticeDto();
         BeanUtils.copyProperties(noticeModel, noticeDto);
 
+        // username
         if (StringUtils.isNotBlank(noticeModel.getPublisher())) {
             ObjServiceResult<UserModel> userResult = userService.get(noticeDto.getPublisher());
             if (Objects.nonNull(userResult.getSource())) {
@@ -265,15 +261,33 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
             }
         }
 
-//        noticeOrgMapper
-//        if (StringUtils.isNotBlank(noticeModel))) {
-//            ObjServiceResult<UserModel> userResult = userService.get(noticeDto.getPublisher());
-//            if (Objects.nonNull(userResult.getSource())) {
-//                noticeDto.(userResult.getSource().getObj().getUsername());
-//            }
-//        }
+        // org
+        List<OrgModel> orgModels = noticeOrgMapper.listByNoticeIds(CollectionUtil.toList(noticeModel.getId()));
+        if (CollectionUtil.isNotEmpty(orgModels)) {
+            noticeDto.setOrgIds(orgModels.stream().map(OrgModel::getId).collect(Collectors.toList()));
+            noticeDto.setOrgPaths(orgModels.stream().map(OrgModel::getPath).collect(Collectors.joining(",")));
+        }
 
-        return null;
+
+        // role
+        List<RoleModel> roleModels = noticeRoleMapper.listByNoticeIds(CollectionUtil.toList(noticeModel.getId()));
+        if (CollectionUtil.isNotEmpty(roleModels)) {
+            noticeDto.setRoleIds(roleModels.stream().map(RoleModel::getId).collect(Collectors.toList()));
+            noticeDto.setRoleNames(roleModels.stream().map(RoleModel::getName).collect(Collectors.joining(",")));
+        }
+
+        return noticeDto;
+    }
+
+    private void convertPageInfo(PageInfo pageInfo) {
+        List<SysNoticeModel> noticeModels = pageInfo.getList();
+
+        List<SysNoticeDto> noticeDtos = noticeModels.stream().map(n -> {
+            SysNoticeDto noticeDto = noticeModel2NoticeDto(n);
+            return noticeDto;
+        }).collect(Collectors.toList());
+//
+        pageInfo.setList(noticeDtos);
     }
 
 

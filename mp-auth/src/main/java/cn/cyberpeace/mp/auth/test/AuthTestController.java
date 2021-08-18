@@ -162,9 +162,12 @@ public class AuthTestController {
     @GetMapping("/testpermmapper")
     public void testpermmapper() {
         String userId = "3fsss655d87112f4ae094bbaf7083";
+
         HumanCondition condition = userPermissionTestMapper.getCondition();
+
         condition.filterContains("name", "题");
         condition.filterEqual("parent", "item-bank-folder");
+
         condition.pagination(1, 10);
 
         List<TargetModel> map = userPermissionTestMapper.listTargetModelsByOwner(userId, condition, UserPermissionModel.class, TargetModel.class);
