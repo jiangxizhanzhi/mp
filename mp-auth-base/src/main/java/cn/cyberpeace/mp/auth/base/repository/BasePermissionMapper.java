@@ -7,7 +7,9 @@ import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.model.auth.BasePermissionModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.util.ClassUtils;
 
+import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,15 +25,8 @@ public interface BasePermissionMapper<P extends BasePermissionModel, T extends B
         condition.link(targetClz);
         condition.link(permClz);
         condition.filterLink(permClz, "target", targetClz, "id");
-
         condition.filterEqual("owner", owner);
         condition.currentLink(targetClz);
-
-        String targetAlias = condition.getLinkedModelNames().get(targetClz);
-        Map<String, String> selectFieldsMap = new HashMap<>();
-        selectFieldsMap.put(targetAlias + ".*", "");
-        condition.setSelectFields(selectFieldsMap);
-
         return condition;
     }
 
@@ -121,6 +116,16 @@ public interface BasePermissionMapper<P extends BasePermissionModel, T extends B
         }
 
         return actualModelClass;
+    }
+
+
+    private Class<?> getMapperInterface(Proxy proxy) {
+        return ClassUtils.getObjFieldValue(Proxy.getInvocationHandler(proxy),
+                "mapperInterface", Class.class);
+    }
+
+    private Class<?> getMapperInterface() {
+        return getMapperInterface((Proxy) this);
     }
 
 

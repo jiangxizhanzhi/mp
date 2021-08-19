@@ -45,7 +45,7 @@ public interface BaseModelMapper<M extends BaseModel> {
                 "mapperInterface", Class.class);
     }
 
-    default Class<?> getMapperInterface() {
+    private Class<?> getMapperInterface() {
         return getMapperInterface((Proxy) this);
     }
 

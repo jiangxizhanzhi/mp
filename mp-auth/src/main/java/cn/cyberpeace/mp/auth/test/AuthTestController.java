@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.OrgDto;
 import cn.cyberpeace.mp.auth.dto.activation.ActivationRequest;
 import cn.cyberpeace.mp.auth.model.TargetModel;
+import cn.cyberpeace.mp.auth.model.UserPermissionModel;
 import cn.cyberpeace.mp.auth.repository.OrgMapper;
 import cn.cyberpeace.mp.auth.repository.SysConfigMapper;
 import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
@@ -141,6 +142,8 @@ public class AuthTestController {
         condition.filterContains("name", "题");
         condition.filterEqual("parent", "item-bank-folder");
         condition.pagination(1, 10);
+        // 自定义返回field
+        condition.select(TargetModel::getName, TargetModel::getPath, TargetModel::getIdentifier);
 
         List<TargetModel> list = userPermissionTestMapper.listTargetsByOwner(condition);
         log.info("{}", list);
