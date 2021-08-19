@@ -33,6 +33,9 @@ public class ProbeRequest {
     @NotNull(message = "探针脚本类型不能为空")
     private Integer scriptType;
 
+    @ApiModelProperty(value = "探针id")
+    private String probeId;
+
     private Date createTime;
 
     private Date updateTime;

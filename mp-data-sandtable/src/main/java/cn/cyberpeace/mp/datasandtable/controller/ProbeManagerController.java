@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.datasandtable.controller;
 
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.datasandtable.constant.SituationalAwareErrorCode;
@@ -9,6 +10,7 @@ import cn.cyberpeace.mp.datasandtable.model.ProbeSearchRequest;
 import cn.cyberpeace.mp.datasandtable.service.ProbeService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import java.util.Objects;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -39,6 +41,16 @@ public class ProbeManagerController {
     @ApiOperation(value = "探针脚本删除")
     public ServiceResult deleteProbeById(@PathVariable("probeId") String probeId) {
         return probeService.deleteProbeById(probeId) ? ServiceResult.successful(): ServiceResult.fail(SituationalAwareErrorCode.PROBE_DELETE_FAIL,"probe delete fail");
+    }
+
+    @PutMapping
+    @ApiOperation(value = "修改探针脚本")
+    public ServiceResult modifyProbe(@RequestBody @Valid ProbeRequest probeRequest){
+        if (Objects.isNull(probeRequest.getProbeId())) {
+            throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_MODIFY_PARAM_ERROR);
+        }
+        boolean updateSuccess = probeService.modifyProbe(probeRequest) > 0;
+        return updateSuccess ? ServiceResult.successful(): ServiceResult.fail(SituationalAwareErrorCode.PROBE_MODIFY_FAIL,"probe update fail");
     }
 
     @GetMapping

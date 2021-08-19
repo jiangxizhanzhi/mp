@@ -83,6 +83,19 @@ public class ProbeService {
         return probeResult;
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    public int modifyProbe(ProbeRequest probeRequest) {
+        //修改参数
+        probeParamModelMapper.deleteParamByProbeId(probeRequest.getProbeId());
+        insertProbeParams(probeRequest);
+        //修改探针参数
+        ProbeModel probeModel = new ProbeModel();
+        BeanUtils.copyProperties(probeRequest, probeModel);
+        probeModel.setUpdateTime(new Date());
+        probeModel.setId(probeRequest.getProbeId());
+        return probeModelMapper.updateByProbeId(probeModel);
+    }
+
 
     private void insertProbeParams(ProbeRequest probeRequest) {
         List<ProbeParamModel> probeParamModels = probeRequest.getProbeParamsRequestList().stream()
