@@ -83,8 +83,8 @@ public abstract class BaseModelController<M extends BaseModel, Q extends QueryPa
      */
     @ApiOperation("获取指定id数据")
     @ApiImplicitParams({
-            @ApiImplicitParam(name="id", paramType="path", value="数据id", dataTypeClass=String.class),
-            @ApiImplicitParam(name="fields", value="需要返回的字段", dataTypeClass=String[].class),
+            @ApiImplicitParam(name = "id", paramType = "path", value = "数据id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "fields", value = "需要返回的字段", dataTypeClass = String[].class),
     })
     @GetMapping("/{id}")
     public ObjServiceResult<M> get(@PathVariable String id, @RequestParam(required = false) String[] fields) {
@@ -99,8 +99,8 @@ public abstract class BaseModelController<M extends BaseModel, Q extends QueryPa
      */
     @ApiOperation("获取指定id数据")
     @ApiImplicitParams({
-            @ApiImplicitParam(name="id", value="数据id", dataTypeClass=String.class),
-            @ApiImplicitParam(name="fields", value="需要返回的字段", dataTypeClass=String[].class),
+            @ApiImplicitParam(name = "id", value = "数据id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "fields", value = "需要返回的字段", dataTypeClass = String[].class),
     })
     @GetMapping(params = "id")
     public ObjServiceResult<M> getByParam(@RequestParam String id, @RequestParam(required = false) String[] fields) {
@@ -115,7 +115,7 @@ public abstract class BaseModelController<M extends BaseModel, Q extends QueryPa
      */
     @ApiOperation("创建数据")
     @ApiImplicitParams({
-            @ApiImplicitParam(name="fields", value="需要返回的字段", dataTypeClass=String[].class),
+            @ApiImplicitParam(name = "fields", value = "需要返回的字段", dataTypeClass=String[].class),
     })
     @PostMapping
     public ObjServiceResult<M> create(@RequestBody M obj, @RequestParam(required = false) String[] fields) {
@@ -131,8 +131,8 @@ public abstract class BaseModelController<M extends BaseModel, Q extends QueryPa
      */
     @ApiOperation("更新指定id数据")
     @ApiImplicitParams({
-            @ApiImplicitParam(name="id", paramType="path", value="数据id", dataTypeClass=String.class),
-            @ApiImplicitParam(name="fields", value="需要返回的字段", dataTypeClass=String[].class),
+            @ApiImplicitParam(name = "id", paramType = "path", value = "数据id", dataTypeClass=String.class),
+            @ApiImplicitParam(name = "fields", value = "需要返回的字段", dataTypeClass = String[].class),
     })
     @PatchMapping("/{id}")
     public ObjServiceResult<M> update(@PathVariable String id, @RequestBody M obj,
@@ -149,7 +149,7 @@ public abstract class BaseModelController<M extends BaseModel, Q extends QueryPa
      */
     @ApiOperation("更新数据")
     @ApiImplicitParams({
-            @ApiImplicitParam(name="fields", value="需要返回的字段", dataTypeClass=String[].class),
+            @ApiImplicitParam(name = "fields", value = "需要返回的字段", dataTypeClass = String[].class),
     })
     @PatchMapping
     public ObjServiceResult<M> update(@RequestBody M obj,
@@ -166,8 +166,8 @@ public abstract class BaseModelController<M extends BaseModel, Q extends QueryPa
      */
     @ApiOperation("更新指定id数据")
     @ApiImplicitParams({
-            @ApiImplicitParam(name="id", value="数据id", dataTypeClass=String.class),
-            @ApiImplicitParam(name="fields", value="需要返回的字段", dataTypeClass=String[].class),
+            @ApiImplicitParam(name = "id", value = "数据id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "fields", value = "需要返回的字段", dataTypeClass = String[].class),
     })
     @PatchMapping(params = "id")
     public ObjServiceResult<M> updateByParam(@RequestParam String id, @RequestBody M obj,
@@ -183,7 +183,7 @@ public abstract class BaseModelController<M extends BaseModel, Q extends QueryPa
      */
     @ApiOperation("删除指定id数据")
     @ApiImplicitParams({
-            @ApiImplicitParam(name="id", paramType="path", value="数据id", dataTypeClass=String.class),
+            @ApiImplicitParam(name = "id", paramType = "path", value = "数据id", dataTypeClass = String.class),
     })
     @DeleteMapping("/{id}")
     public ServiceResult<Boolean> delete(@PathVariable String id) {
@@ -197,7 +197,7 @@ public abstract class BaseModelController<M extends BaseModel, Q extends QueryPa
      */
     @ApiOperation("删除指定id数据")
     @ApiImplicitParams({
-            @ApiImplicitParam(name="id", value="数据id", dataTypeClass=String.class),
+            @ApiImplicitParam(name = "id", value = "数据id", dataTypeClass = String.class),
     })
     @DeleteMapping(params = "id")
     public ServiceResult<Boolean> deleteByParam(@RequestParam String id) {
