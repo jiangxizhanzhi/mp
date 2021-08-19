@@ -10,13 +10,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 公告-群组表
+ * 公告-角色表
  */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table("mp_sys_notice_group")
-public class SysNoticeGroupModel extends BaseModel {
+@Table("mp_sys_notice_role")
+public class SysNoticeRoleModel extends BaseModel {
 
     @ApiModelProperty(value = "租户")
     @DefaultStr(AuthConstant.DEFAULT_TENANT)
@@ -25,7 +25,6 @@ public class SysNoticeGroupModel extends BaseModel {
     @ApiModelProperty(value = "公告ID")
     private String noticeId;
 
-    // 组织或群组
-    @ApiModelProperty(value = "组织或群组")
-    private String owner;
+    @ApiModelProperty(value = "角色ID")
+    private String role;
 }
