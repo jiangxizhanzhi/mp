@@ -11,11 +11,8 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "mp.auth")
 public class AuthConfig {
 
-    @DefaultBool(value = false)
-    private boolean needRegistrationAudit;
+    public static String DEFAULT_ACTIVATION_DIR = "/Users/sternberg/tmp/0811";
 
-    private String excelTemplateName;
-
-    private String excelTemplatePath;
+    private String activationDir = DEFAULT_ACTIVATION_DIR;
 
 }

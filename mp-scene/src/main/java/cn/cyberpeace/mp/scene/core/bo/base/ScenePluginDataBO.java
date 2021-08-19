@@ -8,6 +8,11 @@ import java.util.Map;
 public class ScenePluginDataBO {
 
     /**
+     * key: pluginConfig
+     */
+    private Map<String, Object> scene;
+
+    /**
      * nodeId: pluginNodeData
      */
     private Map<String, Map<String, Object>> elements;

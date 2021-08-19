@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Condition implements BaseCondition {
 
+    private Boolean distinct = false;
+
     private CustomCondition custom;
 
     private AndCondition andi;

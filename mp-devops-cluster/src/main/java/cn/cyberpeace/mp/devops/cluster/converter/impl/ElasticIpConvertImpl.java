@@ -28,12 +28,12 @@ public class ElasticIpConvertImpl implements ElasticIpConverter {
 
     @Override
     public String[] getDefaultPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldName(ElasticIpPageRequest::getPage,ElasticIpPageRequest::getPerPage);
+        return BeanUtils.getBeanGetterFieldNames(ElasticIpPageRequest::getPage,ElasticIpPageRequest::getPerPage);
     }
 
     @Override
     public String[] getTotalPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldName(ElasticIpPageRequest::getLimit,ElasticIpPageRequest::getOffset,
+        return BeanUtils.getBeanGetterFieldNames(ElasticIpPageRequest::getLimit,ElasticIpPageRequest::getOffset,
                 ElasticIpPageRequest::getPage,ElasticIpPageRequest::getPerPage);
     }
 

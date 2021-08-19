@@ -32,12 +32,12 @@ public class ContainerConverterImpl implements ContainerConverter {
 
     @Override
     public String[] getDefaultPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldName(ContainerPageRequest::getPage,ContainerPageRequest::getPerPage);
+        return BeanUtils.getBeanGetterFieldNames(ContainerPageRequest::getPage,ContainerPageRequest::getPerPage);
     }
 
     @Override
     public String[] getTotalPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldName(ContainerPageRequest::getOffset,
+        return BeanUtils.getBeanGetterFieldNames(ContainerPageRequest::getOffset,
                 ContainerPageRequest::getPage,ContainerPageRequest::getPerPage);
     }
 

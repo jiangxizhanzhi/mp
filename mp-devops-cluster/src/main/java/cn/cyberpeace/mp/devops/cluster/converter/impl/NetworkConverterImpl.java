@@ -29,12 +29,12 @@ public class NetworkConverterImpl implements NetworkConverter {
 
     @Override
     public String[] getDefaultPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldName(NetworkPageRequest::getPage,NetworkPageRequest::getPerPage);
+        return BeanUtils.getBeanGetterFieldNames(NetworkPageRequest::getPage,NetworkPageRequest::getPerPage);
     }
 
     @Override
     public String[] getTotalPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldName(NetworkPageRequest::getLimit,NetworkPageRequest::getOffset,
+        return BeanUtils.getBeanGetterFieldNames(NetworkPageRequest::getLimit,NetworkPageRequest::getOffset,
                 NetworkPageRequest::getPage,NetworkPageRequest::getPerPage);
     }
 
