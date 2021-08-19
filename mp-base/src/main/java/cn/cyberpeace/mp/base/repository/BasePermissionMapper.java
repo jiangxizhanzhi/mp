@@ -1,10 +1,8 @@
 package cn.cyberpeace.mp.base.repository;
 
-import cn.cyberpeace.mp.base.model.auth.BasePermissionModel;
 import cn.cyberpeace.mp.base.annotation.Recommendation;
-import cn.cyberpeace.mp.base.repository.BaseModelMapper;
+import cn.cyberpeace.mp.base.model.auth.BasePermissionModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
-import cn.cyberpeace.mp.base.util.ModelUtils;
 
 import java.util.List;
 

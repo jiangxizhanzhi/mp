@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.NetworkConverter;
@@ -47,7 +48,7 @@ public class NetworkController {
     public ListObjServiceResult<NetworkPageResponse> page(NetworkPageRequest request){
         NetworkPageConverterModel model = networkConverter.page(request);
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getModelList())){
-            return new ListObjServiceResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
+            return new ListObjServiceResult<>(new ListObjResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO));
         }
         List<NetworkPageConverterModel.Model> networks = model.getModelList();
         List<NetworkPageResponse> list = networks.stream().map(networkModel -> {
@@ -60,7 +61,7 @@ public class NetworkController {
                     .status(networkModel.getStatus()).subnets(subnets).createdAt(networkModel.getCreatedAt()).build();
                 }
         ).collect(Collectors.toList());
-        return new ListObjServiceResult<>(list,model.getTotal());
+        return new ListObjServiceResult<>(new ListObjResult<>(list,model.getTotal()));
     }
 
 }

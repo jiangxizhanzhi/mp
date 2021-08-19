@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.log.controller;
 
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.log.constant.ControllerConstant;
@@ -60,7 +61,7 @@ public class OperateLogController {
             OperationLogPageResponse operationLog = JSON.parseObject(hit.getSourceAsString(), OperationLogPageResponse.class);
             list.add(operationLog);
         }
-        return new ListObjServiceResult(list,Integer.valueOf(String.valueOf(searchHits.getTotalHits().value)));
+        return new ListObjServiceResult(new ListObjResult<>(list, Integer.valueOf(String.valueOf(searchHits.getTotalHits().value))));
     }
 
 

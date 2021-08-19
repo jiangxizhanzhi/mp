@@ -27,12 +27,12 @@ public class RouterConverterImpl implements RouterConverter {
 
     @Override
     public String[] getDefaultPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldName(RouterPageRequest::getPage,RouterPageRequest::getPerPage);
+        return BeanUtils.getBeanGetterFieldNames(RouterPageRequest::getPage,RouterPageRequest::getPerPage);
     }
 
     @Override
     public String[] getTotalPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldName(RouterPageRequest::getOffset,
+        return BeanUtils.getBeanGetterFieldNames(RouterPageRequest::getOffset,
                 RouterPageRequest::getPage,RouterPageRequest::getPerPage);
     }
 

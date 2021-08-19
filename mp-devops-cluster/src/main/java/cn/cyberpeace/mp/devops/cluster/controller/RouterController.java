@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.RouterConverter;
@@ -47,13 +48,13 @@ public class RouterController {
     public ListObjServiceResult<RouterPageResponse> page(RouterPageRequest request){
         RouterPageConverterModel model = routerConverter.page(request);
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getModelList())){
-            return new ListObjServiceResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
+            return new ListObjServiceResult<>(new ListObjResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO));
         }
         List<RouterPageResponse> list =  model.getModelList().stream().map(routerModel ->
                 RouterPageResponse.builder().name(routerModel.getName())
                         .status(routerModel.getStatus()).createdAt(routerModel.getCreatedAt()).build()
         ).collect(Collectors.toList());
-        return new ListObjServiceResult<>(list,model.getTotal());
+        return new ListObjServiceResult<>(new ListObjResult<>(list,model.getTotal()));
     }
 
 }

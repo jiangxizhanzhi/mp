@@ -19,8 +19,6 @@ public class BaseSceneElementModel extends BaseSceneNodeModel {
     @DefaultStr
     private String flavor;
     @DefaultStr
-    private String accessModes;
-    @DefaultStr
     private String initCommands;
 
     public static class Type {
