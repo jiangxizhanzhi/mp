@@ -9,7 +9,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @ApiModel("探针脚本参数")
-public class ProbeParamRequest {
+public class ProbeParamsRequest {
     private String probeId;
 
     @ApiModelProperty(value = "参数类型", required = true)

@@ -1,17 +1,17 @@
 package cn.cyberpeace.mp.datasandtable.controller;
 
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.datasandtable.constant.SituationalAwareErrorCode;
 import cn.cyberpeace.mp.datasandtable.model.ProbeRequest;
+import cn.cyberpeace.mp.datasandtable.model.ProbeResult;
+import cn.cyberpeace.mp.datasandtable.model.ProbeSearchRequest;
 import cn.cyberpeace.mp.datasandtable.service.ProbeService;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/probes")
@@ -28,6 +28,7 @@ public class ProbeManagerController {
      * @return ServiceResult<Void>
      */
     @PostMapping
+    @ApiOperation(value = "新增探针脚本")
     public ServiceResult<Void> addProbe(
         @RequestBody @Valid ProbeRequest probeRequest) {
         probeService.addProbe(probeRequest);
@@ -35,7 +36,20 @@ public class ProbeManagerController {
     }
 
     @DeleteMapping("/{probeId}")
-    public ServiceResult<Void> deleteProbeById(@PathVariable("probeId") String probeId) {
-        probeService.deleteProbeById(probeId);
+    @ApiOperation(value = "探针脚本删除")
+    public ServiceResult deleteProbeById(@PathVariable("probeId") String probeId) {
+        return probeService.deleteProbeById(probeId) ? ServiceResult.successful(): ServiceResult.fail(SituationalAwareErrorCode.PROBE_DELETE_FAIL,"probe delete fail");
+    }
+
+    @GetMapping
+    @ApiOperation(value = "分页查询探针")
+    public ListObjServiceResult<ProbeResult> queryProbes(ProbeSearchRequest probeSearchRequest) {
+        return probeService.queryProbeListWithPageable(probeSearchRequest);
+    }
+
+    @GetMapping("/{probeId}")
+    @ApiOperation(value = "查询探针详情")
+    public ServiceResult<ProbeResult> queryProbeByProbeId(@PathVariable("probeId") String probeId) {
+        return ServiceResult.<ProbeResult>builder().data(probeService.queryProbeDetail(probeId)).build();
     }
 }

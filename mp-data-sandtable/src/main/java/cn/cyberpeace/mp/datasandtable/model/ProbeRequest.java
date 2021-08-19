@@ -43,5 +43,5 @@ public class ProbeRequest {
     private String scriptContent;
 
     @ApiModelProperty(value = "脚本参数 建议 ##包裹参数，方便替换", required = true)
-    private List<ProbeParamRequest> probeParamRequestList;
+    private List<ProbeParamsRequest> probeParamsRequestList;
 }
