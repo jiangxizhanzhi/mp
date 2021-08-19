@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
@@ -179,7 +180,7 @@ public class CloudPlatformMonitorController {
     public ListObjServiceResult<HypervisorPageResponse> page(HypervisorPageRequest request){
         HypervisorPageConvertModel model = hypervisorConverter.page(request);
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getModelList())){
-            return new ListObjServiceResult<>(Lists.newArrayList(),NumberUtils.INTEGER_ZERO);
+            return new ListObjServiceResult<>(new ListObjResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO));
         }
         List<HypervisorPageResponse> hypervisorPageResponses =  model.getModelList().stream().map(hypervisor ->
                 HypervisorPageResponse.builder().name(hypervisor.getName())
@@ -202,7 +203,7 @@ public class CloudPlatformMonitorController {
             }
         });
 
-        return new ListObjServiceResult<>(hypervisorPageResponses, model.getTotal());
+        return new ListObjServiceResult<>(new ListObjResult<>(hypervisorPageResponses, model.getTotal()));
     }
 
     /**
