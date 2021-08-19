@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.auth.repository;
 
+import cn.cyberpeace.mp.auth.model.OrgModel;
+import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.SysNoticeRoleModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
@@ -13,6 +15,8 @@ import java.util.List;
 @Repository
 @ModelClass(SysNoticeRoleModel.class)
 public interface SysNoticeRoleMapper extends BaseModelMapper<SysNoticeRoleModel> {
+
+    List<RoleModel> listByNoticeIds(@Param("noticeIds") List<String> noticeIds);
 
     int deleteByNoticeIds(@Param("noticeIds") List<String> noticeIds);
 
