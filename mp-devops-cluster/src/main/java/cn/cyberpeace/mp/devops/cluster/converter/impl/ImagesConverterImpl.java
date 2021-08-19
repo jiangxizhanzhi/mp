@@ -5,10 +5,13 @@ import cn.cyberpeace.mp.devops.cluster.dto.ImageDeleteDTO;
 import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devops.cluster.model.Device;
 import cn.cyberpeace.mp.devops.cluster.model.ImagesModel;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtVm;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
 import cn.cyberpeace.mp.devops.cluster.request.*;
 import cn.cyberpeace.mp.devops.cluster.service.DeviceService;
 import cn.cyberpeace.mp.devops.cluster.service.ImagesService;
+import com.alibaba.fastjson.JSONArray;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -100,48 +103,26 @@ public class ImagesConverterImpl implements ImagesConverter {
     }
 
     protected Device convertRequest(ImageRequest request){
-        Device device = new Device();
         if (Objects.isNull(request)){
             return null;
         }
-//        device.setName(request.getName());
-//        device.setDescription(request.getDescription());
-//        device.setLogo(request.getLogo());
-//        device.setRole(request.getRole());
-//        device.setCategory(request.getMainCategory());
-//        device.setSecond_category(request.getSubCategory());
-//        device.setMaintype(request.getVirtualType());
-//
-//        final ExtVm extVm = request.getExtVm();
-//        if (Objects.nonNull(extVm)) {
-//            Device.ExtEntity extEntity = new Device.ExtEntity();
-//            extEntity.setStyle(requestExtEntity.getModel());
-//            extEntity.setParams(requestExtEntity.getParams());
-//            extEntity.setAccess_type(requestExtEntity.getAccessType());
-//            extEntity.setAccess_switch_port(requestExtEntity.getAccessSwitchPort());
-//            extEntity.setAccess_switch_port_name(requestExtEntity.getAccessSwitchPortName());
-//            extEntity.setAccess_ip_address(requestExtEntity.getAccessIpAddress());
-//            extEntity.setAccess_mac_address(requestExtEntity.getAccessMacAddress());
-//            extEntity.setSnmp_version(requestExtEntity.getSnmpVersion());
-//            extEntity.setSnmp_config(requestExtEntity.getSnmpConfig());
-//            extEntity.setSnmp_cpu_oid(requestExtEntity.getSnmpCpuOid());
-//            extEntity.setSnmp_disk_oid(requestExtEntity.getSnmpDiskOid());
-//            extEntity.setSnmp_mem_oid(requestExtEntity.getSnmpMemOid());
-//            extEntity.setCcm_port(requestExtEntity.getCcmPort());
-//            extEntity.setCcm_name(requestExtEntity.getCcmName());
-//            extEntity.setCcm_password(requestExtEntity.getCcmPassword());
-//            extEntity.setAccess_protocals(JSONArray.toJSONString(requestExtEntity.getAccessProtocolList()));
-//            device.setExt_entity(extEntity);
-//        }
-//
-//        final SystemInfo reqSystemInfo = request.getSystemInfo();
-//        if (Objects.nonNull(reqSystemInfo)) {
-//            ExtSystemInfo extSystemInfo = new ExtSystemInfo();
-//            extSystemInfo.setSystem_type(reqSystemInfo.getSystemType());
-//            extSystemInfo.setSystem_architecture(reqSystemInfo.getSystemArchitecture());
-//            extSystemInfo.setLanguage(reqSystemInfo.getLanguage());
-//            device.setExt_system_info(extSystemInfo);
-//        }
+        Device device = new Device();
+        device.setName(request.getName());
+        device.setDescription(request.getDescription());
+        device.setLogo(request.getLogo());
+        device.setRole(request.getRole());
+        device.setCategory(request.getMainCategory());
+        device.setSecondCategory(request.getSubCategory());
+        device.setMaintype(request.getVirtualType());
+        device.setExtGateway(request.getExtGateway());
+        final ExtVm extVm = request.getExtVm();
+        if (Objects.nonNull(extVm) && CollectionUtils.isNotEmpty(request.getAccessProtocolList())){
+            extVm.setAccessProtocols(JSONArray.toJSONString(request.getAccessProtocolList()));
+        }
+        device.setExtVm(extVm);
+
+        device.setExtSystemInfo(request.getExtSystemInfo());
+        device.setExtImageInfo(request.getExtImageInfo());
         return device;
     }
 }

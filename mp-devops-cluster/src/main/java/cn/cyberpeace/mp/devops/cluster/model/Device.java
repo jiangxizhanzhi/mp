@@ -1,8 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.model;
 
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntity;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtGateway;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
+import cn.cyberpeace.mp.devops.cluster.model.common.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -92,7 +90,6 @@ public class Device extends BaseCloudPlatformModel{
      */
     private ExtEntity extEntity;
 
-
     /**
      * 系统信息
      */
@@ -103,5 +100,14 @@ public class Device extends BaseCloudPlatformModel{
      */
     private ExtGateway extGateway;
 
+    /**
+     * 虚拟机信息
+     */
+    private ExtVm extVm;
+
+    /**
+     * 镜像信息
+     */
+    private ExtImageInfo extImageInfo;
 
 }

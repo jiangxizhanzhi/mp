@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.devops.cluster.model.common;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,24 +11,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ExtEntity{
-
-    /**
-     * ID
-     */
-    @JsonIgnore
-    private Integer id;
-
-    /**
-     * UUID
-     */
-    @JsonIgnore
-    private String uuid;
-
-    /**
-     * 设备UUID
-     */
-    @JsonIgnore
-    private String deviceUuid;
 
     /**
      * 实体状态

@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.devops.cluster.model.common;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,34 +9,18 @@ import lombok.NoArgsConstructor;
 @Data
 public class ExtGateway {
 
-    @JsonIgnore
-    private Integer id;
-
-    @JsonIgnore
-    private String uuid;
-
-    @JsonIgnore
-    private String createdAt;
-
-    @JsonIgnore
-    private String updatedAt;
-
-    @JsonIgnore
-    private Boolean deleted;
-
-    @JsonIgnore
-    private String deletedAt;
-
-    private String user;
-
-    private String project;
-
-    @JsonIgnore
-    private String deviceUuid;
-
+    /**
+     * 管理口/Wan口/Lan口
+     */
     private Integer portConfigs;
 
+    /**
+     * 端口名称
+     */
     private String portName;
 
+    /**
+     * 端口网段
+     */
     private String portIps;
 }

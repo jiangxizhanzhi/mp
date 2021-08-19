@@ -18,4 +18,6 @@ public class ExtImageInfo {
     private String metaData;
 
     private Integer imageStatus;
+
+    private String error;
 }
