@@ -29,12 +29,12 @@ public class InstanceConverterImpl implements InstanceConverter {
 
     @Override
     public String[] getDefaultPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldName(InstancePageRequest::getPage,InstancePageRequest::getPerPage);
+        return BeanUtils.getBeanGetterFieldNames(InstancePageRequest::getPage,InstancePageRequest::getPerPage);
     }
 
     @Override
     public String[] getTotalPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldName(InstancePageRequest::getOffset,
+        return BeanUtils.getBeanGetterFieldNames(InstancePageRequest::getOffset,
                 InstancePageRequest::getPage,InstancePageRequest::getPerPage);
     }
 

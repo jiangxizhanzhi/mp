@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
 import cn.cyberpeace.mp.scene.model.SceneConfigModel;
 import cn.cyberpeace.mp.scene.repository.SceneConfigMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -21,14 +22,29 @@ import java.util.Arrays;
 public class SceneConfigService extends BaseModelServiceImpl<SceneConfigModel, SceneConfigMapper, BaseModelFields,
         QueryParams> {
 
+    @Autowired
+    public SceneConfigService(SceneConfigMapper modelMapper) {
+        setModelMapper(modelMapper);
+    }
+
+    public ServiceResult<SceneConfigDataBO> get(String id, boolean isAreaMode, String areaId) {
+        SceneConfigHandler sceneConfigHandler;
+        try {
+            sceneConfigHandler = new SceneConfigHandler(id, areaId, isAreaMode);
+        } catch (SceneNotExistException e) {
+            return new ServiceResult<>(null, SceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return new ServiceResult<>(sceneConfigHandler.toData());
+    }
+
     public ServiceResult<SceneConfigDataBO> sync(SceneConfigDataBO sceneConfigDataBO, boolean isAreaMode) {
         SceneConfigHandler sceneConfigHandler;
         try {
             sceneConfigHandler = new SceneConfigHandler(sceneConfigDataBO, isAreaMode);
+            sceneConfigHandler.save();
         } catch (SceneNotExistException e) {
             return new ServiceResult<>(null, SceneErrorCode.SCENE_NOT_EXIST);
         }
-        sceneConfigHandler.save();
         return new ServiceResult<>(sceneConfigHandler.toData());
     }
 
@@ -37,10 +53,10 @@ public class SceneConfigService extends BaseModelServiceImpl<SceneConfigModel, S
         SceneConfigHandler sceneConfigHandler;
         try {
             sceneConfigHandler = new SceneConfigHandler(id, null, false);
+            sceneConfigHandler.delete();
         } catch (SceneNotExistException e) {
             return new ServiceResult<>(false, SceneErrorCode.SCENE_NOT_EXIST);
         }
-        sceneConfigHandler.delete();
         return new ServiceResult<>(true);
     }
 

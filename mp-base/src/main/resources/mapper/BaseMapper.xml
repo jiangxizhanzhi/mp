@@ -141,7 +141,7 @@
     </sql>
 
     <sql id="listTemplate">
-        SELECT <include refid="cn.cyberpeace.mp.base.selectFields" /> FROM ${table}
+        SELECT <if test="condition.distinct">DISTINCT</if> <include refid="cn.cyberpeace.mp.base.selectFields" /> FROM ${table}
     </sql>
     <sql id="totalTemplate">
         SELECT <include refid="cn.cyberpeace.mp.base.countPk" /> FROM ${table}
