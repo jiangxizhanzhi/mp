@@ -5,7 +5,6 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.RealEquipmentConvertModel
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentPageRequest;
-import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentUpdateRequest;
 
 public interface RealEquipmentConverter extends BaseConverter{
 

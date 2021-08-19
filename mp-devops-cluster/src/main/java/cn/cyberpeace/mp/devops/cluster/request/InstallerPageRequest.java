@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(value = "服务管理的分页请求参数")
-public class ServiceManagePageRequest extends BasePageRequest {
+public class InstallerPageRequest extends BasePageRequest {
 
     /**
      * 名称
@@ -22,6 +22,6 @@ public class ServiceManagePageRequest extends BasePageRequest {
      * 服务类型
      */
     @ApiModelProperty(value = "服务类型")
-    private String serviceType;
+    private String categories;
 
 }

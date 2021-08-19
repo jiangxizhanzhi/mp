@@ -1,0 +1,141 @@
+package cn.cyberpeace.mp.devops.cluster.converter.impl;
+
+import cn.cyberpeace.mp.base.util.BeanUtils;
+import cn.cyberpeace.mp.devops.cluster.converter.InstallerConverter;
+import cn.cyberpeace.mp.devops.cluster.converter.model.InstallerConvertModel;
+import cn.cyberpeace.mp.devops.cluster.converter.model.InstallerConvertPageModel;
+import cn.cyberpeace.mp.devops.cluster.model.Installer;
+import cn.cyberpeace.mp.devops.cluster.model.InstallerCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtDocker;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtNormal;
+import cn.cyberpeace.mp.devops.cluster.model.common.Resource;
+import cn.cyberpeace.mp.devops.cluster.model.common.StartUpParameter;
+import cn.cyberpeace.mp.devops.cluster.request.InstallerDeleteRequest;
+import cn.cyberpeace.mp.devops.cluster.request.InstallerPageRequest;
+import cn.cyberpeace.mp.devops.cluster.request.InstallerRequest;
+import cn.cyberpeace.mp.devops.cluster.service.InstallerService;
+import com.alibaba.fastjson.JSONArray;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+@Service
+public class InstallerConverterImpl implements InstallerConverter {
+
+    private InstallerService installerService;
+
+    @Autowired
+    public InstallerConverterImpl(InstallerService installerService) {
+        this.installerService = installerService;
+    }
+
+    @Override
+    public String[] getDefaultPageIgnoreField() {
+        return new String[0];
+    }
+
+    @Override
+    public String[] getTotalPageIgnoreField() {
+        return new String[0];
+    }
+
+    @Override
+    public InstallerConvertPageModel page(InstallerPageRequest request, String... ignoreFields) {
+        ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
+        String getParams = BeanUtils.wrapperGetParamsByObject(Boolean.TRUE,request,ignoreFields);
+        InstallerCloudPlatformModel model = installerService.page(getParams);
+        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getItems())){
+            return null;
+        }
+        List<InstallerConvertModel> modelList = model.getItems().stream()
+                .map(installer -> convertInstaller(installer)).collect(Collectors.toList());
+
+        InstallerConvertPageModel convertModel = new InstallerConvertPageModel();
+        convertModel.setModelList(modelList);
+        convertModel.setTotal(model.getTotal());
+        return convertModel;
+    }
+
+    @Override
+    public InstallerConvertModel findById(String id) {
+        Installer installer = installerService.findById(id);
+        return convertInstaller(installer);
+    }
+
+    @Override
+    public InstallerConvertModel add(InstallerRequest request) {
+        Installer installer = convertRequest(request);
+        Installer result = installerService.add(installer);
+        return convertInstaller(result);
+    }
+
+    @Override
+    public InstallerConvertModel update(InstallerRequest request) {
+        Installer installer = convertRequest(request);
+        Installer result = installerService.update(request.getUuid(),installer);
+        return convertInstaller(result);
+    }
+
+    @Override
+    public Boolean delete(InstallerDeleteRequest request) {
+        return installerService.deleteByIds(request.getUuids());
+    }
+
+    /**
+     * 转换Installer
+     * @param installer
+     * @return
+     */
+    private InstallerConvertModel convertInstaller(Installer installer){
+        InstallerConvertModel model = new InstallerConvertModel();
+        model.setUuid(installer.getUuid());
+        model.setName(installer.getName());
+        model.setDescription(installer.getDescription());
+        model.setLogo(installer.getLogo());
+        model.setCategories(installer.getCategories());
+        model.setDeployType(installer.getDeployType());
+        ExtDocker extDocker = installer.getExtDocker();
+        if (Objects.nonNull(extDocker) && StringUtils.isNotBlank(extDocker.getSettings())){
+            model.setStartUpParameterList(JSONArray.parseArray(extDocker.getSettings(), StartUpParameter.class));
+        }
+        model.setExtDocker(extDocker);
+        ExtNormal extNormal = installer.getExtNormal();
+        if (Objects.nonNull(extNormal) && StringUtils.isNotBlank(extNormal.getResources())){
+            model.setResourceList(JSONArray.parseArray(extNormal.getResources(), Resource.class));
+        }
+        model.setExtNormal(extNormal);
+        model.setSuccess(installer.isSuccess());
+        return model;
+    }
+
+    /**
+     * 转换InstallerRequest
+     * @param request
+     * @return
+     */
+    private Installer convertRequest(InstallerRequest request){
+        Installer installer = new Installer();
+        installer.setName(request.getName());
+        installer.setDescription(request.getDescription());
+        installer.setLogo(request.getLogo());
+        installer.setCategories(String.join(",",request.getCategories()));
+        installer.setDeployType(request.getDeployType());
+        ExtDocker extDocker = request.getExtDocker();
+        if (Objects.nonNull(extDocker) && CollectionUtils.isNotEmpty(request.getStartUpParameterList())) {
+            extDocker.setSettings(JSONArray.toJSONString(request.getStartUpParameterList()));
+        }
+        installer.setExtDocker(extDocker);
+        ExtNormal extNormal = request.getExtNormal();
+        if (Objects.nonNull(extNormal) && CollectionUtils.isNotEmpty(request.getResourceList())) {
+            extNormal.setResources(JSONArray.toJSONString(request.getResourceList()));
+        }
+        installer.setExtNormal(extNormal);
+        return installer;
+    }
+}

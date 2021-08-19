@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.devops.cluster.converter.model;
 
-import cn.cyberpeace.mp.devops.cluster.converter.model.common.ExtEntity;
-import cn.cyberpeace.mp.devops.cluster.converter.model.common.ExtGateway;
-import cn.cyberpeace.mp.devops.cluster.converter.model.common.SystemInfo;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntity;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtGateway;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
 import lombok.*;
 
 @EqualsAndHashCode(callSuper = true)
@@ -45,7 +45,7 @@ public class RealEquipment extends BasePageConvertModel{
     /**
      * 系统信息
      */
-    private SystemInfo systemInfo;
+    private ExtSystemInfo extSystemInfo;
 
     /**
      * 实体信息

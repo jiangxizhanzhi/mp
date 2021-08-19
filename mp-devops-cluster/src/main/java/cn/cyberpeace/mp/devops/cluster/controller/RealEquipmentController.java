@@ -6,12 +6,12 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.RealEquipmentConverter;
-import cn.cyberpeace.mp.devops.cluster.converter.model.common.ExtEntity;
 import cn.cyberpeace.mp.devops.cluster.converter.model.RealEquipment;
 import cn.cyberpeace.mp.devops.cluster.converter.model.RealEquipmentConvertModel;
-import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentRequest;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntity;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentPageRequest;
+import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentRequest;
 import cn.cyberpeace.mp.devops.cluster.response.RealEquipmentByIdResponse;
 import cn.cyberpeace.mp.devops.cluster.response.RealEquipmentPageResponse;
 import com.google.common.collect.Lists;
@@ -57,11 +57,11 @@ public class RealEquipmentController {
                     .category(v.getMainCategory()).subCategory(v.getSubCategory())
                     .description(v.getDescription()).build();
             if (Objects.nonNull(extEntity)){
-                response.setModel(extEntity.getModel());
+                response.setModel(extEntity.getStyle());
                 response.setParams(extEntity.getParams());
                 response.setEntityType(extEntity.getAccessType());
                 response.setStatus(extEntity.getEntityStatus());
-                response.setEntityDetail(extEntity.getAccessProtocols());
+                response.setEntityDetail(extEntity.getAccessProtocals());
             }
             return response;
         }).collect(Collectors.toList());
@@ -76,7 +76,7 @@ public class RealEquipmentController {
         RealEquipmentByIdResponse response = RealEquipmentByIdResponse.builder().uuid(realEquipment.getUuid())
                 .name(realEquipment.getName()).logo(realEquipment.getLogo()).role(realEquipment.getRole())
                 .mainCategory(realEquipment.getMainCategory()).subCategory(realEquipment.getSubCategory())
-                .systemInfo(realEquipment.getSystemInfo()).extEntity(realEquipment.getExtEntity())
+                .extSystemInfo(realEquipment.getExtSystemInfo()).extEntity(realEquipment.getExtEntity())
                 .description(realEquipment.getDescription()).build();
         return new ServiceResult(response);
     }

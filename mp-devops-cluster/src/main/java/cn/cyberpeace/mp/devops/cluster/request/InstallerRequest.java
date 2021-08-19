@@ -1,5 +1,9 @@
 package cn.cyberpeace.mp.devops.cluster.request;
 
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtDocker;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtNormal;
+import cn.cyberpeace.mp.devops.cluster.model.common.Resource;
+import cn.cyberpeace.mp.devops.cluster.model.common.StartUpParameter;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -13,6 +17,12 @@ import java.util.List;
 @AllArgsConstructor
 @ApiModel(value = "服务管理的新增请求参数")
 public class InstallerRequest extends BaseRequest {
+
+    /**
+     * UUID
+     */
+    @ApiModelProperty("uuid")
+    private String uuid;
 
     /**
      * 名称
@@ -30,103 +40,43 @@ public class InstallerRequest extends BaseRequest {
      * 图标
      */
     @ApiModelProperty(value = "图标")
-    private String imgIconUrl;
+    private String logo;
 
     /**
      * 分类
      */
     @ApiModelProperty(value = "分类")
-    private List<String> categoryList;
+    private List<String> categories;
 
     /**
      * 服务类型
      */
     @ApiModelProperty(value = "服务类型")
-    private String type;
+    private Integer deployType;
+
+    /**
+     * 对应的docker服务的扩展信息
+     */
+    @ApiModelProperty(value = "对应的docker服务的扩展信息")
+    private ExtDocker extDocker;
+
+    /**
+     * 启动参数（包装对象）
+     */
+    @ApiModelProperty(value = "启动参数")
+    private List<StartUpParameter> startUpParameterList;
+
+    /**
+     * 对应的windows服务扩展信息
+     */
+    @ApiModelProperty(value = "对应的windows服务扩展信息")
+    private ExtNormal extNormal;
 
     /**
      * 资源列表
      */
     @ApiModelProperty(value = "资源列表")
-    private List<Resource> resources;
-
-    /**
-     * docker文件地址
-     */
-    @ApiModelProperty(value = "docker文件地址")
-    private String docker;
-
-    /**
-     * 启动参数
-     */
-    @ApiModelProperty(value = "启动参数")
-    private List<StartUpParameter> startUpParameters;
-
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    private class Resource{
-
-        /**
-         * 平台
-         */
-        @ApiModelProperty(value = "平台")
-        private String platform;
-
-        /**
-         * 文件
-         */
-        @ApiModelProperty(value = "文件")
-        private String file;
-    }
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    private class StartUpParameter{
-
-        /**
-         * 参数类型：环境变量/命令参数/端口映射
-         */
-        private String type;
-
-        /**
-         * 可选还是必选
-         */
-        private String option;
-
-        /**
-         * 参数名称
-         */
-        private String name;
-
-        /**
-         * 默认值
-         */
-        private String defaultVal;
-
-        /**
-         * 命令
-         */
-        private String command;
-
-        /**
-         * 容器端口
-         */
-        private String containerPort;
-
-        /**
-         * 主机端口
-         */
-        private String hostPort;
-
-        /**
-         * 描述
-         */
-        private String description;
-    }
-
+    private List<Resource> resourceList;
 
 
 }

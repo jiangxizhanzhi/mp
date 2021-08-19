@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.devops.cluster.request;
 
 
-import cn.cyberpeace.mp.devops.cluster.converter.model.common.ExtEntity;
-import cn.cyberpeace.mp.devops.cluster.converter.model.common.SystemInfo;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntity;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -57,7 +57,7 @@ public class RealEquipmentRequest extends BaseRequest{
      * 系统信息
      */
     @ApiModelProperty("系统信息")
-    private SystemInfo systemInfo;
+    private ExtSystemInfo systemInfo;
 
     /**
      * 实体信息

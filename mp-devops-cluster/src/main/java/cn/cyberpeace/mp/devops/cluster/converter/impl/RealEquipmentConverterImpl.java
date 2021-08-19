@@ -2,15 +2,17 @@ package cn.cyberpeace.mp.devops.cluster.converter.impl;
 
 import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.devops.cluster.converter.RealEquipmentConverter;
-import cn.cyberpeace.mp.devops.cluster.converter.model.common.ExtEntity;
 import cn.cyberpeace.mp.devops.cluster.converter.model.RealEquipment;
 import cn.cyberpeace.mp.devops.cluster.converter.model.RealEquipmentConvertModel;
-import cn.cyberpeace.mp.devops.cluster.converter.model.common.SystemInfo;
 import cn.cyberpeace.mp.devops.cluster.model.Device;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.common.AccessProtocol;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntity;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtGateway;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
-import cn.cyberpeace.mp.devops.cluster.request.*;
+import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentDeleteRequest;
+import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentPageRequest;
+import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentRequest;
 import cn.cyberpeace.mp.devops.cluster.service.DeviceService;
 import cn.cyberpeace.mp.devops.cluster.service.RealEquipmentService;
 import com.alibaba.fastjson.JSONArray;
@@ -108,7 +110,7 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
         if (Objects.isNull(device)){
             return new RealEquipment();
         }
-        final Device.ExtEntity extEntity = device.getExtEntity();
+        final ExtEntity extEntity = device.getExtEntity();
 
         final ExtSystemInfo extSystemInfo = device.getExtSystemInfo();
 
@@ -123,7 +125,7 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
             ExtEntity entity = new ExtEntity();
             entity.setId(extEntity.getId());
             entity.setDeviceUuid(extEntity.getDeviceUuid());
-            entity.setModel(extEntity.getStyle());
+            entity.setStyle(extEntity.getStyle());
             entity.setParams(extEntity.getParams());
             entity.setAccessType(extEntity.getAccessType());
             entity.setEntityStatus(extEntity.getEntityStatus());
@@ -139,15 +141,15 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
             entity.setCcmPort(extEntity.getCcmPort());
             entity.setCcmName(extEntity.getCcmName());
             entity.setCcmPassword(extEntity.getCcmPassword());
-            entity.setAccessProtocols(extEntity.getAccessProtocals());
-            entity.setAccessProtocolList(JSONArray.parseArray(extEntity.getAccessProtocals(), ExtEntity.AccessProtocol.class));
+            entity.setAccessProtocals(extEntity.getAccessProtocals());
+            entity.setAccessProtocolList(JSONArray.parseArray(extEntity.getAccessProtocals(), AccessProtocol.class));
             convertModel.setExtEntity(entity);
         }
         if (Objects.nonNull(extSystemInfo)){
-            SystemInfo systemInfo = SystemInfo.builder().uuid(extSystemInfo.getUuid())
+            ExtSystemInfo systemInfo = ExtSystemInfo.builder().uuid(extSystemInfo.getUuid())
                     .systemType(extSystemInfo.getSystemType()).systemArchitecture(extSystemInfo.getSystemArchitecture())
                     .language(extSystemInfo.getLanguage()).build();
-            convertModel.setSystemInfo(systemInfo);
+            convertModel.setExtSystemInfo(systemInfo);
         }
 
         if (Objects.nonNull(extGateway)){
@@ -175,8 +177,8 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
 
         final ExtEntity requestExtEntity = request.getExtEntity();
         if (Objects.nonNull(requestExtEntity)) {
-            Device.ExtEntity extEntity = new Device.ExtEntity();
-            extEntity.setStyle(requestExtEntity.getModel());
+            ExtEntity extEntity = new ExtEntity();
+            extEntity.setStyle(requestExtEntity.getStyle());
             extEntity.setParams(requestExtEntity.getParams());
             extEntity.setAccessType(requestExtEntity.getAccessType());
             extEntity.setAccessSwitchPort(requestExtEntity.getAccessSwitchPort());
@@ -195,7 +197,7 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
             device.setExtEntity(extEntity);
         }
 
-        final SystemInfo reqSystemInfo = request.getSystemInfo();
+        final ExtSystemInfo reqSystemInfo = request.getSystemInfo();
         if (Objects.nonNull(reqSystemInfo)) {
             ExtSystemInfo extSystemInfo = new ExtSystemInfo();
             extSystemInfo.setSystemType(reqSystemInfo.getSystemType());

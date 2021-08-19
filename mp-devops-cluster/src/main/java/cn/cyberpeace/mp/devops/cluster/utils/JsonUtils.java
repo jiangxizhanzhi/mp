@@ -11,7 +11,7 @@ import java.io.IOException;
 public class JsonUtils {
 
     /**
-     * 将对象的大写转换为下划线加小写，例如：userName-->user_name
+     * 将对象的大写转换为下划线加小写
      * @param object
      * @return
      * @throws JsonProcessingException
@@ -24,7 +24,7 @@ public class JsonUtils {
     }
 
     /**
-     * 将下划线转换为驼峰的形式，例如：user_name-->userName
+     * 将下划线转换为驼峰的形式
      *
      * @param json
      * @param clazz

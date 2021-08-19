@@ -30,7 +30,7 @@ public interface InstallerService extends BaseCloudPlatformService {
      * @param installer
      * @return
      */
-    String update(String uuid,Installer installer);
+    Installer update(String uuid,Installer installer);
 
     /**
      * 根据ID查询
@@ -43,5 +43,5 @@ public interface InstallerService extends BaseCloudPlatformService {
      * 批量删除
      * @param ids
      */
-    void deleteByIds(List<String> ids);
+    Boolean deleteByIds(List<String> ids);
 }

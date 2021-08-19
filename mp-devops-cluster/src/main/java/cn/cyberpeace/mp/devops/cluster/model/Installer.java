@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.devops.cluster.model;
 
-import cn.cyberpeace.mp.auth.dto.common.PageRequest;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtDocker;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtNormal;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -67,33 +67,12 @@ public class Installer extends BaseCloudPlatformModel{
     private Integer deployType;
 
     /**
-     * docker
+     * 对应的docker服务的扩展信息
      */
     private ExtDocker extDocker;
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static final class ExtDocker{
-
-        /**
-         * ID
-         */
-        private Integer id;
-
-        /**
-         * UUID
-         */
-        private String installerUuid;
-
-        /**
-         * 文件地址
-         */
-        private String file;
-
-        private String settings;
-
-        private Integer syncStatus;
-
-    }
+    /**
+     * 对应的windows服务扩展信息
+     */
+    private ExtNormal extNormal;
 }
