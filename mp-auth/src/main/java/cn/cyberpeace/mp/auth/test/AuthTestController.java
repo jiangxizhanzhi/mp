@@ -4,15 +4,14 @@ import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.OrgDto;
 import cn.cyberpeace.mp.auth.dto.activation.ActivationRequest;
 import cn.cyberpeace.mp.auth.model.TargetModel;
-import cn.cyberpeace.mp.auth.model.UserPermissionModel;
 import cn.cyberpeace.mp.auth.repository.OrgMapper;
 import cn.cyberpeace.mp.auth.repository.SysConfigMapper;
 import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
-import cn.cyberpeace.mp.auth.service.sys.LicenseService;
 import cn.cyberpeace.mp.auth.service.OrgService;
+import cn.cyberpeace.mp.auth.service.TargetService;
 import cn.cyberpeace.mp.auth.service.UserHeartbeatService;
 import cn.cyberpeace.mp.auth.service.UserLogService;
-import cn.cyberpeace.mp.auth.service.TargetService;
+import cn.cyberpeace.mp.auth.service.sys.LicenseService;
 import cn.cyberpeace.mp.auth.service.sys.SysActivationService;
 import cn.cyberpeace.mp.auth.util.PasswordStrengthChecker;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
@@ -130,48 +129,22 @@ public class AuthTestController {
     @GetMapping("/testmapper")
     public void testmapper(HumanCondition condition) {
 
-//        HumanCondition condition = new HumanCondition();
-        condition.linkAs(UserPermissionModel.class, "m0");
-        condition.linkAs(TargetModel.class, "m1");
-        condition.filterLink("m0", "target", "m1", "id");
-//        condition.currentLink(UserRoleModel.class);
-//        condition.currentLink("m0");
-        condition.setCurrentLinkName(null);
-
-        condition.filterEqual("m0.owner", "3fsss655d87112f4ae094bbaf7083");
-//        condition.select("*, m1.*");
-//        condition.select("");
-//        condition.toDefaultSelectFields()
-        Map<String, String> selectFieldsMap = new HashMap<>();
-//        selectFieldsMap.put("m0.*", "");
-        selectFieldsMap.put("m1.*", "");
-        condition.setSelectFields(selectFieldsMap);
-
-
-        // less
-//        condition.getAndCondition().getConds();
-//        condition.groupBy("");
-
-
-        List list = userRoleMapper.list(condition);
-
-        log.info("{}", list);
     }
 
 
-    @GetMapping("/testpermmapper")
-    public void testpermmapper() {
+    @GetMapping("/testpermlist")
+    public List<TargetModel> testPermList() {
         String userId = "3fsss655d87112f4ae094bbaf7083";
+        HumanCondition condition = userPermissionTestMapper.getCondition(userId);
 
-        HumanCondition condition = userPermissionTestMapper.getCondition();
-
+        // 自定义条件
         condition.filterContains("name", "题");
         condition.filterEqual("parent", "item-bank-folder");
-
         condition.pagination(1, 10);
 
-        List<TargetModel> map = userPermissionTestMapper.listTargetModelsByOwner(userId, condition, UserPermissionModel.class, TargetModel.class);
-        log.info("{}", map);
+        List<TargetModel> list = userPermissionTestMapper.listTargetsByOwner(condition);
+        log.info("{}", list);
+        return list;
     }
 
     @GetMapping("/testlicense")

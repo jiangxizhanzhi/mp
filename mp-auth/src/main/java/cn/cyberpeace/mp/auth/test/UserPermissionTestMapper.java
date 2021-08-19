@@ -1,20 +1,17 @@
 package cn.cyberpeace.mp.auth.test;
 
+import cn.cyberpeace.mp.auth.base.repository.BasePermissionMapper;
+import cn.cyberpeace.mp.auth.base.repository.stereotype.PermissionModelClass;
 import cn.cyberpeace.mp.auth.model.TargetModel;
-import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserPermissionModel;
-import cn.cyberpeace.mp.base.repository.BaseModelMapper;
-import cn.cyberpeace.mp.base.repository.BasePermissionMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 @Mapper
 @Repository
-@ModelClass(UserPermissionModel.class)
+@PermissionModelClass(permissionClass = UserPermissionModel.class, targetClass = TargetModel.class)
+@ModelClass(TargetModel.class)
 public interface UserPermissionTestMapper extends BasePermissionMapper<UserPermissionModel, TargetModel> {
 
 }

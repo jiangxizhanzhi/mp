@@ -1,13 +1,9 @@
 package cn.cyberpeace.mp.auth.dto.notice;
 
-import cn.cyberpeace.mp.auth.constant.AuthConstant;
-import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
-import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -57,4 +53,8 @@ public class SysNoticeDto {
     @ApiModelProperty(value = "发布时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime createTime;
+
+    @ApiModelProperty(value = "更新时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private LocalDateTime updateTime;
 }
