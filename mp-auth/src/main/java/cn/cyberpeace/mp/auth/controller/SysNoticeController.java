@@ -53,6 +53,12 @@ public class SysNoticeController {
     }
 
 
+    @ApiOperation("阅读公告接口")
+    @GetMapping("/read/{id}")
+    public ServiceResult<SysNoticeDto> read(@PathVariable String id) {
+        return null;
+    }
+
     @ApiOperation("分页查询所有公告")
     @GetMapping("/page")
     public ServiceResult<SysNoticeDto> page(SysNoticePageRequest pageRequest) {

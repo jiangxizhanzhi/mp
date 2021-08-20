@@ -4,7 +4,6 @@ import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.OrgDto;
 import cn.cyberpeace.mp.auth.dto.activation.ActivationRequest;
 import cn.cyberpeace.mp.auth.model.TargetModel;
-import cn.cyberpeace.mp.auth.model.UserPermissionModel;
 import cn.cyberpeace.mp.auth.repository.OrgMapper;
 import cn.cyberpeace.mp.auth.repository.SysConfigMapper;
 import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
@@ -136,16 +135,19 @@ public class AuthTestController {
     @GetMapping("/testpermlist")
     public List<TargetModel> testPermList() {
         String userId = "3fsss655d87112f4ae094bbaf7083";
-        HumanCondition condition = userPermissionTestMapper.getCondition(userId);
 
         // 自定义条件
-        condition.filterContains("name", "题");
-        condition.filterEqual("parent", "item-bank-folder");
-        condition.pagination(1, 10);
+        HumanCondition outerCondition = new HumanCondition();
+        outerCondition.filterContains("name", "题");
+        outerCondition.filterEqual("parent", "item-bank-folder");
+        outerCondition.filterEqual("tenant", "default");
+        outerCondition.pagination(1, 10);
+        outerCondition.orderBy(TargetModel::getId);
+        outerCondition.groupBy(TargetModel::getParent);
         // 自定义返回field
-        condition.select(TargetModel::getName, TargetModel::getPath, TargetModel::getIdentifier);
+        outerCondition.select(TargetModel::getId, TargetModel::getName, TargetModel::getPath, TargetModel::getIdentifier, TargetModel::getParent);
 
-        List<TargetModel> list = userPermissionTestMapper.listTargetsByOwner(condition);
+        List<TargetModel> list = userPermissionTestMapper.listTargetsByOwner(userId, outerCondition);
         log.info("{}", list);
         return list;
     }
