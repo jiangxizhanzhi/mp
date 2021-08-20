@@ -38,6 +38,11 @@ public interface BaseConstants {
     String SPOT = "\\.";
 
     /**
+     * 短横线
+     */
+    String SHORT_DASH = "-";
+
+    /**
      * 默认页数
      */
     int DEFAULT_PAGE = 1;

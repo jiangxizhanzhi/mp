@@ -75,7 +75,9 @@ mp:
     exclude-method: OPTIONS
   flow:
     # 流量发生器地址
-    actuator-url: http://10.200.1.64:80/api/v1/resource
+    actuator-resource-url: http://10.200.1.64:80/api/v1/resource
+    actuator-task-url: http://10.200.1.70:80/api/v1/task
+
 
 
 management:

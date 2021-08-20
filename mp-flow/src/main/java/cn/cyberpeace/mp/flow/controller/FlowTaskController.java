@@ -76,4 +76,10 @@ public class FlowTaskController extends BaseModelController<FlowTaskModel, Query
         return flowTaskService.batchDeleteFlowTask(request);
     }
 
+    @ApiOperation("执行流量任务")
+    @PostMapping("/actuator/{id}")
+    public ServiceResult actuator(@PathVariable String id) {
+        return flowTaskService.actuator(id);
+    }
+
 }

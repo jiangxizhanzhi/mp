@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.flow.util;
 
 import cn.cyberpeace.mp.flow.config.HttpDeleteWithBody;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
@@ -17,6 +18,7 @@ import java.nio.charset.StandardCharsets;
  * @Autho qiaokang
  * @Date：2021/8/11 17:17
  */
+@Slf4j
 public class HttpDeleteUtil {
 
     /**
@@ -27,6 +29,8 @@ public class HttpDeleteUtil {
      * @throws IOException
      */
     public static String sendDelete(String url, String content) throws IOException {
+        log.info("请求地址================>{}", url);
+        log.info("请求参数================>{}", content);
         HttpClient httpClient = HttpClientBuilder.create().build();
         HttpDeleteWithBody httpDeleteWithBody = new HttpDeleteWithBody(url);
         //设置Content-Type

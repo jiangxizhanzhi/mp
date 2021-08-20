@@ -11,15 +11,15 @@ public enum FlowPlatformEnum {
 
     TREX("TREX");
 
-    private final String group;
+    private final String platform;
 
-    FlowPlatformEnum(String group) {
-        this.group = group;
+    FlowPlatformEnum(String platform) {
+        this.platform = platform;
     }
 
     @Override
     public String toString() {
-        return group;
+        return platform;
     }
 
     @JsonValue

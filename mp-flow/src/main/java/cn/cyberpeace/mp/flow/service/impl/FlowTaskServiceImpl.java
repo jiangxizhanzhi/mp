@@ -14,20 +14,24 @@ import cn.cyberpeace.mp.base.util.JsonUtils;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.cyberpeace.mp.flow.enums.FlowPlatformEnum;
 import cn.cyberpeace.mp.flow.enums.ResourceTypeEnum;
+import cn.cyberpeace.mp.flow.enums.TaskActionEnum;
+import cn.cyberpeace.mp.flow.enums.TaskStatusEnum;
+import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskModel;
+import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskMapper;
-import cn.cyberpeace.mp.flow.request.AddPcapRequest;
-import cn.cyberpeace.mp.flow.request.AddScriptsRequest;
-import cn.cyberpeace.mp.flow.request.BatchDeleteFlowTaskRequest;
+import cn.cyberpeace.mp.flow.request.*;
 import cn.cyberpeace.mp.flow.service.FlowInfoService;
 import cn.cyberpeace.mp.flow.service.FlowTaskService;
 import cn.cyberpeace.mp.flow.service.field.FlowTaskFields;
+import cn.cyberpeace.mp.flow.util.FlowExecuteScheduleUtil;
 import cn.cyberpeace.mp.flow.util.HttpDeleteUtil;
 import cn.cyberpeace.mp.flow.util.ResponseUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,14 +53,29 @@ import java.util.stream.Collectors;
 public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, FlowTaskMapper, FlowTaskFields,
         QueryParams> implements FlowTaskService {
 
-    @Value("${mp.flow.actuator-url}")
-    private String actuatorUrl;
+    /**
+     * 流量发生平台资源地址
+     */
+    @Value("${mp.flow.actuator-resource-url}")
+    private String actuatorResourceUrl;
+
+    /**
+     * 流量发生平台任务地址
+     */
+    @Value("${mp.flow.actuator-task-url}")
+    private String actuatorTaskUrl;
 
     @Autowired
     private FastDFSClient fastDFSClient;
 
     @Autowired
     private FlowInfoService flowInfoService;
+
+    @Autowired
+    private FlowActuatorMapper flowActuatorMapper;
+
+    @Autowired
+    private FlowExecuteScheduleMethodImpl flowExecuteScheduleMethod;
 
     public FlowTaskServiceImpl(FlowTaskMapper stuMapper, FlowTaskFields stuFields) {
         setModelFields(stuFields);
@@ -114,7 +133,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                 JSONObject object = new JSONObject();
                 object.put("fileName",
                         flowInfoModel.getTitle() + "." + flowInfoModel.getPcapFile().split(BaseConstants.SPOT)[1]);
-                String pcapRsp = HttpUtils.postFile(actuatorUrl + "/pcap/import", fileByte, object);
+                String pcapRsp = HttpUtils.postFile(actuatorResourceUrl + "/pcap/import", fileByte, "file", object);
                 JSONObject jsonObject = JSONObject.parseObject(pcapRsp);
                 log.info("upload pcap file response:{}", jsonObject.toJSONString());
 
@@ -126,7 +145,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                     // 再向流量发生平台创建pcap管理
                     AddPcapRequest addPcapRequest = new AddPcapRequest();
                     addPcapRequest.setFileName(fileName);
-                    String addPcapRsp = HttpUtils.sendPost(actuatorUrl + "/pcap",
+                    String addPcapRsp = HttpUtils.sendPost(actuatorResourceUrl + "/pcap",
                             JsonUtils.toUnderlineJSONString(addPcapRequest));
 
                     JSONObject addPcapObj = JSONObject.parseObject(addPcapRsp);
@@ -152,11 +171,14 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                 String flowName =
                         flowInfoModel.getTitle() + System.currentTimeMillis()  + "." +  flowInfoModel.getScriptFile().split(BaseConstants.SPOT)[1];
                 scriptsRequest.setName(flowName);
-                // TODO type改为1, isDefault设为true
-                scriptsRequest.setType(2);
+                // TODO 默认执行脚本命令
+                scriptsRequest.setRunCmd("cd");
+                scriptsRequest.setGetResultCmd("cd");
+                JSONObject object = JSONObject.parseObject(JsonUtils.toUnderlineJSONString(scriptsRequest));
+                object.put("fileName", flowName);
+
                 // 先向流量发生平台新增资源文件
-                String scriptRsp = HttpUtils.sendPost(actuatorUrl + "/scripts",
-                        JSONObject.parseObject(JsonUtils.toUnderlineJSONString(scriptsRequest)));
+                String scriptRsp = HttpUtils.postFile(actuatorResourceUrl + "/scripts", fileByte, "run_image_script", object);
                 JSONObject scriptObj = JSONObject.parseObject(scriptRsp);
                 log.info("add script file response:{}", scriptObj.toJSONString());
 
@@ -164,25 +186,6 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                     // 解析返回的uuid
                     String uuid = scriptObj.getString(BaseConstants.STR_DATA);
                     flowTaskModel.setThirdFlowId(uuid);
-
-                    // 再向流量发生平台上传资源文件
-                    JSONObject jsonObj = new JSONObject();
-                    // 文件的uuid
-                    jsonObj.put("file_uuid", uuid);
-                    jsonObj.put("fileName", flowName);
-                    String uploadRsp = HttpUtils.postFile(actuatorUrl + "/upload", fileByte, jsonObj);
-
-                    JSONObject pcapObject = JSONObject.parseObject(uploadRsp);
-                    log.info("upload script file response:{}", pcapObject.toJSONString());
-
-                    if (ResponseUtils.checkResponse(pcapObject)) {
-                        // 获取文件名称
-                        String fileName = pcapObject.getJSONObject(BaseConstants.STR_DATA).getString("file_name");
-                        flowTaskModel.setThirdFlowName(fileName);
-                    } else {
-                        log.error("upload script file error");
-                        isSuccess = false;
-                    }
                 } else {
                     log.error("add script file error");
                     isSuccess = false;
@@ -370,7 +373,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
         object.put("uuids", array);
 
         try {
-            String rsp = HttpDeleteUtil.sendDelete(actuatorUrl + delUrl, object.toJSONString());
+            String rsp = HttpDeleteUtil.sendDelete(actuatorResourceUrl + delUrl, object.toJSONString());
             JSONObject rspObject = JSONObject.parseObject(rsp);
             log.info("delete flow file response: {}", rspObject.toJSONString());
 
@@ -384,6 +387,186 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
         }
 
         return false;
+    }
+
+
+    /**
+     * 执行流量任务
+     * @param flowTaskId
+     * @return
+     */
+    public ServiceResult actuator(String flowTaskId) {
+        // 流量任务存在校验
+        ObjResult<FlowTaskModel> flowTaskResult = get(flowTaskId).getSource();
+        if (Objects.isNull(flowTaskResult)) {
+            log.error("flow task not exist:{}", flowTaskId);
+            return ServiceResult.fail("Flow task not exist");
+        }
+        FlowTaskModel flowTaskModel = flowTaskResult.getObj();
+
+        // 流量信息存在校验
+        ObjResult<FlowInfoModel> flowInfoResult = flowInfoService.get(flowTaskModel.getFlowId()).getSource();
+        if (Objects.isNull(flowInfoResult)) {
+            log.error("flow info in task not exist:{}", flowTaskModel.getFlowId());
+            return ServiceResult.fail("Flow info in task not exist");
+        }
+        FlowInfoModel flowInfoModel = flowInfoResult.getObj();
+
+        // 已经创建过任务，需要判断当前任务状态
+        if (StringUtils.isNotBlank(flowTaskModel.getThirdTaskId())) {
+            try {
+                JSONObject statusObj = new JSONObject();
+                JSONArray statusArray = new JSONArray();
+                statusArray.add(flowTaskModel.getThirdTaskId());
+                statusObj.put("uuids", statusArray);
+
+                String statusRsp = HttpUtils.sendPost(actuatorTaskUrl + "/tasks/standards/many", statusObj.toJSONString());
+                JSONObject statusRspObj = JSONObject.parseObject(statusRsp);
+                log.info("query task status response:{}", statusRspObj.toJSONString());
+                if (ResponseUtils.checkResponse(statusRspObj)) {
+                    JSONArray rows = statusRspObj.getJSONObject(BaseConstants.STR_DATA).getJSONArray("rows");
+                    int taskStatus = rows.getJSONObject(0).getInteger("status");
+                    if (TaskStatusEnum.RUNNING.toValue() == taskStatus || TaskStatusEnum.STOPING.toValue() == taskStatus) {
+                        return ServiceResult.fail("The task is already running");
+                    }
+                } else {
+                    log.error("query task status failed");
+                    return ServiceResult.fail("Actuator flow task error");
+                }
+            } catch (Exception e) {
+                log.error("query task status error", e);
+                return ServiceResult.fail("Actuator flow task error");
+            }
+        }
+
+        // 流量执行器信息查询
+        String sceneId = flowTaskModel.getSceneId();
+        if (StringUtils.isBlank(sceneId)) {
+            log.error("sceneId in flow task is empty");
+            return ServiceResult.fail("Actuator flow task error");
+        }
+        FlowActuatorModel flowActuatorModel = flowActuatorMapper.selectBySceneId(sceneId);
+        if (Objects.isNull(flowActuatorModel)) {
+            log.error("flow actuator is empty for sceneId:{}", sceneId);
+            return ServiceResult.fail("Actuator flow task error");
+        }
+
+
+        String thirdTaskId = "";
+        String urlPath = "";
+
+        if (ResourceTypeEnum.PACP.toValue() == flowInfoModel.getResourceType()) {
+            urlPath = "/tasks/app/action";
+            // 构建新增app任务请求
+            AddAppTaskRequest appTaskRequest = this.buildAddAppTaskRequest(flowTaskModel, flowActuatorModel);
+
+            try {
+                String addAppTaskRsp = HttpUtils.sendPost(actuatorTaskUrl + "/tasks/app",
+                        JsonUtils.toUnderlineJSONString(appTaskRequest));
+                JSONObject addAppTaskObj = JSONObject.parseObject(addAppTaskRsp);
+                log.info("add app task response:{}", addAppTaskObj.toJSONString());
+                if (ResponseUtils.checkResponse(addAppTaskObj)) {
+                    // 第三方任务id
+                    thirdTaskId = addAppTaskObj.getJSONObject(BaseConstants.STR_DATA).getString("uuid");
+
+                } else {
+                    log.error("add app task failed");
+                    return ServiceResult.fail("Actuator flow task error");
+                }
+            } catch (Exception e) {
+                log.error("add app task error", e);
+                return ServiceResult.fail("Actuator flow task error");
+            }
+        } else {
+            urlPath = "/tasks/standards/action";
+            // 封装请求参数
+            AddStandardsTaskRequest standTaskRequest = new AddStandardsTaskRequest(flowTaskModel);
+            standTaskRequest.setPort(flowActuatorModel.getClientMac());
+
+            try {
+                String addStandTaskRsp = HttpUtils.sendPost(actuatorTaskUrl + "/tasks/standards",
+                        JsonUtils.toUnderlineJSONString(standTaskRequest));
+                JSONObject addStandTaskObj = JSONObject.parseObject(addStandTaskRsp);
+                log.info("add standard task response:{}", addStandTaskObj.toJSONString());
+                if (ResponseUtils.checkResponse(addStandTaskObj)) {
+                    // 第三方任务id
+                    thirdTaskId = addStandTaskObj.getString(BaseConstants.STR_DATA);
+
+                } else {
+                    log.error("add standard task failed");
+                    return ServiceResult.fail("Actuator flow task error");
+                }
+            } catch (Exception e) {
+                log.error("add standard task error", e);
+                return ServiceResult.fail("Actuator flow task error");
+            }
+        }
+
+        // 构建执行任务请求
+        FlowExecuteRequest executeRequest = new FlowExecuteRequest(flowTaskModel);
+        executeRequest.setAction(TaskActionEnum.START.toValue());
+        executeRequest.setUuid(thirdTaskId);
+        executeRequest.setUrlPath(urlPath);
+
+        // 调用定时任务处理
+        FlowExecuteScheduleUtil util = FlowExecuteScheduleUtil.builder().build();
+        util.setFlowBaseModel(executeRequest);
+        util.setMethod(flowExecuteScheduleMethod);
+        util.schedule();
+
+        // 更新第三方任务id和任务状态
+        flowTaskModel.setThirdTaskId(thirdTaskId);
+        flowTaskModel.setTaskStatus(TaskStatusEnum.RUNNING.toValue());
+        update(flowTaskModel);
+
+        return ServiceResult.successful();
+    }
+
+    /**
+     * 构建创建app任务请求
+     * @param flowTaskModel
+     * @param flowActuatorModel
+     * @return
+     */
+    private AddAppTaskRequest buildAddAppTaskRequest(FlowTaskModel flowTaskModel, FlowActuatorModel flowActuatorModel) {
+        AddAppTaskRequest.CapList capList = new AddAppTaskRequest.CapList();
+        capList.setName(flowTaskModel.getThirdFlowName());
+
+        AddAppTaskRequest.Specifics specifics = new AddAppTaskRequest.Specifics();
+        int duration = flowTaskModel.getCount() * flowTaskModel.getIntervalTime();
+        specifics.setDuration(duration);
+        specifics.setSrcIpRange(flowTaskModel.getOriginIps());
+        specifics.setDstIpRange(flowTaskModel.getTargetIps());
+        specifics.setCapList(Collections.singletonList(capList));
+
+        AddAppTaskRequest.Client client = new AddAppTaskRequest.Client();
+        client.setIp(flowActuatorModel.getClientIp());
+        client.setPort(flowActuatorModel.getClientMac());
+        client.setDefaultGw(flowActuatorModel.getClientGateway());
+
+        AddAppTaskRequest.Server server = new AddAppTaskRequest.Server();
+        server.setIp(flowActuatorModel.getServerIp());
+        server.setPort(flowActuatorModel.getServerMac());
+        server.setDefaultGw(flowActuatorModel.getServerGateway());
+
+        AddAppTaskRequest.NetworkConfig networkConfig = new AddAppTaskRequest.NetworkConfig();
+        networkConfig.setClient(Collections.singletonList(client));
+        networkConfig.setServer(Collections.singletonList(server));
+
+        AddAppTaskRequest.NetworkStructure networkStructure = new AddAppTaskRequest.NetworkStructure();
+        networkStructure.setNetworkConfig(networkConfig);
+
+        AddAppTaskRequest.Config config = new AddAppTaskRequest.Config();
+        config.setSpecifics(specifics);
+        config.setNetworkStructure(networkStructure);
+
+        AddAppTaskRequest appTaskRequest = AddAppTaskRequest.builder()
+                .name(flowTaskModel.getTitle() + System.currentTimeMillis()) // 名称加时间戳，防止重复
+                .description(flowTaskModel.getTaskDesc())
+                .config(config)
+                .build();
+
+        return appTaskRequest;
     }
 
 }

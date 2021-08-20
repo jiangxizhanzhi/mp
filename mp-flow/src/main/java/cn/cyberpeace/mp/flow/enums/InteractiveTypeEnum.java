@@ -13,15 +13,15 @@ public enum InteractiveTypeEnum {
 
     FULL("FULL");
 
-    private final String group;
+    private final String interactive;
 
-    InteractiveTypeEnum(String group) {
-        this.group = group;
+    InteractiveTypeEnum(String interactive) {
+        this.interactive = interactive;
     }
 
     @Override
     public String toString() {
-        return group;
+        return interactive;
     }
 
     @JsonValue

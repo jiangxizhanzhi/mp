@@ -46,19 +46,13 @@ public class AddScriptsRequest {
      * 资源文件的类别，1：攻击脚本，2：恶意文件
      */
     @ApiModelProperty("资源文件的类别，1：攻击脚本，2：恶意文件")
-    private Integer type;
+    private Integer type = 1;
 
     /**
      * 是否使用默认镜像
      */
     @ApiModelProperty("是否使用默认镜像")
-    private Boolean isDefault;
-
-    /**
-     * 镜像中使用的脚本上传的路径
-     */
-    @ApiModelProperty("镜像中使用的脚本上传的路径")
-    private String scriptPath;
+    private Boolean isDefault = true;
 
     /**
      * 如果是攻击脚本，需要填写运行命令
@@ -73,6 +67,7 @@ public class AddScriptsRequest {
     private String getResultCmd;
 
     @JsonProperty(value = "is_default")
+
     public Boolean getIsDefault() {
         return isDefault;
     }

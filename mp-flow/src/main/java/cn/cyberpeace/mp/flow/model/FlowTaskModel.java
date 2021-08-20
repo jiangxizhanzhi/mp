@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
 
 @Data
 @AllArgsConstructor
@@ -21,6 +22,7 @@ public class FlowTaskModel extends BaseModel {
      * 任务标题
      */
     @ApiModelProperty(value = "任务标题")
+    @Pattern(regexp = "^[a-zA-Z0-9_\u4e00-\u9fa5]+$", message = "标题只能包含中英文数字及下划线")
     private String title;
 
     /**
@@ -29,6 +31,13 @@ public class FlowTaskModel extends BaseModel {
     @ApiModelProperty(value = "任务描述")
     @DefaultStr
     private String taskDesc;
+
+    /**
+     * 场景id
+     */
+    @ApiModelProperty(value = "场景id")
+    @NotBlank(message = "sceneId can not be empty")
+    private String sceneId;
 
     /**
      * 流量id
@@ -45,9 +54,9 @@ public class FlowTaskModel extends BaseModel {
     private int flowPlatform;
 
     /**
-     * 第三方id
+     * 流量第三方id
      */
-    @ApiModelProperty(value = "第三方id")
+    @ApiModelProperty(value = "流量第三方id")
     @DefaultStr
     private String thirdFlowId;
 
@@ -57,6 +66,13 @@ public class FlowTaskModel extends BaseModel {
     @ApiModelProperty(value = "第三方文件名称")
     @DefaultStr
     private String thirdFlowName;
+
+    /**
+     * 流量任务第三方id
+     */
+    @ApiModelProperty(value = "流量任务第三方id")
+    @DefaultStr
+    private String thirdTaskId;
 
     /**
      * 执行次数
@@ -78,6 +94,13 @@ public class FlowTaskModel extends BaseModel {
     @ApiModelProperty(value = "周期执行间隔，单位：秒")
     @DefaultInt(1)
     private int intervalTime;
+
+    /**
+     * 任务状态: 0 初始化，1 正在运行，2 正在停止， 3 已停止
+     */
+    @ApiModelProperty(value = "任务状态: 0 初始化，1 正在运行，2 正在停止， 3 已停止")
+    @DefaultInt()
+    private int taskStatus;
 
     /**
      * 源ip范围

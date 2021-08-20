@@ -90,13 +90,17 @@ public class HttpUtils {
      * @throws IOException
      */
     public static String sendPost(String url, JSONObject jsonObject) throws IOException {
+        log.info("请求地址================>{}", url);
         HttpClient client = HttpClientBuilder.create().build();
         HttpPost httpPost = new HttpPost(url);
         httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded;charset=utf-8");
 
         List<NameValuePair> params = new ArrayList<>();
         if (Objects.nonNull(jsonObject)) {
+            log.info("请求参数================>{}", jsonObject.toJSONString());
             jsonObject.keySet().forEach(key -> params.add(new BasicNameValuePair(key, jsonObject.getString(key))));
+        } else {
+            log.info("请求参数================>{}", jsonObject);
         }
 
         httpPost.setEntity(new UrlEncodedFormEntity(params, StandardCharsets.UTF_8));
@@ -109,6 +113,8 @@ public class HttpUtils {
     }
 
     private static String doPost(String url, String content, HttpClient client) throws IOException {
+        log.info("请求地址================>{}", url);
+        log.info("请求参数================>{}", content);
         HttpPost httpPost = new HttpPost(url);
         // 解决中文乱码问题
         StringEntity entity = new StringEntity(content, StandardCharsets.UTF_8);
@@ -242,9 +248,11 @@ public class HttpUtils {
      * @param url
      * @param fileByte
      * @param jsonObj
+     * @param fileField
      * @return
      */
-    public static String postFile(String url, byte[] fileByte, JSONObject jsonObj) {
+    public static String postFile(String url, byte[] fileByte, String fileField, JSONObject jsonObj) {
+        log.info("请求地址================>{}", url);
         String result = StringUtils.EMPTY;
         // 向流量发生平台导入pcap包
         try {
@@ -254,14 +262,18 @@ public class HttpUtils {
 
             // 请求参数
             if (Objects.nonNull(jsonObj)) {
+                log.info("请求参数================>{}", jsonObj.toJSONString());
                 fileName = jsonObj.getString("fileName");
                 for (Object key : jsonObj.keySet()) {
                     builder.addFormDataPart(key.toString(), jsonObj.getString(key.toString()));
                 }
+            } else {
+                log.info("请求参数================>{}", jsonObj);
             }
+
             // 文件对象
             RequestBody body = builder.setType(MultipartBody.FORM)
-                    .addFormDataPart("file", fileName,
+                    .addFormDataPart(fileField, fileName,
                             RequestBody.create(MediaType.parse(ContentType.APPLICATION_OCTET_STREAM.getMimeType()),
                                     fileByte))
                     .build();

@@ -36,14 +36,14 @@ public class BaseScheduleUtil<B extends FlowBaseModel, M extends ScheduleMethod>
      */
     public void schedule() {
         FlowBaseModel flowBaseModel = this.getFlowBaseModel();
-        long delay = flowBaseModel.getDelay();
-        long interval = flowBaseModel.getInterval() <= 0 ? 1L : flowBaseModel.getInterval();
+        int delay = flowBaseModel.getDelay();
+        int interval = flowBaseModel.getInterval() <= 0 ? 1 : flowBaseModel.getInterval();
         int count = flowBaseModel.getCount();
         log.info("start task==> delay：{}，interval：{}，count：{}", delay, interval, count);
 
         if (count > 0) {
             future = ScheduledThreadPoolUtils.getInstance().scheduleAtFixedRate (
-                    () -> executor(), delay, interval, TimeUnit.SECONDS
+                    this::executor, delay, interval, TimeUnit.SECONDS
             );
         } else {
             log.warn("no need to run task");
@@ -55,7 +55,7 @@ public class BaseScheduleUtil<B extends FlowBaseModel, M extends ScheduleMethod>
      */
     private void executor() {
         FlowBaseModel flowBaseModel = this.getFlowBaseModel();
-        long interval = flowBaseModel.getInterval() <= 0 ? 1L : flowBaseModel.getInterval();
+        int interval = flowBaseModel.getInterval() <= 0 ? 1 : flowBaseModel.getInterval();
         int count = flowBaseModel.getCount();
 
         if (currentAtomicInteger.get() < (count + 1)) {

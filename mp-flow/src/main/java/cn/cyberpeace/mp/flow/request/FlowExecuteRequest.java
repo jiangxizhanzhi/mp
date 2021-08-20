@@ -1,12 +1,11 @@
 package cn.cyberpeace.mp.flow.request;
 
+import cn.cyberpeace.mp.flow.model.FlowTaskModel;
 import cn.cyberpeace.mp.flow.model.base.FlowBaseModel;
 import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import javax.validation.constraints.NotBlank;
 
 
 /**
@@ -20,30 +19,25 @@ import javax.validation.constraints.NotBlank;
 @ApiModel(value = "流量执行请求对象")
 public class FlowExecuteRequest extends FlowBaseModel {
 
-    @ApiModelProperty("流量文件地址")
-    @NotBlank(message = "流量文件地址不能为空")
-    private String flowFileUrl;
+    /**
+     * 任务id
+     */
+    private String uuid;
 
-    @ApiModelProperty("流量生成器地址")
-    @NotBlank(message = "流量生成器地址不能为空")
-    private String flowGeneratorUrl;
+    /**
+     * 任务操作类型：1 start， 2 stop, 3 reset
+     */
+    private int action;
 
-    @ApiModelProperty("源ip")
-    private String originIp;
+    /**
+     * 请求地址路径
+     */
+    private String urlPath;
 
-    @ApiModelProperty("源端口")
-    private Integer originPort;
 
-    @ApiModelProperty("源mac地址")
-    private String originMac;
-
-    @ApiModelProperty("目标ip")
-    private String targetIp;
-
-    @ApiModelProperty("目标端口")
-    private Integer targetPort;
-
-    @ApiModelProperty("目标mac地址")
-    private String targetMac;
-
+    public FlowExecuteRequest(FlowTaskModel flowTaskModel) {
+        this.setCount(flowTaskModel.getCount());
+        this.setDelay(flowTaskModel.getDelay());
+        this.setInterval(flowTaskModel.getIntervalTime());
+    }
 }

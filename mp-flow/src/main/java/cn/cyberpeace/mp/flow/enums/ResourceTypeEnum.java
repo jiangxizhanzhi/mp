@@ -11,15 +11,15 @@ public enum ResourceTypeEnum {
 
     SCRIPT("SCRIPT");
 
-    private final String group;
+    private final String resource;
 
-    ResourceTypeEnum(String group) {
-        this.group = group;
+    ResourceTypeEnum(String resource) {
+        this.resource = resource;
     }
 
     @Override
     public String toString() {
-        return group;
+        return resource;
     }
 
     @JsonValue
