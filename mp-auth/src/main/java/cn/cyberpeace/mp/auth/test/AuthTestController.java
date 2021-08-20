@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.OrgDto;
 import cn.cyberpeace.mp.auth.dto.activation.ActivationRequest;
 import cn.cyberpeace.mp.auth.model.TargetModel;
+import cn.cyberpeace.mp.auth.model.UserPermissionModel;
 import cn.cyberpeace.mp.auth.repository.OrgMapper;
 import cn.cyberpeace.mp.auth.repository.SysConfigMapper;
 import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
@@ -149,6 +150,14 @@ public class AuthTestController {
 
         List<TargetModel> list = userPermissionTestMapper.listTargetsByOwner(userId, outerCondition);
         log.info("{}", list);
+
+
+        UserPermissionModel upmodel = new UserPermissionModel();
+        upmodel.setTarget("123abcd");
+        upmodel.setOwner("123abcd456");
+        boolean result = userPermissionTestMapper.create(upmodel);
+        log.info("{}", result);
+
         return list;
     }
 
