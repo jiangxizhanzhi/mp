@@ -197,39 +197,4 @@ public class UserOnlineReportServiceImpl extends BaseModelServiceImpl<UserOnline
                 new ArrayBlockingQueue(100), namedThreadFactory, new ThreadPoolExecutor.DiscardOldestPolicy());
     }
 
-
-    /*private String convertOpType2Desc(String opType) {
-        if(Objects.equals(opType, AuthLogConstant.TYPE_LOGIN)) {
-            return "登录";
-        }
-        if(Objects.equals(opType, AuthLogConstant.TYPE_LOGOUT)) {
-            return "登出";
-        }
-        if(Objects.equals(opType, AuthLogConstant.TYPE_ADD)) {
-            return "添加";
-        }
-        if(Objects.equals(opType, AuthLogConstant.TYPE_REGISTER)) {
-            return "注册";
-        }
-        if(Objects.equals(opType, AuthLogConstant.TYPE_UPDATE)) {
-            return "更新";
-        }
-        if(Objects.equals(opType, AuthLogConstant.TYPE_DELETE)) {
-            return "删除";
-        }
-        if(Objects.equals(opType, AuthLogConstant.TYPE_BATCH_ADD)) {
-            return "批量添加";
-        }
-        if(Objects.equals(opType, AuthLogConstant.TYPE_BATCH_UPDATE)) {
-            return "批量更新";
-        }
-        if(Objects.equals(opType, AuthLogConstant.TYPE_BATCH_DELETE)) {
-            return "批量删除";
-        }
-
-        log.info("opType: {}", opType);
-        return opType;
-    }*/
-
-
 }

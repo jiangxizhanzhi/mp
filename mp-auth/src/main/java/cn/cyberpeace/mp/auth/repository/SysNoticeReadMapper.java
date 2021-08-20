@@ -14,4 +14,6 @@ public interface SysNoticeReadMapper extends BaseModelMapper<SysNoticeReadModel>
 
     SysNoticeReadModel selectByUserIdAndNoticeId(@Param("user") String user, @Param("noticeId") String noticeId);
 
+    int increaseReadCount(@Param("id") String id);
+
 }

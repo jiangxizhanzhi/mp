@@ -14,4 +14,10 @@
         </where>
     </select>
 
+
+    <update id="increaseReadCount">
+        update mp_sys_notice_read set read_count = read_count + 1 where id = #{id}
+    </update>
+
+
 </mapper>

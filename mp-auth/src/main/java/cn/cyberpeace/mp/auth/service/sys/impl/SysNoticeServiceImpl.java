@@ -82,9 +82,28 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         setModelFields(modelFields);
     }
 
-    public void unpush(String noticeId) {
+    public void noNeedPush(String noticeId) {
+        UserModel userModel = UserUtils.getLoginUser();
+        Assert.notNull(userModel, "未获取到当前登录用户信息");
 
+        SysNoticeModel noticeModel = getModelMapper().get(noticeId);
+        Assert.notNull(noticeModel, "公告不存在！ID:{}", noticeId);
+
+        SysNoticeReadModel noticeReadModel = noticeReadMapper.selectByUserIdAndNoticeId(userModel.getId(), noticeId);
+
+        if (Objects.isNull(noticeReadModel)) {
+            // 创建一个
+            SysNoticeReadModel noticeReadModelNew = SysNoticeReadModel.builder().noticeId(noticeId).user(userModel.getId()).isNeedPush(0).build();
+            noticeReadMapper.create(noticeReadModelNew);
+        } else {
+            // increase read cound
+            SysNoticeReadModel noticeReadModelUpdate = new SysNoticeReadModel();
+            noticeReadModelUpdate.setId(noticeReadModel.getId());
+            noticeReadModelUpdate.setIsNeedPush(0);
+            noticeReadMapper.update(noticeReadModelUpdate);
+        }
     }
+
 
     public void read(String noticeId) {
         UserModel userModel = UserUtils.getLoginUser();
@@ -100,11 +119,8 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
             SysNoticeReadModel noticeReadModelNew = SysNoticeReadModel.builder().noticeId(noticeId).user(userModel.getId()).build();
             noticeReadMapper.create(noticeReadModelNew);
         } else {
-            // add read cound
-            SysNoticeReadModel noticeReadModelUpdate = new SysNoticeReadModel();
-            noticeReadModelUpdate.setNoticeId(noticeReadModel.getNoticeId());
-            noticeReadModelUpdate.setReadCount(noticeReadModel.getReadCount() + 1);
-            noticeReadMapper.update(noticeReadModelUpdate);
+            // increase read cound
+            noticeReadMapper.increaseReadCount(noticeReadModel.getId());
         }
     }
 
@@ -270,12 +286,12 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
             noticeOrgMapper.deleteByNoticeIds(CollectionUtil.toList(ids));
             noticeRoleMapper.deleteByNoticeIds(CollectionUtil.toList(ids));
         }
-        // todo 群组
 
         return result;
     }
 
 
+    @Override
     public SysNoticeDto noticeModel2NoticeDto(SysNoticeModel noticeModel) {
         if (Objects.isNull(noticeModel)) {
             return null;

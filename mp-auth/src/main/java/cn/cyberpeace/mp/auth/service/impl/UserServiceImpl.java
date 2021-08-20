@@ -142,10 +142,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         }
 
         List<UserModel> users = listObjSrvResult.getSource().getObjs();
-        userDtos = users.stream().map(u -> {
-            UserDto userDto = userModel2UserDto(u);
-            return userDto;
-        }).collect(Collectors.toList());
+        userDtos = users.stream().map(this::userModel2UserDto).collect(Collectors.toList());
 
         if (CollectionUtil.isNotEmpty(userDtos)) {
             // 转换
@@ -248,7 +245,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                 ResultUtils.throwExceptionIfError(re, "创建组织-用户关系失败！");
             });
         }
-
 
         // 保存角色-用户关系
         if (CollectionUtil.isNotEmpty(createRequest.getRoleIds())) {
@@ -532,7 +528,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public void downloadExcelTemplate() {
         try {
             HttpServletResponse response = ServletUtils.getResponse();
-//            String path = Objects.requireNonNull(this.getClass().getClassLoader().getResource("excel/import_template.xls")).getPath();
             InputStream is = this.getClass().getClassLoader().getResourceAsStream("excel/import_template.xls");
             String fileName = "用户列表.xls";
 
@@ -544,7 +539,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             response.reset();
             // 设置response的Header
             response.addHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes("UTF-8"),"ISO8859-1"));
-//            response.addHeader("Content-Length", "" + file.length());
             OutputStream toClient = new BufferedOutputStream(response.getOutputStream());
             response.setContentType("application/octet-stream");
             toClient.write(buffer);
@@ -566,9 +560,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             if (Objects.isNull(userModel)) {
                 continue;
             }
-//            String userId = IdGenerator.generateUUID();
-//            log.warn("userId:{}", userId);
-//            userModel.setId(userId);
+
             chooseDefaultAvatar(userModel);
             var result = create(userModel);
             ResultUtils.throwExceptionIfError(result, "创建用户失败！");

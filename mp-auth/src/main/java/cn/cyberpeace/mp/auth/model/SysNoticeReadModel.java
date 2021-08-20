@@ -34,8 +34,8 @@ public class SysNoticeReadModel extends BaseModel {
     @ApiModelProperty(value = "是否已读 1:已读 0:未读 默认为1  首次创建一条数据即为已读")
     private Integer isReaded;
 
-    @ApiModelProperty(value = "是否删除推送消息 1:删除，不再推送； 0:未删除，继续推送  默认为0")
-    private Integer isDeleted;
+    @ApiModelProperty(value = "是否推送本条公告 1:是（需要推送）； 0:否（不再推送） 默认为1")
+    private Integer isNeedPush;
 
     // 阅读次数
     @ApiModelProperty(value = "阅读次数")
