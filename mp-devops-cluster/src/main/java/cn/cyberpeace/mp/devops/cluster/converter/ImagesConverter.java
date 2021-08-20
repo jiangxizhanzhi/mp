@@ -13,13 +13,13 @@ public interface ImagesConverter {
     /**
      * 新增
      */
-    void add(ImageRequest request);
+    Boolean add(ImageRequest request);
 
     /**
      * 更新
      * @param request
      */
-    void update(ImageUpdateRequest request);
+    void update(ImageRequest request);
 
     /**
      * 预览

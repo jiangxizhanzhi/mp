@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.request;
 
+import cn.cyberpeace.mp.devops.cluster.enums.RoleEnum;
 import cn.cyberpeace.mp.devops.cluster.model.common.*;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -19,6 +20,11 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @ApiModel(value = "镜像新增/编辑请求信息")
 public class ImageRequest extends BaseRequest {
+
+    /**
+     * UUID
+     */
+    private String uuid;
 
     /**
      * 名称
@@ -42,7 +48,7 @@ public class ImageRequest extends BaseRequest {
      * 角色：网络/网关/终端
      */
     @ApiModelProperty(value = "角色：网络/网关/终端")
-    private Integer role;
+    private RoleEnum role;
 
 
     /**

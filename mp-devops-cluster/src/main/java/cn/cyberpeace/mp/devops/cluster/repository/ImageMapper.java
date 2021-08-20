@@ -27,7 +27,7 @@ public interface ImageMapper {
      * @param imageModel
      * @return
      */
-    ImageModel insert(ImageModel imageModel);
+    Integer insert(ImageModel imageModel);
 
     /**
      * 根据ID更新信息

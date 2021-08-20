@@ -35,6 +35,6 @@ public class ImageModel extends BaseModel {
     /**
      * 镜像类型
      */
-    private Integer type;
+    private String type;
 
 }

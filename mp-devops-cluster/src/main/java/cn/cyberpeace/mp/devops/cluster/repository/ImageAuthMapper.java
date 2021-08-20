@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 @Mapper
 @Repository
 @PermissionModelClass(permissionClass = ImageAuthModel.class, targetClass = ImageModel.class)
-@ModelClass(ImageModel.class)
-public interface ImagePermissionMapper extends BasePermissionMapper {
+@ModelClass(ImageAuthModel.class)
+public interface ImageAuthMapper extends BasePermissionMapper {
 
 }

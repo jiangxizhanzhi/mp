@@ -65,7 +65,7 @@ public class ImageUpdateRequest extends BaseRequest {
      * 虚拟类型
      */
     @ApiModelProperty(value = "虚拟类型")
-    private Integer virtualType;
+    private String virtualType;
 
     /**
      * 虚拟类型明细

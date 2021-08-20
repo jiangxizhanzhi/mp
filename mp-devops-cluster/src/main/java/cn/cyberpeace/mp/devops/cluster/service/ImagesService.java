@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.devops.cluster.service;
 
 import cn.cyberpeace.mp.devops.cluster.model.Device;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.ImageCloudPlatformModel;
 
 /**
  * 镜像管理底层接口
@@ -22,7 +21,7 @@ public interface ImagesService extends BaseCloudPlatformService  {
     /**
      * 更新
      */
-    String update(String uuid,Device device);
+    Device update(String uuid,Device device);
 
     /**
      * 构建

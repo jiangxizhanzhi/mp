@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.ImagesConverter;
 import cn.cyberpeace.mp.devops.cluster.request.*;
 import cn.cyberpeace.mp.devops.cluster.response.ImagesPageResponse;
+import cn.cyberpeace.mp.devops.cluster.response.base.Result;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -42,8 +43,9 @@ public class ImagesController {
      */
     @ApiOperation("新增")
     @PostMapping("/add")
-    public void add(@RequestBody ImageRequest request){
-        imagesConverter.add(request);
+    public Result<Boolean> add(@RequestBody ImageRequest request){
+       Boolean result = imagesConverter.add(request);
+       return new Result<>(result);
     }
 
     /**
@@ -51,7 +53,7 @@ public class ImagesController {
      */
     @ApiOperation("更新")
     @PostMapping("/update")
-    public void update(@RequestBody ImageUpdateRequest request){
+    public void update(@RequestBody ImageRequest request){
         imagesConverter.update(request);
     }
 
