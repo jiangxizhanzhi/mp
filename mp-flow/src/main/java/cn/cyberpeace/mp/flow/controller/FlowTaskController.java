@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.flow.controller;
 
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.flow.constant.ControllerConstant;
 import cn.cyberpeace.mp.flow.model.FlowTaskModel;
@@ -22,13 +23,37 @@ import org.springframework.web.bind.annotation.*;
 public class FlowTaskController extends BaseModelController<FlowTaskModel, QueryParams, FlowTaskService> {
 
     @Autowired
+    private FlowTaskServiceImpl flowTaskService;
+
+    @Autowired
     public FlowTaskController(FlowTaskService flowTaskService) {
         setModelService(flowTaskService);
     }
 
-    @Autowired
-    private FlowTaskServiceImpl flowTaskService;
+    /**
+     * 查询任务详情
+     * @param id
+     * @param fields
+     * @return
+     */
+    @ApiOperation("查询任务详情")
+    @GetMapping("/detail/{id}")
+    public ServiceResult<FlowTaskModel> getDetail(@PathVariable String id, @RequestParam(required = false) String[] fields) {
+        return flowTaskService.getDetail(id, fields);
+    }
 
+
+    /**
+     * 分页查询
+     *
+     * @param queryParams
+     * @return
+     */
+    @ApiOperation("分页查询任务")
+    @GetMapping("/page")
+    public ListObjResult<FlowTaskModel> pageFlowTask(@Validated QueryParams queryParams) {
+        return flowTaskService.pageFlowTask(queryParams);
+    }
 
     /**
      * 新增流量任务
@@ -56,6 +81,7 @@ public class FlowTaskController extends BaseModelController<FlowTaskModel, Query
 
     /**
      * 删除流量任务
+     *
      * @param id
      * @return
      */
@@ -67,6 +93,7 @@ public class FlowTaskController extends BaseModelController<FlowTaskModel, Query
 
     /**
      * 批量删除流量任务
+     *
      * @param request
      * @return
      */
@@ -76,10 +103,17 @@ public class FlowTaskController extends BaseModelController<FlowTaskModel, Query
         return flowTaskService.batchDeleteFlowTask(request);
     }
 
+    /**
+     * 执行流量任务
+     *
+     * @param id
+     * @param taskAction 1 start， 2 stop, 3 reset
+     * @return
+     */
     @ApiOperation("执行流量任务")
-    @PostMapping("/actuator/{id}")
-    public ServiceResult actuator(@PathVariable String id) {
-        return flowTaskService.actuator(id);
+    @PostMapping("/actuator/{id}/{taskAction}")
+    public ServiceResult<Boolean> actuator(@PathVariable String id, @PathVariable int taskAction) {
+        return flowTaskService.actuator(id, taskAction);
     }
 
 }
