@@ -15,6 +15,7 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -128,6 +129,32 @@ public class HttpUtils {
         // 获得返回值
         return EntityUtils.toString(resp.getEntity(), StandardCharsets.UTF_8);
     }
+
+    /**
+     * patch 请求
+     * @param url
+     * @param content
+     * @return
+     * @throws IOException
+     */
+    public static String sendPatch(String url, String content) throws IOException {
+        HttpClient client = HttpClientBuilder.create().build();
+        log.info("请求地址================>{}", url);
+        log.info("请求参数================>{}", content);
+        HttpPatch httpPatch = new HttpPatch(url);
+        // 解决中文乱码问题
+        StringEntity entity = new StringEntity(content, StandardCharsets.UTF_8);
+        entity.setContentType(ContentType.APPLICATION_JSON.getMimeType());
+        httpPatch.setEntity(entity);
+
+        HttpResponse resp = client.execute(httpPatch);
+        // 设置请求和传输超时时间
+        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
+        httpPatch.setConfig(requestConfig);
+        // 获得返回值
+        return EntityUtils.toString(resp.getEntity(), StandardCharsets.UTF_8);
+    }
+
 
     /**
      * get请求
