@@ -39,6 +39,12 @@ public enum OpModuleEnums {
 
     TARGET("靶标"),
 
+    RED_VS_BLUE("红蓝对抗"),
+
+    TRAINING_SINGLE("单兵训练"),
+
+    TRAINING_TEAM("团队训练"),
+
     DEFAULT("");
 
     private String desc;
