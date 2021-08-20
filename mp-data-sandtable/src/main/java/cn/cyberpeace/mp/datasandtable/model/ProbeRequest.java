@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.datasandtable.model;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.beans.Transient;
 import java.util.Date;
 import java.util.List;
 import javax.validation.constraints.NotNull;
@@ -33,14 +34,8 @@ public class ProbeRequest {
     @NotNull(message = "探针脚本类型不能为空")
     private Integer scriptType;
 
-    @ApiModelProperty(value = "探针id")
+    @ApiModelProperty(value = "探针id,新增的时候不需要传")
     private String probeId;
-
-    private Date createTime;
-
-    private Date updateTime;
-
-    private Integer delFlag;
 
     @ApiModelProperty(value = "探针脚本内容", required = true)
     private String scriptContent;

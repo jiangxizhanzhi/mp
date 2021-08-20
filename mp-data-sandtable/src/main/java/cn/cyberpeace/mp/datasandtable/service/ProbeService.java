@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.datasandtable.model.ProbeResult;
 import cn.cyberpeace.mp.datasandtable.model.ProbeSearchRequest;
 import cn.cyberpeace.mp.datasandtable.repository.ProbeModelMapper;
 import cn.cyberpeace.mp.datasandtable.repository.ProbeParamModelMapper;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,6 +19,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 @Service
 public class ProbeService {
@@ -39,8 +41,9 @@ public class ProbeService {
         probeModel.setCreateTime(new Date());
         probeModel.setUpdateTime(new Date());
         probeModel.setId(TextUtils.uuid());
+        probeModel.setScriptContent(probeRequest.getScriptContent().getBytes(StandardCharsets.UTF_8));
         probeModelMapper.insert(probeModel);
-        insertProbeParams(probeRequest);
+        insertProbeParams(probeRequest, probeModel.getId());
     }
 
     /**
@@ -87,24 +90,26 @@ public class ProbeService {
     public int modifyProbe(ProbeRequest probeRequest) {
         //修改参数
         probeParamModelMapper.deleteParamByProbeId(probeRequest.getProbeId());
-        insertProbeParams(probeRequest);
+        insertProbeParams(probeRequest, probeRequest.getProbeId());
         //修改探针参数
         ProbeModel probeModel = new ProbeModel();
         BeanUtils.copyProperties(probeRequest, probeModel);
         probeModel.setUpdateTime(new Date());
         probeModel.setId(probeRequest.getProbeId());
+        probeModel.setScriptContent(probeRequest.getScriptContent().getBytes(StandardCharsets.UTF_8));
         return probeModelMapper.updateByProbeId(probeModel);
     }
 
 
-    private void insertProbeParams(ProbeRequest probeRequest) {
+    private void insertProbeParams(ProbeRequest probeRequest, String probeId) {
         List<ProbeParamModel> probeParamModels = probeRequest.getProbeParamsRequestList().stream()
             .map((probeParamRequest -> {
                 ProbeParamModel probeParamModel = new ProbeParamModel();
                 BeanUtils.copyProperties(probeParamRequest, probeParamModel);
-                probeParamModel.setProbeId(probeParamModel.getId());
+                probeParamModel.setProbeId(probeId);
                 probeParamModel.setCreateTime(new Date());
                 probeParamModel.setUpdateTime(new Date());
+                probeParamModel.setId(TextUtils.uuid());
                 return probeParamModel;
             })).collect(Collectors.toList());
         probeParamModelMapper.batchInsert(probeParamModels);
