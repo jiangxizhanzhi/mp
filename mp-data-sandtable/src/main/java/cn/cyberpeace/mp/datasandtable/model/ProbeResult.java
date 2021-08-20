@@ -34,7 +34,7 @@ public class ProbeResult {
 
     private Integer delFlag;
 
-    private byte[] scriptContent;
+    private String scriptContent;
 
     private List<ProbeParamsResult> paramsResultList;
 }

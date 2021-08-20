@@ -32,5 +32,4 @@ public class ProbeSearchRequest {
     @ApiModelProperty("关键字查询")
     private String keyWord;
 
-    private Integer offSet;
 }

@@ -60,10 +60,11 @@ public class ProbeService {
     @Transactional(rollbackFor = Exception.class, readOnly = true)
     public ListObjServiceResult<ProbeResult> queryProbeListWithPageable(ProbeSearchRequest probeSearchRequest) {
         int count = probeModelMapper.countQuery(probeSearchRequest);
-        List<ProbeModel> probeModelList = probeModelMapper.queryListWithPage(probeSearchRequest);
+        List<ProbeModel> probeModelList = probeModelMapper.queryListWithPage(probeSearchRequest, (probeSearchRequest.getPageNum() -1) * probeSearchRequest.getPageSize());
         List<ProbeResult> probeResults = probeModelList.stream().map((model -> {
-            ProbeResult probeResult = new ProbeResult();
+            var probeResult = new ProbeResult();
             BeanUtils.copyProperties(model, probeResult);
+            probeResult.setScriptContent(new String(model.getScriptContent(), StandardCharsets.UTF_8));
             return probeResult;
         })).collect(Collectors.toList());
 
@@ -73,8 +74,8 @@ public class ProbeService {
 
     @Transactional(rollbackFor = Exception.class, readOnly = true)
     public ProbeResult queryProbeDetail(String probeId) {
-        ProbeResult probeResult = new ProbeResult();
-        ProbeModel probeModel = probeModelMapper.queryByProbeId(probeId);
+        var probeResult = new ProbeResult();
+        var probeModel = probeModelMapper.queryByProbeId(probeId);
         BeanUtils.copyProperties(probeModel, probeResult);
         List<ProbeParamsResult> probeParamsResults = probeParamModelMapper.queryProbeParamList(probeId).stream()
             .map(paramModel->{
@@ -83,6 +84,7 @@ public class ProbeService {
                 return paramsResult;
             }).collect(Collectors.toList());
         probeResult.setParamsResultList(probeParamsResults);
+        probeResult.setScriptContent(new String(probeModel.getScriptContent(), StandardCharsets.UTF_8));
         return probeResult;
     }
 
