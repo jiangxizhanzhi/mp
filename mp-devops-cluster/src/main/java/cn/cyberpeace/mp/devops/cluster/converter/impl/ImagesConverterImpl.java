@@ -4,7 +4,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.ImagesConverter;
 import cn.cyberpeace.mp.devops.cluster.dto.ImageDeleteDTO;
 import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devops.cluster.model.Device;
-import cn.cyberpeace.mp.devops.cluster.model.ImagesModel;
+import cn.cyberpeace.mp.devops.cluster.model.ImageModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtVm;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
 import cn.cyberpeace.mp.devops.cluster.request.*;
@@ -43,35 +43,37 @@ public class ImagesConverterImpl implements ImagesConverter {
         imagePageDTO.setImageType(request.getImageType());
         imagePageDTO.setName(request.getName());
         imagePageDTO.setRole(request.getRole());
-        imagePageDTO.setSystemType(request.getSystemType());
-        List<ImagesModel> imagesModels = imageMapper.page(imagePageDTO);
+        imagePageDTO.setMainCategory(request.getMainCategory());
+        imagePageDTO.setSubCategory(request.getSubCategory());
+        List<ImageModel> imageModels = imageMapper.page(imagePageDTO);
         imagesService.page("");
     }
 
     @Override
     @Transactional
     public void add(ImageRequest request) {
-//        imagesService.add();
-        ImagesModel imagesModel = new ImagesModel();
-        imagesModel.setName(request.getName());
-        imagesModel.setRole(request.getRole());
-        imagesModel.setMainCategory(request.getMainCategory());
-        imagesModel.setSubCategory(request.getSubCategory());
-        imagesModel.setType(request.getVirtualType());
-        imageMapper.insert(imagesModel);
+        Device device = imagesService.add(convertRequest(request));
+        ImageModel imageModel = new ImageModel();
+        imageModel.setId(device.getUuid());
+        imageModel.setName(request.getName());
+        imageModel.setRole(request.getRole());
+        imageModel.setMainCategory(request.getCategory());
+        imageModel.setSubCategory(request.getSecondCategory());
+        imageModel.setType(request.getVirtualType());
+        imageMapper.insert(imageModel);
     }
 
     @Override
     public void update(ImageUpdateRequest request) {
 //        imagesService.update();
-        ImagesModel imagesModel = new ImagesModel();
-        imagesModel.setId(request.getId());
-        imagesModel.setName(request.getName());
-        imagesModel.setRole(request.getRole());
-        imagesModel.setMainCategory(request.getMainCategory());
-        imagesModel.setSubCategory(request.getSubCategory());
-        imagesModel.setType(request.getVirtualType());
-        imageMapper.updateById(imagesModel);
+        ImageModel imageModel = new ImageModel();
+        imageModel.setId(request.getId());
+        imageModel.setName(request.getName());
+        imageModel.setRole(request.getRole());
+        imageModel.setMainCategory(request.getMainCategory());
+        imageModel.setSubCategory(request.getSubCategory());
+        imageModel.setType(request.getVirtualType());
+        imageMapper.updateById(imageModel);
     }
 
     @Override
@@ -103,16 +105,13 @@ public class ImagesConverterImpl implements ImagesConverter {
     }
 
     protected Device convertRequest(ImageRequest request){
-        if (Objects.isNull(request)){
-            return null;
-        }
         Device device = new Device();
         device.setName(request.getName());
         device.setDescription(request.getDescription());
         device.setLogo(request.getLogo());
         device.setRole(request.getRole());
-        device.setCategory(request.getMainCategory());
-        device.setSecondCategory(request.getSubCategory());
+        device.setCategory(request.getCategory());
+        device.setSecondCategory(request.getSecondCategory());
         device.setMaintype(request.getVirtualType());
         device.setExtGateway(request.getExtGateway());
         final ExtVm extVm = request.getExtVm();

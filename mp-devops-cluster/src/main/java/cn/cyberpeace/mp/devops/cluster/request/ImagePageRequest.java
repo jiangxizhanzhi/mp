@@ -24,7 +24,12 @@ public class ImagePageRequest extends BasePageRequest {
     /**
      * 系统类型
      */
-    private Integer systemType;
+    private Integer mainCategory;
+
+    /**
+     * 子分类
+     */
+    private Integer subCategory;
 
     /**
      * 镜像类型

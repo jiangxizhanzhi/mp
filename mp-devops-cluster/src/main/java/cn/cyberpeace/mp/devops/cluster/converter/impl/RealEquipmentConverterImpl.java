@@ -41,12 +41,12 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
 
     @Override
     public String[] getDefaultPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldName(RealEquipmentPageRequest::getPage,RealEquipmentPageRequest::getPerPage);
+        return BeanUtils.getBeanGetterFieldNames(RealEquipmentPageRequest::getPage,RealEquipmentPageRequest::getPerPage);
     }
 
     @Override
     public String[] getTotalPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldName(RealEquipmentPageRequest::getOffset,
+        return BeanUtils.getBeanGetterFieldNames(RealEquipmentPageRequest::getOffset,
                 RealEquipmentPageRequest::getPage,RealEquipmentPageRequest::getPerPage);
     }
 
@@ -123,8 +123,6 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
         convertModel.setSuccess(device.isSuccess());
         if (Objects.nonNull(extEntity)){
             ExtEntity entity = new ExtEntity();
-            entity.setId(extEntity.getId());
-            entity.setDeviceUuid(extEntity.getDeviceUuid());
             entity.setStyle(extEntity.getStyle());
             entity.setParams(extEntity.getParams());
             entity.setAccessType(extEntity.getAccessType());
@@ -146,7 +144,7 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
             convertModel.setExtEntity(entity);
         }
         if (Objects.nonNull(extSystemInfo)){
-            ExtSystemInfo systemInfo = ExtSystemInfo.builder().uuid(extSystemInfo.getUuid())
+            ExtSystemInfo systemInfo = ExtSystemInfo.builder()
                     .systemType(extSystemInfo.getSystemType()).systemArchitecture(extSystemInfo.getSystemArchitecture())
                     .language(extSystemInfo.getLanguage()).build();
             convertModel.setExtSystemInfo(systemInfo);

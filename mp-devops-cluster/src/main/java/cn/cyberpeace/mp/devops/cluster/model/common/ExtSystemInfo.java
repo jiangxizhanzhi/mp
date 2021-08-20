@@ -14,7 +14,7 @@ public class ExtSystemInfo {
     /**
      * 操作系统
      */
-    private String systemType;
+    private Integer systemType;
 
     /**
      * 系统架构

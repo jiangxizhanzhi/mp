@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.devops.cluster.repository;
 
 import cn.cyberpeace.mp.devops.cluster.dto.ImageDeleteDTO;
 import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
-import cn.cyberpeace.mp.devops.cluster.model.ImagesModel;
+import cn.cyberpeace.mp.devops.cluster.model.ImageModel;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
@@ -20,21 +20,21 @@ public interface ImageMapper {
      * @param dto
      * @return
      */
-    List<ImagesModel> page(ImagePageDTO dto);
+    List<ImageModel> page(ImagePageDTO dto);
 
     /**
      * 新增
-     * @param imagesModel
+     * @param imageModel
      * @return
      */
-    ImagesModel insert(ImagesModel imagesModel);
+    ImageModel insert(ImageModel imageModel);
 
     /**
      * 根据ID更新信息
-     * @param imagesModel
+     * @param imageModel
      * @return
      */
-    Integer updateById(ImagesModel imagesModel);
+    Integer updateById(ImageModel imageModel);
 
     /**
      * 删除

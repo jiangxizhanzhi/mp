@@ -2,8 +2,6 @@ package cn.cyberpeace.mp.devops.cluster.controller;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
-import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.RealEquipmentConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.RealEquipment;
@@ -14,6 +12,8 @@ import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentRequest;
 import cn.cyberpeace.mp.devops.cluster.response.RealEquipmentByIdResponse;
 import cn.cyberpeace.mp.devops.cluster.response.RealEquipmentPageResponse;
+import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
+import cn.cyberpeace.mp.devops.cluster.response.base.Result;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -46,10 +46,10 @@ public class RealEquipmentController {
      */
     @ApiOperation("分页查询")
     @GetMapping("/page")
-    public ListObjServiceResult<RealEquipmentPageResponse> page(RealEquipmentPageRequest request){
+    public PageResult<RealEquipmentPageResponse> page(RealEquipmentPageRequest request){
         RealEquipmentConvertModel model = realEquipmentConverter.page(request);
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getModelList())){
-            return new ListObjServiceResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
+            return new PageResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
         }
         List<RealEquipmentPageResponse> list = model.getModelList().stream().map(v -> {
             ExtEntity extEntity = v.getExtEntity();
@@ -66,19 +66,19 @@ public class RealEquipmentController {
             return response;
         }).collect(Collectors.toList());
 
-        return new ListObjServiceResult<>(list,model.getTotal());
+        return new PageResult<>(list,model.getTotal());
     }
 
     @ApiOperation("根据ID查询")
     @GetMapping("/{id}")
-    public ServiceResult<RealEquipmentByIdResponse> getById(@PathVariable String id){
+    public Result<RealEquipmentByIdResponse> getById(@PathVariable String id){
         RealEquipment realEquipment = realEquipmentConverter.findById(id);
         RealEquipmentByIdResponse response = RealEquipmentByIdResponse.builder().uuid(realEquipment.getUuid())
                 .name(realEquipment.getName()).logo(realEquipment.getLogo()).role(realEquipment.getRole())
                 .mainCategory(realEquipment.getMainCategory()).subCategory(realEquipment.getSubCategory())
                 .extSystemInfo(realEquipment.getExtSystemInfo()).extEntity(realEquipment.getExtEntity())
                 .description(realEquipment.getDescription()).build();
-        return new ServiceResult(response);
+        return new Result(response);
     }
 
     /**
@@ -86,9 +86,9 @@ public class RealEquipmentController {
      */
     @ApiOperation("新增")
     @PostMapping("/add")
-    public ServiceResult<Boolean> add(@RequestBody RealEquipmentRequest request){
+    public Result<Boolean> add(@RequestBody RealEquipmentRequest request){
         RealEquipment realEquipment = realEquipmentConverter.add(request);
-        return new ServiceResult<>(realEquipment.isSuccess());
+        return new Result<>(realEquipment.isSuccess());
     }
 
     /**
@@ -96,12 +96,12 @@ public class RealEquipmentController {
      */
     @ApiOperation("更新")
     @PutMapping("/update")
-    public ServiceResult<Boolean> update(@RequestBody RealEquipmentRequest request){
+    public Result<Boolean> update(@RequestBody RealEquipmentRequest request){
         if (StringUtils.isBlank(request.getUuid())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         RealEquipment realEquipment = realEquipmentConverter.update(request);
-        return new ServiceResult<>(realEquipment.isSuccess());
+        return new Result<>(realEquipment.isSuccess());
     }
 
     /**
@@ -109,9 +109,9 @@ public class RealEquipmentController {
      */
     @ApiOperation("删除")
     @DeleteMapping("/delete")
-    public ServiceResult<Boolean> delete(@RequestBody RealEquipmentDeleteRequest request){
+    public Result<Boolean> delete(@RequestBody RealEquipmentDeleteRequest request){
         Boolean result = realEquipmentConverter.delete(request);
-        return new ServiceResult<>(result);
+        return new Result<>(result);
     }
 
 

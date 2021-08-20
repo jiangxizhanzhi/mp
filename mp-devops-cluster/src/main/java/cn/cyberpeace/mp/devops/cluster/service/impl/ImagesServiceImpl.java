@@ -3,7 +3,9 @@ package cn.cyberpeace.mp.devops.cluster.service.impl;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.*;
 import cn.cyberpeace.mp.devops.cluster.service.ImagesService;
+import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +23,11 @@ public class ImagesServiceImpl extends BaseOpenStackServiceImpl implements Image
 
     @Override
     public Device add(Device device) {
-        return super.sendPost(CPCLOUD_DEVICE + URL_VERSION + "/normal/lists",JSONObject.toJSONString(device), Device.class);
+        try {
+            return super.sendPost(CPCLOUD_DEVICE + URL_VERSION + "/normal/lists", JsonUtils.toUnderlineJSONString(device), Device.class);
+        } catch (JsonProcessingException e) {
+            return null;
+        }
     }
 
 

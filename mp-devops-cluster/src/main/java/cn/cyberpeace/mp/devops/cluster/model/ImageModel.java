@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table("mp_devops_images")
-public class ImagesModel extends BaseModel {
+public class ImageModel extends BaseModel {
 
     /**
      * 名称

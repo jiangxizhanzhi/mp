@@ -1,7 +1,5 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
-import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
-import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.InstallerConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InstallerConvertModel;
@@ -11,6 +9,8 @@ import cn.cyberpeace.mp.devops.cluster.request.InstallerPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerRequest;
 import cn.cyberpeace.mp.devops.cluster.response.InstallerByIdResponse;
 import cn.cyberpeace.mp.devops.cluster.response.InstallerPageResponse;
+import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
+import cn.cyberpeace.mp.devops.cluster.response.base.Result;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -46,10 +46,10 @@ public class InstallerController {
      */
     @ApiOperation("分页查询")
     @GetMapping("/page")
-    public ListObjServiceResult<InstallerPageResponse> page(InstallerPageRequest request){
+    public PageResult<InstallerPageResponse> page(InstallerPageRequest request){
         InstallerConvertPageModel model = installerConverter.page(request);
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getModelList())){
-            return new ListObjServiceResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
+            return new PageResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
         }
 
         List<InstallerPageResponse> list = model.getModelList().stream().map(installer ->
@@ -58,12 +58,12 @@ public class InstallerController {
                         .build()
         ).collect(Collectors.toList());
 
-        return new ListObjServiceResult<>(list,model.getTotal());
+        return new PageResult<>(list,model.getTotal());
     }
 
     @ApiOperation("根据ID查询")
     @GetMapping("/{id}")
-    public ServiceResult<InstallerByIdResponse> getById(@PathVariable String id){
+    public Result<InstallerByIdResponse> getById(@PathVariable String id){
         InstallerConvertModel model = installerConverter.findById(id);
         InstallerByIdResponse response = InstallerByIdResponse.builder().uuid(model.getUuid())
                 .name(model.getName()).description(model.getDescription()).logo(model.getLogo())
@@ -71,7 +71,7 @@ public class InstallerController {
                 .deployType(model.getDeployType()).extDocker(model.getExtDocker())
                 .resourceList(model.getResourceList()).startUpParameterList(model.getStartUpParameterList())
                 .extNormal(model.getExtNormal()).build();
-        return new ServiceResult(response);
+        return new Result<>(response);
     }
 
     /**
@@ -79,9 +79,9 @@ public class InstallerController {
      */
     @ApiOperation("新增")
     @PostMapping("/add")
-    public ServiceResult<Boolean> add(@RequestBody InstallerRequest request){
+    public Result<Boolean> add(@RequestBody InstallerRequest request){
         InstallerConvertModel model = installerConverter.add(request);
-        return new ServiceResult<>(model.isSuccess());
+        return new Result<>(model.isSuccess());
     }
 
     /**
@@ -89,9 +89,9 @@ public class InstallerController {
      */
     @ApiOperation("更新")
     @PutMapping("/update")
-    public ServiceResult<Boolean> update(@RequestBody InstallerRequest request){
+    public Result<Boolean> update(@RequestBody InstallerRequest request){
         InstallerConvertModel model = installerConverter.update(request);
-        return new ServiceResult<>(model.isSuccess());
+        return new Result<>(model.isSuccess());
     }
 
     /**
@@ -99,8 +99,8 @@ public class InstallerController {
      */
     @ApiOperation("删除")
     @DeleteMapping("/delete")
-    public ServiceResult<Boolean> delete(@RequestBody InstallerDeleteRequest request){
+    public Result<Boolean> delete(@RequestBody InstallerDeleteRequest request){
         Boolean result = installerConverter.delete(request);
-        return new ServiceResult<>(result);
+        return new Result<>(result);
     }
 }

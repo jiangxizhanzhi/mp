@@ -44,17 +44,18 @@ public class ImageRequest extends BaseRequest {
     @ApiModelProperty(value = "角色：网络/网关/终端")
     private Integer role;
 
-    /**
-     * 主分类
-     */
-    @ApiModelProperty(value = "主分类")
-    private Integer mainCategory;
 
     /**
-     * 子分类
+     * 分类
      */
-    @ApiModelProperty(value = "子分类")
-    private Integer subCategory;
+    @ApiModelProperty(value = "分类")
+    private Integer category;
+
+    /**
+     * 第二个分类
+     */
+    @ApiModelProperty(value = "第二个分类")
+    private Integer secondCategory;
 
     /**
      * 虚拟类型

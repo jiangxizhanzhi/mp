@@ -1,7 +1,5 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
-import cn.cyberpeace.mp.base.service.result.ListObjResult;
-import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.*;
@@ -11,6 +9,8 @@ import cn.cyberpeace.mp.devops.cluster.response.HypervisorPageResponse;
 import cn.cyberpeace.mp.devops.cluster.response.HypervisorServiceStateResponse;
 import cn.cyberpeace.mp.devops.cluster.response.HypervisorStatisticsResponse;
 import cn.cyberpeace.mp.devops.cluster.response.VirtualRealSwitchStatusResponse;
+import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
+import cn.cyberpeace.mp.devops.cluster.response.base.Result;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -70,7 +70,7 @@ public class CloudPlatformMonitorController {
      */
     @ApiOperation("资源统计")
     @GetMapping("/resources/statistics")
-    public ServiceResult<HypervisorStatisticsResponse> statistics(){
+    public Result<HypervisorStatisticsResponse> statistics(){
 
         //虚拟机个数
         CompletableFuture<Integer> totalInstances = CompletableFuture.supplyAsync(() ->{
@@ -170,7 +170,7 @@ public class CloudPlatformMonitorController {
                     .totalNpc(totalNPCs.get()).totalInstances(totalInstances.get())
                     .totalContainers(totalContainers.get()).totalRealEquipments(totalRealEquipments.get()).totalRouters(totalRouters.get()).build();
             if(Objects.isNull(model) || Objects.isNull(model.get()) || Objects.isNull(model.get())){
-                return new ServiceResult<>(response);
+                return new Result<>(response);
             }
 
             HypervisorStatisticsConvertModel hypervisorStatistics = model.get();
@@ -181,7 +181,7 @@ public class CloudPlatformMonitorController {
         } catch (InterruptedException | ExecutionException e) {
             log.error("资源统计多线程异步合并请求异常信息:{}",e.getMessage());
         }
-        return new ServiceResult<>(response);
+        return new Result<>(response);
     }
 
     /**
@@ -190,10 +190,10 @@ public class CloudPlatformMonitorController {
      */
     @ApiOperation("节点管理")
     @GetMapping("/hypervisor/page")
-    public ListObjServiceResult<HypervisorPageResponse> page(HypervisorPageRequest request){
+    public PageResult<HypervisorPageResponse> page(HypervisorPageRequest request){
         HypervisorPageConvertModel model = hypervisorConverter.page(request);
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getModelList())){
-            return new ListObjServiceResult<>(new ListObjResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO));
+            return new PageResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
         }
         List<HypervisorPageResponse> hypervisorPageResponses =  model.getModelList().stream().map(hypervisor ->
                 HypervisorPageResponse.builder().name(hypervisor.getName())
@@ -216,7 +216,7 @@ public class CloudPlatformMonitorController {
             }
         });
 
-        return new ListObjServiceResult<>(new ListObjResult<>(hypervisorPageResponses, model.getTotal()));
+        return new PageResult<>(hypervisorPageResponses, model.getTotal());
     }
 
     /**
@@ -239,12 +239,12 @@ public class CloudPlatformMonitorController {
      */
     @ApiOperation("服务状态监控")
     @GetMapping("/service-state")
-    public ServiceResult<List<HypervisorServiceStateResponse>> serviceState(){
+    public Result<List<HypervisorServiceStateResponse>> serviceState(){
         List<HypervisorServiceStateConvertModel> modelList = hypervisorConverter.serviceState();
         List<HypervisorServiceStateResponse> result = modelList.stream().map(m ->
             HypervisorServiceStateResponse.builder().name(m.getName()).state(m.getState()).alive(m.getAlive()).build()
         ).collect(Collectors.toList());
-        return new ServiceResult<>(result);
+        return new Result<>(result);
     }
 
     /**
@@ -253,16 +253,16 @@ public class CloudPlatformMonitorController {
      */
     @ApiOperation("虚实结合交换机状态")
     @GetMapping("/virtual-real-switch-state")
-    public ServiceResult<List<VirtualRealSwitchStatusResponse>> virtualRealSwitchStatus(){
+    public Result<List<VirtualRealSwitchStatusResponse>> virtualRealSwitchStatus(){
         VirtualRealSwitchConvertModel model = hypervisorConverter.listVirtualRealSwitch();
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getModelList())){
-            return new ServiceResult<>();
+            return new Result<>();
         }
         List<VirtualRealSwitchStatusResponse> list = model.getModelList().stream().map(v ->
                 VirtualRealSwitchStatusResponse.builder().name(v.getName()).managementIp(v.getManagementIp()).state(v.getState())
                         .usedPorts(v.getUsedPorts()).ports(v.getPorts()).build()
         ).collect(Collectors.toList());
-        return new ServiceResult<>(list);
+        return new Result<>(list);
     }
 
 
