@@ -51,7 +51,6 @@ CREATE TABLE mp_scene_scene_config_element (
     `system_architecture` varchar(16) NOT NULL COMMENT '系统架构',
     `system_language` varchar(8) NOT NULL COMMENT '系统语言',
     `flavor` varchar(32) NOT NULL COMMENT '硬件规格',
-    `access_modes` varchar(1024) NOT NULL COMMENT '接入信息列表',
     `init_commands` varchar(2048) NOT NULL COMMENT '初始化命令',
     `create_time` datetime(6) NOT NULL COMMENT '创建时间',
     `update_time` datetime(6) NOT NULL COMMENT '更新时间',
@@ -79,6 +78,7 @@ CREATE TABLE mp_scene_scene_config_element_port (
     `ingress` int(11) NOT NULL COMMENT '下行带宽',
     `delay` int(10) NOT NULL COMMENT '延迟',
     `loss` int(10) NOT NULL COMMENT '丢包',
+    `access_modes` varchar(1024) NOT NULL COMMENT '接入信息列表',
     `create_time` datetime(6) NOT NULL COMMENT '创建时间',
     `update_time` datetime(6) NOT NULL COMMENT '更新时间',
     PRIMARY KEY (`pk`),
@@ -90,8 +90,11 @@ CREATE TABLE mp_scene_scene_config_element_port_connection (
     `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
     `id` varchar(64)  NOT NULL COMMENT 'id',
     `scene` varchar(64) NOT NULL COMMENT '场景模板id',
+    `source_element` varchar(64) NOT NULL COMMENT '源端口所属网元id',
+    `target_element` varchar(64) NOT NULL COMMENT '目标端口所属网元id',
     `source_port` varchar(64) NOT NULL COMMENT '源端口id',
     `target_port` varchar(64) NOT NULL COMMENT '目标端口id',
+    `connection_id` varchar(64) NOT NULL COMMENT '连接id',
     `source_port_id` varchar(64) NOT NULL COMMENT '源端口id(port_id)',
     `target_port_id` varchar(64) NOT NULL COMMENT '目标端口id(port_id)',
     `name` varchar(64) NOT NULL COMMENT '名称',
@@ -175,7 +178,6 @@ CREATE TABLE mp_scene_scene_element (
     `system_architecture` varchar(16) NOT NULL COMMENT '系统架构',
     `system_language` varchar(8) NOT NULL COMMENT '系统语言',
     `flavor` varchar(32) NOT NULL COMMENT '硬件规格',
-    `access_modes` varchar(1024) NOT NULL COMMENT '接入信息列表',
     `init_commands` varchar(2048) NOT NULL COMMENT '初始化命令',
     `event` int(10) NOT NULL COMMENT '当前事件',
     `event_status` int(10) NOT NULL COMMENT '当前事件状态',
@@ -188,7 +190,6 @@ CREATE TABLE mp_scene_scene_element (
     UNIQUE (`id`),
     UNIQUE (`scene`, `node_id`)
 );
-
 
 CREATE TABLE mp_scene_scene_element_port (
     `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
@@ -208,6 +209,7 @@ CREATE TABLE mp_scene_scene_element_port (
     `ingress` int(11) NOT NULL COMMENT '下行带宽',
     `delay` int(10) NOT NULL COMMENT '延迟',
     `loss` int(10) NOT NULL COMMENT '丢包',
+    `access_modes` varchar(1024) NOT NULL COMMENT '接入信息列表',
     `create_time` datetime(6) NOT NULL COMMENT '创建时间',
     `update_time` datetime(6) NOT NULL COMMENT '更新时间',
     PRIMARY KEY (`pk`),
@@ -219,8 +221,11 @@ CREATE TABLE mp_scene_scene_element_port_connection (
     `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
     `id` varchar(64)  NOT NULL COMMENT 'id',
     `scene` varchar(64) NOT NULL COMMENT '场景实例id',
+    `source_element` varchar(64) NOT NULL COMMENT '源端口所属网元id',
+    `target_element` varchar(64) NOT NULL COMMENT '目标端口所属网元id',
     `source_port` varchar(64) NOT NULL COMMENT '源端口id',
     `target_port` varchar(64) NOT NULL COMMENT '目标端口id',
+    `connection_id` varchar(64) NOT NULL COMMENT '连接id',
     `source_port_id` varchar(64) NOT NULL COMMENT '源端口id(port_id)',
     `target_port_id` varchar(64) NOT NULL COMMENT '目标端口id(port_id)',
     `name` varchar(64) NOT NULL COMMENT '名称',

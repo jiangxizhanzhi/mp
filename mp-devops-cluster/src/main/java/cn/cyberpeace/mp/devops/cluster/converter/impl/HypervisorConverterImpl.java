@@ -31,12 +31,12 @@ public class HypervisorConverterImpl implements HypervisorConverter {
 
     @Override
     public String[] getDefaultPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldName(HypervisorPageRequest::getPage,HypervisorPageRequest::getPerPage);
+        return BeanUtils.getBeanGetterFieldNames(HypervisorPageRequest::getPage,HypervisorPageRequest::getPerPage);
     }
 
     @Override
     public String[] getTotalPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldName(HypervisorPageRequest::getLimit,HypervisorPageRequest::getOffset,
+        return BeanUtils.getBeanGetterFieldNames(HypervisorPageRequest::getLimit,HypervisorPageRequest::getOffset,
                 HypervisorPageRequest::getPage,HypervisorPageRequest::getPerPage);
     }
 

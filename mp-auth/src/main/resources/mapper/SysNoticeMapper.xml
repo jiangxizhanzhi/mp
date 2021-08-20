@@ -7,6 +7,7 @@
             left join mp_sys_notice_org no on n.id = no.notice_id
             left join mp_sys_notice_role nr on n.id = nr.notice_id
         <where>
+            1=1
             <if test="ids != null and ids.size() > 0">
                 AND n.id in
                 <foreach item="id" index="index" collection="ids" open="(" separator="," close=")">
@@ -52,6 +53,7 @@
             <if test="title != null and title != ''">
                 AND n.title like concat('%', #{title}, '%')
             </if>
+            OR n.is_public = 1
         </where>
         ORDER BY n.pk desc
     </select>

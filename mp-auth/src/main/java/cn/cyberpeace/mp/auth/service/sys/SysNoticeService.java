@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.service.sys;
 
+import cn.cyberpeace.mp.auth.dto.notice.SysNoticeDto;
 import cn.cyberpeace.mp.auth.dto.notice.SysNoticePageRequest;
 import cn.cyberpeace.mp.auth.dto.notice.SysNoticeRequest;
 import cn.cyberpeace.mp.auth.model.SysNoticeModel;
@@ -27,4 +28,6 @@ public interface SysNoticeService extends BaseModelService<SysNoticeModel, Query
      * @return
      */
     PageInfo currentUserPage(SysNoticePageRequest pageRequest);
+
+    SysNoticeDto noticeModel2NoticeDto(SysNoticeModel noticeModel);
 }

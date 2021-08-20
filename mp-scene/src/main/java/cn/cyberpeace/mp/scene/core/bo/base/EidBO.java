@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.scene.core.bo.base;
 
+import cn.cyberpeace.mp.base.bo.ModelBO;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import lombok.Data;
 

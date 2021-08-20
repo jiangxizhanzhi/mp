@@ -4,7 +4,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.datasandtable.constant.DataSandtableConstant;
 import cn.cyberpeace.mp.datasandtable.dao.WazuhDao;
 import cn.cyberpeace.mp.datasandtable.model.GroupModel;
-import cn.cyberpeace.mp.datasandtable.service.GroupService;
+import cn.cyberpeace.mp.datasandtable.service.NetworkTrafficGroupService;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import java.io.IOException;
@@ -25,7 +25,7 @@ public class DataSandtableInitListener implements ApplicationListener<Applicatio
 
 
     @Autowired
-    private GroupService service;
+    private NetworkTrafficGroupService service;
 
     @Autowired
     private WazuhDao wazuhDao;

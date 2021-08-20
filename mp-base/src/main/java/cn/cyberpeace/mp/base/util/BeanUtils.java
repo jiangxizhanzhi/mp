@@ -40,10 +40,6 @@ public class BeanUtils implements ApplicationContextAware {
         return context.getBeansOfType(clazz);
     }
 
-    public static <T> String[] getBeanGetterFieldName(SerializableFunction<T>... fieldGetters){
-       return Arrays.stream(fieldGetters).map(BeanUtils::getBeanGetterFieldName).toArray(String[]::new);
-    }
-
     public static <T> String getBeanGetterFieldName(SerializableFunction<T> func) {
         String funcName = ClassUtils.getFuncName(func);
         if (funcName == null) {
@@ -51,6 +47,10 @@ public class BeanUtils implements ApplicationContextAware {
         }
 
         return funcName.substring(3, 4).toLowerCase() + funcName.substring(4);
+    }
+
+    public static <T> String[] getBeanGetterFieldNames(SerializableFunction<T>... fieldGetters){
+        return Arrays.stream(fieldGetters).map(BeanUtils::getBeanGetterFieldName).toArray(String[]::new);
     }
 
     public static String[] getNullPropertyNames(Object obj) {

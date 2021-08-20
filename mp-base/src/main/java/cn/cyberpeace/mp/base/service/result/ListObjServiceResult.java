@@ -1,21 +1,10 @@
 package cn.cyberpeace.mp.base.service.result;
 
-import cn.cyberpeace.mp.base.repository.fields.DynamicFields;
 import cn.cyberpeace.mp.base.service.code.ServiceCode;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @NoArgsConstructor
 public class ListObjServiceResult<T> extends ServiceResult<ListObjResult<T>> {
-
-    public ListObjServiceResult(List<T> list,int total){
-        super(new ListObjResult<>(list,total));
-    }
-
-    public ListObjServiceResult(List<T> list, int total, DynamicFields fields){
-        super(new ListObjResult<>(list,total,fields));
-    }
 
     public ListObjServiceResult(ListObjResult<T> source) {
         super(source);

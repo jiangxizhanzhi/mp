@@ -289,6 +289,7 @@ CREATE TABLE mp_sys_notice (
        `content` text NULL COMMENT '公告内容',
        `title` varchar(200) NOT NULL COMMENT '标题',
        `publisher` varchar(64) NOT NULL COMMENT '发布人',
+       `is_public` int NOT NULL default 0 COMMENT '是否公开，对所有人可见  0:否 1:是 默认是0',
        `type` int NOT NULL default 1 COMMENT '公告类型 1:系统、2:课程、3:练习、4:考试',
        `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
        `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
@@ -329,21 +330,23 @@ CREATE TABLE mp_sys_notice_role (
 ) COMMENT '系统公告-角色表';
 
 
-# 系统公告已读统计表
+# 系统公告消息(已读/删除)统计表
 CREATE TABLE mp_sys_notice_read (
-     `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
-     `id` varchar(64)  NOT NULL COMMENT 'id',
-     `tenant` varchar(64) NOT NULL COMMENT '租户',
-     `notice_id` varchar(64) NOT NULL COMMENT '公告ID',
-     `reader` varchar(64) NULL COMMENT '读者',
-     `read_count` int NOT NULL DEFAULT 0 COMMENT '阅读次数',
-     `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-     `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `id` varchar(64)  NOT NULL COMMENT 'id',
+    `tenant` varchar(64) NOT NULL COMMENT '租户',
+    `notice_id` varchar(64) NOT NULL COMMENT '公告ID',
+    `user` varchar(64) NULL COMMENT '读者',
+    `is_readed` int NOT NULL DEFAULT 1 COMMENT '是否已读 1:已读 0:未读  首次创建一条数据即为已读',
+    `is_deleted` int NOT NULL DEFAULT 0 COMMENT '是否删除推送消息 1:删除，不再推送； 0:未删除，继续推送',
+    `read_count` int NOT NULL DEFAULT 1 COMMENT '已读次数 首次创建一条数据即为已读次数为1',
+    `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
      PRIMARY KEY (`pk`),
      UNIQUE (`id`),
      KEY (`notice_id`),
-     KEY (`reader`, `notice_id`)
-) COMMENT '系统公告已读统计表';
+     KEY (`user`, `notice_id`)
+) COMMENT '系统公告消息(已读/删除)统计表';
 
 
 

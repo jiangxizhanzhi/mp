@@ -6,16 +6,18 @@ import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 公告-群组表
+ * 系统公告消息(已读/删除)统计表
  */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table("mp_sys_notice_group")
+@Builder
+@Table("mp_sys_notice_read")
 public class SysNoticeReadModel extends BaseModel {
 
     @ApiModelProperty(value = "租户")
@@ -27,7 +29,13 @@ public class SysNoticeReadModel extends BaseModel {
 
     // 读者
     @ApiModelProperty(value = "读者")
-    private String reader;
+    private String user;
+
+    @ApiModelProperty(value = "是否已读 1:已读 0:未读 默认为1  首次创建一条数据即为已读")
+    private Integer isReaded;
+
+    @ApiModelProperty(value = "是否删除推送消息 1:删除，不再推送； 0:未删除，继续推送  默认为0")
+    private Integer isDeleted;
 
     // 阅读次数
     @ApiModelProperty(value = "阅读次数")
