@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.datasandtable.repository.ProbeParamModelMapper;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,6 +77,9 @@ public class ProbeService {
     public ProbeResult queryProbeDetail(String probeId) {
         var probeResult = new ProbeResult();
         var probeModel = probeModelMapper.queryByProbeId(probeId);
+        if (Objects.isNull(probeModel)) {
+            return null;
+        }
         BeanUtils.copyProperties(probeModel, probeResult);
         List<ProbeParamsResult> probeParamsResults = probeParamModelMapper.queryProbeParamList(probeId).stream()
             .map(paramModel->{
