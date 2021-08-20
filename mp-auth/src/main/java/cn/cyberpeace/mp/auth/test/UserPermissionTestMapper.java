@@ -12,6 +12,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 @PermissionModelClass(permissionClass = UserPermissionModel.class, targetClass = TargetModel.class)
 @ModelClass(TargetModel.class)
-public interface UserPermissionTestMapper extends BasePermissionMapper<UserPermissionModel, TargetModel> {
+public interface UserPermissionTestMapper extends BasePermissionMapper {
 
 }

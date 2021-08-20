@@ -136,13 +136,14 @@ public class AuthTestController {
     @GetMapping("/testpermlist")
     public List<TargetModel> testPermList() {
         String userId = "3fsss655d87112f4ae094bbaf7083";
+        // todo 取消getCondition方法，在listTargetsByOwner内部做merge操作
         HumanCondition condition = userPermissionTestMapper.getCondition(userId);
 
         // 自定义条件
         condition.filterContains("name", "题");
         condition.filterEqual("parent", "item-bank-folder");
         condition.pagination(1, 10);
-        // 自定义返回field
+//         自定义返回field
         condition.select(TargetModel::getName, TargetModel::getPath, TargetModel::getIdentifier);
 
         List<TargetModel> list = userPermissionTestMapper.listTargetsByOwner(condition);

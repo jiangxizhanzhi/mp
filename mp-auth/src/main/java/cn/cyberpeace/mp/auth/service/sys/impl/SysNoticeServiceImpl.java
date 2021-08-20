@@ -11,10 +11,12 @@ import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.SysNoticeOrgModel;
 import cn.cyberpeace.mp.auth.model.SysNoticeModel;
+import cn.cyberpeace.mp.auth.model.SysNoticeReadModel;
 import cn.cyberpeace.mp.auth.model.SysNoticeRoleModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.repository.SysNoticeOrgMapper;
 import cn.cyberpeace.mp.auth.repository.SysNoticeMapper;
+import cn.cyberpeace.mp.auth.repository.SysNoticeReadMapper;
 import cn.cyberpeace.mp.auth.repository.SysNoticeRoleMapper;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
@@ -60,6 +62,9 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
     private SysNoticeRoleMapper noticeRoleMapper;
 
     @Autowired
+    private SysNoticeReadMapper noticeReadMapper;
+
+    @Autowired
     private OrgUserService orgUserService;
 
     @Autowired
@@ -75,6 +80,32 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
     public SysNoticeServiceImpl(SysNoticeMapper modelMapper, SysNoticeFields modelFields) {
         setModelMapper(modelMapper);
         setModelFields(modelFields);
+    }
+
+    public void unpush(String noticeId) {
+
+    }
+
+    public void read(String noticeId) {
+        UserModel userModel = UserUtils.getLoginUser();
+        Assert.notNull(userModel, "未获取到当前登录用户信息");
+
+        SysNoticeModel noticeModel = getModelMapper().get(noticeId);
+        Assert.notNull(noticeModel, "公告不存在！ID:{}", noticeId);
+
+        SysNoticeReadModel noticeReadModel = noticeReadMapper.selectByUserIdAndNoticeId(userModel.getId(), noticeId);
+
+        if (Objects.isNull(noticeReadModel)) {
+            // 创建一个
+            SysNoticeReadModel noticeReadModelNew = SysNoticeReadModel.builder().noticeId(noticeId).user(userModel.getId()).build();
+            noticeReadMapper.create(noticeReadModelNew);
+        } else {
+            // add read cound
+            SysNoticeReadModel noticeReadModelUpdate = new SysNoticeReadModel();
+            noticeReadModelUpdate.setNoticeId(noticeReadModel.getNoticeId());
+            noticeReadModelUpdate.setReadCount(noticeReadModel.getReadCount() + 1);
+            noticeReadMapper.update(noticeReadModelUpdate);
+        }
     }
 
     @Override

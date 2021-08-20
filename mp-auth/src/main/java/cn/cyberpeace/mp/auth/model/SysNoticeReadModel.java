@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -15,6 +16,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Table("mp_sys_notice_read")
 public class SysNoticeReadModel extends BaseModel {
 
