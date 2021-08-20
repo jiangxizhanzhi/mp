@@ -82,6 +82,12 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         setModelFields(modelFields);
     }
 
+
+    public int unreadCount() {
+        // todo
+        return 0;
+    }
+
     public void noNeedPush(String noticeId) {
         UserModel userModel = UserUtils.getLoginUser();
         Assert.notNull(userModel, "未获取到当前登录用户信息");
@@ -247,7 +253,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
         if (isAdmin) {
             PageHelper.startPage(req.getPage(), req.getPageSize());
-            List<SysNoticeModel> notices = getModelMapper().listNotices(null, null, null, null,null, null);
+            List<SysNoticeModel> notices = getModelMapper().listCurrentUserNotices(null, null, null, null,null, null, userModel.getId());
             PageInfo pageInfo = new PageInfo(notices);
             convertPageInfo(pageInfo);
             return pageInfo;
@@ -268,7 +274,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         });
 
         PageHelper.startPage(req.getPage(), req.getPageSize());
-        List<SysNoticeModel> notices = getModelMapper().listNotices(null, null, allOrgIds, allRoleIds,null, null);
+        List<SysNoticeModel> notices = getModelMapper().listCurrentUserNotices(null, null, allOrgIds, allRoleIds,null, null, userModel.getId());
         PageInfo pageInfo = new PageInfo(notices);
 
         convertPageInfo(pageInfo);
