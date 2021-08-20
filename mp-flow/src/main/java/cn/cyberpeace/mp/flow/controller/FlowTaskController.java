@@ -52,6 +52,7 @@ public class FlowTaskController extends BaseModelController<FlowTaskModel, Query
     @ApiOperation("分页查询任务")
     @GetMapping("/page")
     public ListObjResult<FlowTaskModel> pageFlowTask(@Validated QueryParams queryParams) {
+        handleQueryParams("list", queryParams);
         return flowTaskService.pageFlowTask(queryParams);
     }
 
