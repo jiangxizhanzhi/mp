@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.datasandtable.listener;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.datasandtable.constant.DataSandtableConstant;
-import cn.cyberpeace.mp.datasandtable.repository.WazuhDao;
+import cn.cyberpeace.mp.datasandtable.repository.WazuhRepository;
 import cn.cyberpeace.mp.datasandtable.model.GroupModel;
 import cn.cyberpeace.mp.datasandtable.service.NetworkTrafficGroupService;
 import com.google.common.cache.CacheBuilder;
@@ -28,7 +28,7 @@ public class DataSandtableInitListener implements ApplicationListener<Applicatio
     private NetworkTrafficGroupService service;
 
     @Autowired
-    private WazuhDao wazuhDao;
+    private WazuhRepository wazuhRepository;
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
@@ -53,7 +53,7 @@ public class DataSandtableInitListener implements ApplicationListener<Applicatio
                 @Override public String load(String key)  {
                     String token;
                     try {
-                        token = wazuhDao.queryWazuhToken();
+                        token = wazuhRepository.queryWazuhToken();
                     } catch (IOException e) {
                         log.error("查询wazuhToken失败 : " + e);
                         throw new MpRuntimeException("查询wazuhToken失败");

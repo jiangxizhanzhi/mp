@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @Data
-public class SandTableConfig {
+public class SituationAwareConfig {
 
     @Value("${mp.datasandtable.group-url}")
     private String groupUrl;
@@ -16,4 +16,7 @@ public class SandTableConfig {
 
     @Value("${mp.datasandtable.moloch.password}")
     private String password;
+
+    @Value("${mp.datasandtable.wazuh-probe-manager.url}")
+    private String wazuhManagerUrl;
 }

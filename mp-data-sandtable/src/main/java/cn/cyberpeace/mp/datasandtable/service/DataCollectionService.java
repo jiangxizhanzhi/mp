@@ -4,7 +4,7 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.util.LocalDateTimeUtils;
-import cn.cyberpeace.mp.datasandtable.repository.WazuhDao;
+import cn.cyberpeace.mp.datasandtable.repository.WazuhRepository;
 import cn.cyberpeace.mp.datasandtable.model.*;
 import cn.cyberpeace.mp.datasandtable.model.emum.FileEventType;
 import cn.hutool.core.util.NumberUtil;
@@ -51,7 +51,7 @@ public class DataCollectionService {
     private RestHighLevelClient restHighLevelClient;
 
     @Autowired
-    private WazuhDao wazuhDao;
+    private WazuhRepository wazuhRepository;
 
     private static final String wazuhAlertIndexPrefix = "wazuh-alerts-4.x-";
 
@@ -206,7 +206,7 @@ public class DataCollectionService {
      */
     public MultiValueMap<String, String> queryAllAgentMacAddr() {
         MultiValueMap<String, String> responseMultiMap = new LinkedMultiValueMap<>();
-        var wazuhNetifaceRoot = wazuhDao.queryAllAgentMac();
+        var wazuhNetifaceRoot = wazuhRepository.queryAllAgentMac();
         if (Objects.isNull(wazuhNetifaceRoot.getData())) {
             return responseMultiMap;
         }

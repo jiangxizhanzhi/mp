@@ -17,7 +17,7 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 @Slf4j
-public class WazuhDao {
+public class WazuhRepository {
 
     @Value("${mp.datasandtable.wazuh.base-url}")
     private String wazuhUrl;

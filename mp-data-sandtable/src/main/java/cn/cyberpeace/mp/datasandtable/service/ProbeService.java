@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.datasandtable.service;
 
-import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.util.TextUtils;
 import cn.cyberpeace.mp.datasandtable.model.ProbeModel;
@@ -20,7 +19,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 @Service
 public class ProbeService {
@@ -32,12 +30,12 @@ public class ProbeService {
     private ProbeParamModelMapper probeParamModelMapper;
 
     /**
-     * 新增
+     * 新增探针
      * @param probeRequest
      */
     @Transactional(rollbackFor = Exception.class)
     public void addProbe(ProbeRequest probeRequest) {
-        ProbeModel probeModel = new ProbeModel();
+        var probeModel = new ProbeModel();
         BeanUtils.copyProperties(probeRequest, probeModel);
         probeModel.setCreateTime(new Date());
         probeModel.setUpdateTime(new Date());

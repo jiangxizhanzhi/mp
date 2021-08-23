@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.datasandtable.service;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.HttpUtils;
-import cn.cyberpeace.mp.datasandtable.config.SandTableConfig;
+import cn.cyberpeace.mp.datasandtable.config.SituationAwareConfig;
 import cn.cyberpeace.mp.datasandtable.model.GroupModel;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -25,19 +25,19 @@ import org.springframework.util.ObjectUtils;
 public class NetworkTrafficGroupService {
 
     @Autowired
-    private SandTableConfig sandTableConfig;
+    private SituationAwareConfig situationAwareConfig;
 
     /**
      * 查询底层所有分组数据
      * @return List<GroupModel>
      */
     public List<GroupModel> queryAllGroups(){
-        if (ObjectUtils.isEmpty(sandTableConfig.getGroupUrl())) {
+        if (ObjectUtils.isEmpty(situationAwareConfig.getGroupUrl())) {
             throw new MpRuntimeException("底层分组服务url不存在，请配置");
         }
         String sceneListString;
         try {
-            sceneListString = HttpUtils.sendGet(sandTableConfig.getGroupUrl());
+            sceneListString = HttpUtils.sendGet(situationAwareConfig.getGroupUrl());
         } catch (IOException e) {
             log.error("查询所有分组错误:"+ e);
             throw new MpRuntimeException("查询分组错误:"+ e);
@@ -61,7 +61,7 @@ public class NetworkTrafficGroupService {
             throw new MpRuntimeException("groupId 不为空");
         }
 
-        String requestUri = sandTableConfig.getGroupUrl() + "/" + groupId;
+        String requestUri = situationAwareConfig.getGroupUrl() + "/" + groupId;
 
         String res;
         try {
@@ -85,7 +85,7 @@ public class NetworkTrafficGroupService {
      */
     public void deleteByGroupId(String groupId) {
         try {
-            String requestUri = sandTableConfig.getGroupUrl() + "/" + groupId;
+            String requestUri = situationAwareConfig.getGroupUrl() + "/" + groupId;
             HttpUtils.sendDelete(requestUri);
         } catch (IOException e) {
             log.error("删除分组失败:"+ e);
@@ -107,7 +107,7 @@ public class NetworkTrafficGroupService {
         jsonObject.put("scene_id", groupModel.getGroupId());
         jsonObject.put("macs", groupModel.getMacIds());
         try {
-            String res = HttpUtils.sendPost(sandTableConfig.getGroupUrl(), jsonObject.toJSONString());
+            String res = HttpUtils.sendPost(situationAwareConfig.getGroupUrl(), jsonObject.toJSONString());
             log.info("add group res: {}", res);
             return res;
         } catch (IOException e) {

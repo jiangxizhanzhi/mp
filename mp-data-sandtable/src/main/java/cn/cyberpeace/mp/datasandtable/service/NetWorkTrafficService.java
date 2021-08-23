@@ -5,7 +5,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.LocalDateTimeUtils;
-import cn.cyberpeace.mp.datasandtable.config.SandTableConfig;
+import cn.cyberpeace.mp.datasandtable.config.SituationAwareConfig;
 import cn.cyberpeace.mp.datasandtable.constant.DataSandtableConstant;
 import cn.cyberpeace.mp.datasandtable.model.SPIViewRequest;
 import cn.cyberpeace.mp.datasandtable.model.SessionModel;
@@ -54,7 +54,7 @@ public class NetWorkTrafficService {
     private RestHighLevelClient restHighLevelClient;
 
     @Autowired
-    private SandTableConfig sandTableConfig;
+    private SituationAwareConfig situationAwareConfig;
 
 
     /**
@@ -183,7 +183,7 @@ public class NetWorkTrafficService {
 
         try {
             httpResponse =  HttpUtils.sendGetDownLoadWithDigestAuth(molochUrl,
-                sandTableConfig.getUserName(), sandTableConfig.getPassword());
+                situationAwareConfig.getUserName(), situationAwareConfig.getPassword());
         } catch (IOException e) {
             log.error("查询缓存异常 groupId {}" + e, groupId);
             throw new MpRuntimeException("查询缓存异常 groupId: "+ groupId);
@@ -215,7 +215,7 @@ public class NetWorkTrafficService {
             .append("&interval").append("auto")
         ;
         try {
-           return HttpUtils.sendGet(spiMolochUrlBuilder.toString(), sandTableConfig.getUserName(), sandTableConfig.getPassword());
+           return HttpUtils.sendGet(spiMolochUrlBuilder.toString(), situationAwareConfig.getUserName(), situationAwareConfig.getPassword());
         } catch (Exception e) {
             log.error("查询spi视图异常 groupId {}" + e, spiViewRequest.getGroupId());
             throw new MpRuntimeException("查询spi视图异常 groupId: " + spiViewRequest.getGroupId());

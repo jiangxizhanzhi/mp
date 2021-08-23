@@ -70,6 +70,8 @@ mp:
       es-port: 9200
       es-username: admin
       es-password: SecretPassword
+    wazuh-probe-manager:
+      url: http://localhost:8002
   log:
     exclude-uri: /login
     exclude-method: OPTIONS

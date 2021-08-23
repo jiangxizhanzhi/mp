@@ -16,11 +16,11 @@ import org.springframework.util.Assert;
 
 @SpringBootTest(classes = TestDatasandtableApplciation.class)
 @RunWith(SpringRunner.class)
-public class WazuhDaoTest {
+public class WazuhRepositoryTest {
 
 
     @Autowired
-    private WazuhDao wazuhDao;
+    private WazuhRepository wazuhRepository;
 
     @Test
     public void testWazuhToken() throws IOException, ExecutionException {
@@ -30,12 +30,12 @@ public class WazuhDaoTest {
         System.out.println(DataSandtableConstant.wazuhToken.get("wazuhToken"));
         DataSandtableConstant.wazuhToken.invalidate("wazuhToken");
         System.out.println(DataSandtableConstant.wazuhToken.get("wazuhToken"));
-                var token = wazuhDao.queryWazuhToken();
+                var token = wazuhRepository.queryWazuhToken();
     }
 
     @Test
     public void testWazuhRamRoot() throws IOException{
-        WazuhRamRoot wazuhRamRoot = wazuhDao.queryRamByAgentId("006");
+        WazuhRamRoot wazuhRamRoot = wazuhRepository.queryRamByAgentId("006");
         Assert.isTrue(Objects.nonNull(wazuhRamRoot.getData()), "error");
     }
 
@@ -47,7 +47,7 @@ public class WazuhDaoTest {
 
     @Test
     public void testQueryAllAgentMac() {
-        WazuhNetifaceRoot wazuhNetifaceRoot = wazuhDao.queryAllAgentMac();
+        WazuhNetifaceRoot wazuhNetifaceRoot = wazuhRepository.queryAllAgentMac();
         Assert.isTrue(Objects.nonNull(wazuhNetifaceRoot), "查询mac地址为空");
     }
 }
