@@ -13,11 +13,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public abstract class BaseCsceneRoleBO<M extends BaseCsceneRoleModel> extends ModelBO<M> {
-    private String parent;
+public abstract class BaseCsceneRoleBO<R extends BaseCsceneRoleBO<R, M>, M extends BaseCsceneRoleModel>
+        extends ModelBO<M> {
+    private String id;
     private String name;
     private List<String> assetNodes;
     private List<String> visibleNodes;
+    private List<R> children;
 
     @Override
     public void fromModel(M obj, String... ignoreFields) {
@@ -26,6 +28,8 @@ public abstract class BaseCsceneRoleBO<M extends BaseCsceneRoleModel> extends Mo
                 BeanUtils.getBeanGetterFieldName(BaseCsceneRoleModel::getVisibleNodes)));
         assetNodes = StringUtils.isEmpty(obj.getAssetNodes()) ? new ArrayList<>()
                 : JsonUtils.parse(obj.getAssetNodes(), new TypeReference<List<String>>(){});
+        visibleNodes = StringUtils.isEmpty(obj.getVisibleNodes()) ? new ArrayList<>()
+                : JsonUtils.parse(obj.getVisibleNodes(), new TypeReference<List<String>>(){});
     }
 
     @Override

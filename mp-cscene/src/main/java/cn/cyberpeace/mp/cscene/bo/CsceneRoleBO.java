@@ -5,9 +5,7 @@ import cn.cyberpeace.mp.cscene.model.CsceneRoleModel;
 import lombok.Data;
 
 @Data
-public class CsceneRoleBO extends BaseCsceneRoleBO<CsceneRoleModel> {
-    private String cscene;
-
+public class CsceneRoleBO extends BaseCsceneRoleBO<CsceneRoleBO, CsceneRoleModel> {
     @Override
     public CsceneRoleModel createModel() {
         return new CsceneRoleModel();

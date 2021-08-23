@@ -3,11 +3,12 @@ package cn.cyberpeace.mp.cscene.repository;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import cn.cyberpeace.mp.cscene.model.CsceneRoleModel;
+import cn.cyberpeace.mp.cscene.repository.base.BaseCsceneRoleMapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
 @Mapper
 @Repository
 @ModelClass(CsceneRoleModel.class)
-public interface CsceneRoleMapper extends BaseModelMapper<CsceneRoleModel> {
+public interface CsceneRoleMapper extends BaseCsceneRoleMapper<CsceneRoleModel> {
 }

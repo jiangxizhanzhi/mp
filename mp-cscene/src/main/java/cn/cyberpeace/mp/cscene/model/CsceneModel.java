@@ -13,8 +13,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Table("mp_cscene_cscene")
 public class CsceneModel extends BaseCsceneModel {
-    @DefaultInt
+    @DefaultInt(2)
     private Integer type;
     @DefaultStr
     private String sceneConfig;
+
+    public static class Type {
+        public static final Integer TEMPLATE = 1;
+        public static final Integer INSTANCE = 2;
+
+        private Type() {}
+    }
 }

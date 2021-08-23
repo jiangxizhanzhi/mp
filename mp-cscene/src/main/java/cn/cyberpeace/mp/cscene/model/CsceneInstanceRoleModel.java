@@ -12,6 +12,4 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Table("mp_cscene_cscene_instance_role")
 public class CsceneInstanceRoleModel extends BaseCsceneRoleModel {
-    @DefaultStr
-    private String csceneInstance;
 }

@@ -40,7 +40,7 @@ CREATE TABLE mp_cscene_cscene_instance (
 CREATE TABLE mp_cscene_cscene_instance_role (
     `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
     `id` varchar(64)  NOT NULL COMMENT 'id',
-    `cscene_instance` varchar(64) NOT NULL COMMENT '综合场景实例id',
+    `cscene` varchar(64) NOT NULL COMMENT '综合场景实例id',
     `parent` varchar(64) NOT NULL COMMENT '父角色id',
     `name` varchar(64) NOT NULL COMMENT '名称',
     `asset_nodes` varchar(2048) NOT NULL COMMENT '资产节点',
