@@ -55,8 +55,8 @@
             <if test="role != null">
                 role,
             </if>
-            <if test="type != null">
-                type,
+            <if test="imageType != null">
+                image_type,
             </if>
             <if test="createTime != null">
                 create_time,
@@ -81,8 +81,8 @@
             <if test="role != null">
                 #{role},
             </if>
-            <if test="type != null">
-                #{type},
+            <if test="imageType != null">
+                #{imageType},
             </if>
             <if test="createTime != null">
                 #{createTime},
@@ -111,6 +111,9 @@
             </if>
             <if test="updateTime != null">
                 update_time = #{updateTime},
+            </if>
+            <if test="isPublic != null">
+                is_public = #{is_public}
             </if>
         </set>
         where id = #{id}

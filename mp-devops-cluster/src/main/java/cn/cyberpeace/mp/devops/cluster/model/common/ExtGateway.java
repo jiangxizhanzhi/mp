@@ -12,7 +12,7 @@ public class ExtGateway {
     /**
      * 管理口/Wan口/Lan口
      */
-    private Integer portConfigs;
+    private Integer portConfig;
 
     /**
      * 端口名称

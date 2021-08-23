@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.repository;
 
+import cn.cyberpeace.mp.base.repository.BaseModelMapper;
+import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import cn.cyberpeace.mp.devops.cluster.dto.ImageDeleteDTO;
 import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devops.cluster.model.ImageModel;
@@ -13,7 +15,8 @@ import java.util.List;
  */
 @Mapper
 @Repository
-public interface ImageMapper {
+@ModelClass(ImageModel.class)
+public interface ImageMapper extends BaseModelMapper<ImageModel> {
 
     /**
      * 分页查询

@@ -26,6 +26,14 @@ public interface DeviceService extends BaseCloudPlatformService {
     Device findById(String id);
 
     /**
+     * 根据ID集合查询
+     * @param ids
+     * @return
+     */
+    DeviceCloudPlatformModel findByIds(List<String> ids);
+
+
+    /**
      * 批量删除
      * @param ids
      */

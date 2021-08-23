@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.response;
 
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -18,6 +19,11 @@ import lombok.NoArgsConstructor;
 public class ImagesPageResponse  extends BaseCloudPlatformResponse  {
 
     /**
+     * UUID
+     */
+    private String uuid;
+
+    /**
      * 名称
      */
     @ApiModelProperty(value = "名称")
@@ -26,42 +32,24 @@ public class ImagesPageResponse  extends BaseCloudPlatformResponse  {
     /**
      * 分类
      */
-    @ApiModelProperty(value = "分类")
-    private String category;
+    @ApiModelProperty("分类")
+    private Integer mainCategory;
+
+    /**
+     * 子分类
+     */
+    @ApiModelProperty("子分类")
+    private Integer subCategory;
+
+    /**
+     * 系统信息
+     */
+    @ApiModelProperty("系统信息")
+    private ExtSystemInfo extSystemInfo;
 
     /**
      * 描述
      */
-    @ApiModelProperty(value = "描述")
+    @ApiModelProperty("描述")
     private String description;
-
-    /**
-     * 系统类型
-     */
-    @ApiModelProperty(value = "系统类型")
-    private String systemType;
-
-    /**
-     * 大小
-     */
-    @ApiModelProperty(value = "大小")
-    private String size;
-
-    /**
-     * 文件注入
-     */
-    @ApiModelProperty(value = "文件注入")
-    private Object injectFiles;
-
-    /**
-     * 授权人数
-     */
-    @ApiModelProperty(value = "授权")
-    private Long authNums;
-
-    /**
-     * 状态
-     */
-    @ApiModelProperty(value = "状态")
-    private String status;
 }

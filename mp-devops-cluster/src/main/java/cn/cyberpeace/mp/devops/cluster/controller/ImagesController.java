@@ -1,16 +1,24 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
-import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.ImagesConverter;
+import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertPageModel;
 import cn.cyberpeace.mp.devops.cluster.request.*;
 import cn.cyberpeace.mp.devops.cluster.response.ImagesPageResponse;
+import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
 import cn.cyberpeace.mp.devops.cluster.response.base.Result;
+import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 镜像管理
@@ -33,9 +41,19 @@ public class ImagesController {
      */
     @ApiOperation("分页查询")
     @GetMapping("/page")
-    public ListObjServiceResult<ImagesPageResponse> page(ImagePageRequest request){
-        imagesConverter.page(request);
-        return null;
+    public PageResult<ImagesPageResponse> page(ImagePageRequest request){
+        ImageConvertPageModel model = imagesConverter.page(request);
+        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getModelList())){
+            return new PageResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
+        }
+        List<ImagesPageResponse> list = model.getModelList().stream().map(v -> {
+            ImagesPageResponse response = ImagesPageResponse.builder().uuid(v.getUuid()).name(v.getName())
+                    .mainCategory(v.getMainCategory()).subCategory(v.getSubCategory())
+                    .description(v.getDescription()).extSystemInfo(v.getExtSystemInfo()).build();
+            return response;
+        }).collect(Collectors.toList());
+
+        return new PageResult<>(list,model.getTotal());
     }
 
     /**
@@ -89,7 +107,7 @@ public class ImagesController {
     /**
      * 授权
      */
-    @ApiOperation("授权")
+    @ApiOperation("授权/批量授权")
     @PostMapping("/auth")
     public void auth(@RequestBody ImagesAuthRequest request){
         imagesConverter.auth(request);

@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /**
  * 镜像构建请求信息
  */
@@ -26,6 +28,11 @@ public class ImagesBuildRequest extends BaseRequest {
      * 镜像ID
      */
     private String imageId;
+
+    /**
+     * 服务ID集合
+     */
+    private List<String> serviceIds;
 
 
 }

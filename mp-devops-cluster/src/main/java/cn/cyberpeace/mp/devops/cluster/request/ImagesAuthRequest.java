@@ -21,11 +21,15 @@ public class ImagesAuthRequest extends BaseRequest {
     /**
      * 镜像ID
      */
-    private String imageId;
+    private List<String> ids;
 
     /**
      * 用户ID
      */
     private List<String> userIds;
 
+    /**
+     * 是否公开
+     */
+    private Boolean isAllPublic;
 }

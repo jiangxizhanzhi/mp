@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.devops.cluster.model.DeviceCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.service.DeviceService;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Joiner;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,6 +31,11 @@ public class DeviceServiceImpl extends BaseOpenStackServiceImpl implements Devic
     @Override
     public Device findById(String id) {
         return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + "/device/" + id, Device.class);
+    }
+
+    @Override
+    public DeviceCloudPlatformModel findByIds(List<String> ids) {
+        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + "/device/byid?ids=" + Joiner.on(",").join(ids), DeviceCloudPlatformModel.class);
     }
 
     @Override

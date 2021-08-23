@@ -35,6 +35,11 @@ public class ImageModel extends BaseModel {
     /**
      * 镜像类型
      */
-    private String type;
+    private String imageType;
+
+    /**
+     * 是否公开
+     */
+    private Integer isPublic;
 
 }
