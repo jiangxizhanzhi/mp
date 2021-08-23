@@ -26,6 +26,8 @@ public class ProbeModel implements Serializable {
 
     private byte[] scriptContent;
 
+    private String commandInterval;
+
     private static final long serialVersionUID = 1L;
 
     public Integer getPk() {
@@ -114,5 +116,13 @@ public class ProbeModel implements Serializable {
 
     public void setScriptContent(byte[] scriptContent) {
         this.scriptContent = scriptContent;
+    }
+
+    public String getCommandInterval() {
+        return commandInterval;
+    }
+
+    public void setCommandInterval(String commandInterval) {
+        this.commandInterval = commandInterval;
     }
 }

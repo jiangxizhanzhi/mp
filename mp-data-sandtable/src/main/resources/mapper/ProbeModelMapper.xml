@@ -12,6 +12,7 @@
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
         <result column="del_flag" jdbcType="INTEGER" property="delFlag"/>
+        <result column="command_interval" jdbcType="VARCHAR" property="commandInterval"/>
     </resultMap>
     <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="cn.cyberpeace.mp.datasandtable.model.ProbeModel">
         <result column="script_content" jdbcType="LONGVARBINARY" property="scriptContent"/>
@@ -236,6 +237,7 @@
             type        = #{type,jdbcType=INTEGER},
             script_type = #{scriptType,jdbcType=INTEGER},
             update_time = #{updateTime,jdbcType=TIMESTAMP}
+            command_interval = #{commandInterval,jdbcType=VARCHAR}
         where id = #{id,jdbcType=VARCHAR}
     </update>
 </mapper>
