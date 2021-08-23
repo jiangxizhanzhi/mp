@@ -23,15 +23,15 @@ public class ProbeRequest {
     @ApiModelProperty(value = "探针描述")
     private String des;
 
-    @ApiModelProperty(value = "系统名称", required = true)
+    @ApiModelProperty(value = "系统名称 0:linux 1:windows", required = true)
     @NotNull(message = "系统名称不能为空")
-    private String osName;
+    private Integer osType;
 
     @ApiModelProperty(value = "探针所属分类", required = true)
     @NotNull(message = "探针所属分类不能为空")
     private Integer type;
 
-    @ApiModelProperty(value = "探针脚本类型 0:shell , 1:python", required = true)
+    @ApiModelProperty(value = "探针脚本类型 0:shell 1:python", required = true)
     @NotNull(message = "探针脚本类型不能为空")
     private Integer scriptType;
 
@@ -42,7 +42,7 @@ public class ProbeRequest {
     private String scriptContent;
 
     @ApiModelProperty(value = "定时任务 1m 表示一分钟", required = true)
-    private String interval;
+    private String commandInterval;
 
     @ApiModelProperty(value = "脚本参数 建议 ##包裹参数，方便替换", required = true)
     private List<ProbeParamsRequest> probeParamsRequestList;

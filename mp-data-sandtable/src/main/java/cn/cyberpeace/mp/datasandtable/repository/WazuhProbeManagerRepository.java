@@ -27,10 +27,10 @@ public class WazuhProbeManagerRepository {
         var jsonObject = new JSONObject();
         jsonObject.put("ScriptId", probeRequest.getProbeId());
         jsonObject.put("Content", probeRequest.getScriptContent());
-        jsonObject.put("ProbeType", probeRequest.getOsName());
+        jsonObject.put("ProbeType", probeRequest.getType());
         jsonObject.put("ProbeName", probeRequest.getProbeName());
-        jsonObject.put("OSType", probeRequest.getOsName());
-        jsonObject.put("Interval", probeRequest.getInterval());
+        jsonObject.put("OSType", probeRequest.getOsType());
+        jsonObject.put("Interval", probeRequest.getCommandInterval());
         jsonObject.put("Commandline", buildExecCommandline(probeRequest));
         try {
             return HttpUtils.sendPost(sentUrl, jsonObject.toJSONString());

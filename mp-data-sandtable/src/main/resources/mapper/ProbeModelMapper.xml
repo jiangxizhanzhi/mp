@@ -6,7 +6,7 @@
         <result column="id" jdbcType="VARCHAR" property="id"/>
         <result column="probe_name" jdbcType="VARCHAR" property="probeName"/>
         <result column="des" jdbcType="VARCHAR" property="des"/>
-        <result column="OS_name" jdbcType="VARCHAR" property="osName"/>
+        <result column="OS_type" jdbcType="VARCHAR" property="osType"/>
         <result column="type" jdbcType="INTEGER" property="type"/>
         <result column="script_type" jdbcType="INTEGER" property="scriptType"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
@@ -233,7 +233,7 @@
         set
             probe_name  = #{probeName,jdbcType=VARCHAR},
             des         = #{des,jdbcType=VARCHAR},
-            OS_name     = #{osName,jdbcType=VARCHAR},
+            OS_type     = #{osType,jdbcType=VARCHAR},
             type        = #{type,jdbcType=INTEGER},
             script_type = #{scriptType,jdbcType=INTEGER},
             update_time = #{updateTime,jdbcType=TIMESTAMP}

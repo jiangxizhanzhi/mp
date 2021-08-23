@@ -12,7 +12,7 @@ public class ProbeModel implements Serializable {
 
     private String des;
 
-    private String osName;
+    private String osType;
 
     private Integer type;
 
@@ -62,12 +62,12 @@ public class ProbeModel implements Serializable {
         this.des = des == null ? null : des.trim();
     }
 
-    public String getOsName() {
-        return osName;
+    public String getOsType() {
+        return osType;
     }
 
-    public void setOsName(String osName) {
-        this.osName = osName == null ? null : osName.trim();
+    public void setOsType(String osType) {
+        this.osType = osType;
     }
 
     public Integer getType() {
