@@ -54,9 +54,26 @@ public class SysNoticeController {
 
 
     @ApiOperation("阅读公告接口")
-    @GetMapping("/read/{id}")
-    public ServiceResult<SysNoticeDto> read(@PathVariable String id) {
-        return null;
+    @PostMapping("/read/{id}")
+    public ServiceResult read(@PathVariable String id) {
+        noticeService.read(id);
+        return ServiceResult.successful();
+    }
+
+
+    @ApiOperation("不再推送公告消息")
+    @PostMapping("/unpush/{id}")
+    public ServiceResult unpush(@PathVariable String id) {
+        noticeService.unpush(id);
+        return ServiceResult.successful();
+    }
+
+
+    @ApiOperation("未读公告数量")
+    @GetMapping("/unread_count")
+    public ServiceResult unReadCount() {
+        int unreadCnt = noticeService.unReadCount();
+        return ServiceResult.success(unreadCnt);
     }
 
     @ApiOperation("分页查询所有公告")
@@ -69,7 +86,7 @@ public class SysNoticeController {
     }
 
 
-    @ApiOperation("分页查询当前用户有权看到的公告")
+    @ApiOperation("分页查询当前用户有权看到的公告（公告消息）")
     @GetMapping("/currentuser/page")
     public ServiceResult<SysNoticeDto> currentUserPage(SysNoticePageRequest pageRequest) {
         pageRequest.ensure();

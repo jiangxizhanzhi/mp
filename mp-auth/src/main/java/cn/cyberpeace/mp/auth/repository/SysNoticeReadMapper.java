@@ -16,4 +16,6 @@ public interface SysNoticeReadMapper extends BaseModelMapper<SysNoticeReadModel>
 
     int increaseReadCount(@Param("id") String id);
 
+    int countIsReadedOrIsUnPush();
+
 }

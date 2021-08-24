@@ -27,6 +27,7 @@ import cn.cyberpeace.mp.auth.service.fields.SysNoticeFields;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ObjResult;
@@ -83,12 +84,19 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
     }
 
 
-    public int unreadCount() {
-        // todo
-        return 0;
+    @Override
+    public int unReadCount() {
+        HumanCondition condition = new HumanCondition();
+        condition.distinct();
+        int noticeCnt = getModelMapper().total(condition);
+
+        int readedOrUnpushCnt = noticeReadMapper.countIsReadedOrIsUnPush();
+        int unreadCnt = noticeCnt - readedOrUnpushCnt;
+        return unreadCnt <= 0 ? 0 : unreadCnt;
     }
 
-    public void noNeedPush(String noticeId) {
+    @Override
+    public void unpush(String noticeId) {
         UserModel userModel = UserUtils.getLoginUser();
         Assert.notNull(userModel, "未获取到当前登录用户信息");
 
@@ -99,7 +107,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
         if (Objects.isNull(noticeReadModel)) {
             // 创建一个
-            SysNoticeReadModel noticeReadModelNew = SysNoticeReadModel.builder().noticeId(noticeId).user(userModel.getId()).isNeedPush(0).build();
+            SysNoticeReadModel noticeReadModelNew = SysNoticeReadModel.builder().noticeId(noticeId).user(userModel.getId()).isReaded(0).readCount(0).isNeedPush(0).build();
             noticeReadMapper.create(noticeReadModelNew);
         } else {
             // increase read cound
@@ -111,6 +119,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
     }
 
 
+    @Override
     public void read(String noticeId) {
         UserModel userModel = UserUtils.getLoginUser();
         Assert.notNull(userModel, "未获取到当前登录用户信息");
@@ -122,12 +131,13 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
         if (Objects.isNull(noticeReadModel)) {
             // 创建一个
-            SysNoticeReadModel noticeReadModelNew = SysNoticeReadModel.builder().noticeId(noticeId).user(userModel.getId()).build();
+            SysNoticeReadModel noticeReadModelNew = SysNoticeReadModel.builder().noticeId(noticeId).user(userModel.getId()).isReaded(1).readCount(1).isNeedPush(1).build();
             noticeReadMapper.create(noticeReadModelNew);
         } else {
             // increase read cound
             noticeReadMapper.increaseReadCount(noticeReadModel.getId());
         }
+
     }
 
     @Override

@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.auth.model;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.base.model.BaseModel;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 import io.swagger.annotations.ApiModelProperty;
@@ -32,12 +33,15 @@ public class SysNoticeReadModel extends BaseModel {
     private String user;
 
     @ApiModelProperty(value = "是否已读 1:已读 0:未读 默认为1  首次创建一条数据即为已读")
+    @DefaultInt(0)
     private Integer isReaded;
 
     @ApiModelProperty(value = "是否推送本条公告 1:是（需要推送）； 0:否（不再推送） 默认为1")
+    @DefaultInt(1)
     private Integer isNeedPush;
 
     // 阅读次数
     @ApiModelProperty(value = "阅读次数")
+    @DefaultInt(0)
     private Integer readCount;
 }

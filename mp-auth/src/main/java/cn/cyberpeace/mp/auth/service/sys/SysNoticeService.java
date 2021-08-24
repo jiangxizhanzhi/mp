@@ -11,6 +11,10 @@ import com.github.pagehelper.PageInfo;
 public interface SysNoticeService extends BaseModelService<SysNoticeModel, QueryParams> {
 
 
+    void unpush(String noticeId);
+
+    void read(String noticeId);
+
     SysNoticeModel add(SysNoticeRequest sysNoticeRequest);
 
     SysNoticeModel modify(SysNoticeRequest sysNoticeRequest);
@@ -30,4 +34,6 @@ public interface SysNoticeService extends BaseModelService<SysNoticeModel, Query
     PageInfo currentUserPage(SysNoticePageRequest pageRequest);
 
     SysNoticeDto noticeModel2NoticeDto(SysNoticeModel noticeModel);
+
+    int unReadCount();
 }
