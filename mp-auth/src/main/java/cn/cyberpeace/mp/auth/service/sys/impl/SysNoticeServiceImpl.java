@@ -96,26 +96,29 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
     }
 
     @Override
-    public void unpush(String noticeId) {
+    public void unpush(List<String> noticeIds) {
         UserModel userModel = UserUtils.getLoginUser();
         Assert.notNull(userModel, "未获取到当前登录用户信息");
 
-        SysNoticeModel noticeModel = getModelMapper().get(noticeId);
-        Assert.notNull(noticeModel, "公告不存在！ID:{}", noticeId);
+        for (String noticeId : noticeIds) {
+//            SysNoticeModel noticeModel = getModelMapper().get(noticeId);
+//            Assert.notNull(noticeModel, "公告不存在！ID:{}", noticeId);
 
-        SysNoticeReadModel noticeReadModel = noticeReadMapper.selectByUserIdAndNoticeId(userModel.getId(), noticeId);
+            SysNoticeReadModel noticeReadModel = noticeReadMapper.selectByUserIdAndNoticeId(userModel.getId(), noticeId);
 
-        if (Objects.isNull(noticeReadModel)) {
-            // 创建一个
-            SysNoticeReadModel noticeReadModelNew = SysNoticeReadModel.builder().noticeId(noticeId).user(userModel.getId()).isReaded(0).readCount(0).isNeedPush(0).build();
-            noticeReadMapper.create(noticeReadModelNew);
-        } else {
-            // increase read cound
-            SysNoticeReadModel noticeReadModelUpdate = new SysNoticeReadModel();
-            noticeReadModelUpdate.setId(noticeReadModel.getId());
-            noticeReadModelUpdate.setIsNeedPush(0);
-            noticeReadMapper.update(noticeReadModelUpdate);
+            if (Objects.isNull(noticeReadModel)) {
+                // 创建一个
+                SysNoticeReadModel noticeReadModelNew = SysNoticeReadModel.builder().noticeId(noticeId).user(userModel.getId()).isReaded(0).readCount(0).isNeedPush(0).build();
+                noticeReadMapper.create(noticeReadModelNew);
+            } else {
+                // increase read cound
+                SysNoticeReadModel noticeReadModelUpdate = new SysNoticeReadModel();
+                noticeReadModelUpdate.setId(noticeReadModel.getId());
+                noticeReadModelUpdate.setIsNeedPush(0);
+                noticeReadMapper.update(noticeReadModelUpdate);
+            }
         }
+
     }
 
 

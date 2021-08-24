@@ -8,10 +8,12 @@ import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import com.github.pagehelper.PageInfo;
 
+import java.util.List;
+
 public interface SysNoticeService extends BaseModelService<SysNoticeModel, QueryParams> {
 
 
-    void unpush(String noticeId);
+    void unpush(List<String> noticeIds);
 
     void read(String noticeId);
 

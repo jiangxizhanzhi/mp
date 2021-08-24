@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.auth.service.sys.SysNoticeService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.hutool.core.collection.CollectionUtil;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -62,9 +63,9 @@ public class SysNoticeController {
 
 
     @ApiOperation("不再推送公告消息")
-    @PostMapping("/unpush/{id}")
-    public ServiceResult unpush(@PathVariable String id) {
-        noticeService.unpush(id);
+    @PostMapping("/unpush")
+    public ServiceResult unpush(@RequestBody String[] ids) {
+        noticeService.unpush(CollectionUtil.toList(ids));
         return ServiceResult.successful();
     }
 
