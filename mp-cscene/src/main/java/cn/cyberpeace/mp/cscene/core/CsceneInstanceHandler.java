@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.cscene.core;
 
 import cn.cyberpeace.mp.base.annotation.BeanFieldClasses;
 import cn.cyberpeace.mp.base.annotation.ClassFieldClasses;
+import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstaneRoleBO;
 import cn.cyberpeace.mp.cscene.core.base.BaseCsceneHandler;
@@ -10,7 +11,6 @@ import cn.cyberpeace.mp.cscene.model.CsceneInstanceRoleModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
 import cn.cyberpeace.mp.scene.service.SceneService;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
@@ -32,8 +32,13 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         CsceneInstanceModel, CsceneInstanceRoleModel, CsceneInstaneRoleBO,
         CsceneInstanceBO, CsceneInstanceMapper, CsceneInstanceRoleMapper> {
 
-    @Autowired
     private SceneService sceneService;
+
+    @Override
+    public void initBase() {
+        super.initBase();
+        sceneService = BeanUtils.getBean(SceneService.class);
+    }
 
     public CsceneInstanceHandler(CsceneInstanceBO csceneBO) {
         init(csceneBO);
@@ -66,9 +71,14 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
     public void deleteScene(CsceneInstanceBO csceneBO) {
         var sceneData = csceneBO.getScene();
         String sceneId = sceneData == null ? null : sceneData.getTopology().getScene().getEid();
-        if (sceneId != null) {
-            sceneService.delete(csceneBO.getScene().getTopology().getScene().getEid(), false);
-        }
+        deleteScene(sceneId);
         csceneBO.setScene(null);
+    }
+
+    @Override
+    public void deleteScene(String sceneId) {
+        if (sceneId != null) {
+            sceneService.delete(sceneId, true);
+        }
     }
 }

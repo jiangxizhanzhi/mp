@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.cscene.repository;
 
-import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import cn.cyberpeace.mp.cscene.model.CsceneRoleModel;
 import cn.cyberpeace.mp.cscene.repository.base.BaseCsceneRoleMapper;

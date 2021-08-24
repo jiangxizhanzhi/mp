@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.annotation.BeanFieldClasses;
 import cn.cyberpeace.mp.base.annotation.ClassFieldClasses;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneRoleBO;
@@ -17,9 +18,8 @@ import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneRoleMapper;
 import cn.cyberpeace.mp.scene.service.SceneConfigService;
-import cn.cyberpeace.mp.scene.service.SceneService;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,14 +43,8 @@ public class CsceneHandler extends BaseCsceneHandler<
         CsceneModel, CsceneRoleModel, CsceneRoleBO,
         CsceneBO, CsceneMapper, CsceneRoleMapper> {
 
-    @Autowired
     private SceneConfigService sceneConfigService;
-    @Autowired
-    private SceneService sceneService;
-
-    @Autowired
     private CsceneInstanceMapper csceneInstanceMapper;
-    @Autowired
     private CsceneInstanceRoleMapper csceneInstanceRoleMapper;
 
     /**
@@ -68,6 +62,9 @@ public class CsceneHandler extends BaseCsceneHandler<
      * @return 多个综合场景实例的角色信息
      */
     private List<CsceneInstanceRoleModel> readCsceneInstanceRoles(String[] csceneInstanceIds) {
+        if (csceneInstanceIds == null || csceneInstanceIds.length == 0) {
+            return new ArrayList<>();
+        }
         return csceneInstanceRoleMapper.list(new HumanCondition()
                 .filterIn(CsceneInstanceRoleModel::getCscene, csceneInstanceIds));
     }
@@ -102,6 +99,14 @@ public class CsceneHandler extends BaseCsceneHandler<
         return true;
     }
 
+    @Override
+    public void initBase() {
+        super.initBase();
+        sceneConfigService = BeanUtils.getBean(SceneConfigService.class);
+        csceneInstanceMapper = BeanUtils.getBean(CsceneInstanceMapper.class);
+        csceneInstanceRoleMapper = BeanUtils.getBean(CsceneInstanceRoleMapper.class);
+    }
+
     public CsceneHandler(CsceneBO csceneBO) {
         init(csceneBO);
     }
@@ -119,6 +124,17 @@ public class CsceneHandler extends BaseCsceneHandler<
             reloadCsceneInstances();
         }
         return getCscene();
+    }
+
+    @Override
+    public void delete() {
+        reloadCsceneInstances();
+        for (var csceneInstance: ListUtils.union(getCscene().getTestScenes(), getCscene().getAppScenes())) {
+            var instanceHandler = new CsceneInstanceHandler(csceneInstance);
+            instanceHandler.delete();
+        }
+
+        super.delete();
     }
 
     @Override
@@ -140,9 +156,14 @@ public class CsceneHandler extends BaseCsceneHandler<
     public void deleteScene(CsceneBO csceneBO) {
         var sceneData = csceneBO.getSceneConfig();
         String sceneId = sceneData == null ? null : sceneData.getTopology().getScene().getEid();
-        if (sceneId != null) {
-            sceneConfigService.delete(csceneBO.getSceneConfig().getTopology().getScene().getEid(), false);
-        }
+        deleteScene(sceneId);
         csceneBO.setSceneConfig(null);
+    }
+
+    @Override
+    public void deleteScene(String sceneId) {
+        if (sceneId != null) {
+            sceneConfigService.delete(sceneId, true);
+        }
     }
 }

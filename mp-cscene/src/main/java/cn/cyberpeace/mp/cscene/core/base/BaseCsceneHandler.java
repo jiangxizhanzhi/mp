@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.base.util.ClassUtils;
+import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.base.BaseCsceneBO;
 import cn.cyberpeace.mp.cscene.bo.base.BaseCsceneRoleBO;
 import cn.cyberpeace.mp.cscene.model.base.BaseCsceneModel;
@@ -14,6 +15,7 @@ import cn.cyberpeace.mp.cscene.repository.base.BaseCsceneMapper;
 import cn.cyberpeace.mp.cscene.repository.base.BaseCsceneRoleMapper;
 import cn.cyberpeace.mp.scene.core.exception.SceneUpdateException;
 import lombok.Getter;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -185,6 +187,15 @@ public abstract class BaseCsceneHandler<
      * @return 保存是否成功
      */
     private boolean saveCscene() {
+        var sceneId = getSceneId(cscene.toModel());
+        if (!StringUtils.isEmpty(csceneId)) {
+            var originCsceneObj = readCscene();
+            var originSceneId = originCsceneObj == null ? null : getSceneId(originCsceneObj);
+            // 场景id变化了删除原来的
+            if (!StringUtils.isEmpty(originSceneId) && !originSceneId.equals(sceneId)) {
+                deleteScene(originSceneId);
+            }
+        }
         saveScene(cscene);
 
         C0 csceneObj = cscene.toModel();
@@ -230,6 +241,13 @@ public abstract class BaseCsceneHandler<
         if (updateResult < updatingTargets.size()) {
             throw new SceneUpdateException("Cscene role diff update failed");
         }
+
+        cscene.setRoles(convertToRoleBOs(ListUtils.union(addingTargets, updatingTargets), csceneRoleBOClass));
+    }
+
+    public void initBase() {
+        ClassUtils.loadClassFields(this);
+        BeanUtils.loadBeanFields(this);
     }
 
     /**
@@ -237,8 +255,7 @@ public abstract class BaseCsceneHandler<
      * @param csceneId 综合场景id
      */
     public void init(String csceneId) {
-        ClassUtils.loadClassFields(this);
-        BeanUtils.loadBeanFields(this);
+        initBase();
         this.csceneId = csceneId;
         reload();
     }
@@ -248,8 +265,7 @@ public abstract class BaseCsceneHandler<
      * @param csceneBO 完整的综合场景业务数据
      */
     public void init(C csceneBO) {
-        ClassUtils.loadClassFields(this);
-        BeanUtils.loadBeanFields(this);
+        initBase();
         fromData(csceneBO);
     }
 
@@ -259,8 +275,7 @@ public abstract class BaseCsceneHandler<
      * @param roleObjs 外部查询的综合场景角色数据
      */
     public void init(C0 csceneObj, List<R0> roleObjs) {
-        ClassUtils.loadClassFields(this);
-        BeanUtils.loadBeanFields(this);
+        initBase();
         var csceneBO = convertToCsceneBO(csceneObj);
         csceneBO.setRoles(convertToRoleBOs(roleObjs, csceneRoleBOClass));
         fromData(csceneBO);
@@ -271,7 +286,7 @@ public abstract class BaseCsceneHandler<
      * @param csceneBO 完整的综合场景业务数据
      */
     public void fromData(C csceneBO) {
-        csceneId = cscene.getId();
+        csceneId = csceneBO.getId();
         cscene = csceneBO;
     }
 
@@ -334,4 +349,10 @@ public abstract class BaseCsceneHandler<
      * @param csceneBO 综合场景数据
      */
     public abstract void deleteScene(C csceneBO);
+
+    /**
+     * 删除底层场景
+     * @param sceneId 底层场景id
+     */
+    public abstract void deleteScene(String sceneId);
 }
