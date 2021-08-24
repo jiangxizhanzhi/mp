@@ -17,7 +17,7 @@ public interface SysNoticeService extends BaseModelService<SysNoticeModel, Query
 
     SysNoticeModel add(SysNoticeRequest sysNoticeRequest);
 
-    SysNoticeModel modify(SysNoticeRequest sysNoticeRequest);
+    SysNoticeModel modify(String id, SysNoticeRequest sysNoticeRequest);
 
     /**
      * 分页查询所有公告

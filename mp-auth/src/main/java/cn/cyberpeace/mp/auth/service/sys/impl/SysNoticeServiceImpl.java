@@ -188,11 +188,11 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public SysNoticeModel modify(SysNoticeRequest sysNoticeRequest) {
+    public SysNoticeModel modify(String id, SysNoticeRequest sysNoticeRequest) {
         Assert.notNull(sysNoticeRequest, "公告更新请求不能为空！");
 
-        ObjServiceResult<SysNoticeModel> noticeModelResult = get(sysNoticeRequest.getId());
-        ResultUtils.throwExceptionIfError(noticeModelResult, "ID:" + sysNoticeRequest.getId() + "对应的公告信息不存在！");
+        ObjServiceResult<SysNoticeModel> noticeModelResult = get(id);
+        ResultUtils.throwExceptionIfError(noticeModelResult, "ID:" + id + "对应的公告信息不存在！");
 
         SysNoticeModel noticeModel = new SysNoticeModel();
         BeanUtils.copyProperties(sysNoticeRequest, noticeModel);

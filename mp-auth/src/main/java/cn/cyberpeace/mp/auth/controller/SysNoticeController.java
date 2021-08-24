@@ -104,9 +104,9 @@ public class SysNoticeController {
     }
 
     @ApiOperation("更新公告")
-    @PatchMapping
-    public ServiceResult modify(@RequestBody @Validated(UpdateGroup.class) SysNoticeRequest noticeReq) {
-        SysNoticeModel noticeModel = noticeService.modify(noticeReq);
+    @PatchMapping("/{id}")
+    public ServiceResult modify(@PathVariable String id, @RequestBody @Validated(UpdateGroup.class) SysNoticeRequest noticeReq) {
+        SysNoticeModel noticeModel = noticeService.modify(id, noticeReq);
 
         return ServiceResult.builder().source(noticeModel).build().asResult();
     }
