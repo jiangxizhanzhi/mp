@@ -171,7 +171,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         noticeOrgMapper.bulkCreate(noticeGroupModelList);
 
         // 角色，如果是公开的，则忽略角色字段内的值
-        if (sysNoticeRequest.getIsPublic().equals(SysNoticeModel.NOTICE_NOT_PUBLIC)) {
+        if (Objects.nonNull(sysNoticeRequest.getIsPublic()) && sysNoticeRequest.getIsPublic().equals(SysNoticeModel.NOTICE_NOT_PUBLIC)) {
             List<SysNoticeRoleModel> noticeRoleModelList = new ArrayList<>();
             if (CollectionUtil.isNotEmpty(sysNoticeRequest.getRoleIds())) {
                 sysNoticeRequest.getRoleIds().forEach(roleId -> {
@@ -199,6 +199,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
         SysNoticeModel noticeModel = new SysNoticeModel();
         BeanUtils.copyProperties(sysNoticeRequest, noticeModel);
+        noticeModel.setId(id);
 
         ObjServiceResult<SysNoticeModel> result = update(noticeModel);
         ResultUtils.throwExceptionIfError(result, "更新公告失败！");
@@ -222,7 +223,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         noticeOrgMapper.bulkCreate(noticeGroupModelList);
 
         // 角色，如果是公开的，则忽略角色字段内的值
-        if (sysNoticeRequest.getIsPublic().equals(SysNoticeModel.NOTICE_NOT_PUBLIC)) {
+        if (Objects.nonNull(sysNoticeRequest.getIsPublic()) && sysNoticeRequest.getIsPublic().equals(SysNoticeModel.NOTICE_NOT_PUBLIC)) {
             List<SysNoticeRoleModel> noticeRoleModelList = new ArrayList<>();
             if (CollectionUtil.isNotEmpty(sysNoticeRequest.getRoleIds())) {
                 sysNoticeRequest.getRoleIds().forEach(roleId -> {
