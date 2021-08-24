@@ -38,6 +38,20 @@ public class FlowActuatorModel extends BaseModel {
     private String ip;
 
     /**
+     * 网络id
+     */
+    @ApiModelProperty(value = "网络id")
+    @DefaultStr
+    private String networkId;
+
+    /**
+     * 实例id
+     */
+    @ApiModelProperty(value = "实例id")
+    @DefaultStr
+    private String instanceId;
+
+    /**
      * 服务端ip
      */
     @ApiModelProperty(value = "服务端ip")

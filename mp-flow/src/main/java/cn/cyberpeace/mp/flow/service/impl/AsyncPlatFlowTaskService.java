@@ -12,6 +12,8 @@ import cn.cyberpeace.mp.flow.repository.FlowInfoMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskMapper;
 import cn.cyberpeace.mp.flow.request.AddAppTaskRequest;
 import cn.cyberpeace.mp.flow.request.AddStandardsTaskRequest;
+import cn.cyberpeace.mp.flow.request.AddVmInstanceRequest;
+import cn.cyberpeace.mp.flow.request.AddVmRequest;
 import cn.cyberpeace.mp.flow.util.HttpDeleteUtil;
 import cn.cyberpeace.mp.flow.util.ResponseUtils;
 import com.alibaba.fastjson.JSON;
@@ -25,6 +27,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -42,6 +45,24 @@ public class AsyncPlatFlowTaskService {
      */
     @Value("${mp.flow.actuator-task-url}")
     private String actuatorTaskUrl;
+
+    /**
+     * 云平台地址
+     */
+    @Value("${mp.devops.cp-url}")
+    private String cpUrl;
+
+    /**
+     * trex镜像名称
+     */
+    @Value("${mp.flow.trex-image}")
+    private String trexImage;
+
+    /**
+     * server镜像名称
+     */
+    @Value("${mp.flow.server-image}")
+    private String serverImage;
 
     @Autowired
     private FlowTaskMapper flowTaskMapper;
@@ -204,6 +225,127 @@ public class AsyncPlatFlowTaskService {
         } catch (Exception e) {
             log.error("delete task from flow actuator platform error");
         }
+    }
+
+    /**
+     * 异步新增虚拟机、添加网口
+     * @param request
+     * @return
+     */
+    @Async
+    public void addVmInstance(AddVmInstanceRequest request) {
+        log.info("================ Add vm instance start ==================");
+        FlowActuatorModel flowActuatorModel = new FlowActuatorModel();
+        AddVmRequest addVmRequest = new AddVmRequest();
+        addVmRequest.setName("trex" + System.currentTimeMillis());
+        addVmRequest.setImage(trexImage);
+        AddVmRequest.Networks networks = new AddVmRequest.Networks();
+        networks.setNetworkId(request.getNetworkId());
+        addVmRequest.setNetworks(Collections.singletonList(networks));
+
+        try {
+            // 创建trex虚拟机
+            String addVmRsp = HttpUtils.sendPost(cpUrl + "/v1/scenarios/vm", JsonUtils.toUnderlineJSONString(addVmRequest));
+            JSONObject addVmObj = JSONObject.parseObject(addVmRsp);
+            log.info("add trex vm response:{}", addVmObj.toJSONString());
+
+            if (BaseConstants.SUCCESS_ZERO.equals(addVmObj.getString(BaseConstants.STR_CODE))) {
+                JSONObject vmObj = addVmObj.getJSONObject(BaseConstants.STR_DATA);
+                String instanceId = vmObj.getString("id");
+                JSONObject netWorkObj = vmObj.getJSONArray("networks").getJSONObject(0);
+                String ip = netWorkObj.getString("fixed_ip");
+
+                // 给trex虚拟机添加server网口
+                JSONObject addPortReq = new JSONObject();
+                addPortReq.put("network_id", request.getNetworkId());
+                String addTrexServerPortRsp = HttpUtils.sendPost(cpUrl + "/v1/instances/" + instanceId + "/interfaces", addPortReq.toJSONString());
+                JSONObject addTrexServerObj = JSONObject.parseObject(addTrexServerPortRsp);
+                log.info("add trex server port response:{}", addTrexServerObj.toJSONString());
+                String serverMac = "";
+                if (BaseConstants.SUCCESS_ZERO.equals(addTrexServerObj.getString(BaseConstants.STR_CODE))) {
+                    serverMac = addTrexServerObj.getJSONObject(BaseConstants.STR_DATA).getString("mac_address");
+                } else {
+                    log.error("add trex server port error");
+                }
+
+                // 给trex虚拟机添加client网口
+                String addTrexClientPortRsp = HttpUtils.sendPost(cpUrl + "/v1/instances/" + instanceId + "/interfaces", addPortReq.toJSONString());
+                JSONObject addTrexClientObj = JSONObject.parseObject(addTrexClientPortRsp);
+                log.info("add trex client port response:{}", addTrexClientObj.toJSONString());
+                String clientMac = "";
+                if (BaseConstants.SUCCESS_ZERO.equals(addTrexClientObj.getString(BaseConstants.STR_CODE))) {
+                    clientMac = addTrexClientObj.getJSONObject(BaseConstants.STR_DATA).getString("mac_address");
+                } else {
+                    log.error("add trex client port error");
+                }
+
+                // 查询默认网关
+                String getGateWayRsp = HttpUtils.sendGet(cpUrl + "/v1/networks/" + request.getNetworkId());
+                JSONObject getGateWayObj = JSONObject.parseObject(getGateWayRsp);
+                log.info("get gateway response:{}", getGateWayObj.toJSONString());
+                String gatewayIp = "";
+                if (BaseConstants.SUCCESS_ZERO.equals(getGateWayObj.getString(BaseConstants.STR_CODE))) {
+                    gatewayIp = getGateWayObj.getJSONObject(BaseConstants.STR_DATA).getJSONObject("subnet").getString("gateway_ip");
+                } else {
+                    log.error("get gateway info error");
+                }
+
+                // 创建server虚拟机
+                addVmRequest.setName("trexServer" + System.currentTimeMillis());
+                addVmRequest.setImage(serverImage);
+                String addServerVmRsp = HttpUtils.sendPost(cpUrl + "/v1/scenarios/vm", JsonUtils.toUnderlineJSONString(addVmRequest));
+                JSONObject addServerVmObj = JSONObject.parseObject(addServerVmRsp);
+                log.info("add server vm response:{}", addServerVmObj.toJSONString());
+                String serverIp = "";
+                String clientIp = "";
+                if (BaseConstants.SUCCESS_ZERO.equals(addServerVmObj.getString(BaseConstants.STR_CODE))) {
+                    JSONObject serverVmObj = addServerVmObj.getJSONObject(BaseConstants.STR_DATA);
+                    String serverInstanceId = serverVmObj.getString("id");
+
+                    // 添加server虚拟机的server端口
+                    String addServerPortRsp = HttpUtils.sendPost(cpUrl + "/v1/instances/" + serverInstanceId + "/interfaces", addPortReq.toJSONString());
+                    JSONObject addServerPortObj = JSONObject.parseObject(addServerPortRsp);
+                    log.info("add server port response:{}", addServerPortObj.toJSONString());
+                    if (BaseConstants.SUCCESS_ZERO.equals(addServerPortObj.getString(BaseConstants.STR_CODE))) {
+                        serverIp = addServerPortObj.getJSONObject(BaseConstants.STR_DATA).getString("fixed_ip");
+                    } else {
+                        log.error("add server port error");
+                    }
+
+                    // 添加server虚拟机的client端口
+                    String addClientPortRsp = HttpUtils.sendPost(cpUrl + "/v1/instances/" + serverInstanceId + "/interfaces", addPortReq.toJSONString());
+                    JSONObject addClientPortObj = JSONObject.parseObject(addClientPortRsp);
+                    log.info("add client port response:{}", addClientPortObj.toJSONString());
+                    if (BaseConstants.SUCCESS_ZERO.equals(addClientPortObj.getString(BaseConstants.STR_CODE))) {
+                        clientIp = addClientPortObj.getJSONObject(BaseConstants.STR_DATA).getString("fixed_ip");
+                    } else {
+                        log.error("add client port error");
+                    }
+                } else {
+                    log.error("add server vm error");
+                }
+
+                // 新增流量执行器信息
+                flowActuatorModel.setTitle(addVmRequest.getName());
+                flowActuatorModel.setSceneId(request.getSceneId());
+                flowActuatorModel.setNetworkId(request.getNetworkId());
+                flowActuatorModel.setInstanceId(instanceId);
+                flowActuatorModel.setIp(ip);
+                flowActuatorModel.setServerMac(serverMac);
+                flowActuatorModel.setServerIp(serverIp);
+                flowActuatorModel.setServerGateway(gatewayIp);
+                flowActuatorModel.setClientMac(clientMac);
+                flowActuatorModel.setClientIp(clientIp);
+                flowActuatorModel.setClientGateway(gatewayIp);
+                flowActuatorMapper.create(flowActuatorModel);
+            } else {
+                log.error("add trex vm error");
+            }
+        } catch (Exception e) {
+            log.error("add vm instance error", e);
+        }
+
+        log.info("================ Add vm instance end ==================");
     }
 
 }

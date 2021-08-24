@@ -77,4 +77,14 @@ public interface BaseConstants {
      */
     String STR_DATA = "data";
 
+    /**
+     * code常量
+     */
+    String STR_CODE = "code";
+
+    /**
+     * 0 常量
+     */
+    String SUCCESS_ZERO = "0";
+
 }

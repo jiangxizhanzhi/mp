@@ -49,7 +49,7 @@ mp:
           file-server-addr: /fdfs    # 外部文件服务器地址
           inner-file-server-addr: http://${mp.base.fdfs-url}:8888   # 内部文件服务器地址
   devops:
-    cp-url: http://10.100.7.5:11111 #云平台地址
+    cp-url: http://10.100.7.25:10009 #云平台地址
     cr-url: http://10.100.2.21 #
     hostname: controller  #主机名称
   datasandtable:
@@ -77,6 +77,8 @@ mp:
     # 流量发生器地址
     actuator-resource-url: http://10.200.1.64:80/api/v1/resource
     actuator-task-url: http://10.200.1.70:80/api/v1/task
+    trex-image: cirros
+    server-image: cirros
 
 
 
