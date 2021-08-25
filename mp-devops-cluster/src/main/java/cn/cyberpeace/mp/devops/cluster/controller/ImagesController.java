@@ -3,6 +3,8 @@ package cn.cyberpeace.mp.devops.cluster.controller;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.ImagesConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertPageModel;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtVm;
 import cn.cyberpeace.mp.devops.cluster.request.*;
 import cn.cyberpeace.mp.devops.cluster.response.ImagesPageResponse;
 import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
@@ -15,6 +17,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Objects;
@@ -47,9 +50,13 @@ public class ImagesController {
             return new PageResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
         }
         List<ImagesPageResponse> list = model.getModelList().stream().map(v -> {
+            ExtSystemInfo extSystemInfo = v.getExtSystemInfo();
+            ExtVm extVm = v.getExtVm();
             ImagesPageResponse response = ImagesPageResponse.builder().uuid(v.getUuid()).name(v.getName())
-                    .mainCategory(v.getMainCategory()).subCategory(v.getSubCategory())
-                    .description(v.getDescription()).extSystemInfo(v.getExtSystemInfo()).build();
+                    .mainCategory(v.getMainCategory()).subCategory(v.getSubCategory()).imageType(v.getImageType())
+                    .systemType(Objects.nonNull(extSystemInfo) ? extSystemInfo.getSystemType() : null)
+                    .flavor(Objects.nonNull(extVm) ? extVm.getFlavor() : "")
+                    .description(v.getDescription()).build();
             return response;
         }).collect(Collectors.toList());
 
@@ -113,6 +120,14 @@ public class ImagesController {
         imagesConverter.auth(request);
     }
 
+
+    @ApiOperation(value = "上传", notes = "")
+    @PostMapping("/upload")
+    public Result upload(@RequestParam("file") MultipartFile file) {
+       String result = imagesConverter.upload(file);
+       return new Result<>(result);
+    }
+
     /**
      * 导出
      */
@@ -120,5 +135,14 @@ public class ImagesController {
     @PostMapping("/export")
     public void export(@RequestBody ImagesExportRequest request){
         imagesConverter.export(request);
+    }
+
+    /**
+     * 导出
+     */
+    @ApiOperation("创建虚拟机/容器")
+    @PostMapping("/{id}/create")
+    public void create(@PathVariable("id") String uuid){
+      imagesConverter.create(uuid);
     }
 }

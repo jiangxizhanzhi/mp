@@ -1,18 +1,18 @@
 package cn.cyberpeace.mp.devops.cluster.service;
 
-public interface TypeService {
+import cn.cyberpeace.mp.devops.cluster.model.TypeCloudPlatformModel;
 
-//    applicationystem_types findAll();
-//
-//    device_categories findAll();
-//
-//    device_used_categories findAll();
-//
-//    networkdevice_types findAll();
-//
-//    operatesystem_types findAll();
-//
-//    os_types findAll();
-//
-//    securitydevice_types findAll();
+public interface TypeService extends BaseCloudPlatformService{
+
+    /**
+     * 查询所有类型数据
+     * @return
+     */
+    TypeCloudPlatformModel findL1AndL2AndL3Type();
+
+    /**
+     * 查询类型数据，仅返回L1和L2级类型数据
+     * @return
+     */
+    TypeCloudPlatformModel findL1AndL2Type();
 }

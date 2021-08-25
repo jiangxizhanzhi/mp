@@ -1,7 +1,9 @@
 package cn.cyberpeace.mp.devops.cluster.converter.model;
 
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtGateway;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtImageInfo;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtVm;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -34,14 +36,29 @@ public class ImageConvertModel extends BasePageConvertModel{
     private Integer subCategory;
 
     /**
-     * 系统信息
+     * 镜像类型
      */
-    private ExtSystemInfo extSystemInfo;
+    private String imageType;
 
     /**
      * 描述
      */
     private String description;
+
+    /**
+     * 系统信息
+     */
+    private ExtSystemInfo extSystemInfo;
+
+    /**
+     * 镜像信息
+     */
+    private ExtImageInfo extImageInfo;
+
+    /**
+     * 虚拟机信息
+     */
+    private ExtVm extVm;
 
     /**
      * 网关信息

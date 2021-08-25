@@ -80,6 +80,7 @@ public class BaseServiceImpl {
         String result = "";
         try {
             result =  HttpUtils.getInstance().sendGet(url);
+            log.info("=====GET调用url：{},对应返回结果信息：{}",url,result);
             model = JsonUtils.toSnakeObject(result,valueType);
         } catch (IOException e) {
             log.info("=====GET调用url：{},对应返回结果信息：{},报错信息：{}",url,result,e.getMessage());

@@ -3,32 +3,34 @@ package cn.cyberpeace.mp.devops.cluster.converter.impl;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.LocalDateTimeUtils;
 import cn.cyberpeace.mp.devops.cluster.converter.ImagesConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageAuthConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertPageModel;
 import cn.cyberpeace.mp.devops.cluster.dto.ImageDeleteDTO;
+import cn.cyberpeace.mp.devops.cluster.enums.ImageTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.PublicEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.RoleEnum;
-import cn.cyberpeace.mp.devops.cluster.model.Device;
-import cn.cyberpeace.mp.devops.cluster.model.DeviceCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.ImageAuthModel;
-import cn.cyberpeace.mp.devops.cluster.model.ImageModel;
+import cn.cyberpeace.mp.devops.cluster.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtVm;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageAuthMapper;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
 import cn.cyberpeace.mp.devops.cluster.request.*;
+import cn.cyberpeace.mp.devops.cluster.service.ContainerService;
 import cn.cyberpeace.mp.devops.cluster.service.DeviceService;
 import cn.cyberpeace.mp.devops.cluster.service.ImagesService;
+import cn.cyberpeace.mp.devops.cluster.service.VmService;
 import com.alibaba.fastjson.JSONArray;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -46,36 +48,25 @@ public class ImagesConverterImpl implements ImagesConverter {
 
     private DeviceService deviceService;
 
+    private VmService vmService;
+
+    private ContainerService containerService;
+
     @Autowired
     public ImagesConverterImpl(ImagesService imagesService, ImageMapper imageMapper,DeviceService deviceService,
-                               ImageAuthMapper imageAuthMapper) {
+                               ImageAuthMapper imageAuthMapper,VmService vmService,ContainerService containerService) {
         this.imagesService = imagesService;
         this.imageMapper = imageMapper;
         this.deviceService = deviceService;
         this.imageAuthMapper = imageAuthMapper;
+        this.vmService = vmService;
+        this.containerService = containerService;
     }
 
     @Override
     public ImageConvertPageModel page(ImagePageRequest request) {
 
-        HumanCondition outerCondition = new HumanCondition();
-        if (Objects.nonNull(request.getImageType())) {
-            outerCondition.filterEqual("image_type", request.getImageType());
-        }
-        if (StringUtils.isNotBlank(request.getName())) {
-            outerCondition.filterContains("name", request.getName());
-        }
-        if (Objects.nonNull(request.getRole())) {
-            outerCondition.filterEqual("role", request.getRole());
-        }
-        if (Objects.nonNull(request.getMainCategory())) {
-            outerCondition.filterEqual("main_category", request.getMainCategory());
-        }
-        if (Objects.nonNull(request.getSubCategory())) {
-            outerCondition.filterEqual("sub_category", request.getSubCategory());
-        }
-        outerCondition.pagination(request.getPage(), request.getPerPage());
-        outerCondition.orderBy(ImageModel::getCreateTime);
+        HumanCondition outerCondition = request.wrapperHumanCondition();
 
         List<ImageModel> imageModels = imageAuthMapper.listTargetsByOwner("admin",outerCondition);
 
@@ -107,15 +98,9 @@ public class ImagesConverterImpl implements ImagesConverter {
 //        }
         Device device = imagesService.add(convertRequest(request));
         if (Objects.nonNull(device) && device.isSuccess()) {
-
             ImageModel imageModel = convertDevice(device);
             imageModel.setIsPublic(PublicEnum.ALL_PUBLIC.toValue());
             imageMapper.insert(imageModel);
-
-//            ImageAuthModel imageAuthModel = new ImageAuthModel();
-//            imageAuthModel.setOwner("admin");
-//            imageAuthModel.setTarget(device.getUuid());
-//            imageAuthMapper.create(imageAuthModel);
         }
         return device.isSuccess();
     }
@@ -125,6 +110,7 @@ public class ImagesConverterImpl implements ImagesConverter {
         Device device = deviceService.findById(id);
         return wrapperImageConvertModel(device);
     }
+
 
     @Transactional
     @Override
@@ -208,7 +194,67 @@ public class ImagesConverterImpl implements ImagesConverter {
     }
 
     @Override
+    public String upload(MultipartFile file) {
+        try {
+           return HttpUtils.doFormDataPost("http://47.102.192.61:9019/cpcloud/device/v1/upload/?module=device&type=vm",multipartFileToFile(file));
+        } catch (Exception e) {
+            log.error("上传文件失败，失败信息：{}",e.getMessage());
+        }
+        return null;
+    }
+
+    public static File multipartFileToFile(MultipartFile file) throws Exception {
+
+        File toFile = null;
+        if (file.equals("") || file.getSize() <= 0) {
+            file = null;
+        } else {
+            InputStream ins = null;
+            ins = file.getInputStream();
+            toFile = new File(file.getOriginalFilename());
+            inputStreamToFile(ins, toFile);
+            ins.close();
+        }
+        return toFile;
+    }
+
+    //获取流文件
+    private static void inputStreamToFile(InputStream ins, File file) {
+        try {
+            OutputStream os = new FileOutputStream(file);
+            int bytesRead = 0;
+            byte[] buffer = new byte[1024];
+            while ((bytesRead = ins.read(buffer, 0, 1024)) != -1) {
+                os.write(buffer, 0, bytesRead);
+            }
+            os.close();
+            ins.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
     public void export(ImagesExportRequest request) {
+
+    }
+
+    @Override
+    public void create(String uuid) {
+        Device device = deviceService.findById(uuid);
+
+        if(ImageTypeEnum.VM.getDesc().equals(device.getImageType())) {
+            VmCreateCloudPlatformModel model = new VmCreateCloudPlatformModel();
+            model.setName(device.getName());
+            model.setImage(device.getName());
+            vmService.create(model);
+        }
+        else if(ImageTypeEnum.CONTAINER.getDesc().equals(device.getImageType())) {
+            ContainerCreateCloudPlatformModel model = new ContainerCreateCloudPlatformModel();
+            model.setName(device.getName());
+            model.setImage(device.getName());
+            containerService.create(model);
+        }
 
     }
 
@@ -269,8 +315,12 @@ public class ImagesConverterImpl implements ImagesConverter {
         imageModel.setName(device.getName());
         imageModel.setMainCategory(device.getCategory());
         imageModel.setSubCategory(device.getSecondCategory());
+        imageModel.setImageType(device.getImageType());
         imageModel.setDescription(device.getDescription());
         imageModel.setExtSystemInfo(device.getExtSystemInfo());
+        imageModel.setExtImageInfo(device.getExtImageInfo());
+        imageModel.setExtVm(device.getExtVm());
+        imageModel.setExtGateway(device.getExtGateway());
         return imageModel;
     }
 

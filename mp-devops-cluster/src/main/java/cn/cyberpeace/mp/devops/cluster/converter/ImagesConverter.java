@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.ImageAuthConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertPageModel;
 import cn.cyberpeace.mp.devops.cluster.request.*;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface ImagesConverter extends BaseConverter{
 
@@ -60,8 +61,21 @@ public interface ImagesConverter extends BaseConverter{
     void auth(ImagesAuthRequest request);
 
     /**
+     * 上传
+     * @param file
+     */
+    String upload(MultipartFile file);
+
+
+    /**
      * 导出
      */
     void export(ImagesExportRequest request);
+
+    /**
+     * 创建虚拟机/容器
+     * @param uuid
+     */
+    void create(String uuid);
 
 }

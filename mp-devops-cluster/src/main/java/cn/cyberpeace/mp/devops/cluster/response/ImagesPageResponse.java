@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.devops.cluster.response;
 
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -42,10 +41,22 @@ public class ImagesPageResponse  extends BaseCloudPlatformResponse  {
     private Integer subCategory;
 
     /**
-     * 系统信息
+     * 虚拟类型：vm/container
      */
-    @ApiModelProperty("系统信息")
-    private ExtSystemInfo extSystemInfo;
+    @ApiModelProperty("虚拟类型：vm/container")
+    private String imageType;
+
+    /**
+     * 操作系统类型
+     */
+    @ApiModelProperty("操作系统类型")
+    private Integer systemType;
+
+    /**
+     * 大小
+     */
+    @ApiModelProperty("大小")
+    private String flavor;
 
     /**
      * 描述
