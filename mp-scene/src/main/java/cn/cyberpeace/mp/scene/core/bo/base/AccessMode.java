@@ -1,17 +1,32 @@
 package cn.cyberpeace.mp.scene.core.bo.base;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.util.Map;
 
 @Data
 public class AccessMode {
+
+    @ApiModelProperty(value = "协议")
     private String protocol;
+
+    @ApiModelProperty(value = "端口")
     private Integer port;
+
+    @ApiModelProperty(value = "用户名")
     private String username;
+
+    @ApiModelProperty(value = "密码")
     private String password;
+
+    @ApiModelProperty(value = "路径")
     private String path;
+
+    @ApiModelProperty(value = "描述")
     private String desc;
+
+    @ApiModelProperty(value = "基础协议tcp/udp")
     private String baseProtocol;
 
     public static class Protocol {

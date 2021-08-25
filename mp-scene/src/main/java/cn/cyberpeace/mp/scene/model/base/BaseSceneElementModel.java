@@ -16,8 +16,12 @@ public class BaseSceneElementModel extends BaseSceneNodeModel {
     private String systemArchitecture;
     @DefaultStr(SystemLanguage.OTHER)
     private String systemLanguage;
-    @DefaultStr
-    private String flavor;
+    @DefaultInt
+    private Integer cpu;
+    @DefaultInt
+    private Integer memory;
+    @DefaultInt
+    private Integer disk;
     @DefaultStr
     private String initCommands;
 

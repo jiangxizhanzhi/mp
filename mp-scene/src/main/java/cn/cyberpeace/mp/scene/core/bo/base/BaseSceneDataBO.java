@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.scene.core.bo.base;
 
 import cn.cyberpeace.mp.base.util.ClassUtils;
 import cn.cyberpeace.mp.scene.model.base.*;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.util.HashMap;
@@ -20,11 +21,14 @@ public abstract class BaseSceneDataBO<
         E extends BaseSceneElementBO<E0, P, E>,
         C extends BaseSceneElementPortConnectionBO<C0, C>,
         T extends BaseSceneTopologyBO<S0, A0, E0, P0, C0, S, A, P, E, C, T>, T1> {
+
+    @ApiModelProperty(value = "拓扑数据")
     private T topology;
 
     /**
      * pluginId: pluginData
      */
+    @ApiModelProperty(value = "插件数据")
     private Map<String, ScenePluginDataBO> plugins;
 
     public T1 export() {

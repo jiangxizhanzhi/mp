@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.cscene.bo.base.BaseCsceneBO;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.model.CsceneRoleModel;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -12,9 +13,13 @@ import java.util.List;
 
 @Data
 public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneRoleBO, CsceneBO> {
+    @ApiModelProperty(value = "综合场景类型")
     private Integer type;
+    @ApiModelProperty(value = "综合场景拓扑配置")
     private SceneConfigDataBO sceneConfig;
+    @ApiModelProperty(value = "综合测试场景实例")
     private List<CsceneInstanceBO> testScenes;
+    @ApiModelProperty(value = "综合应用场景实例")
     private List<CsceneInstanceBO> appScenes;
 
     @Override
