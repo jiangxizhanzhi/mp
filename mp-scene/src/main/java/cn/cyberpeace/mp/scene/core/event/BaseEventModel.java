@@ -25,7 +25,7 @@ public interface BaseEventModel {
 
     void setProcessStatus(Integer processStatus);
 
-    Integer getProcessMessage();
+    String getProcessMessage();
 
-    void setProcessMessage(Integer processMessage);
+    void setProcessMessage(String processMessage);
 }

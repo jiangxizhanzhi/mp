@@ -5,6 +5,6 @@ import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementP
 import lombok.Data;
 
 @Data
-public abstract class BaseCloudPluginSceneElementPortBO<M extends BaseCloudPluginSceneElementPortModel>
-        extends BasePluginSceneElementPortBO<M> {
+public abstract class BaseCloudPluginSceneElementPortBO<M extends BaseCloudPluginSceneElementPortModel,
+        T extends BaseCloudPluginSceneElementPortBO<M, T>> extends BasePluginSceneElementPortBO<M, T> {
 }

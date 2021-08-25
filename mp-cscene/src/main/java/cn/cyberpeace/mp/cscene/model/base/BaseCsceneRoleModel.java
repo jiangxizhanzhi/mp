@@ -7,6 +7,8 @@ import lombok.Data;
 @Data
 public class BaseCsceneRoleModel extends BaseModel {
     @DefaultStr
+    private String cscene;
+    @DefaultStr
     private String parent;
     @DefaultStr
     private String name;

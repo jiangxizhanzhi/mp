@@ -44,12 +44,12 @@ public class SceneConfigController {
 
     @DeleteMapping(params = "id")
     public ServiceResult<Boolean> delete(@RequestParam String id) {
-        return sceneConfigService.delete(id).asResult();
+        return sceneConfigService.delete(id, false).asResult();
     }
 
     @DeleteMapping("/bulk_delete")
     public ServiceResult<Integer> bulkDelete(@RequestBody String[] ids) {
-        return sceneConfigService.bulkDelete(ids).asResult();
+        return sceneConfigService.bulkDelete(ids, false).asResult();
     }
 
 }

@@ -7,7 +7,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-public class SceneElementSnapshotBO extends ModelBO<SceneElementSnapshotModel> {
+public class SceneElementSnapshotBO extends ModelBO<SceneElementSnapshotModel, SceneElementSnapshotBO> {
     private String id;
     private String name;
     private String description;
