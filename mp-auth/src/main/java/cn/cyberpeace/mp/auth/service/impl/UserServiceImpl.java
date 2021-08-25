@@ -659,39 +659,59 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         if (Objects.isNull(userModel)) {
             return null;
         }
+        return doModel2Dto(userModel, true, true);
+    }
+
+
+    @Override
+    public UserDto userModel2UserDtoWithoutOrg(UserModel userModel) {
+        if (Objects.isNull(userModel)) {
+            return null;
+        }
+        return doModel2Dto(userModel, false, true);
+    }
+
+    private UserDto doModel2Dto(UserModel userModel, boolean needOrg, boolean needRole) {
+        Assert.notEmpty(userModel.getId(), "用户ID不能为空！");
 
         UserDto userDto = new UserDto();
         BeanUtils.copyProperties(userModel, userDto);
         // 过期状态处理
         processExpiredStatus(userDto);
 
-        List<OrgModel> orgs = orgUserService.listOrgsByUserId(userModel.getId());
-        List<String> orgIds = orgs.stream().map(BaseModel::getId).collect(Collectors.toList());
+        if (needOrg) {
+            List<OrgModel> orgs = orgUserService.listOrgsByUserId(userModel.getId());
+            List<String> orgIds = orgs.stream().map(BaseModel::getId).collect(Collectors.toList());
 
-        List<List<String>> allorgpath = orgs.stream().map(o -> CollectionUtil.toList(StringUtils.split(o.getPath(), AuthConstant.ORG_PATH_SEPARATOR))).collect(Collectors.toList());
-        userDto.setOrgs(orgs);
-        userDto.setOrgIds(orgIds);
-        userDto.setOrgpaths(allorgpath);
-
-        List<RoleModel> roles = userRoleService.listByUserId(userModel.getId());
-        userDto.setRoles(roles);
-
-        boolean isAdmin = roles.stream().anyMatch(r -> r.getIdentifier().equals(AuthConstant.ROLE_ADMIN));
-        boolean isSuperUser = roles.stream().anyMatch(r -> r.getIdentifier().equals(AuthConstant.ROLE_SUPERUSER));
-
-        if (isAdmin) {
-            userDto.setIsAdmin(1);
-        } else {
-            userDto.setIsAdmin(0);
+            List<List<String>> allorgpath = orgs.stream().map(o -> CollectionUtil.toList(StringUtils.split(o.getPath(), AuthConstant.ORG_PATH_SEPARATOR))).collect(Collectors.toList());
+            userDto.setOrgs(orgs);
+            userDto.setOrgIds(orgIds);
+            userDto.setOrgpaths(allorgpath);
         }
 
-        if (isSuperUser) {
-            userDto.setIsSuperUser(1);
-        } else {
-            userDto.setIsSuperUser(0);
+
+        if(needRole) {
+            List<RoleModel> roles = userRoleService.listByUserId(userModel.getId());
+            userDto.setRoles(roles);
+
+            boolean isAdmin = roles.stream().anyMatch(r -> r.getIdentifier().equals(AuthConstant.ROLE_ADMIN));
+            boolean isSuperUser = roles.stream().anyMatch(r -> r.getIdentifier().equals(AuthConstant.ROLE_SUPERUSER));
+
+            if (isAdmin) {
+                userDto.setIsAdmin(1);
+            } else {
+                userDto.setIsAdmin(0);
+            }
+
+            if (isSuperUser) {
+                userDto.setIsSuperUser(1);
+            } else {
+                userDto.setIsSuperUser(0);
+            }
         }
 
         return userDto;
+
     }
 
     @Override

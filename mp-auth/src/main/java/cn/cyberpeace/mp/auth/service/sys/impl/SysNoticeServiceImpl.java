@@ -86,10 +86,10 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
     @Override
     public int unReadCount() {
-        HumanCondition condition = new HumanCondition();
-        condition.distinct();
-        int noticeCnt = getModelMapper().total(condition);
-
+        SysNoticePageRequest pageRequest = new SysNoticePageRequest();
+        pageRequest.ensure();
+        PageInfo pageInfo = currentUserPage(pageRequest);
+        int noticeCnt = (int) pageInfo.getTotal();
         int readedOrUnpushCnt = noticeReadMapper.countIsReadedOrIsUnPush();
         int unreadCnt = noticeCnt - readedOrUnpushCnt;
         return unreadCnt <= 0 ? 0 : unreadCnt;
