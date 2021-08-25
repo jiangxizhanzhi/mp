@@ -71,7 +71,7 @@ mp:
       es-username: admin
       es-password: SecretPassword
     wazuh-probe-manager:
-      url: http://localhost:8002
+      url: http://10.100.0.102:8002
   log:
     exclude-uri: /login
     exclude-method: OPTIONS

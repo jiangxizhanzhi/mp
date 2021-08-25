@@ -1,7 +1,9 @@
 package cn.cyberpeace.mp.datasandtable.repository;
 
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.datasandtable.config.SituationAwareConfig;
+import cn.cyberpeace.mp.datasandtable.constant.SituationalAwareErrorCode;
 import cn.cyberpeace.mp.datasandtable.model.ProbeRequest;
 import com.alibaba.fastjson.JSONObject;
 import java.io.IOException;
@@ -35,15 +37,32 @@ public class WazuhProbeManagerRepository {
         try {
             return HttpUtils.sendPost(sentUrl, jsonObject.toJSONString());
         } catch (IOException e) {
-            log.error("add script error: ", ExceptionUtils.getStackTrace(e));
+            log.error(SituationalAwareErrorCode.PROBE_MANAGER_ADD_ERROR.getMessage(), ExceptionUtils.getStackTrace(e));
+            throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_MANAGER_ADD_ERROR);
         }
-        return null;
     }
 
+    /**
+     * 删除脚本
+     * @param probeId
+     * @return
+     */
+    public String deleteProbeByProbeId(String probeId) {
+        var sentUrl = situationAwareConfig.getWazuhManagerUrl()+"/" + probeId;
+        try {
+            return HttpUtils.sendDelete(sentUrl);
+        } catch (IOException e) {
+            log.error(SituationalAwareErrorCode.PROBE_MANAGER_ADD_ERROR.getMessage(), ExceptionUtils.getStackTrace(e));
+            throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_MANAGER_ADD_ERROR);
+        }
+    }
+
+
+    //todo windows 的场景没有覆盖
     private String buildExecCommandline(ProbeRequest probeRequest) {
         switch (probeRequest.getScriptType()){
             case 0:
-                return "sh " + probeRequest.getProbeName() + ".sh";
+                return "sh " + situationAwareConfig.getWazuhManagerUrl() +probeRequest.getProbeName() + ".sh";
             case 1:
                 return "python " + probeRequest.getProbeName() + ".py";
             default:

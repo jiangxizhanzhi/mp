@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.base.util;
 
+import java.net.URI;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.http.Header;
@@ -9,6 +10,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -164,7 +166,7 @@ public class HttpUtils {
      */
     public static String sendDelete(String url) throws IOException {
         HttpClient client = HttpClientBuilder.create().build();
-        HttpDelete httpDelete = new HttpDelete(url);
+        var httpDelete = new HttpDelete(url);
         RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
         HttpResponse response = client.execute(httpDelete);
         httpDelete.setConfig(requestConfig);
@@ -199,5 +201,8 @@ public class HttpUtils {
         return client;
     }
 }
+
+
+
 
 
