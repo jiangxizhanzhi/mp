@@ -12,13 +12,13 @@ public class SysNoticeReadFields extends BaseModelFields {
     public static final DynamicFields allFields = new DynamicFields(ClassUtils.getBeanClassFields(SysNoticeReadModel.class));
 
     public static final DynamicFields availableFields = new DynamicFields(SysNoticeReadModel::getTenant, SysNoticeReadModel::getNoticeId,
-            SysNoticeReadModel::getReader, SysNoticeReadModel::getReadCount).merge(BaseModelFields.availableFields);
+            SysNoticeReadModel::getUser, SysNoticeReadModel::getReadCount).merge(BaseModelFields.availableFields);
 
     public static final DynamicFields hiddenFields = allFields.subtract(availableFields);
 
     public static final DynamicFields readonlyFields = new DynamicFields().merge(BaseModelFields.readonlyFields);
 
-    public static final DynamicFields searchFields = new DynamicFields(SysNoticeReadModel::getTenant, SysNoticeReadModel::getNoticeId, SysNoticeReadModel::getReader);
+    public static final DynamicFields searchFields = new DynamicFields(SysNoticeReadModel::getTenant, SysNoticeReadModel::getNoticeId, SysNoticeReadModel::getUser);
 
     public static final DynamicFields orderFields = new DynamicFields().merge(BaseModelFields.readonlyFields);
 }

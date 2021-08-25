@@ -3,17 +3,20 @@ package cn.cyberpeace.mp.auth.test;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.OrgDto;
 import cn.cyberpeace.mp.auth.dto.activation.ActivationRequest;
-import cn.cyberpeace.mp.auth.dto.user.UserOlReportCntDto;
+import cn.cyberpeace.mp.auth.model.TargetModel;
+import cn.cyberpeace.mp.auth.model.UserPermissionModel;
 import cn.cyberpeace.mp.auth.repository.OrgMapper;
 import cn.cyberpeace.mp.auth.repository.SysConfigMapper;
-import cn.cyberpeace.mp.auth.service.sys.LicenseService;
+import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
 import cn.cyberpeace.mp.auth.service.OrgService;
+import cn.cyberpeace.mp.auth.service.TargetService;
 import cn.cyberpeace.mp.auth.service.UserHeartbeatService;
 import cn.cyberpeace.mp.auth.service.UserLogService;
-import cn.cyberpeace.mp.auth.service.TargetService;
+import cn.cyberpeace.mp.auth.service.sys.LicenseService;
 import cn.cyberpeace.mp.auth.service.sys.SysActivationService;
 import cn.cyberpeace.mp.auth.util.PasswordStrengthChecker;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.hutool.system.oshi.OshiUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -29,7 +32,6 @@ import org.springframework.web.bind.annotation.RestController;
 import oshi.hardware.ComputerSystem;
 import oshi.hardware.HWDiskStore;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,6 +68,12 @@ public class AuthTestController {
 
     @Autowired
     private SysActivationService activationService;
+
+    @Autowired
+    private UserRoleMapper userRoleMapper;
+
+    @Autowired
+    private UserPermissionTestMapper userPermissionTestMapper;
 
     @ApiOperation("DES加密")
     @PostMapping("/desEncryptPwd")
@@ -120,13 +128,37 @@ public class AuthTestController {
     }
 
     @GetMapping("/testmapper")
-    public void testmapper() {
-//        orgMapper.updatePath("c2e06974488b86f1b126740b242", "123");
-//        int res = sysConfigMapper.updateByKeyName("flag_length", "8");
-//        log.info("{}", res);
+    public void testmapper(HumanCondition condition) {
 
-        List<UserOlReportCntDto> list = heartbeatService.groupCntByUserId(LocalDateTime.now().minusMinutes(100L));
+    }
+
+
+    @GetMapping("/testpermlist")
+    public List<TargetModel> testPermList() {
+        String userId = "3fsss655d87112f4ae094bbaf7083";
+
+        // 自定义条件
+        HumanCondition outerCondition = new HumanCondition();
+        outerCondition.filterContains("name", "题");
+        outerCondition.filterEqual("parent", "item-bank-folder");
+        outerCondition.filterEqual("tenant", "default");
+        outerCondition.pagination(1, 10);
+        outerCondition.orderBy(TargetModel::getId);
+        outerCondition.groupBy(TargetModel::getParent);
+        // 自定义返回field
+        outerCondition.select(TargetModel::getId, TargetModel::getName, TargetModel::getPath, TargetModel::getIdentifier, TargetModel::getParent);
+
+        List<TargetModel> list = userPermissionTestMapper.listTargetsByOwner(userId, outerCondition);
         log.info("{}", list);
+
+
+        UserPermissionModel upmodel = new UserPermissionModel();
+        upmodel.setTarget("123abcd");
+        upmodel.setOwner("123abcd456");
+        boolean result = userPermissionTestMapper.create(upmodel);
+        log.info("{}", result);
+
+        return list;
     }
 
     @GetMapping("/testlicense")
