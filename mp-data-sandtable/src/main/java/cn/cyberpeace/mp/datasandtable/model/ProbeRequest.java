@@ -23,13 +23,13 @@ public class ProbeRequest {
     @ApiModelProperty(value = "探针描述")
     private String des;
 
-    @ApiModelProperty(value = "系统名称 0:linux 1:windows", required = true)
-    @NotNull(message = "系统名称不能为空")
+    @ApiModelProperty(value = "操作系统类型 0:linux 1:windows", required = true)
+    @NotNull(message = "操作系统类型不能为空")
     private Integer osType;
 
     @ApiModelProperty(value = "探针所属分类", required = true)
     @NotNull(message = "探针所属分类不能为空")
-    private Integer type;
+    private Integer probeCategory;
 
     @ApiModelProperty(value = "探针脚本类型 0:shell 1:python", required = true)
     @NotNull(message = "探针脚本类型不能为空")

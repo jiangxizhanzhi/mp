@@ -14,7 +14,7 @@ public class ProbeModel implements Serializable {
 
     private String osType;
 
-    private Integer type;
+    private Integer probeCategory;
 
     private Integer scriptType;
 
@@ -70,12 +70,12 @@ public class ProbeModel implements Serializable {
         this.osType = osType;
     }
 
-    public Integer getType() {
-        return type;
+    public Integer getProbeCategory() {
+        return probeCategory;
     }
 
-    public void setType(Integer type) {
-        this.type = type;
+    public void setProbeCategory(Integer probeCategory) {
+        this.probeCategory = probeCategory;
     }
 
     public Integer getScriptType() {

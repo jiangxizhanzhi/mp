@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.datasandtable.service;
 
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.util.TextUtils;
 import cn.cyberpeace.mp.datasandtable.model.ProbeModel;
@@ -10,6 +11,7 @@ import cn.cyberpeace.mp.datasandtable.model.ProbeResult;
 import cn.cyberpeace.mp.datasandtable.model.ProbeSearchRequest;
 import cn.cyberpeace.mp.datasandtable.repository.ProbeModelMapper;
 import cn.cyberpeace.mp.datasandtable.repository.ProbeParamModelMapper;
+import cn.cyberpeace.mp.datasandtable.repository.WazuhProbeManagerRepository;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
@@ -29,6 +31,9 @@ public class ProbeService {
     @Autowired
     private ProbeParamModelMapper probeParamModelMapper;
 
+    @Autowired
+    private WazuhProbeManagerRepository wazuhProbeManagerRepository;
+
     /**
      * 新增探针
      * @param probeRequest
@@ -43,6 +48,7 @@ public class ProbeService {
         probeModel.setScriptContent(probeRequest.getScriptContent().getBytes(StandardCharsets.UTF_8));
         probeModelMapper.insert(probeModel);
         insertProbeParams(probeRequest, probeModel.getId());
+        wazuhProbeManagerRepository.addScript(probeRequest);
     }
 
     /**
@@ -53,6 +59,7 @@ public class ProbeService {
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteProbeById(String probeId) {
         probeParamModelMapper.deleteParamByProbeId(probeId);
+        wazuhProbeManagerRepository.deleteProbeByProbeId(probeId);
         return probeModelMapper.deleteByProbeId(probeId) >0;
     }
 
@@ -96,11 +103,16 @@ public class ProbeService {
         probeParamModelMapper.deleteParamByProbeId(probeRequest.getProbeId());
         insertProbeParams(probeRequest, probeRequest.getProbeId());
         //修改探针参数
-        ProbeModel probeModel = new ProbeModel();
+        var probeModel = new ProbeModel();
         BeanUtils.copyProperties(probeRequest, probeModel);
         probeModel.setUpdateTime(new Date());
         probeModel.setId(probeRequest.getProbeId());
         probeModel.setScriptContent(probeRequest.getScriptContent().getBytes(StandardCharsets.UTF_8));
+
+        //wazuh 远程操作
+        wazuhProbeManagerRepository.deleteProbeByProbeId(probeModel.getId());
+        wazuhProbeManagerRepository.addScript(probeRequest);
+
         return probeModelMapper.updateByProbeId(probeModel);
     }
 
