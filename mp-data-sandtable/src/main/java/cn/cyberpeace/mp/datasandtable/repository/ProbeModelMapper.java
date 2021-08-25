@@ -14,15 +14,7 @@ public interface ProbeModelMapper {
 
     int insert(ProbeModel record);
 
-    int insertSelective(ProbeModel record);
-
     ProbeModel selectByPrimaryKey(Integer pk);
-
-    int updateByPrimaryKeySelective(ProbeModel record);
-
-    int updateByPrimaryKeyWithBLOBs(ProbeModel record);
-
-    int updateByPrimaryKey(ProbeModel record);
 
     int deleteByProbeId(@Param("probeId") String probeId);
 

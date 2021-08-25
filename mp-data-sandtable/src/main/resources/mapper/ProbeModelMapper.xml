@@ -41,11 +41,11 @@
         insert into mp_situation_probe (pk, id, probe_name,
                                         des, OS_type, probe_category,
                                         script_type, create_time, update_time,
-                                        script_content)
+                                        script_content, command_interval)
         values (#{pk,jdbcType=INTEGER}, #{id,jdbcType=VARCHAR}, #{probeName,jdbcType=VARCHAR},
-                #{des,jdbcType=VARCHAR}, #{osType,jdbcType=INTEGER}, #{type,jdbcType=INTEGER},
+                #{des,jdbcType=VARCHAR}, #{osType,jdbcType=INTEGER}, #{probeCategory,jdbcType=INTEGER},
                 #{scriptType,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
-                   , #{scriptContent,jdbcType=LONGVARBINARY})
+                   , #{scriptContent,jdbcType=LONGVARBINARY} , #{commandInterval,jdbcType=VARCHAR})
     </insert>
 
 
@@ -66,7 +66,7 @@
         <if test="probeSearchRequest.keyWord !=null">
             and probe_name like concat('%', #{probeSearchRequest.keyWord}, '%')
         </if>
-        limit #{offset}, #{probeSearchRequest.pageSize}
+        limit #{offset}, #{probeSearchRequest.pageSize} order by update_time desc
     </select>
 
     <select id="countQuery" parameterType="cn.cyberpeace.mp.datasandtable.model.ProbeSearchRequest"
@@ -78,6 +78,7 @@
         <if test="keyWord !=null">
             and probe_name like concat('%', #{keyWord}, '%')
         </if>
+        order by update_time desc
     </select>
 
     <select id="queryByProbeId" parameterType="java.lang.String"

@@ -12,7 +12,7 @@ public class ProbeModel implements Serializable {
 
     private String des;
 
-    private String osType;
+    private Integer osType;
 
     private Integer probeCategory;
 
@@ -62,11 +62,11 @@ public class ProbeModel implements Serializable {
         this.des = des == null ? null : des.trim();
     }
 
-    public String getOsType() {
+    public Integer getOsType() {
         return osType;
     }
 
-    public void setOsType(String osType) {
+    public void setOsType(Integer osType) {
         this.osType = osType;
     }
 

@@ -25,7 +25,7 @@ public class WazuhProbeManagerRepository {
      * @return String
      */
     public String addScript(ProbeRequest probeRequest) {
-        var sentUrl = situationAwareConfig.getWazuhManagerUrl();
+        var sentUrl = situationAwareConfig.getWazuhManagerUrl() + "/probe";
         var jsonObject = new JSONObject();
         jsonObject.put("ScriptId", probeRequest.getProbeId());
         jsonObject.put("Content", probeRequest.getScriptContent());
