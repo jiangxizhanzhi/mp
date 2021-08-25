@@ -19,7 +19,7 @@
     </resultMap>
     <sql id="Base_Column_List">
         pk
-        , id, probe_name, des, OS_name, type, script_type, create_time, update_time, del_flag
+        , id, probe_name, des, OS_type, probe_category, script_type, create_time, update_time, del_flag, command_interval
     </sql>
     <sql id="Blob_Column_List">
         script_content
@@ -66,7 +66,7 @@
         <if test="probeSearchRequest.keyWord !=null">
             and probe_name like concat('%', #{probeSearchRequest.keyWord}, '%')
         </if>
-        limit #{offset}, #{probeSearchRequest.pageSize} order by update_time desc
+        order by update_time desc limit #{offset}, #{probeSearchRequest.pageSize}
     </select>
 
     <select id="countQuery" parameterType="cn.cyberpeace.mp.datasandtable.model.ProbeSearchRequest"

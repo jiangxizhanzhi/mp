@@ -48,9 +48,11 @@ public class WazuhProbeManagerRepository {
      * @return
      */
     public String deleteProbeByProbeId(String probeId) {
-        var sentUrl = situationAwareConfig.getWazuhManagerUrl()+"/" + probeId;
+        var sentUrl = situationAwareConfig.getWazuhManagerUrl()+"/probe/" + probeId;
         try {
-            return HttpUtils.sendDelete(sentUrl);
+            String deleteResult = HttpUtils.sendDelete(sentUrl);
+            log.info("delete probe id: {} {}:", probeId, deleteResult);
+            return deleteResult;
         } catch (IOException e) {
             log.error(SituationalAwareErrorCode.PROBE_MANAGER_ADD_ERROR.getMessage(), ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_MANAGER_ADD_ERROR);

@@ -48,6 +48,7 @@ public class ProbeService {
         probeModel.setScriptContent(probeRequest.getScriptContent().getBytes(StandardCharsets.UTF_8));
         probeModelMapper.insert(probeModel);
         insertProbeParams(probeRequest, probeModel.getId());
+        probeRequest.setProbeId(probeModel.getId());
         wazuhProbeManagerRepository.addScript(probeRequest);
     }
 
