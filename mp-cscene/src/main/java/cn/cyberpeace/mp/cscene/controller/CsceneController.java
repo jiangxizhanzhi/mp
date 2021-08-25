@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
 import lombok.Data;
@@ -30,6 +31,16 @@ public class CsceneController {
     @PostMapping("/sync")
     public ServiceResult<CsceneBO> sync(@RequestBody CsceneBO csceneBO) {
         return csceneService.sync(csceneBO).asResult();
+    }
+
+    @PostMapping(value = "/test_instance", params = "id")
+    public ServiceResult<CsceneInstanceBO> createTestInstance(@RequestParam String id) {
+        return csceneService.createTestInstance(id, true).asResult();
+    }
+
+    @PostMapping(value = "/app_instance", params = "id")
+    public ServiceResult<CsceneInstanceBO> createAppInstance(@RequestParam String id) {
+        return csceneService.createAppInstance(id, true).asResult();
     }
 
     @DeleteMapping(params = "id")

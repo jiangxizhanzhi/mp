@@ -12,7 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public abstract class BaseSceneElementPortBO<M extends BaseSceneElementPortModel> extends EidBO<M> {
+public abstract class BaseSceneElementPortBO<M extends BaseSceneElementPortModel,
+        T extends BaseSceneElementPortBO<M, T>> extends EidBO<M, T> {
     private String id;
     private String name;
     private Integer type;

@@ -9,7 +9,8 @@ import lombok.Data;
 import org.apache.commons.lang3.ArrayUtils;
 
 @Data
-public class CsceneInstanceBO extends BaseCsceneBO<CsceneInstanceModel, CsceneInstanceRoleModel, CsceneInstaneRoleBO> {
+public class CsceneInstanceBO extends BaseCsceneBO<CsceneInstanceModel, CsceneInstanceRoleModel, CsceneInstaneRoleBO,
+        CsceneInstanceBO> {
     private String cscene;
     private Integer type;
     private SceneDataBO scene;
@@ -33,6 +34,15 @@ public class CsceneInstanceBO extends BaseCsceneBO<CsceneInstanceModel, CsceneIn
             obj.setScene(scene.getTopology().getScene().getEid());
         }
         return obj;
+    }
+
+    public CsceneBO exportToCscene() {
+        var csceneBO = export(CsceneBO.class, CsceneRoleBO.class, CsceneInstanceBO::getType,
+                CsceneInstanceBO::getCscene, CsceneInstanceBO::getScene);
+        if (scene != null) {
+            csceneBO.setSceneConfig(scene.exportToSceneConfig());
+        }
+        return csceneBO;
     }
 
 }

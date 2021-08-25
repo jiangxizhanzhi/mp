@@ -18,6 +18,7 @@ import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneRoleMapper;
 import cn.cyberpeace.mp.scene.service.SceneConfigService;
+import cn.cyberpeace.mp.scene.service.SceneService;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -43,6 +44,7 @@ public class CsceneHandler extends BaseCsceneHandler<
         CsceneModel, CsceneRoleModel, CsceneRoleBO,
         CsceneBO, CsceneMapper, CsceneRoleMapper> {
 
+    private SceneService sceneService;
     private SceneConfigService sceneConfigService;
     private CsceneInstanceMapper csceneInstanceMapper;
     private CsceneInstanceRoleMapper csceneInstanceRoleMapper;
@@ -99,9 +101,23 @@ public class CsceneHandler extends BaseCsceneHandler<
         return true;
     }
 
+    private CsceneInstanceBO createInstance(int type) {
+        var cscene = getCscene();
+        if (cscene == null) {
+            return null;
+        }
+        var csceneInstance = cscene.exportToCsceneInstance();
+        csceneInstance.setCscene(getCsceneId());
+        csceneInstance.setType(type);
+        var instanceHandler = new CsceneInstanceHandler(csceneInstance);
+        instanceHandler.create();
+        return instanceHandler.toData();
+    }
+
     @Override
     public void initBase() {
         super.initBase();
+        sceneService = BeanUtils.getBean(SceneService.class);
         sceneConfigService = BeanUtils.getBean(SceneConfigService.class);
         csceneInstanceMapper = BeanUtils.getBean(CsceneInstanceMapper.class);
         csceneInstanceRoleMapper = BeanUtils.getBean(CsceneInstanceRoleMapper.class);
@@ -124,6 +140,39 @@ public class CsceneHandler extends BaseCsceneHandler<
             reloadCsceneInstances();
         }
         return getCscene();
+    }
+
+    public CsceneInstanceBO createTestInstance(boolean unique) {
+        var cscene = getCscene();
+        if (cscene == null) {
+            return null;
+        }
+
+        if (unique) {
+            reloadCsceneInstances();
+            var testScenes = cscene.getTestScenes();
+            if (testScenes != null && !testScenes.isEmpty()) {
+                return null;
+            }
+        }
+        return createInstance(CsceneInstanceModel.Type.TEST);
+    }
+
+    public CsceneInstanceBO createAppInstance(boolean unique) {
+        var cscene = getCscene();
+        if (cscene == null) {
+            return null;
+        }
+
+        if (unique) {
+            reloadCsceneInstances();
+            var appScenes = cscene.getAppScenes();
+            if (appScenes != null && !appScenes.isEmpty()) {
+                return null;
+            }
+        }
+
+        return createInstance(CsceneInstanceModel.Type.APP);
     }
 
     @Override

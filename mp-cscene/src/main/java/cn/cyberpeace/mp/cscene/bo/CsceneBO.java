@@ -11,7 +11,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import java.util.List;
 
 @Data
-public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneRoleBO> {
+public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneRoleBO, CsceneBO> {
     private Integer type;
     private SceneConfigDataBO sceneConfig;
     private List<CsceneInstanceBO> testScenes;
@@ -38,4 +38,12 @@ public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneR
         return obj;
     }
 
+    public CsceneInstanceBO exportToCsceneInstance() {
+        var csceneInstance = export(CsceneInstanceBO.class, CsceneInstaneRoleBO.class,
+                CsceneBO::getType, CsceneBO::getSceneConfig, CsceneBO::getTestScenes, CsceneBO::getAppScenes);
+        if (sceneConfig != null) {
+            csceneInstance.setScene(sceneConfig.exportToScene());
+        }
+        return csceneInstance;
+    }
 }

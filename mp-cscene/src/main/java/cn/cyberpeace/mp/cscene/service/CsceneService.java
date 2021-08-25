@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.core.CsceneHandler;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
@@ -27,13 +28,23 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
 
     public ServiceResult<CsceneBO> getById(String id) {
         var csceneHandler = new CsceneHandler(id);
-        return new ServiceResult<>(csceneHandler.toData());
+        return new ServiceResult<>(csceneHandler.toData(true));
     }
 
     public ServiceResult<CsceneBO> sync(CsceneBO csceneBO) {
         var csceneHandler = new CsceneHandler(csceneBO);
         csceneHandler.save();
         return new ServiceResult<>(csceneHandler.toData());
+    }
+
+    public ServiceResult<CsceneInstanceBO> createTestInstance(String csceneId, boolean unique) {
+        var csceneHandler = new CsceneHandler(csceneId);
+        return new ServiceResult<>(csceneHandler.createTestInstance(unique));
+    }
+
+    public ServiceResult<CsceneInstanceBO> createAppInstance(String csceneId, boolean unique) {
+        var csceneHandler = new CsceneHandler(csceneId);
+        return new ServiceResult<>(csceneHandler.createTestInstance(unique));
     }
 
     @Override

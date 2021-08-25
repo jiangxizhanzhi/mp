@@ -4,7 +4,8 @@ import cn.cyberpeace.mp.scene.model.base.BaseSceneElementPortConnectionModel;
 import lombok.Data;
 
 @Data
-public abstract class BaseSceneElementPortConnectionBO<M extends BaseSceneElementPortConnectionModel> extends EidBO<M> {
+public abstract class BaseSceneElementPortConnectionBO<M extends BaseSceneElementPortConnectionModel,
+        T extends BaseSceneElementPortConnectionBO<M, T>> extends EidBO<M, T> {
     private String id;
     private String source;
     private String target;

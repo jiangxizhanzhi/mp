@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.cscene.bo.base;
 import cn.cyberpeace.mp.base.bo.ModelBO;
 import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.base.util.JsonUtils;
+import cn.cyberpeace.mp.base.util.SerializableFunction;
 import cn.cyberpeace.mp.cscene.model.base.BaseCsceneRoleModel;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Data;
@@ -11,15 +12,16 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
-public abstract class BaseCsceneRoleBO<R extends BaseCsceneRoleBO<R, M>, M extends BaseCsceneRoleModel>
-        extends ModelBO<M> {
+public abstract class BaseCsceneRoleBO<M extends BaseCsceneRoleModel, T extends BaseCsceneRoleBO<M, T>>
+        extends ModelBO<M, T> {
     private String id;
     private String name;
     private List<String> assetNodes;
     private List<String> visibleNodes;
-    private List<R> children;
+    private List<T> children;
 
     @Override
     public void fromModel(M obj, String... ignoreFields) {
@@ -44,5 +46,30 @@ public abstract class BaseCsceneRoleBO<R extends BaseCsceneRoleBO<R, M>, M exten
             obj.setVisibleNodes(JsonUtils.toJsonString(visibleNodes));
         }
         return obj;
+    }
+
+    @Override
+    public T export() {
+        setId(null);
+        if (children != null) {
+            setChildren(children.stream().map(BaseCsceneRoleBO::export).collect(Collectors.toList()));
+        }
+        return (T) this;
+    }
+
+    @Override
+    public <P1> P1 export(Class<P1> pClass, String... ignoreFields) {
+        return super.export(pClass, ArrayUtils.addAll(ignoreFields, "children"));
+    }
+
+    @SafeVarargs
+    public final <P extends BaseCsceneRoleBO<?, P>> P exportIgnore2(Class<P> pClass,
+                                                                    SerializableFunction<T>... ignoreFieldGetters) {
+        var pObj = super.exportIgnore(pClass, ignoreFieldGetters);
+        if (children != null) {
+            pObj.setChildren(children.stream().map(child -> child.exportIgnore2(pClass, ignoreFieldGetters))
+                    .collect(Collectors.toList()));
+        }
+        return pObj;
     }
 }

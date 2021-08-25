@@ -6,7 +6,6 @@ import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.base.util.ClassUtils;
-import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.base.BaseCsceneBO;
 import cn.cyberpeace.mp.cscene.bo.base.BaseCsceneRoleBO;
 import cn.cyberpeace.mp.cscene.model.base.BaseCsceneModel;
@@ -42,8 +41,8 @@ import java.util.stream.Collectors;
 public abstract class BaseCsceneHandler<
         C0 extends BaseCsceneModel,
         R0 extends BaseCsceneRoleModel,
-        R extends BaseCsceneRoleBO<R, R0>,
-        C extends BaseCsceneBO<C0, R0, R>,
+        R extends BaseCsceneRoleBO<R0, R>,
+        C extends BaseCsceneBO<C0, R0, R, C>,
         M1 extends BaseCsceneMapper<C0>,
         M2 extends BaseCsceneRoleMapper<R0>> {
     /** 综合场景id */

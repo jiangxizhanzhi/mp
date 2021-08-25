@@ -21,8 +21,8 @@ import java.util.List;
 @ClassFieldClasses({
         CsceneInstanceModel.class,
         CsceneInstanceRoleModel.class,
-        CsceneInstaneRoleBO.class,
         CsceneInstanceBO.class,
+        CsceneInstaneRoleBO.class,
 })
 @BeanFieldClasses({
         CsceneInstanceMapper.class,
@@ -52,6 +52,12 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         init(csceneObj, roleObjs);
     }
 
+    public void create() {
+        var cscene = getCscene();
+        cscene.setScene(sceneService.create(cscene.getScene()).getSource());
+        save();
+    }
+
     @Override
     public String getSceneId(CsceneInstanceModel csceneObj) {
         return csceneObj.getScene();
@@ -63,9 +69,7 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
     }
 
     @Override
-    public void saveScene(CsceneInstanceBO csceneBO) {
-//        csceneBO.setScene(sceneService.create(csceneBO.getScene(), false).getSource());
-    }
+    public void saveScene(CsceneInstanceBO csceneBO) {}
 
     @Override
     public void deleteScene(CsceneInstanceBO csceneBO) {

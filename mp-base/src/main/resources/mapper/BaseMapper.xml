@@ -11,6 +11,7 @@
         <if test="countField != null">count(${countField})</if>
         <if test="countField == null">count(*)</if>
     </sql>
+    <sql id="countStar"><if test="true">count(*)</if></sql>
     <sql id="countPk"><if test="true">count(pk)</if></sql>
     <sql id="and">
         <if test="condition.andi != null and !condition.andi.isEmpty()">
@@ -144,7 +145,7 @@
         SELECT <if test="condition.distinct">DISTINCT</if> <include refid="cn.cyberpeace.mp.base.selectFields" /> FROM ${table}
     </sql>
     <sql id="totalTemplate">
-        SELECT <include refid="cn.cyberpeace.mp.base.countPk" /> FROM ${table}
+        SELECT <include refid="cn.cyberpeace.mp.base.countStar" /> FROM ${table}
     </sql>
     <sql id="getTemplate">
         SELECT <include refid="cn.cyberpeace.mp.base.selectFields" /> FROM ${table}
