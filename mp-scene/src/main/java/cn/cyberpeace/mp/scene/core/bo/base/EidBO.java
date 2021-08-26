@@ -5,7 +5,7 @@ import cn.cyberpeace.mp.base.model.BaseModel;
 import lombok.Data;
 
 @Data
-public abstract class EidBO<M extends BaseModel> extends ModelBO<M> {
+public abstract class EidBO<M extends BaseModel, T extends EidBO<M, T>> extends ModelBO<M, T> {
     private String eid;
 
     @Override
@@ -20,4 +20,11 @@ public abstract class EidBO<M extends BaseModel> extends ModelBO<M> {
         obj.setId(eid);
         return obj;
     }
+
+    @Override
+    public T export() {
+        setEid(null);
+        return (T) this;
+    }
+
 }

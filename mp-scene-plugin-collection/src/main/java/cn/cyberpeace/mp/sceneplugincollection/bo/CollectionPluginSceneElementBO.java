@@ -5,7 +5,8 @@ import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneElement
 import lombok.Data;
 
 @Data
-public class CollectionPluginSceneElementBO extends BaseCollectionPluginSceneElementBO<CollectionPluginSceneElementModel> {
+public class CollectionPluginSceneElementBO
+        extends BaseCollectionPluginSceneElementBO<CollectionPluginSceneElementModel, CollectionPluginSceneElementBO> {
     @Override
     public CollectionPluginSceneElementModel createModel() {
         return new CollectionPluginSceneElementModel();

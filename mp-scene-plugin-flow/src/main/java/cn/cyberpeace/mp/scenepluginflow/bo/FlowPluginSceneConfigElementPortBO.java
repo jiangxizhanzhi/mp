@@ -6,7 +6,8 @@ import lombok.Data;
 
 @Data
 public class FlowPluginSceneConfigElementPortBO
-        extends BaseFlowPluginSceneElementPortBO<FlowPluginSceneConfigElementPortModel> {
+        extends BaseFlowPluginSceneElementPortBO<FlowPluginSceneConfigElementPortModel,
+        FlowPluginSceneConfigElementPortBO> {
     @Override
     public FlowPluginSceneConfigElementPortModel createModel() {
         return new FlowPluginSceneConfigElementPortModel();

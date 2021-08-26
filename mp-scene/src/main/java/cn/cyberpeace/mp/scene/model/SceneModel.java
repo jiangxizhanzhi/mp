@@ -23,7 +23,7 @@ public class SceneModel extends BaseSceneModel implements BaseEventModel {
     @DefaultInt
     private Integer processStatus;
     @DefaultStr
-    private Integer processMessage;
+    private String processMessage;
 
     public static class Event {
         public static final Integer DEFAULT = 0;
