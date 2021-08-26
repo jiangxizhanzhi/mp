@@ -64,12 +64,43 @@ public class WazuhProbeManagerRepository {
     private String buildExecCommandline(ProbeRequest probeRequest) {
         switch (probeRequest.getScriptType()){
             case 0:
-                return "sh " + situationAwareConfig.getWazuhManagerUrl() +probeRequest.getProbeName() + ".sh";
+                return "sh " + situationAwareConfig.getScriptPath() + buildProbeFileName(probeRequest);
             case 1:
-                return "python " + probeRequest.getProbeName() + ".py";
+                return "python " + situationAwareConfig.getScriptPath() + buildProbeFileName(probeRequest);
             default:
                 break;
         }
         return null;
+    }
+
+
+    private String buildProbeFileName(ProbeRequest probeRequest) {
+        String osType;
+        String fileSubffix;
+        switch (probeRequest.getOsType()) {
+            case 0:
+                osType = "linux";
+                break;
+            case 1:
+                osType = "windows";
+                break;
+            default:
+                osType = "linux";
+                break;
+        }
+
+        switch (probeRequest.getScriptType()) {
+            case 0:
+                fileSubffix = ".sh";
+                break;
+            case 1:
+                fileSubffix = ".py";
+                break;
+            default:
+                fileSubffix = ".sh";
+                break;
+        }
+
+        return probeRequest.getProbeName() + "_" + osType + fileSubffix;
     }
 }

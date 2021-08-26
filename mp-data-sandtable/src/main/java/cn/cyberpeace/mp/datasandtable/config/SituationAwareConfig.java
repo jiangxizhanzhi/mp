@@ -19,4 +19,7 @@ public class SituationAwareConfig {
 
     @Value("${mp.datasandtable.wazuh-probe-manager.url}")
     private String wazuhManagerUrl;
+
+    @Value("${mp.datasandtable.wazuh-probe-manager.agent-script-path}")
+    private String scriptPath;
 }

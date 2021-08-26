@@ -102,7 +102,8 @@
             OS_type        = #{osType,jdbcType=VARCHAR},
             probe_category = #{probeCategory,jdbcType=INTEGER},
             script_type    = #{scriptType,jdbcType=INTEGER},
-            update_time    = #{updateTime,jdbcType=TIMESTAMP} command_interval = #{commandInterval,jdbcType=VARCHAR}
+            update_time    = #{updateTime,jdbcType=TIMESTAMP},
+            command_interval = #{commandInterval,jdbcType=VARCHAR}
         where id = #{id,jdbcType=VARCHAR}
     </update>
 </mapper>

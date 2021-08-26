@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.datasandtable.service;
 
-import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.util.TextUtils;
 import cn.cyberpeace.mp.datasandtable.model.ProbeModel;
@@ -110,11 +109,12 @@ public class ProbeService {
         probeModel.setId(probeRequest.getProbeId());
         probeModel.setScriptContent(probeRequest.getScriptContent().getBytes(StandardCharsets.UTF_8));
 
+        var rows = probeModelMapper.updateByProbeId(probeModel);
         //wazuh 远程操作
         wazuhProbeManagerRepository.deleteProbeByProbeId(probeModel.getId());
         wazuhProbeManagerRepository.addScript(probeRequest);
 
-        return probeModelMapper.updateByProbeId(probeModel);
+        return rows;
     }
 
 
