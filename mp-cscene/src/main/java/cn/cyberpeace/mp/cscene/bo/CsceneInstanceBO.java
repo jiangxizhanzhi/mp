@@ -10,7 +10,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.apache.commons.lang3.ArrayUtils;
 
-@ApiModel(value = "综合场景实例数据")
+@ApiModel(description = "综合场景实例数据")
 @Data
 public class CsceneInstanceBO extends BaseCsceneBO<CsceneInstanceModel, CsceneInstanceRoleModel, CsceneInstaneRoleBO,
         CsceneInstanceBO> {

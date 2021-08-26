@@ -12,7 +12,7 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.List;
 
-@ApiModel(value = "综合场景数据")
+@ApiModel(description = "综合场景数据")
 @Data
 public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneRoleBO, CsceneBO> {
     @ApiModelProperty(value = "综合场景类型")
