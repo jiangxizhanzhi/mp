@@ -20,7 +20,7 @@ public class AddVmRequest {
     private String image;
     private int cpu = 2;
     private int ram = 4096;
-    private int disk = 40;
+    private int disk = 100;
     private String requestUser;
     private String host;
     private List<Networks> networks;

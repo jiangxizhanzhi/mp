@@ -59,9 +59,9 @@ public class FlowActuatorModel extends BaseModel {
     private String serverIp;
 
     /**
-     * 服务端mac
+     * trex服务端mac
      */
-    @ApiModelProperty(value = "服务端mac")
+    @ApiModelProperty(value = "trex服务端mac")
     @DefaultStr
     private String serverMac;
 
@@ -80,9 +80,9 @@ public class FlowActuatorModel extends BaseModel {
     private String clientIp;
 
     /**
-     * 客户端mac
+     * trex客户端mac
      */
-    @ApiModelProperty(value = "客户端mac")
+    @ApiModelProperty(value = "trex客户端mac")
     @DefaultStr
     private String clientMac;
 

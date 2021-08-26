@@ -25,6 +25,7 @@ import cn.cyberpeace.mp.flow.request.*;
 import cn.cyberpeace.mp.flow.service.FlowInfoService;
 import cn.cyberpeace.mp.flow.service.FlowTaskService;
 import cn.cyberpeace.mp.flow.service.field.FlowTaskFields;
+import cn.cyberpeace.mp.flow.util.CommonUtil;
 import cn.cyberpeace.mp.flow.util.FlowExecuteScheduleUtil;
 import cn.cyberpeace.mp.flow.util.HttpDeleteUtil;
 import cn.cyberpeace.mp.flow.util.ResponseUtils;
@@ -56,12 +57,6 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
      */
     @Value("${mp.flow.actuator-resource-url}")
     private String actuatorResourceUrl;
-
-    /**
-     * 流量发生平台任务地址
-     */
-    @Value("${mp.flow.actuator-task-url}")
-    private String actuatorTaskUrl;
 
     @Autowired
     private FastDFSClient fastDFSClient;
@@ -101,7 +96,19 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                     (TaskStatusEnum.RUNNING.toValue() == flowTaskModel.getTaskStatus()) ||
                     TaskStatusEnum.STOPING.toValue() == flowTaskModel.getTaskStatus()) {
                 // 当前任务处于运行中或者停止中，重新从流量发生平台获取任务最新状态
-                JSONArray rows = this.queryTaskStatus(Collections.singletonList(flowTaskModel.getThirdTaskId()));
+                // 流量执行器信息查询
+                String sceneId = flowTaskModel.getSceneId();
+                if (StringUtils.isBlank(sceneId)) {
+                    log.error("sceneId in task is empty");
+                    return ServiceResult.success(flowTaskModel);
+                }
+                FlowActuatorModel flowActuatorModel = flowActuatorMapper.selectBySceneId(sceneId);
+                if (Objects.isNull(flowActuatorModel)) {
+                    log.error("flow actuator is empty for sceneId:{}", sceneId);
+                    return ServiceResult.success(flowTaskModel);
+                }
+
+                JSONArray rows = this.queryTaskStatus(Collections.singletonList(flowTaskModel.getThirdTaskId()), CommonUtil.getHostUrl(flowActuatorModel.getIp()));
                 if (Objects.nonNull(rows)) {
                     int taskStatus = rows.getJSONObject(0).getInteger("status");
                     flowTaskModel.setTaskStatus(taskStatus);
@@ -126,7 +133,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
     public ListObjResult<FlowTaskModel> pageFlowTask(QueryParams queryParams) {
         ListObjResult<FlowTaskModel> listObjResult = list(queryParams).getSource();
         if (CollectionUtils.isNotEmpty(listObjResult.getList())) {
-            // 过滤Trex流量发生平台、状态为执行中和停止中的任务
+            // 过滤Trex流量发生平台：状态为执行中和停止中的任务
             List<FlowTaskModel> taskModelList = listObjResult.getList().stream().filter(model ->
                     FlowPlatformEnum.TREX.toValue() == model.getFlowPlatform() &&
                             StringUtils.isNotBlank(model.getThirdTaskId()) &&
@@ -135,10 +142,22 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                     .collect(Collectors.toList());
 
             if (CollectionUtils.isNotEmpty(taskModelList)) {
+                // 流量执行器信息查询
+                String sceneId = taskModelList.get(0).getSceneId();
+                if (StringUtils.isBlank(sceneId)) {
+                    log.error("sceneId in task is empty");
+                    return listObjResult;
+                }
+                FlowActuatorModel flowActuatorModel = flowActuatorMapper.selectBySceneId(sceneId);
+                if (Objects.isNull(flowActuatorModel)) {
+                    log.error("flow actuator is empty for sceneId:{}", sceneId);
+                    return listObjResult;
+                }
+
                 List<String> thirdTaskIds =
                         taskModelList.stream().map(FlowTaskModel::getThirdTaskId).collect(Collectors.toList());
 
-                JSONArray rows = this.queryTaskStatus(thirdTaskIds);
+                JSONArray rows = this.queryTaskStatus(thirdTaskIds, CommonUtil.getHostUrl(flowActuatorModel.getIp()));
                 if (Objects.nonNull(rows)) {
                     taskModelList.forEach(task -> {
                         for (int i = 0; i < rows.size(); i++) {
@@ -253,9 +272,14 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                 String flowName =
                         flowInfoModel.getTitle() + System.currentTimeMillis() + "." + flowInfoModel.getScriptFile().split(BaseConstants.SPOT)[1];
                 scriptsRequest.setName(flowName);
-                // TODO 默认执行脚本命令
-                scriptsRequest.setRunCmd("cd");
-                scriptsRequest.setGetResultCmd("cd");
+                // 默认执行脚本命令
+                String runCmd = "";
+                if (flowName.endsWith(".py")) {
+                    runCmd = "python3";
+                } else if (flowName.endsWith(".sh")) {
+                    runCmd = "bash";
+                }
+                scriptsRequest.setRunCmd(runCmd);
                 JSONObject object = JSONObject.parseObject(JsonUtils.toUnderlineJSONString(scriptsRequest));
                 object.put("fileName", flowName);
 
@@ -267,7 +291,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
 
                 if (ResponseUtils.checkResponse(scriptObj)) {
                     // 解析返回的uuid
-                    String uuid = scriptObj.getString(BaseConstants.STR_DATA);
+                    String uuid = scriptObj.getJSONObject(BaseConstants.STR_DATA).getString("uuid");
                     flowTaskModel.setThirdFlowId(uuid);
                 } else {
                     log.error("add script file error");
@@ -372,8 +396,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                     }
 
                     // 异步删除流量平台任务
-                    asyncPlatFlowTaskService.deletePlatFlowTask(oldModel.getResourceType(),
-                            Collections.singletonList(flowTaskModel.getThirdTaskId()));
+                    asyncPlatFlowTaskService.deletePlatFlowTask(oldModel.getResourceType(), Collections.singletonList(flowTaskModel));
                 }
             } else {
                 log.warn("delete flow file not exit");
@@ -402,8 +425,8 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
         ListObjResult<FlowTaskModel> flowTaskResult = list(taskParams).getSource();
         List<FlowTaskModel> flowTaskList = flowTaskResult.getList();
 
-        List<String> pcapThirdTaskIds = new ArrayList<>();
-        List<String> scriptThirdTaskIds = new ArrayList<>();
+        List<FlowTaskModel> pcapTaskModels = new ArrayList<>();
+        List<FlowTaskModel> scriptTaskModels = new ArrayList<>();
 
         if (CollectionUtils.isNotEmpty(flowTaskList)) {
             QueryParams flowInfoParams = new QueryParams();
@@ -418,26 +441,20 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                 // 过滤出所有pcap数据
                 List<String> pcapIdList =
                         infoModelList.stream().filter(model -> (ResourceTypeEnum.PACP.toValue() == model.getResourceType())).map(FlowInfoModel::getId).collect(Collectors.toList());
-                List<FlowTaskModel> pcapTaskModels =
-                        flowTaskList.stream().filter(task ->
+                pcapTaskModels = flowTaskList.stream().filter(task ->
                                 FlowPlatformEnum.TREX.toValue() == task.getFlowPlatform() &&
                                         pcapIdList.contains(task.getFlowId())).collect(Collectors.toList());
                 List<String> pcapThirdFlowIds =
                         pcapTaskModels.stream().map(FlowTaskModel::getThirdFlowId).collect(Collectors.toList());
-                pcapThirdTaskIds =
-                        pcapTaskModels.stream().map(FlowTaskModel::getThirdTaskId).collect(Collectors.toList());
 
                 // 过滤出所有script数据
                 List<String> scriptIdList =
                         infoModelList.stream().filter(model -> (ResourceTypeEnum.SCRIPT.toValue() == model.getResourceType())).map(FlowInfoModel::getId).collect(Collectors.toList());
-                List<FlowTaskModel> scriptTaskModels =
-                        flowTaskList.stream().filter(task ->
+                scriptTaskModels = flowTaskList.stream().filter(task ->
                                 FlowPlatformEnum.TREX.toValue() == task.getFlowPlatform() &&
                                         scriptIdList.contains(task.getFlowId())).collect(Collectors.toList());
                 List<String> scriptThirdFlowIds =
                         scriptTaskModels.stream().map(FlowTaskModel::getThirdFlowId).collect(Collectors.toList());
-                scriptThirdTaskIds =
-                        scriptTaskModels.stream().map(FlowTaskModel::getThirdTaskId).collect(Collectors.toList());
 
                 // 分别批量删除流量执行平台的pcap数据和script数据
                 if (this.deleteFlowFile(ResourceTypeEnum.PACP.toValue(), pcapThirdFlowIds) &&
@@ -457,11 +474,11 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
         ServiceResult<Integer> buldDelResult = bulkDelete(taskDelIds);
 
         // 异步删除流量平台任务
-        if (CollectionUtils.isNotEmpty(pcapThirdTaskIds)) {
-            asyncPlatFlowTaskService.deletePlatFlowTask(ResourceTypeEnum.PACP.toValue(), pcapThirdTaskIds);
+        if (CollectionUtils.isNotEmpty(pcapTaskModels)) {
+            asyncPlatFlowTaskService.deletePlatFlowTask(ResourceTypeEnum.PACP.toValue(), pcapTaskModels);
         }
-        if (CollectionUtils.isNotEmpty(scriptThirdTaskIds)) {
-            asyncPlatFlowTaskService.deletePlatFlowTask(ResourceTypeEnum.SCRIPT.toValue(), scriptThirdTaskIds);
+        if (CollectionUtils.isNotEmpty(scriptTaskModels)) {
+            asyncPlatFlowTaskService.deletePlatFlowTask(ResourceTypeEnum.SCRIPT.toValue(), scriptTaskModels);
         }
 
         return buldDelResult;
@@ -552,12 +569,24 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
             return ServiceResult.fail("Flow info in task not exist");
         }
         FlowInfoModel flowInfoModel = flowInfoResult.getObj();
-        String thirdTaskId = flowTaskModel.getThirdTaskId();
 
+        // 流量执行器信息查询
+        String sceneId = flowTaskModel.getSceneId();
+        if (StringUtils.isBlank(sceneId)) {
+            log.error("sceneId in flow task is empty");
+            return ServiceResult.fail("Actuator flow task error");
+        }
+        FlowActuatorModel flowActuatorModel = flowActuatorMapper.selectBySceneId(sceneId);
+        if (Objects.isNull(flowActuatorModel)) {
+            log.error("flow actuator is empty for sceneId:{}", sceneId);
+            return ServiceResult.fail("Actuator flow task error");
+        }
+
+        String thirdTaskId = flowTaskModel.getThirdTaskId();
         if (StringUtils.isNotBlank(thirdTaskId)) {
             // 流量发生平台已经创建过任务，并且是启动任务，需要判断当前任务状态
             if (TaskActionEnum.START.toValue() == taskAction) {
-                JSONArray rows = this.queryTaskStatus(Collections.singletonList(thirdTaskId));
+                JSONArray rows = this.queryTaskStatus(Collections.singletonList(thirdTaskId), CommonUtil.getHostUrl(flowActuatorModel.getIp()));
                 if (Objects.nonNull(rows)) {
                     int taskStatus = rows.getJSONObject(0).getInteger("status");
                     if (TaskStatusEnum.RUNNING.toValue() == taskStatus || TaskStatusEnum.STOPING.toValue() == taskStatus) {
@@ -576,18 +605,6 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
             }
         }
 
-        // 流量执行器信息查询
-        String sceneId = flowTaskModel.getSceneId();
-        if (StringUtils.isBlank(sceneId)) {
-            log.error("sceneId in flow task is empty");
-            return ServiceResult.fail("Actuator flow task error");
-        }
-        FlowActuatorModel flowActuatorModel = flowActuatorMapper.selectBySceneId(sceneId);
-        if (Objects.isNull(flowActuatorModel)) {
-            log.error("flow actuator is empty for sceneId:{}", sceneId);
-            return ServiceResult.fail("Actuator flow task error");
-        }
-
         // 执行任务地址
         String urlPath = "";
         if (ResourceTypeEnum.PACP.toValue() == flowInfoModel.getResourceType()) {
@@ -598,7 +615,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                 // 构建新增app任务请求
                 AddAppTaskRequest appTaskRequest = new AddAppTaskRequest(flowTaskModel, flowActuatorModel);
                 try {
-                    String addAppTaskRsp = HttpUtils.sendPost(actuatorTaskUrl + "/tasks/app",
+                    String addAppTaskRsp = HttpUtils.sendPost(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks/app",
                             JsonUtils.toUnderlineJSONString(appTaskRequest));
                     JSONObject addAppTaskObj = JSONObject.parseObject(addAppTaskRsp);
                     log.info("add app task response:{}", addAppTaskObj.toJSONString());
@@ -625,7 +642,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                 standTaskRequest.setPort(flowActuatorModel.getClientMac());
 
                 try {
-                    String addStandTaskRsp = HttpUtils.sendPost(actuatorTaskUrl + "/tasks/standards",
+                    String addStandTaskRsp = HttpUtils.sendPost(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks/standards",
                             JsonUtils.toUnderlineJSONString(standTaskRequest));
                     JSONObject addStandTaskObj = JSONObject.parseObject(addStandTaskRsp);
                     log.info("add standard task response:{}", addStandTaskObj.toJSONString());
@@ -648,7 +665,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
         FlowExecuteRequest executeRequest = new FlowExecuteRequest(flowTaskModel);
         executeRequest.setAction(taskAction);
         executeRequest.setUuid(thirdTaskId);
-        executeRequest.setUrlPath(urlPath);
+        executeRequest.setUrlPath(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + urlPath);
         if (TaskActionEnum.STOP.toValue() == taskAction) {
             // 停止任务时，执行次数设为1
             executeRequest.setCount(1);
@@ -673,12 +690,18 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
      * 查询流量任务状态
      *
      * @param thirdTaskIds
+     * @param hostUrl
      * @return
      */
-    private JSONArray queryTaskStatus(List<String> thirdTaskIds) {
+    private JSONArray queryTaskStatus(List<String> thirdTaskIds, String hostUrl) {
         JSONArray rows = null;
         if (CollectionUtils.isEmpty(thirdTaskIds)) {
             log.warn("no thirdTaskIds to query");
+            return rows;
+        }
+
+        if (StringUtils.isBlank(hostUrl)) {
+            log.error("hostUrl is empty");
             return rows;
         }
 
@@ -688,7 +711,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
             statusArray.addAll(thirdTaskIds);
             statusObj.put("uuids", statusArray);
 
-            String statusRsp = HttpUtils.sendPost(actuatorTaskUrl + "/tasks/standards/many",
+            String statusRsp = HttpUtils.sendPost(hostUrl + "/tasks/standards/many",
                     statusObj.toJSONString());
             JSONObject statusRspObj = JSONObject.parseObject(statusRsp);
             log.info("query task status response:{}", statusRspObj.toJSONString());

@@ -7,7 +7,6 @@ import cn.cyberpeace.mp.flow.service.ScheduleMethod;
 import cn.cyberpeace.mp.flow.util.ResponseUtils;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
@@ -19,12 +18,6 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class FlowExecuteScheduleMethodImpl implements ScheduleMethod {
 
-    /**
-     * 流量发生平台任务地址
-     */
-    @Value("${mp.flow.actuator-task-url}")
-    private String actuatorTaskUrl;
-
     @Override
     public void execute(FlowBaseModel model) {
         try {
@@ -34,7 +27,7 @@ public class FlowExecuteScheduleMethodImpl implements ScheduleMethod {
             object.put("uuid", request.getUuid());
             object.put("action", request.getAction());
 
-            String actuatorTaskRsp = HttpUtils.sendPost(actuatorTaskUrl + request.getUrlPath(),
+            String actuatorTaskRsp = HttpUtils.sendPost(request.getUrlPath(),
                     JSONObject.toJSONString(object));
             JSONObject actuatorTaskObj = JSONObject.parseObject(actuatorTaskRsp);
             log.info("actuator task response:{}", actuatorTaskObj.toJSONString());

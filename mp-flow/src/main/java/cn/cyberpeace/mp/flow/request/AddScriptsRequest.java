@@ -49,10 +49,10 @@ public class AddScriptsRequest {
     private Integer type = 1;
 
     /**
-     * 是否使用默认镜像
+     * 是否使用默认镜像: 0 否， 1 是
      */
-    @ApiModelProperty("是否使用默认镜像")
-    private Boolean isDefault = true;
+    @ApiModelProperty("是否使用默认镜像: 0 否， 1 是")
+    private int isDefault = 1;
 
     /**
      * 如果是攻击脚本，需要填写运行命令
@@ -67,12 +67,11 @@ public class AddScriptsRequest {
     private String getResultCmd;
 
     @JsonProperty(value = "is_default")
-
-    public Boolean getIsDefault() {
+    public int getIsDefault() {
         return isDefault;
     }
 
-    public void setIsDefault(Boolean isDefault) {
+    public void setIsDefault(int isDefault) {
         isDefault = isDefault;
     }
 }

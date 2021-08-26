@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.flow.util;
 
-import cn.cyberpeace.mp.base.constant.BaseConstants;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 
