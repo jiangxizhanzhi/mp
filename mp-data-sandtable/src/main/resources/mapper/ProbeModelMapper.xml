@@ -103,6 +103,7 @@
             probe_category = #{probeCategory,jdbcType=INTEGER},
             script_type    = #{scriptType,jdbcType=INTEGER},
             update_time    = #{updateTime,jdbcType=TIMESTAMP},
+            script_content    = #{scriptContent,jdbcType=LONGVARBINARY},
             command_interval = #{commandInterval,jdbcType=VARCHAR}
         where id = #{id,jdbcType=VARCHAR}
     </update>

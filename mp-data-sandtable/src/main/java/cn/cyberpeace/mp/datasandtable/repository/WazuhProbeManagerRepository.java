@@ -24,6 +24,7 @@ public class WazuhProbeManagerRepository {
 
     /**
      * 新增脚本
+     *
      * @param probeRequest probeRequest
      * @return String
      */
@@ -32,9 +33,9 @@ public class WazuhProbeManagerRepository {
         var jsonObject = new JSONObject();
         jsonObject.put("ScriptId", probeRequest.getProbeId());
         jsonObject.put("Content", probeRequest.getScriptContent());
-        jsonObject.put("ProbeType", probeRequest.getProbeCategory());
+        jsonObject.put("ProbeType", probeRequest.getScriptType().getTypeVal());
         jsonObject.put("ProbeName", probeRequest.getProbeName());
-        jsonObject.put("OSType", probeRequest.getOsType());
+        jsonObject.put("OSType", probeRequest.getOsType().getTypeVal());
         jsonObject.put("Interval", probeRequest.getCommandInterval());
         jsonObject.put("Commandline", buildExecCommandline(probeRequest));
         try {
@@ -47,11 +48,12 @@ public class WazuhProbeManagerRepository {
 
     /**
      * 删除脚本
+     *
      * @param probeId
      * @return
      */
     public String deleteProbeByProbeId(String probeId) {
-        var sentUrl = situationAwareConfig.getWazuhManagerUrl()+"/probe/" + probeId;
+        var sentUrl = situationAwareConfig.getWazuhManagerUrl() + "/probe/" + probeId;
         try {
             String deleteResult = HttpUtils.sendDelete(sentUrl);
             log.info("delete probe id: {} {}:", probeId, deleteResult);
@@ -64,15 +66,15 @@ public class WazuhProbeManagerRepository {
 
     /**
      * 构建命令行执行路径
+     *
      * @param probeRequest probeRequest
      * @return 路径地址
      */
     private String buildExecCommandline(ProbeRequest probeRequest) {
         var commandLineBuilder = new StringBuilder();
         return commandLineBuilder.append(buildExecString(probeRequest)).append(" ").append(buildScriptPath(probeRequest))
-            .append("/").append(buildProbeFileName(probeRequest)).toString();
+            .append("/").append(buildProbeFileName(probeRequest)).append(buildProbeFileSubffix(probeRequest)).toString();
     }
-
 
     private String buildExecString(ProbeRequest probeRequest) {
         switch (probeRequest.getScriptType()) {
@@ -90,11 +92,10 @@ public class WazuhProbeManagerRepository {
     private String buildScriptPath(ProbeRequest probeRequest) {
         if (OsType.LINUX.equals(probeRequest.getOsType())) {
             return situationAwareConfig.getScriptLinuxPath();
-        }else {
+        } else {
             return situationAwareConfig.getScripWindowsPath();
         }
     }
-
 
     private String buildProbeFileName(ProbeRequest probeRequest) {
         String osType;
@@ -111,5 +112,25 @@ public class WazuhProbeManagerRepository {
         }
 
         return probeRequest.getProbeName() + "_" + osType;
+    }
+
+    private String buildProbeFileSubffix(ProbeRequest probeRequest) {
+        String subbfix;
+        switch (probeRequest.getScriptType()) {
+            case SHELL:
+                subbfix = ".sh";
+                break;
+            case PYTHON:
+                subbfix = ".py";
+                break;
+            case BAT:
+                subbfix = ".bat";
+                break;
+            default:
+                subbfix = ".sh";
+                break;
+        }
+
+        return subbfix;
     }
 }
