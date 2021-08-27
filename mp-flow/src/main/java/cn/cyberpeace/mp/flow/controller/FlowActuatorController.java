@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.flow.controller;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.TextUtils;
 import cn.cyberpeace.mp.flow.constant.ControllerConstant;
 import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
 import cn.cyberpeace.mp.flow.request.AddVmInstanceRequest;
@@ -39,9 +40,10 @@ public class FlowActuatorController extends BaseModelController<FlowActuatorMode
      */
     @ApiOperation("创建trex虚拟机")
     @PostMapping("/vm/add")
-    public ServiceResult addVmInstance(@Validated @RequestBody AddVmInstanceRequest request) {
-        asyncPlatFlowTaskService.addVmInstance(request);
-        return ServiceResult.successful();
+    public ServiceResult<String> addVmInstance(@Validated @RequestBody AddVmInstanceRequest request) {
+        String uuid = TextUtils.uuid();
+        asyncPlatFlowTaskService.addVmInstance(request, uuid);
+        return ServiceResult.success(uuid);
     }
 
 }

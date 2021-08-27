@@ -26,11 +26,4 @@ public class AddVmInstanceRequest {
     @NotBlank(message = "networkId can not be empty")
     private String networkId;
 
-    /**
-     * 场景id
-     */
-    @ApiModelProperty(value = "场景id")
-    @NotBlank(message = "sceneId can not be empty")
-    private String sceneId;
-
 }

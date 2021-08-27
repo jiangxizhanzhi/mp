@@ -77,8 +77,6 @@ mp:
     # 流量发生器地址
     actuator-resource-url: http://10.200.1.64:80/api/v1/resource
     trex-image: trex_0825
-    client-image: ubuntu1604
-
 
 
 management:

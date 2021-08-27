@@ -33,11 +33,11 @@ public class FlowTaskModel extends BaseModel {
     private String taskDesc;
 
     /**
-     * 场景id
+     * 流量执行器id
      */
-    @ApiModelProperty(value = "场景id")
-    @NotBlank(message = "sceneId can not be empty")
-    private String sceneId;
+    @ApiModelProperty(value = "流量执行器id")
+    @NotBlank(message = "actuatorId can not be empty")
+    private String actuatorId;
 
     /**
      * 流量id

@@ -22,8 +22,8 @@ public class FlowActuatorServiceTest {
     private FlowActuatorMapper flowActuatorMapper;
 
     @Test
-    public void testSelectBySceneId() {
-        FlowActuatorModel flowActuatorModel = flowActuatorMapper.selectBySceneId("aaa");
+    public void testSelectById() {
+        FlowActuatorModel flowActuatorModel = flowActuatorMapper.get("aaa");
         System.out.println("================>" + flowActuatorModel);
     }
 

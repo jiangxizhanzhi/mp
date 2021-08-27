@@ -10,7 +10,7 @@ import org.springframework.context.annotation.ComponentScan;
  * @Date：2021/8/18 15:54
  */
 @SpringBootApplication
-@ComponentScan({"cn.cyberpeace.mp"})
+@ComponentScan({"cn.cyberpeace"})
 public class TestFlowApplication {
 
     public static void main(String[] args) {

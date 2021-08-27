@@ -24,13 +24,6 @@ public class FlowActuatorModel extends BaseModel {
     private String title;
 
     /**
-     * 场景id
-     */
-    @ApiModelProperty(value = "场景id")
-    @DefaultStr
-    private String sceneId;
-
-    /**
      * 执行器ip地址
      */
     @ApiModelProperty(value = "执行器ip地址")

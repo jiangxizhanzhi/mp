@@ -39,7 +39,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -97,14 +100,9 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                     TaskStatusEnum.STOPING.toValue() == flowTaskModel.getTaskStatus()) {
                 // 当前任务处于运行中或者停止中，重新从流量发生平台获取任务最新状态
                 // 流量执行器信息查询
-                String sceneId = flowTaskModel.getSceneId();
-                if (StringUtils.isBlank(sceneId)) {
-                    log.error("sceneId in task is empty");
-                    return ServiceResult.success(flowTaskModel);
-                }
-                FlowActuatorModel flowActuatorModel = flowActuatorMapper.selectBySceneId(sceneId);
+                String actuatorId = flowTaskModel.getActuatorId();
+                FlowActuatorModel flowActuatorModel = asyncPlatFlowTaskService.getFlowActuatorModel(actuatorId);
                 if (Objects.isNull(flowActuatorModel)) {
-                    log.error("flow actuator is empty for sceneId:{}", sceneId);
                     return ServiceResult.success(flowTaskModel);
                 }
 
@@ -143,14 +141,9 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
 
             if (CollectionUtils.isNotEmpty(taskModelList)) {
                 // 流量执行器信息查询
-                String sceneId = taskModelList.get(0).getSceneId();
-                if (StringUtils.isBlank(sceneId)) {
-                    log.error("sceneId in task is empty");
-                    return listObjResult;
-                }
-                FlowActuatorModel flowActuatorModel = flowActuatorMapper.selectBySceneId(sceneId);
+                String actuatorId = taskModelList.get(0).getActuatorId();
+                FlowActuatorModel flowActuatorModel = asyncPlatFlowTaskService.getFlowActuatorModel(actuatorId);
                 if (Objects.isNull(flowActuatorModel)) {
-                    log.error("flow actuator is empty for sceneId:{}", sceneId);
                     return listObjResult;
                 }
 
@@ -571,14 +564,9 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
         FlowInfoModel flowInfoModel = flowInfoResult.getObj();
 
         // 流量执行器信息查询
-        String sceneId = flowTaskModel.getSceneId();
-        if (StringUtils.isBlank(sceneId)) {
-            log.error("sceneId in flow task is empty");
-            return ServiceResult.fail("Actuator flow task error");
-        }
-        FlowActuatorModel flowActuatorModel = flowActuatorMapper.selectBySceneId(sceneId);
+        String actuatorId = flowTaskModel.getActuatorId();
+        FlowActuatorModel flowActuatorModel = asyncPlatFlowTaskService.getFlowActuatorModel(actuatorId);
         if (Objects.isNull(flowActuatorModel)) {
-            log.error("flow actuator is empty for sceneId:{}", sceneId);
             return ServiceResult.fail("Actuator flow task error");
         }
 

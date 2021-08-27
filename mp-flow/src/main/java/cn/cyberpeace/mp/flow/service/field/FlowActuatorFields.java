@@ -16,7 +16,7 @@ public class FlowActuatorFields extends BaseModelFields {
 
     public static final DynamicFields readonlyFields = new DynamicFields().merge(BaseModelFields.readonlyFields);
 
-    public static final DynamicFields searchFields = new DynamicFields(FlowActuatorModel::getTitle, FlowActuatorModel::getSceneId, FlowActuatorModel::getServerIp,
+    public static final DynamicFields searchFields = new DynamicFields(FlowActuatorModel::getTitle, FlowActuatorModel::getServerIp,
             FlowActuatorModel::getServerMac, FlowActuatorModel::getServerGateway, FlowActuatorModel::getClientIp, FlowActuatorModel::getClientMac, FlowActuatorModel::getClientGateway);
 
     public static final DynamicFields orderFields = new DynamicFields(new String[]{}).merge(BaseModelFields.readonlyFields);

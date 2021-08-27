@@ -18,7 +18,7 @@ CREATE TABLE `mp_flow_task` (
         `id` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务id',
         `title` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务标题',
         `task_desc` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务描述',
-        `scene_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '场景id',
+        `actuator_id` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '流量执行器id',
         `flow_id` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '流量id',
         `flow_platform` tinyint(4) NOT NULL COMMENT '流量发生平台：0 通用，1 北京流量发生器',
         `third_flow_id` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '流量第三方uuid',
@@ -40,7 +40,6 @@ CREATE TABLE `mp_flow_actuator` (
         `pk` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
         `id` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '执行器id',
         `title` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '执行器名称',
-        `scene_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '场景id',
         `ip` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '执行器ip地址',
         `network_id` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '网络id',
         `instance_id` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '实例id',
@@ -53,6 +52,5 @@ CREATE TABLE `mp_flow_actuator` (
         `create_time` datetime NOT NULL COMMENT '创建时间',
         `update_time` datetime NOT NULL COMMENT '更新时间',
         PRIMARY KEY (`pk`),
-        UNIQUE KEY `sceneId_index` (`scene_id`) USING BTREE,
         KEY `id_index` (`id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='流量执行器表';
