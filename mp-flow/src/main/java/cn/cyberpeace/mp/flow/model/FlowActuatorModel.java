@@ -44,47 +44,4 @@ public class FlowActuatorModel extends BaseModel {
     @DefaultStr
     private String instanceId;
 
-    /**
-     * 服务端ip
-     */
-    @ApiModelProperty(value = "服务端ip")
-    @DefaultStr
-    private String serverIp;
-
-    /**
-     * trex服务端mac
-     */
-    @ApiModelProperty(value = "trex服务端mac")
-    @DefaultStr
-    private String serverMac;
-
-    /**
-     * 服务端网关
-     */
-    @ApiModelProperty(value = "服务端网关")
-    @DefaultStr
-    private String serverGateway;
-
-    /**
-     * 客户端ip
-     */
-    @ApiModelProperty(value = "客户端ip")
-    @DefaultStr
-    private String clientIp;
-
-    /**
-     * trex客户端mac
-     */
-    @ApiModelProperty(value = "trex客户端mac")
-    @DefaultStr
-    private String clientMac;
-
-    /**
-     * 客户端网关
-     */
-    @ApiModelProperty(value = "客户端网关")
-    @DefaultStr
-    private String clientGateway;
-
-
 }

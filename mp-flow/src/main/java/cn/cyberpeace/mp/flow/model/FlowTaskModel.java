@@ -47,6 +47,13 @@ public class FlowTaskModel extends BaseModel {
     private String flowId;
 
     /**
+     * 流量网口id
+     */
+    @ApiModelProperty(value = "流量网口id")
+    @DefaultStr
+    private String flowPortId;
+
+    /**
      * 流量发生平台：0 通用，1 Trex流量发生器
      */
     @ApiModelProperty(value = "流量发生平台：0 通用，1 Trex流量发生器")

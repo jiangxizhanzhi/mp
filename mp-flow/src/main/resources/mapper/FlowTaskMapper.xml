@@ -5,6 +5,7 @@
     <select id="listByFlowIds" resultType="cn.cyberpeace.mp.flow.model.FlowTaskModel">
         select f.* from mp_flow_task f
         <where>
+            1 == 1
             <if test="flowIds != null and flowIds.size() > 0">
                 AND f.flow_id in
                 <foreach item="id" index="index" collection="flowIds" open="(" separator="," close=")">

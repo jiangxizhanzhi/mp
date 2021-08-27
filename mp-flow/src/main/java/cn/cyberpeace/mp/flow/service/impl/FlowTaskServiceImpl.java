@@ -18,11 +18,12 @@ import cn.cyberpeace.mp.flow.enums.TaskActionEnum;
 import cn.cyberpeace.mp.flow.enums.TaskStatusEnum;
 import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
+import cn.cyberpeace.mp.flow.model.FlowPortModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskModel;
-import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskMapper;
 import cn.cyberpeace.mp.flow.request.*;
 import cn.cyberpeace.mp.flow.service.FlowInfoService;
+import cn.cyberpeace.mp.flow.service.FlowPortService;
 import cn.cyberpeace.mp.flow.service.FlowTaskService;
 import cn.cyberpeace.mp.flow.service.field.FlowTaskFields;
 import cn.cyberpeace.mp.flow.util.CommonUtil;
@@ -68,13 +69,13 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
     private FlowInfoService flowInfoService;
 
     @Autowired
-    private FlowActuatorMapper flowActuatorMapper;
-
-    @Autowired
     private FlowExecuteScheduleMethodImpl flowExecuteScheduleMethod;
 
     @Autowired
     private AsyncPlatFlowTaskService asyncPlatFlowTaskService;
+
+    @Autowired
+    private FlowPortService flowPortService;
 
     public FlowTaskServiceImpl(FlowTaskMapper stuMapper, FlowTaskFields stuFields) {
         setModelFields(stuFields);
@@ -570,6 +571,13 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
             return ServiceResult.fail("Actuator flow task error");
         }
 
+        ObjResult<FlowPortModel> portObjResult = flowPortService.get(flowTaskModel.getFlowPortId()).getSource();
+        if (Objects.isNull(portObjResult)) {
+            log.error("flow port info is empty");
+            return ServiceResult.fail("Actuator flow task error");
+        }
+        FlowPortModel flowPortModel = portObjResult.asResult();
+
         String thirdTaskId = flowTaskModel.getThirdTaskId();
         if (StringUtils.isNotBlank(thirdTaskId)) {
             // 流量发生平台已经创建过任务，并且是启动任务，需要判断当前任务状态
@@ -601,7 +609,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
             // 判断是否关联流量平台任务，没有则新增
             if (StringUtils.isBlank(thirdTaskId)) {
                 // 构建新增app任务请求
-                AddAppTaskRequest appTaskRequest = new AddAppTaskRequest(flowTaskModel, flowActuatorModel);
+                AddAppTaskRequest appTaskRequest = new AddAppTaskRequest(flowTaskModel, flowPortModel);
                 try {
                     String addAppTaskRsp = HttpUtils.sendPost(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks/app",
                             JsonUtils.toUnderlineJSONString(appTaskRequest));
@@ -627,7 +635,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
             if (StringUtils.isBlank(thirdTaskId)) {
                 // 封装请求参数
                 AddStandardsTaskRequest standTaskRequest = new AddStandardsTaskRequest(flowTaskModel);
-                standTaskRequest.setPort(flowActuatorModel.getClientMac());
+                standTaskRequest.setPort(flowPortModel.getServerMac());
 
                 try {
                     String addStandTaskRsp = HttpUtils.sendPost(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks/standards",

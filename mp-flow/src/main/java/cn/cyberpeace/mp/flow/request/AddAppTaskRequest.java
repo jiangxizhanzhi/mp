@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.flow.request;
 
-import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
+import cn.cyberpeace.mp.flow.model.FlowPortModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskModel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -72,7 +72,7 @@ public class AddAppTaskRequest {
         private String defaultGw;
     }
 
-    public AddAppTaskRequest(FlowTaskModel flowTaskModel, FlowActuatorModel flowActuatorModel) {
+    public AddAppTaskRequest(FlowTaskModel flowTaskModel, FlowPortModel flowPortModel) {
         AddAppTaskRequest.CapList capList = new AddAppTaskRequest.CapList();
         capList.setName(flowTaskModel.getThirdFlowName());
 
@@ -84,14 +84,14 @@ public class AddAppTaskRequest {
         specifics.setCapList(Collections.singletonList(capList));
 
         AddAppTaskRequest.Client client = new AddAppTaskRequest.Client();
-        client.setIp(flowActuatorModel.getClientIp());
-        client.setPort(flowActuatorModel.getClientMac());
-        client.setDefaultGw(flowActuatorModel.getClientGateway());
+        client.setIp(flowPortModel.getClientIp());
+        client.setPort(flowPortModel.getClientMac());
+        client.setDefaultGw(flowPortModel.getClientGateway());
 
         AddAppTaskRequest.Server server = new AddAppTaskRequest.Server();
-        server.setIp(flowActuatorModel.getServerIp());
-        server.setPort(flowActuatorModel.getServerMac());
-        server.setDefaultGw(flowActuatorModel.getServerGateway());
+        server.setIp(flowPortModel.getServerIp());
+        server.setPort(flowPortModel.getServerMac());
+        server.setDefaultGw(flowPortModel.getServerGateway());
 
         AddAppTaskRequest.NetworkConfig networkConfig = new AddAppTaskRequest.NetworkConfig();
         networkConfig.setClient(Collections.singletonList(client));

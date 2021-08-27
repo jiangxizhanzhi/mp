@@ -3,12 +3,15 @@ package cn.cyberpeace.mp.flow.service.impl;
 import cn.cyberpeace.mp.base.constant.BaseConstants;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.JsonUtils;
+import cn.cyberpeace.mp.base.util.TextUtils;
 import cn.cyberpeace.mp.flow.enums.ResourceTypeEnum;
 import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
+import cn.cyberpeace.mp.flow.model.FlowPortModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskModel;
 import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
 import cn.cyberpeace.mp.flow.repository.FlowInfoMapper;
+import cn.cyberpeace.mp.flow.repository.FlowPortMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskMapper;
 import cn.cyberpeace.mp.flow.request.AddAppTaskRequest;
 import cn.cyberpeace.mp.flow.request.AddStandardsTaskRequest;
@@ -63,6 +66,9 @@ public class AsyncPlatFlowTaskService {
     @Autowired
     private FlowActuatorMapper flowActuatorMapper;
 
+    @Autowired
+    private FlowPortMapper flowPortMapper;
+
     /**
      * 异步保存流量发生平台任务
      *
@@ -106,19 +112,37 @@ public class AsyncPlatFlowTaskService {
             return;
         }
 
-        String thirdTaskId = "";
+        // 获取网口信息
+        FlowPortModel flowPortModel = null;
+        if (isUpdate) {
+            // 更新时，查询之前记录
+            flowPortModel = flowPortMapper.get(flowTaskModel.getFlowPortId());
+            if (Objects.isNull(flowPortModel)) {
+                log.error("get flow port info error");
+                return;
+            }
+        } else {
+            // 新增时，创建网口信息
+            flowPortModel = this.createPort(flowActuatorModel, flowInfoModel.getResourceType());
+            if (Objects.isNull(flowPortModel)) {
+                log.error("create flow port info error");
+                return;
+            }
+        }
 
+        flowTaskModel.setFlowPortId(flowPortModel.getClientPortId());
+
+        String thirdTaskId = "";
         if (ResourceTypeEnum.PACP.toValue() == flowInfoModel.getResourceType()) {
             // 构建保存app任务请求
-            AddAppTaskRequest appTaskRequest = new AddAppTaskRequest(flowTaskModel, flowActuatorModel);
+            AddAppTaskRequest appTaskRequest = new AddAppTaskRequest(flowTaskModel, flowPortModel);
 
             try {
                 String saveAppTaskRsp = null;
                 if (isUpdate) {
                     // 更新
-                    saveAppTaskRsp = HttpUtils.sendPatch(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks" +
-                                    "/app/" + flowTaskModel.getThirdTaskId(),
-                            JsonUtils.toUnderlineJSONString(appTaskRequest));
+                    saveAppTaskRsp = HttpUtils.sendPatch(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks/app/"
+                                    + flowTaskModel.getThirdTaskId(), JsonUtils.toUnderlineJSONString(appTaskRequest));
                 } else {
                     // 新增
                     saveAppTaskRsp = HttpUtils.sendPost(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks/app",
@@ -140,15 +164,13 @@ public class AsyncPlatFlowTaskService {
             try {
                 // 封装请求参数
                 AddStandardsTaskRequest standTaskRequest = new AddStandardsTaskRequest(flowTaskModel);
-                standTaskRequest.setPort(flowActuatorModel.getClientMac());
+                standTaskRequest.setPort(flowPortModel.getServerMac());
                 String saveStandTaskRsp = null;
                 if (isUpdate) {
-                    saveStandTaskRsp = HttpUtils.sendPatch(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks" +
-                                    "/standards" + flowTaskModel.getThirdTaskId(),
-                            JsonUtils.toUnderlineJSONString(standTaskRequest));
+                    saveStandTaskRsp = HttpUtils.sendPatch(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks/standards" +
+                                    flowTaskModel.getThirdTaskId(), JsonUtils.toUnderlineJSONString(standTaskRequest));
                 } else {
-                    saveStandTaskRsp = HttpUtils.sendPost(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks" +
-                                    "/standards",
+                    saveStandTaskRsp = HttpUtils.sendPost(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks/standards",
                             JsonUtils.toUnderlineJSONString(standTaskRequest));
                 }
 
@@ -182,7 +204,7 @@ public class AsyncPlatFlowTaskService {
     @Async
     public void deletePlatFlowTask(int resourceType, List<FlowTaskModel> flowTaskModels) {
         if (CollectionUtils.isEmpty(flowTaskModels)) {
-            log.warn("no plat flow task to delete");
+            log.warn("no platform flow task to delete");
             return;
         }
 
@@ -193,8 +215,8 @@ public class AsyncPlatFlowTaskService {
             return;
         }
 
-        List<String> thirdTaskIds =
-                flowTaskModels.stream().map(FlowTaskModel::getThirdTaskId).collect(Collectors.toList());
+        List<String> flowPortIds = flowTaskModels.stream().map(FlowTaskModel::getFlowPortId).collect(Collectors.toList());
+        List<String> thirdTaskIds = flowTaskModels.stream().map(FlowTaskModel::getThirdTaskId).collect(Collectors.toList());
         String delUrl = "";
         if (ResourceTypeEnum.PACP.toValue() == resourceType) {
             log.info("start to delete app task");
@@ -226,6 +248,9 @@ public class AsyncPlatFlowTaskService {
             } else {
                 log.error("delete flow task response error");
             }
+
+            // 删除网口信息
+            this.delPorts(flowActuatorModel, flowPortIds);
         } catch (Exception e) {
             log.error("delete task from flow actuator platform error");
         }
@@ -269,63 +294,12 @@ public class AsyncPlatFlowTaskService {
                 String port = portMappingObj.getString("host_port");
                 String ip = host + BaseConstants.COLON + port;
 
-                // 给trex虚拟机添加server网口
-                JSONObject addPortReq = new JSONObject();
-                addPortReq.put("network_id", request.getNetworkId());
-                String addTrexServerPortRsp = HttpUtils.sendPost(cpUrl + "/v1/instances/" + instanceId + "/interfaces"
-                        , addPortReq.toJSONString());
-                JSONObject addTrexServerObj = JSONObject.parseObject(addTrexServerPortRsp);
-                log.info("add trex server port response:{}", addTrexServerObj.toJSONString());
-                String serverMac = "";
-                String serverIp = "";
-                if (BaseConstants.SUCCESS_ZERO.equals(addTrexServerObj.getString(BaseConstants.STR_CODE))) {
-                    JSONObject serverDataObj = addTrexServerObj.getJSONObject(BaseConstants.STR_DATA);
-                    serverMac = serverDataObj.getString("mac_address");
-                    serverIp = serverDataObj.getString("fixed_ip");
-                } else {
-                    log.error("add trex server port error");
-                }
-
-                // 给trex虚拟机添加client网口
-                String addTrexClientPortRsp = HttpUtils.sendPost(cpUrl + "/v1/instances/" + instanceId + "/interfaces"
-                        , addPortReq.toJSONString());
-                JSONObject addTrexClientObj = JSONObject.parseObject(addTrexClientPortRsp);
-                log.info("add trex client port response:{}", addTrexClientObj.toJSONString());
-                String clientMac = "";
-                String clientIp = "";
-                if (BaseConstants.SUCCESS_ZERO.equals(addTrexClientObj.getString(BaseConstants.STR_CODE))) {
-                    JSONObject clientDataObj = addTrexClientObj.getJSONObject(BaseConstants.STR_DATA);
-                    clientMac = clientDataObj.getString("mac_address");
-                    clientIp = clientDataObj.getString("fixed_ip");
-                } else {
-                    log.error("add trex client port error");
-                }
-
-                // 查询默认网关
-                String getGateWayRsp = HttpUtils.sendGet(cpUrl + "/v1/networks/" + request.getNetworkId());
-                JSONObject getGateWayObj = JSONObject.parseObject(getGateWayRsp);
-                log.info("get gateway response:{}", getGateWayObj.toJSONString());
-                String gatewayIp = "";
-                if (BaseConstants.SUCCESS_ZERO.equals(getGateWayObj.getString(BaseConstants.STR_CODE))) {
-                    gatewayIp =
-                            getGateWayObj.getJSONObject(BaseConstants.STR_DATA).getJSONObject("subnet").getString(
-                                    "gateway_ip");
-                } else {
-                    log.error("get gateway info error");
-                }
-
                 // 新增流量执行器信息
                 flowActuatorModel.setId(uuid);
                 flowActuatorModel.setTitle(addVmRequest.getName());
                 flowActuatorModel.setNetworkId(request.getNetworkId());
                 flowActuatorModel.setInstanceId(instanceId);
                 flowActuatorModel.setIp(ip);
-                flowActuatorModel.setServerMac(serverMac);
-                flowActuatorModel.setServerIp(serverIp);
-                flowActuatorModel.setServerGateway(gatewayIp);
-                flowActuatorModel.setClientMac(clientMac);
-                flowActuatorModel.setClientIp(clientIp);
-                flowActuatorModel.setClientGateway(gatewayIp);
                 flowActuatorMapper.create(flowActuatorModel);
             } else {
                 log.error("add trex vm error");
@@ -335,6 +309,122 @@ public class AsyncPlatFlowTaskService {
         }
 
         log.info("================ Add vm instance end ==================");
+    }
+
+    /**
+     * 新增网口
+     * @param flowActuatorModel
+     * @return
+     */
+    private FlowPortModel createPort(FlowActuatorModel flowActuatorModel, int resourceType) {
+        FlowPortModel flowPortModel = null;
+        try {
+            // 给trex虚拟机添加server网口
+            JSONObject addPortReq = new JSONObject();
+            addPortReq.put("network_id", flowActuatorModel.getNetworkId());
+            String addTrexServerPortRsp = HttpUtils.sendPost(cpUrl + "/v1/instances/" + flowActuatorModel.getInstanceId() + "/interfaces"
+                    , addPortReq.toJSONString());
+            JSONObject addTrexServerObj = JSONObject.parseObject(addTrexServerPortRsp);
+            log.info("add trex server port response:{}", addTrexServerObj.toJSONString());
+            String serverMac = "";
+            String serverIp = "";
+            String serverPortId = "";
+            if (BaseConstants.SUCCESS_ZERO.equals(addTrexServerObj.getString(BaseConstants.STR_CODE))) {
+                JSONObject serverDataObj = addTrexServerObj.getJSONObject(BaseConstants.STR_DATA);
+                serverMac = serverDataObj.getString("mac_address");
+                serverIp = serverDataObj.getString("fixed_ip");
+                serverPortId = serverDataObj.getString("port_id");
+            } else {
+                log.error("add trex server port error");
+            }
+
+            String clientMac = "";
+            String clientIp = "";
+            String clientPortId = "";
+            if (ResourceTypeEnum.PACP.toValue() == resourceType) {
+                // pcap需要给trex虚拟机添加client网口
+                String addTrexClientPortRsp = HttpUtils.sendPost(cpUrl + "/v1/instances/" + flowActuatorModel.getInstanceId() + "/interfaces"
+                        , addPortReq.toJSONString());
+                JSONObject addTrexClientObj = JSONObject.parseObject(addTrexClientPortRsp);
+                log.info("add trex client port response:{}", addTrexClientObj.toJSONString());
+                if (BaseConstants.SUCCESS_ZERO.equals(addTrexClientObj.getString(BaseConstants.STR_CODE))) {
+                    JSONObject clientDataObj = addTrexClientObj.getJSONObject(BaseConstants.STR_DATA);
+                    clientMac = clientDataObj.getString("mac_address");
+                    clientIp = clientDataObj.getString("fixed_ip");
+                    clientPortId = clientDataObj.getString("port_id");
+                } else {
+                    log.error("add trex client port error");
+                }
+            }
+
+
+            // 查询默认网关
+            String getGateWayRsp = HttpUtils.sendGet(cpUrl + "/v1/networks/" + flowActuatorModel.getNetworkId());
+            JSONObject getGateWayObj = JSONObject.parseObject(getGateWayRsp);
+            log.info("get gateway response:{}", getGateWayObj.toJSONString());
+            String gatewayIp = "";
+            if (BaseConstants.SUCCESS_ZERO.equals(getGateWayObj.getString(BaseConstants.STR_CODE))) {
+                gatewayIp =
+                        getGateWayObj.getJSONObject(BaseConstants.STR_DATA).getJSONObject("subnet").getString(
+                                "gateway_ip");
+            } else {
+                log.error("get gateway info error");
+            }
+
+            flowPortModel = FlowPortModel.builder()
+                    .serverIp(serverIp)
+                    .serverMac(serverMac)
+                    .serverPortId(serverPortId)
+                    .serverGateway(gatewayIp)
+                    .clientIp(clientIp)
+                    .clientMac(clientMac)
+                    .clientPortId(clientPortId)
+                    .clientGateway(gatewayIp)
+                    .build();
+            flowPortModel.setClientPortId(TextUtils.uuid());
+            flowPortMapper.create(flowPortModel);
+        } catch (Exception e) {
+            log.error("add flow port error", e);
+        }
+
+        return flowPortModel;
+    }
+
+    /**
+     * 删除网口信息
+     * @param flowActuatorModel
+     * @param flowPortIds
+     */
+    private void delPorts(FlowActuatorModel flowActuatorModel, List<String> flowPortIds) {
+        List<FlowPortModel> flowPortModels = flowPortMapper.selectByPortIds(flowPortIds);
+        flowPortModels.forEach(flowPortModel -> {
+            try {
+                // 删除网口信息
+                if (StringUtils.isNotBlank(flowPortModel.getServerPortId())) {
+                    String delServerPortRsp =
+                            HttpUtils.sendDelete(cpUrl + "/v1/instances/" + flowActuatorModel.getInstanceId() +
+                                    "/interfaces/" + flowPortModel.getServerPortId());
+                    JSONObject delServerPortObj = JSONObject.parseObject(delServerPortRsp);
+                    log.info("del server port response:{}", delServerPortObj.toJSONString());
+                    if (!BaseConstants.SUCCESS_ZERO.equals(delServerPortObj.getString(BaseConstants.STR_CODE))) {
+                        log.error("del server port error: {}", flowPortModel.getServerPortId());
+                    }
+                }
+
+                if (StringUtils.isNotBlank(flowPortModel.getClientPortId())) {
+                    String delClientPortRsp =
+                            HttpUtils.sendDelete(cpUrl + "/v1/instances/" + flowActuatorModel.getInstanceId() +
+                                    "/interfaces/" + flowPortModel.getClientPortId());
+                    JSONObject delClientPortObj = JSONObject.parseObject(delClientPortRsp);
+                    log.info("del client port response:{}", delClientPortObj.toJSONString());
+                    if (!BaseConstants.SUCCESS_ZERO.equals(delClientPortObj.getString(BaseConstants.STR_CODE))) {
+                        log.error("del client port error: {}", flowPortModel.getClientPortId());
+                    }
+                }
+            } catch (Exception e) {
+                log.error("del port error", e);
+            }
+        });
     }
 
     /**

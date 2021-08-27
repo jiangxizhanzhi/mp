@@ -20,6 +20,7 @@ CREATE TABLE `mp_flow_task` (
         `task_desc` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务描述',
         `actuator_id` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '流量执行器id',
         `flow_id` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '流量id',
+        `flow_port_id` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '流量网口id',
         `flow_platform` tinyint(4) NOT NULL COMMENT '流量发生平台：0 通用，1 北京流量发生器',
         `third_flow_id` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '流量第三方uuid',
         `third_flow_name` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '流量第三方名称',
@@ -54,3 +55,20 @@ CREATE TABLE `mp_flow_actuator` (
         PRIMARY KEY (`pk`),
         KEY `id_index` (`id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='流量执行器表';
+
+CREATE TABLE `mp_flow_port` (
+        `pk` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+        `id` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '网口id',
+        `server_ip` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '服务端ip',
+        `server_mac` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '服务端mac',
+        `server_port_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '服务端portId',
+        `server_gateway` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '服务端网关',
+        `client_ip` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '客户端ip',
+        `client_mac` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '客户端mac',
+        `client_port_id` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '客户端portId',
+        `client_gateway` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '客户端网关',
+        `create_time` datetime NOT NULL COMMENT '创建时间',
+        `update_time` datetime NOT NULL COMMENT '更新时间',
+        PRIMARY KEY (`pk`),
+        KEY `id_index` (`id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='流量执行网口表';

@@ -11,6 +11,5 @@ import org.springframework.stereotype.Repository;
 @ModelClass(FlowActuatorModel.class)
 public interface FlowActuatorMapper extends BaseModelMapper<FlowActuatorModel> {
 
-//    FlowActuatorModel selectBySceneId(@Param("sceneId") String sceneId);
 
 }
