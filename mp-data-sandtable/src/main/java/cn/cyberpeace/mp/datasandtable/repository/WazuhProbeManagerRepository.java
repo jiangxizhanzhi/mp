@@ -5,12 +5,15 @@ import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.datasandtable.config.SituationAwareConfig;
 import cn.cyberpeace.mp.datasandtable.constant.SituationalAwareErrorCode;
 import cn.cyberpeace.mp.datasandtable.model.ProbeRequest;
+import cn.cyberpeace.mp.datasandtable.model.enums.OsType;
 import com.alibaba.fastjson.JSONObject;
 import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
+import static cn.cyberpeace.mp.datasandtable.model.enums.ScriptType.valueOf;
 
 @Repository
 @Slf4j
@@ -59,29 +62,47 @@ public class WazuhProbeManagerRepository {
         }
     }
 
-
-    //todo windows 的场景没有覆盖
+    /**
+     * 构建命令行执行路径
+     * @param probeRequest probeRequest
+     * @return 路径地址
+     */
     private String buildExecCommandline(ProbeRequest probeRequest) {
-        switch (probeRequest.getScriptType()){
-            case 0:
-                return "sh " + situationAwareConfig.getScriptPath() + buildProbeFileName(probeRequest);
-            case 1:
-                return "python " + situationAwareConfig.getScriptPath() + buildProbeFileName(probeRequest);
+        var commandLineBuilder = new StringBuilder();
+        return commandLineBuilder.append(buildExecString(probeRequest)).append(" ").append(buildScriptPath(probeRequest))
+            .append("/").append(buildProbeFileName(probeRequest)).toString();
+    }
+
+
+    private String buildExecString(ProbeRequest probeRequest) {
+        switch (probeRequest.getScriptType()) {
+            case SHELL:
+                return "sh";
+            case PYTHON:
+                return "python";
+            case BAT:
+                return "call";
             default:
-                break;
+                return "sh";
         }
-        return null;
+    }
+
+    private String buildScriptPath(ProbeRequest probeRequest) {
+        if (OsType.LINUX.equals(probeRequest.getOsType())) {
+            return situationAwareConfig.getScriptLinuxPath();
+        }else {
+            return situationAwareConfig.getScripWindowsPath();
+        }
     }
 
 
     private String buildProbeFileName(ProbeRequest probeRequest) {
         String osType;
-        String fileSubffix;
         switch (probeRequest.getOsType()) {
-            case 0:
+            case LINUX:
                 osType = "linux";
                 break;
-            case 1:
+            case WINDOWS:
                 osType = "windows";
                 break;
             default:
@@ -89,18 +110,6 @@ public class WazuhProbeManagerRepository {
                 break;
         }
 
-        switch (probeRequest.getScriptType()) {
-            case 0:
-                fileSubffix = ".sh";
-                break;
-            case 1:
-                fileSubffix = ".py";
-                break;
-            default:
-                fileSubffix = ".sh";
-                break;
-        }
-
-        return probeRequest.getProbeName() + "_" + osType + fileSubffix;
+        return probeRequest.getProbeName() + "_" + osType;
     }
 }

@@ -7,7 +7,7 @@ import cn.cyberpeace.mp.datasandtable.model.FileEventModel;
 import cn.cyberpeace.mp.datasandtable.model.WazuhEventRequest;
 import cn.cyberpeace.mp.datasandtable.model.WazuhModel;
 import cn.cyberpeace.mp.datasandtable.model.WazuhMonitorEventsRequest;
-import cn.cyberpeace.mp.datasandtable.model.emum.FileEventType;
+import cn.cyberpeace.mp.datasandtable.model.enums.FileEventType;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import java.io.IOException;

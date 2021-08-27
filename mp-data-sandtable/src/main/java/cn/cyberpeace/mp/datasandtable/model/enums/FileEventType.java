@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.datasandtable.model.emum;
+package cn.cyberpeace.mp.datasandtable.model.enums;
 
 /**
  * 文件预警类型

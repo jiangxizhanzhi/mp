@@ -45,6 +45,8 @@ public class ProbeService {
         probeModel.setUpdateTime(new Date());
         probeModel.setId(TextUtils.uuid());
         probeModel.setScriptContent(probeRequest.getScriptContent().getBytes(StandardCharsets.UTF_8));
+        probeModel.setOsType(probeRequest.getOsType().getTypeVal());
+        probeModel.setScriptType(probeRequest.getScriptType().getTypeVal());
         probeModelMapper.insert(probeModel);
         insertProbeParams(probeRequest, probeModel.getId());
         probeRequest.setProbeId(probeModel.getId());
@@ -108,7 +110,8 @@ public class ProbeService {
         probeModel.setUpdateTime(new Date());
         probeModel.setId(probeRequest.getProbeId());
         probeModel.setScriptContent(probeRequest.getScriptContent().getBytes(StandardCharsets.UTF_8));
-
+        probeModel.setOsType(probeRequest.getOsType().getTypeVal());
+        probeModel.setScriptType(probeRequest.getScriptType().getTypeVal());
         var rows = probeModelMapper.updateByProbeId(probeModel);
         //wazuh 远程操作
         wazuhProbeManagerRepository.deleteProbeByProbeId(probeModel.getId());
@@ -121,7 +124,7 @@ public class ProbeService {
     private void insertProbeParams(ProbeRequest probeRequest, String probeId) {
         List<ProbeParamModel> probeParamModels = probeRequest.getProbeParamsRequestList().stream()
             .map((probeParamRequest -> {
-                ProbeParamModel probeParamModel = new ProbeParamModel();
+                var probeParamModel = new ProbeParamModel();
                 BeanUtils.copyProperties(probeParamRequest, probeParamModel);
                 probeParamModel.setProbeId(probeId);
                 probeParamModel.setCreateTime(new Date());

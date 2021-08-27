@@ -20,6 +20,7 @@ public class ProbeSearchRequest {
      */
     @ApiModelProperty("默认分页数量")
     @Min(1)
+    @Builder.Default
     private Integer pageSize = 10;
 
     /**
@@ -27,6 +28,7 @@ public class ProbeSearchRequest {
      */
     @ApiModelProperty("分页页码")
     @Min(1)
+    @Builder.Default
     private Integer pageNum = 1;
 
     @ApiModelProperty("关键字查询")

@@ -6,7 +6,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.util.LocalDateTimeUtils;
 import cn.cyberpeace.mp.datasandtable.repository.WazuhRepository;
 import cn.cyberpeace.mp.datasandtable.model.*;
-import cn.cyberpeace.mp.datasandtable.model.emum.FileEventType;
+import cn.cyberpeace.mp.datasandtable.model.enums.FileEventType;
 import cn.hutool.core.util.NumberUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.annotations.VisibleForTesting;

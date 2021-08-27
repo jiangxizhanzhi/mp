@@ -72,7 +72,8 @@ mp:
       es-password: SecretPassword
     wazuh-probe-manager:
       url: http://10.100.0.102:8002
-      agent-script-path: /var/ossec/etc/shared/scripts/
+      agent-script-linux-path: /var/ossec/etc/shared/scripts/
+      agent-script-windows-path: /var/ossec/etc/shared/scripts/
   log:
     exclude-uri: /login
     exclude-method: OPTIONS

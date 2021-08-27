@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.datasandtable.model;
 
+import cn.cyberpeace.mp.datasandtable.model.enums.OsType;
+import cn.cyberpeace.mp.datasandtable.model.enums.ScriptType;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.List;
@@ -25,15 +27,15 @@ public class ProbeRequest {
 
     @ApiModelProperty(value = "操作系统类型 0:linux 1:windows", required = true)
     @NotNull(message = "操作系统类型不能为空")
-    private Integer osType;
+    private OsType osType;
 
     @ApiModelProperty(value = "探针所属分类", required = true)
     @NotNull(message = "探针所属分类不能为空")
     private Integer probeCategory;
 
-    @ApiModelProperty(value = "探针脚本类型 0:shell 1:python", required = true)
+    @ApiModelProperty(value = "探针脚本类型 0:shell 1:python 2:bat", required = true)
     @NotNull(message = "探针脚本类型不能为空")
-    private Integer scriptType;
+    private ScriptType scriptType;
 
     @ApiModelProperty(value = "探针id,新增的时候不需要传")
     private String probeId;

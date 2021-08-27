@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.datasandtable.model;
 
-import cn.cyberpeace.mp.datasandtable.model.emum.FileEventType;
+import cn.cyberpeace.mp.datasandtable.model.enums.FileEventType;
 import java.time.LocalDateTime;
 import java.util.List;
 
