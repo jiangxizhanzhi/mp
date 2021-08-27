@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.scene.core.event;
+package cn.cyberpeace.mp.scene.core.event.base;
 
 public class ProcessStatus {
     public static final Integer INITIAL = 0;

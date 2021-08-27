@@ -1,4 +1,6 @@
-package cn.cyberpeace.mp.scene.core.event;
+package cn.cyberpeace.mp.scene.core.event.base;
+
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * 通用事件模型
@@ -9,6 +11,8 @@ package cn.cyberpeace.mp.scene.core.event;
  *  processMessage: 进程信息（这件事在这个阶段状态的具体说明信息）
  */
 public interface BaseEventModel {
+    String genTarget();
+
     Integer getEvent();
 
     void setEvent(Integer event);

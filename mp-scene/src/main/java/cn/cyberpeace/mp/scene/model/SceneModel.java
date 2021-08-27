@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.scene.model;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
-import cn.cyberpeace.mp.scene.core.event.BaseEventModel;
+import cn.cyberpeace.mp.scene.core.event.base.BaseEventModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -24,6 +24,11 @@ public class SceneModel extends BaseSceneModel implements BaseEventModel {
     private Integer processStatus;
     @DefaultStr
     private String processMessage;
+
+    @Override
+    public String genTarget() {
+        return getId();
+    }
 
     public static class Event {
         public static final Integer DEFAULT = 0;
