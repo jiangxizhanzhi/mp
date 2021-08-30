@@ -19,7 +19,7 @@ import java.io.File;
 /**
  * @Description: FastDFS文件操作实现类
  *               trackerServers每个接口初始化一次，便于不同业务对接不同集群的FastDFS
- * @Autho qiaokang
+ * @Author qiaokang
  * @Date：2021/7/29 14:47
  */
 @Slf4j

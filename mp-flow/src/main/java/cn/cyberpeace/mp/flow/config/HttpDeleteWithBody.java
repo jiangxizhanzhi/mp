@@ -7,7 +7,7 @@ import java.net.URI;
 
 /**
  * @Description: 重写HttpDelete
- * @Autho qiaokang
+ * @Author qiaokang
  * @Date：2021/8/11 16:24
  */
 @NotThreadSafe

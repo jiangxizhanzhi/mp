@@ -20,7 +20,7 @@ import java.util.List;
 
 /**
  * @Description: 流量service
- * @Autho qiaokang
+ * @Author qiaokang
  * @Date：2021/6/10 10:31
  */
 @Service

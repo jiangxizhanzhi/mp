@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 
 /**
  * @Description: 流量上传返回信息
- * @Autho qiaokang
+ * @Author qiaokang
  * @Date：2021/8/10 16:57
  */
 @Data

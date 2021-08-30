@@ -16,7 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * @Description: 文件操作控制层
  *
- * @Autho qiaokang
+ * @Author qiaokang
  * @Date：2021/6/21 15:01
  */
 @RestController

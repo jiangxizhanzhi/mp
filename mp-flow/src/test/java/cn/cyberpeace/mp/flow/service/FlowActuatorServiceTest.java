@@ -11,7 +11,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 /**
  * @Description: 流量执行测试类
- * @Autho qiaokang
+ * @Author qiaokang
  * @Date：2021/8/18 15:56
  */
 @SpringBootTest(classes = TestFlowApplication.class)

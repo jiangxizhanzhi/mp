@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 
 /**
  * @Description: 流量任务异步执行服务类
- * @Autho qiaokang
+ * @Author qiaokang
  * @Date：2021/8/20 09:56
  */
 @Service

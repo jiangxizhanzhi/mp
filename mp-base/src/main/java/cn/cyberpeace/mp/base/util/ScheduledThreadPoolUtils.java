@@ -8,7 +8,7 @@ import java.util.concurrent.ThreadFactory;
 
 /**
  * @Description: 全局ScheduledThreadPool工具类
- * @Autho qiaokang
+ * @Author qiaokang
  * @Date：2021/8/9 11:29
  */
 public class ScheduledThreadPoolUtils {

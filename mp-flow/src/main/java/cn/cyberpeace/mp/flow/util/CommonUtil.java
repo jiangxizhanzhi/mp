@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * @Description: 通用工具类
- * @Autho qiaokang
+ * @Author qiaokang
  * @Date：2021/8/25 10:08
  */
 @Slf4j

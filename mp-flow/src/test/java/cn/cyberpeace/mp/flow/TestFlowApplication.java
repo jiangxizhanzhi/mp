@@ -6,7 +6,7 @@ import org.springframework.context.annotation.ComponentScan;
 
 /**
  * @Description: 测试启动类
- * @Autho qiaokang
+ * @Author qiaokang
  * @Date：2021/8/18 15:54
  */
 @SpringBootApplication

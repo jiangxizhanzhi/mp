@@ -10,7 +10,7 @@ import javax.validation.constraints.NotBlank;
 
 /**
  * @Description: 新增虚拟机请求
- * @Autho qiaokang
+ * @Author qiaokang
  * @Date：2021/8/23 10:36
  */
 @Data

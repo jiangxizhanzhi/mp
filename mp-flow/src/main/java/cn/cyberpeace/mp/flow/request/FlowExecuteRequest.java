@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 
 /**
  * @Description: 流量执行请求对象
- * @Autho qiaokang
+ * @Author qiaokang
  * @Date：2021/6/17 09:56
  */
 @Data

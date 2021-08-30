@@ -6,7 +6,7 @@ import lombok.Builder;
 
 /**
  * @Description: 流量执行定时任务
- * @Autho qiaokang
+ * @Author qiaokang
  * @Date：2021/6/16 16:30
  */
 @Builder

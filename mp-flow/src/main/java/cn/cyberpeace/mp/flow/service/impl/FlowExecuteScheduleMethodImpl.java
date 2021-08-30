@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * @Description: 流量执行实现类
- * @Autho qiaokang
+ * @Author qiaokang
  * @Date：2021/6/16 15:51
  */
 @Service

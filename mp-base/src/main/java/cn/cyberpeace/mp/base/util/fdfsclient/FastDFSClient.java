@@ -28,7 +28,7 @@ import java.util.Map;
 
 /**
  * @Description: FastDFS文件上传下载工具类
- * @Autho qiaokang
+ * @Author qiaokang
  * @Date：2021/6/21 15:01
  */
 @Service

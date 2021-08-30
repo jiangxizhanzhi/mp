@@ -7,7 +7,7 @@ import java.util.Objects;
 
 /**
  * @Description: 结果解析工具
- * @Autho qiaokang
+ * @Author qiaokang
  * @Date：2021/8/10 17:46
  */
 public class ResponseUtils {

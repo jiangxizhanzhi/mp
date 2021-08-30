@@ -15,7 +15,7 @@ import java.nio.charset.StandardCharsets;
 
 /**
  * @Description: http delete工具类
- * @Autho qiaokang
+ * @Author qiaokang
  * @Date：2021/8/11 17:17
  */
 @Slf4j

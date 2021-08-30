@@ -12,7 +12,7 @@ import java.util.List;
 
 /**
  * @Description: 新增app任务请求
- * @Autho qiaokang
+ * @Author qiaokang
  * @Date：2021/8/18 14:13
  */
 @Data
