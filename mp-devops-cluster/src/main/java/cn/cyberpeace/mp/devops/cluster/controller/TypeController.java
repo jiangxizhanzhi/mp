@@ -34,11 +34,11 @@ public class TypeController {
     }
 
     /**
-     * 查询所有类型数据
+     * 查询所有分类
      * @return
      */
-    @ApiOperation("查询所有类型数据")
-    @GetMapping("/list")
+    @ApiOperation("查询所有分类")
+    @GetMapping("/categories")
     public Result<TypeAllResponse> list(){
         TypeAllConvertModel l1AndL2AndL3Type = typeConvert.findL1AndL2AndL3Type();
         if (Objects.isNull(l1AndL2AndL3Type)){
@@ -46,6 +46,55 @@ public class TypeController {
         }
         TypeAllResponse response = new TypeAllResponse(l1AndL2AndL3Type.getFirstTypeList(),
                 l1AndL2AndL3Type.getSecondTypeList(),l1AndL2AndL3Type.getThirdTypeList());
+        return new Result<>(response);
+    }
+
+    /**
+     * 查询所有平台
+     * @return
+     */
+    @ApiOperation("查询所有平台数据")
+    @GetMapping("/installer-platforms")
+    public Result<TypeAllResponse> installerPlatforms(){
+        TypeAllConvertModel model = typeConvert.findByType("installer_platforms");
+        if (Objects.isNull(model)){
+            return new Result<>();
+        }
+        TypeAllResponse response = new TypeAllResponse();
+        response.setIdStringModelList(model.getInstallerPlatformAndImageTypeList());
+        return new Result<>(response);
+
+    }
+
+    /**
+     * 查询所有角色
+     * @return
+     */
+    @ApiOperation("查询所有角色")
+    @GetMapping("/roles")
+    public Result<TypeAllResponse>  roles(){
+        TypeAllConvertModel model = typeConvert.findAllRoleType();
+        if (Objects.isNull(model)){
+            return new Result<>();
+        }
+        TypeAllResponse response = new TypeAllResponse();
+        response.setIdIntegerModelList(model.getRoleList());
+        return new Result<>(response);
+    }
+
+    /**
+     * 查询所有虚拟类型
+     * @return
+     */
+    @ApiOperation("查询所有虚拟类型")
+    @GetMapping("/image-types")
+    public Result<TypeAllResponse> imageType(){
+        TypeAllConvertModel model = typeConvert.findByType("image_type");
+        if (Objects.isNull(model)){
+            return new Result<>();
+        }
+        TypeAllResponse response = new TypeAllResponse();
+        response.setIdStringModelList(model.getInstallerPlatformAndImageTypeList());
         return new Result<>(response);
     }
 

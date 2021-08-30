@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.request;
 
+import cn.cyberpeace.mp.devops.cluster.enums.ImageTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.RoleEnum;
 import cn.cyberpeace.mp.devops.cluster.model.common.*;
 import io.swagger.annotations.ApiModel;
@@ -54,20 +55,26 @@ public class ImageRequest extends BaseRequest {
     /**
      * 分类
      */
-    @ApiModelProperty(value = "分类")
+    @ApiModelProperty(value = "一级分类")
     private Integer category;
 
     /**
-     * 第二个分类
+     * 二级分类
      */
-    @ApiModelProperty(value = "第二个分类")
+    @ApiModelProperty(value = "二级分类")
     private Integer secondCategory;
+
+    /**
+     * 三级分类
+     */
+    @ApiModelProperty(value = "三级分类")
+    private Integer thirdCategory;
 
     /**
      * 虚拟类型
      */
     @ApiModelProperty(value = "虚拟类型")
-    private Integer virtualType;
+    private ImageTypeEnum virtualType;
 
     /**
      * 网关信息

@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.devops.cluster.request;
 
+import cn.cyberpeace.mp.devops.cluster.enums.PublicEnum;
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -21,15 +23,18 @@ public class ImagesAuthRequest extends BaseRequest {
     /**
      * 镜像ID
      */
-    private List<String> ids;
+    @ApiModelProperty("镜像UUID集合")
+    private List<String> uuids;
 
     /**
      * 用户ID
      */
+    @ApiModelProperty("用户ID集合")
     private List<String> userIds;
 
     /**
      * 是否公开
      */
-    private Boolean isAllPublic;
+    @ApiModelProperty("是否公开")
+    private PublicEnum isAllPublic;
 }

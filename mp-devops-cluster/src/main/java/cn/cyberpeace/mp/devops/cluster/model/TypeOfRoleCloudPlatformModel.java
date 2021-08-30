@@ -1,0 +1,38 @@
+package cn.cyberpeace.mp.devops.cluster.model;
+
+import lombok.*;
+
+import java.io.Serializable;
+import java.util.List;
+
+/**
+ * 类型模型，仅支持role
+ */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@EqualsAndHashCode(callSuper = true)
+public class TypeOfRoleCloudPlatformModel extends BaseCloudPlatformModel implements Serializable {
+
+    /**
+     * 数据列表
+     */
+    private List<Item> items;
+
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Data
+    public static final class Item{
+
+        /**
+         * ID
+         */
+       private Integer id;
+
+        /**
+         * 名称
+         */
+       private String name;
+    }
+}

@@ -1,8 +1,11 @@
 package cn.cyberpeace.mp.devops.cluster.request;
 
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.devops.cluster.enums.ImageTypeEnum;
+import cn.cyberpeace.mp.devops.cluster.enums.PublicEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.RoleEnum;
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -39,7 +42,8 @@ public class ImagePageRequest extends BasePageRequest {
     /**
      * 镜像类型
      */
-    private Integer imageType;
+    @ApiModelProperty(value = "vm,container,entity,simple")
+    private ImageTypeEnum imageType;
 
     /**
      * 镜像名称
@@ -49,7 +53,7 @@ public class ImagePageRequest extends BasePageRequest {
     public HumanCondition wrapperHumanCondition(){
         HumanCondition outerCondition = new HumanCondition();
         if (Objects.nonNull(this.imageType)) {
-            outerCondition.filterEqual("image_type", this.imageType);
+            outerCondition.filterEqual("image_type", this.imageType.toValue());
         }
         if (StringUtils.isNotBlank(this.name)) {
             outerCondition.filterContains("name", this.name);
@@ -63,6 +67,7 @@ public class ImagePageRequest extends BasePageRequest {
         if (Objects.nonNull(this.subCategory)) {
             outerCondition.filterEqual("sub_category", this.subCategory);
         }
+        outerCondition.filterEqual("is_public", PublicEnum.ALL_PUBLIC.toValue());
         outerCondition.pagination(this.getPage(), this.getPerPage());
         outerCondition.orderBy("create_time");
         return outerCondition;

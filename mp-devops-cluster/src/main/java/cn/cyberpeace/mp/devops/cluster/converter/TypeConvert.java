@@ -16,4 +16,17 @@ public interface TypeConvert extends BaseCloudPlatformService {
      * @return
      */
     TypeAllConvertModel findL1AndL2Type();
+
+    /**
+     * 查询所有role
+     * @return
+     */
+    TypeAllConvertModel findAllRoleType();
+
+    /**
+     * 根据类型查询
+     * @param type
+     * @return
+     */
+    TypeAllConvertModel findByType(String type);
 }

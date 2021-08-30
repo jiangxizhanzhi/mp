@@ -12,13 +12,6 @@ import java.util.List;
 public interface DeviceService extends BaseCloudPlatformService {
 
     /**
-     * 分页查询
-     * @param getParams
-     * @return
-     */
-    DeviceCloudPlatformModel page(String getParams);
-
-    /**
      * 根据ID查询
      * @param id
      * @return
@@ -30,7 +23,7 @@ public interface DeviceService extends BaseCloudPlatformService {
      * @param ids
      * @return
      */
-    DeviceCloudPlatformModel findByIds(List<String> ids);
+    DeviceCloudPlatformModel findByIds(List<Integer> ids);
 
 
     /**

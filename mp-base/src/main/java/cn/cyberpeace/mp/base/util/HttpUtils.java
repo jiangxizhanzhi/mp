@@ -110,6 +110,18 @@ public class HttpUtils {
      * @return
      * @throws IOException
      */
+    public static HttpResponse sendGetForDownLoad(String url) throws IOException {
+        HttpClient client = HttpClientBuilder.create().build();
+        return doGetRequestForDownload(url, Objects.nonNull(INSTANCE.httpClient) ? INSTANCE.httpClient : client);
+    }
+
+    /**
+     * get请求
+     *
+     * @param url
+     * @return
+     * @throws IOException
+     */
     public static String sendGet(String url,Map<String,String> headerMap) throws IOException {
         HttpClient client = HttpClientBuilder.create().build();
         return doGetRequest(url,headerMap, Objects.nonNull(INSTANCE.httpClient) ? INSTANCE.httpClient : client);
@@ -233,6 +245,17 @@ public class HttpUtils {
         httpPost.setConfig(requestConfig);
         HttpResponse response = client.execute(httpPost);
         return EntityUtils.toString(response.getEntity(), "UTF-8");
+    }
+
+    private static HttpResponse doGetRequestForDownload(String url, HttpClient client) throws IOException {
+        // 替换url中的空格
+        HttpGet httpget = new HttpGet(url);
+        HttpResponse resp = client.execute(httpget);
+        // 设置请求和传输超时时间
+        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
+        httpget.setConfig(Objects.nonNull(INSTANCE.requestConfig) ? INSTANCE.requestConfig : requestConfig);
+        // 获得返回值
+        return resp;
     }
 }
 

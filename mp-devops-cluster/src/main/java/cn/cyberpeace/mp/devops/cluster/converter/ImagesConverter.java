@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.ImageAuthConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertPageModel;
 import cn.cyberpeace.mp.devops.cluster.request.*;
+import org.apache.http.HttpResponse;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface ImagesConverter extends BaseConverter{
@@ -30,7 +31,7 @@ public interface ImagesConverter extends BaseConverter{
      * 更新
      * @param request
      */
-    void update(ImageRequest request);
+    Boolean update(ImageRequest request);
 
     /**
      * 预览
@@ -70,12 +71,19 @@ public interface ImagesConverter extends BaseConverter{
     /**
      * 导出
      */
-    void export(ImagesExportRequest request);
+    HttpResponse export(String uuid);
 
     /**
      * 创建虚拟机/容器
      * @param uuid
      */
     void create(String uuid);
+
+
+    /**
+     * 仅支持快速创建的分页查询
+     * @param request
+     */
+    ImageConvertPageModel pageForQuickCreate(ImageQuickCreatePageRequest request);
 
 }

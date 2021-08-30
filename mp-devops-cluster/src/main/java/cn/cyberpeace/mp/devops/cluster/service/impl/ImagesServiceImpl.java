@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.devops.cluster.service.ImagesService;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.http.HttpResponse;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -46,7 +47,14 @@ public class ImagesServiceImpl extends BaseOpenStackServiceImpl implements Image
     }
 
     @Override
-    public void export() {
-
+    public HttpResponse export(String uuid) {
+        return super.downLoad(CPCLOUD_DEVICE + URL_VERSION + "/image/export?image_uuid=" + uuid);
     }
+
+
+    @Override
+    public DeviceCloudPlatformModel pageForQuickCreate(String getParams) {
+        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + "/quick_create"+ getParams, DeviceCloudPlatformModel.class);
+    }
+
 }

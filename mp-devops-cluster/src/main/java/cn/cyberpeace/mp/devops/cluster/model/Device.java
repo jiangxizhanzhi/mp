@@ -76,14 +76,19 @@ public class Device extends BaseCloudPlatformModel{
     private Integer role;
 
     /**
-     * 分类
+     * 一级分类
      */
     private Integer category;
 
     /**
-     * 第二个分类
+     * 二级分类
      */
     private Integer secondCategory;
+
+    /**
+     * 三级分类
+     */
+    private Integer l3Category;
 
     /**
      * 实体信息

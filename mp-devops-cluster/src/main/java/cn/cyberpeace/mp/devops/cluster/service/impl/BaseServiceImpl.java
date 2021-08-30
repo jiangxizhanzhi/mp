@@ -57,6 +57,22 @@ public class BaseServiceImpl {
      * @param url
      * @return
      */
+    protected HttpResponse downLoad(String url){
+        HttpResponse result = null;
+        try {
+            result = HttpUtils.getInstance().sendGetForDownLoad(url);
+            log.info("=====GET调用url：{},对应返回结果信息：{}",url,result);
+        } catch (IOException e) {
+            log.info("=====GET调用url：{},对应返回结果信息：{},报错信息：{}",url,result,e.getMessage());
+        }
+        return result;
+    }
+
+    /**
+     * 通过Get方式查询信息
+     * @param url
+     * @return
+     */
     protected String sendGet(String url,Map<String,String> headers){
         String result = "";
         try {
@@ -138,6 +154,7 @@ public class BaseServiceImpl {
         String result = "";
         try {
             result = HttpUtils.getInstance().sendPost(url,body);
+            log.info("=====POST调用url：{},参数：{},对应返回结果信息：{}",url,body,result);
             model = JsonUtils.toSnakeObject(result,valueType);
         } catch (IOException e) {
             log.info("=====POST调用url：{},参数：{},对应返回结果信息：{},报错信息：{}",url,body,result,e.getMessage());

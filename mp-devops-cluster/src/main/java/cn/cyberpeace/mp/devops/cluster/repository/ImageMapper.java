@@ -26,6 +26,13 @@ public interface ImageMapper extends BaseModelMapper<ImageModel> {
     List<ImageModel> page(ImagePageDTO dto);
 
     /**
+     * 获取总数
+     * @param dto
+     * @return
+     */
+    Integer totalCount(ImagePageDTO dto);
+
+    /**
      * 新增
      * @param imageModel
      * @return

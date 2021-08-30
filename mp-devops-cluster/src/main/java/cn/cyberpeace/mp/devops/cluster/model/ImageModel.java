@@ -2,6 +2,8 @@ package cn.cyberpeace.mp.devops.cluster.model;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
+import cn.cyberpeace.mp.devops.cluster.enums.PublicEnum;
+import cn.cyberpeace.mp.devops.cluster.enums.QuickCreateSupportEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,6 +13,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Table("mp_devops_images")
 public class ImageModel extends BaseModel {
+
+    /**
+     * 镜像UUID
+     */
+    private String uuid;
 
     /**
      * 名称
@@ -40,6 +47,11 @@ public class ImageModel extends BaseModel {
     /**
      * 是否公开
      */
-    private Integer isPublic;
+    private PublicEnum isPublic;
+
+    /**
+     * 是否支持快速创建
+     */
+    private QuickCreateSupportEnum quickCreateSupport;
 
 }
