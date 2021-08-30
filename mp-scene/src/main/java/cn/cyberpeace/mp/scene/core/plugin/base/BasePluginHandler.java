@@ -25,7 +25,9 @@ import java.util.Map;
         "elementPortBOClass",
 })
 @Data
-public abstract class BasePluginHandler<S, E, P> {
+public abstract class BasePluginHandler<S, E, P, C extends BasePluginContext<?>> {
+    private C context;
+
     // 源场景索引数据
     private String sourceSceneId;
     private final List<String> elementIds = new ArrayList<>();
@@ -118,6 +120,14 @@ public abstract class BasePluginHandler<S, E, P> {
             this.elementPortIds.addAll(elementPortIds);
         }
         reload();
+    }
+
+    public E getElement(String nodeId) {
+        return elementMap.getOrDefault(nodeId, null);
+    }
+
+    public P getElementPort(String portId) {
+        return elementPortMap.getOrDefault(portId, null);
     }
 
     public abstract void reload();

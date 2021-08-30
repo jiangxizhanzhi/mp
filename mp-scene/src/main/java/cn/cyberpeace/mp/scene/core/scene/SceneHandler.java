@@ -4,8 +4,11 @@ import cn.cyberpeace.mp.base.annotation.BeanFieldClasses;
 import cn.cyberpeace.mp.base.annotation.ClassFieldClasses;
 import cn.cyberpeace.mp.scene.core.base.BaseSceneHandler;
 import cn.cyberpeace.mp.scene.core.bo.*;
+import cn.cyberpeace.mp.scene.core.plugin.ScenePluginContext;
 import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
 import cn.cyberpeace.mp.scene.model.*;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneElementPortModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneNodeModel;
 import cn.cyberpeace.mp.scene.repository.*;
 
 /**
@@ -78,4 +81,73 @@ public class SceneHandler extends BaseSceneHandler<
         init(sceneId, areaId, isAreaMode);
     }
 
+    @Override
+    public void initPluginContext(String pluginKey, ScenePluginHandler<?, ?, ?> plugin) {
+        var context = new ScenePluginContext();
+        context.setSceneHandler(this);
+        plugin.setContext(context);
+    }
+
+    public void initiate() {
+        getPluginMap().forEach((key, plugin) -> {
+            plugin.initiate();
+        });
+    }
+
+    public void create() {
+        getPluginMap().forEach((key, plugin) -> {
+            plugin.create();
+        });
+    }
+
+    public void start() {
+        getPluginMap().forEach((key, plugin) -> {
+            plugin.start();
+        });
+    }
+
+    public void stop() {
+        getPluginMap().forEach((key, plugin) -> {
+            plugin.stop();
+        });
+    }
+
+    public void restart() {
+        getPluginMap().forEach((key, plugin) -> {
+            plugin.restart();
+        });
+    }
+
+    public void pause() {
+        getPluginMap().forEach((key, plugin) -> {
+            plugin.pause();
+        });
+    }
+
+    public void unpause() {
+        getPluginMap().forEach((key, plugin) -> {
+            plugin.unpause();
+        });
+    }
+
+    public void snapshot() {
+        getPluginMap().forEach((key, plugin) -> {
+            plugin.snapshot();
+        });
+    }
+
+    public void delete() {
+        getPluginMap().forEach((key, plugin) -> {
+            plugin.delete();
+        });
+    }
+
+    /**
+     * TODO: 修改场景
+     */
+    public void modify() {
+        getPluginMap().forEach((key, plugin) -> {
+            plugin.modify();
+        });
+    }
 }

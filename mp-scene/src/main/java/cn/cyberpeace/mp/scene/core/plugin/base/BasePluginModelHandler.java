@@ -56,7 +56,7 @@ public class BasePluginModelHandler<
         M1 extends BasePluginSceneMapper<S0>,
         M2 extends BasePluginSceneElementMapper<E0>,
         M3 extends BasePluginSceneElementPortMapper<P0>,
-        H extends BasePluginHandler<S, E, P>> {
+        H extends BasePluginHandler<S, E, P, ?>> {
     private H scenePluginHandler;
 
     // 通过ClassFieldNames注解和实现类ClassFieldClasses注解，初始化调用ClassUtils.loadClassFields(this)设置
