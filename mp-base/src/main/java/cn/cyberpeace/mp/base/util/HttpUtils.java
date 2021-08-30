@@ -231,6 +231,7 @@ public class HttpUtils {
      * @throws IOException
      */
     public static String sendDelete(String url) throws IOException {
+        log.info("请求地址================>{}", url);
         HttpClient client = HttpClientBuilder.create().build();
         HttpDelete httpDelete = new HttpDelete(url);
         RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();

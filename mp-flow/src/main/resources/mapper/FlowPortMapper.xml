@@ -5,7 +5,7 @@
     <select id="selectByPortIds" resultType="cn.cyberpeace.mp.flow.model.FlowPortModel">
         select f.* from mp_flow_port f
         <where>
-            1 == 1
+            1 = 1
             <if test="flowPortIds != null and flowPortIds.size() > 0">
                 AND f.id in
                 <foreach item="id" index="index" collection="flowPortIds" open="(" separator="," close=")">

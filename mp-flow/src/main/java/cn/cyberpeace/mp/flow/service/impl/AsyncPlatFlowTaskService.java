@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.flow.service.impl;
 import cn.cyberpeace.mp.base.constant.BaseConstants;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.JsonUtils;
-import cn.cyberpeace.mp.base.util.TextUtils;
 import cn.cyberpeace.mp.flow.enums.ResourceTypeEnum;
 import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
@@ -251,6 +250,9 @@ public class AsyncPlatFlowTaskService {
 
             // 删除网口信息
             this.delPorts(flowActuatorModel, flowPortIds);
+
+            // 删除流量网口信息
+            flowPortMapper.bulkDelete(flowPortIds.toArray(new String[0]));
         } catch (Exception e) {
             log.error("delete task from flow actuator platform error");
         }
@@ -383,7 +385,6 @@ public class AsyncPlatFlowTaskService {
                     .clientPortId(clientPortId)
                     .clientGateway(gatewayIp)
                     .build();
-            flowPortModel.setClientPortId(TextUtils.uuid());
             flowPortMapper.create(flowPortModel);
         } catch (Exception e) {
             log.error("add flow port error", e);
