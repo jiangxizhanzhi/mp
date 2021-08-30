@@ -130,7 +130,7 @@ public class AsyncPlatFlowTaskService {
             }
         }
 
-        flowTaskModel.setFlowPortId(flowPortModel.getClientPortId());
+        flowTaskModel.setFlowPortId(flowPortModel.getId());
 
         String thirdTaskId = "";
         if (ResourceTypeEnum.PACP.toValue() == flowInfoModel.getResourceType()) {
@@ -313,6 +313,7 @@ public class AsyncPlatFlowTaskService {
 
     /**
      * 新增网口
+     *
      * @param flowActuatorModel
      * @return
      */
@@ -322,8 +323,8 @@ public class AsyncPlatFlowTaskService {
             // 给trex虚拟机添加server网口
             JSONObject addPortReq = new JSONObject();
             addPortReq.put("network_id", flowActuatorModel.getNetworkId());
-            String addTrexServerPortRsp = HttpUtils.sendPost(cpUrl + "/v1/instances/" + flowActuatorModel.getInstanceId() + "/interfaces"
-                    , addPortReq.toJSONString());
+            String addTrexServerPortRsp = HttpUtils.sendPost(cpUrl + "/v1/instances/" +
+                            flowActuatorModel.getInstanceId() + "/interfaces", addPortReq.toJSONString());
             JSONObject addTrexServerObj = JSONObject.parseObject(addTrexServerPortRsp);
             log.info("add trex server port response:{}", addTrexServerObj.toJSONString());
             String serverMac = "";
@@ -343,8 +344,9 @@ public class AsyncPlatFlowTaskService {
             String clientPortId = "";
             if (ResourceTypeEnum.PACP.toValue() == resourceType) {
                 // pcap需要给trex虚拟机添加client网口
-                String addTrexClientPortRsp = HttpUtils.sendPost(cpUrl + "/v1/instances/" + flowActuatorModel.getInstanceId() + "/interfaces"
-                        , addPortReq.toJSONString());
+                String addTrexClientPortRsp =
+                        HttpUtils.sendPost(cpUrl + "/v1/instances/" + flowActuatorModel.getInstanceId() + "/interfaces"
+                                , addPortReq.toJSONString());
                 JSONObject addTrexClientObj = JSONObject.parseObject(addTrexClientPortRsp);
                 log.info("add trex client port response:{}", addTrexClientObj.toJSONString());
                 if (BaseConstants.SUCCESS_ZERO.equals(addTrexClientObj.getString(BaseConstants.STR_CODE))) {
@@ -392,6 +394,7 @@ public class AsyncPlatFlowTaskService {
 
     /**
      * 删除网口信息
+     *
      * @param flowActuatorModel
      * @param flowPortIds
      */
