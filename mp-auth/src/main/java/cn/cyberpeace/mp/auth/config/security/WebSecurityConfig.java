@@ -8,10 +8,13 @@ import cn.cyberpeace.mp.auth.extensions.security.CustomUsernamePasswordAuthentic
 import cn.cyberpeace.mp.auth.extensions.security.HttpAuthenticationEntryPoint;
 import cn.cyberpeace.mp.auth.extensions.security.HttpLogoutSuccessHandler;
 import cn.cyberpeace.mp.auth.extensions.security.JwtAuthenticationFilter;
+import cn.cyberpeace.mp.auth.extensions.security.LicenseFilter;
 import cn.cyberpeace.mp.auth.extensions.security.mobile.MobilePasswordAuthenticationFilter;
 import cn.cyberpeace.mp.auth.extensions.security.mobile.MobilePasswordAuthenticationProvider;
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetailsService;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
+import io.swagger.models.License;
+import org.apache.catalina.filters.AddDefaultCharsetFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -35,6 +38,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private CustomAuthenticationSuccessHandler authenticationSuccessHandler;
     private CustomAuthenticationFailureHandler authenticationFailureHandler;
     private ClientAuthenticationFilter clientAuthenticationFilter;
+    private LicenseFilter licenseFilter;
 
     @Autowired
     public WebSecurityConfig(AuthUserDetailsService userDetailsService,
@@ -84,6 +88,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(clientAuthenticationFilter, JwtAuthenticationFilter.class);
+//                .addFilterBefore(licenseFilter, ClientAuthenticationFilter.class);
 
         // usernamePassword
         var customUsernamePasswordAuthenticationFilter = new CustomUsernamePasswordAuthenticationFilter();

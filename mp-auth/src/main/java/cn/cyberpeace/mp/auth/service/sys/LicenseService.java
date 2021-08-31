@@ -30,7 +30,7 @@ public class LicenseService {
         }
 
 //        Awesome INSTANCE = (Awesome) Native.loadLibrary("/home/tmp/license.so", Awesome.class);
-        Awesome INSTANCE = (Awesome) Native.loadLibrary("classpath:/license/license.so", Awesome.class);
+//        Awesome INSTANCE = (Awesome) Native.loadLibrary("classpath:/license/license.so", Awesome.class);
 
         public class GoString extends Structure {
             public static class ByValue extends GoString implements Structure.ByValue {}
@@ -54,8 +54,8 @@ public class LicenseService {
      * @return
      */
     public boolean verify(String verifyStr, String verifyCode) {
+//        verifyStr = "{\"machinecode\": \"CHTF-12H1-34S8-HV23-123S\", \"deadline\": 1, \"info\": {\"thj\":2}}";
         log.info("verifyStr:{}, verifyCode:{}", verifyStr, verifyCode);
-
         Awesome.GoString.ByValue str = new Awesome.GoString.ByValue();
         str.p = verifyStr;
         str.n = str.p.length();
@@ -64,19 +64,23 @@ public class LicenseService {
         code.p = verifyCode;
         code.n = code.p.length();
 
-        int ret = Awesome.INSTANCE.Verify(str, code);
+        Awesome INSTANCE = (Awesome) Native.loadLibrary(authConfig.getActivationDir() + File.separator + "license.so", Awesome.class);
+        int ret = INSTANCE.Verify(str, code);
 
         //  -1	json传入错误
         //  0	此授权码正确
         //  1	此授权码错误
         if (ret == -1) {
-            throw new MpRuntimeException("json传入错误！");
+            log.error("json格式错误！");
+            throw new MpRuntimeException("json格式错误！");
         }
         if (ret == 1) {
+            log.error("授权码错误！");
             throw new MpRuntimeException("授权码错误！");
         }
         if (ret == 0) {
             // 授权码正确
+            log.info("校验成功！");
             return true;
         }
 
@@ -85,6 +89,7 @@ public class LicenseService {
     }
 
 
+    /*
     public void testlicense() {
 
         Awesome.GoString.ByValue str = new Awesome.GoString.ByValue();
@@ -108,6 +113,7 @@ public class LicenseService {
         System.out.println("错误授权码返回" + ret);
 
     }
+    */
 
 
 }

@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.auth.controller;
 
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.SysConfigConstant;
+import cn.cyberpeace.mp.auth.model.AvatarModel;
 import cn.cyberpeace.mp.auth.model.SysConfigModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.AvatarService;
@@ -33,7 +34,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/sys/config")
 @UnlimitPagination("list")
-public class SysConfigController extends BaseModelController<SysConfigModel, QueryParams, SysConfigService> {
+public class SysConfigController {
+
+    @Autowired
+    private SysConfigService sysConfigService;
 
     @Autowired
     private AvatarService avatarService;
@@ -41,15 +45,11 @@ public class SysConfigController extends BaseModelController<SysConfigModel, Que
     @Autowired
     private UserService userService;
 
-    @Autowired
-    public SysConfigController(SysConfigService modelService) {
-        setModelService(modelService);
-    }
 
     @ApiOperation(value = "查询所有系统设置", notes = "")
     @GetMapping("/all")
     public ServiceResult getall() {
-        List<SysConfigModel> configs = getModelService().listAll();
+        List<SysConfigModel> configs = sysConfigService.listAll();
         return ResultUtils.commonResult(true, configs);
     }
 
@@ -66,7 +66,7 @@ public class SysConfigController extends BaseModelController<SysConfigModel, Que
             }
         }
 
-        boolean success = getModelService().updateByKeyName(updateConfig);
+        boolean success = sysConfigService.updateByKeyName(updateConfig);
         return ResultUtils.commonResult(success, null);
     }
 
@@ -74,7 +74,7 @@ public class SysConfigController extends BaseModelController<SysConfigModel, Que
     @PostMapping("/updateall")
     public ServiceResult updateAll(@RequestBody List<SysConfigModel> configs) {
         // 更新规则，如果key存在，就修改value值，如果key不存在，就忽略不改
-        boolean success = getModelService().batchUpdateByKeyname(configs);
+        boolean success = sysConfigService.batchUpdateByKeyname(configs);
         return ResultUtils.commonResult(success, null);
     }
 
@@ -83,46 +83,12 @@ public class SysConfigController extends BaseModelController<SysConfigModel, Que
     @PostMapping("/init")
     public ServiceResult init() {
         // 更新规则，如果key存在，就修改value值，如果key不存在，就忽略不改
-        boolean success = avatarService.initDefaultAvatars();
-        return ResultUtils.commonResult(success, null);
+        List<AvatarModel> modelList = avatarService.uploadDefaultAvatars();
+        avatarService.clearAndReUploadAvatars(modelList);
+        return ServiceResult.successful();
     }
 
 
-    @Override
-    @ApiIgnore
-    public ObjServiceResult<SysConfigModel> create(SysConfigModel obj, String[] fields) {
-        throw new MpRuntimeException("Not Supported!");
-    }
-
-    @Override
-    @ApiIgnore
-    public ServiceResult<Integer> bulkCreate(List<SysConfigModel> objs) {
-        throw new MpRuntimeException("Not Supported!");
-    }
-
-    @Override
-    @ApiIgnore
-    public ObjServiceResult<SysConfigModel> update(String id, SysConfigModel obj, String[] fields) {
-        throw new MpRuntimeException("Not Supported!");
-    }
-
-    @Override
-    @ApiIgnore
-    public ServiceResult<Integer> bulkUpdate(List<SysConfigModel> objs) {
-        throw new MpRuntimeException("Not Supported!");
-    }
-
-    @Override
-    @ApiIgnore
-    public ServiceResult<Boolean> delete(String id) {
-        throw new MpRuntimeException("Not Supported!");
-    }
-
-    @Override
-    @ApiIgnore
-    public ServiceResult<Integer> bulkDelete(String[] ids) {
-        throw new MpRuntimeException("Not Supported!");
-    }
 
 
 }

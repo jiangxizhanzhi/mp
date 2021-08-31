@@ -137,7 +137,9 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
             log.info("no need to upload default avatar!");
             return;
         } else {
-            avatarService.initDefaultAvatars();
+            log.info("uploading default avatar manually!");
+            List<AvatarModel> modelList = avatarService.uploadDefaultAvatars();
+            avatarService.clearAndReUploadAvatars(modelList);
         }
     }
 }
