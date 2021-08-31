@@ -21,6 +21,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+  *@Desciption 探针管理服务
+  *@Author zhangjin
+  *@Date 8/31/21 11:51 上午
+**/
 @Service
 public class ProbeService {
 
@@ -35,6 +40,7 @@ public class ProbeService {
 
     /**
      * 新增探针
+     *
      * @param probeRequest
      */
     @Transactional(rollbackFor = Exception.class)
@@ -55,6 +61,7 @@ public class ProbeService {
 
     /**
      * 根据probeId删除探针
+     *
      * @param probeId probeId
      * @return 是否删除成功
      */
@@ -62,13 +69,13 @@ public class ProbeService {
     public boolean deleteProbeById(String probeId) {
         probeParamModelMapper.deleteParamByProbeId(probeId);
         wazuhProbeManagerRepository.deleteProbeByProbeId(probeId);
-        return probeModelMapper.deleteByProbeId(probeId) >0;
+        return probeModelMapper.deleteByProbeId(probeId) > 0;
     }
 
     @Transactional(rollbackFor = Exception.class, readOnly = true)
     public ListObjServiceResult<ProbeResult> queryProbeListWithPageable(ProbeSearchRequest probeSearchRequest) {
         int count = probeModelMapper.countQuery(probeSearchRequest);
-        List<ProbeModel> probeModelList = probeModelMapper.queryListWithPage(probeSearchRequest, (probeSearchRequest.getPageNum() -1) * probeSearchRequest.getPageSize());
+        List<ProbeModel> probeModelList = probeModelMapper.queryListWithPage(probeSearchRequest, (probeSearchRequest.getPageNum() - 1) * probeSearchRequest.getPageSize());
         List<ProbeResult> probeResults = probeModelList.stream().map((model -> {
             var probeResult = new ProbeResult();
             BeanUtils.copyProperties(model, probeResult);
@@ -79,7 +86,6 @@ public class ProbeService {
         return new ListObjServiceResult(probeResults, count);
     }
 
-
     @Transactional(rollbackFor = Exception.class, readOnly = true)
     public ProbeResult queryProbeDetail(String probeId) {
         var probeResult = new ProbeResult();
@@ -89,7 +95,7 @@ public class ProbeService {
         }
         BeanUtils.copyProperties(probeModel, probeResult);
         List<ProbeParamsResult> probeParamsResults = probeParamModelMapper.queryProbeParamList(probeId).stream()
-            .map(paramModel->{
+            .map(paramModel -> {
                 ProbeParamsResult paramsResult = new ProbeParamsResult();
                 BeanUtils.copyProperties(paramModel, paramsResult);
                 return paramsResult;
@@ -119,7 +125,6 @@ public class ProbeService {
 
         return rows;
     }
-
 
     private void insertProbeParams(ProbeRequest probeRequest, String probeId) {
         List<ProbeParamModel> probeParamModels = probeRequest.getProbeParamsRequestList().stream()

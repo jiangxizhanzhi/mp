@@ -1,5 +1,10 @@
 package cn.cyberpeace.mp.datasandtable.model.enums;
 
+/**
+  *@Desciption 探针脚本类型
+  *@Author zhangjin
+  *@Date 8/31/21 11:51 上午
+**/
 public enum ScriptType {
     SHELL(0),
     PYTHON(1),

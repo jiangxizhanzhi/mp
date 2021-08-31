@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.datasandtable.config.SituationAwareConfig;
 import cn.cyberpeace.mp.datasandtable.constant.SituationalAwareErrorCode;
 import cn.cyberpeace.mp.datasandtable.model.ProbeRequest;
 import cn.cyberpeace.mp.datasandtable.model.enums.OsType;
+import cn.cyberpeace.mp.datasandtable.model.enums.ScriptType;
 import com.alibaba.fastjson.JSONObject;
 import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
@@ -72,18 +73,17 @@ public class WazuhProbeManagerRepository {
      */
     private String buildExecCommandline(ProbeRequest probeRequest) {
         var commandLineBuilder = new StringBuilder();
-        return commandLineBuilder.append(buildExecString(probeRequest)).append(" ").append(buildScriptPath(probeRequest))
-            .append("/").append(buildProbeFileName(probeRequest)).append(buildProbeFileSubffix(probeRequest)).toString();
+        return commandLineBuilder.append(buildExecString(probeRequest))
+            .append(probeRequest.getScriptType().equals(ScriptType.BAT) ? "" :" ").append(buildScriptPath(probeRequest))
+            .append(buildProbeFileName(probeRequest)).append(buildProbeFileSubffix(probeRequest)).toString();
     }
 
     private String buildExecString(ProbeRequest probeRequest) {
         switch (probeRequest.getScriptType()) {
-            case SHELL:
-                return "sh";
             case PYTHON:
                 return "python";
             case BAT:
-                return "call";
+                return "";
             default:
                 return "sh";
         }
@@ -99,16 +99,10 @@ public class WazuhProbeManagerRepository {
 
     private String buildProbeFileName(ProbeRequest probeRequest) {
         String osType;
-        switch (probeRequest.getOsType()) {
-            case LINUX:
-                osType = "linux";
-                break;
-            case WINDOWS:
-                osType = "windows";
-                break;
-            default:
-                osType = "linux";
-                break;
+        if (probeRequest.getOsType() == OsType.WINDOWS) {
+            osType = "windows";
+        } else {
+            osType = "linux";
         }
 
         return probeRequest.getProbeName() + "_" + osType;
@@ -117,9 +111,6 @@ public class WazuhProbeManagerRepository {
     private String buildProbeFileSubffix(ProbeRequest probeRequest) {
         String subbfix;
         switch (probeRequest.getScriptType()) {
-            case SHELL:
-                subbfix = ".sh";
-                break;
             case PYTHON:
                 subbfix = ".py";
                 break;
