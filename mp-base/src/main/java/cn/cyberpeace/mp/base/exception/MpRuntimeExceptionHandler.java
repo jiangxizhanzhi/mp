@@ -28,8 +28,8 @@ public class MpRuntimeExceptionHandler {
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public ServiceResult<String> b2bRuntimeExceptionHandler(MpRuntimeException ex) {
-        log.error(LOGGER_FORMAT, ex.getMessage(), ex.getDetail());
-        return ServiceResult.fail(BaseErrorCode.ERROR, ex.getMessage(), ex.getDetail());
+        log.error(LOGGER_FORMAT, ex.getServiceCode().getMessage(), ex.getDetail());
+        return ServiceResult.fail(ex.getServiceCode(), ex.getServiceCode().getMessage(), ex.getDetail());
     }
 
     @ExceptionHandler({BindException.class})
