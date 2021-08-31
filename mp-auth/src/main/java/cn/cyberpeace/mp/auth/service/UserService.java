@@ -15,6 +15,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 public interface UserService extends BaseModelService<UserModel, UserQueryParams> {
 
     UserDto getUserDto(String id);

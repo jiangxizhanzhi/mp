@@ -5,7 +5,8 @@ import cn.cyberpeace.mp.scenepluginflow.model.FlowPluginSceneElementModel;
 import lombok.Data;
 
 @Data
-public class FlowPluginSceneElementBO extends BaseFlowPluginSceneElementBO<FlowPluginSceneElementModel> {
+public class FlowPluginSceneElementBO extends BaseFlowPluginSceneElementBO<FlowPluginSceneElementModel,
+        FlowPluginSceneElementBO> {
     @Override
     public FlowPluginSceneElementModel createModel() {
         return new FlowPluginSceneElementModel();

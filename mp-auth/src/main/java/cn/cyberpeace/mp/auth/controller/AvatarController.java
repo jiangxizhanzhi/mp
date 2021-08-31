@@ -21,6 +21,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+/**
+ * @Description: 头像管理接口
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @Api(value = "头像管理接口", tags = "AUTH-头像管理接口")
 @Slf4j
 @RestController

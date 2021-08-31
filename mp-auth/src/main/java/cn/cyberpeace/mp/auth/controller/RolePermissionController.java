@@ -23,6 +23,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+/**
+ * @Description: 角色权限管理接口
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @Api(value = "角色-权限管理接口", tags = "AUTH-角色-权限管理接口")
 @Slf4j
 @RestController

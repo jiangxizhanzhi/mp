@@ -23,7 +23,7 @@ public class SceneElementModel extends BaseSceneElementModel implements BaseEven
     @DefaultInt
     private Integer processStatus;
     @DefaultStr
-    private Integer processMessage;
+    private String processMessage;
 
     public static class Event {
         public static final Integer DEFAULT = 0;

@@ -11,6 +11,11 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @Component
 @Scope("prototype")
 public class QueryChildTargetOperation implements TargetOperation<TargetDto> {

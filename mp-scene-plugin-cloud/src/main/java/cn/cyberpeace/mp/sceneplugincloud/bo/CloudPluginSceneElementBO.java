@@ -5,7 +5,8 @@ import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import lombok.Data;
 
 @Data
-public class CloudPluginSceneElementBO extends BaseCloudPluginSceneElementBO<CloudPluginSceneElementModel> {
+public class CloudPluginSceneElementBO extends BaseCloudPluginSceneElementBO<CloudPluginSceneElementModel,
+        CloudPluginSceneElementBO> {
     @Override
     public CloudPluginSceneElementModel createModel() {
         return new CloudPluginSceneElementModel();

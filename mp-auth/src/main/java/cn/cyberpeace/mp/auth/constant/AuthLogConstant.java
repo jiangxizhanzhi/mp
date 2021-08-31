@@ -1,5 +1,10 @@
 package cn.cyberpeace.mp.auth.constant;
 
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 public class AuthLogConstant {
     // 账号模块
 //    public static final String MODULE = "4";

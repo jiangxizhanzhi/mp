@@ -10,11 +10,16 @@ import cn.cyberpeace.mp.base.repository.condition.AndCondition;
 import cn.cyberpeace.mp.base.repository.condition.ConnectorCond;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.ClassUtils;
+import cn.cyberpeace.mp.base.util.TextUtils;
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.setting.Setting;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Proxy;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,24 +33,25 @@ public interface BasePermissionMapper<P extends BasePermissionModel, T extends B
 
     @Recommendation
     default List<T> listTargetsByOwner(String owner, HumanCondition outerCondition) {
-        HumanCondition innerCondition = getInnerCondition(owner);
-        String currentLinkName = innerCondition.getCurrentLinkName();
+        HumanCondition innerCondition = processOuterCondition(owner, outerCondition);
 
-        // distinct
-        innerCondition.setDistinct(outerCondition.getDistinct());
-        // select fields
-        innerCondition.getSelectFields().putAll(convertSelectFields(currentLinkName, outerCondition));
-        // paging
-        innerCondition.setLimit(outerCondition.getLimit());
-        innerCondition.setOffset(outerCondition.getOffset());
-        // group
-        innerCondition.getGroupFields().addAll(convertGroupFields(currentLinkName, outerCondition));
-        // orders
-        innerCondition.getOrders().addAll(convertOrders(currentLinkName, outerCondition));
-        // andi
-        innerCondition.getAndCondition().addCondition(convertAndCondition(currentLinkName, outerCondition));
+        List<Map<String, Object>> mapList = originList(innerCondition);
 
-        return list(innerCondition);
+        List<T> objs = new ArrayList<>();
+        mapList.forEach(map -> {
+            var obj = mapToTargetObj(map);
+            if (obj != null) {
+                objs.add(obj);
+            }
+        });
+        return objs;
+    }
+
+    @Recommendation
+    default int totalTargetsByOwner(String owner, HumanCondition outerCondition) {
+        HumanCondition innerCondition = processOuterCondition(owner, outerCondition);
+
+        return total(innerCondition);
     }
 
     /*
@@ -86,6 +92,25 @@ public interface BasePermissionMapper<P extends BasePermissionModel, T extends B
         return filterDelete(humanCondition);
     }
 
+    private HumanCondition processOuterCondition(String owner, HumanCondition outerCondition) {
+        HumanCondition innerCondition = getInnerCondition(owner);
+        String currentLinkName = innerCondition.getCurrentLinkName();
+
+        // distinct
+        innerCondition.setDistinct(outerCondition.getDistinct());
+        // select fields
+        innerCondition.getSelectFields().putAll(convertSelectFields(currentLinkName, outerCondition));
+        // paging
+        innerCondition.setLimit(outerCondition.getLimit());
+        innerCondition.setOffset(outerCondition.getOffset());
+        // group
+        innerCondition.getGroupFields().addAll(convertGroupFields(currentLinkName, outerCondition));
+        // orders
+        innerCondition.getOrders().addAll(convertOrders(currentLinkName, outerCondition));
+        // andi
+        innerCondition.getAndCondition().addCondition(convertAndCondition(currentLinkName, outerCondition));
+        return innerCondition;
+    }
 
 
     private Class<P> getPermissionClass() {
@@ -132,6 +157,50 @@ public interface BasePermissionMapper<P extends BasePermissionModel, T extends B
     }
 
 
+    private T mapToTargetObj(Map<String, Object> map) {
+        if (map == null) {
+            return null;
+        }
+
+        Class<T> actualModelClass = getTargetClass();
+        if (actualModelClass == null) {
+            return null;
+        }
+
+        T obj;
+        try {
+            obj = actualModelClass.getDeclaredConstructor().newInstance();
+        } catch (Exception e) {
+            log.error("Convert {} to {} instance failed: {}", map, actualModelClass, e);
+            return null;
+        }
+
+        Map<String, Class<?>> fieldTypes = ClassUtils.getBeanClassFieldTypes(actualModelClass);
+        final BeanWrapper objWrapper = new BeanWrapperImpl(obj);
+        fieldTypes.forEach((fieldName, fieldType) -> {
+            String columnName = TextUtils.humpToLine(fieldName);
+            if (map.containsKey(columnName)) {
+                Object fieldValue = handleRawFieldValue(fieldType, map.get(columnName));
+                objWrapper.setPropertyValue(fieldName, fieldValue);
+            }
+        });
+
+        return obj;
+    }
+
+
+    private Object handleRawFieldValue(Class<?> fieldType, Object fieldValue) {
+        if (fieldType == LocalDateTime.class && fieldValue instanceof java.sql.Timestamp) {
+            return ((java.sql.Timestamp) fieldValue).toLocalDateTime();
+        } else if (fieldType == LocalDate.class && fieldValue instanceof java.sql.Date) {
+            return ((java.sql.Date) fieldValue).toLocalDate();
+        } else if (fieldType == LocalTime.class && fieldValue instanceof java.sql.Time) {
+            return ((java.sql.Time) fieldValue).toLocalTime();
+        } else {
+            return fieldValue;
+        }
+    }
+
     private Class<?> getMapperInterface(Proxy proxy) {
         return ClassUtils.getObjFieldValue(Proxy.getInvocationHandler(proxy),
                 "mapperInterface", Class.class);
@@ -158,7 +227,11 @@ public interface BasePermissionMapper<P extends BasePermissionModel, T extends B
 
 
     private String convertFieldName(String currentLinkName, String fieldName) {
-        return currentLinkName + "." + fieldName;
+        String prefix = currentLinkName + ".";
+        if(fieldName.contains(prefix)) {
+            return fieldName;
+        }
+        return prefix + fieldName;
     }
 
     private Map<String, String> convertSelectFields(String currentLinkName, HumanCondition condition) {
@@ -218,6 +291,7 @@ public interface BasePermissionMapper<P extends BasePermissionModel, T extends B
         return andCondition;
 
     }
+
 
 
 

@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.auth.dto.OrgDto;
 import cn.cyberpeace.mp.auth.dto.activation.ActivationContent;
 import cn.cyberpeace.mp.auth.dto.activation.ActivationRequest;
 import cn.cyberpeace.mp.auth.model.TargetModel;
+import cn.cyberpeace.mp.auth.model.UserPermissionModel;
 import cn.cyberpeace.mp.auth.repository.OrgMapper;
 import cn.cyberpeace.mp.auth.repository.SysConfigMapper;
 import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
@@ -37,6 +38,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @Api(value = "TEST", tags = "AUTH-TEST")
 @Slf4j
 @RestController
@@ -148,9 +154,19 @@ public class AuthTestController {
         outerCondition.groupBy(TargetModel::getParent);
         // 自定义返回field
         outerCondition.select(TargetModel::getId, TargetModel::getName, TargetModel::getPath, TargetModel::getIdentifier, TargetModel::getParent);
+        outerCondition.setDistinct(true);
 
         List<TargetModel> list = userPermissionTestMapper.listTargetsByOwner(userId, outerCondition);
-        log.info("{}", list);
+        int total = userPermissionTestMapper.totalTargetsByOwner(userId, outerCondition);
+        log.info("{}, {}", list, total);
+
+
+        UserPermissionModel upmodel = new UserPermissionModel();
+        upmodel.setTarget("123abcde");
+        upmodel.setOwner("123abcd4567");
+        boolean result = userPermissionTestMapper.create(upmodel);
+        log.info("{}", result);
+
         return list;
     }
 
