@@ -4,7 +4,8 @@ import cn.cyberpeace.mp.scene.model.base.BaseSceneNodeModel;
 import lombok.Data;
 
 @Data
-public abstract class BaseSceneNodeBO<M extends BaseSceneNodeModel> extends EidBO<M> {
+public abstract class BaseSceneNodeBO<M extends BaseSceneNodeModel, T extends BaseSceneNodeBO<M, T>>
+        extends EidBO<M, T> {
     private String id;
     private String area;
     private String icon2;

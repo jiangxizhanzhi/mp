@@ -22,4 +22,10 @@ public class ScenePluginDataBO {
      */
     private Map<String, Map<String, Object>> elementPorts;
 
+    /**
+     * TODO: 这里插件的数据类型无法确定，暂未处理，目前插件实现的业务模型不绑定数据id
+     */
+    public ScenePluginDataBO export() {
+        return this;
+    }
 }

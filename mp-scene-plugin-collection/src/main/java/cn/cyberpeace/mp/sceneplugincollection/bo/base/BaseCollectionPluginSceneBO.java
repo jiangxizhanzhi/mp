@@ -5,5 +5,6 @@ import cn.cyberpeace.mp.sceneplugincollection.model.base.BaseCollectionPluginSce
 import lombok.Data;
 
 @Data
-public abstract class BaseCollectionPluginSceneBO<M extends BaseCollectionPluginSceneModel> extends BasePluginSceneBO<M> {
+public abstract class BaseCollectionPluginSceneBO<M extends BaseCollectionPluginSceneModel,
+        T extends BaseCollectionPluginSceneBO<M, T>> extends BasePluginSceneBO<M, T> {
 }

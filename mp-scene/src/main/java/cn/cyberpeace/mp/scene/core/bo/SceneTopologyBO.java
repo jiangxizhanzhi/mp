@@ -15,5 +15,6 @@ public class SceneTopologyBO extends BaseSceneTopologyBO<
         SceneAreaBO,
         SceneElementPortBO,
         SceneElementBO,
-        SceneElementPortConnectionBO> {
+        SceneElementPortConnectionBO,
+        SceneTopologyBO> {
 }

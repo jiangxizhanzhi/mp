@@ -5,6 +5,6 @@ import cn.cyberpeace.mp.scenepluginflow.model.base.BaseFlowPluginSceneElementPor
 import lombok.Data;
 
 @Data
-public abstract class BaseFlowPluginSceneElementPortBO<M extends BaseFlowPluginSceneElementPortModel>
-        extends BasePluginSceneElementPortBO<M> {
+public abstract class BaseFlowPluginSceneElementPortBO<M extends BaseFlowPluginSceneElementPortModel,
+        T extends BaseFlowPluginSceneElementPortBO<M, T>> extends BasePluginSceneElementPortBO<M, T> {
 }

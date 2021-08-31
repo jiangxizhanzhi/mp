@@ -5,12 +5,12 @@ import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import lombok.Data;
 
 @Data
-public class SceneElementBO extends BaseSceneElementBO<SceneElementModel, SceneElementPortBO> {
+public class SceneElementBO extends BaseSceneElementBO<SceneElementModel, SceneElementPortBO, SceneElementBO> {
     private Integer event;
     private Integer eventStatus;
     private Integer process;
     private Integer processStatus;
-    private Integer processMessage;
+    private String processMessage;
 
     @Override
     public SceneElementModel createModel() {
