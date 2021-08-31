@@ -26,11 +26,11 @@ public class BaseSceneElementModel extends BaseSceneNodeModel {
     private String initCommands;
 
     public static class Type {
-        public static final Integer OTHER = 0;
-        public static final Integer SWITCH = 1;
-        public static final Integer ROUTER = 2;
-        public static final Integer FIREWALL = 3;
-        public static final Integer TERMINAL = 4;
+        public static final int OTHER = 0;
+        public static final int SWITCH = 1;
+        public static final int ROUTER = 2;
+        public static final int FIREWALL = 3;
+        public static final int TERMINAL = 4;
 
         private Type() {}
     }

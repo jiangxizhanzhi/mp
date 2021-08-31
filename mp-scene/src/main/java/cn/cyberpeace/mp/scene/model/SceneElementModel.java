@@ -31,17 +31,17 @@ public class SceneElementModel extends BaseSceneElementModel implements BaseEven
     }
 
     public static class Event {
-        public static final Integer DEFAULT = 0;
-        public static final Integer INITIATE = 1;
-        public static final Integer CREATE = 2;
-        public static final Integer START = 3;
-        public static final Integer STOP = 4;
-        public static final Integer RESTART = 5;
-        public static final Integer PAUSE = 6;
-        public static final Integer UNPAUSE = 7;
-        public static final Integer SNAPSHOT = 8;
-        public static final Integer DELETE = 9;
-        public static final Integer MODIFY = 10;
+        public static final int DEFAULT = 0;
+        public static final int INITIATE = 1;
+        public static final int CREATE = 2;
+        public static final int START = 3;
+        public static final int STOP = 4;
+        public static final int RESTART = 5;
+        public static final int PAUSE = 6;
+        public static final int UNPAUSE = 7;
+        public static final int SNAPSHOT = 8;
+        public static final int DELETE = 9;
+        public static final int MODIFY = 10;
 
         private Event() {}
     }

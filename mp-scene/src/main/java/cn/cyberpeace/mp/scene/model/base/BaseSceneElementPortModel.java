@@ -16,7 +16,7 @@ public class BaseSceneElementPortModel extends BaseModel {
     private String portId;
     @DefaultStr
     private String name;
-    @DefaultInt(1)
+    @DefaultInt(Type.IP_PORT)
     private Integer type;
     @DefaultStr
     private String macAddr;
@@ -42,9 +42,9 @@ public class BaseSceneElementPortModel extends BaseModel {
     private String accessModes;
 
     public static class Type {
-        public static final Integer IP_PORT = 1;
-        public static final Integer MAC_PORT = 2;
-        public static final Integer SERIAL_PORT = 3;
+        public static final int IP_PORT = 1;
+        public static final int MAC_PORT = 2;
+        public static final int SERIAL_PORT = 3;
 
         private Type() {}
     }

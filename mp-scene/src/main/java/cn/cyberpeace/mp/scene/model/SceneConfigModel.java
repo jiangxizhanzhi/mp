@@ -12,13 +12,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Table("mp_scene_scene_config")
 public class SceneConfigModel extends BaseSceneModel {
-    @DefaultInt(2)
+    @DefaultInt(Type.NORMAL)
     private Integer type;
 
     public static class Type {
-        public static final Integer PURE = 1;
-        public static final Integer NORMAL = 2;
-        public static final Integer SNAPSHOT = 3;
+        public static final int PURE = 1;
+        public static final int NORMAL = 2;
+        public static final int SNAPSHOT = 3;
 
         private Type() {}
     }

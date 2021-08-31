@@ -90,9 +90,10 @@ public class CsceneHandler extends BaseCsceneHandler<
         csceneInstanceObjMap.forEach((instanceId, csceneInstanceObj) -> {
             var roleObjs = instanceRoleObjsMap.getOrDefault(instanceId, new ArrayList<>());
             var csceneInstanceHandler = new CsceneInstanceHandler(csceneInstanceObj, roleObjs);
-            if (CsceneInstanceModel.Type.TEST.equals(csceneInstanceObj.getType())) {
+            var type = csceneInstanceObj.getType();
+            if (type != null && type.equals(CsceneInstanceModel.Type.TEST)) {
                 testScenes.add(csceneInstanceHandler.toData());
-            } else if (CsceneInstanceModel.Type.APP.equals(csceneInstanceObj.getType())) {
+            } else if (type != null && type.equals(CsceneInstanceModel.Type.APP)) {
                 appScenes.add(csceneInstanceHandler.toData());
             }
         });
