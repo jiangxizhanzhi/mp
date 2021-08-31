@@ -27,6 +27,8 @@ public interface AvatarService extends BaseModelService<AvatarModel, QueryParams
 
     String uploadIs(InputStream is, String fileName, Map<String, String> desc);
 
-    boolean initDefaultAvatars();
+    void clearAndReUploadAvatars(List<AvatarModel> avatarModels);
+
+    List<AvatarModel> uploadDefaultAvatars();
 
 }

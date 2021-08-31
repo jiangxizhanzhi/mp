@@ -29,6 +29,14 @@ public enum OpTypeEnums {
 
     CONTEST("参赛"),
 
+    STOP("停止"),
+
+    PAUSE("暂停"),
+
+    START("启动"),
+
+    RECOVER("恢复"),
+
     DEFAULT("");
 
 

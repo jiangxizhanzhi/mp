@@ -1,9 +1,9 @@
 package cn.cyberpeace.mp.auth.controller;
 
+import cn.cyberpeace.mp.auth.dto.activation.ActivationContent;
 import cn.cyberpeace.mp.auth.dto.activation.ActivationRequest;
 import cn.cyberpeace.mp.auth.service.sys.SysActivationService;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import com.alibaba.fastjson.JSON;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -36,15 +36,16 @@ public class SysActivationController {
 
         activationService.activate(activationRequest);
 
-        return null;
+        return ServiceResult.successful();
     }
 
 
     @ApiOperation("查询激活状态")
     @GetMapping
-    public ServiceResult status() {
+    public ServiceResult<ActivationContent> status() {
 
-        return null;
+        ActivationContent content = activationService.status();
+        return ServiceResult.success(content);
     }
 
 

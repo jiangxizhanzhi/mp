@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.auth.model.SysNoticeModel;
 import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import com.github.pagehelper.PageInfo;
+import java.util.List;
 
 /**
  * @Description:
@@ -16,9 +17,13 @@ import com.github.pagehelper.PageInfo;
 public interface SysNoticeService extends BaseModelService<SysNoticeModel, QueryParams> {
 
 
+    void unpush(List<String> noticeIds);
+
+    void read(String noticeId);
+
     SysNoticeModel add(SysNoticeRequest sysNoticeRequest);
 
-    SysNoticeModel modify(SysNoticeRequest sysNoticeRequest);
+    SysNoticeModel modify(String id, SysNoticeRequest sysNoticeRequest);
 
     /**
      * 分页查询所有公告
@@ -35,4 +40,6 @@ public interface SysNoticeService extends BaseModelService<SysNoticeModel, Query
     PageInfo currentUserPage(SysNoticePageRequest pageRequest);
 
     SysNoticeDto noticeModel2NoticeDto(SysNoticeModel noticeModel);
+
+    int unReadCount();
 }

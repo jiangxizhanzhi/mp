@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -24,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -123,12 +125,27 @@ public class AvatarServiceImpl extends BaseModelServiceImpl<AvatarModel, AvatarM
         return httpUrl;
     }
 
+
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean initDefaultAvatars() {
-        log.info("uploading default avatar manually!");
+    public void clearAndReUploadAvatars(List<AvatarModel> avatarModels) {
+        if (CollectionUtil.isEmpty(avatarModels) || avatarModels.size() != 9) {
+            log.error("默认头像数量不正确！");
+            throw new MpRuntimeException("默认头像数量不正确！");
+        }
+
         deleteAll();
 
+        for (int i = 0; i < avatarModels.size(); i++) {
+            create(avatarModels.get(i));
+
+            if(i == 0) {
+                updateDefaultUserAvatar(avatarModels.get(i).getUrl());
+            }
+        }
+    }
+
+    public List<AvatarModel> uploadDefaultAvatars() {
         // 默认头像
         InputStream avatar01 = Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("avatar/1.png"));
         InputStream avatar02 = Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("avatar/2.png"));
@@ -140,22 +157,17 @@ public class AvatarServiceImpl extends BaseModelServiceImpl<AvatarModel, AvatarM
         InputStream avatar08 = Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("avatar/8.png"));
         InputStream avatar09 = Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("avatar/9.png"));
 
-
         List<InputStream> avatarlist = Arrays.asList(avatar01, avatar02, avatar03, avatar04, avatar05, avatar06, avatar07, avatar08, avatar09);
 
+        List<AvatarModel> avatarModels = new ArrayList<>();
         for (int i = 0; i < avatarlist.size(); i++) {
             InputStream ava = avatarlist.get(i);
             String url = uploadIs(ava, i + ".png", null);
             AvatarModel avatarModel = new AvatarModel();
             avatarModel.setUrl(url);
-            create(avatarModel);
-
-            if(i == 0) {
-                updateDefaultUserAvatar(url);
-            }
+            avatarModels.add(avatarModel);
         }
-
-        return true;
+        return avatarModels;
     }
 
     // 更新默认用户的头像

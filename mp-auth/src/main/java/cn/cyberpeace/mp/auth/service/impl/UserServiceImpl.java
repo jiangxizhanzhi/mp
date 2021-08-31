@@ -147,10 +147,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         }
 
         List<UserModel> users = listObjSrvResult.getSource().getObjs();
-        userDtos = users.stream().map(u -> {
-            UserDto userDto = userModel2UserDto(u);
-            return userDto;
-        }).collect(Collectors.toList());
+        userDtos = users.stream().map(this::userModel2UserDto).collect(Collectors.toList());
 
         if (CollectionUtil.isNotEmpty(userDtos)) {
             // 转换
@@ -253,7 +250,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                 ResultUtils.throwExceptionIfError(re, "创建组织-用户关系失败！");
             });
         }
-
 
         // 保存角色-用户关系
         if (CollectionUtil.isNotEmpty(createRequest.getRoleIds())) {
@@ -537,7 +533,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public void downloadExcelTemplate() {
         try {
             HttpServletResponse response = ServletUtils.getResponse();
-//            String path = Objects.requireNonNull(this.getClass().getClassLoader().getResource("excel/import_template.xls")).getPath();
             InputStream is = this.getClass().getClassLoader().getResourceAsStream("excel/import_template.xls");
             String fileName = "用户列表.xls";
 
@@ -549,7 +544,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             response.reset();
             // 设置response的Header
             response.addHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes("UTF-8"),"ISO8859-1"));
-//            response.addHeader("Content-Length", "" + file.length());
             OutputStream toClient = new BufferedOutputStream(response.getOutputStream());
             response.setContentType("application/octet-stream");
             toClient.write(buffer);
@@ -571,9 +565,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             if (Objects.isNull(userModel)) {
                 continue;
             }
-//            String userId = IdGenerator.generateUUID();
-//            log.warn("userId:{}", userId);
-//            userModel.setId(userId);
+
             chooseDefaultAvatar(userModel);
             var result = create(userModel);
             ResultUtils.throwExceptionIfError(result, "创建用户失败！");
@@ -672,39 +664,59 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         if (Objects.isNull(userModel)) {
             return null;
         }
+        return doModel2Dto(userModel, true, true);
+    }
+
+
+    @Override
+    public UserDto userModel2UserDtoWithoutOrg(UserModel userModel) {
+        if (Objects.isNull(userModel)) {
+            return null;
+        }
+        return doModel2Dto(userModel, false, true);
+    }
+
+    private UserDto doModel2Dto(UserModel userModel, boolean needOrg, boolean needRole) {
+        Assert.notEmpty(userModel.getId(), "用户ID不能为空！");
 
         UserDto userDto = new UserDto();
         BeanUtils.copyProperties(userModel, userDto);
         // 过期状态处理
         processExpiredStatus(userDto);
 
-        List<OrgModel> orgs = orgUserService.listOrgsByUserId(userModel.getId());
-        List<String> orgIds = orgs.stream().map(BaseModel::getId).collect(Collectors.toList());
+        if (needOrg) {
+            List<OrgModel> orgs = orgUserService.listOrgsByUserId(userModel.getId());
+            List<String> orgIds = orgs.stream().map(BaseModel::getId).collect(Collectors.toList());
 
-        List<List<String>> allorgpath = orgs.stream().map(o -> CollectionUtil.toList(StringUtils.split(o.getPath(), AuthConstant.ORG_PATH_SEPARATOR))).collect(Collectors.toList());
-        userDto.setOrgs(orgs);
-        userDto.setOrgIds(orgIds);
-        userDto.setOrgpaths(allorgpath);
-
-        List<RoleModel> roles = userRoleService.listByUserId(userModel.getId());
-        userDto.setRoles(roles);
-
-        boolean isAdmin = roles.stream().anyMatch(r -> r.getIdentifier().equals(AuthConstant.ROLE_ADMIN));
-        boolean isSuperUser = roles.stream().anyMatch(r -> r.getIdentifier().equals(AuthConstant.ROLE_SUPERUSER));
-
-        if (isAdmin) {
-            userDto.setIsAdmin(1);
-        } else {
-            userDto.setIsAdmin(0);
+            List<List<String>> allorgpath = orgs.stream().map(o -> CollectionUtil.toList(StringUtils.split(o.getPath(), AuthConstant.ORG_PATH_SEPARATOR))).collect(Collectors.toList());
+            userDto.setOrgs(orgs);
+            userDto.setOrgIds(orgIds);
+            userDto.setOrgpaths(allorgpath);
         }
 
-        if (isSuperUser) {
-            userDto.setIsSuperUser(1);
-        } else {
-            userDto.setIsSuperUser(0);
+
+        if(needRole) {
+            List<RoleModel> roles = userRoleService.listByUserId(userModel.getId());
+            userDto.setRoles(roles);
+
+            boolean isAdmin = roles.stream().anyMatch(r -> r.getIdentifier().equals(AuthConstant.ROLE_ADMIN));
+            boolean isSuperUser = roles.stream().anyMatch(r -> r.getIdentifier().equals(AuthConstant.ROLE_SUPERUSER));
+
+            if (isAdmin) {
+                userDto.setIsAdmin(1);
+            } else {
+                userDto.setIsAdmin(0);
+            }
+
+            if (isSuperUser) {
+                userDto.setIsSuperUser(1);
+            } else {
+                userDto.setIsSuperUser(0);
+            }
         }
 
         return userDto;
+
     }
 
     @Override

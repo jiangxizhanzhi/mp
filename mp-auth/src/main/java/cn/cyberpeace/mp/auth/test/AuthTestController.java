@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.auth.test;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.OrgDto;
+import cn.cyberpeace.mp.auth.dto.activation.ActivationContent;
 import cn.cyberpeace.mp.auth.dto.activation.ActivationRequest;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.model.UserPermissionModel;
@@ -26,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -169,15 +171,19 @@ public class AuthTestController {
     }
 
     @GetMapping("/testlicense")
-    public void testlicense() {
+    public void testlicense(@RequestBody ActivationRequest activationRequest) {
 //        licenseJdkDemo.testlicense();
 
 //        str.p = "{\"machinecode\": \"CHTF-12H1-34S8-HV23-123S\", \"deadline\": 1, \"info\": {\"thj\":2}}";
-        ActivationRequest activationRequest = new ActivationRequest();
-        activationRequest.setDeadline(1);
-        activationRequest.setMachinecode("CHTF-12H1-34S8-HV23-123S");
+//        ActivationRequest activationRequest = new ActivationRequest();
+//        activationRequest.setDeadline(1);
+//        activationRequest.setMachinecode("CHTF-12H1-34S8-HV23-123S");
+//        activationRequest.setVerifyCode("");
 
         activationService.activate(activationRequest);
+
+        ActivationContent activationContent = activationService.status();
+        log.info("activationContent:{}", activationContent);
     }
 
     @GetMapping("/testos")

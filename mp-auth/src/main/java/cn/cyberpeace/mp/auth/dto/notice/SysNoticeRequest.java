@@ -22,10 +22,6 @@ import java.util.List;
 @ApiModel
 public class SysNoticeRequest {
 
-    @ApiModelProperty(value = "公告ID")
-    @NotNull(groups = {UpdateGroup.class}, message = "ID不能为空！")
-    private String id;
-
     @ApiModelProperty(value = "租户")
     private String tenant;
 
