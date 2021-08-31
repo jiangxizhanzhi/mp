@@ -11,7 +11,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 系统公告消息(已读/删除)统计表
+ * @Description: 系统公告消息(已读/删除)统计表
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
  */
 @Data
 @AllArgsConstructor

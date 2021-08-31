@@ -4,6 +4,11 @@ import cn.cyberpeace.mp.auth.model.TargetModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @Data
 public class PermissionDto extends TargetModel {
 

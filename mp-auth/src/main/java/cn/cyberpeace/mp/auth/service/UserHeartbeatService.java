@@ -8,6 +8,11 @@ import cn.cyberpeace.mp.base.service.param.QueryParams;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 public interface UserHeartbeatService extends BaseModelService<UserHeartbeatModel, QueryParams> {
 
     List<UserOlReportCntDto> groupCntByUserId(LocalDateTime time);

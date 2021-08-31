@@ -30,6 +30,11 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Collections;
 import java.util.Objects;
 
+/**
+ * @Description: 系统公告管理接口
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @Api(value = "公告管理接口", tags = "AUTH-公告管理接口")
 @Slf4j
 @RestController

@@ -1,5 +1,10 @@
 package cn.cyberpeace.mp.auth.constant;
 
+/**
+ * @Description: 全局变量
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 public class AuthConstant {
     public static final String PASSWORD_SECRET = "99bdfe0886604c49be29c977635572d5";
 

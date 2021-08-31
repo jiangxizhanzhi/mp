@@ -8,6 +8,11 @@ import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 
 import java.util.List;
 
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 public interface OrgService extends BaseModelService<OrgModel, QueryParams> {
 
     List<OrgModel> listParents();
