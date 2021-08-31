@@ -45,6 +45,20 @@ public class FlowInfoModel extends BaseModel {
     private int resourceType;
 
     /**
+     * 攻击脚本运行命令
+     */
+    @ApiModelProperty(value = "攻击脚本运行命令")
+    @DefaultStr
+    private String runCmd;
+
+    /**
+     * 流量分类  0:"测试测量",1:"应用升级",2:"网络管理",4:"金融",5:"邮件",6:"安全工作",7:"分布式计算",9:"移动设备",10:"即时通讯",11:"SCADA",12:"机动",13:"远程控制",14:"音视频",15:"企业应用",16:"社会网络搜索",17:"文件传输",18:"数据库",19:"身份认证",20:"ERP",21:"存储",22:"游戏",23:"安全数据传输
+     */
+    @ApiModelProperty(value = "流量分类")
+    @NotBlank(message = "category can not be empty")
+    private int category;
+
+    /**
      * pcap文件地址
      */
     @ApiModelProperty(value = "pcap文件地址")

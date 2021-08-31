@@ -268,7 +268,10 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                 scriptsRequest.setName(flowName);
                 // 默认执行脚本命令
                 String runCmd = "";
-                if (flowName.endsWith(".py")) {
+
+                if (StringUtils.isNotBlank(flowInfoModel.getRunCmd())) {
+                    runCmd = flowInfoModel.getRunCmd();
+                } else if (flowName.endsWith(".py")) {
                     runCmd = "python3";
                 } else if (flowName.endsWith(".sh")) {
                     runCmd = "bash";
