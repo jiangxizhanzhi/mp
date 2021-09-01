@@ -859,16 +859,9 @@ public class HumanCondition {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class OrConditionProxy {
-
         private HumanCondition humanCondition;
 
         private final OrCondition orCondition = new OrCondition();
-
-        private AndConditionProxy andConditionProxy;
-
-        public OrConditionProxy(HumanCondition humanCondition) {
-            this.humanCondition = humanCondition;
-        }
 
         public OrConditionProxy orLink(Class<?> sourceModel, String sourceFieldName,
                                        Class<?> targetModel, String targetFieldName) {
@@ -1101,9 +1094,8 @@ public class HumanCondition {
          * @param
          * @return AndConditionProxy
          */
-        public AndConditionProxy conditionAndStart() {
-            this.andConditionProxy = new AndConditionProxy(this);
-            return this.andConditionProxy;
+        public AndConditionProxy orAndStart() {
+            return new AndConditionProxy(this);
         }
 
         public static class AndConditionProxy {
@@ -1119,14 +1111,9 @@ public class HumanCondition {
                 this.andCondition = new AndCondition();
             }
 
-            public OrConditionProxy conditionAndEnd() {
+            public OrConditionProxy orAndEnd() {
                 this.orConditionProxy.getOrCondition().addCondition(this.andCondition);
-                OrConditionProxy result = this.orConditionProxy;
-                // end之后 OrConditionProxy 内的变量置空
-                this.orConditionProxy = null;
-                this.humanCondition = null;
-                this.andCondition = null;
-                return result;
+                return this.orConditionProxy;
             }
 
             public AndConditionProxy andLink(Class<?> sourceModel, String sourceFieldName,
