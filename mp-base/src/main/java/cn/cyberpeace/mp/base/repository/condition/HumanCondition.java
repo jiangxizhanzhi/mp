@@ -864,6 +864,12 @@ public class HumanCondition {
 
         private final OrCondition orCondition = new OrCondition();
 
+        private AndConditionProxy andConditionProxy;
+
+        public OrConditionProxy(HumanCondition humanCondition) {
+            this.humanCondition = humanCondition;
+        }
+
         public OrConditionProxy orLink(Class<?> sourceModel, String sourceFieldName,
                                        Class<?> targetModel, String targetFieldName) {
             orCondition.addLink(humanCondition.genLinkFieldName(sourceModel, TextUtils.humpToLine(sourceFieldName)),
@@ -1088,16 +1094,166 @@ public class HumanCondition {
          * 在or条件中添加一组and条件，sql形如 ...AND (id = 1 or id = 2 or (id =3 AND id =4 AND id=5))
          * 例：
          * humanCondition.filterOrStart()
-         * .orEqual(Model::getId, 1)
-         * .orEqual(Model::getId, 2)
-         * .addAndCondition((AndCondition) new AndCondition().addEqual(Model::getId, 3).addEqual(Model::getId, 4).addEqual(Model::getId, 5))
-         * .filterOrEnd()
-         * @param andCondition
-         * @return
+         *               .orEqual(Model::getId, 1)
+         *               .orEqual(Model::getId, 2)
+         *               .conditionAndStart().andEqual(Model::getId, 3).andEqual(Model::getId, 4).andEqual(Model::getId, 5).conditionAndEnd()
+         *               .filterOrEnd()
+         * @param
+         * @return AndConditionProxy
          */
-        public OrConditionProxy addAndCondition(AndCondition andCondition) {
-            this.orCondition.addCondition(andCondition);
-            return this;
+        public AndConditionProxy conditionAndStart() {
+            this.andConditionProxy = new AndConditionProxy(this);
+            return this.andConditionProxy;
+        }
+
+        public static class AndConditionProxy {
+            private HumanCondition humanCondition;
+
+            private OrConditionProxy orConditionProxy;
+
+            private AndCondition andCondition;
+
+            private AndConditionProxy(OrConditionProxy orConditionProxy) {
+                this.orConditionProxy = orConditionProxy;
+                this.humanCondition = orConditionProxy.humanCondition;
+                this.andCondition = new AndCondition();
+            }
+
+            public OrConditionProxy conditionAndEnd() {
+                this.orConditionProxy.getOrCondition().addCondition(this.andCondition);
+                OrConditionProxy result = this.orConditionProxy;
+                // end之后 OrConditionProxy 内的变量置空
+                this.orConditionProxy = null;
+                this.humanCondition = null;
+                this.andCondition = null;
+                return result;
+            }
+
+            public AndConditionProxy orLink(Class<?> sourceModel, String sourceFieldName,
+                                            Class<?> targetModel, String targetFieldName) {
+                this.andCondition.addLink(humanCondition.genLinkFieldName(sourceModel, TextUtils.humpToLine(sourceFieldName)),
+                        humanCondition.genLinkFieldName(targetModel, TextUtils.humpToLine(targetFieldName)));
+                return this;
+            }
+
+            public <S, T> AndConditionProxy orLink(Class<?> sourceModel, SerializableFunction<S> sourceFieldGetter,
+                                                   Class<?> targetModel, SerializableFunction<T> targetFieldGetter) {
+                return this.orLink(sourceModel, BeanUtils.getBeanGetterFieldName(sourceFieldGetter),
+                        targetModel, BeanUtils.getBeanGetterFieldName(targetFieldGetter));
+            }
+
+            public AndConditionProxy orLink(String sourceLinkName, String sourceFieldName,
+                                            String targetLinkName, String targetFieldName) {
+                this.andCondition.addLink(humanCondition.genLinkFieldName(sourceLinkName, TextUtils.humpToLine(sourceFieldName)),
+                        humanCondition.genLinkFieldName(targetLinkName, TextUtils.humpToLine(targetFieldName)));
+                return this;
+            }
+
+            public <S, T> AndConditionProxy orLink(String sourceLinkName, SerializableFunction<S> sourceFieldGetter,
+                                                   String targetLinkName, SerializableFunction<T> targetFieldGetter) {
+                return this.orLink(sourceLinkName, BeanUtils.getBeanGetterFieldName(sourceFieldGetter),
+                        targetLinkName, BeanUtils.getBeanGetterFieldName(targetFieldGetter));
+            }
+
+            public AndConditionProxy andIn(String fieldName, Object[] fieldValue) {
+                this.andCondition.addCondition(fieldName, Connector.IN, fieldValue);
+                return this;
+            }
+
+            public AndConditionProxy andNotIn(String fieldName, Object[] fieldValue) {
+                this.andCondition.addCondition(fieldName, Connector.NOT_IN, fieldValue);
+                return this;
+            }
+
+            public AndConditionProxy andEqual(String fieldName, Object fieldValue) {
+                this.andCondition.addCondition(fieldName, Connector.EQUAL, fieldValue);
+                return this;
+            }
+
+            public AndConditionProxy andNotEqual(String fieldName, Object fieldValue) {
+                this.andCondition.addCondition(fieldName, Connector.NOT_EQUAL, fieldValue);
+                return this;
+            }
+
+            public AndConditionProxy andGreaterThan(String fieldName, Object fieldValue) {
+                this.andCondition.addCondition(fieldName, Connector.GREATER_THAN, fieldValue);
+                return this;
+            }
+
+            public AndConditionProxy andGreaterThanOrEqual(String fieldName, Object fieldValue) {
+                this.andCondition.addCondition(fieldName, Connector.GREATER_THAN_OR_EQUAL, fieldValue);
+                return this;
+            }
+
+            public AndConditionProxy andLessThan(String fieldName, Object fieldValue) {
+                this.andCondition.addCondition(fieldName, Connector.LESS_THAN, fieldValue);
+                return this;
+            }
+
+            public AndConditionProxy andLessThanOrEqual(String fieldName, Object fieldValue) {
+                this.andCondition.addCondition(fieldName, Connector.LESS_THAN_OR_EQUAL, fieldValue);
+                return this;
+            }
+
+            public AndConditionProxy andContains(String fieldName, Object fieldValue) {
+                this.andCondition.addCondition(fieldName, Connector.CONTAINS, fieldValue);
+                return this;
+            }
+
+            public AndConditionProxy andIContains(String fieldName, Object fieldValue) {
+                this.andCondition.addCondition(fieldName, Connector.I_CONTAINS, fieldValue);
+                return this;
+            }
+
+            public AndConditionProxy andStartsWith(String fieldName, Object fieldValue) {
+                this.andCondition.addCondition(fieldName, Connector.STARTS_WITH, fieldValue);
+                return this;
+            }
+
+            public AndConditionProxy andIStartsWith(String fieldName, Object fieldValue) {
+                this.andCondition.addCondition(fieldName, Connector.I_STARTS_WITH, fieldValue);
+                return this;
+            }
+
+            public AndConditionProxy andEndsWith(String fieldName, Object fieldValue) {
+                this.andCondition.addCondition(fieldName, Connector.ENDS_WITH, fieldValue);
+                return this;
+            }
+
+            public AndConditionProxy andIEndsWith(String fieldName, Object fieldValue) {
+                this.andCondition.addCondition(fieldName, Connector.I_ENDS_WITH, fieldValue);
+                return this;
+            }
+
+            public AndConditionProxy andNotContains(String fieldName, Object fieldValue) {
+                this.andCondition.addCondition(fieldName, Connector.NOT_CONTAINS, fieldValue);
+                return this;
+            }
+
+            public AndConditionProxy andNotIContains(String fieldName, Object fieldValue) {
+                this.andCondition.addCondition(fieldName, Connector.NOT_I_CONTAINS, fieldValue);
+                return this;
+            }
+
+            public AndConditionProxy andNotStartsWith(String fieldName, Object fieldValue) {
+                this.andCondition.addCondition(fieldName, Connector.NOT_STARTS_WITH, fieldValue);
+                return this;
+            }
+
+            public AndConditionProxy andNotIStartsWith(String fieldName, Object fieldValue) {
+                this.andCondition.addCondition(fieldName, Connector.NOT_I_STARTS_WITH, fieldValue);
+                return this;
+            }
+
+            public AndConditionProxy andNotEndsWith(String fieldName, Object fieldValue) {
+                this.andCondition.addCondition(fieldName, Connector.NOT_ENDS_WITH, fieldValue);
+                return this;
+            }
+
+            public AndConditionProxy andNotIEndsWith(String fieldName, Object fieldValue) {
+                this.andCondition.addCondition(fieldName, Connector.NOT_I_ENDS_WITH, fieldValue);
+                return this;
+            }
         }
     }
 
