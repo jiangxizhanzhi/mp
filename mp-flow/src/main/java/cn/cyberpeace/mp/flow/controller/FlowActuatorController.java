@@ -19,6 +19,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * @Description: 流量执行控制器
+ * @Author qiaokang
+ * @Date：2021/8/31 17:17
+ */
 @Slf4j
 @Api(tags = "流量执行器接口")
 @RestController

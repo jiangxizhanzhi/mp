@@ -10,6 +10,11 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 
+/**
+ * @Description: 流量执行对象
+ * @Author qiaokang
+ * @Date：2021/8/31 17:17
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

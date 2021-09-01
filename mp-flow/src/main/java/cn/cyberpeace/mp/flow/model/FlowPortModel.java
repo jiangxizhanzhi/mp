@@ -9,6 +9,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * @Description: 流量网口对象
+ * @Author qiaokang
+ * @Date：2021/8/31 17:17
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

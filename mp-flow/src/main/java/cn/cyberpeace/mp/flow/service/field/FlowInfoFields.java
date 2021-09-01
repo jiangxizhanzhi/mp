@@ -10,9 +10,7 @@ import org.springframework.stereotype.Component;
 public class FlowInfoFields extends BaseModelFields {
     public static final DynamicFields allFields = new DynamicFields(ClassUtils.getBeanClassFields(FlowInfoModel.class));
 
-    public static final DynamicFields availableFields = new DynamicFields(FlowInfoModel::getTitle, FlowInfoModel::getFlowDesc,
-            FlowInfoModel::getInteractiveType, FlowInfoModel::getResourceType, FlowInfoModel::getPcapFile,
-            FlowInfoModel::getScriptFile).merge(BaseModelFields.availableFields);
+    public static final DynamicFields availableFields = new DynamicFields(ClassUtils.getBeanClassFields(FlowInfoModel.class)).merge(BaseModelFields.availableFields);
 
     public static final DynamicFields hiddenFields = allFields.subtract(availableFields);
 

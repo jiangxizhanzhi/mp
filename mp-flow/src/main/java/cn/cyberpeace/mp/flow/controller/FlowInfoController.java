@@ -1,11 +1,11 @@
 package cn.cyberpeace.mp.flow.controller;
 
 import cn.cyberpeace.mp.base.controller.BaseModelController;
-import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.flow.constant.ControllerConstant;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
 import cn.cyberpeace.mp.flow.request.BatchDeleteFlowInfoRequest;
+import cn.cyberpeace.mp.flow.request.FlowInfoQueryParams;
 import cn.cyberpeace.mp.flow.service.FlowInfoService;
 import cn.cyberpeace.mp.flow.service.impl.FlowInfoServiceImpl;
 import io.swagger.annotations.Api;
@@ -18,11 +18,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * @Description: 流量信息控制器
+ * @Author qiaokang
+ * @Date：2021/8/31 17:17
+ */
 @Slf4j
 @Api(tags = "流量管理接口")
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/info")
-public class FlowInfoController extends BaseModelController<FlowInfoModel, QueryParams, FlowInfoService> {
+public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowInfoQueryParams, FlowInfoService> {
 
     @Autowired
     private FlowInfoServiceImpl flowServiceImpl;

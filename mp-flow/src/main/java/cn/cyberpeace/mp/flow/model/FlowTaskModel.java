@@ -12,6 +12,11 @@ import lombok.NoArgsConstructor;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 
+/**
+ * @Description: 流量任务对象
+ * @Author qiaokang
+ * @Date：2021/8/31 17:17
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

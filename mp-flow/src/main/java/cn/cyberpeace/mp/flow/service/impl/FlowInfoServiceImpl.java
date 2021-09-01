@@ -1,13 +1,14 @@
 package cn.cyberpeace.mp.flow.service.impl;
 
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
-import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskModel;
 import cn.cyberpeace.mp.flow.repository.FlowInfoMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskMapper;
 import cn.cyberpeace.mp.flow.request.BatchDeleteFlowInfoRequest;
+import cn.cyberpeace.mp.flow.request.FlowInfoQueryParams;
 import cn.cyberpeace.mp.flow.service.FlowInfoService;
 import cn.cyberpeace.mp.flow.service.field.FlowInfoFields;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @Description: 流量service
@@ -25,7 +27,7 @@ import java.util.List;
  */
 @Service
 @Slf4j
-public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, FlowInfoMapper, FlowInfoFields, QueryParams> implements FlowInfoService {
+public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, FlowInfoMapper, FlowInfoFields, FlowInfoQueryParams> implements FlowInfoService {
 
     public FlowInfoServiceImpl(FlowInfoMapper stuMapper, FlowInfoFields stuFields) {
         setModelFields(stuFields);
@@ -34,6 +36,18 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
 
     @Autowired
     private FlowTaskMapper flowTaskMapper;
+
+    /**
+     * 重写list查询方法
+     * @param humanCondition
+     * @param queryParams
+     */
+    @Override
+    public void loadListFilterCondition(HumanCondition humanCondition, FlowInfoQueryParams queryParams) {
+        if (Objects.nonNull(queryParams.getCategory())) {
+            humanCondition.filterEqual("category", queryParams.getCategory());
+        }
+    }
 
     /**
      * 删除流量信息

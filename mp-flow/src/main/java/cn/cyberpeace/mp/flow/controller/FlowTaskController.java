@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.flow.controller;
 
+import cn.cyberpeace.mp.base.constant.BaseConstants;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
@@ -16,6 +17,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * @Description: 流量任务控制器
+ * @Author qiaokang
+ * @Date：2021/8/31 17:17
+ */
 @Slf4j
 @Api(tags = "流量任务管理接口")
 @RestController
@@ -52,7 +58,7 @@ public class FlowTaskController extends BaseModelController<FlowTaskModel, Query
     @ApiOperation("分页查询任务")
     @GetMapping("/page")
     public ListObjResult<FlowTaskModel> pageFlowTask(@Validated QueryParams queryParams) {
-        handleQueryParams("list", queryParams);
+        handleQueryParams(BaseConstants.STR_LIST, queryParams);
         return flowTaskService.pageFlowTask(queryParams);
     }
 

@@ -426,7 +426,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
         List<FlowTaskModel> scriptTaskModels = new ArrayList<>();
 
         if (CollectionUtils.isNotEmpty(flowTaskList)) {
-            QueryParams flowInfoParams = new QueryParams();
+            FlowInfoQueryParams flowInfoParams = new FlowInfoQueryParams();
             String[] flowInfoDelIds = flowTaskList.stream().map(FlowTaskModel::getFlowId).toArray(String[]::new);
             flowInfoParams.setIds(flowInfoDelIds);
             flowInfoParams.setPage(BaseConstants.DEFAULT_PAGE);

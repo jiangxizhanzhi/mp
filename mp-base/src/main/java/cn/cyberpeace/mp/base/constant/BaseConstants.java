@@ -87,4 +87,9 @@ public interface BaseConstants {
      */
     String SUCCESS_ZERO = "0";
 
+    /**
+     * list常量
+     */
+    String STR_LIST = "list";
+
 }

@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.flow.model;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 import io.swagger.annotations.ApiModelProperty;
@@ -10,6 +11,11 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 
+/**
+ * @Description: 流量信息对象
+ * @Author qiaokang
+ * @Date：2021/8/31 17:17
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -34,7 +40,7 @@ public class FlowInfoModel extends BaseModel {
      * 交互类型：0 背景流量，1 攻击流量，2 全流量
      */
     @ApiModelProperty(value = "交互类型：0 背景流量，1 攻击流量，2 全流量")
-    @DefaultStr
+    @DefaultInt
     private int interactiveType;
 
     /**

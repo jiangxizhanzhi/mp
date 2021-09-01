@@ -1,7 +1,8 @@
 package cn.cyberpeace.mp.base.service.impl;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.constant.BaseSingleton;
+import cn.cyberpeace.mp.base.controller.stereotype.UnlimitPagination;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.condition.CustomCondition;
@@ -21,7 +22,6 @@ import org.springframework.dao.DuplicateKeyException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * 单表通用服务实现类，包含通用的增删改查能力
@@ -109,6 +109,40 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
 
         return customCondition.loadFromParams(params);
     }
+
+    /**
+     * 处理有效的查询参数
+     * @param listFuncName 查询方法名称
+     * @param queryParams 查询参数
+     */
+    public void handleQueryParams(String listFuncName, QueryParams queryParams) {
+        queryParams.ensure();
+
+        int page = queryParams.getPage() == null ? 0 : queryParams.getPage();
+        int pageSize = queryParams.getPageSize() == null ? 0 : queryParams.getPageSize();
+        if (pageSize <= 0) {
+            pageSize = BaseSingleton.baseAppConfig.getDefaultPageSize();
+        } else if (pageSize > BaseSingleton.baseAppConfig.getMaxPageSize() && !isUnlimitPagination(listFuncName)) {
+            pageSize = BaseSingleton.baseAppConfig.getMaxPageSize();
+        }
+        queryParams.setPage(page);
+        queryParams.setPageSize(pageSize);
+    }
+
+    /**
+     * 判断查询方法是否不限制分页大小
+     * @param listFuncName 查询方法名称
+     * @return boolean
+     */
+    private boolean isUnlimitPagination(String listFuncName) {
+        var unlimitPaginationAnnotation = getClass().getAnnotation(UnlimitPagination.class);
+        if (unlimitPaginationAnnotation == null) {
+            return false;
+        }
+
+        return Arrays.asList(unlimitPaginationAnnotation.value()).contains(listFuncName);
+    }
+
 
     public void loadListFilterCondition(HumanCondition humanCondition, Q queryParams) {}
 

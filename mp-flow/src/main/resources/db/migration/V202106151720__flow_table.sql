@@ -68,3 +68,39 @@ CREATE TABLE `mp_flow_port` (
         PRIMARY KEY (`pk`),
         KEY `id_index` (`id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='流量执行网口表';
+
+CREATE TABLE `mp_flow_collection` (
+          `pk` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+          `id` varchar(64) NOT NULL COMMENT '集合id',
+          `title` varchar(64) NOT NULL COMMENT '集合标题',
+          `collection_desc` varchar(320) NOT NULL COMMENT '集合描述',
+          `category` tinyint(4) NOT NULL COMMENT '集合类型   0:"测试测量",1:"应用升级",2:"网络管理",4:"金融",5:"邮件",6:"安全工作",7:"分布式计算",9:"移动设备",10:"即时通讯",11:"SCADA",12:"机动",13:"远程控制",14:"音视频",15:"企业应用",16:"社会网络搜索",17:"文件传输",18:"数据库",19:"身份认证",20:"ERP",21:"存储",22:"游戏",23:"安全数据传输"',
+          `background_count` bigint(20) NOT NULL COMMENT '背景流量数量',
+          `attack_count` bigint(20) NOT NULL COMMENT '攻击流量数量',
+          `create_time` datetime NOT NULL COMMENT '创建时间',
+          `update_time` datetime NOT NULL COMMENT '更新时间',
+          PRIMARY KEY (`pk`),
+          KEY `id_index` (`id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='流量集合表';
+
+CREATE TABLE `mp_flow_collection_rel` (
+          `pk` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+          `id` varchar(64) NOT NULL COMMENT '关联id',
+          `collection_id` varchar(64) NOT NULL COMMENT '流量集合id',
+          `flow_id` varchar(64) NOT NULL COMMENT '流量id',
+          `create_time` datetime NOT NULL COMMENT '创建时间',
+          `update_time` datetime NOT NULL COMMENT '更新时间',
+          PRIMARY KEY (`pk`),
+          KEY `id_index` (`id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='流量关联集合表';
+
+CREATE TABLE `mp_flow_script_demo` (
+           `pk` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+           `id` varchar(64) NOT NULL COMMENT 'id',
+           `script_name` varchar(64) NOT NULL COMMENT '脚本名称',
+           `url` varchar(1024) NOT NULL COMMENT '脚本url',
+           `create_time` datetime NOT NULL COMMENT '创建时间',
+           `update_time` datetime NOT NULL COMMENT '更新时间',
+           PRIMARY KEY (`pk`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='流量脚本模板表';
+
