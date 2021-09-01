@@ -77,7 +77,7 @@ public class SysNoticeController {
 
     @ApiOperation("未读公告数量")
     @GetMapping("/unread_count")
-    public ServiceResult unReadCount() {
+    public ServiceResult<Integer> unReadCount() {
         int unreadCnt = noticeService.unReadCount();
         return ServiceResult.success(unreadCnt);
     }
@@ -106,7 +106,7 @@ public class SysNoticeController {
     @PostMapping
     public ServiceResult<SysNoticeModel> create(@RequestBody @Validated(AddGroup.class) SysNoticeRequest noticeReq) {
         SysNoticeModel noticeModel = noticeService.add(noticeReq);
-        return ResultUtils.commonResult(true, noticeModel);
+        return ServiceResult.success(noticeModel);
     }
 
     @ApiOperation("更新公告")

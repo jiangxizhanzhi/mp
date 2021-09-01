@@ -287,7 +287,7 @@ CREATE TABLE mp_sys_notice (
        `id` varchar(64)  NOT NULL COMMENT 'id',
        `tenant` varchar(64) NOT NULL COMMENT '租户',
        `content` text NULL COMMENT '公告内容',
-       `title` varchar(200) NOT NULL COMMENT '标题',
+       `title` varchar(150) NOT NULL COMMENT '标题',
        `publisher` varchar(64) NOT NULL COMMENT '发布人',
        `is_public` int NOT NULL default 0 COMMENT '是否公开，对所有人可见  0:否 1:是 默认是0',
        `type` int NOT NULL default 1 COMMENT '公告类型 1:系统、2:课程、3:练习、4:考试',

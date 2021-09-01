@@ -44,23 +44,27 @@ public class OrgPermissionController extends BaseModelController<OrgPermissionMo
     @PostMapping("/bind")
     public ServiceResult bindOrgPermissions(@RequestBody @Validated BindOrgTargetsRequest bindOrgTargetsReq) {
         boolean success = getModelService().bindOrgTargets(bindOrgTargetsReq.getUserId(), bindOrgTargetsReq.getTargetIds(), true);
-        return ResultUtils.commonResult(success, null);
+        if (success) {
+            return ServiceResult.successful();
+        } else {
+            return ServiceResult.fail("绑定组织权限失败!");
+        }
     }
 
 
     @ApiOperation(value = "查询组织所有权限")
     @GetMapping("/byorg")
-    public ServiceResult getOrgPermissions(@RequestParam String orgId) {
+    public ServiceResult<Set<TargetModel>> getOrgPermissions(@RequestParam String orgId) {
         Set<TargetModel> targets = getModelService().listTargetsByOrgId(orgId);
-        return ResultUtils.commonResult(true, targets);
+        return ServiceResult.success(targets);
     }
 
 
     @ApiOperation(value = "查询组织所有权限（继承上级组织权限）")
     @GetMapping("/byorg/includeparent")
-    public ServiceResult getOrgPermission(@RequestParam String orgId) {
+    public ServiceResult<Set<TargetModel>> getOrgPermission(@RequestParam String orgId) {
         Set<TargetModel> targets = getModelService().listTargetsByOrgIdIncludeAllParentsOrg(orgId);
-        return ResultUtils.commonResult(true, null);
+        return ServiceResult.success(targets);
     }
 
 

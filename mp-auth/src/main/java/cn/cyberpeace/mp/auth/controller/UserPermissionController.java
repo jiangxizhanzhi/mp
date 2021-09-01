@@ -86,7 +86,11 @@ public class UserPermissionController extends BaseModelController<UserPermission
     @PostMapping("/bind")
     public ServiceResult bindUserRoles(@RequestBody @Validated BindUserTargetsRequest userTargetsReq) {
         boolean success = getModelService().bindUserTargets(userTargetsReq.getUserId(), userTargetsReq.getTargetIds(), true);
-        return ResultUtils.commonResult(success, null);
+        if (success) {
+            return ServiceResult.successful();
+        } else {
+            return ServiceResult.fail("绑定用户资源失败!");
+        }
     }
 
 
