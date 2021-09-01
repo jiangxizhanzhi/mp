@@ -1129,29 +1129,29 @@ public class HumanCondition {
                 return result;
             }
 
-            public AndConditionProxy orLink(Class<?> sourceModel, String sourceFieldName,
+            public AndConditionProxy andLink(Class<?> sourceModel, String sourceFieldName,
                                             Class<?> targetModel, String targetFieldName) {
                 this.andCondition.addLink(humanCondition.genLinkFieldName(sourceModel, TextUtils.humpToLine(sourceFieldName)),
                         humanCondition.genLinkFieldName(targetModel, TextUtils.humpToLine(targetFieldName)));
                 return this;
             }
 
-            public <S, T> AndConditionProxy orLink(Class<?> sourceModel, SerializableFunction<S> sourceFieldGetter,
+            public <S, T> AndConditionProxy andLink(Class<?> sourceModel, SerializableFunction<S> sourceFieldGetter,
                                                    Class<?> targetModel, SerializableFunction<T> targetFieldGetter) {
-                return this.orLink(sourceModel, BeanUtils.getBeanGetterFieldName(sourceFieldGetter),
+                return this.andLink(sourceModel, BeanUtils.getBeanGetterFieldName(sourceFieldGetter),
                         targetModel, BeanUtils.getBeanGetterFieldName(targetFieldGetter));
             }
 
-            public AndConditionProxy orLink(String sourceLinkName, String sourceFieldName,
+            public AndConditionProxy andLink(String sourceLinkName, String sourceFieldName,
                                             String targetLinkName, String targetFieldName) {
                 this.andCondition.addLink(humanCondition.genLinkFieldName(sourceLinkName, TextUtils.humpToLine(sourceFieldName)),
                         humanCondition.genLinkFieldName(targetLinkName, TextUtils.humpToLine(targetFieldName)));
                 return this;
             }
 
-            public <S, T> AndConditionProxy orLink(String sourceLinkName, SerializableFunction<S> sourceFieldGetter,
+            public <S, T> AndConditionProxy andLink(String sourceLinkName, SerializableFunction<S> sourceFieldGetter,
                                                    String targetLinkName, SerializableFunction<T> targetFieldGetter) {
-                return this.orLink(sourceLinkName, BeanUtils.getBeanGetterFieldName(sourceFieldGetter),
+                return this.andLink(sourceLinkName, BeanUtils.getBeanGetterFieldName(sourceFieldGetter),
                         targetLinkName, BeanUtils.getBeanGetterFieldName(targetFieldGetter));
             }
 
