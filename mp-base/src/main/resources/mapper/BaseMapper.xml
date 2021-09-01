@@ -43,26 +43,56 @@
                 <if test="cond.name == 'or'">
                     <foreach item="orCond" index="index" collection="cond.conds" open="(" separator=" OR " close=")">
                         <choose>
-                            <when test="orCond.connector == 'link'">${orCond.fieldName} = ${orCond.fieldValue}</when>
-                            <when test="orCond.connector == 'in'">${orCond.fieldName} IN <foreach
-                                    item="value" index="index" collection="orCond.fieldValue"
-                                    open="(" separator="," close=")">#{value}</foreach></when>
-                            <when test="orCond.connector == 'notIn'">${orCond.fieldName} NOT IN <foreach
-                                    item="value" index="index" collection="orCond.fieldValue"
-                                    open="(" separator="," close=")">#{value}</foreach></when>
-                            <when test="orCond.connector == 'contains'">${orCond.fieldName} LIKE BINARY CONCAT('%', #{orCond.fieldValue}, '%')</when>
-                            <when test="orCond.connector == 'iContains'">${orCond.fieldName} LIKE CONCAT('%', #{orCond.fieldValue}, '%')</when>
-                            <when test="orCond.connector == 'startsWith'">${orCond.fieldName} LIKE BINARY CONCAT(#{orCond.fieldValue}, '%')</when>
-                            <when test="orCond.connector == 'iStartsWith'">${orCond.fieldName} LIKE CONCAT(#{orCond.fieldValue}, '%')</when>
-                            <when test="orCond.connector == 'endsWith'">${orCond.fieldName} LIKE BINARY CONCAT('%', #{orCond.fieldValue})</when>
-                            <when test="orCond.connector == 'iEndsWith'">${orCond.fieldName} LIKE CONCAT('%', #{orCond.fieldValue})</when>
-                            <when test="orCond.connector == 'notContains'">${orCond.fieldName} NOT LIKE BINARY CONCAT('%', #{orCond.fieldValue}, '%')</when>
-                            <when test="orCond.connector == 'notIContains'">${orCond.fieldName} NOT LIKE CONCAT('%', #{orCond.fieldValue}, '%')</when>
-                            <when test="orCond.connector == 'notStartsWith'">${orCond.fieldName} NOT LIKE BINARY CONCAT(#{orCond.fieldValue}, '%')</when>
-                            <when test="orCond.connector == 'notIStartsWith'">${orCond.fieldName} NOT LIKE CONCAT(#{orCond.fieldValue}, '%')</when>
-                            <when test="orCond.connector == 'notEndsWith'">${orCond.fieldName} NOT LIKE BINARY CONCAT('%', #{orCond.fieldValue})</when>
-                            <when test="orCond.connector == 'notIEndsWith'">${orCond.fieldName} NOT LIKE CONCAT('%', #{orCond.fieldValue})</when>
-                            <otherwise>${orCond.fieldName} ${orCond.connector} #{orCond.fieldValue}</otherwise>
+                            <when test="orCond.name == 'and'">
+                                <foreach collection="orCond.conds" separator=" AND " open="(" close=")" item="andCond">
+                                    <choose>
+                                        <when test="andCond.connector == 'link'">${andCond.fieldName} = ${andCond.fieldValue}</when>
+                                        <when test="andCond.connector == 'in'">${andCond.fieldName} IN <foreach
+                                                item="value" index="index" collection="andCond.fieldValue"
+                                                open="(" separator="," close=")">#{value}</foreach></when>
+                                        <when test="andCond.connector == 'notIn'">${andCond.fieldName} NOT IN <foreach
+                                                item="value" index="index" collection="andCond.fieldValue"
+                                                open="(" separator="," close=")">#{value}</foreach></when>
+                                        <when test="andCond.connector == 'contains'">${andCond.fieldName} LIKE BINARY CONCAT('%', #{andCond.fieldValue}, '%')</when>
+                                        <when test="andCond.connector == 'iContains'">${andCond.fieldName} LIKE CONCAT('%', #{andCond.fieldValue}, '%')</when>
+                                        <when test="andCond.connector == 'startsWith'">${andCond.fieldName} LIKE BINARY CONCAT(#{andCond.fieldValue}, '%')</when>
+                                        <when test="andCond.connector == 'iStartsWith'">${andCond.fieldName} LIKE CONCAT(#{andCond.fieldValue}, '%')</when>
+                                        <when test="andCond.connector == 'endsWith'">${andCond.fieldName} LIKE BINARY CONCAT('%', #{andCond.fieldValue})</when>
+                                        <when test="andCond.connector == 'iEndsWith'">${andCond.fieldName} LIKE CONCAT('%', #{andCond.fieldValue})</when>
+                                        <when test="andCond.connector == 'notContains'">${andCond.fieldName} NOT LIKE BINARY CONCAT('%', #{andCond.fieldValue}, '%')</when>
+                                        <when test="andCond.connector == 'notIContains'">${andCond.fieldName} NOT LIKE CONCAT('%', #{andCond.fieldValue}, '%')</when>
+                                        <when test="andCond.connector == 'notStartsWith'">${andCond.fieldName} NOT LIKE BINARY CONCAT(#{andCond.fieldValue}, '%')</when>
+                                        <when test="andCond.connector == 'notIStartsWith'">${andCond.fieldName} NOT LIKE CONCAT(#{andCond.fieldValue}, '%')</when>
+                                        <when test="andCond.connector == 'notEndsWith'">${andCond.fieldName} NOT LIKE BINARY CONCAT('%', #{andCond.fieldValue})</when>
+                                        <when test="andCond.connector == 'notIEndsWith'">${andCond.fieldName} NOT LIKE CONCAT('%', #{andCond.fieldValue})</when>
+                                        <otherwise>${andCond.fieldName} ${andCond.connector} #{andCond.fieldValue}</otherwise>
+                                    </choose>
+                                </foreach>
+                            </when>
+                            <otherwise>
+                                <choose>
+                                    <when test="orCond.connector == 'link'">${orCond.fieldName} = ${orCond.fieldValue}</when>
+                                    <when test="orCond.connector == 'in'">${orCond.fieldName} IN <foreach
+                                            item="value" index="index" collection="orCond.fieldValue"
+                                            open="(" separator="," close=")">#{value}</foreach></when>
+                                    <when test="orCond.connector == 'notIn'">${orCond.fieldName} NOT IN <foreach
+                                            item="value" index="index" collection="orCond.fieldValue"
+                                            open="(" separator="," close=")">#{value}</foreach></when>
+                                    <when test="orCond.connector == 'contains'">${orCond.fieldName} LIKE BINARY CONCAT('%', #{orCond.fieldValue}, '%')</when>
+                                    <when test="orCond.connector == 'iContains'">${orCond.fieldName} LIKE CONCAT('%', #{orCond.fieldValue}, '%')</when>
+                                    <when test="orCond.connector == 'startsWith'">${orCond.fieldName} LIKE BINARY CONCAT(#{orCond.fieldValue}, '%')</when>
+                                    <when test="orCond.connector == 'iStartsWith'">${orCond.fieldName} LIKE CONCAT(#{orCond.fieldValue}, '%')</when>
+                                    <when test="orCond.connector == 'endsWith'">${orCond.fieldName} LIKE BINARY CONCAT('%', #{orCond.fieldValue})</when>
+                                    <when test="orCond.connector == 'iEndsWith'">${orCond.fieldName} LIKE CONCAT('%', #{orCond.fieldValue})</when>
+                                    <when test="orCond.connector == 'notContains'">${orCond.fieldName} NOT LIKE BINARY CONCAT('%', #{orCond.fieldValue}, '%')</when>
+                                    <when test="orCond.connector == 'notIContains'">${orCond.fieldName} NOT LIKE CONCAT('%', #{orCond.fieldValue}, '%')</when>
+                                    <when test="orCond.connector == 'notStartsWith'">${orCond.fieldName} NOT LIKE BINARY CONCAT(#{orCond.fieldValue}, '%')</when>
+                                    <when test="orCond.connector == 'notIStartsWith'">${orCond.fieldName} NOT LIKE CONCAT(#{orCond.fieldValue}, '%')</when>
+                                    <when test="orCond.connector == 'notEndsWith'">${orCond.fieldName} NOT LIKE BINARY CONCAT('%', #{orCond.fieldValue})</when>
+                                    <when test="orCond.connector == 'notIEndsWith'">${orCond.fieldName} NOT LIKE CONCAT('%', #{orCond.fieldValue})</when>
+                                    <otherwise>${orCond.fieldName} ${orCond.connector} #{orCond.fieldValue}</otherwise>
+                                </choose>
+                            </otherwise>
                         </choose>
                     </foreach>
                 </if>

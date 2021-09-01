@@ -1,13 +1,22 @@
 package cn.cyberpeace.mp.base.repository.condition;
 
 import cn.cyberpeace.mp.base.repository.condition.aggregation.Aggregation;
-import cn.cyberpeace.mp.base.util.*;
+import cn.cyberpeace.mp.base.util.BeanUtils;
+import cn.cyberpeace.mp.base.util.ClassUtils;
+import cn.cyberpeace.mp.base.util.ModelUtils;
+import cn.cyberpeace.mp.base.util.SerializableFunction;
+import cn.cyberpeace.mp.base.util.TextUtils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 查询条件构造器
@@ -1073,6 +1082,22 @@ public class HumanCondition {
         public HumanCondition filterOrEnd() {
             humanCondition.getAndCondition().addCondition(orCondition);
             return humanCondition;
+        }
+
+        /**
+         * 在or条件中添加一组and条件，sql形如 ...AND (id = 1 or id = 2 or (id =3 AND id =4 AND id=5))
+         * 例：
+         * humanCondition.filterOrStart()
+         * .orEqual(Model::getId, 1)
+         * .orEqual(Model::getId, 2)
+         * .addAndCondition((AndCondition) new AndCondition().addEqual(Model::getId, 3).addEqual(Model::getId, 4).addEqual(Model::getId, 5))
+         * .filterOrEnd()
+         * @param andCondition
+         * @return
+         */
+        public OrConditionPoxy addAndCondition(AndCondition andCondition) {
+            this.orCondition.addCondition(andCondition);
+            return this;
         }
     }
 
