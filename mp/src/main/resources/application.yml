@@ -74,7 +74,9 @@ mp:
     exclude-uri: /login
     exclude-method: OPTIONS
   auth:
-    activationDir: /home/mp/config/license
+    activation:
+      enable: true
+      licenseDir: /home/mp/config/license
 
 management:
   endpoints:

@@ -54,7 +54,7 @@ public class RegisterController {
     @ApiOperation(value = "注册接口", notes = "")
     @PostMapping
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.CREATE, title = "注册新用户", target = AuthLogConstant.TARGET_USER)
-    public ServiceResult register(@RequestBody @Validated RegisterRequest req) {
+    public ServiceResult<UserModel> register(@RequestBody @Validated RegisterRequest req) {
         log.info("req:{}", req);
         String encryptedPwd = req.getPassword();
         req.setPassword(PasswordUtils.desDecrypt(encryptedPwd));
@@ -63,10 +63,10 @@ public class RegisterController {
         if (result.getSource() != null) {
             UserModel userModel = result.getSource().getObj();
             JwtUtils.addResponseHeaderWithJWT(userModel);
-            return ResultUtils.commonResult(true, userModel);
+            return ServiceResult.success(userModel);
         }
 
-        return ResultUtils.commonResult(false, null);
+        return ServiceResult.fail("注册失败！");
     }
 
 }

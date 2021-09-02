@@ -73,7 +73,7 @@ public class UserExcelController {
     @ResponseBody
     public ServiceResult importUsers(MultipartFile file) throws IOException {
         EasyExcel.read(file.getInputStream(), ImportUser.class, new UploadDataListener(userService)).headRowNumber(2).sheet().doRead();
-        return ResultUtils.commonResult(true, null);
+        return ServiceResult.successful();
     }
 
 

@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.auth.test;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.OrgDto;
-import cn.cyberpeace.mp.auth.dto.activation.ActivationContent;
+import cn.cyberpeace.mp.auth.dto.activation.ActivationResponse;
 import cn.cyberpeace.mp.auth.dto.activation.ActivationRequest;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.model.UserPermissionModel;
@@ -182,8 +182,8 @@ public class AuthTestController {
 
         activationService.activate(activationRequest);
 
-        ActivationContent activationContent = activationService.status();
-        log.info("activationContent:{}", activationContent);
+        ActivationResponse activationResponse = activationService.status();
+        log.info("activationContent:{}", activationResponse);
     }
 
     @GetMapping("/testos")

@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.auth.config;
 
 
-import cn.cyberpeace.mp.base.model.stereotype.DefaultBool;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
@@ -13,11 +12,13 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Data
-@ConfigurationProperties(prefix = "mp.auth")
-public class AuthConfig {
+@ConfigurationProperties(prefix = "mp.auth.activation")
+public class ActivationConfig {
 
-    public static String DEFAULT_ACTIVATION_DIR = "/home/mp/config/license";
+    public static String DEFAULT_LICENSE_DIR = "/home/mp/config/license";
 
-    private String activationDir = DEFAULT_ACTIVATION_DIR;
+    private boolean enable = false;
+
+    private String licenseDir = DEFAULT_LICENSE_DIR;
 
 }

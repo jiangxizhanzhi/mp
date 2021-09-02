@@ -39,18 +39,18 @@ public class AvatarController extends BaseModelController<AvatarModel, QueryPara
 
     @ApiOperation(value = "查询所有头像", notes = "")
     @GetMapping("/all")
-    public ServiceResult getAll() {
+    public ServiceResult<List<AvatarModel>> getAll() {
         List<AvatarModel> avatars = getModelService().listAll();
-        return ResultUtils.commonResult(true, avatars);
+        return ServiceResult.success(avatars);
     }
 
 
     @ApiOperation(value = "上传头像，返回url", notes = "")
     @PostMapping("/upload")
     @ResponseBody
-    public ServiceResult upload(MultipartFile file) {
+    public ServiceResult<String> upload(MultipartFile file) {
         FileResponseData responseData = getModelService().upload(file);
-        return ResultUtils.commonResult(true, responseData.getHttpUrl());
+        return ServiceResult.success(responseData.getHttpUrl());
     }
 
 

@@ -55,7 +55,7 @@ public class AuthenticateController {
 
         UserDto userDto = userService.userModel2UserDtoWithoutOrg(userModel);
 
-        return ResultUtils.commonResult(true, userDto);
+        return ServiceResult.success(userDto);
 
     }
 

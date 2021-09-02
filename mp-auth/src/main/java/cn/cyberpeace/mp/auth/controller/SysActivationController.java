@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.auth.controller;
 
-import cn.cyberpeace.mp.auth.dto.activation.ActivationContent;
+import cn.cyberpeace.mp.auth.dto.activation.ActivationResponse;
 import cn.cyberpeace.mp.auth.dto.activation.ActivationRequest;
 import cn.cyberpeace.mp.auth.service.sys.SysActivationService;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Objects;
 
 /**
  * @Description: 系统激活管理接口
@@ -33,18 +35,18 @@ public class SysActivationController {
     @ApiOperation("激活")
     @PostMapping
     public ServiceResult activate(@RequestBody @Validated ActivationRequest activationRequest) {
-
         activationService.activate(activationRequest);
-
         return ServiceResult.successful();
     }
 
 
     @ApiOperation("查询激活状态")
-    @GetMapping
-    public ServiceResult<ActivationContent> status() {
-
-        ActivationContent content = activationService.status();
+    @GetMapping("/status")
+    public ServiceResult<ActivationResponse> status() {
+        ActivationResponse content = activationService.status();
+        if (Objects.isNull(content)) {
+            return ServiceResult.fail("未查询到激活状态信息！");
+        }
         return ServiceResult.success(content);
     }
 

@@ -53,9 +53,9 @@ public class SysConfigController {
 
     @ApiOperation(value = "查询所有系统设置", notes = "")
     @GetMapping("/all")
-    public ServiceResult getall() {
+    public ServiceResult<List<SysConfigModel>> getall() {
         List<SysConfigModel> configs = sysConfigService.listAll();
-        return ResultUtils.commonResult(true, configs);
+        return ServiceResult.success(configs);
     }
 
     @ApiOperation(value = "根据keyname更新单条sysconfig", notes = "")
@@ -72,7 +72,11 @@ public class SysConfigController {
         }
 
         boolean success = sysConfigService.updateByKeyName(updateConfig);
-        return ResultUtils.commonResult(success, null);
+        if (success) {
+            return ServiceResult.successful();
+        } else {
+            return ServiceResult.fail("更新系统配置失败!");
+        }
     }
 
     @ApiOperation(value = "根据keyname批量更新sysconfig", notes = "")
@@ -80,7 +84,11 @@ public class SysConfigController {
     public ServiceResult updateAll(@RequestBody List<SysConfigModel> configs) {
         // 更新规则，如果key存在，就修改value值，如果key不存在，就忽略不改
         boolean success = sysConfigService.batchUpdateByKeyname(configs);
-        return ResultUtils.commonResult(success, null);
+        if (success) {
+            return ServiceResult.successful();
+        } else {
+            return ServiceResult.fail("更新系统配置失败!");
+        }
     }
 
 

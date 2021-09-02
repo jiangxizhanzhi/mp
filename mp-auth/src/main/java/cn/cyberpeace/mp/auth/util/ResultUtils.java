@@ -28,18 +28,6 @@ import java.util.Objects;
  */
 public class ResultUtils {
 
-    @Deprecated
-    public static ServiceResult commonResult(boolean success, Object source) {
-        if (success) {
-            if (source != null) {
-                return ServiceResult.builder().source(source).build().asResult();
-            }
-            return ServiceResult.builder().build().asResult();
-        }
-        return ServiceResult.builder().serviceCode(BaseErrorCode.ERROR).build().asResult();
-    }
-
-
     public static ListObjServiceResult objList2ListObjServiceResult(List<Objects> list, Integer total) {
         return new ListObjServiceResult(new ListObjResult(list, total).asResult()).asResult();
     }
