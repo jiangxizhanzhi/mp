@@ -29,6 +29,9 @@ public class AccessMode {
     @ApiModelProperty(value = "基础协议tcp/udp")
     private String baseProtocol;
 
+    @ApiModelProperty(value = "开启代理")
+    private Boolean proxy;
+
     public static class Protocol {
         public static final String PING = "ping";
         public static final String CONSOLE = "console";
@@ -39,6 +42,7 @@ public class AccessMode {
         public static final String NC = "nc";
         public static final String HTTP = "http";
         public static final String HTTPS = "https";
+        public static final String SERIAL = "serial";
 
         public static final Map<String, Integer> DEFAULT_PORT_MAP = Map.of(
                 SSH, 22,

@@ -30,11 +30,13 @@ public abstract class BaseSceneElementBO<M extends BaseSceneElementModel, P exte
     @ApiModelProperty(value = "cpu数量")
     private Integer cpu;
     @ApiModelProperty(value = "内存大小")
-    private Integer memory;
+    private Integer ram;
     @ApiModelProperty(value = "磁盘大小")
     private Integer disk;
     @ApiModelProperty(value = "初始化命令")
     private List<String> initCommands;
+    @ApiModelProperty(value = "最大端口数量")
+    private Integer maxPortNumber;
     @ApiModelProperty(value = "网元端口")
     private List<P> ports;
 

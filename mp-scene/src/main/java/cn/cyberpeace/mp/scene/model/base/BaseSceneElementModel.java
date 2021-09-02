@@ -19,11 +19,13 @@ public class BaseSceneElementModel extends BaseSceneNodeModel {
     @DefaultInt
     private Integer cpu;
     @DefaultInt
-    private Integer memory;
+    private Integer ram;
     @DefaultInt
     private Integer disk;
     @DefaultStr
     private String initCommands;
+    @DefaultInt
+    private Integer maxPortNumber;
 
     public static class Type {
         public static final int OTHER = 0;

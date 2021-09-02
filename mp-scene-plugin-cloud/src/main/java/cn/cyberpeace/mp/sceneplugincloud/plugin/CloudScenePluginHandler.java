@@ -90,4 +90,8 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         pluginModelHandler.deleteElementPorts(elementPortIds);
     }
 
+    @Override
+    public void initiate() {
+
+    }
 }
