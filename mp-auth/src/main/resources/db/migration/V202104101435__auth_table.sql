@@ -70,6 +70,7 @@ CREATE TABLE mp_auth_user (
     `date_joined` datetime(6) NOT NULL COMMENT '加入时间',
     `expired_time` datetime(6) NOT NULL COMMENT '过期时间',
     `last_login` datetime(6) NOT NULL COMMENT '最后登录时间',
+    `res` varchar(255) NULL COMMENT '保留字段',
     `create_time` datetime(6) NOT NULL COMMENT '创建时间',
     `update_time` datetime(6) NOT NULL COMMENT '更新时间',
     PRIMARY KEY (`pk`),
