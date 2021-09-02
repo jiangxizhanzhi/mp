@@ -30,7 +30,8 @@ public class TargetLogoController {
     @ApiOperation("初始化logo")
     @PostMapping("/init")
     public ServiceResult initLogo() {
-        int result = targetLogoService.init();
+        List<String>  urlList = targetLogoService.upload();
+        int result = targetLogoService.batchAdd(urlList);
         return result > 0 ? ServiceResult.successful() : ServiceResult.fail("");
     }
 

@@ -5,8 +5,10 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.ImagesConverter;
+import cn.cyberpeace.mp.devops.cluster.converter.SnapshotConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertPageModel;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtImageInfo;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtVm;
 import cn.cyberpeace.mp.devops.cluster.request.*;
@@ -48,9 +50,12 @@ public class ImagesController {
 
     private ImagesConverter imagesConverter;
 
+    private SnapshotConverter snapshotConverter;
+
     @Autowired
-    public ImagesController(ImagesConverter imagesConverter) {
+    public ImagesController(ImagesConverter imagesConverter,SnapshotConverter snapshotConverter) {
         this.imagesConverter = imagesConverter;
+        this.snapshotConverter = snapshotConverter;
     }
 
     /**
@@ -83,7 +88,11 @@ public class ImagesController {
     @ApiOperation("快速创建分页查询")
     @GetMapping("/quick-create/page")
     public PageResult<ImagesPageResponse> page(ImageQuickCreatePageRequest request){
-        ImageConvertPageModel model = imagesConverter.pageForQuickCreate(request);
+        ImagePageRequest pageRequest = new ImagePageRequest();
+        pageRequest.setPage(request.getPage());
+        pageRequest.setPerPage(request.getPerPage());
+        pageRequest.setQuickCreateSupport(request.getQuickCreateSupport());
+        ImageConvertPageModel model = imagesConverter.page(pageRequest);
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getModelList())){
             return new PageResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
         }
@@ -106,8 +115,18 @@ public class ImagesController {
      */
     @ApiOperation("新增")
     @PostMapping("/add")
-    public ServiceResult add(@RequestBody ImageRequest request){
-       Boolean result = imagesConverter.add(request);
+    public ServiceResult add(ImageRequest request){
+        String logoUrl = imagesConverter.uploadLogo(request.getLogoFile());
+        request.setLogo(logoUrl);
+        ImagesUploadRequest uploadRequest = new ImagesUploadRequest();
+        String imageUuid = imagesConverter.uploadImage(uploadRequest,request.getImageFile());
+        ExtImageInfo extImageInfo = request.getExtImageInfo();
+        if (Objects.isNull(extImageInfo)){
+            extImageInfo = new ExtImageInfo();
+        }
+        extImageInfo.setUuid(imageUuid);
+        request.setExtImageInfo(extImageInfo);
+        Boolean result = imagesConverter.add(request);
        return result ? ServiceResult.successful() : ServiceResult.fail("");
     }
 
@@ -211,5 +230,41 @@ public class ImagesController {
     @PostMapping("/{id}/create")
     public void create(@PathVariable("id") String uuid){
       imagesConverter.create(uuid);
+    }
+
+    /**
+     * 删除虚拟机/容器
+     */
+    @ApiOperation("删除虚拟机/容器")
+    @PostMapping("/{id}/delete")
+    public void delete(@PathVariable("id") String uuid){
+        imagesConverter.create(uuid);
+    }
+
+    /**
+     * 查询快照历史
+     */
+    @ApiOperation("查询快照历史")
+    @GetMapping("/{id}/snapshot/list")
+    public void listSnapshot(@PathVariable("id") String uuid){
+        snapshotConverter.list(uuid);
+    }
+
+    /**
+     * 合并快照历史
+     */
+    @ApiOperation("合并快照历史")
+    @PostMapping("/{id}/snapshot/merge")
+    public void mergeSnapshot(@PathVariable("id") String uuid){
+        snapshotConverter.merge(uuid);
+    }
+
+    /**
+     * 创建快照
+     */
+    @ApiOperation("创建快照")
+    @GetMapping("/snapshot/create")
+    public void createSnapshot(@RequestBody SnapshotRequest request){
+        snapshotConverter.create(request);
     }
 }

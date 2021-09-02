@@ -2,9 +2,13 @@ package cn.cyberpeace.mp.devops.cluster.converter.impl;
 
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.util.UserUtils;
+import cn.cyberpeace.mp.base.config.FastDfsConfig;
+import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.LocalDateTimeUtils;
+import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.cyberpeace.mp.devops.cluster.converter.ImagesConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageAuthConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertModel;
@@ -30,13 +34,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -56,16 +56,23 @@ public class ImagesConverterImpl implements ImagesConverter {
 
     private ContainerService containerService;
 
+    private FastDFSClient fastDFSClient;
+
+    private FastDfsConfig fastDfsConfig;
+
 
     @Autowired
     public ImagesConverterImpl(ImagesService imagesService, ImageMapper imageMapper,DeviceService deviceService,
-                               ImageAuthMapper imageAuthMapper,VmService vmService,ContainerService containerService) {
+                               ImageAuthMapper imageAuthMapper,VmService vmService,ContainerService containerService,
+                               FastDFSClient fastDFSClient,FastDfsConfig fastDfsConfig) {
         this.imagesService = imagesService;
         this.imageMapper = imageMapper;
         this.deviceService = deviceService;
         this.imageAuthMapper = imageAuthMapper;
         this.vmService = vmService;
         this.containerService = containerService;
+        this.fastDFSClient = fastDFSClient;
+        this.fastDfsConfig = fastDfsConfig;
 
     }
 
@@ -96,6 +103,7 @@ public class ImagesConverterImpl implements ImagesConverter {
         dto.setRole(request.getRole());
         dto.setMainCategory(request.getMainCategory());
         dto.setSubCategory(request.getSubCategory());
+        dto.setQuickCreateSupport(request.getQuickCreateSupport());
         dto.setImageType(Objects.nonNull(request.getImageType()) ? request.getImageType().toValue() : "");
         dto.setName(request.getName());
         dto.setOwner(UserUtils.getLoginUser().getId());
@@ -231,43 +239,47 @@ public class ImagesConverterImpl implements ImagesConverter {
     @Override
     public String upload(MultipartFile file) {
         try {
-           return HttpUtils.doFormDataPost("http://47.102.192.61:9019/cpcloud/device/v1/upload/?module=device&type=vm",multipartFileToFile(file));
+           return HttpUtils.doFormDataPost("http://47.102.192.61:9019/cpcloud/device/v1/upload/?module=device&type=vm",convertMultipartFile(file));
         } catch (Exception e) {
             log.error("上传文件失败，失败信息：{}",e.getMessage());
         }
         return null;
     }
 
-    public static File multipartFileToFile(MultipartFile file) throws Exception {
-
-        File toFile = null;
-        if (file.equals("") || file.getSize() <= 0) {
-            file = null;
-        } else {
-            InputStream ins = null;
-            ins = file.getInputStream();
-            toFile = new File(file.getOriginalFilename());
-            inputStreamToFile(ins, toFile);
-            ins.close();
+    @Override
+    public String uploadLogo(MultipartFile file) {
+        if (Objects.isNull(file) || file.getSize() == 0 ){
+            return null;
         }
-        return toFile;
-    }
-
-    //获取流文件
-    private static void inputStreamToFile(InputStream ins, File file) {
+        FastDfsConfig.Group group = fastDfsConfig.getGroupByName(FdfsGroupEnum.DEFAULT);
+        String logoUrl = "";
         try {
-            OutputStream os = new FileOutputStream(file);
-            int bytesRead = 0;
-            byte[] buffer = new byte[1024];
-            while ((bytesRead = ins.read(buffer, 0, 1024)) != -1) {
-                os.write(buffer, 0, bytesRead);
-            }
-            os.close();
-            ins.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+            String filepath = fastDFSClient.upload(file.getInputStream(), file.getOriginalFilename(), null,
+                    FdfsGroupEnum.DEFAULT.toString());
+            logoUrl = group.getFileServerAddr() + File.separator + filepath;
+        } catch (IOException e) {
+            log.error("上传图标失败：错误信息：{}",e.getMessage());
         }
+        return logoUrl;
     }
+
+    @Override
+    public String uploadImage(ImagesUploadRequest request, MultipartFile multipartFile) {
+        if (Objects.isNull(multipartFile) || multipartFile.getSize() == 0 ){
+            return null;
+        }
+        try {
+            File file = convertMultipartFile(multipartFile);
+            String params = BeanUtils.wrapperGetParamsByObject(Boolean.TRUE,request);
+            return imagesService.upload(params,file);
+        } catch (Exception e) {
+            log.error("上传镜像文件失败：{}",e.getMessage());
+        }
+
+        return null;
+    }
+
+
 
     @Override
     public HttpResponse export(String uuid) {
@@ -278,50 +290,19 @@ public class ImagesConverterImpl implements ImagesConverter {
     public void create(String uuid) {
         Device device = deviceService.findById(uuid);
 
-//        if(ImageTypeEnum.VM.getDesc().equals(device.getImageType())) {
-//            VmCreateCloudPlatformModel model = new VmCreateCloudPlatformModel();
-//            model.setName(device.getName());
-//            model.setImage(device.getName());
-//            vmService.create(model);
-//        }
-//        else if(ImageTypeEnum.CONTAINER.getDesc().equals(device.getImageType())) {
-//            ContainerCreateCloudPlatformModel model = new ContainerCreateCloudPlatformModel();
-//            model.setName(device.getName());
-//            model.setImage(device.getName());
-//            containerService.create(model);
-//        }
-
-    }
-
-    @Override
-    public ImageConvertPageModel pageForQuickCreate(ImageQuickCreatePageRequest request) {
-
-        HumanCondition outerCondition = request.wrapperHumanCondition();
-
-        int total = imageAuthMapper.totalTargetsByOwner(UserUtils.getLoginUser().getId(),outerCondition);
-
-        if (total == 0){
-            return null;
+        if(ImageTypeEnum.VM.toValue().equals(device.getImageType())) {
+            VmCreateCloudPlatformModel model = new VmCreateCloudPlatformModel();
+            model.setName(device.getName());
+            model.setImage(device.getName());
+            vmService.create(model);
+        }
+        else if(ImageTypeEnum.CONTAINER.toValue().equals(device.getImageType())) {
+            ContainerCreateCloudPlatformModel model = new ContainerCreateCloudPlatformModel();
+            model.setName(device.getName());
+            model.setImage(device.getName());
+            containerService.create(model);
         }
 
-        List<ImageModel> imageModels = imageAuthMapper.listTargetsByOwner(UserUtils.getLoginUser().getId(),outerCondition);
-
-        List<Integer> ids = imageModels.stream().map(ImageModel::getId).map(Integer::parseInt).collect(Collectors.toList());
-        if (CollectionUtils.isEmpty(ids)){
-            return null;
-        }
-        DeviceCloudPlatformModel model = deviceService.findByIds(ids);
-
-        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getItems())){
-            return null;
-        }
-
-        List<ImageConvertModel> modelList = model.getItems().stream().map(device -> wrapperImageConvertModel(device)).collect(Collectors.toList());
-
-        ImageConvertPageModel convertModel = new ImageConvertPageModel();
-        convertModel.setModelList(modelList);
-        convertModel.setTotal(total);
-        return convertModel;
     }
 
     /**
@@ -334,14 +315,14 @@ public class ImagesConverterImpl implements ImagesConverter {
         device.setName(request.getName());
         device.setDescription(request.getDescription());
         device.setLogo(request.getLogo());
-        RoleEnum role = request.getRole();
-        device.setRole(role.toValue());
+        Integer role  = request.getRole();
+        device.setRole(role);
         device.setCategory(request.getCategory());
         device.setSecondCategory(request.getSecondCategory());
         device.setL3Category(request.getThirdCategory());
-        device.setImageType(request.getVirtualType().name().toLowerCase(Locale.ROOT));
+        device.setImageType(request.getVirtualType());
         device.setMaintype(MainTypeEnum.NORMAL.ordinal());
-        if (role != RoleEnum.NETWORK) {
+        if (Objects.nonNull(role) && role != RoleEnum.NETWORK.toValue()) {
             final ExtVm extVm = request.getExtVm();
             if (Objects.nonNull(extVm) && CollectionUtils.isNotEmpty(request.getAccessProtocolList())) {
                 extVm.setAccessProtocols(JSONArray.toJSONString(request.getAccessProtocolList()));
@@ -349,7 +330,7 @@ public class ImagesConverterImpl implements ImagesConverter {
             device.setExtVm(extVm);
             device.setExtSystemInfo(request.getExtSystemInfo());
             device.setExtImageInfo(request.getExtImageInfo());
-            if (role == RoleEnum.GATEWAY) {
+            if (role == RoleEnum.GATEWAY.toValue()) {
                 device.setExtGateway(request.getExtGateway());
             }
         }
@@ -400,6 +381,47 @@ public class ImagesConverterImpl implements ImagesConverter {
         imageModel.setExtVm(device.getExtVm());
         imageModel.setExtGateway(device.getExtGateway());
         return imageModel;
+    }
+
+    /**
+     *
+     * @param file
+     * @return
+     * @throws Exception
+     */
+    protected File convertMultipartFile(MultipartFile file) throws Exception {
+
+        File toFile = null;
+        if (file.equals("") || file.getSize() <= 0) {
+            file = null;
+        } else {
+            InputStream ins = null;
+            ins = file.getInputStream();
+            toFile = new File(file.getOriginalFilename());
+            inputStreamToFile(ins, toFile);
+            ins.close();
+        }
+        return toFile;
+    }
+
+    /**
+     * 获取流文件
+     * @param ins
+     * @param file
+     */
+    private void inputStreamToFile(InputStream ins, File file) {
+        try {
+            OutputStream os = new FileOutputStream(file);
+            int bytesRead = 0;
+            byte[] buffer = new byte[1024];
+            while ((bytesRead = ins.read(buffer, 0, 1024)) != -1) {
+                os.write(buffer, 0, bytesRead);
+            }
+            os.close();
+            ins.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }

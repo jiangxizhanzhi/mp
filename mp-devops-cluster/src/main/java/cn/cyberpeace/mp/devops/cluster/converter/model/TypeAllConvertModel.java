@@ -31,12 +31,12 @@ public class TypeAllConvertModel {
     /**
      * 角色列表
      */
-    private List<TypeIdIntegerConvertModel> roleList = new ArrayList<>();
+    private List<TypeIdIntegerConvertModel> idIntegerModelList = new ArrayList<>();
 
     /**
      * 平台&镜像类型
      */
-    private List<TypeIdStringConvertModel> InstallerPlatformAndImageTypeList = new ArrayList<>();
+    private List<TypeIdStringConvertModel> idStringModelList = new ArrayList<>();
 
     public TypeAllConvertModel(List<TypeConvertModel> firstTypeList, List<TypeConvertModel> secondTypeList, List<TypeConvertModel> thirdTypeList) {
         this.firstTypeList = firstTypeList;

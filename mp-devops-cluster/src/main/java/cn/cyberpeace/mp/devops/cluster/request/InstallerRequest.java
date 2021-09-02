@@ -1,7 +1,5 @@
 package cn.cyberpeace.mp.devops.cluster.request;
 
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtDocker;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtNormal;
 import cn.cyberpeace.mp.devops.cluster.model.common.Resource;
 import cn.cyberpeace.mp.devops.cluster.model.common.StartUpParameter;
 import io.swagger.annotations.ApiModel;
@@ -9,6 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -37,6 +36,12 @@ public class InstallerRequest extends BaseRequest {
     private String description;
 
     /**
+     * logo文件流
+     */
+    @ApiModelProperty("logo文件流")
+    private MultipartFile logoFile;
+
+    /**
      * 图标
      */
     @ApiModelProperty(value = "图标")
@@ -55,22 +60,16 @@ public class InstallerRequest extends BaseRequest {
     private Integer deployType;
 
     /**
-     * 对应的docker服务的扩展信息
-     */
-    @ApiModelProperty(value = "对应的docker服务的扩展信息")
-    private ExtDocker extDocker;
-
-    /**
      * 启动参数（包装对象）
      */
     @ApiModelProperty(value = "启动参数")
     private List<StartUpParameter> startUpParameterList;
 
-    /**
-     * 对应的windows服务扩展信息
-     */
-    @ApiModelProperty(value = "对应的windows服务扩展信息")
-    private ExtNormal extNormal;
+    @ApiModelProperty("docker文件流")
+    private MultipartFile dockerFile;
+
+    @ApiModelProperty("windows服务资源流")
+    private List<MultipartFile> multipartFiles;
 
     /**
      * 资源列表

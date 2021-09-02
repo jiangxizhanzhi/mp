@@ -5,7 +5,6 @@ import cn.cyberpeace.mp.devops.cluster.model.Device;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.service.RealEquipmentService;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 
@@ -27,19 +26,11 @@ public class RealEquipmentServiceImpl extends BaseOpenStackServiceImpl implement
 
     @Override
     public Device add(Device device) {
-        try {
-            return super.sendPost(CPCLOUD_DEVICE + URL_VERSION + "/entity/lists", JsonUtils.toUnderlineJSONString(device),Device.class);
-        } catch (JsonProcessingException e) {
-            return null;
-        }
+        return super.sendPost(CPCLOUD_DEVICE + URL_VERSION + "/entity/lists", JsonUtils.toUnderlineJSONString(device),Device.class);
     }
 
     @Override
     public Device update(String uuid,Device device) {
-        try {
-            return super.sendPut(CPCLOUD_DEVICE + URL_VERSION + "/entity/" + uuid,JsonUtils.toUnderlineJSONString(device),Device.class);
-        } catch (JsonProcessingException e) {
-            return null;
-        }
+        return super.sendPut(CPCLOUD_DEVICE + URL_VERSION + "/entity/" + uuid,JsonUtils.toUnderlineJSONString(device),Device.class);
     }
 }

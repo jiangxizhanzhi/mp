@@ -1,0 +1,40 @@
+package cn.cyberpeace.mp.devops.cluster.service.impl;
+
+import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
+import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.InjectFileCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.SnapshotCreate;
+import cn.cyberpeace.mp.devops.cluster.model.common.Snapshot;
+import cn.cyberpeace.mp.devops.cluster.service.InjectFileService;
+import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
+import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class InjectFileServiceImpl extends BaseOpenStackServiceImpl implements InjectFileService {
+
+    public InjectFileServiceImpl(DevopsConfig devopsConfig, ObjectMapper objectMapper) {
+        super(devopsConfig, objectMapper);
+    }
+
+    @Override
+    public InjectFileCloudPlatformModel list(String deviceUuid) {
+        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + "/inject_file?device_uuid=" + deviceUuid, InjectFileCloudPlatformModel.class);
+    }
+
+    @Override
+    public Snapshot create(SnapshotCreate snapshotCreate) {
+        return super.sendPost(CPCLOUD_DEVICE + URL_VERSION + "/inject_file", JsonUtils.toUnderlineJSONString(snapshotCreate), Snapshot.class);
+    }
+
+    @Override
+    public Boolean delete(List<String> uuids) {
+        var jsonObject = new JSONObject();
+        jsonObject.put("inject_uuids", uuids);
+        BaseCloudPlatformModel model = super.sendDelete(CPCLOUD_DEVICE + URL_VERSION + "/inject_file",JSONObject.toJSONString(jsonObject), BaseCloudPlatformModel.class);
+        return model.isSuccess();
+    }
+}

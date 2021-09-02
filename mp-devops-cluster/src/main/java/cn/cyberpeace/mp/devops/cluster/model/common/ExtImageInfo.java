@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.devops.cluster.model.common;
 
-import cn.cyberpeace.mp.devops.cluster.enums.DiskFormatEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,11 +9,19 @@ import lombok.NoArgsConstructor;
 @Data
 public class ExtImageInfo {
 
+    private String uuid;
+
+    /**
+     * 基础镜像
+     */
     private String baseImage;
 
+    /**
+     * 是否支持基础镜像
+     */
     private Boolean baseImageSupport;
 
-    private DiskFormatEnum diskFormat;
+    private String diskFormat;
 
     private String metaData;
 

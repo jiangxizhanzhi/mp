@@ -1,7 +1,5 @@
 package cn.cyberpeace.mp.devops.cluster.request;
 
-import cn.cyberpeace.mp.devops.cluster.enums.ImageTypeEnum;
-import cn.cyberpeace.mp.devops.cluster.enums.RoleEnum;
 import cn.cyberpeace.mp.devops.cluster.model.common.*;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -9,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -28,6 +27,16 @@ public class ImageRequest extends BaseRequest {
     private String uuid;
 
     /**
+     * logo文件流
+     */
+    private MultipartFile logoFile;
+
+    /**
+     * 镜像文件流
+     */
+    private MultipartFile imageFile;
+
+    /**
      * 名称
      */
     @ApiModelProperty(value = "名称",required = true)
@@ -36,20 +45,20 @@ public class ImageRequest extends BaseRequest {
     /**
      * 描述
      */
-    @ApiModelProperty(value = "描述",required = true)
+    @ApiModelProperty(value = "描述")
     private String description;
 
     /**
      * 图标
      */
-    @ApiModelProperty(value = "图标",required = true)
+    @ApiModelProperty(value = "图标")
     private String logo;
 
     /**
      * 角色：网络/网关/终端
      */
     @ApiModelProperty(value = "角色：网络/网关/终端")
-    private RoleEnum role;
+    private Integer role;
 
 
     /**
@@ -74,7 +83,7 @@ public class ImageRequest extends BaseRequest {
      * 虚拟类型
      */
     @ApiModelProperty(value = "虚拟类型")
-    private ImageTypeEnum virtualType;
+    private String virtualType;
 
     /**
      * 网关信息

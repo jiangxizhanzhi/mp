@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.devops.cluster.service;
 
 import cn.cyberpeace.mp.devops.cluster.model.TypeCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.TypeInstallerPlatformAndImageTypeCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.TypeOfRoleCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.TypeIdStringCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.TypeIdIntegerCloudPlatformModel;
 
 public interface TypeService extends BaseCloudPlatformService{
 
@@ -22,11 +22,11 @@ public interface TypeService extends BaseCloudPlatformService{
      * 查询所有角色
      * @return
      */
-    TypeOfRoleCloudPlatformModel findAllRoleType();
+    TypeIdIntegerCloudPlatformModel findIdIntegerByType(String type);
 
     /**
      * 查询所有
      * @return
      */
-    TypeInstallerPlatformAndImageTypeCloudPlatformModel findAllInstallerPlatformAndImageType(String type);
+    TypeIdStringCloudPlatformModel findIdStringByType(String type);
 }

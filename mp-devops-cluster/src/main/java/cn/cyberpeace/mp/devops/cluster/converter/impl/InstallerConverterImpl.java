@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.InstallerConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InstallerConvertPageModel;
 import cn.cyberpeace.mp.devops.cluster.model.Installer;
 import cn.cyberpeace.mp.devops.cluster.model.InstallerCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.InstallerFormDataCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtDocker;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtNormal;
 import cn.cyberpeace.mp.devops.cluster.model.common.Resource;
@@ -14,15 +15,17 @@ import cn.cyberpeace.mp.devops.cluster.request.InstallerDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerRequest;
 import cn.cyberpeace.mp.devops.cluster.service.InstallerService;
+import cn.cyberpeace.mp.devops.cluster.service.TargetLogoService;
+import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import com.alibaba.fastjson.JSONArray;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.io.IOException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,9 +33,12 @@ public class InstallerConverterImpl implements InstallerConverter {
 
     private InstallerService installerService;
 
+    private TargetLogoService targetLogoService;
+
     @Autowired
-    public InstallerConverterImpl(InstallerService installerService) {
+    public InstallerConverterImpl(InstallerService installerService,TargetLogoService targetLogoService) {
         this.installerService = installerService;
+        this.targetLogoService = targetLogoService;
     }
 
     @Override
@@ -70,8 +76,24 @@ public class InstallerConverterImpl implements InstallerConverter {
 
     @Override
     public InstallerConvertModel add(InstallerRequest request) {
-        Installer installer = convertRequest(request);
-        Installer result = installerService.add(installer);
+        String logo = targetLogoService.uploadLogo(request.getLogoFile());
+        if (Objects.nonNull(request.getLogoFile()) && request.getLogoFile().getSize() > 0 ){
+            request.setLogo(logo);
+        }
+        InstallerFormDataCloudPlatformModel installer = convertInstallerRequest(request);
+        installer.setUuid(request.getUuid());
+        List<MultipartFile> multipartFiles = new ArrayList<>();
+        if (Objects.nonNull(request.getDockerFile()) && request.getDockerFile().getSize() > 0){
+           multipartFiles.add(request.getDockerFile());
+        }else{
+            multipartFiles = request.getMultipartFiles();
+        }
+        Installer result = null;
+        try {
+            result = installerService.add(installer,multipartFiles);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return convertInstaller(result);
     }
 
@@ -93,6 +115,9 @@ public class InstallerConverterImpl implements InstallerConverter {
      * @return
      */
     private InstallerConvertModel convertInstaller(Installer installer){
+        if (Objects.isNull(installer)){
+            return null;
+        }
         InstallerConvertModel model = new InstallerConvertModel();
         model.setUuid(installer.getUuid());
         model.setName(installer.getName());
@@ -114,6 +139,25 @@ public class InstallerConverterImpl implements InstallerConverter {
         return model;
     }
 
+    private InstallerFormDataCloudPlatformModel convertInstallerRequest(InstallerRequest request){
+        InstallerFormDataCloudPlatformModel installer = new InstallerFormDataCloudPlatformModel();
+        installer.setName(request.getName());
+        installer.setDescription(request.getDescription());
+        installer.setLogo(request.getLogo());
+        installer.setCategories(String.join(",",request.getCategories()));
+        installer.setDeployType(request.getDeployType());
+//        ExtDocker extDocker = request.getExtDocker();
+        if (CollectionUtils.isNotEmpty(request.getStartUpParameterList())) {
+            installer.setSettings(JsonUtils.toUnderlineJSONString(request.getStartUpParameterList()));
+        }
+//        ExtNormal extNormal = request.getExtNormal();
+        if (CollectionUtils.isNotEmpty(request.getResourceList())) {
+            request.getResourceList().stream().forEach(resource -> resource.setFile(UUID.randomUUID().toString()));
+            installer.setResources(JsonUtils.toUnderlineJSONString(request.getResourceList()));
+        }
+        return installer;
+    }
+
     /**
      * 转换InstallerRequest
      * @param request
@@ -126,16 +170,17 @@ public class InstallerConverterImpl implements InstallerConverter {
         installer.setLogo(request.getLogo());
         installer.setCategories(String.join(",",request.getCategories()));
         installer.setDeployType(request.getDeployType());
-        ExtDocker extDocker = request.getExtDocker();
-        if (Objects.nonNull(extDocker) && CollectionUtils.isNotEmpty(request.getStartUpParameterList())) {
-            extDocker.setSettings(JSONArray.toJSONString(request.getStartUpParameterList()));
-        }
-        installer.setExtDocker(extDocker);
-        ExtNormal extNormal = request.getExtNormal();
-        if (Objects.nonNull(extNormal) && CollectionUtils.isNotEmpty(request.getResourceList())) {
-            extNormal.setResources(JSONArray.toJSONString(request.getResourceList()));
-        }
-        installer.setExtNormal(extNormal);
+//        ExtDocker extDocker = request.getExtDocker();
+//        if (Objects.nonNull(extDocker) && CollectionUtils.isNotEmpty(request.getStartUpParameterList())) {
+//            extDocker.setSettings(JSONArray.toJSONString(request.getStartUpParameterList()));
+//        }
+//        installer.setExtDocker(extDocker);
+//        ExtNormal extNormal = request.getExtNormal();
+//        if (Objects.nonNull(extNormal) && CollectionUtils.isNotEmpty(request.getResourceList())) {
+////            extNormal.setResources(JSONArray.toJSONString(request.getResourceList()));
+//        }
+        installer.setResourceList(request.getResourceList());
+//        installer.setExtNormal(extNormal);
         return installer;
     }
 }

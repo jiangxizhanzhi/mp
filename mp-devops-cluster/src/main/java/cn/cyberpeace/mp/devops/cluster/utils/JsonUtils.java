@@ -16,11 +16,16 @@ public class JsonUtils {
      * @return
      * @throws JsonProcessingException
      */
-    public static String toUnderlineJSONString(Object object) throws JsonProcessingException {
+    public static String toUnderlineJSONString(Object object) {
         ObjectMapper mapper = new ObjectMapper();
         mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        return mapper.writeValueAsString(object);
+        try {
+            return mapper.writeValueAsString(object);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     /**

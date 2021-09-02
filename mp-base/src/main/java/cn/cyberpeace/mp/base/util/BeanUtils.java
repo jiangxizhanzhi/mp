@@ -228,6 +228,4 @@ public class BeanUtils implements ApplicationContextAware {
         matcher.appendTail(sb);
         return sb.toString();
     }
-
-
 }

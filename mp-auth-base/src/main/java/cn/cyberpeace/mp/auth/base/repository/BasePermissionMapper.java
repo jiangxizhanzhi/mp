@@ -61,6 +61,7 @@ public interface BasePermissionMapper<P extends BasePermissionModel, T extends B
         HumanCondition humanCondition = new HumanCondition();
         humanCondition.filterEqual("owner", owner);
 
+
         return list(humanCondition);
     }
 

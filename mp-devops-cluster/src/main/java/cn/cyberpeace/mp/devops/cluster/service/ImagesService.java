@@ -4,6 +4,8 @@ import cn.cyberpeace.mp.devops.cluster.model.Device;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceCloudPlatformModel;
 import org.apache.http.HttpResponse;
 
+import java.io.File;
+
 /**
  * 镜像管理底层接口
  */
@@ -40,4 +42,12 @@ public interface ImagesService extends BaseCloudPlatformService  {
      * @return
      */
     DeviceCloudPlatformModel pageForQuickCreate(String getParams);
+
+    /**
+     * 上传镜像
+     * @param params
+     * @param file
+     * @return
+     */
+    String upload(String params, File file);
 }

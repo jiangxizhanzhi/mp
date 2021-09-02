@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode(callSuper = true)
-public class TypeInstallerPlatformAndImageTypeCloudPlatformModel extends BaseCloudPlatformModel implements Serializable {
+public class TypeIdStringCloudPlatformModel extends BaseCloudPlatformModel implements Serializable {
 
     /**
      * 数据列表

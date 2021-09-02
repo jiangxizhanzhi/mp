@@ -5,10 +5,11 @@ import cn.cyberpeace.mp.devops.cluster.model.Device;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.service.ImagesService;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpResponse;
 import org.springframework.stereotype.Service;
+
+import java.io.File;
 
 @Service
 public class ImagesServiceImpl extends BaseOpenStackServiceImpl implements ImagesService {
@@ -24,21 +25,13 @@ public class ImagesServiceImpl extends BaseOpenStackServiceImpl implements Image
 
     @Override
     public Device add(Device device) {
-        try {
-            return super.sendPost(CPCLOUD_DEVICE + URL_VERSION + "/normal/lists", JsonUtils.toUnderlineJSONString(device), Device.class);
-        } catch (JsonProcessingException e) {
-            return null;
-        }
+        return super.sendPost(CPCLOUD_DEVICE + URL_VERSION + "/normal/lists", JsonUtils.toUnderlineJSONString(device), Device.class);
     }
 
 
     @Override
     public Device update(String uuid,Device device) {
-        try {
-            return super.sendPut(CPCLOUD_DEVICE + URL_VERSION + "/normal/" + uuid,JsonUtils.toUnderlineJSONString(device),Device.class);
-        } catch (JsonProcessingException e) {
-            return null;
-        }
+        return super.sendPut(CPCLOUD_DEVICE + URL_VERSION + "/normal/" + uuid,JsonUtils.toUnderlineJSONString(device),Device.class);
     }
 
     @Override
@@ -57,4 +50,8 @@ public class ImagesServiceImpl extends BaseOpenStackServiceImpl implements Image
         return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + "/quick_create"+ getParams, DeviceCloudPlatformModel.class);
     }
 
+    @Override
+    public String upload(String params,File file) {
+        return super.sendFormDataPost(CPCLOUD_DEVICE + URL_VERSION + "/upload/" + params,file);
+    }
 }

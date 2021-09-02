@@ -5,7 +5,6 @@ import cn.cyberpeace.mp.devops.cluster.model.ContainerCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.ContainerCreateCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.service.ContainerService;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,10 +28,6 @@ public class ContainerServiceImpl extends BaseOpenStackServiceImpl implements Co
 
     @Override
     public void create(ContainerCreateCloudPlatformModel model) {
-        try {
-            super.sendPost(URL_VERSION + "/scenarios/container", JsonUtils.toUnderlineJSONString(model));
-        } catch (JsonProcessingException e) {
-            return;
-        }
+        super.sendPost(URL_VERSION + "/scenarios/container", JsonUtils.toUnderlineJSONString(model));
     }
 }

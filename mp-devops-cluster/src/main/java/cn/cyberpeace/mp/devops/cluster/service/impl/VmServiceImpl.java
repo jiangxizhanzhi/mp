@@ -5,7 +5,6 @@ import cn.cyberpeace.mp.devops.cluster.model.InstanceCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.VmCreateCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.service.VmService;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,11 +28,7 @@ public class VmServiceImpl extends BaseOpenStackServiceImpl implements VmService
 
     @Override
     public void create(VmCreateCloudPlatformModel vmCreateCloudPlatformModel) {
-        try {
-            super.sendPost(URL_VERSION + "/scenarios/vm", JsonUtils.toUnderlineJSONString(vmCreateCloudPlatformModel));
-        } catch (JsonProcessingException e) {
-            return;
-        }
+        super.sendPost(URL_VERSION + "/scenarios/vm", JsonUtils.toUnderlineJSONString(vmCreateCloudPlatformModel));
     }
 
 

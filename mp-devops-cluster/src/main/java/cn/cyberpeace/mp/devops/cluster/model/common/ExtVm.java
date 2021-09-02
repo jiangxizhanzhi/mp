@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.model.common;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,13 +12,29 @@ public class ExtVm {
 
     private String flavor;
 
+    /**
+     * 支持初始化
+     */
     private Boolean initSupport;
 
+    /**
+     * 支持快速创建
+     */
     private Boolean quickCreateSupport;
 
+    /**
+     * 快速创建参数
+     */
     private String quickCreateParams;
 
+    /**
+     * 接入方式
+     */
+    @ApiModelProperty(hidden = true)
     private String accessProtocols;
 
+    /**
+     * 额外信息
+     */
     private String extInfo;
 }

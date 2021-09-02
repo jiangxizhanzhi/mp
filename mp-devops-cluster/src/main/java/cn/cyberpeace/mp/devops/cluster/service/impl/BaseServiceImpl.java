@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.devops.cluster.model.BaseModel;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
@@ -16,6 +17,7 @@ import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
@@ -246,7 +248,37 @@ public class BaseServiceImpl {
     }
 
 
+    protected String sendFormDataPost(String url, File file){
+        try {
+            return HttpUtils.doFormDataPost(url,file);
+        } catch (Exception e) {
+            log.error("上传文件失败，失败信息：{}",e.getMessage());
+        }
+        return null;
+    }
+
+    protected <T extends BaseModel> T sendFormDataPost(String url, HttpEntity httpEntity ,Class<T> valueType){
+        T model = null;
+        String result = "";
+        try {
+            result = HttpUtils.doFormDataPost(url,httpEntity);
+            model = JsonUtils.toSnakeObject(result,valueType);
+        } catch (Exception e) {
+            log.error("上传文件失败，失败信息：{}",e);
+        }
+        return model;
+    }
 
 
-
+    protected <T extends BaseModel> T sendFormDataPut(String url, HttpEntity httpEntity ,Class<T> valueType){
+        T model = null;
+        String result = "";
+        try {
+            result = HttpUtils.doFormDataPut(url,httpEntity);
+            model = JsonUtils.toSnakeObject(result,valueType);
+        } catch (Exception e) {
+            log.error("上传文件失败，失败信息：{}",e);
+        }
+        return model;
+    }
 }

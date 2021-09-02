@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.base.util;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.http.Header;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -241,6 +242,26 @@ public class HttpUtils {
         entityBuilder.addBinaryBody("image", file);
 
         httpPost.setEntity(entityBuilder.build());
+        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(10000).setConnectTimeout(10000).build();
+        httpPost.setConfig(requestConfig);
+        HttpResponse response = client.execute(httpPost);
+        return EntityUtils.toString(response.getEntity(), "UTF-8");
+    }
+
+    public static String doFormDataPost(String url, HttpEntity entity) throws IOException {
+        HttpClient client = INSTANCE.httpClient;
+        HttpPost httpPost = new HttpPost(url);
+        httpPost.setEntity(entity);
+        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(10000).setConnectTimeout(10000).build();
+        httpPost.setConfig(requestConfig);
+        HttpResponse response = client.execute(httpPost);
+        return EntityUtils.toString(response.getEntity(), "UTF-8");
+    }
+
+    public static String doFormDataPut(String url, HttpEntity entity) throws IOException {
+        HttpClient client = INSTANCE.httpClient;
+        HttpPut httpPost = new HttpPut(url);
+        httpPost.setEntity(entity);
         RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(10000).setConnectTimeout(10000).build();
         httpPost.setConfig(requestConfig);
         HttpResponse response = client.execute(httpPost);

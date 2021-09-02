@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode(callSuper = true)
-public class TypeOfRoleCloudPlatformModel extends BaseCloudPlatformModel implements Serializable {
+public class TypeIdIntegerCloudPlatformModel extends BaseCloudPlatformModel implements Serializable {
 
     /**
      * 数据列表

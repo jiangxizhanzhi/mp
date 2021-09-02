@@ -2,9 +2,12 @@ package cn.cyberpeace.mp.devops.cluster.model;
 
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtDocker;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtNormal;
+import cn.cyberpeace.mp.devops.cluster.model.common.Resource;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -20,26 +23,6 @@ public class Installer extends BaseCloudPlatformModel{
      * UUID
      */
     private String uuid;
-
-    /**
-     * 创建时间
-     */
-    private String createdAt;
-
-    /**
-     * 更新时间
-     */
-    private String updatedAt;
-
-    /**
-     * 是否删除
-     */
-    private Boolean deleted;
-
-    /**
-     * 删除时间
-     */
-    private String deletedAt;
 
     /**
      * 名称
@@ -75,4 +58,9 @@ public class Installer extends BaseCloudPlatformModel{
      * 对应的windows服务扩展信息
      */
     private ExtNormal extNormal;
+
+    /**
+     * windows服务存放资源
+     */
+    private List<Resource> resourceList;
 }

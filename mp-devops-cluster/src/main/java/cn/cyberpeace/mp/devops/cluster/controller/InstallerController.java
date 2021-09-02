@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.InstallerConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InstallerConvertModel;
@@ -16,6 +18,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -79,7 +82,7 @@ public class InstallerController {
      */
     @ApiOperation("新增")
     @PostMapping("/add")
-    public Result<Boolean> add(@RequestBody InstallerRequest request){
+    public Result<Boolean> add(InstallerRequest request){
         InstallerConvertModel model = installerConverter.add(request);
         return new Result<>(model.isSuccess());
     }
@@ -89,8 +92,11 @@ public class InstallerController {
      */
     @ApiOperation("更新")
     @PutMapping("/update")
-    public Result<Boolean> update(@RequestBody InstallerRequest request){
-        InstallerConvertModel model = installerConverter.update(request);
+    public Result<Boolean> update(InstallerRequest request){
+        if (StringUtils.isBlank(request.getUuid())){
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+        InstallerConvertModel model = installerConverter.add(request);
         return new Result<>(model.isSuccess());
     }
 

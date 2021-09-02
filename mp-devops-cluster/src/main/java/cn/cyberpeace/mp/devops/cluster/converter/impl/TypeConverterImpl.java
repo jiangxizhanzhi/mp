@@ -1,10 +1,10 @@
 package cn.cyberpeace.mp.devops.cluster.converter.impl;
 
-import cn.cyberpeace.mp.devops.cluster.converter.TypeConvert;
+import cn.cyberpeace.mp.devops.cluster.converter.TypeConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.TypeCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.TypeInstallerPlatformAndImageTypeCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.TypeOfRoleCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.TypeIdStringCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.TypeIdIntegerCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.service.TypeService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,12 +16,12 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
-public class TypeConvertImpl implements TypeConvert {
+public class TypeConverterImpl implements TypeConverter {
 
     private TypeService typeService;
 
     @Autowired
-    public TypeConvertImpl(TypeService typeService) {
+    public TypeConverterImpl(TypeService typeService) {
         this.typeService = typeService;
     }
 
@@ -44,8 +44,8 @@ public class TypeConvertImpl implements TypeConvert {
     }
 
     @Override
-    public TypeAllConvertModel findAllRoleType() {
-        TypeOfRoleCloudPlatformModel list = typeService.findAllRoleType();
+    public TypeAllConvertModel findIdIntegerByType(String type) {
+        TypeIdIntegerCloudPlatformModel list = typeService.findIdIntegerByType(type);
         if (Objects.isNull(list) || CollectionUtils.isEmpty(list.getItems())){
             return null;
         }
@@ -53,12 +53,62 @@ public class TypeConvertImpl implements TypeConvert {
     }
 
     @Override
-    public TypeAllConvertModel findByType(String type) {
-        TypeInstallerPlatformAndImageTypeCloudPlatformModel list = typeService.findAllInstallerPlatformAndImageType(type);
+    public TypeAllConvertModel findIdStringByType(String type) {
+        TypeIdStringCloudPlatformModel list = typeService.findIdStringByType(type);
         if (Objects.isNull(list) || CollectionUtils.isEmpty(list.getItems())){
             return null;
         }
         return convertModel(list);
+    }
+
+    @Override
+    public TypeAllConvertModel findRoles() {
+        return this.findIdIntegerByType("role");
+    }
+
+    @Override
+    public TypeAllConvertModel findDeployType() {
+        return this.findIdIntegerByType("deploy_type");
+    }
+
+    @Override
+    public TypeAllConvertModel findImageType() {
+        return this.findIdStringByType("image_type");
+    }
+
+    @Override
+    public TypeAllConvertModel findLanguage() {
+        return this.findIdStringByType("language");
+    }
+
+    @Override
+    public TypeAllConvertModel findSystemArchitecure() {
+        return this.findIdStringByType("system_architecure");
+    }
+
+    @Override
+    public TypeAllConvertModel findDiskFormat() {
+        return this.findIdStringByType("disk_format");
+    }
+
+    @Override
+    public TypeAllConvertModel findAccessType() {
+        return this.findIdStringByType("access_type");
+    }
+
+    @Override
+    public TypeAllConvertModel findServiceCategories() {
+        return this.findIdStringByType("categories");
+    }
+
+    @Override
+    public TypeAllConvertModel findInstallerPlatforms() {
+        return this.findIdStringByType("installer_platforms");
+    }
+
+    @Override
+    public TypeAllConvertModel findServiceStartType() {
+        return this.findIdStringByType("type");
     }
 
     /**
@@ -66,11 +116,11 @@ public class TypeConvertImpl implements TypeConvert {
      * @param list
      * @return
      */
-    private TypeAllConvertModel convertModel(TypeInstallerPlatformAndImageTypeCloudPlatformModel list){
+    private TypeAllConvertModel convertModel(TypeIdStringCloudPlatformModel list){
         List<TypeIdStringConvertModel> modelList = list.getItems().stream()
                 .map(item -> new TypeIdStringConvertModel(item.getId(),item.getName())).collect(Collectors.toList());
         TypeAllConvertModel model =  new TypeAllConvertModel();
-        model.setInstallerPlatformAndImageTypeList(modelList);
+        model.setIdStringModelList(modelList);
         return model;
     }
 
@@ -79,11 +129,11 @@ public class TypeConvertImpl implements TypeConvert {
      * @param list
      * @return
      */
-    private TypeAllConvertModel convertModel(TypeOfRoleCloudPlatformModel list){
+    private TypeAllConvertModel convertModel(TypeIdIntegerCloudPlatformModel list){
         List<TypeIdIntegerConvertModel> modelList = list.getItems().stream()
                 .map(item -> new TypeIdIntegerConvertModel(item.getId(),item.getName())).collect(Collectors.toList());
         TypeAllConvertModel model =  new TypeAllConvertModel();
-        model.setRoleList(modelList);
+        model.setIdIntegerModelList(modelList);
         return model;
     }
 

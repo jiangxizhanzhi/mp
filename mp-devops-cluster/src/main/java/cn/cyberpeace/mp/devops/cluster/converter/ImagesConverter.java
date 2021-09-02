@@ -67,6 +67,19 @@ public interface ImagesConverter extends BaseConverter{
      */
     String upload(MultipartFile file);
 
+    /**
+     * 上传Logo
+     * @param file
+     * @return
+     */
+    String uploadLogo(MultipartFile file);
+
+    /**
+     * 上传Logo
+     * @param file
+     * @return
+     */
+    String uploadImage(ImagesUploadRequest request ,MultipartFile file);
 
     /**
      * 导出
@@ -78,12 +91,5 @@ public interface ImagesConverter extends BaseConverter{
      * @param uuid
      */
     void create(String uuid);
-
-
-    /**
-     * 仅支持快速创建的分页查询
-     * @param request
-     */
-    ImageConvertPageModel pageForQuickCreate(ImageQuickCreatePageRequest request);
 
 }
