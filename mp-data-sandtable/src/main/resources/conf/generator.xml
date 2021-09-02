@@ -22,7 +22,7 @@
 
         <!--生成实体类的位置以及包的名字-->
         <!--同样Mac用户：targetProject 为全路径（/Users/murasakiseifu/mybatisGenerator/src/main/java）-->
-        <javaModelGenerator targetPackage="cn.cyberpeace.mp.datasandtable.model" targetProject="src/main/java">
+        <javaModelGenerator targetPackage="cn.cyberpeace.mp.situationaware.model" targetProject="src/main/java">
             <!-- enableSubPackages:是否让schema作为包的后缀 -->
             <property name="enableSubPackages" value="true" />
             <!-- 从数据库返回的值被清理前后的空格 -->
@@ -38,7 +38,7 @@
 
         <!--生成Dao类存放位置,mapper接口生成的位置-->
         <!--同样Mac用户：targetProject 为全路径（/Users/murasakiseifu/mybatisGenerator/src/main/java）-->
-        <javaClientGenerator type="XMLMAPPER" targetPackage="cn.cyberpeace.mp.datasandtable.repository" targetProject="src/main/java">
+        <javaClientGenerator type="XMLMAPPER" targetPackage="cn.cyberpeace.mp.situationaware.repository" targetProject="src/main/java">
             <!-- enableSubPackages:是否让schema作为包的后缀 -->
             <property name="enableSubPackages" value="false"/>
         </javaClientGenerator>

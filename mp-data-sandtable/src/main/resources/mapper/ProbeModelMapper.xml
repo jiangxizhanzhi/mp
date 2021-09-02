@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="cn.cyberpeace.mp.datasandtable.repository.ProbeModelMapper">
-    <resultMap id="BaseResultMap" type="cn.cyberpeace.mp.datasandtable.model.ProbeModel">
+<mapper namespace="cn.cyberpeace.mp.situationaware.repository.ProbeModelMapper">
+    <resultMap id="BaseResultMap" type="cn.cyberpeace.mp.situationaware.model.ProbeModel">
         <id column="pk" jdbcType="INTEGER" property="pk"/>
         <result column="id" jdbcType="VARCHAR" property="id"/>
         <result column="probe_name" jdbcType="VARCHAR" property="probeName"/>
@@ -14,7 +14,7 @@
         <result column="del_flag" jdbcType="INTEGER" property="delFlag"/>
         <result column="command_interval" jdbcType="VARCHAR" property="commandInterval"/>
     </resultMap>
-    <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="cn.cyberpeace.mp.datasandtable.model.ProbeModel">
+    <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="cn.cyberpeace.mp.situationaware.model.ProbeModel">
         <result column="script_content" jdbcType="LONGVARBINARY" property="scriptContent"/>
     </resultMap>
     <sql id="Base_Column_List">
@@ -37,7 +37,7 @@
         from mp_situation_probe
         where pk = #{pk,jdbcType=INTEGER}
     </delete>
-    <insert id="insert" parameterType="cn.cyberpeace.mp.datasandtable.model.ProbeModel">
+    <insert id="insert" parameterType="cn.cyberpeace.mp.situationaware.model.ProbeModel">
         insert into mp_situation_probe (pk, id, probe_name,
                                         des, OS_type, probe_category,
                                         script_type, create_time, update_time,
@@ -69,7 +69,7 @@
         order by update_time desc limit #{offset}, #{probeSearchRequest.pageSize}
     </select>
 
-    <select id="countQuery" parameterType="cn.cyberpeace.mp.datasandtable.model.ProbeSearchRequest"
+    <select id="countQuery" parameterType="cn.cyberpeace.mp.situationaware.model.ProbeSearchRequest"
             resultType="java.lang.Integer">
         select count(*)
         from mp_situation_probe
@@ -95,7 +95,7 @@
         </if>
     </select>
 
-    <update id="updateByProbeId" parameterType="cn.cyberpeace.mp.datasandtable.model.ProbeModel">
+    <update id="updateByProbeId" parameterType="cn.cyberpeace.mp.situationaware.model.ProbeModel">
         update mp_situation_probe
         set probe_name     = #{probeName,jdbcType=VARCHAR},
             des            = #{des,jdbcType=VARCHAR},

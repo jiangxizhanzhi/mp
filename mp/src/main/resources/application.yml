@@ -52,7 +52,7 @@ mp:
     cp-url: http://10.100.7.5:11111 #云平台地址
     cr-url: http://10.100.2.21 #
     hostname: controller  #主机名称
-  datasandtable:
+  situationaware:
     group-url: http://10.100.14.107:5079/v1/scenes
     moloch:
       username: api
