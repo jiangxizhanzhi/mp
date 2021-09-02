@@ -3,7 +3,7 @@
 <mapper namespace="cn.cyberpeace.mp.flow.repository.FlowInfoMapper">
 
     <select id="selectByFlowIds" resultType="cn.cyberpeace.mp.flow.model.FlowInfoModel">
-        select f.* from mp_flow_info f
+        select f.* from mp_flow_flow_info f
         <where>
             1 = 1
             <if test="flowIds != null and flowIds.size() > 0">
@@ -12,6 +12,13 @@
                     #{id}
                 </foreach>
             </if>
+        </where>
+    </select>
+
+    <select id="selectByTitle" resultType="cn.cyberpeace.mp.flow.model.FlowInfoModel">
+        select f.* from mp_flow_flow_info f
+        <where>
+            f.title = #{title}
         </where>
     </select>
 </mapper>

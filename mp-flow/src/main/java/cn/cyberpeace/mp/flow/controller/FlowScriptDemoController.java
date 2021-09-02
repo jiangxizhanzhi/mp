@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @Date：2021/8/31 17:17
  */
 @Slf4j
-@Api(tags = "流量模板接口")
+@Api(tags = "流量脚本模板接口")
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/scriptdemo")
 public class FlowScriptDemoController extends BaseModelController<FlowScriptDemoModel, QueryParams, FlowScriptDemoService> {

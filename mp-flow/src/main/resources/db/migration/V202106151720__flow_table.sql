@@ -7,6 +7,7 @@ CREATE TABLE `mp_flow_flow_info` (
          `resource_type` tinyint(2) NOT NULL COMMENT '资源类型：0 pcap包，1 脚本',
          `run_cmd` varchar(128) NOT NULL COMMENT '攻击脚本运行命令',
          `category` tinyint(4) NOT NULL COMMENT '分类   0:"测试测量",1:"应用升级",2:"网络管理",4:"金融",5:"邮件",6:"安全工作",7:"分布式计算",9:"移动设备",10:"即时通讯",11:"SCADA",12:"机动",13:"远程控制",14:"音视频",15:"企业应用",16:"社会网络搜索",17:"文件传输",18:"数据库",19:"身份认证",20:"ERP",21:"存储",22:"游戏",23:"安全数据传输"',
+         `file_name` varchar(128) NOT NULL COMMENT '文件名称',
          `pcap_file` varchar(255) NOT NULL COMMENT 'pcap文件地址',
          `script_file` varchar(255) NOT NULL COMMENT '脚本文件地址',
          `create_time` datetime NOT NULL COMMENT '创建时间',
@@ -91,6 +92,7 @@ CREATE TABLE `mp_flow_collection_rel` (
           `create_time` datetime NOT NULL COMMENT '创建时间',
           `update_time` datetime NOT NULL COMMENT '更新时间',
           PRIMARY KEY (`pk`),
+          UNIQUE KEY `unique_index` (`collection_id`,`flow_id`) USING HASH,
           KEY `id_index` (`id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='流量关联集合表';
 

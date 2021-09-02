@@ -41,20 +41,20 @@ public class FlowCollectionModel extends BaseModel {
      */
     @ApiModelProperty(value = "流量集合类型")
     @NotBlank(message = "category can not be empty")
-    private int category;
+    private Integer category;
 
     /**
      * 背景流量数量
      */
     @ApiModelProperty(value = "背景流量数量")
     @DefaultInt
-    private int backgroundCount;
+    private Integer backgroundCount;
 
     /**
      * 攻击流量数量
      */
     @ApiModelProperty(value = "攻击流量数量")
     @DefaultInt
-    private int attackCount;
+    private Integer attackCount;
 
 }

@@ -22,4 +22,11 @@ public interface FlowInfoMapper extends BaseModelMapper<FlowInfoModel> {
      */
     List<FlowPortModel> selectByFlowIds(@Param("flowIds") List<String> flowIds);
 
+    /**
+     * 根据名称查询
+     * @param title
+     * @return
+     */
+    FlowInfoModel selectByTitle(@Param("title") String title);
+
 }

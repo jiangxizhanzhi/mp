@@ -8,7 +8,7 @@ import cn.cyberpeace.mp.flow.model.FlowCollectionModel;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
 import cn.cyberpeace.mp.flow.request.AddFlowCollectionRelRequest;
 import cn.cyberpeace.mp.flow.request.DelFlowCollectionRelRequest;
-import cn.cyberpeace.mp.flow.request.FlowCollectionQueryParams;
+import cn.cyberpeace.mp.flow.request.queryparam.FlowCollectionQueryParams;
 import cn.cyberpeace.mp.flow.service.FlowCollectionService;
 import cn.cyberpeace.mp.flow.service.impl.FlowCollectionServiceImpl;
 import io.swagger.annotations.Api;
