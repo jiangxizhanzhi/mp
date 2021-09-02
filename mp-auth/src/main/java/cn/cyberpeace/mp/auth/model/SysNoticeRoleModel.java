@@ -10,7 +10,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 公告-角色表
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
  */
 @Data
 @AllArgsConstructor

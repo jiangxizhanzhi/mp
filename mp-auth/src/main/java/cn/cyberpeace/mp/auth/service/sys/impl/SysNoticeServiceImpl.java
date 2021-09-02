@@ -27,6 +27,7 @@ import cn.cyberpeace.mp.auth.service.fields.SysNoticeFields;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ObjResult;
@@ -50,6 +51,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @Service
 @Slf4j
 public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, SysNoticeMapper, SysNoticeFields, QueryParams>
@@ -82,10 +88,46 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         setModelFields(modelFields);
     }
 
-    public void unpush(String noticeId) {
+
+    @Override
+    public int unReadCount() {
+        SysNoticePageRequest pageRequest = new SysNoticePageRequest();
+        pageRequest.ensure();
+        PageInfo pageInfo = currentUserPage(pageRequest);
+        int noticeCnt = (int) pageInfo.getTotal();
+        int readedOrUnpushCnt = noticeReadMapper.countIsReadedOrIsUnPush();
+        int unreadCnt = noticeCnt - readedOrUnpushCnt;
+        return unreadCnt <= 0 ? 0 : unreadCnt;
+    }
+
+    @Override
+    public void unpush(List<String> noticeIds) {
+        UserModel userModel = UserUtils.getLoginUser();
+        Assert.notNull(userModel, "未获取到当前登录用户信息");
+
+        for (String noticeId : noticeIds) {
+//            SysNoticeModel noticeModel = getModelMapper().get(noticeId);
+//            Assert.notNull(noticeModel, "公告不存在！ID:{}", noticeId);
+
+            SysNoticeReadModel noticeReadModel = noticeReadMapper.selectByUserIdAndNoticeId(userModel.getId(), noticeId);
+
+            if (Objects.isNull(noticeReadModel)) {
+                // 创建一个
+                SysNoticeReadModel noticeReadModelNew = SysNoticeReadModel.builder().noticeId(noticeId).user(userModel.getId()).isReaded(0).readCount(0).isNeedPush(0).build();
+                noticeReadMapper.create(noticeReadModelNew);
+            } else {
+                // increase read cound
+                SysNoticeReadModel noticeReadModelUpdate = new SysNoticeReadModel();
+                noticeReadModelUpdate.setId(noticeReadModel.getId());
+                noticeReadModelUpdate.setIsNeedPush(0);
+                noticeReadMapper.update(noticeReadModelUpdate);
+            }
+        }
 
     }
 
+
+    @Override
     public void read(String noticeId) {
         UserModel userModel = UserUtils.getLoginUser();
         Assert.notNull(userModel, "未获取到当前登录用户信息");
@@ -97,15 +139,13 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
         if (Objects.isNull(noticeReadModel)) {
             // 创建一个
-            SysNoticeReadModel noticeReadModelNew = SysNoticeReadModel.builder().noticeId(noticeId).user(userModel.getId()).build();
+            SysNoticeReadModel noticeReadModelNew = SysNoticeReadModel.builder().noticeId(noticeId).user(userModel.getId()).isReaded(1).readCount(1).isNeedPush(1).build();
             noticeReadMapper.create(noticeReadModelNew);
         } else {
-            // add read cound
-            SysNoticeReadModel noticeReadModelUpdate = new SysNoticeReadModel();
-            noticeReadModelUpdate.setNoticeId(noticeReadModel.getNoticeId());
-            noticeReadModelUpdate.setReadCount(noticeReadModel.getReadCount() + 1);
-            noticeReadMapper.update(noticeReadModelUpdate);
+            // increase read cound
+            noticeReadMapper.increaseReadCount(noticeReadModel.getId());
         }
+
     }
 
     @Override
@@ -136,7 +176,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         noticeOrgMapper.bulkCreate(noticeGroupModelList);
 
         // 角色，如果是公开的，则忽略角色字段内的值
-        if (sysNoticeRequest.getIsPublic().equals(SysNoticeModel.NOTICE_NOT_PUBLIC)) {
+        if (Objects.nonNull(sysNoticeRequest.getIsPublic()) && sysNoticeRequest.getIsPublic().equals(SysNoticeModel.NOTICE_NOT_PUBLIC)) {
             List<SysNoticeRoleModel> noticeRoleModelList = new ArrayList<>();
             if (CollectionUtil.isNotEmpty(sysNoticeRequest.getRoleIds())) {
                 sysNoticeRequest.getRoleIds().forEach(roleId -> {
@@ -156,14 +196,15 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public SysNoticeModel modify(SysNoticeRequest sysNoticeRequest) {
+    public SysNoticeModel modify(String id, SysNoticeRequest sysNoticeRequest) {
         Assert.notNull(sysNoticeRequest, "公告更新请求不能为空！");
 
-        ObjServiceResult<SysNoticeModel> noticeModelResult = get(sysNoticeRequest.getId());
-        ResultUtils.throwExceptionIfError(noticeModelResult, "ID:" + sysNoticeRequest.getId() + "对应的公告信息不存在！");
+        ObjServiceResult<SysNoticeModel> noticeModelResult = get(id);
+        ResultUtils.throwExceptionIfError(noticeModelResult, "ID:" + id + "对应的公告信息不存在！");
 
         SysNoticeModel noticeModel = new SysNoticeModel();
         BeanUtils.copyProperties(sysNoticeRequest, noticeModel);
+        noticeModel.setId(id);
 
         ObjServiceResult<SysNoticeModel> result = update(noticeModel);
         ResultUtils.throwExceptionIfError(result, "更新公告失败！");
@@ -187,7 +228,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         noticeOrgMapper.bulkCreate(noticeGroupModelList);
 
         // 角色，如果是公开的，则忽略角色字段内的值
-        if (sysNoticeRequest.getIsPublic().equals(SysNoticeModel.NOTICE_NOT_PUBLIC)) {
+        if (Objects.nonNull(sysNoticeRequest.getIsPublic()) && sysNoticeRequest.getIsPublic().equals(SysNoticeModel.NOTICE_NOT_PUBLIC)) {
             List<SysNoticeRoleModel> noticeRoleModelList = new ArrayList<>();
             if (CollectionUtil.isNotEmpty(sysNoticeRequest.getRoleIds())) {
                 sysNoticeRequest.getRoleIds().forEach(roleId -> {
@@ -231,7 +272,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
         if (isAdmin) {
             PageHelper.startPage(req.getPage(), req.getPageSize());
-            List<SysNoticeModel> notices = getModelMapper().listNotices(null, null, null, null,null, null);
+            List<SysNoticeModel> notices = getModelMapper().listCurrentUserNotices(null, null, null, null,null, null, userModel.getId());
             PageInfo pageInfo = new PageInfo(notices);
             convertPageInfo(pageInfo);
             return pageInfo;
@@ -252,7 +293,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         });
 
         PageHelper.startPage(req.getPage(), req.getPageSize());
-        List<SysNoticeModel> notices = getModelMapper().listNotices(null, null, allOrgIds, allRoleIds,null, null);
+        List<SysNoticeModel> notices = getModelMapper().listCurrentUserNotices(null, null, allOrgIds, allRoleIds,null, null, userModel.getId());
         PageInfo pageInfo = new PageInfo(notices);
 
         convertPageInfo(pageInfo);
@@ -270,12 +311,12 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
             noticeOrgMapper.deleteByNoticeIds(CollectionUtil.toList(ids));
             noticeRoleMapper.deleteByNoticeIds(CollectionUtil.toList(ids));
         }
-        // todo 群组
 
         return result;
     }
 
 
+    @Override
     public SysNoticeDto noticeModel2NoticeDto(SysNoticeModel noticeModel) {
         if (Objects.isNull(noticeModel)) {
             return null;

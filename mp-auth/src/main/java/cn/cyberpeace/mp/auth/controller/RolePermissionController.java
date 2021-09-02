@@ -23,6 +23,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+/**
+ * @Description: 角色权限管理接口
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @Api(value = "角色-权限管理接口", tags = "AUTH-角色-权限管理接口")
 @Slf4j
 @RestController
@@ -36,17 +41,21 @@ public class RolePermissionController extends BaseModelController<RolePermission
 
     @ApiOperation(value = "查询角色权限", notes = "")
     @GetMapping("/byrole")
-    public ServiceResult getTargetsByRole(@RequestParam String roleId) {
+    public ServiceResult<List<TargetModel>> getTargetsByRole(@RequestParam String roleId) {
         List<TargetModel> targets = getModelService().listTargetsByRoleId(roleId);
 
-        return ResultUtils.commonResult(true, targets);
+        return ServiceResult.success(targets);
     }
 
     @ApiOperation(value = "绑定角色-权限关系，注意，如果targetIds为空，表示删除角色所有权限！", notes = "")
     @PostMapping("/bind")
-    public ServiceResult bindOrgPermission(@RequestBody @Validated BindRoleTargetsRequest bindRoleTargetsReq) {
+    public ServiceResult bindRolePermission(@RequestBody @Validated BindRoleTargetsRequest bindRoleTargetsReq) {
         boolean success = getModelService().bindRoleTargets(bindRoleTargetsReq.getRoleId(), bindRoleTargetsReq.getTargetIds(), true);
-        return ResultUtils.commonResult(success, null);
+        if (success) {
+            return ServiceResult.successful();
+        } else {
+            return ServiceResult.fail("绑定角色权限失败!");
+        }
     }
 
 

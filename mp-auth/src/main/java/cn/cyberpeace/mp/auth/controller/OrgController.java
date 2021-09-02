@@ -30,6 +30,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+/**
+ * @Description: 组织管理接口
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @Api(value = "组织管理接口", tags = "AUTH-组织管理接口")
 @Slf4j
 @RestController

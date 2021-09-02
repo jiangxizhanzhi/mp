@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
- * Auth模块异常统一处理
+ * @Description: Auth模块异常统一处理
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
  */
 @ControllerAdvice(basePackages = "cn.cyberpeace.mp.auth")
 @Slf4j

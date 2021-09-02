@@ -14,7 +14,9 @@ import lombok.NoArgsConstructor;
 import javax.validation.constraints.NotBlank;
 
 /**
- * 公告表
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
  */
 @Data
 @AllArgsConstructor

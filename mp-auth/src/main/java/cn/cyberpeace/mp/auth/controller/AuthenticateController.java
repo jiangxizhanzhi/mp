@@ -3,7 +3,9 @@ package cn.cyberpeace.mp.auth.controller;
 
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
+import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.auth.util.UserUtils;
@@ -13,17 +15,25 @@ import com.auth0.jwt.exceptions.TokenExpiredException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * @Description: 认证接口
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @Api(value = "认证相关接口", tags = "AUTH-认证相关接口")
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_UNAUTH_API_PATH + "/authenticate")
 public class AuthenticateController {
 
+    @Autowired
+    private UserService userService;
 
     @ApiOperation(value = "检查是否是有效token", notes = "")
     @GetMapping
@@ -42,7 +52,10 @@ public class AuthenticateController {
         }
 
         UserModel userModel = UserUtils.getUser(user.getId());
-        return ResultUtils.commonResult(true, userModel);
+
+        UserDto userDto = userService.userModel2UserDtoWithoutOrg(userModel);
+
+        return ServiceResult.success(userDto);
 
     }
 

@@ -26,6 +26,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @Service
 @Slf4j
 public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, SysConfigMapper, SysConfigFields, QueryParams>
@@ -137,7 +142,9 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
             log.info("no need to upload default avatar!");
             return;
         } else {
-            avatarService.initDefaultAvatars();
+            log.info("uploading default avatar manually!");
+            List<AvatarModel> modelList = avatarService.uploadDefaultAvatars();
+            avatarService.clearAndReUploadAvatars(modelList);
         }
     }
 }

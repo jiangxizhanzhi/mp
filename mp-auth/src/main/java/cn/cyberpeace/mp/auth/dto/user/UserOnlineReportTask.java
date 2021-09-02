@@ -5,6 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
 
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @Slf4j
 public class UserOnlineReportTask implements Runnable {
 
