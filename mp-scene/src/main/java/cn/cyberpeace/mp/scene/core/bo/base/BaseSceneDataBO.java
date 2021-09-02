@@ -28,7 +28,10 @@ public abstract class BaseSceneDataBO<
     /**
      * pluginId: pluginData
      */
-    @ApiModelProperty(value = "插件数据")
+    @ApiModelProperty(value = "插件数据(字典: key-插件代号, value-插件数据[不同插件代号对应的数据模型不一样]), "
+            + "cpcloud(云平台): CloudPluginSceneConfigDataBO/CloudPluginSceneDataBO, "
+            + "cpcollection(采集): CollectionPluginSceneConfigDataBO/CollectionPluginSceneDataBO, "
+            + "cpflow(流量): FlowPluginSceneConfigDataBO/FlowPluginSceneDataBO")
     private Map<String, ScenePluginDataBO> plugins;
 
     public T1 export() {
