@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.auth.service.sys;
 
-import cn.cyberpeace.mp.auth.config.AuthConfig;
+import cn.cyberpeace.mp.auth.config.ActivationConfig;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import com.sun.jna.Library;
 import com.sun.jna.Native;
@@ -25,7 +25,7 @@ public class LicenseService {
     public final String ACTIVATION_LICENSE = "license.so";
 
     @Autowired
-    private AuthConfig authConfig;
+    private ActivationConfig activationConfig;
 
     public interface Awesome extends Library {
 
@@ -69,7 +69,7 @@ public class LicenseService {
         code.p = verifyCode;
         code.n = code.p.length();
 
-        Awesome INSTANCE = (Awesome) Native.loadLibrary(authConfig.getActivationDir() + File.separator + "license.so", Awesome.class);
+        Awesome INSTANCE = (Awesome) Native.loadLibrary(activationConfig.getLicenseDir() + File.separator + "license.so", Awesome.class);
         int ret = INSTANCE.Verify(str, code);
 
         //  -1	json传入错误

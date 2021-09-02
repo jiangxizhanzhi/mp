@@ -359,6 +359,10 @@ INSERT INTO mp_auth_user (id, tenant, identifier, username, password, token_secr
 -- 默认管理员角色
 INSERT INTO mp_auth_role (id, tenant, org, identifier, name, description, create_time, update_time) VALUES ('5827ff7847504ffd806e0a85c417228d', 'default', 'default', 'ADMIN', '管理员', '管理员角色', '2021-06-23 06:20:05.000000', '2021-07-08 20:59:14.037209');
 INSERT INTO mp_auth_role (id, tenant, org, identifier, name, description, create_time, update_time) VALUES ('e12bb08a9bc545bbba46a2fb3c92533a', 'default', 'default', 'SUPERUSER', '超级用户', '超级用户角色', '2021-06-23 06:20:05.000000', '2021-07-08 20:59:14.037209');
+-- 特定需求角色？
+INSERT INTO mp_auth_role (id, tenant, org, identifier, name, description, create_time, update_time) VALUES ('7454c07d331841f4a58b17e4fb933b94', 'default', 'default', 'TEACHER', '教员', '教员角色', '2021-06-23 06:20:05.000000', '2021-07-08 20:59:14.037209');
+INSERT INTO mp_auth_role (id, tenant, org, identifier, name, description, create_time, update_time) VALUES ('1e9748bd16c4406f8a5790b645b6c5d1', 'default', 'default', 'STUDENT', '学员', '学员角色', '2021-06-23 06:20:05.000000', '2021-07-08 20:59:14.037209');
+
 
 -- 用户-角色关系
 INSERT INTO mp_auth_user_role (id, tenant, user, role, create_time, update_time) VALUES ('791088e33dd44de3899f3c105597c354', 'default', '3f655d87112f4ae094bbaf70830e20aa', '5827ff7847504ffd806e0a85c417228d', '2021-07-08 20:16:47.896726', '2021-07-08 20:16:47.896733');
@@ -380,13 +384,13 @@ INSERT INTO mp_auth_tenant (id, identifier, name, create_time, update_time) VALU
 INSERT INTO mp_sys_config (pk, id, tenant, key_name, value, create_time, update_time) VALUES (1, 'ec8bda8f239d4967b9ace3d425c829fb', 'default', 'system_name', '浙江能源', '2021-07-05 11:41:29.435932', '2021-07-05 11:41:29.435944');
 INSERT INTO mp_sys_config (pk, id, tenant, key_name, value, create_time, update_time) VALUES (2, '4a3d2ecc528e4b77b3d518a81bd01335', 'default', 'copyright', '@2021-2023，南京赛宁信息技术有限公司，版权所有', '2021-07-05 11:41:29.436008', '2021-07-05 11:41:29.436010');
 INSERT INTO mp_sys_config (pk, id, tenant, key_name, value, create_time, update_time) VALUES (3, 'bbd330a0fa7646fc937c8a875996ee8c', 'default', 'env_per_person', '12', '2021-07-05 11:41:29.436067', '2021-07-05 11:41:29.436070');
-INSERT INTO mp_sys_config (pk, id, tenant, key_name, value, create_time, update_time) VALUES (4, '9efaf1686331402f814e266f740cba74', 'default', 'public_register', '3', '2021-07-05 11:41:29.436128', '2021-07-07 17:33:35.000000');
+INSERT INTO mp_sys_config (pk, id, tenant, key_name, value, create_time, update_time) VALUES (4, '9efaf1686331402f814e266f740cba74', 'default', 'public_register', '0', '2021-07-05 11:41:29.436128', '2021-07-07 17:33:35.000000');
 INSERT INTO mp_sys_config (pk, id, tenant, key_name, value, create_time, update_time) VALUES (5, 'b64cfb718fe64d7797d361aa8f806743', 'default', 'user_audit', '1', '2021-07-05 11:41:29.436235', '2021-07-14 15:13:46.000000');
 INSERT INTO mp_sys_config (pk, id, tenant, key_name, value, create_time, update_time) VALUES (6, '3c20e18b430c4387aa3ac98dd0bebbfe', 'default', 'flag_length', '8', '2021-07-05 11:41:29.436292', '2021-07-05 11:41:29.436295');
 INSERT INTO mp_sys_config (pk, id, tenant, key_name, value, create_time, update_time) VALUES (7, 'ecf0293f69d84dbdb430ebf96e323404', 'default', 'flag_prefix', '12345', '2021-07-05 11:41:29.436337', '2021-07-05 11:41:29.436339');
 INSERT INTO mp_sys_config (pk, id, tenant, key_name, value, create_time, update_time) VALUES (8, '308666a1b1614a0bae80f838f35fff97', 'default', 'vlan_bucket', '100-200', '2021-07-05 11:41:29.436392', '2021-07-14 15:22:20.320849');
-
-
+INSERT INTO mp_sys_config (pk, id, tenant, key_name, value, create_time, update_time) VALUES (9, 'x23fasdbda1b161bae80f833ac98dd0b', 'default', 'logo', '', '2021-07-05 11:41:29', '2021-07-14 15:22:20');
+INSERT INTO mp_sys_config (pk, id, tenant, key_name, value, create_time, update_time) VALUES (10, 'q03a9asdbd0f833ac98dd0ba1b161ba8', 'default', 'vpn_packages', '', '2021-07-05 11:41:29.000000', '2021-07-14 15:22:20.000000');
 
 -- 菜单
 INSERT INTO mp_auth_target (pk, id, parent, identifier, tenant, name, path, type, create_time, update_time) VALUES (1, 'course-folder', 'front_all', 'course-folder', 'default', '课程训练', '前台/课程训练', 1, '2021-08-03 16:58:48.428371000', '2021-08-03 16:58:48.428421000');
