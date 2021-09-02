@@ -4,6 +4,12 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
+
+/**
+  *@Desciption
+  *@Author zhangjin
+  *@Date 9/2/21 11:15 上午
+**/
 @Data
 @Builder
 @AllArgsConstructor

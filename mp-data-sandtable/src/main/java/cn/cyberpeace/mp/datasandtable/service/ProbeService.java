@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.util.TextUtils;
 import cn.cyberpeace.mp.datasandtable.model.ProbeModel;
 import cn.cyberpeace.mp.datasandtable.model.ProbeParamModel;
+import cn.cyberpeace.mp.datasandtable.model.ProbeParamsRequest;
 import cn.cyberpeace.mp.datasandtable.model.ProbeParamsResult;
 import cn.cyberpeace.mp.datasandtable.model.ProbeRequest;
 import cn.cyberpeace.mp.datasandtable.model.ProbeResult;
@@ -50,7 +51,7 @@ public class ProbeService {
         probeModel.setCreateTime(new Date());
         probeModel.setUpdateTime(new Date());
         probeModel.setId(TextUtils.uuid());
-        probeModel.setScriptContent(probeRequest.getScriptContent().getBytes(StandardCharsets.UTF_8));
+        probeModel.setScriptContent(buildScriptContent(probeRequest).getBytes(StandardCharsets.UTF_8));
         probeModel.setOsType(probeRequest.getOsType().getTypeVal());
         probeModel.setScriptType(probeRequest.getScriptType().getTypeVal());
         probeModelMapper.insert(probeModel);
@@ -115,7 +116,7 @@ public class ProbeService {
         BeanUtils.copyProperties(probeRequest, probeModel);
         probeModel.setUpdateTime(new Date());
         probeModel.setId(probeRequest.getProbeId());
-        probeModel.setScriptContent(probeRequest.getScriptContent().getBytes(StandardCharsets.UTF_8));
+        probeModel.setScriptContent(buildScriptContent(probeRequest).getBytes(StandardCharsets.UTF_8));
         probeModel.setOsType(probeRequest.getOsType().getTypeVal());
         probeModel.setScriptType(probeRequest.getScriptType().getTypeVal());
         var rows = probeModelMapper.updateByProbeId(probeModel);
@@ -138,5 +139,18 @@ public class ProbeService {
                 return probeParamModel;
             })).collect(Collectors.toList());
         probeParamModelMapper.batchInsert(probeParamModels);
+    }
+
+    /**
+     * 替换参数
+     * @param probeRequest probeRequest
+     * @return 脚本内容
+     */
+    private String buildScriptContent(ProbeRequest probeRequest) {
+        var scriptContent =probeRequest.getScriptContent();
+        for (ProbeParamsRequest param : probeRequest.getProbeParamsRequestList()) {
+            scriptContent = scriptContent.replace("$" + param.getParamName() + "$", param.getDefaultVal());
+        }
+        return scriptContent;
     }
 }
