@@ -135,7 +135,7 @@ public class UserModel extends BaseModel implements Serializable {
 
 
     @Builder
-    public UserModel(String id, LocalDateTime createTime, LocalDateTime updateTime, String tenant, String identifier, String username, String password, String tokenSecret, String name, String nickname, String avatar, LocalDate birthday, String email, String mobile, String idCard, String address, Integer initCheck, String description, Integer isEnabled, Integer isAudited, LocalDateTime dateJoined, LocalDateTime expiredTime, LocalDateTime lastLogin) {
+    public UserModel(String id, LocalDateTime createTime, LocalDateTime updateTime, String tenant, String identifier, String username, String password, String tokenSecret, String name, String nickname, String avatar, LocalDate birthday, String email, String mobile, String idCard, String address, Integer initCheck, String description, Integer isEnabled, Integer isAudited, LocalDateTime dateJoined, LocalDateTime expiredTime, LocalDateTime lastLogin, String res) {
         super(id, createTime, updateTime);
         this.tenant = tenant;
         this.identifier = identifier;
@@ -157,6 +157,7 @@ public class UserModel extends BaseModel implements Serializable {
         this.dateJoined = dateJoined;
         this.expiredTime = expiredTime;
         this.lastLogin = lastLogin;
+        this.res = res;
     }
 
     public static class Status {
