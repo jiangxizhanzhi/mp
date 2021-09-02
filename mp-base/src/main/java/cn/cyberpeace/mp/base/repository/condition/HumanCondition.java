@@ -1089,7 +1089,11 @@ public class HumanCondition {
          * humanCondition.filterOrStart()
          *               .orEqual(Model::getId, 1)
          *               .orEqual(Model::getId, 2)
-         *               .conditionAndStart().andEqual(Model::getId, 3).andEqual(Model::getId, 4).andEqual(Model::getId, 5).conditionAndEnd()
+         *               .orAndStart()
+         *                  .andEqual(Model::getId, 3)
+         *                  .andEqual(Model::getId, 4)
+         *                  .andEqual(Model::getId, 5)
+         *               .orAndEnd()
          *               .filterOrEnd()
          * @param
          * @return AndConditionProxy
@@ -1147,9 +1151,17 @@ public class HumanCondition {
                 return this;
             }
 
+            public <T> AndConditionProxy andIn(SerializableFunction<T> fieldGetter, Object[] fieldValue) {
+                return andIn(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+            }
+
             public AndConditionProxy andNotIn(String fieldName, Object[] fieldValue) {
                 this.andCondition.addCondition(fieldName, Connector.NOT_IN, fieldValue);
                 return this;
+            }
+
+            public <T> AndConditionProxy andNotIn(SerializableFunction<T> fieldGetter, Object[] fieldValue) {
+                return andNotIn(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
             }
 
             public AndConditionProxy andEqual(String fieldName, Object fieldValue) {
@@ -1157,9 +1169,17 @@ public class HumanCondition {
                 return this;
             }
 
+            public <T> AndConditionProxy andEqual(SerializableFunction<T> fieldGetter, Object fieldValue) {
+                return andEqual(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+            }
+
             public AndConditionProxy andNotEqual(String fieldName, Object fieldValue) {
                 this.andCondition.addCondition(fieldName, Connector.NOT_EQUAL, fieldValue);
                 return this;
+            }
+
+            public <T> AndConditionProxy andNotEqual(SerializableFunction<T> fieldGetter, Object fieldValue) {
+                return andNotEqual(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
             }
 
             public AndConditionProxy andGreaterThan(String fieldName, Object fieldValue) {
@@ -1167,9 +1187,17 @@ public class HumanCondition {
                 return this;
             }
 
+            public <T> AndConditionProxy andGreaterThan(SerializableFunction<T> fieldGetter, Object fieldValue) {
+                return andGreaterThan(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+            }
+
             public AndConditionProxy andGreaterThanOrEqual(String fieldName, Object fieldValue) {
                 this.andCondition.addCondition(fieldName, Connector.GREATER_THAN_OR_EQUAL, fieldValue);
                 return this;
+            }
+
+            public <T> AndConditionProxy andGreaterThanOrEqual(SerializableFunction<T> fieldGetter, Object fieldValue) {
+                return andGreaterThanOrEqual(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
             }
 
             public AndConditionProxy andLessThan(String fieldName, Object fieldValue) {
@@ -1177,9 +1205,17 @@ public class HumanCondition {
                 return this;
             }
 
+            public <T> AndConditionProxy andLessThan(SerializableFunction<T> fieldGetter, Object fieldValue) {
+                return andLessThan(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+            }
+
             public AndConditionProxy andLessThanOrEqual(String fieldName, Object fieldValue) {
                 this.andCondition.addCondition(fieldName, Connector.LESS_THAN_OR_EQUAL, fieldValue);
                 return this;
+            }
+
+            public <T> AndConditionProxy andLessThanOrEqual(SerializableFunction<T> fieldGetter, Object fieldValue) {
+                return andLessThanOrEqual(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
             }
 
             public AndConditionProxy andContains(String fieldName, Object fieldValue) {
@@ -1187,9 +1223,17 @@ public class HumanCondition {
                 return this;
             }
 
+            public <T> AndConditionProxy andContains(SerializableFunction<T> fieldGetter, Object fieldValue) {
+                return andContains(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+            }
+
             public AndConditionProxy andIContains(String fieldName, Object fieldValue) {
                 this.andCondition.addCondition(fieldName, Connector.I_CONTAINS, fieldValue);
                 return this;
+            }
+
+            public <T> AndConditionProxy andIContains(SerializableFunction<T> fieldGetter, Object fieldValue) {
+                return andIContains(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
             }
 
             public AndConditionProxy andStartsWith(String fieldName, Object fieldValue) {
@@ -1197,9 +1241,18 @@ public class HumanCondition {
                 return this;
             }
 
+            public <T> AndConditionProxy andStartsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
+                return andStartsWith(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+            }
+
+
             public AndConditionProxy andIStartsWith(String fieldName, Object fieldValue) {
                 this.andCondition.addCondition(fieldName, Connector.I_STARTS_WITH, fieldValue);
                 return this;
+            }
+
+            public <T> AndConditionProxy andIStartsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
+                return andIStartsWith(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
             }
 
             public AndConditionProxy andEndsWith(String fieldName, Object fieldValue) {
@@ -1207,9 +1260,17 @@ public class HumanCondition {
                 return this;
             }
 
+            public <T> AndConditionProxy andEndsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
+                return andEndsWith(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+            }
+
             public AndConditionProxy andIEndsWith(String fieldName, Object fieldValue) {
                 this.andCondition.addCondition(fieldName, Connector.I_ENDS_WITH, fieldValue);
                 return this;
+            }
+
+            public <T> AndConditionProxy andIEndsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
+                return andIEndsWith(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
             }
 
             public AndConditionProxy andNotContains(String fieldName, Object fieldValue) {
@@ -1217,9 +1278,17 @@ public class HumanCondition {
                 return this;
             }
 
+            public <T> AndConditionProxy andNotContains(SerializableFunction<T> fieldGetter, Object fieldValue) {
+                return andNotContains(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+            }
+
             public AndConditionProxy andNotIContains(String fieldName, Object fieldValue) {
                 this.andCondition.addCondition(fieldName, Connector.NOT_I_CONTAINS, fieldValue);
                 return this;
+            }
+
+            public <T> AndConditionProxy andNotIContains(SerializableFunction<T> fieldGetter, Object fieldValue) {
+                return andNotIContains(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
             }
 
             public AndConditionProxy andNotStartsWith(String fieldName, Object fieldValue) {
@@ -1227,9 +1296,17 @@ public class HumanCondition {
                 return this;
             }
 
+            public <T> AndConditionProxy andNotStartsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
+                return andNotStartsWith(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+            }
+
             public AndConditionProxy andNotIStartsWith(String fieldName, Object fieldValue) {
                 this.andCondition.addCondition(fieldName, Connector.NOT_I_STARTS_WITH, fieldValue);
                 return this;
+            }
+
+            public <T> AndConditionProxy andNotIStartsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
+                return andNotIStartsWith(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
             }
 
             public AndConditionProxy andNotEndsWith(String fieldName, Object fieldValue) {
@@ -1237,9 +1314,17 @@ public class HumanCondition {
                 return this;
             }
 
+            public <T> AndConditionProxy andNotEndsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
+                return andNotEndsWith(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+            }
+
             public AndConditionProxy andNotIEndsWith(String fieldName, Object fieldValue) {
                 this.andCondition.addCondition(fieldName, Connector.NOT_I_ENDS_WITH, fieldValue);
                 return this;
+            }
+
+            public <T> AndConditionProxy andNotIEndsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
+                return andNotIEndsWith(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
             }
         }
     }
