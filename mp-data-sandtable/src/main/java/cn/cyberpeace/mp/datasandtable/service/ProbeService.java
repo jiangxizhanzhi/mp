@@ -54,6 +54,7 @@ public class ProbeService {
         probeModel.setScriptContent(buildScriptContent(probeRequest).getBytes(StandardCharsets.UTF_8));
         probeModel.setOsType(probeRequest.getOsType().getTypeVal());
         probeModel.setScriptType(probeRequest.getScriptType().getTypeVal());
+        probeModel.setCommandInterval(probeRequest.getCommandInterval() + "m");
         probeModelMapper.insert(probeModel);
         insertProbeParams(probeRequest, probeModel.getId());
         probeRequest.setProbeId(probeModel.getId());
@@ -119,6 +120,7 @@ public class ProbeService {
         probeModel.setScriptContent(buildScriptContent(probeRequest).getBytes(StandardCharsets.UTF_8));
         probeModel.setOsType(probeRequest.getOsType().getTypeVal());
         probeModel.setScriptType(probeRequest.getScriptType().getTypeVal());
+        probeModel.setCommandInterval(probeRequest.getCommandInterval() + "m");
         var rows = probeModelMapper.updateByProbeId(probeModel);
         //wazuh 远程操作
         wazuhProbeManagerRepository.deleteProbeByProbeId(probeModel.getId());

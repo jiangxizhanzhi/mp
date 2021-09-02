@@ -43,8 +43,8 @@ public class ProbeRequest {
     @ApiModelProperty(value = "探针脚本内容", required = true)
     private String scriptContent;
 
-    @ApiModelProperty(value = "定时任务 1m 表示一分钟", required = true)
-    private String commandInterval;
+    @ApiModelProperty(value = "单位分钟", required = true)
+    private Integer commandInterval;
 
     @ApiModelProperty(value = "脚本参数 建议 ##包裹参数，方便替换", required = true)
     private List<ProbeParamsRequest> probeParamsRequestList;
