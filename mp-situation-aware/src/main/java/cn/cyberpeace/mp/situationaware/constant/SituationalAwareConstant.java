@@ -5,7 +5,7 @@ import com.google.common.cache.LoadingCache;
 /**
  * 数据沙盘全局缓存
  */
-public class DataSandtableConstant {
+public class SituationalAwareConstant {
     /**
      * 分组id url 分组
      */

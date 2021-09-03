@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.situationaware.repository;
 
 import cn.cyberpeace.mp.situationaware.TestDatasandtableApplciation;
-import cn.cyberpeace.mp.situationaware.constant.DataSandtableConstant;
+import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
 import cn.cyberpeace.mp.situationaware.model.WazuhNetifaceRoot;
 import cn.cyberpeace.mp.situationaware.model.WazuhRamRoot;
 import java.io.IOException;
@@ -27,9 +27,9 @@ public class WazuhRepositoryTest {
 //        var token = wazuhDao.queryWazuhToken();
 //        System.out.println("token" +  token);
 
-        System.out.println(DataSandtableConstant.wazuhToken.get("wazuhToken"));
-        DataSandtableConstant.wazuhToken.invalidate("wazuhToken");
-        System.out.println(DataSandtableConstant.wazuhToken.get("wazuhToken"));
+        System.out.println(SituationalAwareConstant.wazuhToken.get("wazuhToken"));
+        SituationalAwareConstant.wazuhToken.invalidate("wazuhToken");
+        System.out.println(SituationalAwareConstant.wazuhToken.get("wazuhToken"));
                 var token = wazuhRepository.queryWazuhToken();
     }
 

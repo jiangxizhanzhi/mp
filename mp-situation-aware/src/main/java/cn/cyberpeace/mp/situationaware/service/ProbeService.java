@@ -1,7 +1,9 @@
 package cn.cyberpeace.mp.situationaware.service;
 
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.util.TextUtils;
+import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
 import cn.cyberpeace.mp.situationaware.model.ProbeModel;
 import cn.cyberpeace.mp.situationaware.model.ProbeParamModel;
 import cn.cyberpeace.mp.situationaware.model.ProbeParamsRequest;
@@ -55,6 +57,10 @@ public class ProbeService {
         probeModel.setOsType(probeRequest.getOsType().getTypeVal());
         probeModel.setScriptType(probeRequest.getScriptType().getTypeVal());
         probeModel.setCommandInterval(probeRequest.getCommandInterval() + "m");
+        var probeExist = probeModelMapper.countQueryByProbeName(probeRequest.getProbeName()) > 0;
+        if (Boolean.TRUE.equals(probeExist)) {
+            throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_NAME_EXIST);
+        }
         probeModelMapper.insert(probeModel);
         insertProbeParams(probeRequest, probeModel.getId());
         probeRequest.setProbeId(probeModel.getId());
@@ -121,6 +127,12 @@ public class ProbeService {
         probeModel.setOsType(probeRequest.getOsType().getTypeVal());
         probeModel.setScriptType(probeRequest.getScriptType().getTypeVal());
         probeModel.setCommandInterval(probeRequest.getCommandInterval() + "m");
+        //是否存在保证name去重
+        var probeExist = probeModelMapper.countQueryModifyByProbeName(probeRequest.getProbeName(), probeModel.getProbeName()) > 0;
+        if (Boolean.TRUE.equals(probeExist)) {
+            throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_NAME_EXIST);
+        }
+
         var rows = probeModelMapper.updateByProbeId(probeModel);
         //wazuh 远程操作
         wazuhProbeManagerRepository.deleteProbeByProbeId(probeModel.getId());

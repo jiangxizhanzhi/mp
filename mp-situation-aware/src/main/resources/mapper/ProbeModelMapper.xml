@@ -107,4 +107,23 @@
             command_interval = #{commandInterval,jdbcType=VARCHAR}
         where id = #{id,jdbcType=VARCHAR}
     </update>
+
+    <select id="countQueryByProbeName" parameterType="java.lang.String"
+            resultType="java.lang.Integer">
+        select count(*)
+        from mp_situation_probe
+        where
+        del_flag != 1
+        and probe_name = #{probeName,jdbcType=VARCHAR}
+    </select>
+
+    <select id="countQueryModifyByProbeName" parameterType="java.lang.String"
+            resultType="java.lang.Integer">
+        select count(*)
+        from mp_situation_probe
+        where
+        del_flag != 1
+            and probe_name = #{probeName,jdbcType=VARCHAR}
+            and id != #{probeId}
+    </select>
 </mapper>

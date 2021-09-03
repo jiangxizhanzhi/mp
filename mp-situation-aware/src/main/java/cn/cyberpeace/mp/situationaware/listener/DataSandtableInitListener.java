@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.situationaware.listener;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.situationaware.constant.DataSandtableConstant;
+import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
 import cn.cyberpeace.mp.situationaware.repository.WazuhRepository;
 import cn.cyberpeace.mp.situationaware.model.GroupModel;
 import cn.cyberpeace.mp.situationaware.service.NetworkTrafficGroupService;
@@ -35,7 +35,7 @@ public class DataSandtableInitListener implements ApplicationListener<Applicatio
         log.info("prepare init actions for mp system");
 
         //初始化
-        DataSandtableConstant.groupIdSessionUrlCache = CacheBuilder.newBuilder()
+        SituationalAwareConstant.groupIdSessionUrlCache = CacheBuilder.newBuilder()
             .maximumSize(1000)
             .expireAfterWrite(30, TimeUnit.DAYS)
             .build(new CacheLoader<String, String>() {
@@ -46,7 +46,7 @@ public class DataSandtableInitListener implements ApplicationListener<Applicatio
             });
 
         //定时更新token初始化
-        DataSandtableConstant.wazuhToken = CacheBuilder.newBuilder()
+        SituationalAwareConstant.wazuhToken = CacheBuilder.newBuilder()
             .maximumSize(1)
             .expireAfterWrite(30, TimeUnit.DAYS)
             .build(new CacheLoader<String, String>() {

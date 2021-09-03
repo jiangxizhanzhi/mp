@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.situationaware.utils;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.situationaware.constant.DataSandtableConstant;
+import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -49,12 +49,12 @@ public class WazuhHttpsUtils {
             httpClient = createIgnoreSSLHttpClient();
 
             HttpGet httpGet = new HttpGet(url);
-            httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + DataSandtableConstant.wazuhToken.get("wazuhToken"));
+            httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + SituationalAwareConstant.wazuhToken.get("wazuhToken"));
             response = httpClient.execute(httpGet);
             StatusLine sl = response.getStatusLine();
             if (sl.getStatusCode() == 401) {
-                DataSandtableConstant.wazuhToken.invalidate("wazuhToken");
-                httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + DataSandtableConstant.wazuhToken.get("wazuhToken"));
+                SituationalAwareConstant.wazuhToken.invalidate("wazuhToken");
+                httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + SituationalAwareConstant.wazuhToken.get("wazuhToken"));
                 response = httpClient.execute(httpGet);
             }
             return EntityUtils.toString(response.getEntity(), "UTF-8");

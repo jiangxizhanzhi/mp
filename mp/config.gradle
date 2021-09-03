@@ -7,7 +7,7 @@ gradle.ext {
         'mp-scene-plugin-cloud',
         'mp-scene-plugin-collection',
         'mp-scene-plugin-flow',
-        'mp-data-sandtable',
+        'mp-situation-aware',
         'mp-devops-log',
         'mp-flow'
     ]

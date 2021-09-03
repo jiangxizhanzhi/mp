@@ -6,7 +6,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.LocalDateTimeUtils;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
-import cn.cyberpeace.mp.situationaware.constant.DataSandtableConstant;
+import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
 import cn.cyberpeace.mp.situationaware.model.SPIViewRequest;
 import cn.cyberpeace.mp.situationaware.model.SessionModel;
 import cn.cyberpeace.mp.situationaware.model.SessionRequest;
@@ -173,7 +173,7 @@ public class NetWorkTrafficService {
         HttpResponse httpResponse = null;
         String molochUrl;
         try {
-            molochUrl = DataSandtableConstant.groupIdSessionUrlCache.get(groupId);
+            molochUrl = SituationalAwareConstant.groupIdSessionUrlCache.get(groupId);
         } catch (ExecutionException e) {
             log.error("查询缓存异常 groupId {}" + e, groupId);
             throw new MpRuntimeException("查询缓存异常 groupId: "+ groupId);
@@ -199,7 +199,7 @@ public class NetWorkTrafficService {
     public String querySPIView(SPIViewRequest spiViewRequest) {
         String molochUrl;
         try {
-            molochUrl = DataSandtableConstant.groupIdSessionUrlCache.get(spiViewRequest.getGroupId());
+            molochUrl = SituationalAwareConstant.groupIdSessionUrlCache.get(spiViewRequest.getGroupId());
         } catch (ExecutionException e) {
             log.error("查询缓存异常 groupId {}" + e, spiViewRequest.getGroupId());
             throw new MpRuntimeException("查询缓存异常 groupId: "+ spiViewRequest.getGroupId());
