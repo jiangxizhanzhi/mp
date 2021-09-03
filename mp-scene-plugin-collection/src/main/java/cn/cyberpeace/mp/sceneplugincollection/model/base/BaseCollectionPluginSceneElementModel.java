@@ -6,6 +6,6 @@ import lombok.Data;
 
 @Data
 public class BaseCollectionPluginSceneElementModel extends BasePluginSceneElementModel {
-//    @DefaultStr
-//    private String probes;
+    @DefaultStr
+    private String probes;
 }

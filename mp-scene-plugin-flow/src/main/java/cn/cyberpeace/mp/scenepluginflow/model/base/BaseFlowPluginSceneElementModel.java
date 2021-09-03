@@ -6,6 +6,6 @@ import lombok.Data;
 
 @Data
 public class BaseFlowPluginSceneElementModel extends BasePluginSceneElementModel {
-//    @DefaultStr
-//    private String flows;
+    @DefaultStr
+    private String flows;
 }
