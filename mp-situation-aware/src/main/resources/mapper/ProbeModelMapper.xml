@@ -126,4 +126,19 @@
             and probe_name = #{probeName,jdbcType=VARCHAR}
             and id != #{probeId}
     </select>
+
+    <update id="updateProbeStatus" parameterType="cn.cyberpeace.mp.situationaware.model.ProbeModel">
+        update mp_situation_probe
+        set probe_status = #{probeStatus},
+        where id = #{probeId,jdbcType=VARCHAR}
+    </update>
+
+    <select id="queryAllProbes" parameterType="java.lang.String"
+            resultMap="ResultMapWithBLOBs">
+        select
+        <include refid="Base_Column_List"/>
+        from mp_situation_probe
+        where
+        del_flag != 1
+    </select>
 </mapper>
