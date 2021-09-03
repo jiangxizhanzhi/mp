@@ -1,9 +1,8 @@
 package cn.cyberpeace.mp.auth.test;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
-import cn.cyberpeace.mp.auth.dto.OrgDto;
-import cn.cyberpeace.mp.auth.dto.activation.ActivationResponse;
 import cn.cyberpeace.mp.auth.dto.activation.ActivationRequest;
+import cn.cyberpeace.mp.auth.dto.activation.ActivationResponse;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.model.UserPermissionModel;
 import cn.cyberpeace.mp.auth.repository.OrgMapper;
@@ -187,14 +186,19 @@ public class AuthTestController {
     }
 
     @GetMapping("/testos")
-    public List<OrgDto> testos(@RequestParam String org) {
-//        licenseJdkDemo.testlicense();
-//        List<OrgDto> orgDtos = orgService.listAllParentIgnoreLevelExcludeSelf(org);
+    public List testos(@RequestParam String org) {
         ComputerSystem computerSystem = OshiUtil.getSystem();
         List<HWDiskStore> diskStores = OshiUtil.getDiskStores();
 
-        log.warn("system:{}", computerSystem);
-        log.warn("disk:{}", diskStores);
-        return null;
+        log.error("system:{}", computerSystem);
+        log.error("disk:{}", diskStores);
+        System.out.println("--------------####------------");
+        diskStores.forEach(e -> {
+            log.error("e1 {}:{}", e.getName(), e.getSerial());
+        });
+
+        System.out.println("--------------####------------");
+
+        return diskStores;
     }
 }
