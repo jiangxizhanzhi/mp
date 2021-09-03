@@ -8,10 +8,10 @@ import cn.cyberpeace.mp.base.service.code.ErrorCode;
 public enum BaseErrorCode implements ErrorCode {
     SUCCESS("MP-000000", "success"),
     ERROR("MP-099999", "error"),
-    PARAMS_INVALID("MP-000002", "params_invalid"),
-    DATA_EXISTS("MP-000003", "data_exists"),
-    DATA_NOT_EXIST("MP-000004", "data_not_exist"),
-    DATA_PARTIAL_SUCCESS("MP-000005", "partial_success");
+    PARAMS_INVALID("MP-000001", "params_invalid"),
+    DATA_EXISTS("MP-000002", "data_exists"),
+    DATA_NOT_EXIST("MP-000003", "data_not_exist"),
+    DATA_PARTIAL_SUCCESS("MP-000004", "partial_success");
 
     BaseErrorCode(String code, String message) {
         setCode(code, "base.error_code." + message);
