@@ -8,6 +8,11 @@ import cn.cyberpeace.mp.base.service.param.QueryParams;
 
 import java.util.List;
 
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 public interface RolePermissionModelService extends BaseModelService<RolePermissionModel, QueryParams> {
 
     List<TargetModel> listTargetsByRoleId(String roleId);

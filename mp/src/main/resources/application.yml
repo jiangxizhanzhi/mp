@@ -74,7 +74,9 @@ mp:
     exclude-uri: /login
     exclude-method: OPTIONS
   auth:
-    activationDir: /Users/sternberg/tmp/0811
+    activation:
+      enable: true
+      licenseDir: /home/mp/config/license
 
 management:
   endpoints:

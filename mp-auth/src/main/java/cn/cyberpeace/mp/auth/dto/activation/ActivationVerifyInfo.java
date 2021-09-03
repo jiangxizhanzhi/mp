@@ -5,7 +5,11 @@ import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
 import java.util.Map;
-
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @Data
 public class ActivationVerifyInfo {
 

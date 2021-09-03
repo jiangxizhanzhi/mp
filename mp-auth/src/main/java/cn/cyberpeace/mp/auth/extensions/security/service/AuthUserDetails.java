@@ -10,6 +10,11 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 public class AuthUserDetails implements UserDetails {
 
     private final UserModel user;

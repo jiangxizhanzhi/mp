@@ -6,7 +6,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 租户查询参数定义
+ * @Description: 租户查询参数定义
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
  */
 @Data
 @AllArgsConstructor

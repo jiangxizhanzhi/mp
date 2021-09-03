@@ -7,6 +7,11 @@ import cn.cyberpeace.mp.base.service.param.QueryParams;
 
 import java.util.List;
 
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 public interface TargetService extends BaseModelService<TargetModel, QueryParams> {
 
     TargetModel getByIdentifier(String identifier);
