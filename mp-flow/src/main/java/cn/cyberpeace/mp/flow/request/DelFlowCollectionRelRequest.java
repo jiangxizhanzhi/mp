@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import java.util.List;
 
 /**
@@ -31,6 +32,7 @@ public class DelFlowCollectionRelRequest {
      * 流量id集合
      */
     @ApiModelProperty(value = "流量id集合")
+    @NotEmpty(message = "flowIds can not be empty")
     private List<String> flowIds;
 
 }

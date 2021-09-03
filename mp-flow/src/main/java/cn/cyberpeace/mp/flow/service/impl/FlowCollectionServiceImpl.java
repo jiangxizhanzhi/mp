@@ -4,7 +4,9 @@ import cn.cyberpeace.mp.base.constant.BaseConstants;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.flow.enums.InteractiveTypeEnum;
 import cn.cyberpeace.mp.flow.model.FlowCollectionModel;
 import cn.cyberpeace.mp.flow.model.FlowCollectionRelModel;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
@@ -19,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -80,7 +83,14 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
      * @param addRequest
      * @return
      */
+    @Transactional
     public ServiceResult<Integer> addCollectionRel(AddFlowCollectionRelRequest addRequest) {
+        ObjResult<FlowCollectionModel> modelResult = get(addRequest.getCollectionId()).getSource();
+        if (Objects.isNull(modelResult)) {
+            log.error("collection is empty for:{}", addRequest.getCollectionId());
+            return ServiceResult.fail("collection is not exist");
+        }
+
         // 查询已有关联信息
         List<FlowCollectionRelModel> relModels =
                 flowCollectionRelService.selectByCollectionIds(Collections.singletonList(addRequest.getCollectionId()));
@@ -91,11 +101,15 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
         if (CollectionUtils.isNotEmpty(addFlowIds)) {
             List<FlowCollectionRelModel> addRelModels = new ArrayList<>();
             addFlowIds.forEach(flowId -> {
+                // 遍历生成关联对象集合
                 FlowCollectionRelModel relModel = new FlowCollectionRelModel();
                 relModel.setCollectionId(addRequest.getCollectionId());
                 relModel.setFlowId(flowId);
                 addRelModels.add(relModel);
             });
+
+            // 更新关联流量数量
+            updateRelFlowCount(modelResult.getObj(), addFlowIds, true);
 
             // 批量新增关联信息
             return flowCollectionRelService.bulkCreate(addRelModels);
@@ -109,11 +123,51 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
      * @param delRequest
      * @return
      */
+    @Transactional
     public ServiceResult<Integer> delCollectionRel(DelFlowCollectionRelRequest delRequest) {
+        ObjResult<FlowCollectionModel> modelResult = get(delRequest.getCollectionId()).getSource();
+        if (Objects.isNull(modelResult)) {
+            log.error("collection is empty for:{}", delRequest.getCollectionId());
+            return ServiceResult.fail("collection is not exist");
+        }
+
         if (CollectionUtils.isEmpty(delRequest.getFlowIds())) {
             return ServiceResult.success(0);
         }
+
+        // 更新关联流量数量
+        updateRelFlowCount(modelResult.getObj(), delRequest.getFlowIds(), false);
         return flowCollectionRelService.delCollectionRel(delRequest);
+    }
+
+    /**
+     * 更新关联流量数量
+     * @param collectionModel
+     * @param flowIds
+     * @param isIncrease
+     */
+    private void updateRelFlowCount(FlowCollectionModel collectionModel, List<String> flowIds, boolean isIncrease) {
+        // 更新关联流量数量
+        List<FlowInfoModel> flowInfoModels = flowInfoService.selectByFlowIds(flowIds);
+        if (CollectionUtils.isNotEmpty(flowInfoModels)) {
+            // 背景流量数量
+            int backgroundCount = (int) flowInfoModels.stream().filter(model -> InteractiveTypeEnum.BACKGROUND.toValue() == model.getInteractiveType()).count();
+            // 攻击流量数量
+            int attackCount = (int) flowInfoModels.stream().filter(model -> InteractiveTypeEnum.ATTACK.toValue() == model.getInteractiveType()).count();
+            if (isIncrease) {
+                // 增加
+                collectionModel.setBackgroundFlowCount(collectionModel.getBackgroundFlowCount() + backgroundCount);
+                collectionModel.setAttackFlowCount(collectionModel.getAttackFlowCount() + attackCount);
+            } else {
+                // 减少
+                collectionModel.setBackgroundFlowCount(collectionModel.getBackgroundFlowCount() - backgroundCount);
+                collectionModel.setAttackFlowCount(collectionModel.getAttackFlowCount() - attackCount);
+            }
+
+            update(collectionModel);
+        } else {
+            log.warn("关联流量信息不存在");
+        }
     }
 
 }

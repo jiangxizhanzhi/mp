@@ -13,6 +13,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
@@ -103,7 +104,7 @@ public abstract class BaseModelController<M extends BaseModel, Q extends QueryPa
             @ApiImplicitParam(name="fields", value="需要返回的字段",dataTypeClass = String[].class),
     })
     @PostMapping
-    public ObjServiceResult<M> create(@RequestBody M obj, @RequestParam(required = false) String[] fields) {
+    public ObjServiceResult<M> create(@RequestBody @Validated M obj, @RequestParam(required = false) String[] fields) {
         log.info("obj:{}, fields:{}", obj, fields);
         return getModelService().create(obj, fields).asResult();
     }
@@ -121,7 +122,7 @@ public abstract class BaseModelController<M extends BaseModel, Q extends QueryPa
             @ApiImplicitParam(name="fields", value="需要返回的字段",dataTypeClass = String[].class),
     })
     @PatchMapping("/{id}")
-    public ObjServiceResult<M> update(@PathVariable String id, @RequestBody M obj,
+    public ObjServiceResult<M> update(@PathVariable String id, @RequestBody @Validated M obj,
                                       @RequestParam(required = false) String[] fields) {
         log.info("id:{}, obj:{}, fields:{}", id, obj, fields);
         obj.setId(id);

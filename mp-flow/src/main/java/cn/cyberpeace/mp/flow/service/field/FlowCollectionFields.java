@@ -16,7 +16,7 @@ public class FlowCollectionFields extends BaseModelFields {
 
     public static final DynamicFields readonlyFields = new DynamicFields().merge(BaseModelFields.readonlyFields);
 
-    public static final DynamicFields searchFields = new DynamicFields(FlowCollectionModel::getTitle, FlowCollectionModel::getCollectionDesc,
+    public static final DynamicFields searchFields = new DynamicFields(FlowCollectionModel::getTitle, FlowCollectionModel::getDescription,
             FlowCollectionModel::getCategory, FlowCollectionModel::getCreateTime);
 
     public static final DynamicFields orderFields = new DynamicFields(new String[]{}).merge(BaseModelFields.readonlyFields);

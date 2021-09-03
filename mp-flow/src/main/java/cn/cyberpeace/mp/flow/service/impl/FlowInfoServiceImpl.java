@@ -427,4 +427,14 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         return Objects.isNull(flowInfoModel) || flowInfoModel.getId().equals(id);
     }
 
+
+    /**
+     * 根据流量id批量查询
+     * @param flowIds
+     * @return
+     */
+    public List<FlowInfoModel> selectByFlowIds(List<String> flowIds) {
+        return getModelMapper().selectByFlowIds(flowIds);
+    }
+
 }
