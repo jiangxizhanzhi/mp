@@ -17,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import oshi.util.ExecutingCommand;
 
 import java.io.File;
 import java.util.HashMap;
@@ -25,7 +26,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * @Description:
+ * @Description: 系统激活相关service
  * @Author zhouxinghuai
  * @Date：2021/8/31 11:13
  */
@@ -43,7 +44,10 @@ public class SysActivationService {
 
     public static final String ACTIVATION_FILE = "activation";
 
-
+    /**
+     * 激活
+     * @param activationRequest
+     */
     public void activate(ActivationRequest activationRequest) {
         log.info("activationRequest:{}", activationRequest);
         // 拼接json串，调用licenseService验证
@@ -67,12 +71,15 @@ public class SysActivationService {
         if (success) {
             generateEncryptedFile(activationRequest);
         } else {
-            log.error("验证失败！");
+            log.error("license verify failed！");
         }
 
     }
 
-
+    /**
+     * 查询系统激活状态
+     * @return
+     */
     public ActivationResponse status() {
 
         if (Objects.isNull(ACTIVATION_CONTENT)) {
@@ -82,6 +89,21 @@ public class SysActivationService {
         }
 
         return ACTIVATION_CONTENT;
+    }
+
+
+    /**
+     * 查询系统UUID
+     * @return
+     */
+    public String querySysUUID() {
+        // If root privileges this will work
+        for (String checkLine : ExecutingCommand.runNative("dmidecode -s system-uuid")) {
+            if (StringUtils.isNotBlank(checkLine)) {
+                return checkLine;
+            }
+        }
+        return null;
     }
 
 
