@@ -19,7 +19,7 @@ public class SceneModel extends BaseSceneModel implements BaseEventModel {
     @DefaultInt
     private Integer eventStatus;
     @DefaultInt
-    private Integer process;
+    private String process;
     @DefaultInt
     private Integer processStatus;
     @DefaultStr

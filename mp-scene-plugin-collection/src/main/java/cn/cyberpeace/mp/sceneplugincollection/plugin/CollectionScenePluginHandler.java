@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin;
 
 import cn.cyberpeace.mp.base.annotation.ClassFieldClasses;
-import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneBO;
@@ -10,8 +9,6 @@ import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementPor
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.modelhandler.CollectionScenePluginModelHandler;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 
 @ClassFieldClasses({
@@ -27,15 +24,9 @@ public class CollectionScenePluginHandler extends ScenePluginHandler<CollectionP
     private CollectionScenePluginModelHandler pluginModelHandler;
 
     @Override
-    public void init(String sceneId, ScenePluginDataBO pluginDataBO) {
+    public void initBase() {
+        super.initBase();
         pluginModelHandler = new CollectionScenePluginModelHandler(this);
-        super.init(sceneId, pluginDataBO);
-    }
-
-    @Override
-    public void init(String sceneId, List<String> elementIds, List<String> elementPortIds) {
-        pluginModelHandler = new CollectionScenePluginModelHandler(this);
-        super.init(sceneId, elementIds, elementPortIds);
     }
 
     @Override

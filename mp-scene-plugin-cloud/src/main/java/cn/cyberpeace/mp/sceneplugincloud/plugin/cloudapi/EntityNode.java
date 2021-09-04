@@ -1,9 +1,9 @@
-package cn.cyberpeace.mp.sceneplugincloud.core;
+package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi;
 
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
-import cn.cyberpeace.mp.sceneplugincloud.core.common.CloudClient;
-import cn.cyberpeace.mp.sceneplugincloud.core.param.EntityNodeCreateData;
-import cn.cyberpeace.mp.sceneplugincloud.core.param.EntityNodeDeleteData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.EntityNodeCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.EntityNodeDeleteData;
 
 public class EntityNode extends CloudClient {
 

@@ -1,9 +1,9 @@
-package cn.cyberpeace.mp.sceneplugincloud.core;
+package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi;
 
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
-import cn.cyberpeace.mp.sceneplugincloud.core.common.CloudClient;
-import cn.cyberpeace.mp.sceneplugincloud.core.param.VirtualRouterCreateData;
-import cn.cyberpeace.mp.sceneplugincloud.core.param.VirtualRouterDeleteData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterDeleteData;
 
 public class VirtualRouter extends CloudClient {
 

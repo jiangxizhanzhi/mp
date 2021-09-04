@@ -1178,12 +1178,12 @@ public abstract class BaseSceneHandler<
     public void delete() {
         deleteTopology();
 
-        sceneMapper.delete(sceneId);
-
         // 删除插件数据
         pluginMap.forEach((key, plugin) -> {
             plugin.deleteScene();
         });
+
+        sceneMapper.delete(sceneId);
     }
 
     /**

@@ -19,7 +19,7 @@ public class SceneElementModel extends BaseSceneElementModel implements BaseEven
     @DefaultInt
     private Integer eventStatus;
     @DefaultInt
-    private Integer process;
+    private String process;
     @DefaultInt
     private Integer processStatus;
     @DefaultStr

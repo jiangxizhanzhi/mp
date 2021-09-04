@@ -16,7 +16,7 @@ public class EventModel extends BaseModel {
     @DefaultInt
     private Integer eventStatus;
     @DefaultInt
-    private Integer process;
+    private String process;
     @DefaultInt
     private Integer processStatus;
     @DefaultStr

@@ -112,6 +112,30 @@ public abstract class ScenePluginHandler<S, E, P> extends BasePluginHandler<S, E
         return getSceneHandler().getPortConnectedEle(portId);
     }
 
+    public void progressSceneProcess(int event, String process, String processMessage) {
+        getSceneHandler().progressSceneProcess(event, process, processMessage);
+    }
+
+    public void progressElementProcess(String nodeId, int event, String process, String processMessage) {
+        getSceneHandler().progressElementProcess(nodeId, event, process, processMessage);
+    }
+
+    public void overSceneProcess(int event, String processMessage) {
+        getSceneHandler().overSceneProcess(event, processMessage);
+    }
+
+    public void overElementProcess(String nodeId, int event, String processMessage) {
+        getSceneHandler().overElementProcess(nodeId, event, processMessage);
+    }
+
+    public void errorSceneProcess(int event, String processMessage) {
+        getSceneHandler().errorSceneProcess(event, processMessage);
+    }
+
+    public void errorElementProcess(String nodeId, int event, String processMessage) {
+        getSceneHandler().errorElementProcess(nodeId, event, processMessage);
+    }
+
     public void initiate() {
     }
 

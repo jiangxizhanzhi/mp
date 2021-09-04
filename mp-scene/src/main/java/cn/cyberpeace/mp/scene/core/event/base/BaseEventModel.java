@@ -1,7 +1,5 @@
 package cn.cyberpeace.mp.scene.core.event.base;
 
-import org.apache.commons.lang3.StringUtils;
-
 /**
  * 通用事件模型
  *  event: 事件（目标做某件事）
@@ -21,9 +19,9 @@ public interface BaseEventModel {
 
     void setEventStatus(Integer eventStatus);
 
-    Integer getProcess();
+    String getProcess();
 
-    void setProcess(Integer process);
+    void setProcess(String process);
 
     Integer getProcessStatus();
 

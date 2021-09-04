@@ -16,7 +16,7 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     /**
      * 云平台资源类型
      */
-    @DefaultInt(ResourceType.VIRTUAL_SWITCH)
+    @DefaultInt(VirtualType.VIRTUAL_SWITCH)
     private Integer virtualType;
 
     /**
@@ -44,10 +44,12 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     private String dnsNameservers;
     @DefaultBool
     private Boolean dhcp;
-    @DefaultInt
-    private Integer vlanId;
     @DefaultStr
     private String allocationPools;
+    @DefaultBool
+    private Boolean vlan;
+    @DefaultInt
+    private Integer vlanId;
 
     // 虚拟路由属性
     @DefaultStr
@@ -64,7 +66,7 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     private String image;
     private String initialTools;
 
-    public static class ResourceType {
+    public static class VirtualType {
         public static final int VIRTUAL_SWITCH = 1;
         public static final int VIRTUAL_ROUTER = 2;
         public static final int VIRTUAL_FIREWALL = 3;
@@ -72,7 +74,7 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
         public static final int CONTAINER = 5;
         public static final int ENTITY_NODE = 6;
 
-        private ResourceType() {}
+        private VirtualType() {}
     }
 
     public static class ElectricPortType {
@@ -90,35 +92,24 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
         private OpticalPortType() {}
     }
 
-    /**
-     * 用于设备连接的辅助网络
-     */
+    // 用于设备连接的辅助网络
+    @DefaultBool
+    private Boolean auxiliaryNetworkOn;
     @DefaultStr
     private String auxiliaryNetworkId;
-    /**
-     * 用于设备连接的辅助网络
-     */
     @DefaultStr
     private String auxiliaryNetworkCidr;
-    /**
-     * 用于设备连接的辅助网络
-     */
     @DefaultStr
     private String auxiliaryNetworkGateway;
-    /**
-     * 用于设备连接的辅助网络
-     */
     @DefaultStr
     private String auxiliaryNetworkDnsNameservers;
-    /**
-     * 用于设备连接的辅助网络
-     */
-    @DefaultBool(true)
+    @DefaultBool
     private Boolean auxiliaryNetworkDhcp;
-    /**
-     * 用于设备连接的辅助网络
-     */
     @DefaultStr
     private String auxiliaryNetworkAllocationPools;
+    @DefaultBool
+    private Boolean auxiliaryNetworkVlan;
+    @DefaultStr
+    private Integer auxiliaryNetworkVlanId;
 
 }

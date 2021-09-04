@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.sceneplugincloud.core.common;
+package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common;
 
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 

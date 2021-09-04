@@ -38,14 +38,14 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
     /**
      * 获取事件锁
      */
-    private boolean acquireEventLock(int event, int process, int processStatus) {
+    private boolean acquireEventLock(int event, String process, int processStatus) {
         return true;
     }
 
     /**
      * 释放事件锁
      */
-    private boolean releaseEventLock(int event, int process, int processStatus) {
+    private boolean releaseEventLock(int event, String process, int processStatus) {
         return true;
     }
 
@@ -54,7 +54,7 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
      * 1.即时同步到事件目标上
      * 2.存储事件状态（TODO）
      */
-    private E saveEvent(int event, int eventStatus, int process, int processStatus, String processMessage) {
+    private E saveEvent(int event, int eventStatus, String process, int processStatus, String processMessage) {
         target.setEvent(event);
         target.setEventStatus(eventStatus);
         target.setProcess(process);
@@ -81,7 +81,7 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
      * @param processMessage 事件进程描述
      * @return 事件触发结果
      */
-    private int triggerEvent(int event, int eventStatus, int process, int processStatus, String processMessage) {
+    private int triggerEvent(int event, int eventStatus, String process, int processStatus, String processMessage) {
         if (acquireEventLock(event, process, processStatus)) {
             var eventObj = saveEvent(event, eventStatus, process, processStatus, processMessage);
             if (eventObj == null) {
@@ -121,16 +121,24 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
     }
 
     /**
+     * 开始事件
+     */
+    public int startEvent() {
+        return triggerEvent(event, EventStatus.START, target.getProcess(), target.getProcessStatus(),
+                target.getProcessMessage());
+    }
+
+    /**
      * 开始进程
      */
-    public int startProcess(int process, String processMessage) {
+    public int startProcess(String process, String processMessage) {
         return triggerEvent(event, EventStatus.IN_PROGRESS, process, ProcessStatus.START, processMessage);
     }
 
     /**
      * 进行中事件进程
      */
-    public int progressProcess(int process, String processMessage) {
+    public int progressProcess(String process, String processMessage) {
         return triggerEvent(event, EventStatus.IN_PROGRESS, process, ProcessStatus.IN_PROGRESS, processMessage);
     }
 
@@ -145,8 +153,8 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
     /**
      * 结束事件进程
      */
-    public int overProcess(int process, String processMessage) {
-        return triggerEvent(event, EventStatus.IN_PROGRESS, process, ProcessStatus.OVER, processMessage);
+    public int overProcess(String processMessage) {
+        return triggerEvent(event, EventStatus.IN_PROGRESS, target.getProcess(), ProcessStatus.OVER, processMessage);
     }
 
     /**
@@ -160,8 +168,8 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
     /**
      * 异常事件
      */
-    public int error(int process, String processMessage) {
-        return triggerEvent(event, EventStatus.ABNORMAL, process, ProcessStatus.ABNORMAL, processMessage);
+    public int error(String processMessage) {
+        return triggerEvent(event, EventStatus.ABNORMAL, target.getProcess(), ProcessStatus.ABNORMAL, processMessage);
     }
 
 }

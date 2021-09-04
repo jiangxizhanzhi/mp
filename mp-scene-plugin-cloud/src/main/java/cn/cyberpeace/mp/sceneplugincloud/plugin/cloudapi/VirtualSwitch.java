@@ -1,9 +1,9 @@
-package cn.cyberpeace.mp.sceneplugincloud.core;
+package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi;
 
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
-import cn.cyberpeace.mp.sceneplugincloud.core.common.CloudClient;
-import cn.cyberpeace.mp.sceneplugincloud.core.param.VirtualSwitchCreateData;
-import cn.cyberpeace.mp.sceneplugincloud.core.param.VirtualSwitchDeleteData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchDeleteData;
 
 public class VirtualSwitch extends CloudClient {
 

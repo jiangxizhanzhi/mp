@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.sceneplugincloud.core.param;
+package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param;
 
 import lombok.Data;
 

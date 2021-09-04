@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.base.util.JsonUtils;
 import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -43,10 +44,12 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     private List<String> dnsNameservers;
     @ApiModelProperty(value = "虚拟交换机是否开启dhcp")
     private Boolean dhcp;
-    @ApiModelProperty(value = "虚拟交换机vlanId")
-    private Integer vlanId;
     @ApiModelProperty(value = "虚拟交换机地址池")
     private List<AllocationPool> allocationPools;
+    @ApiModelProperty(value = "虚拟交换机vlan模式")
+    private Boolean vlan;
+    @ApiModelProperty(value = "虚拟交换机vlanId")
+    private Integer vlanId;
 
     // 虚拟路由属性
     @ApiModelProperty(value = "虚拟路由静态路由")
@@ -64,6 +67,34 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     @ApiModelProperty(value = "终端初始包含工具")
     private List<InitialTool> initialTools;
 
+    @ApiModelProperty(value = "是否开启辅助网络", hidden = true)
+    @JsonIgnore
+    private Boolean auxiliaryNetworkOn;
+    @ApiModelProperty(value = "辅助网络id", hidden = true)
+    @JsonIgnore
+    private String auxiliaryNetworkId;
+    @ApiModelProperty(value = "辅助网络cidr", hidden = true)
+    @JsonIgnore
+    private String auxiliaryNetworkCidr;
+    @ApiModelProperty(value = "辅助网络网关", hidden = true)
+    @JsonIgnore
+    private String auxiliaryNetworkGateway;
+    @ApiModelProperty(value = "辅助网络dns", hidden = true)
+    @JsonIgnore
+    private List<String> auxiliaryNetworkDnsNameservers;
+    @ApiModelProperty(value = "辅助网络dhcp", hidden = true)
+    @JsonIgnore
+    private Boolean auxiliaryNetworkDhcp;
+    @ApiModelProperty(value = "辅助网络地址池", hidden = true)
+    @JsonIgnore
+    private List<AllocationPool> auxiliaryNetworkAllocationPools;
+    @ApiModelProperty(value = "辅助网络vlan模式", hidden = true)
+    @JsonIgnore
+    private Boolean auxiliaryNetworkVlan;
+    @ApiModelProperty(value = "辅助网络vlanId", hidden = true)
+    @JsonIgnore
+    private Integer auxiliaryNetworkVlanId;
+
     @Override
     public void fromModel(M obj, String... ignoreFields) {
         super.fromModel(obj, ArrayUtils.addAll(ignoreFields,
@@ -72,7 +103,9 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getStaticRoutes),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getFirewallIngressRules),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getFirewallEgressRules),
-                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getInitialTools)));
+                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getInitialTools),
+                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAuxiliaryNetworkDnsNameservers),
+                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAuxiliaryNetworkAllocationPools)));
         dnsNameservers = StringUtils.isEmpty(obj.getDnsNameservers()) ? new ArrayList<>()
                 : JsonUtils.parse(obj.getDnsNameservers(), new TypeReference<List<String>>(){});
         allocationPools = StringUtils.isEmpty(obj.getAllocationPools()) ? new ArrayList<>()
@@ -85,6 +118,10 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
                 : JsonUtils.parse(obj.getFirewallEgressRules(), new TypeReference<List<FirewallRule>>(){});
         initialTools = StringUtils.isEmpty(obj.getInitialTools()) ? new ArrayList<>()
                 : JsonUtils.parse(obj.getInitialTools(), new TypeReference<List<InitialTool>>(){});
+        auxiliaryNetworkDnsNameservers = StringUtils.isEmpty(obj.getAuxiliaryNetworkDnsNameservers()) ? new ArrayList<>()
+                : JsonUtils.parse(obj.getAuxiliaryNetworkDnsNameservers(), new TypeReference<List<String>>(){});
+        auxiliaryNetworkAllocationPools = StringUtils.isEmpty(obj.getAuxiliaryNetworkAllocationPools()) ? new ArrayList<>()
+                : JsonUtils.parse(obj.getAuxiliaryNetworkAllocationPools(), new TypeReference<List<AllocationPool>>(){});
     }
 
     @Override
@@ -95,7 +132,9 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getStaticRoutes),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getFirewallIngressRules),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getFirewallEgressRules),
-                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getInitialTools)));
+                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getInitialTools),
+                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAuxiliaryNetworkDnsNameservers),
+                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAuxiliaryNetworkAllocationPools)));
         if (dnsNameservers != null) {
             obj.setDnsNameservers(JsonUtils.toJsonString(dnsNameservers));
         }
@@ -113,6 +152,12 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
         }
         if (initialTools != null) {
             obj.setInitialTools(JsonUtils.toJsonString(initialTools));
+        }
+        if (auxiliaryNetworkDnsNameservers != null) {
+            obj.setAuxiliaryNetworkDnsNameservers(JsonUtils.toJsonString(auxiliaryNetworkDnsNameservers));
+        }
+        if (auxiliaryNetworkAllocationPools != null) {
+            obj.setAuxiliaryNetworkAllocationPools(JsonUtils.toJsonString(auxiliaryNetworkAllocationPools));
         }
         return obj;
     }

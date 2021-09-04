@@ -8,9 +8,13 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.InitiateHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.modelhandler.CloudScenePluginModelHandler;
+import lombok.Data;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -21,21 +25,60 @@ import java.util.List;
 })
 @Component
 @PluginKey(PluginConstant.PLUGIN_KEY)
+@Data
 public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginSceneBO,
         CloudPluginSceneElementBO, CloudPluginSceneElementPortBO> {
 
     private CloudScenePluginModelHandler pluginModelHandler;
 
-    @Override
-    public void init(String sceneId, ScenePluginDataBO pluginDataBO) {
-        pluginModelHandler = new CloudScenePluginModelHandler(this);
-        super.init(sceneId, pluginDataBO);
+    private final List<CloudPluginSceneElementBO> virtualSwitchElements = new ArrayList<>();
+    private final List<CloudPluginSceneElementBO> virtualRouterElements = new ArrayList<>();
+    private final List<CloudPluginSceneElementBO> virtualFirewallElements = new ArrayList<>();
+    private final List<CloudPluginSceneElementBO> virtualMachineElements = new ArrayList<>();
+    private final List<CloudPluginSceneElementBO> containerElements = new ArrayList<>();
+    private final List<CloudPluginSceneElementBO> entityNodeElements = new ArrayList<>();
+
+    private InitiateHandler initiateHandler;
+
+    private void loadCategoryElements() {
+        virtualSwitchElements.clear();
+        virtualRouterElements.clear();
+        virtualFirewallElements.clear();
+        virtualMachineElements.clear();
+        containerElements.clear();
+        entityNodeElements.clear();
+        getElementMap().forEach((nodeId, element) -> {
+            Integer virtualType = element.getVirtualType();
+            if (virtualType == null) {
+                return;
+            }
+            if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH)) {
+                virtualSwitchElements.add(element);
+            } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
+                virtualRouterElements.add(element);
+            } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_FIREWALL)) {
+                virtualFirewallElements.add(element);
+            } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
+                virtualMachineElements.add(element);
+            } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
+                containerElements.add(element);
+            } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE)) {
+                entityNodeElements.add(element);
+            }
+        });
     }
 
     @Override
-    public void init(String sceneId, List<String> elementIds, List<String> elementPortIds) {
+    public void fromData(ScenePluginDataBO pluginData) {
+        super.fromData(pluginData);
+        loadCategoryElements();
+    }
+
+    @Override
+    public void initBase() {
+        super.initBase();
         pluginModelHandler = new CloudScenePluginModelHandler(this);
-        super.init(sceneId, elementIds, elementPortIds);
+        initiateHandler = new InitiateHandler(this);
     }
 
     @Override
@@ -48,6 +91,7 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         pluginModelHandler.loadElements(pluginModelHandler.readElements(getElementIds().toArray(new String[0])));
         pluginModelHandler.loadElementPorts(pluginModelHandler.readElementPorts(getElementPortIds()
                 .toArray(new String[0])));
+        loadCategoryElements();
     }
 
     @Override
@@ -92,6 +136,5 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
 
     @Override
     public void initiate() {
-
     }
 }

@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.scene.core.plugin.base;
 
 import cn.cyberpeace.mp.base.annotation.ClassFieldNames;
+import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.base.util.ClassUtils;
 import cn.cyberpeace.mp.base.util.JsonUtils;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
@@ -46,7 +47,7 @@ public abstract class BasePluginHandler<S, E, P, C extends BasePluginContext<?>>
      * 从场景插件业务数据载入
      * @param pluginData 场景插件业务数据
      */
-    private void fromData(ScenePluginDataBO pluginData) {
+    public void fromData(ScenePluginDataBO pluginData) {
         var sceneSrc = pluginData.getScene();
         if (sceneSrc != null) {
             scene = JsonUtils.mapToBean(sceneSrc, sceneBOClass);
@@ -94,12 +95,16 @@ public abstract class BasePluginHandler<S, E, P, C extends BasePluginContext<?>>
         return pluginData;
     }
 
+    public void initBase() {
+        ClassUtils.loadClassFields(this);
+    }
+
     /**
      * 从场景插件业务数据初始化
      * @param pluginDataBO 场景插件业务数据
      */
     public void init(String sceneId, ScenePluginDataBO pluginDataBO) {
-        ClassUtils.loadClassFields(this);
+        initBase();
         sourceSceneId = sceneId;
         if (pluginDataBO != null) {
             fromData(pluginDataBO);
@@ -111,7 +116,7 @@ public abstract class BasePluginHandler<S, E, P, C extends BasePluginContext<?>>
      * @param sceneId 场景ID
      */
     public void init(String sceneId, List<String> elementIds, List<String> elementPortIds) {
-        ClassUtils.loadClassFields(this);
+        initBase();
         sourceSceneId = sceneId;
         if (elementIds != null) {
             this.elementIds.addAll(elementIds);

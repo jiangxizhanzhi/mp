@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.sceneplugincloud.core.common;
+package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import com.fasterxml.jackson.core.JsonProcessingException;
