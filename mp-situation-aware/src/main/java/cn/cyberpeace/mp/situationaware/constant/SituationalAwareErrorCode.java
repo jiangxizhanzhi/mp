@@ -8,12 +8,12 @@ import cn.cyberpeace.mp.base.service.code.ErrorCode;
   *@Date 9/3/21 10:22 上午
 **/
 public enum SituationalAwareErrorCode implements ErrorCode {
-    PROBE_DELETE_FAIL("SA-1001", "probe delete fail"),
-    PROBE_MODIFY_FAIL("SA-1002", "probe update fail"),
-    PROBE_MODIFY_PARAM_ERROR("SA-1003", "probe update param error"),
-    PROBE_MANAGER_ADD_ERROR("SA-1004", "probe manager add script error"),
-    PROBE_NAME_EXIST("SA-1005", "probe name already exit"),
-    PROBE_MANAGER_ES_QUERY_ERROR("SA-1005", "probe es query error")
+    PROBE_DELETE_FAIL("MP-110401", "probe delete fail"),
+    PROBE_MODIFY_FAIL("MP-110402", "probe update fail"),
+    PROBE_MODIFY_PARAM_ERROR("MP-110403", "probe update param error"),
+    PROBE_MANAGER_ADD_ERROR("MP-110404", "probe manager add script error"),
+    PROBE_NAME_EXIST("MP-110405", "probe name already exit"),
+    PROBE_MANAGER_ES_QUERY_ERROR("MP-110406", "probe es query error")
     ;
 
     SituationalAwareErrorCode(String code, String message) {
