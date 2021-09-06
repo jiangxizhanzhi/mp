@@ -4,26 +4,33 @@ import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.devops.cluster.converter.RealEquipmentConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.RealEquipment;
 import cn.cyberpeace.mp.devops.cluster.converter.model.RealEquipmentConvertModel;
+import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
+import cn.cyberpeace.mp.devops.cluster.enums.ImageTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.model.Device;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.TargetModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.AccessProtocol;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntity;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtGateway;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
+import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentRequest;
 import cn.cyberpeace.mp.devops.cluster.service.DeviceService;
+import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.devops.cluster.service.RealEquipmentService;
 import com.alibaba.fastjson.JSONArray;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,10 +40,17 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
 
     private DeviceService deviceService;
 
+    private DevopsTargetService devopsTargetService;
+
+    private ImageMapper imageMapper;
+
     @Autowired
-    public RealEquipmentConverterImpl(RealEquipmentService realEquipmentService,DeviceService deviceService) {
+    public RealEquipmentConverterImpl(RealEquipmentService realEquipmentService, DeviceService deviceService,
+                                      DevopsTargetService devopsTargetService, ImageMapper imageMapper) {
         this.realEquipmentService = realEquipmentService;
         this.deviceService = deviceService;
+        this.devopsTargetService = devopsTargetService;
+        this.imageMapper = imageMapper;
     }
 
     @Override
@@ -58,14 +72,44 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
     }
 
     @Override
-    public RealEquipmentConvertModel page(RealEquipmentPageRequest request, String... ignoreFields) {
-        ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
-        String getParams = BeanUtils.wrapperGetParamsByObject(Boolean.TRUE,request,ignoreFields);
-        DeviceCloudPlatformModel model = realEquipmentService.page(getParams);
+    public RealEquipmentConvertModel page(RealEquipmentPageRequest request) {
+        ImagePageDTO dto = new ImagePageDTO();
+        dto.setMainCategory(request.getCategory());
+        dto.setSubCategory(request.getSecondCategory());
+        dto.setImageType(ImageTypeEnum.ENTITY.toValue());
+        dto.setUseStatus(request.getUseStatus());
+        dto.setName(request.getName());
+        dto.setInPosition(request.getInPosition());
+        dto.setOffset((request.getPage() - 1) * request.getPerPage());
+        dto.setLimit(request.getPerPage());
+
+        Integer total = imageMapper.totalCount(dto);
+        if (total == 0){
+            return null;
+        }
+        List<TargetModel> targetModels = imageMapper.page(dto);
+
+        List<Integer> ids = targetModels.stream().map(TargetModel::getId).map(Integer::parseInt).collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(ids)){
+            return null;
+        }
+        DeviceCloudPlatformModel model = deviceService.findByIds(ids);
+
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getItems())){
             return null;
         }
-        List<RealEquipment> modelList = model.getItems().stream().map(device -> convertDevice(device)).collect(Collectors.toList());
+
+        Map<String, TargetModel> map = targetModels.stream().collect(Collectors.toMap(TargetModel::getUuid, Function.identity()));
+        List<RealEquipment> modelList = model.getItems().stream().map(device -> {
+            RealEquipment realEquipment = convertDevice(device);
+            TargetModel targetModel = map.get(device.getUuid());
+            if (Objects.nonNull(targetModel)){
+               realEquipment.setInPosition(targetModel.getInPosition());
+               realEquipment.setReferenceStatus(targetModel.getReferenceStatus());
+               realEquipment.setUseStatus(targetModel.getUseStatus());
+            }
+            return realEquipment;
+        }).collect(Collectors.toList());
 
         RealEquipmentConvertModel convertModel = new RealEquipmentConvertModel();
         convertModel.setModelList(modelList);
@@ -79,6 +123,7 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
         return convertDevice(device);
     }
 
+    @Transactional
     @Override
     public RealEquipment add(RealEquipmentRequest request) {
         Device device = convertRequest(request);
@@ -86,6 +131,7 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
             return new RealEquipment();
         }
         Device result = realEquipmentService.add(device);
+        devopsTargetService.insert(result);
         return convertDevice(result);
     }
 
@@ -143,16 +189,8 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
             entity.setAccessProtocolList(JSONArray.parseArray(extEntity.getAccessProtocals(), AccessProtocol.class));
             convertModel.setExtEntity(entity);
         }
-        if (Objects.nonNull(extSystemInfo)){
-            ExtSystemInfo systemInfo = ExtSystemInfo.builder()
-                    .systemType(extSystemInfo.getSystemType()).systemArchitecture(extSystemInfo.getSystemArchitecture())
-                    .language(extSystemInfo.getLanguage()).build();
-            convertModel.setExtSystemInfo(systemInfo);
-        }
-
-        if (Objects.nonNull(extGateway)){
-
-        }
+        convertModel.setExtSystemInfo(extSystemInfo);
+        convertModel.setExtGateway(extGateway);
         return convertModel;
     }
 

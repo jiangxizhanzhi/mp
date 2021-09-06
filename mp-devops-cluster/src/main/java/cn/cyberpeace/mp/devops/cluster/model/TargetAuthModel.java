@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-@Table("mp_devops_images_auth")
-public class ImageAuthModel extends BasePermissionModel {
+@Table("mp_devops_target_auth")
+public class TargetAuthModel extends BasePermissionModel {
 
 }
