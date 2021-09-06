@@ -6,6 +6,7 @@ import okhttp3.*;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthScope;
@@ -13,12 +14,10 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPatch;
-import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.*;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -27,6 +26,7 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -178,17 +178,6 @@ public class HttpUtils {
     public static HttpResponse sendGetForDownLoad(String url) throws IOException {
         HttpClient client = HttpClientBuilder.create().build();
         return doGetRequestForDownload(url, Objects.nonNull(INSTANCE.httpClient) ? INSTANCE.httpClient : client);
-    }
-
-    private static HttpResponse doGetRequestForDownload(String url, HttpClient client) throws IOException {
-        // 替换url中的空格
-        HttpGet httpget = new HttpGet(url);
-        HttpResponse resp = client.execute(httpget);
-        // 设置请求和传输超时时间
-        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
-        httpget.setConfig(Objects.nonNull(INSTANCE.requestConfig) ? INSTANCE.requestConfig : requestConfig);
-        // 获得返回值
-        return resp;
     }
 
     /**
@@ -346,6 +335,70 @@ public class HttpUtils {
         }
 
         return result;
+    }
+
+    public static String sendPut(String url,String content) throws IOException {
+        HttpClient client = HttpClientBuilder.create().build();
+        HttpPut httpPut = new HttpPut(url);
+        // 解决中文乱码问题
+        StringEntity entity = new StringEntity(content, "utf-8");
+        entity.setContentType("application/json");
+        httpPut.setEntity(entity);
+        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(10000).setConnectTimeout(10000).build();
+        HttpResponse response = client.execute(httpPut);
+        httpPut.setConfig(requestConfig);
+        return EntityUtils.toString(response.getEntity(), "UTF-8");
+    }
+
+
+    public static String doFormDataPost(String url,final File file) throws IOException {
+        HttpClient client = INSTANCE.httpClient;
+        HttpPost httpPost = new HttpPost(url);
+
+        //创建 MultipartEntityBuilder,以此来构建我们的参数
+        MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create();
+        //        ContentType contentType = ContentType.create("text/plain", Charset.forName("UTF-8"));
+        //        entityBuilder.addPart("name", new StringBody("value",contentType));
+        //        entityBuilder.addPart("name1", new StringBody("value1",contentType));
+        //        entityBuilder.addPart("name2", new StringBody("value2",contentType));
+        entityBuilder.addBinaryBody("image", file);
+
+        httpPost.setEntity(entityBuilder.build());
+        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(10000).setConnectTimeout(10000).build();
+        httpPost.setConfig(requestConfig);
+        HttpResponse response = client.execute(httpPost);
+        return EntityUtils.toString(response.getEntity(), "UTF-8");
+    }
+
+    public static String doFormDataPost(String url, HttpEntity entity) throws IOException {
+        HttpClient client = INSTANCE.httpClient;
+        HttpPost httpPost = new HttpPost(url);
+        httpPost.setEntity(entity);
+        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(10000).setConnectTimeout(10000).build();
+        httpPost.setConfig(requestConfig);
+        HttpResponse response = client.execute(httpPost);
+        return EntityUtils.toString(response.getEntity(), "UTF-8");
+    }
+
+    public static String doFormDataPut(String url, HttpEntity entity) throws IOException {
+        HttpClient client = INSTANCE.httpClient;
+        HttpPut httpPost = new HttpPut(url);
+        httpPost.setEntity(entity);
+        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(10000).setConnectTimeout(10000).build();
+        httpPost.setConfig(requestConfig);
+        HttpResponse response = client.execute(httpPost);
+        return EntityUtils.toString(response.getEntity(), "UTF-8");
+    }
+
+    private static HttpResponse doGetRequestForDownload(String url, HttpClient client) throws IOException {
+        // 替换url中的空格
+        HttpGet httpget = new HttpGet(url);
+        HttpResponse resp = client.execute(httpget);
+        // 设置请求和传输超时时间
+        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
+        httpget.setConfig(Objects.nonNull(INSTANCE.requestConfig) ? INSTANCE.requestConfig : requestConfig);
+        // 获得返回值
+        return resp;
     }
 
 }
