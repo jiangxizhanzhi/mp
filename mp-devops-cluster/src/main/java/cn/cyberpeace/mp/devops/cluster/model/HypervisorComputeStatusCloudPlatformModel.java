@@ -15,27 +15,27 @@ public class HypervisorComputeStatusCloudPlatformModel extends BaseCloudPlatform
     /**
      * 磁盘信息
      */
-    private DiskData disk_data;
+    private DiskData diskData;
 
     /**
      * 磁盘IO
      */
-    private Map<String,Object> disk_io;
+    private Map<String,Object> diskIo;
 
     /**
      * 内存信息
      */
-    private MemoryData memory_data;
+    private MemoryData memoryData;
 
     /**
      * CPU信息
      */
-    private CpuData cpu_data;
+    private CpuData cpuData;
 
     /**
      * 网络IO
      */
-    private Map<String,Object> net_io;
+    private Map<String,Object> netIo;
 
     @Data
     @NoArgsConstructor
@@ -65,27 +65,27 @@ public class HypervisorComputeStatusCloudPlatformModel extends BaseCloudPlatform
         /**
          * read_count/write_count
          */
-        private BigDecimal rc_wc;
+        private BigDecimal rcWc;
 
         /**
          * read_bytes/write_bytes
          */
-        private BigDecimal rb_wb;
+        private BigDecimal rbWb;
 
         /**
          * read_time/write_time
          */
-        private BigDecimal rt_wt;
+        private BigDecimal rtWt;
 
         /**
          * read_merged_count/write_merged_count
          */
-        private BigDecimal rmc_wmc;
+        private BigDecimal rmcWmc;
 
         /**
          *
          */
-        private Integer busy_time;
+        private Integer busyTime;
     }
 
     @Data
@@ -113,9 +113,9 @@ public class HypervisorComputeStatusCloudPlatformModel extends BaseCloudPlatform
     @AllArgsConstructor
     public static final class CpuData{
 
-        private Integer cpu_count;
+        private Integer cpuCount;
 
-        private BigDecimal cpu_use;
+        private BigDecimal cpuUse;
     }
 
     @Data
@@ -126,11 +126,11 @@ public class HypervisorComputeStatusCloudPlatformModel extends BaseCloudPlatform
         /**
          * bytes_sent/bytes_recv
          */
-        private BigDecimal bs_br;
+        private BigDecimal bsBr;
 
         /**
          * packets_sent/packets_recv
          */
-        private BigDecimal packets_sent_packets_recv;
+        private BigDecimal packetsSentPacketsRecv;
     }
 }

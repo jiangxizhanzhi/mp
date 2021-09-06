@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.cyberpeace.mp.devops.cluster.repository.ImageMapper">
+
+    <resultMap id="BaseResultMap" type="cn.cyberpeace.mp.devops.cluster.model.ImageModel">
+        <id column="pk" property="pk"/>
+        <result column="id"  property="id"/>
+        <result column="uuid"  property="uuid"/>
+        <result column="name"  property="name"/>
+        <result column="main_category"  property="mainCategory"/>
+        <result column="sub_category" property="subCategory"/>
+        <result column="image_type" property="imageType"/>
+        <result column="is_public" property="isPublic" typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler"/>
+        <result column="quick_create_support" property="quickCreateSupport" typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler"/>
+    </resultMap>
+
+    <sql id="commonWhere">
+        <if test=" owner != null">
+            left join mp_devops_images_auth a on i.id = a.target
+        </if>
+        <where>
+            <if test=" name != null and name != ''">
+                and i.name like CONCAT('%',#{name},'%')
+            </if>
+            <if test=" mainCategory != null">
+                and i.main_category = #{mainCategory}
+            </if>
+            <if test=" subCategory != null">
+                and i.sub_category = #{subCategory}
+            </if>
+            <if test=" imageType != null and imageType != '' ">
+                and i.image_type = #{imageType}
+            </if>
+            <if test=" quickCreateSupport != null">
+                and i.quick_create_support = #{quickCreateSupport,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler}
+            </if>
+            <if test=" owner != null and isPublic != null">
+                and ( a.owner = #{owner} or i.is_public = #{isPublic,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler} )
+            </if>
+        </where>
+    </sql>
+    
+    <select id="totalCount" parameterType="cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO"  resultType="java.lang.Integer">
+        select
+               count(i.pk)
+        from
+        mp_devops_images i
+        <include refid="commonWhere"/>
+    </select>
+
+    <select id="page" parameterType="cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO" resultMap="BaseResultMap">
+        select
+            i.pk,i.id,i.uuid,i.name,i.main_category,i.sub_category,i.image_type,i.is_public,i.quick_create_support
+        from
+            mp_devops_images i
+        <include refid="commonWhere"/>
+        ORDER BY i.create_time desc
+        limit #{offset}, #{limit}
+    </select>
+
+    <insert id="insert" parameterType="cn.cyberpeace.mp.devops.cluster.model.ImageModel">
+        insert into mp_devops_images
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="uuid != null">
+                uuid,
+            </if>
+            <if test="name != null">
+                name,
+            </if>
+            <if test="mainCategory != null">
+                main_category,
+            </if>
+            <if test="subCategory != null">
+                sub_category,
+            </if>
+            <if test="role != null">
+                role,
+            </if>
+            <if test="imageType != null">
+                image_type,
+            </if>
+            <if test="isPublic != null">
+                is_public,
+            </if>
+            <if test="quickCreateSupport != null">
+                quick_create_support,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+            <if test="updateTime != null">
+                update_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id},
+            </if>
+            <if test="uuid != null">
+                #{uuid},
+            </if>
+            <if test="name != null">
+                #{name},
+            </if>
+            <if test="mainCategory != null">
+                #{mainCategory},
+            </if>
+            <if test="subCategory != null">
+                #{subCategory},
+            </if>
+            <if test="role != null">
+                #{role},
+            </if>
+            <if test="imageType != null">
+                #{imageType},
+            </if>
+            <if test="isPublic != null">
+                #{isPublic,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
+            </if>
+            <if test="quickCreateSupport != null">
+                #{quickCreateSupport,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
+            </if>
+            <if test="createTime != null">
+                #{createTime},
+            </if>
+            <if test="updateTime != null">
+                #{updateTime},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateById"
+            parameterType="cn.cyberpeace.mp.devops.cluster.model.ImageModel">
+        update mp_devops_images
+        <set>
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="mainCategory != null">
+                main_category = #{mainCategory},
+            </if>
+            <if test="subCategory != null">
+                sub_category = #{subCategory},
+            </if>
+            <if test="imageType != null">
+                image_type = #{imageType},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime},
+            </if>
+            <if test="isPublic != null">
+                is_public = #{is_public,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler}
+            </if>
+        </set>
+        where uuid = #{uuid}
+    </update>
+
+    <delete id="delete" parameterType="cn.cyberpeace.mp.devops.cluster.dto.ImageDeleteDTO">
+        delete from mp_devops_images
+        <where>
+            <if test="ids != null and ids.size > 0">
+                 id in
+                <foreach collection="ids" item="item" index="index"  open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </delete>
+</mapper>

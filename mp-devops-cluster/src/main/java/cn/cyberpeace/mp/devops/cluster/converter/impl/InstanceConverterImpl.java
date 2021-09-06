@@ -6,7 +6,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.InstanceConvertModel;
 import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
 import cn.cyberpeace.mp.devops.cluster.model.InstanceCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.request.InstancePageRequest;
-import cn.cyberpeace.mp.devops.cluster.service.InstanceService;
+import cn.cyberpeace.mp.devops.cluster.service.VmService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,11 +20,11 @@ import java.util.stream.Collectors;
 @Service
 public class InstanceConverterImpl implements InstanceConverter {
 
-    private InstanceService instanceService;
+    private VmService vmService;
 
     @Autowired
-    public InstanceConverterImpl(InstanceService instanceService) {
-        this.instanceService = instanceService;
+    public InstanceConverterImpl(VmService vmService) {
+        this.vmService = vmService;
     }
 
     @Override
@@ -43,7 +43,7 @@ public class InstanceConverterImpl implements InstanceConverter {
     public InstanceConvertModel page(InstancePageRequest request, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         String getParams = BeanUtils.wrapperGetParamsByObject(request,ignoreFields);
-        InstanceCloudPlatformModel model = instanceService.page(getParams);
+        InstanceCloudPlatformModel model = vmService.page(getParams);
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getInstances())){
             return null;
         }
@@ -51,7 +51,7 @@ public class InstanceConverterImpl implements InstanceConverter {
                 InstanceConvertModel.Model.builder().name(instanceModel.getName()).node(instanceModel.getHostname())
                         .addressList(instanceModel.getAddresses().stream().map(InstanceCloudPlatformModel.InstanceModel.Address::getIp)
                                 .collect(Collectors.toList()))
-                        .status(CloudPlatformEnum.fromValue(instanceModel.getStatus())).createTime(instanceModel.getCreated_at()).build()
+                        .status(CloudPlatformEnum.fromValue(instanceModel.getStatus())).createTime(instanceModel.getCreatedAt()).build()
         ).collect(Collectors.toList());
         InstanceConvertModel convertModel = new InstanceConvertModel();
         convertModel.setModelList(list);
@@ -62,7 +62,7 @@ public class InstanceConverterImpl implements InstanceConverter {
     @Override
     public Integer getTotalInstances(InstancePageRequest request) {
         String getParams = BeanUtils.wrapperGetParamsByObject(request,this.getTotalPageIgnoreField());
-        InstanceCloudPlatformModel page = instanceService.page(getParams);
+        InstanceCloudPlatformModel page = vmService.page(getParams);
         return Objects.isNull(page) ||  Objects.isNull(page.getTotal()) ? NumberUtils.INTEGER_ZERO : page.getTotal() ;
     }
 }

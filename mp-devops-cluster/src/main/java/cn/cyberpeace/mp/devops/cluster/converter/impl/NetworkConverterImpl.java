@@ -50,11 +50,11 @@ public class NetworkConverterImpl implements NetworkConverter {
             NetworkCloudPlatformModel.NetworkModel.Subnet subnet = networkModel.getSubnet();
             List<NetworkPageConverterModel.Model.Subnet> subnets = Lists.newArrayList();
             if (Objects.nonNull(subnet)) {
-                subnets = List.of(new NetworkPageConverterModel.Model.Subnet(subnet.getId(), subnet.getCidr(), subnet.getGateway_ip()));
+                subnets = List.of(new NetworkPageConverterModel.Model.Subnet(subnet.getId(), subnet.getCidr(), subnet.getGatewayIp()));
             }
-            return  NetworkPageConverterModel.Model.builder().name(networkModel.getName()).networkType(networkModel.getNetwork_type())
+            return  NetworkPageConverterModel.Model.builder().name(networkModel.getName()).networkType(networkModel.getNetworkType())
                     .status(CloudPlatformEnum.fromValue(networkModel.getStatus()))
-                    .subnets(subnets).createdAt(networkModel.getCreated_at()).build();
+                    .subnets(subnets).createdAt(networkModel.getCreatedAt()).build();
         }).collect(Collectors.toList());
         NetworkPageConverterModel convertModel = new NetworkPageConverterModel();
         convertModel.setModelList(list);

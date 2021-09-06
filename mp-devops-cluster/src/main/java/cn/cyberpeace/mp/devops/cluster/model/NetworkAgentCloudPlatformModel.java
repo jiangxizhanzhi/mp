@@ -35,7 +35,7 @@ public class NetworkAgentCloudPlatformModel extends BaseCloudPlatformModel imple
         /**
          * agent_type
          */
-        private String agent_type;
+        private String agentType;
 
         /**
          * binary
@@ -55,22 +55,22 @@ public class NetworkAgentCloudPlatformModel extends BaseCloudPlatformModel imple
         /**
          * admin_state_up
          */
-        private Boolean admin_state_up;
+        private Boolean adminStateUp;
 
         /**
          *
          */
-        private String created_at;
+        private String createdAt;
 
         /**
          *
          */
-        private String started_at;
+        private String startedAt;
 
         /**
          *
          */
-        private String heartbeat_timestamp;
+        private String heartbeatTimestamp;
 
         /**
          * 描述
@@ -80,12 +80,12 @@ public class NetworkAgentCloudPlatformModel extends BaseCloudPlatformModel imple
         /**
          * resources_synced
          */
-        private Object resources_synced;
+        private Object resourcesSynced;
 
         /**
          *
          */
-        private String availability_zone;
+        private String availabilityZone;
 
         /**
          *
@@ -99,11 +99,11 @@ public class NetworkAgentCloudPlatformModel extends BaseCloudPlatformModel imple
         @AllArgsConstructor
         public static final class Configurations{
 
-            private String dhcp_driver;
+            private String dhcpDriver;
 
-            private Long dhcp_lease_duration;
+            private Long dhcpLeaseDuration;
 
-            private Boolean log_agent_heartbeats;
+            private Boolean logAgentHeartbeats;
 
             private Integer networks;
 

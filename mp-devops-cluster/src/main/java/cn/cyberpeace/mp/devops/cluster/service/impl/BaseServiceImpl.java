@@ -1,15 +1,23 @@
 package cn.cyberpeace.mp.devops.cluster.service.impl;
 
-import cn.cyberpeace.mp.auth.extensions.security.common.JwtCommon;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
+import cn.cyberpeace.mp.devops.cluster.config.HttpDeleteWithBody;
 import cn.cyberpeace.mp.devops.cluster.model.BaseModel;
+import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
@@ -51,6 +59,22 @@ public class BaseServiceImpl {
      * @param url
      * @return
      */
+    protected HttpResponse downLoad(String url){
+        HttpResponse result = null;
+        try {
+            result = HttpUtils.getInstance().sendGetForDownLoad(url);
+            log.info("=====GET调用url：{},对应返回结果信息：{}",url,result);
+        } catch (IOException e) {
+            log.info("=====GET调用url：{},对应返回结果信息：{},报错信息：{}",url,result,e.getMessage());
+        }
+        return result;
+    }
+
+    /**
+     * 通过Get方式查询信息
+     * @param url
+     * @return
+     */
     protected String sendGet(String url,Map<String,String> headers){
         String result = "";
         try {
@@ -73,8 +97,9 @@ public class BaseServiceImpl {
         T model = null;
         String result = "";
         try {
-            result = this.sendGet(url);
-            model = objectMapper.readValue(result,valueType);
+            result =  HttpUtils.getInstance().sendGet(url);
+            log.info("=====GET调用url：{},对应返回结果信息：{}",url,result);
+            model = JsonUtils.toSnakeObject(result,valueType);
         } catch (IOException e) {
             log.info("=====GET调用url：{},对应返回结果信息：{},报错信息：{}",url,result,e.getMessage());
         }
@@ -93,8 +118,8 @@ public class BaseServiceImpl {
         T model = null;
         String result = "";
         try {
-            result = this.sendGet(url,headers);
-            model = objectMapper.readValue(result,valueType);
+            result =  HttpUtils.getInstance().sendGet(url,headers);
+            model = JsonUtils.toSnakeObject(result,valueType);
         } catch (IOException e) {
             log.info("=====GET调用url：{},对应返回结果信息：{},报错信息：{}",url,result,e.getMessage());
         }
@@ -130,12 +155,130 @@ public class BaseServiceImpl {
         T model = null;
         String result = "";
         try {
-            result = this.sendPost(url,body);
-            model = objectMapper.readValue(result,valueType);
+            result = HttpUtils.getInstance().sendPost(url,body);
+            log.info("=====POST调用url：{},参数：{},对应返回结果信息：{}",url,body,result);
+            model = JsonUtils.toSnakeObject(result,valueType);
         } catch (IOException e) {
             log.info("=====POST调用url：{},参数：{},对应返回结果信息：{},报错信息：{}",url,body,result,e.getMessage());
         }
         return model;
     }
 
+    /**
+     * 通过PUT方式更新信息
+     * @param url
+     * @param body
+     * @return
+     */
+    protected String sendPut(String url,String body){
+        String result = "";
+        try {
+            result = HttpUtils.getInstance().sendPut(url,body);
+            log.info("=====PUT调用url：{},参数：{},对应返回结果信息：{}",url,body,result);
+        } catch (IOException e) {
+            log.info("=====PUT调用url：{},参数：{},对应返回结果信息：{},报错信息：{}",url,body,result,e.getMessage());
+        }
+        return result;
+    }
+
+    /**
+     * 通过PUT方式更新信息
+     * @param url
+     * @param body
+     * @param valueType
+     * @param <T>
+     * @return
+     */
+    protected <T extends BaseModel> T sendPut(String url,String body,Class<T> valueType){
+        T model = null;
+        String result = "";
+        try {
+            result =  HttpUtils.getInstance().sendPut(url,body);
+            model = JsonUtils.toSnakeObject(result,valueType);
+        } catch (IOException e) {
+            log.info("=====PUT调用url：{},参数：{},对应返回结果信息：{},报错信息：{}",url,body,result,e.getMessage());
+        }
+        return model;
+    }
+
+    /**
+     * 通过Delete方式删除数据
+     * @param url
+     * @param body
+     * @return
+     */
+    private String sendDelete(String url,String body){
+        String result = "";
+        try {
+            HttpClient client = HttpClientBuilder.create().build();
+            HttpDeleteWithBody httpDelete = new HttpDeleteWithBody(url);
+            StringEntity entity = new StringEntity(body, "utf-8");
+            entity.setContentType("application/json");
+            httpDelete.setEntity(entity);
+            HttpResponse resp = client.execute(httpDelete);
+            // 设置请求和传输超时时间
+            RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
+            httpDelete.setConfig(requestConfig);
+            result =  EntityUtils.toString(resp.getEntity(), "UTF-8");
+            log.info("=====DELETE调用url：{},参数：{},对应返回结果信息：{}",url,body,result);
+        } catch (IOException e) {
+            log.info("=====DELETE调用url：{},参数：{},对应返回结果信息：{},报错信息：{}",url,body,result,e.getMessage());
+        }
+        return result;
+    }
+
+    /**
+     * 删除
+     * @param url
+     * @param body
+     * @param valueType
+     * @param <T>
+     * @return
+     */
+    protected <T extends BaseModel> T sendDelete(String url,String body,Class<T> valueType){
+        T model = null;
+        String result = "";
+        try {
+            result = this.sendDelete(url,body);
+            model = JsonUtils.toSnakeObject(result,valueType);
+        } catch (IOException e) {
+            log.info("=====DELETE调用url：{},参数：{},对应返回结果信息：{},报错信息：{}",url,body,result,e.getMessage());
+        }
+        return model;
+    }
+
+
+    protected String sendFormDataPost(String url, File file){
+        try {
+            return HttpUtils.doFormDataPost(url,file);
+        } catch (Exception e) {
+            log.error("上传文件失败，失败信息：{}",e.getMessage());
+        }
+        return null;
+    }
+
+    protected <T extends BaseModel> T sendFormDataPost(String url, HttpEntity httpEntity ,Class<T> valueType){
+        T model = null;
+        String result = "";
+        try {
+            result = HttpUtils.doFormDataPost(url,httpEntity);
+            model = JsonUtils.toSnakeObject(result,valueType);
+        } catch (Exception e) {
+            log.error("上传文件失败，失败信息：{}",e);
+        }
+        return model;
+    }
+
+
+    protected <T extends BaseModel> T sendFormDataPut(String url, HttpEntity httpEntity ,Class<T> valueType){
+        T model = null;
+        String result = "";
+        try {
+            result = HttpUtils.doFormDataPut(url,httpEntity);
+            model = JsonUtils.toSnakeObject(result,valueType);
+        } catch (Exception e) {
+            log.error("上传文件失败，失败信息：{}",e);
+        }
+        return model;
+    }
 }
