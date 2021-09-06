@@ -72,5 +72,17 @@ public class RealEquipmentPageResponse  extends BaseCloudPlatformResponse{
      * 在位状态
      */
     @ApiModelProperty(value = "在位状态")
-    private Boolean status;
+    private Boolean inPosition;
+
+    /**
+     * 引用状态
+     */
+    @ApiModelProperty(value = "引用状态")
+    private Integer referenceStatus;
+
+    /**
+     * 使用状态
+     */
+    @ApiModelProperty(value = "使用状态")
+    private Integer useStatus;
 }
