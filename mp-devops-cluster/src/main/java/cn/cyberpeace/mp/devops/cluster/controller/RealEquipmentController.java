@@ -8,9 +8,12 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.RealEquipment;
 import cn.cyberpeace.mp.devops.cluster.converter.model.RealEquipmentConvertModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntity;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentDeleteRequest;
+import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentNetworkCardPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentRequest;
 import cn.cyberpeace.mp.devops.cluster.response.RealEquipmentByIdResponse;
+import cn.cyberpeace.mp.devops.cluster.response.RealEquipmentDevopsDetailResponse;
+import cn.cyberpeace.mp.devops.cluster.response.RealEquipmentNetworkCardPageResponse;
 import cn.cyberpeace.mp.devops.cluster.response.RealEquipmentPageResponse;
 import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
 import cn.cyberpeace.mp.devops.cluster.response.base.Result;
@@ -60,7 +63,7 @@ public class RealEquipmentController {
                 response.setModel(extEntity.getStyle());
                 response.setParams(extEntity.getParams());
                 response.setEntityType(extEntity.getAccessType());
-                response.setStatus(extEntity.getEntityStatus());
+                response.setInPosition(extEntity.getEntityStatus());
                 response.setEntityDetail(extEntity.getAccessProtocals());
             }
             return response;
@@ -114,5 +117,17 @@ public class RealEquipmentController {
         return new Result<>(result);
     }
 
+    @ApiOperation("查询详情")
+    @GetMapping("/get-devops-details")
+    public Result<RealEquipmentDevopsDetailResponse> findDevopsDetails(@RequestParam("uuid") String id){
+        return new Result<>(new RealEquipmentDevopsDetailResponse());
+    }
+
+
+    @ApiOperation("接口资源")
+    @GetMapping("/network-card")
+    public PageResult<RealEquipmentNetworkCardPageResponse> pageNetworkCard(RealEquipmentNetworkCardPageRequest request){
+        return new PageResult<>(Lists.newArrayList(),100);
+    }
 
 }
