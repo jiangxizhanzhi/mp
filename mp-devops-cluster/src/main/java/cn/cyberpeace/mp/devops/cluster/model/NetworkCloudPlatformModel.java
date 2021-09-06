@@ -45,7 +45,7 @@ public class NetworkCloudPlatformModel extends BaseCloudPlatformModel implements
         /**
          * 网络类型：flat、vlan、vxlan、gre
          */
-        private String network_type;
+        private String networkType;
 
         /**
          * mtu大小
@@ -55,22 +55,22 @@ public class NetworkCloudPlatformModel extends BaseCloudPlatformModel implements
         /**
          * 段ID
          */
-        private Integer segmentation_id;
+        private Integer segmentationId;
 
         /**
          *
          */
-        private Integer port_limit;
+        private Integer portLimit;
 
         /**
          * 端口安全开启状态
          */
-        private Boolean port_security_enabled;
+        private Boolean portSecurityEnabled;
 
         /**
          *
          */
-        private String bridge_name;
+        private String bridgeName;
 
         /**
          *
@@ -80,7 +80,7 @@ public class NetworkCloudPlatformModel extends BaseCloudPlatformModel implements
         /**
          *
          */
-        private String mechanism_driver;
+        private String mechanismDriver;
 
         /**
          * 子网信息
@@ -90,7 +90,7 @@ public class NetworkCloudPlatformModel extends BaseCloudPlatformModel implements
         /**
          * 关联的QOS策略ID
          */
-        private String qos_policy_id;
+        private String qosPolicyId;
 
         /**
          * 状态：ACTIVE、DOWN、BUILD、ERROR
@@ -105,11 +105,11 @@ public class NetworkCloudPlatformModel extends BaseCloudPlatformModel implements
         /**
          * 创建时间
          */
-        private String created_at;
+        private String createdAt;
         /**
          * 更新时间
          */
-        private String updated_at;
+        private String updatedAt;
 
         @Data
         @NoArgsConstructor
@@ -128,32 +128,32 @@ public class NetworkCloudPlatformModel extends BaseCloudPlatformModel implements
             /**
              * IP版本
              */
-            private Integer ip_version;
+            private Integer ipVersion;
 
             /**
              * 网关ip
              */
-            private String gateway_ip;
+            private String gatewayIp;
 
             /**
              * DHCP开启状态
              */
-            private Boolean enable_dhcp;
+            private Boolean enableDhcp;
 
             /**
              * 分配池列表
              */
-            private List<AllocationPools> allocation_pools;
+            private List<AllocationPools> allocationPools;
 
             /**
              * DNS域名服务器列表
              */
-            private List<Object> dns_nameservers;
+            private List<Object> dnsNameservers;
 
             /**
              * 主机路由
              */
-            private List<Object> host_routes;
+            private List<Object> hostRoutes;
 
             @Data
             @NoArgsConstructor

@@ -6,6 +6,7 @@ import okhttp3.*;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthScope;
@@ -19,6 +20,7 @@ import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -27,6 +29,7 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -175,7 +178,19 @@ public class HttpUtils {
      * @return
      * @throws IOException
      */
-    public static String sendGet(String url, Map<String, String> headerMap) throws IOException {
+    public static HttpResponse sendGetForDownLoad(String url) throws IOException {
+        HttpClient client = HttpClientBuilder.create().build();
+        return doGetRequestForDownload(url, Objects.nonNull(INSTANCE.httpClient) ? INSTANCE.httpClient : client);
+    }
+
+    /**
+     * get请求
+     *
+     * @param url
+     * @return
+     * @throws IOException
+     */
+    public static String sendGet(String url,Map<String,String> headerMap) throws IOException {
         HttpClient client = HttpClientBuilder.create().build();
         return doGetRequest(url, headerMap, Objects.nonNull(INSTANCE.httpClient) ? INSTANCE.httpClient : client);
     }

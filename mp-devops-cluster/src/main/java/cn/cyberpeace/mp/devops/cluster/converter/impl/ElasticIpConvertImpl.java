@@ -28,12 +28,12 @@ public class ElasticIpConvertImpl implements ElasticIpConverter {
 
     @Override
     public String[] getDefaultPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldName(ElasticIpPageRequest::getPage,ElasticIpPageRequest::getPerPage);
+        return BeanUtils.getBeanGetterFieldNames(ElasticIpPageRequest::getPage,ElasticIpPageRequest::getPerPage);
     }
 
     @Override
     public String[] getTotalPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldName(ElasticIpPageRequest::getLimit,ElasticIpPageRequest::getOffset,
+        return BeanUtils.getBeanGetterFieldNames(ElasticIpPageRequest::getLimit,ElasticIpPageRequest::getOffset,
                 ElasticIpPageRequest::getPage,ElasticIpPageRequest::getPerPage);
     }
 
@@ -46,10 +46,10 @@ public class ElasticIpConvertImpl implements ElasticIpConverter {
             return null;
         }
         List<ElasticIpConvertModel.Model> list = model.getFloatingips().stream().map(elasticIpModel ->
-                ElasticIpConvertModel.Model.builder().floatIpAddress(elasticIpModel.getFloating_ip_address())
-                        .fixedIpAddress(elasticIpModel.getFixed_ip_address())
+                ElasticIpConvertModel.Model.builder().floatIpAddress(elasticIpModel.getFloatingIpAddress())
+                        .fixedIpAddress(elasticIpModel.getFixedIpAddress())
                         .status(CloudPlatformEnum.fromValue(elasticIpModel.getStatus()))
-                        .createdAt(elasticIpModel.getCreated_at()).build()
+                        .createdAt(elasticIpModel.getCreatedAt()).build()
         ).collect(Collectors.toList());
 
         ElasticIpConvertModel convertModel = new ElasticIpConvertModel();

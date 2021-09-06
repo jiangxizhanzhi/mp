@@ -10,7 +10,7 @@ import cn.cyberpeace.mp.auth.model.UserPermissionModel;
 import cn.cyberpeace.mp.auth.repository.UserPermissionMapper;
 import cn.cyberpeace.mp.auth.service.OrgPermissionService;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
-import cn.cyberpeace.mp.auth.service.RolePermissionService;
+import cn.cyberpeace.mp.auth.service.RolePermissionModelService;
 import cn.cyberpeace.mp.auth.service.TargetService;
 import cn.cyberpeace.mp.auth.service.UserPermissionService;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
@@ -39,6 +39,11 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @Service
 public class UserPermissionServiceImpl
         extends BaseModelServiceImpl<UserPermissionModel, UserPermissionMapper, UserPermissionFields, QueryParams>
@@ -48,7 +53,7 @@ public class UserPermissionServiceImpl
     private UserRoleService userRoleService;
 
     @Autowired
-    private RolePermissionService rolePermissionService;
+    private RolePermissionModelService rolePermissionService;
 
     @Autowired
     private TargetService targetService;
@@ -69,7 +74,7 @@ public class UserPermissionServiceImpl
     }
 
     @Override
-    public List<TargetModel> listByUserId(String userId) {
+    public List<TargetModel> listTargetsByUserId(String userId) {
         Assert.notBlank(userId, "userId不能为空！");
         Set<TargetModel> authorizedTargetsSet = new HashSet<>();
 
@@ -92,7 +97,7 @@ public class UserPermissionServiceImpl
         });
 
         // 用户直接绑定的target
-        List<TargetModel> userTargets = getModelMapper().listByUserId(userId);
+        List<TargetModel> userTargets = getModelMapper().listTargetsByUserId(userId);
         authorizedTargetsSet.addAll(userTargets);
 
         // 用户所在组织绑定的target
@@ -110,9 +115,18 @@ public class UserPermissionServiceImpl
     }
 
     @Override
+    public List<UserModel> listUsersByTargetId(String targetId) {
+        Assert.notEmpty("target id should not be null");
+
+        List<UserModel> users = getModelMapper().listUsersByTargetId(targetId);
+
+        return users;
+    }
+
+    @Override
     public List<TargetModel> listMenusByUserId(String userId) {
         Assert.notBlank(userId, "userId不能为空！");
-        List<TargetModel> targets = listByUserId(userId);
+        List<TargetModel> targets = listTargetsByUserId(userId);
         if (CollectionUtil.isNotEmpty(targets)) {
             return targets.stream().filter(t -> Objects.equals(t.getType(), TargetModel.TYPE_MENU)).collect(Collectors.toList());
         }
@@ -121,7 +135,7 @@ public class UserPermissionServiceImpl
 
 
     public List<TargetDto> getTreeByUserId(String userId) {
-        List<TargetModel> targets = listByUserId(userId);
+        List<TargetModel> targets = listTargetsByUserId(userId);
         if (CollectionUtil.isEmpty(targets)) {
             return new ArrayList<>();
         }

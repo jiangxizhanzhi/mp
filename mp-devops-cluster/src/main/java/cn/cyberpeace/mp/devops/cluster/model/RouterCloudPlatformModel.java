@@ -45,7 +45,7 @@ public class RouterCloudPlatformModel extends BaseCloudPlatformModel implements 
         /**
          * 外部网关信息
          */
-        private ExternalGateway external_gateway;
+        private ExternalGateway externalGateway;
 
         /**
          * 路由器规则列表
@@ -70,11 +70,11 @@ public class RouterCloudPlatformModel extends BaseCloudPlatformModel implements 
         /**
          * 创建时间
          */
-        private String created_at;
+        private String createdAt;
         /**
          * 更新时间
          */
-        private String updated_at;
+        private String updatedAt;
 
         @Data
         @NoArgsConstructor
@@ -84,12 +84,12 @@ public class RouterCloudPlatformModel extends BaseCloudPlatformModel implements 
             /**
              * 外部网络ID
              */
-            private String network_id;
+            private String networkId;
 
             /**
              * 外部网关地址
              */
-            private String fixed_ip;
+            private String fixedIp;
 
         }
 
@@ -101,17 +101,17 @@ public class RouterCloudPlatformModel extends BaseCloudPlatformModel implements 
             /**
              * 外部网络ID
              */
-            private String network_id;
+            private String networkId;
 
             /**
              * 外部网关地址
              */
-            private String fixed_ip;
+            private String fixedIp;
 
             /**
              * 端口ID
              */
-            private String port_id;
+            private String portId;
         }
 
         @Data

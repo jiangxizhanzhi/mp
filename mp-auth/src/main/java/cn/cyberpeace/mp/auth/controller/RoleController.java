@@ -38,6 +38,11 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.List;
 
+/**
+ * @Description: 角色管理接口
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @Api(value = "角色管理接口", tags = "AUTH-角色管理接口")
 @Slf4j
 @RestController
@@ -107,30 +112,30 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
     @ApiOperation(value = "创建角色，同时完成角色-权限绑定关系", notes = "")
     @PostMapping("/add")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.CREATE, title = "新增角色", target = AuthLogConstant.TARGET_ROLE)
-    public ServiceResult add(@RequestBody @Validated RoleRequest createRequest) {
+    public ServiceResult<RoleModel> add(@RequestBody @Validated RoleRequest createRequest) {
         RoleModel roleModel = getModelService().add(createRequest);
-        return ResultUtils.commonResult(true, roleModel);
+        return ServiceResult.success(roleModel);
     }
 
 
     @ApiOperation(value = "更新角色，同时完成角色-权限绑定关系", notes = "")
     @PostMapping("modify")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "修改角色", target = AuthLogConstant.TARGET_ROLE)
-    public ServiceResult modify(@RequestBody @Validated RoleRequest modifyRequest) {
+    public ServiceResult<RoleModel> modify(@RequestBody @Validated RoleRequest modifyRequest) {
         RoleModel roleModel = getModelService().modify(modifyRequest);
-        return ResultUtils.commonResult(true, roleModel);
+        return ServiceResult.success(roleModel);
     }
 
     @ApiOperation(value = "根据租户查询所有角色", notes = "")
     @GetMapping("/bytenant")
-    public ServiceResult getRoleByTenant(@RequestParam(required = false) String tenant) {
+    public ServiceResult<List<RoleModel>> getRoleByTenant(@RequestParam(required = false) String tenant) {
         List<RoleModel> roles;
         if (StringUtils.isNotBlank(tenant)) {
             roles = getModelService().listByTenantId(tenant);
         } else {
             roles = getModelService().listAll();
         }
-        return ServiceResult.builder().source(roles).build().asResult();
+        return ServiceResult.success(roles);
     }
 
 
@@ -146,9 +151,9 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
 
     @ApiOperation(value = "查询所有角色", notes = "")
     @GetMapping("/all")
-    public ServiceResult getRoleByTenant() {
+    public ServiceResult<List<RoleModel>> getRoleByTenant() {
         List<RoleModel> roles = getModelService().listAll();
-        return ServiceResult.builder().source(roles).build().asResult();
+        return ServiceResult.success(roles);
     }
 
 

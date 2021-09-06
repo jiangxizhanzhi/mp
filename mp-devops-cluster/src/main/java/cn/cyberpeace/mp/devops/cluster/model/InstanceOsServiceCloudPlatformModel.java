@@ -60,11 +60,11 @@ public class InstanceOsServiceCloudPlatformModel extends BaseCloudPlatformModel 
         /**
          *
          */
-        private String disabled_reason;
+        private String disabledReason;
 
         /**
          *
          */
-        private String updated_at;
+        private String updatedAt;
     }
 }

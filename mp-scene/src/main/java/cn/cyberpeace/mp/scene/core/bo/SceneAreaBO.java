@@ -5,7 +5,7 @@ import cn.cyberpeace.mp.scene.model.SceneAreaModel;
 import lombok.Data;
 
 @Data
-public class SceneAreaBO extends BaseSceneAreaBO<SceneAreaModel> {
+public class SceneAreaBO extends BaseSceneAreaBO<SceneAreaModel, SceneAreaBO> {
 
     @Override
     public SceneAreaModel createModel() {

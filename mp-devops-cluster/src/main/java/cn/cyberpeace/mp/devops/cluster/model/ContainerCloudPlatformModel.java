@@ -51,7 +51,7 @@ public class ContainerCloudPlatformModel extends BaseCloudPlatformModel implemen
         /**
          * 镜像驱动
          */
-        private String image_driver;
+        private String imageDriver;
 
         /**
          * 主机名/节点名称
@@ -144,11 +144,11 @@ public class ContainerCloudPlatformModel extends BaseCloudPlatformModel implemen
         /**
          * 创建时间
          */
-        private String created_at;
+        private String createdAt;
         /**
          * 更新时间
          */
-        private String updated_at;
+        private String updatedAt;
 
         @Data
         @NoArgsConstructor
@@ -161,9 +161,9 @@ public class ContainerCloudPlatformModel extends BaseCloudPlatformModel implemen
 
             private String port;
 
-            private String subnet_id;
+            private String subnetId;
 
-            private Boolean preserve_on_delete;
+            private Boolean preserveOnDelete;
 
         }
     }

@@ -1,11 +1,11 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
-import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.ContainerConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ContainerConvertModel;
 import cn.cyberpeace.mp.devops.cluster.request.ContainerPageRequest;
 import cn.cyberpeace.mp.devops.cluster.response.ContainerPageResponse;
+import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -44,10 +44,10 @@ public class ContainerController {
      */
     @ApiOperation("分页查询容器列表")
     @GetMapping("/page")
-    public ListObjServiceResult<ContainerPageResponse> page(ContainerPageRequest request){
+    public PageResult<ContainerPageResponse> page(ContainerPageRequest request){
         ContainerConvertModel model = containerConverter.page(request);
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getModelList())){
-            return new ListObjServiceResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
+            return new PageResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
         }
         List<ContainerPageResponse> list = model.getModelList().stream().map(containerModel ->
                 ContainerPageResponse.builder().name(containerModel.getName())
@@ -55,7 +55,7 @@ public class ContainerController {
                 .status(containerModel.getStatus()).addressList(containerModel.getAddressList()).build())
                 .collect(Collectors.toList());
 
-        return new ListObjServiceResult<>(list,model.getTotal());
+        return new PageResult<>(list, model.getTotal());
     }
 
 }

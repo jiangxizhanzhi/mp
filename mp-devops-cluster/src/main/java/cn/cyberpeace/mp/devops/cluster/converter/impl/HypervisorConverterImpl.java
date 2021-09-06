@@ -31,22 +31,22 @@ public class HypervisorConverterImpl implements HypervisorConverter {
 
     @Override
     public String[] getDefaultPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldName(HypervisorPageRequest::getPage,HypervisorPageRequest::getPerPage);
+        return BeanUtils.getBeanGetterFieldNames(HypervisorPageRequest::getPage,HypervisorPageRequest::getPerPage);
     }
 
     @Override
     public String[] getTotalPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldName(HypervisorPageRequest::getLimit,HypervisorPageRequest::getOffset,
+        return BeanUtils.getBeanGetterFieldNames(HypervisorPageRequest::getLimit,HypervisorPageRequest::getOffset,
                 HypervisorPageRequest::getPage,HypervisorPageRequest::getPerPage);
     }
 
     @Override
     public HypervisorStatisticsConvertModel statistics() {
         HypervisorStatisticsCloudPlatformModel statistics = hypervisorService.statistics();
-        HypervisorStatisticsCloudPlatformModel.HypervisorStatistics hypervisorStatistics = statistics.getHypervisor_statistics();
-        return new HypervisorStatisticsConvertModel(hypervisorStatistics.getVcpus(),hypervisorStatistics.getMemory_mb()
-                ,hypervisorStatistics.getLocal_gb(),hypervisorStatistics.getVcpus_used(),hypervisorStatistics.getMemory_mb_used()
-                ,hypervisorStatistics.getLocal_gb_used(),hypervisorStatistics.getFree_ram_mb(),hypervisorStatistics.getFree_disk_gb());
+        HypervisorStatisticsCloudPlatformModel.HypervisorStatistics hypervisorStatistics = statistics.getHypervisorStatistics();
+        return new HypervisorStatisticsConvertModel(hypervisorStatistics.getVcpus(),hypervisorStatistics.getMemoryMb()
+                ,hypervisorStatistics.getLocalGb(),hypervisorStatistics.getVcpusUsed(),hypervisorStatistics.getMemoryMbUsed()
+                ,hypervisorStatistics.getLocalGbUsed(),hypervisorStatistics.getFreeRamMb(),hypervisorStatistics.getFreeDiskGb());
     }
 
     @Override
@@ -59,10 +59,10 @@ public class HypervisorConverterImpl implements HypervisorConverter {
         }
         List<HypervisorPageConvertModel.Model> list = model.getHypervisors().stream().map(hypervisor ->
                 HypervisorPageConvertModel.Model.builder().name(hypervisor.getHostname())
-                        .ip(hypervisor.getHost_ip()).status(hypervisor.getStatus()).state(hypervisor.getState())
+                        .ip(hypervisor.getHostIp()).status(hypervisor.getStatus()).state(hypervisor.getState())
                         .cpu(hypervisor.getCpu()).ram(hypervisor.getRam()).disk(hypervisor.getDisk())
-                        .cpuUsed(hypervisor.getCpu_used()).ramUsed(hypervisor.getRam_used())
-                        .diskUsed(hypervisor.getDisk_used()).build()
+                        .cpuUsed(hypervisor.getCpuUsed()).ramUsed(hypervisor.getRamUsed())
+                        .diskUsed(hypervisor.getDiskUsed()).build()
         ).collect(Collectors.toList());
 
         HypervisorPageConvertModel convertModel = new HypervisorPageConvertModel();
@@ -77,7 +77,7 @@ public class HypervisorConverterImpl implements HypervisorConverter {
         if (Objects.isNull(model)){
             return null;
         }
-        return new HypervisorWeightAndMaxInstanceConvertModel(model.getWeight(),model.getMax_instances());
+        return new HypervisorWeightAndMaxInstanceConvertModel(model.getWeight(),model.getMaxInstances());
     }
 
     @Override
@@ -113,7 +113,7 @@ public class HypervisorConverterImpl implements HypervisorConverter {
             return null;
         }
         List<VirtualRealSwitchConvertModel.Model> list = model.getSwitchs().stream().map(v ->
-                VirtualRealSwitchConvertModel.Model.builder().name(v.getName()).managementIp(v.getManagement_ip()).state(v.getStatus())
+                VirtualRealSwitchConvertModel.Model.builder().name(v.getName()).managementIp(v.getManagementIp()).state(v.getStatus())
                         .usedPorts(Integer.valueOf(v.getInterfaces_used())).ports(Integer.valueOf(v.getInterfaces_summary())).build()
         ).collect(Collectors.toList());
 

@@ -84,12 +84,27 @@ public abstract class BaseModelController<M extends BaseModel, Q extends QueryPa
      */
     @ApiOperation("获取指定id数据")
     @ApiImplicitParams({
-            @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class),
-            @ApiImplicitParam(name="fields", value="需要返回的字段",dataTypeClass = String[].class),
+            @ApiImplicitParam(name = "id", paramType = "path", value = "数据id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "fields", value = "需要返回的字段", dataTypeClass = String[].class),
     })
     @GetMapping("/{id}")
     public ObjServiceResult<M> get(@PathVariable String id, @RequestParam(required = false) String[] fields) {
-        log.info("id:{}, fields:{}", id, fields);
+        return getModelService().get(id, fields).asResult();
+    }
+
+    /**
+     * 通用单条数据id查询
+     * @param id 数据id
+     * @param fields 返回数据字段
+     * @return 单条数据结果
+     */
+    @ApiOperation("获取指定id数据")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "数据id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "fields", value = "需要返回的字段", dataTypeClass = String[].class),
+    })
+    @GetMapping(params = "id")
+    public ObjServiceResult<M> getByParam(@RequestParam String id, @RequestParam(required = false) String[] fields) {
         return getModelService().get(id, fields).asResult();
     }
 
@@ -101,11 +116,10 @@ public abstract class BaseModelController<M extends BaseModel, Q extends QueryPa
      */
     @ApiOperation("创建数据")
     @ApiImplicitParams({
-            @ApiImplicitParam(name="fields", value="需要返回的字段",dataTypeClass = String[].class),
+            @ApiImplicitParam(name = "fields", value = "需要返回的字段", dataTypeClass=String[].class),
     })
     @PostMapping
     public ObjServiceResult<M> create(@RequestBody @Validated M obj, @RequestParam(required = false) String[] fields) {
-        log.info("obj:{}, fields:{}", obj, fields);
         return getModelService().create(obj, fields).asResult();
     }
 
@@ -118,13 +132,47 @@ public abstract class BaseModelController<M extends BaseModel, Q extends QueryPa
      */
     @ApiOperation("更新指定id数据")
     @ApiImplicitParams({
-            @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class),
-            @ApiImplicitParam(name="fields", value="需要返回的字段",dataTypeClass = String[].class),
+            @ApiImplicitParam(name = "id", paramType = "path", value = "数据id", dataTypeClass=String.class),
+            @ApiImplicitParam(name = "fields", value = "需要返回的字段", dataTypeClass = String[].class),
     })
     @PatchMapping("/{id}")
     public ObjServiceResult<M> update(@PathVariable String id, @RequestBody @Validated M obj,
                                       @RequestParam(required = false) String[] fields) {
-        log.info("id:{}, obj:{}, fields:{}", id, obj, fields);
+        obj.setId(id);
+        return getModelService().update(obj, fields).asResult();
+    }
+
+    /**
+     * 通用更新, 兼容
+     * @param obj 数据对象
+     * @param fields 返回数据字段，只涉及更新字段
+     * @return 单条数据结果
+     */
+    @ApiOperation("更新数据")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "fields", value = "需要返回的字段", dataTypeClass = String[].class),
+    })
+    @PatchMapping
+    public ObjServiceResult<M> update(@RequestBody M obj,
+                                      @RequestParam(required = false) String[] fields) {
+        return getModelService().update(obj, fields).asResult();
+    }
+
+    /**
+     * 通用更新, 兼容
+     * @param id 数据id
+     * @param obj 数据对象
+     * @param fields 返回数据字段，只涉及更新字段
+     * @return 单条数据结果
+     */
+    @ApiOperation("更新指定id数据")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "数据id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "fields", value = "需要返回的字段", dataTypeClass = String[].class),
+    })
+    @PatchMapping(params = "id")
+    public ObjServiceResult<M> updateByParam(@RequestParam String id, @RequestBody M obj,
+                                      @RequestParam(required = false) String[] fields) {
         obj.setId(id);
         return getModelService().update(obj, fields).asResult();
     }
@@ -136,11 +184,24 @@ public abstract class BaseModelController<M extends BaseModel, Q extends QueryPa
      */
     @ApiOperation("删除指定id数据")
     @ApiImplicitParams({
-            @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class),
+            @ApiImplicitParam(name = "id", paramType = "path", value = "数据id", dataTypeClass = String.class),
     })
     @DeleteMapping("/{id}")
     public ServiceResult<Boolean> delete(@PathVariable String id) {
-        log.info("id:{}", id);
+        return getModelService().delete(id).asResult();
+    }
+
+    /**
+     * 通用删除
+     * @param id 数据id
+     * @return 是否删除成功
+     */
+    @ApiOperation("删除指定id数据")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "数据id", dataTypeClass = String.class),
+    })
+    @DeleteMapping(params = "id")
+    public ServiceResult<Boolean> deleteByParam(@RequestParam String id) {
         return getModelService().delete(id).asResult();
     }
 

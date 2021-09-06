@@ -2,12 +2,18 @@ package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.auth.dto.target.TargetDto;
 import cn.cyberpeace.mp.auth.model.TargetModel;
+import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserPermissionModel;
 import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 
 import java.util.List;
 
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 public interface UserPermissionService extends BaseModelService<UserPermissionModel, QueryParams> {
 
     /**
@@ -19,7 +25,9 @@ public interface UserPermissionService extends BaseModelService<UserPermissionMo
      * @param targetType
      * @return
      */
-    List<TargetModel> listByUserId(String userId);
+    List<TargetModel> listTargetsByUserId(String userId);
+
+    List<UserModel> listUsersByTargetId(String targetId);
 
     List<TargetModel> listMenusByUserId(String userId);
 

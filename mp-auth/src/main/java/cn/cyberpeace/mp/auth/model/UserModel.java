@@ -25,6 +25,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -55,7 +60,7 @@ public class UserModel extends BaseModel implements Serializable {
     // 该字段对读屏蔽，对写不屏蔽
     private String password;
 
-    @ApiModelProperty(value = "token秘钥")
+    @ApiModelProperty(value = "token秘钥", hidden = true)
     @DefaultGen(UuidGenerator.class)
     // 该字段对读屏蔽，对写不屏蔽
     private String tokenSecret;
@@ -123,9 +128,14 @@ public class UserModel extends BaseModel implements Serializable {
     @DefaultGen(DateTimeGenerator.class)
     private LocalDateTime lastLogin;
 
+    @ApiModelProperty(value = "保留字段")
+    @DefaultStr
+    private String res;
+
+
 
     @Builder
-    public UserModel(String id, LocalDateTime createTime, LocalDateTime updateTime, String tenant, String identifier, String username, String password, String tokenSecret, String name, String nickname, String avatar, LocalDate birthday, String email, String mobile, String idCard, String address, Integer initCheck, String description, Integer isEnabled, Integer isAudited, LocalDateTime dateJoined, LocalDateTime expiredTime, LocalDateTime lastLogin) {
+    public UserModel(String id, LocalDateTime createTime, LocalDateTime updateTime, String tenant, String identifier, String username, String password, String tokenSecret, String name, String nickname, String avatar, LocalDate birthday, String email, String mobile, String idCard, String address, Integer initCheck, String description, Integer isEnabled, Integer isAudited, LocalDateTime dateJoined, LocalDateTime expiredTime, LocalDateTime lastLogin, String res) {
         super(id, createTime, updateTime);
         this.tenant = tenant;
         this.identifier = identifier;
@@ -147,6 +157,7 @@ public class UserModel extends BaseModel implements Serializable {
         this.dateJoined = dateJoined;
         this.expiredTime = expiredTime;
         this.lastLogin = lastLogin;
+        this.res = res;
     }
 
     public static class Status {

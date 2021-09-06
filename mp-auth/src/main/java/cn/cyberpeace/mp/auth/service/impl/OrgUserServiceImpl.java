@@ -31,6 +31,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @Service
 @Slf4j
 public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUserMapper, OrgUserFields, QueryParams>
@@ -76,8 +81,8 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
         List<String> orgIds = new ArrayList<>();
         // 先添加父级id
         if (StringUtils.isNotBlank(orgId)) {
-            orgIds.add(orgId);
-            List<OrgDto> childOrgDtos = orgService.listAllChildIgnoreLevel(orgId);
+            orgIds.add(orgId);  // 把自己先加进去
+            List<OrgDto> childOrgDtos = orgService.listAllChildIgnoreLevelExcludeSelf(orgId);
             orgIds.addAll(childOrgDtos.stream().map(OrgDto::getId).collect(Collectors.toList()));
         }
 
@@ -158,10 +163,10 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
 
         List<String> orgIds = new ArrayList<>();
         if (StringUtils.isNotBlank(req.getOrg())) {
-            // 添加父级org
+            // 添加父级org（把自己先加进去）
             orgIds.add(req.getOrg());
             if (req.isShowAllUnderLevel()) {
-                List<OrgDto> childOrgDtos = orgService.listAllChildIgnoreLevel(req.getOrg());
+                List<OrgDto> childOrgDtos = orgService.listAllChildIgnoreLevelExcludeSelf(req.getOrg());
                 if (CollectionUtil.isNotEmpty(childOrgDtos)) {
                     orgIds.addAll(childOrgDtos.stream().map(OrgDto::getId).collect(Collectors.toList()));
                 }

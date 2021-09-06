@@ -4,7 +4,7 @@ import cn.cyberpeace.mp.base.annotation.BeanFieldClasses;
 import cn.cyberpeace.mp.base.annotation.ClassFieldClasses;
 import cn.cyberpeace.mp.scene.core.base.BaseSceneHandler;
 import cn.cyberpeace.mp.scene.core.bo.*;
-import cn.cyberpeace.mp.scene.core.exception.SceneNotExistException;
+import cn.cyberpeace.mp.scene.core.plugin.SceneConfigPluginContext;
 import cn.cyberpeace.mp.scene.core.plugin.SceneConfigPluginHandler;
 import cn.cyberpeace.mp.scene.model.*;
 import cn.cyberpeace.mp.scene.repository.*;
@@ -26,6 +26,7 @@ import cn.cyberpeace.mp.scene.repository.*;
         SceneConfigElementModel.class,
         SceneConfigElementPortModel.class,
         SceneConfigElementPortConnectionModel.class,
+        SceneConfigElementPluginModel.class,
         SceneConfigPluginHandler.class,
         SceneConfigHandler.class,
 })
@@ -57,23 +58,32 @@ public class SceneConfigHandler extends BaseSceneHandler<
         SceneConfigElementPortMapper,
         SceneConfigElementPortConnectionMapper,
         SceneConfigElementPluginMapper,
-        SceneConfigPluginHandler<?, ?>,
+        SceneConfigPluginHandler<?, ?, ?>,
         SceneConfigHandler> {
 
-    public SceneConfigHandler(SceneConfigDataBO sceneConfigDataBO) throws SceneNotExistException {
+    public SceneConfigHandler() {}
+
+    public SceneConfigHandler(SceneConfigDataBO sceneConfigDataBO) {
         init(sceneConfigDataBO, false);
     }
 
-    public SceneConfigHandler(SceneConfigDataBO sceneConfigDataBO, boolean isAreaMode) throws SceneNotExistException {
+    public SceneConfigHandler(SceneConfigDataBO sceneConfigDataBO, boolean isAreaMode) {
         init(sceneConfigDataBO, isAreaMode);
     }
 
-    public SceneConfigHandler(String sceneId, String areaId) throws SceneNotExistException {
+    public SceneConfigHandler(String sceneId, String areaId) {
         init(sceneId, areaId, false);
     }
 
-    public SceneConfigHandler(String sceneId, String areaId, boolean isAreaMode) throws SceneNotExistException {
+    public SceneConfigHandler(String sceneId, String areaId, boolean isAreaMode) {
         init(sceneId, areaId, isAreaMode);
+    }
+
+    @Override
+    public void initPluginContext(String pluginKey, SceneConfigPluginHandler<?, ?, ?> plugin) {
+        var context = new SceneConfigPluginContext();
+        context.setSceneHandler(this);
+        plugin.setContext(context);
     }
 
 }

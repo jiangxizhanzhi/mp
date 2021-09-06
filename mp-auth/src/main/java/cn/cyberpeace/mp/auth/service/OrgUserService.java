@@ -12,15 +12,32 @@ import com.github.pagehelper.PageInfo;
 
 import java.util.List;
 
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 public interface OrgUserService extends BaseModelService<OrgUserModel, QueryParams> {
 
+    /**
+     * 查询组织内所有用户
+     * @param orgId
+     * @return
+     */
     List<UserModel> listUsersByOrgId(String orgId);
 
     List<UserModel> listUsersByOrgAndUname(String orgId, String uname, List<String> userIds);
 
+    /**
+     * 查询用户所在的所有组织
+     * @param userId
+     * @return
+     */
     List<OrgModel> listOrgsByUserId(String userId);
 
-    // 列出用户所在组织的层级关系
+    /**
+     *  列出用户所在组织的层级关系，查出组织，上级组织直到顶级组织
+     */
     List<OrgDto> listHierarchicalOrgsByUserId(String userId);
 
     // 增量添加组织-用户关系

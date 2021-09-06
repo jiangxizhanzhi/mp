@@ -4,7 +4,7 @@ import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.target.BindRoleTargetsRequest;
 import cn.cyberpeace.mp.auth.model.RolePermissionModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
-import cn.cyberpeace.mp.auth.service.RolePermissionService;
+import cn.cyberpeace.mp.auth.service.RolePermissionModelService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
@@ -23,30 +23,39 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+/**
+ * @Description: 角色权限管理接口
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @Api(value = "角色-权限管理接口", tags = "AUTH-角色-权限管理接口")
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/role_permissions")
-public class RolePermissionController extends BaseModelController<RolePermissionModel, QueryParams, RolePermissionService> {
+public class RolePermissionController extends BaseModelController<RolePermissionModel, QueryParams, RolePermissionModelService> {
 
     @Autowired
-    public RolePermissionController(RolePermissionService modelService) {
+    public RolePermissionController(RolePermissionModelService modelService) {
         setModelService(modelService);
     }
 
     @ApiOperation(value = "查询角色权限", notes = "")
     @GetMapping("/byrole")
-    public ServiceResult getTargetsByRole(@RequestParam String roleId) {
+    public ServiceResult<List<TargetModel>> getTargetsByRole(@RequestParam String roleId) {
         List<TargetModel> targets = getModelService().listTargetsByRoleId(roleId);
 
-        return ResultUtils.commonResult(true, targets);
+        return ServiceResult.success(targets);
     }
 
     @ApiOperation(value = "绑定角色-权限关系，注意，如果targetIds为空，表示删除角色所有权限！", notes = "")
     @PostMapping("/bind")
-    public ServiceResult bindOrgPermission(@RequestBody @Validated BindRoleTargetsRequest bindRoleTargetsReq) {
+    public ServiceResult bindRolePermission(@RequestBody @Validated BindRoleTargetsRequest bindRoleTargetsReq) {
         boolean success = getModelService().bindRoleTargets(bindRoleTargetsReq.getRoleId(), bindRoleTargetsReq.getTargetIds(), true);
-        return ResultUtils.commonResult(success, null);
+        if (success) {
+            return ServiceResult.successful();
+        } else {
+            return ServiceResult.fail("绑定角色权限失败!");
+        }
     }
 
 

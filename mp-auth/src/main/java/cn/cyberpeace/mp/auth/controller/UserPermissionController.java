@@ -24,6 +24,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+/**
+ * @Description: 用户权限管理接口
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @Api(value = "用户-权限管理接口", tags = "AUTH-用户-权限管理接口")
 @Slf4j
 @RestController
@@ -39,7 +44,7 @@ public class UserPermissionController extends BaseModelController<UserPermission
     @ApiOperation(value = "根据userId查询所有权限", notes = "")
     @GetMapping("/byuser")
     public ServiceResult getTargetsByUser(@RequestParam String userId) {
-        List<TargetModel> targets = getModelService().listByUserId(userId);
+        List<TargetModel> targets = getModelService().listTargetsByUserId(userId);
         return ServiceResult.builder().source(targets).build().asResult();
     }
 
@@ -81,7 +86,11 @@ public class UserPermissionController extends BaseModelController<UserPermission
     @PostMapping("/bind")
     public ServiceResult bindUserRoles(@RequestBody @Validated BindUserTargetsRequest userTargetsReq) {
         boolean success = getModelService().bindUserTargets(userTargetsReq.getUserId(), userTargetsReq.getTargetIds(), true);
-        return ResultUtils.commonResult(success, null);
+        if (success) {
+            return ServiceResult.successful();
+        } else {
+            return ServiceResult.fail("绑定用户资源失败!");
+        }
     }
 
 

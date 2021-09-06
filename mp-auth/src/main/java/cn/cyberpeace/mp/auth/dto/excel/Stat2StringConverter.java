@@ -1,14 +1,15 @@
 package cn.cyberpeace.mp.auth.dto.excel;
 
-import cn.cyberpeace.mp.auth.model.UserModel;
 import com.alibaba.excel.converters.Converter;
 import com.alibaba.excel.enums.CellDataTypeEnum;
 import com.alibaba.excel.metadata.CellData;
 import com.alibaba.excel.metadata.GlobalConfiguration;
 import com.alibaba.excel.metadata.property.ExcelContentProperty;
-
-import java.util.Objects;
-
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 public class Stat2StringConverter implements Converter<String> {
     @Override
     public Class supportJavaTypeKey() {

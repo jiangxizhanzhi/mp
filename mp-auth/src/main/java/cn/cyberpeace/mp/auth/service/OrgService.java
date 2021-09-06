@@ -8,6 +8,11 @@ import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 
 import java.util.List;
 
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 public interface OrgService extends BaseModelService<OrgModel, QueryParams> {
 
     List<OrgModel> listParents();
@@ -34,7 +39,15 @@ public interface OrgService extends BaseModelService<OrgModel, QueryParams> {
      * 注意！不包括传入的org本身
      * @param orgId
      */
-    List<OrgDto> listAllChildIgnoreLevel(String orgId);
+    List<OrgDto> listAllChildIgnoreLevelExcludeSelf(String orgId);
+
+
+    /**
+     * 列出所有的父组织，忽略层级限制
+     * 注意！不包括传入的org本身
+     * @param orgId
+     */
+    List<OrgDto> listAllParentIgnoreLevelExcludeSelf(String orgId);
 
     @Override
     default ObjServiceResult<OrgModel> update(OrgModel obj, String[] fields) {

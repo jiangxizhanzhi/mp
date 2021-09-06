@@ -1,0 +1,32 @@
+package cn.cyberpeace.mp.devops.cluster.model.common;
+
+import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class Snapshot extends BaseCloudPlatformModel {
+
+    /**
+     * UUID
+     */
+    private String snapshotUuid;
+
+    /**
+     * 名称
+     */
+    private String name;
+
+    /**
+     * 描述
+     */
+    private String description;
+
+    /**
+     * 创建时间
+     */
+    private String createdAt;
+}

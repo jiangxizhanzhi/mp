@@ -5,7 +5,11 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.util.Objects;
-
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @Data
 public class OrgUserPageRequest extends PageRequest {
 

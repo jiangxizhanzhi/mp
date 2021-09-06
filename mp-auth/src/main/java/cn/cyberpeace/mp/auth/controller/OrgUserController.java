@@ -28,6 +28,11 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * @Description: 组织用户管理接口
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @Api(value = "组织-用户管理接口", tags = "AUTH-组织-用户管理接口")
 @Slf4j
 @RestController
@@ -72,7 +77,11 @@ public class OrgUserController extends BaseModelController<OrgUserModel, QueryPa
     @PostMapping("/bind")
     public ServiceResult bindOrgUsersAdditional(@RequestBody @Validated BindOrgUsersRequest bindOrgUsersReq) {
         boolean success = getModelService().additionalBindOrgUsers(bindOrgUsersReq.getOrgId(), bindOrgUsersReq.getUserIds());
-        return ResultUtils.commonResult(success, null);
+        if (success) {
+            return ServiceResult.successful();
+        } else {
+            return ServiceResult.fail("绑定组织用户失败!");
+        }
     }
 
 
