@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.bo.ModelBO;
 import cn.cyberpeace.mp.base.util.SerializableFunction;
 import cn.cyberpeace.mp.cscene.model.base.BaseCsceneModel;
 import cn.cyberpeace.mp.cscene.model.base.BaseCsceneRoleModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -16,7 +17,9 @@ public abstract class BaseCsceneBO<
         R0 extends BaseCsceneRoleModel,
         R extends BaseCsceneRoleBO<R0, R>,
         T extends BaseCsceneBO<M, R0, R, T>> extends ModelBO<M, T> {
+    @ApiModelProperty(value = "综合场景id")
     private String id;
+    @ApiModelProperty(value = "角色信息")
     private List<R> roles;
 
     @Override
