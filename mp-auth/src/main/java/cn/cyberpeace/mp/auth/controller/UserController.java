@@ -214,7 +214,7 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
 
 
     @ApiOperation(value = "更改用户头像", notes = "")
-    @PostMapping("/updateAvatar")
+    @PostMapping("/update_avatar")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "更改头像", target = AuthLogConstant.TARGET_USER)
     public ServiceResult updateAvatar(@RequestParam String userId, MultipartFile file) throws MpRuntimeException {
         boolean success = getModelService().updateAvatar(userId, file);

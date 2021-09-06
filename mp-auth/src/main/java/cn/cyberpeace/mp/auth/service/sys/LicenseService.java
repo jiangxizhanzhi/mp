@@ -8,6 +8,7 @@ import com.sun.jna.Structure;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import oshi.util.ExecutingCommand;
 
 import java.io.File;
 import java.util.Arrays;
@@ -92,7 +93,6 @@ public class LicenseService {
         log.error("校验失败！");
         return false;
     }
-
 
     /*
     public void testlicense() {
