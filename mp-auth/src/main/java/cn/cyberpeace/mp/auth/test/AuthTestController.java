@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import oshi.driver.linux.Dmidecode;
 import oshi.hardware.ComputerSystem;
 import oshi.hardware.HWDiskStore;
 
@@ -70,10 +71,10 @@ public class AuthTestController {
     private LicenseService licenseService;
 
     @Autowired
-    private OrgService orgService;
+    private SysActivationService activationService;
 
     @Autowired
-    private SysActivationService activationService;
+    private OrgService orgService;
 
     @Autowired
     private UserRoleMapper userRoleMapper;
@@ -185,20 +186,37 @@ public class AuthTestController {
         log.info("activationContent:{}", activationResponse);
     }
 
-    @GetMapping("/testos")
-    public List testos(@RequestParam String org) {
+    @GetMapping("/getDiskInfo")
+    public List<HWDiskStore> getDiskInfo() {
         ComputerSystem computerSystem = OshiUtil.getSystem();
         List<HWDiskStore> diskStores = OshiUtil.getDiskStores();
 
         log.error("system:{}", computerSystem);
         log.error("disk:{}", diskStores);
-        System.out.println("--------------####------------");
+
+
+        log.error("--------------####------------");
         diskStores.forEach(e -> {
             log.error("e1 {}:{}", e.getName(), e.getSerial());
         });
 
-        System.out.println("--------------####------------");
+        log.error("--------------####------------");
 
         return diskStores;
     }
+
+
+    @GetMapping("/getSysUUID")
+    public String getSysUUID() {
+        String serialNumber = Dmidecode.querySerialNumber();
+        log.error("serialNumber:{}", serialNumber);
+
+        String uuid = activationService.querySysUUID();
+        log.error("uuid:{}", uuid);
+
+        return uuid;
+    }
+
+
+
 }
