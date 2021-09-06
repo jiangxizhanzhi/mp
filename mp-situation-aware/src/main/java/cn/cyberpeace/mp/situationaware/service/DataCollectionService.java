@@ -53,7 +53,7 @@ public class DataCollectionService {
     @Autowired
     private WazuhRepository wazuhRepository;
 
-    private static final String wazuhAlertIndexPrefix = "wazuh-alerts-4.x-";
+    private static final String WAZUH_ALERT_INDEX_PREFIX = "wazuh-alerts-4.x-";
 
     /**
      * 查询文件事件分页
@@ -287,7 +287,7 @@ public class DataCollectionService {
      * @param end
      * @return
      */
-    private String[] buildRequestIndex(LocalDateTime start, LocalDateTime end) {
+    public static String[] buildRequestIndex(LocalDateTime start, LocalDateTime end) {
         List<String> indexList = indexListBuilder(start, end);
         var indexArray = new String[indexList.size()];
         indexList.toArray(indexArray);
@@ -359,9 +359,9 @@ public class DataCollectionService {
      * @return List<IndexBoost>
      */
     @VisibleForTesting
-    protected List<String> indexListBuilder(LocalDateTime start, LocalDateTime end) {
+    public static List<String> indexListBuilder(LocalDateTime start, LocalDateTime end) {
         List<String> dateStringList = fetchFormatterTime(start, end);
-        return dateStringList.stream().map(dateString -> wazuhAlertIndexPrefix + dateString).collect(Collectors.toList());
+        return dateStringList.stream().map(dateString -> WAZUH_ALERT_INDEX_PREFIX + dateString).collect(Collectors.toList());
     }
 
     /**
@@ -371,7 +371,7 @@ public class DataCollectionService {
      * @param endTime endTime
      * @return List<String>
      */
-    private List<String> fetchFormatterTime(LocalDateTime startTime, LocalDateTime endTime) {
+    public static List<String> fetchFormatterTime(LocalDateTime startTime, LocalDateTime endTime) {
         long betweenDay = ChronoUnit.DAYS.between(startTime, endTime);
         long month = ChronoUnit.MONTHS.between(startTime, endTime);
         int days = (int) betweenDay;

@@ -1,6 +1,6 @@
 server:
   servlet:
-    context-path: /api
+    context-path: /api/mp
   port: 8080
 
 spring:
@@ -17,12 +17,12 @@ spring:
   application:
     name: mp
 
-#logging:
-#  config: classpath:logback-spring.xml
-#  level:
-#    root: INFO
-#  file:
-#    path: ${user.home}/logs
+logging:
+  config: classpath:logback-spring.xml
+  level:
+    root: INFO
+  file:
+    path: ${user.home}/logs
 
 mybatis:
   mapper-locations: classpath*:mapper/*.xml
@@ -32,20 +32,48 @@ mybatis:
 
 # 请求云平台组信息的url配置，必需填写
 mp:
-  datasandtable:
-    group-url: http://10.100.7.50:5079/v1/scenes
+  base:
+    mg-url: http://10.100.14.252:8077
+    fdfs-url: 10.100.14.252  # fdfs服务器地址
+    # fastdfs配置
+    fastdfs:
+      max-storage-connection: 8   # 最大连接数
+      connect-timeout-in-seconds: 10
+      network-timeout-in-seconds: 30
+      charset: UTF-8
+      http-tracker-http-port: 80
+      groups:
+        # 集群配置：每增加一个集群，参考下例添加相应配置即可，同时在FdfsGroupEnum.java枚举类中添加该集群名称
+        - group-name: DEFAULT    # 集群名称
+          tracker-servers: ${mp.base.fdfs-url}:22122
+          file-server-addr: /fdfs    # 外部文件服务器地址
+          inner-file-server-addr: http://${mp.base.fdfs-url}:8888   # 内部文件服务器地址
+  devops:
+    cp-url: http://10.100.7.5:11111 #云平台地址
+    cr-url: http://10.100.2.21 #
+    hostname: controller  #主机名称
+  situationaware:
+    group-url: http://10.100.14.107:5079/v1/scenes
     moloch:
       username: api
       password: api
-    es-nodes: 10.100.7.50:9200
+    #moloch es节点地址
+    es-nodes: 10.100.14.107:9200
     wazuh:
-      base-url: https://192.168.5.125:55000
-      username: wazuh
-      password: wazuh
-      es-url: 192.168.5.125
+      #wazuh 开放接口地址
+      base-url: https://10.100.14.106:55000
+      #wazuh 开放接口用户名密码
+      username: acme-user
+      password: MyS3cr37P450r.*-
+      #wazuh es地址用户名密码
+      es-url: 10.100.0.102
       es-port: 9200
       es-username: admin
       es-password: admin
+    wazuh-probe-manager:
+      url: http://10.100.0.102:8002
+      agent-script-linux-path: /var/ossec/etc/shared/scripts/
+      agent-script-windows-path: C:\ossec-agent\shared\scripts\
   log:
     exclude-uri: /login
     exclude-method: OPTIONS
@@ -74,9 +102,3 @@ spring:
 logging:
   file:
     path: /home/mp/logs
-
----
-# 文件服务器地址
-file_server_addr: http://192.168.5.68:80
-# 最大连接数 并发量较大的话可加大该连接数
-max_storage_connection: 8

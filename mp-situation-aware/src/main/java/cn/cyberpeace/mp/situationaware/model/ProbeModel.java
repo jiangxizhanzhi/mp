@@ -28,6 +28,8 @@ public class ProbeModel implements Serializable {
 
     private String commandInterval;
 
+    private Integer probeStatus;
+
     private static final long serialVersionUID = 1L;
 
     public Integer getPk() {
@@ -124,5 +126,13 @@ public class ProbeModel implements Serializable {
 
     public void setCommandInterval(String commandInterval) {
         this.commandInterval = commandInterval;
+    }
+
+    public Integer getProbeStatus() {
+        return probeStatus;
+    }
+
+    public void setProbeStatus(Integer probeStatus) {
+        this.probeStatus = probeStatus;
     }
 }

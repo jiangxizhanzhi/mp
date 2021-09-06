@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.situationaware.service;
 
-import cn.cyberpeace.mp.situationaware.TestDatasandtableApplciation;
+import cn.cyberpeace.mp.situationaware.TestSituationAwareApplciation;
 import cn.cyberpeace.mp.situationaware.model.GroupModel;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
 
-@SpringBootTest(classes = TestDatasandtableApplciation.class)
+@SpringBootTest(classes = TestSituationAwareApplciation.class)
 @RunWith(SpringRunner.class)
 public class NetworkTrafficGroupServiceTest {
     @Autowired

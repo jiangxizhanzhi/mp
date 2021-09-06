@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.situationaware.service;
 
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.util.LocalDateTimeUtils;
-import cn.cyberpeace.mp.situationaware.TestDatasandtableApplciation;
+import cn.cyberpeace.mp.situationaware.TestSituationAwareApplciation;
 import cn.cyberpeace.mp.situationaware.model.FileEventModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.model.WazuhModel;
@@ -29,7 +29,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
-@SpringBootTest(classes = TestDatasandtableApplciation.class)
+@SpringBootTest(classes = TestSituationAwareApplciation.class)
 @RunWith(SpringRunner.class)
 public class DataCollectionServiceTest {
 

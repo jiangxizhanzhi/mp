@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.situationaware.repository;
 
-import cn.cyberpeace.mp.situationaware.TestDatasandtableApplciation;
+import cn.cyberpeace.mp.situationaware.TestSituationAwareApplciation;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
 import cn.cyberpeace.mp.situationaware.model.WazuhNetifaceRoot;
 import cn.cyberpeace.mp.situationaware.model.WazuhRamRoot;
@@ -14,7 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
 
-@SpringBootTest(classes = TestDatasandtableApplciation.class)
+@SpringBootTest(classes = TestSituationAwareApplciation.class)
 @RunWith(SpringRunner.class)
 public class WazuhRepositoryTest {
 
