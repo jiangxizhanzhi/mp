@@ -13,5 +13,10 @@ public interface ContainerConverter extends BaseConverter {
      */
     ContainerConvertModel page(ContainerPageRequest request, String... ignoreFields);
 
+    /**
+     * 获取容器总数
+     * @param request
+     * @return
+     */
     Integer getTotalContainers(ContainerPageRequest request);
 }

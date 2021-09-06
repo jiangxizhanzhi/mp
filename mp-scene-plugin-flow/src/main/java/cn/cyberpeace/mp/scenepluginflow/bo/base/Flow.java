@@ -1,0 +1,16 @@
+package cn.cyberpeace.mp.scenepluginflow.bo.base;
+
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+
+@Data
+public class Flow {
+    @ApiModelProperty(value = "流量id")
+    private String id;
+    @ApiModelProperty(value = "名称")
+    private String name;
+    @ApiModelProperty(value = "描述")
+    private String desc;
+    @ApiModelProperty(value = "分类")
+    private String type;
+}

@@ -21,6 +21,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+/**
+ * @Description: 头像管理接口
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @Api(value = "头像管理接口", tags = "AUTH-头像管理接口")
 @Slf4j
 @RestController
@@ -34,18 +39,18 @@ public class AvatarController extends BaseModelController<AvatarModel, QueryPara
 
     @ApiOperation(value = "查询所有头像", notes = "")
     @GetMapping("/all")
-    public ServiceResult getAll() {
+    public ServiceResult<List<AvatarModel>> getAll() {
         List<AvatarModel> avatars = getModelService().listAll();
-        return ResultUtils.commonResult(true, avatars);
+        return ServiceResult.success(avatars);
     }
 
 
     @ApiOperation(value = "上传头像，返回url", notes = "")
     @PostMapping("/upload")
     @ResponseBody
-    public ServiceResult upload(MultipartFile file) {
+    public ServiceResult<String> upload(MultipartFile file) {
         FileResponseData responseData = getModelService().upload(file);
-        return ResultUtils.commonResult(true, responseData.getHttpUrl());
+        return ServiceResult.success(responseData.getHttpUrl());
     }
 
 

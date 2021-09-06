@@ -4,8 +4,10 @@ import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.BaseModel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpEntity;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.util.Map;
 
 /**
@@ -62,8 +64,75 @@ public class BaseOpenStackServiceImpl extends BaseServiceImpl {
      * @param body
      * @return
      */
-    @Override
     protected String sendPost(String api,String body){
         return super.sendPost(devopsConfig.getCpUrl().concat(api),body);
+    }
+
+    /**
+     * 通过PUT方式查询信息
+     * @param api
+     * @param body
+     * @param valueType
+     * @param <T>
+     * @return
+     */
+    @Override
+    protected <T extends BaseModel> T sendPut(String api,String body,Class<T> valueType){
+        return super.sendPut(devopsConfig.getCpUrl().concat(api),body,valueType);
+    }
+
+    /**
+     * 通过PUT方式查询信息
+     * @param api
+     * @param body
+     * @return
+     */
+    @Override
+    protected String sendPut(String api,String body){
+        return super.sendPut(devopsConfig.getCpUrl().concat(api),body);
+    }
+
+    /**
+     * 通过Delete方式删除数据
+     * @param api
+     * @param body
+     * @return
+     */
+    @Override
+    protected <T extends BaseModel> T sendDelete(String api, String body,Class<T> valueType){
+        return super.sendDelete(devopsConfig.getCpUrl().concat(api),body, valueType);
+    }
+
+    /**
+     * 上传文件
+     * @param api
+     * @param file
+     * @return
+     */
+    @Override
+    protected String sendFormDataPost(String api, File file){
+        return super.sendFormDataPost(devopsConfig.getCpUrl().concat(api),file);
+    }
+
+    /**
+     * 上传文件
+     * @param api
+     * @param httpEntity
+     * @return
+     */
+    @Override
+    protected <T extends BaseModel> T sendFormDataPost(String api, HttpEntity httpEntity ,Class<T> valueType){
+        return super.sendFormDataPost(devopsConfig.getCpUrl().concat(api),httpEntity,valueType);
+    }
+
+    /**
+     * 上传文件
+     * @param api
+     * @param httpEntity
+     * @return
+     */
+    @Override
+    protected <T extends BaseModel> T sendFormDataPut(String api, HttpEntity httpEntity ,Class<T> valueType){
+        return super.sendFormDataPut(devopsConfig.getCpUrl().concat(api),httpEntity,valueType);
     }
 }

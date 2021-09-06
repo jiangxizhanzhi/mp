@@ -20,6 +20,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @Slf4j
 @Service
 public class AuthUserDetailsService implements UserDetailsService {

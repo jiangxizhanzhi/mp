@@ -29,7 +29,7 @@ public class HypervisorCloudPlatformModel extends BaseCloudPlatformModel {
         /**
          * 主机IP
          */
-        private String host_ip;
+        private String hostIp;
 
         /**
          * 主机名称
@@ -59,22 +59,22 @@ public class HypervisorCloudPlatformModel extends BaseCloudPlatformModel {
         /**
          * 已使用CPU核数
          */
-        private Integer cpu_used;
+        private Integer cpuUsed;
 
         /**
          * 已使用内存大小
          */
-        private Long ram_used;
+        private Long ramUsed;
 
         /**
          * 已使用磁盘大小
          */
-        private Long disk_used;
+        private Long diskUsed;
 
         /**
          * 运行中的虚拟机数量
          */
-        private Integer running_vms;
+        private Integer runningVms;
 
         /**
          * 服务器

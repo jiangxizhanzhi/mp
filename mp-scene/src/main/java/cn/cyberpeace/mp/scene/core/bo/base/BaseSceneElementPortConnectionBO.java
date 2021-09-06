@@ -1,14 +1,21 @@
 package cn.cyberpeace.mp.scene.core.bo.base;
 
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementPortConnectionModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 @Data
-public abstract class BaseSceneElementPortConnectionBO<M extends BaseSceneElementPortConnectionModel> extends EidBO<M> {
+public abstract class BaseSceneElementPortConnectionBO<M extends BaseSceneElementPortConnectionModel,
+        T extends BaseSceneElementPortConnectionBO<M, T>> extends EidBO<M, T> {
+    @ApiModelProperty(value = "连接id")
     private String id;
+    @ApiModelProperty(value = "源端口id")
     private String source;
+    @ApiModelProperty(value = "目标端口id")
     private String target;
+    @ApiModelProperty(value = "连接名称")
     private String name;
+    @ApiModelProperty(value = "是否单向连接")
     private Boolean unidirectional;
 
     @Override

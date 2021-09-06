@@ -17,6 +17,11 @@ public interface BaseCloudPlatformService {
     String CPCLOUD_INFO_URL = CPCLOUD_URL + "/info";
 
     /**
+     * cpcloud平台device
+     */
+    String CPCLOUD_DEVICE = CPCLOUD_URL + "/device";
+
+    /**
      * cpcloud平台NPC模块URL前缀
      */
     String CPCLOUD_NPC_URL = CPCLOUD_URL + "/npc_node";

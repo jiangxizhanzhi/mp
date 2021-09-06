@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.auth.dto.notice;
 
 import cn.cyberpeace.mp.auth.dto.validate.AddGroup;
 import cn.cyberpeace.mp.auth.dto.validate.UpdateGroup;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -20,10 +21,6 @@ import java.util.List;
 @NoArgsConstructor
 @ApiModel
 public class SysNoticeRequest {
-
-    @ApiModelProperty(value = "公告ID")
-    @NotNull(groups = {UpdateGroup.class}, message = "ID不能为空！")
-    private String id;
 
     @ApiModelProperty(value = "租户")
     private String tenant;
@@ -46,8 +43,11 @@ public class SysNoticeRequest {
     @ApiModelProperty(value = "1:系统  2:课程  3:练习  4:考试")
     private Integer type;
 
-    @ApiModelProperty(value = "群组id列表")
-    private List<String> groupIds;
+    @ApiModelProperty(value = "是否公开，对所有人可见  0:否 1:是 默认是0  (注意，如果传了1，则后台会忽略roleIds的内容)")
+    private Integer isPublic;
+
+    @ApiModelProperty(value = "角色id列表")
+    private List<String> roleIds;
 
     @ApiModelProperty(value = "组织id列表")
     private List<String> orgIds;

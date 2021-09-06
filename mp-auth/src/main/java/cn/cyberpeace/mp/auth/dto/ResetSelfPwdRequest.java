@@ -8,6 +8,11 @@ import lombok.Data;
 
 import javax.validation.constraints.NotEmpty;
 
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @ApiModel(value = "修改本人密码请求体")
 @Data
 public class ResetSelfPwdRequest {

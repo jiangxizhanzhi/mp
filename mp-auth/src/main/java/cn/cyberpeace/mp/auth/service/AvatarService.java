@@ -10,6 +10,11 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 public interface AvatarService extends BaseModelService<AvatarModel, QueryParams> {
 
     List<AvatarModel> listAll();
@@ -22,6 +27,8 @@ public interface AvatarService extends BaseModelService<AvatarModel, QueryParams
 
     String uploadIs(InputStream is, String fileName, Map<String, String> desc);
 
-    boolean initDefaultAvatars();
+    void clearAndReUploadAvatars(List<AvatarModel> avatarModels);
+
+    List<AvatarModel> uploadDefaultAvatars();
 
 }

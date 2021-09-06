@@ -1,7 +1,5 @@
 package cn.cyberpeace.mp.devops.cluster.converter.model;
 
-import cn.cyberpeace.mp.devops.cluster.model.BaseModel;
-import io.swagger.annotations.ApiModel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class BasePageConvertModel extends BaseModel {
+public class BasePageConvertModel {
 
     /**
      * 是否成功

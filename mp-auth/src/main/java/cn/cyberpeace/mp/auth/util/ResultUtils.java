@@ -21,19 +21,12 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 public class ResultUtils {
-
-    @Deprecated
-    public static ServiceResult commonResult(boolean success, Object source) {
-        if (success) {
-            if (source != null) {
-                return ServiceResult.builder().source(source).build().asResult();
-            }
-            return ServiceResult.builder().build().asResult();
-        }
-        return ServiceResult.builder().serviceCode(BaseErrorCode.ERROR).build().asResult();
-    }
-
 
     public static ListObjServiceResult objList2ListObjServiceResult(List<Objects> list, Integer total) {
         return new ListObjServiceResult(new ListObjResult(list, total).asResult()).asResult();

@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.situationaware.service;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.util.TextUtils;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
@@ -90,7 +91,7 @@ public class ProbeService {
             return probeResult;
         })).collect(Collectors.toList());
 
-        return new ListObjServiceResult(probeResults, count);
+        return new ListObjServiceResult<ProbeResult>(new ListObjResult<>(probeResults, count));
     }
 
     @Transactional(rollbackFor = Exception.class, readOnly = true)

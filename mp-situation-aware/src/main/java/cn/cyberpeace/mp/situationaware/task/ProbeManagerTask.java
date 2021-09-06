@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.support.IndicesOptions;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -65,6 +66,7 @@ public class ProbeManagerTask {
             .to(LocalDateTimeUtils.localDateTimeToString(endTime, LocalDateTimeUtils.esdateTimeFormatter)));
         sourceBuilder.sort("timestamp", SortOrder.DESC);
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
+        searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
 
         SearchResponse response = null;
         try {

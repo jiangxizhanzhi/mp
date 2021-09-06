@@ -27,12 +27,12 @@ public class RouterConverterImpl implements RouterConverter {
 
     @Override
     public String[] getDefaultPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldName(RouterPageRequest::getPage,RouterPageRequest::getPerPage);
+        return BeanUtils.getBeanGetterFieldNames(RouterPageRequest::getPage,RouterPageRequest::getPerPage);
     }
 
     @Override
     public String[] getTotalPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldName(RouterPageRequest::getOffset,
+        return BeanUtils.getBeanGetterFieldNames(RouterPageRequest::getOffset,
                 RouterPageRequest::getPage,RouterPageRequest::getPerPage);
     }
 
@@ -47,7 +47,7 @@ public class RouterConverterImpl implements RouterConverter {
         List<RouterCloudPlatformModel.RouterModel> routers = model.getRouters();
         List<RouterPageConverterModel.Model> list = routers.stream().map(routerModel ->
                 RouterPageConverterModel.Model.builder().name(routerModel.getName())
-                        .status(CloudPlatformEnum.fromValue(routerModel.getStatus())).createdAt(routerModel.getCreated_at()).build()
+                        .status(CloudPlatformEnum.fromValue(routerModel.getStatus())).createdAt(routerModel.getCreatedAt()).build()
         ).collect(Collectors.toList());
         RouterPageConverterModel convertModel = new RouterPageConverterModel();
         convertModel.setModelList(list);

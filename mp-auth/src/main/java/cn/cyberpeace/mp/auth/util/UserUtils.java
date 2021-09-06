@@ -15,6 +15,11 @@ import org.springframework.stereotype.Component;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Objects;
 
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @Component
 @Slf4j
 public class UserUtils {

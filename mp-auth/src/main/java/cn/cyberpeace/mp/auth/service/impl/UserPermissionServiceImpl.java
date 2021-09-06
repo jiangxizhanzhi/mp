@@ -10,7 +10,7 @@ import cn.cyberpeace.mp.auth.model.UserPermissionModel;
 import cn.cyberpeace.mp.auth.repository.UserPermissionMapper;
 import cn.cyberpeace.mp.auth.service.OrgPermissionService;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
-import cn.cyberpeace.mp.auth.service.RolePermissionService;
+import cn.cyberpeace.mp.auth.service.RolePermissionModelService;
 import cn.cyberpeace.mp.auth.service.TargetService;
 import cn.cyberpeace.mp.auth.service.UserPermissionService;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
@@ -39,6 +39,11 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @Service
 public class UserPermissionServiceImpl
         extends BaseModelServiceImpl<UserPermissionModel, UserPermissionMapper, UserPermissionFields, QueryParams>
@@ -48,7 +53,7 @@ public class UserPermissionServiceImpl
     private UserRoleService userRoleService;
 
     @Autowired
-    private RolePermissionService rolePermissionService;
+    private RolePermissionModelService rolePermissionService;
 
     @Autowired
     private TargetService targetService;

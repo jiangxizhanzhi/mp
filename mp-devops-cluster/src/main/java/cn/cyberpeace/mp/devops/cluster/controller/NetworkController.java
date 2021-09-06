@@ -1,11 +1,11 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
-import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.NetworkConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.NetworkPageConverterModel;
 import cn.cyberpeace.mp.devops.cluster.request.NetworkPageRequest;
 import cn.cyberpeace.mp.devops.cluster.response.NetworkPageResponse;
+import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -44,10 +44,10 @@ public class NetworkController {
      */
     @ApiOperation("分页查询网络信息")
     @GetMapping("/page")
-    public ListObjServiceResult<NetworkPageResponse> page(NetworkPageRequest request){
+    public PageResult<NetworkPageResponse> page(NetworkPageRequest request){
         NetworkPageConverterModel model = networkConverter.page(request);
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getModelList())){
-            return new ListObjServiceResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
+            return new PageResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
         }
         List<NetworkPageConverterModel.Model> networks = model.getModelList();
         List<NetworkPageResponse> list = networks.stream().map(networkModel -> {
@@ -60,7 +60,7 @@ public class NetworkController {
                     .status(networkModel.getStatus()).subnets(subnets).createdAt(networkModel.getCreatedAt()).build();
                 }
         ).collect(Collectors.toList());
-        return new ListObjServiceResult<>(list,model.getTotal());
+        return new PageResult<>(list,model.getTotal());
     }
 
 }

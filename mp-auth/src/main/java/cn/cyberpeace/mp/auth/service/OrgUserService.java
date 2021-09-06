@@ -12,6 +12,11 @@ import com.github.pagehelper.PageInfo;
 
 import java.util.List;
 
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 public interface OrgUserService extends BaseModelService<OrgUserModel, QueryParams> {
 
     /**

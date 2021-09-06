@@ -9,13 +9,23 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @Mapper
 @Repository
 @ModelClass(SysNoticeModel.class)
 public interface SysNoticeMapper extends BaseModelMapper<SysNoticeModel> {
 
     List<SysNoticeModel> listNotices(@Param("title") String title, @Param("ids") List<String> ids,
-                                     @Param("orgs") List<String> orgs, @Param("publisher") String publisher,
-                                     @Param("type") Integer type);
+                                     @Param("orgs") List<String> orgs, @Param("roles") List<String> roles,
+                                     @Param("publisher") String publisher, @Param("type") Integer type);
+
+
+    List<SysNoticeModel> listCurrentUserNotices(@Param("title") String title, @Param("ids") List<String> ids,
+                                     @Param("orgs") List<String> orgs, @Param("roles") List<String> roles,
+                                     @Param("publisher") String publisher, @Param("type") Integer type, @Param("userId") String userId);
 
 }

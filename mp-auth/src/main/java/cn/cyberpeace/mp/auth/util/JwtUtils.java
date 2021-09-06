@@ -28,6 +28,11 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @Slf4j
 public class JwtUtils {
     private static final long JWT_EXPIRATION = 24 * 3600 * 1000L * 7;

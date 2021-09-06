@@ -41,14 +41,7 @@ public class Swagger2Config implements ModelPropertyBuilderPlugin {
     @Bean
     public Docket createRestApi() {
 
-//        ParameterBuilder ticketPar = new ParameterBuilder();
-//        List<Parameter> pars = new ArrayList<Parameter>();
-//        ticketPar.name("Authorization").description("登录校验")//name表示名称，description表示描述
-//                .modelRef(new ModelRef("string")).parameterType("header")
-//                .required(false).defaultValue("Bearer SSSS ").build();//required表示是否必填，defaultvalue表示默认值
-//        pars.add(ticketPar.build());//添加完此处一定要把下边的带***的也加上否则不生效
-
-        String defaultJwt = "JWT eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjZmYjZmNWQ0N2Q4YTQwOGQ5ZjZlNTMzNzE2NWNmNjQ5IiwiZXhwIjoxNjI3NjM1ODYzLCJrZXkiOiIzNTE2NzJmZjg4NTQ0MzhlYWFhNDhjNDZlZmRmYTk0NyIsInVzZXJuYW1lIjoiZGVtbzQifQ.CK6861lgss2BGH-fHBK2EHPzVfO3o5Bo4vIdURmlmPE";
+        String defaultJwt = "";
         //在配置好的配置类中增加此段代码即可
         RequestParameter parameter =
                 new RequestParameterBuilder()

@@ -9,6 +9,11 @@ import cn.cyberpeace.mp.base.service.param.QueryParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @Service
 public class TenantUserServiceImpl
         extends BaseModelServiceImpl<TenantUserModel, TenantUserMapper, TenantUserFields, QueryParams>
