@@ -28,7 +28,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -70,12 +72,14 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
     }
 
     @Override
-    public RealEquipmentConvertModel page(RealEquipmentPageRequest request, String... ignoreFields) {
+    public RealEquipmentConvertModel page(RealEquipmentPageRequest request) {
         ImagePageDTO dto = new ImagePageDTO();
         dto.setMainCategory(request.getCategory());
         dto.setSubCategory(request.getSecondCategory());
         dto.setImageType(ImageTypeEnum.ENTITY.toValue());
+        dto.setUseStatus(request.getUseStatus());
         dto.setName(request.getName());
+        dto.setInPosition(request.getInPosition());
         dto.setOffset((request.getPage() - 1) * request.getPerPage());
         dto.setLimit(request.getPerPage());
 
@@ -94,7 +98,18 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getItems())){
             return null;
         }
-        List<RealEquipment> modelList = model.getItems().stream().map(device -> convertDevice(device)).collect(Collectors.toList());
+
+        Map<String, TargetModel> map = targetModels.stream().collect(Collectors.toMap(TargetModel::getUuid, Function.identity()));
+        List<RealEquipment> modelList = model.getItems().stream().map(device -> {
+            RealEquipment realEquipment = convertDevice(device);
+            TargetModel targetModel = map.get(device.getUuid());
+            if (Objects.nonNull(targetModel)){
+               realEquipment.setInPosition(targetModel.getInPosition());
+               realEquipment.setReferenceStatus(targetModel.getReferenceStatus());
+               realEquipment.setUseStatus(targetModel.getUseStatus());
+            }
+            return realEquipment;
+        }).collect(Collectors.toList());
 
         RealEquipmentConvertModel convertModel = new RealEquipmentConvertModel();
         convertModel.setModelList(modelList);
@@ -174,16 +189,8 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
             entity.setAccessProtocolList(JSONArray.parseArray(extEntity.getAccessProtocals(), AccessProtocol.class));
             convertModel.setExtEntity(entity);
         }
-        if (Objects.nonNull(extSystemInfo)){
-            ExtSystemInfo systemInfo = ExtSystemInfo.builder()
-                    .systemType(extSystemInfo.getSystemType()).systemArchitecture(extSystemInfo.getSystemArchitecture())
-                    .language(extSystemInfo.getLanguage()).build();
-            convertModel.setExtSystemInfo(systemInfo);
-        }
-
-        if (Objects.nonNull(extGateway)){
-
-        }
+        convertModel.setExtSystemInfo(extSystemInfo);
+        convertModel.setExtGateway(extGateway);
         return convertModel;
     }
 

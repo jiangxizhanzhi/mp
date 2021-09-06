@@ -52,7 +52,7 @@ public class RealEquipmentController {
             ExtEntity extEntity = v.getExtEntity();
             RealEquipmentPageResponse response = RealEquipmentPageResponse.builder().id(v.getUuid()).name(v.getName())
                     .category(v.getMainCategory()).subCategory(v.getSubCategory())
-                    .description(v.getDescription()).build();
+                    .description(v.getDescription()).extSystemInfo(v.getExtSystemInfo()).build();
             if (Objects.nonNull(extEntity)){
                 response.setModel(extEntity.getStyle());
                 response.setParams(extEntity.getParams());
