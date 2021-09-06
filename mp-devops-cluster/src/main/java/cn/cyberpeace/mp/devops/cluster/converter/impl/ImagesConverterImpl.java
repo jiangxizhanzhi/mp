@@ -108,9 +108,9 @@ public class ImagesConverterImpl implements ImagesConverter {
         if (total == 0){
             return null;
         }
-        List<ImageModel> imageModels = imageMapper.page(dto);
+        List<TargetModel> targetModels = imageMapper.page(dto);
 
-        List<Integer> ids = imageModels.stream().map(ImageModel::getId).map(Integer::parseInt).collect(Collectors.toList());
+        List<Integer> ids = targetModels.stream().map(TargetModel::getId).map(Integer::parseInt).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(ids)){
             return null;
         }
@@ -133,9 +133,9 @@ public class ImagesConverterImpl implements ImagesConverter {
     public Boolean add(ImageRequest request) {
         Device device = imagesService.add(convertRequest(request));
         if (Objects.nonNull(device) && device.isSuccess()) {
-            ImageModel imageModel = convertDevice(device);
-            imageModel.setIsPublic(PublicEnum.ALL_PUBLIC);
-            imageMapper.insert(imageModel);
+            TargetModel targetModel = convertDevice(device);
+            targetModel.setIsPublic(PublicEnum.ALL_PUBLIC);
+            imageMapper.insert(targetModel);
         }
         return device.isSuccess();
     }
@@ -152,10 +152,10 @@ public class ImagesConverterImpl implements ImagesConverter {
     public Boolean update(ImageRequest request) {
         Device device = imagesService.update(request.getUuid(),convertRequest(request));
         if (Objects.nonNull(device) && device.isSuccess()) {
-            ImageModel oldImageModel = imageMapper.get(request.getUuid());
-            ImageModel imageModel = convertDevice(device);
-            imageModel.setIsPublic(oldImageModel.getIsPublic());
-            imageMapper.updateById(imageModel);
+            TargetModel oldTargetModel = imageMapper.get(request.getUuid());
+            TargetModel targetModel = convertDevice(device);
+            targetModel.setIsPublic(oldTargetModel.getIsPublic());
+            imageMapper.updateById(targetModel);
         }
         return device.isSuccess();
     }
@@ -171,12 +171,12 @@ public class ImagesConverterImpl implements ImagesConverter {
 
     @Override
     public ImageAuthConvertModel findAuthById(String imageId){
-        ImageModel imageModel = imageMapper.get(imageId);
+        TargetModel targetModel = imageMapper.get(imageId);
         ImageAuthConvertModel authConvertModel = new ImageAuthConvertModel();
         authConvertModel.setPublicEnum(PublicEnum.ALL_PUBLIC);
-        if (Objects.nonNull(imageModel) && PublicEnum.ALL_PUBLIC != imageModel.getIsPublic()){
-            List<ImageAuthModel> authModelList = imageAuthMapper.list(new HumanCondition().filterEqual("target",imageId));
-            List<String> userIds = authModelList.stream().map(ImageAuthModel::getOwner).collect(Collectors.toList());
+        if (Objects.nonNull(targetModel) && PublicEnum.ALL_PUBLIC != targetModel.getIsPublic()){
+            List<TargetAuthModel> authModelList = imageAuthMapper.list(new HumanCondition().filterEqual("target",imageId));
+            List<String> userIds = authModelList.stream().map(TargetAuthModel::getOwner).collect(Collectors.toList());
             authConvertModel.setUserIds(userIds);
             authConvertModel.setPublicEnum(PublicEnum.CUSTOMIZE);
 
@@ -205,10 +205,10 @@ public class ImagesConverterImpl implements ImagesConverter {
         List<String> userIds = request.getUserIds();
         PublicEnum isAllPublic = request.getIsAllPublic();
         imageIds.forEach(imageId -> {
-            ImageModel imageModel = new ImageModel();
-            imageModel.setIsPublic(isAllPublic);
-            imageModel.setUuid(imageId);
-            imageMapper.updateById(imageModel);
+            TargetModel targetModel = new TargetModel();
+            targetModel.setIsPublic(isAllPublic);
+            targetModel.setUuid(imageId);
+            imageMapper.updateById(targetModel);
         });
         if (PublicEnum.ALL_PUBLIC != isAllPublic){
             if (CollectionUtils.isEmpty(userIds)){
@@ -217,11 +217,11 @@ public class ImagesConverterImpl implements ImagesConverter {
                 userIds.add(loginUser.getId());
             }
             imageIds.forEach(imageId -> {
-                List<ImageAuthModel> authModelList = userIds.stream().map(userId -> {
-                    ImageAuthModel imageAuthModel = new ImageAuthModel();
-                    imageAuthModel.setOwner(userId);
-                    imageAuthModel.setTarget(imageId);
-                    return imageAuthModel;
+                List<TargetAuthModel> authModelList = userIds.stream().map(userId -> {
+                    TargetAuthModel targetAuthModel = new TargetAuthModel();
+                    targetAuthModel.setOwner(userId);
+                    targetAuthModel.setTarget(imageId);
+                    return targetAuthModel;
                 }).collect(Collectors.toList());
                 imageAuthMapper.bulkCreate(authModelList);
             });
@@ -308,25 +308,25 @@ public class ImagesConverterImpl implements ImagesConverter {
      * @param device
      * @return
      */
-    protected ImageModel convertDevice(Device device){
-        ImageModel imageModel = new ImageModel();
-        imageModel.setId(device.getId().toString());
-        imageModel.setUuid(device.getUuid());
-        imageModel.setName(device.getName());
-        imageModel.setRole(device.getRole());
-        imageModel.setMainCategory(device.getCategory());
-        imageModel.setSubCategory(device.getSecondCategory());
-        imageModel.setImageType(device.getImageType());
+    protected TargetModel convertDevice(Device device){
+        TargetModel targetModel = new TargetModel();
+        targetModel.setId(device.getId().toString());
+        targetModel.setUuid(device.getUuid());
+        targetModel.setName(device.getName());
+        targetModel.setRole(device.getRole());
+        targetModel.setMainCategory(device.getCategory());
+        targetModel.setSubCategory(device.getSecondCategory());
+        targetModel.setImageType(device.getImageType());
         ExtVm extVm = device.getExtVm();
         if (Objects.nonNull(extVm)) {
-            imageModel.setQuickCreateSupport(Boolean.TRUE.equals(extVm.getQuickCreateSupport()) ?
+            targetModel.setQuickCreateSupport(Boolean.TRUE.equals(extVm.getQuickCreateSupport()) ?
                     QuickCreateSupportEnum.TRUE : QuickCreateSupportEnum.FALSE);
         }else{
-            imageModel.setQuickCreateSupport(QuickCreateSupportEnum.FALSE);
+            targetModel.setQuickCreateSupport(QuickCreateSupportEnum.FALSE);
         }
-        imageModel.setCreateTime(LocalDateTime.parse(device.getCreatedAt(), LocalDateTimeUtils.dateTimeFormatter));
-        imageModel.setUpdateTime(LocalDateTime.parse(device.getUpdatedAt(), LocalDateTimeUtils.dateTimeFormatter));
-        return imageModel;
+        targetModel.setCreateTime(LocalDateTime.parse(device.getCreatedAt(), LocalDateTimeUtils.dateTimeFormatter));
+        targetModel.setUpdateTime(LocalDateTime.parse(device.getUpdatedAt(), LocalDateTimeUtils.dateTimeFormatter));
+        return targetModel;
     }
 
     /**
