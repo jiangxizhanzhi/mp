@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-@ApiModel(value = "实装分页请求信息")
+@ApiModel(value = "实装-接口资源分页请求信息")
 public class RealEquipmentNetworkCardPageRequest extends BasePageRequest{
 
     /**

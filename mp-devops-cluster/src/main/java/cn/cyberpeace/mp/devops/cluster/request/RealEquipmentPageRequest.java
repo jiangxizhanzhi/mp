@@ -32,4 +32,16 @@ public class RealEquipmentPageRequest extends BasePageRequest{
      */
     @ApiModelProperty(value = "名称")
     private String name;
+
+    /**
+     * 在位状态
+     */
+    @ApiModelProperty(value = "在位状态")
+    private Integer inPosition;
+
+    /**
+     * 使用状态
+     */
+    @ApiModelProperty(value = "使用状态")
+    private Integer useStatus;
 }
