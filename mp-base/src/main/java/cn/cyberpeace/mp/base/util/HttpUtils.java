@@ -6,7 +6,6 @@ import okhttp3.*;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthScope;
@@ -20,7 +19,6 @@ import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -29,7 +27,6 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -181,6 +178,17 @@ public class HttpUtils {
     public static HttpResponse sendGetForDownLoad(String url) throws IOException {
         HttpClient client = HttpClientBuilder.create().build();
         return doGetRequestForDownload(url, Objects.nonNull(INSTANCE.httpClient) ? INSTANCE.httpClient : client);
+    }
+
+    private static HttpResponse doGetRequestForDownload(String url, HttpClient client) throws IOException {
+        // 替换url中的空格
+        HttpGet httpget = new HttpGet(url);
+        HttpResponse resp = client.execute(httpget);
+        // 设置请求和传输超时时间
+        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
+        httpget.setConfig(Objects.nonNull(INSTANCE.requestConfig) ? INSTANCE.requestConfig : requestConfig);
+        // 获得返回值
+        return resp;
     }
 
     /**
