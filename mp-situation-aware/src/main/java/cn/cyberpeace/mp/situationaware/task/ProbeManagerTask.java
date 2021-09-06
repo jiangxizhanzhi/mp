@@ -1,6 +1,10 @@
 package cn.cyberpeace.mp.situationaware.task;
 
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.util.LocalDateTimeUtils;
+import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
 import cn.cyberpeace.mp.situationaware.model.ProbeModel;
+import cn.cyberpeace.mp.situationaware.model.enums.ProbeStatus;
 import cn.cyberpeace.mp.situationaware.repository.ProbeModelMapper;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import com.google.common.annotations.VisibleForTesting;
@@ -9,7 +13,10 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import javax.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
@@ -22,9 +29,12 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 /**
- *
- **/
+  *@Desciption 定时任务修改
+  *@Author zhangjin
+  *@Date 9/6/21 2:42 下午
+**/
 @Component
+@Slf4j
 public class ProbeManagerTask {
 
     @Autowired
@@ -33,35 +43,41 @@ public class ProbeManagerTask {
     @Resource(name = "wazuhRestHighLevelClient")
     private RestHighLevelClient restHighLevelClient;
 
-    private static final String WAZUH_ALERT_INDEX_PREFIX = "wazuh-alerts-4.x-";
-
     @Scheduled(fixedRate = 1000 * 60)
     private void processProbeStatus() {
         List<ProbeModel> probeModelList = probeModelMapper.queryAllProbes();
         probeModelList.forEach(model -> {
-
+            ProbeStatus probeStatus = Boolean.TRUE.equals(queryProbeExist(model)) ? ProbeStatus.RUNNING : ProbeStatus.TERMINATE;
+            probeModelMapper.updateProbeStatus(model.getId(), probeStatus);
         });
     }
 
     @VisibleForTesting
-    protected Map<String, Boolean> queryProbeExist(ProbeModel probeModel) {
-        Map<String, Boolean> result = Maps.newHashMap();
+    protected Boolean queryProbeExist(ProbeModel probeModel) {
+        LocalDateTime startTime = LocalDateTime.now().minusMinutes(Long.parseLong(probeModel.getCommandInterval().replace("m", "") + 2L));
+        var endTime = LocalDateTime.now();
         //构建请求索引
-        String[] indexArray = DataCollectionService.buildRequestIndex(LocalDateTime.now().minusMinutes(Long.parseLong(probeModel.getCommandInterval().replace("m", ""))), LocalDateTime.now());
+        String[] indexArray = DataCollectionService.buildRequestIndex(startTime, endTime);
         var searchRequest = new SearchRequest(indexArray);
         var boolQueryBuilder = QueryBuilders.boolQuery();
         var sourceBuilder = new SearchSourceBuilder();
         boolQueryBuilder.must(QueryBuilders.termQuery("rule.id", "86701"));
         boolQueryBuilder.must(QueryBuilders.termQuery("location", "command_" + probeModel.getProbeName()));
+        //时间查询
+        boolQueryBuilder.must(QueryBuilders.rangeQuery("timestamp")
+            .from(LocalDateTimeUtils.localDateTimeToString(startTime, LocalDateTimeUtils.esdateTimeFormatter))
+            .to(LocalDateTimeUtils.localDateTimeToString(endTime, LocalDateTimeUtils.esdateTimeFormatter)));
         sourceBuilder.sort("timestamp", SortOrder.DESC);
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
+
         SearchResponse response = null;
         try {
             response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("探针es查询失败 探针id: {},失败异常: {}", probeModel.getId(), ExceptionUtils.getStackTrace(e));
+            throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_MANAGER_ES_QUERY_ERROR, ExceptionUtils.getStackTrace(e));
         }
-        result.put(probeModel.getId(), response.getHits().getHits().length > 0);
-        return result;
+        return Objects.requireNonNull(response).getHits().getHits().length > 0;
     }
+
 }

@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.situationaware.model.ProbeParamsResult;
 import cn.cyberpeace.mp.situationaware.model.ProbeRequest;
 import cn.cyberpeace.mp.situationaware.model.ProbeResult;
 import cn.cyberpeace.mp.situationaware.model.ProbeSearchRequest;
+import cn.cyberpeace.mp.situationaware.model.enums.ProbeStatus;
 import cn.cyberpeace.mp.situationaware.repository.ProbeModelMapper;
 import cn.cyberpeace.mp.situationaware.repository.ProbeParamModelMapper;
 import cn.cyberpeace.mp.situationaware.repository.WazuhProbeManagerRepository;
@@ -25,10 +26,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
-  *@Desciption 探针管理服务
-  *@Author zhangjin
-  *@Date 8/31/21 11:51 上午
-**/
+ *
+ **/
 @Service
 public class ProbeService {
 
@@ -141,6 +140,11 @@ public class ProbeService {
         return rows;
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    public int modifyProbeStatus(String probeId, ProbeStatus status) {
+        return probeModelMapper.updateProbeStatus(probeId, status);
+    }
+
     private void insertProbeParams(ProbeRequest probeRequest, String probeId) {
         List<ProbeParamModel> probeParamModels = probeRequest.getProbeParamsRequestList().stream()
             .map((probeParamRequest -> {
@@ -157,11 +161,12 @@ public class ProbeService {
 
     /**
      * 替换参数
+     *
      * @param probeRequest probeRequest
      * @return 脚本内容
      */
     private String buildScriptContent(ProbeRequest probeRequest) {
-        var scriptContent =probeRequest.getScriptContent();
+        var scriptContent = probeRequest.getScriptContent();
         for (ProbeParamsRequest param : probeRequest.getProbeParamsRequestList()) {
             scriptContent = scriptContent.replace("$" + param.getParamName() + "$", param.getDefaultVal());
         }

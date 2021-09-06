@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.situationaware.repository;
 
 import cn.cyberpeace.mp.situationaware.model.ProbeModel;
 import cn.cyberpeace.mp.situationaware.model.ProbeSearchRequest;
+import cn.cyberpeace.mp.situationaware.model.enums.ProbeStatus;
 import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -30,7 +31,7 @@ public interface ProbeModelMapper {
 
     int countQueryModifyByProbeName(@Param("probeName") String probeName, @Param("probeId") String probeId);
 
-    int updateProbeStatus(@Param("probeId") String probeId, @Param("probeStatus") Integer probeStatus);
+    int updateProbeStatus(@Param("probeId") String probeId, @Param("probeStatus") ProbeStatus probeStatus);
 
     List<ProbeModel> queryAllProbes();
 }
