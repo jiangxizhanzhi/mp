@@ -70,7 +70,7 @@ public class InstanceCloudPlatformModel extends BaseCloudPlatformModel implement
         /**
          * 初始化脚本
          */
-        private String user_data;
+        private String userData;
 
         /**
          * 元数据信息
@@ -90,7 +90,7 @@ public class InstanceCloudPlatformModel extends BaseCloudPlatformModel implement
         /**
          * 实例名称
          */
-        private String instance_name;
+        private String instanceName;
 
         /**
          * 用户
@@ -105,11 +105,11 @@ public class InstanceCloudPlatformModel extends BaseCloudPlatformModel implement
         /**
          * 创建时间
          */
-        private String created_at;
+        private String createdAt;
         /**
          * 更新时间
          */
-        private String updated_at;
+        private String updatedAt;
 
         @Data
         @NoArgsConstructor

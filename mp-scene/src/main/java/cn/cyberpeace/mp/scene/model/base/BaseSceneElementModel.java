@@ -16,17 +16,23 @@ public class BaseSceneElementModel extends BaseSceneNodeModel {
     private String systemArchitecture;
     @DefaultStr(SystemLanguage.OTHER)
     private String systemLanguage;
-    @DefaultStr
-    private String flavor;
+    @DefaultInt
+    private Integer cpu;
+    @DefaultInt
+    private Integer ram;
+    @DefaultInt
+    private Integer disk;
     @DefaultStr
     private String initCommands;
+    @DefaultInt
+    private Integer maxPortNumber;
 
     public static class Type {
-        public static final Integer OTHER = 0;
-        public static final Integer SWITCH = 1;
-        public static final Integer ROUTER = 2;
-        public static final Integer FIREWALL = 3;
-        public static final Integer TERMINAL = 4;
+        public static final int OTHER = 0;
+        public static final int SWITCH = 1;
+        public static final int ROUTER = 2;
+        public static final int FIREWALL = 3;
+        public static final int TERMINAL = 4;
 
         private Type() {}
     }

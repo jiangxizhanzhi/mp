@@ -47,7 +47,7 @@ public class RouterConverterImpl implements RouterConverter {
         List<RouterCloudPlatformModel.RouterModel> routers = model.getRouters();
         List<RouterPageConverterModel.Model> list = routers.stream().map(routerModel ->
                 RouterPageConverterModel.Model.builder().name(routerModel.getName())
-                        .status(CloudPlatformEnum.fromValue(routerModel.getStatus())).createdAt(routerModel.getCreated_at()).build()
+                        .status(CloudPlatformEnum.fromValue(routerModel.getStatus())).createdAt(routerModel.getCreatedAt()).build()
         ).collect(Collectors.toList());
         RouterPageConverterModel convertModel = new RouterPageConverterModel();
         convertModel.setModelList(list);

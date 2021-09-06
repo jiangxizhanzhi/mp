@@ -39,6 +39,8 @@ public class SceneService {
         try {
             sceneHandler = new SceneHandler(sceneDataBO, false);
             sceneHandler.save();
+            sceneHandler.initiate();
+            sceneHandler.save();
         } catch (SceneNotExistException e) {
             return new ServiceResult<>(null, SceneErrorCode.SCENE_NOT_EXIST);
         }

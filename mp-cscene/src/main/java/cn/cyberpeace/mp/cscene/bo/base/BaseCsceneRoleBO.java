@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.util.JsonUtils;
 import cn.cyberpeace.mp.base.util.SerializableFunction;
 import cn.cyberpeace.mp.cscene.model.base.BaseCsceneRoleModel;
 import com.fasterxml.jackson.core.type.TypeReference;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -17,10 +18,15 @@ import java.util.stream.Collectors;
 @Data
 public abstract class BaseCsceneRoleBO<M extends BaseCsceneRoleModel, T extends BaseCsceneRoleBO<M, T>>
         extends ModelBO<M, T> {
+    @ApiModelProperty(value = "角色id")
     private String id;
+    @ApiModelProperty(value = "角色名称")
     private String name;
+    @ApiModelProperty(value = "资产节点id列表")
     private List<String> assetNodes;
+    @ApiModelProperty(value = "可见节点id列表")
     private List<String> visibleNodes;
+    @ApiModelProperty(value = "子角色信息")
     private List<T> children;
 
     @Override

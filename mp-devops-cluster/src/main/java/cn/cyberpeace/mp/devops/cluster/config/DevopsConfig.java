@@ -18,9 +18,4 @@ public class DevopsConfig {
      */
     private String cpUrl;
 
-    /**
-     * cr接口地址
-     */
-    private String crUrl;
-
 }

@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.util.JsonUtils;
 import cn.cyberpeace.mp.base.util.SerializableFunction;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import com.fasterxml.jackson.core.type.TypeReference;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -16,13 +17,27 @@ import java.util.stream.Collectors;
 @Data
 public abstract class BaseSceneElementBO<M extends BaseSceneElementModel, P extends BaseSceneElementPortBO<?, P>,
         T extends BaseSceneElementBO<M, P, T>> extends BaseSceneNodeBO<M, T> {
+    @ApiModelProperty(value = "网元类型")
     private Integer type;
+    @ApiModelProperty(value = "节点文件")
     private String file;
+    @ApiModelProperty(value = "系统类型")
     private String systemType;
+    @ApiModelProperty(value = "系统架构")
     private String systemArchitecture;
+    @ApiModelProperty(value = "系统语言")
     private String systemLanguage;
-    private String flavor;
+    @ApiModelProperty(value = "cpu数量")
+    private Integer cpu;
+    @ApiModelProperty(value = "内存大小")
+    private Integer ram;
+    @ApiModelProperty(value = "磁盘大小")
+    private Integer disk;
+    @ApiModelProperty(value = "初始化命令")
     private List<String> initCommands;
+    @ApiModelProperty(value = "最大端口数量")
+    private Integer maxPortNumber;
+    @ApiModelProperty(value = "网元端口")
     private List<P> ports;
 
     @Override

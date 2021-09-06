@@ -14,11 +14,15 @@ import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Component
 public class BeanUtils implements ApplicationContextAware {
+
+    private static Pattern humpPattern = Pattern.compile("[A-Z]");
 
     private static ApplicationContext context;
 
@@ -138,6 +142,31 @@ public class BeanUtils implements ApplicationContextAware {
     }
 
     /**
+     * 包装成get方式的请求参数格式，例如：?a=1&b=2
+     * @param fieldList
+     * @param object
+     * @return
+     */
+    public static String wrapperGetParamsByFieldsAndObject(List<Field> fieldList, Object object,Boolean humpToLine) {
+        String result = "";
+        StringBuffer joinerStr = new StringBuffer();
+        final BeanWrapper objWrapper = new BeanWrapperImpl(object);
+        fieldList.stream().forEach(field -> {
+            field.setAccessible(true);
+            String fieldName = field.getName();
+            Object fieldVal = objWrapper.getPropertyValue(fieldName);
+            if (humpToLine){
+                fieldName = humpToLine(fieldName);
+            }
+            if (Objects.nonNull(fieldVal)) {
+                joinerStr.append(Joiner.on("&").join(Joiner.on("=").join(fieldName, fieldVal), ""));
+            }
+        });
+        result = StringUtils.substringBeforeLast(joinerStr.toString(),"&");
+        return StringUtils.isBlank(result) ? "" : "?" + result;
+    }
+
+    /**
      * 获取对象所有的字段对象Field
      * @param object
      * @return
@@ -171,7 +200,32 @@ public class BeanUtils implements ApplicationContextAware {
     public static String wrapperGetParamsByObject(Object object,String... ignoreFields){
         List<Field> fieldList = getFieldsByObject(object);
         fieldList = fieldList.stream().filter(field -> Arrays.stream(ignoreFields).noneMatch(f ->field.getName().equals(f))).collect(Collectors.toList());
-        return wrapperGetParamsByFieldsAndObject(fieldList,object);
+        return wrapperGetParamsByFieldsAndObject(fieldList,object,Boolean.FALSE);
     }
 
+    /**
+     * 将对象的所有字段转化为Get请求方式的参数格式
+     * @param object
+     * @return
+     */
+    public static String wrapperGetParamsByObject(Boolean humpToLine,Object object,String... ignoreFields){
+        List<Field> fieldList = getFieldsByObject(object);
+        fieldList = fieldList.stream().filter(field -> Arrays.stream(ignoreFields).noneMatch(f ->field.getName().equals(f))).collect(Collectors.toList());
+        return wrapperGetParamsByFieldsAndObject(fieldList,object,humpToLine);
+    }
+
+    /**
+     * 驼峰转下划线
+     * @param str
+     * @return
+     */
+    public static String humpToLine(String str) {
+        Matcher matcher = humpPattern.matcher(str);
+        StringBuffer sb = new StringBuffer();
+        while (matcher.find()) {
+            matcher.appendReplacement(sb, "_" + matcher.group(0).toLowerCase());
+        }
+        matcher.appendTail(sb);
+        return sb.toString();
+    }
 }

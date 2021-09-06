@@ -16,5 +16,5 @@ public class HypervisorWeightAndMaxInstanceCloudPlatformModel extends BaseCloudP
     /**
      * 虚拟机数量限制
      */
-   private Integer max_instances;
+   private Integer maxInstances;
 }
