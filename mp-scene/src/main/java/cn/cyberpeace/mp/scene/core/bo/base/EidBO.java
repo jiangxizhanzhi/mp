@@ -2,10 +2,12 @@ package cn.cyberpeace.mp.scene.core.bo.base;
 
 import cn.cyberpeace.mp.base.bo.ModelBO;
 import cn.cyberpeace.mp.base.model.BaseModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 @Data
 public abstract class EidBO<M extends BaseModel, T extends EidBO<M, T>> extends ModelBO<M, T> {
+    @ApiModelProperty(value = "服务端id")
     private String eid;
 
     @Override

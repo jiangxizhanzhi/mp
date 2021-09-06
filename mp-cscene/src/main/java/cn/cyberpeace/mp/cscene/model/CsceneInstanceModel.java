@@ -15,14 +15,14 @@ import lombok.NoArgsConstructor;
 public class CsceneInstanceModel extends BaseCsceneModel {
     @DefaultStr
     private String cscene;
-    @DefaultInt(2)
+    @DefaultInt(Type.APP)
     private Integer type;
     @DefaultStr
     private String scene;
 
     public static class Type {
-        public static final Integer TEST = 1;
-        public static final Integer APP = 2;
+        public static final int TEST = 1;
+        public static final int APP = 2;
 
         private Type() {}
     }

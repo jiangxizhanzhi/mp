@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.scenepluginflow.plugin;
 
 import cn.cyberpeace.mp.base.annotation.ClassFieldClasses;
-import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.plugin.SceneConfigPluginHandler;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneConfigBO;
@@ -10,8 +9,6 @@ import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneConfigElementPortBO;
 import cn.cyberpeace.mp.scenepluginflow.constant.PluginConstant;
 import cn.cyberpeace.mp.scenepluginflow.plugin.modelhandler.FlowSceneConfigPluginModelHandler;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 
 @ClassFieldClasses({
@@ -27,15 +24,9 @@ public class FlowSceneConfigPluginHandler extends SceneConfigPluginHandler<FlowP
     private FlowSceneConfigPluginModelHandler pluginModelHandler;
 
     @Override
-    public void init(String sceneId, ScenePluginDataBO pluginDataBO) {
+    public void initBase() {
+        super.initBase();
         pluginModelHandler = new FlowSceneConfigPluginModelHandler(this);
-        super.init(sceneId, pluginDataBO);
-    }
-
-    @Override
-    public void init(String sceneId, List<String> elementIds, List<String> elementPortIds) {
-        pluginModelHandler = new FlowSceneConfigPluginModelHandler(this);
-        super.init(sceneId, elementIds, elementPortIds);
     }
 
     @Override

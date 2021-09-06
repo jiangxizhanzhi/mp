@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin;
 
 import cn.cyberpeace.mp.base.annotation.ClassFieldClasses;
-import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.plugin.SceneConfigPluginHandler;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigBO;
@@ -10,8 +9,6 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.modelhandler.CloudSceneConfigPluginModelHandler;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 
 @ClassFieldClasses({
@@ -27,15 +24,9 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
     private CloudSceneConfigPluginModelHandler pluginModelHandler;
 
     @Override
-    public void init(String sceneId, ScenePluginDataBO pluginDataBO) {
+    public void initBase() {
+        super.initBase();
         pluginModelHandler = new CloudSceneConfigPluginModelHandler(this);
-        super.init(sceneId, pluginDataBO);
-    }
-
-    @Override
-    public void init(String sceneId, List<String> elementIds, List<String> elementPortIds) {
-        pluginModelHandler = new CloudSceneConfigPluginModelHandler(this);
-        super.init(sceneId, elementIds, elementPortIds);
     }
 
     @Override
