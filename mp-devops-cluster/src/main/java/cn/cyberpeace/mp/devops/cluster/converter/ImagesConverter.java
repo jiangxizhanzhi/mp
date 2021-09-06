@@ -62,19 +62,6 @@ public interface ImagesConverter extends BaseConverter{
     void auth(ImagesAuthRequest request);
 
     /**
-     * 上传
-     * @param file
-     */
-    String upload(MultipartFile file);
-
-    /**
-     * 上传Logo
-     * @param file
-     * @return
-     */
-    String uploadLogo(MultipartFile file);
-
-    /**
      * 上传Logo
      * @param file
      * @return

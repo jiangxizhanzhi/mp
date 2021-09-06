@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.devops.cluster.controller;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.InstallerConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InstallerConvertModel;
@@ -71,9 +72,9 @@ public class InstallerController {
         InstallerByIdResponse response = InstallerByIdResponse.builder().uuid(model.getUuid())
                 .name(model.getName()).description(model.getDescription()).logo(model.getLogo())
                 .categories(model.getCategories())
-                .deployType(model.getDeployType()).extDocker(model.getExtDocker())
+                .deployType(model.getDeployType()).dockerFile(Objects.isNull(model.getExtDocker()) ? null : model.getExtDocker().getFile())
                 .resourceList(model.getResourceList()).startUpParameterList(model.getStartUpParameterList())
-                .extNormal(model.getExtNormal()).build();
+                .build();
         return new Result<>(response);
     }
 
@@ -82,9 +83,9 @@ public class InstallerController {
      */
     @ApiOperation("新增")
     @PostMapping("/add")
-    public Result<Boolean> add(InstallerRequest request){
+    public ServiceResult add(InstallerRequest request){
         InstallerConvertModel model = installerConverter.add(request);
-        return new Result<>(model.isSuccess());
+        return model.isSuccess() ? ServiceResult.successful() : ServiceResult.fail("");
     }
 
     /**
@@ -92,12 +93,12 @@ public class InstallerController {
      */
     @ApiOperation("更新")
     @PutMapping("/update")
-    public Result<Boolean> update(InstallerRequest request){
+    public ServiceResult update(InstallerRequest request){
         if (StringUtils.isBlank(request.getUuid())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         InstallerConvertModel model = installerConverter.add(request);
-        return new Result<>(model.isSuccess());
+        return model.isSuccess() ? ServiceResult.successful() : ServiceResult.fail("");
     }
 
     /**
@@ -105,8 +106,8 @@ public class InstallerController {
      */
     @ApiOperation("删除")
     @DeleteMapping("/delete")
-    public Result<Boolean> delete(@RequestBody InstallerDeleteRequest request){
+    public ServiceResult delete(@RequestBody InstallerDeleteRequest request){
         Boolean result = installerConverter.delete(request);
-        return new Result<>(result);
+        return result ? ServiceResult.successful() : ServiceResult.fail("");
     }
 }

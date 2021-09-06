@@ -3,10 +3,8 @@ package cn.cyberpeace.mp.devops.cluster.converter.impl;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.config.FastDfsConfig;
-import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.BeanUtils;
-import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.LocalDateTimeUtils;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.cyberpeace.mp.devops.cluster.converter.ImagesConverter;
@@ -25,6 +23,7 @@ import cn.cyberpeace.mp.devops.cluster.service.ContainerService;
 import cn.cyberpeace.mp.devops.cluster.service.DeviceService;
 import cn.cyberpeace.mp.devops.cluster.service.ImagesService;
 import cn.cyberpeace.mp.devops.cluster.service.VmService;
+import cn.cyberpeace.mp.devops.cluster.utils.FileUtils;
 import com.alibaba.fastjson.JSONArray;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -34,8 +33,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -88,16 +91,6 @@ public class ImagesConverterImpl implements ImagesConverter {
 
     @Override
     public ImageConvertPageModel page(ImagePageRequest request) {
-
-//        HumanCondition outerCondition = request.wrapperHumanCondition();
-
-//        int total = imageAuthMapper.totalTargetsByOwner(UserUtils.getLoginUser().getId(),outerCondition);
-//
-//        if (total == 0){
-//            return null;
-//        }
-
-//        List<ImageModel> imageModels = imageAuthMapper.listTargetsByOwner(UserUtils.getLoginUser().getId(),outerCondition);
 
         ImagePageDTO dto = new ImagePageDTO();
         dto.setRole(request.getRole());
@@ -237,41 +230,14 @@ public class ImagesConverterImpl implements ImagesConverter {
     }
 
     @Override
-    public String upload(MultipartFile file) {
-        try {
-           return HttpUtils.doFormDataPost("http://47.102.192.61:9019/cpcloud/device/v1/upload/?module=device&type=vm",convertMultipartFile(file));
-        } catch (Exception e) {
-            log.error("上传文件失败，失败信息：{}",e.getMessage());
-        }
-        return null;
-    }
-
-    @Override
-    public String uploadLogo(MultipartFile file) {
-        if (Objects.isNull(file) || file.getSize() == 0 ){
-            return null;
-        }
-        FastDfsConfig.Group group = fastDfsConfig.getGroupByName(FdfsGroupEnum.DEFAULT);
-        String logoUrl = "";
-        try {
-            String filepath = fastDFSClient.upload(file.getInputStream(), file.getOriginalFilename(), null,
-                    FdfsGroupEnum.DEFAULT.toString());
-            logoUrl = group.getFileServerAddr() + File.separator + filepath;
-        } catch (IOException e) {
-            log.error("上传图标失败：错误信息：{}",e.getMessage());
-        }
-        return logoUrl;
-    }
-
-    @Override
     public String uploadImage(ImagesUploadRequest request, MultipartFile multipartFile) {
         if (Objects.isNull(multipartFile) || multipartFile.getSize() == 0 ){
             return null;
         }
         try {
-            File file = convertMultipartFile(multipartFile);
+            List<File> fileList = FileUtils.transferToFile(Arrays.asList(multipartFile));
             String params = BeanUtils.wrapperGetParamsByObject(Boolean.TRUE,request);
-            return imagesService.upload(params,file);
+            return imagesService.upload(params,fileList.get(0));
         } catch (Exception e) {
             log.error("上传镜像文件失败：{}",e.getMessage());
         }

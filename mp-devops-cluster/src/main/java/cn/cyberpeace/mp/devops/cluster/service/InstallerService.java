@@ -1,8 +1,10 @@
 package cn.cyberpeace.mp.devops.cluster.service;
 
-import cn.cyberpeace.mp.devops.cluster.model.*;
-import org.springframework.web.multipart.MultipartFile;
+import cn.cyberpeace.mp.devops.cluster.model.Installer;
+import cn.cyberpeace.mp.devops.cluster.model.InstallerCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.InstallerFormDataCloudPlatformModel;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -24,7 +26,7 @@ public interface InstallerService extends BaseCloudPlatformService {
      * @param installer
      * @return
      */
-    Installer add(InstallerFormDataCloudPlatformModel installer, List<MultipartFile> multipartFiles) throws IOException;
+    Installer add(InstallerFormDataCloudPlatformModel installer, List<File> fileList) throws IOException;
 
     /**
      * 更新

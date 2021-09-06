@@ -1,12 +1,13 @@
 package cn.cyberpeace.mp.devops.cluster.response;
 
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtDocker;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtNormal;
 import cn.cyberpeace.mp.devops.cluster.model.common.Resource;
 import cn.cyberpeace.mp.devops.cluster.model.common.StartUpParameter;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -53,11 +54,17 @@ public class InstallerByIdResponse extends BaseCloudPlatformResponse{
     @ApiModelProperty("服务类型")
     private Integer deployType;
 
+//    /**
+//     * 对应的docker服务的扩展信息
+//     */
+//    @ApiModelProperty("对应的docker服务的扩展信息")
+//    private ExtDocker extDocker;
+
     /**
-     * 对应的docker服务的扩展信息
+     * 文件地址
      */
-    @ApiModelProperty("对应的docker服务的扩展信息")
-    private ExtDocker extDocker;
+    @ApiModelProperty(value = "Docker文件地址")
+    private String dockerFile;
 
     /**
      * 启动参数（包装对象）
@@ -65,11 +72,11 @@ public class InstallerByIdResponse extends BaseCloudPlatformResponse{
     @ApiModelProperty(value = "启动参数")
     private List<StartUpParameter> startUpParameterList;
 
-    /**
-     * 对应的windows服务扩展信息
-     */
-    @ApiModelProperty("对应的windows服务的扩展信息")
-    private ExtNormal extNormal;
+//    /**
+//     * 对应的windows服务扩展信息
+//     */
+//    @ApiModelProperty("对应的windows服务的扩展信息")
+//    private ExtNormal extNormal;
 
     /**
      * 资源列表

@@ -49,7 +49,6 @@ public class ImagePageRequest extends BasePageRequest {
     /**
      * 快速创建
      */
-    @ApiModelProperty(hidden = true)
     private QuickCreateSupportEnum quickCreateSupport;
 
 }

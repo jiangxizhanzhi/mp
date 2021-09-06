@@ -16,8 +16,10 @@ import cn.cyberpeace.mp.devops.cluster.request.InstallerPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerRequest;
 import cn.cyberpeace.mp.devops.cluster.service.InstallerService;
 import cn.cyberpeace.mp.devops.cluster.service.TargetLogoService;
+import cn.cyberpeace.mp.devops.cluster.utils.FileUtils;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import com.alibaba.fastjson.JSONArray;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +30,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class InstallerConverterImpl implements InstallerConverter {
 
@@ -90,19 +93,20 @@ public class InstallerConverterImpl implements InstallerConverter {
         }
         Installer result = null;
         try {
-            result = installerService.add(installer,multipartFiles);
+            result = installerService.add(installer, FileUtils.transferToFile(multipartFiles));
         } catch (IOException e) {
-            e.printStackTrace();
+           log.error("add installer error, message : {}",e);
         }
         return convertInstaller(result);
     }
 
-    @Override
-    public InstallerConvertModel update(InstallerRequest request) {
-        Installer installer = convertRequest(request);
-        Installer result = installerService.update(request.getUuid(),installer);
-        return convertInstaller(result);
-    }
+//    @Deprecated
+//    @Override
+//    public InstallerConvertModel update(InstallerRequest request) {
+//        Installer installer = convertRequest(request);
+//        Installer result = installerService.update(request.getUuid(),installer);
+//        return convertInstaller(result);
+//    }
 
     @Override
     public Boolean delete(InstallerDeleteRequest request) {
@@ -146,11 +150,9 @@ public class InstallerConverterImpl implements InstallerConverter {
         installer.setLogo(request.getLogo());
         installer.setCategories(String.join(",",request.getCategories()));
         installer.setDeployType(request.getDeployType());
-//        ExtDocker extDocker = request.getExtDocker();
         if (CollectionUtils.isNotEmpty(request.getStartUpParameterList())) {
             installer.setSettings(JsonUtils.toUnderlineJSONString(request.getStartUpParameterList()));
         }
-//        ExtNormal extNormal = request.getExtNormal();
         if (CollectionUtils.isNotEmpty(request.getResourceList())) {
             request.getResourceList().stream().forEach(resource -> resource.setFile(UUID.randomUUID().toString()));
             installer.setResources(JsonUtils.toUnderlineJSONString(request.getResourceList()));
@@ -163,24 +165,24 @@ public class InstallerConverterImpl implements InstallerConverter {
      * @param request
      * @return
      */
-    private Installer convertRequest(InstallerRequest request){
-        Installer installer = new Installer();
-        installer.setName(request.getName());
-        installer.setDescription(request.getDescription());
-        installer.setLogo(request.getLogo());
-        installer.setCategories(String.join(",",request.getCategories()));
-        installer.setDeployType(request.getDeployType());
-//        ExtDocker extDocker = request.getExtDocker();
-//        if (Objects.nonNull(extDocker) && CollectionUtils.isNotEmpty(request.getStartUpParameterList())) {
-//            extDocker.setSettings(JSONArray.toJSONString(request.getStartUpParameterList()));
-//        }
-//        installer.setExtDocker(extDocker);
-//        ExtNormal extNormal = request.getExtNormal();
-//        if (Objects.nonNull(extNormal) && CollectionUtils.isNotEmpty(request.getResourceList())) {
-////            extNormal.setResources(JSONArray.toJSONString(request.getResourceList()));
-//        }
-        installer.setResourceList(request.getResourceList());
-//        installer.setExtNormal(extNormal);
-        return installer;
-    }
+//    private Installer convertRequest(InstallerRequest request){
+//        Installer installer = new Installer();
+//        installer.setName(request.getName());
+//        installer.setDescription(request.getDescription());
+//        installer.setLogo(request.getLogo());
+//        installer.setCategories(String.join(",",request.getCategories()));
+//        installer.setDeployType(request.getDeployType());
+////        ExtDocker extDocker = request.getExtDocker();
+////        if (Objects.nonNull(extDocker) && CollectionUtils.isNotEmpty(request.getStartUpParameterList())) {
+////            extDocker.setSettings(JSONArray.toJSONString(request.getStartUpParameterList()));
+////        }
+////        installer.setExtDocker(extDocker);
+////        ExtNormal extNormal = request.getExtNormal();
+////        if (Objects.nonNull(extNormal) && CollectionUtils.isNotEmpty(request.getResourceList())) {
+//////            extNormal.setResources(JSONArray.toJSONString(request.getResourceList()));
+////        }
+//        installer.setResourceList(request.getResourceList());
+////        installer.setExtNormal(extNormal);
+//        return installer;
+//    }
 }

@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.devops.cluster.response.ImagesByIdResponse;
 import cn.cyberpeace.mp.devops.cluster.response.ImagesPageResponse;
 import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
 import cn.cyberpeace.mp.devops.cluster.response.base.Result;
+import cn.cyberpeace.mp.devops.cluster.service.TargetLogoService;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -31,7 +32,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -52,10 +52,14 @@ public class ImagesController {
 
     private SnapshotConverter snapshotConverter;
 
+    private TargetLogoService targetLogoService;
+
     @Autowired
-    public ImagesController(ImagesConverter imagesConverter,SnapshotConverter snapshotConverter) {
+    public ImagesController(ImagesConverter imagesConverter,SnapshotConverter snapshotConverter,
+                            TargetLogoService targetLogoService) {
         this.imagesConverter = imagesConverter;
         this.snapshotConverter = snapshotConverter;
+        this.targetLogoService = targetLogoService;
     }
 
     /**
@@ -82,33 +86,33 @@ public class ImagesController {
         return new PageResult<>(list,model.getTotal());
     }
 
-    /**
-     * 分页查询
-     */
-    @ApiOperation("快速创建分页查询")
-    @GetMapping("/quick-create/page")
-    public PageResult<ImagesPageResponse> page(ImageQuickCreatePageRequest request){
-        ImagePageRequest pageRequest = new ImagePageRequest();
-        pageRequest.setPage(request.getPage());
-        pageRequest.setPerPage(request.getPerPage());
-        pageRequest.setQuickCreateSupport(request.getQuickCreateSupport());
-        ImageConvertPageModel model = imagesConverter.page(pageRequest);
-        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getModelList())){
-            return new PageResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
-        }
-        List<ImagesPageResponse> list = model.getModelList().stream().map(v -> {
-            ExtSystemInfo extSystemInfo = v.getExtSystemInfo();
-            ExtVm extVm = v.getExtVm();
-            ImagesPageResponse response = ImagesPageResponse.builder().uuid(v.getUuid()).name(v.getName())
-                    .mainCategory(v.getMainCategory()).subCategory(v.getSubCategory()).imageType(v.getImageType())
-                    .systemType(Objects.nonNull(extSystemInfo) ? extSystemInfo.getSystemType() : null)
-                    .flavor(Objects.nonNull(extVm) ? extVm.getFlavor() : "")
-                    .description(v.getDescription()).build();
-            return response;
-        }).collect(Collectors.toList());
-
-        return new PageResult<>(list,model.getTotal());
-    }
+//    /**
+//     * 分页查询
+//     */
+//    @ApiOperation("快速创建分页查询")
+//    @GetMapping("/quick-create/page")
+//    public PageResult<ImagesPageResponse> page(ImageQuickCreatePageRequest request){
+//        ImagePageRequest pageRequest = new ImagePageRequest();
+//        pageRequest.setPage(request.getPage());
+//        pageRequest.setPerPage(request.getPerPage());
+//        pageRequest.setQuickCreateSupport(request.getQuickCreateSupport());
+//        ImageConvertPageModel model = imagesConverter.page(pageRequest);
+//        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getModelList())){
+//            return new PageResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
+//        }
+//        List<ImagesPageResponse> list = model.getModelList().stream().map(v -> {
+//            ExtSystemInfo extSystemInfo = v.getExtSystemInfo();
+//            ExtVm extVm = v.getExtVm();
+//            ImagesPageResponse response = ImagesPageResponse.builder().uuid(v.getUuid()).name(v.getName())
+//                    .mainCategory(v.getMainCategory()).subCategory(v.getSubCategory()).imageType(v.getImageType())
+//                    .systemType(Objects.nonNull(extSystemInfo) ? extSystemInfo.getSystemType() : null)
+//                    .flavor(Objects.nonNull(extVm) ? extVm.getFlavor() : "")
+//                    .description(v.getDescription()).build();
+//            return response;
+//        }).collect(Collectors.toList());
+//
+//        return new PageResult<>(list,model.getTotal());
+//    }
 
     /**
      * 新增
@@ -116,7 +120,7 @@ public class ImagesController {
     @ApiOperation("新增")
     @PostMapping("/add")
     public ServiceResult add(ImageRequest request){
-        String logoUrl = imagesConverter.uploadLogo(request.getLogoFile());
+        String logoUrl = targetLogoService.uploadLogo(request.getLogoFile());
         request.setLogo(logoUrl);
         ImagesUploadRequest uploadRequest = new ImagesUploadRequest();
         String imageUuid = imagesConverter.uploadImage(uploadRequest,request.getImageFile());
@@ -193,14 +197,6 @@ public class ImagesController {
         imagesConverter.auth(request);
     }
 
-
-    @ApiOperation(value = "上传", notes = "")
-    @PostMapping("/upload")
-    public Result upload(@RequestParam("file") MultipartFile file) {
-       String result = imagesConverter.upload(file);
-       return new Result<>(result);
-    }
-
     /**
      * 导出
      */
@@ -266,5 +262,23 @@ public class ImagesController {
     @GetMapping("/snapshot/create")
     public void createSnapshot(@RequestBody SnapshotRequest request){
         snapshotConverter.create(request);
+    }
+
+    /**
+     * 文件注入
+     */
+    @ApiOperation("文件注入")
+    @PostMapping("/inject-file")
+    public void injectFile(@RequestBody ImageInjectFileRequest request){
+
+    }
+
+    /**
+     * 查看文件注入列表
+     */
+    @ApiOperation("查看文件注入列表")
+    @GetMapping("/inject-file")
+    public void findInjectFileList(@RequestBody ImageInjectFileRequest request){
+
     }
 }
