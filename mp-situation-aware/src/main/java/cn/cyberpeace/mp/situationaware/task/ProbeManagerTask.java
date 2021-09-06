@@ -8,11 +8,9 @@ import cn.cyberpeace.mp.situationaware.model.enums.ProbeStatus;
 import cn.cyberpeace.mp.situationaware.repository.ProbeModelMapper;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Maps;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import javax.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -29,10 +27,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 /**
-  *@Desciption 定时任务修改
-  *@Author zhangjin
-  *@Date 9/6/21 2:42 下午
-**/
+ *
+ **/
 @Component
 @Slf4j
 public class ProbeManagerTask {
