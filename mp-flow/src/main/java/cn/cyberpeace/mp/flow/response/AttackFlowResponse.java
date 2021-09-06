@@ -41,9 +41,9 @@ public class AttackFlowResponse extends FlowInfoResponse {
     private Integer suffix;
 
     /**
-     * 攻击脚本运行命令
+     * 攻击脚本运行参数
      */
-    @ApiModelProperty(value = "攻击脚本运行命令")
+    @ApiModelProperty(value = "攻击脚本运行参数")
     private String runCmd;
 
     public AttackFlowResponse(FlowInfoModel flowInfoModel, String prefixUrl) {

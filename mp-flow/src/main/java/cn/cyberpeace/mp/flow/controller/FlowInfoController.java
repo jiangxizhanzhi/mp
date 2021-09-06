@@ -77,6 +77,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
      * @param addRequest
      * @return
      */
+    @ApiOperation("新增背景流量")
     @PostMapping("/background_add")
     public ServiceResult<BackgroundFlowResponse> addBackgroundFlow(@Validated AddBackgroundFlowRequest addRequest) {
         return flowServiceImpl.addBackgroundFlow(addRequest);
@@ -87,6 +88,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
      * @param modifyRequest
      * @return
      */
+    @ApiOperation("更新背景流量")
     @PostMapping("/background_modify")
     public ServiceResult<BackgroundFlowResponse> modifyBackgroundFlow(@Validated ModifyBackgroundFlowRequest modifyRequest) {
         return flowServiceImpl.modifyBackgroundFlow(modifyRequest);
@@ -108,6 +110,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
      * @param addRequest
      * @return
      */
+    @ApiOperation("新增攻击流量")
     @PostMapping("/attack_add")
     public ServiceResult<AttackFlowResponse> addAttackFlow(@Validated AddAttackFlowRequest addRequest) {
         return flowServiceImpl.addAttackFlow(addRequest);
@@ -118,6 +121,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
      * @param modifyRequest
      * @return
      */
+    @ApiOperation("更新攻击流量")
     @PostMapping("/attack_modify")
     public ServiceResult<AttackFlowResponse> modifyAttackFlow(@Validated ModifyAttackFlowRequest modifyRequest) {
         return flowServiceImpl.modifyAttackFlow(modifyRequest);

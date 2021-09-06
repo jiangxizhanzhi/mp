@@ -55,9 +55,9 @@ public class AddScriptsRequest {
     private int isDefault = 1;
 
     /**
-     * 如果是攻击脚本，需要填写运行命令
+     * 如果是攻击脚本，需要填写运行参数
      */
-    @ApiModelProperty("如果是攻击脚本，需要填写运行命令")
+    @ApiModelProperty("如果是攻击脚本，需要填写运行参数")
     private String runCmd;
 
     /**

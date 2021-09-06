@@ -58,9 +58,9 @@ public class AddAttackFlowRequest {
     private Integer suffix;
 
     /**
-     * 运行命令
+     * 运行参数
      */
-    @ApiModelProperty(required = true, value = "运行命令")
+    @ApiModelProperty(required = true, value = "运行参数")
     @NotBlank(message = "runCmd can not be empty")
     private String runCmd;
 

@@ -52,9 +52,9 @@ public class FlowInfoModel extends BaseModel {
     private Integer resourceType;
 
     /**
-     * 攻击脚本运行命令
+     * 攻击脚本运行参数
      */
-    @ApiModelProperty(value = "攻击脚本运行命令")
+    @ApiModelProperty(value = "攻击脚本运行参数")
     @DefaultStr
     private String runCmd;
 

@@ -59,9 +59,9 @@ public class ModifyAttackFlowRequest {
     private Integer suffix;
 
     /**
-     * 运行命令
+     * 运行参数
      */
-    @ApiModelProperty(value = "运行命令")
+    @ApiModelProperty(value = "运行参数")
     private String runCmd;
 
     /**
