@@ -44,13 +44,13 @@ public class RealEquipmentRequest extends BaseRequest{
     /**
      * 分类
      */
-    @ApiModelProperty("分类")
+    @ApiModelProperty("一级分类")
     private Integer mainCategory;
 
     /**
      * 子分类
      */
-    @ApiModelProperty("子分类")
+    @ApiModelProperty("二级分类")
     private Integer subCategory;
 
     /**

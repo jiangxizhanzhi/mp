@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.response;
 
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -72,5 +73,23 @@ public class RealEquipmentPageResponse  extends BaseCloudPlatformResponse{
      * 在位状态
      */
     @ApiModelProperty(value = "在位状态")
-    private Boolean status;
+    private Boolean inPosition;
+
+    /**
+     * 引用状态
+     */
+    @ApiModelProperty(value = "引用状态")
+    private Integer referenceStatus;
+
+    /**
+     * 使用状态
+     */
+    @ApiModelProperty(value = "使用状态")
+    private Integer useStatus;
+
+    /**
+     * 系统信息
+     */
+    @ApiModelProperty("系统信息")
+    private ExtSystemInfo extSystemInfo;
 }

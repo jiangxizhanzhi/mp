@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 import cn.cyberpeace.mp.devops.cluster.enums.PublicEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.QuickCreateSupportEnum;
+import cn.cyberpeace.mp.devops.cluster.enums.StatusEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,8 +12,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table("mp_devops_images")
-public class ImageModel extends BaseModel {
+@Table("mp_devops_target")
+public class TargetModel extends BaseModel {
 
     /**
      * 镜像UUID
@@ -53,5 +54,20 @@ public class ImageModel extends BaseModel {
      * 是否支持快速创建
      */
     private QuickCreateSupportEnum quickCreateSupport;
+
+    /**
+     * 在位状态
+     */
+    private StatusEnum inPosition;
+
+    /**
+     * 使用状态
+     */
+    private Integer useStatus;
+
+    /**
+     * 引用状态
+     */
+    private Integer referenceStatus;
 
 }

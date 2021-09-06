@@ -7,11 +7,8 @@ import cn.cyberpeace.mp.devops.cluster.converter.RealEquipmentConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.RealEquipment;
 import cn.cyberpeace.mp.devops.cluster.converter.model.RealEquipmentConvertModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntity;
-import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentDeleteRequest;
-import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentPageRequest;
-import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentRequest;
-import cn.cyberpeace.mp.devops.cluster.response.RealEquipmentByIdResponse;
-import cn.cyberpeace.mp.devops.cluster.response.RealEquipmentPageResponse;
+import cn.cyberpeace.mp.devops.cluster.request.*;
+import cn.cyberpeace.mp.devops.cluster.response.*;
 import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
 import cn.cyberpeace.mp.devops.cluster.response.base.Result;
 import com.google.common.collect.Lists;
@@ -55,12 +52,12 @@ public class RealEquipmentController {
             ExtEntity extEntity = v.getExtEntity();
             RealEquipmentPageResponse response = RealEquipmentPageResponse.builder().id(v.getUuid()).name(v.getName())
                     .category(v.getMainCategory()).subCategory(v.getSubCategory())
-                    .description(v.getDescription()).build();
+                    .description(v.getDescription()).extSystemInfo(v.getExtSystemInfo()).build();
             if (Objects.nonNull(extEntity)){
                 response.setModel(extEntity.getStyle());
                 response.setParams(extEntity.getParams());
                 response.setEntityType(extEntity.getAccessType());
-                response.setStatus(extEntity.getEntityStatus());
+                response.setInPosition(extEntity.getEntityStatus());
                 response.setEntityDetail(extEntity.getAccessProtocals());
             }
             return response;
@@ -114,5 +111,41 @@ public class RealEquipmentController {
         return new Result<>(result);
     }
 
+    /**
+     * 登录
+     */
+    @ApiOperation("登录")
+    @PostMapping("/sign-in")
+    public Result<Boolean> signIn(@RequestBody RealEquipmentSignInRequest request){
+//        Boolean result = realEquipmentConverter.delete(request);
+        return new Result<>();
+    }
 
+    /**
+     * 释放
+     */
+    @ApiOperation("释放")
+    @PostMapping("/freed")
+    public Result<Boolean> freed(@RequestBody RealEquipmentFreedRequest request){
+        return new Result<>();
+    }
+
+    @ApiOperation("查询详情")
+    @GetMapping("/get-devops-details")
+    public Result<RealEquipmentDevopsDetailResponse> findDevopsDetails(@RequestParam("uuid") String id){
+        return new Result<>(new RealEquipmentDevopsDetailResponse());
+    }
+
+
+    @ApiOperation("接口资源")
+    @GetMapping("/network-card")
+    public PageResult<RealEquipmentNetworkCardPageResponse> pageNetworkCard(RealEquipmentNetworkCardPageRequest request){
+        return new PageResult<>(Lists.newArrayList(),100);
+    }
+
+    @ApiOperation("场景引用")
+    @GetMapping("/scenes")
+    public PageResult<RealEquipmentScenesPageResponse> pageScenes(RealEquipmentScenesPageRequest request){
+        return new PageResult<>(Lists.newArrayList(),100);
+    }
 }

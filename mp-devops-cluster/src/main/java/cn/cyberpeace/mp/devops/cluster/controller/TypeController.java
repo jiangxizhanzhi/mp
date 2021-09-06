@@ -37,7 +37,7 @@ public class TypeController {
      * 查询所有分类
      * @return
      */
-    @ApiOperation("查询所有分类")
+    @ApiOperation("查询所有镜像管理分类")
     @GetMapping("/image-add-page")
     public Result<TypeAllResponse> imageAddPage(){
         TypeAllConvertModel roles = typeConverter.findRoles();

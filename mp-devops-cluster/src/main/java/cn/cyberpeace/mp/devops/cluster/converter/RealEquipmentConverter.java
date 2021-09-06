@@ -18,7 +18,7 @@ public interface RealEquipmentConverter extends BaseConverter{
      * 分页查询
      * @param request
      */
-    RealEquipmentConvertModel page(RealEquipmentPageRequest request, String... ignoreFields);
+    RealEquipmentConvertModel page(RealEquipmentPageRequest request);
 
     /**
      * 根据ID查询

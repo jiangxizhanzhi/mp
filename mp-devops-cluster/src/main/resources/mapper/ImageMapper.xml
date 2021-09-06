@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="cn.cyberpeace.mp.devops.cluster.repository.ImageMapper">
 
-    <resultMap id="BaseResultMap" type="cn.cyberpeace.mp.devops.cluster.model.ImageModel">
+    <resultMap id="BaseResultMap" type="cn.cyberpeace.mp.devops.cluster.model.TargetModel">
         <id column="pk" property="pk"/>
         <result column="id"  property="id"/>
         <result column="uuid"  property="uuid"/>
@@ -16,7 +16,7 @@
 
     <sql id="commonWhere">
         <if test=" owner != null">
-            left join mp_devops_images_auth a on i.id = a.target
+            left join mp_devops_target_auth a on i.id = a.target
         </if>
         <where>
             <if test=" name != null and name != ''">
@@ -31,6 +31,18 @@
             <if test=" imageType != null and imageType != '' ">
                 and i.image_type = #{imageType}
             </if>
+            <if test=" searchType != null and searchType == 1 ">
+                and i.image_type in ('vm','container','simple')
+            </if>
+            <if test=" searchType != null and searchType == 2 ">
+                and i.image_type = 'entity'
+            </if>
+            <if test=" inPosition != null  ">
+                and i.in_position = #{inPosition}
+            </if>
+            <if test=" useStatus != null  ">
+                and i.use_status = #{useStatus}
+            </if>
             <if test=" quickCreateSupport != null">
                 and i.quick_create_support = #{quickCreateSupport,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler}
             </if>
@@ -44,7 +56,7 @@
         select
                count(i.pk)
         from
-        mp_devops_images i
+        mp_devops_target i
         <include refid="commonWhere"/>
     </select>
 
@@ -52,14 +64,14 @@
         select
             i.pk,i.id,i.uuid,i.name,i.main_category,i.sub_category,i.image_type,i.is_public,i.quick_create_support
         from
-            mp_devops_images i
+            mp_devops_target i
         <include refid="commonWhere"/>
         ORDER BY i.create_time desc
         limit #{offset}, #{limit}
     </select>
 
-    <insert id="insert" parameterType="cn.cyberpeace.mp.devops.cluster.model.ImageModel">
-        insert into mp_devops_images
+    <insert id="insert" parameterType="cn.cyberpeace.mp.devops.cluster.model.TargetModel">
+        insert into mp_devops_target
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="id != null">
                 id,
@@ -93,6 +105,15 @@
             </if>
             <if test="updateTime != null">
                 update_time,
+            </if>
+            <if test="inPosition != null">
+                in_position,
+            </if>
+            <if test="useStatus != null">
+                use_status,
+            </if>
+            <if test="referenceStatus != null">
+                reference_status,
             </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
@@ -129,12 +150,21 @@
             <if test="updateTime != null">
                 #{updateTime},
             </if>
+            <if test="inPosition != null">
+                #{inPosition,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
+            </if>
+            <if test="useStatus != null">
+                #{useStatus},
+            </if>
+            <if test="referenceStatus != null">
+                #{referenceStatus},
+            </if>
         </trim>
     </insert>
 
     <update id="updateById"
-            parameterType="cn.cyberpeace.mp.devops.cluster.model.ImageModel">
-        update mp_devops_images
+            parameterType="cn.cyberpeace.mp.devops.cluster.model.TargetModel">
+        update mp_devops_target
         <set>
             <if test="name != null">
                 name = #{name},
@@ -159,7 +189,7 @@
     </update>
 
     <delete id="delete" parameterType="cn.cyberpeace.mp.devops.cluster.dto.ImageDeleteDTO">
-        delete from mp_devops_images
+        delete from mp_devops_target
         <where>
             <if test="ids != null and ids.size > 0">
                  id in
