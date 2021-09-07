@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.response;
 
+import cn.cyberpeace.mp.devops.cluster.enums.StatusEnum;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -73,7 +74,7 @@ public class RealEquipmentPageResponse  extends BaseCloudPlatformResponse{
      * 在位状态
      */
     @ApiModelProperty(value = "在位状态")
-    private Boolean inPosition;
+    private StatusEnum inPosition;
 
     /**
      * 引用状态
@@ -85,7 +86,7 @@ public class RealEquipmentPageResponse  extends BaseCloudPlatformResponse{
      * 使用状态
      */
     @ApiModelProperty(value = "使用状态")
-    private Integer useStatus;
+    private StatusEnum useStatus;
 
     /**
      * 系统信息
