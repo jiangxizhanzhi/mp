@@ -2,27 +2,24 @@ package cn.cyberpeace.mp.devops.cluster.converter.impl;
 
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.util.UserUtils;
-import cn.cyberpeace.mp.base.config.FastDfsConfig;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.BeanUtils;
-import cn.cyberpeace.mp.base.util.LocalDateTimeUtils;
-import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.cyberpeace.mp.devops.cluster.converter.ImagesConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageAuthConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertPageModel;
 import cn.cyberpeace.mp.devops.cluster.dto.ImageDeleteDTO;
 import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
-import cn.cyberpeace.mp.devops.cluster.enums.*;
+import cn.cyberpeace.mp.devops.cluster.enums.ImageTypeEnum;
+import cn.cyberpeace.mp.devops.cluster.enums.MainTypeEnum;
+import cn.cyberpeace.mp.devops.cluster.enums.PublicEnum;
+import cn.cyberpeace.mp.devops.cluster.enums.RoleEnum;
 import cn.cyberpeace.mp.devops.cluster.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtVm;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageAuthMapper;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
 import cn.cyberpeace.mp.devops.cluster.request.*;
-import cn.cyberpeace.mp.devops.cluster.service.ContainerService;
-import cn.cyberpeace.mp.devops.cluster.service.DeviceService;
-import cn.cyberpeace.mp.devops.cluster.service.ImagesService;
-import cn.cyberpeace.mp.devops.cluster.service.VmService;
+import cn.cyberpeace.mp.devops.cluster.service.*;
 import cn.cyberpeace.mp.devops.cluster.utils.FileUtils;
 import com.alibaba.fastjson.JSONArray;
 import lombok.extern.slf4j.Slf4j;
@@ -34,10 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -59,24 +52,20 @@ public class ImagesConverterImpl implements ImagesConverter {
 
     private ContainerService containerService;
 
-    private FastDFSClient fastDFSClient;
-
-    private FastDfsConfig fastDfsConfig;
+    private DevopsTargetService devopsTargetService;
 
 
     @Autowired
     public ImagesConverterImpl(ImagesService imagesService, ImageMapper imageMapper,DeviceService deviceService,
                                ImageAuthMapper imageAuthMapper,VmService vmService,ContainerService containerService,
-                               FastDFSClient fastDFSClient,FastDfsConfig fastDfsConfig) {
+                               DevopsTargetService devopsTargetService) {
         this.imagesService = imagesService;
         this.imageMapper = imageMapper;
         this.deviceService = deviceService;
         this.imageAuthMapper = imageAuthMapper;
         this.vmService = vmService;
         this.containerService = containerService;
-        this.fastDFSClient = fastDFSClient;
-        this.fastDfsConfig = fastDfsConfig;
-
+        this.devopsTargetService = devopsTargetService;
     }
 
     @Override
@@ -132,11 +121,7 @@ public class ImagesConverterImpl implements ImagesConverter {
     @Transactional
     public Boolean add(ImageRequest request) {
         Device device = imagesService.add(convertRequest(request));
-        if (Objects.nonNull(device) && device.isSuccess()) {
-            TargetModel targetModel = convertDevice(device);
-            targetModel.setIsPublic(PublicEnum.ALL_PUBLIC);
-            imageMapper.insert(targetModel);
-        }
+        devopsTargetService.insert(device);
         return device.isSuccess();
     }
 
@@ -151,12 +136,7 @@ public class ImagesConverterImpl implements ImagesConverter {
     @Override
     public Boolean update(ImageRequest request) {
         Device device = imagesService.update(request.getUuid(),convertRequest(request));
-        if (Objects.nonNull(device) && device.isSuccess()) {
-            TargetModel oldTargetModel = imageMapper.get(request.getUuid());
-            TargetModel targetModel = convertDevice(device);
-            targetModel.setIsPublic(oldTargetModel.getIsPublic());
-            imageMapper.updateById(targetModel);
-        }
+        devopsTargetService.updateById(device);
         return device.isSuccess();
     }
 
@@ -308,32 +288,6 @@ public class ImagesConverterImpl implements ImagesConverter {
      * @param device
      * @return
      */
-    protected TargetModel convertDevice(Device device){
-        TargetModel targetModel = new TargetModel();
-        targetModel.setId(device.getId().toString());
-        targetModel.setUuid(device.getUuid());
-        targetModel.setName(device.getName());
-        targetModel.setRole(device.getRole());
-        targetModel.setMainCategory(device.getCategory());
-        targetModel.setSubCategory(device.getSecondCategory());
-        targetModel.setImageType(device.getImageType());
-        ExtVm extVm = device.getExtVm();
-        if (Objects.nonNull(extVm)) {
-            targetModel.setQuickCreateSupport(Boolean.TRUE.equals(extVm.getQuickCreateSupport()) ?
-                    QuickCreateSupportEnum.TRUE : QuickCreateSupportEnum.FALSE);
-        }else{
-            targetModel.setQuickCreateSupport(QuickCreateSupportEnum.FALSE);
-        }
-        targetModel.setCreateTime(LocalDateTime.parse(device.getCreatedAt(), LocalDateTimeUtils.dateTimeFormatter));
-        targetModel.setUpdateTime(LocalDateTime.parse(device.getUpdatedAt(), LocalDateTimeUtils.dateTimeFormatter));
-        return targetModel;
-    }
-
-    /**
-     * 转换Device
-     * @param device
-     * @return
-     */
     protected ImageConvertModel wrapperImageConvertModel(Device device){
         ImageConvertModel imageModel = new ImageConvertModel();
         imageModel.setUuid(device.getUuid());
@@ -347,47 +301,6 @@ public class ImagesConverterImpl implements ImagesConverter {
         imageModel.setExtVm(device.getExtVm());
         imageModel.setExtGateway(device.getExtGateway());
         return imageModel;
-    }
-
-    /**
-     *
-     * @param file
-     * @return
-     * @throws Exception
-     */
-    protected File convertMultipartFile(MultipartFile file) throws Exception {
-
-        File toFile = null;
-        if (file.equals("") || file.getSize() <= 0) {
-            file = null;
-        } else {
-            InputStream ins = null;
-            ins = file.getInputStream();
-            toFile = new File(file.getOriginalFilename());
-            inputStreamToFile(ins, toFile);
-            ins.close();
-        }
-        return toFile;
-    }
-
-    /**
-     * 获取流文件
-     * @param ins
-     * @param file
-     */
-    private void inputStreamToFile(InputStream ins, File file) {
-        try {
-            OutputStream os = new FileOutputStream(file);
-            int bytesRead = 0;
-            byte[] buffer = new byte[1024];
-            while ((bytesRead = ins.read(buffer, 0, 1024)) != -1) {
-                os.write(buffer, 0, bytesRead);
-            }
-            os.close();
-            ins.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
 }

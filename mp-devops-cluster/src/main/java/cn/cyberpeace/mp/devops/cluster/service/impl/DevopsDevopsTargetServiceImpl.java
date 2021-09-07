@@ -38,6 +38,17 @@ public class DevopsDevopsTargetServiceImpl implements DevopsTargetService {
         return 0;
     }
 
+    @Override
+    public Integer updateById(Device device) {
+        if (Objects.nonNull(device) && device.isSuccess()) {
+            TargetModel oldTargetModel = imageMapper.get(device.getUuid());
+            TargetModel targetModel = convertDevice(device);
+            targetModel.setIsPublic(oldTargetModel.getIsPublic());
+            return imageMapper.updateById(targetModel);
+        }
+        return 0;
+    }
+
     protected TargetModel convertDevice(Device device){
         TargetModel targetModel = new TargetModel();
         targetModel.setId(device.getId().toString());

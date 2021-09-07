@@ -44,5 +44,5 @@ public class RealEquipmentPageRequest extends BasePageRequest{
      * 使用状态
      */
     @ApiModelProperty(value = "使用状态")
-    private Integer useStatus;
+    private StatusEnum useStatus;
 }
