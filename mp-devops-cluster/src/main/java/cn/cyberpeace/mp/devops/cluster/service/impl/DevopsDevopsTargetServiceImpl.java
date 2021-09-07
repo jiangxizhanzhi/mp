@@ -1,0 +1,76 @@
+package cn.cyberpeace.mp.devops.cluster.service.impl;
+
+import cn.cyberpeace.mp.base.util.LocalDateTimeUtils;
+import cn.cyberpeace.mp.devops.cluster.enums.PublicEnum;
+import cn.cyberpeace.mp.devops.cluster.enums.QuickCreateSupportEnum;
+import cn.cyberpeace.mp.devops.cluster.enums.StatusEnum;
+import cn.cyberpeace.mp.devops.cluster.model.Device;
+import cn.cyberpeace.mp.devops.cluster.model.TargetModel;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntity;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtVm;
+import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
+import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.Objects;
+
+@Service
+public class DevopsDevopsTargetServiceImpl implements DevopsTargetService {
+
+    private ImageMapper imageMapper;
+
+    @Autowired
+    public DevopsDevopsTargetServiceImpl(ImageMapper imageMapper) {
+        this.imageMapper = imageMapper;
+    }
+
+    @Transactional
+    @Override
+    public Integer insert(Device device) {
+        if (Objects.nonNull(device) && device.isSuccess()) {
+            TargetModel targetModel = convertDevice(device);
+            targetModel.setIsPublic(PublicEnum.ALL_PUBLIC);
+            return imageMapper.insert(targetModel);
+        }
+        return 0;
+    }
+
+    @Override
+    public Integer updateById(Device device) {
+        if (Objects.nonNull(device) && device.isSuccess()) {
+            TargetModel oldTargetModel = imageMapper.get(device.getUuid());
+            TargetModel targetModel = convertDevice(device);
+            targetModel.setIsPublic(oldTargetModel.getIsPublic());
+            return imageMapper.updateById(targetModel);
+        }
+        return 0;
+    }
+
+    protected TargetModel convertDevice(Device device){
+        TargetModel targetModel = new TargetModel();
+        targetModel.setId(device.getId().toString());
+        targetModel.setUuid(device.getUuid());
+        targetModel.setName(device.getName());
+        targetModel.setRole(device.getRole());
+        targetModel.setMainCategory(device.getCategory());
+        targetModel.setSubCategory(device.getSecondCategory());
+        targetModel.setImageType(device.getImageType());
+        ExtVm extVm = device.getExtVm();
+        if (Objects.nonNull(extVm)) {
+            targetModel.setQuickCreateSupport(Boolean.TRUE.equals(extVm.getQuickCreateSupport()) ?
+                    QuickCreateSupportEnum.TRUE : QuickCreateSupportEnum.FALSE);
+        }else{
+            targetModel.setQuickCreateSupport(QuickCreateSupportEnum.FALSE);
+        }
+        targetModel.setCreateTime(LocalDateTime.parse(device.getCreatedAt(), LocalDateTimeUtils.dateTimeFormatter));
+        targetModel.setUpdateTime(LocalDateTime.parse(device.getUpdatedAt(), LocalDateTimeUtils.dateTimeFormatter));
+        ExtEntity extEntity = device.getExtEntity();
+        if (Objects.nonNull(extEntity)){
+            targetModel.setInPosition(extEntity.getEntityStatus() ? StatusEnum.YES : StatusEnum.NO);
+        }
+        return targetModel;
+    }
+}

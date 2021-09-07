@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.converter;
 
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeAllConvertModel;
+import cn.cyberpeace.mp.devops.cluster.converter.model.TypeL2AllConvertModel;
 import cn.cyberpeace.mp.devops.cluster.service.BaseCloudPlatformService;
 
 public interface TypeConverter extends BaseCloudPlatformService {
@@ -15,7 +16,7 @@ public interface TypeConverter extends BaseCloudPlatformService {
      * 查询类型数据，仅返回L1和L2级类型数据
      * @return
      */
-    TypeAllConvertModel findL1AndL2Type();
+    TypeL2AllConvertModel findL1AndL2Type();
 
     /**
      * 查询所有role

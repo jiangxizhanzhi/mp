@@ -2,27 +2,24 @@ package cn.cyberpeace.mp.devops.cluster.converter.impl;
 
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.util.UserUtils;
-import cn.cyberpeace.mp.base.config.FastDfsConfig;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.BeanUtils;
-import cn.cyberpeace.mp.base.util.LocalDateTimeUtils;
-import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.cyberpeace.mp.devops.cluster.converter.ImagesConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageAuthConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertPageModel;
 import cn.cyberpeace.mp.devops.cluster.dto.ImageDeleteDTO;
 import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
-import cn.cyberpeace.mp.devops.cluster.enums.*;
+import cn.cyberpeace.mp.devops.cluster.enums.ImageTypeEnum;
+import cn.cyberpeace.mp.devops.cluster.enums.MainTypeEnum;
+import cn.cyberpeace.mp.devops.cluster.enums.PublicEnum;
+import cn.cyberpeace.mp.devops.cluster.enums.RoleEnum;
 import cn.cyberpeace.mp.devops.cluster.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtVm;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageAuthMapper;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
 import cn.cyberpeace.mp.devops.cluster.request.*;
-import cn.cyberpeace.mp.devops.cluster.service.ContainerService;
-import cn.cyberpeace.mp.devops.cluster.service.DeviceService;
-import cn.cyberpeace.mp.devops.cluster.service.ImagesService;
-import cn.cyberpeace.mp.devops.cluster.service.VmService;
+import cn.cyberpeace.mp.devops.cluster.service.*;
 import cn.cyberpeace.mp.devops.cluster.utils.FileUtils;
 import com.alibaba.fastjson.JSONArray;
 import lombok.extern.slf4j.Slf4j;
@@ -34,10 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -59,24 +52,20 @@ public class ImagesConverterImpl implements ImagesConverter {
 
     private ContainerService containerService;
 
-    private FastDFSClient fastDFSClient;
-
-    private FastDfsConfig fastDfsConfig;
+    private DevopsTargetService devopsTargetService;
 
 
     @Autowired
     public ImagesConverterImpl(ImagesService imagesService, ImageMapper imageMapper,DeviceService deviceService,
                                ImageAuthMapper imageAuthMapper,VmService vmService,ContainerService containerService,
-                               FastDFSClient fastDFSClient,FastDfsConfig fastDfsConfig) {
+                               DevopsTargetService devopsTargetService) {
         this.imagesService = imagesService;
         this.imageMapper = imageMapper;
         this.deviceService = deviceService;
         this.imageAuthMapper = imageAuthMapper;
         this.vmService = vmService;
         this.containerService = containerService;
-        this.fastDFSClient = fastDFSClient;
-        this.fastDfsConfig = fastDfsConfig;
-
+        this.devopsTargetService = devopsTargetService;
     }
 
     @Override
@@ -108,9 +97,9 @@ public class ImagesConverterImpl implements ImagesConverter {
         if (total == 0){
             return null;
         }
-        List<ImageModel> imageModels = imageMapper.page(dto);
+        List<TargetModel> targetModels = imageMapper.page(dto);
 
-        List<Integer> ids = imageModels.stream().map(ImageModel::getId).map(Integer::parseInt).collect(Collectors.toList());
+        List<Integer> ids = targetModels.stream().map(TargetModel::getId).map(Integer::parseInt).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(ids)){
             return null;
         }
@@ -132,11 +121,7 @@ public class ImagesConverterImpl implements ImagesConverter {
     @Transactional
     public Boolean add(ImageRequest request) {
         Device device = imagesService.add(convertRequest(request));
-        if (Objects.nonNull(device) && device.isSuccess()) {
-            ImageModel imageModel = convertDevice(device);
-            imageModel.setIsPublic(PublicEnum.ALL_PUBLIC);
-            imageMapper.insert(imageModel);
-        }
+        devopsTargetService.insert(device);
         return device.isSuccess();
     }
 
@@ -151,12 +136,7 @@ public class ImagesConverterImpl implements ImagesConverter {
     @Override
     public Boolean update(ImageRequest request) {
         Device device = imagesService.update(request.getUuid(),convertRequest(request));
-        if (Objects.nonNull(device) && device.isSuccess()) {
-            ImageModel oldImageModel = imageMapper.get(request.getUuid());
-            ImageModel imageModel = convertDevice(device);
-            imageModel.setIsPublic(oldImageModel.getIsPublic());
-            imageMapper.updateById(imageModel);
-        }
+        devopsTargetService.updateById(device);
         return device.isSuccess();
     }
 
@@ -171,12 +151,12 @@ public class ImagesConverterImpl implements ImagesConverter {
 
     @Override
     public ImageAuthConvertModel findAuthById(String imageId){
-        ImageModel imageModel = imageMapper.get(imageId);
+        TargetModel targetModel = imageMapper.get(imageId);
         ImageAuthConvertModel authConvertModel = new ImageAuthConvertModel();
         authConvertModel.setPublicEnum(PublicEnum.ALL_PUBLIC);
-        if (Objects.nonNull(imageModel) && PublicEnum.ALL_PUBLIC != imageModel.getIsPublic()){
-            List<ImageAuthModel> authModelList = imageAuthMapper.list(new HumanCondition().filterEqual("target",imageId));
-            List<String> userIds = authModelList.stream().map(ImageAuthModel::getOwner).collect(Collectors.toList());
+        if (Objects.nonNull(targetModel) && PublicEnum.ALL_PUBLIC != targetModel.getIsPublic()){
+            List<TargetAuthModel> authModelList = imageAuthMapper.list(new HumanCondition().filterEqual("target",imageId));
+            List<String> userIds = authModelList.stream().map(TargetAuthModel::getOwner).collect(Collectors.toList());
             authConvertModel.setUserIds(userIds);
             authConvertModel.setPublicEnum(PublicEnum.CUSTOMIZE);
 
@@ -205,10 +185,10 @@ public class ImagesConverterImpl implements ImagesConverter {
         List<String> userIds = request.getUserIds();
         PublicEnum isAllPublic = request.getIsAllPublic();
         imageIds.forEach(imageId -> {
-            ImageModel imageModel = new ImageModel();
-            imageModel.setIsPublic(isAllPublic);
-            imageModel.setUuid(imageId);
-            imageMapper.updateById(imageModel);
+            TargetModel targetModel = new TargetModel();
+            targetModel.setIsPublic(isAllPublic);
+            targetModel.setUuid(imageId);
+            imageMapper.updateById(targetModel);
         });
         if (PublicEnum.ALL_PUBLIC != isAllPublic){
             if (CollectionUtils.isEmpty(userIds)){
@@ -217,11 +197,11 @@ public class ImagesConverterImpl implements ImagesConverter {
                 userIds.add(loginUser.getId());
             }
             imageIds.forEach(imageId -> {
-                List<ImageAuthModel> authModelList = userIds.stream().map(userId -> {
-                    ImageAuthModel imageAuthModel = new ImageAuthModel();
-                    imageAuthModel.setOwner(userId);
-                    imageAuthModel.setTarget(imageId);
-                    return imageAuthModel;
+                List<TargetAuthModel> authModelList = userIds.stream().map(userId -> {
+                    TargetAuthModel targetAuthModel = new TargetAuthModel();
+                    targetAuthModel.setOwner(userId);
+                    targetAuthModel.setTarget(imageId);
+                    return targetAuthModel;
                 }).collect(Collectors.toList());
                 imageAuthMapper.bulkCreate(authModelList);
             });
@@ -308,32 +288,6 @@ public class ImagesConverterImpl implements ImagesConverter {
      * @param device
      * @return
      */
-    protected ImageModel convertDevice(Device device){
-        ImageModel imageModel = new ImageModel();
-        imageModel.setId(device.getId().toString());
-        imageModel.setUuid(device.getUuid());
-        imageModel.setName(device.getName());
-        imageModel.setRole(device.getRole());
-        imageModel.setMainCategory(device.getCategory());
-        imageModel.setSubCategory(device.getSecondCategory());
-        imageModel.setImageType(device.getImageType());
-        ExtVm extVm = device.getExtVm();
-        if (Objects.nonNull(extVm)) {
-            imageModel.setQuickCreateSupport(Boolean.TRUE.equals(extVm.getQuickCreateSupport()) ?
-                    QuickCreateSupportEnum.TRUE : QuickCreateSupportEnum.FALSE);
-        }else{
-            imageModel.setQuickCreateSupport(QuickCreateSupportEnum.FALSE);
-        }
-        imageModel.setCreateTime(LocalDateTime.parse(device.getCreatedAt(), LocalDateTimeUtils.dateTimeFormatter));
-        imageModel.setUpdateTime(LocalDateTime.parse(device.getUpdatedAt(), LocalDateTimeUtils.dateTimeFormatter));
-        return imageModel;
-    }
-
-    /**
-     * 转换Device
-     * @param device
-     * @return
-     */
     protected ImageConvertModel wrapperImageConvertModel(Device device){
         ImageConvertModel imageModel = new ImageConvertModel();
         imageModel.setUuid(device.getUuid());
@@ -347,47 +301,6 @@ public class ImagesConverterImpl implements ImagesConverter {
         imageModel.setExtVm(device.getExtVm());
         imageModel.setExtGateway(device.getExtGateway());
         return imageModel;
-    }
-
-    /**
-     *
-     * @param file
-     * @return
-     * @throws Exception
-     */
-    protected File convertMultipartFile(MultipartFile file) throws Exception {
-
-        File toFile = null;
-        if (file.equals("") || file.getSize() <= 0) {
-            file = null;
-        } else {
-            InputStream ins = null;
-            ins = file.getInputStream();
-            toFile = new File(file.getOriginalFilename());
-            inputStreamToFile(ins, toFile);
-            ins.close();
-        }
-        return toFile;
-    }
-
-    /**
-     * 获取流文件
-     * @param ins
-     * @param file
-     */
-    private void inputStreamToFile(InputStream ins, File file) {
-        try {
-            OutputStream os = new FileOutputStream(file);
-            int bytesRead = 0;
-            byte[] buffer = new byte[1024];
-            while ((bytesRead = ins.read(buffer, 0, 1024)) != -1) {
-                os.write(buffer, 0, bytesRead);
-            }
-            os.close();
-            ins.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
 }

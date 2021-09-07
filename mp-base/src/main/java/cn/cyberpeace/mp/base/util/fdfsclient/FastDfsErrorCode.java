@@ -4,7 +4,7 @@ import cn.cyberpeace.mp.base.service.code.ErrorCode;
 
 /**
  * @Description: FastDFS错误码
- * @Autho qiaokang
+ * @Author qiaokang
  * @Date：2021/6/21 15:01
  */
 public enum FastDfsErrorCode implements ErrorCode {

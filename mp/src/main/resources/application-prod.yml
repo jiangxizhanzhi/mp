@@ -1,12 +1,12 @@
 ip:
-  mariadb: ${MP_DB_IP}         # MP新中台mariadb数据库地址
-  mg: ${MG_IP}             # MG老中台地址
-  fdfs: ${FDFS_IP}           # FastDFS地址
-  cp: ${CP_IP}                # 云平台适配层接口地址
-  cr: ${CR_IP}               # cr接口地址
-  moloch: ${MOLOCH_IP}           # moloch的IP地址
-  wazuh: ${WAZUH_IP}          # wazuh的IP地址
-  es: ${MP_ES_IP}                 # MP新中台ES地址
+  mariadb: ${MP_DB_IP:10.100.0.101}         # MP新中台mariadb数据库地址
+  mg: ${MG_IP:10.100.2.21}             # MG老中台地址
+  fdfs: ${FDFS_IP:10.100.14.252}           # FastDFS地址
+  cp: ${CP_IP:10.100.7.25}                # 云平台适配层接口地址
+#  cr: ${CR_IP}               # cr接口地址
+  moloch: ${MOLOCH_IP:10.100.7.104}           # moloch的IP地址
+  wazuh: ${WAZUH_IP:10.100.14.106}          # wazuh的IP地址
+  es: ${MP_ES_IP:10.100.14.104}                 # MP新中台ES地址
 
 server:
   servlet:
@@ -59,7 +59,7 @@ mp:
           inner-file-server-addr: http://${ip.fdfs}:8888   # 内部文件服务器地址
   devops:
     cp-url: http://${ip.cp}:11111 #云平台地址
-    cr-url: http://${ip.cr} #
+#    cr-url: http://${ip.cr} #
     hostname: controller  #主机名称
     es-nodes: ${ip.es}:${MP_ES_PORT:9200}
   datasandtable:
@@ -83,6 +83,10 @@ mp:
   log:
     exclude-uri: /login
     exclude-method: OPTIONS
+  flow:
+    # 流量发生器资源地址
+    actuator-resource-url: http://10.200.1.64:80/api/v1/resource
+    trex-image: trex_0906
 
 
 management:

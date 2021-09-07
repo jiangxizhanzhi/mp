@@ -8,7 +8,7 @@ import org.csource.fastdfs.TrackerServer;
 
 /**
  * @Description: TrackerServer 工厂类，创建对象池需要 BasePooledObjectFactory 对象或子类
- * @Autho qiaokang
+ * @Author qiaokang
  * @Date：2021/6/21 15:01
  */
 public class TrackerServerFactory extends BasePooledObjectFactory<TrackerServer> {

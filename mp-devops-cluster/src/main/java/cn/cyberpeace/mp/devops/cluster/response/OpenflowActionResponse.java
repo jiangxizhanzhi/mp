@@ -12,7 +12,7 @@ import java.util.List;
 
 /**
  * @Description: 流表操作返回信息
- * @Autho qiaokang
+ * @Author qiaokang
  * @Date：2021/7/9 15:08
  */
 @Data
