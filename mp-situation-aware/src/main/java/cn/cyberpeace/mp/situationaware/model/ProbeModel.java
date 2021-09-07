@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.situationaware.model;
 
+import cn.cyberpeace.mp.situationaware.model.enums.ProbeStatus;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -28,7 +29,7 @@ public class ProbeModel implements Serializable {
 
     private String commandInterval;
 
-    private Integer probeStatus;
+    private ProbeStatus probeStatus;
 
     private static final long serialVersionUID = 1L;
 
@@ -128,11 +129,11 @@ public class ProbeModel implements Serializable {
         this.commandInterval = commandInterval;
     }
 
-    public Integer getProbeStatus() {
+    public ProbeStatus getProbeStatus() {
         return probeStatus;
     }
 
-    public void setProbeStatus(Integer probeStatus) {
+    public void setProbeStatus(ProbeStatus probeStatus) {
         this.probeStatus = probeStatus;
     }
 }

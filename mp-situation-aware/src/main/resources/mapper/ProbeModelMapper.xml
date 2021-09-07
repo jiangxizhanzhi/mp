@@ -13,13 +13,14 @@
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
         <result column="del_flag" jdbcType="INTEGER" property="delFlag"/>
         <result column="command_interval" jdbcType="VARCHAR" property="commandInterval"/>
+        <result column="probe_status" jdbcType="VARCHAR" property="probeStatus" typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler"/>
     </resultMap>
     <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="cn.cyberpeace.mp.situationaware.model.ProbeModel">
         <result column="script_content" jdbcType="LONGVARBINARY" property="scriptContent"/>
     </resultMap>
     <sql id="Base_Column_List">
         pk
-        , id, probe_name, des, OS_type, probe_category, script_type, create_time, update_time, del_flag, command_interval
+        , id, probe_name, des, OS_type, probe_category, script_type, create_time, update_time, del_flag, command_interval, probe_status
     </sql>
     <sql id="Blob_Column_List">
         script_content
