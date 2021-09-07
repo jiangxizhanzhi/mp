@@ -79,7 +79,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
      * @return
      */
     @ApiOperation("背景流量详情")
-    @GetMapping("/background_detail")
+    @GetMapping("/background")
     public ServiceResult<BackgroundFlowResponse> queryBackgroundDetail(@RequestParam String id) {
         return flowServiceImpl.queryBackgroundDetail(id);
     }
@@ -90,7 +90,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
      * @return
      */
     @ApiOperation("新增背景流量")
-    @PostMapping("/background_add")
+    @PostMapping("/background")
     public ServiceResult<BackgroundFlowResponse> addBackgroundFlow(@Validated AddBackgroundFlowRequest addRequest) {
         return flowServiceImpl.addBackgroundFlow(addRequest);
     }
@@ -101,7 +101,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
      * @return
      */
     @ApiOperation("更新背景流量")
-    @PostMapping("/background_modify")
+    @PatchMapping("/background")
     public ServiceResult<BackgroundFlowResponse> modifyBackgroundFlow(@Validated ModifyBackgroundFlowRequest modifyRequest) {
         return flowServiceImpl.modifyBackgroundFlow(modifyRequest);
     }
@@ -112,7 +112,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
      * @return
      */
     @ApiOperation("攻击流量详情")
-    @GetMapping("/attack_detail")
+    @GetMapping("/attack")
     public ServiceResult<AttackFlowResponse> queryAttackDetail(@RequestParam String id) {
         return flowServiceImpl.queryAttackDetail(id);
     }
@@ -123,7 +123,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
      * @return
      */
     @ApiOperation("新增攻击流量")
-    @PostMapping("/attack_add")
+    @PostMapping("/attack")
     public ServiceResult<AttackFlowResponse> addAttackFlow(@Validated AddAttackFlowRequest addRequest) {
         return flowServiceImpl.addAttackFlow(addRequest);
     }
@@ -134,7 +134,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
      * @return
      */
     @ApiOperation("更新攻击流量")
-    @PostMapping("/attack_modify")
+    @PatchMapping("/attack")
     public ServiceResult<AttackFlowResponse> modifyAttackFlow(@Validated ModifyAttackFlowRequest modifyRequest) {
         return flowServiceImpl.modifyAttackFlow(modifyRequest);
     }
