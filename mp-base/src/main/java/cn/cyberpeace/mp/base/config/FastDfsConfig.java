@@ -10,7 +10,7 @@ import java.util.List;
 
 /**
  * @Description: FastDFS配置类
- * @Autho qiaokang
+ * @Author qiaokang
  * @Date：2021/6/23 20:14
  */
 @Component

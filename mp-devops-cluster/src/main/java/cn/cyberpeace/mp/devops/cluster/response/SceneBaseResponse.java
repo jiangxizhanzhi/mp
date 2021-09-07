@@ -17,7 +17,7 @@ import java.util.Objects;
 
 /**
  * @Description: 场景通用返回体
- * @Autho qiaokang
+ * @Author qiaokang
  * @Date：2021/7/9 10:22
  */
 @Data

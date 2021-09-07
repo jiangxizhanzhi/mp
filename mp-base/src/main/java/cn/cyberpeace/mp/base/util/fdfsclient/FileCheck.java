@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * @Description: FastDFS文件检查类
- * @Autho qiaokang
+ * @Author qiaokang
  * @Date：2021/6/21 15:01
  */
 public class FileCheck {

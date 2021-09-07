@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.base.controller;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.FileService;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -15,7 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * @Description: 文件操作控制层
  *
- * @Autho qiaokang
+ * @Author qiaokang
  * @Date：2021/6/21 15:01
  */
 @RestController
@@ -36,7 +37,7 @@ public class FileController {
      */
     @PostMapping(value = "/file/upload")
     @ResponseBody
-    public ServiceResult uploadFile(MultipartFile file, HttpServletRequest request) {
+    public ServiceResult<FileResponseData> uploadFile(MultipartFile file, HttpServletRequest request) {
         return fileService.uploadFile(file, request);
     }
 

@@ -1,18 +1,19 @@
 package cn.cyberpeace.mp.flow.util;
 
+import cn.cyberpeace.mp.base.util.ScheduledThreadPoolUtils;
 import cn.cyberpeace.mp.flow.model.base.FlowBaseModel;
 import cn.cyberpeace.mp.flow.service.ScheduleMethod;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @Description: 定时任务基本工具类
- * @Autho qiaokang
+ * @Author qiaokang
  * @Date：2021/6/16 11:35
  */
 @Slf4j
@@ -24,7 +25,7 @@ public class BaseScheduleUtil<B extends FlowBaseModel, M extends ScheduleMethod>
 
     private M method;
 
-    private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = null;
+    private ScheduledFuture<?> future;
 
     /**
      * 当前执行点
@@ -36,18 +37,17 @@ public class BaseScheduleUtil<B extends FlowBaseModel, M extends ScheduleMethod>
      */
     public void schedule() {
         FlowBaseModel flowBaseModel = this.getFlowBaseModel();
-        long delay = flowBaseModel.getDelay();
-        long interval = flowBaseModel.getInterval() <= 0 ? 1L : flowBaseModel.getInterval();
+        int delay = flowBaseModel.getDelay();
+        int interval = flowBaseModel.getInterval() <= 0 ? 1 : flowBaseModel.getInterval();
         int count = flowBaseModel.getCount();
-        log.info("开始执行任务==> 延迟时间：{}，执行间隔：{}，执行次数：{}", delay, interval, count);
+        log.info("start task==> delay：{}，interval：{}，count：{}", delay, interval, count);
 
         if (count > 0) {
-            this.scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(3);
-            this.scheduledThreadPoolExecutor.scheduleAtFixedRate(
-                    () -> executor(), delay, interval, TimeUnit.SECONDS
+            future = ScheduledThreadPoolUtils.getInstance().scheduleAtFixedRate (
+                    this::executor, delay, interval, TimeUnit.SECONDS
             );
         } else {
-            log.warn("无需执行任务");
+            log.warn("no need to run task");
         }
     }
 
@@ -56,27 +56,27 @@ public class BaseScheduleUtil<B extends FlowBaseModel, M extends ScheduleMethod>
      */
     private void executor() {
         FlowBaseModel flowBaseModel = this.getFlowBaseModel();
-        long interval = flowBaseModel.getInterval() <= 0 ? 1L : flowBaseModel.getInterval();
+        int interval = flowBaseModel.getInterval() <= 0 ? 1 : flowBaseModel.getInterval();
         int count = flowBaseModel.getCount();
 
         if (currentAtomicInteger.get() < (count + 1)) {
             //需要处理的逻辑
-            log.info("当前执行次数：{}，间隔时间：{}秒", currentAtomicInteger.get(), interval);
+            log.info("current count：{}，delay：{} second", currentAtomicInteger.get(), interval);
             // 调用流量发生接口
             getMethod().execute(getFlowBaseModel());
             //当满足条件时，停止任务
             if (currentAtomicInteger.get() == count) {
                 // 停止任务
-                this.scheduledThreadPoolExecutor.shutdownNow();
-                log.info("停止任务");
+                future.cancel(false);
+                log.info("task stop");
             } else {
                 // 执行次数加1
                 currentAtomicInteger.getAndIncrement();
-                log.info("执行下次任务");
+                log.info("execute next task");
             }
         } else {
-            this.scheduledThreadPoolExecutor.shutdownNow();
-            this.scheduledThreadPoolExecutor = null;
+            future.cancel(false);
+            log.info("task finished");
         }
     }
 
