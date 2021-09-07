@@ -43,8 +43,8 @@ public abstract class ScenePluginHandler<S, E, P> extends BasePluginHandler<S, E
      * @param pluginKey 插件代号
      * @param nodeId 网元节点id
      */
-    public <E9> E9 getPluginEle(String pluginKey, String nodeId) {
-        return getSceneHandler().getPluginEle(pluginKey, nodeId);
+    public <E9> E9 getPluginElement(String pluginKey, String nodeId) {
+        return getSceneHandler().getPluginElement(pluginKey, nodeId);
     }
 
     /**
@@ -60,31 +60,31 @@ public abstract class ScenePluginHandler<S, E, P> extends BasePluginHandler<S, E
      * 获取网元数据
      * @param nodeId 网元节点id
      */
-    public SceneElementBO getEle(String nodeId) {
-        return getSceneHandler().getEle(nodeId);
+    public SceneElementBO getSrcElement(String nodeId) {
+        return getSceneHandler().getElement(nodeId);
     }
 
     /**
      * 获取网元连接的网元
      * @param nodeId 网元节点id
      */
-    public List<SceneElementBO> getEleConnectedEles(String nodeId) {
-        return getSceneHandler().getEleConnectedEles(nodeId);
+    public List<SceneElementBO> getElementConnectedSrcElements(String nodeId) {
+        return getSceneHandler().getElementConnectedElements(nodeId);
     }
 
     /**
      * 获取网元连接的网元
      * @param nodeId 网元节点id
      */
-    public List<SceneElementPortBO> getEleConnectedPorts(String nodeId) {
-        return getSceneHandler().getEleConnectedPorts(nodeId);
+    public List<SceneElementPortBO> getElementConnectedSrcPorts(String nodeId) {
+        return getSceneHandler().getElementConnectedPorts(nodeId);
     }
 
     /**
      * 获取端口数据
      * @param portId 端口id
      */
-    public SceneElementPortBO getPort(String portId) {
+    public SceneElementPortBO getSrcPort(String portId) {
         return getSceneHandler().getPort(portId);
     }
 
@@ -92,15 +92,15 @@ public abstract class ScenePluginHandler<S, E, P> extends BasePluginHandler<S, E
      * 获取端口所属网元数据
      * @param portId 端口id
      */
-    public SceneElementBO getPortEle(String portId) {
-        return getSceneHandler().getPortEle(portId);
+    public SceneElementBO getPortSrcElement(String portId) {
+        return getSceneHandler().getPortElement(portId);
     }
 
     /**
      * 获取端口连接的端口
      * @param portId 端口id
      */
-    public SceneElementPortBO getPortConnectedPort(String portId) {
+    public SceneElementPortBO getPortConnectedSrcPort(String portId) {
         return getSceneHandler().getPortConnectedPort(portId);
     }
 
@@ -108,8 +108,8 @@ public abstract class ScenePluginHandler<S, E, P> extends BasePluginHandler<S, E
      * 获取端口连接的节点
      * @param portId 端口id
      */
-    public SceneElementBO getPortConnectedEle(String portId) {
-        return getSceneHandler().getPortConnectedEle(portId);
+    public SceneElementBO getPortConnectedSrcElement(String portId) {
+        return getSceneHandler().getPortConnectedElement(portId);
     }
 
     public void progressSceneProcess(int event, String process, String processMessage) {
