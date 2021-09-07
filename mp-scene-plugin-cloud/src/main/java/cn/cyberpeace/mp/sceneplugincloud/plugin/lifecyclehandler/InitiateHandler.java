@@ -218,6 +218,17 @@ public class InitiateHandler extends HandlerCommon {
     private void initIpPool(String auxiliaryNetworkNodeId) {
         var auxiliaryNetworkCloudElement = getPluginHandler().getElement(auxiliaryNetworkNodeId);
         var connectedOpaqueSrcPorts = getEleConnectedOpaqueSrcPorts(auxiliaryNetworkNodeId);
+        Integer virtualType = auxiliaryNetworkCloudElement.getVirtualType();
+        if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)
+                || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)
+                || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
+            var auxiliaryNetworkSrcElement = getPluginHandler().getSrcElement(auxiliaryNetworkNodeId);
+            var auxiliaryNetworkSrcPorts = auxiliaryNetworkSrcElement.getPorts();
+            if (auxiliaryNetworkSrcPorts != null) {
+                connectedOpaqueSrcPorts.addAll(auxiliaryNetworkSrcPorts);
+            }
+        }
+
         var requireCount = 0;
         List<String> existIps = new ArrayList<>();
         for (var port : connectedOpaqueSrcPorts) {
