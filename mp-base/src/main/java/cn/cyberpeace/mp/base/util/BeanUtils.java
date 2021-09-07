@@ -57,6 +57,21 @@ public class BeanUtils implements ApplicationContextAware {
         return Arrays.stream(fieldGetters).map(BeanUtils::getBeanGetterFieldName).toArray(String[]::new);
     }
 
+    public static String[] getNotNullPropertyNames(Object obj) {
+        final BeanWrapper objWrapper = new BeanWrapperImpl(obj);
+        java.beans.PropertyDescriptor[] pds = objWrapper.getPropertyDescriptors();
+
+        Set<String> notNullPropertyNames = new HashSet<>();
+        for (java.beans.PropertyDescriptor pd: pds) {
+            String propertyName = pd.getName();
+            Object propertyValue = objWrapper.getPropertyValue(propertyName);
+            if (propertyValue != null) {
+                notNullPropertyNames.add(propertyName);
+            }
+        }
+        return notNullPropertyNames.toArray(new String[0]);
+    }
+
     public static String[] getNullPropertyNames(Object obj) {
         final BeanWrapper objWrapper = new BeanWrapperImpl(obj);
         java.beans.PropertyDescriptor[] pds = objWrapper.getPropertyDescriptors();

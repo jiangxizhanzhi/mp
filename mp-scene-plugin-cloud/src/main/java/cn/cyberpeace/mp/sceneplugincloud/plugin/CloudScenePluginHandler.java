@@ -14,8 +14,8 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.modelhandler.CloudScenePluginMod
 import lombok.Data;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 
 @ClassFieldClasses({
@@ -31,39 +31,40 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
 
     private CloudScenePluginModelHandler pluginModelHandler;
 
-    private final List<CloudPluginSceneElementBO> virtualSwitchElements = new ArrayList<>();
-    private final List<CloudPluginSceneElementBO> virtualRouterElements = new ArrayList<>();
-    private final List<CloudPluginSceneElementBO> virtualFirewallElements = new ArrayList<>();
-    private final List<CloudPluginSceneElementBO> virtualMachineElements = new ArrayList<>();
-    private final List<CloudPluginSceneElementBO> containerElements = new ArrayList<>();
-    private final List<CloudPluginSceneElementBO> entityNodeElements = new ArrayList<>();
+    private final Map<String, CloudPluginSceneElementBO> virtualSwitchElementMap = new HashMap<>();
+    private final Map<String, CloudPluginSceneElementBO> virtualRouterElementMap = new HashMap<>();
+    private final Map<String, CloudPluginSceneElementBO> virtualFirewallElementMap = new HashMap<>();
+    private final Map<String, CloudPluginSceneElementBO> virtualMachineElementMap = new HashMap<>();
+    private final Map<String, CloudPluginSceneElementBO> containerElementMap = new HashMap<>();
+    private final Map<String, CloudPluginSceneElementBO> entityNodeElementMap = new HashMap<>();
 
     private InitiateHandler initiateHandler;
 
     private void loadCategoryElements() {
-        virtualSwitchElements.clear();
-        virtualRouterElements.clear();
-        virtualFirewallElements.clear();
-        virtualMachineElements.clear();
-        containerElements.clear();
-        entityNodeElements.clear();
+        virtualSwitchElementMap.clear();
+        virtualRouterElementMap.clear();
+        virtualFirewallElementMap.clear();
+        virtualMachineElementMap.clear();
+        containerElementMap.clear();
+        entityNodeElementMap.clear();
         getElementMap().forEach((nodeId, element) -> {
             Integer virtualType = element.getVirtualType();
             if (virtualType == null) {
                 return;
             }
             if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH)) {
-                virtualSwitchElements.add(element);
+                virtualSwitchElementMap.put(nodeId, element);
             } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
-                virtualRouterElements.add(element);
+                virtualRouterElementMap.put(nodeId, element);
             } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_FIREWALL)) {
-                virtualFirewallElements.add(element);
+                element.setTransparent(true);
+                virtualFirewallElementMap.put(nodeId, element);
             } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
-                virtualMachineElements.add(element);
+                virtualMachineElementMap.put(nodeId, element);
             } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
-                containerElements.add(element);
+                containerElementMap.put(nodeId, element);
             } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE)) {
-                entityNodeElements.add(element);
+                entityNodeElementMap.put(nodeId, element);
             }
         });
     }
@@ -136,5 +137,6 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
 
     @Override
     public void initiate() {
+        initiateHandler.initiate();
     }
 }
