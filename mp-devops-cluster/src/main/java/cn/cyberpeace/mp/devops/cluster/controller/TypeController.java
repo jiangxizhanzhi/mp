@@ -3,7 +3,9 @@ package cn.cyberpeace.mp.devops.cluster.controller;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.TypeConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeAllConvertModel;
+import cn.cyberpeace.mp.devops.cluster.converter.model.TypeL2AllConvertModel;
 import cn.cyberpeace.mp.devops.cluster.response.TypeAllResponse;
+import cn.cyberpeace.mp.devops.cluster.response.TypeL2AllResponse;
 import cn.cyberpeace.mp.devops.cluster.response.base.Result;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -72,6 +74,19 @@ public class TypeController {
         return new Result<>(response);
     }
 
+    /**
+     * 查询所有分类
+     * @return
+     */
+    @ApiOperation("查询所有二级分类")
+    @GetMapping("/l2-categories")
+    public Result<TypeL2AllResponse> l2List(){
+        TypeL2AllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2Type();
+        if (Objects.isNull(l1AndL2AndL3Type)){
+            return new Result<>();
+        }
+        return new Result<>(new TypeL2AllResponse(l1AndL2AndL3Type.getItems()));
+    }
 
 
     /**

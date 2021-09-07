@@ -139,6 +139,7 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
     public RealEquipment update(RealEquipmentRequest request) {
         Device device = convertRequest(request);
         Device result = realEquipmentService.update(request.getUuid(),device);
+        devopsTargetService.updateById(result);
         return convertDevice(result);
     }
 
