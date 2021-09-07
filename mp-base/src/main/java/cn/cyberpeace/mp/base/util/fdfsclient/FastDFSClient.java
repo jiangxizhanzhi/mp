@@ -255,7 +255,7 @@ public class FastDFSClient {
                 throw new MpRuntimeException(FastDfsErrorCode.FILE_OUT_SIZE);
             }
         } catch (IOException e) {
-            log.error("上传文件io异常,filename:{},groupName:{}", filename, groupName, e);
+            log.error("upload file io exception,filename:{},groupName:{}", filename, groupName, e);
         }
 
         filename = toLocal(filename);
@@ -398,10 +398,10 @@ public class FastDFSClient {
             }
             os.flush();
         } catch (IOException e) {
-            log.error("文件下载失败,filepath:{},filename:{},groupName:{}", filepath, filename, groupName, e);
+            log.error("file download failed,filepath:{},filename:{},groupName:{}", filepath, filename, groupName, e);
             throw new MpRuntimeException(FastDfsErrorCode.FILE_DOWNLOAD_FAILED);
         } catch (MyException e) {
-            log.error("文件下载失败,filepath:{},filename:{},groupName:{}", filepath, filename, groupName, e);
+            log.error("file download failed,filepath:{},filename:{},groupName:{}", filepath, filename, groupName, e);
             throw new MpRuntimeException(FastDfsErrorCode.FILE_DOWNLOAD_FAILED);
         } finally {
             // 关闭流
@@ -434,10 +434,10 @@ public class FastDFSClient {
                 throw new MpRuntimeException(FastDfsErrorCode.FILE_NOT_EXIST);
             }
         } catch (IOException e) {
-            log.error("文件下载失败,filepath:{},groupName:{}", filepath, groupName, e);
+            log.error("file download failed,filepath:{},groupName:{}", filepath, groupName, e);
             throw new MpRuntimeException(FastDfsErrorCode.FILE_DOWNLOAD_FAILED);
         } catch (MyException e) {
-            log.error("文件下载失败,filepath:{},groupName:{}", filepath, groupName, e);
+            log.error("file download failed,filepath:{},groupName:{}", filepath, groupName, e);
             throw new MpRuntimeException(FastDfsErrorCode.FILE_DOWNLOAD_FAILED);
         } finally {
             // 返还对象
@@ -467,10 +467,10 @@ public class FastDFSClient {
                 throw new MpRuntimeException(FastDfsErrorCode.FILE_DELETE_FAILED);
             }
         } catch (IOException e) {
-            log.error("文件下载失败,filepath:{},groupName:{}", filepath, groupName, e);
+            log.error("file download failed,filepath:{},groupName:{}", filepath, groupName, e);
             throw new MpRuntimeException(FastDfsErrorCode.FILE_DELETE_FAILED);
         } catch (MyException e) {
-            log.error("文件下载失败,filepath:{},groupName:{}", filepath, groupName, e);
+            log.error("file download failed,filepath:{},groupName:{}", filepath, groupName, e);
             throw new MpRuntimeException(FastDfsErrorCode.FILE_DELETE_FAILED);
         } finally {
             // 返还对象
@@ -494,9 +494,9 @@ public class FastDFSClient {
         try {
             fileInfo = storageClient.get_file_info1(filepath);
         } catch (IOException e) {
-            log.error("获取文件信息失败,filepath:{},groupName:{}", filepath, groupName, e);
+            log.error("get file info failed,filepath:{},groupName:{}", filepath, groupName, e);
         } catch (MyException e) {
-            log.error("获取文件信息失败,filepath:{},groupName:{}", filepath, groupName, e);
+            log.error("get file info failed,filepath:{},groupName:{}", filepath, groupName, e);
         }
         // 返还对象
         TrackerServerPool.returnObject(trackerServer, groupName);
@@ -626,11 +626,11 @@ public class FastDFSClient {
         try {
             token = ProtoCommon.getToken(getFilename(filepath), ts, httpSecretKey);
         } catch (UnsupportedEncodingException e) {
-            log.error("获取token失败", e);
+            log.error("get token failed,filepath:{}", filepath, e);
         } catch (NoSuchAlgorithmException e) {
-            log.error("获取token失败", e);
+            log.error("get token failed,filepath:{}", filepath, e);
         } catch (MyException e) {
-            log.error("获取token失败", e);
+            log.error("get token failed,filepath:{}", filepath, e);
         }
 
         StringBuilder sb = new StringBuilder();
