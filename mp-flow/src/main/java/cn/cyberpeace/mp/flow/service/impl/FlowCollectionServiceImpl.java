@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.flow.service.impl;
 
-import cn.cyberpeace.mp.base.constant.BaseConstants;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -14,7 +14,7 @@ import cn.cyberpeace.mp.flow.repository.FlowCollectionMapper;
 import cn.cyberpeace.mp.flow.request.AddFlowCollectionRelRequest;
 import cn.cyberpeace.mp.flow.request.DelFlowCollectionRelRequest;
 import cn.cyberpeace.mp.flow.request.queryparam.FlowCollectionQueryParams;
-import cn.cyberpeace.mp.flow.request.queryparam.FlowInfoQueryParams;
+import cn.cyberpeace.mp.flow.request.queryparam.FlowCollectionRelQueryParams;
 import cn.cyberpeace.mp.flow.service.FlowCollectionService;
 import cn.cyberpeace.mp.flow.service.field.FlowCollectionFields;
 import lombok.extern.slf4j.Slf4j;
@@ -63,19 +63,23 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
 
 
     /**
-     * 根据集合id查询流量信息
-     * @param collectionId
+     * 根据集合id分页查询流量信息
+     * @param queryParams
      * @return
      */
-    public ListObjServiceResult<FlowInfoModel> getByCollectionId(String collectionId) {
-        List<FlowCollectionRelModel> relModels =
-                flowCollectionRelService.selectByCollectionIds(Collections.singletonList(collectionId));
-        String[] flowIds = relModels.stream().map(FlowCollectionRelModel::getFlowId).toArray(String[]::new);
-        FlowInfoQueryParams flowInfoQueryParams = new FlowInfoQueryParams();
-        flowInfoQueryParams.setIds(flowIds);
-        handleQueryParams(BaseConstants.STR_LIST, flowInfoQueryParams);
+    public ListObjServiceResult<FlowInfoModel> getByCollectionId(FlowCollectionRelQueryParams queryParams) {
+        List<FlowInfoModel> flowInfoModels = new ArrayList<>();
+        ListObjServiceResult<FlowCollectionRelModel> objServiceResult = flowCollectionRelService.list(queryParams);
+        if (Objects.nonNull(objServiceResult.getSource())) {
+            List<FlowCollectionRelModel> relModels = objServiceResult.getSource().getList();
+            if (CollectionUtils.isNotEmpty(relModels)) {
+                List<String> idList =
+                        relModels.stream().map(FlowCollectionRelModel::getFlowId).collect(Collectors.toList());
+                flowInfoModels = flowInfoService.selectByFlowIds(idList);
+            }
+        }
 
-        return flowInfoService.list(flowInfoQueryParams);
+        return new ListObjServiceResult<>(new ListObjResult<>(flowInfoModels, objServiceResult.getSource().getTotal()));
     }
 
     /**

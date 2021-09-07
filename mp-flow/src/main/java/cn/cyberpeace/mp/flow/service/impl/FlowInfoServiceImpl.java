@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.flow.service.impl;
 
 import cn.cyberpeace.mp.base.config.FastDfsConfig;
-import cn.cyberpeace.mp.base.constant.BaseConstants;
 import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
@@ -116,7 +115,6 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
      */
     public ListObjServiceResult<FlowInfoResponse> pageFlowInfo(FlowInfoQueryParams queryParams) {
         // 查询流量信息
-        handleQueryParams(BaseConstants.STR_LIST, queryParams);
         ListObjServiceResult<FlowInfoModel> listObjServiceResult = list(queryParams);
 
         // 结果转换

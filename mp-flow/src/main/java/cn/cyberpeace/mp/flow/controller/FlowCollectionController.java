@@ -1,6 +1,9 @@
 package cn.cyberpeace.mp.flow.controller;
 
+import cn.cyberpeace.mp.base.constant.BaseConstants;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.flow.constant.ControllerConstant;
@@ -9,8 +12,10 @@ import cn.cyberpeace.mp.flow.model.FlowInfoModel;
 import cn.cyberpeace.mp.flow.request.AddFlowCollectionRelRequest;
 import cn.cyberpeace.mp.flow.request.DelFlowCollectionRelRequest;
 import cn.cyberpeace.mp.flow.request.queryparam.FlowCollectionQueryParams;
+import cn.cyberpeace.mp.flow.request.queryparam.FlowCollectionRelQueryParams;
 import cn.cyberpeace.mp.flow.service.FlowCollectionService;
 import cn.cyberpeace.mp.flow.service.impl.FlowCollectionServiceImpl;
+import io.micrometer.core.instrument.util.StringUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -39,8 +44,12 @@ public class FlowCollectionController extends BaseModelController<FlowCollection
 
     @ApiOperation("根据集合id查询流量信息")
     @GetMapping("/detail/page")
-    public ListObjServiceResult<FlowInfoModel> getByCollectionId(@RequestParam String collectionId) {
-        return flowCollectionService.getByCollectionId(collectionId);
+    public ListObjServiceResult<FlowInfoModel> getByCollectionId(FlowCollectionRelQueryParams queryParams) {
+        if (StringUtils.isBlank(queryParams.getCollectionId())) {
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+        handleQueryParams(BaseConstants.STR_LIST, queryParams);
+        return flowCollectionService.getByCollectionId(queryParams);
     }
 
     @ApiOperation("新增集合关联信息")

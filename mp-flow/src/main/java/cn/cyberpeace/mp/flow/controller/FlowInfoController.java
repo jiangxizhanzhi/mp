@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.flow.controller;
 
+import cn.cyberpeace.mp.base.constant.BaseConstants;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -60,12 +61,23 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
         return flowServiceImpl.batchDeleteFlowInfo(request);
     }
 
+    /**
+     * 分页查询流量信息
+     * @param queryParams
+     * @return
+     */
     @ApiOperation("分页查询流量信息")
     @GetMapping("/page")
-    public ListObjServiceResult<FlowInfoResponse> pageFlowInfo(@Validated FlowInfoQueryParams queryParams) {
+    public ListObjServiceResult<FlowInfoResponse> pageFlowInfo(FlowInfoQueryParams queryParams) {
+        handleQueryParams(BaseConstants.STR_LIST, queryParams);
         return flowServiceImpl.pageFlowInfo(queryParams);
     }
 
+    /**
+     * 背景流量详情
+     * @param id
+     * @return
+     */
     @ApiOperation("背景流量详情")
     @GetMapping("/background_detail")
     public ServiceResult<BackgroundFlowResponse> queryBackgroundDetail(@RequestParam String id) {
