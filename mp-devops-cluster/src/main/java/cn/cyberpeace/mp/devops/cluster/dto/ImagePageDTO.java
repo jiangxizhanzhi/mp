@@ -68,7 +68,7 @@ public class ImagePageDTO extends BasePageDTO{
     /**
      * 使用状态
      */
-    private Integer useStatus;
+    private StatusEnum useStatus;
 
 
 }
