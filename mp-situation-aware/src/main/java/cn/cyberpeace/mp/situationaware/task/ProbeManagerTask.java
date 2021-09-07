@@ -45,7 +45,10 @@ public class ProbeManagerTask {
         List<ProbeModel> probeModelList = probeModelMapper.queryAllProbes();
         probeModelList.forEach(model -> {
             ProbeStatus probeStatus = Boolean.TRUE.equals(queryProbeExist(model)) ? ProbeStatus.RUNNING : ProbeStatus.TERMINATE;
-            probeModelMapper.updateProbeStatus(model.getId(), probeStatus);
+            //状态不同的需要修改状态
+            if (!probeStatus.equals(model.getProbeStatus())) {
+                probeModelMapper.updateProbeStatus(model.getId(), probeStatus);
+            }
         });
     }
 
