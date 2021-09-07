@@ -39,9 +39,9 @@ public class TypeController {
      * 查询所有分类
      * @return
      */
-    @ApiOperation("查询所有镜像管理分类")
-    @GetMapping("/image-add-page")
-    public Result<TypeAllResponse> imageAddPage(){
+    @ApiOperation("查询所有靶标分类")
+    @GetMapping("/target-categories")
+    public Result<TypeAllResponse> targetCategories(){
         TypeAllConvertModel roles = typeConverter.findRoles();
         TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type();
         TypeAllConvertModel language = typeConverter.findLanguage();
@@ -205,7 +205,7 @@ public class TypeController {
      * 查询所有服务分类
      * @return
      */
-    @ApiOperation("查询所有访问类型")
+    @ApiOperation("查询所有服务分类")
     @GetMapping("/service-categories")
     public Result<TypeAllResponse> serviceCategories(){
         TypeAllConvertModel model = typeConverter.findServiceCategories();

@@ -24,6 +24,12 @@ public class RealEquipmentDevopsDetailResponse extends BaseCloudPlatformResponse
     private String name;
 
     /**
+     * 图标
+     */
+    @ApiModelProperty("图标")
+    private String logo;
+
+    /**
      * 管理地址
      */
     @ApiModelProperty("管理地址")

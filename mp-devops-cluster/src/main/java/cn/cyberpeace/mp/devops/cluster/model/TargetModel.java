@@ -63,7 +63,7 @@ public class TargetModel extends BaseModel {
     /**
      * 使用状态
      */
-    private Integer useStatus;
+    private StatusEnum useStatus;
 
     /**
      * 引用状态
