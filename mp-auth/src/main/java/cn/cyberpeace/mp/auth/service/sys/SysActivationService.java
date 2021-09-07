@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.auth.service.sys;
 
 import cn.cyberpeace.mp.auth.config.ActivationConfig;
-import cn.cyberpeace.mp.auth.dto.activation.ActivationResponse;
 import cn.cyberpeace.mp.auth.dto.activation.ActivationRequest;
+import cn.cyberpeace.mp.auth.dto.activation.ActivationResponse;
 import cn.cyberpeace.mp.auth.dto.activation.ActivationVerifyInfo;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.base.util.BeanUtils;
@@ -155,7 +155,12 @@ public class SysActivationService {
         String jsonStr = StringUtils.substring(decryptedContent, 8, decryptedContent.length());
 
         ActivationResponse activationResponse = JSON.parseObject(jsonStr, ActivationResponse.class);
-        log.info("salt:{}", salt);
+        DateTime dateTime = new DateTime(activationResponse.getExpiredDate());
+        if (DateTime.now().isBefore(dateTime.plusDays(1))) {
+            activationResponse.setIsActived(1);
+        } else {
+            activationResponse.setIsActived(0);
+        }
         log.info("activationContent:{}", activationResponse);
         return activationResponse;
     }
