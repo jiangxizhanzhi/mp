@@ -16,7 +16,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
@@ -253,7 +260,7 @@ public class FastDFSClient {
                 throw new MpRuntimeException(FastDfsErrorCode.FILE_OUT_SIZE);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("upload file io exception,filename:{},groupName:{}", filename, groupName, e);
         }
 
         filename = toLocal(filename);
@@ -300,9 +307,9 @@ public class FastDFSClient {
             throw new MpRuntimeException(FastDfsErrorCode.FILE_UPLOAD_FAILED);
         } finally {
             IOUtils.closeQuietly(is);
+            // 返还对象
+            TrackerServerPool.returnObject(trackerServer, groupName);
         }
-        // 返还对象
-        TrackerServerPool.returnObject(trackerServer, groupName);
 
         return path;
     }
@@ -396,16 +403,17 @@ public class FastDFSClient {
             }
             os.flush();
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("file download failed,filepath:{},filename:{},groupName:{}", filepath, filename, groupName, e);
+            throw new MpRuntimeException(FastDfsErrorCode.FILE_DOWNLOAD_FAILED);
         } catch (MyException e) {
-            e.printStackTrace();
+            log.error("file download failed,filepath:{},filename:{},groupName:{}", filepath, filename, groupName, e);
             throw new MpRuntimeException(FastDfsErrorCode.FILE_DOWNLOAD_FAILED);
         } finally {
             // 关闭流
             IOUtils.closeQuietly(is);
+            // 返还对象
+            TrackerServerPool.returnObject(trackerServer, groupName);
         }
-        // 返还对象
-        TrackerServerPool.returnObject(trackerServer, groupName);
     }
 
     /**
@@ -430,13 +438,15 @@ public class FastDFSClient {
                 throw new MpRuntimeException(FastDfsErrorCode.FILE_NOT_EXIST);
             }
         } catch (IOException e) {
-            e.printStackTrace();
-        } catch (MyException e) {
-            e.printStackTrace();
+            log.error("file download failed,filepath:{},groupName:{}", filepath, groupName, e);
             throw new MpRuntimeException(FastDfsErrorCode.FILE_DOWNLOAD_FAILED);
+        } catch (MyException e) {
+            log.error("file download failed,filepath:{},groupName:{}", filepath, groupName, e);
+            throw new MpRuntimeException(FastDfsErrorCode.FILE_DOWNLOAD_FAILED);
+        } finally {
+            // 返还对象
+            TrackerServerPool.returnObject(trackerServer, groupName);
         }
-        // 返还对象
-        TrackerServerPool.returnObject(trackerServer, groupName);
 
         return fileByte;
     }
@@ -461,13 +471,15 @@ public class FastDFSClient {
                 throw new MpRuntimeException(FastDfsErrorCode.FILE_DELETE_FAILED);
             }
         } catch (IOException e) {
-            e.printStackTrace();
-        } catch (MyException e) {
-            e.printStackTrace();
+            log.error("file download failed,filepath:{},groupName:{}", filepath, groupName, e);
             throw new MpRuntimeException(FastDfsErrorCode.FILE_DELETE_FAILED);
+        } catch (MyException e) {
+            log.error("file download failed,filepath:{},groupName:{}", filepath, groupName, e);
+            throw new MpRuntimeException(FastDfsErrorCode.FILE_DELETE_FAILED);
+        } finally {
+            // 返还对象
+            TrackerServerPool.returnObject(trackerServer, groupName);
         }
-        // 返还对象
-        TrackerServerPool.returnObject(trackerServer, groupName);
 
         return success;
     }
@@ -486,9 +498,9 @@ public class FastDFSClient {
         try {
             fileInfo = storageClient.get_file_info1(filepath);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("get file info failed,filepath:{},groupName:{}", filepath, groupName, e);
         } catch (MyException e) {
-            e.printStackTrace();
+            log.error("get file info failed,filepath:{},groupName:{}", filepath, groupName, e);
         }
         // 返还对象
         TrackerServerPool.returnObject(trackerServer, groupName);
@@ -618,11 +630,11 @@ public class FastDFSClient {
         try {
             token = ProtoCommon.getToken(getFilename(filepath), ts, httpSecretKey);
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            log.error("get token failed,filepath:{}", filepath, e);
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+            log.error("get token failed,filepath:{}", filepath, e);
         } catch (MyException e) {
-            e.printStackTrace();
+            log.error("get token failed,filepath:{}", filepath, e);
         }
 
         StringBuilder sb = new StringBuilder();
