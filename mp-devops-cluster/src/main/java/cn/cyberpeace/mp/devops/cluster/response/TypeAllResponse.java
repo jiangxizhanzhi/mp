@@ -36,8 +36,14 @@ public class TypeAllResponse {
     /**
      * 角色
      */
-    @ApiModelProperty("角色")
+    @ApiModelProperty("镜像角色")
     private List<TypeIdIntegerConvertModel> role;
+
+    /**
+     * 角色
+     */
+    @ApiModelProperty("实体角色")
+    private List<TypeIdIntegerConvertModel> entityRole;
 
     /**
      * 分类
