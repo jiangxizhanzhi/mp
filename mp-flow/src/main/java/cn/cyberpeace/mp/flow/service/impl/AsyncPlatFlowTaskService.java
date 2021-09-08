@@ -259,17 +259,6 @@ public class AsyncPlatFlowTaskService {
         }
     }
 
-    public static void main(String[] args) {
-        try {
-            String getNetworkRsp = HttpUtils.sendPost("http://10.100.7.25:11111" + "/v1/scenarios/virtual_internet", new JSONObject().toJSONString());
-            JSONObject networkObj = JSONObject.parseObject(getNetworkRsp);
-            log.info("get network response:{}", networkObj.toJSONString());
-        } catch (IOException e) {
-            log.error("get network error", e);
-            return;
-        }
-    }
-
     /**
      * 异步新增虚拟机、添加网口
      *
