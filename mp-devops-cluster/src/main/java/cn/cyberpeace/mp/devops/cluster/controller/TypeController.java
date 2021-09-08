@@ -43,11 +43,13 @@ public class TypeController {
     @GetMapping("/target-categories")
     public Result<TypeAllResponse> targetCategories(){
         TypeAllConvertModel roles = typeConverter.findRoles();
+        TypeAllConvertModel entityRoles = typeConverter.findEntityRoles();
         TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type();
         TypeAllConvertModel language = typeConverter.findLanguage();
         TypeAllConvertModel systemArchitecure = typeConverter.findSystemArchitecure();
         TypeAllResponse allResponse = new TypeAllResponse();
         allResponse.setRole(Objects.nonNull(roles) ? roles.getIdIntegerModelList() : null);
+        allResponse.setEntityRole(Objects.nonNull(entityRoles) ? entityRoles.getIdIntegerModelList() : null);
         allResponse.setFirstTypeList(Objects.nonNull(l1AndL2AndL3Type) ? l1AndL2AndL3Type.getFirstTypeList() : null);
         allResponse.setSecondTypeList(Objects.nonNull(l1AndL2AndL3Type) ? l1AndL2AndL3Type.getSecondTypeList() : null);
         allResponse.setThirdTypeList(Objects.nonNull(l1AndL2AndL3Type) ? l1AndL2AndL3Type.getThirdTypeList() : null);

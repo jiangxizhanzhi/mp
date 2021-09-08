@@ -7,11 +7,13 @@ import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.RealEquipmentConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.RealEquipment;
 import cn.cyberpeace.mp.devops.cluster.converter.model.RealEquipmentConvertModel;
+import cn.cyberpeace.mp.devops.cluster.model.SnmpParams;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntity;
 import cn.cyberpeace.mp.devops.cluster.request.*;
 import cn.cyberpeace.mp.devops.cluster.response.*;
 import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
 import cn.cyberpeace.mp.devops.cluster.response.base.Result;
+import cn.cyberpeace.mp.devops.cluster.service.RealEquipmentService;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -34,9 +36,12 @@ public class RealEquipmentController {
 
     private RealEquipmentConverter realEquipmentConverter;
 
+    private RealEquipmentService realEquipmentService;
+
     @Autowired
-    public RealEquipmentController(RealEquipmentConverter realEquipmentConverter) {
+    public RealEquipmentController(RealEquipmentConverter realEquipmentConverter,RealEquipmentService realEquipmentService) {
         this.realEquipmentConverter = realEquipmentConverter;
+        this.realEquipmentService = realEquipmentService;
     }
 
     /**
@@ -144,6 +149,21 @@ public class RealEquipmentController {
             response.setAddress(extEntity.getAccessIpAddress());
             response.setModel(extEntity.getStyle());
             response.setParams(extEntity.getParams());
+            if (Objects.nonNull(extEntity.getSnmpConfigs())) {
+                SnmpParams snmpParams = new SnmpParams();
+                if (extEntity.getSnmpVersion().equals("V1")) {
+                    snmpParams.setVersion(1);
+                } else if (extEntity.getSnmpVersion().equals("V2C")) {
+                    snmpParams.setVersion(2);
+                } else if (extEntity.getSnmpVersion().equals("V3")) {
+                    snmpParams.setVersion(3);
+                }
+                snmpParams.setIp(extEntity.getSnmpConfigs().getIp());
+                snmpParams.setAuth(extEntity.getSnmpConfigs());
+                realEquipmentService.snmpForCpu(snmpParams);
+                realEquipmentService.snmpForRam(snmpParams);
+                realEquipmentService.snmpForDisk(snmpParams);
+            }
         }
 
         return new Result<>(response);

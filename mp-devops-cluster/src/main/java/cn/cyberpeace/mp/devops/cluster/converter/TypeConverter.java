@@ -38,6 +38,12 @@ public interface TypeConverter extends BaseCloudPlatformService {
     TypeAllConvertModel  findRoles();
 
     /**
+     * 查询实体角色
+     * @return
+     */
+    TypeAllConvertModel  findEntityRoles();
+
+    /**
      * 查询部署类型
      * @return
      */
