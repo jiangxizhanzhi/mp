@@ -435,7 +435,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
             flowInfoParams.setPage(BaseConstants.DEFAULT_PAGE);
             flowInfoParams.setPageSize(BaseSingleton.baseAppConfig.getMaxPageSize());
             ListObjServiceResult<FlowInfoModel> flowInfoResult = flowInfoService.list(flowInfoParams);
-            List<FlowInfoModel> infoModelList = flowInfoResult.getSource().getList();
+            List<FlowInfoModel> infoModelList = flowInfoResult.getSource().getObjs();
 
             if (CollectionUtils.isNotEmpty(infoModelList)) {
                 // 过滤出所有pcap数据
