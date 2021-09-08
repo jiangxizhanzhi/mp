@@ -64,7 +64,7 @@ public class ExtEntity{
      * 管理协议列表
      */
     @ApiModelProperty("管理协议列表")
-    private String accessProtocals;
+    private String accessProtocols;
 
     /**
      * SNMP版本
@@ -77,6 +77,9 @@ public class ExtEntity{
      */
     @ApiModelProperty("SNMP配置")
     private String snmpConfig;
+
+    @ApiModelProperty("SNMP配置")
+    private SnmpConfig snmpConfigs;
 
     /**
      * SNMP CPU占用率table根节点OID

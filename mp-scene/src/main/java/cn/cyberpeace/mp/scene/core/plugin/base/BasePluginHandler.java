@@ -131,7 +131,7 @@ public abstract class BasePluginHandler<S, E, P, C extends BasePluginContext<?>>
         return elementMap.getOrDefault(nodeId, null);
     }
 
-    public P getElementPort(String portId) {
+    public P getPort(String portId) {
         return elementPortMap.getOrDefault(portId, null);
     }
 

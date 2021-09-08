@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.response;
 
+import cn.cyberpeace.mp.devops.cluster.model.common.AccessProtocol;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntity;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -9,6 +11,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -22,6 +25,12 @@ public class RealEquipmentDevopsDetailResponse extends BaseCloudPlatformResponse
      */
     @ApiModelProperty("名称")
     private String name;
+
+    /**
+     * 图标
+     */
+    @ApiModelProperty("图标")
+    private String logo;
 
     /**
      * 管理地址
@@ -46,6 +55,18 @@ public class RealEquipmentDevopsDetailResponse extends BaseCloudPlatformResponse
      */
     @ApiModelProperty("系统信息")
     private ExtSystemInfo extSystemInfo;
+
+    /**
+     * 实体信息
+     */
+    @ApiModelProperty("实体信息")
+    private ExtEntity extEntity;
+
+    /**
+     * 接入方式集合
+     */
+    @ApiModelProperty("接入方式集合")
+    private List<AccessProtocol> accessProtocolList;
 
     /**
      * CPU使用率

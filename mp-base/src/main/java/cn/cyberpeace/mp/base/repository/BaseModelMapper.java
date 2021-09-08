@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.base.util.ClassUtils;
 import cn.cyberpeace.mp.base.util.ModelUtils;
 import cn.cyberpeace.mp.base.util.TextUtils;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.mapping.MappedStatement;
@@ -23,10 +24,7 @@ import java.lang.reflect.Proxy;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public interface BaseModelMapper<M extends BaseModel> {
 
@@ -220,6 +218,22 @@ public interface BaseModelMapper<M extends BaseModel> {
         return new Object[]{ updateColumnFields.toArray(new String[0]), updateFieldValuesList };
     }
 
+    /**
+     * 按有效字段分组对象
+     * @param objs 数据对象
+     * @return 有效字段分组对象
+     */
+    private Map<String, List<M>> groupValidFieldsObjs(List<M> objs) {
+        Map<String, List<M>> validFieldsObjs = new HashMap<>();
+        objs.forEach(obj -> {
+            String key = DigestUtils.md5Hex(StringUtils.joinWith(":", BeanUtils.getNotNullPropertyNames(obj)));
+            var keyObjs = validFieldsObjs.getOrDefault(key, new ArrayList<>());
+            keyObjs.add(obj);
+            validFieldsObjs.put(key, keyObjs);
+        });
+        return validFieldsObjs;
+    }
+
     @Recommendation
     default List<M> list(HumanCondition humanCondition) {
         if (humanCondition.getLimit() != null && humanCondition.getLimit() == 0) {
@@ -356,13 +370,17 @@ public interface BaseModelMapper<M extends BaseModel> {
             return 0;
         }
 
-        Object[] updateParams = convertUpdateParams(objs);
-        if (updateParams.length == 0) {
-            log.error("Service bulk update {} has empty field", objs);
-            return 0;
+        var successCount = 0;
+        for (var validFieldsObjs: groupValidFieldsObjs(objs).values()) {
+            Object[] updateParams = convertUpdateParams(validFieldsObjs);
+            if (updateParams.length == 0) {
+                log.error("Service bulk update {} has empty field", objs);
+                continue;
+            }
+            successCount += bulkUpdate((String[]) updateParams[0], (Object[][]) updateParams[1]);
         }
 
-        return bulkUpdate((String[]) updateParams[0], (Object[][]) updateParams[1]);
+        return successCount;
     }
 
     default List<M> commonList(String tableName, @Param("condition") Condition condition, String[] selectFields) {

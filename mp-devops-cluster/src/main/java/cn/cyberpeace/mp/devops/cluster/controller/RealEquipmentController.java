@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.devops.cluster.controller;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.RealEquipmentConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.RealEquipment;
@@ -52,13 +53,13 @@ public class RealEquipmentController {
             ExtEntity extEntity = v.getExtEntity();
             RealEquipmentPageResponse response = RealEquipmentPageResponse.builder().id(v.getUuid()).name(v.getName())
                     .category(v.getMainCategory()).subCategory(v.getSubCategory())
-                    .description(v.getDescription()).extSystemInfo(v.getExtSystemInfo()).build();
+                    .description(v.getDescription()).extSystemInfo(v.getExtSystemInfo()).useStatus(v.getUseStatus()).referenceStatus(v.getReferenceStatus())
+                    .inPosition(v.getInPosition()).build();
             if (Objects.nonNull(extEntity)){
                 response.setModel(extEntity.getStyle());
                 response.setParams(extEntity.getParams());
                 response.setEntityType(extEntity.getAccessType());
-                response.setInPosition(extEntity.getEntityStatus());
-                response.setEntityDetail(extEntity.getAccessProtocals());
+                response.setEntityDetail(extEntity.getAccessProtocols());
             }
             return response;
         }).collect(Collectors.toList());
@@ -83,9 +84,9 @@ public class RealEquipmentController {
      */
     @ApiOperation("新增")
     @PostMapping("/add")
-    public Result<Boolean> add(@RequestBody RealEquipmentRequest request){
+    public ServiceResult add(@RequestBody RealEquipmentRequest request){
         RealEquipment realEquipment = realEquipmentConverter.add(request);
-        return new Result<>(realEquipment.isSuccess());
+        return realEquipment.isSuccess() ? ServiceResult.successful() :ServiceResult.fail("");
     }
 
     /**
@@ -93,12 +94,12 @@ public class RealEquipmentController {
      */
     @ApiOperation("更新")
     @PutMapping("/update")
-    public Result<Boolean> update(@RequestBody RealEquipmentRequest request){
+    public ServiceResult update(@RequestBody RealEquipmentRequest request){
         if (StringUtils.isBlank(request.getUuid())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         RealEquipment realEquipment = realEquipmentConverter.update(request);
-        return new Result<>(realEquipment.isSuccess());
+        return realEquipment.isSuccess() ? ServiceResult.successful() :ServiceResult.fail("");
     }
 
     /**
@@ -133,7 +134,19 @@ public class RealEquipmentController {
     @ApiOperation("查询详情")
     @GetMapping("/get-devops-details")
     public Result<RealEquipmentDevopsDetailResponse> findDevopsDetails(@RequestParam("uuid") String id){
-        return new Result<>(new RealEquipmentDevopsDetailResponse());
+        RealEquipment realEquipment = realEquipmentConverter.findById(id);
+        RealEquipmentDevopsDetailResponse response = RealEquipmentDevopsDetailResponse.builder()
+                .name(realEquipment.getName()).logo(realEquipment.getLogo())
+                .extSystemInfo(realEquipment.getExtSystemInfo()).extEntity(realEquipment.getExtEntity()).build();
+
+        if (Objects.nonNull(realEquipment) && Objects.nonNull(realEquipment.getExtEntity())){
+            ExtEntity extEntity = realEquipment.getExtEntity();
+            response.setAddress(extEntity.getAccessIpAddress());
+            response.setModel(extEntity.getStyle());
+            response.setParams(extEntity.getParams());
+        }
+
+        return new Result<>(response);
     }
 
 

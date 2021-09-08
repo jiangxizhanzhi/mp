@@ -1266,18 +1266,18 @@ public abstract class BaseSceneHandler<
      * @param pluginKey 插件代号
      * @param nodeId 网元节点id
      */
-    public <E9> E9 getPluginEle(String pluginKey, String nodeId) {
+    public <E9> E9 getPluginElement(String pluginKey, String nodeId) {
         var plugin = pluginMap.getOrDefault(pluginKey, null);
         if (plugin == null) {
             return null;
         }
 
-        var ele = plugin.getElement(nodeId);
-        if (ele == null) {
+        var pluginElement = plugin.getElement(nodeId);
+        if (pluginElement == null) {
             return null;
         }
 
-        return (E9) ele;
+        return (E9) pluginElement;
     }
 
     /**
@@ -1291,12 +1291,12 @@ public abstract class BaseSceneHandler<
             return null;
         }
 
-        var ele = plugin.getElementPort(portId);
-        if (ele == null) {
+        var pluginPort = plugin.getPort(portId);
+        if (pluginPort == null) {
             return null;
         }
 
-        return (P9) ele;
+        return (P9) pluginPort;
     }
 
 
@@ -1304,7 +1304,7 @@ public abstract class BaseSceneHandler<
      * 获取网元数据
      * @param nodeId 网元节点id
      */
-    public E getEle(String nodeId) {
+    public E getElement(String nodeId) {
         return elementMap.getOrDefault(nodeId, null);
     }
 
@@ -1312,25 +1312,25 @@ public abstract class BaseSceneHandler<
      * 获取网元连接的网元
      * @param nodeId 网元节点id
      */
-    public List<E> getEleConnectedEles(String nodeId) {
-        var connectedPorts = getEleConnectedPorts(nodeId);
-        Map<String, E> connectedEleMap = new HashMap<>();
+    public List<E> getElementConnectedElements(String nodeId) {
+        var connectedPorts = getElementConnectedPorts(nodeId);
+        Map<String, E> connectedElementMap = new HashMap<>();
         connectedPorts.forEach(port -> {
-            var ele = getPortEle(port.getId());
-            if (ele == null) {
+            var element = getPortElement(port.getId());
+            if (element == null) {
                 return;
             }
-            connectedEleMap.put(ele.getId(), ele);
+            connectedElementMap.put(element.getId(), element);
         });
-        return new ArrayList<>(connectedEleMap.values());
+        return new ArrayList<>(connectedElementMap.values());
     }
 
     /**
      * 获取网元连接的网元
      * @param nodeId 网元节点id
      */
-    public List<P> getEleConnectedPorts(String nodeId) {
-        var ele = getEle(nodeId);
+    public List<P> getElementConnectedPorts(String nodeId) {
+        var ele = getElement(nodeId);
         var ports = ele.getPorts();
         if (ports == null) {
             return new ArrayList<>();
@@ -1358,7 +1358,7 @@ public abstract class BaseSceneHandler<
      * 获取端口所属网元数据
      * @param portId 端口id
      */
-    public E getPortEle(String portId) {
+    public E getPortElement(String portId) {
         return portIdElementMap.getOrDefault(portId, null);
     }
 
@@ -1375,9 +1375,9 @@ public abstract class BaseSceneHandler<
      * 获取端口连接的节点
      * @param portId 端口id
      */
-    public E getPortConnectedEle(String portId) {
+    public E getPortConnectedElement(String portId) {
         var connectedPortId = portIdConnectedPortIdMap.getOrDefault(portId, null);
-        return getPortEle(connectedPortId);
+        return getPortElement(connectedPortId);
     }
 
 }
