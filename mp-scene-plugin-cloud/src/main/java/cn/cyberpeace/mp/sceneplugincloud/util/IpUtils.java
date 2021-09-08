@@ -39,7 +39,7 @@ public class IpUtils {
      * @param allocationPools 地址池
      * @return 随机ip列表
      */
-    public static List<String> randomIps(String cidr, int count, String[] excludeIps,
+    public static List<String> randomIps(String cidr, int count, List<String> excludeIps,
                                          List<AllocationPool> allocationPools) {
         List<String> ips = getCidrIps(cidr);
         if (!ips.isEmpty()) {
@@ -49,8 +49,8 @@ public class IpUtils {
             ips.remove(ips.size() - 1);
         }
 
-        if (excludeIps != null && excludeIps.length > 0) {
-            ips.removeAll(Arrays.asList(excludeIps));
+        if (excludeIps != null && !excludeIps.isEmpty()) {
+            ips.removeAll(excludeIps);
         }
 
         if (allocationPools != null && !allocationPools.isEmpty()) {

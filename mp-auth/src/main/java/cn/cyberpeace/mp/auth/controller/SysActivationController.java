@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.auth.controller;
 
-import cn.cyberpeace.mp.auth.dto.activation.ActivationResponse;
 import cn.cyberpeace.mp.auth.dto.activation.ActivationRequest;
+import cn.cyberpeace.mp.auth.dto.activation.ActivationResponse;
 import cn.cyberpeace.mp.auth.service.sys.SysActivationService;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import io.swagger.annotations.Api;
@@ -50,6 +50,13 @@ public class SysActivationController {
         return ServiceResult.success(content);
     }
 
+
+    @ApiOperation("查询机器序列号")
+    @GetMapping("/machinecode")
+    public ServiceResult getMachineCode() {
+        String code = activationService.querySysUUID();
+        return ServiceResult.success(code);
+    }
 
 
 }

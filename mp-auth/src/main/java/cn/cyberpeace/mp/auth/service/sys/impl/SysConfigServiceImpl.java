@@ -1,25 +1,22 @@
 package cn.cyberpeace.mp.auth.service.sys.impl;
 
 import cn.cyberpeace.mp.auth.constant.SysConfigConstant;
-import cn.cyberpeace.mp.auth.model.AvatarModel;
 import cn.cyberpeace.mp.auth.model.SysConfigModel;
 import cn.cyberpeace.mp.auth.repository.SysConfigMapper;
 import cn.cyberpeace.mp.auth.service.AvatarService;
-import cn.cyberpeace.mp.auth.service.sys.SysConfigService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.SysConfigFields;
+import cn.cyberpeace.mp.auth.service.sys.SysConfigService;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.lang.Assert;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,11 +44,6 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
 
     @Autowired
     private UserService userService;
-
-    @Scheduled(initialDelay = 10000, fixedDelay = Long.MAX_VALUE)
-    public void defaultAvatarsInit() {
-        checkAndInitDefaultAvatars();
-    }
 
 
     @Override
@@ -131,20 +123,4 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
         return false;
     }
 
-
-
-    @Override
-    public void checkAndInitDefaultAvatars() {
-        // 检查是否需要自动上传默认头像
-        log.info("check if need to upload default avatar!");
-        List<AvatarModel> avatarModels = avatarService.listAll();
-        if (CollectionUtil.isNotEmpty(avatarModels) && avatarModels.size() == 9) {
-            log.info("no need to upload default avatar!");
-            return;
-        } else {
-            log.info("uploading default avatar manually!");
-            List<AvatarModel> modelList = avatarService.uploadDefaultAvatars();
-            avatarService.clearAndReUploadAvatars(modelList);
-        }
-    }
 }
