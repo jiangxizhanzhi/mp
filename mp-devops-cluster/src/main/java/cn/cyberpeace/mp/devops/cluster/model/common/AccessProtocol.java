@@ -17,6 +17,12 @@ public class AccessProtocol{
     private String protocol;
 
     /**
+     * IP地址
+     */
+    @ApiModelProperty("IP地址")
+    private String ip;
+
+    /**
      * 端口
      */
     @ApiModelProperty("端口")

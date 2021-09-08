@@ -36,10 +36,15 @@ public class JsonUtils {
      * @return
      * @throws IOException
      */
-    public static <T> T toSnakeObject(String json, Class<T> clazz) throws IOException {
+    public static <T> T toSnakeObject(String json, Class<T> clazz) {
         ObjectMapper mapper = new ObjectMapper();
         mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return mapper.readValue(json, clazz);
+        try {
+           return mapper.readValue(json, clazz);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

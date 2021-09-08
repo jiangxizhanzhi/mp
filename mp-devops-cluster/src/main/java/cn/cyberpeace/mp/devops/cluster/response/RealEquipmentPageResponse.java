@@ -73,7 +73,7 @@ public class RealEquipmentPageResponse  extends BaseCloudPlatformResponse{
     /**
      * 在位状态
      */
-    @ApiModelProperty(value = "在位状态")
+    @ApiModelProperty(value = "在位状态,0:不再在位，1：在位")
     private StatusEnum inPosition;
 
     /**
@@ -85,7 +85,7 @@ public class RealEquipmentPageResponse  extends BaseCloudPlatformResponse{
     /**
      * 使用状态
      */
-    @ApiModelProperty(value = "使用状态")
+    @ApiModelProperty(value = "使用状态，0：空闲，1：使用")
     private StatusEnum useStatus;
 
     /**

@@ -59,7 +59,7 @@ public class RealEquipmentController {
                 response.setModel(extEntity.getStyle());
                 response.setParams(extEntity.getParams());
                 response.setEntityType(extEntity.getAccessType());
-                response.setEntityDetail(extEntity.getAccessProtocals());
+                response.setEntityDetail(extEntity.getAccessProtocols());
             }
             return response;
         }).collect(Collectors.toList());
@@ -137,7 +137,7 @@ public class RealEquipmentController {
         RealEquipment realEquipment = realEquipmentConverter.findById(id);
         RealEquipmentDevopsDetailResponse response = RealEquipmentDevopsDetailResponse.builder()
                 .name(realEquipment.getName()).logo(realEquipment.getLogo())
-                .extSystemInfo(realEquipment.getExtSystemInfo()).build();
+                .extSystemInfo(realEquipment.getExtSystemInfo()).extEntity(realEquipment.getExtEntity()).build();
 
         if (Objects.nonNull(realEquipment) && Objects.nonNull(realEquipment.getExtEntity())){
             ExtEntity extEntity = realEquipment.getExtEntity();
