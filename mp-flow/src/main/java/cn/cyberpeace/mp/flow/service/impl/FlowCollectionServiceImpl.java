@@ -71,7 +71,7 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
         List<FlowInfoModel> flowInfoModels = new ArrayList<>();
         ListObjServiceResult<FlowCollectionRelModel> objServiceResult = flowCollectionRelService.list(queryParams);
         if (Objects.nonNull(objServiceResult.getSource())) {
-            List<FlowCollectionRelModel> relModels = objServiceResult.getSource().getList();
+            List<FlowCollectionRelModel> relModels = objServiceResult.getSource().getObjs();
             if (CollectionUtils.isNotEmpty(relModels)) {
                 List<String> idList =
                         relModels.stream().map(FlowCollectionRelModel::getFlowId).collect(Collectors.toList());
@@ -79,7 +79,7 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
             }
         }
 
-        return new ListObjServiceResult<>(new ListObjResult<>(flowInfoModels, objServiceResult.getSource().getTotal()));
+        return new ListObjServiceResult<>(new ListObjResult<>(flowInfoModels, objServiceResult.getSource().getTotal())).asResult();
     }
 
     /**
