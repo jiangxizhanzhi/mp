@@ -2,7 +2,7 @@ ip:
   mariadb: 10.100.0.101         # MP新中台mariadb数据库地址
   mg: 10.100.14.252             # MG老中台地址
   fdfs: 10.100.14.252           # FastDFS地址
-  cp: 10.100.14.252                # 云平台适配层接口地址
+  cp: 10.100.7.25                # 云平台适配层接口地址
   cr: 10.100.2.21               # cr接口地址
   moloch: 10.100.14.107         # moloch的IP地址
   wazuh: 10.100.14.106          # wazuh的IP地址
@@ -63,8 +63,8 @@ mp:
           file-server-addr: /fdfs    # 外部文件服务器地址
           inner-file-server-addr: http://${ip.fdfs}:8888   # 内部文件服务器地址
   devops:
-    cp-url: http://10.100.7.25:9019 #云平台地址
-#    cp-url: http://${ip.cp}:11111 #云平台地址
+#    cp-url: http://10.100.7.25:9019 #云平台地址
+    cp-url: http://${ip.cp}:11111 #云平台地址
     hostname: controller  #主机名称
     es-nodes: ${ip.es}:9200
   datasandtable:

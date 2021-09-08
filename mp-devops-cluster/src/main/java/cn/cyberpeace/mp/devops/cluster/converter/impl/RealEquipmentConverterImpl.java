@@ -9,10 +9,7 @@ import cn.cyberpeace.mp.devops.cluster.enums.ImageTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.model.Device;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.TargetModel;
-import cn.cyberpeace.mp.devops.cluster.model.common.AccessProtocol;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntity;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtGateway;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
+import cn.cyberpeace.mp.devops.cluster.model.common.*;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentPageRequest;
@@ -20,6 +17,7 @@ import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentRequest;
 import cn.cyberpeace.mp.devops.cluster.service.DeviceService;
 import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.devops.cluster.service.RealEquipmentService;
+import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import com.alibaba.fastjson.JSONArray;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -186,8 +184,9 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
             entity.setCcmPort(extEntity.getCcmPort());
             entity.setCcmName(extEntity.getCcmName());
             entity.setCcmPassword(extEntity.getCcmPassword());
-            entity.setAccessProtocals(extEntity.getAccessProtocals());
-            entity.setAccessProtocolList(JSONArray.parseArray(extEntity.getAccessProtocals(), AccessProtocol.class));
+            entity.setAccessProtocols(extEntity.getAccessProtocols());
+            entity.setAccessProtocolList(JSONArray.parseArray(extEntity.getAccessProtocols(), AccessProtocol.class));
+            entity.setSnmpConfigs(JsonUtils.toSnakeObject(extEntity.getSnmpConfig(), SnmpConfig.class));
             convertModel.setExtEntity(entity);
         }
         convertModel.setExtSystemInfo(extSystemInfo);
@@ -223,14 +222,14 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
             extEntity.setAccessIpAddress(requestExtEntity.getAccessIpAddress());
             extEntity.setAccessMacAddress(requestExtEntity.getAccessMacAddress());
             extEntity.setSnmpVersion(requestExtEntity.getSnmpVersion());
-            extEntity.setSnmpConfig(requestExtEntity.getSnmpConfig());
+            extEntity.setSnmpConfig(JsonUtils.toUnderlineJSONString(request.getSnmpConfig()));
             extEntity.setSnmpCpuOid(requestExtEntity.getSnmpCpuOid());
             extEntity.setSnmpDiskOid(requestExtEntity.getSnmpDiskOid());
             extEntity.setSnmpMemOid(requestExtEntity.getSnmpMemOid());
             extEntity.setCcmPort(requestExtEntity.getCcmPort());
             extEntity.setCcmName(requestExtEntity.getCcmName());
             extEntity.setCcmPassword(requestExtEntity.getCcmPassword());
-            extEntity.setAccessProtocals(JSONArray.toJSONString(requestExtEntity.getAccessProtocolList()));
+            extEntity.setAccessProtocols(JSONArray.toJSONString(requestExtEntity.getAccessProtocolList()));
             device.setExtEntity(extEntity);
         }
 

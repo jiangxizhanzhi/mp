@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.ImagesConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.SnapshotConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertPageModel;
+import cn.cyberpeace.mp.devops.cluster.model.FlavorCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtImageInfo;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtVm;
@@ -16,6 +17,7 @@ import cn.cyberpeace.mp.devops.cluster.response.ImagesByIdResponse;
 import cn.cyberpeace.mp.devops.cluster.response.ImagesPageResponse;
 import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
 import cn.cyberpeace.mp.devops.cluster.response.base.Result;
+import cn.cyberpeace.mp.devops.cluster.service.FlavorService;
 import cn.cyberpeace.mp.devops.cluster.service.TargetLogoService;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
@@ -54,12 +56,15 @@ public class ImagesController {
 
     private TargetLogoService targetLogoService;
 
+    private FlavorService flavorService;
+
     @Autowired
     public ImagesController(ImagesConverter imagesConverter,SnapshotConverter snapshotConverter,
-                            TargetLogoService targetLogoService) {
+                            TargetLogoService targetLogoService,FlavorService flavorService) {
         this.imagesConverter = imagesConverter;
         this.snapshotConverter = snapshotConverter;
         this.targetLogoService = targetLogoService;
+        this.flavorService = flavorService;
     }
 
     /**
@@ -280,5 +285,16 @@ public class ImagesController {
     @GetMapping("/inject-file")
     public void findInjectFileList(@RequestBody ImageInjectFileRequest request){
 
+    }
+
+
+    /**
+     * 分页查询
+     */
+    @ApiOperation("查询flavor")
+    @GetMapping("/page-flavor")
+    public PageResult pageFlavor(){
+        FlavorCloudPlatformModel page = flavorService.page("");
+        return new PageResult<>(page.getData().getList(),page.getTotal());
     }
 }
