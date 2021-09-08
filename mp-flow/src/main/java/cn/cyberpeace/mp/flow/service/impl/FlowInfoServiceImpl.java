@@ -9,8 +9,10 @@ import cn.cyberpeace.mp.base.util.TextUtils;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.cyberpeace.mp.flow.enums.InteractiveTypeEnum;
 import cn.cyberpeace.mp.flow.enums.ResourceTypeEnum;
+import cn.cyberpeace.mp.flow.model.FlowCollectionRelModel;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskModel;
+import cn.cyberpeace.mp.flow.repository.FlowCollectionRelMapper;
 import cn.cyberpeace.mp.flow.repository.FlowInfoMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskMapper;
 import cn.cyberpeace.mp.flow.request.*;
@@ -58,6 +60,9 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
     @Autowired
     private FastDFSClient fastDFSClient;
 
+    @Autowired
+    private FlowCollectionRelMapper flowCollectionRelMapper;
+
     /**
      * 补充list查询条件
      * @param humanCondition
@@ -87,6 +92,13 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             return ServiceResult.fail("Can not delete flow task related flow info");
         }
 
+        // 判断流量是否关联流量集合信息
+        List<FlowCollectionRelModel> flowCollectionRelModels =
+                flowCollectionRelMapper.selectByFlowIds(Collections.singletonList(id));
+        if (CollectionUtils.isNotEmpty(flowCollectionRelModels)) {
+            return ServiceResult.fail("Can not delete flow collection related flow info");
+        }
+
         return delete(id);
     }
 
@@ -102,6 +114,14 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         if (CollectionUtils.isNotEmpty(flowTaskList)) {
             log.info("flow info related flow task can not delete: {}", flowTaskList);
             return ServiceResult.fail("Can not delete flow task related flow info");
+        }
+
+        // 判断流量是否关联流量集合信息
+        List<FlowCollectionRelModel> flowCollectionRelModels =
+                flowCollectionRelMapper.selectByFlowIds(request.getIdList());
+        if (CollectionUtils.isNotEmpty(flowCollectionRelModels)) {
+            log.info("flow info related flow collection can not delete: {}", flowCollectionRelModels);
+            return ServiceResult.fail("Can not delete flow collection related flow info");
         }
 
         String[] delIds = request.getIdList().toArray(new String[0]);

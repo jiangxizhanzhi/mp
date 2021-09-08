@@ -21,4 +21,12 @@ public interface FlowCollectionRelMapper extends BaseModelMapper<FlowCollectionR
      */
     List<FlowCollectionRelModel> selectByCollectionIds(@Param("collectionIds") List<String> collectionIds);
 
+    /**
+     * 根据流量id查询关联信息
+     * @param flowIds
+     * @return
+     */
+    List<FlowCollectionRelModel> selectByFlowIds(@Param("flowIds") List<String> flowIds);
+
+
 }
