@@ -44,7 +44,7 @@ public class ProbeManagerController {
         return probeService.deleteProbeById(probeIds) ? ServiceResult.successful(): ServiceResult.fail(SituationalAwareErrorCode.PROBE_DELETE_FAIL,"probe delete fail");
     }
 
-    @PutMapping
+    @PatchMapping
     @ApiOperation(value = "修改探针脚本")
     public ServiceResult modifyProbe(@RequestBody @Valid ProbeRequest probeRequest){
         if (Objects.isNull(probeRequest.getProbeId())) {
