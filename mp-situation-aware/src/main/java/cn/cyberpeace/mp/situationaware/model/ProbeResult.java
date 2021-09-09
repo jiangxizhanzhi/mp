@@ -45,7 +45,7 @@ public class ProbeResult {
     private String scriptContent;
 
     @ApiModelProperty(value = "探针状态 0:未开始 1：运行中 2：已关闭")
-    private ProbeStatus probeStatus;
+    private Integer probeStatus;
 
     private List<ProbeParamsResult> paramsResultList;
 }

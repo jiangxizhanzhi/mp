@@ -88,6 +88,7 @@ public class ProbeService {
             var probeResult = new ProbeResult();
             BeanUtils.copyProperties(model, probeResult);
             probeResult.setScriptContent(new String(model.getScriptContent(), StandardCharsets.UTF_8));
+            probeResult.setProbeStatus(model.getProbeStatus().ordinal());
             return probeResult;
         })).collect(Collectors.toList());
 
@@ -110,6 +111,7 @@ public class ProbeService {
             }).collect(Collectors.toList());
         probeResult.setParamsResultList(probeParamsResults);
         probeResult.setScriptContent(new String(probeModel.getScriptContent(), StandardCharsets.UTF_8));
+        probeResult.setProbeStatus(probeModel.getProbeStatus().ordinal());
         return probeResult;
     }
 
