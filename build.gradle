@@ -1,3 +1,5 @@
+
+
 plugins {
     id 'org.springframework.boot' version '2.4.4'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
@@ -5,10 +7,16 @@ plugins {
     id 'java'
     id 'application'
     id 'org.flywaydb.flyway' version '7.7.3'
+    id "com.thinkimi.gradle.MybatisGenerator" version "2.3"
 }
+
+
+
+
 
 apply from: 'mp/config.gradle'
 
+//引入 mybatis-generator 插件
 subprojects {
     apply plugin: 'org.springframework.boot'
     apply plugin: 'io.spring.dependency-management'
@@ -62,9 +70,13 @@ subprojects {
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
         testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
         testImplementation 'junit:junit:4.13.2'
+        testImplementation 'junit:junit:4.13.2'
         implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
         implementation group: 'ch.qos.logback', name: 'logback-core', version: '1.2.3'
+        testImplementation'org.mybatis.generator:mybatis-generator-core:1.3.7'
     }
+
+
 
     test {
         outputs.dir snippetsDir

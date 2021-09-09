@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -267,12 +268,27 @@ public class AsyncPlatFlowTaskService {
     @Async
     public void addVmInstance(AddVmInstanceRequest request, String uuid) {
         log.info("================ Add vm instance start ==================");
+        // 获取外部networkId，用于管理端口
+        String externalNetId = "";
+        try {
+            String getNetworkRsp = HttpUtils.sendPost(cpUrl + "/v1/scenarios/virtual_internet", new JSONObject().toJSONString());
+            JSONObject getNetworkObj = JSONObject.parseObject(getNetworkRsp);
+            log.info("get network response:{}", getNetworkObj.toJSONString());
+            if (BaseConstants.SUCCESS_ZERO.equals(getNetworkObj.getString(BaseConstants.STR_CODE))) {
+                JSONObject networkObj = getNetworkObj.getJSONObject(BaseConstants.STR_DATA);
+                externalNetId = networkObj.getString("external_net_id");
+            }
+        } catch (IOException e) {
+            log.error("get network error", e);
+            return;
+        }
+
         FlowActuatorModel flowActuatorModel = new FlowActuatorModel();
         AddVmRequest addVmRequest = new AddVmRequest();
         addVmRequest.setName("trex" + System.currentTimeMillis());
         addVmRequest.setImage(trexImage);
         AddVmRequest.Networks networks = new AddVmRequest.Networks();
-        networks.setNetworkId(request.getNetworkId());
+        networks.setNetworkId(externalNetId);
         AddVmRequest.AccessModes accessModes = new AddVmRequest.AccessModes();
         accessModes.setPort(80);
         accessModes.setEnablePortMapping(true);
