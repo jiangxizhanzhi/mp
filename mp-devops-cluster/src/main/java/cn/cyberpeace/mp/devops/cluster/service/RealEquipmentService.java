@@ -33,7 +33,7 @@ public interface RealEquipmentService extends BaseCloudPlatformService {
 
     SnmpCloudPlatform snmpForCpu(SnmpParams snmp);
 
-    SnmpCloudPlatform snmpForRam(SnmpParams snmp);
+    SnmpCloudPlatform snmpForMem(SnmpParams snmp);
 
     SnmpCloudPlatform snmpForDisk(SnmpParams snmp);
 }
