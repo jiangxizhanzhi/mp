@@ -158,7 +158,7 @@ public class ProbeService {
     }
 
     private void insertProbeParams(ProbeRequest probeRequest, String probeId) {
-        List<ProbeParamModel> probeParamModels = probeRequest.getProbeParamsRequestList().stream()
+        List<ProbeParamModel> probeParamModels = probeRequest.getParamsResultList().stream()
             .map((probeParamRequest -> {
                 var probeParamModel = new ProbeParamModel();
                 BeanUtils.copyProperties(probeParamRequest, probeParamModel);
@@ -179,7 +179,7 @@ public class ProbeService {
      */
     private String buildScriptContent(ProbeRequest probeRequest) {
         var scriptContent = probeRequest.getScriptContent();
-        for (ProbeParamsRequest param : probeRequest.getProbeParamsRequestList()) {
+        for (ProbeParamsRequest param : probeRequest.getParamsResultList()) {
             scriptContent = scriptContent.replace("$" + param.getParamName() + "$", param.getDefaultVal());
         }
         return scriptContent;

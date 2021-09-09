@@ -44,6 +44,9 @@ public class ProbeResult {
     @ApiModelProperty(value = "脚本内容")
     private String scriptContent;
 
+    @ApiModelProperty(value = "调度周期 单位分钟")
+    private Integer commandInterval;
+
     @ApiModelProperty(value = "探针状态 0:未开始 1：运行中 2：已关闭")
     private Integer probeStatus;
 
