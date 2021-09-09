@@ -12,7 +12,6 @@ import cn.cyberpeace.mp.devops.cluster.model.TargetModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntity;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtGateway;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
-import cn.cyberpeace.mp.devops.cluster.model.common.SnmpConfig;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentPageRequest;
@@ -21,7 +20,6 @@ import cn.cyberpeace.mp.devops.cluster.request.TargetPageRequest;
 import cn.cyberpeace.mp.devops.cluster.service.DeviceService;
 import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.devops.cluster.service.RealEquipmentService;
-import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -222,7 +220,7 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
             entity.setCcmPassword(extEntity.getCcmPassword());
 //            entity.setAccessProtocols(extEntity.getAccessProtocols());
 //            entity.setAccessProtocolList(JSONArray.parseArray(extEntity.getAccessProtocols(), AccessProtocol.class));
-            entity.setSnmpConfigs(JsonUtils.toSnakeObject(extEntity.getSnmpConfig(), SnmpConfig.class));
+            entity.setSnmpConfig(extEntity.getSnmpConfig());
             convertModel.setExtEntity(entity);
         }
         convertModel.setExtSystemInfo(extSystemInfo);
@@ -258,7 +256,7 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
 //            extEntity.setAccessIpAddress(requestExtEntity.getAccessIpAddress());
 //            extEntity.setAccessMacAddress(requestExtEntity.getAccessMacAddress());
             extEntity.setSnmpVersion(requestExtEntity.getSnmpVersion());
-            extEntity.setSnmpConfig(JsonUtils.toUnderlineJSONString(request.getSnmpConfig()));
+            extEntity.setSnmpConfig(requestExtEntity.getSnmpConfig());
             extEntity.setSnmpCpuOid(requestExtEntity.getSnmpCpuOid());
             extEntity.setSnmpDiskOid(requestExtEntity.getSnmpDiskOid());
             extEntity.setSnmpMemOid(requestExtEntity.getSnmpMemOid());
