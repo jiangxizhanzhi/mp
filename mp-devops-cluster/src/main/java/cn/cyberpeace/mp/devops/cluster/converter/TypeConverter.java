@@ -96,4 +96,10 @@ public interface TypeConverter extends BaseCloudPlatformService {
      * @return
      */
     TypeAllConvertModel findServiceStartType();
+
+    /**
+     * 查询SNMP版本
+     * @return
+     */
+    TypeAllConvertModel findSnmpVersion();
 }

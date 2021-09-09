@@ -64,12 +64,14 @@ public class TypeController {
         TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type();
         TypeAllConvertModel language = typeConverter.findLanguage();
         TypeAllConvertModel systemArchitecure = typeConverter.findSystemArchitecure();
+        TypeAllConvertModel snmpVersion = typeConverter.findSnmpVersion();
         TypeAllResponse allResponse = new TypeAllResponse();
         List<SerialPortConvertModel> serialPortConvertModels = serialPortConverter.list();
         serialPortConvertModels.add(new SerialPortConvertModel(50,100,10,"10.100.0.102",1));
         allResponse.setSerialPortConvertModels(serialPortConvertModels);
         allResponse.setSwitchConvertModels(switchConverter.treeList());
         allResponse.setAccessProtocolsPorts(typeService.findAccessProtocolsPort().getItems());
+        allResponse.setSnmpVersions(Objects.nonNull(snmpVersion) ? snmpVersion.getIdStringModelList() : null);
         allResponse.setRole(Objects.nonNull(roles) ? roles.getIdIntegerModelList() : null);
         allResponse.setEntityRole(Objects.nonNull(entityRoles) ? entityRoles.getIdIntegerModelList() : null);
         allResponse.setFirstTypeList(Objects.nonNull(l1AndL2AndL3Type) ? l1AndL2AndL3Type.getFirstTypeList() : null);

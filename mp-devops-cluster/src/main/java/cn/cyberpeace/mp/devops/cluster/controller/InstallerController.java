@@ -49,7 +49,7 @@ public class InstallerController {
      * 分页查询
      */
     @ApiOperation("分页查询")
-    @GetMapping("/page")
+    @GetMapping
     public PageResult<InstallerPageResponse> page(InstallerPageRequest request){
         InstallerConvertPageModel model = installerConverter.page(request);
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getModelList())){
@@ -66,8 +66,8 @@ public class InstallerController {
     }
 
     @ApiOperation("根据ID查询")
-    @GetMapping("/{id}")
-    public Result<InstallerByIdResponse> getById(@PathVariable String id){
+    @GetMapping("/by-id")
+    public Result<InstallerByIdResponse> getById(@RequestParam("id") String id){
         InstallerConvertModel model = installerConverter.findById(id);
         InstallerByIdResponse response = InstallerByIdResponse.builder().uuid(model.getUuid())
                 .name(model.getName()).description(model.getDescription()).logo(model.getLogo())
@@ -82,7 +82,7 @@ public class InstallerController {
      * 新增
      */
     @ApiOperation("新增")
-    @PostMapping("/add")
+    @PostMapping
     public ServiceResult add(InstallerRequest request){
         InstallerConvertModel model = installerConverter.add(request);
         return model.isSuccess() ? ServiceResult.successful() : ServiceResult.fail("");
@@ -92,7 +92,7 @@ public class InstallerController {
      * 更新
      */
     @ApiOperation("更新")
-    @PutMapping("/update")
+    @PatchMapping
     public ServiceResult update(InstallerRequest request){
         if (StringUtils.isBlank(request.getUuid())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
@@ -105,7 +105,7 @@ public class InstallerController {
      * 删除
      */
     @ApiOperation("删除")
-    @DeleteMapping("/delete")
+    @DeleteMapping
     public ServiceResult delete(@RequestBody InstallerDeleteRequest request){
         Boolean result = installerConverter.delete(request);
         return result ? ServiceResult.successful() : ServiceResult.fail("");
