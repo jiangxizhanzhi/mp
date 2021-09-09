@@ -1,21 +1,12 @@
 package cn.cyberpeace.mp.auth.controller;
 
-import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
-import cn.cyberpeace.mp.auth.constant.SysConfigConstant;
 import cn.cyberpeace.mp.auth.model.AvatarModel;
 import cn.cyberpeace.mp.auth.model.SysConfigModel;
-import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.AvatarService;
-import cn.cyberpeace.mp.auth.service.sys.SysConfigService;
 import cn.cyberpeace.mp.auth.service.UserService;
-import cn.cyberpeace.mp.auth.util.ResultUtils;
-import cn.cyberpeace.mp.base.controller.BaseModelController;
+import cn.cyberpeace.mp.auth.service.sys.SysConfigService;
 import cn.cyberpeace.mp.base.controller.stereotype.UnlimitPagination;
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.service.param.QueryParams;
-import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.hutool.core.collection.CollectionUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +16,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.List;
 
@@ -61,15 +51,6 @@ public class SysConfigController {
     @ApiOperation(value = "根据keyname更新单条sysconfig", notes = "")
     @PostMapping("/update/bykeyname")
     public ServiceResult updateByKeyName(@RequestBody SysConfigModel updateConfig) {
-
-        if (updateConfig.getKeyName().equals(SysConfigConstant.KEY_USER_AUDIT) && updateConfig.getValue().equals("0")) {
-            // 如果要关闭审核功能，需要检查用户中有没有处于待审核状态的
-            List<UserModel> list = userService.listNotAudited();
-            if (CollectionUtil.isNotEmpty(list)) {
-//                throw new MpRuntimeException(AuthErrorCode.SYS_CONFIG_CANNOT_CLOSE_AUDIT);
-                return ServiceResult.builder().serviceCode(AuthErrorCode.SYS_CONFIG_CANNOT_CLOSE_AUDIT).build().asResult();
-            }
-        }
 
         boolean success = sysConfigService.updateByKeyName(updateConfig);
         if (success) {
