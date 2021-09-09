@@ -121,6 +121,7 @@ public class ProbeService {
         probeResult.setParamsResultList(probeParamsResults);
         probeResult.setScriptContent(new String(probeModel.getScriptContent(), StandardCharsets.UTF_8));
         probeResult.setProbeStatus(probeModel.getProbeStatus().ordinal());
+        probeResult.setCommandInterval(Integer.parseInt(probeModel.getCommandInterval().replace("m", "")));
         return probeResult;
     }
 
