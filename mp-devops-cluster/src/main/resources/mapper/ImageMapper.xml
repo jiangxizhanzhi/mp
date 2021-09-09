@@ -74,7 +74,9 @@
             mp_devops_target i
         <include refid="commonWhere"/>
         ORDER BY i.create_time desc
-        limit #{offset}, #{limit}
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
     </select>
 
     <insert id="insert" parameterType="cn.cyberpeace.mp.devops.cluster.model.TargetModel">
