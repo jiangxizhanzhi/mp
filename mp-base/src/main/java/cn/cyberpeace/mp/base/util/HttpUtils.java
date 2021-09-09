@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.base.util;
 
 import com.alibaba.fastjson.JSONObject;
-import java.net.URI;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.apache.commons.collections4.MapUtils;
