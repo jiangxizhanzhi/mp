@@ -47,8 +47,8 @@ public class RealEquipmentServiceImpl extends BaseOpenStackServiceImpl implement
     }
 
     @Override
-    public SnmpCloudPlatform snmpForRam(SnmpParams snmp) {
-        snmp.setDataType("ram");
+    public SnmpCloudPlatform snmpForMem(SnmpParams snmp) {
+        snmp.setDataType("mem");
         return super.sendPost(CPCLOUD_INFO_URL + URL_VERSION + "/snmp", JsonUtils.toUnderlineJSONString(snmp), SnmpCloudPlatform.class);
     }
 

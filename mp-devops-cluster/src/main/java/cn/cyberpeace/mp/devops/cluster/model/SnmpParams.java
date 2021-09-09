@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.devops.cluster.model;
 
-import cn.cyberpeace.mp.devops.cluster.model.common.SnmpConfig;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,7 +17,7 @@ public class SnmpParams {
 
     private String oid;
 
-    private SnmpConfig auth;
+    private Object auth;
 
     private String dataType;
 }

@@ -5,10 +5,15 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.RealEquipmentConverter;
+import cn.cyberpeace.mp.devops.cluster.converter.SerialPortConverter;
+import cn.cyberpeace.mp.devops.cluster.converter.SwitchConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.RealEquipment;
 import cn.cyberpeace.mp.devops.cluster.converter.model.RealEquipmentConvertModel;
+import cn.cyberpeace.mp.devops.cluster.model.SnmpAuth;
+import cn.cyberpeace.mp.devops.cluster.model.SnmpBaseAuth;
 import cn.cyberpeace.mp.devops.cluster.model.SnmpParams;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntity;
+import cn.cyberpeace.mp.devops.cluster.model.common.SnmpConfig;
 import cn.cyberpeace.mp.devops.cluster.request.*;
 import cn.cyberpeace.mp.devops.cluster.response.*;
 import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
@@ -38,10 +43,17 @@ public class RealEquipmentController {
 
     private RealEquipmentService realEquipmentService;
 
+    private SerialPortConverter serialPortConverter;
+
+    private SwitchConverter switchConverter;
+
     @Autowired
-    public RealEquipmentController(RealEquipmentConverter realEquipmentConverter,RealEquipmentService realEquipmentService) {
+    public RealEquipmentController(RealEquipmentConverter realEquipmentConverter,RealEquipmentService realEquipmentService,
+                                   SerialPortConverter serialPortConverter,SwitchConverter switchConverter) {
         this.realEquipmentConverter = realEquipmentConverter;
         this.realEquipmentService = realEquipmentService;
+        this.serialPortConverter = serialPortConverter;
+        this.switchConverter = switchConverter;
     }
 
     /**
@@ -151,17 +163,37 @@ public class RealEquipmentController {
             response.setParams(extEntity.getParams());
             if (Objects.nonNull(extEntity.getSnmpConfigs())) {
                 SnmpParams snmpParams = new SnmpParams();
+                SnmpConfig snmpConfigs = extEntity.getSnmpConfigs();
                 if (extEntity.getSnmpVersion().equals("V1")) {
                     snmpParams.setVersion(1);
+                    if (Objects.nonNull(snmpConfigs)) {
+                        SnmpBaseAuth snmpAuth = new SnmpBaseAuth();
+                        snmpAuth.setCommunityName(snmpConfigs.getCommunityName());
+                        snmpParams.setAuth(snmpAuth);
+                    }
                 } else if (extEntity.getSnmpVersion().equals("V2C")) {
                     snmpParams.setVersion(2);
+                    if (Objects.nonNull(snmpConfigs)) {
+                        SnmpBaseAuth snmpAuth = new SnmpBaseAuth();
+                        snmpAuth.setCommunityName(snmpConfigs.getCommunityName());
+                        snmpParams.setAuth(snmpAuth);
+                    }
                 } else if (extEntity.getSnmpVersion().equals("V3")) {
                     snmpParams.setVersion(3);
+                    if (Objects.nonNull(snmpConfigs)) {
+                        SnmpAuth snmpAuth = new SnmpAuth();
+                        snmpAuth.setAuthKey(snmpConfigs.getAuthKey());
+                        snmpAuth.setUsername(snmpConfigs.getUsername());
+                        snmpAuth.setPrivKey(snmpConfigs.getPrivKey());
+                        snmpParams.setAuth(snmpAuth);
+                    }
                 }
                 snmpParams.setIp(extEntity.getSnmpConfigs().getIp());
-                snmpParams.setAuth(extEntity.getSnmpConfigs());
+                snmpParams.setOid(extEntity.getSnmpCpuOid());
                 realEquipmentService.snmpForCpu(snmpParams);
-                realEquipmentService.snmpForRam(snmpParams);
+                snmpParams.setOid(extEntity.getSnmpMemOid());
+                realEquipmentService.snmpForMem(snmpParams);
+                snmpParams.setOid(extEntity.getSnmpDiskOid());
                 realEquipmentService.snmpForDisk(snmpParams);
             }
         }

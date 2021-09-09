@@ -1,9 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.service;
 
-import cn.cyberpeace.mp.devops.cluster.model.TypeCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.TypeIdIntegerCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.TypeIdStringCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.TypeL2CloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.*;
 
 public interface TypeService extends BaseCloudPlatformService{
 
@@ -18,6 +15,12 @@ public interface TypeService extends BaseCloudPlatformService{
      * @return
      */
     TypeL2CloudPlatformModel findL1AndL2Type();
+
+    /**
+     * 查询接入协议端口
+     * @return
+     */
+    AccessProtocolsPortCloudPlatform findAccessProtocolsPort();
 
     /**
      * 查询所有角色
