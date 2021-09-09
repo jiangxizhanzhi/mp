@@ -9,8 +9,6 @@ import cn.cyberpeace.mp.devops.cluster.converter.SerialPortConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.SwitchConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.RealEquipment;
 import cn.cyberpeace.mp.devops.cluster.converter.model.RealEquipmentConvertModel;
-import cn.cyberpeace.mp.devops.cluster.converter.model.SerialPortConvertModel;
-import cn.cyberpeace.mp.devops.cluster.converter.model.SwitchConvertModel;
 import cn.cyberpeace.mp.devops.cluster.model.SnmpAuth;
 import cn.cyberpeace.mp.devops.cluster.model.SnmpBaseAuth;
 import cn.cyberpeace.mp.devops.cluster.model.SnmpParams;
@@ -214,19 +212,5 @@ public class RealEquipmentController {
     @GetMapping("/scenes")
     public PageResult<RealEquipmentScenesPageResponse> pageScenes(RealEquipmentScenesPageRequest request){
         return new PageResult<>(Lists.newArrayList(),100);
-    }
-
-    @ApiOperation("查询串口配置")
-    @GetMapping("/serial-port-list")
-    public Result<List<SerialPortConvertModel>> serialPortList(){
-        List<SerialPortConvertModel> list = serialPortConverter.list();
-        list.add(new SerialPortConvertModel(50,100,10,"10.100.0.102",1));
-        return new Result<>(list);
-    }
-
-    @ApiOperation("查询交换机")
-    @GetMapping("/switch-list")
-    public Result<List<SwitchConvertModel>> switchList(){
-        return new Result<>(switchConverter.list());
     }
 }

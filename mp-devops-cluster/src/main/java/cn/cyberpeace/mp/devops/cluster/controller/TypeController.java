@@ -1,7 +1,11 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
+import cn.cyberpeace.mp.devops.cluster.converter.SerialPortConverter;
+import cn.cyberpeace.mp.devops.cluster.converter.SwitchConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.TypeConverter;
+import cn.cyberpeace.mp.devops.cluster.converter.model.SerialPortConvertModel;
+import cn.cyberpeace.mp.devops.cluster.converter.model.SwitchConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeAllConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeL2AllConvertModel;
 import cn.cyberpeace.mp.devops.cluster.response.TypeAllResponse;
@@ -17,6 +21,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -33,10 +38,17 @@ public class TypeController {
 
     private TypeService typeService;
 
+    private SerialPortConverter serialPortConverter;
+
+    private SwitchConverter switchConverter;
+
     @Autowired
-    public TypeController(TypeConverter typeConverter,TypeService typeService) {
+    public TypeController(TypeConverter typeConverter,TypeService typeService,SerialPortConverter serialPortConverter,
+                          SwitchConverter switchConverter) {
         this.typeConverter = typeConverter;
         this.typeService = typeService;
+        this.serialPortConverter = serialPortConverter;
+        this.switchConverter = switchConverter;
     }
 
     /**
@@ -52,6 +64,10 @@ public class TypeController {
         TypeAllConvertModel language = typeConverter.findLanguage();
         TypeAllConvertModel systemArchitecure = typeConverter.findSystemArchitecure();
         TypeAllResponse allResponse = new TypeAllResponse();
+        List<SerialPortConvertModel> serialPortConvertModels = serialPortConverter.list();
+        serialPortConvertModels.add(new SerialPortConvertModel(50,100,10,"10.100.0.102",1));
+        allResponse.setSerialPortConvertModels(serialPortConvertModels);
+        allResponse.setSwitchConvertModels(switchConverter.list());
         allResponse.setAccessProtocolsPorts(typeService.findAccessProtocolsPort().getItems());
         allResponse.setRole(Objects.nonNull(roles) ? roles.getIdIntegerModelList() : null);
         allResponse.setEntityRole(Objects.nonNull(entityRoles) ? entityRoles.getIdIntegerModelList() : null);
@@ -255,5 +271,19 @@ public class TypeController {
         response.setInstallerPlatforms(model.getIdStringModelList());
         return new Result<>(response);
 
+    }
+
+    @ApiOperation("查询串口配置")
+    @GetMapping("/serial-port-list")
+    public Result<List<SerialPortConvertModel>> serialPortList(){
+        List<SerialPortConvertModel> list = serialPortConverter.list();
+        list.add(new SerialPortConvertModel(50,100,10,"10.100.0.102",1));
+        return new Result<>(list);
+    }
+
+    @ApiOperation("查询交换机")
+    @GetMapping("/switch-list")
+    public Result<List<SwitchConvertModel>> switchList(){
+        return new Result<>(switchConverter.list());
     }
 }
