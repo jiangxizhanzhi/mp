@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.situationaware.model;
 
+import cn.cyberpeace.mp.situationaware.model.enums.ProbeStatus;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Date;
@@ -42,6 +43,9 @@ public class ProbeResult {
 
     @ApiModelProperty(value = "脚本内容")
     private String scriptContent;
+
+    @ApiModelProperty(value = "探针状态 0:未开始 1：运行中 2：已关闭")
+    private ProbeStatus probeStatus;
 
     private List<ProbeParamsResult> paramsResultList;
 }
