@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.devops.cluster.response;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeIdIntegerConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeIdStringConvertModel;
+import cn.cyberpeace.mp.devops.cluster.model.common.AccessProtocolsPort;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -110,6 +111,12 @@ public class TypeAllResponse {
      */
     @ApiModelProperty("安装平台")
     private List<TypeIdStringConvertModel> installerPlatforms;
+
+    /**
+     * 接入协议和端口
+     */
+    @ApiModelProperty("接入协议和端口")
+    private List<AccessProtocolsPort> accessProtocolsPorts;;
 
     public TypeAllResponse(List<TypeConvertModel> firstTypeList, List<TypeConvertModel> secondTypeList, List<TypeConvertModel> thirdTypeList) {
         this.firstTypeList = firstTypeList;

@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.TypeL2AllConvertModel;
 import cn.cyberpeace.mp.devops.cluster.response.TypeAllResponse;
 import cn.cyberpeace.mp.devops.cluster.response.TypeL2AllResponse;
 import cn.cyberpeace.mp.devops.cluster.response.base.Result;
+import cn.cyberpeace.mp.devops.cluster.service.TypeService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -30,9 +31,12 @@ public class TypeController {
 
     private TypeConverter typeConverter;
 
+    private TypeService typeService;
+
     @Autowired
-    public TypeController(TypeConverter typeConverter) {
+    public TypeController(TypeConverter typeConverter,TypeService typeService) {
         this.typeConverter = typeConverter;
+        this.typeService = typeService;
     }
 
     /**
@@ -48,6 +52,7 @@ public class TypeController {
         TypeAllConvertModel language = typeConverter.findLanguage();
         TypeAllConvertModel systemArchitecure = typeConverter.findSystemArchitecure();
         TypeAllResponse allResponse = new TypeAllResponse();
+        allResponse.setAccessProtocolsPorts(typeService.findAccessProtocolsPort().getItems());
         allResponse.setRole(Objects.nonNull(roles) ? roles.getIdIntegerModelList() : null);
         allResponse.setEntityRole(Objects.nonNull(entityRoles) ? entityRoles.getIdIntegerModelList() : null);
         allResponse.setFirstTypeList(Objects.nonNull(l1AndL2AndL3Type) ? l1AndL2AndL3Type.getFirstTypeList() : null);

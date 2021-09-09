@@ -1,10 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.service.impl;
 
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
-import cn.cyberpeace.mp.devops.cluster.model.TypeCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.TypeIdIntegerCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.TypeIdStringCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.TypeL2CloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.*;
 import cn.cyberpeace.mp.devops.cluster.service.TypeService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
@@ -25,6 +22,12 @@ public class TypeServiceImpl extends BaseOpenStackServiceImpl implements TypeSer
     public TypeL2CloudPlatformModel findL1AndL2Type() {
         return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + "/type?type=l2", TypeL2CloudPlatformModel.class);
     }
+
+    @Override
+    public AccessProtocolsPortCloudPlatform findAccessProtocolsPort() {
+        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + "/type?type=access_protocols_port", AccessProtocolsPortCloudPlatform.class);
+    }
+
 
     @Override
     public TypeIdIntegerCloudPlatformModel findIdIntegerByType(String type) {

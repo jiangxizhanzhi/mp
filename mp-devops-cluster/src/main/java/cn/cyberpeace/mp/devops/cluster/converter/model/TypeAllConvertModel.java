@@ -38,6 +38,8 @@ public class TypeAllConvertModel {
      */
     private List<TypeIdStringConvertModel> idStringModelList = new ArrayList<>();
 
+
+
     public TypeAllConvertModel(List<TypeConvertModel> firstTypeList, List<TypeConvertModel> secondTypeList, List<TypeConvertModel> thirdTypeList) {
         this.firstTypeList = firstTypeList;
         this.secondTypeList = secondTypeList;
