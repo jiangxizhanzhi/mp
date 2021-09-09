@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.SerialPortConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.SwitchConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeAllConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeL2AllConvertModel;
+import cn.cyberpeace.mp.devops.cluster.model.Switches;
 import cn.cyberpeace.mp.devops.cluster.response.TypeAllResponse;
 import cn.cyberpeace.mp.devops.cluster.response.TypeL2AllResponse;
 import cn.cyberpeace.mp.devops.cluster.response.base.Result;
@@ -67,7 +68,7 @@ public class TypeController {
         List<SerialPortConvertModel> serialPortConvertModels = serialPortConverter.list();
         serialPortConvertModels.add(new SerialPortConvertModel(50,100,10,"10.100.0.102",1));
         allResponse.setSerialPortConvertModels(serialPortConvertModels);
-        allResponse.setSwitchConvertModels(switchConverter.list());
+        allResponse.setSwitchConvertModels(switchConverter.treeList());
         allResponse.setAccessProtocolsPorts(typeService.findAccessProtocolsPort().getItems());
         allResponse.setRole(Objects.nonNull(roles) ? roles.getIdIntegerModelList() : null);
         allResponse.setEntityRole(Objects.nonNull(entityRoles) ? entityRoles.getIdIntegerModelList() : null);
@@ -281,9 +282,15 @@ public class TypeController {
         return new Result<>(list);
     }
 
-    @ApiOperation("查询交换机")
+    @ApiOperation("查询交换机部分信息数据")
+    @GetMapping("/switch-tree-list")
+    public Result<List<SwitchConvertModel>> treeList(){
+        return new Result<>(switchConverter.treeList());
+    }
+
+    @ApiOperation("查询交换机所有信息")
     @GetMapping("/switch-list")
-    public Result<List<SwitchConvertModel>> switchList(){
+    public Result<List<Switches>> switchList(){
         return new Result<>(switchConverter.list());
     }
 }

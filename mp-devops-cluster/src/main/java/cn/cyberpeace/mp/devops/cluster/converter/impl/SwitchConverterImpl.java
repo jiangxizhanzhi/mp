@@ -26,13 +26,10 @@ public class SwitchConverterImpl implements SwitchConverter {
     }
 
     @Override
-    public List<SwitchConvertModel> list() {
-        SwitchesCloudPlatform model = switchService.list();
-        if (Objects.isNull(model)){
-            return Lists.newArrayList();
-        }
+    public List<SwitchConvertModel> treeList() {
+        List<Switches> switchesList = this.list();
         List<SwitchConvertModel> switchConvertModels = new ArrayList<>();
-        for (Switches switches : model.getSwitchs()){
+        for (Switches switches : switchesList){
             SwitchConvertModel convertModel = new SwitchConvertModel();
             convertModel.setLabel(switches.getName());
             convertModel.setValue(switches.getName());
@@ -49,5 +46,14 @@ public class SwitchConverterImpl implements SwitchConverter {
             switchConvertModels.add(convertModel);
         }
         return switchConvertModels;
+    }
+
+    @Override
+    public List<Switches> list() {
+        SwitchesCloudPlatform model = switchService.list();
+        if (Objects.isNull(model)){
+            return Lists.newArrayList();
+        }
+        return model.getSwitchs();
     }
 }

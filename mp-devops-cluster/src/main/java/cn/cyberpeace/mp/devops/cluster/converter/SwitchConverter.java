@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.converter;
 
 import cn.cyberpeace.mp.devops.cluster.converter.model.SwitchConvertModel;
+import cn.cyberpeace.mp.devops.cluster.model.Switches;
 
 import java.util.List;
 
@@ -11,8 +12,14 @@ import java.util.List;
 public interface SwitchConverter {
 
     /**
+     * 树形结构
+     * @return
+     */
+    List<SwitchConvertModel> treeList();
+
+    /**
      * 查询交换机信息
      * @return
      */
-    List<SwitchConvertModel> list();
+    List<Switches> list();
 }
