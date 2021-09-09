@@ -47,5 +47,5 @@ public class ProbeRequest {
     private Integer commandInterval;
 
     @ApiModelProperty(value = "脚本参数 建议 ##包裹参数，方便替换", required = true)
-    private List<ProbeParamsRequest> probeParamsRequestList;
+    private List<ProbeParamsRequest> paramsResultList;
 }
