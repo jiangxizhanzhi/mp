@@ -62,6 +62,6 @@ public class ProbeManagerController {
     @GetMapping("/{probeId}")
     @ApiOperation(value = "查询探针详情")
     public ServiceResult<ProbeResult> queryProbeByProbeId(@PathVariable("probeId") String probeId) {
-        return ServiceResult.<ProbeResult>builder().data(probeService.queryProbeDetail(probeId)).build();
+        return new ServiceResult<>(probeService.queryProbeDetail(probeId)).asResult();
     }
 }
