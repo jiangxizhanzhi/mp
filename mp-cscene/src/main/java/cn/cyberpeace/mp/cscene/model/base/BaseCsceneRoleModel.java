@@ -13,6 +13,8 @@ public class BaseCsceneRoleModel extends BaseModel {
     @DefaultStr
     private String name;
     @DefaultStr
+    private String type;
+    @DefaultStr
     private String assetNodes;
     @DefaultStr
     private String visibleNodes;

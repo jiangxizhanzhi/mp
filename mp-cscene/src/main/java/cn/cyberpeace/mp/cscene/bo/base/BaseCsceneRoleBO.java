@@ -22,6 +22,8 @@ public abstract class BaseCsceneRoleBO<M extends BaseCsceneRoleModel, T extends 
     private String id;
     @ApiModelProperty(value = "角色名称")
     private String name;
+    @ApiModelProperty(value = "角色类型")
+    private String type;
     @ApiModelProperty(value = "资产节点id列表")
     private List<String> assetNodes;
     @ApiModelProperty(value = "可见节点id列表")

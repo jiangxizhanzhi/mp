@@ -1,10 +1,14 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class VirtualNic {
     private String networkId;
     private String fixedIp;
@@ -14,6 +18,8 @@ public class VirtualNic {
     private String firewallId;
 
     @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class QosRule {
         private Integer maxKbps;
         private Integer maxBurstKbps;
@@ -24,6 +30,8 @@ public class VirtualNic {
     }
 
     @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class AccessMode {
         private String protocol;
         private String ipAddress;
