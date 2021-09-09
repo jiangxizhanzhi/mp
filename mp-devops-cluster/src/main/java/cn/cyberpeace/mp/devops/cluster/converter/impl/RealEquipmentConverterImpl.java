@@ -14,11 +14,13 @@ import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentRequest;
+import cn.cyberpeace.mp.devops.cluster.request.TargetPageRequest;
 import cn.cyberpeace.mp.devops.cluster.service.DeviceService;
 import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.devops.cluster.service.RealEquipmentService;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import com.alibaba.fastjson.JSONArray;
+import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -113,6 +115,38 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
         convertModel.setModelList(modelList);
         convertModel.setTotal(model.getTotal());
         return convertModel;
+    }
+
+    @Override
+    public List<Device> allTarget(TargetPageRequest request) {
+        ImagePageDTO dto = new ImagePageDTO();
+        dto.setMainCategory(request.getCategory());
+        dto.setSubCategory(request.getSecondCategory());
+        dto.setImageType(ImageTypeEnum.ENTITY.toValue());
+        dto.setImageType(Objects.nonNull(request.getImageType()) ? request.getImageType().toValue() : "");
+//        dto.setUseStatus(request.getUseStatus());
+        dto.setName(request.getName());
+//        dto.setInPosition(request.getInPosition());
+//        dto.setOffset((request.getPage() - 1) * request.getPerPage());
+//        dto.setLimit(request.getPerPage());
+
+        Integer total = imageMapper.totalCount(dto);
+        if (total == 0){
+            return null;
+        }
+        List<TargetModel> targetModels = imageMapper.page(dto);
+
+        List<Integer> ids = targetModels.stream().map(TargetModel::getId).map(Integer::parseInt).collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(ids)){
+            return null;
+        }
+        DeviceCloudPlatformModel model = deviceService.findByIds(ids);
+
+        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getItems())){
+            return Lists.newArrayList();
+        }
+
+        return model.getItems();
     }
 
     @Override
