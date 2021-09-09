@@ -118,6 +118,11 @@ public class TypeConverterImpl implements TypeConverter {
         return this.findIdStringByType("type");
     }
 
+    @Override
+    public TypeAllConvertModel findSnmpVersion() {
+        return this.findIdStringByType("snmp_version");
+    }
+
     /**
      * 转换TypeOfRoleCloudPlatformModel对象
      * @param list

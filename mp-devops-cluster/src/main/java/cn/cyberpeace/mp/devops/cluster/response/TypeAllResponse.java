@@ -128,6 +128,9 @@ public class TypeAllResponse {
     @ApiModelProperty("串口信息")
     private List<SerialPortConvertModel> serialPortConvertModels;
 
+    @ApiModelProperty("SNMP版本")
+    private List<TypeIdStringConvertModel> snmpVersions;
+
     public TypeAllResponse(List<TypeConvertModel> firstTypeList, List<TypeConvertModel> secondTypeList, List<TypeConvertModel> thirdTypeList) {
         this.firstTypeList = firstTypeList;
         this.secondTypeList = secondTypeList;
