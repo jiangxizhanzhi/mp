@@ -56,7 +56,7 @@ public class ProbeManagerController {
     @GetMapping
     @ApiOperation(value = "分页查询探针")
     public ListObjServiceResult<ProbeResult> queryProbes(ProbeSearchRequest probeSearchRequest) {
-        return probeService.queryProbeListWithPageable(probeSearchRequest);
+        return probeService.queryProbeListWithPageable(probeSearchRequest).asResult();
     }
 
     @GetMapping("/{probeId}")
