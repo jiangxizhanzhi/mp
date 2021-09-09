@@ -13,12 +13,14 @@ import cn.cyberpeace.mp.devops.cluster.model.SnmpAuth;
 import cn.cyberpeace.mp.devops.cluster.model.SnmpBaseAuth;
 import cn.cyberpeace.mp.devops.cluster.model.SnmpParams;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntity;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntityAccess;
 import cn.cyberpeace.mp.devops.cluster.model.common.SnmpConfig;
 import cn.cyberpeace.mp.devops.cluster.request.*;
 import cn.cyberpeace.mp.devops.cluster.response.*;
 import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
 import cn.cyberpeace.mp.devops.cluster.response.base.Result;
 import cn.cyberpeace.mp.devops.cluster.service.RealEquipmentService;
+import com.alibaba.fastjson.JSONArray;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -75,8 +77,11 @@ public class RealEquipmentController {
             if (Objects.nonNull(extEntity)){
                 response.setModel(extEntity.getStyle());
                 response.setParams(extEntity.getParams());
-                response.setEntityType(extEntity.getAccessType());
-                response.setEntityDetail(extEntity.getAccessProtocols());
+            }
+            List<ExtEntityAccess> extEntityAccess = v.getExtEntityAccess();
+            if (CollectionUtils.isNotEmpty(extEntityAccess)){
+                response.setEntityType(extEntityAccess.get(0).getAccessType());
+                response.setEntityDetail(JSONArray.toJSONString(extEntityAccess));
             }
             return response;
         }).collect(Collectors.toList());
@@ -155,10 +160,9 @@ public class RealEquipmentController {
         RealEquipmentDevopsDetailResponse response = RealEquipmentDevopsDetailResponse.builder()
                 .name(realEquipment.getName()).logo(realEquipment.getLogo())
                 .extSystemInfo(realEquipment.getExtSystemInfo()).extEntity(realEquipment.getExtEntity()).build();
-
+        response.setAddress(realEquipment.getExtEntityAccess().stream().map(ExtEntityAccess::getIp).collect(Collectors.toList()));
         if (Objects.nonNull(realEquipment) && Objects.nonNull(realEquipment.getExtEntity())){
             ExtEntity extEntity = realEquipment.getExtEntity();
-            response.setAddress(extEntity.getAccessIpAddress());
             response.setModel(extEntity.getStyle());
             response.setParams(extEntity.getParams());
             if (Objects.nonNull(extEntity.getSnmpConfigs())) {

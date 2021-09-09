@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /**
  * 设备信息
  */
@@ -94,6 +96,11 @@ public class Device extends BaseCloudPlatformModel{
      * 实体信息
      */
     private ExtEntity extEntity;
+
+    /**
+     * 交换机
+     */
+    private List<ExtEntityAccess> extEntityAccess;
 
     /**
      * 系统信息
