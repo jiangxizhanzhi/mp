@@ -186,6 +186,15 @@
         where probe_id = #{probeId,jdbcType=VARCHAR}
     </delete>
 
+    <delete id="deleteParamByProbeIds" parameterType="java.util.List">
+        delete
+        from mp_situation_probe_param
+        where probe_id in
+        <foreach collection="probeIds" item="probeId" index="index" open="(" close=")" separator=",">
+            #{probeId}
+        </foreach>
+    </delete>
+
 
     <select id="queryProbeParamList" parameterType="java.lang.String" resultMap="BaseResultMap">
         select

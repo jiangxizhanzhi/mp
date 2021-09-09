@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.situationaware.model.ProbeSearchRequest;
 import cn.cyberpeace.mp.situationaware.service.ProbeService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import java.util.List;
 import java.util.Objects;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,10 +38,10 @@ public class ProbeManagerController {
         return ServiceResult.successful();
     }
 
-    @DeleteMapping("/{probeId}")
+    @DeleteMapping("")
     @ApiOperation(value = "探针脚本删除")
-    public ServiceResult deleteProbeById(@PathVariable("probeId") String probeId) {
-        return probeService.deleteProbeById(probeId) ? ServiceResult.successful(): ServiceResult.fail(SituationalAwareErrorCode.PROBE_DELETE_FAIL,"probe delete fail");
+    public ServiceResult deleteProbeById(@RequestBody List<String> probeIds) {
+        return probeService.deleteProbeById(probeIds) ? ServiceResult.successful(): ServiceResult.fail(SituationalAwareErrorCode.PROBE_DELETE_FAIL,"probe delete fail");
     }
 
     @PutMapping

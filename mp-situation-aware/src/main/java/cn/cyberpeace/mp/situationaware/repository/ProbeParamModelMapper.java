@@ -25,6 +25,8 @@ public interface ProbeParamModelMapper {
 
     int deleteParamByProbeId(@Param("probeId") String probeId);
 
+    int deleteParamByProbeIds(@Param("probeIds") List<String> probeIds);
+
     List<ProbeParamModel> queryProbeParamList(@Param("probeId") String probeId);
 
 }

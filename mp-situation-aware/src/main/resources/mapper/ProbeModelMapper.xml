@@ -56,6 +56,15 @@
         where id = #{probeId,jdbcType=VARCHAR}
     </update>
 
+    <update id="deleteByProbeIds" parameterType="java.util.List">
+        update mp_situation_probe
+        set del_flag=1
+        where id in
+        <foreach collection="probeIds" item="probeId" index="index" open="(" close=")" separator=",">
+            #{probeId}
+        </foreach>
+    </update>
+
     <select id="queryListWithPage"
             resultMap="ResultMapWithBLOBs">
         select

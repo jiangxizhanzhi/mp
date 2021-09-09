@@ -19,6 +19,8 @@ public interface ProbeModelMapper {
 
     int deleteByProbeId(@Param("probeId") String probeId);
 
+    int deleteByProbeIds(@Param("probeIds") List<String> probeIds);
+
     List<ProbeModel> queryListWithPage(@Param("probeSearchRequest") ProbeSearchRequest probeSearchRequest, @Param("offset") Integer offset);
 
     Integer countQuery(ProbeSearchRequest probeSearchRequest);

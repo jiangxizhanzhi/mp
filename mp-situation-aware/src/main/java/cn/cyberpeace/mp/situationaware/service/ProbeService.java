@@ -25,6 +25,9 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 /**
  *
@@ -70,14 +73,20 @@ public class ProbeService {
     /**
      * 根据probeId删除探针
      *
-     * @param probeId probeId
+     * @param probeIds probeIds
      * @return 是否删除成功
      */
     @Transactional(rollbackFor = Exception.class)
-    public boolean deleteProbeById(String probeId) {
-        probeParamModelMapper.deleteParamByProbeId(probeId);
-        wazuhProbeManagerRepository.deleteProbeByProbeId(probeId);
-        return probeModelMapper.deleteByProbeId(probeId) > 0;
+    public boolean deleteProbeById(List<String> probeIds) {
+        if (CollectionUtils.isEmpty(probeIds) || probeIds.stream().anyMatch(ObjectUtils::isEmpty)) {
+            throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_MANAGER_DELETE_PARAM_ERROR);
+        }
+        probeParamModelMapper.deleteParamByProbeIds(probeIds);
+
+        probeIds.forEach(probeId -> {
+            wazuhProbeManagerRepository.deleteProbeByProbeId(probeId);
+        });
+        return probeModelMapper.deleteByProbeIds(probeIds) > 0;
     }
 
     @Transactional(rollbackFor = Exception.class, readOnly = true)
