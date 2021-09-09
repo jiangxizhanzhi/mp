@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.devops.cluster.request;
 
 
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntity;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntityAccess;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
 import cn.cyberpeace.mp.devops.cluster.model.common.SnmpConfig;
 import io.swagger.annotations.ApiModel;
@@ -10,6 +11,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -65,6 +68,11 @@ public class RealEquipmentRequest extends BaseRequest{
      */
     @ApiModelProperty("实体信息")
     private ExtEntity extEntity;
+
+    /**
+     * 交换机
+     */
+    private List<ExtEntityAccess> extEntityAccess;
 
     private SnmpConfig snmpConfig;
 

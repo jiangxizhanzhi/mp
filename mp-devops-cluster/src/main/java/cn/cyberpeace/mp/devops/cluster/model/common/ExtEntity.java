@@ -5,8 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -29,42 +27,6 @@ public class ExtEntity{
      */
     @ApiModelProperty("参数")
     private String params;
-
-    /**
-     * 接入类型
-     */
-    @ApiModelProperty("接入类型")
-    private String accessType;
-
-    /**
-     * 交换机端口
-     */
-    @ApiModelProperty("交换机端口")
-    private String accessSwitchPort;
-
-    /**
-     * 实体端口名
-     */
-    @ApiModelProperty("实体端口名")
-    private String accessSwitchPortName;
-
-    /**
-     * IP地址
-     */
-    @ApiModelProperty("IP地址")
-    private String accessIpAddress;
-
-    /**
-     * IMAC地址
-     */
-    @ApiModelProperty("IMAC地址")
-    private String accessMacAddress;
-
-    /**
-     * 管理协议列表
-     */
-    @ApiModelProperty("管理协议列表")
-    private String accessProtocols;
 
     /**
      * SNMP版本
@@ -116,10 +78,4 @@ public class ExtEntity{
      */
     @ApiModelProperty("串口密码")
     private String ccmPassword;
-
-    /**
-     * 接入方式集合
-     */
-    @ApiModelProperty("接入方式集合")
-    private List<AccessProtocol> accessProtocolList;
 }

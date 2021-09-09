@@ -20,7 +20,7 @@ public class AccessProtocol{
      * IP地址
      */
     @ApiModelProperty("IP地址")
-    private String ip;
+    private String hostname;
 
     /**
      * 端口
