@@ -1,0 +1,127 @@
+package cn.cyberpeace.mp.situationaware.repository;
+
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.util.HttpUtils;
+import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
+import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
+import cn.cyberpeace.mp.situationaware.model.ProbeRequest;
+import cn.cyberpeace.mp.situationaware.model.enums.OsType;
+import cn.cyberpeace.mp.situationaware.model.enums.ScriptType;
+import com.alibaba.fastjson.JSONObject;
+import java.io.IOException;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+import static cn.cyberpeace.mp.situationaware.model.enums.ScriptType.valueOf;
+
+@Repository
+@Slf4j
+public class WazuhProbeManagerRepository {
+
+    @Autowired
+    private SituationAwareConfig situationAwareConfig;
+
+    /**
+     * 新增脚本
+     *
+     * @param probeRequest probeRequest
+     * @return String
+     */
+    public String addScript(ProbeRequest probeRequest) {
+        var sentUrl = situationAwareConfig.getWazuhManagerUrl() + "/probe";
+        var jsonObject = new JSONObject();
+        jsonObject.put("ScriptId", probeRequest.getProbeId());
+        jsonObject.put("Content", probeRequest.getScriptContent());
+        jsonObject.put("ProbeType", probeRequest.getScriptType().getTypeVal());
+        jsonObject.put("ProbeName", probeRequest.getProbeName());
+        jsonObject.put("OSType", probeRequest.getOsType().getTypeVal());
+        jsonObject.put("Interval", probeRequest.getCommandInterval());
+        jsonObject.put("Commandline", buildExecCommandline(probeRequest));
+        try {
+            return HttpUtils.sendPost(sentUrl, jsonObject.toJSONString());
+        } catch (IOException e) {
+            log.error(SituationalAwareErrorCode.PROBE_MANAGER_ADD_ERROR.getMessage(), ExceptionUtils.getStackTrace(e));
+            throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_MANAGER_ADD_ERROR);
+        }
+    }
+
+    /**
+     * 删除脚本
+     *
+     * @param probeId
+     * @return
+     */
+    public String deleteProbeByProbeId(String probeId) {
+        var sentUrl = situationAwareConfig.getWazuhManagerUrl() + "/probe/" + probeId;
+        try {
+            String deleteResult = HttpUtils.sendDelete(sentUrl);
+            log.info("delete probe id: {} {}:", probeId, deleteResult);
+            return deleteResult;
+        } catch (IOException e) {
+            log.error(SituationalAwareErrorCode.PROBE_MANAGER_ADD_ERROR.getMessage(), ExceptionUtils.getStackTrace(e));
+            throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_MANAGER_ADD_ERROR);
+        }
+    }
+
+    /**
+     * 构建命令行执行路径
+     *
+     * @param probeRequest probeRequest
+     * @return 路径地址
+     */
+    private String buildExecCommandline(ProbeRequest probeRequest) {
+        var commandLineBuilder = new StringBuilder();
+        return commandLineBuilder.append(buildExecString(probeRequest))
+            .append(probeRequest.getScriptType().equals(ScriptType.BAT) ? "" :" ").append(buildScriptPath(probeRequest))
+            .append(buildProbeFileName(probeRequest)).append(buildProbeFileSubffix(probeRequest)).toString();
+    }
+
+    private String buildExecString(ProbeRequest probeRequest) {
+        switch (probeRequest.getScriptType()) {
+            case PYTHON:
+                return "python";
+            case BAT:
+                return "";
+            default:
+                return "sh";
+        }
+    }
+
+    private String buildScriptPath(ProbeRequest probeRequest) {
+        if (OsType.LINUX.equals(probeRequest.getOsType())) {
+            return situationAwareConfig.getScriptLinuxPath();
+        } else {
+            return situationAwareConfig.getScripWindowsPath();
+        }
+    }
+
+    private String buildProbeFileName(ProbeRequest probeRequest) {
+        String osType;
+        if (probeRequest.getOsType() == OsType.WINDOWS) {
+            osType = "windows";
+        } else {
+            osType = "linux";
+        }
+
+        return probeRequest.getProbeName() + "_" + osType;
+    }
+
+    private String buildProbeFileSubffix(ProbeRequest probeRequest) {
+        String subbfix;
+        switch (probeRequest.getScriptType()) {
+            case PYTHON:
+                subbfix = ".py";
+                break;
+            case BAT:
+                subbfix = ".bat";
+                break;
+            default:
+                subbfix = ".sh";
+                break;
+        }
+
+        return subbfix;
+    }
+}

@@ -5,7 +5,7 @@ ip:
   cp: 10.100.7.25                # 云平台适配层接口地址
   cr: 10.100.2.21               # cr接口地址
   moloch: 10.100.14.107         # moloch的IP地址
-  wazuh: 10.100.14.106          # wazuh的IP地址
+  wazuh: 10.100.0.102          # wazuh的IP地址
   es: 127.0.0.1                 # MP新中台ES地址
 
 server:
@@ -66,9 +66,8 @@ mp:
 #    cp-url: http://10.100.7.25:10009 #云平台地址
     cp-url: http://${ip.cp}:11111 #云平台地址
     hostname: controller  #主机名称
-    es-nodes: ${ip.es}:9200
-  datasandtable:
-    group-url: http://${ip.moloch}:5079/v1/scenes
+  situationaware:
+    group-url: http://10.100.14.107:5079/v1/scenes
     moloch:
       username: api
       password: api
@@ -84,7 +83,11 @@ mp:
       es-url: ${ip.wazuh}
       es-port: 9200
       es-username: admin
-      es-password: SecretPassword
+      es-password: admin
+    wazuh-probe-manager:
+      url: http://10.100.0.102:8002
+      agent-script-linux-path: /var/ossec/etc/shared/scripts/
+      agent-script-windows-path: C:\ossec-agent\shared\scripts\
   log:
     exclude-uri: /login
     exclude-method: OPTIONS
