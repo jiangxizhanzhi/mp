@@ -16,7 +16,7 @@ import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentRequest;
-import cn.cyberpeace.mp.devops.cluster.request.TargetPageRequest;
+import cn.cyberpeace.mp.devops.cluster.request.TargetSceneRequest;
 import cn.cyberpeace.mp.devops.cluster.service.DeviceService;
 import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.devops.cluster.service.RealEquipmentService;
@@ -118,7 +118,7 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
     }
 
     @Override
-    public List<Device> allTarget(TargetPageRequest request) {
+    public List<Device> allTarget(TargetSceneRequest request) {
         ImagePageDTO dto = new ImagePageDTO();
         dto.setMainCategory(request.getCategory());
         dto.setSubCategory(request.getSecondCategory());

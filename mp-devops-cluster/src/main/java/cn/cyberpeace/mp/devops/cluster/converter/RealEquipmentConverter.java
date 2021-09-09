@@ -6,7 +6,7 @@ import cn.cyberpeace.mp.devops.cluster.model.Device;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentRequest;
-import cn.cyberpeace.mp.devops.cluster.request.TargetPageRequest;
+import cn.cyberpeace.mp.devops.cluster.request.TargetSceneRequest;
 
 import java.util.List;
 
@@ -29,7 +29,7 @@ public interface RealEquipmentConverter extends BaseConverter{
      * @param request
      * @return
      */
-    List<Device> allTarget(TargetPageRequest request);
+    List<Device> allTarget(TargetSceneRequest request);
 
     /**
      * 根据ID查询
