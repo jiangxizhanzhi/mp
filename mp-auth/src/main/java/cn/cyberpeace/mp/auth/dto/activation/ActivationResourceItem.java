@@ -14,6 +14,9 @@ public class ActivationResourceItem {
     @ApiModelProperty(value = "资源项ID")
     private String id;
 
+    @ApiModelProperty(value = "唯一编号")
+    private String identifier;
+
     @ApiModelProperty(value = "产品/模块")
     private String module;
 

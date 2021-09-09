@@ -70,9 +70,9 @@ public class SceneHandler extends BaseSceneHandler<
         ScenePluginHandler<?, ?, ?>,
         SceneHandler> {
 
-    private Map<String, SceneEventHandler> sceneEventHandlerMap;
+    private final Map<String, SceneEventHandler> sceneEventHandlerMap = new HashMap<>();
 
-    private Map<String, SceneElementEventHandler> elementEventHandlerMap;
+    private final Map<String, SceneElementEventHandler> elementEventHandlerMap = new HashMap<>();
 
     private String genEventKey(String targetId, int event) {
         return String.format("%s:%d", targetId, event);

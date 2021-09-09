@@ -1,7 +1,12 @@
 dependencies {
     implementation project(':mp-base')
+
     implementation project(':mp-auth')
+
     implementation project(':mp-devops-log')
+
     implementation project(':mp-auth-base')
-    implementation('org.apache.httpcomponents:httpmime:4.4.1')
+
+    implementation 'org.apache.httpcomponents:httpmime:4.4.1'
+
 }

@@ -162,10 +162,14 @@ public class BasePluginModelHandler<
      * 保存场景属性数据
      */
     public boolean saveScene() {
+        var existScene = readScene();
         var sceneId = scenePluginHandler.getSourceSceneId();
         var scene = scenePluginHandler.getScene();
         S0 sceneObj = scene.toModel();
         sceneObj.setScene(sceneId);
+        if (existScene != null) {
+            sceneObj.setId(existScene.getId());
+        }
         var result = pluginSceneMapper.save(sceneObj);
         scene.fromModel(sceneObj);
         return result;
@@ -219,7 +223,7 @@ public class BasePluginModelHandler<
     public int updateElements(String... elementIds) {
         var elementMap = scenePluginHandler.getElementMap();
         List<E0> updatingElements = new ArrayList<>();
-        List<String> creatingElementIds = Arrays.asList(elementIds);
+        List<String> creatingElementIds = new ArrayList<>(Arrays.asList(elementIds));
         // 更新已存在的
         List<E0> existElements = readElements(elementIds);
         existElements.forEach(existElement -> {
@@ -289,7 +293,7 @@ public class BasePluginModelHandler<
     public int updateElementPorts(String... elementPortIds) {
         var elementPortMap = scenePluginHandler.getElementPortMap();
         List<P0> updatingElementPorts = new ArrayList<>();
-        List<String> creatingElementPortIds = Arrays.asList(elementPortIds);
+        List<String> creatingElementPortIds = new ArrayList<>(Arrays.asList(elementPortIds));
         // 更新已存在的
         List<P0> existElementPorts = readElementPorts(elementPortIds);
         existElementPorts.forEach(existElementPort -> {

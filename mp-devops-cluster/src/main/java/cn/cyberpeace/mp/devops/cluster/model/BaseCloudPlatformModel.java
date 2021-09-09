@@ -44,4 +44,9 @@ public class BaseCloudPlatformModel extends BaseModel {
      */
     private String errorMessage;
 
+    /**
+     * code
+     */
+    private String code;
+
 }

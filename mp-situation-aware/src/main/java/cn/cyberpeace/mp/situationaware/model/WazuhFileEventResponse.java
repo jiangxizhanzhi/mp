@@ -10,7 +10,7 @@ import java.util.List;
 
 /**
  * @Description: 事件查询返回结果
- * @Autho qiaokang
+ * @Author qiaokang
  * @Date：2021/6/22 17:20
  */
 @Data

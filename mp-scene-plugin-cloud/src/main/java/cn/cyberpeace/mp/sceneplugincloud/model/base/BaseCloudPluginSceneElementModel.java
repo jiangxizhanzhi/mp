@@ -18,6 +18,8 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
      */
     @DefaultInt(VirtualType.VIRTUAL_SWITCH)
     private Integer virtualType;
+    @DefaultBool
+    private Boolean transparent;
 
     /**
      * 云平台资源id
@@ -64,6 +66,7 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     // 虚拟机/容器属性
     @DefaultStr
     private String image;
+    @DefaultStr
     private String initialTools;
 
     public static class VirtualType {
@@ -109,7 +112,7 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     private String auxiliaryNetworkAllocationPools;
     @DefaultBool
     private Boolean auxiliaryNetworkVlan;
-    @DefaultStr
+    @DefaultInt
     private Integer auxiliaryNetworkVlanId;
 
 }

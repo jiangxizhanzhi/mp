@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.converter.model;
 
+import cn.cyberpeace.mp.devops.cluster.enums.StatusEnum;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntity;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtGateway;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
@@ -61,4 +62,19 @@ public class RealEquipment extends BasePageConvertModel{
      * 网关信息
      */
     private ExtGateway extGateway;
+
+    /**
+     * 在位状态
+     */
+    private StatusEnum inPosition;
+
+    /**
+     * 使用状态
+     */
+    private StatusEnum useStatus;
+
+    /**
+     * 引用状态
+     */
+    private Integer referenceStatus;
 }

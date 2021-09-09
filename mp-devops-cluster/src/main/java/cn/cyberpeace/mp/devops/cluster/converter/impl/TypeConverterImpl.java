@@ -3,8 +3,9 @@ package cn.cyberpeace.mp.devops.cluster.converter.impl;
 import cn.cyberpeace.mp.devops.cluster.converter.TypeConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.TypeCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.TypeIdStringCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.TypeIdIntegerCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.TypeIdStringCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.TypeL2CloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.service.TypeService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,12 +36,13 @@ public class TypeConverterImpl implements TypeConverter {
     }
 
     @Override
-    public TypeAllConvertModel findL1AndL2Type() {
-        TypeCloudPlatformModel l1AndL2Type = typeService.findL1AndL2Type();
+    public TypeL2AllConvertModel findL1AndL2Type() {
+        TypeL2CloudPlatformModel l1AndL2Type = typeService.findL1AndL2Type();
         if (Objects.isNull(l1AndL2Type) || CollectionUtils.isEmpty(l1AndL2Type.getItems())){
             return null;
         }
-        return convertModel(l1AndL2Type);
+
+        return new TypeL2AllConvertModel(l1AndL2Type.getItems());
     }
 
     @Override
@@ -64,6 +66,11 @@ public class TypeConverterImpl implements TypeConverter {
     @Override
     public TypeAllConvertModel findRoles() {
         return this.findIdIntegerByType("role");
+    }
+
+    @Override
+    public TypeAllConvertModel findEntityRoles() {
+        return this.findIdIntegerByType("entity_role");
     }
 
     @Override

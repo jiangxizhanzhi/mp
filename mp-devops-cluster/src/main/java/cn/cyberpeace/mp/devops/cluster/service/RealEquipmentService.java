@@ -1,9 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.service;
 
-import cn.cyberpeace.mp.devops.cluster.model.Device;
-import cn.cyberpeace.mp.devops.cluster.model.DeviceCloudPlatformModel;
-
-import java.util.List;
+import cn.cyberpeace.mp.devops.cluster.model.*;
 
 /**
  * 实装管理接口
@@ -31,4 +28,12 @@ public interface RealEquipmentService extends BaseCloudPlatformService {
      * @return
      */
     Device update(String uuid,Device device);
+
+    SnmpInterfaceResourceCloudPlatform interfacesResource(SnmpParams snmp);
+
+    SnmpCloudPlatform snmpForCpu(SnmpParams snmp);
+
+    SnmpCloudPlatform snmpForRam(SnmpParams snmp);
+
+    SnmpCloudPlatform snmpForDisk(SnmpParams snmp);
 }

@@ -4,7 +4,7 @@ import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import cn.cyberpeace.mp.devops.cluster.dto.ImageDeleteDTO;
 import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
-import cn.cyberpeace.mp.devops.cluster.model.ImageModel;
+import cn.cyberpeace.mp.devops.cluster.model.TargetModel;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
@@ -15,15 +15,15 @@ import java.util.List;
  */
 @Mapper
 @Repository
-@ModelClass(ImageModel.class)
-public interface ImageMapper extends BaseModelMapper<ImageModel> {
+@ModelClass(TargetModel.class)
+public interface ImageMapper extends BaseModelMapper<TargetModel> {
 
     /**
      * 分页查询
      * @param dto
      * @return
      */
-    List<ImageModel> page(ImagePageDTO dto);
+    List<TargetModel> page(ImagePageDTO dto);
 
     /**
      * 获取总数
@@ -34,17 +34,17 @@ public interface ImageMapper extends BaseModelMapper<ImageModel> {
 
     /**
      * 新增
-     * @param imageModel
+     * @param targetModel
      * @return
      */
-    Integer insert(ImageModel imageModel);
+    Integer insert(TargetModel targetModel);
 
     /**
      * 根据ID更新信息
-     * @param imageModel
+     * @param targetModel
      * @return
      */
-    Integer updateById(ImageModel imageModel);
+    Integer updateById(TargetModel targetModel);
 
     /**
      * 删除

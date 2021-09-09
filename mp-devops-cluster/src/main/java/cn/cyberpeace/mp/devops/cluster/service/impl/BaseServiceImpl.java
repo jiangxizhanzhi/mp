@@ -237,13 +237,9 @@ public class BaseServiceImpl {
      */
     protected <T extends BaseModel> T sendDelete(String url,String body,Class<T> valueType){
         T model = null;
-        String result = "";
-        try {
-            result = this.sendDelete(url,body);
-            model = JsonUtils.toSnakeObject(result,valueType);
-        } catch (IOException e) {
-            log.info("=====DELETE调用url：{},参数：{},对应返回结果信息：{},报错信息：{}",url,body,result,e.getMessage());
-        }
+        String result = this.sendDelete(url,body);
+        model = JsonUtils.toSnakeObject(result,valueType);
+        log.info("=====DELETE调用url：{},参数：{},对应返回结果信息：{}",url,body,result);
         return model;
     }
 

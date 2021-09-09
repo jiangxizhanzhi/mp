@@ -1,0 +1,23 @@
+package cn.cyberpeace.mp.flow.service.field;
+
+import cn.cyberpeace.mp.base.repository.fields.DynamicFields;
+import cn.cyberpeace.mp.base.service.fields.BaseModelFields;
+import cn.cyberpeace.mp.base.util.ClassUtils;
+import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
+import org.springframework.stereotype.Component;
+
+@Component
+public class FlowActuatorFields extends BaseModelFields {
+    public static final DynamicFields allFields = new DynamicFields(ClassUtils.getBeanClassFields(FlowActuatorModel.class));
+
+    public static final DynamicFields availableFields = new DynamicFields(ClassUtils.getBeanClassFields(FlowActuatorModel.class)).merge(BaseModelFields.availableFields);
+
+    public static final DynamicFields hiddenFields = allFields.subtract(availableFields);
+
+    public static final DynamicFields readonlyFields = new DynamicFields().merge(BaseModelFields.readonlyFields);
+
+    public static final DynamicFields searchFields = new DynamicFields(FlowActuatorModel::getTitle, FlowActuatorModel::getIp,
+            FlowActuatorModel::getInstanceId, FlowActuatorModel::getNetworkId);
+
+    public static final DynamicFields orderFields = new DynamicFields(new String[]{}).merge(BaseModelFields.readonlyFields);
+}
