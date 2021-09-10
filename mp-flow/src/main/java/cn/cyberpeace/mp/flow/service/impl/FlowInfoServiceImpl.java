@@ -63,6 +63,9 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
     @Autowired
     private FlowCollectionRelMapper flowCollectionRelMapper;
 
+    @Autowired
+    private AsyncPlatFlowTaskService asyncPlatFlowTaskService;
+
     /**
      * 补充list查询条件
      * @param humanCondition
@@ -99,7 +102,16 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             return ServiceResult.fail("Can not delete flow collection related flow info");
         }
 
-        return delete(id);
+        ObjServiceResult<FlowInfoModel> serviceResult = get(id);
+        if (Objects.nonNull(serviceResult.getSource())) {
+            // 异步删除流量文件
+            asyncPlatFlowTaskService.deleteFlowFile(Collections.singletonList(serviceResult.getSource().getObj()));
+            return delete(id);
+        } else {
+            log.error("flow file to delete not exist");
+        }
+
+        return ServiceResult.success(false);
     }
 
     /**
@@ -124,8 +136,17 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             return ServiceResult.fail("Can not delete flow collection related flow info");
         }
 
-        String[] delIds = request.getIdList().toArray(new String[0]);
-        return bulkDelete(delIds);
+        List<FlowInfoModel> flowInfoModels = this.selectByFlowIds(request.getIdList());
+        if (CollectionUtils.isNotEmpty(flowInfoModels)) {
+            String[] delIds = request.getIdList().toArray(new String[0]);
+            // 异步删除流量文件
+            asyncPlatFlowTaskService.deleteFlowFile(flowInfoModels);
+            return bulkDelete(delIds);
+        } else {
+            log.error("flow files to delete not exist");
+        }
+
+        return ServiceResult.success(0);
     }
 
     /**
@@ -444,7 +465,6 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         FlowInfoModel flowInfoModel = getModelMapper().selectByTitle(title);
         return Objects.isNull(flowInfoModel) || flowInfoModel.getId().equals(id);
     }
-
 
     /**
      * 根据流量id批量查询
