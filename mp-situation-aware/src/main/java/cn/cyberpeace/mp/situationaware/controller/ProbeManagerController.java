@@ -44,12 +44,10 @@ public class ProbeManagerController {
         return probeService.deleteProbeById(probeIds) ? ServiceResult.successful(): ServiceResult.fail(SituationalAwareErrorCode.PROBE_DELETE_FAIL,"probe delete fail");
     }
 
-    @PatchMapping
+    @PatchMapping("/{probeId}")
     @ApiOperation(value = "修改探针脚本")
-    public ServiceResult modifyProbe(@RequestBody @Valid ProbeRequest probeRequest){
-        if (Objects.isNull(probeRequest.getProbeId())) {
-            throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_MODIFY_PARAM_ERROR);
-        }
+    public ServiceResult modifyProbe(@RequestBody ProbeRequest probeRequest, @PathVariable("probeId") String probeId){
+        probeRequest.setProbeId(probeId);
         boolean updateSuccess = probeService.modifyProbe(probeRequest) > 0;
         return updateSuccess ? ServiceResult.successful(): ServiceResult.fail(SituationalAwareErrorCode.PROBE_MODIFY_FAIL,"probe update fail");
     }
