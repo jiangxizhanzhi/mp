@@ -70,6 +70,7 @@ public class SysActivationService {
         // 验证通过，加载内存激活配置项目，生成加密文件存储磁盘
         if (success) {
             generateEncryptedFile(activationRequest);
+            ACTIVATION_CONTENT = null;
         } else {
             log.error("license verify failed！");
         }
