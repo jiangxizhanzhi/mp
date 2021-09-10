@@ -47,6 +47,11 @@ public class RealEquipment extends BasePageConvertModel{
     private Integer subCategory;
 
     /**
+     * 三级分类
+     */
+    private Integer thirdCategory;
+
+    /**
      * 系统信息
      */
     private ExtSystemInfo extSystemInfo;

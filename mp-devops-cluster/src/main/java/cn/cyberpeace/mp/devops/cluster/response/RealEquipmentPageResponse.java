@@ -43,14 +43,40 @@ public class RealEquipmentPageResponse  extends BaseCloudPlatformResponse{
     /**
      * 分类
      */
-    @ApiModelProperty(value = "分类")
+    @ApiModelProperty(value = "一级分类")
     private Integer category;
+
+    /**
+     * 分类
+     */
+    @ApiModelProperty(value = "一级分类名称")
+    private String categoryName;
+
 
     /**
      * 子分类
      */
-    @ApiModelProperty(value = "子分类")
+    @ApiModelProperty(value = "二级分类")
     private Integer subCategory;
+
+    /**
+     * 子分类
+     */
+    @ApiModelProperty(value = "二级分类名称")
+    private String subCategoryName;
+
+
+    /**
+     * 子分类
+     */
+    @ApiModelProperty(value = "三级分类")
+    private Integer thirdCategory;
+
+    /**
+     * 三级分类名称
+     */
+    @ApiModelProperty(value = "三级分类名称")
+    private String thirdCategoryName;
 
     /**
      * 描述
@@ -63,6 +89,12 @@ public class RealEquipmentPageResponse  extends BaseCloudPlatformResponse{
      */
     @ApiModelProperty(value = "实体类型")
     private String entityType;
+
+    /**
+     * 实体类型名称
+     */
+    @ApiModelProperty(value = "实体类型名称")
+    private String entityTypeName;
 
     /**
      * 实体详情
