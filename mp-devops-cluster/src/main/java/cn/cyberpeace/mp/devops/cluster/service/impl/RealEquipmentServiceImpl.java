@@ -33,6 +33,15 @@ public class RealEquipmentServiceImpl extends BaseOpenStackServiceImpl implement
         return super.sendPut(CPCLOUD_DEVICE + URL_VERSION + "/entity/" + uuid,JsonUtils.toUnderlineJSONString(device),Device.class);
     }
 
+    @Override
+    public RealEquipmentBySwitchNameCloudPlatform findBySwitchName(String switchName) {
+        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + "/entity/switch_map?switch_name=" + switchName,RealEquipmentBySwitchNameCloudPlatform.class);
+    }
+
+    @Override
+    public RealEquipmentBySerialPortCloudPlatform findBySerialPort(String serialPort) {
+        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + "/entity/ccm_map?ccm_server_name=" + serialPort,RealEquipmentBySerialPortCloudPlatform.class);
+    }
 
     @Override
     public SnmpInterfaceResourceCloudPlatform interfacesResource(SnmpParams snmp) {

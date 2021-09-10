@@ -20,6 +20,7 @@ import cn.cyberpeace.mp.devops.cluster.request.TargetSceneRequest;
 import cn.cyberpeace.mp.devops.cluster.service.DeviceService;
 import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.devops.cluster.service.RealEquipmentService;
+import cn.cyberpeace.mp.devops.cluster.service.TargetLogoService;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -44,13 +45,17 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
 
     private ImageMapper imageMapper;
 
+    private TargetLogoService targetLogoService;
+
     @Autowired
     public RealEquipmentConverterImpl(RealEquipmentService realEquipmentService, DeviceService deviceService,
-                                      DevopsTargetService devopsTargetService, ImageMapper imageMapper) {
+                                      DevopsTargetService devopsTargetService, ImageMapper imageMapper,
+                                      TargetLogoService targetLogoService) {
         this.realEquipmentService = realEquipmentService;
         this.deviceService = deviceService;
         this.devopsTargetService = devopsTargetService;
         this.imageMapper = imageMapper;
+        this.targetLogoService = targetLogoService;
     }
 
     @Override
@@ -158,6 +163,10 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
     @Transactional
     @Override
     public RealEquipment add(RealEquipmentRequest request) {
+        String logo = targetLogoService.uploadLogo(request.getLogoFile());
+        if (Objects.nonNull(request.getLogoFile()) && request.getLogoFile().getSize() > 0 ){
+            request.setLogo(logo);
+        }
         Device device = convertRequest(request);
         if (Objects.isNull(device)){
             return new RealEquipment();
@@ -169,6 +178,10 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
 
     @Override
     public RealEquipment update(RealEquipmentRequest request) {
+        String logo = targetLogoService.uploadLogo(request.getLogoFile());
+        if (Objects.nonNull(request.getLogoFile()) && request.getLogoFile().getSize() > 0 ){
+            request.setLogo(logo);
+        }
         Device device = convertRequest(request);
         Device result = realEquipmentService.update(request.getUuid(),device);
         devopsTargetService.updateById(result);
@@ -216,8 +229,9 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
             entity.setSnmpDiskOid(extEntity.getSnmpDiskOid());
             entity.setSnmpMemOid(extEntity.getSnmpMemOid());
             entity.setCcmPort(extEntity.getCcmPort());
-            entity.setCcmName(extEntity.getCcmName());
+            entity.setCcmUsername(extEntity.getCcmUsername());
             entity.setCcmPassword(extEntity.getCcmPassword());
+            entity.setCcmServerName(extEntity.getCcmServerName());
 //            entity.setAccessProtocols(extEntity.getAccessProtocols());
 //            entity.setAccessProtocolList(JSONArray.parseArray(extEntity.getAccessProtocols(), AccessProtocol.class));
             entity.setSnmpConfig(extEntity.getSnmpConfig());
@@ -261,7 +275,8 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
             extEntity.setSnmpDiskOid(requestExtEntity.getSnmpDiskOid());
             extEntity.setSnmpMemOid(requestExtEntity.getSnmpMemOid());
             extEntity.setCcmPort(requestExtEntity.getCcmPort());
-            extEntity.setCcmName(requestExtEntity.getCcmName());
+            extEntity.setCcmUsername(requestExtEntity.getCcmUsername());
+            extEntity.setCcmServerName(requestExtEntity.getCcmServerName());
             extEntity.setCcmPassword(requestExtEntity.getCcmPassword());
 //            extEntity.setAccessProtocols(JSONArray.toJSONString(requestExtEntity.getAccessProtocolList()));
             device.setExtEntity(extEntity);
