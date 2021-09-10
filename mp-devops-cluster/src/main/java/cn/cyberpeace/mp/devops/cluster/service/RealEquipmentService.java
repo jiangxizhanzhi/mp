@@ -36,4 +36,8 @@ public interface RealEquipmentService extends BaseCloudPlatformService {
     SnmpCloudPlatform snmpForMem(SnmpParams snmp);
 
     SnmpCloudPlatform snmpForDisk(SnmpParams snmp);
+
+    RealEquipmentBySwitchNameCloudPlatform findBySwitchName(String switchName);
+
+    RealEquipmentBySerialPortCloudPlatform findBySerialPort(String serialPort);
 }

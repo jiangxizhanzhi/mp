@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -31,6 +32,12 @@ public class RealEquipmentRequest extends BaseRequest{
      */
     @ApiModelProperty("名称")
     private String name;
+
+    /**
+     * logo文件流
+     */
+    @ApiModelProperty("logo文件流")
+    private MultipartFile logoFile;
 
     /**
      * 图标
