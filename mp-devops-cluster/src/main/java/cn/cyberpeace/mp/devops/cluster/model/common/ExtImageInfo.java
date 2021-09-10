@@ -25,6 +25,9 @@ public class ExtImageInfo {
 
     private String metaData;
 
+    /**
+     * 0：待编辑，1：创建中，2：已创建，3：错误
+     */
     private Integer imageStatus;
 
     private String error;
