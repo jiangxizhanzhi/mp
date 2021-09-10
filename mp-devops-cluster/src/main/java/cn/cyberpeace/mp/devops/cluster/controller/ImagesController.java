@@ -80,11 +80,12 @@ public class ImagesController {
         List<ImagesPageResponse> list = model.getModelList().stream().map(v -> {
             ExtSystemInfo extSystemInfo = v.getExtSystemInfo();
             ExtVm extVm = v.getExtVm();
+            ExtImageInfo extImageInfo = v.getExtImageInfo();
             ImagesPageResponse response = ImagesPageResponse.builder().uuid(v.getUuid()).name(v.getName())
                     .mainCategory(v.getMainCategory()).subCategory(v.getSubCategory()).imageType(v.getImageType())
                     .systemType(Objects.nonNull(extSystemInfo) ? extSystemInfo.getSystemType() : null)
                     .flavor(Objects.nonNull(extVm) ? extVm.getFlavor() : "")
-                    .description(v.getDescription()).build();
+                    .description(v.getDescription()).imageStatus(Objects.nonNull(extImageInfo) ? extImageInfo.getImageStatus() : null).build();
             return response;
         }).collect(Collectors.toList());
 
@@ -293,8 +294,8 @@ public class ImagesController {
      */
     @ApiOperation("查询flavor")
     @GetMapping("/page-flavor")
-    public PageResult pageFlavor(){
+    public Result pageFlavor(){
         FlavorCloudPlatformModel page = flavorService.page("");
-        return new PageResult<>(page.getData().getList(),page.getTotal());
+        return new Result<>(page.getData().getList());
     }
 }
