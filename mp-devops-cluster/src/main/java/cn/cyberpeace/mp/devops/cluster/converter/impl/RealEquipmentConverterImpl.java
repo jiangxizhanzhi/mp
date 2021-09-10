@@ -229,8 +229,9 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
             entity.setSnmpDiskOid(extEntity.getSnmpDiskOid());
             entity.setSnmpMemOid(extEntity.getSnmpMemOid());
             entity.setCcmPort(extEntity.getCcmPort());
-            entity.setCcmName(extEntity.getCcmName());
+            entity.setCcmUsername(extEntity.getCcmUsername());
             entity.setCcmPassword(extEntity.getCcmPassword());
+            entity.setCcmServerName(extEntity.getCcmServerName());
 //            entity.setAccessProtocols(extEntity.getAccessProtocols());
 //            entity.setAccessProtocolList(JSONArray.parseArray(extEntity.getAccessProtocols(), AccessProtocol.class));
             entity.setSnmpConfig(extEntity.getSnmpConfig());
@@ -274,7 +275,8 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
             extEntity.setSnmpDiskOid(requestExtEntity.getSnmpDiskOid());
             extEntity.setSnmpMemOid(requestExtEntity.getSnmpMemOid());
             extEntity.setCcmPort(requestExtEntity.getCcmPort());
-            extEntity.setCcmName(requestExtEntity.getCcmName());
+            extEntity.setCcmUsername(requestExtEntity.getCcmUsername());
+            extEntity.setCcmServerName(requestExtEntity.getCcmServerName());
             extEntity.setCcmPassword(requestExtEntity.getCcmPassword());
 //            extEntity.setAccessProtocols(JSONArray.toJSONString(requestExtEntity.getAccessProtocolList()));
             device.setExtEntity(extEntity);
