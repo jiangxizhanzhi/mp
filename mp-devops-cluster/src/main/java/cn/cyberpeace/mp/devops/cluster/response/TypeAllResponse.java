@@ -126,7 +126,7 @@ public class TypeAllResponse {
      * 串口信息
      */
     @ApiModelProperty("串口信息")
-    private SerialPortResponse serialPortResponse;
+    private List<SerialPortResponse> serialPortResponses;
 
     @ApiModelProperty("SNMP版本")
     private List<TypeIdStringConvertModel> snmpVersions;
