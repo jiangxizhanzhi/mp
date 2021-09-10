@@ -67,6 +67,7 @@ public class TypeController {
         TypeAllConvertModel language = typeConverter.findLanguage();
         TypeAllConvertModel systemArchitecure = typeConverter.findSystemArchitecure();
         TypeAllConvertModel snmpVersion = typeConverter.findSnmpVersion();
+        TypeAllConvertModel imageType = typeConverter.findImageType();
         TypeAllResponse allResponse = new TypeAllResponse();
         List<SerialPortConvertModel> serialPortConvertModels = serialPortConverter.list();
         serialPortConvertModels.add(new SerialPortConvertModel(50,100,10,"10.100.0.102",1));
@@ -82,6 +83,7 @@ public class TypeController {
         allResponse.setLanguage(Objects.nonNull(language) ? language.getIdStringModelList() : null);
         allResponse.setSystemArchitecure(Objects.nonNull(systemArchitecure) ?
                 systemArchitecure.getIdStringModelList() : null);
+        allResponse.setImageType(Objects.nonNull(imageType) ? imageType.getIdStringModelList() : null);
         return new Result<>(allResponse);
     }
 
