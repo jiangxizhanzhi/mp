@@ -121,6 +121,7 @@ public class ProbeService {
         probeResult.setParamsResultList(probeParamsResults);
         probeResult.setScriptContent(new String(probeModel.getScriptContent(), StandardCharsets.UTF_8));
         probeResult.setProbeStatus(probeModel.getProbeStatus().ordinal());
+        probeResult.setCommandInterval(Integer.parseInt(probeModel.getCommandInterval().replace("m", "")));
         return probeResult;
     }
 
@@ -158,6 +159,9 @@ public class ProbeService {
     }
 
     private void insertProbeParams(ProbeRequest probeRequest, String probeId) {
+        if (CollectionUtils.isEmpty(probeRequest.getParamsResultList())) {
+            return;
+        }
         List<ProbeParamModel> probeParamModels = probeRequest.getParamsResultList().stream()
             .map((probeParamRequest -> {
                 var probeParamModel = new ProbeParamModel();
@@ -178,6 +182,9 @@ public class ProbeService {
      * @return 脚本内容
      */
     private String buildScriptContent(ProbeRequest probeRequest) {
+        if (CollectionUtils.isEmpty(probeRequest.getParamsResultList())) {
+            return probeRequest.getScriptContent();
+        }
         var scriptContent = probeRequest.getScriptContent();
         for (ProbeParamsRequest param : probeRequest.getParamsResultList()) {
             scriptContent = scriptContent.replace("$" + param.getParamName() + "$", param.getDefaultVal());
