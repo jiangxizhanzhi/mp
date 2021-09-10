@@ -4,7 +4,6 @@ package cn.cyberpeace.mp.devops.cluster.request;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntity;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntityAccess;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
-import cn.cyberpeace.mp.devops.cluster.model.common.SnmpConfig;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -72,9 +71,8 @@ public class RealEquipmentRequest extends BaseRequest{
     /**
      * 交换机
      */
+    @ApiModelProperty("交换机接入配置")
     private List<ExtEntityAccess> extEntityAccess;
-
-    private SnmpConfig snmpConfig;
 
     /**
      * 描述

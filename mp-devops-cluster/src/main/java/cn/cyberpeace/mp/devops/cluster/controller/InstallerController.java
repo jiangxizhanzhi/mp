@@ -49,7 +49,7 @@ public class InstallerController {
      * 分页查询
      */
     @ApiOperation("分页查询")
-    @GetMapping
+    @GetMapping("/page")
     public PageResult<InstallerPageResponse> page(InstallerPageRequest request){
         InstallerConvertPageModel model = installerConverter.page(request);
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getModelList())){
@@ -66,8 +66,8 @@ public class InstallerController {
     }
 
     @ApiOperation("根据ID查询")
-    @GetMapping("/by-id")
-    public Result<InstallerByIdResponse> getById(@RequestParam("id") String id){
+    @GetMapping("/{id}")
+    public Result<InstallerByIdResponse> getById(@PathVariable String id){
         InstallerConvertModel model = installerConverter.findById(id);
         InstallerByIdResponse response = InstallerByIdResponse.builder().uuid(model.getUuid())
                 .name(model.getName()).description(model.getDescription()).logo(model.getLogo())

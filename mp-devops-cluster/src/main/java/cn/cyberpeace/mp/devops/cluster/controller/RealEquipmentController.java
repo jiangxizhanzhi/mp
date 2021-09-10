@@ -165,9 +165,9 @@ public class RealEquipmentController {
             ExtEntity extEntity = realEquipment.getExtEntity();
             response.setModel(extEntity.getStyle());
             response.setParams(extEntity.getParams());
-            if (Objects.nonNull(extEntity.getSnmpConfigs())) {
+            if (Objects.nonNull(extEntity.getSnmpConfig())) {
                 SnmpParams snmpParams = new SnmpParams();
-                SnmpConfig snmpConfigs = extEntity.getSnmpConfigs();
+                SnmpConfig snmpConfigs = extEntity.getSnmpConfig();
                 if (extEntity.getSnmpVersion().equals("V1")) {
                     snmpParams.setVersion(1);
                     if (Objects.nonNull(snmpConfigs)) {
@@ -192,7 +192,7 @@ public class RealEquipmentController {
                         snmpParams.setAuth(snmpAuth);
                     }
                 }
-                snmpParams.setIp(extEntity.getSnmpConfigs().getIp());
+                snmpParams.setIp(extEntity.getSnmpConfig().getIp());
                 snmpParams.setOid(extEntity.getSnmpCpuOid());
                 realEquipmentService.snmpForCpu(snmpParams);
                 snmpParams.setOid(extEntity.getSnmpMemOid());

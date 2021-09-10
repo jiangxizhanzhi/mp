@@ -34,14 +34,8 @@ public class ExtEntity{
     @ApiModelProperty("SNMP版本")
     private String snmpVersion;
 
-    /**
-     * SNMP配置
-     */
     @ApiModelProperty("SNMP配置")
-    private String snmpConfig;
-
-    @ApiModelProperty("SNMP配置")
-    private SnmpConfig snmpConfigs;
+    private SnmpConfig snmpConfig;
 
     /**
      * SNMP CPU占用率table根节点OID
