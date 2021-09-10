@@ -55,6 +55,9 @@ public class ExtEntity{
     @ApiModelProperty(" SNMP 磁盘占用率table根节点OID")
     private String snmpDiskOid;
 
+    @ApiModelProperty("串口服务器名称")
+    private String ccmServerName;
+
     /**
      * 串口端口
      */
@@ -65,7 +68,7 @@ public class ExtEntity{
      * 串口用户名
      */
     @ApiModelProperty("串口用户名")
-    private String ccmName;
+    private String ccmUsername;
 
     /**
      * 串口密码

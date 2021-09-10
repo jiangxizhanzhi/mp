@@ -9,9 +9,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.SerialPortConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.SwitchConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.RealEquipment;
 import cn.cyberpeace.mp.devops.cluster.converter.model.RealEquipmentConvertModel;
-import cn.cyberpeace.mp.devops.cluster.model.SnmpAuth;
-import cn.cyberpeace.mp.devops.cluster.model.SnmpBaseAuth;
-import cn.cyberpeace.mp.devops.cluster.model.SnmpParams;
+import cn.cyberpeace.mp.devops.cluster.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntity;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntityAccess;
 import cn.cyberpeace.mp.devops.cluster.model.common.SnmpConfig;
@@ -106,7 +104,7 @@ public class RealEquipmentController {
      */
     @ApiOperation("新增")
     @PostMapping("/add")
-    public ServiceResult add(@RequestBody RealEquipmentRequest request){
+    public ServiceResult add(RealEquipmentRequest request){
         RealEquipment realEquipment = realEquipmentConverter.add(request);
         return realEquipment.isSuccess() ? ServiceResult.successful() :ServiceResult.fail("");
     }
@@ -116,7 +114,7 @@ public class RealEquipmentController {
      */
     @ApiOperation("更新")
     @PutMapping("/update")
-    public ServiceResult update(@RequestBody RealEquipmentRequest request){
+    public ServiceResult update(RealEquipmentRequest request){
         if (StringUtils.isBlank(request.getUuid())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
@@ -216,5 +214,25 @@ public class RealEquipmentController {
     @GetMapping("/scenes")
     public PageResult<RealEquipmentScenesPageResponse> pageScenes(RealEquipmentScenesPageRequest request){
         return new PageResult<>(Lists.newArrayList(),100);
+    }
+
+    @ApiOperation("根据交换机名称查询实体装备")
+    @GetMapping("/by-switch-name")
+    public Result<List<RealEquipmentByParams>> findBySwitchName(@RequestParam("switchName") String switchName){
+        RealEquipmentBySwitchNameCloudPlatform bySwitchName = realEquipmentService.findBySwitchName(switchName);
+        if (Objects.isNull(bySwitchName)){
+            return new Result<>();
+        }
+        return new Result<>(bySwitchName.getItems());
+    }
+
+    @ApiOperation("根据串口名称查询实体装备")
+    @GetMapping("/by-serial-port")
+    public Result<List<RealEquipmentByParams>> findBySerialPort(@RequestParam("serialPort") String serialPort){
+        RealEquipmentBySerialPortCloudPlatform bySerialPort = realEquipmentService.findBySerialPort(serialPort);
+        if (Objects.isNull(bySerialPort)){
+            return new Result<>();
+        }
+        return new Result<>(bySerialPort.getItems());
     }
 }
