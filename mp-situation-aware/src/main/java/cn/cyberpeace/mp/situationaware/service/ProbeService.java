@@ -12,15 +12,19 @@ import cn.cyberpeace.mp.situationaware.model.ProbeParamsResult;
 import cn.cyberpeace.mp.situationaware.model.ProbeRequest;
 import cn.cyberpeace.mp.situationaware.model.ProbeResult;
 import cn.cyberpeace.mp.situationaware.model.ProbeSearchRequest;
+import cn.cyberpeace.mp.situationaware.model.enums.OsType;
 import cn.cyberpeace.mp.situationaware.model.enums.ProbeStatus;
+import cn.cyberpeace.mp.situationaware.model.enums.ScriptType;
 import cn.cyberpeace.mp.situationaware.repository.ProbeModelMapper;
 import cn.cyberpeace.mp.situationaware.repository.ProbeParamModelMapper;
 import cn.cyberpeace.mp.situationaware.repository.WazuhProbeManagerRepository;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,9 +34,12 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- *
- **/
+  *@Desciption
+  *@Author zhangjin
+  *@Date 9/10/21 11:12 上午
+**/
 @Service
+@Slf4j
 public class ProbeService {
 
     @Autowired
@@ -127,20 +134,27 @@ public class ProbeService {
 
     @Transactional(rollbackFor = Exception.class)
     public int modifyProbe(ProbeRequest probeRequest) {
-        //修改参数
-        probeParamModelMapper.deleteParamByProbeId(probeRequest.getProbeId());
-        insertProbeParams(probeRequest, probeRequest.getProbeId());
+        ProbeRequest mergedRequest = buildMergedRequest(probeRequest);
+        try {
+            cn.cyberpeace.mp.base.util.BeanUtils.merge(mergedRequest, probeRequest);
+        } catch (Exception e) {
+            log.error("patch probe error probeId : {}", mergedRequest.getProbeId());
+            throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_MODIFY_FAIL);
+        }
+
+        //修改探针参数
+        modifyProbeParams(probeRequest);
         //修改探针参数
         var probeModel = new ProbeModel();
-        BeanUtils.copyProperties(probeRequest, probeModel);
+        BeanUtils.copyProperties(mergedRequest, probeModel);
         probeModel.setUpdateTime(new Date());
-        probeModel.setId(probeRequest.getProbeId());
-        probeModel.setScriptContent(buildScriptContent(probeRequest).getBytes(StandardCharsets.UTF_8));
-        probeModel.setOsType(probeRequest.getOsType().getTypeVal());
-        probeModel.setScriptType(probeRequest.getScriptType().getTypeVal());
-        probeModel.setCommandInterval(probeRequest.getCommandInterval() + "m");
+        probeModel.setId(mergedRequest.getProbeId());
+        probeModel.setScriptContent(buildScriptContent(mergedRequest).getBytes(StandardCharsets.UTF_8));
+        probeModel.setOsType(mergedRequest.getOsType().getTypeVal());
+        probeModel.setScriptType(mergedRequest.getScriptType().getTypeVal());
+        probeModel.setCommandInterval(mergedRequest.getCommandInterval() + "m");
         //是否存在保证name去重
-        var probeExist = probeModelMapper.countQueryModifyByProbeName(probeRequest.getProbeName(), probeModel.getProbeName()) > 0;
+        var probeExist = probeModelMapper.countQueryModifyByProbeName(mergedRequest.getProbeName(), probeModel.getId()) > 0;
         if (Boolean.TRUE.equals(probeExist)) {
             throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_NAME_EXIST);
         }
@@ -148,9 +162,42 @@ public class ProbeService {
         var rows = probeModelMapper.updateByProbeId(probeModel);
         //wazuh 远程操作
         wazuhProbeManagerRepository.deleteProbeByProbeId(probeModel.getId());
-        wazuhProbeManagerRepository.addScript(probeRequest);
+        wazuhProbeManagerRepository.addScript(mergedRequest);
 
         return rows;
+    }
+
+    /**
+     * 修改探针参数
+     * @param probeRequest probeRequest
+     */
+    private void modifyProbeParams(ProbeRequest probeRequest) {
+        if (CollectionUtils.isEmpty(probeRequest.getParamsResultList())) {
+            return;
+        }
+        probeParamModelMapper.deleteParamByProbeId(probeRequest.getProbeId());
+        insertProbeParams(probeRequest, probeRequest.getProbeId());
+    }
+
+
+    /**
+     * 构造patch merge 请求参数
+     * @param probeRequest probeRequest
+     * @return ProbeRequest
+     */
+    private ProbeRequest buildMergedRequest(ProbeRequest probeRequest) {
+        var queryModel = probeModelMapper.queryByProbeId(probeRequest.getProbeId());
+        var mergedRequest = new ProbeRequest();
+
+        mergedRequest.setProbeId(queryModel.getId());
+        mergedRequest.setProbeName(queryModel.getProbeName());
+        mergedRequest.setOsType(OsType.values()[queryModel.getOsType()]);
+        mergedRequest.setDes(queryModel.getDes());
+        mergedRequest.setCommandInterval(Integer.parseInt(queryModel.getCommandInterval().replace("m", "")));
+        mergedRequest.setProbeCategory(queryModel.getProbeCategory());
+        mergedRequest.setScriptType(ScriptType.values()[queryModel.getScriptType()]);
+        mergedRequest.setScriptContent(new String(queryModel.getScriptContent(), StandardCharsets.UTF_8));
+        return mergedRequest;
     }
 
     @Transactional(rollbackFor = Exception.class)

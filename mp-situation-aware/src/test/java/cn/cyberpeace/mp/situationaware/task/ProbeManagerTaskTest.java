@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.situationaware.task;
 
+import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.situationaware.TestSituationAwareApplciation;
 import cn.cyberpeace.mp.situationaware.model.ProbeModel;
 import cn.cyberpeace.mp.situationaware.model.enums.ProbeStatus;
@@ -39,5 +40,15 @@ public class ProbeManagerTaskTest {
     @Test
     public void testModifyProbeStatus() {
         probeModelMapper.updateProbeStatus("383bcc02858946ebaf8e5b9177f157b6", ProbeStatus.TERMINATE);
+    }
+
+    @Test
+    public void testBeanMerge() throws Exception {
+        ProbeModel probeModel = probeModelMapper.queryByProbeId("d4707889737f40c2ab15e990bf691639");
+        ProbeModel toUpdate = new ProbeModel();
+        toUpdate.setCommandInterval("3m");
+        toUpdate.setProbeStatus(ProbeStatus.RUNNING);
+        BeanUtils.merge(probeModel, toUpdate);
+        Assert.assertEquals(probeModel.getProbeStatus(), ProbeStatus.RUNNING);
     }
 }

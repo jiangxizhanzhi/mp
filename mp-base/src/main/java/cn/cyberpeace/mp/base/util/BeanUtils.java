@@ -3,6 +3,9 @@ package cn.cyberpeace.mp.base.util;
 import cn.cyberpeace.mp.base.annotation.BeanFieldClasses;
 import cn.cyberpeace.mp.base.annotation.BeanFieldNames;
 import com.google.common.base.Joiner;
+import java.beans.BeanInfo;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanWrapper;
@@ -104,6 +107,25 @@ public class BeanUtils implements ApplicationContextAware {
         ignorePropertyNames.addAll(Arrays.asList(getNullPropertyNames(source)));
         org.springframework.beans.BeanUtils.copyProperties(source, target, ignorePropertyNames.toArray(new String[0]));
     }
+
+
+    public static <M> void merge(M target, M destination) throws Exception {
+        //获取目标bean
+        BeanInfo beanInfo = Introspector.getBeanInfo(target.getClass());
+        // 遍历所有属性
+        for (PropertyDescriptor descriptor : beanInfo.getPropertyDescriptors()) {
+            // 如果是可写属性
+            if (descriptor.getWriteMethod() != null) {
+                Object defaultValue = descriptor.getReadMethod().invoke(destination);
+                //可以使用StringUtil.isNotEmpty(defaultValue)来判断
+                if(defaultValue!=null && !"".equals(defaultValue)){
+                    //用非空的defaultValue值覆盖到target去
+                    descriptor.getWriteMethod().invoke(target, defaultValue);
+                }
+            }
+        }
+    }
+
 
     public static void loadBeanFields(Object obj) {
         Class<?> clazz = obj.getClass();
