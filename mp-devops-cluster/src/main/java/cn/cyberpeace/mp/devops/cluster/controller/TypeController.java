@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.devops.cluster.response.TypeAllResponse;
 import cn.cyberpeace.mp.devops.cluster.response.TypeL2AllResponse;
 import cn.cyberpeace.mp.devops.cluster.response.base.Result;
 import cn.cyberpeace.mp.devops.cluster.service.TypeService;
+import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -69,7 +70,7 @@ public class TypeController {
         TypeAllResponse allResponse = new TypeAllResponse();
         List<SerialPortConvertModel> serialPortConvertModels = serialPortConverter.list();
         serialPortConvertModels.add(new SerialPortConvertModel(50,100,10,"10.100.0.102",1));
-        allResponse.setSerialPortResponse(new SerialPortResponse("CCM-1","CCM-1",serialPortConvertModels));
+        allResponse.setSerialPortResponses(Lists.newArrayList(new SerialPortResponse("CCM-1","CCM-1",serialPortConvertModels)));
         allResponse.setSwitchConvertModels(switchConverter.treeList());
         allResponse.setAccessProtocolsPorts(typeService.findAccessProtocolsPort().getItems());
         allResponse.setSnmpVersions(Objects.nonNull(snmpVersion) ? snmpVersion.getIdStringModelList() : null);
@@ -279,10 +280,10 @@ public class TypeController {
 
     @ApiOperation("查询串口配置")
     @GetMapping("/serial-port-list")
-    public Result<SerialPortResponse> serialPortList(){
+    public Result<List<SerialPortResponse>> serialPortList(){
         List<SerialPortConvertModel> list = serialPortConverter.list();
         list.add(new SerialPortConvertModel(50,100,10,"10.100.0.102",1));
-        return new Result<>(new SerialPortResponse("CCM-1","CCM-1",list));
+        return new Result<>(Lists.newArrayList(new SerialPortResponse("CCM-1","CCM-1",list)));
     }
 
     @ApiOperation("查询交换机部分信息数据")
