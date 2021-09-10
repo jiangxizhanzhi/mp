@@ -31,4 +31,22 @@ public class ExtSystemInfo {
      */
     @ApiModelProperty("语言")
     private String language;
+
+    /**
+     * 系统类型名称
+     */
+    @ApiModelProperty("系统类型名称")
+    private String systemTypeName;
+
+    /**
+     * 系统架构名称
+     */
+    @ApiModelProperty("系统架构名称")
+    private String systemArchitectureName;
+
+    /**
+     * 语言名称
+     */
+    @ApiModelProperty("语言名称")
+    private String languageName;
 }
