@@ -113,7 +113,7 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
 
         RealEquipmentConvertModel convertModel = new RealEquipmentConvertModel();
         convertModel.setModelList(modelList);
-        convertModel.setTotal(model.getTotal());
+        convertModel.setTotal(total);
         return convertModel;
     }
 
