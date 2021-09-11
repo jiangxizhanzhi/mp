@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.situationaware.constant;
 import com.google.common.cache.LoadingCache;
 
 /**
- * 数据沙盘全局缓存
+ * 态势感知全局缓存
  */
 public class SituationalAwareConstant {
     /**
