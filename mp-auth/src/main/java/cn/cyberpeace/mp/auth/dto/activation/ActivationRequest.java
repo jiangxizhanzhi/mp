@@ -23,6 +23,10 @@ public class ActivationRequest {
     @NotNull
     private Integer deadline;
 
+    @ApiModelProperty(value = "激活版本 0:标准版 1:专业版")
+    @NotNull
+    private Integer edition;
+
     @ApiModelProperty(value = "授权功能项列表")
     private List<ActivationModuleItem> moduleItems;
 

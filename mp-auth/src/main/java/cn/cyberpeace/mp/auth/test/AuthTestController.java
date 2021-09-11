@@ -127,6 +127,11 @@ public class AuthTestController {
         return map;
     }
 
+    @GetMapping("/sysUUID")
+    public String sysUUID() {
+        String code = activationService.querySysUUID();
+        return code;
+    }
 
     @GetMapping("/tmpmenu")
 //    @ApiIgnore
