@@ -8,7 +8,8 @@ import lombok.Data;
 @Data
 public abstract class BaseCloudPluginSceneElementPortBO<M extends BaseCloudPluginSceneElementPortModel,
         T extends BaseCloudPluginSceneElementPortBO<M, T>> extends BasePluginSceneElementPortBO<M, T> {
-
+    @ApiModelProperty(value = "云平台虚拟化资源id")
+    private String resourceId;
     @ApiModelProperty(value = "是否nat外网")
     private Boolean nat;
 }
