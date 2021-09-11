@@ -85,7 +85,7 @@ public class InstallerController {
     @PostMapping
     public ServiceResult add(InstallerRequest request){
         InstallerConvertModel model = installerConverter.add(request);
-        return model.isSuccess() ? ServiceResult.successful() : ServiceResult.fail("");
+        return model.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(model.getMessageZh());
     }
 
     /**

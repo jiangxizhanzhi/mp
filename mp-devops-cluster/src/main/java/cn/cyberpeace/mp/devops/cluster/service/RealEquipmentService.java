@@ -40,4 +40,11 @@ public interface RealEquipmentService extends BaseCloudPlatformService {
     RealEquipmentBySwitchNameCloudPlatform findBySwitchName(String switchName);
 
     RealEquipmentBySerialPortCloudPlatform findBySerialPort(String serialPort);
+
+    /**
+     * 获取登录链接
+     * @param deviceUuid
+     * @return
+     */
+    RealEquipmentConnectionCloudPlatform connection(String deviceUuid);
 }

@@ -66,4 +66,9 @@ public class RealEquipmentServiceImpl extends BaseOpenStackServiceImpl implement
         snmp.setDataType("disk");
         return super.sendPost(CPCLOUD_INFO_URL + URL_VERSION + "/snmp", JsonUtils.toUnderlineJSONString(snmp), SnmpCloudPlatform.class);
     }
+
+    @Override
+    public RealEquipmentConnectionCloudPlatform connection(String deviceUuid){
+        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + "/entity/connection?device_uuid=" + deviceUuid,RealEquipmentConnectionCloudPlatform.class);
+    }
 }
