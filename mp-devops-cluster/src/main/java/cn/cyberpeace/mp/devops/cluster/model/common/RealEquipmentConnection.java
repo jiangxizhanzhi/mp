@@ -32,4 +32,7 @@ public class RealEquipmentConnection {
 
     @ApiModelProperty("登录URL")
     private String url;
+
+    @ApiModelProperty("内部IP")
+    private String internalIp;
 }
