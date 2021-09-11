@@ -133,14 +133,8 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
         ImagePageDTO dto = new ImagePageDTO();
         dto.setMainCategory(request.getCategory());
         dto.setSubCategory(request.getSecondCategory());
-        dto.setImageType(ImageTypeEnum.ENTITY.toValue());
         dto.setImageType(Objects.nonNull(request.getImageType()) ? request.getImageType().toValue() : "");
-//        dto.setUseStatus(request.getUseStatus());
         dto.setName(request.getName());
-//        dto.setInPosition(request.getInPosition());
-//        dto.setOffset((request.getPage() - 1) * request.getPerPage());
-//        dto.setLimit(request.getPerPage());
-
         Integer total = imageMapper.totalCount(dto);
         if (total == 0){
             return null;
@@ -195,6 +189,7 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
     }
 
     @Override
+    @Transactional
     public Boolean delete(RealEquipmentDeleteRequest request) {
         deviceService.deleteByIds(request.getUuids());
         ImageDeleteDTO dto = new ImageDeleteDTO();
