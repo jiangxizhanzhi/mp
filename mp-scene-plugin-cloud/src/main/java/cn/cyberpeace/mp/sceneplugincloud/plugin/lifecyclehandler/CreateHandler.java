@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.QosRuleDirection;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.*;
@@ -66,13 +67,14 @@ public class CreateHandler extends HandlerCommon {
             virtualNic.setNetworkId(auxiliaryNetworkCloudElement.getAuxiliaryNetworkId());
             virtualNic.setFixedIp(port.getIp());
 
+            List<VirtualNic.QosRule> qosRules = new ArrayList<>();
             if (port.getIngress() > 0 || port.getDelay() > 0 || port.getLoss() > 0) {
                 var qosRule = new VirtualNic.QosRule();
                 qosRule.setMaxKbps(port.getIngress());
                 qosRule.setDirection(QosRuleDirection.INGRESS);
                 qosRule.setDelayMs(port.getDelay());
                 qosRule.setLossPercent(port.getLoss());
-                virtualNic.setQosRule(qosRule);
+                qosRules.add(qosRule);
             }
             if (port.getEgress() > 0 || port.getDelay() > 0 || port.getLoss() > 0) {
                 var qosRule = new VirtualNic.QosRule();
@@ -80,14 +82,16 @@ public class CreateHandler extends HandlerCommon {
                 qosRule.setDirection(QosRuleDirection.EGRESS);
                 qosRule.setDelayMs(port.getDelay());
                 qosRule.setLossPercent(port.getLoss());
-                virtualNic.setQosRule(qosRule);
+                qosRules.add(qosRule);
+            }
+            if (!qosRules.isEmpty()) {
+                virtualNic.setQosRules(qosRules);
             }
 
             if (cloudPort != null) {
                 virtualNic.setEnableExternal(cloudPort.getNat());
             }
 
-            // TODO
             virtualNic.setFirewallId(null);
 
             var srcAccessModes = port.getAccessModes();
@@ -168,8 +172,9 @@ public class CreateHandler extends HandlerCommon {
     }
 
     private void createVirtualFirewall(CloudPluginSceneElementBO cloudElement) {
+        var srcElement = cloudElement.getSrcElement();
         var createData = new VirtualFirewallCreateData();
-        createData.setName(genResourceName(cloudElement.getSrcElement().getEid()));
+        createData.setName(genResourceName(srcElement.getEid()));
         var srcIngressRules = cloudElement.getFirewallIngressRules();
         if (srcIngressRules != null) {
             List<VirtualFirewallCreateData.Rule> ingressRules = new ArrayList<>();
@@ -192,7 +197,27 @@ public class CreateHandler extends HandlerCommon {
             });
             createData.setEgressRules(egressRules);
         }
-        // TODO 端口
+
+        // 防火墙连接的虚拟路由端口
+        List<String> targetPorts = new ArrayList<>();
+        var connectedSrcPorts = getPluginHandler().getElementConnectedSrcPorts(srcElement.getId());
+        for (var connectedSrcPort : connectedSrcPorts) {
+            var connectedCloutPort = getPluginHandler().getPort(connectedSrcPort.getId());
+            if (connectedCloutPort == null || connectedCloutPort.getResourceId() == null) {
+                continue;
+            }
+            var connectedSrcElement = getPluginHandler().getPortSrcElement(connectedSrcPort.getId());
+            var connectedCloutElement = getPluginHandler().getElement(connectedSrcElement.getId());
+            if (connectedCloutElement == null || connectedCloutElement.getVirtualType() == null
+                    || connectedCloutElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
+                continue;
+            }
+            targetPorts.add(connectedCloutPort.getResourceId());
+        }
+        if (!targetPorts.isEmpty()) {
+            createData.setPorts(targetPorts);
+        }
+
         vfClient.create(createData);
     }
 

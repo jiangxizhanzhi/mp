@@ -17,6 +17,8 @@ import java.util.List;
 public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneRoleBO, CsceneBO> {
     @ApiModelProperty(value = "综合场景类型")
     private Integer type;
+    @ApiModelProperty(value = "综合场景模板引用类型")
+    private Integer referenceType;
     @ApiModelProperty(value = "综合场景logo")
     private String logo;
     @ApiModelProperty(value = "综合场景拓扑配置")

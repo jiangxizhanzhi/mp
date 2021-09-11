@@ -11,6 +11,8 @@ public class BaseCsceneRoleModel extends BaseModel {
     @DefaultStr
     private String parent;
     @DefaultStr
+    private String key;
+    @DefaultStr
     private String name;
     @DefaultStr
     private String type;
@@ -18,4 +20,6 @@ public class BaseCsceneRoleModel extends BaseModel {
     private String assetNodes;
     @DefaultStr
     private String visibleNodes;
+    @DefaultStr
+    private String users;
 }

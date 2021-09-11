@@ -12,7 +12,7 @@ import java.util.List;
 public class VirtualNic {
     private String networkId;
     private String fixedIp;
-    private QosRule qosRule;
+    private List<QosRule> qosRules;
     private Boolean enableExternal;
     private List<AccessMode> accessModes;
     private String firewallId;

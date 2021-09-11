@@ -20,6 +20,8 @@ public abstract class BaseCsceneRoleBO<M extends BaseCsceneRoleModel, T extends 
         extends ModelBO<M, T> {
     @ApiModelProperty(value = "角色id")
     private String id;
+    @ApiModelProperty(value = "角色key")
+    private String key;
     @ApiModelProperty(value = "角色名称")
     private String name;
     @ApiModelProperty(value = "角色类型")
@@ -28,6 +30,8 @@ public abstract class BaseCsceneRoleBO<M extends BaseCsceneRoleModel, T extends 
     private List<String> assetNodes;
     @ApiModelProperty(value = "可见节点id列表")
     private List<String> visibleNodes;
+    @ApiModelProperty(value = "包含用户id列表")
+    private List<String> users;
     @ApiModelProperty(value = "子角色信息")
     private List<T> children;
 
@@ -35,23 +39,30 @@ public abstract class BaseCsceneRoleBO<M extends BaseCsceneRoleModel, T extends 
     public void fromModel(M obj, String... ignoreFields) {
         super.fromModel(obj, ArrayUtils.addAll(ignoreFields,
                 BeanUtils.getBeanGetterFieldName(BaseCsceneRoleModel::getAssetNodes),
-                BeanUtils.getBeanGetterFieldName(BaseCsceneRoleModel::getVisibleNodes)));
+                BeanUtils.getBeanGetterFieldName(BaseCsceneRoleModel::getVisibleNodes),
+                BeanUtils.getBeanGetterFieldName(BaseCsceneRoleModel::getUsers)));
         assetNodes = StringUtils.isEmpty(obj.getAssetNodes()) ? new ArrayList<>()
                 : JsonUtils.parse(obj.getAssetNodes(), new TypeReference<List<String>>(){});
         visibleNodes = StringUtils.isEmpty(obj.getVisibleNodes()) ? new ArrayList<>()
                 : JsonUtils.parse(obj.getVisibleNodes(), new TypeReference<List<String>>(){});
+        users = StringUtils.isEmpty(obj.getUsers()) ? new ArrayList<>()
+                : JsonUtils.parse(obj.getUsers(), new TypeReference<List<String>>(){});
     }
 
     @Override
     public M toModel(String... ignoreFields) {
         var obj = super.toModel(ArrayUtils.addAll(ignoreFields,
                 BeanUtils.getBeanGetterFieldName(BaseCsceneRoleModel::getAssetNodes),
-                BeanUtils.getBeanGetterFieldName(BaseCsceneRoleModel::getVisibleNodes)));
+                BeanUtils.getBeanGetterFieldName(BaseCsceneRoleModel::getVisibleNodes),
+                BeanUtils.getBeanGetterFieldName(BaseCsceneRoleModel::getUsers)));
         if (assetNodes != null) {
             obj.setAssetNodes(JsonUtils.toJsonString(assetNodes));
         }
         if (visibleNodes != null) {
             obj.setVisibleNodes(JsonUtils.toJsonString(visibleNodes));
+        }
+        if (users != null) {
+            obj.setUsers(JsonUtils.toJsonString(users));
         }
         return obj;
     }
