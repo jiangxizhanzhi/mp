@@ -59,14 +59,24 @@ public class InstallerRequest extends BaseRequest {
     @ApiModelProperty(value = "服务类型")
     private Integer deployType;
 
-    /**
-     * 启动参数（包装对象）
-     */
-    @ApiModelProperty(value = "启动参数")
-    private List<StartUpParameter> startUpParameterList;
+    @ApiModelProperty("docker参数")
+    private DockerInstallerData dockerInstallerData;
 
-    @ApiModelProperty("docker文件流")
-    private MultipartFile dockerFile;
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public class DockerInstallerData {
+
+        /**
+         * 启动参数（包装对象）
+         */
+        @ApiModelProperty(value = "启动参数")
+        private List<StartUpParameter> startUpParameterList;
+
+        @ApiModelProperty("docker文件流")
+        private MultipartFile dockerFile;
+    }
+
 
     @ApiModelProperty("windows服务资源流")
     private List<MultipartFile> multipartFiles;
