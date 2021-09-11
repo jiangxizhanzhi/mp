@@ -247,11 +247,11 @@ public class RealEquipmentController {
                 }
                 snmpParams.setIp(extEntity.getSnmpConfig().getIp());
                 snmpParams.setOid(extEntity.getSnmpCpuOid());
-                realEquipmentService.snmpForCpu(snmpParams);
+                SnmpCloudPlatform cpu = realEquipmentService.snmpForCpu(snmpParams);
                 snmpParams.setOid(extEntity.getSnmpMemOid());
-                realEquipmentService.snmpForMem(snmpParams);
+                SnmpCloudPlatform mem = realEquipmentService.snmpForMem(snmpParams);
                 snmpParams.setOid(extEntity.getSnmpDiskOid());
-                realEquipmentService.snmpForDisk(snmpParams);
+                var disk = realEquipmentService.snmpForDisk(snmpParams);
             }
         }
 

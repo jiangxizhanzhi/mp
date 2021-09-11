@@ -92,6 +92,7 @@ mp:
       task-enable: false
 
   log:
+    es-nodes: 10.100.0.103:9200
     exclude-uri: /login
     exclude-method: OPTIONS
   auth:
