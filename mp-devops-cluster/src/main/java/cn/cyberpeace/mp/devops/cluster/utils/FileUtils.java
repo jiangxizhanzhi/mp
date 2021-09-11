@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.utils;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -17,6 +18,9 @@ public class FileUtils {
      * @throws IOException
      */
     public static List<File> transferToFile(List<MultipartFile> multipartFiles) throws IOException {
+        if (CollectionUtils.isEmpty(multipartFiles)){
+            return new ArrayList<>();
+        }
         List<File> fileList = new ArrayList<>();
         String fileName;
         String prefix;

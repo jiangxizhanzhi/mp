@@ -86,8 +86,9 @@ public class InstallerConverterImpl implements InstallerConverter {
         InstallerFormDataCloudPlatformModel installer = convertInstallerRequest(request);
         installer.setUuid(request.getUuid());
         List<MultipartFile> multipartFiles = new ArrayList<>();
-        if (Objects.nonNull(request.getDockerFile()) && request.getDockerFile().getSize() > 0){
-           multipartFiles.add(request.getDockerFile());
+        if (Objects.nonNull(request.getDockerInstallerData()) &&
+                Objects.nonNull(request.getDockerInstallerData().getDockerFile()) && request.getDockerInstallerData().getDockerFile().getSize() > 0){
+           multipartFiles.add(request.getDockerInstallerData().getDockerFile());
         }else{
             multipartFiles = request.getMultipartFiles();
         }
@@ -150,8 +151,9 @@ public class InstallerConverterImpl implements InstallerConverter {
         installer.setLogo(request.getLogo());
         installer.setCategories(String.join(",",request.getCategories()));
         installer.setDeployType(request.getDeployType());
-        if (CollectionUtils.isNotEmpty(request.getStartUpParameterList())) {
-            installer.setSettings(JsonUtils.toUnderlineJSONString(request.getStartUpParameterList()));
+        if (Objects.nonNull(request.getDockerInstallerData())
+                && CollectionUtils.isNotEmpty(request.getDockerInstallerData().getStartUpParameterList())) {
+            installer.setSettings(JsonUtils.toUnderlineJSONString(request.getDockerInstallerData().getStartUpParameterList()));
         }
         if (CollectionUtils.isNotEmpty(request.getResourceList())) {
             request.getResourceList().stream().forEach(resource -> resource.setFile(UUID.randomUUID().toString()));

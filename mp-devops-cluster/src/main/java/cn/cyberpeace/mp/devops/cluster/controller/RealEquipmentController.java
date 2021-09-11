@@ -6,12 +6,12 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.RealEquipmentConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.SerialPortConverter;
-import cn.cyberpeace.mp.devops.cluster.converter.SwitchConverter;
-import cn.cyberpeace.mp.devops.cluster.converter.model.RealEquipment;
-import cn.cyberpeace.mp.devops.cluster.converter.model.RealEquipmentConvertModel;
+import cn.cyberpeace.mp.devops.cluster.converter.TypeConverter;
+import cn.cyberpeace.mp.devops.cluster.converter.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntity;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntityAccess;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
 import cn.cyberpeace.mp.devops.cluster.model.common.SnmpConfig;
 import cn.cyberpeace.mp.devops.cluster.request.*;
 import cn.cyberpeace.mp.devops.cluster.response.*;
@@ -45,15 +45,15 @@ public class RealEquipmentController {
 
     private SerialPortConverter serialPortConverter;
 
-    private SwitchConverter switchConverter;
+    private TypeConverter typeConverter;
 
     @Autowired
     public RealEquipmentController(RealEquipmentConverter realEquipmentConverter,RealEquipmentService realEquipmentService,
-                                   SerialPortConverter serialPortConverter,SwitchConverter switchConverter) {
+                                   SerialPortConverter serialPortConverter,TypeConverter typeConverter) {
         this.realEquipmentConverter = realEquipmentConverter;
         this.realEquipmentService = realEquipmentService;
         this.serialPortConverter = serialPortConverter;
-        this.switchConverter = switchConverter;
+        this.typeConverter = typeConverter;
     }
 
     /**
@@ -66,19 +66,74 @@ public class RealEquipmentController {
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getModelList())){
             return new PageResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
         }
+        TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type();
+        TypeAllConvertModel language = typeConverter.findLanguage();
+        TypeAllConvertModel systemArchitecure = typeConverter.findSystemArchitecure();
+        TypeAllConvertModel accessType = typeConverter.findAccessType();
+
         List<RealEquipmentPageResponse> list = model.getModelList().stream().map(v -> {
             ExtEntity extEntity = v.getExtEntity();
             RealEquipmentPageResponse response = RealEquipmentPageResponse.builder().id(v.getUuid()).name(v.getName())
-                    .category(v.getMainCategory()).subCategory(v.getSubCategory())
-                    .description(v.getDescription()).extSystemInfo(v.getExtSystemInfo()).useStatus(v.getUseStatus()).referenceStatus(v.getReferenceStatus())
+                    .category(v.getMainCategory()).subCategory(v.getSubCategory()).thirdCategory(v.getThirdCategory())
+                    .description(v.getDescription()).useStatus(v.getUseStatus()).referenceStatus(v.getReferenceStatus())
                     .inPosition(v.getInPosition()).build();
+            if (Objects.nonNull(l1AndL2AndL3Type)){
+               List<String> firstTypeList = CollectionUtils.isEmpty(l1AndL2AndL3Type.getFirstTypeList()) ?
+                            null : l1AndL2AndL3Type.getFirstTypeList().stream()
+                        .filter(typeConvertModel -> typeConvertModel.getId().equals(v.getMainCategory()))
+                       .map(TypeConvertModel::getName).collect(Collectors.toList());
+               response.setCategoryName(CollectionUtils.isEmpty(firstTypeList) ? null : firstTypeList.get(0));
+
+                List<String> secondTypeList = CollectionUtils.isEmpty(l1AndL2AndL3Type.getSecondTypeList()) ? null : l1AndL2AndL3Type.getSecondTypeList().stream()
+                        .filter(typeConvertModel -> typeConvertModel.getId().equals(v.getSubCategory()))
+                        .map(TypeConvertModel::getName).collect(Collectors.toList());
+                response.setSubCategoryName(CollectionUtils.isEmpty(secondTypeList) ? null : secondTypeList.get(0));
+
+                List<String> thirdTypeList = CollectionUtils.isEmpty(l1AndL2AndL3Type.getThirdTypeList()) ? null : l1AndL2AndL3Type.getThirdTypeList().stream()
+                        .filter(typeConvertModel -> typeConvertModel.getId().equals(v.getThirdCategory()))
+                        .map(TypeConvertModel::getName).collect(Collectors.toList());
+                response.setThirdCategoryName(CollectionUtils.isEmpty(thirdTypeList) ? null : thirdTypeList.get(0));
+            }
+            ExtSystemInfo extSystemInfo = v.getExtSystemInfo();
+            if (Objects.nonNull(extSystemInfo)){
+                if (Objects.nonNull(l1AndL2AndL3Type) && CollectionUtils.isNotEmpty(l1AndL2AndL3Type.getThirdTypeList())) {
+                    List<String> systemTypeList = l1AndL2AndL3Type.getThirdTypeList().stream()
+                            .filter(typeConvertModel -> typeConvertModel.getId().equals(extSystemInfo.getSystemType()))
+                            .map(TypeConvertModel::getName).collect(Collectors.toList());
+                    extSystemInfo.setSystemTypeName(CollectionUtils.isEmpty(systemTypeList) ? null : systemTypeList.get(0));
+                }
+                if (Objects.nonNull(language) && CollectionUtils.isNotEmpty(language.getIdStringModelList())){
+                    List<String> languageTypeList = language.getIdStringModelList().stream()
+                            .filter(typeConvertModel -> typeConvertModel.getId().equals(extSystemInfo.getLanguage()))
+                            .map(TypeIdStringConvertModel::getName).collect(Collectors.toList());
+                    extSystemInfo.setLanguageName(CollectionUtils.isEmpty(languageTypeList) ? null : languageTypeList.get(0));
+                }
+
+                if (Objects.nonNull(systemArchitecure) && CollectionUtils.isNotEmpty(systemArchitecure.getIdStringModelList())){
+                    List<String> systemArchitecureTypeList = systemArchitecure.getIdStringModelList().stream()
+                            .filter(typeConvertModel -> typeConvertModel.getId().equals(extSystemInfo.getSystemArchitecture()))
+                            .map(TypeIdStringConvertModel::getName).collect(Collectors.toList());
+                    extSystemInfo.setSystemArchitectureName(CollectionUtils.isEmpty(systemArchitecureTypeList) ? null : systemArchitecureTypeList.get(0));
+                }
+                response.setExtSystemInfo(extSystemInfo);
+            }
+
             if (Objects.nonNull(extEntity)){
                 response.setModel(extEntity.getStyle());
                 response.setParams(extEntity.getParams());
             }
+
             List<ExtEntityAccess> extEntityAccess = v.getExtEntityAccess();
             if (CollectionUtils.isNotEmpty(extEntityAccess)){
-                response.setEntityType(extEntityAccess.get(0).getAccessType());
+                String accessType1 = Objects.isNull(extEntityAccess.get(0)) ? "" : extEntityAccess.get(0).getAccessType();
+                if (Objects.nonNull(accessType) && CollectionUtils.isNotEmpty(accessType.getIdStringModelList())){
+                    List<String> accessTypeeTypeList = accessType.getIdStringModelList().stream()
+                            .filter(typeConvertModel -> typeConvertModel.getId().equals(accessType1))
+                            .map(TypeIdStringConvertModel::getName).collect(Collectors.toList());
+                    response.setEntityTypeName(CollectionUtils.isEmpty(accessTypeeTypeList) ? null : accessTypeeTypeList.get(0));
+                }
+                response.setEntityType(accessType1);
+
                 response.setEntityDetail(JSONArray.toJSONString(extEntityAccess));
             }
             return response;
@@ -192,11 +247,11 @@ public class RealEquipmentController {
                 }
                 snmpParams.setIp(extEntity.getSnmpConfig().getIp());
                 snmpParams.setOid(extEntity.getSnmpCpuOid());
-                realEquipmentService.snmpForCpu(snmpParams);
+                SnmpCloudPlatform cpu = realEquipmentService.snmpForCpu(snmpParams);
                 snmpParams.setOid(extEntity.getSnmpMemOid());
-                realEquipmentService.snmpForMem(snmpParams);
+                SnmpCloudPlatform mem = realEquipmentService.snmpForMem(snmpParams);
                 snmpParams.setOid(extEntity.getSnmpDiskOid());
-                realEquipmentService.snmpForDisk(snmpParams);
+                var disk = realEquipmentService.snmpForDisk(snmpParams);
             }
         }
 

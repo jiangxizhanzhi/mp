@@ -63,4 +63,6 @@ public class ImagesPageResponse  extends BaseCloudPlatformResponse  {
      */
     @ApiModelProperty("描述")
     private String description;
+
+    private Integer imageStatus;
 }

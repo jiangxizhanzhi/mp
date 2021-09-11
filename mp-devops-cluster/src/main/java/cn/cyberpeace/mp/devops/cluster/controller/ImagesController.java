@@ -80,44 +80,17 @@ public class ImagesController {
         List<ImagesPageResponse> list = model.getModelList().stream().map(v -> {
             ExtSystemInfo extSystemInfo = v.getExtSystemInfo();
             ExtVm extVm = v.getExtVm();
+            ExtImageInfo extImageInfo = v.getExtImageInfo();
             ImagesPageResponse response = ImagesPageResponse.builder().uuid(v.getUuid()).name(v.getName())
                     .mainCategory(v.getMainCategory()).subCategory(v.getSubCategory()).imageType(v.getImageType())
                     .systemType(Objects.nonNull(extSystemInfo) ? extSystemInfo.getSystemType() : null)
                     .flavor(Objects.nonNull(extVm) ? extVm.getFlavor() : "")
-                    .description(v.getDescription()).build();
+                    .description(v.getDescription()).imageStatus(Objects.nonNull(extImageInfo) ? extImageInfo.getImageStatus() : null).build();
             return response;
         }).collect(Collectors.toList());
 
         return new PageResult<>(list,model.getTotal());
     }
-
-//    /**
-//     * 分页查询
-//     */
-//    @ApiOperation("快速创建分页查询")
-//    @GetMapping("/quick-create/page")
-//    public PageResult<ImagesPageResponse> page(ImageQuickCreatePageRequest request){
-//        ImagePageRequest pageRequest = new ImagePageRequest();
-//        pageRequest.setPage(request.getPage());
-//        pageRequest.setPerPage(request.getPerPage());
-//        pageRequest.setQuickCreateSupport(request.getQuickCreateSupport());
-//        ImageConvertPageModel model = imagesConverter.page(pageRequest);
-//        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getModelList())){
-//            return new PageResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
-//        }
-//        List<ImagesPageResponse> list = model.getModelList().stream().map(v -> {
-//            ExtSystemInfo extSystemInfo = v.getExtSystemInfo();
-//            ExtVm extVm = v.getExtVm();
-//            ImagesPageResponse response = ImagesPageResponse.builder().uuid(v.getUuid()).name(v.getName())
-//                    .mainCategory(v.getMainCategory()).subCategory(v.getSubCategory()).imageType(v.getImageType())
-//                    .systemType(Objects.nonNull(extSystemInfo) ? extSystemInfo.getSystemType() : null)
-//                    .flavor(Objects.nonNull(extVm) ? extVm.getFlavor() : "")
-//                    .description(v.getDescription()).build();
-//            return response;
-//        }).collect(Collectors.toList());
-//
-//        return new PageResult<>(list,model.getTotal());
-//    }
 
     /**
      * 新增
@@ -293,8 +266,8 @@ public class ImagesController {
      */
     @ApiOperation("查询flavor")
     @GetMapping("/page-flavor")
-    public PageResult pageFlavor(){
+    public Result pageFlavor(){
         FlavorCloudPlatformModel page = flavorService.page("");
-        return new PageResult<>(page.getData().getList(),page.getTotal());
+        return new Result<>(page.getData().getList());
     }
 }
