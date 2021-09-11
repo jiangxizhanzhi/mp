@@ -23,5 +23,5 @@ public class SerialPortConvertModel {
     private String host;
 
     @ApiModelProperty("串口ID")
-    private Integer interfaceId;
+    private String interfaceId;
 }

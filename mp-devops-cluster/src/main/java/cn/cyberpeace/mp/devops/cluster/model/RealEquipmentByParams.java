@@ -19,6 +19,9 @@ public class RealEquipmentByParams {
     @ApiModelProperty("UUID")
     private String deviceUuid;
 
-    @ApiModelProperty("名称")
+    @ApiModelProperty("设备名称")
     private String deviceName;
+
+    @ApiModelProperty("图标")
+    private String logo;
 }

@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.devops.cluster.converter.RealEquipmentConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.RealEquipment;
 import cn.cyberpeace.mp.devops.cluster.converter.model.RealEquipmentConvertModel;
+import cn.cyberpeace.mp.devops.cluster.dto.ImageDeleteDTO;
 import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devops.cluster.enums.ImageTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.model.Device;
@@ -12,6 +13,7 @@ import cn.cyberpeace.mp.devops.cluster.model.TargetModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntity;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtGateway;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
+import cn.cyberpeace.mp.devops.cluster.repository.ImageAuthMapper;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentPageRequest;
@@ -47,15 +49,19 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
 
     private TargetLogoService targetLogoService;
 
+
+    private ImageAuthMapper imageAuthMapper;
+
     @Autowired
     public RealEquipmentConverterImpl(RealEquipmentService realEquipmentService, DeviceService deviceService,
                                       DevopsTargetService devopsTargetService, ImageMapper imageMapper,
-                                      TargetLogoService targetLogoService) {
+                                      TargetLogoService targetLogoService,ImageAuthMapper imageAuthMapper) {
         this.realEquipmentService = realEquipmentService;
         this.deviceService = deviceService;
         this.devopsTargetService = devopsTargetService;
         this.imageMapper = imageMapper;
         this.targetLogoService = targetLogoService;
+        this.imageAuthMapper = imageAuthMapper;
     }
 
     @Override
@@ -190,7 +196,12 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
 
     @Override
     public Boolean delete(RealEquipmentDeleteRequest request) {
-        return deviceService.deleteByIds(request.getUuids());
+        deviceService.deleteByIds(request.getUuids());
+        ImageDeleteDTO dto = new ImageDeleteDTO();
+        dto.setIds(request.getUuids());
+        imageMapper.delete(dto);
+        request.getUuids().forEach(id -> imageAuthMapper.deleteByTarget(id));
+        return Boolean.TRUE;
     }
 
     /**
