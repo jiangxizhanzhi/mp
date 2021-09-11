@@ -96,7 +96,7 @@ mp:
   flow:
     # 流量发生器资源地址
     actuator-resource-url: http://${ip.trex}:80/api/v1/resource
-    trex-image: trex_0910
+    trex-image: trex_0911
 
 management:
   endpoints:
