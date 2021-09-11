@@ -25,4 +25,7 @@ public class SituationAwareConfig {
 
     @Value("${mp.situationaware.wazuh-probe-manager.agent-script-windows-path}")
     private String scripWindowsPath;
+
+    @Value("${mp.situationaware.wazuh-probe-manager.task-enable}")
+    private Boolean taskEnable;
 }

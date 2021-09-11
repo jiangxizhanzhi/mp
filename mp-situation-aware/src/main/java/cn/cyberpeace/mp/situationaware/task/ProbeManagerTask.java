@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.situationaware.task;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.LocalDateTimeUtils;
+import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
 import cn.cyberpeace.mp.situationaware.model.ProbeModel;
 import cn.cyberpeace.mp.situationaware.model.enums.ProbeStatus;
@@ -40,8 +41,15 @@ public class ProbeManagerTask {
     @Resource(name = "wazuhRestHighLevelClient")
     private RestHighLevelClient restHighLevelClient;
 
+    @Autowired
+    private SituationAwareConfig situationAwareConfig;
+
     @Scheduled(fixedRate = 1000 * 60)
     private void processProbeStatus() {
+        if(!situationAwareConfig.getTaskEnable()){
+            log.info("ProbeManagerTask disabled");
+            return;
+        }
         List<ProbeModel> probeModelList = probeModelMapper.queryAllProbes();
         probeModelList.forEach(model -> {
             ProbeStatus probeStatus = Boolean.TRUE.equals(queryProbeExist(model)) ? ProbeStatus.RUNNING : ProbeStatus.TERMINATE;
