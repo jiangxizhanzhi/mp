@@ -16,7 +16,7 @@ import org.springframework.util.ObjectUtils;
 @Configuration(value = "LogElasticsearchConfig")
 public class ElasticsearchConfig {
 
-    @Value("${mp.situationaware.es-nodes}")
+    @Value("${mp.log.es-nodes}")
     private String elasticsearchNodes;
 
     @Bean(name="logRestHighLevelClient")

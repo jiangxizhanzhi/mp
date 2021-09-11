@@ -90,6 +90,7 @@ mp:
       agent-script-linux-path: /var/ossec/etc/shared/scripts/
       agent-script-windows-path: C:\ossec-agent\shared\scripts\
   log:
+    es-nodes: 10.100.0.103:9200
     exclude-uri: /login
     exclude-method: OPTIONS
   auth:
