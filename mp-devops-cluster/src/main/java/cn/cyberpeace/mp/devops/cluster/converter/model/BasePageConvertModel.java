@@ -32,4 +32,9 @@ public class BasePageConvertModel {
      */
     private String message;
 
+    /**
+     * 错误信息
+     */
+    private String messageZh;
+
 }

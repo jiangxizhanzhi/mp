@@ -8,6 +8,7 @@ import org.apache.http.HttpEntity;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -121,7 +122,7 @@ public class BaseOpenStackServiceImpl extends BaseServiceImpl {
      * @return
      */
     @Override
-    protected <T extends BaseModel> T sendFormDataPost(String api, HttpEntity httpEntity ,Class<T> valueType){
+    protected <T extends BaseModel> T sendFormDataPost(String api, HttpEntity httpEntity ,Class<T> valueType) throws IOException {
         return super.sendFormDataPost(devopsConfig.getCpUrl().concat(api),httpEntity,valueType);
     }
 
