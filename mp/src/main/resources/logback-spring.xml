@@ -46,14 +46,10 @@
         <!-- 日志记录器的滚动策略，按日期，按大小记录 -->
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- 日志归档 -->
-            <fileNamePattern>${LOG_HOME}/%d{yyyy-MM-dd}/mp-%d{HHmmss.SSS}.%i.log</fileNamePattern>
+            <fileNamePattern>${LOG_HOME}/%d{yyyy-MM-dd}.log</fileNamePattern>
             <!--日志文件保留天数-->
             <maxHistory>${LOG_FILE_MAX_HISTORY}</maxHistory>
             <cleanHistoryOnStart>true</cleanHistoryOnStart>
-            <TimeBasedFileNamingAndTriggeringPolicy
-                    class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-                <MaxFileSize>${LOG_FILE_MAX_SIZE}</MaxFileSize>
-            </TimeBasedFileNamingAndTriggeringPolicy>
         </rollingPolicy>
         <encoder>
             <pattern>${FILE_LOG_PATTERN}</pattern>
