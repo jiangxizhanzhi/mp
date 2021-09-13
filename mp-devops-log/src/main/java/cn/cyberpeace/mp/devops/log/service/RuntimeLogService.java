@@ -79,12 +79,12 @@ public class RuntimeLogService {
      * @return ByteArrayInputStream
      */
     public ByteArrayInputStream zipDownLoadFile(List<String> logFileNames){
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        var bos = new ByteArrayOutputStream();
         var logFile = new File(logPath);
         List<File> fileList = Arrays.stream(Objects.requireNonNull(logFile.listFiles())).filter(File::isFile).collect(Collectors.toList());
         List<File> downloadFiles = fileList.stream().filter(file -> logFileNames.contains(file.getName())).collect(Collectors.toList());
 
-        ZipOutputStream zout = new ZipOutputStream(bos);
+        var zout = new ZipOutputStream(bos);
         try {
             for (File file : downloadFiles) {
                 FileInputStream fileInputStream = new FileInputStream(file);
@@ -97,6 +97,7 @@ public class RuntimeLogService {
                 }
                 zout.flush();
                 zout.closeEntry();
+                fileInputStream.close();
             }
         }catch (Exception e){
             log.error("file read path fail");
@@ -105,6 +106,8 @@ public class RuntimeLogService {
 
 
         return new ByteArrayInputStream(bos.toByteArray());
+
+
     }
 
 }
