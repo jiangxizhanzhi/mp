@@ -9,6 +9,7 @@
         <result column="name"  property="name"/>
         <result column="main_category"  property="mainCategory"/>
         <result column="sub_category" property="subCategory"/>
+        <result column="third_category" property="thirdCategory"/>
         <result column="image_type" property="imageType"/>
         <result column="is_public" property="isPublic" typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler"/>
         <result column="quick_create_support" property="quickCreateSupport" typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler"/>
@@ -30,6 +31,9 @@
             </if>
             <if test=" subCategory != null">
                 and i.sub_category = #{subCategory}
+            </if>
+            <if test=" thirdCategory != null">
+                and i.third_category = #{thirdCategory}
             </if>
             <if test=" imageType != null and imageType != '' ">
                 and i.image_type = #{imageType}
@@ -68,7 +72,7 @@
 
     <select id="page" parameterType="cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO" resultMap="BaseResultMap">
         select
-            i.pk,i.id,i.uuid,i.name,i.main_category,i.sub_category,i.image_type,i.is_public,i.quick_create_support,
+            i.pk,i.id,i.uuid,i.name,i.main_category,i.sub_category,i.third_category,i.image_type,i.is_public,i.quick_create_support,
                i.in_position,i.reference_status,i.use_status
         from
             mp_devops_target i
@@ -77,6 +81,15 @@
         <if test="offset != null and limit != null">
             limit #{offset}, #{limit}
         </if>
+    </select>
+
+    <select id="findByUuid" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select
+        i.pk,i.id,i.uuid,i.name,i.main_category,i.sub_category,i.third_category,i.image_type,i.is_public,i.quick_create_support,
+        i.in_position,i.reference_status,i.use_status
+        from
+        mp_devops_target i
+        where i.uuid = #{uuid}
     </select>
 
     <insert id="insert" parameterType="cn.cyberpeace.mp.devops.cluster.model.TargetModel">
@@ -96,6 +109,9 @@
             </if>
             <if test="subCategory != null">
                 sub_category,
+            </if>
+            <if test="thirdCategory != null">
+                third_category,
             </if>
             <if test="role != null">
                 role,
@@ -141,6 +157,9 @@
             <if test="subCategory != null">
                 #{subCategory},
             </if>
+            <if test="thirdCategory != null">
+                #{thirdCategory},
+            </if>
             <if test="role != null">
                 #{role},
             </if>
@@ -184,6 +203,9 @@
             <if test="subCategory != null">
                 sub_category = #{subCategory},
             </if>
+            <if test="thirdCategory != null">
+                third_category = #{thirdCategory},
+            </if>
             <if test="imageType != null">
                 image_type = #{imageType},
             </if>
@@ -191,7 +213,7 @@
                 update_time = #{updateTime},
             </if>
             <if test="isPublic != null">
-                is_public = #{is_public,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler}
+                is_public = #{isPublic,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler}
             </if>
         </set>
         where uuid = #{uuid}
