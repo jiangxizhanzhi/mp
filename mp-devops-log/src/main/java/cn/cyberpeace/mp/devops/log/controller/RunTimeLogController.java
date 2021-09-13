@@ -43,10 +43,9 @@ public class RunTimeLogController {
         return new ListObjServiceResult(runTimeLogService.queryRuntimeLog()).asResult();
     }
 
-    @PostMapping("/{logFileName}")
+    @PostMapping()
     @ApiOperation(value = "日志下载", notes = "")
-    public ResponseEntity<Resource> downloadPcapFile(HttpServletResponse httpServletResponse,
-        @PathVariable("logFileName") List<String> logFileNames) {
+    public ResponseEntity<Resource> downloadPcapFile(HttpServletResponse httpServletResponse, @RequestBody List<String> logFileNames) {
         InputStreamResource resource = null;
         try {
             resource = new InputStreamResource(new InputStream() {
