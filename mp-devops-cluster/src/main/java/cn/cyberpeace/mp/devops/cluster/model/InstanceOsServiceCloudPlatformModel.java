@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.model;
 
+import cn.cyberpeace.mp.devops.cluster.model.common.InstanceOsServiceModel;
 import io.swagger.annotations.ApiModel;
 import lombok.*;
 
@@ -22,49 +23,5 @@ public class InstanceOsServiceCloudPlatformModel extends BaseCloudPlatformModel 
      */
     private List<InstanceOsServiceModel> services;
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static final class InstanceOsServiceModel implements Serializable{
 
-        /**
-         * id
-         */
-        private Integer id;
-
-        /**
-         * binary
-         */
-        private String binary;
-
-        /**
-         * host
-         */
-        private String host;
-
-        /**
-         * zone
-         */
-        private String zone;
-
-        /**
-         * status
-         */
-        private String status;
-
-        /**
-         * state
-         */
-        private String state;
-
-        /**
-         *
-         */
-        private String disabledReason;
-
-        /**
-         *
-         */
-        private String updatedAt;
-    }
 }
