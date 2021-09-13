@@ -7,6 +7,8 @@ import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.InstallerConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InstallerConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InstallerConvertPageModel;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtDocker;
+import cn.cyberpeace.mp.devops.cluster.request.DockerInstallerData;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerRequest;
@@ -69,11 +71,16 @@ public class InstallerController {
     @GetMapping("/{id}")
     public Result<InstallerByIdResponse> getById(@PathVariable String id){
         InstallerConvertModel model = installerConverter.findById(id);
+        if (Objects.isNull(model)){
+            return new Result<>();
+        }
+        ExtDocker extDocker = model.getExtDocker();
         InstallerByIdResponse response = InstallerByIdResponse.builder().uuid(model.getUuid())
                 .name(model.getName()).description(model.getDescription()).logo(model.getLogo())
                 .categories(model.getCategories())
-                .deployType(model.getDeployType()).dockerFile(Objects.isNull(model.getExtDocker()) ? null : model.getExtDocker().getFile())
-                .resourceList(model.getResourceList()).startUpParameterList(model.getStartUpParameterList())
+                .deployType(model.getDeployType())
+                .dockerInstallerData(new DockerInstallerData(model.getStartUpParameterList(),null,Objects.nonNull(extDocker) ? extDocker.getFile() : null))
+                .resourceList(model.getResourceList())
                 .build();
         return new Result<>(response);
     }

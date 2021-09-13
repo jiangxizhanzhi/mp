@@ -22,4 +22,7 @@ public class DockerInstallerData {
 
     @ApiModelProperty("docker文件流")
     private MultipartFile dockerFile;
+
+    @ApiModelProperty("docker文件地址")
+    private String dockerUrl;
 }
