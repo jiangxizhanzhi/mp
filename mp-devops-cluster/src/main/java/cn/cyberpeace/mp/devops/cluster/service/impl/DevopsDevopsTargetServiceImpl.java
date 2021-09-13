@@ -41,10 +41,12 @@ public class DevopsDevopsTargetServiceImpl implements DevopsTargetService {
     @Override
     public Integer updateById(Device device) {
         if (Objects.nonNull(device) && device.isSuccess()) {
-            TargetModel oldTargetModel = imageMapper.get(device.getUuid());
-            TargetModel targetModel = convertDevice(device);
-            targetModel.setIsPublic(oldTargetModel.getIsPublic());
-            return imageMapper.updateById(targetModel);
+            TargetModel oldTargetModel = imageMapper.findByUuid(device.getUuid());
+            if (Objects.nonNull(oldTargetModel)) {
+                TargetModel targetModel = convertDevice(device);
+                targetModel.setIsPublic(oldTargetModel.getIsPublic());
+                return imageMapper.updateById(targetModel);
+            }
         }
         return 0;
     }
@@ -57,6 +59,7 @@ public class DevopsDevopsTargetServiceImpl implements DevopsTargetService {
         targetModel.setRole(device.getRole());
         targetModel.setMainCategory(device.getCategory());
         targetModel.setSubCategory(device.getSecondCategory());
+        targetModel.setThirdCategory(device.getL3Category());
         targetModel.setImageType(device.getImageType());
         ExtVm extVm = device.getExtVm();
         if (Objects.nonNull(extVm)) {

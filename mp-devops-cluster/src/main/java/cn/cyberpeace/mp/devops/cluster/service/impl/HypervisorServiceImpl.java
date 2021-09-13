@@ -3,9 +3,13 @@ package cn.cyberpeace.mp.devops.cluster.service.impl;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.HypervisorPageResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.HypervisorStatisticsResult;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.InstanceOsServicePageResult;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.NetworkAgentPageResult;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.common.Hypervisor;
+import cn.cyberpeace.mp.devops.cluster.model.common.InstanceOsServiceModel;
+import cn.cyberpeace.mp.devops.cluster.model.common.NetworkAgentModel;
 import cn.cyberpeace.mp.devops.cluster.service.HypervisorService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
@@ -68,7 +72,17 @@ public class HypervisorServiceImpl extends BaseOpenStackServiceImpl implements H
      * @return
      */
     public InstanceOsServiceCloudPlatformModel osServicesStateFromInstances(){
-       return super.sendGet(URL_VERSION + "/instances/os-services", InstanceOsServiceCloudPlatformModel.class);
+        InstanceOsServicePageResult pageResult = super.sendGet(URL_VERSION + "/instances/os-services", InstanceOsServicePageResult.class);
+        if (Objects.isNull(pageResult) || Objects.isNull(pageResult.getData())){
+            return null;
+        }
+        CloudPlatformPageResult<InstanceOsServiceModel> data = pageResult.getData();
+        List<InstanceOsServiceModel> list = data.getList();
+        InstanceOsServiceCloudPlatformModel model = new InstanceOsServiceCloudPlatformModel();
+        model.setServices(CollectionUtils.isEmpty(list) ? Lists.newArrayList() : list);
+        model.setTotal(data.getTotal());
+        model.setCode(pageResult.getCode());
+        return model;
     }
 
     /**
@@ -76,7 +90,17 @@ public class HypervisorServiceImpl extends BaseOpenStackServiceImpl implements H
      * @return
      */
     public NetworkAgentCloudPlatformModel agentsStateFromNetworks(){
-       return super.sendGet(URL_VERSION + "/networks/agents", NetworkAgentCloudPlatformModel.class);
+        NetworkAgentPageResult pageResult = super.sendGet(URL_VERSION + "/networks/agents", NetworkAgentPageResult.class);
+        if (Objects.isNull(pageResult) || Objects.isNull(pageResult.getData())){
+            return null;
+        }
+        CloudPlatformPageResult<NetworkAgentModel> data = pageResult.getData();
+        List<NetworkAgentModel> list = data.getList();
+        NetworkAgentCloudPlatformModel model = new NetworkAgentCloudPlatformModel();
+        model.setAgents(CollectionUtils.isEmpty(list) ? Lists.newArrayList() : list);
+        model.setTotal(data.getTotal());
+        model.setCode(pageResult.getCode());
+        return model;
     }
 
 
