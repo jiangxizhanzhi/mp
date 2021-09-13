@@ -146,8 +146,8 @@ public class RealEquipmentController {
         RealEquipmentByIdResponse response = RealEquipmentByIdResponse.builder().uuid(realEquipment.getUuid())
                 .name(realEquipment.getName()).logo(realEquipment.getLogo()).role(realEquipment.getRole())
                 .mainCategory(realEquipment.getMainCategory()).subCategory(realEquipment.getSubCategory())
-                .extSystemInfo(realEquipment.getExtSystemInfo()).extEntity(realEquipment.getExtEntity())
-                .description(realEquipment.getDescription()).build();
+                .systemInfo(realEquipment.getExtSystemInfo()).extEntity(realEquipment.getExtEntity())
+                .description(realEquipment.getDescription()).extEntityAccess(realEquipment.getExtEntityAccess()).build();
         return new Result(response);
     }
 
@@ -156,7 +156,7 @@ public class RealEquipmentController {
      */
     @ApiOperation("新增")
     @PostMapping("/add")
-    public ServiceResult add(RealEquipmentRequest request){
+    public ServiceResult add(@RequestBody RealEquipmentRequest request){
         RealEquipment realEquipment = realEquipmentConverter.add(request);
         return realEquipment.isSuccess() ? ServiceResult.successful() :ServiceResult.fail("");
     }
@@ -166,7 +166,7 @@ public class RealEquipmentController {
      */
     @ApiOperation("更新")
     @PutMapping("/update")
-    public ServiceResult update(RealEquipmentRequest request){
+    public ServiceResult update(@RequestBody RealEquipmentRequest request){
         if (StringUtils.isBlank(request.getUuid())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
