@@ -18,7 +18,7 @@ public class RunTimeLogResponse {
     private String logName;
 
     @ApiModelProperty(value = "日志文件大小", required = true)
-    private Integer size;
+    private Long size;
 
     @ApiModelProperty(value = "日志文件最新时间-yyyy-MM-dd HH:mm:ss", required = true)
     private LocalDateTime lastModifyTime;

@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.InstanceConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InstanceConvertModel;
 import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
 import cn.cyberpeace.mp.devops.cluster.model.InstanceCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.common.InstanceModel;
 import cn.cyberpeace.mp.devops.cluster.request.InstancePageRequest;
 import cn.cyberpeace.mp.devops.cluster.service.VmService;
 import org.apache.commons.collections4.CollectionUtils;
@@ -49,7 +50,7 @@ public class InstanceConverterImpl implements InstanceConverter {
         }
         List<InstanceConvertModel.Model> list = model.getInstances().stream().map(instanceModel ->
                 InstanceConvertModel.Model.builder().name(instanceModel.getName()).node(instanceModel.getHostname())
-                        .addressList(instanceModel.getAddresses().stream().map(InstanceCloudPlatformModel.InstanceModel.Address::getIp)
+                        .addressList(instanceModel.getAddresses().stream().map(InstanceModel.Address::getIp)
                                 .collect(Collectors.toList()))
                         .status(CloudPlatformEnum.fromValue(instanceModel.getStatus())).createTime(instanceModel.getCreatedAt()).build()
         ).collect(Collectors.toList());

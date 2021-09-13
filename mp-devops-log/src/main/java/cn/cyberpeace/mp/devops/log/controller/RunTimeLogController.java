@@ -4,12 +4,18 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.devops.log.request.BasePageRequest;
 import cn.cyberpeace.mp.devops.log.response.RunTimeLogResponse;
-import cn.cyberpeace.mp.devops.log.service.RunTimeLogService;
+import cn.cyberpeace.mp.devops.log.service.RuntimeLogService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
@@ -18,7 +24,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,24 +40,20 @@ import org.springframework.web.bind.annotation.RestController;
 public class RunTimeLogController {
 
     @Autowired
-    private RunTimeLogService runTimeLogService;
+    private RuntimeLogService runTimeLogService;
 
     @GetMapping("/logs")
     @ApiOperation(value = "分页查询运行时日志", notes = "")
-    public ListObjServiceResult<RunTimeLogResponse> queryLogs(@RequestBody BasePageRequest basePageRequest) {
-        return new ListObjServiceResult(runTimeLogService.queryRuntimeLog()).asResult();
+    public ListObjServiceResult<RunTimeLogResponse> queryLogs(BasePageRequest basePageRequest) {
+        return new ListObjServiceResult(runTimeLogService.queryRuntimeLog(basePageRequest)).asResult();
     }
 
     @PostMapping()
     @ApiOperation(value = "日志下载", notes = "")
-    public ResponseEntity<Resource> downloadPcapFile(HttpServletResponse httpServletResponse, @RequestBody List<String> logFileNames) {
+    public ResponseEntity<Resource> downloadLogFiles(HttpServletResponse httpServletResponse, @RequestBody List<String> logFileNames) {
         InputStreamResource resource = null;
         try {
-            resource = new InputStreamResource(new InputStream() {
-                @Override public int read() throws IOException {
-                    return 0;
-                }
-            });
+            resource = new InputStreamResource(runTimeLogService.zipDownLoadFile(logFileNames));
         } catch (Exception e) {
             throw new MpRuntimeException("获取文件流失败");
         }

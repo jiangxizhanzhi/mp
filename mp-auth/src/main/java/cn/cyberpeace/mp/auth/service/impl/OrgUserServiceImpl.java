@@ -154,6 +154,13 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
     }
 
     @Override
+    public Integer getUserCnt(String orgId) {
+        Integer userCnt = getModelMapper().selectUserCnt(orgId);
+
+        return userCnt;
+    }
+
+    @Override
     public PageInfo<UserDto> pageUsersByOrg(OrgUserPageRequest req) {
 
         List<String> idsList = null;

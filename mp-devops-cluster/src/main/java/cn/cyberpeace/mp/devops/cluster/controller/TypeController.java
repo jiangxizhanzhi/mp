@@ -235,6 +235,22 @@ public class TypeController {
      * 查询所有服务分类
      * @return
      */
+    @ApiOperation("查询所有服务管理分类")
+    @GetMapping("/service-mg-categories")
+    public Result<TypeAllResponse> serviceMgCategories(){
+        TypeAllConvertModel serviceCategories = typeConverter.findServiceCategories();
+        TypeAllConvertModel deployType = typeConverter.findDeployType();
+        TypeAllResponse response = new TypeAllResponse();
+        response.setDeployType(Objects.nonNull(deployType) ?  deployType.getIdIntegerModelList() : null);
+        response.setServiceCategories(Objects.nonNull(serviceCategories) ?
+                serviceCategories.getIdStringModelList() : null);
+        return new Result<>(response);
+    }
+
+    /**
+     * 查询所有服务分类
+     * @return
+     */
     @ApiOperation("查询所有服务分类")
     @GetMapping("/service-categories")
     public Result<TypeAllResponse> serviceCategories(){
