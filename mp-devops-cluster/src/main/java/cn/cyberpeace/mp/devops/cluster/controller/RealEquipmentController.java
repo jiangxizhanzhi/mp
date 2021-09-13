@@ -145,7 +145,7 @@ public class RealEquipmentController {
         RealEquipment realEquipment = realEquipmentConverter.findById(id);
         RealEquipmentByIdResponse response = RealEquipmentByIdResponse.builder().uuid(realEquipment.getUuid())
                 .name(realEquipment.getName()).logo(realEquipment.getLogo()).role(realEquipment.getRole())
-                .mainCategory(realEquipment.getMainCategory()).subCategory(realEquipment.getSubCategory())
+                .mainCategory(realEquipment.getMainCategory()).subCategory(realEquipment.getSubCategory()).thirdCategory(realEquipment.getThirdCategory())
                 .systemInfo(realEquipment.getExtSystemInfo()).extEntity(realEquipment.getExtEntity())
                 .description(realEquipment.getDescription()).extEntityAccess(realEquipment.getExtEntityAccess()).build();
         return new Result(response);

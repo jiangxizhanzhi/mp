@@ -57,6 +57,12 @@ public class RealEquipmentByIdResponse extends BaseCloudPlatformResponse{
     private Integer subCategory;
 
     /**
+     * 子分类
+     */
+    @ApiModelProperty("三级分类")
+    private Integer thirdCategory;
+
+    /**
      * 系统信息
      */
     @ApiModelProperty("系统信息")
