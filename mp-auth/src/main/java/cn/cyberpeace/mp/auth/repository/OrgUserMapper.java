@@ -33,6 +33,8 @@ public interface OrgUserMapper extends BaseModelMapper<OrgUserModel> {
      */
     List<UserModel> listUsers(@Param("orgIds") List<String> orgIds, @Param("username") String username, @Param("userIds") List<String> userIds);
 
+    Integer selectUserCnt(@Param("orgId") String orgId);
+
     void deleteByUserId(@Param("userId") String userId);
 
     void deleteByOrgId(@Param("orgId") String orgId);
