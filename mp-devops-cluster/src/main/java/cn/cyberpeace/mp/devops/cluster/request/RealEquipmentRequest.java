@@ -36,7 +36,7 @@ public class RealEquipmentRequest extends BaseRequest{
     /**
      * logo文件流
      */
-    @ApiModelProperty("logo文件流")
+    @ApiModelProperty(value = "logo文件流",hidden = true)
     private MultipartFile logoFile;
 
     /**

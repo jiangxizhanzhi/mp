@@ -41,6 +41,12 @@ public class ImagesPageResponse  extends BaseCloudPlatformResponse  {
     private Integer subCategory;
 
     /**
+     * 子分类
+     */
+    @ApiModelProperty("子分类")
+    private Integer thirdCategory;
+
+    /**
      * 虚拟类型：vm/container
      */
     @ApiModelProperty("虚拟类型：vm/container")

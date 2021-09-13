@@ -163,8 +163,8 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
     @Transactional
     @Override
     public RealEquipment add(RealEquipmentRequest request) {
-        String logo = targetLogoService.uploadLogo(request.getLogoFile());
         if (Objects.nonNull(request.getLogoFile()) && request.getLogoFile().getSize() > 0 ){
+            String logo = targetLogoService.uploadLogo(request.getLogoFile());
             request.setLogo(logo);
         }
         Device device = convertRequest(request);
@@ -178,8 +178,8 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
 
     @Override
     public RealEquipment update(RealEquipmentRequest request) {
-        String logo = targetLogoService.uploadLogo(request.getLogoFile());
         if (Objects.nonNull(request.getLogoFile()) && request.getLogoFile().getSize() > 0 ){
+            String logo = targetLogoService.uploadLogo(request.getLogoFile());
             request.setLogo(logo);
         }
         Device device = convertRequest(request);
