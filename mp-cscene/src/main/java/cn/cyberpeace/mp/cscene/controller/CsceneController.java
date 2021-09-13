@@ -1,8 +1,13 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
+import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCreateContext;
+import cn.cyberpeace.mp.cscene.bo.CsceneStatBO;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
 import io.swagger.annotations.Api;
@@ -14,66 +19,92 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-@Api(value = "综合场景", tags = "CSCENE-综合场景")
+import java.util.List;
+
+@Api(value = "场景模板", tags = "CSCENE-场景模板")
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/cscenes")
 @Data
-public class CsceneController {
+public class CsceneController implements BaseModelListControllerBase {
 
-    private CsceneService csceneService;
+    private CsceneService modelService;
 
     @Autowired
     public CsceneController(CsceneService csceneService) {
-        setCsceneService(csceneService);
+        setModelService(csceneService);
     }
 
-    @ApiOperation("获取指定id综合场景")
+    @ApiOperation("获取分页数据")
+    @GetMapping
+    public ListObjServiceResult<CsceneBO> list(QueryParams queryParams) {
+        handleQueryParams("list", queryParams);
+        return getModelService().listBO(queryParams, false);
+    }
+
+    @ApiOperation("获取指定id场景模板")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "综合场景id", dataTypeClass = String.class),
     })
     @GetMapping(params = "id")
     public ServiceResult<CsceneBO> get(@RequestParam String id) {
-        return csceneService.getById(id).asResult();
+        return modelService.getById(id, false).asResult();
     }
 
-    @ApiOperation(value = "保存（创建/更新）综合场景", notes="请忽略test_scenes和app_scenes字段")
+    @ApiOperation("导出指定id场景模板")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "综合场景id", dataTypeClass = String.class),
+    })
+    @GetMapping(value = "/export", params = "id")
+    public ServiceResult<CsceneBO> export(@RequestParam String id) {
+        return modelService.export(id).asResult();
+    }
+
+    @ApiOperation(value = "保存（创建/更新）场景模板", notes="请忽略test_scenes和app_scenes字段")
     @PostMapping("/sync")
     public ServiceResult<CsceneBO> sync(@RequestBody CsceneBO csceneBO) {
-        return csceneService.sync(csceneBO).asResult();
+        return modelService.sync(csceneBO).asResult();
     }
 
-    @ApiOperation("创建综合场景测试实例")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "综合场景id", dataTypeClass = String.class),
-    })
-    @PostMapping(value = "/test_instance", params = "id")
-    public ServiceResult<CsceneInstanceBO> createTestInstance(@RequestParam String id) {
-        return csceneService.createTestInstance(id, false).asResult();
-    }
-
-    @ApiOperation("创建综合场景应用实例")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "综合场景id", dataTypeClass = String.class),
-    })
-    @PostMapping(value = "/app_instance", params = "id")
-    public ServiceResult<CsceneInstanceBO> createAppInstance(@RequestParam String id) {
-        return csceneService.createAppInstance(id, true).asResult();
-    }
-
-    @ApiOperation("删除综合场景")
+    @ApiOperation("删除场景模板")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "综合场景id", dataTypeClass = String.class),
     })
     @DeleteMapping(params = "id")
     public ServiceResult<Boolean> delete(@RequestParam String id) {
-        return csceneService.delete(id).asResult();
+        return modelService.delete(id).asResult();
     }
 
-    @ApiOperation("批量删除综合场景")
+    @ApiOperation("批量删除场景模板")
     @DeleteMapping("/bulk_delete")
     public ServiceResult<Integer> bulkDelete(@RequestBody String[] ids) {
-        return csceneService.bulkDelete(ids).asResult();
+        return modelService.bulkDelete(ids).asResult();
+    }
+
+    @ApiOperation("创建场景模板测试实例")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "综合场景id", dataTypeClass = String.class),
+    })
+    @PostMapping(value = "/test_instance", params = "id")
+    public ServiceResult<CsceneInstanceBO> createTestInstance(@RequestParam String id,
+                                                              @RequestBody CsceneInstanceCreateContext createContext) {
+        return modelService.createTestInstance(id, true).asResult();
+    }
+
+    @ApiOperation("创建场景模板应用实例")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "综合场景id", dataTypeClass = String.class),
+    })
+    @PostMapping(value = "/app_instance", params = "id")
+    public ServiceResult<CsceneInstanceBO> createAppInstance(@RequestParam String id,
+                                                             @RequestBody CsceneInstanceCreateContext createContext) {
+        return modelService.createAppInstance(id, true).asResult();
+    }
+
+    @ApiOperation("获取场景模板统计数据")
+    @GetMapping("/stat")
+    public ServiceResult<List<CsceneStatBO>> stat(@RequestParam String[] ids) {
+        return getModelService().stat(ids).asResult();
     }
 
 }
