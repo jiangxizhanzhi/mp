@@ -40,6 +40,13 @@ public interface ImageMapper extends BaseModelMapper<TargetModel> {
     Integer insert(TargetModel targetModel);
 
     /**
+     * 新增
+     * @param uuid
+     * @return
+     */
+    TargetModel findByUuid(String uuid);
+
+    /**
      * 根据ID更新信息
      * @param targetModel
      * @return

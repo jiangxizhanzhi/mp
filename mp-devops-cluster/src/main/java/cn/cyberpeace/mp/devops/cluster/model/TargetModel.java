@@ -41,6 +41,11 @@ public class TargetModel extends BaseModel {
     private Integer subCategory;
 
     /**
+     * 子分类
+     */
+    private Integer thirdCategory;
+
+    /**
      * 镜像类型
      */
     private String imageType;
