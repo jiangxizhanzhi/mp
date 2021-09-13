@@ -31,6 +31,11 @@ public class ImagePageDTO extends BasePageDTO{
     private Integer subCategory;
 
     /**
+     * 三级分类
+     */
+    private Integer thirdCategory;
+
+    /**
      * 搜索类型，0：全部; 1：'vm','container','simple'; 2: entity
      */
     private Integer searchType;

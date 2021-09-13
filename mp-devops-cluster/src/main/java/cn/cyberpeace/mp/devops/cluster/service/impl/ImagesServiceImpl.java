@@ -10,6 +10,7 @@ import org.apache.http.HttpResponse;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.io.IOException;
 
 @Service
 public class ImagesServiceImpl extends BaseOpenStackServiceImpl implements ImagesService {
@@ -52,6 +53,11 @@ public class ImagesServiceImpl extends BaseOpenStackServiceImpl implements Image
 
     @Override
     public String upload(String params,File file) {
-        return super.sendFormDataPost(CPCLOUD_DEVICE + URL_VERSION + "/upload/" + params,file);
+        try {
+            return super.sendFormDataPost(CPCLOUD_DEVICE + URL_VERSION + "/upload/" + params,file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

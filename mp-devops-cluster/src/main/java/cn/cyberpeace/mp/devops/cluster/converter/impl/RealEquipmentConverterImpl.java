@@ -87,6 +87,7 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
         ImagePageDTO dto = new ImagePageDTO();
         dto.setMainCategory(request.getCategory());
         dto.setSubCategory(request.getSecondCategory());
+        dto.setThirdCategory(request.getThirdCategory());
         dto.setImageType(ImageTypeEnum.ENTITY.toValue());
         dto.setUseStatus(request.getUseStatus());
         dto.setName(request.getName());
