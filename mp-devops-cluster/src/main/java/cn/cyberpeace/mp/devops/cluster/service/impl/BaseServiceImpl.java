@@ -244,13 +244,8 @@ public class BaseServiceImpl {
     }
 
 
-    protected String sendFormDataPost(String url, File file){
-        try {
-            return HttpUtils.doFormDataPost(url,file);
-        } catch (Exception e) {
-            log.error("上传文件失败，失败信息：{}",e.getMessage());
-        }
-        return null;
+    protected String sendFormDataPost(String url, File file) throws IOException {
+        return HttpUtils.doFormDataPost(url,file);
     }
 
     protected <T extends BaseModel> T sendFormDataPost(String url, HttpEntity httpEntity ,Class<T> valueType) throws IOException {
@@ -261,16 +256,10 @@ public class BaseServiceImpl {
     }
 
 
-    protected <T extends BaseModel> T sendFormDataPut(String url, HttpEntity httpEntity ,Class<T> valueType){
-        T model = null;
-        String result = "";
-        try {
-            result = HttpUtils.doFormDataPut(url,httpEntity);
-            model = JsonUtils.toSnakeObject(result,valueType);
-            log.info("=====FormData调用url：{},参数：{},返回结果：{}",url,httpEntity,result);
-        } catch (Exception e) {
-            log.error("上传文件失败，失败信息：{}",e);
-        }
+    protected <T extends BaseModel> T sendFormDataPut(String url, HttpEntity httpEntity ,Class<T> valueType) throws IOException {
+        String result = HttpUtils.doFormDataPut(url,httpEntity);
+        T model = JsonUtils.toSnakeObject(result,valueType);
+        log.info("=====FormData调用url：{},参数：{},返回结果：{}",url,httpEntity,result);
         return model;
     }
 }

@@ -111,7 +111,7 @@ public class BaseOpenStackServiceImpl extends BaseServiceImpl {
      * @return
      */
     @Override
-    protected String sendFormDataPost(String api, File file){
+    protected String sendFormDataPost(String api, File file) throws IOException {
         return super.sendFormDataPost(devopsConfig.getCpUrl().concat(api),file);
     }
 
@@ -133,7 +133,7 @@ public class BaseOpenStackServiceImpl extends BaseServiceImpl {
      * @return
      */
     @Override
-    protected <T extends BaseModel> T sendFormDataPut(String api, HttpEntity httpEntity ,Class<T> valueType){
+    protected <T extends BaseModel> T sendFormDataPut(String api, HttpEntity httpEntity ,Class<T> valueType) throws IOException {
         return super.sendFormDataPut(devopsConfig.getCpUrl().concat(api),httpEntity,valueType);
     }
 }
