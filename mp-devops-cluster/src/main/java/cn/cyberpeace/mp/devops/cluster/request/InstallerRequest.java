@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.request;
 
 import cn.cyberpeace.mp.devops.cluster.model.common.Resource;
-import cn.cyberpeace.mp.devops.cluster.model.common.StartUpParameter;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -61,22 +60,6 @@ public class InstallerRequest extends BaseRequest {
 
     @ApiModelProperty("docker参数")
     private DockerInstallerData dockerInstallerData;
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public class DockerInstallerData {
-
-        /**
-         * 启动参数（包装对象）
-         */
-        @ApiModelProperty(value = "启动参数")
-        private List<StartUpParameter> startUpParameterList;
-
-        @ApiModelProperty("docker文件流")
-        private MultipartFile dockerFile;
-    }
-
 
     @ApiModelProperty("windows服务资源流")
     private List<MultipartFile> multipartFiles;

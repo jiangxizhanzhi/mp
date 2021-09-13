@@ -41,17 +41,19 @@ public class SceneService {
             sceneHandler.save();
             sceneHandler.initiate();
             sceneHandler.save();
+            sceneHandler.create();
+            sceneHandler.save();
         } catch (SceneNotExistException e) {
             return new ServiceResult<>(null, SceneErrorCode.SCENE_NOT_EXIST);
         }
         return new ServiceResult<>(sceneHandler.toData());
     }
 
-    public ServiceResult<SceneDataBO> create(SceneConfigDataBO sceneConfigDataBO) {
+    public ServiceResult<SceneDataBO> createFromSceneConfig(SceneConfigDataBO sceneConfigDataBO) {
         return create(sceneConfigDataBO.exportToScene());
     }
 
-    public ServiceResult<SceneDataBO> create(String sceneConfigId) {
+    public ServiceResult<SceneDataBO> createFromSceneConfig(String sceneConfigId) {
         var sceneConfigDataBO = sceneConfigService.get(sceneConfigId, false, null)
                 .getSource();
 
@@ -59,7 +61,7 @@ public class SceneService {
             return new ServiceResult<>(null, SceneErrorCode.SCENE_NOT_EXIST);
         }
 
-        return create(sceneConfigDataBO);
+        return createFromSceneConfig(sceneConfigDataBO);
     }
 
     public ServiceResult<Boolean> delete(String id, boolean logic) {

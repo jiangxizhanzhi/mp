@@ -86,9 +86,13 @@ public class ImagesConverterImpl implements ImagesConverter {
         dto.setMainCategory(request.getMainCategory());
         dto.setSubCategory(request.getSubCategory());
         dto.setQuickCreateSupport(request.getQuickCreateSupport());
-        dto.setImageType(Objects.nonNull(request.getImageType()) ? request.getImageType().toValue() : "");
+        if (Objects.isNull(request.getImageType())){
+            dto.setSearchType(1);
+        }else {
+            dto.setImageType(Objects.nonNull(request.getImageType()) ? request.getImageType().toValue() : "");
+        }
         dto.setName(request.getName());
-        dto.setOwner(UserUtils.getLoginUser().getId());
+        dto.setOwner(Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : null);
         dto.setIsPublic(PublicEnum.ALL_PUBLIC);
         dto.setOffset((request.getPage() - 1) * request.getPerPage());
         dto.setLimit(request.getPerPage());

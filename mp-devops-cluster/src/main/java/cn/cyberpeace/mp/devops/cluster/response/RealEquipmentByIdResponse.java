@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.response;
 
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntity;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntityAccess;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtGateway;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
 import io.swagger.annotations.ApiModel;
@@ -9,6 +10,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -57,7 +60,7 @@ public class RealEquipmentByIdResponse extends BaseCloudPlatformResponse{
      * 系统信息
      */
     @ApiModelProperty("系统信息")
-    private ExtSystemInfo extSystemInfo;
+    private ExtSystemInfo systemInfo;
 
     /**
      * 实体信息
@@ -69,6 +72,12 @@ public class RealEquipmentByIdResponse extends BaseCloudPlatformResponse{
      * 扩展网关信息
      */
     private ExtGateway extGateway;
+
+    /**
+     * 交换机
+     */
+    @ApiModelProperty("交换机接入配置")
+    private List<ExtEntityAccess> extEntityAccess;
 
     /**
      * 描述

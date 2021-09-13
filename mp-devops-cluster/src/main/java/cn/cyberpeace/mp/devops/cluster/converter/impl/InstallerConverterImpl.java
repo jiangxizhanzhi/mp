@@ -141,6 +141,8 @@ public class InstallerConverterImpl implements InstallerConverter {
         }
         model.setExtNormal(extNormal);
         model.setSuccess(installer.isSuccess());
+        model.setMessage(installer.getMessage());
+        model.setMessageZh(installer.getMessageZh());
         return model;
     }
 
@@ -149,7 +151,8 @@ public class InstallerConverterImpl implements InstallerConverter {
         installer.setName(request.getName());
         installer.setDescription(request.getDescription());
         installer.setLogo(request.getLogo());
-        installer.setCategories(String.join(",",request.getCategories()));
+        installer.setCategories(CollectionUtils.isEmpty(request.getCategories()) ? null :
+                request.getCategories().stream().reduce((a,b) -> a.concat(b)).orElse("") );
         installer.setDeployType(request.getDeployType());
         if (Objects.nonNull(request.getDockerInstallerData())
                 && CollectionUtils.isNotEmpty(request.getDockerInstallerData().getStartUpParameterList())) {

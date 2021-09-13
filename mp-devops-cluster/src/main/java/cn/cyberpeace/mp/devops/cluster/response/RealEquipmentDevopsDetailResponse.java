@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.devops.cluster.response;
 
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntity;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
+import cn.cyberpeace.mp.devops.cluster.model.common.RealEquipmentConnection;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -78,4 +79,11 @@ public class RealEquipmentDevopsDetailResponse extends BaseCloudPlatformResponse
      */
     @ApiModelProperty("磁盘使用率")
     private BigDecimal diskPercent;
+
+
+    /**
+     * 登录链接信息
+     */
+    @ApiModelProperty("登录链接信息")
+    private List<RealEquipmentConnection> connections;
 }

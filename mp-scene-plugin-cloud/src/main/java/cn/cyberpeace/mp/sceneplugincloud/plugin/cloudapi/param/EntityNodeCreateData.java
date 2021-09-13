@@ -1,17 +1,23 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param;
 
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.HttpData;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class EntityNodeCreateData implements HttpData {
     private String name;
     private String requestUser;
     private List<Interface> interfaces;
 
     @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class Interface {
         private String interfaceName;
         private String linkType;
@@ -22,9 +28,13 @@ public class EntityNodeCreateData implements HttpData {
         public static class LinkType {
             public static final String ACCESS = "access";
             public static final String TRUNK = "trunk";
+
+            private LinkType() {}
         }
 
         @Data
+        @AllArgsConstructor
+        @NoArgsConstructor
         public static class AccessMode {
             private String protocol;
             private String ipAddress;

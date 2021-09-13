@@ -49,7 +49,7 @@ public class CsceneController {
     })
     @PostMapping(value = "/test_instance", params = "id")
     public ServiceResult<CsceneInstanceBO> createTestInstance(@RequestParam String id) {
-        return csceneService.createTestInstance(id, true).asResult();
+        return csceneService.createTestInstance(id, false).asResult();
     }
 
     @ApiOperation("创建综合场景应用实例")

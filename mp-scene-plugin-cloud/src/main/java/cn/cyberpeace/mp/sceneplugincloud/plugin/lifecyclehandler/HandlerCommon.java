@@ -2,7 +2,9 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import lombok.Data;
@@ -44,6 +46,61 @@ public class HandlerCommon {
         return existCidrs;
     }
 
+    public String genResourceName(String name) {
+        return StringUtils.joinWith("_", CloudSingleton.cloudAppConfig.getCpcloudResourceGroup(), name);
+    }
+
+    /**
+     * 确认连接使用的辅助网络所在节点
+     * @param cloudElement 源节点
+     * @param connectedCloudElement 连接节点
+     * @return 辅助网络所在节点
+     */
+    public CloudPluginSceneElementBO confirmAuxiliaryNetworkCloudElement(
+            CloudPluginSceneElementBO cloudElement, CloudPluginSceneElementBO connectedCloudElement) {
+        if (cloudElement == null || connectedCloudElement == null) {
+            if (cloudElement != null && Boolean.TRUE.equals(cloudElement.getAuxiliaryNetworkOn())) {
+                return cloudElement;
+            }
+            if (connectedCloudElement != null && Boolean.TRUE.equals(connectedCloudElement.getAuxiliaryNetworkOn())) {
+                return connectedCloudElement;
+            }
+            return null;
+        }
+
+        Integer virtualType = cloudElement.getVirtualType();
+        if (virtualType != null && virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH)) {
+            return cloudElement;
+        }
+
+        Integer connectedVirtualType = connectedCloudElement.getVirtualType();
+        if (connectedVirtualType != null
+                && connectedVirtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH)) {
+            return connectedCloudElement;
+        }
+
+        if (virtualType != null && virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)
+                && Boolean.TRUE.equals(cloudElement.getAuxiliaryNetworkOn())) {
+            return cloudElement;
+        }
+
+        if (connectedVirtualType != null
+                && connectedVirtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)
+                && Boolean.TRUE.equals(connectedCloudElement.getAuxiliaryNetworkOn())) {
+            return connectedCloudElement;
+        }
+
+        if (Boolean.TRUE.equals(cloudElement.getAuxiliaryNetworkOn())) {
+            return cloudElement;
+        }
+
+        if (Boolean.TRUE.equals(connectedCloudElement.getAuxiliaryNetworkOn())) {
+            return connectedCloudElement;
+        }
+
+        return null;
+    }
+
     /**
      * 获得节点连接的不透明元素，忽略透明模式节点
      * @param nodeId 节点id
@@ -67,7 +124,7 @@ public class HandlerCommon {
      */
     public List<SceneElementPortBO> getEleConnectedOpaqueSrcPorts(String nodeId) {
         List<SceneElementPortBO> connectedOpaqueSrcPorts = new ArrayList<>();
-        var srcElement = getPluginHandler().getSrcElement(nodeId);
+        var srcElement = pluginHandler.getSrcElement(nodeId);
         var srcPorts = srcElement.getPorts();
         if (srcPorts == null) {
             return connectedOpaqueSrcPorts;
@@ -133,7 +190,7 @@ public class HandlerCommon {
             return null;
         }
 
-        return getPluginHandler().getPortSrcElement(connectedSrcPort.getId());
+        return pluginHandler.getPortSrcElement(connectedSrcPort.getId());
     }
 
 }

@@ -9,10 +9,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.SerialPortConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.TypeConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.*;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntity;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntityAccess;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
-import cn.cyberpeace.mp.devops.cluster.model.common.SnmpConfig;
+import cn.cyberpeace.mp.devops.cluster.model.common.*;
 import cn.cyberpeace.mp.devops.cluster.request.*;
 import cn.cyberpeace.mp.devops.cluster.response.*;
 import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
@@ -149,8 +146,8 @@ public class RealEquipmentController {
         RealEquipmentByIdResponse response = RealEquipmentByIdResponse.builder().uuid(realEquipment.getUuid())
                 .name(realEquipment.getName()).logo(realEquipment.getLogo()).role(realEquipment.getRole())
                 .mainCategory(realEquipment.getMainCategory()).subCategory(realEquipment.getSubCategory())
-                .extSystemInfo(realEquipment.getExtSystemInfo()).extEntity(realEquipment.getExtEntity())
-                .description(realEquipment.getDescription()).build();
+                .systemInfo(realEquipment.getExtSystemInfo()).extEntity(realEquipment.getExtEntity())
+                .description(realEquipment.getDescription()).extEntityAccess(realEquipment.getExtEntityAccess()).build();
         return new Result(response);
     }
 
@@ -159,7 +156,7 @@ public class RealEquipmentController {
      */
     @ApiOperation("新增")
     @PostMapping("/add")
-    public ServiceResult add(RealEquipmentRequest request){
+    public ServiceResult add(@RequestBody RealEquipmentRequest request){
         RealEquipment realEquipment = realEquipmentConverter.add(request);
         return realEquipment.isSuccess() ? ServiceResult.successful() :ServiceResult.fail("");
     }
@@ -169,7 +166,7 @@ public class RealEquipmentController {
      */
     @ApiOperation("更新")
     @PutMapping("/update")
-    public ServiceResult update(RealEquipmentRequest request){
+    public ServiceResult update(@RequestBody RealEquipmentRequest request){
         if (StringUtils.isBlank(request.getUuid())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
@@ -254,21 +251,58 @@ public class RealEquipmentController {
                 var disk = realEquipmentService.snmpForDisk(snmpParams);
             }
         }
-
+        RealEquipmentConnectionCloudPlatform connection = realEquipmentService.connection(id);
+        if (Objects.nonNull(connection)){
+            response.setConnections(connection.getItems());
+        }
         return new Result<>(response);
     }
 
 
     @ApiOperation("接口资源")
     @GetMapping("/network-card")
-    public PageResult<RealEquipmentNetworkCardPageResponse> pageNetworkCard(RealEquipmentNetworkCardPageRequest request){
-        return new PageResult<>(Lists.newArrayList(),100);
+    public PageResult<SnmpInterfaceResourceCloudPlatform.Interfaces> pageNetworkCard(RealEquipmentNetworkCardPageRequest request){
+        SnmpParams snmpParams = new SnmpParams();
+        snmpParams.setVersion(request.getVersion());
+        SnmpConfig snmpConfig = request.getSnmpConfig();
+        if (Objects.nonNull(snmpConfig)){
+            snmpParams.setIp(snmpConfig.getIp());
+            if (StringUtils.isNotBlank(snmpConfig.getCommunityName())){
+                SnmpBaseAuth snmpAuth = new SnmpBaseAuth();
+                snmpAuth.setCommunityName(snmpConfig.getCommunityName());
+                snmpParams.setAuth(snmpAuth);
+            }else{
+                SnmpAuth snmpAuth = new SnmpAuth();
+                snmpAuth.setAuthKey(snmpConfig.getAuthKey());
+                snmpAuth.setUsername(snmpConfig.getUsername());
+                snmpAuth.setPrivKey(snmpConfig.getPrivKey());
+                snmpParams.setAuth(snmpAuth);
+            }
+        }
+        SnmpInterfaceResourceCloudPlatform model = realEquipmentService.interfacesResource(snmpParams);
+        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getResult())){
+            return new PageResult<>(Lists.newArrayList(),0);
+        }
+        Integer page = request.getPage();
+        Integer perPage = request.getPerPage();
+        List<SnmpInterfaceResourceCloudPlatform.Interfaces> interfaces = model.getResult().subList((page - 1) * perPage, (page - 1) * perPage + perPage);
+        return new PageResult<>(interfaces,100);
     }
 
     @ApiOperation("场景引用")
     @GetMapping("/scenes")
     public PageResult<RealEquipmentScenesPageResponse> pageScenes(RealEquipmentScenesPageRequest request){
         return new PageResult<>(Lists.newArrayList(),100);
+    }
+
+    @ApiOperation("根据设备ID获取登录链接信息")
+    @GetMapping("/connection")
+    public Result<List<RealEquipmentConnection>> connection(@RequestParam String uuid){
+        RealEquipmentConnectionCloudPlatform connection = realEquipmentService.connection(uuid);
+        if (Objects.isNull(connection)){
+            return new Result<>();
+        }
+        return new Result<>(connection.getItems());
     }
 
     @ApiOperation("根据交换机名称查询实体装备")
