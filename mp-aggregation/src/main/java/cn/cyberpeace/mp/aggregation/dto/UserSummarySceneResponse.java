@@ -16,8 +16,8 @@ import lombok.Data;
 public class UserSummarySceneResponse {
 
     @ApiModelProperty("场景数量")
-    private Integer sceneCount;
+    private Integer runningSceneCount;
 
     @ApiModelProperty("场景占比")
-    private Integer scenePercent;
+    private Double runningScenePercent;
 }

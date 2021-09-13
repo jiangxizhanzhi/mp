@@ -19,9 +19,9 @@ public class DailyUserActivityResponse {
     private String[] xAxis;
 
     @ApiModelProperty(notes = "用户数量")
-    private String[] userCount;
+    private Integer[] userCount;
 
     @ApiModelProperty(notes = "场景数量")
-    private String[] sceneCount;
+    private Integer[] sceneCount;
 
 }

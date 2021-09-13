@@ -206,6 +206,18 @@ public class Swagger2Config implements ModelPropertyBuilderPlugin {
                 .globalRequestParameters(CollectionUtil.toList(parameter)).groupName("situation-aware");
     }
 
+
+    @Bean
+    public Docket apiAgg() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .apiInfo(apiInfo())
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.aggregation"))
+                .paths(PathSelectors.any())
+                .build()
+                .globalRequestParameters(CollectionUtil.toList(parameter)).groupName("aggregation");
+    }
+
     @Bean
     public Docket apiOther() {
         return new Docket(DocumentationType.SWAGGER_2)

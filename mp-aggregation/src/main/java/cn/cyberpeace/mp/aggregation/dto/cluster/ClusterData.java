@@ -15,13 +15,13 @@ import lombok.Data;
 public class ClusterData {
 
     @ApiModelProperty("cpu数据")
-    private String[] CPUData;
+    private Integer[] CPUData;
 
     @ApiModelProperty("磁盘数据")
-    private String[] DISKData;
+    private Integer[] DISKData;
 
     @ApiModelProperty("内存数据")
-    private String[] RAMData;
+    private Integer[] RAMData;
 
     @ApiModelProperty("x轴")
     private String[] xAxis;
