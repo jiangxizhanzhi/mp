@@ -1,6 +1,10 @@
 package cn.cyberpeace.mp.aggregation.controller;
 
 import cn.cyberpeace.mp.aggregation.constant.ControllerConstant;
+import cn.cyberpeace.mp.aggregation.dto.DailyUserActivityResponse;
+import cn.cyberpeace.mp.aggregation.dto.UserResourceResponse;
+import cn.cyberpeace.mp.aggregation.dto.UserSummarySceneResponse;
+import cn.cyberpeace.mp.aggregation.dto.resource.ResourceStatisticsResponse;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class DashboardController {
 
     @GetMapping("/daily_user_activity")
-    public ServiceResult getDailyUserActivity() {
+    public ServiceResult<DailyUserActivityResponse> getDailyUserActivity() {
 
 
         return null;
@@ -28,7 +32,7 @@ public class DashboardController {
 
 
     @GetMapping("/get_resource_statistics")
-    public ServiceResult getResourceStatistics() {
+    public ServiceResult<ResourceStatisticsResponse> getResourceStatistics() {
 
 
         return null;
@@ -42,8 +46,8 @@ public class DashboardController {
         return null;
     }
 
-    @GetMapping("/user_summary")
-    public ServiceResult userSummary() {
+    @GetMapping("/user_summary_scene")
+    public ServiceResult<UserSummarySceneResponse> userSummary() {
 
 
         return null;
@@ -51,7 +55,7 @@ public class DashboardController {
 
 
     @GetMapping("/user_resource")
-    public ServiceResult userResource() {
+    public ServiceResult<UserResourceResponse> userResource() {
 
 
         return null;
