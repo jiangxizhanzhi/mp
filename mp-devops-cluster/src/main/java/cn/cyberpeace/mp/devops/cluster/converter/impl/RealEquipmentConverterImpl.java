@@ -217,7 +217,7 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
         RealEquipment convertModel = RealEquipment.builder().uuid(device.getUuid())
                 .name(device.getName()).role(device.getRole()).logo(device.getLogo())
                 .mainCategory(device.getCategory()).subCategory(device.getSecondCategory())
-                .description(device.getDescription()).extEntityAccess(device.getExtEntityAccess()).build();
+                .description(device.getDescription()).thirdCategory(device.getL3Category()).extEntityAccess(device.getExtEntityAccess()).build();
         convertModel.setSuccess(device.isSuccess());
         if (Objects.nonNull(extEntity)){
             ExtEntity entity = new ExtEntity();
@@ -264,6 +264,7 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
         device.setRole(request.getRole());
         device.setCategory(request.getMainCategory());
         device.setSecondCategory(request.getSubCategory());
+        device.setL3Category(request.getThirdCategory());
         device.setExtEntityAccess(request.getExtEntityAccess());
         final ExtEntity requestExtEntity = request.getExtEntity();
         if (Objects.nonNull(requestExtEntity)) {
