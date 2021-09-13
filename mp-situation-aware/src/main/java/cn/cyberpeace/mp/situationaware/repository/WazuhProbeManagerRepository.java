@@ -14,8 +14,6 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import static cn.cyberpeace.mp.situationaware.model.enums.ScriptType.valueOf;
-
 @Repository
 @Slf4j
 public class WazuhProbeManagerRepository {
@@ -74,7 +72,7 @@ public class WazuhProbeManagerRepository {
     private String buildExecCommandline(ProbeRequest probeRequest) {
         var commandLineBuilder = new StringBuilder();
         return commandLineBuilder.append(buildExecString(probeRequest))
-            .append(probeRequest.getScriptType().equals(ScriptType.BAT) ? "" :" ").append(buildScriptPath(probeRequest))
+            .append(probeRequest.getScriptType().equals(ScriptType.BAT) ? "" : " ").append(buildScriptPath(probeRequest))
             .append(buildProbeFileName(probeRequest)).append(buildProbeFileSubffix(probeRequest)).toString();
     }
 

@@ -5,8 +5,9 @@ ip:
   cp: ${CP_IP:10.100.7.25}                # 云平台适配层接口地址
 #  cr: ${CR_IP}               # cr接口地址
   moloch: ${MOLOCH_IP:10.100.7.104}           # moloch的IP地址
-  wazuh: ${WAZUH_IP:10.100.14.106}          # wazuh的IP地址
+  wazuh: ${WAZUH_IP:10.100.0.102}          # wazuh的IP地址
   es: ${MP_ES_IP:10.100.14.104}                 # MP新中台ES地址
+  trex: 10.100.7.158                            # trex资源服务器地址
 
 server:
   servlet:
@@ -62,8 +63,8 @@ mp:
 #    cr-url: http://${ip.cr} #
     hostname: controller  #主机名称
     es-nodes: ${ip.es}:${MP_ES_PORT:9200}
-  datasandtable:
-    group-url: http://${ip.moloch}:5079/v1/scenes
+  situationaware:
+    group-url: http://10.100.14.107:5079/v1/scenes
     moloch:
       username: api
       password: api
@@ -79,14 +80,19 @@ mp:
       es-url: ${ip.wazuh}
       es-port: 9200
       es-username: admin
-      es-password: SecretPassword
+      es-password: admin
+    wazuh-probe-manager:
+      url: http://10.100.0.102:8002
+      agent-script-linux-path: /var/ossec/etc/shared/scripts/
+      agent-script-windows-path: C:\ossec-agent\shared\scripts\
+      task-enable: true
   log:
     exclude-uri: /login
     exclude-method: OPTIONS
   flow:
     # 流量发生器资源地址
-    actuator-resource-url: http://10.200.1.64:80/api/v1/resource
-    trex-image: trex_0907
+    actuator-resource-url: http://${ip.trex}:80/api/v1/resource
+    trex-image: trex_0910
 
 
 management:

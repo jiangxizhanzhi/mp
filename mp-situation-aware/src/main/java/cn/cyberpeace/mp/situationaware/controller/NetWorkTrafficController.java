@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/sessions")
-@Api(value = "数据沙盘-流量接口", tags = "数据沙盘-流量接口")
+@Api(value = "态势感知-流量接口", tags = "态势感知-流量接口")
 public class NetWorkTrafficController {
 
     @Autowired

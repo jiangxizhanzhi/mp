@@ -16,6 +16,8 @@ public class CsceneModel extends BaseCsceneModel {
     @DefaultInt(Type.INSTANCE)
     private Integer type;
     @DefaultStr
+    private String logo;
+    @DefaultStr
     private String sceneConfig;
 
     public static class Type {

@@ -19,6 +19,10 @@ public abstract class BaseCsceneBO<
         T extends BaseCsceneBO<M, R0, R, T>> extends ModelBO<M, T> {
     @ApiModelProperty(value = "综合场景id")
     private String id;
+    @ApiModelProperty(value = "创建用户")
+    private String createUser;
+    @ApiModelProperty(value = "创建用户名")
+    private String createUsername;
     @ApiModelProperty(value = "角色信息")
     private List<R> roles;
 

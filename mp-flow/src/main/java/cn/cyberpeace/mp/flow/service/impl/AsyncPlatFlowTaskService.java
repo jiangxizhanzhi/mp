@@ -1,8 +1,11 @@
 package cn.cyberpeace.mp.flow.service.impl;
 
 import cn.cyberpeace.mp.base.constant.BaseConstants;
+import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.JsonUtils;
+import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
+import cn.cyberpeace.mp.flow.enums.FlowPlatformEnum;
 import cn.cyberpeace.mp.flow.enums.ResourceTypeEnum;
 import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
@@ -68,6 +71,9 @@ public class AsyncPlatFlowTaskService {
 
     @Autowired
     private FlowPortMapper flowPortMapper;
+
+    @Autowired
+    private FastDFSClient fastDFSClient;
 
     /**
      * 异步保存流量发生平台任务
@@ -285,7 +291,7 @@ public class AsyncPlatFlowTaskService {
 
         FlowActuatorModel flowActuatorModel = new FlowActuatorModel();
         AddVmRequest addVmRequest = new AddVmRequest();
-        addVmRequest.setName("trex" + System.currentTimeMillis());
+        addVmRequest.setName(FlowPlatformEnum.TREX.toString() + System.currentTimeMillis());
         addVmRequest.setImage(trexImage);
         AddVmRequest.Networks networks = new AddVmRequest.Networks();
         networks.setNetworkId(externalNetId);
@@ -465,6 +471,24 @@ public class AsyncPlatFlowTaskService {
         }
 
         return flowActuatorModel;
+    }
+
+    /**
+     * 异步删除流量文件
+     * @param infoModelList
+     */
+    @Async
+    public void deleteFlowFile(List<FlowInfoModel> infoModelList) {
+        try {
+            if (CollectionUtils.isNotEmpty(infoModelList)) {
+                infoModelList.forEach(infoModel -> {
+                    String filePath = ResourceTypeEnum.SCRIPT.toValue() == infoModel.getResourceType() ? infoModel.getScriptFile() : infoModel.getPcapFile();
+                    fastDFSClient.deleteFile(filePath, FdfsGroupEnum.DEFAULT.toString());
+                });
+            }
+        } catch (Exception e) {
+            log.error("delete flow file error", e);
+        }
     }
 
 }

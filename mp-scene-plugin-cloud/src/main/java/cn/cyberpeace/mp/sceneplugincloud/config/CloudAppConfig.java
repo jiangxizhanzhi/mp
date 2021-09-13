@@ -20,6 +20,9 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.cpcloud_server_timeout:600}")
     private Integer cpcloudServerTimeout;
 
+    @Value("${mp.sceneplugincloud.cpcloud_server_timeout:MP_SCENE}")
+    private String cpcloudResourceGroup;
+
     public List<String> getCidrPool() {
         List<String> cidrPool = new ArrayList<>();
         IntStream.range(172, 173).forEach(cidrA -> IntStream.range(0, 255)

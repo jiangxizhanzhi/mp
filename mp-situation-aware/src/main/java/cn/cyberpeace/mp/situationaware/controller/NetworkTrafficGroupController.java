@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/flow_group")
-@Api(value = "数据沙盘-场景的操作接口", tags = "数据沙盘-场景的操作接口")
+@Api(value = "态势感知-场景的操作接口", tags = "态势感知-场景的操作接口")
 public class NetworkTrafficGroupController {
 
     @Autowired

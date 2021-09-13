@@ -18,8 +18,14 @@ public class CsceneInstanceBO extends BaseCsceneBO<CsceneInstanceModel, CsceneIn
     private String cscene;
     @ApiModelProperty(value = "综合场景实例类型")
     private Integer type;
+    @ApiModelProperty(value = "综合场景实例引用类型")
+    private Integer referenceType;
     @ApiModelProperty(value = "基础场景实例")
     private SceneDataBO scene;
+    @ApiModelProperty(value = "综合场景实例存活时间")
+    private Integer sceneTtl;
+    @ApiModelProperty(value = "综合场景实例属性")
+    private String sceneAttr;
 
     @Override
     public CsceneInstanceModel createModel() {

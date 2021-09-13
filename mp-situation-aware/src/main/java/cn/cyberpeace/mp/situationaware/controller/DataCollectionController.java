@@ -23,7 +23,7 @@ import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/wazuh")
-@Api(value = "数据沙盘-场景监控事件查询接口", tags = "数据沙盘-场景监控事件查询接口")
+@Api(value = "态势感知-场景监控事件查询接口", tags = "态势感知-场景监控事件查询接口")
 public class DataCollectionController {
 
     @Autowired
