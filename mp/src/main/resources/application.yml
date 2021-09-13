@@ -128,5 +128,5 @@ spring:
       on-profile: prod
 logging:
   file:
-    path: /home/mp/logs
+    path: ${user.home}/logs
 
