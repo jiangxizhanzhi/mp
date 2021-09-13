@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.RouterConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.RouterPageConverterModel;
 import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
 import cn.cyberpeace.mp.devops.cluster.model.RouterCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.common.RouterModel;
 import cn.cyberpeace.mp.devops.cluster.request.RouterPageRequest;
 import cn.cyberpeace.mp.devops.cluster.service.RouterService;
 import org.apache.commons.collections4.CollectionUtils;
@@ -44,7 +45,7 @@ public class RouterConverterImpl implements RouterConverter {
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getRouters())){
             return null;
         }
-        List<RouterCloudPlatformModel.RouterModel> routers = model.getRouters();
+        List<RouterModel> routers = model.getRouters();
         List<RouterPageConverterModel.Model> list = routers.stream().map(routerModel ->
                 RouterPageConverterModel.Model.builder().name(routerModel.getName())
                         .status(CloudPlatformEnum.fromValue(routerModel.getStatus())).createdAt(routerModel.getCreatedAt()).build()

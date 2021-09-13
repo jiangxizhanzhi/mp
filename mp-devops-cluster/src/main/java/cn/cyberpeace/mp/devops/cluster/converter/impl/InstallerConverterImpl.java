@@ -19,6 +19,7 @@ import cn.cyberpeace.mp.devops.cluster.service.TargetLogoService;
 import cn.cyberpeace.mp.devops.cluster.utils.FileUtils;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import com.alibaba.fastjson.JSONArray;
+import com.google.common.base.Joiner;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -128,7 +129,9 @@ public class InstallerConverterImpl implements InstallerConverter {
         model.setName(installer.getName());
         model.setDescription(installer.getDescription());
         model.setLogo(installer.getLogo());
-        model.setCategories(installer.getCategories());
+        if (StringUtils.isNotBlank(installer.getCategories())){
+            model.setCategories(Joiner.on("|").join(installer.getCategories().split("")));
+        }
         model.setDeployType(installer.getDeployType());
         ExtDocker extDocker = installer.getExtDocker();
         if (Objects.nonNull(extDocker) && StringUtils.isNotBlank(extDocker.getSettings())){
@@ -151,8 +154,9 @@ public class InstallerConverterImpl implements InstallerConverter {
         installer.setName(request.getName());
         installer.setDescription(request.getDescription());
         installer.setLogo(request.getLogo());
-        installer.setCategories(CollectionUtils.isEmpty(request.getCategories()) ? null :
-                request.getCategories().stream().reduce((a,b) -> a.concat(b)).orElse("") );
+        if (StringUtils.isNotBlank(request.getCategories())){
+            installer.setCategories(Arrays.stream(request.getCategories().split("\\|")).reduce((a,b) -> a.concat(b)).orElse(""));
+        }
         installer.setDeployType(request.getDeployType());
         if (Objects.nonNull(request.getDockerInstallerData())
                 && CollectionUtils.isNotEmpty(request.getDockerInstallerData().getStartUpParameterList())) {

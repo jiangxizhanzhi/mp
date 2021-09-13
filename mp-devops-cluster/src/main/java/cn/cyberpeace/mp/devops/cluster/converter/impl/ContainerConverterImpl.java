@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.ContainerConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ContainerConvertModel;
 import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
 import cn.cyberpeace.mp.devops.cluster.model.ContainerCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.common.ContainerModel;
 import cn.cyberpeace.mp.devops.cluster.request.ContainerPageRequest;
 import cn.cyberpeace.mp.devops.cluster.service.ContainerService;
 import com.alibaba.fastjson.JSONArray;
@@ -54,10 +55,10 @@ public class ContainerConverterImpl implements ContainerConverter {
                     .node(containerModel.getHost()).status(CloudPlatformEnum.fromValue(containerModel.getStatus())).build();
             Map<String,Object> addresses = containerModel.getAddresses();
             if (MapUtils.isNotEmpty(addresses)){
-                List<ContainerCloudPlatformModel.ContainerModel.Address> addressList = addresses.values().stream()
-                        .map(v -> JSONArray.parseArray(JSONArray.toJSONString(v), ContainerCloudPlatformModel.ContainerModel.Address.class))
+                List<ContainerModel.Address> addressList = addresses.values().stream()
+                        .map(v -> JSONArray.parseArray(JSONArray.toJSONString(v),ContainerModel.Address.class))
                         .flatMap(List::stream).collect(Collectors.toList());
-                response.setAddressList(addressList.stream().map(ContainerCloudPlatformModel.ContainerModel.Address::getAddr).collect(Collectors.toList()));
+                response.setAddressList(addressList.stream().map(ContainerModel.Address::getAddr).collect(Collectors.toList()));
             }
             return response;
         }).collect(Collectors.toList());
