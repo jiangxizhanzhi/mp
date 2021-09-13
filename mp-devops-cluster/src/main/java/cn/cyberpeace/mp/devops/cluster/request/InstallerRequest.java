@@ -49,8 +49,8 @@ public class InstallerRequest extends BaseRequest {
     /**
      * 分类
      */
-    @ApiModelProperty(value = "分类")
-    private List<String> categories;
+    @ApiModelProperty(value = "分类,以|分割")
+    private String categories;
 
     /**
      * 服务类型

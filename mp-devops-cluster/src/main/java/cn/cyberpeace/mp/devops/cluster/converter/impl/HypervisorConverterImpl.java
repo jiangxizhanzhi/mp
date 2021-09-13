@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.devops.cluster.converter.HypervisorConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.*;
+import cn.cyberpeace.mp.devops.cluster.model.common.HypervisorStatistics;
 import cn.cyberpeace.mp.devops.cluster.request.HypervisorPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.HypervisorRequest;
 import cn.cyberpeace.mp.devops.cluster.request.HypervisorWeightAndMaxInstanceRequest;
@@ -43,7 +44,7 @@ public class HypervisorConverterImpl implements HypervisorConverter {
     @Override
     public HypervisorStatisticsConvertModel statistics() {
         HypervisorStatisticsCloudPlatformModel statistics = hypervisorService.statistics();
-        HypervisorStatisticsCloudPlatformModel.HypervisorStatistics hypervisorStatistics = statistics.getHypervisorStatistics();
+        HypervisorStatistics hypervisorStatistics = statistics.getHypervisorStatistics();
         return new HypervisorStatisticsConvertModel(hypervisorStatistics.getVcpus(),hypervisorStatistics.getMemoryMb()
                 ,hypervisorStatistics.getLocalGb(),hypervisorStatistics.getVcpusUsed(),hypervisorStatistics.getMemoryMbUsed()
                 ,hypervisorStatistics.getLocalGbUsed(),hypervisorStatistics.getFreeRamMb(),hypervisorStatistics.getFreeDiskGb());
