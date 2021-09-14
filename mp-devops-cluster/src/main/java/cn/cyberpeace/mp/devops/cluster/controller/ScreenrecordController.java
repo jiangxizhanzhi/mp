@@ -16,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * @Description 录屏文件管理controller
  * @Author qiaokang
@@ -53,5 +55,12 @@ public class ScreenrecordController {
     public ServiceResult<ScreenRecordUsedSpaceResponse> queryUsedSpace() {
         return screenrecordService.queryUsedSpace();
     }
+
+    @ApiOperation("下载录屏文件")
+    @GetMapping("/download")
+    public void download(@RequestParam String fileName, HttpServletResponse response) {
+        screenrecordService.download(fileName, response);
+    }
+
 
 }
