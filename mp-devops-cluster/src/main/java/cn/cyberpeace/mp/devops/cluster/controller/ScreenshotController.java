@@ -4,9 +4,10 @@ import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.model.ScreenshotModel;
+import cn.cyberpeace.mp.devops.cluster.request.ScreenshotDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.ScreenshotUploadRequest;
 import cn.cyberpeace.mp.devops.cluster.request.queryparam.ScreenshotQueryParams;
-import cn.cyberpeace.mp.devops.cluster.response.UsedSpaceResponse;
+import cn.cyberpeace.mp.devops.cluster.response.ScreenshotUsedSpaceResponse;
 import cn.cyberpeace.mp.devops.cluster.service.ScreenshotService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -39,14 +40,14 @@ public class ScreenshotController extends BaseModelController<ScreenshotModel, S
 
     @ApiOperation("查询已用空间")
     @GetMapping("/used_space")
-    public ServiceResult<UsedSpaceResponse> queryUsedSpace() {
+    public ServiceResult<ScreenshotUsedSpaceResponse> queryUsedSpace() {
         return getModelService().queryUsedSpace();
     }
 
     @ApiOperation("按时间删除截屏文件")
     @DeleteMapping("/time_delete")
-    public ServiceResult<Integer> timeDelete(@RequestParam Integer recordTime) {
-        return getModelService().timeDelete(recordTime);
+    public ServiceResult<Integer> timeDelete(@RequestBody @Validated ScreenshotDeleteRequest request) {
+        return getModelService().timeDelete(request);
     }
 
 }

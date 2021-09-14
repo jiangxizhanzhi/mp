@@ -13,9 +13,10 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.cyberpeace.mp.devops.cluster.model.ScreenshotModel;
 import cn.cyberpeace.mp.devops.cluster.repository.ScreenshotMapper;
+import cn.cyberpeace.mp.devops.cluster.request.ScreenshotDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.ScreenshotUploadRequest;
 import cn.cyberpeace.mp.devops.cluster.request.queryparam.ScreenshotQueryParams;
-import cn.cyberpeace.mp.devops.cluster.response.UsedSpaceResponse;
+import cn.cyberpeace.mp.devops.cluster.response.ScreenshotUsedSpaceResponse;
 import cn.cyberpeace.mp.devops.cluster.service.ScreenshotService;
 import cn.cyberpeace.mp.devops.cluster.service.fields.ScreenshotFields;
 import cn.hutool.core.date.DateUtil;
@@ -102,22 +103,22 @@ public class ScreenshotServiceImpl extends BaseModelServiceImpl<ScreenshotModel,
      * @return
      */
     @Override
-    public ServiceResult<UsedSpaceResponse> queryUsedSpace() {
+    public ServiceResult<ScreenshotUsedSpaceResponse> queryUsedSpace() {
         // 查询已占用空间
         Long usedSpace = this.getModelMapper().queryUsedSpace();
-        UsedSpaceResponse response = new UsedSpaceResponse(usedSpace);
+        ScreenshotUsedSpaceResponse response = new ScreenshotUsedSpaceResponse(usedSpace);
         return ServiceResult.success(response);
     }
 
     /**
      * 按时间删除截屏文件
-     * @param recordTime 1: 6个月之前，2：3个月之前
+     * @param request 1: 6个月之前，2：3个月之前
      * @return
      */
-    public ServiceResult<Integer> timeDelete(Integer recordTime) {
+    public ServiceResult<Integer> timeDelete(ScreenshotDeleteRequest request) {
         Integer deleteCount = 0;
         Long deleteMonth;
-        if (2 == recordTime) {
+        if (2 == request.getRecordTime()) {
             // 减3个月
             deleteMonth = 3L;
         } else {
