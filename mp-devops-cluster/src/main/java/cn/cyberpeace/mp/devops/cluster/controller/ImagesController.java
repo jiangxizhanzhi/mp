@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.ImagesConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.SnapshotConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertPageModel;
+import cn.cyberpeace.mp.devops.cluster.model.Flavor;
 import cn.cyberpeace.mp.devops.cluster.model.FlavorCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtImageInfo;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
@@ -267,8 +268,11 @@ public class ImagesController {
      */
     @ApiOperation("查询flavor")
     @GetMapping("/page-flavor")
-    public Result pageFlavor(){
+    public Result<List<Flavor>> pageFlavor(){
         FlavorCloudPlatformModel page = flavorService.page("");
+        if (Objects.isNull(page) ||  Objects.isNull(page.getData())){
+            return new Result();
+        }
         return new Result<>(page.getData().getList());
     }
 }
