@@ -5,7 +5,6 @@ import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.fields.BaseModelFields;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
-import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -15,6 +14,7 @@ import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceRoleModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
+import cn.cyberpeace.mp.cscene.service.param.InstanceQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
 import cn.cyberpeace.mp.scenepluginflow.bo.base.Flow;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceModel, CsceneInstanceMapper,
-        BaseModelFields, QueryParams> {
+        BaseModelFields, InstanceQueryParams> {
 
     @Autowired
     private CsceneInstanceRoleMapper csceneInstanceRoleMapper;
@@ -47,7 +47,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         setModelMapper(modelMapper);
     }
 
-    public ListObjServiceResult<CsceneInstanceBO> listBO(QueryParams queryParams) {
+    public ListObjServiceResult<CsceneInstanceBO> listBO(InstanceQueryParams queryParams) {
         var listResult = super.list(queryParams);
         if (listResult.getSource() == null) {
             new ListObjServiceResult<>(null, listResult.getServiceCode(), listResult.getDetail());
