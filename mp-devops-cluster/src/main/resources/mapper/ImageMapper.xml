@@ -59,6 +59,18 @@
             <if test=" owner != null and searchPublicEnum == 1">
                 and ( a.owner = #{owner} or i.is_public in (0,2) )
             </if>
+            <if test="systemType != null">
+                AND i.system_type = #{systemType},
+            </if>
+            <if test="systemArchitecure != null">
+                And i.system_architecure = #{systemArchitecure}
+            </if>
+            <if test="language != null">
+                and i.language = #{language},
+            </if>
+            <if test="imageStatus != null">
+                and i.image_status = #{imageStatus},
+            </if>
         </where>
     </sql>
     
@@ -140,6 +152,18 @@
             <if test="referenceStatus != null">
                 reference_status,
             </if>
+            <if test="systemType != null">
+                system_type,
+            </if>
+            <if test="systemArchitecure != null">
+                system_architecure,
+            </if>
+            <if test="language != null">
+                language,
+            </if>
+            <if test="imageStatus != null">
+                image_status,
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="id != null">
@@ -187,6 +211,18 @@
             <if test="referenceStatus != null">
                 #{referenceStatus},
             </if>
+            <if test="systemType != null">
+                #{systemType},
+            </if>
+            <if test="systemArchitecure != null">
+                #{systemArchitecure},
+            </if>
+            <if test="language != null">
+                #{language},
+            </if>
+            <if test="imageStatus != null">
+                #{imageStatus},
+            </if>
         </trim>
     </insert>
 
@@ -213,7 +249,31 @@
                 update_time = #{updateTime},
             </if>
             <if test="isPublic != null">
-                is_public = #{isPublic,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler}
+                is_public = #{isPublic,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
+            </if>
+            <if test="quickCreateSupport != null">
+                quick_create_support = #{quickCreateSupport,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
+            </if>
+            <if test="inPosition != null">
+                in_position = #{inPosition,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
+            </if>
+            <if test="useStatus != null">
+                use_status = #{useStatus},
+            </if>
+            <if test="referenceStatus != null">
+                reference_status = #{referenceStatus},
+            </if>
+            <if test="systemType != null">
+                system_type = #{systemType},
+            </if>
+            <if test="systemArchitecure != null">
+                system_architecure = #{systemArchitecure},
+            </if>
+            <if test="language != null">
+                language = #{language},
+            </if>
+            <if test="imageStatus != null">
+                image_status = #{imageStatus},
             </if>
         </set>
         where uuid = #{uuid}

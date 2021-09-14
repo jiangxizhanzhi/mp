@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.model.common;
 
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,6 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
+@ApiModel("镜像")
 public class ExtImageInfo {
 
     @ApiModelProperty("UUID")

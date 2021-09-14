@@ -80,5 +80,25 @@ public class ImagePageDTO extends BasePageDTO{
      */
     private Integer searchPublicEnum;
 
+    /**
+     * 系统类型
+     */
+    private Integer systemType;
+
+    /**
+     * 系统架构
+     */
+    private String systemArchitecure;
+
+    /**
+     * 系统语言
+     */
+    private String language;
+
+    /**
+     * 镜像状态
+     */
+    private Integer imageStatus;
+
 
 }

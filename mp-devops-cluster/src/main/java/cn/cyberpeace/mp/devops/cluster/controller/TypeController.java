@@ -200,10 +200,10 @@ public class TypeController {
     }
 
     /**
-     * 查询所有系统架构
+     * 查询支持的磁盘格式
      * @return
      */
-    @ApiOperation("查询所有系统架构")
+    @ApiOperation("查询支持的磁盘格式")
     @GetMapping("/disk-format")
     public Result<TypeAllResponse> diskFormat(){
         TypeAllConvertModel model = typeConverter.findDiskFormat();

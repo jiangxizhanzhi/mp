@@ -65,6 +65,12 @@ public class FileResponseData {
     @JsonInclude(Include.NON_NULL)
     private String token;
 
+    /**
+     * 文件大小
+     */
+    @JsonInclude(Include.NON_NULL)
+    private Long fileSize;
+
 
     public FileResponseData() {
     }

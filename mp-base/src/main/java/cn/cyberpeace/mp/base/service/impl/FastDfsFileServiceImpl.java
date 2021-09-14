@@ -97,6 +97,7 @@ public class FastDfsFileServiceImpl implements FileService {
             responseData.setFileType(FastDFSClient.getFilenameSuffix(file.getOriginalFilename()));
             responseData.setHttpUrl(group.getFileServerAddr() + File.separator + filepath);
             responseData.setInnerHttpUrl(group.getInnerFileServerAddr() + File.separator + filepath);
+            responseData.setFileSize(file.getSize());
         } catch (MpRuntimeException e) {
             responseData.setSuccess(false);
             responseData.setCode(e.getErrorCode());
