@@ -15,8 +15,16 @@ import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedInputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -33,6 +41,9 @@ public class ScreenrecordServiceImpl extends BaseOpenStackServiceImpl {
     public ScreenrecordServiceImpl(DevopsConfig devopsConfig, ObjectMapper objectMapper) {
         super(devopsConfig, objectMapper);
     }
+
+    @Value("${mp.devops.cp-url}")
+    private String cpUrl;
 
     /**
      * 分页查询录屏文件
@@ -126,6 +137,40 @@ public class ScreenrecordServiceImpl extends BaseOpenStackServiceImpl {
         }
 
         return ServiceResult.success(false);
+    }
+
+    /**
+     * 下载录屏文件
+     * @param fileName
+     * @param response
+     */
+    public void download(String fileName, HttpServletResponse response) {
+        BufferedInputStream bin = null;
+        OutputStream os = null;
+        try {
+            URL url = new URL(cpUrl + BaseCloudPlatformService.SCREENRECORD_METHOD + "/downloadfile?recordfilename=" + fileName);
+            // 建立连接
+            URLConnection urlConnection = url.openConnection();
+            // http的连接类
+            HttpURLConnection httpURLConnection = (HttpURLConnection) urlConnection;
+            // 设置字符编码
+            httpURLConnection.setRequestProperty("Charset", "UTF-8");
+            // 打开到此 URL引用的资源的通信链接
+            httpURLConnection.connect();
+            bin = new BufferedInputStream(httpURLConnection.getInputStream());
+            os = response.getOutputStream();
+            int len = 0;
+            byte[] buffer = new byte[1024 * 5];
+            while ((len = bin.read(buffer)) > 0) {
+                os.write(buffer, 0, len);
+            }
+            os.flush();
+        } catch (Exception e) {
+            log.error("download screenrecord error for fileName:{}", fileName, e);
+        } finally {
+            IOUtils.closeQuietly(bin);
+            IOUtils.closeQuietly(os);
+        }
     }
 
 }
