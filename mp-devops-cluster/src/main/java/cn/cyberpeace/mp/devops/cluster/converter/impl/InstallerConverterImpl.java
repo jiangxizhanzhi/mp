@@ -141,6 +141,9 @@ public class InstallerConverterImpl implements InstallerConverter {
         ExtNormal extNormal = installer.getExtNormal();
         if (Objects.nonNull(extNormal) && StringUtils.isNotBlank(extNormal.getResources())){
             model.setResourceList(JSONArray.parseArray(extNormal.getResources(), Resource.class));
+            model.getResourceList().stream().filter(resource -> StringUtils.isNotBlank(resource.getPlatforms())).forEach(resource -> {
+                resource.setPlatforms(Joiner.on("|").join(resource.getPlatforms().split("")));
+            });
         }
         model.setExtNormal(extNormal);
         model.setSuccess(installer.isSuccess());
@@ -163,7 +166,12 @@ public class InstallerConverterImpl implements InstallerConverter {
             installer.setSettings(JsonUtils.toUnderlineJSONString(request.getDockerInstallerData().getStartUpParameterList()));
         }
         if (CollectionUtils.isNotEmpty(request.getResourceList())) {
-            request.getResourceList().stream().forEach(resource -> resource.setFile(UUID.randomUUID().toString()));
+            request.getResourceList().forEach(resource -> {
+                resource.setFile(UUID.randomUUID().toString());
+                if (StringUtils.isNotBlank(resource.getPlatforms())){
+                    resource.setPlatforms(Arrays.stream(resource.getPlatforms().split("\\|")).reduce((a,b) -> a.concat(b)).orElse(""));
+                }
+            });
             installer.setResources(JsonUtils.toUnderlineJSONString(request.getResourceList()));
         }
         return installer;
