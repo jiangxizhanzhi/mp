@@ -51,4 +51,9 @@ public interface BaseCloudPlatformService {
      */
     String OPENFLOW_ACTION_METHOD = "list";
 
+    /**
+     * 截屏模块URL前缀
+     */
+    String SCREENRECORD_METHOD = CPCLOUD_URL + "/guacamole" + URL_VERSION;
+
 }
