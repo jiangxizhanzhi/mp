@@ -53,7 +53,7 @@ public class ScreenrecordServiceImpl extends BaseOpenStackServiceImpl {
      */
     public ListObjServiceResult<ScreenrecordResponse> pageScreenrecord(ScreenrecordQueryParams queryParams) {
         StringBuffer getParams = new StringBuffer(BaseConstants.QUESTION_MARK);
-        getParams.append("limit=").append(queryParams.getPageSize())
+        getParams.append("limit=").append(Objects.nonNull(queryParams.getPageSize()) ? queryParams.getPageSize() : queryParams.getPerPage())
                 .append("&page=").append(queryParams.getPage());
         if (StringUtils.isNotBlank(queryParams.getSearch())) {
             getParams.append("&params=").append(queryParams.getSearch());
