@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.cyberpeace.mp.devops.cluster.model.ScreenshotModel;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -29,7 +30,9 @@ public class AsyncScreenshotModelService {
     @Async
     public void batchDeleteScreenshot(List<ScreenshotModel> screenshotModels) {
         try {
-            screenshotModels.forEach(model -> fastDFSClient.deleteFile(model.getFile(), FdfsGroupEnum.DEFAULT.toString()));
+            if (CollectionUtils.isNotEmpty(screenshotModels)) {
+                screenshotModels.forEach(model -> fastDFSClient.deleteFile(model.getFile(), FdfsGroupEnum.DEFAULT.toString()));
+            }
         } catch (Exception e) {
             log.error("delete screenshot file error", e);
         }
