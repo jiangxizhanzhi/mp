@@ -1,9 +1,16 @@
 package cn.cyberpeace.mp.aggregation.controller;
 
 import cn.cyberpeace.mp.aggregation.constant.ControllerConstant;
+import cn.cyberpeace.mp.aggregation.dto.DailyUserActivityResponse;
+import cn.cyberpeace.mp.aggregation.dto.UserResourceResponse;
+import cn.cyberpeace.mp.aggregation.dto.UserSummarySceneResponse;
+import cn.cyberpeace.mp.aggregation.dto.cluster.SystemClusterUsed;
+import cn.cyberpeace.mp.aggregation.dto.resource.ResourceStatisticsResponse;
+import cn.cyberpeace.mp.aggregation.service.MockService;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,42 +26,40 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/dashboard")
 public class DashboardController {
 
+    @Autowired
+    private MockService mockService;
+
     @GetMapping("/daily_user_activity")
-    public ServiceResult getDailyUserActivity() {
-
-
-        return null;
+    public ServiceResult<DailyUserActivityResponse> getDailyUserActivity() {
+        DailyUserActivityResponse response = mockService.mockDailyUserActivityResponse();
+        return ServiceResult.success(response);
     }
 
 
     @GetMapping("/get_resource_statistics")
-    public ServiceResult getResourceStatistics() {
-
-
-        return null;
+    public ServiceResult<ResourceStatisticsResponse> getResourceStatistics() {
+        ResourceStatisticsResponse response = mockService.mockResourceStatisticsResponse();
+        return ServiceResult.success(response);
     }
 
 
     @GetMapping("/get_system_cluster_used")
-    public ServiceResult getSystemClusterUsed() {
-
-
-        return null;
+    public ServiceResult<SystemClusterUsed> getSystemClusterUsed() {
+        SystemClusterUsed response = mockService.mockSystemClusterUsed();
+        return ServiceResult.success(response);
     }
 
-    @GetMapping("/user_summary")
-    public ServiceResult userSummary() {
-
-
-        return null;
+    @GetMapping("/user_summary_scene")
+    public ServiceResult<UserSummarySceneResponse> userSummary() {
+        UserSummarySceneResponse response = mockService.mockUserSummarySceneResponse();
+        return ServiceResult.success(response);
     }
 
 
     @GetMapping("/user_resource")
-    public ServiceResult userResource() {
-
-
-        return null;
+    public ServiceResult<UserResourceResponse> userResource() {
+        UserResourceResponse response = mockService.mockUserResourceResponse();
+        return ServiceResult.success(response);
     }
 
 }
