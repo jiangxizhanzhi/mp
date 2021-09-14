@@ -11,6 +11,12 @@ public class CsceneInstanceCreateContext {
     @ApiModelProperty(value = "flags列表")
     private List<String> flags;
 
+    @ApiModelProperty(value = "场景存活时间")
+    private Integer sceneTtl;
+
+    @ApiModelProperty(value = "场景属性")
+    private String sceneAttr;
+
     @ApiModelProperty(value = "透明上下文")
     private Map<String, Object> context;
 }
