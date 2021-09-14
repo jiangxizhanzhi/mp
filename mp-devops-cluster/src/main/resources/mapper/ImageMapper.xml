@@ -56,8 +56,8 @@
             <if test=" quickCreateSupport != null">
                 and i.quick_create_support = #{quickCreateSupport,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler}
             </if>
-            <if test=" owner != null and isPublic != null">
-                and ( a.owner = #{owner} or i.is_public = #{isPublic,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler} )
+            <if test=" owner != null and searchPublicEnum == 1">
+                and ( a.owner = #{owner} or i.is_public in (0,2) )
             </if>
         </where>
     </sql>
@@ -220,14 +220,10 @@
     </update>
 
     <delete id="delete" parameterType="cn.cyberpeace.mp.devops.cluster.dto.ImageDeleteDTO">
-        delete from mp_devops_target
-        <where>
-            <if test="ids != null and ids.size > 0">
-                 uuid in
+        delete from mp_devops_target t
+        where t.uuid in
                 <foreach collection="ids" item="item" index="index"  open="(" separator="," close=")">
                     #{item}
                 </foreach>
-            </if>
-        </where>
     </delete>
 </mapper>
