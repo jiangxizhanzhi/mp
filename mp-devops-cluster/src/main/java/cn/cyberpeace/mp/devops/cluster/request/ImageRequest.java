@@ -114,4 +114,6 @@ public class ImageRequest extends BaseRequest {
      */
     @ApiModelProperty(value = "系统镜像")
     private ExtImageInfo extImageInfo;
+
+
 }
