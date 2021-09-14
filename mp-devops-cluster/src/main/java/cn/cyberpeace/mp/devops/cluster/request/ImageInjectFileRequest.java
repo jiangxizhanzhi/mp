@@ -5,7 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 /**
  * 镜像文件注入请求信息
@@ -17,14 +19,15 @@ import org.springframework.web.multipart.MultipartFile;
 @ApiModel(value = "镜像文件注入请求信息")
 public class ImageInjectFileRequest extends BaseRequest {
 
-    /**
-     * UUID
-     */
-    private String uuid;
+    @NotBlank
+    private String deviceUuid;
 
+    @NotBlank
+    private String fileUrl;
 
-    /**
-     * 文件流
-     */
-    private MultipartFile file;
+    @NotBlank
+    private String fileName;
+
+    @NotNull
+    private Long fileSize;
 }
