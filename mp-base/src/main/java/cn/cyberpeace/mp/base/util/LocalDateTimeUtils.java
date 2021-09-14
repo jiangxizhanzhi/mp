@@ -30,11 +30,11 @@ public class LocalDateTimeUtils {
 
     /**
      * string转localDateTime
-     * @param date
+     * @param date：2021-09-14T03:38:59Z
      * @return
      */
     public static LocalDateTime stringToLocalDateTime(String date) {
-        return LocalDateTime.parse(date, dateTimeFormatter1);
+        return LocalDateTime.parse(date, dateTimeFormatter);
     }
 
     public static void main(String[] args) {
