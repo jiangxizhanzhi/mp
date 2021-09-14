@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.model.ScreenshotModel;
+import cn.cyberpeace.mp.devops.cluster.request.ScreenshotBatchDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.ScreenshotDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.ScreenshotUploadRequest;
 import cn.cyberpeace.mp.devops.cluster.request.queryparam.ScreenshotQueryParams;
@@ -48,6 +49,12 @@ public class ScreenshotController extends BaseModelController<ScreenshotModel, S
     @DeleteMapping("/time_delete")
     public ServiceResult<Integer> timeDelete(@RequestBody @Validated ScreenshotDeleteRequest request) {
         return getModelService().timeDelete(request);
+    }
+
+    @ApiOperation("批量删除截屏文件")
+    @DeleteMapping("/batch_delete")
+    public ServiceResult<Integer> batchDelete(@RequestBody @Validated ScreenshotBatchDeleteRequest request) {
+        return getModelService().batchDelete(request);
     }
 
 }

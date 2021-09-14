@@ -13,6 +13,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.cyberpeace.mp.devops.cluster.model.ScreenshotModel;
 import cn.cyberpeace.mp.devops.cluster.repository.ScreenshotMapper;
+import cn.cyberpeace.mp.devops.cluster.request.ScreenshotBatchDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.ScreenshotDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.ScreenshotUploadRequest;
 import cn.cyberpeace.mp.devops.cluster.request.queryparam.ScreenshotQueryParams;
@@ -140,6 +141,26 @@ public class ScreenshotServiceImpl extends BaseModelServiceImpl<ScreenshotModel,
         }
 
         return ServiceResult.success(deleteCount);
+    }
+
+    /**
+     * 批量删除截屏文件
+     * @param request
+     * @return
+     */
+    public ServiceResult<Integer> batchDelete(ScreenshotBatchDeleteRequest request) {
+        List<ScreenshotModel> screenshotModels = this.getModelMapper().selectByIds(request.getIds());
+
+        if (CollectionUtils.isNotEmpty(screenshotModels)) {
+            // 异步删除文件服务器上文件
+            asyncScreenshotModelService.batchDeleteScreenshot(screenshotModels);
+            bulkDelete(request.getIds().toArray(new String[0]));
+            return ServiceResult.success(screenshotModels.size());
+        } else {
+            log.error("Screenshot to delete not exist:{}", request.getIds());
+            return ServiceResult.fail("Screenshot to delete not exist");
+        }
+
     }
 
 }

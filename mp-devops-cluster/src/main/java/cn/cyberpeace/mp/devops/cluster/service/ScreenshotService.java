@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.devops.cluster.service;
 import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.cluster.model.ScreenshotModel;
+import cn.cyberpeace.mp.devops.cluster.request.ScreenshotBatchDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.ScreenshotDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.ScreenshotUploadRequest;
 import cn.cyberpeace.mp.devops.cluster.request.queryparam.ScreenshotQueryParams;
@@ -34,6 +35,13 @@ public interface ScreenshotService extends BaseModelService<ScreenshotModel, Scr
      * @return
      */
     ServiceResult<Integer> timeDelete(ScreenshotDeleteRequest request);
+
+    /**
+     * 批量删除
+     * @param request
+     * @return
+     */
+    ServiceResult<Integer> batchDelete(ScreenshotBatchDeleteRequest request);
 
 }
 

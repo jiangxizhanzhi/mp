@@ -22,4 +22,17 @@
         </where>
     </select>
 
+    <select id="selectByIds" resultType="cn.cyberpeace.mp.devops.cluster.model.ScreenshotModel">
+        select s.* from mp_devops_screenshot s
+        <where>
+            1 = 1
+            <if test="ids != null and ids.size() > 0">
+                AND s.id in
+                <foreach item="id" index="index" collection="ids" open="(" separator="," close=")">
+                    #{id}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
 </mapper>
