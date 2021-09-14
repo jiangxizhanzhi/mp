@@ -20,9 +20,11 @@ public class InstanceQueryParams extends QueryParams {
     @ApiModelProperty(value = "场景实例状态")
     private String sceneStatus;
     @ApiModelProperty(value = "是否只显示活动状态")
-    private String active;
+    private Boolean active;
     @ApiModelProperty(value = "是否只显示已结束")
-    private String over;
+    private Boolean over;
     @ApiModelProperty(value = "是否只显示异常")
-    private String error;
+    private Boolean error;
+    @ApiModelProperty(value = "是否只显示自己的场景")
+    private Boolean self;
 }
