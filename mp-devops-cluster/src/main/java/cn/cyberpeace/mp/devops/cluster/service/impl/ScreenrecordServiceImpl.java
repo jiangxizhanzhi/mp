@@ -13,6 +13,7 @@ import cn.cyberpeace.mp.devops.cluster.service.BaseCloudPlatformService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
@@ -53,10 +54,16 @@ public class ScreenrecordServiceImpl extends BaseOpenStackServiceImpl {
     public ListObjServiceResult<ScreenrecordResponse> pageScreenrecord(ScreenrecordQueryParams queryParams) {
         StringBuffer getParams = new StringBuffer(BaseConstants.QUESTION_MARK);
         getParams.append("limit=").append(queryParams.getPageSize())
-                .append("&page=").append(queryParams.getPage())
-                .append("&params=").append(queryParams.getSearch())
-                .append("&start_time=").append(queryParams.getStartTime())
-                .append("&end_time=").append(queryParams.getEndTime());
+                .append("&page=").append(queryParams.getPage());
+        if (StringUtils.isNotBlank(queryParams.getSearch())) {
+            getParams.append("&params=").append(queryParams.getSearch());
+        }
+        if (StringUtils.isNotBlank(queryParams.getStartTime())) {
+            getParams.append("&start_time=").append(queryParams.getStartTime());
+        }
+        if (StringUtils.isNotBlank(queryParams.getEndTime())) {
+            getParams.append("&end_time=").append(queryParams.getEndTime());
+        }
 
         ScreenrecordPageResponse pageResponse = super.sendGet(BaseCloudPlatformService.SCREENRECORD_METHOD +
                 "/recordfile_list/" + getParams, ScreenrecordPageResponse.class);
