@@ -77,6 +77,7 @@ public class Swagger2Config implements ModelPropertyBuilderPlugin {
 
         return new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(apiInfo())
+                .enableUrlTemplating(true)
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp"))
                 .paths(PathSelectors.any())
@@ -89,6 +90,7 @@ public class Swagger2Config implements ModelPropertyBuilderPlugin {
     public Docket apiBase() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(apiInfo())
+                .enableUrlTemplating(true)
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.base"))
                 .paths(PathSelectors.any())
@@ -100,6 +102,7 @@ public class Swagger2Config implements ModelPropertyBuilderPlugin {
     public Docket apiAuth() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(apiInfo())
+                .enableUrlTemplating(true)
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.auth"))
                 .paths(PathSelectors.any())
@@ -111,6 +114,7 @@ public class Swagger2Config implements ModelPropertyBuilderPlugin {
     public Docket apiCScene() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(apiInfo())
+                .enableUrlTemplating(true)
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.cscene"))
                 .paths(PathSelectors.any())
@@ -122,6 +126,7 @@ public class Swagger2Config implements ModelPropertyBuilderPlugin {
     public Docket apiDevopsCluster() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(apiInfo())
+                .enableUrlTemplating(true)
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.devops.cluster"))
                 .paths(PathSelectors.any())
@@ -133,6 +138,7 @@ public class Swagger2Config implements ModelPropertyBuilderPlugin {
     public Docket apiDevopsLog() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(apiInfo())
+                .enableUrlTemplating(true)
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.devops.log"))
                 .paths(PathSelectors.any())
@@ -144,6 +150,7 @@ public class Swagger2Config implements ModelPropertyBuilderPlugin {
     public Docket apiMpFlow() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(apiInfo())
+                .enableUrlTemplating(true)
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.flow"))
                 .paths(PathSelectors.any())
@@ -155,6 +162,7 @@ public class Swagger2Config implements ModelPropertyBuilderPlugin {
     public Docket apiScene() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(apiInfo())
+                .enableUrlTemplating(true)
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.scene"))
                 .paths(PathSelectors.any())
@@ -166,6 +174,7 @@ public class Swagger2Config implements ModelPropertyBuilderPlugin {
     public Docket apiScenePluginCloud() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(apiInfo())
+                .enableUrlTemplating(true)
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.sceneplugincloud"))
                 .paths(PathSelectors.any())
@@ -177,6 +186,7 @@ public class Swagger2Config implements ModelPropertyBuilderPlugin {
     public Docket apiScenePluginCollection() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(apiInfo())
+                .enableUrlTemplating(true)
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.sceneplugincollection"))
                 .paths(PathSelectors.any())
@@ -188,6 +198,7 @@ public class Swagger2Config implements ModelPropertyBuilderPlugin {
     public Docket apiScenePluginFlow() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(apiInfo())
+                .enableUrlTemplating(true)
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.scenepluginflow"))
                 .paths(PathSelectors.any())
@@ -199,6 +210,7 @@ public class Swagger2Config implements ModelPropertyBuilderPlugin {
     public Docket apiSituationAware() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(apiInfo())
+                .enableUrlTemplating(true)
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.situationaware"))
                 .paths(PathSelectors.any())
@@ -211,6 +223,7 @@ public class Swagger2Config implements ModelPropertyBuilderPlugin {
     public Docket apiAgg() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(apiInfo())
+                .enableUrlTemplating(true)
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.aggregation"))
                 .paths(PathSelectors.any())
@@ -222,6 +235,7 @@ public class Swagger2Config implements ModelPropertyBuilderPlugin {
     public Docket apiOther() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(apiInfo())
+                .enableUrlTemplating(true)
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp"))
                 .paths(PathSelectors.any())
