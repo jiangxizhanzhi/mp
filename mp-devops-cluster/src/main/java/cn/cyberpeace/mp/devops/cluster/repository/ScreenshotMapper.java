@@ -30,5 +30,12 @@ public interface ScreenshotMapper extends BaseModelMapper<ScreenshotModel> {
      * @return
      */
     List<ScreenshotModel> queryByCreateTime(String createTime);
+
+    /**
+     * 根据id批量查询
+     * @param ids
+     * @return
+     */
+    List<ScreenshotModel> selectByIds(List<String> ids);
 	
 }
