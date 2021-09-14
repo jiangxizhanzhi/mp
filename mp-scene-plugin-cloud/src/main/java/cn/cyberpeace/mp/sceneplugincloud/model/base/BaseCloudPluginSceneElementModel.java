@@ -59,9 +59,7 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
 
     // 虚拟防火墙属性
     @DefaultStr
-    private String firewallIngressRules;
-    @DefaultStr
-    private String firewallEgressRules;
+    private String firewallRules;
 
     // 虚拟机/容器属性
     @DefaultStr

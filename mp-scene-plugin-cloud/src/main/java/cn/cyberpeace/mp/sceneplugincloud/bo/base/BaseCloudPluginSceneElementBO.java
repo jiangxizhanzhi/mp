@@ -58,10 +58,8 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     private List<StaticRoute> staticRoutes;
 
     // 虚拟防火墙属性
-    @ApiModelProperty(value = "虚拟防火墙入口规则")
-    private List<FirewallRule> firewallIngressRules;
-    @ApiModelProperty(value = "虚拟防火墙出口规则")
-    private List<FirewallRule> firewallEgressRules;
+    @ApiModelProperty(value = "虚拟防火墙规则")
+    private List<FirewallRule> firewallRules;
 
     // 虚拟机/容器属性
     @ApiModelProperty(value = "虚拟机/容器镜像名称")
@@ -103,8 +101,7 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getDnsNameservers),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAllocationPools),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getStaticRoutes),
-                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getFirewallIngressRules),
-                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getFirewallEgressRules),
+                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getFirewallRules),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getInitialTools),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAuxiliaryNetworkDnsNameservers),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAuxiliaryNetworkAllocationPools)));
@@ -114,10 +111,8 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
                 : JsonUtils.parse(obj.getAllocationPools(), new TypeReference<List<AllocationPool>>(){});
         staticRoutes = StringUtils.isEmpty(obj.getStaticRoutes()) ? new ArrayList<>()
                 : JsonUtils.parse(obj.getStaticRoutes(), new TypeReference<List<StaticRoute>>(){});
-        firewallIngressRules = StringUtils.isEmpty(obj.getFirewallIngressRules()) ? new ArrayList<>()
-                : JsonUtils.parse(obj.getFirewallIngressRules(), new TypeReference<List<FirewallRule>>(){});
-        firewallEgressRules = StringUtils.isEmpty(obj.getFirewallEgressRules()) ? new ArrayList<>()
-                : JsonUtils.parse(obj.getFirewallEgressRules(), new TypeReference<List<FirewallRule>>(){});
+        firewallRules = StringUtils.isEmpty(obj.getFirewallRules()) ? new ArrayList<>()
+                : JsonUtils.parse(obj.getFirewallRules(), new TypeReference<List<FirewallRule>>(){});
         initialTools = StringUtils.isEmpty(obj.getInitialTools()) ? new ArrayList<>()
                 : JsonUtils.parse(obj.getInitialTools(), new TypeReference<List<InitialTool>>(){});
         auxiliaryNetworkDnsNameservers = StringUtils.isEmpty(obj.getAuxiliaryNetworkDnsNameservers()) ? new ArrayList<>()
@@ -132,8 +127,7 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getDnsNameservers),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAllocationPools),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getStaticRoutes),
-                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getFirewallIngressRules),
-                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getFirewallEgressRules),
+                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getFirewallRules),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getInitialTools),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAuxiliaryNetworkDnsNameservers),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAuxiliaryNetworkAllocationPools)));
@@ -146,11 +140,8 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
         if (staticRoutes != null) {
             obj.setStaticRoutes(JsonUtils.toJsonString(staticRoutes));
         }
-        if (firewallIngressRules != null) {
-            obj.setFirewallIngressRules(JsonUtils.toJsonString(firewallIngressRules));
-        }
-        if (firewallEgressRules != null) {
-            obj.setFirewallEgressRules(JsonUtils.toJsonString(firewallEgressRules));
+        if (firewallRules != null) {
+            obj.setFirewallRules(JsonUtils.toJsonString(firewallRules));
         }
         if (initialTools != null) {
             obj.setInitialTools(JsonUtils.toJsonString(initialTools));

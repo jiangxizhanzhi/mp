@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.constant.FirewallRuleDirection;
 import cn.cyberpeace.mp.sceneplugincloud.constant.QosRuleDirection;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
@@ -175,26 +176,27 @@ public class CreateHandler extends HandlerCommon {
         var srcElement = cloudElement.getSrcElement();
         var createData = new VirtualFirewallCreateData();
         createData.setName(genResourceName(srcElement.getEid()));
-        var srcIngressRules = cloudElement.getFirewallIngressRules();
-        if (srcIngressRules != null) {
+        var srcRules = cloudElement.getFirewallRules();
+        if (srcRules != null) {
             List<VirtualFirewallCreateData.Rule> ingressRules = new ArrayList<>();
-            srcIngressRules.forEach(srcIngressRule -> {
-                ingressRules.add(new VirtualFirewallCreateData.Rule(srcIngressRule.getSourceIpAddress(),
-                        srcIngressRule.getDestinationIpAddress(), srcIngressRule.getSourcePort(),
-                        srcIngressRule.getDestinationPort(), null, srcIngressRule.getProtocol(),
-                        srcIngressRule.getAction()));
+            List<VirtualFirewallCreateData.Rule> egressRules = new ArrayList<>();
+            srcRules.forEach(srcRule -> {
+                var direction = srcRule.getDirection();
+                var rule = new VirtualFirewallCreateData.Rule(srcRule.getSourceIpAddress(),
+                        srcRule.getDestinationIpAddress(), srcRule.getSourcePort(),
+                        srcRule.getDestinationPort(), null, srcRule.getProtocol(),
+                        srcRule.getAction());
+                if (FirewallRuleDirection.INGRESS.equals(direction)) {
+                    ingressRules.add(rule);
+                } else if (FirewallRuleDirection.EGRESS.equals(direction)) {
+                    egressRules.add(rule);
+                } else if (FirewallRuleDirection.BOTH.equals(direction)) {
+                    ingressRules.add(rule);
+                    egressRules.add(rule);
+                }
+
             });
             createData.setIngressRules(ingressRules);
-        }
-        var srcEgressRules = cloudElement.getFirewallEgressRules();
-        if (srcEgressRules != null) {
-            List<VirtualFirewallCreateData.Rule> egressRules = new ArrayList<>();
-            srcEgressRules.forEach(srcEgressRule -> {
-                egressRules.add(new VirtualFirewallCreateData.Rule(srcEgressRule.getSourceIpAddress(),
-                        srcEgressRule.getDestinationIpAddress(), srcEgressRule.getSourcePort(),
-                        srcEgressRule.getDestinationPort(), null, srcEgressRule.getProtocol(),
-                        srcEgressRule.getAction()));
-            });
             createData.setEgressRules(egressRules);
         }
 
