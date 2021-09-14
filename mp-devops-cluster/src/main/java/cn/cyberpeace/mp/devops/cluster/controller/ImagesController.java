@@ -85,7 +85,8 @@ public class ImagesController {
                     .mainCategory(v.getMainCategory()).subCategory(v.getSubCategory()).imageType(v.getImageType())
                     .systemType(Objects.nonNull(extSystemInfo) ? extSystemInfo.getSystemType() : null)
                     .flavor(Objects.nonNull(extVm) ? extVm.getFlavor() : "")
-                    .description(v.getDescription()).imageStatus(Objects.nonNull(extImageInfo) ? extImageInfo.getImageStatus() : null).build();
+                    .description(v.getDescription()).imageStatus(Objects.nonNull(extImageInfo) ? extImageInfo.getImageStatus() : null)
+                    .authTotal(v.getAuthTotal()).isPublic(v.getIsPublic()).build();
             return response;
         }).collect(Collectors.toList());
 
@@ -117,7 +118,7 @@ public class ImagesController {
      */
     @ApiOperation("更新")
     @PostMapping("/update")
-    public ServiceResult update(@RequestBody ImageRequest request){
+    public ServiceResult update(ImageRequest request){
         if (StringUtils.isBlank(request.getUuid())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }

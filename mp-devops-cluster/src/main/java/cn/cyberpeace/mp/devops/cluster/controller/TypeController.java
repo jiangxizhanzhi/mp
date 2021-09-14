@@ -240,10 +240,13 @@ public class TypeController {
     public Result<TypeAllResponse> serviceMgCategories(){
         TypeAllConvertModel serviceCategories = typeConverter.findServiceCategories();
         TypeAllConvertModel deployType = typeConverter.findDeployType();
+        TypeAllConvertModel installerPlatforms = typeConverter.findInstallerPlatforms();
+
         TypeAllResponse response = new TypeAllResponse();
         response.setDeployType(Objects.nonNull(deployType) ?  deployType.getIdIntegerModelList() : null);
         response.setServiceCategories(Objects.nonNull(serviceCategories) ?
                 serviceCategories.getIdStringModelList() : null);
+        response.setInstallerPlatforms(Objects.nonNull(installerPlatforms) ? installerPlatforms.getIdStringModelList() : null);
         return new Result<>(response);
     }
 

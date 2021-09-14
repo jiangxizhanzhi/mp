@@ -75,5 +75,10 @@ public class ImagePageDTO extends BasePageDTO{
      */
     private StatusEnum useStatus;
 
+    /**
+     * 1:查询私有和公开的数据
+     */
+    private Integer searchPublicEnum;
+
 
 }
