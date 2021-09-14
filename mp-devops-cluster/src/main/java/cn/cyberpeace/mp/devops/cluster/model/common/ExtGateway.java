@@ -1,10 +1,11 @@
 package cn.cyberpeace.mp.devops.cluster.model.common;
 
 import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -12,21 +13,5 @@ import lombok.NoArgsConstructor;
 @ApiModel("网关信息")
 public class ExtGateway {
 
-    /**
-     * 管理口/Wan口/Lan口
-     */
-    @ApiModelProperty
-    private Integer portConfig;
-
-    /**
-     * 端口名称
-     */
-    @ApiModelProperty("端口名称")
-    private String portName;
-
-    /**
-     * 端口网段
-     */
-    @ApiModelProperty("端口网段")
-    private String portIps;
+    private List<PortConfig> portConfigs;
 }
