@@ -7,6 +7,8 @@ import cn.cyberpeace.mp.devops.cluster.enums.StatusEnum;
 import cn.cyberpeace.mp.devops.cluster.model.Device;
 import cn.cyberpeace.mp.devops.cluster.model.TargetModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntity;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtImageInfo;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtVm;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
 import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
@@ -74,6 +76,19 @@ public class DevopsDevopsTargetServiceImpl implements DevopsTargetService {
         if (Objects.nonNull(extEntity)){
             targetModel.setInPosition(extEntity.getEntityStatus() ? StatusEnum.YES : StatusEnum.NO);
         }
+
+        ExtImageInfo extImageInfo = device.getExtImageInfo();
+        if (Objects.nonNull(extImageInfo)){
+            targetModel.setImageStatus(extImageInfo.getImageStatus());
+        }
+
+        ExtSystemInfo extSystemInfo = device.getExtSystemInfo();
+        if (Objects.nonNull(extSystemInfo)){
+            targetModel.setSystemType(extSystemInfo.getSystemType());
+            targetModel.setLanguage(extSystemInfo.getLanguage());
+            targetModel.setSystemArchitecure(extSystemInfo.getSystemArchitecture());
+        }
+
         return targetModel;
     }
 }

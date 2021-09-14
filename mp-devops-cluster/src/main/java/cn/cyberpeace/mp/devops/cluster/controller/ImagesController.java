@@ -102,13 +102,18 @@ public class ImagesController {
     public ServiceResult add(ImageRequest request){
         String logoUrl = targetLogoService.uploadLogo(request.getLogoFile());
         request.setLogo(logoUrl);
-        ImagesUploadRequest uploadRequest = new ImagesUploadRequest();
-        String imageUuid = imagesConverter.uploadImage(uploadRequest,request.getImageFile());
         ExtImageInfo extImageInfo = request.getExtImageInfo();
-        if (Objects.isNull(extImageInfo)){
-            extImageInfo = new ExtImageInfo();
+        if (Objects.nonNull(extImageInfo) && extImageInfo.getSystemImageType() == 3) {
+            ImagesUploadRequest uploadRequest = new ImagesUploadRequest();
+            uploadRequest.setUploadType(extImageInfo.getUploadType());
+            uploadRequest.setDiskFormat(extImageInfo.getDiskFormat());
+            uploadRequest.setFtpFilename(extImageInfo.getFtpFilename());
+            uploadRequest.setType(request.getVirtualType());
+            uploadRequest.setHwDiskFormat(extImageInfo.getHwDiskFormat());
+            uploadRequest.setHwVifModel(extImageInfo.getHwVifModel());
+            String imageUuid = imagesConverter.uploadImage(uploadRequest, request.getImageFile());
+            extImageInfo.setUuid(imageUuid);
         }
-        extImageInfo.setUuid(imageUuid);
         request.setExtImageInfo(extImageInfo);
         Boolean result = imagesConverter.add(request);
        return result ? ServiceResult.successful() : ServiceResult.fail("");
