@@ -1,13 +1,17 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
+import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.ImagesConverter;
+import cn.cyberpeace.mp.devops.cluster.converter.InjectFileConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.SnapshotConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertPageModel;
+import cn.cyberpeace.mp.devops.cluster.converter.model.InjectFileConvertModel;
+import cn.cyberpeace.mp.devops.cluster.converter.model.InjectFileListConvertModel;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceInjectFileCreate;
 import cn.cyberpeace.mp.devops.cluster.model.Flavor;
 import cn.cyberpeace.mp.devops.cluster.model.FlavorCloudPlatformModel;
@@ -64,15 +68,18 @@ public class ImagesController {
 
     private ScenariosSnapshotService scenariosSnapshotService;
 
+    private InjectFileConverter injectFileConverter;
+
     @Autowired
     public ImagesController(ImagesConverter imagesConverter,SnapshotConverter snapshotConverter,
                             TargetLogoService targetLogoService,FlavorService flavorService,
-                            ScenariosSnapshotService scenariosSnapshotService) {
+                            ScenariosSnapshotService scenariosSnapshotService,InjectFileConverter injectFileConverter) {
         this.imagesConverter = imagesConverter;
         this.snapshotConverter = snapshotConverter;
         this.targetLogoService = targetLogoService;
         this.flavorService = flavorService;
         this.scenariosSnapshotService = scenariosSnapshotService;
+        this.injectFileConverter = injectFileConverter;
     }
 
     /**
@@ -192,6 +199,16 @@ public class ImagesController {
     }
 
     /**
+     * 授权
+     */
+    @ApiOperation("根据uuid查询授权用户信息")
+    @GetMapping("/auth-users")
+    public Result<List<UserDto>> authUsers(@RequestParam("uuid") String uuid ){
+        List<UserDto> userDtos = imagesConverter.findUsersByUuid(uuid);
+        return new Result<>(userDtos);
+    }
+
+    /**
      * 导出
      */
     @ApiOperation("导出")
@@ -273,8 +290,12 @@ public class ImagesController {
      */
     @ApiOperation("查看文件注入列表")
     @GetMapping("/inject-file")
-    public void findInjectFileList(@RequestBody ImageInjectFileRequest request){
-
+    public Result<InjectFileConvertModel> findInjectFileList(ImageInjectFilePageRequest request){
+        InjectFileListConvertModel list = injectFileConverter.list(request.getDeviceUuid());
+        if (Objects.isNull(list)){
+            return new Result();
+        }
+        return new Result(list.getModelList());
     }
 
 

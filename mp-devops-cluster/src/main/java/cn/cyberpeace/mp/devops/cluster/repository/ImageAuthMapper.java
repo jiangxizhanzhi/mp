@@ -23,4 +23,11 @@ public interface ImageAuthMapper extends BasePermissionMapper {
      * @return
      */
     List<ImageAuthTotalCount> totalCount(List<String> ids);
+
+    /**
+     * 根据镜像ID查询用户信息
+     * @param target
+     * @return
+     */
+    List<TargetAuthModel> findByTarget(String target);
 }
