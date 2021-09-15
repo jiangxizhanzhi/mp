@@ -31,6 +31,6 @@ public class ScreenshotUsedSpaceResponse {
      * 总共空间：默认10G
      */
     @ApiModelProperty("总共空间")
-    private Long totalSpace = 10 * 1024 * 1024 * 1024 * 1024L;
+    private Long totalSpace = 10L * 1024 * 1024 * 1024 * 1024;
 
 }
