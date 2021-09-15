@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @Description:
@@ -24,13 +25,17 @@ public class LicenseService {
 
     public final String ACTIVATION_LICENSE = "license.so";
 
+    private static Awesome INSTANCE = null;
+
     @Autowired
     private ActivationConfig activationConfig;
 
     public interface Awesome extends Library {
 
         public class GoString extends Structure {
-            public static class ByValue extends GoString implements Structure.ByValue {}
+            public static class ByValue extends GoString implements Structure.ByValue {
+            }
+
             public String p;
             public long n;
 
@@ -58,13 +63,26 @@ public class LicenseService {
         Awesome.GoString.ByValue str = new Awesome.GoString.ByValue();
         str.p = verifyStr;
         str.n = str.p.length();
+        log.info("phase 1...");
 
         Awesome.GoString.ByValue code = new Awesome.GoString.ByValue();
         code.p = verifyCode;
         code.n = code.p.length();
+        log.info("phase 2...");
 
-        Awesome INSTANCE = (Awesome) Native.loadLibrary(activationConfig.getLicenseDir() + File.separator + "license.so", Awesome.class);
+        if (Objects.isNull(INSTANCE)) {
+            log.info("init INSTANCE...");
+            try {
+                INSTANCE = (Awesome) Native.loadLibrary(activationConfig.getLicenseDir() + File.separator + "license.so", Awesome.class);
+                log.info("load license.so success!");
+            } catch (Exception e) {
+                log.error("load license.so error!");
+                throw e;
+            }
+        }
+
         int ret = INSTANCE.Verify(str, code);
+        log.info("verify success, ret:{}", ret);
 
         //  -1	json传入错误
         //  0	此授权码正确

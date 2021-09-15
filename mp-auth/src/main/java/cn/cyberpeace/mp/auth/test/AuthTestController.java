@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.TargetService;
 import cn.cyberpeace.mp.auth.service.UserHeartbeatService;
 import cn.cyberpeace.mp.auth.service.UserLogService;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.sys.LicenseService;
 import cn.cyberpeace.mp.auth.service.sys.SysActivationService;
 import cn.cyberpeace.mp.auth.util.PasswordStrengthChecker;
@@ -29,7 +30,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import oshi.driver.linux.Dmidecode;
 import oshi.hardware.ComputerSystem;
 import oshi.hardware.HWDiskStore;
 
@@ -80,6 +80,9 @@ public class AuthTestController {
 
     @Autowired
     private UserPermissionTestMapper userPermissionTestMapper;
+
+    @Autowired
+    private UserService userService;
 
     @ApiOperation("DES加密")
     @PostMapping("/desEncryptPwd")
@@ -220,13 +223,17 @@ public class AuthTestController {
 
     @GetMapping("/getSysUUID")
     public String getSysUUID() {
-        String serialNumber = Dmidecode.querySerialNumber();
-        log.error("serialNumber:{}", serialNumber);
-
-        String uuid = activationService.querySysUUID();
-        log.error("uuid:{}", uuid);
-
-        return uuid;
+//        String serialNumber = Dmidecode.querySerialNumber();
+//        log.error("serialNumber:{}", serialNumber);
+//
+//        String uuid = activationService.querySysUUID();
+//        log.error("uuid:{}", uuid);
+//
+//        return uuid;
+//        String[] ids = {"1f581231da924094ac2c5f892936169f", "5ffc5f6891e54371ad63c4ecf6bda692", "3fsss655d87112f4ae094bbaf7083"};
+//        List<UserDto> userDtos = userService.listByUserIds(ids);
+//        log.info("{}", userDtos);
+        return "";
     }
 
 
