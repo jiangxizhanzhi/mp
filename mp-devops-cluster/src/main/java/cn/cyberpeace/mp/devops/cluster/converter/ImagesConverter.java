@@ -54,7 +54,7 @@ public interface ImagesConverter extends BaseConverter{
     /**
      * 删除
      */
-    void delete(ImagesDeleteRequest request);
+    Boolean delete(ImagesDeleteRequest request);
 
     /**
      * 授权

@@ -189,12 +189,13 @@ public class ImagesConverterImpl implements ImagesConverter {
 
     @Override
     @Transactional
-    public void delete(ImagesDeleteRequest request) {
-        deviceService.deleteByIds(request.getImageIds());
+    public Boolean delete(ImagesDeleteRequest request) {
+        Boolean result = deviceService.deleteByIds(request.getImageIds());
         ImageDeleteDTO dto = new ImageDeleteDTO();
         dto.setIds(request.getImageIds());
         imageMapper.delete(dto);
         request.getImageIds().forEach(id -> imageAuthMapper.deleteByTarget(id));
+        return result;
     }
 
     @Transactional

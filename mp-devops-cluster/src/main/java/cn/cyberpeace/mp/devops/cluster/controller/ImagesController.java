@@ -176,8 +176,9 @@ public class ImagesController {
      */
     @ApiOperation("删除")
     @DeleteMapping("/page")
-    public void delete(ImagesDeleteRequest request){
-        imagesConverter.delete(request);
+    public ServiceResult delete(ImagesDeleteRequest request){
+        Boolean result = imagesConverter.delete(request);
+        return result ? ServiceResult.successful() : ServiceResult.fail("");
     }
 
     /**
@@ -185,8 +186,9 @@ public class ImagesController {
      */
     @ApiOperation("授权/批量授权")
     @PostMapping("/auth")
-    public void auth(@RequestBody ImagesAuthRequest request){
+    public ServiceResult auth(@RequestBody ImagesAuthRequest request){
         imagesConverter.auth(request);
+        return ServiceResult.successful();
     }
 
     /**
