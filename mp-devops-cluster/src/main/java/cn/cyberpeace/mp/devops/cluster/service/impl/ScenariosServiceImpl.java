@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.devops.cluster.service.impl;
 
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.DeviceInjectFileCreate;
 import cn.cyberpeace.mp.devops.cluster.model.ScenarioDeleteDeviceParams;
 import cn.cyberpeace.mp.devops.cluster.model.ScenariosSnapshot;
 import cn.cyberpeace.mp.devops.cluster.model.common.Snapshot;
@@ -25,6 +26,13 @@ public class ScenariosServiceImpl extends BaseOpenStackServiceImpl implements Sc
     @Override
     public Boolean deleteDeviceScenario(ScenarioDeleteDeviceParams params) {
         BaseCloudPlatformModel model = super.sendDelete( URL_VERSION + "/scenarios/device_scenario",JsonUtils.toUnderlineJSONString(params), BaseCloudPlatformModel.class);
+        return model.isSuccess();
+    }
+
+
+    @Override
+    public Boolean injectFile(DeviceInjectFileCreate injectFileCreate) {
+        BaseCloudPlatformModel model = super.sendPost(  URL_VERSION + "/scenarios/device_inject_file", JsonUtils.toUnderlineJSONString(injectFileCreate), BaseCloudPlatformModel.class);
         return model.isSuccess();
     }
 }

@@ -21,4 +21,6 @@ public class FirewallRule {
     private String protocol;
     @ApiModelProperty(value = "动作")
     private String action;
+    @ApiModelProperty(value = "方向")
+    private String direction;
 }

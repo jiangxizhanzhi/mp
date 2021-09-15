@@ -178,10 +178,16 @@ public class CsceneHandler extends BaseCsceneHandler<
 
     @Override
     public void delete() {
-        reloadCsceneInstances();
-        for (var csceneInstance: ListUtils.union(getCscene().getTestScenes(), getCscene().getAppScenes())) {
-            var instanceHandler = new CsceneInstanceHandler(csceneInstance);
-            instanceHandler.delete();
+        delete(true);
+    }
+
+    public void delete(boolean withInstance) {
+        if (withInstance) {
+            reloadCsceneInstances();
+            for (var csceneInstance: ListUtils.union(getCscene().getTestScenes(), getCscene().getAppScenes())) {
+                var instanceHandler = new CsceneInstanceHandler(csceneInstance);
+                instanceHandler.delete();
+            }
         }
 
         super.delete();

@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.devops.cluster.converter.impl;
 
-import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.BeanUtils;
@@ -24,6 +23,7 @@ import cn.cyberpeace.mp.devops.cluster.utils.FileUtils;
 import com.alibaba.fastjson.JSONArray;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.http.HttpResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,6 +33,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -93,7 +94,8 @@ public class ImagesConverterImpl implements ImagesConverter {
         }
         dto.setName(request.getName());
         dto.setOwner(Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : null);
-        dto.setIsPublic(PublicEnum.ALL_PUBLIC);
+//        dto.setIsPublic(PublicEnum.ALL_PUBLIC);
+        dto.setSearchPublicEnum(1);
         dto.setOffset((request.getPage() - 1) * request.getPerPage());
         dto.setLimit(request.getPerPage());
 
@@ -113,7 +115,24 @@ public class ImagesConverterImpl implements ImagesConverter {
             return null;
         }
 
+        List<String> targetUuids = targetModels.stream().map(TargetModel::getUuid).collect(Collectors.toList());
+
+        List<ImageAuthTotalCount> imageAuthTotalCounts = imageAuthMapper.totalCount(targetUuids);
+
+        Map<String, Integer> imageAuthTotalCountsMap = imageAuthTotalCounts.stream().collect(Collectors.toMap(ImageAuthTotalCount::getTarget, ImageAuthTotalCount::getTotal));
+
+        Map<String, PublicEnum> targetMap = targetModels.stream().collect(Collectors.toMap(TargetModel::getUuid, TargetModel::getIsPublic));
+
         List<ImageConvertModel> modelList = model.getItems().stream().map(device -> wrapperImageConvertModel(device)).collect(Collectors.toList());
+
+        if (CollectionUtils.isNotEmpty(modelList)) {
+            for (ImageConvertModel imageConvertModel : modelList) {
+                if (MapUtils.isNotEmpty(targetMap)) {
+                    imageConvertModel.setIsPublic(targetMap.get(imageConvertModel.getUuid()));
+                }
+                imageConvertModel.setAuthTotal(imageAuthTotalCountsMap.get(imageConvertModel.getUuid()));
+            }
+        }
 
         ImageConvertPageModel convertModel = new ImageConvertPageModel();
         convertModel.setModelList(modelList);
@@ -185,8 +204,7 @@ public class ImagesConverterImpl implements ImagesConverter {
         List<String> imageIds = request.getUuids();
         //先删除上次的权限数据
         imageIds.forEach(imageId ->  imageAuthMapper.deleteByTarget(imageId));
-        //再新增权限数据
-        List<String> userIds = request.getUserIds();
+
         PublicEnum isAllPublic = request.getIsAllPublic();
         imageIds.forEach(imageId -> {
             TargetModel targetModel = new TargetModel();
@@ -194,12 +212,14 @@ public class ImagesConverterImpl implements ImagesConverter {
             targetModel.setUuid(imageId);
             imageMapper.updateById(targetModel);
         });
-        if (PublicEnum.ALL_PUBLIC != isAllPublic){
-            if (CollectionUtils.isEmpty(userIds)){
-                //私有的
-                UserModel loginUser = UserUtils.getLoginUser();
-                userIds.add(loginUser.getId());
-            }
+        //再新增权限数据
+        List<String> userIds = request.getUserIds();
+        if (PublicEnum.ALL_PUBLIC != isAllPublic && PublicEnum.PRIVATE != isAllPublic && CollectionUtils.isNotEmpty(userIds)){
+//            if (CollectionUtils.isEmpty(userIds)){
+//                //私有的
+//                UserModel loginUser = UserUtils.getLoginUser();
+//                userIds.add(loginUser.getId());
+//            }
             imageIds.forEach(imageId -> {
                 List<TargetAuthModel> authModelList = userIds.stream().map(userId -> {
                     TargetAuthModel targetAuthModel = new TargetAuthModel();

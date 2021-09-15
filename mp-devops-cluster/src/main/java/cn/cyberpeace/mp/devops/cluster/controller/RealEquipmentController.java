@@ -185,16 +185,6 @@ public class RealEquipmentController {
     }
 
     /**
-     * 登录
-     */
-    @ApiOperation("登录")
-    @PostMapping("/sign-in")
-    public Result<Boolean> signIn(@RequestBody RealEquipmentSignInRequest request){
-//        Boolean result = realEquipmentConverter.delete(request);
-        return new Result<>();
-    }
-
-    /**
      * 释放
      */
     @ApiOperation("释放")

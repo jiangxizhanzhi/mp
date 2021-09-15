@@ -8,6 +8,8 @@ import cn.cyberpeace.mp.devops.cluster.converter.ImagesConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.SnapshotConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertPageModel;
+import cn.cyberpeace.mp.devops.cluster.model.DeviceInjectFileCreate;
+import cn.cyberpeace.mp.devops.cluster.model.Flavor;
 import cn.cyberpeace.mp.devops.cluster.model.FlavorCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtImageInfo;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
@@ -18,6 +20,7 @@ import cn.cyberpeace.mp.devops.cluster.response.ImagesPageResponse;
 import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
 import cn.cyberpeace.mp.devops.cluster.response.base.Result;
 import cn.cyberpeace.mp.devops.cluster.service.FlavorService;
+import cn.cyberpeace.mp.devops.cluster.service.ScenariosSnapshotService;
 import cn.cyberpeace.mp.devops.cluster.service.TargetLogoService;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
@@ -36,6 +39,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
@@ -58,13 +62,17 @@ public class ImagesController {
 
     private FlavorService flavorService;
 
+    private ScenariosSnapshotService scenariosSnapshotService;
+
     @Autowired
     public ImagesController(ImagesConverter imagesConverter,SnapshotConverter snapshotConverter,
-                            TargetLogoService targetLogoService,FlavorService flavorService) {
+                            TargetLogoService targetLogoService,FlavorService flavorService,
+                            ScenariosSnapshotService scenariosSnapshotService) {
         this.imagesConverter = imagesConverter;
         this.snapshotConverter = snapshotConverter;
         this.targetLogoService = targetLogoService;
         this.flavorService = flavorService;
+        this.scenariosSnapshotService = scenariosSnapshotService;
     }
 
     /**
@@ -85,7 +93,8 @@ public class ImagesController {
                     .mainCategory(v.getMainCategory()).subCategory(v.getSubCategory()).imageType(v.getImageType())
                     .systemType(Objects.nonNull(extSystemInfo) ? extSystemInfo.getSystemType() : null)
                     .flavor(Objects.nonNull(extVm) ? extVm.getFlavor() : "")
-                    .description(v.getDescription()).imageStatus(Objects.nonNull(extImageInfo) ? extImageInfo.getImageStatus() : null).build();
+                    .description(v.getDescription()).imageStatus(Objects.nonNull(extImageInfo) ? extImageInfo.getImageStatus() : null)
+                    .authTotal(v.getAuthTotal()).isPublic(v.getIsPublic()).build();
             return response;
         }).collect(Collectors.toList());
 
@@ -100,13 +109,18 @@ public class ImagesController {
     public ServiceResult add(ImageRequest request){
         String logoUrl = targetLogoService.uploadLogo(request.getLogoFile());
         request.setLogo(logoUrl);
-        ImagesUploadRequest uploadRequest = new ImagesUploadRequest();
-        String imageUuid = imagesConverter.uploadImage(uploadRequest,request.getImageFile());
         ExtImageInfo extImageInfo = request.getExtImageInfo();
-        if (Objects.isNull(extImageInfo)){
-            extImageInfo = new ExtImageInfo();
+        if (Objects.nonNull(extImageInfo) && extImageInfo.getSystemImageType() == 3) {
+            ImagesUploadRequest uploadRequest = new ImagesUploadRequest();
+            uploadRequest.setUploadType(extImageInfo.getUploadType());
+            uploadRequest.setDiskFormat(extImageInfo.getDiskFormat());
+            uploadRequest.setFtpFilename(extImageInfo.getFtpFilename());
+            uploadRequest.setType(request.getVirtualType());
+            uploadRequest.setHwDiskFormat(extImageInfo.getHwDiskFormat());
+            uploadRequest.setHwVifModel(extImageInfo.getHwVifModel());
+            String imageUuid = imagesConverter.uploadImage(uploadRequest, request.getImageFile());
+            extImageInfo.setUuid(imageUuid);
         }
-        extImageInfo.setUuid(imageUuid);
         request.setExtImageInfo(extImageInfo);
         Boolean result = imagesConverter.add(request);
        return result ? ServiceResult.successful() : ServiceResult.fail("");
@@ -117,7 +131,7 @@ public class ImagesController {
      */
     @ApiOperation("更新")
     @PostMapping("/update")
-    public ServiceResult update(@RequestBody ImageRequest request){
+    public ServiceResult update(ImageRequest request){
         if (StringUtils.isBlank(request.getUuid())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
@@ -247,8 +261,9 @@ public class ImagesController {
      */
     @ApiOperation("文件注入")
     @PostMapping("/inject-file")
-    public void injectFile(@RequestBody ImageInjectFileRequest request){
-
+    public void injectFile(@Valid @RequestBody ImageInjectFileRequest request){
+        scenariosSnapshotService.injectFile(new DeviceInjectFileCreate(request.getDeviceUuid(),
+                request.getFileUrl(),request.getFileName(),request.getFileSize()));
     }
 
     /**
@@ -266,8 +281,11 @@ public class ImagesController {
      */
     @ApiOperation("查询flavor")
     @GetMapping("/page-flavor")
-    public Result pageFlavor(){
+    public Result<List<Flavor>> pageFlavor(){
         FlavorCloudPlatformModel page = flavorService.page("");
+        if (Objects.isNull(page) ||  Objects.isNull(page.getData())){
+            return new Result();
+        }
         return new Result<>(page.getData().getList());
     }
 }

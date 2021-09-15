@@ -28,6 +28,15 @@ public class LocalDateTimeUtils {
             ZoneId.systemDefault());
     }
 
+    /**
+     * string转localDateTime
+     * @param date：2021-09-14T03:38:59Z
+     * @return
+     */
+    public static LocalDateTime stringToLocalDateTime(String date) {
+        return LocalDateTime.parse(date, dateTimeFormatter);
+    }
+
     public static void main(String[] args) {
         System.out.println(LocalDateTime.parse("2021-08-20T03:28:38Z",LocalDateTimeUtils.dateTimeFormatter));
     }

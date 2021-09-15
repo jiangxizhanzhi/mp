@@ -41,6 +41,11 @@ public class TargetModel extends BaseModel {
     private Integer subCategory;
 
     /**
+     * 子分类
+     */
+    private Integer thirdCategory;
+
+    /**
      * 镜像类型
      */
     private String imageType;
@@ -69,5 +74,27 @@ public class TargetModel extends BaseModel {
      * 引用状态
      */
     private Integer referenceStatus;
+
+    /**
+     * 系统类型
+     */
+    private Integer systemType;
+
+    /**
+     * 系统架构
+     */
+    private String systemArchitecure;
+
+    /**
+     * 系统语言
+     */
+    private String language;
+
+    /**
+     * 镜像状态
+     */
+    private Integer imageStatus;
+
+
 
 }
