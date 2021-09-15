@@ -60,8 +60,7 @@ public class AddAttackFlowRequest {
     /**
      * 运行参数
      */
-    @ApiModelProperty(required = true, value = "运行参数")
-    @NotBlank(message = "runCmd can not be empty")
+    @ApiModelProperty(value = "运行参数")
     private String runCmd;
 
     /**
