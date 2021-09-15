@@ -17,7 +17,6 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * @Description: 文件操作控制层
- *
  * @Author qiaokang
  * @Date：2021/6/21 15:01
  */
@@ -52,7 +51,7 @@ public class FileController {
      * @param response
      */
     @ApiOperation("文件下载通用接口")
-    @RequestMapping("/file/download")
+    @RequestMapping(value = "/file/download", method = {RequestMethod.POST, RequestMethod.GET})
     public void downloadFile(String filePath, HttpServletResponse response) throws MpRuntimeException {
         fileService.downloadFile(filePath, response);
     }

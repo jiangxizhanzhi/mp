@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotEmpty;
 import java.util.List;
 
 /**
@@ -21,6 +22,7 @@ public class ImagesDeleteRequest extends BaseRequest {
     /**
      * 镜像ID
      */
+    @NotEmpty
     private List<String> imageIds;
 
 }

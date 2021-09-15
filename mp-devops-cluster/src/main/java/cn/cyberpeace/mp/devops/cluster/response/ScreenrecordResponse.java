@@ -18,7 +18,7 @@ public class ScreenrecordResponse extends ScreenshotModel {
     /**
      * 录屏时长
      */
-    @ApiModelProperty(value = "截屏文件地址")
+    @ApiModelProperty(value = "录屏时长")
     private Double recortime;
 
     /**

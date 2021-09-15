@@ -280,10 +280,14 @@
     </update>
 
     <delete id="delete" parameterType="cn.cyberpeace.mp.devops.cluster.dto.ImageDeleteDTO">
-        delete from mp_devops_target t
-        where t.uuid in
+        delete from mp_devops_target
+        <where>
+            <if test="ids != null and ids.size > 0">
+                uuid in
                 <foreach collection="ids" item="item" index="index"  open="(" separator="," close=")">
                     #{item}
                 </foreach>
+            </if>
+        </where>
     </delete>
 </mapper>

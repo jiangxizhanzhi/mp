@@ -6,11 +6,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel("资源信息")
-public class Resource {
+public class Resource implements Serializable {
 
     /**
      * 文件地址
@@ -35,4 +37,10 @@ public class Resource {
      */
     @ApiModelProperty(hidden = true)
     private String installScript;
+
+    /**
+     * 用户文件名
+     */
+    @ApiModelProperty("用户文件名")
+    private String userFilename;
 }

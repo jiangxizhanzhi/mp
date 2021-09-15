@@ -251,7 +251,7 @@ public class BaseServiceImpl {
     protected <T extends BaseModel> T sendFormDataPost(String url, HttpEntity httpEntity ,Class<T> valueType) throws IOException {
         String result = HttpUtils.doFormDataPost(url,httpEntity);
         T model = JsonUtils.toSnakeObject(result,valueType);
-        log.info("=====FormData调用url：{},参数：{},返回结果：{}",url,httpEntity,result);
+        log.info("=====FormDataPost调用url：{},参数：{},返回结果：{}",url,httpEntity,result);
         return model;
     }
 
