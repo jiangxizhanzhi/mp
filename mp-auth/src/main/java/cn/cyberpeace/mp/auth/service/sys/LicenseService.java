@@ -8,7 +8,6 @@ import com.sun.jna.Structure;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import oshi.util.ExecutingCommand;
 
 import java.io.File;
 import java.util.Arrays;
@@ -29,14 +28,6 @@ public class LicenseService {
     private ActivationConfig activationConfig;
 
     public interface Awesome extends Library {
-
-        String foo = null;
-
-        default void setFoo(String file) {
-        }
-
-//        Awesome INSTANCE = (Awesome) Native.loadLibrary("/home/tmp/license.so", Awesome.class);
-//        Awesome INSTANCE = (Awesome) Native.loadLibrary("classpath:/license/license.so", Awesome.class);
 
         public class GoString extends Structure {
             public static class ByValue extends GoString implements Structure.ByValue {}
@@ -61,7 +52,9 @@ public class LicenseService {
      */
     public boolean verify(String verifyStr, String verifyCode) {
 //        verifyStr = "{\"machinecode\": \"CHTF-12H1-34S8-HV23-123S\", \"deadline\": 1, \"info\": {\"thj\":2}}";
-        log.info("verifyStr:{}, verifyCode:{}", verifyStr, verifyCode);
+        log.info("verifyStr:{}", verifyStr);
+        log.info("verifyCode:{}", verifyCode);
+//        "{\"deadline\":1,\"info\":{\"thj\":\"2\"},\"machinecode\":\"CHTF-12H1-34S8-HV23-123S\"}"
         Awesome.GoString.ByValue str = new Awesome.GoString.ByValue();
         str.p = verifyStr;
         str.n = str.p.length();

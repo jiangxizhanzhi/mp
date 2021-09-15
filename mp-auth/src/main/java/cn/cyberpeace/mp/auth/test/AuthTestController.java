@@ -1,8 +1,6 @@
 package cn.cyberpeace.mp.auth.test;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
-import cn.cyberpeace.mp.auth.dto.activation.ActivationRequest;
-import cn.cyberpeace.mp.auth.dto.activation.ActivationResponse;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.model.UserPermissionModel;
 import cn.cyberpeace.mp.auth.repository.OrgMapper;
@@ -17,6 +15,7 @@ import cn.cyberpeace.mp.auth.service.sys.SysActivationService;
 import cn.cyberpeace.mp.auth.util.PasswordStrengthChecker;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.hutool.system.oshi.OshiUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -175,8 +174,8 @@ public class AuthTestController {
         return list;
     }
 
-    @GetMapping("/testlicense")
-    public void testlicense(@RequestBody ActivationRequest activationRequest) {
+    @PostMapping("/testlicense")
+    public ServiceResult testlicense(@RequestBody TestVerifyRequest testVerifyRequest) {
 //        licenseJdkDemo.testlicense();
 
 //        str.p = "{\"machinecode\": \"CHTF-12H1-34S8-HV23-123S\", \"deadline\": 1, \"info\": {\"thj\":2}}";
@@ -185,10 +184,18 @@ public class AuthTestController {
 //        activationRequest.setMachinecode("CHTF-12H1-34S8-HV23-123S");
 //        activationRequest.setVerifyCode("");
 
-        activationService.activate(activationRequest);
+//        activationService.activate(activationRequest);
+//
+//        ActivationResponse activationResponse = activationService.status();
+//        log.info("activationContent:{}", activationResponse);
+        log.info("{}", testVerifyRequest.getVerifyCode());
+        log.info("{}", testVerifyRequest.getVerifyStr());
 
-        ActivationResponse activationResponse = activationService.status();
-        log.info("activationContent:{}", activationResponse);
+        boolean success = licenseService.verify(testVerifyRequest.getVerifyStr(), testVerifyRequest.getVerifyCode());
+        if (success) {
+            return ServiceResult.success(success);
+        }
+        return ServiceResult.fail("校验失败");
     }
 
     @GetMapping("/getDiskInfo")
@@ -221,7 +228,6 @@ public class AuthTestController {
 
         return uuid;
     }
-
 
 
 }
