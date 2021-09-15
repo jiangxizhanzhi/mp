@@ -12,8 +12,11 @@ public class CsceneInstanceCreateContext {
     private Integer sceneTtl;
 
     @ApiModelProperty(value = "场景属性")
-    private String sceneAttr;
+    private Integer sceneAttr;
 
     @ApiModelProperty(value = "透明上下文")
     private Map<String, Object> context;
+
+    @ApiModelProperty(value = "场景模板数据")
+    private CsceneBO cscene;
 }

@@ -43,8 +43,13 @@ public class InitiateHandler extends HandlerCommon {
      */
     private boolean requireAuxiliaryNetwork(CloudPluginSceneElementBO cloudElement,
                                             CloudPluginSceneElementBO connectedCloudElement) {
-        if (cloudElement == null || connectedCloudElement == null) {
+        if (cloudElement == null) {
             return false;
+        }
+
+        // 没有连接，需要辅助网络
+        if (connectedCloudElement == null) {
+            return true;
         }
 
         // 自己和自己连接（异常），无需辅助网络
@@ -207,11 +212,8 @@ public class InitiateHandler extends HandlerCommon {
 
         var portId = srcPort.getId();
         var connectedSrcElement = getPortConnectedOpaqueSrcElement(portId);
-        if (connectedSrcElement == null) {
-            return;
-        }
-
-        var connectedCloudElement = getPluginHandler().getElement(connectedSrcElement.getId());
+        var connectedCloudElement = connectedSrcElement == null ? null
+                : getPluginHandler().getElement(connectedSrcElement.getId());
         var auxiliaryNetworkCloudElement = confirmAuxiliaryNetworkCloudElement(cloudElement,
                 connectedCloudElement);
         if (auxiliaryNetworkCloudElement == null) {
