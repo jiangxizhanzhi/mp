@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.aggregation.dto.cluster;
 
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Builder;
 import lombok.Data;
@@ -12,6 +13,7 @@ import lombok.Data;
 
 @Data
 @Builder
+@ApiModel
 public class SystemData {
 
     @ApiModelProperty("cpu数据")

@@ -15,6 +15,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -58,7 +59,7 @@ public class FlowScriptDemoServiceImpl extends BaseModelServiceImpl<FlowScriptDe
         if (CollectionUtils.isNotEmpty(flowScriptDemoModels)) {
             FastDfsConfig.Group group = fastDfsConfig.getGroupByName(FdfsGroupEnum.DEFAULT);
             scriptDemoList = flowScriptDemoModels.stream().map(demo -> new QueryFlowScriptDemoResponse.ScriptDemo(demo.getUrl(),
-                    group.getInnerFileServerAddr() + demo.getUrl(), demo.getScriptName())).collect(Collectors.toList());
+                    group.getInnerFileServerAddr() + File.separator + demo.getUrl(), demo.getScriptName())).collect(Collectors.toList());
         }
         response.setDemoList(scriptDemoList);
 

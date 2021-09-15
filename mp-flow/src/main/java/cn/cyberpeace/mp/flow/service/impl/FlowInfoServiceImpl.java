@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.flow.service.impl;
 
 import cn.cyberpeace.mp.base.config.FastDfsConfig;
 import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.result.*;
@@ -25,6 +26,7 @@ import cn.cyberpeace.mp.flow.service.field.FlowInfoFields;
 import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -270,9 +272,18 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         } else {
             fileName = addRequest.getFileName();
         }
-        InputStream is = new ByteArrayInputStream(addRequest.getCode().getBytes());
-        String filePath = fastDFSClient.upload(is, fileName, null, FdfsGroupEnum.DEFAULT.toString());
-        addRequest.setFilePath(filePath);
+
+        InputStream is = null;
+        try {
+            is = new ByteArrayInputStream(addRequest.getCode().getBytes());
+            String filePath = fastDFSClient.upload(is, fileName, null, FdfsGroupEnum.DEFAULT.toString());
+            addRequest.setFilePath(filePath);
+        } catch (MpRuntimeException e) {
+            log.error("add attack flow error", e);
+            return ServiceResult.fail("Add attack flow error");
+        } finally {
+            IOUtils.closeQuietly(is);
+        }
 
         // 请求对象转换
         FlowInfoModel flowInfoModel = this.getFlowInfoModel(addRequest);
@@ -352,22 +363,34 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         }
 
         if (StringUtils.isNotBlank(modifyRequest.getCode())) {
-            if (Objects.isNull(modifyRequest.getSuffix())) {
-                // 更新脚本时，suffix不能为空
-                return ServiceResult.fail("Suffix can not be empty");
-            }
-
             // 判断是否有文件名，没有则根据脚本语言默认生成一个
             String fileName;
             if (StringUtils.isBlank(modifyRequest.getFileName())) {
-                fileName = TextUtils.uuid() + (modifyRequest.getSuffix() == 1 ? ".sh" : ".py");
+                // 文件后缀
+                String suffix = "";
+                if (Objects.nonNull(modifyRequest.getSuffix())) {
+                    suffix = modifyRequest.getSuffix() == 1 ? ".sh" : ".py";
+                } else {
+                    // 没变更suffix时，根据文件名后缀判断之前类型
+                    suffix = oldServiceResult.getSource().getObj().getScriptFile().endsWith(".sh") ? ".sh" : ".py";
+                }
+                fileName = TextUtils.uuid() + suffix;
                 modifyRequest.setFileName(fileName);
             } else {
                 fileName = modifyRequest.getFileName();
             }
-            InputStream is = new ByteArrayInputStream(modifyRequest.getCode().getBytes());
-            String filePath = fastDFSClient.upload(is, fileName, null, FdfsGroupEnum.DEFAULT.toString());
-            modifyRequest.setFilePath(filePath);
+
+            InputStream is = null;
+            try {
+                is = new ByteArrayInputStream(modifyRequest.getCode().getBytes());
+                String filePath = fastDFSClient.upload(is, fileName, null, FdfsGroupEnum.DEFAULT.toString());
+                modifyRequest.setFilePath(filePath);
+            } catch (MpRuntimeException e) {
+                log.error("modify attack flow error", e);
+                return ServiceResult.fail("Modify attack flow error");
+            } finally {
+                IOUtils.closeQuietly(is);
+            }
         }
 
         // 请求对象转换

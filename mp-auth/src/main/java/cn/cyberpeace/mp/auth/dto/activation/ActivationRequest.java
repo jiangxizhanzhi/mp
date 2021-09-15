@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
@@ -19,7 +20,7 @@ public class ActivationRequest {
     @NotBlank
     private String machineCode;
 
-    @ApiModelProperty(value = "授权月份（多少个月）")
+    @ApiModelProperty(value = "授权月数")
     @NotNull
     private Integer deadline;
 
@@ -27,16 +28,12 @@ public class ActivationRequest {
     @NotNull
     private Integer edition;
 
-    @ApiModelProperty(value = "授权功能项列表")
-    private List<ActivationModuleItem> moduleItems;
-
-    @ApiModelProperty(value = "授权资源项列表")
-    private List<ActivationResourceItem> resourceItems;
+    @ApiModelProperty(value = "授权项列表")
+    @NotEmpty
+    private List<ActivationItem> items;
 
     @ApiModelProperty(value = "校验码")
     @NotBlank
     private String verifyCode;
-
-
 
 }
