@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.devops.cluster.service;
 
 import cn.cyberpeace.mp.devops.cluster.model.Device;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.DeviceQuickCreateCloudPlatformModel;
 import org.apache.http.HttpResponse;
 
 import java.io.File;
@@ -42,6 +43,9 @@ public interface ImagesService extends BaseCloudPlatformService  {
      * @return
      */
     DeviceCloudPlatformModel pageForQuickCreate(String getParams);
+
+
+    Device quickCreate(DeviceQuickCreateCloudPlatformModel model);
 
     /**
      * 上传镜像

@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.devops.cluster.service.impl;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.Device;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.DeviceQuickCreateCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.service.ImagesService;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -50,6 +51,12 @@ public class ImagesServiceImpl extends BaseOpenStackServiceImpl implements Image
     public DeviceCloudPlatformModel pageForQuickCreate(String getParams) {
         return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + "/quick_create"+ getParams, DeviceCloudPlatformModel.class);
     }
+
+    @Override
+    public Device quickCreate(DeviceQuickCreateCloudPlatformModel model) {
+        return super.sendPost(CPCLOUD_DEVICE + URL_VERSION + "/quick_create", JsonUtils.toUnderlineJSONString(model), Device.class);
+    }
+
 
     @Override
     public String upload(String params,File file) {

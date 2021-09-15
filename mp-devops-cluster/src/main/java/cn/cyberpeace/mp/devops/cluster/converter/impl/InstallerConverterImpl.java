@@ -80,6 +80,10 @@ public class InstallerConverterImpl implements InstallerConverter {
 
     @Override
     public InstallerConvertModel add(InstallerRequest request) {
+//        if (Objects.nonNull(request.getLogoFile()) && !request.getLogoFile().getClass().isAssignableFrom(String.class)) {
+//            String logo = targetLogoService.uploadLogo((MultipartFile) request.getLogoFile());
+//            request.setLogo(logo);
+//        }
         String logo = targetLogoService.uploadLogo(request.getLogoFile());
         if (Objects.nonNull(request.getLogoFile()) && request.getLogoFile().getSize() > 0 ){
             request.setLogo(logo);

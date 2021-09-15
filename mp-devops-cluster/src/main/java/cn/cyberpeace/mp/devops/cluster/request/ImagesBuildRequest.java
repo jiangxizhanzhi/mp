@@ -25,9 +25,9 @@ public class ImagesBuildRequest extends BaseRequest {
     private String name;
 
     /**
-     * 镜像ID
+     * 镜像名称
      */
-    private String imageId;
+    private String imageName;
 
     /**
      * 服务ID集合

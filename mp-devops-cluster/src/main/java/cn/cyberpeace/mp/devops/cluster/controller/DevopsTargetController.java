@@ -13,6 +13,7 @@ import cn.cyberpeace.mp.devops.cluster.response.base.Result;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -53,6 +55,9 @@ public class DevopsTargetController {
         List<TypeConvertModel> firstTypeList = l1AndL2AndL3Type.getFirstTypeList();
         List<TypeConvertModel> secondTypeList = l1AndL2AndL3Type.getSecondTypeList();
         List<Device> deviceList = realEquipmentConverter.allTarget(request);
+        if (CollectionUtils.isEmpty(deviceList)){
+            return new Result<>();
+        }
         List<TargetScene> targetScenes = new ArrayList<>();
         for (TypeConvertModel first : firstTypeList){
             TargetScene targetScene = new TargetScene();
@@ -63,7 +68,7 @@ public class DevopsTargetController {
                     .filter(v -> v.getL1ParentId().equals(firstId)).collect(Collectors.toList());
             for (TypeConvertModel second : typeConvertModels){
                 Integer secondId = second.getId();
-                List<Device> secondDeviceList = deviceList.stream().filter(device -> device.getSecondCategory().equals(secondId)).collect(Collectors.toList());
+                List<Device> secondDeviceList = deviceList.stream().filter(device -> Objects.nonNull(device.getSecondCategory())).filter(device -> device.getSecondCategory().equals(secondId)).collect(Collectors.toList());
                 targetScene.setSecondTypeId(secondId);
                 targetScene.setSecondTypeName(second.getName());
                 targetScene.setDeviceList(secondDeviceList);

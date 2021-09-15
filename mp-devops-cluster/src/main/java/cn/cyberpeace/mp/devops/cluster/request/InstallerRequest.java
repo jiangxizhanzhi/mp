@@ -37,7 +37,7 @@ public class InstallerRequest extends BaseRequest {
     /**
      * logo文件流
      */
-    @ApiModelProperty("logo文件流")
+    @ApiModelProperty("logo文件流/文件地址")
     private MultipartFile logoFile;
 
     /**
@@ -61,6 +61,8 @@ public class InstallerRequest extends BaseRequest {
     @ApiModelProperty("docker参数")
     private DockerInstallerData dockerInstallerData;
 
+
+
     @ApiModelProperty("windows服务资源流")
     private List<MultipartFile> multipartFiles;
 
@@ -69,6 +71,8 @@ public class InstallerRequest extends BaseRequest {
      */
     @ApiModelProperty(value = "资源列表")
     private List<Resource> resourceList;
+
+    private String resources;
 
 
 }

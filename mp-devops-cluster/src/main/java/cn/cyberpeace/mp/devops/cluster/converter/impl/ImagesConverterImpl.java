@@ -169,7 +169,7 @@ public class ImagesConverterImpl implements ImagesConverter {
 
     @Override
     public void build(ImagesBuildRequest request) {
-
+        imagesService.quickCreate(new DeviceQuickCreateCloudPlatformModel(request.getName(),request.getImageName(),request.getServiceIds()));
     }
 
     @Override
