@@ -104,8 +104,9 @@ public class InstallerController {
      * 更新
      */
     @ApiOperation("更新")
-    @PatchMapping
-    public ServiceResult update(InstallerRequest request){
+    @PatchMapping("/{uuid}")
+    public ServiceResult update(InstallerRequest request,@PathVariable("uuid") String uuid){
+        request.setUuid(uuid);
         if (StringUtils.isBlank(request.getUuid())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
