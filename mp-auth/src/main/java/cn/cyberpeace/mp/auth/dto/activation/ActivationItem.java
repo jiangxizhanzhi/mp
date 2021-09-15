@@ -20,4 +20,7 @@ public class ActivationItem {
     @ApiModelProperty(value = "授权项值")
     private String value;
 
+    @ApiModelProperty(value = "1:授权功能  2:授权资源")
+    private Integer type;
+
 }
