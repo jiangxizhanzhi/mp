@@ -9,10 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * @Description:
@@ -25,12 +23,14 @@ public class LicenseService {
 
     public final String ACTIVATION_LICENSE = "license.so";
 
-    private static Awesome INSTANCE = null;
+//    private static Awesome INSTANCE = null;
 
     @Autowired
     private ActivationConfig activationConfig;
 
     public interface Awesome extends Library {
+
+        Awesome INSTANCE = (Awesome) Native.loadLibrary("/home/mp/config/license/license.so", Awesome.class);
 
         public class GoString extends Structure {
             public static class ByValue extends GoString implements Structure.ByValue {
@@ -39,8 +39,8 @@ public class LicenseService {
             public String p;
             public long n;
 
-            protected List getFieldOrder(){
-                return Arrays.asList(new String[]{"p","n"});
+            protected List getFieldOrder() {
+                return Arrays.asList(new String[]{"p", "n"});
             }
 
         }
@@ -59,7 +59,6 @@ public class LicenseService {
 //        verifyStr = "{\"machinecode\": \"CHTF-12H1-34S8-HV23-123S\", \"deadline\": 1, \"info\": {\"thj\":2}}";
         log.info("verifyStr:{}", verifyStr);
         log.info("verifyCode:{}", verifyCode);
-//        "{\"deadline\":1,\"info\":{\"thj\":\"2\"},\"machinecode\":\"CHTF-12H1-34S8-HV23-123S\"}"
         Awesome.GoString.ByValue str = new Awesome.GoString.ByValue();
         str.p = verifyStr;
         str.n = str.p.length();
@@ -68,9 +67,10 @@ public class LicenseService {
         Awesome.GoString.ByValue code = new Awesome.GoString.ByValue();
         code.p = verifyCode;
         code.n = code.p.length();
-        log.info("phase 2...");
 
-        if (Objects.isNull(INSTANCE)) {
+        //  log.info("now loading INSTANCE...");
+
+        /*if (Objects.isNull(INSTANCE)) {
             log.info("init INSTANCE...");
             try {
                 INSTANCE = (Awesome) Native.loadLibrary(activationConfig.getLicenseDir() + File.separator + "license.so", Awesome.class);
@@ -79,9 +79,12 @@ public class LicenseService {
                 log.error("load license.so error!");
                 throw e;
             }
-        }
+        }*/
 
-        int ret = INSTANCE.Verify(str, code);
+//        INSTANCE = (Awesome) Native.loadLibrary(activationConfig.getLicenseDir() + File.separator + "license.so", Awesome.class);
+        log.info("Awesome INSTANCE:{}", Awesome.INSTANCE);
+
+        int ret = Awesome.INSTANCE.Verify(str, code);
         log.info("verify success, ret:{}", ret);
 
         //  -1	json传入错误

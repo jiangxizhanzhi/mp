@@ -23,8 +23,8 @@ public class CsceneInstanceModel extends BaseCsceneModel {
     private String createUser;
     @DefaultInt
     private Integer sceneTtl;
-    @DefaultStr
-    private String sceneAttr;
+    @DefaultInt
+    private Integer sceneAttr;
 
     public static class Type {
         public static final int TEST = 1;
