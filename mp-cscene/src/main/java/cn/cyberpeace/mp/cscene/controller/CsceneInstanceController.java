@@ -45,7 +45,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
     @ApiOperation("获取指定id场景实例")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "综合场景实例id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
     })
     @GetMapping(params = "id")
     public ServiceResult<CsceneInstanceBO> get(@RequestParam String id) {
@@ -54,7 +54,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
     @ApiOperation("删除场景实例")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "综合场景实例id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
     })
     @DeleteMapping(params = "id")
     public ServiceResult<Boolean> delete(@RequestParam String id) {
@@ -69,7 +69,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
     @ApiOperation("清理场景实例")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "综合场景实例id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
     })
     @DeleteMapping(value = "/clear", params = "id")
     public ServiceResult<Boolean> clear(@RequestParam String id) {
@@ -84,7 +84,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
     @ApiOperation("场景实例启动节点流量")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "综合场景实例id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
             @ApiImplicitParam(name = "nodeId", value = "节点id", dataTypeClass = String.class),
             @ApiImplicitParam(name = "flowId", value = "流量id", dataTypeClass = String.class),
     })
@@ -94,9 +94,21 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return modelService.startFlow(id, nodeId, flowId).asResult();
     }
 
+    @ApiOperation("场景实例停止节点流量")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "nodeId", value = "节点id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "flowId", value = "流量id", dataTypeClass = String.class),
+    })
+    @GetMapping(value = "/stop_flow", params = {"id", "nodeId", "flowId"})
+    public ServiceResult<Flow> stopFlow(@RequestParam String id, @RequestParam String nodeId,
+                                        @RequestParam String flowId) {
+        return modelService.stopFlow(id, nodeId, flowId).asResult();
+    }
+
     @ApiOperation("场景实例启动节点探针")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "综合场景实例id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
             @ApiImplicitParam(name = "nodeId", value = "节点id", dataTypeClass = String.class),
             @ApiImplicitParam(name = "probeId", value = "探针id", dataTypeClass = String.class),
     })
@@ -108,7 +120,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
     @ApiOperation("场景实例停止节点探针")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "综合场景实例id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
             @ApiImplicitParam(name = "nodeId", value = "节点id", dataTypeClass = String.class),
             @ApiImplicitParam(name = "probeId", value = "探针id", dataTypeClass = String.class),
     })
@@ -120,7 +132,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
     @ApiOperation("场景实例获取会话列表")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "综合场景实例id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
     })
     @GetMapping(value = "/node_sessions", params = "id")
     public ServiceResult<List<NodeSessionBO>> getNodeSession(@RequestParam String id, @RequestParam String nodeId) {

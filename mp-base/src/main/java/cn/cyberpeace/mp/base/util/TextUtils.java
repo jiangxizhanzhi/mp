@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.base.util;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.UUID;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class TextUtils {
@@ -66,6 +67,12 @@ public class TextUtils {
             result[i] = humpToLine(strs[i]);
         }
         return result;
+    }
+
+    public static boolean containChinese(String str) {
+        var p = Pattern.compile("[\u4E00-\u9FA5|\\！|\\，|\\。|\\（|\\）|\\《|\\》|\\“|\\”|\\？|\\：|\\；|\\【|\\】]");
+        var m = p.matcher(str);
+        return m.find();
     }
 }
 
