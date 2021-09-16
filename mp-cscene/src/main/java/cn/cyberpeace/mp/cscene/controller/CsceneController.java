@@ -88,7 +88,7 @@ public class CsceneController implements BaseModelListControllerBase {
     @PostMapping(value = "/test_instance", params = "id")
     public ServiceResult<CsceneInstanceBO> createTestInstance(
             @RequestParam String id, @RequestBody(required = false) CsceneInstanceCreateContext createContext) {
-        return modelService.createTestInstance(id, true, createContext).asResult();
+        return modelService.createTestInstance(id, false, createContext).asResult();
     }
 
     @ApiOperation("创建场景模板应用实例")
@@ -98,7 +98,7 @@ public class CsceneController implements BaseModelListControllerBase {
     @PostMapping(value = "/app_instance", params = "id")
     public ServiceResult<CsceneInstanceBO> createAppInstance(
             @RequestParam String id, @RequestBody(required = false) CsceneInstanceCreateContext createContext) {
-        return modelService.createAppInstance(id, true, createContext).asResult();
+        return modelService.createAppInstance(id, false, createContext).asResult();
     }
 
     @ApiOperation("获取场景模板统计数据")

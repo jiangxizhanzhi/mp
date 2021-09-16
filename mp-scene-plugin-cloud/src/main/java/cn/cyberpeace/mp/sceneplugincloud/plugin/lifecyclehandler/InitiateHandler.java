@@ -117,7 +117,11 @@ public class InitiateHandler extends HandlerCommon {
             return false;
         }
 
-        for (var connectedOpaqueSrcElement : getEleConnectedOpaqueSrcElements(cloudElement.getSrcElement().getId())) {
+        var connectedOpaqueSrcElements = getEleConnectedOpaqueSrcElements(cloudElement.getSrcElement().getId());
+        if (connectedOpaqueSrcElements.isEmpty()) {
+            return true;
+        }
+        for (var connectedOpaqueSrcElement : connectedOpaqueSrcElements) {
             var connectedOpaqueCloudElement = getPluginHandler().getElement(connectedOpaqueSrcElement.getId());
             if (requireAuxiliaryNetwork(cloudElement, connectedOpaqueCloudElement)) {
                 return true;
