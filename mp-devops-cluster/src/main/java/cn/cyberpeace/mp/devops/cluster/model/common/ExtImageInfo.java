@@ -52,12 +52,6 @@ public class ExtImageInfo {
     private String uploadType;
 
     /**
-     * ftp文件名称
-     */
-    @ApiModelProperty("ftp文件名称")
-    private String ftpFilename;
-
-    /**
      * 磁盘格式
      */
     @ApiModelProperty("磁盘格式")
@@ -74,4 +68,12 @@ public class ExtImageInfo {
      */
     @ApiModelProperty("VIF模型")
     private String hwVifModel;
+
+
+    @ApiModelProperty("临时文件ID")
+    private String tmpdirUuid;
+
+
+    @ApiModelProperty("http/ftp文件名称")
+    private String userFilename;
 }
