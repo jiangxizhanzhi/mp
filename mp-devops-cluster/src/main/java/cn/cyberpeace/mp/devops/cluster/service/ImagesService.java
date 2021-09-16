@@ -1,11 +1,13 @@
 package cn.cyberpeace.mp.devops.cluster.service;
 
+import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.Device;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceQuickCreateCloudPlatformModel;
 import org.apache.http.HttpResponse;
 
 import java.io.File;
+import java.util.Map;
 
 /**
  * 镜像管理底层接口
@@ -54,4 +56,12 @@ public interface ImagesService extends BaseCloudPlatformService  {
      * @return
      */
     String upload(String params, File file);
+
+    /**
+     * 上传文件
+     * @param file
+     * @param type :  image or installer
+     * @return
+     */
+    BaseCloudPlatformModel upload(Map<String,File> file, String type);
 }

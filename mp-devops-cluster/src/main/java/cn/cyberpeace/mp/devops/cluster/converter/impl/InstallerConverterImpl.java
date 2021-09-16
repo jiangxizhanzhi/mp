@@ -84,8 +84,8 @@ public class InstallerConverterImpl implements InstallerConverter {
 //            String logo = targetLogoService.uploadLogo((MultipartFile) request.getLogoFile());
 //            request.setLogo(logo);
 //        }
-        String logo = targetLogoService.uploadLogo(request.getLogoFile());
         if (Objects.nonNull(request.getLogoFile()) && request.getLogoFile().getSize() > 0 ){
+            String logo = targetLogoService.uploadLogo(request.getLogoFile());
             request.setLogo(logo);
         }
         InstallerFormDataCloudPlatformModel installer = convertInstallerRequest(request);
@@ -161,6 +161,8 @@ public class InstallerConverterImpl implements InstallerConverter {
         installer.setName(request.getName());
         installer.setDescription(request.getDescription());
         installer.setLogo(request.getLogo());
+        installer.setTmpdirUuid(Objects.nonNull(request.getDockerInstallerData()) ? request.getDockerInstallerData().getTmpdirUuid() : null);
+        installer.setUserFilename(Objects.nonNull(request.getDockerInstallerData()) ? request.getDockerInstallerData().getUserfileName() : null);
         if (StringUtils.isNotBlank(request.getCategories())){
             installer.setCategories(Arrays.stream(request.getCategories().split("\\|")).reduce((a,b) -> a.concat(b)).orElse(""));
         }

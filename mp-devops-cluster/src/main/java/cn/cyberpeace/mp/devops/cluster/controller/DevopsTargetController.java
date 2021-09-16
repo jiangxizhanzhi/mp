@@ -1,27 +1,31 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.RealEquipmentConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.TypeConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeAllConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeConvertModel;
+import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.Device;
 import cn.cyberpeace.mp.devops.cluster.request.TargetSceneRequest;
 import cn.cyberpeace.mp.devops.cluster.response.TargetScene;
 import cn.cyberpeace.mp.devops.cluster.response.TargetSceneResponse;
+import cn.cyberpeace.mp.devops.cluster.response.TargetUploadResponse;
 import cn.cyberpeace.mp.devops.cluster.response.base.Result;
+import cn.cyberpeace.mp.devops.cluster.service.ImagesService;
+import cn.cyberpeace.mp.devops.cluster.utils.FileUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -37,10 +41,14 @@ public class DevopsTargetController {
 
     private TypeConverter typeConverter;
 
+    private ImagesService imagesService;
+
     @Autowired
-    public DevopsTargetController(RealEquipmentConverter realEquipmentConverter,TypeConverter typeConverter) {
+    public DevopsTargetController(RealEquipmentConverter realEquipmentConverter,TypeConverter typeConverter,
+                                  ImagesService imagesService) {
         this.realEquipmentConverter = realEquipmentConverter;
         this.typeConverter = typeConverter;
+        this.imagesService = imagesService;
     }
 
     /**
@@ -77,6 +85,22 @@ public class DevopsTargetController {
         }
 
         return new Result<>(new TargetSceneResponse(targetScenes));
+    }
+
+    @ApiOperation("上传文件")
+    @PostMapping("/upload")
+    public ServiceResult<TargetUploadResponse> upload(@RequestParam("type") String type,@RequestParam("file") MultipartFile file){
+        Map<String,File> fileList = null;
+        try {
+            fileList = FileUtils.transferToFileMap(Arrays.asList(file));
+        } catch (IOException e) {
+           log.error("file transfer error");
+        }
+        BaseCloudPlatformModel model = imagesService.upload(fileList,type);
+        if (Objects.isNull(model) || !model.isSuccess()){
+            return ServiceResult.fail("file upload error");
+        }
+        return new Result(new TargetUploadResponse(model.getTmpdirUuid(),model.getFileNames()));
     }
 
 }

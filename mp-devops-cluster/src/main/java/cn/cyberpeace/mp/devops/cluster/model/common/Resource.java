@@ -27,6 +27,12 @@ public class Resource implements Serializable {
     private String platforms;
 
     /**
+     * 临时文件ID
+     */
+    @ApiModelProperty("临时文件ID")
+    private String tmpdirUuid;
+
+    /**
      * 安装方式
      */
     @ApiModelProperty(hidden = true)

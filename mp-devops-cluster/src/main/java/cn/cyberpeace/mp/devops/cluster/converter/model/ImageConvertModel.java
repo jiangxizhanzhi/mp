@@ -27,6 +27,11 @@ public class ImageConvertModel extends BasePageConvertModel{
     private String name;
 
     /**
+     * 图标
+     */
+    private String logo;
+
+    /**
      * 分类
      */
     private Integer mainCategory;
@@ -45,6 +50,16 @@ public class ImageConvertModel extends BasePageConvertModel{
      * 描述
      */
     private String description;
+
+    /**
+     * 角色
+     */
+    private Integer role;
+
+    /**
+     * 三级分类
+     */
+    private Integer thirdCategory;
 
     /**
      * 系统信息
