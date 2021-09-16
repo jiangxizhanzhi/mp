@@ -118,5 +118,7 @@ spring:
     activate:
       on-profile: prod
 logging:
+  level:
+    root: debug
   file:
     path: /home/mp/logs
