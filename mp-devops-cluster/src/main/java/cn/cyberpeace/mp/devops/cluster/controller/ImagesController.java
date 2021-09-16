@@ -116,22 +116,22 @@ public class ImagesController {
      */
     @ApiOperation("新增")
     @PostMapping("/add")
-    public ServiceResult add(ImageRequest request){
-        String logoUrl = targetLogoService.uploadLogo(request.getLogoFile());
-        request.setLogo(logoUrl);
-        ExtImageInfo extImageInfo = request.getExtImageInfo();
-        if (Objects.nonNull(extImageInfo) && extImageInfo.getImageSource() == 3) {
-            ImagesUploadRequest uploadRequest = new ImagesUploadRequest();
-            uploadRequest.setUploadType(extImageInfo.getUploadType());
-            uploadRequest.setDiskFormat(extImageInfo.getDiskFormat());
-            uploadRequest.setFtpFilename(extImageInfo.getFtpFilename());
-            uploadRequest.setType(request.getVirtualType());
-            uploadRequest.setHwDiskFormat(extImageInfo.getHwDiskFormat());
-            uploadRequest.setHwVifModel(extImageInfo.getHwVifModel());
-            String imageUuid = imagesConverter.uploadImage(uploadRequest, request.getImageFile());
-            extImageInfo.setUuid(imageUuid);
-        }
-        request.setExtImageInfo(extImageInfo);
+    public ServiceResult add(@RequestBody ImageRequest request){
+//        String logoUrl = targetLogoService.uploadLogo(request.getLogoFile());
+//        request.setLogo(logoUrl);
+//        ExtImageInfo extImageInfo = request.getExtImageInfo();
+//        if (Objects.nonNull(extImageInfo) && extImageInfo.getImageSource() == 3) {
+//            ImagesUploadRequest uploadRequest = new ImagesUploadRequest();
+//            uploadRequest.setUploadType(extImageInfo.getUploadType());
+//            uploadRequest.setDiskFormat(extImageInfo.getDiskFormat());
+////            uploadRequest.setFtpFilename(extImageInfo.getFtpFilename());
+//            uploadRequest.setType(request.getVirtualType());
+//            uploadRequest.setHwDiskFormat(extImageInfo.getHwDiskFormat());
+//            uploadRequest.setHwVifModel(extImageInfo.getHwVifModel());
+//            String imageUuid = imagesConverter.uploadImage(uploadRequest, request.getImageFile());
+//            extImageInfo.setUuid(imageUuid);
+//        }
+//        request.setExtImageInfo(extImageInfo);
         Boolean result = imagesConverter.add(request);
        return result ? ServiceResult.successful() : ServiceResult.fail("");
     }
@@ -141,7 +141,7 @@ public class ImagesController {
      */
     @ApiOperation("更新")
     @PostMapping("/update")
-    public ServiceResult update(ImageRequest request){
+    public ServiceResult update(@RequestBody ImageRequest request){
         if (StringUtils.isBlank(request.getUuid())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
