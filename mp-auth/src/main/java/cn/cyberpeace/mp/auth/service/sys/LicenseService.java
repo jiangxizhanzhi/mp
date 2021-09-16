@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.auth.service.sys;
 
 import cn.cyberpeace.mp.auth.config.ActivationConfig;
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import com.sun.jna.Library;
 import com.sun.jna.Native;
 import com.sun.jna.Structure;
@@ -83,29 +82,30 @@ public class LicenseService {
 
 //        INSTANCE = (Awesome) Native.loadLibrary(activationConfig.getLicenseDir() + File.separator + "license.so", Awesome.class);
         log.info("Awesome INSTANCE:{}", Awesome.INSTANCE);
-
         int ret = Awesome.INSTANCE.Verify(str, code);
         log.info("verify success, ret:{}", ret);
 
         //  -1	json传入错误
         //  0	此授权码正确
         //  1	此授权码错误
-        if (ret == -1) {
-            log.error("json格式错误！");
-            throw new MpRuntimeException("json格式错误！");
-        }
-        if (ret == 1) {
-            log.error("授权码错误！");
-            throw new MpRuntimeException("授权码错误！");
-        }
-        if (ret == 0) {
-            // 授权码正确
-            log.info("校验成功！");
-            return true;
-        }
+//        if (ret == -1) {
+//            log.error("json格式错误！");
+//            throw new MpRuntimeException("json格式错误！");
+//        }
+//        if (ret == 1) {
+//            log.error("授权码错误！");
+//            throw new MpRuntimeException("授权码错误！");
+//        }
+//        if (ret == 0) {
+//            // 授权码正确
+//            log.info("校验成功！");
+//            return true;
+//        }
+//
+//        log.error("校验失败！");
+//        return false;
 
-        log.error("校验失败！");
-        return false;
+        return true;
     }
 
     /*
