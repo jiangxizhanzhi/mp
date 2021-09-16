@@ -36,5 +36,5 @@ public class ExtDocker{
 
 
     @ApiModelProperty("用户文件名称")
-    private String userFileName;
+    private String userFilename;
 }

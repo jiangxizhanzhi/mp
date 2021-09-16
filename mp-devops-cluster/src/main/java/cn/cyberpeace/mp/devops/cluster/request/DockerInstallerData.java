@@ -27,10 +27,10 @@ public class DockerInstallerData implements Serializable {
     @ApiModelProperty("docker文件地址")
     private String dockerUrl;
 
-    public DockerInstallerData(List<StartUpParameter> startUpParameterList, String dockerUrl, String userfileName) {
+    public DockerInstallerData(List<StartUpParameter> startUpParameterList, String dockerUrl, String userFilename) {
         this.startUpParameterList = startUpParameterList;
         this.dockerUrl = dockerUrl;
-        this.userfileName = userfileName;
+        this.userFilename = userFilename;
     }
 
     /**
@@ -40,5 +40,5 @@ public class DockerInstallerData implements Serializable {
     private String tmpdirUuid;
 
     @ApiModelProperty("用户文件名称")
-    private String userfileName;
+    private String userFilename;
 }
