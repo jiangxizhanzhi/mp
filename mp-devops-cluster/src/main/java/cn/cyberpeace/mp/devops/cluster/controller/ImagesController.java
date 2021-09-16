@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertPageModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InjectFileConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InjectFileListConvertModel;
+import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceInjectFileCreate;
 import cn.cyberpeace.mp.devops.cluster.model.Flavor;
 import cn.cyberpeace.mp.devops.cluster.model.FlavorCloudPlatformModel;
@@ -45,6 +46,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -97,6 +99,7 @@ public class ImagesController {
             ExtVm extVm = v.getExtVm();
             ExtImageInfo extImageInfo = v.getExtImageInfo();
             ImagesPageResponse response = ImagesPageResponse.builder().uuid(v.getUuid()).name(v.getName())
+                    .logo(v.getLogo())
                     .mainCategory(v.getMainCategory()).subCategory(v.getSubCategory()).imageType(v.getImageType())
                     .systemType(Objects.nonNull(extSystemInfo) ? extSystemInfo.getSystemType() : null)
                     .flavor(Objects.nonNull(extVm) ? extVm.getFlavor() : "")
@@ -117,7 +120,7 @@ public class ImagesController {
         String logoUrl = targetLogoService.uploadLogo(request.getLogoFile());
         request.setLogo(logoUrl);
         ExtImageInfo extImageInfo = request.getExtImageInfo();
-        if (Objects.nonNull(extImageInfo) && extImageInfo.getSystemImageType() == 3) {
+        if (Objects.nonNull(extImageInfo) && extImageInfo.getImageSource() == 3) {
             ImagesUploadRequest uploadRequest = new ImagesUploadRequest();
             uploadRequest.setUploadType(extImageInfo.getUploadType());
             uploadRequest.setDiskFormat(extImageInfo.getDiskFormat());
@@ -281,8 +284,9 @@ public class ImagesController {
     @ApiOperation("文件注入")
     @PostMapping("/inject-file")
     public void injectFile(@Valid @RequestBody ImageInjectFileRequest request){
-        scenariosSnapshotService.injectFile(new DeviceInjectFileCreate(request.getDeviceUuid(),
+        BaseCloudPlatformModel model = scenariosSnapshotService.injectFile(new DeviceInjectFileCreate(request.getDeviceUuid(),
                 request.getFileUrl(),request.getFileName(),request.getFileSize()));
+
     }
 
     /**
@@ -296,6 +300,16 @@ public class ImagesController {
             return new Result();
         }
         return new Result(list.getModelList());
+    }
+
+    /**
+     * 删除文件注入
+     */
+    @ApiOperation("删除文件注入")
+    @DeleteMapping("/inject-file")
+    public ServiceResult deleteInjectFile(@RequestBody ImageInjectFileDeleteRequest request){
+        Boolean result = injectFileConverter.delete(Arrays.asList(request.getInjectUuid()));
+        return result ? ServiceResult.successful() : ServiceResult.fail("");
     }
 
 

@@ -40,10 +40,10 @@ public class ExtImageInfo {
     private String error;
 
     /**
-     * 系统镜像类型，0：基础镜像，1：openstack已有镜像，2：自定义上传
+     * 系统镜像类型，1：基础镜像，2：openstack已有镜像，3：自定义上传
      */
-    @ApiModelProperty("系统镜像类型，0：基础镜像，1：openstack已有镜像，2：自定义上传")
-    private Integer systemImageType;
+    @ApiModelProperty("系统镜像类型，1：基础镜像，2：openstack已有镜像，3：自定义上传")
+    private Integer imageSource;
 
     /**
      * 上传方式

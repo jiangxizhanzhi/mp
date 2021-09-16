@@ -335,8 +335,11 @@ public class ImagesConverterImpl implements ImagesConverter {
         ImageConvertModel imageModel = new ImageConvertModel();
         imageModel.setUuid(device.getUuid());
         imageModel.setName(device.getName());
+        imageModel.setLogo(device.getLogo());
         imageModel.setMainCategory(device.getCategory());
         imageModel.setSubCategory(device.getSecondCategory());
+        imageModel.setRole(device.getRole());
+        imageModel.setThirdCategory(device.getL3Category());
         imageModel.setImageType(device.getImageType());
         imageModel.setDescription(device.getDescription());
         imageModel.setExtSystemInfo(device.getExtSystemInfo());

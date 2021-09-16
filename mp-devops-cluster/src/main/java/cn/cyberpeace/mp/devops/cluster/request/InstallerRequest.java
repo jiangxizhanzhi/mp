@@ -37,7 +37,7 @@ public class InstallerRequest extends BaseRequest {
     /**
      * logo文件流
      */
-    @ApiModelProperty("logo文件流/文件地址")
+    @ApiModelProperty(value = "logo文件流/文件地址",hidden = true)
     private MultipartFile logoFile;
 
     /**
@@ -63,7 +63,7 @@ public class InstallerRequest extends BaseRequest {
 
 
 
-    @ApiModelProperty("windows服务资源流")
+    @ApiModelProperty(value = "windows服务资源流",hidden = true)
     private List<MultipartFile> multipartFiles;
 
     /**
@@ -72,7 +72,7 @@ public class InstallerRequest extends BaseRequest {
     @ApiModelProperty(value = "资源列表")
     private List<Resource> resourceList;
 
-    private String resources;
+//    private String resources;
 
 
 }
