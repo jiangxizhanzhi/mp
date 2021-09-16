@@ -80,7 +80,7 @@ public class InstallerController {
                 .name(model.getName()).description(model.getDescription()).logo(model.getLogo())
                 .categories(model.getCategories())
                 .deployType(model.getDeployType())
-                .dockerInstallerData(new DockerInstallerData(model.getStartUpParameterList(),Objects.nonNull(extDocker) ? extDocker.getFile() : null, Objects.nonNull(extDocker) ? extDocker.getUserFileName() : null))
+                .dockerInstallerData(new DockerInstallerData(model.getStartUpParameterList(),Objects.nonNull(extDocker) ? extDocker.getFile() : null, Objects.nonNull(extDocker) ? extDocker.getUserFilename() : null))
                 .resourceList(model.getResourceList())
                 .build();
         return new Result<>(response);

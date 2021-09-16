@@ -162,7 +162,7 @@ public class InstallerConverterImpl implements InstallerConverter {
         installer.setDescription(request.getDescription());
         installer.setLogo(request.getLogo());
         installer.setTmpdirUuid(Objects.nonNull(request.getDockerInstallerData()) ? request.getDockerInstallerData().getTmpdirUuid() : null);
-        installer.setUserFilename(Objects.nonNull(request.getDockerInstallerData()) ? request.getDockerInstallerData().getUserfileName() : null);
+        installer.setUserFilename(Objects.nonNull(request.getDockerInstallerData()) ? request.getDockerInstallerData().getUserFilename() : null);
         if (StringUtils.isNotBlank(request.getCategories())){
             installer.setCategories(Arrays.stream(request.getCategories().split("\\|")).reduce((a,b) -> a.concat(b)).orElse(""));
         }
