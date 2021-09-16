@@ -8,7 +8,6 @@ import cn.cyberpeace.mp.devops.cluster.converter.InstallerConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InstallerConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InstallerConvertPageModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtDocker;
-import cn.cyberpeace.mp.devops.cluster.model.common.Resource;
 import cn.cyberpeace.mp.devops.cluster.request.DockerInstallerData;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerPageRequest;
@@ -17,7 +16,6 @@ import cn.cyberpeace.mp.devops.cluster.response.InstallerByIdResponse;
 import cn.cyberpeace.mp.devops.cluster.response.InstallerPageResponse;
 import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
 import cn.cyberpeace.mp.devops.cluster.response.base.Result;
-import com.alibaba.fastjson.JSONArray;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -62,7 +60,8 @@ public class InstallerController {
 
         List<InstallerPageResponse> list = model.getModelList().stream().map(installer ->
                 InstallerPageResponse.builder().uuid(installer.getUuid()).name(installer.getName())
-                        .description(installer.getDescription()).categories(installer.getCategories())
+                        .logo(installer.getLogo()).description(installer.getDescription())
+                        .categories(installer.getCategories())
                         .build()
         ).collect(Collectors.toList());
 
@@ -81,7 +80,7 @@ public class InstallerController {
                 .name(model.getName()).description(model.getDescription()).logo(model.getLogo())
                 .categories(model.getCategories())
                 .deployType(model.getDeployType())
-                .dockerInstallerData(new DockerInstallerData(model.getStartUpParameterList(),null,Objects.nonNull(extDocker) ? extDocker.getFile() : null))
+                .dockerInstallerData(new DockerInstallerData(model.getStartUpParameterList(),Objects.nonNull(extDocker) ? extDocker.getFile() : null, Objects.nonNull(extDocker) ? extDocker.getUserFileName() : null))
                 .resourceList(model.getResourceList())
                 .build();
         return new Result<>(response);
@@ -92,10 +91,10 @@ public class InstallerController {
      */
     @ApiOperation("新增")
     @PostMapping
-    public ServiceResult add(InstallerRequest request){
-        if (StringUtils.isNotBlank(request.getResources())){
-            request.setResourceList(JSONArray.parseArray(request.getResources(), Resource.class));
-        }
+    public ServiceResult add(@RequestBody InstallerRequest request){
+//        if (StringUtils.isNotBlank(request.getResources())){
+//            request.setResourceList(JSONArray.parseArray(request.getResources(), Resource.class));
+//        }
         InstallerConvertModel model = installerConverter.add(request);
         return model.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(model.getMessageZh());
     }
@@ -105,7 +104,7 @@ public class InstallerController {
      */
     @ApiOperation("更新")
     @PatchMapping("/{uuid}")
-    public ServiceResult update(InstallerRequest request,@PathVariable("uuid") String uuid){
+    public ServiceResult update(@RequestBody InstallerRequest request,@PathVariable("uuid") String uuid){
         request.setUuid(uuid);
         if (StringUtils.isBlank(request.getUuid())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);

@@ -31,8 +31,7 @@ public class ScenariosServiceImpl extends BaseOpenStackServiceImpl implements Sc
 
 
     @Override
-    public Boolean injectFile(DeviceInjectFileCreate injectFileCreate) {
-        BaseCloudPlatformModel model = super.sendPost(  URL_VERSION + "/scenarios/device_inject_file", JsonUtils.toUnderlineJSONString(injectFileCreate), BaseCloudPlatformModel.class);
-        return model.isSuccess();
+    public BaseCloudPlatformModel injectFile(DeviceInjectFileCreate injectFileCreate) {
+        return super.sendPost(  URL_VERSION + "/scenarios/device_inject_file", JsonUtils.toUnderlineJSONString(injectFileCreate), BaseCloudPlatformModel.class);
     }
 }

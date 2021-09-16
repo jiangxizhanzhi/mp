@@ -30,6 +30,12 @@ public class ImagesPageResponse  extends BaseCloudPlatformResponse  {
     private String name;
 
     /**
+     * 图标
+     */
+    @ApiModelProperty(value = "图标地址")
+    private String logo;
+
+    /**
      * 分类
      */
     @ApiModelProperty("分类")
