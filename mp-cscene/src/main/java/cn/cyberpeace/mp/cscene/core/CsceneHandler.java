@@ -103,11 +103,21 @@ public class CsceneHandler extends BaseCsceneHandler<
     }
 
     private CsceneInstanceBO createInstance(int type) {
-        var cscene = getCscene();
+        return createInstance(type, getCscene());
+    }
+
+    private CsceneInstanceBO createInstance(int type, CsceneBO cscene) {
         if (cscene == null) {
             return null;
         }
         var csceneInstance = cscene.exportToCsceneInstance();
+        return createInstance(type, csceneInstance);
+    }
+
+    private CsceneInstanceBO createInstance(int type, CsceneInstanceBO csceneInstance) {
+        if (csceneInstance == null) {
+            return null;
+        }
         csceneInstance.setCscene(getCsceneId());
         csceneInstance.setType(type);
         var instanceHandler = new CsceneInstanceHandler(csceneInstance);
@@ -144,36 +154,73 @@ public class CsceneHandler extends BaseCsceneHandler<
     }
 
     public CsceneInstanceBO createTestInstance(boolean unique) {
-        var cscene = getCscene();
+        return createTestInstance(unique, getCscene());
+    }
+
+    public CsceneInstanceBO createTestInstance(boolean unique, CsceneBO cscene) {
         if (cscene == null) {
             return null;
         }
 
         if (unique) {
             reloadCsceneInstances();
-            var testScenes = cscene.getTestScenes();
+            var testScenes = getCscene().getTestScenes();
             if (testScenes != null && !testScenes.isEmpty()) {
                 return null;
             }
         }
-        return createInstance(CsceneInstanceModel.Type.TEST);
+        return createInstance(CsceneInstanceModel.Type.TEST, cscene);
+    }
+
+    public CsceneInstanceBO createTestInstance(boolean unique, CsceneInstanceBO csceneInstance) {
+        if (csceneInstance == null) {
+            return null;
+        }
+
+        if (unique) {
+            reloadCsceneInstances();
+            var testScenes = getCscene().getTestScenes();
+            if (testScenes != null && !testScenes.isEmpty()) {
+                return null;
+            }
+        }
+        return createInstance(CsceneInstanceModel.Type.TEST, csceneInstance);
     }
 
     public CsceneInstanceBO createAppInstance(boolean unique) {
-        var cscene = getCscene();
+        return createAppInstance(unique, getCscene());
+    }
+
+    public CsceneInstanceBO createAppInstance(boolean unique, CsceneBO cscene) {
         if (cscene == null) {
             return null;
         }
 
         if (unique) {
             reloadCsceneInstances();
-            var appScenes = cscene.getAppScenes();
+            var appScenes = getCscene().getAppScenes();
             if (appScenes != null && !appScenes.isEmpty()) {
                 return null;
             }
         }
 
-        return createInstance(CsceneInstanceModel.Type.APP);
+        return createInstance(CsceneInstanceModel.Type.APP, cscene);
+    }
+
+    public CsceneInstanceBO createAppInstance(boolean unique, CsceneInstanceBO csceneInstanceBO) {
+        if (csceneInstanceBO == null) {
+            return null;
+        }
+
+        if (unique) {
+            reloadCsceneInstances();
+            var appScenes = getCscene().getAppScenes();
+            if (appScenes != null && !appScenes.isEmpty()) {
+                return null;
+            }
+        }
+
+        return createInstance(CsceneInstanceModel.Type.APP, csceneInstanceBO);
     }
 
     @Override

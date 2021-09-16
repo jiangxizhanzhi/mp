@@ -43,8 +43,13 @@ public class InitiateHandler extends HandlerCommon {
      */
     private boolean requireAuxiliaryNetwork(CloudPluginSceneElementBO cloudElement,
                                             CloudPluginSceneElementBO connectedCloudElement) {
-        if (cloudElement == null || connectedCloudElement == null) {
+        if (cloudElement == null) {
             return false;
+        }
+
+        // 没有连接，需要辅助网络
+        if (connectedCloudElement == null) {
+            return true;
         }
 
         // 自己和自己连接（异常），无需辅助网络
@@ -112,7 +117,11 @@ public class InitiateHandler extends HandlerCommon {
             return false;
         }
 
-        for (var connectedOpaqueSrcElement : getEleConnectedOpaqueSrcElements(cloudElement.getSrcElement().getId())) {
+        var connectedOpaqueSrcElements = getEleConnectedOpaqueSrcElements(cloudElement.getSrcElement().getId());
+        if (connectedOpaqueSrcElements.isEmpty()) {
+            return true;
+        }
+        for (var connectedOpaqueSrcElement : connectedOpaqueSrcElements) {
             var connectedOpaqueCloudElement = getPluginHandler().getElement(connectedOpaqueSrcElement.getId());
             if (requireAuxiliaryNetwork(cloudElement, connectedOpaqueCloudElement)) {
                 return true;
@@ -207,11 +216,8 @@ public class InitiateHandler extends HandlerCommon {
 
         var portId = srcPort.getId();
         var connectedSrcElement = getPortConnectedOpaqueSrcElement(portId);
-        if (connectedSrcElement == null) {
-            return;
-        }
-
-        var connectedCloudElement = getPluginHandler().getElement(connectedSrcElement.getId());
+        var connectedCloudElement = connectedSrcElement == null ? null
+                : getPluginHandler().getElement(connectedSrcElement.getId());
         var auxiliaryNetworkCloudElement = confirmAuxiliaryNetworkCloudElement(cloudElement,
                 connectedCloudElement);
         if (auxiliaryNetworkCloudElement == null) {

@@ -98,6 +98,10 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return new ServiceResult<>(null);
     }
 
+    public ServiceResult<Flow> stopFlow(String id, String toNodeId, String flowId) {
+        return new ServiceResult<>(null);
+    }
+
     public ServiceResult<Probe> startProbe(String id, String toNodeId, String probeId) {
         return new ServiceResult<>(null);
     }

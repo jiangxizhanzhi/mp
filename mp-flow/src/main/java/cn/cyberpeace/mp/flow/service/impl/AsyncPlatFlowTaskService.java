@@ -173,7 +173,7 @@ public class AsyncPlatFlowTaskService {
                 standTaskRequest.setPort(flowPortModel.getServerMac());
                 String saveStandTaskRsp = null;
                 if (isUpdate) {
-                    saveStandTaskRsp = HttpUtils.sendPatch(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks/standards" +
+                    saveStandTaskRsp = HttpUtils.sendPatch(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks/standards/" +
                                     flowTaskModel.getThirdTaskId(), JsonUtils.toUnderlineJSONString(standTaskRequest));
                 } else {
                     saveStandTaskRsp = HttpUtils.sendPost(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks/standards",

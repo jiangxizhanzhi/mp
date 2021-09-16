@@ -44,7 +44,7 @@ public class CsceneController implements BaseModelListControllerBase {
 
     @ApiOperation("获取指定id场景模板")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "综合场景id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),
     })
     @GetMapping(params = "id")
     public ServiceResult<CsceneBO> get(@RequestParam String id) {
@@ -53,7 +53,7 @@ public class CsceneController implements BaseModelListControllerBase {
 
     @ApiOperation("导出指定id场景模板")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "综合场景id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),
     })
     @GetMapping(value = "/export", params = "id")
     public ServiceResult<CsceneBO> export(@RequestParam String id) {
@@ -68,7 +68,7 @@ public class CsceneController implements BaseModelListControllerBase {
 
     @ApiOperation("删除场景模板")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "综合场景id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),
     })
     @DeleteMapping(params = "id")
     public ServiceResult<Boolean> delete(@RequestParam String id) {
@@ -83,22 +83,22 @@ public class CsceneController implements BaseModelListControllerBase {
 
     @ApiOperation("创建场景模板测试实例")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "综合场景id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),
     })
     @PostMapping(value = "/test_instance", params = "id")
-    public ServiceResult<CsceneInstanceBO> createTestInstance(@RequestParam String id,
-                                                              @RequestBody CsceneInstanceCreateContext createContext) {
-        return modelService.createTestInstance(id, true).asResult();
+    public ServiceResult<CsceneInstanceBO> createTestInstance(
+            @RequestParam String id, @RequestBody(required = false) CsceneInstanceCreateContext createContext) {
+        return modelService.createTestInstance(id, false, createContext).asResult();
     }
 
     @ApiOperation("创建场景模板应用实例")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "综合场景id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),
     })
     @PostMapping(value = "/app_instance", params = "id")
-    public ServiceResult<CsceneInstanceBO> createAppInstance(@RequestParam String id,
-                                                             @RequestBody CsceneInstanceCreateContext createContext) {
-        return modelService.createAppInstance(id, true).asResult();
+    public ServiceResult<CsceneInstanceBO> createAppInstance(
+            @RequestParam String id, @RequestBody(required = false) CsceneInstanceCreateContext createContext) {
+        return modelService.createAppInstance(id, false, createContext).asResult();
     }
 
     @ApiOperation("获取场景模板统计数据")
