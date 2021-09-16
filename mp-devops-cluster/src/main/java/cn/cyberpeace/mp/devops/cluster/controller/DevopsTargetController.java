@@ -67,21 +67,27 @@ public class DevopsTargetController {
             return new Result<>();
         }
         List<TargetScene> targetScenes = new ArrayList<>();
+        if (Objects.nonNull(request.getCategory())) {
+            firstTypeList = firstTypeList.stream().filter(v -> v.getId().equals(request.getCategory())).collect(Collectors.toList());
+        }
+        if (Objects.nonNull(request.getSecondCategory())) {
+            secondTypeList = secondTypeList.stream().filter(v -> v.getId().equals(request.getSecondCategory())).collect(Collectors.toList());
+        }
         for (TypeConvertModel first : firstTypeList){
-            TargetScene targetScene = new TargetScene();
             Integer firstId = first.getId();
-            targetScene.setFirstTypeId(firstId);
-            targetScene.setFirstTypeName(first.getName());
             List<TypeConvertModel> typeConvertModels = secondTypeList.stream()
                     .filter(v -> v.getL1ParentId().equals(firstId)).collect(Collectors.toList());
             for (TypeConvertModel second : typeConvertModels){
+                TargetScene targetScene = new TargetScene();
+                targetScene.setFirstTypeId(firstId);
+                targetScene.setFirstTypeName(first.getName());
                 Integer secondId = second.getId();
                 List<Device> secondDeviceList = deviceList.stream().filter(device -> Objects.nonNull(device.getSecondCategory())).filter(device -> device.getSecondCategory().equals(secondId)).collect(Collectors.toList());
                 targetScene.setSecondTypeId(secondId);
                 targetScene.setSecondTypeName(second.getName());
                 targetScene.setDeviceList(secondDeviceList);
+                targetScenes.add(targetScene);
             }
-            targetScenes.add(targetScene);
         }
 
         return new Result<>(new TargetSceneResponse(targetScenes));
