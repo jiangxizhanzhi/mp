@@ -116,7 +116,7 @@ public class ImagesController {
      */
     @ApiOperation("新增")
     @PostMapping("/add")
-    public ServiceResult add(ImageRequest request){
+    public ServiceResult add(@RequestBody ImageRequest request){
 //        String logoUrl = targetLogoService.uploadLogo(request.getLogoFile());
 //        request.setLogo(logoUrl);
 //        ExtImageInfo extImageInfo = request.getExtImageInfo();
@@ -141,7 +141,7 @@ public class ImagesController {
      */
     @ApiOperation("更新")
     @PostMapping("/update")
-    public ServiceResult update(ImageRequest request){
+    public ServiceResult update(@RequestBody ImageRequest request){
         if (StringUtils.isBlank(request.getUuid())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
