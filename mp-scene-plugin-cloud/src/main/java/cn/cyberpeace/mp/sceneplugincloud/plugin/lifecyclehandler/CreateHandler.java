@@ -57,10 +57,8 @@ public class CreateHandler extends HandlerCommon {
         for (var port : ports) {
             var cloudPort = getPluginHandler().getPort(port.getId());
             var connectedSrcElement = getPluginHandler().getPortConnectedSrcElement(port.getId());
-            if (connectedSrcElement == null) {
-                continue;
-            }
-            var connectedCloudElement = getPluginHandler().getElement(connectedSrcElement.getId());
+            var connectedCloudElement = connectedSrcElement == null ? null
+                    : getPluginHandler().getElement(connectedSrcElement.getId());
             var auxiliaryNetworkCloudElement = confirmAuxiliaryNetworkCloudElement(cloudElement, connectedCloudElement);
             if (auxiliaryNetworkCloudElement == null) {
                 continue;
