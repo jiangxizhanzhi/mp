@@ -18,6 +18,9 @@ import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.hutool.system.oshi.OshiUtil;
+import com.sun.jna.Library;
+import com.sun.jna.Native;
+import com.sun.jna.Structure;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -33,6 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 import oshi.hardware.ComputerSystem;
 import oshi.hardware.HWDiskStore;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -146,6 +150,34 @@ public class AuthTestController {
 
     }
 
+
+    public interface Awesome extends Library {
+
+        AuthTestController.Awesome INSTANCE = (AuthTestController.Awesome) Native.loadLibrary("/home/go_test/stack1/main.so", AuthTestController.Awesome.class);
+
+        public class GoString extends Structure {
+            public static class ByValue extends LicenseService.Awesome.GoString implements Structure.ByValue {
+            }
+
+            public String p;
+            public long n;
+
+            protected List getFieldOrder() {
+                return Arrays.asList(new String[]{"p", "n"});
+            }
+
+
+        }
+
+        String hello();
+
+    }
+
+    @GetMapping("/invokeso")
+    public void tetso() {
+        String res = AuthTestController.Awesome.INSTANCE.hello();
+        log.info("invoke so success! res:{}", res);
+    }
 
     @GetMapping("/testpermlist")
     public List<TargetModel> testPermList() {
