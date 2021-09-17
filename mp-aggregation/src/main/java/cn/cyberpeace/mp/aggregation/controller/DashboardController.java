@@ -49,7 +49,7 @@ public class DashboardController {
         return ServiceResult.success(response);
     }
 
-    @GetMapping("/user_summary_scene")
+    @GetMapping("/user_summary")
     public ServiceResult<UserSummarySceneResponse> userSummary() {
         UserSummarySceneResponse response = mockService.mockUserSummarySceneResponse();
         return ServiceResult.success(response);
