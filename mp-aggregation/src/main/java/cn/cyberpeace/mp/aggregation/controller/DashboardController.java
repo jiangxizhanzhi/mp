@@ -36,14 +36,14 @@ public class DashboardController {
     }
 
 
-    @GetMapping("/get_resource_statistics")
+    @GetMapping("/resource_statistics")
     public ServiceResult<ResourceStatisticsResponse> getResourceStatistics() {
         ResourceStatisticsResponse response = mockService.mockResourceStatisticsResponse();
         return ServiceResult.success(response);
     }
 
 
-    @GetMapping("/get_system_cluster_used")
+    @GetMapping("/system_cluster_used")
     public ServiceResult<SystemClusterUsed> getSystemClusterUsed() {
         SystemClusterUsed response = mockService.mockSystemClusterUsed();
         return ServiceResult.success(response);
