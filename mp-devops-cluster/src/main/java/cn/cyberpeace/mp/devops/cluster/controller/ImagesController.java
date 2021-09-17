@@ -26,7 +26,6 @@ import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
 import cn.cyberpeace.mp.devops.cluster.response.base.Result;
 import cn.cyberpeace.mp.devops.cluster.service.FlavorService;
 import cn.cyberpeace.mp.devops.cluster.service.ScenariosSnapshotService;
-import cn.cyberpeace.mp.devops.cluster.service.TargetLogoService;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -64,8 +63,6 @@ public class ImagesController {
 
     private SnapshotConverter snapshotConverter;
 
-    private TargetLogoService targetLogoService;
-
     private FlavorService flavorService;
 
     private ScenariosSnapshotService scenariosSnapshotService;
@@ -74,11 +71,10 @@ public class ImagesController {
 
     @Autowired
     public ImagesController(ImagesConverter imagesConverter,SnapshotConverter snapshotConverter,
-                            TargetLogoService targetLogoService,FlavorService flavorService,
+                            FlavorService flavorService,
                             ScenariosSnapshotService scenariosSnapshotService,InjectFileConverter injectFileConverter) {
         this.imagesConverter = imagesConverter;
         this.snapshotConverter = snapshotConverter;
-        this.targetLogoService = targetLogoService;
         this.flavorService = flavorService;
         this.scenariosSnapshotService = scenariosSnapshotService;
         this.injectFileConverter = injectFileConverter;
@@ -104,7 +100,8 @@ public class ImagesController {
                     .systemType(Objects.nonNull(extSystemInfo) ? extSystemInfo.getSystemType() : null)
                     .flavor(Objects.nonNull(extVm) ? extVm.getFlavor() : "")
                     .description(v.getDescription()).imageStatus(Objects.nonNull(extImageInfo) ? extImageInfo.getImageStatus() : null)
-                    .authTotal(v.getAuthTotal()).isPublic(v.getIsPublic()).build();
+                    .authTotal(v.getAuthTotal()).isPublic(v.getIsPublic()).extSystemInfo(v.getExtSystemInfo())
+                    .extGateway(v.getExtGateway()).extVm(v.getExtVm()).extImageInfo(v.getExtImageInfo()).build();
             return response;
         }).collect(Collectors.toList());
 

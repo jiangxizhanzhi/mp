@@ -98,11 +98,13 @@ public class ImagesConverterImpl implements ImagesConverter {
         }
         dto.setName(request.getName());
         dto.setOwner(Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : null);
-//        dto.setIsPublic(PublicEnum.ALL_PUBLIC);
         dto.setSearchPublicEnum(1);
         dto.setOffset((request.getPage() - 1) * request.getPerPage());
         dto.setLimit(request.getPerPage());
-
+        dto.setSystemType(request.getSystemType());
+        dto.setSystemArchitecure(request.getSystemArchitecure());
+        dto.setLanguage(request.getLanguage());
+        dto.setImageStatus(request.getImageStatus());
         Integer total = imageMapper.totalCount(dto);
         if (total == 0){
             return null;
