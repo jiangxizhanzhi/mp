@@ -200,10 +200,10 @@ public class TypeController {
     }
 
     /**
-     * 查询所有系统架构
+     * 查询支持的磁盘格式
      * @return
      */
-    @ApiOperation("查询所有系统架构")
+    @ApiOperation("查询支持的磁盘格式")
     @GetMapping("/disk-format")
     public Result<TypeAllResponse> diskFormat(){
         TypeAllConvertModel model = typeConverter.findDiskFormat();
@@ -240,10 +240,13 @@ public class TypeController {
     public Result<TypeAllResponse> serviceMgCategories(){
         TypeAllConvertModel serviceCategories = typeConverter.findServiceCategories();
         TypeAllConvertModel deployType = typeConverter.findDeployType();
+        TypeAllConvertModel installerPlatforms = typeConverter.findInstallerPlatforms();
+
         TypeAllResponse response = new TypeAllResponse();
         response.setDeployType(Objects.nonNull(deployType) ?  deployType.getIdIntegerModelList() : null);
         response.setServiceCategories(Objects.nonNull(serviceCategories) ?
                 serviceCategories.getIdStringModelList() : null);
+        response.setInstallerPlatforms(Objects.nonNull(installerPlatforms) ? installerPlatforms.getIdStringModelList() : null);
         return new Result<>(response);
     }
 

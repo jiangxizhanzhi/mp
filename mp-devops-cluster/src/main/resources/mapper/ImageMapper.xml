@@ -9,6 +9,7 @@
         <result column="name"  property="name"/>
         <result column="main_category"  property="mainCategory"/>
         <result column="sub_category" property="subCategory"/>
+        <result column="third_category" property="thirdCategory"/>
         <result column="image_type" property="imageType"/>
         <result column="is_public" property="isPublic" typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler"/>
         <result column="quick_create_support" property="quickCreateSupport" typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler"/>
@@ -31,6 +32,9 @@
             <if test=" subCategory != null">
                 and i.sub_category = #{subCategory}
             </if>
+            <if test=" thirdCategory != null">
+                and i.third_category = #{thirdCategory}
+            </if>
             <if test=" imageType != null and imageType != '' ">
                 and i.image_type = #{imageType}
             </if>
@@ -52,8 +56,20 @@
             <if test=" quickCreateSupport != null">
                 and i.quick_create_support = #{quickCreateSupport,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler}
             </if>
-            <if test=" owner != null and isPublic != null">
-                and ( a.owner = #{owner} or i.is_public = #{isPublic,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler} )
+            <if test=" owner != null and searchPublicEnum == 1">
+                and ( a.owner = #{owner} or i.is_public in (0,2) )
+            </if>
+            <if test="systemType != null">
+                AND i.system_type = #{systemType},
+            </if>
+            <if test="systemArchitecure != null">
+                And i.system_architecure = #{systemArchitecure}
+            </if>
+            <if test="language != null">
+                and i.language = #{language},
+            </if>
+            <if test="imageStatus != null">
+                and i.image_status = #{imageStatus},
             </if>
         </where>
     </sql>
@@ -68,7 +84,7 @@
 
     <select id="page" parameterType="cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO" resultMap="BaseResultMap">
         select
-            i.pk,i.id,i.uuid,i.name,i.main_category,i.sub_category,i.image_type,i.is_public,i.quick_create_support,
+            i.pk,i.id,i.uuid,i.name,i.main_category,i.sub_category,i.third_category,i.image_type,i.is_public,i.quick_create_support,
                i.in_position,i.reference_status,i.use_status
         from
             mp_devops_target i
@@ -77,6 +93,15 @@
         <if test="offset != null and limit != null">
             limit #{offset}, #{limit}
         </if>
+    </select>
+
+    <select id="findByUuid" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select
+        i.pk,i.id,i.uuid,i.name,i.main_category,i.sub_category,i.third_category,i.image_type,i.is_public,i.quick_create_support,
+        i.in_position,i.reference_status,i.use_status
+        from
+        mp_devops_target i
+        where i.uuid = #{uuid}
     </select>
 
     <insert id="insert" parameterType="cn.cyberpeace.mp.devops.cluster.model.TargetModel">
@@ -96,6 +121,9 @@
             </if>
             <if test="subCategory != null">
                 sub_category,
+            </if>
+            <if test="thirdCategory != null">
+                third_category,
             </if>
             <if test="role != null">
                 role,
@@ -124,6 +152,18 @@
             <if test="referenceStatus != null">
                 reference_status,
             </if>
+            <if test="systemType != null">
+                system_type,
+            </if>
+            <if test="systemArchitecure != null">
+                system_architecure,
+            </if>
+            <if test="language != null">
+                language,
+            </if>
+            <if test="imageStatus != null">
+                image_status,
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="id != null">
@@ -140,6 +180,9 @@
             </if>
             <if test="subCategory != null">
                 #{subCategory},
+            </if>
+            <if test="thirdCategory != null">
+                #{thirdCategory},
             </if>
             <if test="role != null">
                 #{role},
@@ -168,6 +211,18 @@
             <if test="referenceStatus != null">
                 #{referenceStatus},
             </if>
+            <if test="systemType != null">
+                #{systemType},
+            </if>
+            <if test="systemArchitecure != null">
+                #{systemArchitecure},
+            </if>
+            <if test="language != null">
+                #{language},
+            </if>
+            <if test="imageStatus != null">
+                #{imageStatus},
+            </if>
         </trim>
     </insert>
 
@@ -184,6 +239,9 @@
             <if test="subCategory != null">
                 sub_category = #{subCategory},
             </if>
+            <if test="thirdCategory != null">
+                third_category = #{thirdCategory},
+            </if>
             <if test="imageType != null">
                 image_type = #{imageType},
             </if>
@@ -191,7 +249,31 @@
                 update_time = #{updateTime},
             </if>
             <if test="isPublic != null">
-                is_public = #{is_public,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler}
+                is_public = #{isPublic,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
+            </if>
+            <if test="quickCreateSupport != null">
+                quick_create_support = #{quickCreateSupport,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
+            </if>
+            <if test="inPosition != null">
+                in_position = #{inPosition,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
+            </if>
+            <if test="useStatus != null">
+                use_status = #{useStatus},
+            </if>
+            <if test="referenceStatus != null">
+                reference_status = #{referenceStatus},
+            </if>
+            <if test="systemType != null">
+                system_type = #{systemType},
+            </if>
+            <if test="systemArchitecure != null">
+                system_architecure = #{systemArchitecure},
+            </if>
+            <if test="language != null">
+                language = #{language},
+            </if>
+            <if test="imageStatus != null">
+                image_status = #{imageStatus},
             </if>
         </set>
         where uuid = #{uuid}
@@ -201,7 +283,7 @@
         delete from mp_devops_target
         <where>
             <if test="ids != null and ids.size > 0">
-                 uuid in
+                uuid in
                 <foreach collection="ids" item="item" index="index"  open="(" separator="," close=")">
                     #{item}
                 </foreach>

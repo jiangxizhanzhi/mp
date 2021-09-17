@@ -1,8 +1,6 @@
 package cn.cyberpeace.mp.auth.test;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
-import cn.cyberpeace.mp.auth.dto.activation.ActivationRequest;
-import cn.cyberpeace.mp.auth.dto.activation.ActivationResponse;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.model.UserPermissionModel;
 import cn.cyberpeace.mp.auth.repository.OrgMapper;
@@ -12,12 +10,17 @@ import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.TargetService;
 import cn.cyberpeace.mp.auth.service.UserHeartbeatService;
 import cn.cyberpeace.mp.auth.service.UserLogService;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.sys.LicenseService;
 import cn.cyberpeace.mp.auth.service.sys.SysActivationService;
 import cn.cyberpeace.mp.auth.util.PasswordStrengthChecker;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.hutool.system.oshi.OshiUtil;
+import com.sun.jna.Library;
+import com.sun.jna.Native;
+import com.sun.jna.Structure;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -30,10 +33,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import oshi.driver.linux.Dmidecode;
 import oshi.hardware.ComputerSystem;
 import oshi.hardware.HWDiskStore;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -81,6 +84,9 @@ public class AuthTestController {
 
     @Autowired
     private UserPermissionTestMapper userPermissionTestMapper;
+
+    @Autowired
+    private UserService userService;
 
     @ApiOperation("DES加密")
     @PostMapping("/desEncryptPwd")
@@ -145,6 +151,34 @@ public class AuthTestController {
     }
 
 
+    public interface Awesome extends Library {
+
+        AuthTestController.Awesome INSTANCE = (AuthTestController.Awesome) Native.loadLibrary("/home/go_test/stack1/main.so", AuthTestController.Awesome.class);
+
+        public class GoString extends Structure {
+            public static class ByValue extends LicenseService.Awesome.GoString implements Structure.ByValue {
+            }
+
+            public String p;
+            public long n;
+
+            protected List getFieldOrder() {
+                return Arrays.asList(new String[]{"p", "n"});
+            }
+
+
+        }
+
+        String hello();
+
+    }
+
+    @GetMapping("/invokeso")
+    public void tetso() {
+        String res = AuthTestController.Awesome.INSTANCE.hello();
+        log.info("invoke so success! res:{}", res);
+    }
+
     @GetMapping("/testpermlist")
     public List<TargetModel> testPermList() {
         String userId = "3fsss655d87112f4ae094bbaf7083";
@@ -175,8 +209,8 @@ public class AuthTestController {
         return list;
     }
 
-    @GetMapping("/testlicense")
-    public void testlicense(@RequestBody ActivationRequest activationRequest) {
+    @PostMapping("/testlicense")
+    public ServiceResult testlicense(@RequestBody TestVerifyRequest testVerifyRequest) {
 //        licenseJdkDemo.testlicense();
 
 //        str.p = "{\"machinecode\": \"CHTF-12H1-34S8-HV23-123S\", \"deadline\": 1, \"info\": {\"thj\":2}}";
@@ -185,10 +219,18 @@ public class AuthTestController {
 //        activationRequest.setMachinecode("CHTF-12H1-34S8-HV23-123S");
 //        activationRequest.setVerifyCode("");
 
-        activationService.activate(activationRequest);
+//        activationService.activate(activationRequest);
+//
+//        ActivationResponse activationResponse = activationService.status();
+//        log.info("activationContent:{}", activationResponse);
+        log.info("{}", testVerifyRequest.getVerifyCode());
+        log.info("{}", testVerifyRequest.getVerifyStr());
 
-        ActivationResponse activationResponse = activationService.status();
-        log.info("activationContent:{}", activationResponse);
+        boolean success = licenseService.verify(testVerifyRequest.getVerifyStr(), testVerifyRequest.getVerifyCode());
+        if (success) {
+            return ServiceResult.success(success);
+        }
+        return ServiceResult.fail("校验失败");
     }
 
     @GetMapping("/getDiskInfo")
@@ -213,15 +255,18 @@ public class AuthTestController {
 
     @GetMapping("/getSysUUID")
     public String getSysUUID() {
-        String serialNumber = Dmidecode.querySerialNumber();
-        log.error("serialNumber:{}", serialNumber);
-
-        String uuid = activationService.querySysUUID();
-        log.error("uuid:{}", uuid);
-
-        return uuid;
+//        String serialNumber = Dmidecode.querySerialNumber();
+//        log.error("serialNumber:{}", serialNumber);
+//
+//        String uuid = activationService.querySysUUID();
+//        log.error("uuid:{}", uuid);
+//
+//        return uuid;
+//        String[] ids = {"1f581231da924094ac2c5f892936169f", "5ffc5f6891e54371ad63c4ecf6bda692", "3fsss655d87112f4ae094bbaf7083"};
+//        List<UserDto> userDtos = userService.listByUserIds(ids);
+//        log.info("{}", userDtos);
+        return "";
     }
-
 
 
 }

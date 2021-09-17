@@ -7,12 +7,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.Serializable;
 import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DockerInstallerData {
+public class DockerInstallerData implements Serializable {
 
     /**
      * 启动参数（包装对象）
@@ -20,9 +21,24 @@ public class DockerInstallerData {
     @ApiModelProperty(value = "启动参数")
     private List<StartUpParameter> startUpParameterList;
 
-    @ApiModelProperty("docker文件流")
+    @ApiModelProperty(value = "docker文件流",hidden = true)
     private MultipartFile dockerFile;
 
     @ApiModelProperty("docker文件地址")
     private String dockerUrl;
+
+    public DockerInstallerData(List<StartUpParameter> startUpParameterList, String dockerUrl, String userFilename) {
+        this.startUpParameterList = startUpParameterList;
+        this.dockerUrl = dockerUrl;
+        this.userFilename = userFilename;
+    }
+
+    /**
+     * 临时文件ID
+     */
+    @ApiModelProperty("临时文件ID")
+    private String tmpdirUuid;
+
+    @ApiModelProperty("用户文件名称")
+    private String userFilename;
 }

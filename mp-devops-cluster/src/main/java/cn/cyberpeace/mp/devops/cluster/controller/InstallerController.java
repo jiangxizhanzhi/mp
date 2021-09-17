@@ -60,7 +60,8 @@ public class InstallerController {
 
         List<InstallerPageResponse> list = model.getModelList().stream().map(installer ->
                 InstallerPageResponse.builder().uuid(installer.getUuid()).name(installer.getName())
-                        .description(installer.getDescription()).categories(installer.getCategories())
+                        .logo(installer.getLogo()).description(installer.getDescription())
+                        .categories(installer.getCategories())
                         .build()
         ).collect(Collectors.toList());
 
@@ -79,7 +80,7 @@ public class InstallerController {
                 .name(model.getName()).description(model.getDescription()).logo(model.getLogo())
                 .categories(model.getCategories())
                 .deployType(model.getDeployType())
-                .dockerInstallerData(new DockerInstallerData(model.getStartUpParameterList(),null,Objects.nonNull(extDocker) ? extDocker.getFile() : null))
+                .dockerInstallerData(new DockerInstallerData(model.getStartUpParameterList(),Objects.nonNull(extDocker) ? extDocker.getFile() : null, Objects.nonNull(extDocker) ? extDocker.getUserFilename() : null))
                 .resourceList(model.getResourceList())
                 .build();
         return new Result<>(response);
@@ -90,7 +91,10 @@ public class InstallerController {
      */
     @ApiOperation("新增")
     @PostMapping
-    public ServiceResult add(InstallerRequest request){
+    public ServiceResult add(@RequestBody InstallerRequest request){
+//        if (StringUtils.isNotBlank(request.getResources())){
+//            request.setResourceList(JSONArray.parseArray(request.getResources(), Resource.class));
+//        }
         InstallerConvertModel model = installerConverter.add(request);
         return model.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(model.getMessageZh());
     }
@@ -99,8 +103,9 @@ public class InstallerController {
      * 更新
      */
     @ApiOperation("更新")
-    @PatchMapping
-    public ServiceResult update(InstallerRequest request){
+    @PatchMapping("/{uuid}")
+    public ServiceResult update(@RequestBody InstallerRequest request,@PathVariable("uuid") String uuid){
+        request.setUuid(uuid);
         if (StringUtils.isBlank(request.getUuid())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }

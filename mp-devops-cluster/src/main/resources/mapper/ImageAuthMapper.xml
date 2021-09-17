@@ -2,4 +2,38 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="cn.cyberpeace.mp.devops.cluster.repository.ImageAuthMapper">
 
+    <select id="totalCount" resultType="cn.cyberpeace.mp.devops.cluster.model.ImageAuthTotalCount">
+        select
+            a.target as target,
+            count(a.pk) as total
+        from
+            mp_devops_target_auth a
+        <where>
+            <if test="ids != null and ids.size > 0">
+                a.target in
+                <foreach collection="ids" item="item" index="index"  open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+        group by a.target
+    </select>
+
+    <select id="findByTarget" parameterType="java.lang.String" resultType="cn.cyberpeace.mp.devops.cluster.model.TargetAuthModel">
+        select
+            a.pk as pk,
+            a.id as id,
+            a.tenant as tenant,
+            a.owner as owner,
+            a.target as target,
+            a.can_read ,
+            a.can_create,
+            a.can_update,
+            a.can_delete,
+            a.create_time,
+            a.update_time
+        from mp_devops_target_auth a
+        where a.target = #{target}
+    </select>
+
 </mapper>

@@ -80,8 +80,12 @@ public class InstallerConverterImpl implements InstallerConverter {
 
     @Override
     public InstallerConvertModel add(InstallerRequest request) {
-        String logo = targetLogoService.uploadLogo(request.getLogoFile());
+//        if (Objects.nonNull(request.getLogoFile()) && !request.getLogoFile().getClass().isAssignableFrom(String.class)) {
+//            String logo = targetLogoService.uploadLogo((MultipartFile) request.getLogoFile());
+//            request.setLogo(logo);
+//        }
         if (Objects.nonNull(request.getLogoFile()) && request.getLogoFile().getSize() > 0 ){
+            String logo = targetLogoService.uploadLogo(request.getLogoFile());
             request.setLogo(logo);
         }
         InstallerFormDataCloudPlatformModel installer = convertInstallerRequest(request);
@@ -134,13 +138,14 @@ public class InstallerConverterImpl implements InstallerConverter {
         }
         model.setDeployType(installer.getDeployType());
         ExtDocker extDocker = installer.getExtDocker();
-        if (Objects.nonNull(extDocker) && StringUtils.isNotBlank(extDocker.getSettings())){
-            model.setStartUpParameterList(JSONArray.parseArray(extDocker.getSettings(), StartUpParameter.class));
-        }
+        model.setStartUpParameterList(extDocker.getSettings());
         model.setExtDocker(extDocker);
         ExtNormal extNormal = installer.getExtNormal();
         if (Objects.nonNull(extNormal) && StringUtils.isNotBlank(extNormal.getResources())){
             model.setResourceList(JSONArray.parseArray(extNormal.getResources(), Resource.class));
+            model.getResourceList().stream().filter(resource -> StringUtils.isNotBlank(resource.getPlatforms())).forEach(resource -> {
+                resource.setPlatforms(Joiner.on("|").join(resource.getPlatforms().split("")));
+            });
         }
         model.setExtNormal(extNormal);
         model.setSuccess(installer.isSuccess());
@@ -154,6 +159,8 @@ public class InstallerConverterImpl implements InstallerConverter {
         installer.setName(request.getName());
         installer.setDescription(request.getDescription());
         installer.setLogo(request.getLogo());
+        installer.setTmpdirUuid(Objects.nonNull(request.getDockerInstallerData()) ? request.getDockerInstallerData().getTmpdirUuid() : null);
+        installer.setUserFilename(Objects.nonNull(request.getDockerInstallerData()) ? request.getDockerInstallerData().getUserFilename() : null);
         if (StringUtils.isNotBlank(request.getCategories())){
             installer.setCategories(Arrays.stream(request.getCategories().split("\\|")).reduce((a,b) -> a.concat(b)).orElse(""));
         }
@@ -163,7 +170,12 @@ public class InstallerConverterImpl implements InstallerConverter {
             installer.setSettings(JsonUtils.toUnderlineJSONString(request.getDockerInstallerData().getStartUpParameterList()));
         }
         if (CollectionUtils.isNotEmpty(request.getResourceList())) {
-            request.getResourceList().stream().forEach(resource -> resource.setFile(UUID.randomUUID().toString()));
+            request.getResourceList().forEach(resource -> {
+                resource.setFile(UUID.randomUUID().toString());
+                if (StringUtils.isNotBlank(resource.getPlatforms())){
+                    resource.setPlatforms(Arrays.stream(resource.getPlatforms().split("\\|")).reduce((a,b) -> a.concat(b)).orElse(""));
+                }
+            });
             installer.setResources(JsonUtils.toUnderlineJSONString(request.getResourceList()));
         }
         return installer;

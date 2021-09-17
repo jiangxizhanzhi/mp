@@ -1,9 +1,9 @@
 package cn.cyberpeace.mp.devops.cluster.converter.impl;
 
-import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.dto.user.UserDto;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
-import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.devops.cluster.converter.ImagesConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageAuthConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertModel;
@@ -20,19 +20,17 @@ import cn.cyberpeace.mp.devops.cluster.repository.ImageAuthMapper;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
 import cn.cyberpeace.mp.devops.cluster.request.*;
 import cn.cyberpeace.mp.devops.cluster.service.*;
-import cn.cyberpeace.mp.devops.cluster.utils.FileUtils;
 import com.alibaba.fastjson.JSONArray;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.http.HttpResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -54,11 +52,12 @@ public class ImagesConverterImpl implements ImagesConverter {
 
     private DevopsTargetService devopsTargetService;
 
+    private UserService userService;
 
     @Autowired
     public ImagesConverterImpl(ImagesService imagesService, ImageMapper imageMapper,DeviceService deviceService,
                                ImageAuthMapper imageAuthMapper,VmService vmService,ContainerService containerService,
-                               DevopsTargetService devopsTargetService) {
+                               DevopsTargetService devopsTargetService,UserService userService) {
         this.imagesService = imagesService;
         this.imageMapper = imageMapper;
         this.deviceService = deviceService;
@@ -66,6 +65,7 @@ public class ImagesConverterImpl implements ImagesConverter {
         this.vmService = vmService;
         this.containerService = containerService;
         this.devopsTargetService = devopsTargetService;
+        this.userService = userService;
     }
 
     @Override
@@ -93,10 +93,13 @@ public class ImagesConverterImpl implements ImagesConverter {
         }
         dto.setName(request.getName());
         dto.setOwner(Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : null);
-        dto.setIsPublic(PublicEnum.ALL_PUBLIC);
+        dto.setSearchPublicEnum(1);
         dto.setOffset((request.getPage() - 1) * request.getPerPage());
         dto.setLimit(request.getPerPage());
-
+        dto.setSystemType(request.getSystemType());
+        dto.setSystemArchitecure(request.getSystemArchitecure());
+        dto.setLanguage(request.getLanguage());
+        dto.setImageStatus(request.getImageStatus());
         Integer total = imageMapper.totalCount(dto);
         if (total == 0){
             return null;
@@ -113,7 +116,24 @@ public class ImagesConverterImpl implements ImagesConverter {
             return null;
         }
 
+        List<String> targetUuids = targetModels.stream().map(TargetModel::getUuid).collect(Collectors.toList());
+
+        List<ImageAuthTotalCount> imageAuthTotalCounts = imageAuthMapper.totalCount(targetUuids);
+
+        Map<String, Integer> imageAuthTotalCountsMap = imageAuthTotalCounts.stream().collect(Collectors.toMap(ImageAuthTotalCount::getTarget, ImageAuthTotalCount::getTotal));
+
+        Map<String, PublicEnum> targetMap = targetModels.stream().collect(Collectors.toMap(TargetModel::getUuid, TargetModel::getIsPublic));
+
         List<ImageConvertModel> modelList = model.getItems().stream().map(device -> wrapperImageConvertModel(device)).collect(Collectors.toList());
+
+        if (CollectionUtils.isNotEmpty(modelList)) {
+            for (ImageConvertModel imageConvertModel : modelList) {
+                if (MapUtils.isNotEmpty(targetMap)) {
+                    imageConvertModel.setIsPublic(targetMap.get(imageConvertModel.getUuid()));
+                }
+                imageConvertModel.setAuthTotal(imageAuthTotalCountsMap.get(imageConvertModel.getUuid()));
+            }
+        }
 
         ImageConvertPageModel convertModel = new ImageConvertPageModel();
         convertModel.setModelList(modelList);
@@ -123,10 +143,10 @@ public class ImagesConverterImpl implements ImagesConverter {
 
     @Override
     @Transactional
-    public Boolean add(ImageRequest request) {
+    public Device add(ImageRequest request) {
         Device device = imagesService.add(convertRequest(request));
         devopsTargetService.insert(device);
-        return device.isSuccess();
+        return device;
     }
 
     @Override
@@ -138,10 +158,10 @@ public class ImagesConverterImpl implements ImagesConverter {
 
     @Transactional
     @Override
-    public Boolean update(ImageRequest request) {
+    public Device update(ImageRequest request) {
         Device device = imagesService.update(request.getUuid(),convertRequest(request));
         devopsTargetService.updateById(device);
-        return device.isSuccess();
+        return device;
     }
 
     @Override
@@ -150,7 +170,7 @@ public class ImagesConverterImpl implements ImagesConverter {
 
     @Override
     public void build(ImagesBuildRequest request) {
-
+        imagesService.quickCreate(new DeviceQuickCreateCloudPlatformModel(request.getName(),request.getImageName(),request.getServiceIds()));
     }
 
     @Override
@@ -170,12 +190,13 @@ public class ImagesConverterImpl implements ImagesConverter {
 
     @Override
     @Transactional
-    public void delete(ImagesDeleteRequest request) {
-        deviceService.deleteByIds(request.getImageIds());
+    public Boolean delete(ImagesDeleteRequest request) {
+        Boolean result = deviceService.deleteByIds(request.getImageIds());
         ImageDeleteDTO dto = new ImageDeleteDTO();
         dto.setIds(request.getImageIds());
         imageMapper.delete(dto);
         request.getImageIds().forEach(id -> imageAuthMapper.deleteByTarget(id));
+        return result;
     }
 
     @Transactional
@@ -185,8 +206,7 @@ public class ImagesConverterImpl implements ImagesConverter {
         List<String> imageIds = request.getUuids();
         //先删除上次的权限数据
         imageIds.forEach(imageId ->  imageAuthMapper.deleteByTarget(imageId));
-        //再新增权限数据
-        List<String> userIds = request.getUserIds();
+
         PublicEnum isAllPublic = request.getIsAllPublic();
         imageIds.forEach(imageId -> {
             TargetModel targetModel = new TargetModel();
@@ -194,12 +214,14 @@ public class ImagesConverterImpl implements ImagesConverter {
             targetModel.setUuid(imageId);
             imageMapper.updateById(targetModel);
         });
-        if (PublicEnum.ALL_PUBLIC != isAllPublic){
-            if (CollectionUtils.isEmpty(userIds)){
-                //私有的
-                UserModel loginUser = UserUtils.getLoginUser();
-                userIds.add(loginUser.getId());
-            }
+        //再新增权限数据
+        List<String> userIds = request.getUserIds();
+        if (PublicEnum.ALL_PUBLIC != isAllPublic && PublicEnum.PRIVATE != isAllPublic && CollectionUtils.isNotEmpty(userIds)){
+//            if (CollectionUtils.isEmpty(userIds)){
+//                //私有的
+//                UserModel loginUser = UserUtils.getLoginUser();
+//                userIds.add(loginUser.getId());
+//            }
             imageIds.forEach(imageId -> {
                 List<TargetAuthModel> authModelList = userIds.stream().map(userId -> {
                     TargetAuthModel targetAuthModel = new TargetAuthModel();
@@ -213,23 +235,19 @@ public class ImagesConverterImpl implements ImagesConverter {
 
     }
 
-    @Override
-    public String uploadImage(ImagesUploadRequest request, MultipartFile multipartFile) {
-        if (Objects.isNull(multipartFile) || multipartFile.getSize() == 0 ){
+    /**
+     * 根据镜像ID查询用户列表
+     * @param uuid
+     * @return
+     */
+    public List<UserDto> findUsersByUuid(String uuid){
+        List<TargetAuthModel> targetAuthModels = imageAuthMapper.findByTarget(uuid);
+        if (CollectionUtils.isEmpty(targetAuthModels)){
             return null;
         }
-        try {
-            List<File> fileList = FileUtils.transferToFile(Arrays.asList(multipartFile));
-            String params = BeanUtils.wrapperGetParamsByObject(Boolean.TRUE,request);
-            return imagesService.upload(params,fileList.get(0));
-        } catch (Exception e) {
-            log.error("上传镜像文件失败：{}",e.getMessage());
-        }
-
-        return null;
+        List<String> userIds = targetAuthModels.stream().map(TargetAuthModel::getOwner).collect(Collectors.toList());
+        return userService.listByUserIds(userIds.stream().toArray(String[]::new));
     }
-
-
 
     @Override
     public HttpResponse export(String uuid) {
@@ -296,8 +314,11 @@ public class ImagesConverterImpl implements ImagesConverter {
         ImageConvertModel imageModel = new ImageConvertModel();
         imageModel.setUuid(device.getUuid());
         imageModel.setName(device.getName());
+        imageModel.setLogo(device.getLogo());
         imageModel.setMainCategory(device.getCategory());
         imageModel.setSubCategory(device.getSecondCategory());
+        imageModel.setRole(device.getRole());
+        imageModel.setThirdCategory(device.getL3Category());
         imageModel.setImageType(device.getImageType());
         imageModel.setDescription(device.getDescription());
         imageModel.setExtSystemInfo(device.getExtSystemInfo());

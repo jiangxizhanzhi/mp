@@ -2,6 +2,8 @@ package cn.cyberpeace.mp.auth.controller;
 
 import cn.cyberpeace.mp.auth.dto.activation.ActivationRequest;
 import cn.cyberpeace.mp.auth.dto.activation.ActivationResponse;
+import cn.cyberpeace.mp.auth.dto.activation.VerifyInfoRequest;
+import cn.cyberpeace.mp.auth.dto.activation.VerifyInfoResponse;
 import cn.cyberpeace.mp.auth.service.sys.SysActivationService;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import io.swagger.annotations.Api;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.Objects;
 
@@ -35,8 +38,31 @@ public class SysActivationController {
     @ApiOperation("激活")
     @PostMapping
     public ServiceResult activate(@RequestBody @Validated ActivationRequest activationRequest) {
+        log.info("{}", activationRequest);
         activationService.activate(activationRequest);
         return ServiceResult.successful();
+    }
+
+
+    @ApiIgnore
+    @ApiOperation("(生成校验码之前)查询授权信息，包括机器码，自定义授权信息，授权月数")
+    @PostMapping("/verifyinfo")
+    public ServiceResult getVerifyInfo(@RequestBody @Validated VerifyInfoRequest verifyInfoRequest) {
+        log.info("{}", verifyInfoRequest);
+        String customizedVerifyJSONInfo = activationService.generateCustomizedVerifyJSONInfo(verifyInfoRequest.getModuleItems(), verifyInfoRequest.getResourceItems());
+        String sysUUID = activationService.querySysUUID();
+        Integer deadline = verifyInfoRequest.getDeadline();
+
+        VerifyInfoResponse verifyInfoResponse = VerifyInfoResponse.builder()
+                .verifyInfo(customizedVerifyJSONInfo)
+                .deadline(deadline)
+                .machineCode(sysUUID)
+                .edition(verifyInfoRequest.getEdition())
+                .build();
+
+        log.info("verifyInfoResponse:{}", verifyInfoResponse);
+
+        return ServiceResult.success(verifyInfoResponse);
     }
 
 

@@ -1,14 +1,19 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
+import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.ImagesConverter;
+import cn.cyberpeace.mp.devops.cluster.converter.InjectFileConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.SnapshotConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertPageModel;
-import cn.cyberpeace.mp.devops.cluster.model.FlavorCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.converter.model.InjectFileConvertModel;
+import cn.cyberpeace.mp.devops.cluster.converter.model.InjectFileListConvertModel;
+import cn.cyberpeace.mp.devops.cluster.model.*;
+import cn.cyberpeace.mp.devops.cluster.model.common.AccessProtocol;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtImageInfo;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtVm;
@@ -18,7 +23,8 @@ import cn.cyberpeace.mp.devops.cluster.response.ImagesPageResponse;
 import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
 import cn.cyberpeace.mp.devops.cluster.response.base.Result;
 import cn.cyberpeace.mp.devops.cluster.service.FlavorService;
-import cn.cyberpeace.mp.devops.cluster.service.TargetLogoService;
+import cn.cyberpeace.mp.devops.cluster.service.ScenariosSnapshotService;
+import com.alibaba.fastjson.JSONArray;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -36,7 +42,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -54,17 +62,21 @@ public class ImagesController {
 
     private SnapshotConverter snapshotConverter;
 
-    private TargetLogoService targetLogoService;
-
     private FlavorService flavorService;
+
+    private ScenariosSnapshotService scenariosSnapshotService;
+
+    private InjectFileConverter injectFileConverter;
 
     @Autowired
     public ImagesController(ImagesConverter imagesConverter,SnapshotConverter snapshotConverter,
-                            TargetLogoService targetLogoService,FlavorService flavorService) {
+                            FlavorService flavorService,
+                            ScenariosSnapshotService scenariosSnapshotService,InjectFileConverter injectFileConverter) {
         this.imagesConverter = imagesConverter;
         this.snapshotConverter = snapshotConverter;
-        this.targetLogoService = targetLogoService;
         this.flavorService = flavorService;
+        this.scenariosSnapshotService = scenariosSnapshotService;
+        this.injectFileConverter = injectFileConverter;
     }
 
     /**
@@ -82,10 +94,13 @@ public class ImagesController {
             ExtVm extVm = v.getExtVm();
             ExtImageInfo extImageInfo = v.getExtImageInfo();
             ImagesPageResponse response = ImagesPageResponse.builder().uuid(v.getUuid()).name(v.getName())
+                    .logo(v.getLogo())
                     .mainCategory(v.getMainCategory()).subCategory(v.getSubCategory()).imageType(v.getImageType())
                     .systemType(Objects.nonNull(extSystemInfo) ? extSystemInfo.getSystemType() : null)
                     .flavor(Objects.nonNull(extVm) ? extVm.getFlavor() : "")
-                    .description(v.getDescription()).imageStatus(Objects.nonNull(extImageInfo) ? extImageInfo.getImageStatus() : null).build();
+                    .description(v.getDescription()).imageStatus(Objects.nonNull(extImageInfo) ? extImageInfo.getImageStatus() : null)
+                    .authTotal(v.getAuthTotal()).isPublic(v.getIsPublic()).extSystemInfo(v.getExtSystemInfo())
+                    .extGateway(v.getExtGateway()).extVm(v.getExtVm()).extImageInfo(v.getExtImageInfo()).build();
             return response;
         }).collect(Collectors.toList());
 
@@ -97,19 +112,12 @@ public class ImagesController {
      */
     @ApiOperation("新增")
     @PostMapping("/add")
-    public ServiceResult add(ImageRequest request){
-        String logoUrl = targetLogoService.uploadLogo(request.getLogoFile());
-        request.setLogo(logoUrl);
-        ImagesUploadRequest uploadRequest = new ImagesUploadRequest();
-        String imageUuid = imagesConverter.uploadImage(uploadRequest,request.getImageFile());
-        ExtImageInfo extImageInfo = request.getExtImageInfo();
-        if (Objects.isNull(extImageInfo)){
-            extImageInfo = new ExtImageInfo();
+    public ServiceResult add(@RequestBody ImageRequest request){
+        Device device = imagesConverter.add(request);
+        if (Objects.isNull(device)){
+            return new Result();
         }
-        extImageInfo.setUuid(imageUuid);
-        request.setExtImageInfo(extImageInfo);
-        Boolean result = imagesConverter.add(request);
-       return result ? ServiceResult.successful() : ServiceResult.fail("");
+        return device.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(device.getMessage());
     }
 
     /**
@@ -121,8 +129,11 @@ public class ImagesController {
         if (StringUtils.isBlank(request.getUuid())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
-        Boolean result = imagesConverter.update(request);
-        return result ? ServiceResult.successful() : ServiceResult.fail("");
+        Device device = imagesConverter.update(request);
+        if (Objects.isNull(device)){
+            return new Result();
+        }
+        return device.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(device.getMessage());
     }
 
     /**
@@ -135,13 +146,18 @@ public class ImagesController {
         ImagesByIdResponse imagesByIdResponse = new ImagesByIdResponse();
         imagesByIdResponse.setUuid(model.getUuid());
         imagesByIdResponse.setName(model.getName());
-        imagesByIdResponse.setMainCategory(model.getMainCategory());
-        imagesByIdResponse.setSubCategory(model.getSubCategory());
-        imagesByIdResponse.setImageType(model.getImageType());
+        imagesByIdResponse.setCategory(model.getMainCategory());
+        imagesByIdResponse.setSecondCategory(model.getSubCategory());
+        imagesByIdResponse.setThirdCategory(model.getThirdCategory());
+        imagesByIdResponse.setRole(model.getRole());
+        imagesByIdResponse.setLogo(model.getLogo());
+        ExtVm extVm = model.getExtVm();
+        imagesByIdResponse.setAccessProtocolList(Objects.nonNull(extVm) ? JSONArray.parseArray(extVm.getAccessProtocols(), AccessProtocol.class) : null);
+        imagesByIdResponse.setVirtualType(model.getImageType());
         imagesByIdResponse.setDescription(model.getDescription());
         imagesByIdResponse.setExtImageInfo(model.getExtImageInfo());
         imagesByIdResponse.setExtGateway(model.getExtGateway());
-        imagesByIdResponse.setExtVm(model.getExtVm());
+        imagesByIdResponse.setExtVm(extVm);
         imagesByIdResponse.setExtSystemInfo(model.getExtSystemInfo());
         return new Result<>(imagesByIdResponse);
     }
@@ -152,8 +168,9 @@ public class ImagesController {
      */
     @ApiOperation("快速构建")
     @PostMapping("/build")
-    public void build(@RequestBody ImagesBuildRequest request){
+    public ServiceResult build(@RequestBody ImagesBuildRequest request){
         imagesConverter.build(request);
+        return ServiceResult.successful();
     }
 
 
@@ -162,8 +179,9 @@ public class ImagesController {
      */
     @ApiOperation("删除")
     @DeleteMapping("/page")
-    public void delete(ImagesDeleteRequest request){
-        imagesConverter.delete(request);
+    public ServiceResult delete(ImagesDeleteRequest request){
+        Boolean result = imagesConverter.delete(request);
+        return result ? ServiceResult.successful() : ServiceResult.fail("");
     }
 
     /**
@@ -171,8 +189,19 @@ public class ImagesController {
      */
     @ApiOperation("授权/批量授权")
     @PostMapping("/auth")
-    public void auth(@RequestBody ImagesAuthRequest request){
+    public ServiceResult auth(@RequestBody ImagesAuthRequest request){
         imagesConverter.auth(request);
+        return ServiceResult.successful();
+    }
+
+    /**
+     * 授权
+     */
+    @ApiOperation("根据uuid查询授权用户信息")
+    @GetMapping("/auth-users")
+    public Result<List<UserDto>> authUsers(@RequestParam("uuid") String uuid ){
+        List<UserDto> userDtos = imagesConverter.findUsersByUuid(uuid);
+        return new Result<>(userDtos);
     }
 
     /**
@@ -247,7 +276,9 @@ public class ImagesController {
      */
     @ApiOperation("文件注入")
     @PostMapping("/inject-file")
-    public void injectFile(@RequestBody ImageInjectFileRequest request){
+    public void injectFile(@Valid @RequestBody ImageInjectFileRequest request){
+        BaseCloudPlatformModel model = scenariosSnapshotService.injectFile(new DeviceInjectFileCreate(request.getDeviceUuid(),
+                request.getFileUrl(),request.getFileName(),request.getFileSize()));
 
     }
 
@@ -256,8 +287,22 @@ public class ImagesController {
      */
     @ApiOperation("查看文件注入列表")
     @GetMapping("/inject-file")
-    public void findInjectFileList(@RequestBody ImageInjectFileRequest request){
+    public Result<InjectFileConvertModel> findInjectFileList(ImageInjectFilePageRequest request){
+        InjectFileListConvertModel list = injectFileConverter.list(request.getDeviceUuid());
+        if (Objects.isNull(list)){
+            return new Result();
+        }
+        return new Result(list.getModelList());
+    }
 
+    /**
+     * 删除文件注入
+     */
+    @ApiOperation("删除文件注入")
+    @DeleteMapping("/inject-file")
+    public ServiceResult deleteInjectFile(@RequestBody ImageInjectFileDeleteRequest request){
+        Boolean result = injectFileConverter.delete(Arrays.asList(request.getInjectUuid()));
+        return result ? ServiceResult.successful() : ServiceResult.fail("");
     }
 
 
@@ -266,8 +311,11 @@ public class ImagesController {
      */
     @ApiOperation("查询flavor")
     @GetMapping("/page-flavor")
-    public Result pageFlavor(){
+    public Result<List<Flavor>> pageFlavor(){
         FlavorCloudPlatformModel page = flavorService.page("");
+        if (Objects.isNull(page) ||  Objects.isNull(page.getData())){
+            return new Result();
+        }
         return new Result<>(page.getData().getList());
     }
 }
