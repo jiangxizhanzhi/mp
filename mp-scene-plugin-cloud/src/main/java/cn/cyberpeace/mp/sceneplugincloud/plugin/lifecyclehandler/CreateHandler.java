@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.base.util.BoolUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.util.CommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
@@ -31,7 +32,7 @@ public class CreateHandler extends HandlerCommon {
         var subnet = new VirtualSwitchCreateData.Subnet();
         subnet.setCidr(cloudElement.getAuxiliaryNetworkCidr());
         subnet.setGatewayIp(cloudElement.getAuxiliaryNetworkGateway());
-        subnet.setEnableDhcp(cloudElement.getAuxiliaryNetworkDhcp());
+        subnet.setEnableDhcp(BoolUtils.bool(cloudElement.getAuxiliaryNetworkDhcp()));
         var srcAllocationPools = cloudElement.getAuxiliaryNetworkAllocationPools();
         if (srcAllocationPools != null) {
             List<VirtualSwitchCreateData.Subnet.AllocationPool> allocationPools = new ArrayList<>();
