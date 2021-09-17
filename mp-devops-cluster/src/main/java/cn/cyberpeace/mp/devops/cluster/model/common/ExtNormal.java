@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -15,5 +17,5 @@ public class ExtNormal{
      * 资源列表
      */
     @ApiModelProperty(value = "资源列表",hidden = true)
-    private String resources;
+    private List<Resource> resources;
 }
