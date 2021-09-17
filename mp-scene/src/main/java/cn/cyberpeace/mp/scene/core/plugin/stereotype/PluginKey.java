@@ -9,4 +9,6 @@ public @interface PluginKey {
 
     String value();
 
+    float priority() default 0;
+
 }

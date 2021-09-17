@@ -1,10 +1,10 @@
 package cn.cyberpeace.mp.scene.core.plugin.base;
 
 import cn.cyberpeace.mp.base.annotation.ClassFieldNames;
-import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.base.util.ClassUtils;
 import cn.cyberpeace.mp.base.util.JsonUtils;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
+import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -27,6 +27,9 @@ import java.util.Map;
 })
 @Data
 public abstract class BasePluginHandler<S, E, P, C extends BasePluginContext<?>> {
+    private String key;
+    private float priority;
+
     private C context;
 
     // 源场景索引数据
@@ -97,6 +100,9 @@ public abstract class BasePluginHandler<S, E, P, C extends BasePluginContext<?>>
 
     public void initBase() {
         ClassUtils.loadClassFields(this);
+        var pluginKeyAnnotation = getClass().getAnnotation(PluginKey.class);
+        key = pluginKeyAnnotation.value();
+        priority = pluginKeyAnnotation.priority();
     }
 
     /**

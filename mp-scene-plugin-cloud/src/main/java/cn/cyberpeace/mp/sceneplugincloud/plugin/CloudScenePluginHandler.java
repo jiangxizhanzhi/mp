@@ -26,7 +26,7 @@ import java.util.Map;
         CloudPluginSceneElementPortBO.class,
 })
 @Component
-@PluginKey(PluginConstant.PLUGIN_KEY)
+@PluginKey(value = PluginConstant.PLUGIN_KEY, priority = PluginConstant.PLUGIN_PRIORITY)
 @Data
 public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginSceneBO,
         CloudPluginSceneElementBO, CloudPluginSceneElementPortBO> {
