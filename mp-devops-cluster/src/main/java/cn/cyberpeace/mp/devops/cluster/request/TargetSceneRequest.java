@@ -37,6 +37,6 @@ public class TargetSceneRequest implements Serializable {
     /**
      * 镜像类型
      */
-    @ApiModelProperty(value = "vm,container,entity,simple")
+    @ApiModelProperty("镜像类型")
     private ImageTypeEnum imageType;
 }

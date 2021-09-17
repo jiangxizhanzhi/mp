@@ -1,6 +1,10 @@
 package cn.cyberpeace.mp.devops.cluster.response;
 
 import cn.cyberpeace.mp.devops.cluster.enums.PublicEnum;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtGateway;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtImageInfo;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtVm;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -90,4 +94,24 @@ public class ImagesPageResponse  extends BaseCloudPlatformResponse  {
     private Integer authTotal;
 
     private Integer imageStatus;
+
+    /**
+     * 系统信息
+     */
+    private ExtSystemInfo extSystemInfo;
+
+    /**
+     * 镜像信息
+     */
+    private ExtImageInfo extImageInfo;
+
+    /**
+     * 虚拟机信息
+     */
+    private ExtVm extVm;
+
+    /**
+     * 网关信息
+     */
+    private ExtGateway extGateway;
 }

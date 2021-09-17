@@ -31,17 +31,17 @@ public class ExtVm {
      * 快速创建参数
      */
     @ApiModelProperty("快速创建参数")
-    private String quickCreateParams;
+    private Object quickCreateParams;
 
     /**
      * 接入方式
      */
-    @ApiModelProperty(hidden = true)
+    @ApiModelProperty("接入方式")
     private String accessProtocols;
 
     /**
      * 额外信息
      */
     @ApiModelProperty("扩展信息")
-    private String extInfo;
+    private Object extInfo;
 }
