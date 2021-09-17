@@ -4,12 +4,12 @@ import cn.cyberpeace.mp.devops.cluster.model.common.ExtDocker;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtNormal;
 import cn.cyberpeace.mp.devops.cluster.model.common.Resource;
 import cn.cyberpeace.mp.devops.cluster.model.common.StartUpParameter;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @NoArgsConstructor
@@ -67,6 +67,6 @@ public class InstallerConvertModel extends BasePageConvertModel{
     /**
      * 资源列表
      */
-    private List<Resource> resourceList;
+    private List<Resource> resourceList = new ArrayList<>();
 
 }
