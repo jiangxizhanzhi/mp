@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
@@ -102,17 +101,6 @@ public class BaseOpenStackServiceImpl extends BaseServiceImpl {
     @Override
     protected <T extends BaseModel> T sendDelete(String api, String body,Class<T> valueType){
         return super.sendDelete(devopsConfig.getCpUrl().concat(api),body, valueType);
-    }
-
-    /**
-     * 上传文件
-     * @param api
-     * @param file
-     * @return
-     */
-    @Override
-    protected String sendFormDataPost(String api, File file) throws IOException {
-        return super.sendFormDataPost(devopsConfig.getCpUrl().concat(api),file);
     }
 
     /**

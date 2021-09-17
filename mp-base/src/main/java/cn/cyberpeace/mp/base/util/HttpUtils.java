@@ -17,7 +17,6 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.*;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -26,7 +25,6 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -347,26 +345,6 @@ public class HttpUtils {
         RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(10000).setConnectTimeout(10000).build();
         HttpResponse response = client.execute(httpPut);
         httpPut.setConfig(requestConfig);
-        return EntityUtils.toString(response.getEntity(), "UTF-8");
-    }
-
-
-    public static String doFormDataPost(String url,final File file) throws IOException {
-        HttpClient client = INSTANCE.httpClient;
-        HttpPost httpPost = new HttpPost(url);
-
-        //创建 MultipartEntityBuilder,以此来构建我们的参数
-        MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create();
-        //        ContentType contentType = ContentType.create("text/plain", Charset.forName("UTF-8"));
-        //        entityBuilder.addPart("name", new StringBody("value",contentType));
-        //        entityBuilder.addPart("name1", new StringBody("value1",contentType));
-        //        entityBuilder.addPart("name2", new StringBody("value2",contentType));
-        entityBuilder.addBinaryBody("image", file);
-
-        httpPost.setEntity(entityBuilder.build());
-        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(10000).setConnectTimeout(10000).build();
-        httpPost.setConfig(requestConfig);
-        HttpResponse response = client.execute(httpPost);
         return EntityUtils.toString(response.getEntity(), "UTF-8");
     }
 

@@ -62,5 +62,6 @@ public class InstallerByIdResponse extends BaseCloudPlatformResponse{
      * 资源列表
      */
     @ApiModelProperty(value = "资源列表")
+    @Builder.Default
     private List<Resource> resourceList = new ArrayList<>();
 }

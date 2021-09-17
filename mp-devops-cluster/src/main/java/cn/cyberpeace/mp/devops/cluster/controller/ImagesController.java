@@ -12,10 +12,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertPageModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InjectFileConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InjectFileListConvertModel;
-import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.DeviceInjectFileCreate;
-import cn.cyberpeace.mp.devops.cluster.model.Flavor;
-import cn.cyberpeace.mp.devops.cluster.model.FlavorCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.common.AccessProtocol;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtImageInfo;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
@@ -116,23 +113,11 @@ public class ImagesController {
     @ApiOperation("新增")
     @PostMapping("/add")
     public ServiceResult add(@RequestBody ImageRequest request){
-//        String logoUrl = targetLogoService.uploadLogo(request.getLogoFile());
-//        request.setLogo(logoUrl);
-//        ExtImageInfo extImageInfo = request.getExtImageInfo();
-//        if (Objects.nonNull(extImageInfo) && extImageInfo.getImageSource() == 3) {
-//            ImagesUploadRequest uploadRequest = new ImagesUploadRequest();
-//            uploadRequest.setUploadType(extImageInfo.getUploadType());
-//            uploadRequest.setDiskFormat(extImageInfo.getDiskFormat());
-////            uploadRequest.setFtpFilename(extImageInfo.getFtpFilename());
-//            uploadRequest.setType(request.getVirtualType());
-//            uploadRequest.setHwDiskFormat(extImageInfo.getHwDiskFormat());
-//            uploadRequest.setHwVifModel(extImageInfo.getHwVifModel());
-//            String imageUuid = imagesConverter.uploadImage(uploadRequest, request.getImageFile());
-//            extImageInfo.setUuid(imageUuid);
-//        }
-//        request.setExtImageInfo(extImageInfo);
-        Boolean result = imagesConverter.add(request);
-       return result ? ServiceResult.successful() : ServiceResult.fail("");
+        Device device = imagesConverter.add(request);
+        if (Objects.isNull(device)){
+            return new Result();
+        }
+        return device.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(device.getMessage());
     }
 
     /**
@@ -144,8 +129,11 @@ public class ImagesController {
         if (StringUtils.isBlank(request.getUuid())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
-        Boolean result = imagesConverter.update(request);
-        return result ? ServiceResult.successful() : ServiceResult.fail("");
+        Device device = imagesConverter.update(request);
+        if (Objects.isNull(device)){
+            return new Result();
+        }
+        return device.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(device.getMessage());
     }
 
     /**
@@ -158,8 +146,8 @@ public class ImagesController {
         ImagesByIdResponse imagesByIdResponse = new ImagesByIdResponse();
         imagesByIdResponse.setUuid(model.getUuid());
         imagesByIdResponse.setName(model.getName());
-        imagesByIdResponse.setMainCategory(model.getMainCategory());
-        imagesByIdResponse.setSubCategory(model.getSubCategory());
+        imagesByIdResponse.setCategory(model.getMainCategory());
+        imagesByIdResponse.setSecondCategory(model.getSubCategory());
         imagesByIdResponse.setThirdCategory(model.getThirdCategory());
         imagesByIdResponse.setRole(model.getRole());
         imagesByIdResponse.setLogo(model.getLogo());
@@ -180,8 +168,9 @@ public class ImagesController {
      */
     @ApiOperation("快速构建")
     @PostMapping("/build")
-    public void build(@RequestBody ImagesBuildRequest request){
+    public ServiceResult build(@RequestBody ImagesBuildRequest request){
         imagesConverter.build(request);
+        return ServiceResult.successful();
     }
 
 

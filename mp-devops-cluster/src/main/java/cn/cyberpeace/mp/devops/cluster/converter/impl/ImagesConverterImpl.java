@@ -4,7 +4,6 @@ import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
-import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.devops.cluster.converter.ImagesConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageAuthConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertModel;
@@ -21,7 +20,6 @@ import cn.cyberpeace.mp.devops.cluster.repository.ImageAuthMapper;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
 import cn.cyberpeace.mp.devops.cluster.request.*;
 import cn.cyberpeace.mp.devops.cluster.service.*;
-import cn.cyberpeace.mp.devops.cluster.utils.FileUtils;
 import com.alibaba.fastjson.JSONArray;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -30,10 +28,7 @@ import org.apache.http.HttpResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -148,10 +143,10 @@ public class ImagesConverterImpl implements ImagesConverter {
 
     @Override
     @Transactional
-    public Boolean add(ImageRequest request) {
+    public Device add(ImageRequest request) {
         Device device = imagesService.add(convertRequest(request));
         devopsTargetService.insert(device);
-        return device.isSuccess();
+        return device;
     }
 
     @Override
@@ -163,10 +158,10 @@ public class ImagesConverterImpl implements ImagesConverter {
 
     @Transactional
     @Override
-    public Boolean update(ImageRequest request) {
+    public Device update(ImageRequest request) {
         Device device = imagesService.update(request.getUuid(),convertRequest(request));
         devopsTargetService.updateById(device);
-        return device.isSuccess();
+        return device;
     }
 
     @Override
@@ -253,24 +248,6 @@ public class ImagesConverterImpl implements ImagesConverter {
         List<String> userIds = targetAuthModels.stream().map(TargetAuthModel::getOwner).collect(Collectors.toList());
         return userService.listByUserIds(userIds.stream().toArray(String[]::new));
     }
-
-    @Override
-    public String uploadImage(ImagesUploadRequest request, MultipartFile multipartFile) {
-        if (Objects.isNull(multipartFile) || multipartFile.getSize() == 0 ){
-            return null;
-        }
-        try {
-            List<File> fileList = FileUtils.transferToFile(Arrays.asList(multipartFile));
-            String params = BeanUtils.wrapperGetParamsByObject(Boolean.TRUE,request);
-            return imagesService.upload(params,fileList.get(0));
-        } catch (Exception e) {
-            log.error("上传镜像文件失败：{}",e.getMessage());
-        }
-
-        return null;
-    }
-
-
 
     @Override
     public HttpResponse export(String uuid) {

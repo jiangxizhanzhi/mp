@@ -36,13 +36,13 @@ public class ImagesByIdResponse extends BaseCloudPlatformResponse  {
      * 分类
      */
     @ApiModelProperty(value = "一级分类")
-    private Integer mainCategory;
+    private Integer category;
 
     /**
      * 子分类
      */
     @ApiModelProperty(value = "二级分类")
-    private Integer subCategory;
+    private Integer secondCategory;
 
     /**
      * 三级分类

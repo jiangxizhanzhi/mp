@@ -17,7 +17,6 @@ import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
@@ -47,9 +46,11 @@ public class BaseServiceImpl {
         String result = "";
         try {
             result = HttpUtils.getInstance().sendGet(url);
-            log.info("=====GET调用url：{},对应返回结果信息：{}",url,result);
+            if (log.isInfoEnabled()) {
+                log.info("=====GET调用url：{},对应返回结果信息：{}", url, result);
+            }
         } catch (IOException e) {
-            log.info("=====GET调用url：{},对应返回结果信息：{},报错信息：{}",url,result,e.getMessage());
+            log.error("=====GET调用url：{},对应返回结果信息：{},报错信息：{}",url,result,e.getMessage(),e);
         }
         return result;
     }
@@ -63,9 +64,11 @@ public class BaseServiceImpl {
         HttpResponse result = null;
         try {
             result = HttpUtils.getInstance().sendGetForDownLoad(url);
-            log.info("=====GET调用url：{},对应返回结果信息：{}",url,result);
+            if (log.isInfoEnabled()) {
+                log.info("=====GET调用url：{},对应返回结果信息：{}", url, result);
+            }
         } catch (IOException e) {
-            log.info("=====GET调用url：{},对应返回结果信息：{},报错信息：{}",url,result,e.getMessage());
+            log.error("=====GET调用url：{},对应返回结果信息：{},报错信息：{}",url,result,e.getMessage(),e);
         }
         return result;
     }
@@ -79,9 +82,11 @@ public class BaseServiceImpl {
         String result = "";
         try {
             result = HttpUtils.getInstance().sendGet(url,headers);
-            log.info("=====GET调用url：{},对应返回结果信息：{}",url,result);
+            if (log.isInfoEnabled()) {
+                log.info("=====GET调用url：{},对应返回结果信息：{}", url, result);
+            }
         } catch (IOException e) {
-            log.info("=====GET调用url：{},对应返回结果信息：{},报错信息：{}",url,result,e.getMessage());
+            log.error("=====GET调用url：{},对应返回结果信息：{},报错信息：{}",url,result,e.getMessage(),e);
         }
         return result;
     }
@@ -98,10 +103,12 @@ public class BaseServiceImpl {
         String result = "";
         try {
             result =  HttpUtils.getInstance().sendGet(url);
-            log.info("=====GET调用url：{},对应返回结果信息：{}",url,result);
+            if (log.isInfoEnabled()) {
+                log.info("=====GET调用url：{},对应返回结果信息：{}", url, result);
+            }
             model = JsonUtils.toSnakeObject(result,valueType);
         } catch (IOException e) {
-            log.info("=====GET调用url：{},对应返回结果信息：{},报错信息：{}",url,result,e.getMessage());
+            log.error("=====GET调用url：{},对应返回结果信息：{},报错信息：{}",url,result,e.getMessage(),e);
         }
         return model;
     }
@@ -119,9 +126,12 @@ public class BaseServiceImpl {
         String result = "";
         try {
             result =  HttpUtils.getInstance().sendGet(url,headers);
+            if (log.isInfoEnabled()) {
+                log.info("=====GET调用url：{},对应返回结果信息：{}", url, result);
+            }
             model = JsonUtils.toSnakeObject(result,valueType);
         } catch (IOException e) {
-            log.info("=====GET调用url：{},对应返回结果信息：{},报错信息：{}",url,result,e.getMessage());
+            log.error("=====GET调用url：{},对应返回结果信息：{},报错信息：{}",url,result,e.getMessage(),e);
         }
         return model;
     }
@@ -136,9 +146,11 @@ public class BaseServiceImpl {
         String result = "";
         try {
             result = HttpUtils.getInstance().sendPost(url,body);
-            log.info("=====POST调用url：{},参数：{},对应返回结果信息：{}",url,body,result);
+            if (log.isInfoEnabled()) {
+                log.info("=====POST调用url：{},参数：{},对应返回结果信息：{}", url, body, result);
+            }
         } catch (IOException e) {
-            log.info("=====POST调用url：{},参数：{},对应返回结果信息：{},报错信息：{}",url,body,result,e.getMessage());
+            log.error("=====POST调用url：{},参数：{},对应返回结果信息：{},报错信息：{}",url,body,result,e.getMessage(),e);
         }
         return result;
     }
@@ -156,10 +168,12 @@ public class BaseServiceImpl {
         String result = "";
         try {
             result = HttpUtils.getInstance().sendPost(url,body);
-            log.info("=====POST调用url：{},参数：{},对应返回结果信息：{}",url,body,result);
+            if (log.isInfoEnabled()) {
+                log.info("=====POST调用url：{},参数：{},对应返回结果信息：{}", url, body, result);
+            }
             model = JsonUtils.toSnakeObject(result,valueType);
         } catch (IOException e) {
-            log.info("=====POST调用url：{},参数：{},对应返回结果信息：{},报错信息：{}",url,body,result,e.getMessage());
+            log.error("=====POST调用url：{},参数：{},对应返回结果信息：{},报错信息：{}",url,body,result,e.getMessage(),e);
         }
         return model;
     }
@@ -174,9 +188,11 @@ public class BaseServiceImpl {
         String result = "";
         try {
             result = HttpUtils.getInstance().sendPut(url,body);
-            log.info("=====PUT调用url：{},参数：{},对应返回结果信息：{}",url,body,result);
+            if (log.isInfoEnabled()) {
+                log.info("=====PUT调用url：{},参数：{},对应返回结果信息：{}", url, body, result);
+            }
         } catch (IOException e) {
-            log.info("=====PUT调用url：{},参数：{},对应返回结果信息：{},报错信息：{}",url,body,result,e.getMessage());
+            log.error("=====PUT调用url：{},参数：{},对应返回结果信息：{},报错信息：{}",url,body,result,e.getMessage(),e);
         }
         return result;
     }
@@ -194,9 +210,12 @@ public class BaseServiceImpl {
         String result = "";
         try {
             result =  HttpUtils.getInstance().sendPut(url,body);
+            if (log.isInfoEnabled()) {
+                log.info("=====PUT调用url：{},参数：{},对应返回结果信息：{}", url, body, result);
+            }
             model = JsonUtils.toSnakeObject(result,valueType);
         } catch (IOException e) {
-            log.info("=====PUT调用url：{},参数：{},对应返回结果信息：{},报错信息：{}",url,body,result,e.getMessage());
+            log.error("=====PUT调用url：{},参数：{},对应返回结果信息：{},报错信息：{}",url,body,result,e.getMessage(),e);
         }
         return model;
     }
@@ -217,12 +236,14 @@ public class BaseServiceImpl {
             httpDelete.setEntity(entity);
             HttpResponse resp = client.execute(httpDelete);
             // 设置请求和传输超时时间
-            RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
+            RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(10000).setConnectTimeout(10000).build();
             httpDelete.setConfig(requestConfig);
             result =  EntityUtils.toString(resp.getEntity(), "UTF-8");
-            log.info("=====DELETE调用url：{},参数：{},对应返回结果信息：{}",url,body,result);
+            if (log.isInfoEnabled()) {
+                log.info("=====DELETE调用url：{},参数：{},对应返回结果信息：{}", url, body, result);
+            }
         } catch (IOException e) {
-            log.info("=====DELETE调用url：{},参数：{},对应返回结果信息：{},报错信息：{}",url,body,result,e.getMessage());
+            log.error("=====DELETE调用url：{},参数：{},对应返回结果信息：{},报错信息：{}",url,body,result,e.getMessage(),e);
         }
         return result;
     }
@@ -236,22 +257,20 @@ public class BaseServiceImpl {
      * @return
      */
     protected <T extends BaseModel> T sendDelete(String url,String body,Class<T> valueType){
-        T model = null;
         String result = this.sendDelete(url,body);
-        model = JsonUtils.toSnakeObject(result,valueType);
-        log.info("=====DELETE调用url：{},参数：{},对应返回结果信息：{}",url,body,result);
+        T model = JsonUtils.toSnakeObject(result,valueType);
+        if (log.isInfoEnabled()) {
+            log.info("=====DELETE调用url：{},参数：{},对应返回结果信息：{}", url, body, result);
+        }
         return model;
-    }
-
-
-    protected String sendFormDataPost(String url, File file) throws IOException {
-        return HttpUtils.doFormDataPost(url,file);
     }
 
     protected <T extends BaseModel> T sendFormDataPost(String url, HttpEntity httpEntity ,Class<T> valueType) throws IOException {
         String result = HttpUtils.doFormDataPost(url,httpEntity);
         T model = JsonUtils.toSnakeObject(result,valueType);
-        log.info("=====FormDataPost调用url：{},参数：{},返回结果：{}",url,httpEntity,result);
+        if (log.isInfoEnabled()) {
+            log.info("=====FormDataPost调用url：{},参数：{},返回结果：{}", url, httpEntity, result);
+        }
         return model;
     }
 
@@ -259,7 +278,9 @@ public class BaseServiceImpl {
     protected <T extends BaseModel> T sendFormDataPut(String url, HttpEntity httpEntity ,Class<T> valueType) throws IOException {
         String result = HttpUtils.doFormDataPut(url,httpEntity);
         T model = JsonUtils.toSnakeObject(result,valueType);
-        log.info("=====FormData调用url：{},参数：{},返回结果：{}",url,httpEntity,result);
+        if (log.isInfoEnabled()) {
+            log.info("=====FormData调用url：{},参数：{},返回结果：{}", url, httpEntity, result);
+        }
         return model;
     }
 }

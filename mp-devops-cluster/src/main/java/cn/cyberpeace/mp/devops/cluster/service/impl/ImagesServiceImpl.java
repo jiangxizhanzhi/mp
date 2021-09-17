@@ -63,16 +63,6 @@ public class ImagesServiceImpl extends BaseOpenStackServiceImpl implements Image
 
 
     @Override
-    public String upload(String params,File file) {
-        try {
-            return super.sendFormDataPost(CPCLOUD_DEVICE + URL_VERSION + "/upload/" + params,file);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    @Override
     public BaseCloudPlatformModel upload(Map<String,File> fileList, String type){
         if (MapUtils.isEmpty(fileList)){
             return null;
