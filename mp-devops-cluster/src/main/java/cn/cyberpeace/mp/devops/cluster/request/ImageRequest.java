@@ -39,7 +39,7 @@ public class ImageRequest extends BaseRequest {
     /**
      * 名称
      */
-    @ApiModelProperty(value = "名称",required = true)
+    @ApiModelProperty(value = "名称")
     private String name;
 
     /**
