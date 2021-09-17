@@ -36,7 +36,7 @@ public class ExtVm {
     /**
      * 接入方式
      */
-    @ApiModelProperty(hidden = true)
+    @ApiModelProperty("接入方式")
     private String accessProtocols;
 
     /**
