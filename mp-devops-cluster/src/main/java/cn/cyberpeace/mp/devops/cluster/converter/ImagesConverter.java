@@ -1,11 +1,14 @@
 package cn.cyberpeace.mp.devops.cluster.converter;
 
+import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageAuthConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertPageModel;
 import cn.cyberpeace.mp.devops.cluster.request.*;
 import org.apache.http.HttpResponse;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 public interface ImagesConverter extends BaseConverter{
 
@@ -79,4 +82,10 @@ public interface ImagesConverter extends BaseConverter{
      */
     void create(String uuid);
 
+    /**
+     * 根据镜像ID查询用户列表
+     * @param uuid
+     * @return
+     */
+    List<UserDto> findUsersByUuid(String uuid);
 }

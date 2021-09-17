@@ -40,22 +40,16 @@ public class ExtImageInfo {
     private String error;
 
     /**
-     * 系统镜像类型，0：基础镜像，1：openstack已有镜像，2：自定义上传
+     * 系统镜像类型，1：基础镜像，2：openstack已有镜像，3：自定义上传
      */
-    @ApiModelProperty("系统镜像类型，0：基础镜像，1：openstack已有镜像，2：自定义上传")
-    private Integer systemImageType;
+    @ApiModelProperty("系统镜像类型，1：基础镜像，2：openstack已有镜像，3：自定义上传")
+    private Integer imageSource;
 
     /**
      * 上传方式
      */
     @ApiModelProperty("上传方式，http or ftp")
     private String uploadType;
-
-    /**
-     * ftp文件名称
-     */
-    @ApiModelProperty("ftp文件名称")
-    private String ftpFilename;
 
     /**
      * 磁盘格式
@@ -74,4 +68,12 @@ public class ExtImageInfo {
      */
     @ApiModelProperty("VIF模型")
     private String hwVifModel;
+
+
+    @ApiModelProperty("临时文件ID")
+    private String tmpdirUuid;
+
+
+    @ApiModelProperty("http/ftp文件名称")
+    private String userFilename;
 }

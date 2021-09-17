@@ -74,6 +74,59 @@ public class SceneHandler extends BaseSceneHandler<
 
     private final Map<String, SceneElementEventHandler> elementEventHandlerMap = new HashMap<>();
 
+    public CollectedSceneBO getCollectedSceneBO() {
+        var collectedSceneBO = new CollectedSceneBO();
+        collectedSceneBO.setScene(getScene());
+        Map<String, Object> pluginData = new HashMap<>();
+        getPluginMap().forEach((pluginKey, plugin) -> {
+            var pluginScene = plugin.getScene();
+            if (pluginScene != null) {
+                pluginData.put(pluginKey, plugin.getScene());
+            }
+        });
+        collectedSceneBO.setScenePluginData(pluginData);
+        return collectedSceneBO;
+    }
+
+    public CollectedSceneElementBO getCollectedSceneElementBO(String nodeId) {
+        var collectedSceneElementBO = new CollectedSceneElementBO();
+        var sceneElement = getElement(nodeId);
+        collectedSceneElementBO.setSceneElement(sceneElement);
+        var sceneElementPorts = sceneElement.getPorts();
+        
+        Map<String, Object> pluginData = new HashMap<>();
+        Map<String, Map<String, Object>> portPluginData = new HashMap<>();
+        getPluginMap().forEach((pluginKey, plugin) -> {
+            var pluginElement = plugin.getElement(nodeId);
+            if (pluginElement != null) {
+                pluginData.put(pluginKey, pluginElement);
+            }
+            
+            if (sceneElementPorts != null) {
+                Map<String, Object> pluginPorts = new HashMap<>();
+                sceneElementPorts.forEach(sceneElementPort -> {
+                    var portId = sceneElementPort.getId();
+                    var pluginPort = plugin.getPort(portId);
+                    if (pluginPort != null) {
+                        pluginPorts.put(portId, pluginPort);
+                    }
+                });
+                portPluginData.put(pluginKey, pluginPorts);
+            }
+        });
+        return collectedSceneElementBO;
+    }
+
+    public void notifySceneUpdated() {
+        var collectedScene = getCollectedSceneBO();
+        // TODO 通知
+    }
+
+    public void notifyElementUpdated(String nodeId) {
+        var collectedSceneElement = getCollectedSceneElementBO(nodeId);
+        // TODO 通知
+    }
+
     private String genEventKey(String targetId, int event) {
         return String.format("%s:%d", targetId, event);
     }

@@ -50,4 +50,14 @@ public class InstallerFormDataCloudPlatformModel implements Serializable {
      * 资源
      */
     private String resources;
+
+    /**
+     * docker服务对应的临时文件ID
+     */
+    private String tmpdirUuid;
+
+    /**
+     * 文件名称
+     */
+    private String userFilename;
 }

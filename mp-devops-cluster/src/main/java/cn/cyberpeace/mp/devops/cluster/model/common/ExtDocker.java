@@ -28,4 +28,13 @@ public class ExtDocker{
     @ApiModelProperty(value = "状态")
     private Integer syncStatus;
 
+    /**
+     * 临时文件ID
+     */
+    @ApiModelProperty("临时文件ID")
+    private String tmpdirUuid;
+
+
+    @ApiModelProperty("用户文件名称")
+    private String userFilename;
 }

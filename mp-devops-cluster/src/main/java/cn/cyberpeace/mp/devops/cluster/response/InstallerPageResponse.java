@@ -24,6 +24,12 @@ public class InstallerPageResponse extends BaseCloudPlatformResponse{
     private String name;
 
     /**
+     * 图标地址
+     */
+    @ApiModelProperty("图标地址")
+    private String logo;
+
+    /**
      * 描述
      */
     @ApiModelProperty("描述")

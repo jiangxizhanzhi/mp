@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.service;
 
+import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceInjectFileCreate;
 import cn.cyberpeace.mp.devops.cluster.model.ScenarioDeleteDeviceParams;
 import cn.cyberpeace.mp.devops.cluster.model.ScenariosSnapshot;
@@ -23,5 +24,5 @@ public interface ScenariosSnapshotService extends BaseCloudPlatformService{
      * @param injectFileCreate
      * @return
      */
-    Boolean injectFile(DeviceInjectFileCreate injectFileCreate);
+    BaseCloudPlatformModel injectFile(DeviceInjectFileCreate injectFileCreate);
 }

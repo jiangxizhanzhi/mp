@@ -1,9 +1,10 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
+import cn.cyberpeace.mp.scene.util.CommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.FirewallRuleDirection;
 import cn.cyberpeace.mp.sceneplugincloud.constant.QosRuleDirection;
-import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.*;
@@ -56,10 +57,8 @@ public class CreateHandler extends HandlerCommon {
         for (var port : ports) {
             var cloudPort = getPluginHandler().getPort(port.getId());
             var connectedSrcElement = getPluginHandler().getPortConnectedSrcElement(port.getId());
-            if (connectedSrcElement == null) {
-                continue;
-            }
-            var connectedCloudElement = getPluginHandler().getElement(connectedSrcElement.getId());
+            var connectedCloudElement = connectedSrcElement == null ? null
+                    : getPluginHandler().getElement(connectedSrcElement.getId());
             var auxiliaryNetworkCloudElement = confirmAuxiliaryNetworkCloudElement(cloudElement, connectedCloudElement);
             if (auxiliaryNetworkCloudElement == null) {
                 continue;
@@ -156,6 +155,18 @@ public class CreateHandler extends HandlerCommon {
         return entityInterfaces;
     }
 
+    private String combineInitCommand(SceneElementBO srcElement) {
+        List<String> commands = new ArrayList<>();
+        List<String> initCommands = srcElement.getInitCommands();
+        if (initCommands != null) {
+            commands.addAll(initCommands);
+        }
+
+        // TODO: 应用安装
+
+        return CommandUtils.joinCommands(commands.toArray(new String[0]), srcElement.getSystemType());
+    }
+
     private void createVirtualRouter(CloudPluginSceneElementBO cloudElement) {
         var createData = new VirtualRouterCreateData();
         createData.setName(genResourceName(cloudElement.getSrcElement().getEid()));
@@ -230,6 +241,7 @@ public class CreateHandler extends HandlerCommon {
         createData.setImage(cloudElement.getImage());
         createData.setCpu(srcElement.getCpu());
         createData.setRam(srcElement.getRam());
+        createData.setUserData(combineInitCommand(srcElement));
         createData.setNetworks(genVirutalNics(cloudElement));
         vmClient.create(createData);
     }
@@ -241,6 +253,7 @@ public class CreateHandler extends HandlerCommon {
         createData.setImage(cloudElement.getImage());
         createData.setCpu(srcElement.getCpu());
         createData.setRam(srcElement.getRam());
+        createData.setPostCommand(combineInitCommand(srcElement));
         createData.setNetworks(genVirutalNics(cloudElement));
         containerClient.create(createData);
     }

@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.converter.impl;
 
+import cn.cyberpeace.mp.auth.dto.user.UserDto;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.BeanUtils;
@@ -55,11 +57,12 @@ public class ImagesConverterImpl implements ImagesConverter {
 
     private DevopsTargetService devopsTargetService;
 
+    private UserService userService;
 
     @Autowired
     public ImagesConverterImpl(ImagesService imagesService, ImageMapper imageMapper,DeviceService deviceService,
                                ImageAuthMapper imageAuthMapper,VmService vmService,ContainerService containerService,
-                               DevopsTargetService devopsTargetService) {
+                               DevopsTargetService devopsTargetService,UserService userService) {
         this.imagesService = imagesService;
         this.imageMapper = imageMapper;
         this.deviceService = deviceService;
@@ -67,6 +70,7 @@ public class ImagesConverterImpl implements ImagesConverter {
         this.vmService = vmService;
         this.containerService = containerService;
         this.devopsTargetService = devopsTargetService;
+        this.userService = userService;
     }
 
     @Override
@@ -234,6 +238,20 @@ public class ImagesConverterImpl implements ImagesConverter {
 
     }
 
+    /**
+     * 根据镜像ID查询用户列表
+     * @param uuid
+     * @return
+     */
+    public List<UserDto> findUsersByUuid(String uuid){
+        List<TargetAuthModel> targetAuthModels = imageAuthMapper.findByTarget(uuid);
+        if (CollectionUtils.isEmpty(targetAuthModels)){
+            return null;
+        }
+        List<String> userIds = targetAuthModels.stream().map(TargetAuthModel::getOwner).collect(Collectors.toList());
+        return userService.listByUserIds(userIds.stream().toArray(String[]::new));
+    }
+
     @Override
     public String uploadImage(ImagesUploadRequest request, MultipartFile multipartFile) {
         if (Objects.isNull(multipartFile) || multipartFile.getSize() == 0 ){
@@ -317,8 +335,11 @@ public class ImagesConverterImpl implements ImagesConverter {
         ImageConvertModel imageModel = new ImageConvertModel();
         imageModel.setUuid(device.getUuid());
         imageModel.setName(device.getName());
+        imageModel.setLogo(device.getLogo());
         imageModel.setMainCategory(device.getCategory());
         imageModel.setSubCategory(device.getSecondCategory());
+        imageModel.setRole(device.getRole());
+        imageModel.setThirdCategory(device.getL3Category());
         imageModel.setImageType(device.getImageType());
         imageModel.setDescription(device.getDescription());
         imageModel.setExtSystemInfo(device.getExtSystemInfo());

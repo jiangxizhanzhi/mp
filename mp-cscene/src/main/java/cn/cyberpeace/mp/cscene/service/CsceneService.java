@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCreateContext;
 import cn.cyberpeace.mp.cscene.bo.CsceneStatBO;
 import cn.cyberpeace.mp.cscene.core.CsceneHandler;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
@@ -110,9 +111,66 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         return new ServiceResult<>(csceneHandler.createTestInstance(unique));
     }
 
+    public ServiceResult<CsceneInstanceBO> createTestInstance(String csceneId, boolean unique, CsceneBO cscene) {
+        var csceneHandler = new CsceneHandler(csceneId);
+        return new ServiceResult<>(csceneHandler.createTestInstance(unique, cscene));
+    }
+
+    public ServiceResult<CsceneInstanceBO> createTestInstance(String csceneId, boolean unique,
+                                                              CsceneInstanceCreateContext createContext) {
+        if (createContext == null) {
+            return createTestInstance(csceneId, unique);
+        }
+
+        var csceneHandler = new CsceneHandler(csceneId);
+        var cscene = createContext.getCscene();
+        CsceneInstanceBO csceneInstance;
+        if (cscene == null) {
+            csceneInstance = csceneHandler.getCscene().exportToCsceneInstance();
+        } else {
+            csceneInstance = cscene.exportToCsceneInstance();
+        }
+        if (createContext.getSceneAttr() != null) {
+            csceneInstance.setSceneAttr(createContext.getSceneAttr());
+        }
+        if (createContext.getSceneTtl() != null) {
+            csceneInstance.setSceneTtl(createContext.getSceneTtl());
+        }
+        return new ServiceResult<>(csceneHandler.createTestInstance(unique, csceneInstance));
+    }
+
     public ServiceResult<CsceneInstanceBO> createAppInstance(String csceneId, boolean unique) {
         var csceneHandler = new CsceneHandler(csceneId);
         return new ServiceResult<>(csceneHandler.createTestInstance(unique));
+    }
+
+    public ServiceResult<CsceneInstanceBO> createAppInstance(String csceneId, boolean unique, CsceneBO cscene) {
+        var csceneHandler = new CsceneHandler(csceneId);
+        return new ServiceResult<>(csceneHandler.createTestInstance(unique, cscene));
+    }
+
+    public ServiceResult<CsceneInstanceBO> createAppInstance(String csceneId, boolean unique,
+                                                             CsceneInstanceCreateContext createContext) {
+        if (createContext == null) {
+            return createAppInstance(csceneId, unique);
+        }
+
+        var csceneHandler = new CsceneHandler(csceneId);
+        var cscene = createContext.getCscene();
+        CsceneInstanceBO csceneInstance;
+        if (cscene == null) {
+            csceneInstance = csceneHandler.getCscene().exportToCsceneInstance();
+        } else {
+            csceneInstance = cscene.exportToCsceneInstance();
+        }
+        if (createContext.getSceneAttr() != null) {
+            csceneInstance.setSceneAttr(createContext.getSceneAttr());
+        }
+        if (createContext.getSceneTtl() != null) {
+            csceneInstance.setSceneTtl(createContext.getSceneTtl());
+        }
+        
+        return new ServiceResult<>(csceneHandler.createAppInstance(unique, csceneInstance));
     }
 
     public ServiceResult<List<CsceneStatBO>> stat(String[] ids) {

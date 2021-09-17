@@ -18,5 +18,6 @@ public class VirtualMachineCreateData implements HttpData {
     private Integer disk;
     private String requestUser;
     private String host;
+    private String userData;
     private List<VirtualNic> networks;
 }
