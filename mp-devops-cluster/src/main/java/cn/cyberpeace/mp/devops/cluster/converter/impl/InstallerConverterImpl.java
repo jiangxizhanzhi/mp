@@ -138,9 +138,7 @@ public class InstallerConverterImpl implements InstallerConverter {
         }
         model.setDeployType(installer.getDeployType());
         ExtDocker extDocker = installer.getExtDocker();
-        if (Objects.nonNull(extDocker) && StringUtils.isNotBlank(extDocker.getSettings())){
-            model.setStartUpParameterList(JSONArray.parseArray(extDocker.getSettings(), StartUpParameter.class));
-        }
+        model.setStartUpParameterList(extDocker.getSettings());
         model.setExtDocker(extDocker);
         ExtNormal extNormal = installer.getExtNormal();
         if (Objects.nonNull(extNormal) && StringUtils.isNotBlank(extNormal.getResources())){

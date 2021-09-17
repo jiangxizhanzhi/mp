@@ -49,13 +49,6 @@ public interface ImagesService extends BaseCloudPlatformService  {
 
     Device quickCreate(DeviceQuickCreateCloudPlatformModel model);
 
-    /**
-     * 上传镜像
-     * @param params
-     * @param file
-     * @return
-     */
-    String upload(String params, File file);
 
     /**
      * 上传文件
