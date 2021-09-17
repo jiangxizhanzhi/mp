@@ -180,29 +180,4 @@ public class InstallerConverterImpl implements InstallerConverter {
         return installer;
     }
 
-    /**
-     * 转换InstallerRequest
-     * @param request
-     * @return
-     */
-//    private Installer convertRequest(InstallerRequest request){
-//        Installer installer = new Installer();
-//        installer.setName(request.getName());
-//        installer.setDescription(request.getDescription());
-//        installer.setLogo(request.getLogo());
-//        installer.setCategories(String.join(",",request.getCategories()));
-//        installer.setDeployType(request.getDeployType());
-////        ExtDocker extDocker = request.getExtDocker();
-////        if (Objects.nonNull(extDocker) && CollectionUtils.isNotEmpty(request.getStartUpParameterList())) {
-////            extDocker.setSettings(JSONArray.toJSONString(request.getStartUpParameterList()));
-////        }
-////        installer.setExtDocker(extDocker);
-////        ExtNormal extNormal = request.getExtNormal();
-////        if (Objects.nonNull(extNormal) && CollectionUtils.isNotEmpty(request.getResourceList())) {
-//////            extNormal.setResources(JSONArray.toJSONString(request.getResourceList()));
-////        }
-//        installer.setResourceList(request.getResourceList());
-////        installer.setExtNormal(extNormal);
-//        return installer;
-//    }
 }
