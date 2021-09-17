@@ -92,10 +92,10 @@ public class InstallerController {
     @ApiOperation("新增")
     @PostMapping
     public ServiceResult add(@RequestBody InstallerRequest request){
-//        if (StringUtils.isNotBlank(request.getResources())){
-//            request.setResourceList(JSONArray.parseArray(request.getResources(), Resource.class));
-//        }
         InstallerConvertModel model = installerConverter.add(request);
+        if (Objects.isNull(model)){
+            return ServiceResult.fail("");
+        }
         return model.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(model.getMessageZh());
     }
 
@@ -110,7 +110,10 @@ public class InstallerController {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         InstallerConvertModel model = installerConverter.add(request);
-        return model.isSuccess() ? ServiceResult.successful() : ServiceResult.fail("");
+        if (Objects.isNull(model)){
+            return ServiceResult.fail("");
+        }
+        return model.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(model.getMessageZh());
     }
 
     /**
