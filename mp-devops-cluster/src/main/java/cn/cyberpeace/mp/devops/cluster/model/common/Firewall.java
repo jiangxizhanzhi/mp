@@ -17,9 +17,9 @@ public class Firewall {
 
     private String id;
 
-    private String egressFirewallPolicyId;
+    private FirewallPolicy egressFirewallPolicy;
 
-    private String ingressFirewallPolicyId;
+    private FirewallPolicy ingressFirewallPolicy;
 
     private List<String> ports;
 

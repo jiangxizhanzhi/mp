@@ -50,7 +50,9 @@ public class FirewallController {
             return new PageResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
         }
         List<FirewallPageResponse> list = model.getModelList().stream().map(firewall ->
-            new FirewallPageResponse(firewall.getName(),firewall.getIngressFirewallPolicyId(),firewall.getEgressFirewallPolicyId(),
+            new FirewallPageResponse(firewall.getName(),
+                    Objects.nonNull(firewall.getIngressFirewallPolicy()) ? firewall.getIngressFirewallPolicy().getName() : null,
+                    Objects.nonNull(firewall.getEgressFirewallPolicy()) ? firewall.getEgressFirewallPolicy().getName() : null,
                     firewall.getDescription(),firewall.getStatus())
         ).collect(Collectors.toList());
         return new PageResult<>(list,model.getTotal());
