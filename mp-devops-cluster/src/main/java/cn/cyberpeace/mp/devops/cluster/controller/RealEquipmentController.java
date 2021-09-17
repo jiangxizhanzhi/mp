@@ -287,7 +287,7 @@ public class RealEquipmentController {
 
     @ApiOperation("根据设备ID获取登录链接信息")
     @GetMapping("/connection")
-    public Result<List<RealEquipmentConnection>> connection(@RequestParam String uuid){
+    public Result<List<TargetConnection>> connection(@RequestParam String uuid){
         RealEquipmentConnectionCloudPlatform connection = realEquipmentService.connection(uuid);
         if (Objects.isNull(connection)){
             return new Result<>();
