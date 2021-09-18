@@ -8,12 +8,12 @@ import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.ImagesConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.InjectFileConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.SnapshotConverter;
-import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertModel;
-import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertPageModel;
-import cn.cyberpeace.mp.devops.cluster.converter.model.InjectFileConvertModel;
-import cn.cyberpeace.mp.devops.cluster.converter.model.InjectFileListConvertModel;
+import cn.cyberpeace.mp.devops.cluster.converter.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.*;
-import cn.cyberpeace.mp.devops.cluster.model.common.*;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtImageInfo;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtVm;
+import cn.cyberpeace.mp.devops.cluster.model.common.TargetConnection;
 import cn.cyberpeace.mp.devops.cluster.request.*;
 import cn.cyberpeace.mp.devops.cluster.response.ImagesByIdResponse;
 import cn.cyberpeace.mp.devops.cluster.response.ImagesPageResponse;
@@ -22,7 +22,6 @@ import cn.cyberpeace.mp.devops.cluster.response.base.Result;
 import cn.cyberpeace.mp.devops.cluster.service.FlavorService;
 import cn.cyberpeace.mp.devops.cluster.service.ImagesService;
 import cn.cyberpeace.mp.devops.cluster.service.ScenariosSnapshotService;
-import com.alibaba.fastjson.JSONArray;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -154,7 +153,7 @@ public class ImagesController {
         imagesByIdResponse.setRole(model.getRole());
         imagesByIdResponse.setLogo(model.getLogo());
         ExtVm extVm = model.getExtVm();
-        imagesByIdResponse.setAccessProtocolList(Objects.nonNull(extVm) ? JSONArray.parseArray(extVm.getAccessProtocols(), AccessProtocol.class) : null);
+        imagesByIdResponse.setAccessProtocolList(Objects.nonNull(extVm) ? extVm.getAccessProtocols() : null);
         imagesByIdResponse.setVirtualType(model.getImageType());
         imagesByIdResponse.setDescription(model.getDescription());
         imagesByIdResponse.setExtImageInfo(model.getExtImageInfo());
@@ -231,7 +230,7 @@ public class ImagesController {
     /**
      * 创建虚拟机/容器
      */
-    @ApiOperation("创建虚拟机/容器")
+    @ApiOperation("编辑镜像")
     @PostMapping("/{id}/create")
     public ServiceResult create(@PathVariable("id") String uuid){
         BaseCloudPlatformModel model = imagesConverter.create(uuid);
@@ -244,10 +243,23 @@ public class ImagesController {
     /**
      * 删除虚拟机/容器
      */
-    @ApiOperation("删除虚拟机/容器")
+    @ApiOperation("释放镜像机器")
     @PostMapping("/delete-instance")
     public ServiceResult deleteInstance(@RequestBody ImagesDeleteInstanceRequest request){
         BaseCloudPlatformModel model = imagesConverter.delete(request);
+        if (Objects.isNull(model)){
+            return ServiceResult.fail("");
+        }
+        return model.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(model.getMessageZh());
+    }
+
+    /**
+     * 重启镜像机器
+     */
+    @ApiOperation("重启镜像机器")
+    @PostMapping("/reboot")
+    public ServiceResult reboot(@RequestBody ImagesRebootInstanceRequest request){
+        BaseCloudPlatformModel model = imagesConverter.reboot(request);
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
         }
@@ -259,8 +271,12 @@ public class ImagesController {
      */
     @ApiOperation("查询快照历史")
     @GetMapping("/{id}/snapshot/list")
-    public void listSnapshot(@PathVariable("id") String uuid){
-        snapshotConverter.list(uuid);
+    public Result<List<SnapshotConvertModel>> listSnapshot(@PathVariable("id") String uuid){
+        SnapshotListConvertModel convertModel = snapshotConverter.list(uuid);
+        if (Objects.isNull(convertModel)){
+            return new Result();
+        }
+        return new Result(convertModel.getModelList());
     }
 
     /**

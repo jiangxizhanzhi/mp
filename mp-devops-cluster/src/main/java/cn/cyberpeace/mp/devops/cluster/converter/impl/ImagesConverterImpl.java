@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertPageModel;
 import cn.cyberpeace.mp.devops.cluster.dto.ImageDeleteDTO;
 import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
+import cn.cyberpeace.mp.devops.cluster.enums.ImageTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.MainTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.PublicEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.RoleEnum;
@@ -19,7 +20,6 @@ import cn.cyberpeace.mp.devops.cluster.repository.ImageAuthMapper;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
 import cn.cyberpeace.mp.devops.cluster.request.*;
 import cn.cyberpeace.mp.devops.cluster.service.*;
-import com.alibaba.fastjson.JSONArray;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -253,6 +253,23 @@ public class ImagesConverterImpl implements ImagesConverter {
     }
 
     @Override
+    public BaseCloudPlatformModel reboot(ImagesRebootInstanceRequest request) {
+        BaseCloudPlatformModel platformModel = null;
+        if(ImageTypeEnum.VM.toValue().equals(request.getImageType())) {
+            VmActionCloudPlatformModel model = new VmActionCloudPlatformModel();
+            model.setReboot(new VmActionCloudPlatformModel.Reboot("HARD"));
+            platformModel = vmService.action(model,request.getInstanceId());
+        }
+        else if(ImageTypeEnum.CONTAINER.toValue().equals(request.getImageType())) {
+            ContainerActionCloudPlatformModel model = new ContainerActionCloudPlatformModel();
+            model.setAction("reboot");
+            model.setWaitForStatus(Boolean.TRUE);
+            platformModel = containerService.action(model, request.getInstanceId());
+        }
+        return platformModel;
+    }
+
+    @Override
     public HttpResponse export(String uuid) {
         return imagesService.export(uuid);
     }
@@ -302,8 +319,8 @@ public class ImagesConverterImpl implements ImagesConverter {
         device.setMaintype(MainTypeEnum.NORMAL.ordinal());
         if (Objects.nonNull(role) && role != RoleEnum.NETWORK.toValue()) {
             final ExtVm extVm = request.getExtVm();
-            if (Objects.nonNull(extVm) && CollectionUtils.isNotEmpty(request.getAccessProtocolList())) {
-                extVm.setAccessProtocols(JSONArray.toJSONString(request.getAccessProtocolList()));
+            if (Objects.nonNull(extVm)) {
+                extVm.setAccessProtocols(request.getAccessProtocolList());
             }
             device.setExtVm(extVm);
             device.setExtSystemInfo(request.getExtSystemInfo());

@@ -66,4 +66,5 @@ public class InstanceConverterImpl implements InstanceConverter {
         InstanceCloudPlatformModel page = vmService.page(getParams);
         return Objects.isNull(page) ||  Objects.isNull(page.getTotal()) ? NumberUtils.INTEGER_ZERO : page.getTotal() ;
     }
+
 }

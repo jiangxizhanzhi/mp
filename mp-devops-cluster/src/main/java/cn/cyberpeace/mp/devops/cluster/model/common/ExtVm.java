@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -37,7 +39,7 @@ public class ExtVm {
      * 接入方式
      */
     @ApiModelProperty("接入方式")
-    private String accessProtocols;
+    private List<AccessProtocol> accessProtocols;
 
     /**
      * 额外信息
@@ -54,4 +56,18 @@ public class ExtVm {
     @ApiModelProperty("快照数量")
     private Integer snapshotCount;
 
+    @ApiModelProperty("实例ID")
+    private String instanceUuid;
+
+    @ApiModelProperty("实例状态")
+    private Integer instanceState;
+
+    @ApiModelProperty("CPU核数")
+    private Integer cpu;
+
+    @ApiModelProperty("内存大小")
+    private Integer ram;
+
+    @ApiModelProperty("磁盘大小")
+    private Integer disk;
 }
