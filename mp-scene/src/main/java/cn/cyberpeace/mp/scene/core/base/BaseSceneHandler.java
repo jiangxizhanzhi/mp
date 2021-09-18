@@ -20,6 +20,7 @@ import lombok.Getter;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -153,7 +154,8 @@ public abstract class BaseSceneHandler<
     private M5 sceneElementPortConnectionMapper;
     private M6 sceneElementPluginMapper;
 
-    /** 插件数据处理对象集合，key为插件代号 */
+    /** 插件数据处理对象集合 */
+    private final List<P2> plugins = new ArrayList<>();
     private final Map<String, P2> pluginMap = new HashMap<>();
     /** 网元对应节点插件关系，一个网元节点对于多个插件 */
     private final Map<String, List<P1>> elementIdPluginsMap = new HashMap<>();
@@ -162,7 +164,8 @@ public abstract class BaseSceneHandler<
      * 初始化插件集合
      */
     @SuppressWarnings("unchecked")
-    private void initPluginMap(Map<String, ScenePluginDataBO> scenePluginData) {
+    private void initPlugins(Map<String, ScenePluginDataBO> scenePluginData) {
+        plugins.clear();
         pluginMap.clear();
         BeanUtils.getBeanType(scenePluginHandlerInterface).forEach((name, pluginInstance) -> {
             Class<?> pluginClass = pluginInstance.getClass();
@@ -180,16 +183,19 @@ public abstract class BaseSceneHandler<
             P2 plugin = (P2) ClassUtils.createInstance(pluginClass);
             initPluginContext(pluginKey, plugin);
             plugin.init(sceneId, pluginData);
+            plugins.add(plugin);
             pluginMap.put(pluginKey, plugin);
         });
+        plugins.sort(Comparator.comparing(BasePluginHandler::getPriority));
     }
 
     /**
      * 初始化插件集合
      */
     @SuppressWarnings("unchecked")
-    private void initPluginMap(Map<String, List<String>> pluginKeyElementIds,
-                               Map<String, List<String>> pluginKeyElementPortIds) {
+    private void initPlugins(Map<String, List<String>> pluginKeyElementIds,
+                             Map<String, List<String>> pluginKeyElementPortIds) {
+        plugins.clear();
         pluginMap.clear();
         BeanUtils.getBeanType(scenePluginHandlerInterface).forEach((name, pluginInstance) -> {
             Class<?> pluginClass = pluginInstance.getClass();
@@ -209,8 +215,10 @@ public abstract class BaseSceneHandler<
             initPluginContext(pluginKey, plugin);
             plugin.init(sceneId, elementIds, elementPortIds);
             scenePluginData.put(pluginKey, plugin.toData());
+            plugins.add(plugin);
             pluginMap.put(pluginKey, plugin);
         });
+        plugins.sort(Comparator.comparing(BasePluginHandler::getPriority));
     }
 
     /**
@@ -750,9 +758,7 @@ public abstract class BaseSceneHandler<
         sceneId = sceneObj.getId();
         scene.fromModel(sceneObj);
 
-        pluginMap.forEach((key, plugin) -> {
-            plugin.setSourceSceneId(sceneId);
-        });
+        plugins.forEach(plugin -> plugin.setSourceSceneId(sceneId));
 
         return result;
     }
@@ -998,7 +1004,7 @@ public abstract class BaseSceneHandler<
         if (!StringUtils.isEmpty(sceneId) && readScene() == null) {
             throw new SceneNotExistException("Scene " + sceneId + " not exist");
         }
-        initPluginMap(scenePluginData);
+        initPlugins(scenePluginData);
     }
 
     /**
@@ -1065,6 +1071,7 @@ public abstract class BaseSceneHandler<
         outerConnectionPortIds.clear();
         scenePluginData.clear();
         elementIdPluginsMap.clear();
+        plugins.clear();
         pluginMap.clear();
 
         loadScene(readScene());
@@ -1112,7 +1119,7 @@ public abstract class BaseSceneHandler<
                 }
             });
         });
-        initPluginMap(pluginKeyElementIds, pluginKeyElementPortIds);
+        initPlugins(pluginKeyElementIds, pluginKeyElementPortIds);
     }
 
     /**
@@ -1155,7 +1162,7 @@ public abstract class BaseSceneHandler<
         DiffTargets<P1> diffElementPlugins = saveElementPlugins(existElementPluginMap);
 
         // 保存插件数据
-        pluginMap.forEach((key, plugin) -> {
+        plugins.forEach(plugin -> {
             plugin.saveScene();
             plugin.createElements(diffElements.getAddingTargets().stream().map(BaseSceneNodeModel::getNodeId)
                     .toArray(String[]::new));
@@ -1179,7 +1186,7 @@ public abstract class BaseSceneHandler<
         deleteTopology();
 
         // 删除插件数据
-        pluginMap.forEach((key, plugin) -> {
+        plugins.forEach(plugin -> {
             plugin.deleteScene();
         });
 
@@ -1228,7 +1235,7 @@ public abstract class BaseSceneHandler<
         }
 
         // 删除插件数据
-        pluginMap.forEach((key, plugin) -> {
+        plugins.forEach(plugin -> {
             plugin.deleteElements(elements.stream().map(BaseSceneNodeModel::getNodeId).toArray(String[]::new));
             plugin.deleteElementPorts(elementPorts.stream().map(BaseSceneElementPortModel::getPortId)
                     .toArray(String[]::new));

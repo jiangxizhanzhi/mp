@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincloud.model.base;
 
 import cn.cyberpeace.mp.base.model.stereotype.DefaultBool;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.scene.core.plugin.model.BasePluginSceneElementPortModel;
 import lombok.Data;
@@ -13,5 +14,17 @@ public class BaseCloudPluginSceneElementPortModel extends BasePluginSceneElement
 
     @DefaultBool
     private Boolean nat;
+
+    // 靶标属性
+    @DefaultStr
+    private String entityAccessType;
+    @DefaultStr
+    private String entitySwitchName;
+    @DefaultStr
+    private String entitySwitchPort;
+    @DefaultInt
+    private Integer gatewayPortType;
+    @DefaultStr
+    private String gatewayPortIps;
 
 }

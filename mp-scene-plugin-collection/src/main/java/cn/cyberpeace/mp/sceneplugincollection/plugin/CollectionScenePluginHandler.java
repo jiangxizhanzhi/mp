@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
         CollectionPluginSceneElementPortBO.class,
 })
 @Component
-@PluginKey(PluginConstant.PLUGIN_KEY)
+@PluginKey(value = PluginConstant.PLUGIN_KEY, priority = PluginConstant.PLUGIN_PRIORITY)
 public class CollectionScenePluginHandler extends ScenePluginHandler<CollectionPluginSceneBO,
         CollectionPluginSceneElementBO, CollectionPluginSceneElementPortBO> {
 

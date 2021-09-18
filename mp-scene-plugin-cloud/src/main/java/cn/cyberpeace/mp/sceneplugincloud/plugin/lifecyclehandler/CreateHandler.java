@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.base.util.BoolUtils;
+import cn.cyberpeace.mp.base.util.IntUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.util.CommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
@@ -27,11 +29,11 @@ public class CreateHandler extends HandlerCommon {
         var createData = new VirtualSwitchCreateData();
         createData.setName(genResourceName(cloudElement.getSrcElement().getEid()));
         createData.setEntityNetwork(cloudElement.getAuxiliaryNetworkVlan());
-        createData.setSegmentationId(cloudElement.getVlanId());
+        createData.setSegmentationId(IntUtils.zeroNull(cloudElement.getAuxiliaryNetworkVlanId()));
         var subnet = new VirtualSwitchCreateData.Subnet();
         subnet.setCidr(cloudElement.getAuxiliaryNetworkCidr());
         subnet.setGatewayIp(cloudElement.getAuxiliaryNetworkGateway());
-        subnet.setEnableDhcp(cloudElement.getAuxiliaryNetworkDhcp());
+        subnet.setEnableDhcp(BoolUtils.bool(cloudElement.getAuxiliaryNetworkDhcp()));
         var srcAllocationPools = cloudElement.getAuxiliaryNetworkAllocationPools();
         if (srcAllocationPools != null) {
             List<VirtualSwitchCreateData.Subnet.AllocationPool> allocationPools = new ArrayList<>();
@@ -43,7 +45,8 @@ public class CreateHandler extends HandlerCommon {
         }
         subnet.setDnsNameservers(cloudElement.getAuxiliaryNetworkDnsNameservers());
         createData.setSubnet(subnet);
-        vsClient.create(createData);
+        var virtualSwitch = vsClient.create(createData);
+        cloudElement.setAuxiliaryNetworkId(virtualSwitch.getId());
     }
 
     private List<VirtualNic> genVirutalNics(CloudPluginSceneElementBO cloudElement) {
@@ -239,8 +242,9 @@ public class CreateHandler extends HandlerCommon {
         var createData = new VirtualMachineCreateData();
         createData.setName(genResourceName(srcElement.getEid()));
         createData.setImage(cloudElement.getImage());
-        createData.setCpu(srcElement.getCpu());
-        createData.setRam(srcElement.getRam());
+        createData.setCpu(IntUtils.zeroNull(srcElement.getCpu()));
+        createData.setRam(IntUtils.zeroNull(srcElement.getRam()));
+        createData.setDisk(IntUtils.zeroNull(srcElement.getDisk()));
         createData.setUserData(combineInitCommand(srcElement));
         createData.setNetworks(genVirutalNics(cloudElement));
         vmClient.create(createData);

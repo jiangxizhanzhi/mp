@@ -21,6 +21,7 @@ import cn.cyberpeace.mp.cscene.repository.CsceneRoleMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -78,6 +79,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         return new ServiceResult<>(csceneHandler.toData(false).export());
     }
 
+    @Transactional
     public ServiceResult<CsceneBO> sync(CsceneBO csceneBO) {
         var csceneHandler = new CsceneHandler(csceneBO);
         csceneHandler.save();
