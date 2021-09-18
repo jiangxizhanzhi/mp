@@ -1125,7 +1125,6 @@ public abstract class BaseSceneHandler<
     /**
      * 保存当前场景数据
      */
-    @Transactional
     public void save() {
         boolean isCreate = StringUtils.isEmpty(sceneId);
         saveScene();
@@ -1183,7 +1182,6 @@ public abstract class BaseSceneHandler<
     /**
      * 删除场景数据
      */
-    @Transactional
     public void delete() {
         deleteTopology();
 

@@ -16,7 +16,6 @@ import cn.cyberpeace.mp.scene.core.exception.SceneUpdateException;
 import lombok.Getter;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -311,7 +310,6 @@ public abstract class BaseCsceneHandler<
     /**
      * 保存综合场景业务数据
      */
-    @Transactional
     public void save() {
         saveCscene();
         saveCsceneRoles();
@@ -320,7 +318,6 @@ public abstract class BaseCsceneHandler<
     /**
      * 删除综合场景业务数据
      */
-    @Transactional
     public void delete() {
         deleteScene(cscene);
         csceneMapper.logicDelete(cscene.getId());

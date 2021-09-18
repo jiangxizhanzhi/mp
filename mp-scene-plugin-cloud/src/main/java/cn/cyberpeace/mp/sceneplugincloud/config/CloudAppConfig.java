@@ -17,7 +17,7 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.cpcloud_server:http://127.0.0.1:10009}")
     private String cpcloudServer;
 
-    @Value("${mp.sceneplugincloud.cpcloud_server_timeout:600}")
+    @Value("${mp.sceneplugincloud.cpcloud_server_timeout:600000}")
     private Integer cpcloudServerTimeout;
 
     @Value("${mp.sceneplugincloud.cpcloud_server_timeout:MP_SCENE}")
