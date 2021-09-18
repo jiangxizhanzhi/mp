@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.service;
 
+import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.Installer;
 import cn.cyberpeace.mp.devops.cluster.model.InstallerCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.InstallerFormDataCloudPlatformModel;
@@ -47,5 +48,5 @@ public interface InstallerService extends BaseCloudPlatformService {
      * 批量删除
      * @param ids
      */
-    Boolean deleteByIds(List<String> ids);
+    BaseCloudPlatformModel deleteByIds(List<String> ids);
 }
