@@ -10,7 +10,6 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertPageModel;
 import cn.cyberpeace.mp.devops.cluster.dto.ImageDeleteDTO;
 import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
-import cn.cyberpeace.mp.devops.cluster.enums.ImageTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.MainTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.PublicEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.RoleEnum;
@@ -54,10 +53,13 @@ public class ImagesConverterImpl implements ImagesConverter {
 
     private UserService userService;
 
+    private ScenariosSnapshotService scenariosSnapshotService;
+
     @Autowired
     public ImagesConverterImpl(ImagesService imagesService, ImageMapper imageMapper,DeviceService deviceService,
                                ImageAuthMapper imageAuthMapper,VmService vmService,ContainerService containerService,
-                               DevopsTargetService devopsTargetService,UserService userService) {
+                               DevopsTargetService devopsTargetService,UserService userService,
+                               ScenariosSnapshotService scenariosSnapshotService) {
         this.imagesService = imagesService;
         this.imageMapper = imageMapper;
         this.deviceService = deviceService;
@@ -66,6 +68,7 @@ public class ImagesConverterImpl implements ImagesConverter {
         this.containerService = containerService;
         this.devopsTargetService = devopsTargetService;
         this.userService = userService;
+        this.scenariosSnapshotService = scenariosSnapshotService;
     }
 
     @Override
@@ -255,22 +258,29 @@ public class ImagesConverterImpl implements ImagesConverter {
     }
 
     @Override
-    public void create(String uuid) {
-        Device device = deviceService.findById(uuid);
+    public BaseCloudPlatformModel create(String uuid) {
+        return scenariosSnapshotService.create(new ImagesCreateInstanceCloudPlatform(uuid,
+                Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getUsername() : ""));
+//        Device device = deviceService.findById(uuid);
+//
+//        if(ImageTypeEnum.VM.toValue().equals(device.getImageType())) {
+//            VmCreateCloudPlatformModel model = new VmCreateCloudPlatformModel();
+//            model.setName(device.getName());
+//            model.setImage(device.getName());
+//            vmService.create(model);
+//        }
+//        else if(ImageTypeEnum.CONTAINER.toValue().equals(device.getImageType())) {
+//            ContainerCreateCloudPlatformModel model = new ContainerCreateCloudPlatformModel();
+//            model.setName(device.getName());
+//            model.setImage(device.getName());
+//            containerService.create(model);
+//        }
 
-        if(ImageTypeEnum.VM.toValue().equals(device.getImageType())) {
-            VmCreateCloudPlatformModel model = new VmCreateCloudPlatformModel();
-            model.setName(device.getName());
-            model.setImage(device.getName());
-            vmService.create(model);
-        }
-        else if(ImageTypeEnum.CONTAINER.toValue().equals(device.getImageType())) {
-            ContainerCreateCloudPlatformModel model = new ContainerCreateCloudPlatformModel();
-            model.setName(device.getName());
-            model.setImage(device.getName());
-            containerService.create(model);
-        }
+    }
 
+    @Override
+    public BaseCloudPlatformModel delete(ImagesDeleteInstanceRequest request) {
+        return scenariosSnapshotService.delete(new ImagesDeleteInstanceCloudPlatform(request.getUuid(),request.getImageType()));
     }
 
     /**

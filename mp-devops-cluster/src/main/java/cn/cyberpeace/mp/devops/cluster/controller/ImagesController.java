@@ -233,17 +233,25 @@ public class ImagesController {
      */
     @ApiOperation("创建虚拟机/容器")
     @PostMapping("/{id}/create")
-    public void create(@PathVariable("id") String uuid){
-      imagesConverter.create(uuid);
+    public ServiceResult create(@PathVariable("id") String uuid){
+        BaseCloudPlatformModel model = imagesConverter.create(uuid);
+        if (Objects.isNull(model)){
+            return ServiceResult.fail("");
+        }
+        return model.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(model.getMessageZh());
     }
 
     /**
      * 删除虚拟机/容器
      */
     @ApiOperation("删除虚拟机/容器")
-    @PostMapping("/{id}/delete")
-    public void delete(@PathVariable("id") String uuid){
-        imagesConverter.create(uuid);
+    @PostMapping("/delete-instance")
+    public ServiceResult deleteInstance(@RequestBody ImagesDeleteInstanceRequest request){
+        BaseCloudPlatformModel model = imagesConverter.delete(request);
+        if (Objects.isNull(model)){
+            return ServiceResult.fail("");
+        }
+        return model.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(model.getMessageZh());
     }
 
     /**
