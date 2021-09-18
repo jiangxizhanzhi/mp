@@ -20,6 +20,7 @@ import cn.cyberpeace.mp.devops.cluster.repository.ImageAuthMapper;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
 import cn.cyberpeace.mp.devops.cluster.request.*;
 import cn.cyberpeace.mp.devops.cluster.service.*;
+import com.alibaba.fastjson.JSONArray;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -319,8 +320,8 @@ public class ImagesConverterImpl implements ImagesConverter {
         device.setMaintype(MainTypeEnum.NORMAL.ordinal());
         if (Objects.nonNull(role) && role != RoleEnum.NETWORK.toValue()) {
             final ExtVm extVm = request.getExtVm();
-            if (Objects.nonNull(extVm)) {
-                extVm.setAccessProtocols(request.getAccessProtocolList());
+            if (Objects.nonNull(extVm) && CollectionUtils.isNotEmpty(request.getAccessProtocolList())) {
+                extVm.setAccessProtocols(JSONArray.toJSONString(request.getAccessProtocolList()));
             }
             device.setExtVm(extVm);
             device.setExtSystemInfo(request.getExtSystemInfo());
