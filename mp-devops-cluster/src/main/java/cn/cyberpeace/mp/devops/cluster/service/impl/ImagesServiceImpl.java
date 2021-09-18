@@ -1,10 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.service.impl;
 
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
-import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.Device;
-import cn.cyberpeace.mp.devops.cluster.model.DeviceCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.DeviceQuickCreateCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.*;
 import cn.cyberpeace.mp.devops.cluster.service.ImagesService;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -69,15 +66,16 @@ public class ImagesServiceImpl extends BaseOpenStackServiceImpl implements Image
         }
         MultipartEntityBuilder builder = MultipartEntityBuilder.create();
         fileList.entrySet().stream().forEach(entry -> builder.addBinaryBody(entry.getKey(), entry.getValue()));
-//        for (Map<String,File> file : fileList) {
-//            builder.addBinaryBody(file.keySet()., file);
-//            count++;
-//        }
         try {
             return super.sendFormDataPost(CPCLOUD_DEVICE + URL_VERSION + "/file_upload?type=" + type, builder.build(), BaseCloudPlatformModel.class);
         } catch (IOException e) {
             e.printStackTrace();
         }
         return null;
+    }
+
+    @Override
+    public ImageConnectionCloudPlatform connection(String deviceUuid){
+        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + "/normal/connection?device_uuid=" + deviceUuid,ImageConnectionCloudPlatform.class);
     }
 }

@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.model;
 
 import cn.cyberpeace.mp.devops.cluster.model.common.RealEquipmentConnection;
+import cn.cyberpeace.mp.devops.cluster.model.common.TargetConnection;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,6 +13,6 @@ import java.util.List;
 @AllArgsConstructor
 public class RealEquipmentConnectionCloudPlatform extends BaseCloudPlatformModel{
 
-   private List<RealEquipmentConnection> items;
+   private List<TargetConnection> items;
 
 }

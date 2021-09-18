@@ -15,6 +15,11 @@ public class SnapshotRequest {
     private String uuid;
 
     /**
+     * 镜像类型
+     */
+    private String imageType;
+
+    /**
      * 名称
      */
     private String name;

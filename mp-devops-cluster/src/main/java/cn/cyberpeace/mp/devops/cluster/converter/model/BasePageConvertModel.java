@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.converter.model;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,26 +16,31 @@ public class BasePageConvertModel {
     /**
      * 是否成功
      */
+    @ApiModelProperty(hidden = true)
     private boolean success;
 
     /**
      * 请求ID
      */
+    @ApiModelProperty(hidden = true)
     private String request_id;
 
     /**
      * 总数据大小
      */
+    @ApiModelProperty(hidden = true)
     private Integer total = 0;
 
     /**
      * 消息体
      */
+    @ApiModelProperty(hidden = true)
     private String message;
 
     /**
      * 错误信息
      */
+    @ApiModelProperty(hidden = true)
     private String messageZh;
 
 }

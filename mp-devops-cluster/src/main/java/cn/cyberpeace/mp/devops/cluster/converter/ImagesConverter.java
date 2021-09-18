@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageAuthConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertPageModel;
+import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.Device;
 import cn.cyberpeace.mp.devops.cluster.request.*;
 import org.apache.http.HttpResponse;
@@ -73,7 +74,13 @@ public interface ImagesConverter extends BaseConverter{
      * 创建虚拟机/容器
      * @param uuid
      */
-    void create(String uuid);
+    BaseCloudPlatformModel create(String uuid);
+
+    /**
+     * 创建虚拟机/容器
+     * @param request
+     */
+    BaseCloudPlatformModel delete(ImagesDeleteInstanceRequest request);
 
     /**
      * 根据镜像ID查询用户列表
@@ -81,4 +88,10 @@ public interface ImagesConverter extends BaseConverter{
      * @return
      */
     List<UserDto> findUsersByUuid(String uuid);
+
+    /**
+     * 创建虚拟机/容器
+     * @param request
+     */
+    BaseCloudPlatformModel reboot(ImagesRebootInstanceRequest request);
 }

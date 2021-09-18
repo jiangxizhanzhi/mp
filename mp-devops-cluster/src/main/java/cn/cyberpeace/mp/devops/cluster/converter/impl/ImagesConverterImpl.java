@@ -54,10 +54,13 @@ public class ImagesConverterImpl implements ImagesConverter {
 
     private UserService userService;
 
+    private ScenariosSnapshotService scenariosSnapshotService;
+
     @Autowired
     public ImagesConverterImpl(ImagesService imagesService, ImageMapper imageMapper,DeviceService deviceService,
                                ImageAuthMapper imageAuthMapper,VmService vmService,ContainerService containerService,
-                               DevopsTargetService devopsTargetService,UserService userService) {
+                               DevopsTargetService devopsTargetService,UserService userService,
+                               ScenariosSnapshotService scenariosSnapshotService) {
         this.imagesService = imagesService;
         this.imageMapper = imageMapper;
         this.deviceService = deviceService;
@@ -66,6 +69,7 @@ public class ImagesConverterImpl implements ImagesConverter {
         this.containerService = containerService;
         this.devopsTargetService = devopsTargetService;
         this.userService = userService;
+        this.scenariosSnapshotService = scenariosSnapshotService;
     }
 
     @Override
@@ -250,27 +254,51 @@ public class ImagesConverterImpl implements ImagesConverter {
     }
 
     @Override
+    public BaseCloudPlatformModel reboot(ImagesRebootInstanceRequest request) {
+        BaseCloudPlatformModel platformModel = null;
+        if(ImageTypeEnum.VM.toValue().equals(request.getImageType())) {
+            VmActionCloudPlatformModel model = new VmActionCloudPlatformModel();
+            model.setReboot(new VmActionCloudPlatformModel.Reboot("HARD"));
+            platformModel = vmService.action(model,request.getInstanceId());
+        }
+        else if(ImageTypeEnum.CONTAINER.toValue().equals(request.getImageType())) {
+            ContainerActionCloudPlatformModel model = new ContainerActionCloudPlatformModel();
+            model.setAction("reboot");
+            model.setWaitForStatus(Boolean.TRUE);
+            platformModel = containerService.action(model, request.getInstanceId());
+        }
+        return platformModel;
+    }
+
+    @Override
     public HttpResponse export(String uuid) {
         return imagesService.export(uuid);
     }
 
     @Override
-    public void create(String uuid) {
-        Device device = deviceService.findById(uuid);
+    public BaseCloudPlatformModel create(String uuid) {
+        return scenariosSnapshotService.create(new ImagesCreateInstanceCloudPlatform(uuid,
+                Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getUsername() : ""));
+//        Device device = deviceService.findById(uuid);
+//
+//        if(ImageTypeEnum.VM.toValue().equals(device.getImageType())) {
+//            VmCreateCloudPlatformModel model = new VmCreateCloudPlatformModel();
+//            model.setName(device.getName());
+//            model.setImage(device.getName());
+//            vmService.create(model);
+//        }
+//        else if(ImageTypeEnum.CONTAINER.toValue().equals(device.getImageType())) {
+//            ContainerCreateCloudPlatformModel model = new ContainerCreateCloudPlatformModel();
+//            model.setName(device.getName());
+//            model.setImage(device.getName());
+//            containerService.create(model);
+//        }
 
-        if(ImageTypeEnum.VM.toValue().equals(device.getImageType())) {
-            VmCreateCloudPlatformModel model = new VmCreateCloudPlatformModel();
-            model.setName(device.getName());
-            model.setImage(device.getName());
-            vmService.create(model);
-        }
-        else if(ImageTypeEnum.CONTAINER.toValue().equals(device.getImageType())) {
-            ContainerCreateCloudPlatformModel model = new ContainerCreateCloudPlatformModel();
-            model.setName(device.getName());
-            model.setImage(device.getName());
-            containerService.create(model);
-        }
+    }
 
+    @Override
+    public BaseCloudPlatformModel delete(ImagesDeleteInstanceRequest request) {
+        return scenariosSnapshotService.delete(new ImagesDeleteInstanceCloudPlatform(request.getUuid(),request.getImageType()));
     }
 
     /**

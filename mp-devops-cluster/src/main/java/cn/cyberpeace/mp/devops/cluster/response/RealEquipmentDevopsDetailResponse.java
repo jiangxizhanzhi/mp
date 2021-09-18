@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.devops.cluster.response;
 
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntity;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
-import cn.cyberpeace.mp.devops.cluster.model.common.RealEquipmentConnection;
+import cn.cyberpeace.mp.devops.cluster.model.common.TargetConnection;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -85,5 +85,5 @@ public class RealEquipmentDevopsDetailResponse extends BaseCloudPlatformResponse
      * 登录链接信息
      */
     @ApiModelProperty("登录链接信息")
-    private List<RealEquipmentConnection> connections;
+    private List<TargetConnection> connections;
 }

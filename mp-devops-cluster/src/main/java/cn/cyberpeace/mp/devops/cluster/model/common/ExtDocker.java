@@ -5,8 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,7 +20,7 @@ public class ExtDocker{
      * 启动参数
      */
     @ApiModelProperty(value = "启动参数",hidden = true)
-    private List<StartUpParameter> settings;
+    private String settings;
 
     /**
      * 状态
@@ -39,4 +37,11 @@ public class ExtDocker{
 
     @ApiModelProperty("用户文件名称")
     private String userFilename;
+
+
+    @ApiModelProperty("实例ID")
+    private String instanceUuid;
+
+    @ApiModelProperty("实例状态")
+    private Integer instanceState;
 }
