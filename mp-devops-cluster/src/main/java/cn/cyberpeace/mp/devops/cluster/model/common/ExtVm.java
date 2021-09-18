@@ -44,4 +44,14 @@ public class ExtVm {
      */
     @ApiModelProperty("扩展信息")
     private Object extInfo;
+
+    /**
+     * 实例是否存在
+     */
+    @ApiModelProperty("实例是否存在")
+    private Boolean instanceExist;
+
+    @ApiModelProperty("快照数量")
+    private Integer snapshotCount;
+
 }

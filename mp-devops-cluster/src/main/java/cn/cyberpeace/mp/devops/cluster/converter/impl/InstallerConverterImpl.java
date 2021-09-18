@@ -4,11 +4,14 @@ import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.devops.cluster.converter.InstallerConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InstallerConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InstallerConvertPageModel;
+import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.Installer;
 import cn.cyberpeace.mp.devops.cluster.model.InstallerCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.InstallerFormDataCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtDocker;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtNormal;
+import cn.cyberpeace.mp.devops.cluster.model.common.Resource;
+import cn.cyberpeace.mp.devops.cluster.model.common.StartUpParameter;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerRequest;
@@ -16,6 +19,7 @@ import cn.cyberpeace.mp.devops.cluster.service.InstallerService;
 import cn.cyberpeace.mp.devops.cluster.service.TargetLogoService;
 import cn.cyberpeace.mp.devops.cluster.utils.FileUtils;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
+import com.alibaba.fastjson.JSONArray;
 import com.google.common.base.Joiner;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -112,7 +116,7 @@ public class InstallerConverterImpl implements InstallerConverter {
 //    }
 
     @Override
-    public Boolean delete(InstallerDeleteRequest request) {
+    public BaseCloudPlatformModel delete(InstallerDeleteRequest request) {
         return installerService.deleteByIds(request.getUuids());
     }
 
@@ -135,13 +139,13 @@ public class InstallerConverterImpl implements InstallerConverter {
         }
         model.setDeployType(installer.getDeployType());
         ExtDocker extDocker = installer.getExtDocker();
-        if (Objects.nonNull(extDocker)) {
-            model.setStartUpParameterList(extDocker.getSettings());
+        if (Objects.nonNull(extDocker) && StringUtils.isNotBlank(extDocker.getSettings())){
+            model.setStartUpParameterList(JSONArray.parseArray(extDocker.getSettings(), StartUpParameter.class));
         }
         model.setExtDocker(extDocker);
         ExtNormal extNormal = installer.getExtNormal();
-        if (Objects.nonNull(extNormal) && CollectionUtils.isNotEmpty(extNormal.getResources())){
-            model.setResourceList(extNormal.getResources());
+        if (Objects.nonNull(extNormal) && StringUtils.isNotBlank(extNormal.getResources())){
+            model.setResourceList(JSONArray.parseArray(extNormal.getResources(), Resource.class));
             model.getResourceList().stream().filter(resource -> StringUtils.isNotBlank(resource.getPlatforms())).forEach(resource -> {
                 resource.setPlatforms(Joiner.on("|").join(resource.getPlatforms().split("")));
             });
