@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-@ApiModel(value = "镜像构建请求信息")
+@ApiModel(value = "镜像删除实例请求信息")
 public class ImagesDeleteInstanceRequest extends BaseRequest {
 
 
