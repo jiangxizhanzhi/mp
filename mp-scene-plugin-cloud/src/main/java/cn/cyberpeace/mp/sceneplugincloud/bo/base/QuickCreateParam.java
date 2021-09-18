@@ -21,6 +21,8 @@ public class QuickCreateParam {
     private Integer deployType;
     @ApiModelProperty(value = "资源文件列表")
     private List<Resource> resourceList;
+    @ApiModelProperty(value = "docker资源信息")
+    private DockerInstaller dockerInstallerData;
 
     @Data
     public static class Resource {
