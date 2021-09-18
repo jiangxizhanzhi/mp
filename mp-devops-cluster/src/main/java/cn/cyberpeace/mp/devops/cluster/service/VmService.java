@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.devops.cluster.service;
 
+import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.InstanceCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.VmActionCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.VmCreateCloudPlatformModel;
 
 /**
@@ -20,4 +22,12 @@ public interface VmService extends BaseCloudPlatformService {
      * 创建虚拟机
      */
     void create(VmCreateCloudPlatformModel vmCreateCloudPlatformModel);
+
+    /**
+     * 操作
+     * @param model
+     * @param uuid
+     * @return
+     */
+    BaseCloudPlatformModel action(VmActionCloudPlatformModel model, String uuid);
 }

@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.service;
 
+import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.ContainerActionCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.ContainerCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.ContainerCreateCloudPlatformModel;
 
@@ -21,4 +23,12 @@ public interface ContainerService extends BaseCloudPlatformService {
      * @param model
      */
     void create(ContainerCreateCloudPlatformModel model);
+
+    /**
+     * 操作
+     * @param model
+     * @param uuid
+     * @return
+     */
+    BaseCloudPlatformModel action(ContainerActionCloudPlatformModel model,String uuid);
 }

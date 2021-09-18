@@ -78,7 +78,7 @@ public interface ImagesConverter extends BaseConverter{
 
     /**
      * 创建虚拟机/容器
-     * @param uuid
+     * @param request
      */
     BaseCloudPlatformModel delete(ImagesDeleteInstanceRequest request);
 
@@ -88,4 +88,10 @@ public interface ImagesConverter extends BaseConverter{
      * @return
      */
     List<UserDto> findUsersByUuid(String uuid);
+
+    /**
+     * 创建虚拟机/容器
+     * @param request
+     */
+    BaseCloudPlatformModel reboot(ImagesRebootInstanceRequest request);
 }
