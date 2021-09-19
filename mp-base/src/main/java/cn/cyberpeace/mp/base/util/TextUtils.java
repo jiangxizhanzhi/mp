@@ -13,6 +13,10 @@ public class TextUtils {
 
     private TextUtils() {}
 
+    public static String emptyNull(String str) {
+        return StringUtils.isEmpty(str) ? null : str;
+    }
+
     public static String uuid() {
         return UUID.randomUUID().toString().replace("-", StringUtils.EMPTY).toLowerCase();
     }

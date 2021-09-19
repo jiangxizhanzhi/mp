@@ -27,4 +27,13 @@ public class BaseCloudPluginSceneElementPortModel extends BasePluginSceneElement
     @DefaultStr
     private String gatewayPortIps;
 
+    // 辅助信息
+    @DefaultStr
+    private String auxiliaryNetworkId;
+
+    @DefaultStr
+    private String qosId;
+    @DefaultStr
+    private String accessModes;
+
 }
