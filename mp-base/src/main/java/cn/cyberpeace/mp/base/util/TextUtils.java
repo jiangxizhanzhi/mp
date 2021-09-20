@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.base.util;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.UUID;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class TextUtils {

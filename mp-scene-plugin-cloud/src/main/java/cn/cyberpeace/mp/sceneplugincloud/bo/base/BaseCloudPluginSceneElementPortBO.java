@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.sceneplugincloud.bo.base;
 import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.base.util.JsonUtils;
 import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementPortBO;
-import cn.cyberpeace.mp.scene.model.base.BaseSceneElementPortModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementPortModel;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.swagger.annotations.ApiModelProperty;

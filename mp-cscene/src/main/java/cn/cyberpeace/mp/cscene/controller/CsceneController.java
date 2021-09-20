@@ -6,7 +6,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCreateContext;
+import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCreateContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneStatBO;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
@@ -39,7 +39,7 @@ public class CsceneController implements BaseModelListControllerBase {
     @GetMapping
     public ListObjServiceResult<CsceneBO> list(QueryParams queryParams) {
         handleQueryParams("list", queryParams);
-        return getModelService().listBO(queryParams, false).asResult();
+        return getModelService().listBO(queryParams, false, null).asResult();
     }
 
     @ApiOperation("获取指定id场景模板")
@@ -48,7 +48,7 @@ public class CsceneController implements BaseModelListControllerBase {
     })
     @GetMapping(params = "id")
     public ServiceResult<CsceneBO> get(@RequestParam String id) {
-        return modelService.getById(id, false).asResult();
+        return modelService.getById(id, false, null).asResult();
     }
 
     @ApiOperation("导出指定id场景模板")
@@ -57,13 +57,13 @@ public class CsceneController implements BaseModelListControllerBase {
     })
     @GetMapping(value = "/export", params = "id")
     public ServiceResult<CsceneBO> export(@RequestParam String id) {
-        return modelService.export(id).asResult();
+        return modelService.export(id, null).asResult();
     }
 
     @ApiOperation(value = "保存（创建/更新）场景模板", notes="请忽略test_scenes和app_scenes字段")
     @PostMapping("/sync")
     public ServiceResult<CsceneBO> sync(@RequestBody CsceneBO csceneBO) {
-        return modelService.sync(csceneBO).asResult();
+        return modelService.sync(csceneBO, null).asResult();
     }
 
     @ApiOperation("删除场景模板")
@@ -72,13 +72,13 @@ public class CsceneController implements BaseModelListControllerBase {
     })
     @DeleteMapping(params = "id")
     public ServiceResult<Boolean> delete(@RequestParam String id) {
-        return modelService.delete(id).asResult();
+        return modelService.deleteById(id, false, null).asResult();
     }
 
     @ApiOperation("批量删除场景模板")
     @DeleteMapping("/bulk_delete")
     public ServiceResult<Integer> bulkDelete(@RequestBody String[] ids) {
-        return modelService.bulkDelete(ids).asResult();
+        return modelService.bulkDeleteByIds(ids, false, null).asResult();
     }
 
     @ApiOperation("创建场景模板测试实例")
@@ -87,7 +87,7 @@ public class CsceneController implements BaseModelListControllerBase {
     })
     @PostMapping(value = "/test_instance", params = "id")
     public ServiceResult<CsceneInstanceBO> createTestInstance(
-            @RequestParam String id, @RequestBody(required = false) CsceneInstanceCreateContext createContext) {
+            @RequestParam String id, @RequestBody(required = false) CsceneInstanceCreateContextBO createContext) {
         return modelService.createTestInstance(id, false, createContext).asResult();
     }
 
@@ -97,14 +97,14 @@ public class CsceneController implements BaseModelListControllerBase {
     })
     @PostMapping(value = "/app_instance", params = "id")
     public ServiceResult<CsceneInstanceBO> createAppInstance(
-            @RequestParam String id, @RequestBody(required = false) CsceneInstanceCreateContext createContext) {
+            @RequestParam String id, @RequestBody(required = false) CsceneInstanceCreateContextBO createContext) {
         return modelService.createAppInstance(id, false, createContext).asResult();
     }
 
     @ApiOperation("获取场景模板统计数据")
     @GetMapping("/stat")
     public ServiceResult<List<CsceneStatBO>> stat(@RequestParam String[] ids) {
-        return getModelService().stat(ids).asResult();
+        return getModelService().stat(ids, null).asResult();
     }
 
 }

@@ -402,6 +402,7 @@ public class CreateHandler extends HandlerCommon {
     private void createVirtualMachine(CloudPluginSceneElementBO cloudElement) {
         var srcElement = cloudElement.getSrcElement();
         var createData = new VirtualMachineCreateData();
+        createData.setRequestUser(getRequestUser());
         createData.setName(genResourceName(srcElement.getEid()));
         createData.setImage(cloudElement.getImage());
         createData.setCpu(IntUtils.zeroNull(srcElement.getCpu()));
@@ -420,6 +421,7 @@ public class CreateHandler extends HandlerCommon {
     private void createContainer(CloudPluginSceneElementBO cloudElement) {
         var srcElement = cloudElement.getSrcElement();
         var createData = new ContainerCreateData();
+        createData.setRequestUser(getRequestUser());
         createData.setName(genResourceName(srcElement.getEid()));
         createData.setImage(cloudElement.getImage());
         createData.setCpu(srcElement.getCpu());
@@ -436,6 +438,7 @@ public class CreateHandler extends HandlerCommon {
 
     private void createEntityNode(CloudPluginSceneElementBO cloudElement) {
         var createData = new EntityNodeCreateData();
+        createData.setRequestUser(getRequestUser());
         createData.setName(cloudElement.getImage());
         createData.setInterfaces(genEntityInterfaces(cloudElement));
         var entityNode = enClient.create(createData);

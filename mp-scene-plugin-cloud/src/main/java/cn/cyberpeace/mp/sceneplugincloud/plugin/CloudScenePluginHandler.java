@@ -24,12 +24,13 @@ import java.util.Map;
         CloudPluginSceneBO.class,
         CloudPluginSceneElementBO.class,
         CloudPluginSceneElementPortBO.class,
+        CloudScenePluginContext.class,
 })
 @Component
 @PluginKey(value = PluginConstant.PLUGIN_KEY, priority = PluginConstant.PLUGIN_PRIORITY)
 @Data
 public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginSceneBO,
-        CloudPluginSceneElementBO, CloudPluginSceneElementPortBO> {
+        CloudPluginSceneElementBO, CloudPluginSceneElementPortBO, CloudScenePluginContext> {
 
     private CloudScenePluginModelHandler pluginModelHandler;
 
