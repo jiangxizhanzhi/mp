@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param;
 
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.HttpData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudHttpData;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,7 +10,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class EntityNodeCreateData implements HttpData {
+public class EntityNodeCreateData implements CloudHttpData {
     private String name;
     private String requestUser;
     private List<Interface> interfaces;
@@ -42,6 +42,17 @@ public class EntityNodeCreateData implements HttpData {
             private String username;
             private String password;
             private String macAddress;
+
+            private Connection connection;
+
+            @Data
+            @AllArgsConstructor
+            @NoArgsConstructor
+            public static class Connection {
+                private String url;
+                private String connectionId;
+                private String connectionName;
+            }
         }
     }
 }

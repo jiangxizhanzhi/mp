@@ -8,10 +8,6 @@ import lombok.Data;
 public class BaseSceneElementModel extends BaseSceneNodeModel {
     @DefaultInt
     private Integer type;
-    @DefaultInt
-    private Integer role;
-    @DefaultInt
-    private String imageType;
     @DefaultStr
     private String file;
     @DefaultStr(SystemType.OTHER)

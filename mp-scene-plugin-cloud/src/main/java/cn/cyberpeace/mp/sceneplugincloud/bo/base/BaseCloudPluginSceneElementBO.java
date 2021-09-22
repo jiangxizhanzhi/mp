@@ -1,5 +1,8 @@
 package cn.cyberpeace.mp.sceneplugincloud.bo.base;
 
+import cn.cyberpeace.mp.base.model.stereotype.DefaultBool;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.base.util.JsonUtils;
 import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementBO;
@@ -67,6 +70,20 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     @ApiModelProperty(value = "终端初始包含工具")
     private List<InitialTool> initialTools;
 
+    // 靶标属性
+    @ApiModelProperty(value = "靶标角色")
+    private Integer role;
+    @ApiModelProperty(value = "镜像类型")
+    private String imageType;
+    @ApiModelProperty(value = "靶标分类")
+    private Integer category;
+    @ApiModelProperty(value = "是否支持初始化")
+    private Boolean initSupport;
+    @ApiModelProperty(value = "是否支持快速创建")
+    private Boolean quickCreateSupport;
+    @ApiModelProperty(value = "快速创建参数")
+    private List<QuickCreateParam> quickCreateParams;
+
     @ApiModelProperty(value = "是否开启辅助网络", hidden = true)
     @JsonIgnore
     private Boolean auxiliaryNetworkOn;
@@ -103,6 +120,7 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getStaticRoutes),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getFirewallRules),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getInitialTools),
+                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getQuickCreateParams),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAuxiliaryNetworkDnsNameservers),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAuxiliaryNetworkAllocationPools)));
         dnsNameservers = StringUtils.isEmpty(obj.getDnsNameservers()) ? new ArrayList<>()
@@ -115,6 +133,8 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
                 : JsonUtils.parse(obj.getFirewallRules(), new TypeReference<List<FirewallRule>>(){});
         initialTools = StringUtils.isEmpty(obj.getInitialTools()) ? new ArrayList<>()
                 : JsonUtils.parse(obj.getInitialTools(), new TypeReference<List<InitialTool>>(){});
+        quickCreateParams = StringUtils.isEmpty(obj.getQuickCreateParams()) ? new ArrayList<>()
+                : JsonUtils.parse(obj.getQuickCreateParams(), new TypeReference<List<QuickCreateParam>>(){});
         auxiliaryNetworkDnsNameservers = StringUtils.isEmpty(obj.getAuxiliaryNetworkDnsNameservers()) ? new ArrayList<>()
                 : JsonUtils.parse(obj.getAuxiliaryNetworkDnsNameservers(), new TypeReference<List<String>>(){});
         auxiliaryNetworkAllocationPools = StringUtils.isEmpty(obj.getAuxiliaryNetworkAllocationPools()) ? new ArrayList<>()
@@ -129,6 +149,7 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getStaticRoutes),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getFirewallRules),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getInitialTools),
+                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getQuickCreateParams),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAuxiliaryNetworkDnsNameservers),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAuxiliaryNetworkAllocationPools)));
         if (dnsNameservers != null) {
@@ -145,6 +166,9 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
         }
         if (initialTools != null) {
             obj.setInitialTools(JsonUtils.toJsonString(initialTools));
+        }
+        if (quickCreateParams != null) {
+            obj.setQuickCreateParams(JsonUtils.toJsonString(quickCreateParams));
         }
         if (auxiliaryNetworkDnsNameservers != null) {
             obj.setAuxiliaryNetworkDnsNameservers(JsonUtils.toJsonString(auxiliaryNetworkDnsNameservers));
