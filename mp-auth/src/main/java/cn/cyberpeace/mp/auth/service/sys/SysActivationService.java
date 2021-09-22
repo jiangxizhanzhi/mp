@@ -1,7 +1,10 @@
 package cn.cyberpeace.mp.auth.service.sys;
 
 import cn.cyberpeace.mp.auth.config.ActivationConfig;
+import cn.cyberpeace.mp.auth.dto.activation.ActivationItem;
+import cn.cyberpeace.mp.auth.dto.activation.ActivationModuleItem;
 import cn.cyberpeace.mp.auth.dto.activation.ActivationRequest;
+import cn.cyberpeace.mp.auth.dto.activation.ActivationResourceItem;
 import cn.cyberpeace.mp.auth.dto.activation.ActivationResponse;
 import cn.cyberpeace.mp.auth.dto.activation.ActivationVerifyInfo;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
@@ -9,9 +12,12 @@ import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.base.util.IdGenerator;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.crypto.digest.MD5;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
@@ -56,9 +62,13 @@ public class SysActivationService {
         verifyInfo.setMachinecode(activationRequest.getMachineCode());
 
         // TODO setInfo
-        Map<String, String> info = new HashMap<>();
-        info.put("thj", "2");
-        verifyInfo.setInfo(info);
+//        Map<String, String> info = new HashMap<>();
+//        info.put("thj", "2");
+//        verifyInfo.setInfo(info);
+
+        // 自定义信息
+        Map<String, String> infoMap = convertActivationItems2CustomVerifyInfoMap(activationRequest.getItems());
+        verifyInfo.setInfo(infoMap);
 
         String verifyStr = JSON.toJSONString(verifyInfo);
         String verifyCode = activationRequest.getVerifyCode();
@@ -70,6 +80,7 @@ public class SysActivationService {
         // 验证通过，加载内存激活配置项目，生成加密文件存储磁盘
         if (success) {
             generateEncryptedFile(activationRequest);
+            ACTIVATION_CONTENT = null;
         } else {
             log.error("license verify failed！");
         }
@@ -86,6 +97,15 @@ public class SysActivationService {
             ActivationResponse activationResponse = parseContentFromDecrpytedFile();
             log.info("{}", activationResponse);
             ACTIVATION_CONTENT = activationResponse;
+        }
+
+        if (Objects.nonNull(ACTIVATION_CONTENT)) {
+            DateTime dateTime = new DateTime(ACTIVATION_CONTENT.getExpiredDate());
+            if (DateTime.now().isBefore(dateTime.plusDays(1))) {
+                ACTIVATION_CONTENT.setIsActived(1);
+            } else {
+                ACTIVATION_CONTENT.setIsActived(0);
+            }
         }
 
         return ACTIVATION_CONTENT;
@@ -106,6 +126,34 @@ public class SysActivationService {
         return null;
     }
 
+    @Deprecated
+    public String generateCustomizedVerifyJSONInfo(List<ActivationModuleItem> moduleItems, List<ActivationResourceItem> resourceItems) {
+        JSONObject jsonObject = new JSONObject();
+
+        JSONArray moduleArray = new JSONArray();
+        moduleItems.forEach(m -> {
+            JSONObject module = new JSONObject();
+            module.put("identifier", m.getIdentifier());
+            module.put("name", m.getName());
+            moduleArray.add(module);
+        });
+
+        JSONArray resourceArray = new JSONArray();
+        resourceItems.forEach(r -> {
+            JSONObject resource = new JSONObject();
+            resource.put("identifier", r.getIdentifier());
+            resource.put("module", r.getModule());
+            resource.put("restrictName", r.getRestrictName());
+            resource.put("maxValue", r.getMaxValue());
+            resourceArray.add(resource);
+        });
+
+        jsonObject.put("modules", moduleArray);
+        jsonObject.put("resources", resourceArray);
+
+        String jsonStr = jsonObject.toJSONString();
+        return jsonStr;
+    }
 
     private void generateEncryptedFile(ActivationRequest activationRequest) {
         log.info("generate encrypted file activationRequest:{}", activationRequest);
@@ -155,14 +203,18 @@ public class SysActivationService {
         String jsonStr = StringUtils.substring(decryptedContent, 8, decryptedContent.length());
 
         ActivationResponse activationResponse = JSON.parseObject(jsonStr, ActivationResponse.class);
-        DateTime dateTime = new DateTime(activationResponse.getExpiredDate());
-        if (DateTime.now().isBefore(dateTime.plusDays(1))) {
-            activationResponse.setIsActived(1);
-        } else {
-            activationResponse.setIsActived(0);
-        }
         log.info("activationContent:{}", activationResponse);
         return activationResponse;
+    }
+
+
+    private Map<String, String> convertActivationItems2CustomVerifyInfoMap(List<ActivationItem> items) {
+        Assert.notEmpty(items, "ActivationItem list should not be empty!");
+        Map<String, String> map = new HashMap<>();
+        items.forEach(i -> {
+            map.put(i.getKey(), i.getValue());
+        });
+        return map;
     }
 
 }

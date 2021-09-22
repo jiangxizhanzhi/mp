@@ -19,6 +19,12 @@ public class CsceneInstanceModel extends BaseCsceneModel {
     private Integer type;
     @DefaultStr
     private String scene;
+    @DefaultStr
+    private String createUser;
+    @DefaultInt
+    private Integer sceneTtl;
+    @DefaultInt
+    private Integer sceneAttr;
 
     public static class Type {
         public static final int TEST = 1;

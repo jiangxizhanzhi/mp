@@ -4,7 +4,6 @@ import cn.cyberpeace.mp.base.annotation.BeanFieldClasses;
 import cn.cyberpeace.mp.base.annotation.ClassFieldClasses;
 import cn.cyberpeace.mp.scene.core.base.BaseSceneHandler;
 import cn.cyberpeace.mp.scene.core.bo.*;
-import cn.cyberpeace.mp.scene.core.plugin.SceneConfigPluginContext;
 import cn.cyberpeace.mp.scene.core.plugin.SceneConfigPluginHandler;
 import cn.cyberpeace.mp.scene.model.*;
 import cn.cyberpeace.mp.scene.repository.*;
@@ -58,32 +57,26 @@ public class SceneConfigHandler extends BaseSceneHandler<
         SceneConfigElementPortMapper,
         SceneConfigElementPortConnectionMapper,
         SceneConfigElementPluginMapper,
-        SceneConfigPluginHandler<?, ?, ?>,
+        SceneConfigContextBO,
+        SceneConfigPluginHandler<?, ?, ?, ?>,
         SceneConfigHandler> {
 
     public SceneConfigHandler() {}
 
-    public SceneConfigHandler(SceneConfigDataBO sceneConfigDataBO) {
-        init(sceneConfigDataBO, false);
+    public SceneConfigHandler(SceneConfigDataBO sceneConfigDataBO, SceneConfigContextBO context) {
+        init(sceneConfigDataBO, false, context);
     }
 
-    public SceneConfigHandler(SceneConfigDataBO sceneConfigDataBO, boolean isAreaMode) {
-        init(sceneConfigDataBO, isAreaMode);
+    public SceneConfigHandler(SceneConfigDataBO sceneConfigDataBO, boolean isAreaMode, SceneConfigContextBO context) {
+        init(sceneConfigDataBO, isAreaMode, context);
     }
 
-    public SceneConfigHandler(String sceneId, String areaId) {
-        init(sceneId, areaId, false);
+    public SceneConfigHandler(String sceneId, String areaId, SceneConfigContextBO context) {
+        init(sceneId, areaId, false, context);
     }
 
-    public SceneConfigHandler(String sceneId, String areaId, boolean isAreaMode) {
-        init(sceneId, areaId, isAreaMode);
-    }
-
-    @Override
-    public void initPluginContext(String pluginKey, SceneConfigPluginHandler<?, ?, ?> plugin) {
-        var context = new SceneConfigPluginContext();
-        context.setSceneHandler(this);
-        plugin.setContext(context);
+    public SceneConfigHandler(String sceneId, String areaId, boolean isAreaMode, SceneConfigContextBO context) {
+        init(sceneId, areaId, isAreaMode, context);
     }
 
 }

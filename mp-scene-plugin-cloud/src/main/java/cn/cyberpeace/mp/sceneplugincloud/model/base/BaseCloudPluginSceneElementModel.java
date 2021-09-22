@@ -59,15 +59,28 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
 
     // 虚拟防火墙属性
     @DefaultStr
-    private String firewallIngressRules;
-    @DefaultStr
-    private String firewallEgressRules;
+    private String firewallRules;
 
     // 虚拟机/容器属性
     @DefaultStr
     private String image;
     @DefaultStr
     private String initialTools;
+
+    // 靶标属性
+    @DefaultInt
+    private Integer role;
+    @DefaultStr
+    private String imageType;
+    @DefaultInt
+    private Integer category;
+    @DefaultBool
+    private Boolean initSupport;
+    @DefaultBool
+    private Boolean quickCreateSupport;
+    @DefaultStr
+    private String quickCreateParams;
+
 
     public static class VirtualType {
         public static final int VIRTUAL_SWITCH = 1;

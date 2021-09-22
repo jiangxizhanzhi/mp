@@ -58,16 +58,28 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     private List<StaticRoute> staticRoutes;
 
     // 虚拟防火墙属性
-    @ApiModelProperty(value = "虚拟防火墙入口规则")
-    private List<FirewallRule> firewallIngressRules;
-    @ApiModelProperty(value = "虚拟防火墙出口规则")
-    private List<FirewallRule> firewallEgressRules;
+    @ApiModelProperty(value = "虚拟防火墙规则")
+    private List<FirewallRule> firewallRules;
 
     // 虚拟机/容器属性
     @ApiModelProperty(value = "虚拟机/容器镜像名称")
     private String image;
     @ApiModelProperty(value = "终端初始包含工具")
     private List<InitialTool> initialTools;
+
+    // 靶标属性
+    @ApiModelProperty(value = "靶标角色")
+    private Integer role;
+    @ApiModelProperty(value = "镜像类型")
+    private String imageType;
+    @ApiModelProperty(value = "靶标分类")
+    private Integer category;
+    @ApiModelProperty(value = "是否支持初始化")
+    private Boolean initSupport;
+    @ApiModelProperty(value = "是否支持快速创建")
+    private Boolean quickCreateSupport;
+    @ApiModelProperty(value = "快速创建参数")
+    private List<QuickCreateParam> quickCreateParams;
 
     @ApiModelProperty(value = "是否开启辅助网络", hidden = true)
     @JsonIgnore
@@ -103,9 +115,9 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getDnsNameservers),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAllocationPools),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getStaticRoutes),
-                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getFirewallIngressRules),
-                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getFirewallEgressRules),
+                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getFirewallRules),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getInitialTools),
+                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getQuickCreateParams),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAuxiliaryNetworkDnsNameservers),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAuxiliaryNetworkAllocationPools)));
         dnsNameservers = StringUtils.isEmpty(obj.getDnsNameservers()) ? new ArrayList<>()
@@ -114,12 +126,12 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
                 : JsonUtils.parse(obj.getAllocationPools(), new TypeReference<List<AllocationPool>>(){});
         staticRoutes = StringUtils.isEmpty(obj.getStaticRoutes()) ? new ArrayList<>()
                 : JsonUtils.parse(obj.getStaticRoutes(), new TypeReference<List<StaticRoute>>(){});
-        firewallIngressRules = StringUtils.isEmpty(obj.getFirewallIngressRules()) ? new ArrayList<>()
-                : JsonUtils.parse(obj.getFirewallIngressRules(), new TypeReference<List<FirewallRule>>(){});
-        firewallEgressRules = StringUtils.isEmpty(obj.getFirewallEgressRules()) ? new ArrayList<>()
-                : JsonUtils.parse(obj.getFirewallEgressRules(), new TypeReference<List<FirewallRule>>(){});
+        firewallRules = StringUtils.isEmpty(obj.getFirewallRules()) ? new ArrayList<>()
+                : JsonUtils.parse(obj.getFirewallRules(), new TypeReference<List<FirewallRule>>(){});
         initialTools = StringUtils.isEmpty(obj.getInitialTools()) ? new ArrayList<>()
                 : JsonUtils.parse(obj.getInitialTools(), new TypeReference<List<InitialTool>>(){});
+        quickCreateParams = StringUtils.isEmpty(obj.getQuickCreateParams()) ? new ArrayList<>()
+                : JsonUtils.parse(obj.getQuickCreateParams(), new TypeReference<List<QuickCreateParam>>(){});
         auxiliaryNetworkDnsNameservers = StringUtils.isEmpty(obj.getAuxiliaryNetworkDnsNameservers()) ? new ArrayList<>()
                 : JsonUtils.parse(obj.getAuxiliaryNetworkDnsNameservers(), new TypeReference<List<String>>(){});
         auxiliaryNetworkAllocationPools = StringUtils.isEmpty(obj.getAuxiliaryNetworkAllocationPools()) ? new ArrayList<>()
@@ -132,9 +144,9 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getDnsNameservers),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAllocationPools),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getStaticRoutes),
-                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getFirewallIngressRules),
-                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getFirewallEgressRules),
+                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getFirewallRules),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getInitialTools),
+                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getQuickCreateParams),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAuxiliaryNetworkDnsNameservers),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAuxiliaryNetworkAllocationPools)));
         if (dnsNameservers != null) {
@@ -146,14 +158,14 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
         if (staticRoutes != null) {
             obj.setStaticRoutes(JsonUtils.toJsonString(staticRoutes));
         }
-        if (firewallIngressRules != null) {
-            obj.setFirewallIngressRules(JsonUtils.toJsonString(firewallIngressRules));
-        }
-        if (firewallEgressRules != null) {
-            obj.setFirewallEgressRules(JsonUtils.toJsonString(firewallEgressRules));
+        if (firewallRules != null) {
+            obj.setFirewallRules(JsonUtils.toJsonString(firewallRules));
         }
         if (initialTools != null) {
             obj.setInitialTools(JsonUtils.toJsonString(initialTools));
+        }
+        if (quickCreateParams != null) {
+            obj.setQuickCreateParams(JsonUtils.toJsonString(quickCreateParams));
         }
         if (auxiliaryNetworkDnsNameservers != null) {
             obj.setAuxiliaryNetworkDnsNameservers(JsonUtils.toJsonString(auxiliaryNetworkDnsNameservers));

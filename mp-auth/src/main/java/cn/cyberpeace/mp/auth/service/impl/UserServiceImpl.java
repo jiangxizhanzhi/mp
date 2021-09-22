@@ -653,7 +653,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
         LocalDateTime now = LocalDateTime.now();
         if (Objects.nonNull(user.getExpiredTime()) && now.isAfter(user.getExpiredTime())) {
-            log.info("用户状态已经过期，准备更新数据库用户状态！ username:{}", user.getUsername());
             user.setIsExpired(UserModel.Status.EXPIRED);
         }
     }
@@ -738,6 +737,18 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public List<UserModel> listNotAudited() {
         List<UserModel> userModels = getModelMapper().list(new HumanCondition().filterEqual("is_audited", "0"));
         return userModels;
+    }
+
+    @Override
+    public List<UserDto> listByUserIds(String[] userIds) {
+        List<UserModel> userModels = getModelMapper().list(new HumanCondition().filterIn("id", userIds).orderBy("pk"));
+
+        List<UserDto> userDtos = userModels.stream().map(u -> {
+            UserDto userDto = userModel2UserDto(u);
+            return userDto;
+        }).collect(Collectors.toList());
+
+        return userDtos;
     }
 
     @Override

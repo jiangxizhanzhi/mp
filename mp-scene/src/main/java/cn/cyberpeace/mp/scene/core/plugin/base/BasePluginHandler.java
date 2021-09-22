@@ -1,11 +1,12 @@
 package cn.cyberpeace.mp.scene.core.plugin.base;
 
 import cn.cyberpeace.mp.base.annotation.ClassFieldNames;
-import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.base.util.ClassUtils;
 import cn.cyberpeace.mp.base.util.JsonUtils;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
+import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,13 +21,18 @@ import java.util.Map;
  * @param <E> 网元节点的插件对应配置类
  * @param <P> 网元端口的插件对应配置类
  */
+@Slf4j
 @ClassFieldNames({
         "sceneBOClass",
         "elementBOClass",
         "elementPortBOClass",
+        "contextClass",
 })
 @Data
-public abstract class BasePluginHandler<S, E, P, C extends BasePluginContext<?>> {
+public abstract class BasePluginHandler<S, E, P, C> {
+    private String key;
+    private float priority;
+
     private C context;
 
     // 源场景索引数据
@@ -42,6 +48,25 @@ public abstract class BasePluginHandler<S, E, P, C extends BasePluginContext<?>>
     private Class<S> sceneBOClass;
     private Class<E> elementBOClass;
     private Class<P> elementPortBOClass;
+    private Class<C> contextClass;
+
+    private void loadContext(Object context) {
+        if (context == null) {
+            return;
+        }
+
+        try {
+            if (contextClass.equals(context.getClass())) {
+                this.context = (C) context;
+            } else if (context instanceof Map) {
+                this.context = JsonUtils.mapToBean((Map<String, Object>) context, contextClass);
+            } else {
+                this.context = (C) context;
+            }
+        } catch (Exception e) {
+            log.error("load plugin({}) context({}) error: {}", key, context, e);
+        }
+    }
 
     /**
      * 从场景插件业务数据载入
@@ -97,14 +122,19 @@ public abstract class BasePluginHandler<S, E, P, C extends BasePluginContext<?>>
 
     public void initBase() {
         ClassUtils.loadClassFields(this);
+        var pluginKeyAnnotation = getClass().getAnnotation(PluginKey.class);
+        key = pluginKeyAnnotation.value();
+        priority = pluginKeyAnnotation.priority();
     }
 
     /**
      * 从场景插件业务数据初始化
+     * @param sceneId 场景ID
      * @param pluginDataBO 场景插件业务数据
      */
-    public void init(String sceneId, ScenePluginDataBO pluginDataBO) {
+    public void init(String sceneId, ScenePluginDataBO pluginDataBO, Object context) {
         initBase();
+        loadContext(context);
         sourceSceneId = sceneId;
         if (pluginDataBO != null) {
             fromData(pluginDataBO);
@@ -114,9 +144,12 @@ public abstract class BasePluginHandler<S, E, P, C extends BasePluginContext<?>>
     /**
      * 从场景插件索引数据初始化
      * @param sceneId 场景ID
+     * @param elementIds 网元ID
+     * @param elementPortIds 端口ID
      */
-    public void init(String sceneId, List<String> elementIds, List<String> elementPortIds) {
+    public void init(String sceneId, List<String> elementIds, List<String> elementPortIds, Object context) {
         initBase();
+        loadContext(context);
         sourceSceneId = sceneId;
         if (elementIds != null) {
             this.elementIds.addAll(elementIds);

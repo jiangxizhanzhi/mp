@@ -1,12 +1,16 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param;
 
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.HttpData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudHttpData;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
-public class VirtualMachineCreateData implements HttpData {
+@AllArgsConstructor
+@NoArgsConstructor
+public class VirtualMachineCreateData implements CloudHttpData {
     private String name;
     private String image;
     private Integer cpu;
@@ -14,5 +18,9 @@ public class VirtualMachineCreateData implements HttpData {
     private Integer disk;
     private String requestUser;
     private String host;
+    private String hostname;
+    private String userData;
     private List<VirtualNic> networks;
+
+    private String id;
 }

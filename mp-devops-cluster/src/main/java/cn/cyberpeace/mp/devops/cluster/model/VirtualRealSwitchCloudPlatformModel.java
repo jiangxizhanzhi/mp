@@ -53,11 +53,11 @@ public class VirtualRealSwitchCloudPlatformModel extends BaseCloudPlatformModel 
          */
         private String interfacesUsed;
 
-        public String getInterfaces_summary() {
+        public String getInterfacesSummary() {
             return StringUtils.isBlank(interfacesSummary) ? "0" : interfacesSummary;
         }
 
-        public String getInterfaces_used() {
+        public String getInterfacesUsed() {
             return StringUtils.isBlank(interfacesUsed) ? "0" : interfacesUsed;
         }
     }

@@ -7,6 +7,9 @@ import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.InstallerConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InstallerConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InstallerConvertPageModel;
+import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtDocker;
+import cn.cyberpeace.mp.devops.cluster.request.DockerInstallerData;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerRequest;
@@ -58,7 +61,8 @@ public class InstallerController {
 
         List<InstallerPageResponse> list = model.getModelList().stream().map(installer ->
                 InstallerPageResponse.builder().uuid(installer.getUuid()).name(installer.getName())
-                        .description(installer.getDescription()).categories(installer.getCategories())
+                        .logo(installer.getLogo()).description(installer.getDescription())
+                        .categories(installer.getCategories())
                         .build()
         ).collect(Collectors.toList());
 
@@ -69,11 +73,16 @@ public class InstallerController {
     @GetMapping("/{id}")
     public Result<InstallerByIdResponse> getById(@PathVariable String id){
         InstallerConvertModel model = installerConverter.findById(id);
+        if (Objects.isNull(model)){
+            return new Result<>();
+        }
+        ExtDocker extDocker = model.getExtDocker();
         InstallerByIdResponse response = InstallerByIdResponse.builder().uuid(model.getUuid())
                 .name(model.getName()).description(model.getDescription()).logo(model.getLogo())
                 .categories(model.getCategories())
-                .deployType(model.getDeployType()).dockerFile(Objects.isNull(model.getExtDocker()) ? null : model.getExtDocker().getFile())
-                .resourceList(model.getResourceList()).startUpParameterList(model.getStartUpParameterList())
+                .deployType(model.getDeployType())
+                .dockerInstallerData(new DockerInstallerData(model.getStartUpParameterList(),Objects.nonNull(extDocker) ? extDocker.getFile() : null, Objects.nonNull(extDocker) ? extDocker.getUserFilename() : null))
+                .resourceList(model.getResourceList())
                 .build();
         return new Result<>(response);
     }
@@ -82,32 +91,42 @@ public class InstallerController {
      * 新增
      */
     @ApiOperation("新增")
-    @PostMapping("/add")
-    public ServiceResult add(InstallerRequest request){
+    @PostMapping
+    public ServiceResult add(@RequestBody InstallerRequest request){
         InstallerConvertModel model = installerConverter.add(request);
-        return model.isSuccess() ? ServiceResult.successful() : ServiceResult.fail("");
+        if (Objects.isNull(model)){
+            return ServiceResult.fail("");
+        }
+        return model.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(model.getMessageZh());
     }
 
     /**
      * 更新
      */
     @ApiOperation("更新")
-    @PutMapping("/update")
-    public ServiceResult update(InstallerRequest request){
+    @PatchMapping("/{uuid}")
+    public ServiceResult update(@RequestBody InstallerRequest request,@PathVariable("uuid") String uuid){
+        request.setUuid(uuid);
         if (StringUtils.isBlank(request.getUuid())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         InstallerConvertModel model = installerConverter.add(request);
-        return model.isSuccess() ? ServiceResult.successful() : ServiceResult.fail("");
+        if (Objects.isNull(model)){
+            return ServiceResult.fail("");
+        }
+        return model.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(model.getMessageZh());
     }
 
     /**
      * 删除
      */
     @ApiOperation("删除")
-    @DeleteMapping("/delete")
+    @DeleteMapping
     public ServiceResult delete(@RequestBody InstallerDeleteRequest request){
-        Boolean result = installerConverter.delete(request);
-        return result ? ServiceResult.successful() : ServiceResult.fail("");
+        BaseCloudPlatformModel model = installerConverter.delete(request);
+        if (Objects.isNull(model)){
+            return ServiceResult.fail("");
+        }
+        return model.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(model.getMessageZh());
     }
 }

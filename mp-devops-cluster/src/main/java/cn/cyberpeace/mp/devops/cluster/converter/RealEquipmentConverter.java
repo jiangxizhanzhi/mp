@@ -2,9 +2,13 @@ package cn.cyberpeace.mp.devops.cluster.converter;
 
 import cn.cyberpeace.mp.devops.cluster.converter.model.RealEquipment;
 import cn.cyberpeace.mp.devops.cluster.converter.model.RealEquipmentConvertModel;
-import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentRequest;
+import cn.cyberpeace.mp.devops.cluster.model.Device;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentPageRequest;
+import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentRequest;
+import cn.cyberpeace.mp.devops.cluster.request.TargetSceneRequest;
+
+import java.util.List;
 
 public interface RealEquipmentConverter extends BaseConverter{
 
@@ -19,6 +23,13 @@ public interface RealEquipmentConverter extends BaseConverter{
      * @param request
      */
     RealEquipmentConvertModel page(RealEquipmentPageRequest request);
+
+    /**
+     * 查询所有靶标
+     * @param request
+     * @return
+     */
+    List<Device> allTarget(TargetSceneRequest request);
 
     /**
      * 根据ID查询

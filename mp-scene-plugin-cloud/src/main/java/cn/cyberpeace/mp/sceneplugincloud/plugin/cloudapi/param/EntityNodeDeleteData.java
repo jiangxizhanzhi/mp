@@ -1,12 +1,17 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param;
 
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.HttpData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudHttpData;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
-public class EntityNodeDeleteData implements HttpData {
+@AllArgsConstructor
+@NoArgsConstructor
+public class EntityNodeDeleteData implements CloudHttpData {
     private String name;
     private List<String> interfaces;
+    private List<String> connections;
 }

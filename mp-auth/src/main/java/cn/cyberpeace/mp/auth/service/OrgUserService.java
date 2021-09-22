@@ -36,7 +36,7 @@ public interface OrgUserService extends BaseModelService<OrgUserModel, QueryPara
     List<OrgModel> listOrgsByUserId(String userId);
 
     /**
-     *  列出用户所在组织的层级关系，查出组织，上级组织直到顶级组织
+     * 列出用户所在组织的层级关系，查出组织，上级组织直到顶级组织
      */
     List<OrgDto> listHierarchicalOrgsByUserId(String userId);
 
@@ -44,6 +44,8 @@ public interface OrgUserService extends BaseModelService<OrgUserModel, QueryPara
     boolean additionalBindOrgUsers(String orgId, List<String> userIds);
 
     String getAllOrgPathByUserId(String userId);
+
+    Integer getUserCnt(String orgId);
 
     PageInfo<UserDto> pageUsersByOrg(OrgUserPageRequest req);
 

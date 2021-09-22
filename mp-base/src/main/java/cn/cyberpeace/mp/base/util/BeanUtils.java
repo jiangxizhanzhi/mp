@@ -12,6 +12,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
+import java.beans.BeanInfo;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -104,6 +107,25 @@ public class BeanUtils implements ApplicationContextAware {
         ignorePropertyNames.addAll(Arrays.asList(getNullPropertyNames(source)));
         org.springframework.beans.BeanUtils.copyProperties(source, target, ignorePropertyNames.toArray(new String[0]));
     }
+
+
+    public static <M> void merge(M target, M destination) throws Exception {
+        //获取目标bean
+        BeanInfo beanInfo = Introspector.getBeanInfo(target.getClass());
+        // 遍历所有属性
+        for (PropertyDescriptor descriptor : beanInfo.getPropertyDescriptors()) {
+            // 如果是可写属性
+            if (descriptor.getWriteMethod() != null) {
+                Object defaultValue = descriptor.getReadMethod().invoke(destination);
+                //可以使用StringUtil.isNotEmpty(defaultValue)来判断
+                if(defaultValue!=null && !"".equals(defaultValue)){
+                    //用非空的defaultValue值覆盖到target去
+                    descriptor.getWriteMethod().invoke(target, defaultValue);
+                }
+            }
+        }
+    }
+
 
     public static void loadBeanFields(Object obj) {
         Class<?> clazz = obj.getClass();

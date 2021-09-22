@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import cn.cyberpeace.mp.scene.core.exception.SceneNotExistException;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
@@ -24,48 +25,51 @@ public class SceneService {
         this.sceneConfigService = sceneConfigService;
     }
 
-    public ServiceResult<SceneDataBO> get(String id, boolean isAreaMode, String areaId) {
+    public ServiceResult<SceneDataBO> get(String id, boolean isAreaMode, String areaId, SceneContextBO context) {
         SceneHandler sceneHandler;
         try {
-            sceneHandler = new SceneHandler(id, areaId, isAreaMode);
+            sceneHandler = new SceneHandler(id, areaId, isAreaMode, context);
         } catch (SceneNotExistException e) {
             return new ServiceResult<>(null, SceneErrorCode.SCENE_NOT_EXIST);
         }
         return new ServiceResult<>(sceneHandler.toData());
     }
 
-    public ServiceResult<SceneDataBO> create(SceneDataBO sceneDataBO) {
+    public ServiceResult<SceneDataBO> create(SceneDataBO sceneDataBO, SceneContextBO context) {
         SceneHandler sceneHandler;
         try {
-            sceneHandler = new SceneHandler(sceneDataBO, false);
+            sceneHandler = new SceneHandler(sceneDataBO, false, context);
             sceneHandler.save();
             sceneHandler.initiate();
             sceneHandler.save();
+            sceneHandler.create();
+            sceneHandler.save();
         } catch (SceneNotExistException e) {
             return new ServiceResult<>(null, SceneErrorCode.SCENE_NOT_EXIST);
         }
         return new ServiceResult<>(sceneHandler.toData());
     }
 
-    public ServiceResult<SceneDataBO> create(SceneConfigDataBO sceneConfigDataBO) {
-        return create(sceneConfigDataBO.exportToScene());
+    public ServiceResult<SceneDataBO> createFromSceneConfig(SceneConfigDataBO sceneConfigDataBO,
+                                                            SceneContextBO context) {
+        return create(sceneConfigDataBO.exportToScene(), context);
     }
 
-    public ServiceResult<SceneDataBO> create(String sceneConfigId) {
-        var sceneConfigDataBO = sceneConfigService.get(sceneConfigId, false, null)
+    public ServiceResult<SceneDataBO> createFromSceneConfig(String sceneConfigId, SceneContextBO context) {
+        var sceneConfigDataBO = sceneConfigService.get(sceneConfigId, false, null, null)
                 .getSource();
 
         if (sceneConfigDataBO == null) {
             return new ServiceResult<>(null, SceneErrorCode.SCENE_NOT_EXIST);
         }
 
-        return create(sceneConfigDataBO);
+        return createFromSceneConfig(sceneConfigDataBO, context);
     }
 
-    public ServiceResult<Boolean> delete(String id, boolean logic) {
+    public ServiceResult<Boolean> delete(String id, boolean logic, SceneContextBO context) {
         SceneHandler sceneHandler;
         try {
-            sceneHandler = new SceneHandler(id, null, false);
+            sceneHandler = new SceneHandler(id, null, false, context);
             if (logic) {
                 sceneHandler.logicDelete();
             } else {
@@ -77,10 +81,10 @@ public class SceneService {
         return new ServiceResult<>(true);
     }
 
-    public ServiceResult<Integer> bulkDelete(String[] ids, boolean logic) {
+    public ServiceResult<Integer> bulkDelete(String[] ids, boolean logic, SceneContextBO context) {
         var result = 0;
         for (String id: ids) {
-            if (Boolean.TRUE.equals(delete(id, logic).getSource())) {
+            if (Boolean.TRUE.equals(delete(id, logic, context).getSource())) {
                 result += 1;
             }
         }

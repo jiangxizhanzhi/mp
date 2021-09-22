@@ -149,7 +149,7 @@ public class CloudPlatformMonitorController {
                 hypervisorConverter.statistics()).handle((result,throwable) -> {
             // 如果异常存在,打印异常，并且返回默认值
             if (throwable != null) {
-                log.info("========statistics方法:statistics获取资源统计信息异常信息：{}",throwable.getMessage());
+                log.info("========statistics方法:statistics获取资源统计信息异常信息：{}",throwable.getMessage(),throwable);
                 return null;
             } else {
                 return result;

@@ -1,19 +1,29 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class VirtualNic {
     private String networkId;
     private String fixedIp;
-    private QosRule qosRule;
+    private String macAddress;
+    private List<QosRule> qosRules;
     private Boolean enableExternal;
     private List<AccessMode> accessModes;
     private String firewallId;
 
+    private String portId;
+    private String qosId;
+
     @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class QosRule {
         private Integer maxKbps;
         private Integer maxBurstKbps;
@@ -24,6 +34,8 @@ public class VirtualNic {
     }
 
     @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class AccessMode {
         private String protocol;
         private String ipAddress;
@@ -32,5 +44,26 @@ public class VirtualNic {
         private String password;
         private Boolean enablePortMapping;
         private String portMappingProtocol;
+
+        private Connection connection;
+        private PortMapping portMapping;
+
+        @Data
+        @AllArgsConstructor
+        @NoArgsConstructor
+        public static class Connection {
+            private String url;
+            private String connectionId;
+            private String connectionName;
+        }
+
+        @Data
+        @AllArgsConstructor
+        @NoArgsConstructor
+        public static class PortMapping {
+            private String id;
+            private String host;
+            private Integer hostPort;
+        }
     }
 }

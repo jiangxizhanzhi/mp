@@ -1,15 +1,18 @@
 package cn.cyberpeace.mp.devops.cluster.service.impl;
 
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
-import cn.cyberpeace.mp.devops.cluster.model.Device;
-import cn.cyberpeace.mp.devops.cluster.model.DeviceCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.*;
 import cn.cyberpeace.mp.devops.cluster.service.ImagesService;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.http.HttpResponse;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.Map;
 
 @Service
 public class ImagesServiceImpl extends BaseOpenStackServiceImpl implements ImagesService {
@@ -51,7 +54,28 @@ public class ImagesServiceImpl extends BaseOpenStackServiceImpl implements Image
     }
 
     @Override
-    public String upload(String params,File file) {
-        return super.sendFormDataPost(CPCLOUD_DEVICE + URL_VERSION + "/upload/" + params,file);
+    public Device quickCreate(DeviceQuickCreateCloudPlatformModel model) {
+        return super.sendPost(CPCLOUD_DEVICE + URL_VERSION + "/quick_create", JsonUtils.toUnderlineJSONString(model), Device.class);
+    }
+
+
+    @Override
+    public BaseCloudPlatformModel upload(Map<String,File> fileList, String type){
+        if (MapUtils.isEmpty(fileList)){
+            return null;
+        }
+        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+        fileList.entrySet().stream().forEach(entry -> builder.addBinaryBody(entry.getKey(), entry.getValue()));
+        try {
+            return super.sendFormDataPost(CPCLOUD_DEVICE + URL_VERSION + "/file_upload?type=" + type, builder.build(), BaseCloudPlatformModel.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public ImageConnectionCloudPlatform connection(String deviceUuid){
+        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + "/normal/connection?device_uuid=" + deviceUuid,ImageConnectionCloudPlatform.class);
     }
 }

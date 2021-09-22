@@ -1,8 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.response;
 
-import cn.cyberpeace.mp.devops.cluster.converter.model.TypeConvertModel;
-import cn.cyberpeace.mp.devops.cluster.converter.model.TypeIdIntegerConvertModel;
-import cn.cyberpeace.mp.devops.cluster.converter.model.TypeIdStringConvertModel;
+import cn.cyberpeace.mp.devops.cluster.converter.model.*;
+import cn.cyberpeace.mp.devops.cluster.model.common.AccessProtocolsPort;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -36,8 +35,14 @@ public class TypeAllResponse {
     /**
      * 角色
      */
-    @ApiModelProperty("角色")
+    @ApiModelProperty("镜像角色")
     private List<TypeIdIntegerConvertModel> role;
+
+    /**
+     * 角色
+     */
+    @ApiModelProperty("实体角色")
+    private List<TypeIdIntegerConvertModel> entityRole;
 
     /**
      * 分类
@@ -104,6 +109,27 @@ public class TypeAllResponse {
      */
     @ApiModelProperty("安装平台")
     private List<TypeIdStringConvertModel> installerPlatforms;
+
+    /**
+     * 接入协议和端口
+     */
+    @ApiModelProperty("接入协议和端口")
+    private List<AccessProtocolsPort> accessProtocolsPorts;
+
+    /**
+     * 交换机端口
+     */
+    @ApiModelProperty("交换机端口")
+    private List<SwitchConvertModel> switchConvertModels;
+
+    /**
+     * 串口信息
+     */
+    @ApiModelProperty("串口信息")
+    private List<SerialPortResponse> serialPortResponses;
+
+    @ApiModelProperty("SNMP版本")
+    private List<TypeIdStringConvertModel> snmpVersions;
 
     public TypeAllResponse(List<TypeConvertModel> firstTypeList, List<TypeConvertModel> secondTypeList, List<TypeConvertModel> thirdTypeList) {
         this.firstTypeList = firstTypeList;

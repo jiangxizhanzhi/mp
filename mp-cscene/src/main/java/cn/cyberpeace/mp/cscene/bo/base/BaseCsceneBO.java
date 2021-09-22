@@ -17,14 +17,20 @@ public abstract class BaseCsceneBO<
         R0 extends BaseCsceneRoleModel,
         R extends BaseCsceneRoleBO<R0, R>,
         T extends BaseCsceneBO<M, R0, R, T>> extends ModelBO<M, T> {
-    @ApiModelProperty(value = "综合场景id")
+    @ApiModelProperty(value = "id")
     private String id;
+    @ApiModelProperty(value = "创建用户")
+    private String createUser;
+    @ApiModelProperty(value = "创建用户名")
+    private String createUsername;
     @ApiModelProperty(value = "角色信息")
     private List<R> roles;
 
     @Override
     public T export() {
         setId(null);
+        setCreateUser(null);
+        setCreateUsername(null);
         return (T) this;
     }
 

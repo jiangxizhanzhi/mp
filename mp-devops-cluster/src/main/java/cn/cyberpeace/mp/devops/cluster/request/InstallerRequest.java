@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.request;
 
 import cn.cyberpeace.mp.devops.cluster.model.common.Resource;
-import cn.cyberpeace.mp.devops.cluster.model.common.StartUpParameter;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -38,7 +37,7 @@ public class InstallerRequest extends BaseRequest {
     /**
      * logo文件流
      */
-    @ApiModelProperty("logo文件流")
+    @ApiModelProperty(value = "logo文件流/文件地址",hidden = true)
     private MultipartFile logoFile;
 
     /**
@@ -50,8 +49,8 @@ public class InstallerRequest extends BaseRequest {
     /**
      * 分类
      */
-    @ApiModelProperty(value = "分类")
-    private List<String> categories;
+    @ApiModelProperty(value = "分类,以|分割")
+    private String categories;
 
     /**
      * 服务类型
@@ -59,16 +58,12 @@ public class InstallerRequest extends BaseRequest {
     @ApiModelProperty(value = "服务类型")
     private Integer deployType;
 
-    /**
-     * 启动参数（包装对象）
-     */
-    @ApiModelProperty(value = "启动参数")
-    private List<StartUpParameter> startUpParameterList;
+    @ApiModelProperty("docker参数")
+    private DockerInstallerData dockerInstallerData;
 
-    @ApiModelProperty("docker文件流")
-    private MultipartFile dockerFile;
 
-    @ApiModelProperty("windows服务资源流")
+
+    @ApiModelProperty(value = "windows服务资源流",hidden = true)
     private List<MultipartFile> multipartFiles;
 
     /**
@@ -76,6 +71,8 @@ public class InstallerRequest extends BaseRequest {
      */
     @ApiModelProperty(value = "资源列表")
     private List<Resource> resourceList;
+
+//    private String resources;
 
 
 }

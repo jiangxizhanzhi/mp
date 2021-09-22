@@ -12,6 +12,10 @@ public class TextUtils {
 
     private TextUtils() {}
 
+    public static String emptyNull(String str) {
+        return StringUtils.isEmpty(str) ? null : str;
+    }
+
     public static String uuid() {
         return UUID.randomUUID().toString().replace("-", StringUtils.EMPTY).toLowerCase();
     }
@@ -66,6 +70,12 @@ public class TextUtils {
             result[i] = humpToLine(strs[i]);
         }
         return result;
+    }
+
+    public static boolean containChinese(String str) {
+        var p = Pattern.compile("[\u4E00-\u9FA5|\\！|\\，|\\。|\\（|\\）|\\《|\\》|\\“|\\”|\\？|\\：|\\；|\\【|\\】]");
+        var m = p.matcher(str);
+        return m.find();
     }
 }
 

@@ -69,6 +69,11 @@ public class TypeConverterImpl implements TypeConverter {
     }
 
     @Override
+    public TypeAllConvertModel findEntityRoles() {
+        return this.findIdIntegerByType("entity_role");
+    }
+
+    @Override
     public TypeAllConvertModel findDeployType() {
         return this.findIdIntegerByType("deploy_type");
     }
@@ -111,6 +116,11 @@ public class TypeConverterImpl implements TypeConverter {
     @Override
     public TypeAllConvertModel findServiceStartType() {
         return this.findIdStringByType("type");
+    }
+
+    @Override
+    public TypeAllConvertModel findSnmpVersion() {
+        return this.findIdStringByType("snmp_version");
     }
 
     /**

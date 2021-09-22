@@ -7,7 +7,9 @@ import cn.cyberpeace.mp.scene.core.plugin.base.BasePluginHandler;
  * @param <S> 插件对应配置类
  * @param <E> 网元节点的插件对应配置类
  * @param <P> 网元端口的插件对应配置类
+ * @param <C> 插件上下文类
  */
-public abstract class SceneConfigPluginHandler<S, E, P> extends BasePluginHandler<S, E, P, SceneConfigPluginContext> {
+public abstract class SceneConfigPluginHandler<S, E, P, C>
+        extends BasePluginHandler<S, E, P, C> {
 
 }

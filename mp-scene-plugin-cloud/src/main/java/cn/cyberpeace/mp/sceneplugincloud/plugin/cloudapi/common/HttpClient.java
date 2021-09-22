@@ -160,17 +160,17 @@ public class HttpClient {
         return resultMap(result);
     }
 
-    public <T> T resultBean(String result) {
+    public <T> T resultBean(String result, TypeReference<T> valueTypeRef) {
         if (StringUtils.isNotBlank(result)) {
-            return JsonUtils.parse(result, new TypeReference<T>() {});
+            return JsonUtils.parse(result, valueTypeRef);
         } else {
             return null;
         }
     }
 
-    public <T> T resultBean(HttpResponse httpResponse) throws IOException {
+    public <T> T resultBean(HttpResponse httpResponse, TypeReference<T> valueTypeRef) throws IOException {
         String result = result(httpResponse);
-        return resultBean(result);
+        return resultBean(result, valueTypeRef);
     }
 
     public HttpResponse get(String url, HttpParam param, Map<String, String> headers, Integer timeout)

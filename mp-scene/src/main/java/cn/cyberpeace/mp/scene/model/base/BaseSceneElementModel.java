@@ -39,12 +39,32 @@ public class BaseSceneElementModel extends BaseSceneNodeModel {
 
     public static class SystemType {
         public static final String OTHER = "other";
+        public static final String WINDOWS_10 = "windows10";
+        public static final String WINDOWS_8 = "windows8";
+        public static final String WINDOWS_7 = "windows7";
+        public static final String WINDOWS_XP = "windowsxp";
+        public static final String WINDOWS_VISTA = "windows_vista";
+        public static final String WINDOWS_SERVER_2019 = "windows-server2019";
+        public static final String WINDOWS_SERVER_2016 = "windows-server2016";
+        public static final String WINDOWS_SERVER_2012 = "windows-server2012";
+        public static final String WINDOWS_SERVER_2010 = "windows-server2010";
+        public static final String WINDOWS_SERVER_2008 = "windows-server2008";
+        public static final String WINDOWS_SERVER_2003 = "windows-server2003";
+        public static final String WINDOWS_SERVER_2000 = "windows-server2000";
+        public static final String CENTOS = "centos";
+        public static final String UBUNTU = "ubuntu";
+        public static final String KALI = "kali";
+
+        public static final String WINDOWS = "windows";
+        public static final String LINUX = "linux";
 
         private SystemType() {}
     }
 
     public static class SystemArchitecture {
         public static final String OTHER = "other";
+        public static final String BIT_32 = "32";
+        public static final String BIT_64 = "64";
 
         private SystemArchitecture() {}
     }

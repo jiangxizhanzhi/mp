@@ -12,16 +12,20 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.List;
 
-@ApiModel(description = "综合场景数据")
+@ApiModel(description = "场景模板数据")
 @Data
 public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneRoleBO, CsceneBO> {
-    @ApiModelProperty(value = "综合场景类型")
+    @ApiModelProperty(value = "场景模板类型")
     private Integer type;
-    @ApiModelProperty(value = "综合场景拓扑配置")
+    @ApiModelProperty(value = "场景模板引用类型")
+    private Integer referenceType;
+    @ApiModelProperty(value = "场景模板logo")
+    private String logo;
+    @ApiModelProperty(value = "场景模板拓扑配置")
     private SceneConfigDataBO sceneConfig;
-    @ApiModelProperty(value = "综合测试场景实例")
+    @ApiModelProperty(value = "场景模板测试实例")
     private List<CsceneInstanceBO> testScenes;
-    @ApiModelProperty(value = "综合应用场景实例")
+    @ApiModelProperty(value = "场景模板应用实例")
     private List<CsceneInstanceBO> appScenes;
 
     @Override
@@ -43,6 +47,17 @@ public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneR
             obj.setSceneConfig(sceneConfig.getTopology().getScene().getEid());
         }
         return obj;
+    }
+
+    @Override
+    public CsceneBO export() {
+        var csceneBO = super.export();
+        csceneBO.setTestScenes(null);
+        csceneBO.setAppScenes(null);
+        if (sceneConfig != null) {
+            csceneBO.setSceneConfig(sceneConfig.export());
+        }
+        return this;
     }
 
     public CsceneInstanceBO exportToCsceneInstance() {

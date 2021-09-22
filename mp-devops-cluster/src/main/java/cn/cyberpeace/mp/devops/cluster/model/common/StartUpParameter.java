@@ -6,11 +6,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel("启动参数")
-public class StartUpParameter {
+public class StartUpParameter implements Serializable {
 
     /**
      * 参数类型：环境变量/命令参数/端口映射

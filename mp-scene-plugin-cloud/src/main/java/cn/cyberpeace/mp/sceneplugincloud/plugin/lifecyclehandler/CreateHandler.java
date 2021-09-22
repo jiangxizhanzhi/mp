@@ -1,4 +1,500 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
-public class CreateHandler {
+import cn.cyberpeace.mp.base.util.BoolUtils;
+import cn.cyberpeace.mp.base.util.IntUtils;
+import cn.cyberpeace.mp.base.util.TextUtils;
+import cn.cyberpeace.mp.scene.util.CommandUtils;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
+import cn.cyberpeace.mp.sceneplugincloud.constant.FirewallRuleDirection;
+import cn.cyberpeace.mp.sceneplugincloud.constant.QosRuleDirection;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.*;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+public class CreateHandler extends HandlerCommon {
+
+    private final VirtualSwitch vsClient = new VirtualSwitch();
+    private final VirtualRouter vrClient = new VirtualRouter();
+    private final VirtualFirewall vfClient = new VirtualFirewall();
+    private final VirtualMachine vmClient = new VirtualMachine();
+    private final Container containerClient = new Container();
+    private final EntityNode enClient = new EntityNode();
+
+    private void addCloudPort(String portId, CloudPluginSceneElementPortBO cloudPort) {
+        getPluginHandler().getElementIds().add(portId);
+        getPluginHandler().getElementPortMap().put(portId, cloudPort);
+
+        var srcPort = getPluginHandler().getSrcPort(portId);
+        cloudPort.setSrcPort(srcPort);
+    }
+
+    private String genAccessModeKey(String protocol, int port, String username, String password) {
+        return String.format("%s:%d:%s:%s", protocol, port, username, password);
+    }
+
+    private String genAccessModeKey(CloudAccessMode accessMode) {
+        return genAccessModeKey(accessMode.getProtocol(), accessMode.getPort(), accessMode.getUsername(),
+                accessMode.getPassword());
+    }
+
+    private String genAccessModeKey(VirtualNic.AccessMode accessMode) {
+        return genAccessModeKey(accessMode.getProtocol(), accessMode.getPort(), accessMode.getUsername(),
+                accessMode.getPassword());
+    }
+
+    private String genAccessModeKey(EntityNodeCreateData.Interface.AccessMode accessMode) {
+        return genAccessModeKey(accessMode.getProtocol(), accessMode.getPort(), accessMode.getUsername(),
+                accessMode.getPassword());
+    }
+
+    private void createAuxiliaryNetwork(CloudPluginSceneElementBO cloudElement) {
+        var srcElement = cloudElement.getSrcElement();
+        var createData = new VirtualSwitchCreateData();
+        createData.setName(genResourceName(srcElement.getEid()));
+        createData.setEntityNetwork(cloudElement.getAuxiliaryNetworkVlan());
+        createData.setSegmentationId(IntUtils.zeroNull(cloudElement.getAuxiliaryNetworkVlanId()));
+        var subnet = new VirtualSwitchCreateData.Subnet();
+        subnet.setCidr(cloudElement.getAuxiliaryNetworkCidr());
+        subnet.setGatewayIp(cloudElement.getAuxiliaryNetworkGateway());
+        subnet.setEnableDhcp(BoolUtils.bool(cloudElement.getAuxiliaryNetworkDhcp()));
+        var srcAllocationPools = cloudElement.getAuxiliaryNetworkAllocationPools();
+        if (srcAllocationPools != null) {
+            List<VirtualSwitchCreateData.Subnet.AllocationPool> allocationPools = new ArrayList<>();
+            srcAllocationPools.forEach(srcAllocationPool -> {
+                allocationPools.add(new VirtualSwitchCreateData.Subnet.AllocationPool(srcAllocationPool.getStart(),
+                        srcAllocationPool.getEnd()));
+            });
+            subnet.setAllocationPools(allocationPools);
+        }
+        subnet.setDnsNameservers(cloudElement.getAuxiliaryNetworkDnsNameservers());
+        createData.setSubnet(subnet);
+        var virtualSwitch = vsClient.create(createData);
+        cloudElement.setAuxiliaryNetworkId(virtualSwitch.getId());
+    }
+
+    private List<VirtualNic> genVirutalNics(CloudPluginSceneElementBO cloudElement) {
+        List<VirtualNic> virtualNics = new ArrayList<>();
+        var srcElement = cloudElement.getSrcElement();
+        var ports = srcElement.getPorts();
+        if (ports == null) {
+            return virtualNics;
+        }
+
+        for (var port : ports) {
+            var cloudPort = getPluginHandler().getPort(port.getId());
+            var connectedSrcElement = getPluginHandler().getPortConnectedSrcElement(port.getId());
+            var connectedCloudElement = connectedSrcElement == null ? null
+                    : getPluginHandler().getElement(connectedSrcElement.getId());
+            var auxiliaryNetworkCloudElement = confirmAuxiliaryNetworkCloudElement(cloudElement, connectedCloudElement);
+            if (auxiliaryNetworkCloudElement == null) {
+                continue;
+            }
+
+            // 没有定义的端口补全
+            if (cloudPort == null) {
+                cloudPort = new CloudPluginSceneElementPortBO();
+                addCloudPort(port.getId(), cloudPort);
+            }
+            cloudPort.setAuxiliaryNetworkId(auxiliaryNetworkCloudElement.getAuxiliaryNetworkId());
+
+            var virtualNic = new VirtualNic();
+            virtualNic.setNetworkId(auxiliaryNetworkCloudElement.getAuxiliaryNetworkId());
+            virtualNic.setFixedIp(port.getIp());
+            virtualNic.setMacAddress(TextUtils.emptyNull(port.getMacAddr()));
+
+            List<VirtualNic.QosRule> qosRules = new ArrayList<>();
+            if (port.getIngress() > 0 || port.getDelay() > 0 || port.getLoss() > 0) {
+                var qosRule = new VirtualNic.QosRule();
+                qosRule.setMaxKbps(port.getIngress());
+                qosRule.setDirection(QosRuleDirection.INGRESS);
+                qosRule.setDelayMs(port.getDelay());
+                qosRule.setLossPercent(port.getLoss());
+                qosRules.add(qosRule);
+            }
+            if (port.getEgress() > 0 || port.getDelay() > 0 || port.getLoss() > 0) {
+                var qosRule = new VirtualNic.QosRule();
+                qosRule.setMaxKbps(port.getEgress());
+                qosRule.setDirection(QosRuleDirection.EGRESS);
+                qosRule.setDelayMs(port.getDelay());
+                qosRule.setLossPercent(port.getLoss());
+                qosRules.add(qosRule);
+            }
+            if (!qosRules.isEmpty()) {
+                virtualNic.setQosRules(qosRules);
+            }
+
+            virtualNic.setEnableExternal(cloudPort.getNat());
+            virtualNic.setFirewallId(null);
+
+            var accessModes = cloudPort.getAccessModes();
+            if (accessModes != null) {
+                virtualNic.setAccessModes(accessModes.stream().map(accessMode -> {
+                    var accessModeParam = new VirtualNic.AccessMode();
+                    accessModeParam.setProtocol(accessMode.getProtocol());
+                    accessModeParam.setPort(accessMode.getPort());
+                    accessModeParam.setUsername(accessMode.getUsername());
+                    accessModeParam.setPassword(accessMode.getPassword());
+                    accessModeParam.setEnablePortMapping(accessMode.getProxy());
+                    accessModeParam.setPortMappingProtocol(accessMode.getBaseProtocol());
+                    accessModeParam.setIpAddress(port.getIp());
+                    return accessModeParam;
+                }).collect(Collectors.toList()));
+            }
+            virtualNics.add(virtualNic);
+        }
+
+        return virtualNics;
+    }
+
+    private List<EntityNodeCreateData.Interface> genEntityInterfaces(CloudPluginSceneElementBO cloudElement) {
+        List<EntityNodeCreateData.Interface> entityInterfaces = new ArrayList<>();
+        var srcElement = cloudElement.getSrcElement();
+        var ports = srcElement.getPorts();
+        if (ports == null) {
+            return entityInterfaces;
+        }
+
+        for (var port : ports) {
+            var connectedSrcElement = getPluginHandler().getPortConnectedSrcElement(port.getId());
+            if (connectedSrcElement == null) {
+                continue;
+            }
+            var connectedCloudElement = getPluginHandler().getElement(connectedSrcElement.getId());
+            var auxiliaryNetworkCloudElement = confirmAuxiliaryNetworkCloudElement(cloudElement, connectedCloudElement);
+            if (auxiliaryNetworkCloudElement == null) {
+                continue;
+            }
+
+            var cloudPort = getPluginHandler().getPort(port.getId());
+            // 没有定义的端口补全
+            if (cloudPort == null) {
+                cloudPort = new CloudPluginSceneElementPortBO();
+                addCloudPort(port.getId(), cloudPort);
+            }
+            cloudPort.setAuxiliaryNetworkId(auxiliaryNetworkCloudElement.getAuxiliaryNetworkId());
+
+            var entityInterface = new EntityNodeCreateData.Interface();
+            entityInterface.setNetworkId(auxiliaryNetworkCloudElement.getAuxiliaryNetworkId());
+            entityInterface.setInterfaceName(port.getName());
+
+            var accessModes = cloudPort.getAccessModes();
+            if (accessModes != null) {
+                entityInterface.setAccessModes(accessModes.stream().map(accessMode -> {
+                    var accessModeParam = new EntityNodeCreateData.Interface.AccessMode();
+                    accessModeParam.setProtocol(accessMode.getProtocol());
+                    accessModeParam.setPort(accessMode.getPort());
+                    accessModeParam.setUsername(accessMode.getUsername());
+                    accessModeParam.setPassword(accessMode.getPassword());
+                    accessModeParam.setIpAddress(port.getIp());
+                    accessModeParam.setMacAddress(port.getMacAddr());
+                    return accessModeParam;
+                }).collect(Collectors.toList()));
+            }
+            entityInterfaces.add(entityInterface);
+        }
+
+        return entityInterfaces;
+    }
+
+    private String combineInitCommand(CloudPluginSceneElementBO cloudElement) {
+        var srcElement = cloudElement.getSrcElement();
+        List<String> commands = new ArrayList<>();
+        List<String> initCommands = srcElement.getInitCommands();
+        if (initCommands != null) {
+            commands.addAll(initCommands);
+        }
+
+        // TODO: 应用安装
+
+        // TODO: 快速创建安装
+//        if (Boolean.TRUE.equals(cloudElement.getQuickCreateSupport())) {
+//
+//        }
+
+        return CommandUtils.joinCommands(commands.toArray(new String[0]), srcElement.getSystemType());
+    }
+
+    private void receiveVirtualPortInfo(CloudPluginSceneElementBO cloudElement, List<VirtualNic> virtualNics) {
+        if (virtualNics == null) {
+            return;
+        }
+
+        var srcPorts = cloudElement.getSrcElement().getPorts();
+        if (srcPorts == null) {
+            return;
+        }
+
+        Map<String, CloudPluginSceneElementPortBO> networkIdCloudPortMap = new HashMap<>();
+        srcPorts.forEach(srcPort -> {
+            var cloudPort = getPluginHandler().getPort(srcPort.getId());
+            networkIdCloudPortMap.put(cloudPort.getAuxiliaryNetworkId(), cloudPort);
+        });
+
+        virtualNics.forEach(virtualNic -> {
+            var cloudPort = networkIdCloudPortMap.getOrDefault(virtualNic.getNetworkId(), null);
+            if (cloudPort == null) {
+                return;
+            }
+
+            var srcPort = cloudPort.getSrcPort();
+            srcPort.setIp(virtualNic.getFixedIp());
+            srcPort.setMacAddr(virtualNic.getMacAddress());
+
+            cloudPort.setResourceId(virtualNic.getPortId());
+            cloudPort.setQosId(virtualNic.getQosId());
+
+            var accessModesData = virtualNic.getAccessModes();
+            if (accessModesData != null) {
+                Map<String, VirtualNic.AccessMode> accessModeDataMap = accessModesData.stream()
+                        .collect(Collectors.toMap(this::genAccessModeKey, accessMode -> accessMode));
+                cloudPort.getAccessModes().forEach(accessMode -> {
+                    var accessModeData = accessModeDataMap.getOrDefault(genAccessModeKey(accessMode), null);
+                    if (accessModeData == null) {
+                        return;
+                    }
+
+                    var connection = accessModeData.getConnection();
+                    if (connection != null) {
+                        accessMode.setConnectionId(connection.getConnectionId());
+                        accessMode.setConnectionUrl(connection.getUrl());
+                    }
+
+                    var portMapping = accessModeData.getPortMapping();
+                    if (portMapping != null) {
+                        accessMode.setProxyId(portMapping.getId());
+                        accessMode.setAccessIp(portMapping.getHost());
+                        accessMode.setAccessPort(portMapping.getHostPort());
+                    } else {
+                        accessMode.setAccessIp(accessModeData.getIpAddress());
+                        accessMode.setAccessPort(accessModeData.getPort());
+                    }
+                });
+            }
+
+        });
+    }
+
+    private void receiveEntityInterfaceInfo(CloudPluginSceneElementBO cloudElement,
+                                            List<EntityNodeCreateData.Interface> entityInterfaces) {
+        if (entityInterfaces == null) {
+            return;
+        }
+
+        var srcPorts = cloudElement.getSrcElement().getPorts();
+        if (srcPorts == null) {
+            return;
+        }
+
+        Map<String, CloudPluginSceneElementPortBO> networkIdCloudPortMap = new HashMap<>();
+        srcPorts.forEach(srcPort -> {
+            var cloudPort = getPluginHandler().getPort(srcPort.getId());
+            networkIdCloudPortMap.put(cloudPort.getAuxiliaryNetworkId(), cloudPort);
+        });
+
+        entityInterfaces.forEach(entityInterface -> {
+            var cloudPort = networkIdCloudPortMap.getOrDefault(entityInterface.getNetworkId(), null);
+            if (cloudPort == null) {
+                return;
+            }
+
+            var accessModesData = entityInterface.getAccessModes();
+            if (accessModesData != null) {
+                Map<String, EntityNodeCreateData.Interface.AccessMode> accessModeDataMap = accessModesData.stream()
+                        .collect(Collectors.toMap(this::genAccessModeKey, accessMode -> accessMode));
+                cloudPort.getAccessModes().forEach(accessMode -> {
+                    var accessModeData = accessModeDataMap.getOrDefault(genAccessModeKey(accessMode), null);
+                    if (accessModeData == null) {
+                        return;
+                    }
+
+                    var connection = accessModeData.getConnection();
+                    if (connection != null) {
+                        accessMode.setConnectionId(connection.getConnectionId());
+                        accessMode.setConnectionUrl(connection.getUrl());
+                    }
+                    accessMode.setAccessIp(accessModeData.getIpAddress());
+                    accessMode.setAccessPort(accessModeData.getPort());
+                });
+            }
+        });
+    }
+
+    private void createVirtualRouter(CloudPluginSceneElementBO cloudElement) {
+        var createData = new VirtualRouterCreateData();
+        createData.setName(genResourceName(cloudElement.getSrcElement().getEid()));
+        var srcStaticRoutes = cloudElement.getStaticRoutes();
+        if (srcStaticRoutes != null) {
+            List<VirtualRouterCreateData.StaticRoute> staticRoutes = new ArrayList<>();
+            srcStaticRoutes.forEach(srcStaticRoute -> {
+                staticRoutes.add(new VirtualRouterCreateData.StaticRoute(srcStaticRoute.getDestination(),
+                        srcStaticRoute.getNexthop()));
+            });
+            createData.setRoutes(staticRoutes);
+        }
+        createData.setNetworks(genVirutalNics(cloudElement));
+        var virtualRouter = vrClient.create(createData);
+        cloudElement.setResourceId(virtualRouter.getId());
+
+        receiveVirtualPortInfo(cloudElement, virtualRouter.getNetworks());
+    }
+
+    private void createVirtualFirewall(CloudPluginSceneElementBO cloudElement) {
+        var srcElement = cloudElement.getSrcElement();
+        var createData = new VirtualFirewallCreateData();
+        createData.setName(genResourceName(srcElement.getEid()));
+        var srcRules = cloudElement.getFirewallRules();
+        if (srcRules != null) {
+            List<VirtualFirewallCreateData.Rule> ingressRules = new ArrayList<>();
+            List<VirtualFirewallCreateData.Rule> egressRules = new ArrayList<>();
+            srcRules.forEach(srcRule -> {
+                var direction = srcRule.getDirection();
+                var rule = new VirtualFirewallCreateData.Rule(srcRule.getSourceIpAddress(),
+                        srcRule.getDestinationIpAddress(), srcRule.getSourcePort(),
+                        srcRule.getDestinationPort(), null, srcRule.getProtocol(),
+                        srcRule.getAction());
+                if (FirewallRuleDirection.INGRESS.equals(direction)) {
+                    ingressRules.add(rule);
+                } else if (FirewallRuleDirection.EGRESS.equals(direction)) {
+                    egressRules.add(rule);
+                } else if (FirewallRuleDirection.BOTH.equals(direction)) {
+                    ingressRules.add(rule);
+                    egressRules.add(rule);
+                }
+
+            });
+            createData.setIngressRules(ingressRules);
+            createData.setEgressRules(egressRules);
+        }
+
+        // 防火墙连接的虚拟路由端口
+        List<String> targetPorts = new ArrayList<>();
+        var connectedSrcPorts = getPluginHandler().getElementConnectedSrcPorts(srcElement.getId());
+        for (var connectedSrcPort : connectedSrcPorts) {
+            var connectedCloudPort = getPluginHandler().getPort(connectedSrcPort.getId());
+            if (connectedCloudPort == null || connectedCloudPort.getResourceId() == null) {
+                continue;
+            }
+            var connectedSrcElement = getPluginHandler().getPortSrcElement(connectedSrcPort.getId());
+            var connectedCloutElement = getPluginHandler().getElement(connectedSrcElement.getId());
+            if (connectedCloutElement == null || connectedCloutElement.getVirtualType() == null
+                    || connectedCloutElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
+                continue;
+            }
+            targetPorts.add(connectedCloudPort.getResourceId());
+        }
+        if (!targetPorts.isEmpty()) {
+            createData.setPorts(targetPorts);
+        }
+
+        var virtualFirewall = vfClient.create(createData);
+        cloudElement.setResourceId(virtualFirewall.getId());
+    }
+
+    private void createVirtualMachine(CloudPluginSceneElementBO cloudElement) {
+        var srcElement = cloudElement.getSrcElement();
+        var createData = new VirtualMachineCreateData();
+        createData.setRequestUser(getRequestUser());
+        createData.setName(genResourceName(srcElement.getEid()));
+        createData.setImage(cloudElement.getImage());
+        createData.setCpu(IntUtils.zeroNull(srcElement.getCpu()));
+        createData.setRam(IntUtils.zeroNull(srcElement.getRam()));
+        createData.setDisk(IntUtils.zeroNull(srcElement.getDisk()));
+        if (Boolean.TRUE.equals(cloudElement.getInitSupport())) {
+            createData.setUserData(combineInitCommand(cloudElement));
+        }
+        createData.setNetworks(genVirutalNics(cloudElement));
+        var virtualMachine = vmClient.create(createData);
+        cloudElement.setResourceId(virtualMachine.getId());
+
+        receiveVirtualPortInfo(cloudElement, virtualMachine.getNetworks());
+    }
+
+    private void createContainer(CloudPluginSceneElementBO cloudElement) {
+        var srcElement = cloudElement.getSrcElement();
+        var createData = new ContainerCreateData();
+        createData.setRequestUser(getRequestUser());
+        createData.setName(genResourceName(srcElement.getEid()));
+        createData.setImage(cloudElement.getImage());
+        createData.setCpu(srcElement.getCpu());
+        createData.setRam(srcElement.getRam());
+        if (Boolean.TRUE.equals(cloudElement.getInitSupport())) {
+            createData.setPostCommand(combineInitCommand(cloudElement));
+        }
+        createData.setNetworks(genVirutalNics(cloudElement));
+        var container = containerClient.create(createData);
+        cloudElement.setResourceId(container.getId());
+
+        receiveVirtualPortInfo(cloudElement, container.getNetworks());
+    }
+
+    private void createEntityNode(CloudPluginSceneElementBO cloudElement) {
+        var createData = new EntityNodeCreateData();
+        createData.setRequestUser(getRequestUser());
+        createData.setName(cloudElement.getImage());
+        createData.setInterfaces(genEntityInterfaces(cloudElement));
+        var entityNode = enClient.create(createData);
+
+        receiveEntityInterfaceInfo(cloudElement, entityNode.getInterfaces());
+    }
+
+    private void createElement(CloudPluginSceneElementBO cloudElement) {
+        if (Boolean.TRUE.equals(cloudElement.getExternal())) {
+            return;
+        }
+        Integer virtualType = cloudElement.getVirtualType();
+        if (virtualType == null) {
+            return;
+        }
+
+        if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH)) {
+            cloudElement.setResourceId(cloudElement.getAuxiliaryNetworkId());
+        } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
+            createVirtualRouter(cloudElement);
+        } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_FIREWALL)) {
+            createVirtualFirewall(cloudElement);
+        } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
+            createVirtualMachine(cloudElement);
+        } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
+            createContainer(cloudElement);
+        } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE)) {
+            createEntityNode(cloudElement);
+        }
+    }
+
+    public CreateHandler(CloudScenePluginHandler pluginHandler) {
+        super(pluginHandler);
+    }
+
+    public void create() {
+        // 先创建辅助网络(包含虚拟交换机)
+        for (var cloudElement : getPluginHandler().getElementMap().values()) {
+            if (Boolean.TRUE.equals(cloudElement.getAuxiliaryNetworkOn())) {
+                createAuxiliaryNetwork(cloudElement);
+            }
+        }
+
+        // 再创建网关
+        for (var cloudElement : getPluginHandler().getGatewayElementMap().values()) {
+            createElement(cloudElement);
+        }
+
+        // 再创建防火墙
+        for (var cloudElement : getPluginHandler().getFirewallElementMap().values()) {
+            createElement(cloudElement);
+        }
+
+        // 再创建终端
+        for (var cloudElement : getPluginHandler().getTerminalElementMap().values()) {
+            createElement(cloudElement);
+        }
+    }
 }

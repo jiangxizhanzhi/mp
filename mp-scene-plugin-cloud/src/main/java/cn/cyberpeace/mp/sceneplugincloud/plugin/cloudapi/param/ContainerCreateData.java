@@ -1,12 +1,17 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param;
 
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.HttpData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudHttpData;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Map;
 
 @Data
-public class ContainerCreateData implements HttpData {
+@AllArgsConstructor
+@NoArgsConstructor
+public class ContainerCreateData implements CloudHttpData {
     private String name;
     private String image;
     private Integer cpu;
@@ -24,6 +29,8 @@ public class ContainerCreateData implements HttpData {
     private String command;
     private String postCommand;
     private String workdir;
-    private String environment;
+    private Map<String, String> environment;
     private String hostname;
+
+    private String id;
 }

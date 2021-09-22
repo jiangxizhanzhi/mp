@@ -17,10 +17,16 @@ public class AccessProtocol{
     private String protocol;
 
     /**
+     * 认证协议
+     */
+    @ApiModelProperty("认证协议")
+    private String authProtocol;
+
+    /**
      * IP地址
      */
     @ApiModelProperty("IP地址")
-    private String ip;
+    private String hostname;
 
     /**
      * 端口
@@ -39,5 +45,11 @@ public class AccessProtocol{
      */
     @ApiModelProperty("密码")
     private String password;
+
+    /**d
+     * 描述
+     */
+    @ApiModelProperty("描述")
+    private String description;
 
 }

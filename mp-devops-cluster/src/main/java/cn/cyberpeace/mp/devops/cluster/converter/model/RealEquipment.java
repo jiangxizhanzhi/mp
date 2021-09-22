@@ -2,9 +2,12 @@ package cn.cyberpeace.mp.devops.cluster.converter.model;
 
 import cn.cyberpeace.mp.devops.cluster.enums.StatusEnum;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntity;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntityAccess;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtGateway;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
 import lombok.*;
+
+import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
@@ -44,6 +47,11 @@ public class RealEquipment extends BasePageConvertModel{
     private Integer subCategory;
 
     /**
+     * 三级分类
+     */
+    private Integer thirdCategory;
+
+    /**
      * 系统信息
      */
     private ExtSystemInfo extSystemInfo;
@@ -52,6 +60,11 @@ public class RealEquipment extends BasePageConvertModel{
      * 实体信息
      */
     private ExtEntity extEntity;
+
+    /**
+     * 交换机
+     */
+    private List<ExtEntityAccess> extEntityAccess;
 
     /**
      * 描述

@@ -7,6 +7,8 @@ import cn.cyberpeace.mp.devops.cluster.enums.StatusEnum;
 import cn.cyberpeace.mp.devops.cluster.model.Device;
 import cn.cyberpeace.mp.devops.cluster.model.TargetModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntity;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtImageInfo;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtVm;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
 import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
@@ -41,10 +43,12 @@ public class DevopsDevopsTargetServiceImpl implements DevopsTargetService {
     @Override
     public Integer updateById(Device device) {
         if (Objects.nonNull(device) && device.isSuccess()) {
-            TargetModel oldTargetModel = imageMapper.get(device.getUuid());
-            TargetModel targetModel = convertDevice(device);
-            targetModel.setIsPublic(oldTargetModel.getIsPublic());
-            return imageMapper.updateById(targetModel);
+            TargetModel oldTargetModel = imageMapper.findByUuid(device.getUuid());
+            if (Objects.nonNull(oldTargetModel)) {
+                TargetModel targetModel = convertDevice(device);
+                targetModel.setIsPublic(oldTargetModel.getIsPublic());
+                return imageMapper.updateById(targetModel);
+            }
         }
         return 0;
     }
@@ -57,6 +61,7 @@ public class DevopsDevopsTargetServiceImpl implements DevopsTargetService {
         targetModel.setRole(device.getRole());
         targetModel.setMainCategory(device.getCategory());
         targetModel.setSubCategory(device.getSecondCategory());
+        targetModel.setThirdCategory(device.getL3Category());
         targetModel.setImageType(device.getImageType());
         ExtVm extVm = device.getExtVm();
         if (Objects.nonNull(extVm)) {
@@ -71,6 +76,19 @@ public class DevopsDevopsTargetServiceImpl implements DevopsTargetService {
         if (Objects.nonNull(extEntity)){
             targetModel.setInPosition(extEntity.getEntityStatus() ? StatusEnum.YES : StatusEnum.NO);
         }
+
+        ExtImageInfo extImageInfo = device.getExtImageInfo();
+        if (Objects.nonNull(extImageInfo)){
+            targetModel.setImageStatus(extImageInfo.getImageStatus());
+        }
+
+        ExtSystemInfo extSystemInfo = device.getExtSystemInfo();
+        if (Objects.nonNull(extSystemInfo)){
+            targetModel.setSystemType(extSystemInfo.getSystemType());
+            targetModel.setLanguage(extSystemInfo.getLanguage());
+            targetModel.setSystemArchitecure(extSystemInfo.getSystemArchitecture());
+        }
+
         return targetModel;
     }
 }

@@ -5,8 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -31,55 +29,13 @@ public class ExtEntity{
     private String params;
 
     /**
-     * 接入类型
-     */
-    @ApiModelProperty("接入类型")
-    private String accessType;
-
-    /**
-     * 交换机端口
-     */
-    @ApiModelProperty("交换机端口")
-    private String accessSwitchPort;
-
-    /**
-     * 实体端口名
-     */
-    @ApiModelProperty("实体端口名")
-    private String accessSwitchPortName;
-
-    /**
-     * IP地址
-     */
-    @ApiModelProperty("IP地址")
-    private String accessIpAddress;
-
-    /**
-     * IMAC地址
-     */
-    @ApiModelProperty("IMAC地址")
-    private String accessMacAddress;
-
-    /**
-     * 管理协议列表
-     */
-    @ApiModelProperty("管理协议列表")
-    private String accessProtocols;
-
-    /**
      * SNMP版本
      */
     @ApiModelProperty("SNMP版本")
     private String snmpVersion;
 
-    /**
-     * SNMP配置
-     */
     @ApiModelProperty("SNMP配置")
-    private String snmpConfig;
-
-    @ApiModelProperty("SNMP配置")
-    private SnmpConfig snmpConfigs;
+    private SnmpConfig snmpConfig;
 
     /**
      * SNMP CPU占用率table根节点OID
@@ -99,6 +55,9 @@ public class ExtEntity{
     @ApiModelProperty(" SNMP 磁盘占用率table根节点OID")
     private String snmpDiskOid;
 
+    @ApiModelProperty("串口服务器名称")
+    private String ccmServerName;
+
     /**
      * 串口端口
      */
@@ -109,17 +68,11 @@ public class ExtEntity{
      * 串口用户名
      */
     @ApiModelProperty("串口用户名")
-    private String ccmName;
+    private String ccmUsername;
 
     /**
      * 串口密码
      */
     @ApiModelProperty("串口密码")
     private String ccmPassword;
-
-    /**
-     * 接入方式集合
-     */
-    @ApiModelProperty("接入方式集合")
-    private List<AccessProtocol> accessProtocolList;
 }

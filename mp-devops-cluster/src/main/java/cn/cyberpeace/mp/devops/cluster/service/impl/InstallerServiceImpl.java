@@ -74,10 +74,9 @@ public class InstallerServiceImpl extends BaseOpenStackServiceImpl implements In
     }
 
     @Override
-    public Boolean deleteByIds(List<String> ids) {
+    public BaseCloudPlatformModel deleteByIds(List<String> ids) {
         var jsonObject = new JSONObject();
         jsonObject.put("uuids", ids);
-        BaseCloudPlatformModel model = super.sendDelete(CPCLOUD_DEVICE + URL_VERSION + "/installer/lists",JSONObject.toJSONString(jsonObject),BaseCloudPlatformModel.class);
-        return model.isSuccess();
+        return super.sendDelete(CPCLOUD_DEVICE + URL_VERSION + "/installer/lists",JSONObject.toJSONString(jsonObject),BaseCloudPlatformModel.class);
     }
 }

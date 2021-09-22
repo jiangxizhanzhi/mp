@@ -23,5 +23,4 @@ public class InstallerDeleteRequest extends BaseRequest{
     @NotEmpty
     private List<String> uuids;
 
-
 }

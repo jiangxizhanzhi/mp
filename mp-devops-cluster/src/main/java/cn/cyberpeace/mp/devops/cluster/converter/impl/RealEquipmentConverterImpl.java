@@ -4,21 +4,26 @@ import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.devops.cluster.converter.RealEquipmentConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.RealEquipment;
 import cn.cyberpeace.mp.devops.cluster.converter.model.RealEquipmentConvertModel;
+import cn.cyberpeace.mp.devops.cluster.dto.ImageDeleteDTO;
 import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devops.cluster.enums.ImageTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.model.Device;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.TargetModel;
-import cn.cyberpeace.mp.devops.cluster.model.common.*;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntity;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtGateway;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
+import cn.cyberpeace.mp.devops.cluster.repository.ImageAuthMapper;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentRequest;
+import cn.cyberpeace.mp.devops.cluster.request.TargetSceneRequest;
 import cn.cyberpeace.mp.devops.cluster.service.DeviceService;
 import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.devops.cluster.service.RealEquipmentService;
-import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
-import com.alibaba.fastjson.JSONArray;
+import cn.cyberpeace.mp.devops.cluster.service.TargetLogoService;
+import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,13 +47,21 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
 
     private ImageMapper imageMapper;
 
+    private TargetLogoService targetLogoService;
+
+
+    private ImageAuthMapper imageAuthMapper;
+
     @Autowired
     public RealEquipmentConverterImpl(RealEquipmentService realEquipmentService, DeviceService deviceService,
-                                      DevopsTargetService devopsTargetService, ImageMapper imageMapper) {
+                                      DevopsTargetService devopsTargetService, ImageMapper imageMapper,
+                                      TargetLogoService targetLogoService,ImageAuthMapper imageAuthMapper) {
         this.realEquipmentService = realEquipmentService;
         this.deviceService = deviceService;
         this.devopsTargetService = devopsTargetService;
         this.imageMapper = imageMapper;
+        this.targetLogoService = targetLogoService;
+        this.imageAuthMapper = imageAuthMapper;
     }
 
     @Override
@@ -74,6 +87,7 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
         ImagePageDTO dto = new ImagePageDTO();
         dto.setMainCategory(request.getCategory());
         dto.setSubCategory(request.getSecondCategory());
+        dto.setThirdCategory(request.getThirdCategory());
         dto.setImageType(ImageTypeEnum.ENTITY.toValue());
         dto.setUseStatus(request.getUseStatus());
         dto.setName(request.getName());
@@ -111,8 +125,34 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
 
         RealEquipmentConvertModel convertModel = new RealEquipmentConvertModel();
         convertModel.setModelList(modelList);
-        convertModel.setTotal(model.getTotal());
+        convertModel.setTotal(total);
         return convertModel;
+    }
+
+    @Override
+    public List<Device> allTarget(TargetSceneRequest request) {
+        ImagePageDTO dto = new ImagePageDTO();
+        dto.setMainCategory(request.getCategory());
+        dto.setSubCategory(request.getSecondCategory());
+        dto.setImageType(Objects.nonNull(request.getImageType()) ? request.getImageType().toValue() : "");
+        dto.setName(request.getName());
+        Integer total = imageMapper.totalCount(dto);
+        if (total == 0){
+            return null;
+        }
+        List<TargetModel> targetModels = imageMapper.page(dto);
+
+        List<Integer> ids = targetModels.stream().map(TargetModel::getId).map(Integer::parseInt).collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(ids)){
+            return null;
+        }
+        DeviceCloudPlatformModel model = deviceService.findByIds(ids);
+
+        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getItems())){
+            return Lists.newArrayList();
+        }
+
+        return model.getItems();
     }
 
     @Override
@@ -124,6 +164,10 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
     @Transactional
     @Override
     public RealEquipment add(RealEquipmentRequest request) {
+        if (Objects.nonNull(request.getLogoFile()) && request.getLogoFile().getSize() > 0 ){
+            String logo = targetLogoService.uploadLogo(request.getLogoFile());
+            request.setLogo(logo);
+        }
         Device device = convertRequest(request);
         if (Objects.isNull(device)){
             return new RealEquipment();
@@ -135,6 +179,10 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
 
     @Override
     public RealEquipment update(RealEquipmentRequest request) {
+        if (Objects.nonNull(request.getLogoFile()) && request.getLogoFile().getSize() > 0 ){
+            String logo = targetLogoService.uploadLogo(request.getLogoFile());
+            request.setLogo(logo);
+        }
         Device device = convertRequest(request);
         Device result = realEquipmentService.update(request.getUuid(),device);
         devopsTargetService.updateById(result);
@@ -142,8 +190,14 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
     }
 
     @Override
+    @Transactional
     public Boolean delete(RealEquipmentDeleteRequest request) {
-        return deviceService.deleteByIds(request.getUuids());
+        deviceService.deleteByIds(request.getUuids());
+        ImageDeleteDTO dto = new ImageDeleteDTO();
+        dto.setIds(request.getUuids());
+        imageMapper.delete(dto);
+        request.getUuids().forEach(id -> imageAuthMapper.deleteByTarget(id));
+        return Boolean.TRUE;
     }
 
     /**
@@ -164,29 +218,30 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
         RealEquipment convertModel = RealEquipment.builder().uuid(device.getUuid())
                 .name(device.getName()).role(device.getRole()).logo(device.getLogo())
                 .mainCategory(device.getCategory()).subCategory(device.getSecondCategory())
-                .description(device.getDescription()).build();
+                .description(device.getDescription()).thirdCategory(device.getL3Category()).extEntityAccess(device.getExtEntityAccess()).build();
         convertModel.setSuccess(device.isSuccess());
         if (Objects.nonNull(extEntity)){
             ExtEntity entity = new ExtEntity();
             entity.setStyle(extEntity.getStyle());
             entity.setParams(extEntity.getParams());
-            entity.setAccessType(extEntity.getAccessType());
+//            entity.setAccessType(extEntity.getAccessType());
             entity.setEntityStatus(extEntity.getEntityStatus());
-            entity.setAccessSwitchPort(extEntity.getAccessSwitchPort());
-            entity.setAccessSwitchPortName(extEntity.getAccessSwitchPortName());
-            entity.setAccessIpAddress(extEntity.getAccessIpAddress());
-            entity.setAccessMacAddress(extEntity.getAccessMacAddress());
+//            entity.setAccessSwitchPort(extEntity.getAccessSwitchPort());
+//            entity.setAccessSwitchPortName(extEntity.getAccessSwitchPortName());
+//            entity.setAccessIpAddress(extEntity.getAccessIpAddress());
+//            entity.setAccessMacAddress(extEntity.getAccessMacAddress());
             entity.setSnmpVersion(extEntity.getSnmpVersion());
             entity.setSnmpConfig(extEntity.getSnmpConfig());
             entity.setSnmpCpuOid(extEntity.getSnmpCpuOid());
             entity.setSnmpDiskOid(extEntity.getSnmpDiskOid());
             entity.setSnmpMemOid(extEntity.getSnmpMemOid());
             entity.setCcmPort(extEntity.getCcmPort());
-            entity.setCcmName(extEntity.getCcmName());
+            entity.setCcmUsername(extEntity.getCcmUsername());
             entity.setCcmPassword(extEntity.getCcmPassword());
-            entity.setAccessProtocols(extEntity.getAccessProtocols());
-            entity.setAccessProtocolList(JSONArray.parseArray(extEntity.getAccessProtocols(), AccessProtocol.class));
-            entity.setSnmpConfigs(JsonUtils.toSnakeObject(extEntity.getSnmpConfig(), SnmpConfig.class));
+            entity.setCcmServerName(extEntity.getCcmServerName());
+//            entity.setAccessProtocols(extEntity.getAccessProtocols());
+//            entity.setAccessProtocolList(JSONArray.parseArray(extEntity.getAccessProtocols(), AccessProtocol.class));
+            entity.setSnmpConfig(extEntity.getSnmpConfig());
             convertModel.setExtEntity(entity);
         }
         convertModel.setExtSystemInfo(extSystemInfo);
@@ -210,26 +265,28 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
         device.setRole(request.getRole());
         device.setCategory(request.getMainCategory());
         device.setSecondCategory(request.getSubCategory());
-
+        device.setL3Category(request.getThirdCategory());
+        device.setExtEntityAccess(request.getExtEntityAccess());
         final ExtEntity requestExtEntity = request.getExtEntity();
         if (Objects.nonNull(requestExtEntity)) {
             ExtEntity extEntity = new ExtEntity();
             extEntity.setStyle(requestExtEntity.getStyle());
             extEntity.setParams(requestExtEntity.getParams());
-            extEntity.setAccessType(requestExtEntity.getAccessType());
-            extEntity.setAccessSwitchPort(requestExtEntity.getAccessSwitchPort());
-            extEntity.setAccessSwitchPortName(requestExtEntity.getAccessSwitchPortName());
-            extEntity.setAccessIpAddress(requestExtEntity.getAccessIpAddress());
-            extEntity.setAccessMacAddress(requestExtEntity.getAccessMacAddress());
+//            extEntity.setAccessType(requestExtEntity.getAccessType());
+//            extEntity.setAccessSwitchPort(requestExtEntity.getAccessSwitchPort());
+//            extEntity.setAccessSwitchPortName(requestExtEntity.getAccessSwitchPortName());
+//            extEntity.setAccessIpAddress(requestExtEntity.getAccessIpAddress());
+//            extEntity.setAccessMacAddress(requestExtEntity.getAccessMacAddress());
             extEntity.setSnmpVersion(requestExtEntity.getSnmpVersion());
-            extEntity.setSnmpConfig(JsonUtils.toUnderlineJSONString(request.getSnmpConfig()));
+            extEntity.setSnmpConfig(requestExtEntity.getSnmpConfig());
             extEntity.setSnmpCpuOid(requestExtEntity.getSnmpCpuOid());
             extEntity.setSnmpDiskOid(requestExtEntity.getSnmpDiskOid());
             extEntity.setSnmpMemOid(requestExtEntity.getSnmpMemOid());
             extEntity.setCcmPort(requestExtEntity.getCcmPort());
-            extEntity.setCcmName(requestExtEntity.getCcmName());
+            extEntity.setCcmUsername(requestExtEntity.getCcmUsername());
+            extEntity.setCcmServerName(requestExtEntity.getCcmServerName());
             extEntity.setCcmPassword(requestExtEntity.getCcmPassword());
-            extEntity.setAccessProtocols(JSONArray.toJSONString(requestExtEntity.getAccessProtocolList()));
+//            extEntity.setAccessProtocols(JSONArray.toJSONString(requestExtEntity.getAccessProtocolList()));
             device.setExtEntity(extEntity);
         }
 

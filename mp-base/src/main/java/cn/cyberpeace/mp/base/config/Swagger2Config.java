@@ -38,6 +38,17 @@ import java.util.stream.Collectors;
 @EnableSwagger2
 public class Swagger2Config implements ModelPropertyBuilderPlugin {
 
+    private static RequestParameter parameter =
+            new RequestParameterBuilder()
+                    .name("Authorization")
+                    .description("认证")
+                    .in(ParameterType.HEADER)
+                    .query(q ->
+                            q.defaultValue("abc")
+                                    .allowEmptyValue(true))
+                    .required(false)
+                    .build();
+
     @Bean
     public Docket createRestApi() {
 
@@ -62,12 +73,171 @@ public class Swagger2Config implements ModelPropertyBuilderPlugin {
 
         return new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(apiInfo())
+                .enableUrlTemplating(true)
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp"))
                 .paths(PathSelectors.any())
                 .build()
                 .globalRequestParameters(CollectionUtil.toList(parameter));
 
+    }
+
+    @Bean
+    public Docket apiBase() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .apiInfo(apiInfo())
+                .enableUrlTemplating(true)
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.base"))
+                .paths(PathSelectors.any())
+                .build()
+                .globalRequestParameters(CollectionUtil.toList(parameter)).groupName("base");
+    }
+
+    @Bean
+    public Docket apiAuth() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .apiInfo(apiInfo())
+                .enableUrlTemplating(true)
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.auth"))
+                .paths(PathSelectors.any())
+                .build()
+                .globalRequestParameters(CollectionUtil.toList(parameter)).groupName("auth");
+    }
+
+    @Bean
+    public Docket apiCScene() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .apiInfo(apiInfo())
+                .enableUrlTemplating(true)
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.cscene"))
+                .paths(PathSelectors.any())
+                .build()
+                .globalRequestParameters(CollectionUtil.toList(parameter)).groupName("cscene");
+    }
+
+    @Bean
+    public Docket apiDevopsCluster() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .apiInfo(apiInfo())
+                .enableUrlTemplating(true)
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.devops.cluster"))
+                .paths(PathSelectors.any())
+                .build()
+                .globalRequestParameters(CollectionUtil.toList(parameter)).groupName("devops-cluster");
+    }
+
+    @Bean
+    public Docket apiDevopsLog() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .apiInfo(apiInfo())
+                .enableUrlTemplating(true)
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.devops.log"))
+                .paths(PathSelectors.any())
+                .build()
+                .globalRequestParameters(CollectionUtil.toList(parameter)).groupName("devops-log");
+    }
+
+    @Bean
+    public Docket apiMpFlow() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .apiInfo(apiInfo())
+                .enableUrlTemplating(true)
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.flow"))
+                .paths(PathSelectors.any())
+                .build()
+                .globalRequestParameters(CollectionUtil.toList(parameter)).groupName("flow");
+    }
+
+    @Bean
+    public Docket apiScene() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .apiInfo(apiInfo())
+                .enableUrlTemplating(true)
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.scene"))
+                .paths(PathSelectors.any())
+                .build()
+                .globalRequestParameters(CollectionUtil.toList(parameter)).groupName("scene");
+    }
+
+    @Bean
+    public Docket apiScenePluginCloud() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .apiInfo(apiInfo())
+                .enableUrlTemplating(true)
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.sceneplugincloud"))
+                .paths(PathSelectors.any())
+                .build()
+                .globalRequestParameters(CollectionUtil.toList(parameter)).groupName("scene-plugin-cloud");
+    }
+
+    @Bean
+    public Docket apiScenePluginCollection() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .apiInfo(apiInfo())
+                .enableUrlTemplating(true)
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.sceneplugincollection"))
+                .paths(PathSelectors.any())
+                .build()
+                .globalRequestParameters(CollectionUtil.toList(parameter)).groupName("scene-plugin-collection");
+    }
+
+    @Bean
+    public Docket apiScenePluginFlow() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .apiInfo(apiInfo())
+                .enableUrlTemplating(true)
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.scenepluginflow"))
+                .paths(PathSelectors.any())
+                .build()
+                .globalRequestParameters(CollectionUtil.toList(parameter)).groupName("scene-plugin-flow");
+    }
+
+    @Bean
+    public Docket apiSituationAware() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .apiInfo(apiInfo())
+                .enableUrlTemplating(true)
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.situationaware"))
+                .paths(PathSelectors.any())
+                .build()
+                .globalRequestParameters(CollectionUtil.toList(parameter)).groupName("situation-aware");
+    }
+
+
+    @Bean
+    public Docket apiAgg() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .apiInfo(apiInfo())
+                .enableUrlTemplating(true)
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.aggregation"))
+                .paths(PathSelectors.any())
+                .build()
+                .globalRequestParameters(CollectionUtil.toList(parameter)).groupName("aggregation");
+    }
+
+    @Bean
+    public Docket apiOther() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .apiInfo(apiInfo())
+                .enableUrlTemplating(true)
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp"))
+                .paths(PathSelectors.any())
+                .build()
+                .globalRequestParameters(CollectionUtil.toList(parameter))
+                .groupName("other");
     }
 
     private ApiInfo apiInfo() {

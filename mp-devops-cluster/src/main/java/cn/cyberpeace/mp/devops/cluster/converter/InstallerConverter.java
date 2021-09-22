@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.devops.cluster.converter;
 
 import cn.cyberpeace.mp.devops.cluster.converter.model.InstallerConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InstallerConvertPageModel;
+import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerRequest;
@@ -37,5 +38,5 @@ public interface InstallerConverter extends BaseConverter{
      * 批量删除
      * @param request
      */
-    Boolean delete(InstallerDeleteRequest request);
+    BaseCloudPlatformModel delete(InstallerDeleteRequest request);
 }

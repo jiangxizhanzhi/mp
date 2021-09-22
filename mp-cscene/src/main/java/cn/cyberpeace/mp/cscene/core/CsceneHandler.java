@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneRoleBO;
 import cn.cyberpeace.mp.cscene.core.base.BaseCsceneHandler;
@@ -89,7 +90,7 @@ public class CsceneHandler extends BaseCsceneHandler<
         List<CsceneInstanceBO> appScenes = new ArrayList<>();
         csceneInstanceObjMap.forEach((instanceId, csceneInstanceObj) -> {
             var roleObjs = instanceRoleObjsMap.getOrDefault(instanceId, new ArrayList<>());
-            var csceneInstanceHandler = new CsceneInstanceHandler(csceneInstanceObj, roleObjs);
+            var csceneInstanceHandler = new CsceneInstanceHandler(csceneInstanceObj, roleObjs, getContext());
             var type = csceneInstanceObj.getType();
             if (type != null && type.equals(CsceneInstanceModel.Type.TEST)) {
                 testScenes.add(csceneInstanceHandler.toData());
@@ -103,16 +104,38 @@ public class CsceneHandler extends BaseCsceneHandler<
     }
 
     private CsceneInstanceBO createInstance(int type) {
-        var cscene = getCscene();
+        return createInstance(type, getCscene());
+    }
+
+    private CsceneInstanceBO createInstance(int type, CsceneBO cscene) {
         if (cscene == null) {
             return null;
         }
         var csceneInstance = cscene.exportToCsceneInstance();
+        return createInstance(type, csceneInstance);
+    }
+
+    private CsceneInstanceBO createInstance(int type, CsceneInstanceBO csceneInstance) {
+        if (csceneInstance == null) {
+            return null;
+        }
         csceneInstance.setCscene(getCsceneId());
         csceneInstance.setType(type);
-        var instanceHandler = new CsceneInstanceHandler(csceneInstance);
+        var instanceHandler = new CsceneInstanceHandler(csceneInstance, getContext());
         instanceHandler.create();
         return instanceHandler.toData();
+    }
+
+    public CsceneHandler(CsceneBO csceneBO, CsceneContextBO context) {
+        init(csceneBO, context);
+    }
+
+    public CsceneHandler(String csceneId, CsceneContextBO context) {
+        init(csceneId, context);
+    }
+
+    public CsceneHandler(CsceneModel csceneObj, List<CsceneRoleModel> roleObjs, CsceneContextBO context) {
+        init(csceneObj, roleObjs, context);
     }
 
     @Override
@@ -124,18 +147,6 @@ public class CsceneHandler extends BaseCsceneHandler<
         csceneInstanceRoleMapper = BeanUtils.getBean(CsceneInstanceRoleMapper.class);
     }
 
-    public CsceneHandler(CsceneBO csceneBO) {
-        init(csceneBO);
-    }
-
-    public CsceneHandler(String csceneId) {
-        init(csceneId);
-    }
-
-    public CsceneHandler(CsceneModel csceneObj, List<CsceneRoleModel> roleObjs) {
-        init(csceneObj, roleObjs);
-    }
-
     public CsceneBO toData(boolean withInstance) {
         if (withInstance) {
             reloadCsceneInstances();
@@ -144,44 +155,87 @@ public class CsceneHandler extends BaseCsceneHandler<
     }
 
     public CsceneInstanceBO createTestInstance(boolean unique) {
-        var cscene = getCscene();
+        return createTestInstance(unique, getCscene());
+    }
+
+    public CsceneInstanceBO createTestInstance(boolean unique, CsceneBO cscene) {
         if (cscene == null) {
             return null;
         }
 
         if (unique) {
             reloadCsceneInstances();
-            var testScenes = cscene.getTestScenes();
+            var testScenes = getCscene().getTestScenes();
             if (testScenes != null && !testScenes.isEmpty()) {
                 return null;
             }
         }
-        return createInstance(CsceneInstanceModel.Type.TEST);
+        return createInstance(CsceneInstanceModel.Type.TEST, cscene);
+    }
+
+    public CsceneInstanceBO createTestInstance(boolean unique, CsceneInstanceBO csceneInstance) {
+        if (csceneInstance == null) {
+            return null;
+        }
+
+        if (unique) {
+            reloadCsceneInstances();
+            var testScenes = getCscene().getTestScenes();
+            if (testScenes != null && !testScenes.isEmpty()) {
+                return null;
+            }
+        }
+        return createInstance(CsceneInstanceModel.Type.TEST, csceneInstance);
     }
 
     public CsceneInstanceBO createAppInstance(boolean unique) {
-        var cscene = getCscene();
+        return createAppInstance(unique, getCscene());
+    }
+
+    public CsceneInstanceBO createAppInstance(boolean unique, CsceneBO cscene) {
         if (cscene == null) {
             return null;
         }
 
         if (unique) {
             reloadCsceneInstances();
-            var appScenes = cscene.getAppScenes();
+            var appScenes = getCscene().getAppScenes();
             if (appScenes != null && !appScenes.isEmpty()) {
                 return null;
             }
         }
 
-        return createInstance(CsceneInstanceModel.Type.APP);
+        return createInstance(CsceneInstanceModel.Type.APP, cscene);
+    }
+
+    public CsceneInstanceBO createAppInstance(boolean unique, CsceneInstanceBO csceneInstanceBO) {
+        if (csceneInstanceBO == null) {
+            return null;
+        }
+
+        if (unique) {
+            reloadCsceneInstances();
+            var appScenes = getCscene().getAppScenes();
+            if (appScenes != null && !appScenes.isEmpty()) {
+                return null;
+            }
+        }
+
+        return createInstance(CsceneInstanceModel.Type.APP, csceneInstanceBO);
     }
 
     @Override
     public void delete() {
-        reloadCsceneInstances();
-        for (var csceneInstance: ListUtils.union(getCscene().getTestScenes(), getCscene().getAppScenes())) {
-            var instanceHandler = new CsceneInstanceHandler(csceneInstance);
-            instanceHandler.delete();
+        delete(true);
+    }
+
+    public void delete(boolean withInstance) {
+        if (withInstance) {
+            reloadCsceneInstances();
+            for (var csceneInstance: ListUtils.union(getCscene().getTestScenes(), getCscene().getAppScenes())) {
+                var instanceHandler = new CsceneInstanceHandler(csceneInstance, getContext());
+                instanceHandler.delete();
+            }
         }
 
         super.delete();
@@ -194,12 +248,12 @@ public class CsceneHandler extends BaseCsceneHandler<
 
     @Override
     public void loadScene(CsceneBO csceneBO, String sceneId) {
-        csceneBO.setSceneConfig(sceneConfigService.get(sceneId, false, null).getSource());
+        csceneBO.setSceneConfig(sceneConfigService.get(sceneId, false, null, null).getSource());
     }
 
     @Override
     public void saveScene(CsceneBO csceneBO) {
-        csceneBO.setSceneConfig(sceneConfigService.sync(csceneBO.getSceneConfig(), false).getSource());
+        csceneBO.setSceneConfig(sceneConfigService.sync(csceneBO.getSceneConfig(), false, null).getSource());
     }
 
     @Override
@@ -213,7 +267,7 @@ public class CsceneHandler extends BaseCsceneHandler<
     @Override
     public void deleteScene(String sceneId) {
         if (sceneId != null) {
-            sceneConfigService.delete(sceneId, true);
+            sceneConfigService.delete(sceneId, true, null);
         }
     }
 }

@@ -4,10 +4,12 @@ import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.devops.cluster.converter.HypervisorConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.*;
+import cn.cyberpeace.mp.devops.cluster.model.common.HypervisorStatistics;
 import cn.cyberpeace.mp.devops.cluster.request.HypervisorPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.HypervisorRequest;
 import cn.cyberpeace.mp.devops.cluster.request.HypervisorWeightAndMaxInstanceRequest;
 import cn.cyberpeace.mp.devops.cluster.service.HypervisorService;
+import cn.cyberpeace.mp.devops.cluster.service.SwitchService;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,9 +26,12 @@ public class HypervisorConverterImpl implements HypervisorConverter {
 
     private HypervisorService hypervisorService;
 
+    private SwitchService switchService;
+
     @Autowired
-    public HypervisorConverterImpl(HypervisorService hypervisorService) {
+    public HypervisorConverterImpl(HypervisorService hypervisorService, SwitchService switchService) {
         this.hypervisorService = hypervisorService;
+        this.switchService = switchService;
     }
 
     @Override
@@ -43,7 +48,7 @@ public class HypervisorConverterImpl implements HypervisorConverter {
     @Override
     public HypervisorStatisticsConvertModel statistics() {
         HypervisorStatisticsCloudPlatformModel statistics = hypervisorService.statistics();
-        HypervisorStatisticsCloudPlatformModel.HypervisorStatistics hypervisorStatistics = statistics.getHypervisorStatistics();
+        HypervisorStatistics hypervisorStatistics = statistics.getHypervisorStatistics();
         return new HypervisorStatisticsConvertModel(hypervisorStatistics.getVcpus(),hypervisorStatistics.getMemoryMb()
                 ,hypervisorStatistics.getLocalGb(),hypervisorStatistics.getVcpusUsed(),hypervisorStatistics.getMemoryMbUsed()
                 ,hypervisorStatistics.getLocalGbUsed(),hypervisorStatistics.getFreeRamMb(),hypervisorStatistics.getFreeDiskGb());
@@ -92,13 +97,13 @@ public class HypervisorConverterImpl implements HypervisorConverter {
 
         List<HypervisorServiceStateConvertModel> resultList = new ArrayList<>();
 
-        if (Objects.nonNull(osServiceOpenStackModel)){
+        if (Objects.nonNull(osServiceOpenStackModel) && CollectionUtils.isNotEmpty(osServiceOpenStackModel.getServices())){
             resultList.addAll(osServiceOpenStackModel.getServices().stream().map(instanceOsServiceModel ->
                     new HypervisorServiceStateConvertModel(instanceOsServiceModel.getBinary(),instanceOsServiceModel.getState())
             ).collect(Collectors.toList()));
         }
 
-        if (Objects.nonNull(networkAgentOpenStackModel)){
+        if (Objects.nonNull(networkAgentOpenStackModel) && CollectionUtils.isNotEmpty(networkAgentOpenStackModel.getAgents())){
             resultList.addAll(networkAgentOpenStackModel.getAgents().stream().map(networkAgentModel ->
                     new HypervisorServiceStateConvertModel(networkAgentModel.getBinary(),networkAgentModel.getAlive())).collect(Collectors.toList())
             );
@@ -108,13 +113,13 @@ public class HypervisorConverterImpl implements HypervisorConverter {
 
     @Override
     public VirtualRealSwitchConvertModel listVirtualRealSwitch() {
-        VirtualRealSwitchCloudPlatformModel model = hypervisorService.listVirtualRealSwitch();
+        SwitchesCloudPlatform model = switchService.list();
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getSwitchs())){
             return null;
         }
         List<VirtualRealSwitchConvertModel.Model> list = model.getSwitchs().stream().map(v ->
                 VirtualRealSwitchConvertModel.Model.builder().name(v.getName()).managementIp(v.getManagementIp()).state(v.getStatus())
-                        .usedPorts(Integer.valueOf(v.getInterfaces_used())).ports(Integer.valueOf(v.getInterfaces_summary())).build()
+                        .usedPorts(v.getInterfaceUpNums()).ports(v.getInterfaceNums()).build()
         ).collect(Collectors.toList());
 
         VirtualRealSwitchConvertModel convertModel = new VirtualRealSwitchConvertModel();

@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Objects;
 
 /**
  * @Description: 组织用户管理接口
@@ -58,9 +57,9 @@ public class OrgUserController extends BaseModelController<OrgUserModel, QueryPa
 
     @ApiOperation(value = "查询组织下所有用户信息", notes = "")
     @GetMapping("/list/byorg")
-    public ServiceResult getByOrg(@RequestParam String orgId) {
+    public ServiceResult<List<UserModel>> getByOrg(@RequestParam String orgId) {
         List<UserModel> users = getModelService().listUsersByOrgId(orgId);
-        return ServiceResult.builder().source(users).build().asResult();
+        return ServiceResult.success(users);
     }
 
 
@@ -85,14 +84,19 @@ public class OrgUserController extends BaseModelController<OrgUserModel, QueryPa
     }
 
 
-
     @ApiOperation(value = "根据userId查询所有所在组织的路径 如： 赛宁信息/产品研发中心/产品部,赛宁信息/产品研发中心/研发部", notes = "")
     @GetMapping("/allorgpath/byuser")
     public ServiceResult getAllOrgPath(@RequestParam String userId) {
         String allOrgPath = getModelService().getAllOrgPathByUserId(userId);
-        return ServiceResult.builder().source(allOrgPath).build().asResult();
+        return ServiceResult.success(allOrgPath);
     }
 
+    @ApiOperation(value = "查询组织下的用户数量", notes = "")
+    @GetMapping("/usercnt")
+    public ServiceResult<Integer> getUserCnt(@RequestParam String orgId) {
+        Integer userCnt = getModelService().getUserCnt(orgId);
+        return ServiceResult.success(userCnt);
+    }
 
 
 }
