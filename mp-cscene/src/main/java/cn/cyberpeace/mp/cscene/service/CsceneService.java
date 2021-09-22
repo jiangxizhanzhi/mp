@@ -9,10 +9,7 @@ import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.cscene.bo.CsceneBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCreateContext;
-import cn.cyberpeace.mp.cscene.bo.CsceneStatBO;
+import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.core.CsceneHandler;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.model.CsceneRoleModel;
@@ -49,7 +46,8 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         setModelMapper(modelMapper);
     }
 
-    public ListObjServiceResult<CsceneBO> listBO(QueryParams queryParams, boolean withInstance) {
+    public ListObjServiceResult<CsceneBO> listBO(QueryParams queryParams, boolean withInstance,
+                                                 CsceneContextBO context) {
         var listResult = super.list(queryParams);
         if (listResult.getSource() == null) {
             new ListObjServiceResult<>(null, listResult.getServiceCode(), listResult.getDetail());
@@ -62,40 +60,40 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         List<CsceneBO> csceneBOs = new ArrayList<>();
         csceneObjMap.forEach((csceneId, csceneObj) -> {
             var roleObjs = csceneRoleObjMap.getOrDefault(csceneId, new ArrayList<>());
-            var csceneHandler = new CsceneHandler(csceneObj, roleObjs);
+            var csceneHandler = new CsceneHandler(csceneObj, roleObjs, context);
             csceneBOs.add(csceneHandler.toData(withInstance));
         });
         return new ListObjServiceResult<>(new ListObjResult<>(csceneBOs, listResult.getSource().getTotal(),
                 listResult.getSource().getFields()));
     }
 
-    public ServiceResult<CsceneBO> getById(String id, boolean withInstance) {
-        var csceneHandler = new CsceneHandler(id);
+    public ServiceResult<CsceneBO> getById(String id, boolean withInstance, CsceneContextBO context) {
+        var csceneHandler = new CsceneHandler(id, context);
         return new ServiceResult<>(csceneHandler.toData(withInstance));
     }
 
-    public ServiceResult<CsceneBO> export(String id) {
-        var csceneHandler = new CsceneHandler(id);
+    public ServiceResult<CsceneBO> export(String id, CsceneContextBO context) {
+        var csceneHandler = new CsceneHandler(id, context);
         return new ServiceResult<>(csceneHandler.toData(false).export());
     }
 
     @Transactional
-    public ServiceResult<CsceneBO> sync(CsceneBO csceneBO) {
-        var csceneHandler = new CsceneHandler(csceneBO);
+    public ServiceResult<CsceneBO> sync(CsceneBO csceneBO, CsceneContextBO context) {
+        var csceneHandler = new CsceneHandler(csceneBO, context);
         csceneHandler.save();
         return new ServiceResult<>(csceneHandler.toData());
     }
 
-    public ServiceResult<Boolean> deleteById(String id, boolean withInstance) {
-        var csceneHandler = new CsceneHandler(id);
+    public ServiceResult<Boolean> deleteById(String id, boolean withInstance, CsceneContextBO context) {
+        var csceneHandler = new CsceneHandler(id, context);
         csceneHandler.delete(withInstance);
         return new ServiceResult<>(true);
     }
 
-    public ServiceResult<Integer> bulkDeleteByIds(String[] ids, boolean withInstance) {
+    public ServiceResult<Integer> bulkDeleteByIds(String[] ids, boolean withInstance, CsceneContextBO context) {
         var result = 0;
         for (String id: ids) {
-            if (Boolean.TRUE.equals(deleteById(id, withInstance).getSource())) {
+            if (Boolean.TRUE.equals(deleteById(id, withInstance, context).getSource())) {
                 result += 1;
             }
         }
@@ -108,23 +106,25 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         }
     }
 
-    public ServiceResult<CsceneInstanceBO> createTestInstance(String csceneId, boolean unique) {
-        var csceneHandler = new CsceneHandler(csceneId);
+    public ServiceResult<CsceneInstanceBO> createTestInstance(String csceneId, boolean unique,
+                                                              CsceneContextBO context) {
+        var csceneHandler = new CsceneHandler(csceneId, context);
         return new ServiceResult<>(csceneHandler.createTestInstance(unique));
     }
 
-    public ServiceResult<CsceneInstanceBO> createTestInstance(String csceneId, boolean unique, CsceneBO cscene) {
-        var csceneHandler = new CsceneHandler(csceneId);
+    public ServiceResult<CsceneInstanceBO> createTestInstance(String csceneId, boolean unique, CsceneBO cscene,
+                                                              CsceneContextBO context) {
+        var csceneHandler = new CsceneHandler(csceneId, context);
         return new ServiceResult<>(csceneHandler.createTestInstance(unique, cscene));
     }
 
     public ServiceResult<CsceneInstanceBO> createTestInstance(String csceneId, boolean unique,
-                                                              CsceneInstanceCreateContext createContext) {
+                                                              CsceneInstanceCreateContextBO createContext) {
         if (createContext == null) {
-            return createTestInstance(csceneId, unique);
+            return createTestInstance(csceneId, unique, null);
         }
 
-        var csceneHandler = new CsceneHandler(csceneId);
+        var csceneHandler = new CsceneHandler(csceneId, createContext.toCsceneContext());
         var cscene = createContext.getCscene();
         CsceneInstanceBO csceneInstance;
         if (cscene == null) {
@@ -141,23 +141,24 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         return new ServiceResult<>(csceneHandler.createTestInstance(unique, csceneInstance));
     }
 
-    public ServiceResult<CsceneInstanceBO> createAppInstance(String csceneId, boolean unique) {
-        var csceneHandler = new CsceneHandler(csceneId);
+    public ServiceResult<CsceneInstanceBO> createAppInstance(String csceneId, boolean unique, CsceneContextBO context) {
+        var csceneHandler = new CsceneHandler(csceneId, context);
         return new ServiceResult<>(csceneHandler.createTestInstance(unique));
     }
 
-    public ServiceResult<CsceneInstanceBO> createAppInstance(String csceneId, boolean unique, CsceneBO cscene) {
-        var csceneHandler = new CsceneHandler(csceneId);
+    public ServiceResult<CsceneInstanceBO> createAppInstance(String csceneId, boolean unique, CsceneBO cscene,
+                                                             CsceneContextBO context) {
+        var csceneHandler = new CsceneHandler(csceneId, context);
         return new ServiceResult<>(csceneHandler.createTestInstance(unique, cscene));
     }
 
     public ServiceResult<CsceneInstanceBO> createAppInstance(String csceneId, boolean unique,
-                                                             CsceneInstanceCreateContext createContext) {
+                                                             CsceneInstanceCreateContextBO createContext) {
         if (createContext == null) {
-            return createAppInstance(csceneId, unique);
+            return createAppInstance(csceneId, unique, null);
         }
 
-        var csceneHandler = new CsceneHandler(csceneId);
+        var csceneHandler = new CsceneHandler(csceneId, createContext.toCsceneContext());
         var cscene = createContext.getCscene();
         CsceneInstanceBO csceneInstance;
         if (cscene == null) {
@@ -175,7 +176,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         return new ServiceResult<>(csceneHandler.createAppInstance(unique, csceneInstance));
     }
 
-    public ServiceResult<List<CsceneStatBO>> stat(String[] ids) {
+    public ServiceResult<List<CsceneStatBO>> stat(String[] ids, CsceneContextBO context) {
         // TODO
         return new ServiceResult<>(null);
     }

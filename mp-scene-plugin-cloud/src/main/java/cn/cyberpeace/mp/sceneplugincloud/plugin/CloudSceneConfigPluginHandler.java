@@ -15,11 +15,12 @@ import org.springframework.stereotype.Component;
         CloudPluginSceneConfigBO.class,
         CloudPluginSceneConfigElementBO.class,
         CloudPluginSceneConfigElementPortBO.class,
+        Object.class,
 })
 @Component
 @PluginKey(value = PluginConstant.PLUGIN_KEY, priority = PluginConstant.PLUGIN_PRIORITY)
 public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<CloudPluginSceneConfigBO,
-        CloudPluginSceneConfigElementBO, CloudPluginSceneConfigElementPortBO> {
+        CloudPluginSceneConfigElementBO, CloudPluginSceneConfigElementPortBO, Object> {
 
     private CloudSceneConfigPluginModelHandler pluginModelHandler;
 

@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.base.util.ClassUtils;
+import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.base.BaseCsceneBO;
 import cn.cyberpeace.mp.cscene.bo.base.BaseCsceneRoleBO;
 import cn.cyberpeace.mp.cscene.model.base.BaseCsceneModel;
@@ -45,6 +46,9 @@ public abstract class BaseCsceneHandler<
         C extends BaseCsceneBO<C0, R0, R, C>,
         M1 extends BaseCsceneMapper<C0>,
         M2 extends BaseCsceneRoleMapper<R0>> {
+
+    private CsceneContextBO context;
+
     /** 综合场景id */
     private String csceneId;
     /** 综合场景业务数据 */
@@ -253,8 +257,9 @@ public abstract class BaseCsceneHandler<
      * 从完整的综合场景id初始化
      * @param csceneId 综合场景id
      */
-    public void init(String csceneId) {
+    public void init(String csceneId, CsceneContextBO context) {
         initBase();
+        this.context = context;
         this.csceneId = csceneId;
         reload();
     }
@@ -263,8 +268,9 @@ public abstract class BaseCsceneHandler<
      * 从完整的综合场景业务数据初始化
      * @param csceneBO 完整的综合场景业务数据
      */
-    public void init(C csceneBO) {
+    public void init(C csceneBO, CsceneContextBO context) {
         initBase();
+        this.context = context;
         fromData(csceneBO);
     }
 
@@ -273,8 +279,9 @@ public abstract class BaseCsceneHandler<
      * @param csceneObj 外部查询的综合场景数据
      * @param roleObjs 外部查询的综合场景角色数据
      */
-    public void init(C0 csceneObj, List<R0> roleObjs) {
+    public void init(C0 csceneObj, List<R0> roleObjs, CsceneContextBO context) {
         initBase();
+        this.context = context;
         var csceneBO = convertToCsceneBO(csceneObj);
         csceneBO.setRoles(convertToRoleBOs(roleObjs, csceneRoleBOClass));
         fromData(csceneBO);

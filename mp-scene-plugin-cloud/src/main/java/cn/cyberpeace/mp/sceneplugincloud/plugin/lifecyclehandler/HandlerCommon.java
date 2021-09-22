@@ -50,6 +50,15 @@ public class HandlerCommon {
         return StringUtils.joinWith("_", CloudSingleton.cloudAppConfig.getCpcloudResourceGroup(), name);
     }
 
+    public String getRequestUser() {
+        var context = pluginHandler.getContext();
+        if (context == null) {
+            return null;
+        }
+
+        return context.getRequestUser();
+    }
+
     /**
      * 确认连接使用的辅助网络所在节点
      * @param cloudElement 源节点

@@ -1,8 +1,5 @@
 package cn.cyberpeace.mp.sceneplugincloud.bo.base;
 
-import cn.cyberpeace.mp.base.model.stereotype.DefaultBool;
-import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
-import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.base.util.JsonUtils;
 import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementBO;

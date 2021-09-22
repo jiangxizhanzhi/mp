@@ -12,6 +12,7 @@ import java.util.List;
 public class VirtualNic {
     private String networkId;
     private String fixedIp;
+    private String macAddress;
     private List<QosRule> qosRules;
     private Boolean enableExternal;
     private List<AccessMode> accessModes;

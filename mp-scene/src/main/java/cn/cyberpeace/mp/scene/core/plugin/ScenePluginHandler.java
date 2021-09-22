@@ -1,10 +1,10 @@
 package cn.cyberpeace.mp.scene.core.plugin;
 
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.plugin.base.BasePluginHandler;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import lombok.Data;
 
 import java.util.List;
 
@@ -13,22 +13,12 @@ import java.util.List;
  * @param <S> 插件对应配置类
  * @param <E> 网元节点的插件对应配置类
  * @param <P> 网元端口的插件对应配置类
+ * @param <C> 插件上下文类
  */
-public abstract class ScenePluginHandler<S, E, P> extends BasePluginHandler<S, E, P, ScenePluginContext> {
+@Data
+public abstract class ScenePluginHandler<S, E, P, C> extends BasePluginHandler<S, E, P, C> {
 
-    private SceneHandler getSceneHandler() {
-        SceneHandler sceneHandler = null;
-        var context = getContext();
-        if (context != null) {
-            sceneHandler = context.getSceneHandler();
-        }
-
-        if (sceneHandler == null) {
-            throw new MpRuntimeException("Scene plugin has no valid scene handler");
-        }
-
-        return sceneHandler;
-    }
+    private SceneHandler sceneHandler;
 
     /**
      * 获取其它插件全局数据

@@ -15,11 +15,12 @@ import org.springframework.stereotype.Component;
         FlowPluginSceneBO.class,
         FlowPluginSceneElementBO.class,
         FlowPluginSceneElementPortBO.class,
+        Object.class,
 })
 @Component
 @PluginKey(value = PluginConstant.PLUGIN_KEY, priority = PluginConstant.PLUGIN_PRIORITY)
 public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO,
-        FlowPluginSceneElementBO, FlowPluginSceneElementPortBO> {
+        FlowPluginSceneElementBO, FlowPluginSceneElementPortBO, Object> {
 
     private FlowScenePluginModelHandler pluginModelHandler;
 

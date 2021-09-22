@@ -6,7 +6,6 @@ import cn.cyberpeace.mp.scene.core.base.BaseSceneHandler;
 import cn.cyberpeace.mp.scene.core.bo.*;
 import cn.cyberpeace.mp.scene.core.event.SceneElementEventHandler;
 import cn.cyberpeace.mp.scene.core.event.SceneEventHandler;
-import cn.cyberpeace.mp.scene.core.plugin.ScenePluginContext;
 import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
 import cn.cyberpeace.mp.scene.model.*;
 import cn.cyberpeace.mp.scene.repository.*;
@@ -65,12 +64,18 @@ public class SceneHandler extends BaseSceneHandler<
         SceneElementPortMapper,
         SceneElementPortConnectionMapper,
         SceneElementPluginMapper,
-        ScenePluginHandler<?, ?, ?>,
+        SceneContextBO,
+        ScenePluginHandler<?, ?, ?, ?>,
         SceneHandler> {
 
     private final Map<String, SceneEventHandler> sceneEventHandlerMap = new HashMap<>();
 
     private final Map<String, SceneElementEventHandler> elementEventHandlerMap = new HashMap<>();
+
+    @Override
+    public void beforeInitPlugin(ScenePluginHandler<?, ?, ?, ?> plugin) {
+        plugin.setSceneHandler(this);
+    }
 
     public CollectedSceneBO getCollectedSceneBO() {
         var collectedSceneBO = new CollectedSceneBO();
@@ -184,27 +189,20 @@ public class SceneHandler extends BaseSceneHandler<
 
     public SceneHandler() {}
 
-    public SceneHandler(SceneDataBO sceneDataBO) {
-        init(sceneDataBO, false);
+    public SceneHandler(SceneDataBO sceneDataBO, SceneContextBO context) {
+        init(sceneDataBO, false, context);
     }
 
-    public SceneHandler(SceneDataBO sceneDataBO, boolean isAreaMode) {
-        init(sceneDataBO, isAreaMode);
+    public SceneHandler(SceneDataBO sceneDataBO, boolean isAreaMode, SceneContextBO context) {
+        init(sceneDataBO, isAreaMode, context);
     }
 
-    public SceneHandler(String sceneId, String areaId) {
-        init(sceneId, areaId, false);
+    public SceneHandler(String sceneId, String areaId, SceneContextBO context) {
+        init(sceneId, areaId, false, context);
     }
 
-    public SceneHandler(String sceneId, String areaId, boolean isAreaMode) {
-        init(sceneId, areaId, isAreaMode);
-    }
-
-    @Override
-    public void initPluginContext(String pluginKey, ScenePluginHandler<?, ?, ?> plugin) {
-        var context = new ScenePluginContext();
-        context.setSceneHandler(this);
-        plugin.setContext(context);
+    public SceneHandler(String sceneId, String areaId, boolean isAreaMode, SceneContextBO context) {
+        init(sceneId, areaId, isAreaMode, context);
     }
 
     public void progressSceneProcess(int event, String process, String processMessage) {

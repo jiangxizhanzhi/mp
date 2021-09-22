@@ -20,7 +20,6 @@ import lombok.Getter;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -99,9 +98,12 @@ public abstract class BaseSceneHandler<
         M4 extends BaseSceneElementPortMapper<P0>,
         M5 extends BaseSceneElementPortConnectionMapper<C0>,
         M6 extends BaseSceneElementPluginMapper<P1>,
+        C2 extends BaseSceneContextBO,
         P2 extends BasePluginHandler<?, ?, ?, ?>,
-        H extends BaseSceneHandler<S0, A0, E0, P0, C0, P1, S, A, P, E, C, T, D, M1, M2, M3, M4, M5, M6, P2, H>> {
+        H extends BaseSceneHandler<S0, A0, E0, P0, C0, P1, S, A, P, E, C, T, D, M1, M2, M3, M4, M5, M6, C2, P2, H>> {
 
+    /** 上下文 */
+    private C2 context;
     /** 是否区域模式 */
     private boolean isAreaMode;
     /** 场景模板/场景实例id */
@@ -160,6 +162,19 @@ public abstract class BaseSceneHandler<
     /** 网元对应节点插件关系，一个网元节点对于多个插件 */
     private final Map<String, List<P1>> elementIdPluginsMap = new HashMap<>();
 
+    private Object getPluginContext(String pluginKey) {
+        if (context == null) {
+            return null;
+        }
+
+        var pluginsContexts = context.getPlugins();
+        if (pluginsContexts == null) {
+            return null;
+        }
+
+        return pluginsContexts.getOrDefault(pluginKey, null);
+    }
+
     /**
      * 初始化插件集合
      */
@@ -181,8 +196,9 @@ public abstract class BaseSceneHandler<
             }
 
             P2 plugin = (P2) ClassUtils.createInstance(pluginClass);
-            initPluginContext(pluginKey, plugin);
-            plugin.init(sceneId, pluginData);
+            beforeInitPlugin(plugin);
+            plugin.init(sceneId, pluginData, getPluginContext(pluginKey));
+            afterInitPlugin(plugin);
             plugins.add(plugin);
             pluginMap.put(pluginKey, plugin);
         });
@@ -212,8 +228,9 @@ public abstract class BaseSceneHandler<
             }
 
             P2 plugin = (P2) ClassUtils.createInstance(pluginClass);
-            initPluginContext(pluginKey, plugin);
-            plugin.init(sceneId, elementIds, elementPortIds);
+            beforeInitPlugin(plugin);
+            plugin.init(sceneId, elementIds, elementPortIds, getPluginContext(pluginKey));
+            afterInitPlugin(plugin);
             scenePluginData.put(pluginKey, plugin.toData());
             plugins.add(plugin);
             pluginMap.put(pluginKey, plugin);
@@ -781,7 +798,7 @@ public abstract class BaseSceneHandler<
             for (var removingArea: diff.getRemovingTargets()) {
                 if (!Boolean.TRUE.equals(removingArea.getOpen())) {
                     var sceneHandler = ClassUtils.createInstance(sceneHandlerClass);
-                    sceneHandler.init(sceneId, removingArea.getNodeId(), isAreaMode);
+                    sceneHandler.init(sceneId, removingArea.getNodeId(), isAreaMode, context);
                     sceneHandler.deleteTopology();
                 }
             }
@@ -996,9 +1013,10 @@ public abstract class BaseSceneHandler<
      * @param sceneDataBO 场景业务数据
      * @param isAreaMode 是否区域模式
      */
-    public void init(D sceneDataBO, boolean isAreaMode) {
+    public void init(D sceneDataBO, boolean isAreaMode, C2 context) {
         ClassUtils.loadClassFields(this);
         BeanUtils.loadBeanFields(this);
+        this.context = context;
         this.isAreaMode = isAreaMode;
         fromData(sceneDataBO);
         if (!StringUtils.isEmpty(sceneId) && readScene() == null) {
@@ -1013,9 +1031,10 @@ public abstract class BaseSceneHandler<
      * @param areaId 区域id
      * @param isAreaMode 是否区域模式
      */
-    public void init(String sceneId, String areaId, boolean isAreaMode) {
+    public void init(String sceneId, String areaId, boolean isAreaMode, C2 context) {
         ClassUtils.loadClassFields(this);
         BeanUtils.loadBeanFields(this);
+        this.context = context;
         this.sceneId = sceneId;
         this.areaId = areaId;
         this.isAreaMode = isAreaMode;
@@ -1025,7 +1044,8 @@ public abstract class BaseSceneHandler<
         }
     }
 
-    public void initPluginContext(String pluginKey, P2 plugin) {}
+    public void beforeInitPlugin(P2 plugin) {}
+    public void afterInitPlugin(P2 plugin) {}
 
     /**
      * 切换区域
@@ -1204,7 +1224,7 @@ public abstract class BaseSceneHandler<
             for (var removingArea: areas) {
                 if (!Boolean.TRUE.equals(removingArea.getOpen())) {
                     var sceneHandler = ClassUtils.createInstance(sceneHandlerClass);
-                    sceneHandler.init(sceneId, removingArea.getNodeId(), isAreaMode);
+                    sceneHandler.init(sceneId, removingArea.getNodeId(), isAreaMode, context);
                     sceneHandler.deleteTopology();
                 }
             }
