@@ -321,7 +321,7 @@ public class ImagesConverterImpl implements ImagesConverter {
         if (Objects.nonNull(role) && role != RoleEnum.NETWORK.toValue()) {
             final ExtVm extVm = request.getExtVm();
             if (Objects.nonNull(extVm) && CollectionUtils.isNotEmpty(request.getAccessProtocolList())) {
-                extVm.setAccessProtocols(JSONArray.toJSONString(request.getAccessProtocolList()));
+                extVm.setAccessProtocols(request.getAccessProtocolList());
             }
             device.setExtVm(extVm);
             device.setExtSystemInfo(request.getExtSystemInfo());
