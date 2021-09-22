@@ -90,46 +90,34 @@ public class ImagesPageResponse  extends BaseCloudPlatformResponse  {
     @ApiModelProperty("授权人数")
     private Integer authTotal;
 
+    @ApiModelProperty("镜像状态")
     private Integer imageStatus;
 
     /**
      * 系统信息
      */
+    @ApiModelProperty("系统信息")
     private ExtSystemInfo extSystemInfo;
 
     /**
      * 镜像信息
      */
+    @ApiModelProperty("镜像信息")
     private ExtImageInfo extImageInfo;
 
     /**
      * 虚拟机信息
      */
+    @ApiModelProperty("虚拟机信息")
     private ExtVm extVm;
 
     /**
      * 网关信息
      */
+    @ApiModelProperty("网关信息")
     private ExtGateway extGateway;
 
+    @ApiModelProperty("容器信息")
     private ExtDocker extDocker;
 
-
-    @ApiModelProperty("实例ID")
-    private String instanceUuid;
-
-    @ApiModelProperty("实例状态")
-    private Integer instanceState;
-
-    /**
-     * 支持初始化
-     */
-    @ApiModelProperty("支持初始化")
-    private Boolean initSupport;
-
-    /**
-     * 支持快速创建
-     */
-    @ApiModelProperty("支持快速创建")
-    private Boolean quickCreateSupport;
 }
