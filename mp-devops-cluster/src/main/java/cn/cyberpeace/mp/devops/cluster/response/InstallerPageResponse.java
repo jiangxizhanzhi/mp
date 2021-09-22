@@ -46,10 +46,4 @@ public class InstallerPageResponse extends BaseCloudPlatformResponse{
      */
     @ApiModelProperty("服务类型")
     private Integer deployType;
-
-    /**
-     * 状态
-     */
-    @ApiModelProperty("状态")
-    private String status;
 }
