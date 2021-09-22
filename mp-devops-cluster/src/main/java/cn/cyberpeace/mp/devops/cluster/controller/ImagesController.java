@@ -10,10 +10,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.InjectFileConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.SnapshotConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.*;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtImageInfo;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtVm;
-import cn.cyberpeace.mp.devops.cluster.model.common.TargetConnection;
+import cn.cyberpeace.mp.devops.cluster.model.common.*;
 import cn.cyberpeace.mp.devops.cluster.request.*;
 import cn.cyberpeace.mp.devops.cluster.response.ImagesByIdResponse;
 import cn.cyberpeace.mp.devops.cluster.response.ImagesPageResponse;
@@ -93,6 +90,7 @@ public class ImagesController {
             ExtSystemInfo extSystemInfo = v.getExtSystemInfo();
             ExtVm extVm = v.getExtVm();
             ExtImageInfo extImageInfo = v.getExtImageInfo();
+            ExtDocker extDocker = v.getExtDocker();
             ImagesPageResponse response = ImagesPageResponse.builder().uuid(v.getUuid()).name(v.getName())
                     .logo(v.getLogo())
                     .mainCategory(v.getMainCategory()).subCategory(v.getSubCategory()).thirdCategory(v.getThirdCategory())
@@ -101,7 +99,7 @@ public class ImagesController {
                     .flavor(Objects.nonNull(extVm) ? extVm.getFlavor() : "")
                     .description(v.getDescription()).imageStatus(Objects.nonNull(extImageInfo) ? extImageInfo.getImageStatus() : null)
                     .authTotal(v.getAuthTotal()).isPublic(v.getIsPublic()).extSystemInfo(v.getExtSystemInfo())
-                    .extGateway(v.getExtGateway()).extVm(v.getExtVm()).extImageInfo(v.getExtImageInfo()).build();
+                    .extGateway(v.getExtGateway()).extVm(v.getExtVm()).extImageInfo(v.getExtImageInfo()).extDocker(extDocker).build();
             return response;
         }).collect(Collectors.toList());
 
