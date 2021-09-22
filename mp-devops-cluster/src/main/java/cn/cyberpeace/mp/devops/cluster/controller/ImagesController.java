@@ -90,7 +90,6 @@ public class ImagesController {
             ExtSystemInfo extSystemInfo = v.getExtSystemInfo();
             ExtVm extVm = v.getExtVm();
             ExtImageInfo extImageInfo = v.getExtImageInfo();
-            ExtDocker extDocker = v.getExtDocker();
             ImagesPageResponse response = ImagesPageResponse.builder().uuid(v.getUuid()).name(v.getName())
                     .logo(v.getLogo())
                     .mainCategory(v.getMainCategory()).subCategory(v.getSubCategory()).thirdCategory(v.getThirdCategory())
@@ -99,7 +98,7 @@ public class ImagesController {
                     .flavor(Objects.nonNull(extVm) ? extVm.getFlavor() : "")
                     .description(v.getDescription()).imageStatus(Objects.nonNull(extImageInfo) ? extImageInfo.getImageStatus() : null)
                     .authTotal(v.getAuthTotal()).isPublic(v.getIsPublic()).extSystemInfo(v.getExtSystemInfo())
-                    .extGateway(v.getExtGateway()).extVm(v.getExtVm()).extImageInfo(v.getExtImageInfo()).extDocker(extDocker).build();
+                    .extGateway(v.getExtGateway()).extVm(v.getExtVm()).extImageInfo(v.getExtImageInfo()).extDocker(v.getExtDocker()).build();
             return response;
         }).collect(Collectors.toList());
 
@@ -158,6 +157,7 @@ public class ImagesController {
         imagesByIdResponse.setExtGateway(model.getExtGateway());
         imagesByIdResponse.setExtVm(extVm);
         imagesByIdResponse.setExtSystemInfo(model.getExtSystemInfo());
+        imagesByIdResponse.setExtDocker(model.getExtDocker());
         return new Result<>(imagesByIdResponse);
     }
 

@@ -13,7 +13,6 @@ import java.io.Serializable;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-@ApiModel(value = "防火墙分页请求信息")
 public class FirewallPageRequest extends BasePageRequest implements Serializable {
 
 }

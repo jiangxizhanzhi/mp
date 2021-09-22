@@ -13,7 +13,6 @@ import java.io.Serializable;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-@ApiModel(value = "节点管理分页请求参数")
 public class HypervisorPageRequest extends BasePageRequest implements Serializable {
 
 }

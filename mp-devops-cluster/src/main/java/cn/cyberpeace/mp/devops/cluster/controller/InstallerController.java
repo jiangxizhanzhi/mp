@@ -62,7 +62,7 @@ public class InstallerController {
         List<InstallerPageResponse> list = model.getModelList().stream().map(installer ->
                 InstallerPageResponse.builder().uuid(installer.getUuid()).name(installer.getName())
                         .logo(installer.getLogo()).description(installer.getDescription())
-                        .categories(installer.getCategories())
+                        .categories(installer.getCategories()).deployType(installer.getDeployType())
                         .build()
         ).collect(Collectors.toList());
 
@@ -83,6 +83,7 @@ public class InstallerController {
                 .deployType(model.getDeployType())
                 .dockerInstallerData(new DockerInstallerData(model.getStartUpParameterList(),Objects.nonNull(extDocker) ? extDocker.getFile() : null, Objects.nonNull(extDocker) ? extDocker.getUserFilename() : null))
                 .resourceList(model.getResourceList())
+                .deviceCount(model.getDeviceCount())
                 .build();
         return new Result<>(response);
     }

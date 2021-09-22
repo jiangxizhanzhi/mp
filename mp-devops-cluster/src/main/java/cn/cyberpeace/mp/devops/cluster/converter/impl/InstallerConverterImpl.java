@@ -150,6 +150,7 @@ public class InstallerConverterImpl implements InstallerConverter {
                 resource.setPlatforms(Joiner.on("|").join(resource.getPlatforms().split("")));
             });
         }
+        model.setDeviceCount(installer.getDeviceCount());
         model.setExtNormal(extNormal);
         model.setSuccess(installer.isSuccess());
         model.setMessage(installer.getMessage());

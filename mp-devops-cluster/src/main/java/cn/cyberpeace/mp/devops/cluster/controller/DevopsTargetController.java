@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.devops.cluster.controller;
 
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
-import cn.cyberpeace.mp.devops.cluster.converter.RealEquipmentConverter;
+import cn.cyberpeace.mp.devops.cluster.converter.TargetConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.TypeConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeAllConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeConvertModel;
@@ -37,16 +37,16 @@ import java.util.stream.Collectors;
 @Api(tags = "靶标管理")
 public class DevopsTargetController {
 
-    private RealEquipmentConverter realEquipmentConverter;
+    private TargetConverter targetConverter;
 
     private TypeConverter typeConverter;
 
     private ImagesService imagesService;
 
     @Autowired
-    public DevopsTargetController(RealEquipmentConverter realEquipmentConverter,TypeConverter typeConverter,
+    public DevopsTargetController(TargetConverter targetConverter,TypeConverter typeConverter,
                                   ImagesService imagesService) {
-        this.realEquipmentConverter = realEquipmentConverter;
+        this.targetConverter = targetConverter;
         this.typeConverter = typeConverter;
         this.imagesService = imagesService;
     }
@@ -62,7 +62,7 @@ public class DevopsTargetController {
         TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type();
         List<TypeConvertModel> firstTypeList = l1AndL2AndL3Type.getFirstTypeList();
         List<TypeConvertModel> secondTypeList = l1AndL2AndL3Type.getSecondTypeList();
-        List<Device> deviceList = realEquipmentConverter.allTarget(request);
+        List<Device> deviceList = targetConverter.allTarget(request);
         if (CollectionUtils.isEmpty(deviceList)){
             return new Result<>();
         }

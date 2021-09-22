@@ -13,7 +13,6 @@ import java.io.Serializable;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ApiModel(value = "靶标分页请求信息")
 public class TargetSceneRequest implements Serializable {
 
     /**

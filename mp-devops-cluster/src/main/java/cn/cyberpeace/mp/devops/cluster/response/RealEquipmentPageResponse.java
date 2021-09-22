@@ -105,7 +105,7 @@ public class RealEquipmentPageResponse  extends BaseCloudPlatformResponse{
     /**
      * 在位状态
      */
-    @ApiModelProperty(value = "在位状态,0:不再在位，1：在位")
+    @ApiModelProperty(value = "在位状态,0:不在位，1：在位")
     private StatusEnum inPosition;
 
     /**

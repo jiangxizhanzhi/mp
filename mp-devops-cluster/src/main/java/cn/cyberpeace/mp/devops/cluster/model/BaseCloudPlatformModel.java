@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.devops.cluster.model;
 
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,7 +13,6 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ApiModel(description = "基础模型，对应云平台接口返回信息")
 public class BaseCloudPlatformModel extends BaseModel {
 
     /**

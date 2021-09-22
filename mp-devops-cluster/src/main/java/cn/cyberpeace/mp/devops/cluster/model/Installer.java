@@ -63,4 +63,9 @@ public class Installer extends BaseCloudPlatformModel{
      * windows服务存放资源
      */
     private List<Resource> resourceList;
+
+    /**
+     * 关联镜像数量
+     */
+    private Integer deviceCount;
 }

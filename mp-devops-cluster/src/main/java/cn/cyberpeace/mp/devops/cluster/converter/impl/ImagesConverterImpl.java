@@ -20,7 +20,6 @@ import cn.cyberpeace.mp.devops.cluster.repository.ImageAuthMapper;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
 import cn.cyberpeace.mp.devops.cluster.request.*;
 import cn.cyberpeace.mp.devops.cluster.service.*;
-import com.alibaba.fastjson.JSONArray;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -353,6 +352,7 @@ public class ImagesConverterImpl implements ImagesConverter {
         imageModel.setExtImageInfo(device.getExtImageInfo());
         imageModel.setExtVm(device.getExtVm());
         imageModel.setExtGateway(device.getExtGateway());
+        imageModel.setExtDocker(device.getExtDocker());
         return imageModel;
     }
 

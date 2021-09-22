@@ -16,7 +16,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-@ApiModel(value = "镜像删除请求信息")
 public class ImagesDeleteRequest extends BaseRequest {
 
     /**

@@ -16,7 +16,6 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-@ApiModel(value = "镜像文件注入请求信息")
 public class ImageInjectFileRequest extends BaseRequest {
 
     @NotBlank

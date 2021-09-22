@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ApiModel(value = "服务管理的分页请求参数")
 public class InstallerPageRequest extends BasePageRequest {
 
     /**

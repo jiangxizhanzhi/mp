@@ -13,7 +13,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-@ApiModel(value = "实装批量删除请求信息")
 public class RealEquipmentDeleteRequest extends BaseRequest{
 
     /**

@@ -13,7 +13,6 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ApiModel(value = "服务管理的新增请求参数")
 public class InstallerRequest extends BaseRequest {
 
     /**

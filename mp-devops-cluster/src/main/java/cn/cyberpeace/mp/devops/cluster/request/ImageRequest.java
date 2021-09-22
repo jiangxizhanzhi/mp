@@ -18,7 +18,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-@ApiModel(value = "镜像新增/编辑请求信息")
 public class ImageRequest extends BaseRequest {
 
     /**
