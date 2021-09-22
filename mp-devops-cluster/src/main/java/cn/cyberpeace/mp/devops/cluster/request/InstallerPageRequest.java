@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.devops.cluster.request;
 
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,9 +17,15 @@ public class InstallerPageRequest extends BasePageRequest {
     private String name;
 
     /**
-     * 服务类型
+     * 分类
+     */
+    @ApiModelProperty(value = "分类")
+    private String categories;
+
+    /**
+     * 服务类型：windows服务/docker服务
      */
     @ApiModelProperty(value = "服务类型")
-    private String categories;
+    private Integer deployType;
 
 }
