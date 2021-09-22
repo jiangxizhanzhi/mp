@@ -1,10 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.response;
 
 import cn.cyberpeace.mp.devops.cluster.enums.PublicEnum;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtGateway;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtImageInfo;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtVm;
+import cn.cyberpeace.mp.devops.cluster.model.common.*;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -114,4 +111,25 @@ public class ImagesPageResponse  extends BaseCloudPlatformResponse  {
      * 网关信息
      */
     private ExtGateway extGateway;
+
+    private ExtDocker extDocker;
+
+
+    @ApiModelProperty("实例ID")
+    private String instanceUuid;
+
+    @ApiModelProperty("实例状态")
+    private Integer instanceState;
+
+    /**
+     * 支持初始化
+     */
+    @ApiModelProperty("支持初始化")
+    private Boolean initSupport;
+
+    /**
+     * 支持快速创建
+     */
+    @ApiModelProperty("支持快速创建")
+    private Boolean quickCreateSupport;
 }

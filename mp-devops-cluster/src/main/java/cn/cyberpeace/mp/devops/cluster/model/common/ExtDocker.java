@@ -44,4 +44,16 @@ public class ExtDocker{
 
     @ApiModelProperty("实例状态")
     private Integer instanceState;
+
+    /**
+     * 支持初始化
+     */
+    @ApiModelProperty("支持初始化")
+    private Boolean initSupport;
+
+    /**
+     * 支持快速创建
+     */
+    @ApiModelProperty("支持快速创建")
+    private Boolean quickCreateSupport;
 }
