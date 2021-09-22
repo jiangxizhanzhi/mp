@@ -104,4 +104,10 @@ public class ImagesByIdResponse extends BaseCloudPlatformResponse  {
      */
     @ApiModelProperty(value = "网关信息")
     private ExtGateway extGateway;
+
+    /**
+     * 容器信息
+     */
+    @ApiModelProperty(value = "容器信息")
+    private ExtDocker extDocker;
 }

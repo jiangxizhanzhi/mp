@@ -17,7 +17,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-@ApiModel(value = "镜像分页请求信息")
 public class ImagePageRequest extends BasePageRequest {
 
     /**

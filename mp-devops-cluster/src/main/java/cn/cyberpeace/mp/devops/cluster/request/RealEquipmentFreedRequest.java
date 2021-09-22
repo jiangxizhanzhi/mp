@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-@ApiModel(value = "实装释放请求信息")
 public class RealEquipmentFreedRequest extends BaseRequest{
 
     /**

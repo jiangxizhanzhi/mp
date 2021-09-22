@@ -122,4 +122,6 @@ public class Device extends BaseCloudPlatformModel{
      */
     private ExtImageInfo extImageInfo;
 
+    private ExtDocker extDocker;
+
 }

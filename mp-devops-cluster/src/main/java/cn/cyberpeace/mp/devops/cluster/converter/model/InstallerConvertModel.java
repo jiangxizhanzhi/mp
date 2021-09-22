@@ -67,4 +67,10 @@ public class InstallerConvertModel extends BasePageConvertModel{
      */
     private List<Resource> resourceList = new ArrayList<>();
 
+
+    /**
+     * 关联镜像数量
+     */
+    private Integer deviceCount;
+
 }

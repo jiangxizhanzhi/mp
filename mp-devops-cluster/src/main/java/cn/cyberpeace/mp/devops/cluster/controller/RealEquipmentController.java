@@ -157,8 +157,11 @@ public class RealEquipmentController {
     @ApiOperation("新增")
     @PostMapping("/add")
     public ServiceResult add(@RequestBody RealEquipmentRequest request){
-        RealEquipment realEquipment = realEquipmentConverter.add(request);
-        return realEquipment.isSuccess() ? ServiceResult.successful() :ServiceResult.fail("");
+        Device realEquipment = realEquipmentConverter.add(request);
+        if (Objects.isNull(realEquipment)){
+            return ServiceResult.fail("");
+        }
+        return realEquipment.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(realEquipment.getMessage());
     }
 
     /**
@@ -170,8 +173,11 @@ public class RealEquipmentController {
         if (StringUtils.isBlank(request.getUuid())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
-        RealEquipment realEquipment = realEquipmentConverter.update(request);
-        return realEquipment.isSuccess() ? ServiceResult.successful() :ServiceResult.fail("");
+        Device realEquipment = realEquipmentConverter.update(request);
+        if (Objects.isNull(realEquipment)){
+            return ServiceResult.fail("");
+        }
+        return realEquipment.isSuccess() ? ServiceResult.successful() :ServiceResult.fail(realEquipment.getMessage());
     }
 
     /**
@@ -184,14 +190,14 @@ public class RealEquipmentController {
         return new Result<>(result);
     }
 
-    /**
-     * 释放
-     */
-    @ApiOperation("释放")
-    @PostMapping("/freed")
-    public Result<Boolean> freed(@RequestBody RealEquipmentFreedRequest request){
-        return new Result<>();
-    }
+//    /**
+//     * 释放
+//     */
+//    @ApiOperation("释放")
+//    @PostMapping("/freed")
+//    public Result<Boolean> freed(@RequestBody RealEquipmentFreedRequest request){
+//        return new Result<>();
+//    }
 
     @ApiOperation("查询详情")
     @GetMapping("/get-devops-details")
@@ -215,7 +221,7 @@ public class RealEquipmentController {
                         snmpAuth.setCommunityName(snmpConfigs.getCommunityName());
                         snmpParams.setAuth(snmpAuth);
                     }
-                } else if (extEntity.getSnmpVersion().equals("V2C")) {
+                } else if (extEntity.getSnmpVersion().equals("V2")) {
                     snmpParams.setVersion(2);
                     if (Objects.nonNull(snmpConfigs)) {
                         SnmpBaseAuth snmpAuth = new SnmpBaseAuth();

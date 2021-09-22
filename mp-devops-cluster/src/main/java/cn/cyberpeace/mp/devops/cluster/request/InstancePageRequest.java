@@ -16,7 +16,6 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-@ApiModel(value = "实例分页请求信息")
 public class InstancePageRequest extends BasePageRequest implements Serializable {
 
     /**
