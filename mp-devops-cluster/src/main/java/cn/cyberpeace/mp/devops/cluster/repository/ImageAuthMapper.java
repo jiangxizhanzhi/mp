@@ -30,4 +30,11 @@ public interface ImageAuthMapper extends BasePermissionMapper {
      * @return
      */
     List<TargetAuthModel> findByTarget(String target);
+
+    /**
+     * 根据镜像ID集合批量删除数据
+     * @param ids
+     * @return
+     */
+    Integer deleteByTargets(List<String> ids);
 }
