@@ -11,4 +11,18 @@ public interface SysContext {
      * @return
      */
     String getExecuteId();
+
+    /**
+     * 根据key获取内容
+     * @param key
+     * @return
+     */
+    Object get(String key);
+
+    /**
+     * 可以用于保存不同业务中的参数
+     * @param key
+     * @param value
+     */
+    void put(String key, Object value);
 }

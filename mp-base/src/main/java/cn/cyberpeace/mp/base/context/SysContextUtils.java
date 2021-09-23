@@ -15,4 +15,11 @@ public final class SysContextUtils {
         return SysContextHolder.get().getExecuteId();
     }
 
+    public static void put(String key, Object value) {
+        SysContextHolder.get().put(key, value);
+    }
+
+    public static Object get(String key) {
+        return SysContextHolder.get().get(key);
+    }
 }
