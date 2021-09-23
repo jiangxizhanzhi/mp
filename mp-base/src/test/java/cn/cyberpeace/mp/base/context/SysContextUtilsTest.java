@@ -5,6 +5,9 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @Description
  * @Author maojun
@@ -23,5 +26,12 @@ public class SysContextUtilsTest {
         SysContextHolder.set(null);
         Assert.assertNotNull(SysContextUtils.getCallChainId());
         SysContextHolder.clear();
+
+        SysContextHolder.set(new BaseSysContext());
+        SysContextUtils.setCallChainId("test");
+        Map<String, Object> map = new HashMap<>();
+        SysContextUtils.setPassThroughMap(map);
+        Assert.assertEquals("test", SysContextUtils.getCallChainId());
+        Assert.assertEquals(map, SysContextUtils.getPassThroughMap());
     }
 }

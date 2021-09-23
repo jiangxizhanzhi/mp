@@ -17,15 +17,15 @@ public final class SysContextUtils {
         return SysContextHolder.get().getCallChainId();
     }
 
-    public static void setCallChainId() {
-        SysContextHolder.get().getCallChainId();
+    public static void setCallChainId(String callChainId) {
+        SysContextHolder.get().setCallChainId(callChainId);
     }
 
     public static void setPassThroughMap(Map<String, Object> map) {
         SysContextHolder.get().setPassThroughMap(map);
     }
 
-    public Map<String, Object> getPassThroughMap() {
+    public static Map<String, Object> getPassThroughMap() {
         return SysContextHolder.get().getPassThroughMap();
     }
 }
