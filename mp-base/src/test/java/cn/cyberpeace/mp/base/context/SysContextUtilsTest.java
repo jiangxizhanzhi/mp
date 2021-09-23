@@ -16,12 +16,12 @@ public class SysContextUtilsTest {
     public void httpContextTest() {
         String requestId = RandomStringUtils.random(10, true, true);
         SysContextHolder.set(new HttpContext(requestId));
-        Assert.assertNotNull(SysContextUtils.getExecuteId());
-        Assert.assertEquals(requestId, SysContextUtils.getExecuteId());
+        Assert.assertNotNull(SysContextUtils.getCallChainId());
+        Assert.assertEquals(requestId, SysContextUtils.getCallChainId());
         SysContextHolder.clear();
 
         SysContextHolder.set(null);
-        Assert.assertNotNull(SysContextUtils.getExecuteId());
+        Assert.assertNotNull(SysContextUtils.getCallChainId());
         SysContextHolder.clear();
     }
 }

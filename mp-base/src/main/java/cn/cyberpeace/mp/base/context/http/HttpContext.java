@@ -20,7 +20,7 @@ public class HttpContext extends BaseSysContext implements IHttpContext {
      * @return
      */
     @Override
-    public String getExecuteId() {
-        return this.requestId != null ? this.requestId : super.getExecuteId();
+    public String getCallChainId() {
+        return this.requestId != null ? this.requestId : super.getCallChainId();
     }
 }
