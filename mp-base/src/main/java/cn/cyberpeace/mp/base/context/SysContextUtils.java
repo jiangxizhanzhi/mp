@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.base.context;
 
+import java.util.Map;
+
 /**
  * @Description 用于快速获取上下文信息的工具类
  * @Author maojun
@@ -11,15 +13,19 @@ public final class SysContextUtils {
         return SysContextHolder.get();
     }
 
-    public static String getExecuteId() {
-        return SysContextHolder.get().getExecuteId();
+    public static String getCallChainId() {
+        return SysContextHolder.get().getCallChainId();
     }
 
-    public static void put(String key, Object value) {
-        SysContextHolder.get().put(key, value);
+    public static void setCallChainId() {
+        SysContextHolder.get().getCallChainId();
     }
 
-    public static Object get(String key) {
-        return SysContextHolder.get().get(key);
+    public static void setPassThroughMap(Map<String, Object> map) {
+        SysContextHolder.get().setPassThroughMap(map);
+    }
+
+    public Map<String, Object> getPassThroughMap() {
+        return SysContextHolder.get().getPassThroughMap();
     }
 }

@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.base.context;
 
+import java.util.Map;
+
 /**
  * @Description 系统请求的上下文环境变量，用于存储通用的上下文信息
  * @Author maojun
@@ -7,22 +9,26 @@ package cn.cyberpeace.mp.base.context;
  */
 public interface SysContext {
     /**
-     * 本次处理过程的唯一Id
+     * 查询调用链路id
      * @return
      */
-    String getExecuteId();
+    String getCallChainId();
 
     /**
-     * 根据key获取内容
-     * @param key
+     * 设置调用链路id
      * @return
      */
-    Object get(String key);
+    void setCallChainId(String callChainId);
 
     /**
-     * 可以用于保存不同业务中的参数
-     * @param key
-     * @param value
+     * 用于透传内容
+     * @param map
      */
-    void put(String key, Object value);
+    void setPassThroughMap(Map<String, Object> map);
+
+    /**
+     * 获取透传内容
+     * @return
+     */
+    Map<String, Object> getPassThroughMap();
 }
