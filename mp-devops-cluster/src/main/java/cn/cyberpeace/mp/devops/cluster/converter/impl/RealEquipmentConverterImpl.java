@@ -10,8 +10,6 @@ import cn.cyberpeace.mp.devops.cluster.enums.ImageTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.model.Device;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.TargetModel;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntity;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageAuthMapper;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentDeleteRequest;
@@ -210,31 +208,8 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
         device.setSecondCategory(request.getSubCategory());
         device.setL3Category(request.getThirdCategory());
         device.setExtEntityAccess(request.getExtEntityAccess());
-        final ExtEntity requestExtEntity = request.getExtEntity();
-        if (Objects.nonNull(requestExtEntity)) {
-            ExtEntity extEntity = new ExtEntity();
-            extEntity.setStyle(requestExtEntity.getStyle());
-            extEntity.setParams(requestExtEntity.getParams());
-            extEntity.setSnmpVersion(requestExtEntity.getSnmpVersion());
-            extEntity.setSnmpConfig(requestExtEntity.getSnmpConfig());
-            extEntity.setSnmpCpuOid(requestExtEntity.getSnmpCpuOid());
-            extEntity.setSnmpDiskOid(requestExtEntity.getSnmpDiskOid());
-            extEntity.setSnmpMemOid(requestExtEntity.getSnmpMemOid());
-            extEntity.setCcmPort(requestExtEntity.getCcmPort());
-            extEntity.setCcmUsername(requestExtEntity.getCcmUsername());
-            extEntity.setCcmServerName(requestExtEntity.getCcmServerName());
-            extEntity.setCcmPassword(requestExtEntity.getCcmPassword());
-            device.setExtEntity(extEntity);
-        }
-
-        final ExtSystemInfo reqSystemInfo = request.getSystemInfo();
-        if (Objects.nonNull(reqSystemInfo)) {
-            ExtSystemInfo extSystemInfo = new ExtSystemInfo();
-            extSystemInfo.setSystemType(reqSystemInfo.getSystemType());
-            extSystemInfo.setSystemArchitecture(reqSystemInfo.getSystemArchitecture());
-            extSystemInfo.setLanguage(reqSystemInfo.getLanguage());
-            device.setExtSystemInfo(extSystemInfo);
-        }
+        device.setExtEntity(request.getExtEntity());
+        device.setExtSystemInfo(request.getSystemInfo());
         return device;
     }
 
