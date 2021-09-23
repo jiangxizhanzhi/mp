@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.base.util;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.UUID;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class TextUtils {
@@ -12,6 +11,10 @@ public class TextUtils {
     private static final Pattern humpPattern = Pattern.compile("\\B(\\p{Upper})(\\p{Lower}*)");
 
     private TextUtils() {}
+
+    public static String emptyNull(String str) {
+        return StringUtils.isEmpty(str) ? null : str;
+    }
 
     public static String uuid() {
         return UUID.randomUUID().toString().replace("-", StringUtils.EMPTY).toLowerCase();

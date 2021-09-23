@@ -5,8 +5,12 @@ import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementM
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class DeleteHandler extends HandlerCommon {
@@ -18,87 +22,142 @@ public class DeleteHandler extends HandlerCommon {
     private final Container containerClient = new Container();
     private final EntityNode enClient = new EntityNode();
 
-    private void deleteAuxiliaryNetwork(CloudPluginSceneElementBO cloudElement) {
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    private static class ElementExtraCloudInfo {
+        private List<String> qosIds;
+        private List<String> connectionIds;
+        private List<String> proxyIds;
+    }
+
+    private ElementExtraCloudInfo collectElementExtraCloudInfo(CloudPluginSceneElementBO cloudElement) {
+        List<String> qosIds = new ArrayList<>();
+        List<String> connectionIds = new ArrayList<>();
+        List<String> proxyIds = new ArrayList<>();
+        var srcPorts = cloudElement.getSrcElement().getPorts();
+        srcPorts.forEach(srcPort -> {
+            var cloudPort = getPluginHandler().getPort(srcPort.getId());
+            if (cloudPort == null) {
+                return;
+            }
+
+            var qosId = cloudPort.getQosId();
+            if (!StringUtils.isEmpty(qosId)) {
+                qosIds.add(qosId);
+            }
+
+            var accessModes = cloudPort.getAccessModes();
+            if (accessModes != null) {
+                accessModes.forEach(accessMode -> {
+                    var connectionId = accessMode.getConnectionId();
+                    if (!StringUtils.isEmpty(connectionId)) {
+                        connectionIds.add(connectionId);
+                    }
+
+                    var proxyId = accessMode.getProxyId();
+                    if (!StringUtils.isEmpty(proxyId)) {
+                        proxyIds.add(proxyId);
+                    }
+                });
+            }
+        });
+        return new ElementExtraCloudInfo(qosIds, connectionIds, proxyIds);
+    }
+
+    private boolean deleteAuxiliaryNetwork(CloudPluginSceneElementBO cloudElement) {
         var resourceId = cloudElement.getAuxiliaryNetworkId();
         if (StringUtils.isEmpty(resourceId)) {
-            return;
+            return true;
         }
 
         var deleteData = new VirtualSwitchDeleteData();
         deleteData.setEntityNetwork(cloudElement.getAuxiliaryNetworkVlan());
         deleteData.setIds(List.of(resourceId));
-        vsClient.delete(deleteData);
+        return vsClient.delete(deleteData);
     }
 
-    private void deleteVirtualRouter(CloudPluginSceneElementBO cloudElement) {
+    private boolean deleteVirtualRouter(CloudPluginSceneElementBO cloudElement) {
         var resourceId = cloudElement.getResourceId();
         if (StringUtils.isEmpty(resourceId)) {
-            return;
+            return true;
         }
 
         var deleteData = new VirtualRouterDeleteData();
         deleteData.setIds(List.of(resourceId));
-        vrClient.delete(deleteData);
+        return vrClient.delete(deleteData);
     }
 
-    private void deleteVirtualFirewall(CloudPluginSceneElementBO cloudElement) {
+    private boolean deleteVirtualFirewall(CloudPluginSceneElementBO cloudElement) {
         var resourceId = cloudElement.getResourceId();
         if (StringUtils.isEmpty(resourceId)) {
-            return;
+            return true;
         }
 
         var deleteData = new VirtualFirewallDeleteData();
         deleteData.setIds(List.of(resourceId));
-        vfClient.delete(deleteData);
+        return vfClient.delete(deleteData);
     }
 
-    private void deleteVirtualMachine(CloudPluginSceneElementBO cloudElement) {
+    private boolean deleteVirtualMachine(CloudPluginSceneElementBO cloudElement) {
         var resourceId = cloudElement.getResourceId();
         if (StringUtils.isEmpty(resourceId)) {
-            return;
+            return true;
         }
 
         var deleteData = new VirtualMachineDeleteData();
         deleteData.setVms(List.of(resourceId));
-        vmClient.delete(deleteData);
+        var extraInfo = collectElementExtraCloudInfo(cloudElement);
+        // TODO qos列表
+        deleteData.setConnections(extraInfo.getConnectionIds());
+        deleteData.setPortMappings(extraInfo.getProxyIds());
+        return vmClient.delete(deleteData);
     }
 
-    private void deleteContainer(CloudPluginSceneElementBO cloudElement) {
+    private boolean deleteContainer(CloudPluginSceneElementBO cloudElement) {
         var resourceId = cloudElement.getResourceId();
         if (StringUtils.isEmpty(resourceId)) {
-            return;
+            return true;
         }
 
         var deleteData = new ContainerDeleteData();
         deleteData.setContainers(List.of(resourceId));
-        containerClient.delete(deleteData);
+        var extraInfo = collectElementExtraCloudInfo(cloudElement);
+        // TODO qos列表
+        deleteData.setConnections(extraInfo.getConnectionIds());
+        deleteData.setPortMappings(extraInfo.getProxyIds());
+        return containerClient.delete(deleteData);
     }
 
-    private void deleteEntityNode(CloudPluginSceneElementBO cloudElement) {
+    private boolean deleteEntityNode(CloudPluginSceneElementBO cloudElement) {
         var deleteData = new EntityNodeDeleteData();
         deleteData.setName(cloudElement.getImage());
-        enClient.delete(deleteData);
+        var extraInfo = collectElementExtraCloudInfo(cloudElement);
+        deleteData.setConnections(extraInfo.getConnectionIds());
+        return enClient.delete(deleteData);
     }
 
-    private void deleteElement(CloudPluginSceneElementBO cloudElement) {
+    private boolean deleteElement(CloudPluginSceneElementBO cloudElement) {
         if (Boolean.TRUE.equals(cloudElement.getExternal())) {
-            return;
+            return true;
         }
         Integer virtualType = cloudElement.getVirtualType();
         if (virtualType == null) {
-            return;
+            return true;
         }
 
         if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
-            deleteVirtualRouter(cloudElement);
+            return deleteVirtualRouter(cloudElement);
         } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_FIREWALL)) {
-            deleteVirtualFirewall(cloudElement);
+            return deleteVirtualFirewall(cloudElement);
         } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
-            deleteVirtualMachine(cloudElement);
+            return deleteVirtualMachine(cloudElement);
         } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
-            deleteContainer(cloudElement);
+            return deleteContainer(cloudElement);
         } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE)) {
-            deleteEntityNode(cloudElement);
+            return deleteEntityNode(cloudElement);
+        } else {
+            return true;
         }
     }
 

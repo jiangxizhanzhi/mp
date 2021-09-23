@@ -1,22 +1,13 @@
 package cn.cyberpeace.mp.base.repository.condition;
 
 import cn.cyberpeace.mp.base.repository.condition.aggregation.Aggregation;
-import cn.cyberpeace.mp.base.util.BeanUtils;
-import cn.cyberpeace.mp.base.util.ClassUtils;
-import cn.cyberpeace.mp.base.util.ModelUtils;
-import cn.cyberpeace.mp.base.util.SerializableFunction;
-import cn.cyberpeace.mp.base.util.TextUtils;
+import cn.cyberpeace.mp.base.util.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 查询条件构造器

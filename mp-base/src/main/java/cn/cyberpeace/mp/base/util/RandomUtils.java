@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.base.util;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 

@@ -13,4 +13,5 @@ import java.util.List;
 public class EntityNodeDeleteData implements CloudHttpData {
     private String name;
     private List<String> interfaces;
+    private List<String> connections;
 }
