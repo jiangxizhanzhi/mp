@@ -81,10 +81,6 @@ public class InstallerConverterImpl implements InstallerConverter {
 
     @Override
     public InstallerConvertModel add(InstallerRequest request) {
-//        if (Objects.nonNull(request.getLogoFile()) && !request.getLogoFile().getClass().isAssignableFrom(String.class)) {
-//            String logo = targetLogoService.uploadLogo((MultipartFile) request.getLogoFile());
-//            request.setLogo(logo);
-//        }
         if (Objects.nonNull(request.getLogoFile()) && request.getLogoFile().getSize() > 0 ){
             String logo = targetLogoService.uploadLogo(request.getLogoFile());
             request.setLogo(logo);
@@ -106,14 +102,6 @@ public class InstallerConverterImpl implements InstallerConverter {
         }
         return convertInstaller(result);
     }
-
-//    @Deprecated
-//    @Override
-//    public InstallerConvertModel update(InstallerRequest request) {
-//        Installer installer = convertRequest(request);
-//        Installer result = installerService.update(request.getUuid(),installer);
-//        return convertInstaller(result);
-//    }
 
     @Override
     public BaseCloudPlatformModel delete(InstallerDeleteRequest request) {

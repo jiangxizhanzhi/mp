@@ -98,7 +98,7 @@ public class InstallerController {
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
         }
-        return model.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(model.getMessageZh());
+        return model.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
     }
 
     /**
@@ -115,7 +115,7 @@ public class InstallerController {
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
         }
-        return model.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(model.getMessageZh());
+        return model.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
     }
 
     /**

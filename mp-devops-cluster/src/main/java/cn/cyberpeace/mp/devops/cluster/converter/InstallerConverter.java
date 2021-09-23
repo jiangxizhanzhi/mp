@@ -29,12 +29,6 @@ public interface InstallerConverter extends BaseConverter{
     InstallerConvertModel add(InstallerRequest request);
 
     /**
-     * 更新
-     * @param request
-     */
-//    InstallerConvertModel update(InstallerRequest request);
-
-    /**
      * 批量删除
      * @param request
      */
