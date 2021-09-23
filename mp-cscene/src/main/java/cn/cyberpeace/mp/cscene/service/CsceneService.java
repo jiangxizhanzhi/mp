@@ -121,7 +121,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     public ServiceResult<CsceneInstanceBO> createTestInstance(String csceneId, boolean unique,
                                                               CsceneInstanceCreateContextBO createContext) {
         if (createContext == null) {
-            return createTestInstance(csceneId, unique, null);
+            return createTestInstance(csceneId, unique, new CsceneContextBO());
         }
 
         var csceneHandler = new CsceneHandler(csceneId, createContext.toCsceneContext());
@@ -155,7 +155,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     public ServiceResult<CsceneInstanceBO> createAppInstance(String csceneId, boolean unique,
                                                              CsceneInstanceCreateContextBO createContext) {
         if (createContext == null) {
-            return createAppInstance(csceneId, unique, null);
+            return createAppInstance(csceneId, unique, new CsceneContextBO());
         }
 
         var csceneHandler = new CsceneHandler(csceneId, createContext.toCsceneContext());

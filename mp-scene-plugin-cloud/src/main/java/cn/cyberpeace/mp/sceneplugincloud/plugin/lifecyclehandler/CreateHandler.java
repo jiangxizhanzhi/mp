@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.base.util.BoolUtils;
 import cn.cyberpeace.mp.base.util.IntUtils;
 import cn.cyberpeace.mp.base.util.TextUtils;
@@ -13,6 +14,7 @@ import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementM
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,6 +30,7 @@ public class CreateHandler extends HandlerCommon {
     private final VirtualMachine vmClient = new VirtualMachine();
     private final Container containerClient = new Container();
     private final EntityNode enClient = new EntityNode();
+    private final CreateTaskPool taskPool = CreateTaskPool.getInstance();
 
     private void addCloudPort(String portId, CloudPluginSceneElementPortBO cloudPort) {
         getPluginHandler().getElementIds().add(portId);
@@ -476,25 +479,20 @@ public class CreateHandler extends HandlerCommon {
 
     public void create() {
         // 先创建辅助网络(包含虚拟交换机)
-        for (var cloudElement : getPluginHandler().getElementMap().values()) {
-            if (Boolean.TRUE.equals(cloudElement.getAuxiliaryNetworkOn())) {
-                createAuxiliaryNetwork(cloudElement);
-            }
-        }
+        taskPool.runTasks(getPluginHandler().getElementMap().values().stream()
+                .filter(cloudElement -> Boolean.TRUE.equals(cloudElement.getAuxiliaryNetworkOn()))
+                .map(cloudElement -> (Runnable) () -> createAuxiliaryNetwork(cloudElement)).collect(Collectors.toList()));
 
         // 再创建网关
-        for (var cloudElement : getPluginHandler().getGatewayElementMap().values()) {
-            createElement(cloudElement);
-        }
+        taskPool.runTasks(getPluginHandler().getGatewayElementMap().values().stream()
+                .map(cloudElement -> (Runnable) () -> createElement(cloudElement)).collect(Collectors.toList()));
 
         // 再创建防火墙
-        for (var cloudElement : getPluginHandler().getFirewallElementMap().values()) {
-            createElement(cloudElement);
-        }
+        taskPool.runTasks(getPluginHandler().getFirewallElementMap().values().stream()
+                .map(cloudElement -> (Runnable) () -> createElement(cloudElement)).collect(Collectors.toList()));
 
         // 再创建终端
-        for (var cloudElement : getPluginHandler().getTerminalElementMap().values()) {
-            createElement(cloudElement);
-        }
+        taskPool.runTasks(getPluginHandler().getTerminalElementMap().values().stream()
+                .map(cloudElement -> (Runnable) () -> createElement(cloudElement)).collect(Collectors.toList()));
     }
 }

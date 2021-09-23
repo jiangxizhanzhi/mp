@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common;
+package cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
