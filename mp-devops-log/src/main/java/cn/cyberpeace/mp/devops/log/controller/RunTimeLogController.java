@@ -50,7 +50,7 @@ public class RunTimeLogController {
 
     @PostMapping()
     @ApiOperation(value = "日志下载", notes = "")
-    public ResponseEntity<Resource> downloadLogFiles(HttpServletResponse httpServletResponse, @RequestBody List<String> logFileNames) {
+    public ResponseEntity<Resource> downloadLogFiles(HttpServletResponse response, @RequestBody List<String> logFileNames) {
         InputStreamResource resource = null;
         try {
             resource = new InputStreamResource(runTimeLogService.zipDownLoadFile(logFileNames));
@@ -61,7 +61,8 @@ public class RunTimeLogController {
         var httpHeaders = new HttpHeaders();
 
         httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        httpServletResponse.setHeader("Content-Disposition", "attachment; filename=log.zip");
+        response.setHeader("Content-Disposition", "attachment; filename=log.zip");
+        response.setHeader("Content-Type", "application/zip");
         return ResponseEntity.ok().headers(httpHeaders)
             .contentType(MediaType.parseMediaType("application/octet-stream")).body(resource);
     }
