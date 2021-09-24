@@ -78,6 +78,12 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     }
 
     @Transactional
+    public ServiceResult<CsceneBO> clone(String id, CsceneContextBO context) {
+        var csceneHandler = new CsceneHandler(id, context);
+        return sync(csceneHandler.toData(false).export(), context);
+    }
+
+    @Transactional
     public ServiceResult<CsceneBO> sync(CsceneBO csceneBO, CsceneContextBO context) {
         var csceneHandler = new CsceneHandler(csceneBO, context);
         csceneHandler.save();
