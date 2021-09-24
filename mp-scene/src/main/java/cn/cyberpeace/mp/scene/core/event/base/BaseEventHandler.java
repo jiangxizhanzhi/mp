@@ -3,8 +3,11 @@ package cn.cyberpeace.mp.scene.core.event.base;
 import cn.cyberpeace.mp.base.annotation.ClassFieldNames;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.ClassUtils;
+import cn.cyberpeace.mp.base.util.MessageUtils;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -20,6 +23,7 @@ import java.util.Map;
 @ClassFieldNames({
         "eventModelClass",
 })
+@Slf4j
 @Data
 public abstract class BaseEventHandler<M extends BaseEventModel, E extends EventModel> {
 
@@ -31,6 +35,9 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
 
     /** 当前管理事件 */
     private Integer event;
+
+    /** 当前管理事件名称 */
+    private String eventName;
 
     /** 事件转移表 */
     private Map<String, List<Integer>> eventTransition;
@@ -86,11 +93,16 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
             var eventObj = saveEvent(event, eventStatus, process, processStatus, processMessage);
             if (eventObj == null) {
                 releaseEventLock(event, process, processStatus);
+                log.error("{} save event failed: event({}), eventStatus({}), process({}), processStatus({}), processMessage({})",
+                        getTargetName(), event, eventStatus, process, processStatus, processMessage);
                 return EventFlag.SAVE_FAILED;
             } else {
+                log.info(processMessage);
                 return EventFlag.SUCCESS;
             }
         } else {
+            log.error("{} enter event failed: event({}), eventStatus({}), process({}), processStatus({}), processMessage({})",
+                    getTargetName(), event, eventStatus, process, processStatus, processMessage);
             return EventFlag.ENTER_FAILED;
         }
     }
@@ -100,17 +112,20 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
      * @param target 事件目标
      * @param event 当前管理事件
      */
-    public void init(M target, int event, Map<String, List<Integer>> eventTransition) {
+    public void init(M target, int event, String eventName, Map<String, List<Integer>> eventTransition) {
         ClassUtils.loadClassFields(this);
         this.target = target;
         this.event = event;
+        this.eventName = eventName;
         this.eventTransition = eventTransition;
         checkEvent();
     }
 
-    public BaseEventHandler(M target, int event, Map<String, List<Integer>> eventTransition) {
-        init(target, event, eventTransition);
+    public BaseEventHandler(M target, int event, String eventName, Map<String, List<Integer>> eventTransition) {
+        init(target, event, eventName, eventTransition);
     }
+
+    public String getTargetName() { return target.getClass().toString() + " instance"; }
 
     public void checkEvent() {
         var validEvents = eventTransition.getOrDefault(EventTransition.genKey(target.getEvent(),
@@ -124,8 +139,9 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
      * 开始事件
      */
     public int startEvent() {
-        return triggerEvent(event, EventStatus.START, target.getProcess(), target.getProcessStatus(),
-                target.getProcessMessage());
+        var processMessage = MessageUtils.get("scene.event.start_message", getTargetName(),
+                MessageUtils.get(eventName));
+        return triggerEvent(event, EventStatus.START, target.getProcess(), target.getProcessStatus(), processMessage);
     }
 
     /**
@@ -146,6 +162,9 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
      * 暂停事件
      */
     public int pauseProcess(String processMessage) {
+        processMessage = StringUtils.isEmpty(processMessage) ?
+                MessageUtils.get("scene.event.pause_message", getTargetName(), MessageUtils.get(eventName)) :
+                processMessage;
         return triggerEvent(target.getEvent(), EventStatus.PAUSE, target.getProcess(), ProcessStatus.PAUSE,
                 processMessage);
     }
@@ -161,14 +180,17 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
      * 结束事件
      */
     public int overEvent() {
-        return triggerEvent(event, EventStatus.OVER, target.getProcess(), target.getProcessStatus(),
-                target.getProcessMessage());
+        var processMessage = MessageUtils.get("scene.event.over_message", getTargetName(),
+                MessageUtils.get(eventName));
+        return triggerEvent(event, EventStatus.OVER, target.getProcess(), target.getProcessStatus(), processMessage);
     }
 
     /**
      * 异常事件
      */
     public int error(String processMessage) {
+        processMessage = MessageUtils.get("scene.event.error_message", getTargetName(),
+                MessageUtils.get(eventName), processMessage);
         return triggerEvent(event, EventStatus.ABNORMAL, target.getProcess(), ProcessStatus.ABNORMAL, processMessage);
     }
 
