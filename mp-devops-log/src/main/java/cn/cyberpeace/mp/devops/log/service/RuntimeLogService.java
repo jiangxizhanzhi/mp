@@ -91,6 +91,7 @@ public class RuntimeLogService {
                 }
                 zout.flush();
                 zout.closeEntry();
+                zout.finish();
                 fileInputStream.close();
             }
         } catch (Exception e) {
