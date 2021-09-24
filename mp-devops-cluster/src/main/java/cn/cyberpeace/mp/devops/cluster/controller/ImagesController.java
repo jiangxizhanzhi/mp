@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.ImagesConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.InjectFileConverter;
@@ -347,7 +348,10 @@ public class ImagesController {
     @ApiOperation("查询flavor")
     @GetMapping("/page-flavor")
     public Result<List<Flavor>> pageFlavor(){
-        FlavorCloudPlatformModel page = flavorService.page("");
+        BasePageRequest request = new BasePageRequest();
+        request.setPerPage(1000);
+        String getParams = BeanUtils.wrapperGetParamsByObject(Boolean.TRUE,request);
+        FlavorCloudPlatformModel page = flavorService.page(getParams);
         if (Objects.isNull(page) ||  Objects.isNull(page.getData())){
             return new Result();
         }
