@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,8 +40,12 @@ public class CreateHandler extends HandlerCommon {
         cloudPort.setSrcPort(srcPort);
     }
 
-    private String genAccessModeKey(String protocol, int port, String username, String password) {
-        return String.format("%s:%d:%s:%s", protocol, port, username, password);
+    private String genAccessModeKey(String protocol, String port, String username, String password) {
+        return String.format("%s:%s:%s:%s", protocol, port, username, password);
+    }
+
+    private String genAccessModeKey(String protocol, Integer port, String username, String password) {
+        return genAccessModeKey(protocol, port.toString(), username, password);
     }
 
     private String genAccessModeKey(CloudAccessMode accessMode) {
@@ -49,7 +54,13 @@ public class CreateHandler extends HandlerCommon {
     }
 
     private String genAccessModeKey(VirtualNic.AccessMode accessMode) {
-        return genAccessModeKey(accessMode.getProtocol(), accessMode.getPort(), accessMode.getUsername(),
+        String port;
+        if (Boolean.TRUE.equals(accessMode.getEnablePortMapping()) && accessMode.getPortMapping() != null) {
+            port = accessMode.getPortMapping().getInstancePort();
+        } else {
+            port = accessMode.getPort().toString();
+        }
+        return genAccessModeKey(accessMode.getProtocol(), port, accessMode.getUsername(),
                 accessMode.getPassword());
     }
 

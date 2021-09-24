@@ -63,7 +63,7 @@ public class TaskPool {
                 new LinkedBlockingQueue<>(holdSize - poolSize));
     }
 
-    public PoolTask<Runnable> runTask(Runnable task) {
+    public PoolTask<Runnable> executeTask(Runnable task) {
         var poolTask = new PoolTask<>(task, TaskStatus.WAITING, null);
         executor.execute(ThreadUtils.format(() -> runTask(poolTask)));
         return poolTask;

@@ -4,8 +4,6 @@ import cn.cyberpeace.mp.base.util.thread.TaskPool;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import lombok.Data;
 
-import java.util.List;
-
 @Data
 public class SceneReportTaskPool {
 
@@ -25,8 +23,8 @@ public class SceneReportTaskPool {
     }
 
 
-    public TaskPool.PoolTask<Runnable> runTask(Runnable task) {
-        return taskPool.runTask(task);
+    public TaskPool.PoolTask<Runnable> executeTask(Runnable task) {
+        return taskPool.executeTask(task);
     }
 
 }

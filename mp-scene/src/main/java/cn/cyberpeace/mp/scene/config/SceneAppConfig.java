@@ -10,6 +10,12 @@ import org.springframework.context.annotation.Configuration;
 @Data
 public class SceneAppConfig {
 
+    @Value("${mp.scene.scene_pool_size:100}")
+    private Integer scenePoolSize;
+
+    @Value("${mp.scene.scene_hold_size:10000}")
+    private Integer sceneHoldSize;
+
     @Value("${mp.scene.report_pool_size:10}")
     private Integer reportPoolSize;
 
