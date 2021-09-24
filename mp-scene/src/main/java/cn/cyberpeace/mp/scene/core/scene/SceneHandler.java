@@ -2,8 +2,6 @@ package cn.cyberpeace.mp.scene.core.scene;
 
 import cn.cyberpeace.mp.base.annotation.BeanFieldClasses;
 import cn.cyberpeace.mp.base.annotation.ClassFieldClasses;
-import cn.cyberpeace.mp.base.util.BeanUtils;
-import cn.cyberpeace.mp.base.util.thread.context.TransferContext;
 import cn.cyberpeace.mp.scene.core.base.BaseSceneHandler;
 import cn.cyberpeace.mp.scene.core.bo.*;
 import cn.cyberpeace.mp.scene.core.event.SceneElementEventHandler;
@@ -210,12 +208,12 @@ public class SceneHandler extends BaseSceneHandler<
 
     public void reportSceneUpdated() {
         var collectedScene = getCollectedSceneBO();
-        reporters.forEach(reporter -> reportTaskPool.runTask(() -> reporter.reportScene(collectedScene)));
+        reporters.forEach(reporter -> reportTaskPool.executeTask(() -> reporter.reportScene(collectedScene)));
     }
 
     public void reportElementUpdated(String nodeId) {
         var collectedSceneElement = getCollectedSceneElementBO(nodeId);
-        reporters.forEach(reporter -> reportTaskPool.runTask(() -> reporter.reportElement(collectedSceneElement)));
+        reporters.forEach(reporter -> reportTaskPool.executeTask(() -> reporter.reportElement(collectedSceneElement)));
     }
 
     public void progressSceneProcess(int event, String process, String processMessage) {

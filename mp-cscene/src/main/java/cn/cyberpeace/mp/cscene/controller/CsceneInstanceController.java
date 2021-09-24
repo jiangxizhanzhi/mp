@@ -41,7 +41,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @GetMapping
     public ListObjServiceResult<CsceneInstanceBO> list(InstanceQueryParams queryParams) {
         handleQueryParams("list", queryParams);
-        return getModelService().listBO(queryParams, new CsceneContextBO(queryParams.getAccessUserId(), null));
+        return getModelService().listBO(queryParams, new CsceneContextBO(queryParams.getAccessUserId(), null)).asResult();
     }
 
     @ApiOperation("获取指定id场景实例")
@@ -50,7 +50,8 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             @ApiImplicitParam(name = "accessUserId", value = "场景访问用户id", dataTypeClass = String.class),
     })
     @GetMapping(params = "id")
-    public ServiceResult<CsceneInstanceBO> get(@RequestParam String id, @RequestParam String accessUserId) {
+    public ServiceResult<CsceneInstanceBO> get(@RequestParam String id,
+                                               @RequestParam(required = false) String accessUserId) {
         return modelService.getById(id, new CsceneContextBO(accessUserId, null)).asResult();
     }
 

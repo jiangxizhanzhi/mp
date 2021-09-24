@@ -55,6 +55,9 @@ public class VirtualNic {
             private String url;
             private String connectionId;
             private String connectionName;
+
+            private String requestId;
+            private Boolean success;
         }
 
         @Data
@@ -64,6 +67,16 @@ public class VirtualNic {
             private String id;
             private String host;
             private Integer hostPort;
+
+            private String createdAt;
+            private String user;
+            private String project;
+            private String networkId;
+            private String instanceIp;
+            private String instancePort;
+            private String proto;
+            private String requestId;
+            private Boolean success;
         }
     }
 }
