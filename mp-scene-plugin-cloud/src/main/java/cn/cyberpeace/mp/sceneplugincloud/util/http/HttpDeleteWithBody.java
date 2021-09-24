@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common;
+package cn.cyberpeace.mp.sceneplugincloud.util.http;
 
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 

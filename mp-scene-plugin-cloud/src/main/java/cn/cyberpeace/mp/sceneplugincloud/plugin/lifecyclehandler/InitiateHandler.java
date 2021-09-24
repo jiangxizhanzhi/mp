@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.InitiateTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -11,11 +12,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class InitiateHandler extends HandlerCommon {
 
     private List<String> existCidrs;
     private final Map<String, List<String>> networkNodeIdIpPool = new HashMap<>();
+    private InitiateTaskPool taskPool = InitiateTaskPool.getInstance();
 
     private void prepareExistCidrs() {
         if (existCidrs == null) {
@@ -297,21 +300,19 @@ public class InitiateHandler extends HandlerCommon {
     }
 
     public void initiate() {
+        var cloudElements = getPluginHandler().getElementMap().values();
         // 初始化节点属性
-        for (var cloudElement : getPluginHandler().getElementMap().values()) {
-            initiateElement(cloudElement);
-        }
+        taskPool.runTasks(cloudElements.stream()
+                .map(cloudElement -> (Runnable) () -> initiateElement(cloudElement)).collect(Collectors.toList()));
+
         // 初始化ip池
-        for (var entry : getPluginHandler().getElementMap().entrySet()) {
-            var cloudElement = entry.getValue();
-            if (Boolean.TRUE.equals(cloudElement.getAuxiliaryNetworkOn())) {
-                initIpPool(cloudElement);
-            }
-        }
+        taskPool.runTasks(cloudElements.stream()
+                .filter(cloudElement -> Boolean.TRUE.equals(cloudElement.getAuxiliaryNetworkOn()))
+                .map(cloudElement -> (Runnable) () -> initIpPool(cloudElement)).collect(Collectors.toList()));
+
         // 初始化端口
-        for (var cloudElement : getPluginHandler().getElementMap().values()) {
-            initiateVirtualPorts(cloudElement);
-        }
+        taskPool.runTasks(cloudElements.stream()
+                .map(cloudElement -> (Runnable) () -> initiateVirtualPorts(cloudElement)).collect(Collectors.toList()));
     }
 
 }

@@ -1,12 +1,15 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin;
 
 import cn.cyberpeace.mp.base.annotation.ClassFieldClasses;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
 import cn.cyberpeace.mp.scene.core.plugin.SceneConfigPluginHandler;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.modelhandler.CloudSceneConfigPluginModelHandler;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +26,64 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
         CloudPluginSceneConfigElementBO, CloudPluginSceneConfigElementPortBO, Object> {
 
     private CloudSceneConfigPluginModelHandler pluginModelHandler;
+
+    private void correctElementRoleRelated(SceneConfigElementBO srcElement, CloudPluginSceneConfigElementBO cloudElement,
+                                           Integer role) {
+        if (role == null) {
+            return;
+        }
+
+        if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_2_GATEWAY)) {
+            // TODO
+        } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_GATEWAY)) {
+
+        } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK)) {
+            srcElement.setType(BaseSceneElementModel.Type.SWITCH);
+            cloudElement.setExternal(true);
+            cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH);
+        } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_TERMINAL)) {
+            srcElement.setType(BaseSceneElementModel.Type.TERMINAL);
+        } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_TRANSPARENT_GATEWAY)) {
+
+        } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_IMAGE_GATEWAY)) {
+
+        } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER)) {
+            srcElement.setType(BaseSceneElementModel.Type.ROUTER);
+        } else if (role.equals(BaseCloudPluginSceneElementModel.Role.ENTITY_GATEWAY)) {
+
+        } else if (role.equals(BaseCloudPluginSceneElementModel.Role.ENTITY_TERMINAL)) {
+            srcElement.setType(BaseSceneElementModel.Type.TERMINAL);
+        }
+    }
+
+    private void correctElementImageTypeRelated(SceneConfigElementBO srcElement, CloudPluginSceneConfigElementBO cloudElement,
+                                                String imageType) {
+        if (imageType == null) {
+            return;
+        }
+
+        if (imageType.equals(BaseCloudPluginSceneElementModel.ImageType.SIMPLE)) {
+            // TODO
+        } else if (imageType.equals(BaseCloudPluginSceneElementModel.ImageType.VM)) {
+            cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE);
+        } else if (imageType.equals(BaseCloudPluginSceneElementModel.ImageType.CONTAINER)) {
+            cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER);
+        } else if (imageType.equals(BaseCloudPluginSceneElementModel.ImageType.ENTITY)) {
+            cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE);
+        }
+    }
+
+    @Override
+    public void correctData() {
+        getElementMap().forEach((nodeId, element) -> {
+            var srcElement = getSrcElement(nodeId);
+            // 纠正 role imageType 对应type virtualType
+            Integer role = element.getRole();
+            correctElementRoleRelated(srcElement, element, role);
+            String imageType = element.getImageType();
+            correctElementImageTypeRelated(srcElement, element, imageType);
+        });
+    }
 
     @Override
     public void initBase() {

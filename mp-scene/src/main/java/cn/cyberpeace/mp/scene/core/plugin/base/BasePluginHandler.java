@@ -94,6 +94,11 @@ public abstract class BasePluginHandler<S, E, P, C> {
     }
 
     /**
+     * 纠正场景插件数据
+     */
+    public void correctData() {}
+
+    /**
      * 转出场景插件业务数据
      * @return 场景插件业务数据
      */

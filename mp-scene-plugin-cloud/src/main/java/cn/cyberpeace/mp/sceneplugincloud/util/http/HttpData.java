@@ -1,18 +1,17 @@
-package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common;
+package cn.cyberpeace.mp.sceneplugincloud.util.http;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public interface CloudHttpData extends HttpData {
+public interface HttpData {
 
-    @Override
+    Logger log = LoggerFactory.getLogger(HttpData.class);
+
     default String toContent() {
         var objectMapper = new ObjectMapper();
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        objectMapper.setPropertyNamingStrategy(new PropertyNamingStrategy.SnakeCaseStrategy());
         try {
             return objectMapper.writeValueAsString(this);
         } catch (JsonProcessingException e) {
@@ -20,4 +19,5 @@ public interface CloudHttpData extends HttpData {
             throw new MpRuntimeException("Stringify obj error: " + e.getMessage());
         }
     }
+
 }

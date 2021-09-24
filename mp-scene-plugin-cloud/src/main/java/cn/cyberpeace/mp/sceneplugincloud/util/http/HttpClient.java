@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common;
+package cn.cyberpeace.mp.sceneplugincloud.util.http;
 
 import cn.cyberpeace.mp.base.util.ClassUtils;
 import cn.cyberpeace.mp.base.util.JsonUtils;
