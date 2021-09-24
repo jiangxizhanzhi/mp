@@ -5,13 +5,15 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.RealEquipmentConverter;
-import cn.cyberpeace.mp.devops.cluster.converter.SerialPortConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.TypeConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.common.*;
 import cn.cyberpeace.mp.devops.cluster.request.*;
-import cn.cyberpeace.mp.devops.cluster.response.*;
+import cn.cyberpeace.mp.devops.cluster.response.RealEquipmentByIdResponse;
+import cn.cyberpeace.mp.devops.cluster.response.RealEquipmentDevopsDetailResponse;
+import cn.cyberpeace.mp.devops.cluster.response.RealEquipmentPageResponse;
+import cn.cyberpeace.mp.devops.cluster.response.RealEquipmentScenesPageResponse;
 import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
 import cn.cyberpeace.mp.devops.cluster.response.base.Result;
 import cn.cyberpeace.mp.devops.cluster.service.RealEquipmentService;
@@ -40,16 +42,13 @@ public class RealEquipmentController {
 
     private RealEquipmentService realEquipmentService;
 
-    private SerialPortConverter serialPortConverter;
-
     private TypeConverter typeConverter;
 
     @Autowired
     public RealEquipmentController(RealEquipmentConverter realEquipmentConverter,RealEquipmentService realEquipmentService,
-                                   SerialPortConverter serialPortConverter,TypeConverter typeConverter) {
+                                  TypeConverter typeConverter) {
         this.realEquipmentConverter = realEquipmentConverter;
         this.realEquipmentService = realEquipmentService;
-        this.serialPortConverter = serialPortConverter;
         this.typeConverter = typeConverter;
     }
 
@@ -190,15 +189,6 @@ public class RealEquipmentController {
         return new Result<>(result);
     }
 
-//    /**
-//     * 释放
-//     */
-//    @ApiOperation("释放")
-//    @PostMapping("/freed")
-//    public Result<Boolean> freed(@RequestBody RealEquipmentFreedRequest request){
-//        return new Result<>();
-//    }
-
     @ApiOperation("查询详情")
     @GetMapping("/get-devops-details")
     public Result<RealEquipmentDevopsDetailResponse> findDevopsDetails(@RequestParam("uuid") String id){
@@ -282,7 +272,7 @@ public class RealEquipmentController {
         Integer page = request.getPage();
         Integer perPage = request.getPerPage();
         List<SnmpInterfaceResourceCloudPlatform.Interfaces> interfaces = model.getResult().subList((page - 1) * perPage, (page - 1) * perPage + perPage);
-        return new PageResult<>(interfaces,100);
+        return new PageResult<>(interfaces,model.getResult().size());
     }
 
     @ApiOperation("场景引用")

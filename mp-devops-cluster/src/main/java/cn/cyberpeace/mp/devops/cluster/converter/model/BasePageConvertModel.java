@@ -43,4 +43,9 @@ public class BasePageConvertModel {
     @ApiModelProperty(hidden = true)
     private String messageZh;
 
+    /**
+     * 错误信息
+     */
+    @ApiModelProperty(hidden = true)
+    private String errorMessage;
 }
