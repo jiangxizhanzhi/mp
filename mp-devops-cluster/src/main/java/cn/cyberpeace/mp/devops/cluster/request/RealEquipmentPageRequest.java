@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.request;
 
 
-import cn.cyberpeace.mp.devops.cluster.enums.StatusEnum;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -42,11 +41,11 @@ public class RealEquipmentPageRequest extends BasePageRequest{
      * 在位状态
      */
     @ApiModelProperty(value = "在位状态")
-    private StatusEnum inPosition;
+    private Integer inPosition;
 
     /**
      * 使用状态
      */
     @ApiModelProperty(value = "使用状态")
-    private StatusEnum useStatus;
+    private Integer useStatus;
 }
