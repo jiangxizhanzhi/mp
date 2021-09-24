@@ -73,7 +73,10 @@ public class ExtImageInfo {
     @ApiModelProperty("临时文件ID")
     private String tmpdirUuid;
 
+    @ApiModelProperty("ftp文件名称")
+    private String ftpFilename;
 
-    @ApiModelProperty("http/ftp文件名称")
+
+    @ApiModelProperty("http文件名称")
     private String userFilename;
 }
