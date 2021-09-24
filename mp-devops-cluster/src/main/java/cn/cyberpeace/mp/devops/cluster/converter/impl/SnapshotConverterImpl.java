@@ -7,7 +7,6 @@ import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceSnapshotMergeCloudPlatform;
 import cn.cyberpeace.mp.devops.cluster.model.ScenariosSnapshot;
 import cn.cyberpeace.mp.devops.cluster.model.SnapshotCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.common.Snapshot;
 import cn.cyberpeace.mp.devops.cluster.request.SnapshotMergeRequest;
 import cn.cyberpeace.mp.devops.cluster.request.SnapshotRequest;
 import cn.cyberpeace.mp.devops.cluster.service.ScenariosSnapshotService;
@@ -49,14 +48,13 @@ public class SnapshotConverterImpl implements SnapshotConverter {
     }
 
     @Override
-    public Boolean create(SnapshotRequest request) {
+    public BaseCloudPlatformModel create(SnapshotRequest request) {
         ScenariosSnapshot snapshotCreate = new ScenariosSnapshot();
         snapshotCreate.setDeviceUuid(request.getUuid());
         snapshotCreate.setImageType(request.getImageType());
         snapshotCreate.setName(request.getName());
         snapshotCreate.setDescription(request.getDescription());
-        Snapshot snapshot = scenariosSnapshotService.create(snapshotCreate);
-        return snapshot.isSuccess();
+        return scenariosSnapshotService.create(snapshotCreate);
     }
 
     @Override

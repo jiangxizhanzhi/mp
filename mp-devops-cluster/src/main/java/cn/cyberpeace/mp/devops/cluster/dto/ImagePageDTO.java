@@ -100,5 +100,9 @@ public class ImagePageDTO extends BasePageDTO{
      */
     private Integer imageStatus;
 
+    /**
+     * 是否支持基础镜像
+     */
+    private Boolean baseImageSupport;
 
 }

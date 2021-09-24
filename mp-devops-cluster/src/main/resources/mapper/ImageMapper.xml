@@ -60,16 +60,19 @@
                 and ( a.owner = #{owner} or i.is_public in (0,2) )
             </if>
             <if test="systemType != null">
-                AND i.system_type = #{systemType},
+                AND i.system_type = #{systemType}
             </if>
             <if test="systemArchitecure != null">
                 And i.system_architecure = #{systemArchitecure}
             </if>
             <if test="language != null">
-                and i.language = #{language},
+                and i.language = #{language}
             </if>
             <if test="imageStatus != null">
-                and i.image_status = #{imageStatus},
+                and i.image_status = #{imageStatus}
+            </if>
+            <if test="baseImageSupport != null">
+                and base_image_support = #{baseImageSupport}
             </if>
         </where>
     </sql>

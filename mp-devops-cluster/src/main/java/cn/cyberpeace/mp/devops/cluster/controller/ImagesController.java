@@ -294,9 +294,13 @@ public class ImagesController {
      * 创建快照
      */
     @ApiOperation("创建快照")
-    @GetMapping("/snapshot/create")
-    public void createSnapshot(@RequestBody SnapshotRequest request){
-        snapshotConverter.create(request);
+    @PostMapping("/snapshot/create")
+    public ServiceResult createSnapshot(@RequestBody SnapshotRequest request){
+        BaseCloudPlatformModel model = snapshotConverter.create(request);
+        if (Objects.isNull(model)){
+            return ServiceResult.fail("");
+        }
+        return ControllerConstant.code.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessageZh());
     }
 
     /**
@@ -304,10 +308,13 @@ public class ImagesController {
      */
     @ApiOperation("文件注入")
     @PostMapping("/inject-file")
-    public void injectFile(@Valid @RequestBody ImageInjectFileRequest request){
+    public ServiceResult injectFile(@Valid @RequestBody ImageInjectFileRequest request){
         BaseCloudPlatformModel model = scenariosSnapshotService.injectFile(new DeviceInjectFileCreate(request.getDeviceUuid(),
                 request.getFileUrl(),request.getFileName(),request.getFileSize()));
-
+        if (Objects.isNull(model)){
+            return ServiceResult.fail("");
+        }
+        return ControllerConstant.code.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessageZh());
     }
 
     /**
