@@ -317,7 +317,7 @@ public class ImagesConverterImpl implements ImagesConverter {
         device.setCategory(request.getCategory());
         device.setSecondCategory(request.getSecondCategory());
         device.setL3Category(request.getThirdCategory());
-        device.setImageType(request.getVirtualType());
+        device.setImageType(request.getImageType());
         device.setMaintype(MainTypeEnum.NORMAL.ordinal());
         if (Objects.nonNull(role) && role != RoleEnum.NETWORK.toValue()) {
             final ExtVm extVm = request.getExtVm();
