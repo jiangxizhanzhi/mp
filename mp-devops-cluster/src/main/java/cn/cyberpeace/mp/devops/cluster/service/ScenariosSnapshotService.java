@@ -31,6 +31,13 @@ public interface ScenariosSnapshotService extends BaseCloudPlatformService{
     BaseCloudPlatformModel create(ImagesCreateInstanceCloudPlatform snapshotCreate);
 
     /**
+     * 合并快照
+     * @param mergeCloudPlatform
+     * @return
+     */
+    BaseCloudPlatformModel mergeSnapshot(DeviceSnapshotMergeCloudPlatform mergeCloudPlatform);
+
+    /**
      * 删除虚拟靶标实例
      * @param cloudPlatform
      * @return

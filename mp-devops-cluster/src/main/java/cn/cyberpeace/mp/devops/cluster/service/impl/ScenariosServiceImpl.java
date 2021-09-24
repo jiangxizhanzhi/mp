@@ -38,6 +38,11 @@ public class ScenariosServiceImpl extends BaseOpenStackServiceImpl implements Sc
     }
 
     @Override
+    public BaseCloudPlatformModel mergeSnapshot(DeviceSnapshotMergeCloudPlatform mergeCloudPlatform) {
+        return super.sendPost(  URL_VERSION + "/scenarios/device_snapshot_merge", JsonUtils.toUnderlineJSONString(mergeCloudPlatform), BaseCloudPlatformModel.class);
+    }
+
+    @Override
     public BaseCloudPlatformModel delete(ImagesDeleteInstanceCloudPlatform cloudPlatform) {
         return super.sendDelete(  URL_VERSION + "/scenarios/device_scenario", JsonUtils.toUnderlineJSONString(cloudPlatform), BaseCloudPlatformModel.class);
     }

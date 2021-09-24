@@ -80,6 +80,7 @@ public class DevopsDevopsTargetServiceImpl implements DevopsTargetService {
         ExtImageInfo extImageInfo = device.getExtImageInfo();
         if (Objects.nonNull(extImageInfo)){
             targetModel.setImageStatus(extImageInfo.getImageStatus());
+            targetModel.setBaseImageSupport(extImageInfo.getBaseImageSupport());
         }
 
         ExtSystemInfo extSystemInfo = device.getExtSystemInfo();
