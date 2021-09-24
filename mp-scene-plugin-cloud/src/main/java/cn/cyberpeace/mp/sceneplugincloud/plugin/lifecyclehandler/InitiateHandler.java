@@ -217,6 +217,16 @@ public class InitiateHandler extends HandlerCommon {
             return;
         }
 
+        Integer virtualType = cloudElement.getVirtualType();
+        if (virtualType == null) {
+            return;
+        }
+        if (!virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)
+                && !virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)
+                && !virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
+            return;
+        }
+
         var portId = srcPort.getId();
         var connectedSrcElement = getPortConnectedOpaqueSrcElement(portId);
         var connectedCloudElement = connectedSrcElement == null ? null
@@ -230,7 +240,6 @@ public class InitiateHandler extends HandlerCommon {
         // 分配ip
         List<String> ipPool = networkNodeIdIpPool.get(auxiliaryNetworkCloudElement.getSrcElement().getId());
         if (ipPool == null || ipPool.isEmpty()) {
-            // TODO 异常
             return;
         }
 
