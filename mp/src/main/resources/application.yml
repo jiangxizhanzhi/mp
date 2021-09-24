@@ -103,6 +103,8 @@ mp:
     # 流量发生器资源地址
     actuator-resource-url: http://${ip.trex}:80/api/v1/resource
     trex-image: trex_0911
+  sceneplugincloud:
+    cpcloud-server: http://${ip.cp}:10009
 
 management:
   endpoints:

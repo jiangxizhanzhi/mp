@@ -108,6 +108,29 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
         private OpticalPortType() {}
     }
 
+    public static class Role {
+        public static final int VIRTUAL_LAYER_2_GATEWAY = 1;
+        public static final int VIRTUAL_LAYER_3_GATEWAY = 2;
+        public static final int VIRTUAL_EXTERNAL_NETWORK = 3;
+        public static final int VIRTUAL_TERMINAL = 4;
+        public static final int VIRTUAL_TRANSPARENT_GATEWAY = 5;
+        public static final int VIRTUAL_LAYER_3_IMAGE_GATEWAY = 20;
+        public static final int VIRTUAL_LAYER_3_SIMPLE_ROUTER = 21;
+        public static final int ENTITY_GATEWAY = 50;
+        public static final int ENTITY_TERMINAL = 51;
+
+        private Role() {}
+    }
+
+    public static class ImageType {
+        public static final String SIMPLE = "simple";
+        public static final String VM = "vm";
+        public static final String CONTAINER = "container";
+        public static final String ENTITY = "entity";
+
+        private ImageType() {}
+    }
+
     // 用于设备连接的辅助网络
     @DefaultBool
     private Boolean auxiliaryNetworkOn;

@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementM
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.DeleteTaskPool;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class DeleteHandler extends HandlerCommon {
 
@@ -21,6 +23,7 @@ public class DeleteHandler extends HandlerCommon {
     private final VirtualMachine vmClient = new VirtualMachine();
     private final Container containerClient = new Container();
     private final EntityNode enClient = new EntityNode();
+    private final DeleteTaskPool taskPool = DeleteTaskPool.getInstance();
 
     @Data
     @AllArgsConstructor
@@ -108,7 +111,7 @@ public class DeleteHandler extends HandlerCommon {
         var deleteData = new VirtualMachineDeleteData();
         deleteData.setVms(List.of(resourceId));
         var extraInfo = collectElementExtraCloudInfo(cloudElement);
-        // TODO qos列表
+        deleteData.setQoses(extraInfo.getQosIds());
         deleteData.setConnections(extraInfo.getConnectionIds());
         deleteData.setPortMappings(extraInfo.getProxyIds());
         return vmClient.delete(deleteData);
@@ -123,7 +126,7 @@ public class DeleteHandler extends HandlerCommon {
         var deleteData = new ContainerDeleteData();
         deleteData.setContainers(List.of(resourceId));
         var extraInfo = collectElementExtraCloudInfo(cloudElement);
-        // TODO qos列表
+        deleteData.setQoses(extraInfo.getQosIds());
         deleteData.setConnections(extraInfo.getConnectionIds());
         deleteData.setPortMappings(extraInfo.getProxyIds());
         return containerClient.delete(deleteData);
@@ -167,25 +170,20 @@ public class DeleteHandler extends HandlerCommon {
 
     public void delete() {
         // 删除终端
-        for (var cloudElement : getPluginHandler().getTerminalElementMap().values()) {
-            deleteElement(cloudElement);
-        }
+        taskPool.runTasks(getPluginHandler().getTerminalElementMap().values().stream()
+                .map(cloudElement -> (Runnable) () -> deleteElement(cloudElement)).collect(Collectors.toList()));
 
         // 删除防火墙
-        for (var cloudElement : getPluginHandler().getFirewallElementMap().values()) {
-            deleteElement(cloudElement);
-        }
+        taskPool.runTasks(getPluginHandler().getFirewallElementMap().values().stream()
+                .map(cloudElement -> (Runnable) () -> deleteElement(cloudElement)).collect(Collectors.toList()));
 
         // 删除网关
-        for (var cloudElement : getPluginHandler().getGatewayElementMap().values()) {
-            deleteElement(cloudElement);
-        }
+        taskPool.runTasks(getPluginHandler().getGatewayElementMap().values().stream()
+                .map(cloudElement -> (Runnable) () -> deleteElement(cloudElement)).collect(Collectors.toList()));
 
         // 删除辅助网络(包含虚拟交换机)
-        for (var cloudElement : getPluginHandler().getElementMap().values()) {
-            if (Boolean.TRUE.equals(cloudElement.getAuxiliaryNetworkOn())) {
-                deleteAuxiliaryNetwork(cloudElement);
-            }
-        }
+        taskPool.runTasks(getPluginHandler().getElementMap().values().stream()
+                .filter(cloudElement -> Boolean.TRUE.equals(cloudElement.getAuxiliaryNetworkOn()))
+                .map(cloudElement -> (Runnable) () -> deleteAuxiliaryNetwork(cloudElement)).collect(Collectors.toList()));
     }
 }

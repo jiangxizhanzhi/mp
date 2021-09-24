@@ -1,6 +1,7 @@
-package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common;
+package cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp;
 
 import cn.cyberpeace.mp.base.util.BeanUtils;
+import cn.cyberpeace.mp.sceneplugincloud.util.http.HttpParam;
 
 import java.lang.reflect.Field;
 import java.util.List;

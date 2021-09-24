@@ -20,8 +20,26 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.cpcloud_server_timeout:600000}")
     private Integer cpcloudServerTimeout;
 
-    @Value("${mp.sceneplugincloud.cpcloud_server_timeout:MP_SCENE}")
+    @Value("${mp.sceneplugincloud.cpcloud_resource_group:MP_SCENE}")
     private String cpcloudResourceGroup;
+
+    @Value("${mp.sceneplugincloud.initiate_pool_size:10}")
+    private Integer initiatePoolSize;
+
+    @Value("${mp.sceneplugincloud.initiate_hold_size:200000}")
+    private Integer initiateHoldSize;
+
+    @Value("${mp.sceneplugincloud.create_pool_size:10}")
+    private Integer createPoolSize;
+
+    @Value("${mp.sceneplugincloud.create_hold_size:200000}")
+    private Integer createHoldSize;
+
+    @Value("${mp.sceneplugincloud.delete_pool_size:10}")
+    private Integer deletePoolSize;
+
+    @Value("${mp.sceneplugincloud.delete_hold_size:200000}")
+    private Integer deleteHoldSize;
 
     public List<String> getCidrPool() {
         List<String> cidrPool = new ArrayList<>();

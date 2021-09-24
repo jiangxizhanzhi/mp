@@ -2,6 +2,8 @@ package cn.cyberpeace.mp.scene.core.scene;
 
 import cn.cyberpeace.mp.base.annotation.BeanFieldClasses;
 import cn.cyberpeace.mp.base.annotation.ClassFieldClasses;
+import cn.cyberpeace.mp.base.util.BeanUtils;
+import cn.cyberpeace.mp.base.util.thread.context.TransferContext;
 import cn.cyberpeace.mp.scene.core.base.BaseSceneHandler;
 import cn.cyberpeace.mp.scene.core.bo.*;
 import cn.cyberpeace.mp.scene.core.event.SceneElementEventHandler;
@@ -12,6 +14,7 @@ import cn.cyberpeace.mp.scene.repository.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -72,63 +75,9 @@ public class SceneHandler extends BaseSceneHandler<
 
     private final Map<String, SceneElementEventHandler> elementEventHandlerMap = new HashMap<>();
 
-    @Override
-    public void beforeInitPlugin(ScenePluginHandler<?, ?, ?, ?> plugin) {
-        plugin.setSceneHandler(this);
-    }
+    private final List<SceneReporter> reporters = SceneReporter.getReporters();
 
-    public CollectedSceneBO getCollectedSceneBO() {
-        var collectedSceneBO = new CollectedSceneBO();
-        collectedSceneBO.setScene(getScene());
-        Map<String, Object> pluginData = new HashMap<>();
-        getPlugins().forEach(plugin -> {
-            var pluginScene = plugin.getScene();
-            if (pluginScene != null) {
-                pluginData.put(plugin.getKey(), plugin.getScene());
-            }
-        });
-        collectedSceneBO.setScenePluginData(pluginData);
-        return collectedSceneBO;
-    }
-
-    public CollectedSceneElementBO getCollectedSceneElementBO(String nodeId) {
-        var collectedSceneElementBO = new CollectedSceneElementBO();
-        var sceneElement = getElement(nodeId);
-        collectedSceneElementBO.setSceneElement(sceneElement);
-        var sceneElementPorts = sceneElement.getPorts();
-        
-        Map<String, Object> pluginData = new HashMap<>();
-        Map<String, Map<String, Object>> portPluginData = new HashMap<>();
-        getPlugins().forEach(plugin -> {
-            var pluginElement = plugin.getElement(nodeId);
-            if (pluginElement != null) {
-                pluginData.put(plugin.getKey(), pluginElement);
-            }
-            
-            if (sceneElementPorts != null) {
-                Map<String, Object> pluginPorts = new HashMap<>();
-                sceneElementPorts.forEach(sceneElementPort -> {
-                    var portId = sceneElementPort.getId();
-                    var pluginPort = plugin.getPort(portId);
-                    if (pluginPort != null) {
-                        pluginPorts.put(portId, pluginPort);
-                    }
-                });
-                portPluginData.put(plugin.getKey(), pluginPorts);
-            }
-        });
-        return collectedSceneElementBO;
-    }
-
-    public void notifySceneUpdated() {
-        var collectedScene = getCollectedSceneBO();
-        // TODO 通知
-    }
-
-    public void notifyElementUpdated(String nodeId) {
-        var collectedSceneElement = getCollectedSceneElementBO(nodeId);
-        // TODO 通知
-    }
+    private final SceneReportTaskPool reportTaskPool = SceneReportTaskPool.getInstance();
 
     private String genEventKey(String targetId, int event) {
         return String.format("%s:%d", targetId, event);
@@ -159,18 +108,22 @@ public class SceneHandler extends BaseSceneHandler<
 
     private void startSceneEvent(int event) {
         getSceneEventHandler(event).startEvent();
+        reportSceneUpdated();
     }
 
     private void startElementEvent(String nodeId, int event) {
         getElementEventHandler(nodeId, event).startEvent();
+        reportElementUpdated(nodeId);
     }
 
     private void overSceneEvent(int event) {
         getSceneEventHandler(event).overEvent();
+        reportSceneUpdated();
     }
 
     private void overElementEvent(String nodeId, int event) {
         getElementEventHandler(nodeId, event).overEvent();
+        reportElementUpdated(nodeId);
     }
 
     private void startAllEvent(int sceneEvent, int elementEvent) {
@@ -205,28 +158,94 @@ public class SceneHandler extends BaseSceneHandler<
         init(sceneId, areaId, isAreaMode, context);
     }
 
+    @Override
+    public void beforeInitPlugin(ScenePluginHandler<?, ?, ?, ?> plugin) {
+        plugin.setSceneHandler(this);
+    }
+
+    public CollectedSceneBO getCollectedSceneBO() {
+        var collectedSceneBO = new CollectedSceneBO();
+        collectedSceneBO.setScene(getScene());
+        Map<String, Object> pluginData = new HashMap<>();
+        getPlugins().forEach(plugin -> {
+            var pluginScene = plugin.getScene();
+            if (pluginScene != null) {
+                pluginData.put(plugin.getKey(), plugin.getScene());
+            }
+        });
+        collectedSceneBO.setScenePluginData(pluginData);
+        return collectedSceneBO;
+    }
+
+    public CollectedSceneElementBO getCollectedSceneElementBO(String nodeId) {
+        var collectedSceneElementBO = new CollectedSceneElementBO();
+        var sceneElement = getElement(nodeId);
+        collectedSceneElementBO.setSceneElement(sceneElement);
+        var sceneElementPorts = sceneElement.getPorts();
+
+        Map<String, Object> pluginData = new HashMap<>();
+        Map<String, Map<String, Object>> portPluginData = new HashMap<>();
+        getPlugins().forEach(plugin -> {
+            var pluginElement = plugin.getElement(nodeId);
+            if (pluginElement != null) {
+                pluginData.put(plugin.getKey(), pluginElement);
+            }
+
+            if (sceneElementPorts != null) {
+                Map<String, Object> pluginPorts = new HashMap<>();
+                sceneElementPorts.forEach(sceneElementPort -> {
+                    var portId = sceneElementPort.getId();
+                    var pluginPort = plugin.getPort(portId);
+                    if (pluginPort != null) {
+                        pluginPorts.put(portId, pluginPort);
+                    }
+                });
+                portPluginData.put(plugin.getKey(), pluginPorts);
+            }
+        });
+        collectedSceneElementBO.setSceneElementPluginData(pluginData);
+        collectedSceneElementBO.setSceneElementPortPluginData(portPluginData);
+        return collectedSceneElementBO;
+    }
+
+    public void reportSceneUpdated() {
+        var collectedScene = getCollectedSceneBO();
+        reporters.forEach(reporter -> reportTaskPool.runTask(() -> reporter.reportScene(collectedScene)));
+    }
+
+    public void reportElementUpdated(String nodeId) {
+        var collectedSceneElement = getCollectedSceneElementBO(nodeId);
+        reporters.forEach(reporter -> reportTaskPool.runTask(() -> reporter.reportElement(collectedSceneElement)));
+    }
+
     public void progressSceneProcess(int event, String process, String processMessage) {
         getSceneEventHandler(event).progressProcess(process, processMessage);
+        reportSceneUpdated();
     }
 
     public void progressElementProcess(String nodeId, int event, String process, String processMessage) {
         getElementEventHandler(nodeId, event).progressProcess(process, processMessage);
+        reportElementUpdated(nodeId);
     }
 
     public void overSceneProcess(int event, String processMessage) {
         getSceneEventHandler(event).overProcess(processMessage);
+        reportSceneUpdated();
     }
 
     public void overElementProcess(String nodeId, int event, String processMessage) {
         getElementEventHandler(nodeId, event).overProcess(processMessage);
+        reportElementUpdated(nodeId);
     }
 
     public void errorSceneProcess(int event, String processMessage) {
         getSceneEventHandler(event).error(processMessage);
+        reportSceneUpdated();
     }
 
     public void errorElementProcess(String nodeId, int event, String processMessage) {
         getElementEventHandler(nodeId, event).error(processMessage);
+        reportElementUpdated(nodeId);
     }
 
     public void initiate() {
