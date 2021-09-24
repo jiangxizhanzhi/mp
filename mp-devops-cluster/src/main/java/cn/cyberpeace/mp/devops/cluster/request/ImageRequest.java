@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.request;
 
 import cn.cyberpeace.mp.devops.cluster.model.common.*;
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -82,7 +81,7 @@ public class ImageRequest extends BaseRequest {
      * 虚拟类型
      */
     @ApiModelProperty(value = "虚拟类型")
-    private String virtualType;
+    private String imageType;
 
     /**
      * 网关信息

@@ -72,7 +72,7 @@ public class ImagesByIdResponse extends BaseCloudPlatformResponse  {
      * 镜像类型
      */
     @ApiModelProperty(value = "虚拟类型")
-    private String virtualType;
+    private String imageType;
 
     /**
      * 接入方式
