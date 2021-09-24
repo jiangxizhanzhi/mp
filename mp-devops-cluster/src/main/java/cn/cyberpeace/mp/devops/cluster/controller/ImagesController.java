@@ -281,9 +281,13 @@ public class ImagesController {
      * 合并快照历史
      */
     @ApiOperation("合并快照历史")
-    @PostMapping("/{id}/snapshot/merge")
-    public void mergeSnapshot(@PathVariable("id") String uuid){
-        snapshotConverter.merge(uuid);
+    @PostMapping("/snapshot/merge")
+    public ServiceResult mergeSnapshot(@RequestBody SnapshotMergeRequest request){
+        BaseCloudPlatformModel model = snapshotConverter.merge(request);
+        if (Objects.isNull(model)){
+            return ServiceResult.fail("");
+        }
+        return ControllerConstant.code.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessageZh());
     }
 
     /**
