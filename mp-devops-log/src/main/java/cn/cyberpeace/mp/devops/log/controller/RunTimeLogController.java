@@ -63,7 +63,6 @@ public class RunTimeLogController {
         httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
         response.setHeader("Content-Disposition", "attachment; filename=log.zip");
         response.setHeader("Content-Type", "application/zip");
-        return ResponseEntity.ok().headers(httpHeaders)
-            .contentType(MediaType.parseMediaType("application/octet-stream")).body(resource);
+        return ResponseEntity.ok().headers(httpHeaders).body(resource);
     }
 }
