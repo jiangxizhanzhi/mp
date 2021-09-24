@@ -178,7 +178,7 @@ public class ImagesController {
      */
     @ApiOperation("删除")
     @DeleteMapping("/page")
-    public ServiceResult delete(ImagesDeleteRequest request){
+    public ServiceResult delete(@RequestBody ImagesDeleteRequest request){
         Boolean result = imagesConverter.delete(request);
         return result ? ServiceResult.successful() : ServiceResult.fail("");
     }
