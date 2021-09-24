@@ -42,8 +42,8 @@ public class InstallerPageResponse extends BaseCloudPlatformResponse{
     private String categories;
 
     /**
-     * 状态
+     * 服务类型：windows服务/docker服务
      */
-    @ApiModelProperty("状态")
-    private String status;
+    @ApiModelProperty("服务类型")
+    private Integer deployType;
 }

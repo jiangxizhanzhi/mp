@@ -98,9 +98,12 @@ public abstract class BaseSceneHandler<
         M4 extends BaseSceneElementPortMapper<P0>,
         M5 extends BaseSceneElementPortConnectionMapper<C0>,
         M6 extends BaseSceneElementPluginMapper<P1>,
+        C2 extends BaseSceneContextBO,
         P2 extends BasePluginHandler<?, ?, ?, ?>,
-        H extends BaseSceneHandler<S0, A0, E0, P0, C0, P1, S, A, P, E, C, T, D, M1, M2, M3, M4, M5, M6, P2, H>> {
+        H extends BaseSceneHandler<S0, A0, E0, P0, C0, P1, S, A, P, E, C, T, D, M1, M2, M3, M4, M5, M6, C2, P2, H>> {
 
+    /** 上下文 */
+    private C2 context;
     /** 是否区域模式 */
     private boolean isAreaMode;
     /** 场景模板/场景实例id */
@@ -153,16 +156,31 @@ public abstract class BaseSceneHandler<
     private M5 sceneElementPortConnectionMapper;
     private M6 sceneElementPluginMapper;
 
-    /** 插件数据处理对象集合，key为插件代号 */
+    /** 插件数据处理对象集合 */
+    private final List<P2> plugins = new ArrayList<>();
     private final Map<String, P2> pluginMap = new HashMap<>();
     /** 网元对应节点插件关系，一个网元节点对于多个插件 */
     private final Map<String, List<P1>> elementIdPluginsMap = new HashMap<>();
+
+    private Object getPluginContext(String pluginKey) {
+        if (context == null) {
+            return null;
+        }
+
+        var pluginsContexts = context.getPlugins();
+        if (pluginsContexts == null) {
+            return null;
+        }
+
+        return pluginsContexts.getOrDefault(pluginKey, null);
+    }
 
     /**
      * 初始化插件集合
      */
     @SuppressWarnings("unchecked")
-    private void initPluginMap(Map<String, ScenePluginDataBO> scenePluginData) {
+    private void initPlugins(Map<String, ScenePluginDataBO> scenePluginData) {
+        plugins.clear();
         pluginMap.clear();
         BeanUtils.getBeanType(scenePluginHandlerInterface).forEach((name, pluginInstance) -> {
             Class<?> pluginClass = pluginInstance.getClass();
@@ -178,18 +196,22 @@ public abstract class BaseSceneHandler<
             }
 
             P2 plugin = (P2) ClassUtils.createInstance(pluginClass);
-            initPluginContext(pluginKey, plugin);
-            plugin.init(sceneId, pluginData);
+            beforeInitPlugin(plugin);
+            plugin.init(sceneId, pluginData, getPluginContext(pluginKey));
+            afterInitPlugin(plugin);
+            plugins.add(plugin);
             pluginMap.put(pluginKey, plugin);
         });
+        plugins.sort(Comparator.comparing(BasePluginHandler::getPriority));
     }
 
     /**
      * 初始化插件集合
      */
     @SuppressWarnings("unchecked")
-    private void initPluginMap(Map<String, List<String>> pluginKeyElementIds,
-                               Map<String, List<String>> pluginKeyElementPortIds) {
+    private void initPlugins(Map<String, List<String>> pluginKeyElementIds,
+                             Map<String, List<String>> pluginKeyElementPortIds) {
+        plugins.clear();
         pluginMap.clear();
         BeanUtils.getBeanType(scenePluginHandlerInterface).forEach((name, pluginInstance) -> {
             Class<?> pluginClass = pluginInstance.getClass();
@@ -206,11 +228,14 @@ public abstract class BaseSceneHandler<
             }
 
             P2 plugin = (P2) ClassUtils.createInstance(pluginClass);
-            initPluginContext(pluginKey, plugin);
-            plugin.init(sceneId, elementIds, elementPortIds);
+            beforeInitPlugin(plugin);
+            plugin.init(sceneId, elementIds, elementPortIds, getPluginContext(pluginKey));
+            afterInitPlugin(plugin);
             scenePluginData.put(pluginKey, plugin.toData());
+            plugins.add(plugin);
             pluginMap.put(pluginKey, plugin);
         });
+        plugins.sort(Comparator.comparing(BasePluginHandler::getPriority));
     }
 
     /**
@@ -750,9 +775,7 @@ public abstract class BaseSceneHandler<
         sceneId = sceneObj.getId();
         scene.fromModel(sceneObj);
 
-        pluginMap.forEach((key, plugin) -> {
-            plugin.setSourceSceneId(sceneId);
-        });
+        plugins.forEach(plugin -> plugin.setSourceSceneId(sceneId));
 
         return result;
     }
@@ -775,7 +798,7 @@ public abstract class BaseSceneHandler<
             for (var removingArea: diff.getRemovingTargets()) {
                 if (!Boolean.TRUE.equals(removingArea.getOpen())) {
                     var sceneHandler = ClassUtils.createInstance(sceneHandlerClass);
-                    sceneHandler.init(sceneId, removingArea.getNodeId(), isAreaMode);
+                    sceneHandler.init(sceneId, removingArea.getNodeId(), isAreaMode, context);
                     sceneHandler.deleteTopology();
                 }
             }
@@ -990,15 +1013,16 @@ public abstract class BaseSceneHandler<
      * @param sceneDataBO 场景业务数据
      * @param isAreaMode 是否区域模式
      */
-    public void init(D sceneDataBO, boolean isAreaMode) {
+    public void init(D sceneDataBO, boolean isAreaMode, C2 context) {
         ClassUtils.loadClassFields(this);
         BeanUtils.loadBeanFields(this);
+        this.context = context;
         this.isAreaMode = isAreaMode;
         fromData(sceneDataBO);
         if (!StringUtils.isEmpty(sceneId) && readScene() == null) {
             throw new SceneNotExistException("Scene " + sceneId + " not exist");
         }
-        initPluginMap(scenePluginData);
+        initPlugins(scenePluginData);
     }
 
     /**
@@ -1007,9 +1031,10 @@ public abstract class BaseSceneHandler<
      * @param areaId 区域id
      * @param isAreaMode 是否区域模式
      */
-    public void init(String sceneId, String areaId, boolean isAreaMode) {
+    public void init(String sceneId, String areaId, boolean isAreaMode, C2 context) {
         ClassUtils.loadClassFields(this);
         BeanUtils.loadBeanFields(this);
+        this.context = context;
         this.sceneId = sceneId;
         this.areaId = areaId;
         this.isAreaMode = isAreaMode;
@@ -1019,7 +1044,8 @@ public abstract class BaseSceneHandler<
         }
     }
 
-    public void initPluginContext(String pluginKey, P2 plugin) {}
+    public void beforeInitPlugin(P2 plugin) {}
+    public void afterInitPlugin(P2 plugin) {}
 
     /**
      * 切换区域
@@ -1065,6 +1091,7 @@ public abstract class BaseSceneHandler<
         outerConnectionPortIds.clear();
         scenePluginData.clear();
         elementIdPluginsMap.clear();
+        plugins.clear();
         pluginMap.clear();
 
         loadScene(readScene());
@@ -1112,7 +1139,7 @@ public abstract class BaseSceneHandler<
                 }
             });
         });
-        initPluginMap(pluginKeyElementIds, pluginKeyElementPortIds);
+        initPlugins(pluginKeyElementIds, pluginKeyElementPortIds);
     }
 
     /**
@@ -1155,7 +1182,7 @@ public abstract class BaseSceneHandler<
         DiffTargets<P1> diffElementPlugins = saveElementPlugins(existElementPluginMap);
 
         // 保存插件数据
-        pluginMap.forEach((key, plugin) -> {
+        plugins.forEach(plugin -> {
             plugin.saveScene();
             plugin.createElements(diffElements.getAddingTargets().stream().map(BaseSceneNodeModel::getNodeId)
                     .toArray(String[]::new));
@@ -1179,7 +1206,7 @@ public abstract class BaseSceneHandler<
         deleteTopology();
 
         // 删除插件数据
-        pluginMap.forEach((key, plugin) -> {
+        plugins.forEach(plugin -> {
             plugin.deleteScene();
         });
 
@@ -1197,7 +1224,7 @@ public abstract class BaseSceneHandler<
             for (var removingArea: areas) {
                 if (!Boolean.TRUE.equals(removingArea.getOpen())) {
                     var sceneHandler = ClassUtils.createInstance(sceneHandlerClass);
-                    sceneHandler.init(sceneId, removingArea.getNodeId(), isAreaMode);
+                    sceneHandler.init(sceneId, removingArea.getNodeId(), isAreaMode, context);
                     sceneHandler.deleteTopology();
                 }
             }
@@ -1228,7 +1255,7 @@ public abstract class BaseSceneHandler<
         }
 
         // 删除插件数据
-        pluginMap.forEach((key, plugin) -> {
+        plugins.forEach(plugin -> {
             plugin.deleteElements(elements.stream().map(BaseSceneNodeModel::getNodeId).toArray(String[]::new));
             plugin.deleteElementPorts(elementPorts.stream().map(BaseSceneElementPortModel::getPortId)
                     .toArray(String[]::new));

@@ -18,7 +18,6 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ApiModel(value = "流表操作请求信息")
 public class OpenflowActionRequest {
 
     @ApiModelProperty(value = "执行动作", required = true)

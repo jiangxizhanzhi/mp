@@ -1,9 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.service;
 
-import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.DeviceInjectFileCreate;
-import cn.cyberpeace.mp.devops.cluster.model.ScenarioDeleteDeviceParams;
-import cn.cyberpeace.mp.devops.cluster.model.ScenariosSnapshot;
+import cn.cyberpeace.mp.devops.cluster.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.common.Snapshot;
 
 public interface ScenariosSnapshotService extends BaseCloudPlatformService{
@@ -25,4 +22,25 @@ public interface ScenariosSnapshotService extends BaseCloudPlatformService{
      * @return
      */
     BaseCloudPlatformModel injectFile(DeviceInjectFileCreate injectFileCreate);
+
+    /**
+     * 创建虚拟靶标实例
+     * @param snapshotCreate
+     * @return
+     */
+    BaseCloudPlatformModel create(ImagesCreateInstanceCloudPlatform snapshotCreate);
+
+    /**
+     * 合并快照
+     * @param mergeCloudPlatform
+     * @return
+     */
+    BaseCloudPlatformModel mergeSnapshot(DeviceSnapshotMergeCloudPlatform mergeCloudPlatform);
+
+    /**
+     * 删除虚拟靶标实例
+     * @param cloudPlatform
+     * @return
+     */
+    BaseCloudPlatformModel delete(ImagesDeleteInstanceCloudPlatform cloudPlatform);
 }

@@ -70,7 +70,6 @@ public class TypeController {
         TypeAllConvertModel imageType = typeConverter.findImageType();
         TypeAllResponse allResponse = new TypeAllResponse();
         List<SerialPortConvertModel> serialPortConvertModels = serialPortConverter.list();
-        serialPortConvertModels.add(new SerialPortConvertModel(50,100,10,"10.100.0.102","1"));
         allResponse.setSerialPortResponses(Lists.newArrayList(new SerialPortResponse("CCM-1","CCM-1",serialPortConvertModels)));
         allResponse.setSwitchConvertModels(switchConverter.treeList());
         allResponse.setAccessProtocolsPorts(typeService.findAccessProtocolsPort().getItems());
@@ -87,6 +86,24 @@ public class TypeController {
         return new Result<>(allResponse);
     }
 
+    /**
+     * 查询所有分类
+     * @return
+     */
+    @ApiOperation("查询所有镜像管理分类")
+    @GetMapping("/image-mg-categories")
+    public Result<TypeAllResponse> imageCategories(){
+        TypeAllConvertModel roles = typeConverter.findRoles();
+        TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type();
+        TypeAllConvertModel imageType = typeConverter.findImageType();
+        TypeAllResponse allResponse = new TypeAllResponse();
+        allResponse.setRole(Objects.nonNull(roles) ? roles.getIdIntegerModelList() : null);
+        allResponse.setFirstTypeList(Objects.nonNull(l1AndL2AndL3Type) ? l1AndL2AndL3Type.getFirstTypeList() : null);
+        allResponse.setSecondTypeList(Objects.nonNull(l1AndL2AndL3Type) ? l1AndL2AndL3Type.getSecondTypeList() : null);
+        allResponse.setThirdTypeList(Objects.nonNull(l1AndL2AndL3Type) ? l1AndL2AndL3Type.getThirdTypeList() : null);
+        allResponse.setImageType(Objects.nonNull(imageType) ? imageType.getIdStringModelList() : null);
+        return new Result<>(allResponse);
+    }
 
     /**
      * 查询所有分类
@@ -251,6 +268,34 @@ public class TypeController {
     }
 
     /**
+     * 查询所有实装管理分类
+     * @return
+     */
+    @ApiOperation("查询所有实装管理分类")
+    @GetMapping("/entity-mg-categories")
+    public Result<TypeAllResponse> entityMgCategories(){
+        TypeAllConvertModel entityRoles = typeConverter.findEntityRoles();
+        TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type();
+        TypeAllConvertModel language = typeConverter.findLanguage();
+        TypeAllConvertModel systemArchitecure = typeConverter.findSystemArchitecure();
+        TypeAllConvertModel snmpVersion = typeConverter.findSnmpVersion();
+        TypeAllResponse allResponse = new TypeAllResponse();
+        List<SerialPortConvertModel> serialPortConvertModels = serialPortConverter.list();
+        allResponse.setSerialPortResponses(Lists.newArrayList(new SerialPortResponse("CCM-1","CCM-1",serialPortConvertModels)));
+        allResponse.setSwitchConvertModels(switchConverter.treeList());
+        allResponse.setAccessProtocolsPorts(typeService.findAccessProtocolsPort().getItems());
+        allResponse.setSnmpVersions(Objects.nonNull(snmpVersion) ? snmpVersion.getIdStringModelList() : null);
+        allResponse.setEntityRole(Objects.nonNull(entityRoles) ? entityRoles.getIdIntegerModelList() : null);
+        allResponse.setFirstTypeList(Objects.nonNull(l1AndL2AndL3Type) ? l1AndL2AndL3Type.getFirstTypeList() : null);
+        allResponse.setSecondTypeList(Objects.nonNull(l1AndL2AndL3Type) ? l1AndL2AndL3Type.getSecondTypeList() : null);
+        allResponse.setThirdTypeList(Objects.nonNull(l1AndL2AndL3Type) ? l1AndL2AndL3Type.getThirdTypeList() : null);
+        allResponse.setLanguage(Objects.nonNull(language) ? language.getIdStringModelList() : null);
+        allResponse.setSystemArchitecure(Objects.nonNull(systemArchitecure) ?
+                systemArchitecure.getIdStringModelList() : null);
+        return new Result<>(allResponse);
+    }
+
+    /**
      * 查询所有服务分类
      * @return
      */
@@ -303,7 +348,6 @@ public class TypeController {
     @GetMapping("/serial-port-list")
     public Result<List<SerialPortResponse>> serialPortList(){
         List<SerialPortConvertModel> list = serialPortConverter.list();
-        list.add(new SerialPortConvertModel(50,100,10,"10.100.0.102","1"));
         return new Result<>(Lists.newArrayList(new SerialPortResponse("CCM-1","CCM-1",list)));
     }
 

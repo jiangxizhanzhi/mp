@@ -17,7 +17,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-@ApiModel(value = "镜像分页请求信息")
 public class ImagePageRequest extends BasePageRequest {
 
     /**
@@ -38,7 +37,7 @@ public class ImagePageRequest extends BasePageRequest {
     /**
      * 镜像类型
      */
-    @ApiModelProperty(value = "vm,container,entity,simple")
+    @ApiModelProperty(value = "镜像类型")
     private ImageTypeEnum imageType;
 
     /**
@@ -50,5 +49,25 @@ public class ImagePageRequest extends BasePageRequest {
      * 快速创建
      */
     private QuickCreateSupportEnum quickCreateSupport;
+
+    /**
+     * 系统类型
+     */
+    private Integer systemType;
+
+    /**
+     * 系统架构
+     */
+    private String systemArchitecure;
+
+    /**
+     * 语言
+     */
+    private String language;
+
+    /**
+     * 镜像状态
+     */
+    private Integer imageStatus;
 
 }

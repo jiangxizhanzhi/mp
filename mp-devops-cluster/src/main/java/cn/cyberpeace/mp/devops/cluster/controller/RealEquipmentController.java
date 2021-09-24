@@ -5,13 +5,15 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.RealEquipmentConverter;
-import cn.cyberpeace.mp.devops.cluster.converter.SerialPortConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.TypeConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.common.*;
 import cn.cyberpeace.mp.devops.cluster.request.*;
-import cn.cyberpeace.mp.devops.cluster.response.*;
+import cn.cyberpeace.mp.devops.cluster.response.RealEquipmentByIdResponse;
+import cn.cyberpeace.mp.devops.cluster.response.RealEquipmentDevopsDetailResponse;
+import cn.cyberpeace.mp.devops.cluster.response.RealEquipmentPageResponse;
+import cn.cyberpeace.mp.devops.cluster.response.RealEquipmentScenesPageResponse;
 import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
 import cn.cyberpeace.mp.devops.cluster.response.base.Result;
 import cn.cyberpeace.mp.devops.cluster.service.RealEquipmentService;
@@ -40,16 +42,13 @@ public class RealEquipmentController {
 
     private RealEquipmentService realEquipmentService;
 
-    private SerialPortConverter serialPortConverter;
-
     private TypeConverter typeConverter;
 
     @Autowired
     public RealEquipmentController(RealEquipmentConverter realEquipmentConverter,RealEquipmentService realEquipmentService,
-                                   SerialPortConverter serialPortConverter,TypeConverter typeConverter) {
+                                  TypeConverter typeConverter) {
         this.realEquipmentConverter = realEquipmentConverter;
         this.realEquipmentService = realEquipmentService;
-        this.serialPortConverter = serialPortConverter;
         this.typeConverter = typeConverter;
     }
 
@@ -157,8 +156,11 @@ public class RealEquipmentController {
     @ApiOperation("新增")
     @PostMapping("/add")
     public ServiceResult add(@RequestBody RealEquipmentRequest request){
-        RealEquipment realEquipment = realEquipmentConverter.add(request);
-        return realEquipment.isSuccess() ? ServiceResult.successful() :ServiceResult.fail("");
+        Device realEquipment = realEquipmentConverter.add(request);
+        if (Objects.isNull(realEquipment)){
+            return ServiceResult.fail("");
+        }
+        return realEquipment.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(realEquipment.getMessage());
     }
 
     /**
@@ -170,8 +172,11 @@ public class RealEquipmentController {
         if (StringUtils.isBlank(request.getUuid())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
-        RealEquipment realEquipment = realEquipmentConverter.update(request);
-        return realEquipment.isSuccess() ? ServiceResult.successful() :ServiceResult.fail("");
+        Device realEquipment = realEquipmentConverter.update(request);
+        if (Objects.isNull(realEquipment)){
+            return ServiceResult.fail("");
+        }
+        return realEquipment.isSuccess() ? ServiceResult.successful() :ServiceResult.fail(realEquipment.getMessage());
     }
 
     /**
@@ -182,15 +187,6 @@ public class RealEquipmentController {
     public Result<Boolean> delete(@RequestBody RealEquipmentDeleteRequest request){
         Boolean result = realEquipmentConverter.delete(request);
         return new Result<>(result);
-    }
-
-    /**
-     * 释放
-     */
-    @ApiOperation("释放")
-    @PostMapping("/freed")
-    public Result<Boolean> freed(@RequestBody RealEquipmentFreedRequest request){
-        return new Result<>();
     }
 
     @ApiOperation("查询详情")
@@ -215,7 +211,7 @@ public class RealEquipmentController {
                         snmpAuth.setCommunityName(snmpConfigs.getCommunityName());
                         snmpParams.setAuth(snmpAuth);
                     }
-                } else if (extEntity.getSnmpVersion().equals("V2C")) {
+                } else if (extEntity.getSnmpVersion().equals("V2")) {
                     snmpParams.setVersion(2);
                     if (Objects.nonNull(snmpConfigs)) {
                         SnmpBaseAuth snmpAuth = new SnmpBaseAuth();
@@ -276,7 +272,7 @@ public class RealEquipmentController {
         Integer page = request.getPage();
         Integer perPage = request.getPerPage();
         List<SnmpInterfaceResourceCloudPlatform.Interfaces> interfaces = model.getResult().subList((page - 1) * perPage, (page - 1) * perPage + perPage);
-        return new PageResult<>(interfaces,100);
+        return new PageResult<>(interfaces,model.getResult().size());
     }
 
     @ApiOperation("场景引用")
@@ -287,7 +283,7 @@ public class RealEquipmentController {
 
     @ApiOperation("根据设备ID获取登录链接信息")
     @GetMapping("/connection")
-    public Result<List<RealEquipmentConnection>> connection(@RequestParam String uuid){
+    public Result<List<TargetConnection>> connection(@RequestParam String uuid){
         RealEquipmentConnectionCloudPlatform connection = realEquipmentService.connection(uuid);
         if (Objects.isNull(connection)){
             return new Result<>();

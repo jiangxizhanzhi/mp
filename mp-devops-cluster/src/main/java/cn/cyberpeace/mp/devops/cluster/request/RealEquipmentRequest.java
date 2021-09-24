@@ -4,7 +4,6 @@ package cn.cyberpeace.mp.devops.cluster.request;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntity;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntityAccess;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,7 +17,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-@ApiModel(value = "实装新增/更新请求信息")
 public class RealEquipmentRequest extends BaseRequest{
 
     /**

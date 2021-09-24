@@ -3,6 +3,8 @@ package cn.cyberpeace.mp.devops.cluster.service.impl;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.ContainerPageResult;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
+import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.ContainerActionCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.ContainerCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.ContainerCreateCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.ContainerModel;
@@ -47,5 +49,10 @@ public class ContainerServiceImpl extends BaseOpenStackServiceImpl implements Co
     @Override
     public void create(ContainerCreateCloudPlatformModel model) {
         super.sendPost(URL_VERSION + "/scenarios/container", JsonUtils.toUnderlineJSONString(model));
+    }
+
+    @Override
+    public BaseCloudPlatformModel action(ContainerActionCloudPlatformModel model,String uuid) {
+       return super.sendPost(URL_VERSION + "/containers/"+ uuid +"/action", JsonUtils.toUnderlineJSONString(model), BaseCloudPlatformModel.class);
     }
 }

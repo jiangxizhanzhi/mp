@@ -17,7 +17,13 @@ public class ExtSystemInfo {
     /**
      * 操作系统
      */
-    @ApiModelProperty("系统类型")
+    @ApiModelProperty("二级系统类型")
+    private Integer parentSystemType;
+
+    /**
+     * 操作系统
+     */
+    @ApiModelProperty("三级系统类型")
     private Integer systemType;
 
     /**

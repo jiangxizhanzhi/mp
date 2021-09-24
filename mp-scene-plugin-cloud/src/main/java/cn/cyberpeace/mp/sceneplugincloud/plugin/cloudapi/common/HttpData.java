@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,7 +12,6 @@ public interface HttpData {
 
     default String toContent() {
         var objectMapper = new ObjectMapper();
-        objectMapper.setPropertyNamingStrategy(new PropertyNamingStrategy.SnakeCaseStrategy());
         try {
             return objectMapper.writeValueAsString(this);
         } catch (JsonProcessingException e) {

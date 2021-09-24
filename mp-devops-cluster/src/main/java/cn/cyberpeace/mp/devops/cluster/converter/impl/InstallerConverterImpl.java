@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.devops.cluster.converter.InstallerConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InstallerConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InstallerConvertPageModel;
+import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.Installer;
 import cn.cyberpeace.mp.devops.cluster.model.InstallerCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.InstallerFormDataCloudPlatformModel;
@@ -80,10 +81,6 @@ public class InstallerConverterImpl implements InstallerConverter {
 
     @Override
     public InstallerConvertModel add(InstallerRequest request) {
-//        if (Objects.nonNull(request.getLogoFile()) && !request.getLogoFile().getClass().isAssignableFrom(String.class)) {
-//            String logo = targetLogoService.uploadLogo((MultipartFile) request.getLogoFile());
-//            request.setLogo(logo);
-//        }
         if (Objects.nonNull(request.getLogoFile()) && request.getLogoFile().getSize() > 0 ){
             String logo = targetLogoService.uploadLogo(request.getLogoFile());
             request.setLogo(logo);
@@ -106,16 +103,8 @@ public class InstallerConverterImpl implements InstallerConverter {
         return convertInstaller(result);
     }
 
-//    @Deprecated
-//    @Override
-//    public InstallerConvertModel update(InstallerRequest request) {
-//        Installer installer = convertRequest(request);
-//        Installer result = installerService.update(request.getUuid(),installer);
-//        return convertInstaller(result);
-//    }
-
     @Override
-    public Boolean delete(InstallerDeleteRequest request) {
+    public BaseCloudPlatformModel delete(InstallerDeleteRequest request) {
         return installerService.deleteByIds(request.getUuids());
     }
 
@@ -125,10 +114,10 @@ public class InstallerConverterImpl implements InstallerConverter {
      * @return
      */
     private InstallerConvertModel convertInstaller(Installer installer){
-        if (Objects.isNull(installer)){
-            return null;
-        }
         InstallerConvertModel model = new InstallerConvertModel();
+        if (Objects.isNull(installer)){
+            return model;
+        }
         model.setUuid(installer.getUuid());
         model.setName(installer.getName());
         model.setDescription(installer.getDescription());
@@ -149,6 +138,7 @@ public class InstallerConverterImpl implements InstallerConverter {
                 resource.setPlatforms(Joiner.on("|").join(resource.getPlatforms().split("")));
             });
         }
+        model.setDeviceCount(installer.getDeviceCount());
         model.setExtNormal(extNormal);
         model.setSuccess(installer.isSuccess());
         model.setMessage(installer.getMessage());
@@ -168,10 +158,10 @@ public class InstallerConverterImpl implements InstallerConverter {
         }
         installer.setDeployType(request.getDeployType());
         if (Objects.nonNull(request.getDockerInstallerData())
-                && CollectionUtils.isNotEmpty(request.getDockerInstallerData().getStartUpParameterList())) {
+                && Objects.nonNull(request.getDockerInstallerData().getStartUpParameterList())) {
             installer.setSettings(JsonUtils.toUnderlineJSONString(request.getDockerInstallerData().getStartUpParameterList()));
         }
-        if (CollectionUtils.isNotEmpty(request.getResourceList())) {
+        if (Objects.nonNull(request.getResourceList())) {
             request.getResourceList().forEach(resource -> {
                 resource.setFile(UUID.randomUUID().toString());
                 if (StringUtils.isNotBlank(resource.getPlatforms())){
@@ -183,29 +173,4 @@ public class InstallerConverterImpl implements InstallerConverter {
         return installer;
     }
 
-    /**
-     * 转换InstallerRequest
-     * @param request
-     * @return
-     */
-//    private Installer convertRequest(InstallerRequest request){
-//        Installer installer = new Installer();
-//        installer.setName(request.getName());
-//        installer.setDescription(request.getDescription());
-//        installer.setLogo(request.getLogo());
-//        installer.setCategories(String.join(",",request.getCategories()));
-//        installer.setDeployType(request.getDeployType());
-////        ExtDocker extDocker = request.getExtDocker();
-////        if (Objects.nonNull(extDocker) && CollectionUtils.isNotEmpty(request.getStartUpParameterList())) {
-////            extDocker.setSettings(JSONArray.toJSONString(request.getStartUpParameterList()));
-////        }
-////        installer.setExtDocker(extDocker);
-////        ExtNormal extNormal = request.getExtNormal();
-////        if (Objects.nonNull(extNormal) && CollectionUtils.isNotEmpty(request.getResourceList())) {
-//////            extNormal.setResources(JSONArray.toJSONString(request.getResourceList()));
-////        }
-//        installer.setResourceList(request.getResourceList());
-////        installer.setExtNormal(extNormal);
-//        return installer;
-//    }
 }

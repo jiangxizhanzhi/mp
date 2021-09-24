@@ -12,10 +12,14 @@ import java.util.List;
 public class VirtualNic {
     private String networkId;
     private String fixedIp;
+    private String macAddress;
     private List<QosRule> qosRules;
     private Boolean enableExternal;
     private List<AccessMode> accessModes;
     private String firewallId;
+
+    private String portId;
+    private String qosId;
 
     @Data
     @AllArgsConstructor
@@ -40,5 +44,26 @@ public class VirtualNic {
         private String password;
         private Boolean enablePortMapping;
         private String portMappingProtocol;
+
+        private Connection connection;
+        private PortMapping portMapping;
+
+        @Data
+        @AllArgsConstructor
+        @NoArgsConstructor
+        public static class Connection {
+            private String url;
+            private String connectionId;
+            private String connectionName;
+        }
+
+        @Data
+        @AllArgsConstructor
+        @NoArgsConstructor
+        public static class PortMapping {
+            private String id;
+            private String host;
+            private Integer hostPort;
+        }
     }
 }

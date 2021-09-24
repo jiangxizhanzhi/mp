@@ -27,4 +27,6 @@ public class InstanceQueryParams extends QueryParams {
     private Boolean error;
     @ApiModelProperty(value = "是否只显示自己的场景")
     private Boolean self;
+    @ApiModelProperty(value = "场景访问用户id")
+    private String accessUserId;
 }

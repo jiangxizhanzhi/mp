@@ -6,11 +6,8 @@ import cn.cyberpeace.mp.scene.core.base.BaseSceneHandler;
 import cn.cyberpeace.mp.scene.core.bo.*;
 import cn.cyberpeace.mp.scene.core.event.SceneElementEventHandler;
 import cn.cyberpeace.mp.scene.core.event.SceneEventHandler;
-import cn.cyberpeace.mp.scene.core.plugin.ScenePluginContext;
 import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
 import cn.cyberpeace.mp.scene.model.*;
-import cn.cyberpeace.mp.scene.model.base.BaseSceneElementPortModel;
-import cn.cyberpeace.mp.scene.model.base.BaseSceneNodeModel;
 import cn.cyberpeace.mp.scene.repository.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -67,21 +64,27 @@ public class SceneHandler extends BaseSceneHandler<
         SceneElementPortMapper,
         SceneElementPortConnectionMapper,
         SceneElementPluginMapper,
-        ScenePluginHandler<?, ?, ?>,
+        SceneContextBO,
+        ScenePluginHandler<?, ?, ?, ?>,
         SceneHandler> {
 
     private final Map<String, SceneEventHandler> sceneEventHandlerMap = new HashMap<>();
 
     private final Map<String, SceneElementEventHandler> elementEventHandlerMap = new HashMap<>();
 
+    @Override
+    public void beforeInitPlugin(ScenePluginHandler<?, ?, ?, ?> plugin) {
+        plugin.setSceneHandler(this);
+    }
+
     public CollectedSceneBO getCollectedSceneBO() {
         var collectedSceneBO = new CollectedSceneBO();
         collectedSceneBO.setScene(getScene());
         Map<String, Object> pluginData = new HashMap<>();
-        getPluginMap().forEach((pluginKey, plugin) -> {
+        getPlugins().forEach(plugin -> {
             var pluginScene = plugin.getScene();
             if (pluginScene != null) {
-                pluginData.put(pluginKey, plugin.getScene());
+                pluginData.put(plugin.getKey(), plugin.getScene());
             }
         });
         collectedSceneBO.setScenePluginData(pluginData);
@@ -96,10 +99,10 @@ public class SceneHandler extends BaseSceneHandler<
         
         Map<String, Object> pluginData = new HashMap<>();
         Map<String, Map<String, Object>> portPluginData = new HashMap<>();
-        getPluginMap().forEach((pluginKey, plugin) -> {
+        getPlugins().forEach(plugin -> {
             var pluginElement = plugin.getElement(nodeId);
             if (pluginElement != null) {
-                pluginData.put(pluginKey, pluginElement);
+                pluginData.put(plugin.getKey(), pluginElement);
             }
             
             if (sceneElementPorts != null) {
@@ -111,7 +114,7 @@ public class SceneHandler extends BaseSceneHandler<
                         pluginPorts.put(portId, pluginPort);
                     }
                 });
-                portPluginData.put(pluginKey, pluginPorts);
+                portPluginData.put(plugin.getKey(), pluginPorts);
             }
         });
         return collectedSceneElementBO;
@@ -186,27 +189,20 @@ public class SceneHandler extends BaseSceneHandler<
 
     public SceneHandler() {}
 
-    public SceneHandler(SceneDataBO sceneDataBO) {
-        init(sceneDataBO, false);
+    public SceneHandler(SceneDataBO sceneDataBO, SceneContextBO context) {
+        init(sceneDataBO, false, context);
     }
 
-    public SceneHandler(SceneDataBO sceneDataBO, boolean isAreaMode) {
-        init(sceneDataBO, isAreaMode);
+    public SceneHandler(SceneDataBO sceneDataBO, boolean isAreaMode, SceneContextBO context) {
+        init(sceneDataBO, isAreaMode, context);
     }
 
-    public SceneHandler(String sceneId, String areaId) {
-        init(sceneId, areaId, false);
+    public SceneHandler(String sceneId, String areaId, SceneContextBO context) {
+        init(sceneId, areaId, false, context);
     }
 
-    public SceneHandler(String sceneId, String areaId, boolean isAreaMode) {
-        init(sceneId, areaId, isAreaMode);
-    }
-
-    @Override
-    public void initPluginContext(String pluginKey, ScenePluginHandler<?, ?, ?> plugin) {
-        var context = new ScenePluginContext();
-        context.setSceneHandler(this);
-        plugin.setContext(context);
+    public SceneHandler(String sceneId, String areaId, boolean isAreaMode, SceneContextBO context) {
+        init(sceneId, areaId, isAreaMode, context);
     }
 
     public void progressSceneProcess(int event, String process, String processMessage) {
@@ -237,7 +233,7 @@ public class SceneHandler extends BaseSceneHandler<
         prepareAllEvent(SceneModel.Event.INITIATE, SceneElementModel.Event.INITIATE);
         startAllEvent(SceneModel.Event.INITIATE, SceneElementModel.Event.INITIATE);
         try {
-            for (var plugin : getPluginMap().values()) {
+            for (var plugin : getPlugins()) {
                 plugin.initiate();
             }
         } catch (Exception e) {
@@ -251,7 +247,7 @@ public class SceneHandler extends BaseSceneHandler<
         prepareAllEvent(SceneModel.Event.CREATE, SceneElementModel.Event.CREATE);
         startAllEvent(SceneModel.Event.CREATE, SceneElementModel.Event.CREATE);
         try {
-            for (var plugin : getPluginMap().values()) {
+            for (var plugin : getPlugins()) {
                 plugin.create();
             }
         } catch (Exception e) {
@@ -262,39 +258,21 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public void start() {
-        getPluginMap().forEach((key, plugin) -> {
-            plugin.start();
-        });
     }
 
     public void stop() {
-        getPluginMap().forEach((key, plugin) -> {
-            plugin.stop();
-        });
     }
 
     public void restart() {
-        getPluginMap().forEach((key, plugin) -> {
-            plugin.restart();
-        });
     }
 
     public void pause() {
-        getPluginMap().forEach((key, plugin) -> {
-            plugin.pause();
-        });
     }
 
     public void unpause() {
-        getPluginMap().forEach((key, plugin) -> {
-            plugin.unpause();
-        });
     }
 
     public void snapshot() {
-        getPluginMap().forEach((key, plugin) -> {
-            plugin.snapshot();
-        });
     }
 
     @Override
@@ -302,7 +280,7 @@ public class SceneHandler extends BaseSceneHandler<
         prepareAllEvent(SceneModel.Event.DELETE, SceneElementModel.Event.DELETE);
         startAllEvent(SceneModel.Event.DELETE, SceneElementModel.Event.DELETE);
         try {
-            for (var plugin : getPluginMap().values()) {
+            for (var plugin : getPlugins()) {
                 plugin.delete();
             }
         } catch (Exception e) {
@@ -319,7 +297,7 @@ public class SceneHandler extends BaseSceneHandler<
         prepareAllEvent(SceneModel.Event.DELETE, SceneElementModel.Event.DELETE);
         startAllEvent(SceneModel.Event.DELETE, SceneElementModel.Event.DELETE);
         try {
-            for (var plugin : getPluginMap().values()) {
+            for (var plugin : getPlugins()) {
                 plugin.delete();
             }
         } catch (Exception e) {
@@ -335,8 +313,5 @@ public class SceneHandler extends BaseSceneHandler<
      * TODO: 修改场景
      */
     public void modify() {
-        getPluginMap().forEach((key, plugin) -> {
-            plugin.modify();
-        });
     }
 }

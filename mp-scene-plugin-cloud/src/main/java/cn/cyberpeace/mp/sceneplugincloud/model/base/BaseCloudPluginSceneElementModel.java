@@ -67,6 +67,21 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     @DefaultStr
     private String initialTools;
 
+    // 靶标属性
+    @DefaultInt
+    private Integer role;
+    @DefaultStr
+    private String imageType;
+    @DefaultInt
+    private Integer category;
+    @DefaultBool
+    private Boolean initSupport;
+    @DefaultBool
+    private Boolean quickCreateSupport;
+    @DefaultStr
+    private String quickCreateParams;
+
+
     public static class VirtualType {
         public static final int VIRTUAL_SWITCH = 1;
         public static final int VIRTUAL_ROUTER = 2;

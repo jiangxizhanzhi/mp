@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.request;
 
 import cn.cyberpeace.mp.devops.cluster.model.common.Resource;
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,7 +12,6 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ApiModel(value = "服务管理的新增请求参数")
 public class InstallerRequest extends BaseRequest {
 
     /**
@@ -61,8 +59,6 @@ public class InstallerRequest extends BaseRequest {
     @ApiModelProperty("docker参数")
     private DockerInstallerData dockerInstallerData;
 
-
-
     @ApiModelProperty(value = "windows服务资源流",hidden = true)
     private List<MultipartFile> multipartFiles;
 
@@ -71,8 +67,6 @@ public class InstallerRequest extends BaseRequest {
      */
     @ApiModelProperty(value = "资源列表")
     private List<Resource> resourceList;
-
-//    private String resources;
 
 
 }

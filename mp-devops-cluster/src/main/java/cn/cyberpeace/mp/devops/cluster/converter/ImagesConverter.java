@@ -4,9 +4,10 @@ import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageAuthConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertPageModel;
+import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.Device;
 import cn.cyberpeace.mp.devops.cluster.request.*;
 import org.apache.http.HttpResponse;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -21,7 +22,7 @@ public interface ImagesConverter extends BaseConverter{
     /**
      * 新增
      */
-    Boolean add(ImageRequest request);
+    Device add(ImageRequest request);
 
     /**
      * 根据ID查询
@@ -34,7 +35,7 @@ public interface ImagesConverter extends BaseConverter{
      * 更新
      * @param request
      */
-    Boolean update(ImageRequest request);
+    Device update(ImageRequest request);
 
     /**
      * 预览
@@ -65,13 +66,6 @@ public interface ImagesConverter extends BaseConverter{
     void auth(ImagesAuthRequest request);
 
     /**
-     * 上传Logo
-     * @param file
-     * @return
-     */
-    String uploadImage(ImagesUploadRequest request ,MultipartFile file);
-
-    /**
      * 导出
      */
     HttpResponse export(String uuid);
@@ -80,7 +74,13 @@ public interface ImagesConverter extends BaseConverter{
      * 创建虚拟机/容器
      * @param uuid
      */
-    void create(String uuid);
+    BaseCloudPlatformModel create(String uuid);
+
+    /**
+     * 创建虚拟机/容器
+     * @param request
+     */
+    BaseCloudPlatformModel delete(ImagesDeleteInstanceRequest request);
 
     /**
      * 根据镜像ID查询用户列表
@@ -88,4 +88,10 @@ public interface ImagesConverter extends BaseConverter{
      * @return
      */
     List<UserDto> findUsersByUuid(String uuid);
+
+    /**
+     * 创建虚拟机/容器
+     * @param request
+     */
+    BaseCloudPlatformModel reboot(ImagesRebootInstanceRequest request);
 }

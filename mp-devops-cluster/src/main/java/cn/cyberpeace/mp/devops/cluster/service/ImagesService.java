@@ -1,9 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.service;
 
-import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.Device;
-import cn.cyberpeace.mp.devops.cluster.model.DeviceCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.DeviceQuickCreateCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.*;
 import org.apache.http.HttpResponse;
 
 import java.io.File;
@@ -49,13 +46,6 @@ public interface ImagesService extends BaseCloudPlatformService  {
 
     Device quickCreate(DeviceQuickCreateCloudPlatformModel model);
 
-    /**
-     * 上传镜像
-     * @param params
-     * @param file
-     * @return
-     */
-    String upload(String params, File file);
 
     /**
      * 上传文件
@@ -64,4 +54,6 @@ public interface ImagesService extends BaseCloudPlatformService  {
      * @return
      */
     BaseCloudPlatformModel upload(Map<String,File> file, String type);
+
+    ImageConnectionCloudPlatform connection(String deviceUuid);
 }

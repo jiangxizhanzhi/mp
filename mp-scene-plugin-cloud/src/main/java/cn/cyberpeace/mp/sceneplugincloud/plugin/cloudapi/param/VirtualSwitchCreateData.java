@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param;
 
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.HttpData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudHttpData;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,12 +10,15 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class VirtualSwitchCreateData implements HttpData {
+public class VirtualSwitchCreateData implements CloudHttpData {
     private String name;
     private Boolean entityNetwork;
     private Boolean configSwitch;
     private Integer segmentationId;
     private Subnet subnet;
+
+    private String id;
+    private String networkType;
 
     @Data
     @AllArgsConstructor
@@ -28,7 +31,11 @@ public class VirtualSwitchCreateData implements HttpData {
         private List<AllocationPool> allocationPools;
         private List<String> dnsNameservers;
         private List<HostRoute> hostRoutes;
-        private List<String> switchVlanif;
+        private String switchVlanif;
+        private Boolean noGateway;
+
+        private String id;
+        private String name;
 
         @Data
         @AllArgsConstructor

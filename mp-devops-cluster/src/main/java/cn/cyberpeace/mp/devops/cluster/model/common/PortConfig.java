@@ -15,8 +15,8 @@ public class PortConfig {
     /**
      * 管理口/Wan口/Lan口
      */
-    @ApiModelProperty
-    private Integer portConfig;
+    @ApiModelProperty("配置类型")
+    private Integer portType;
 
     /**
      * 端口名称

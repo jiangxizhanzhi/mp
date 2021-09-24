@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.devops.cluster.request;
 
 
 import cn.cyberpeace.mp.devops.cluster.enums.StatusEnum;
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,7 +12,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-@ApiModel(value = "实装分页请求信息")
 public class RealEquipmentPageRequest extends BasePageRequest{
 
     /**

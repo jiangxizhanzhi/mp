@@ -3,8 +3,7 @@ package cn.cyberpeace.mp.devops.cluster.service.impl;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.InstancePageResult;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
-import cn.cyberpeace.mp.devops.cluster.model.InstanceCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.VmCreateCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.common.InstanceModel;
 import cn.cyberpeace.mp.devops.cluster.service.VmService;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
@@ -49,5 +48,9 @@ public class VmServiceImpl extends BaseOpenStackServiceImpl implements VmService
         super.sendPost(URL_VERSION + "/scenarios/vm", JsonUtils.toUnderlineJSONString(vmCreateCloudPlatformModel));
     }
 
+    @Override
+    public BaseCloudPlatformModel action(VmActionCloudPlatformModel model, String uuid) {
+        return super.sendPost(URL_VERSION + "/instances/" + uuid  + "/action", JsonUtils.toUnderlineJSONString(model),BaseCloudPlatformModel.class);
+    }
 
 }

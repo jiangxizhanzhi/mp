@@ -13,7 +13,6 @@ import java.io.Serializable;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ApiModel(value = "靶标分页请求信息")
 public class TargetSceneRequest implements Serializable {
 
     /**
@@ -37,6 +36,6 @@ public class TargetSceneRequest implements Serializable {
     /**
      * 镜像类型
      */
-    @ApiModelProperty(value = "vm,container,entity,simple")
+    @ApiModelProperty("镜像类型")
     private ImageTypeEnum imageType;
 }

@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.InstallerConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InstallerConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InstallerConvertPageModel;
+import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtDocker;
 import cn.cyberpeace.mp.devops.cluster.request.DockerInstallerData;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerDeleteRequest;
@@ -61,7 +62,7 @@ public class InstallerController {
         List<InstallerPageResponse> list = model.getModelList().stream().map(installer ->
                 InstallerPageResponse.builder().uuid(installer.getUuid()).name(installer.getName())
                         .logo(installer.getLogo()).description(installer.getDescription())
-                        .categories(installer.getCategories())
+                        .categories(installer.getCategories()).deployType(installer.getDeployType())
                         .build()
         ).collect(Collectors.toList());
 
@@ -82,6 +83,7 @@ public class InstallerController {
                 .deployType(model.getDeployType())
                 .dockerInstallerData(new DockerInstallerData(model.getStartUpParameterList(),Objects.nonNull(extDocker) ? extDocker.getFile() : null, Objects.nonNull(extDocker) ? extDocker.getUserFilename() : null))
                 .resourceList(model.getResourceList())
+                .deviceCount(model.getDeviceCount())
                 .build();
         return new Result<>(response);
     }
@@ -92,11 +94,11 @@ public class InstallerController {
     @ApiOperation("新增")
     @PostMapping
     public ServiceResult add(@RequestBody InstallerRequest request){
-//        if (StringUtils.isNotBlank(request.getResources())){
-//            request.setResourceList(JSONArray.parseArray(request.getResources(), Resource.class));
-//        }
         InstallerConvertModel model = installerConverter.add(request);
-        return model.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(model.getMessageZh());
+        if (Objects.isNull(model)){
+            return ServiceResult.fail("");
+        }
+        return model.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
     }
 
     /**
@@ -110,7 +112,10 @@ public class InstallerController {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         InstallerConvertModel model = installerConverter.add(request);
-        return model.isSuccess() ? ServiceResult.successful() : ServiceResult.fail("");
+        if (Objects.isNull(model)){
+            return ServiceResult.fail("");
+        }
+        return model.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
     }
 
     /**
@@ -119,7 +124,10 @@ public class InstallerController {
     @ApiOperation("删除")
     @DeleteMapping
     public ServiceResult delete(@RequestBody InstallerDeleteRequest request){
-        Boolean result = installerConverter.delete(request);
-        return result ? ServiceResult.successful() : ServiceResult.fail("");
+        BaseCloudPlatformModel model = installerConverter.delete(request);
+        if (Objects.isNull(model)){
+            return ServiceResult.fail("");
+        }
+        return model.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(model.getMessageZh());
     }
 }

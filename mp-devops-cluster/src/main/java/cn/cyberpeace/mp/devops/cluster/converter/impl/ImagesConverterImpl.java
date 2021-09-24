@@ -4,7 +4,6 @@ import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
-import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.devops.cluster.converter.ImagesConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageAuthConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertModel;
@@ -21,8 +20,6 @@ import cn.cyberpeace.mp.devops.cluster.repository.ImageAuthMapper;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
 import cn.cyberpeace.mp.devops.cluster.request.*;
 import cn.cyberpeace.mp.devops.cluster.service.*;
-import cn.cyberpeace.mp.devops.cluster.utils.FileUtils;
-import com.alibaba.fastjson.JSONArray;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -30,10 +27,7 @@ import org.apache.http.HttpResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -59,10 +53,13 @@ public class ImagesConverterImpl implements ImagesConverter {
 
     private UserService userService;
 
+    private ScenariosSnapshotService scenariosSnapshotService;
+
     @Autowired
     public ImagesConverterImpl(ImagesService imagesService, ImageMapper imageMapper,DeviceService deviceService,
                                ImageAuthMapper imageAuthMapper,VmService vmService,ContainerService containerService,
-                               DevopsTargetService devopsTargetService,UserService userService) {
+                               DevopsTargetService devopsTargetService,UserService userService,
+                               ScenariosSnapshotService scenariosSnapshotService) {
         this.imagesService = imagesService;
         this.imageMapper = imageMapper;
         this.deviceService = deviceService;
@@ -71,6 +68,7 @@ public class ImagesConverterImpl implements ImagesConverter {
         this.containerService = containerService;
         this.devopsTargetService = devopsTargetService;
         this.userService = userService;
+        this.scenariosSnapshotService = scenariosSnapshotService;
     }
 
     @Override
@@ -98,11 +96,13 @@ public class ImagesConverterImpl implements ImagesConverter {
         }
         dto.setName(request.getName());
         dto.setOwner(Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : null);
-//        dto.setIsPublic(PublicEnum.ALL_PUBLIC);
         dto.setSearchPublicEnum(1);
         dto.setOffset((request.getPage() - 1) * request.getPerPage());
         dto.setLimit(request.getPerPage());
-
+        dto.setSystemType(request.getSystemType());
+        dto.setSystemArchitecure(request.getSystemArchitecure());
+        dto.setLanguage(request.getLanguage());
+        dto.setImageStatus(request.getImageStatus());
         Integer total = imageMapper.totalCount(dto);
         if (total == 0){
             return null;
@@ -146,10 +146,10 @@ public class ImagesConverterImpl implements ImagesConverter {
 
     @Override
     @Transactional
-    public Boolean add(ImageRequest request) {
+    public Device add(ImageRequest request) {
         Device device = imagesService.add(convertRequest(request));
         devopsTargetService.insert(device);
-        return device.isSuccess();
+        return device;
     }
 
     @Override
@@ -161,10 +161,10 @@ public class ImagesConverterImpl implements ImagesConverter {
 
     @Transactional
     @Override
-    public Boolean update(ImageRequest request) {
+    public Device update(ImageRequest request) {
         Device device = imagesService.update(request.getUuid(),convertRequest(request));
         devopsTargetService.updateById(device);
-        return device.isSuccess();
+        return device;
     }
 
     @Override
@@ -195,10 +195,12 @@ public class ImagesConverterImpl implements ImagesConverter {
     @Transactional
     public Boolean delete(ImagesDeleteRequest request) {
         Boolean result = deviceService.deleteByIds(request.getImageIds());
-        ImageDeleteDTO dto = new ImageDeleteDTO();
-        dto.setIds(request.getImageIds());
-        imageMapper.delete(dto);
-        request.getImageIds().forEach(id -> imageAuthMapper.deleteByTarget(id));
+        if (CollectionUtils.isNotEmpty(request.getImageIds())){
+            ImageDeleteDTO dto = new ImageDeleteDTO();
+            dto.setIds(request.getImageIds());
+            imageMapper.delete(dto);
+            imageAuthMapper.deleteByTargets(request.getImageIds());
+        }
         return result;
     }
 
@@ -253,22 +255,21 @@ public class ImagesConverterImpl implements ImagesConverter {
     }
 
     @Override
-    public String uploadImage(ImagesUploadRequest request, MultipartFile multipartFile) {
-        if (Objects.isNull(multipartFile) || multipartFile.getSize() == 0 ){
-            return null;
+    public BaseCloudPlatformModel reboot(ImagesRebootInstanceRequest request) {
+        BaseCloudPlatformModel platformModel = null;
+        if(ImageTypeEnum.VM.toValue().equals(request.getImageType())) {
+            VmActionCloudPlatformModel model = new VmActionCloudPlatformModel();
+            model.setReboot(new VmActionCloudPlatformModel.Reboot("HARD"));
+            platformModel = vmService.action(model,request.getInstanceId());
         }
-        try {
-            List<File> fileList = FileUtils.transferToFile(Arrays.asList(multipartFile));
-            String params = BeanUtils.wrapperGetParamsByObject(Boolean.TRUE,request);
-            return imagesService.upload(params,fileList.get(0));
-        } catch (Exception e) {
-            log.error("上传镜像文件失败：{}",e.getMessage());
+        else if(ImageTypeEnum.CONTAINER.toValue().equals(request.getImageType())) {
+            ContainerActionCloudPlatformModel model = new ContainerActionCloudPlatformModel();
+            model.setAction("reboot");
+            model.setWaitForStatus(Boolean.TRUE);
+            platformModel = containerService.action(model, request.getInstanceId());
         }
-
-        return null;
+        return platformModel;
     }
-
-
 
     @Override
     public HttpResponse export(String uuid) {
@@ -276,22 +277,29 @@ public class ImagesConverterImpl implements ImagesConverter {
     }
 
     @Override
-    public void create(String uuid) {
-        Device device = deviceService.findById(uuid);
+    public BaseCloudPlatformModel create(String uuid) {
+        return scenariosSnapshotService.create(new ImagesCreateInstanceCloudPlatform(uuid,
+                Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getUsername() : ""));
+//        Device device = deviceService.findById(uuid);
+//
+//        if(ImageTypeEnum.VM.toValue().equals(device.getImageType())) {
+//            VmCreateCloudPlatformModel model = new VmCreateCloudPlatformModel();
+//            model.setName(device.getName());
+//            model.setImage(device.getName());
+//            vmService.create(model);
+//        }
+//        else if(ImageTypeEnum.CONTAINER.toValue().equals(device.getImageType())) {
+//            ContainerCreateCloudPlatformModel model = new ContainerCreateCloudPlatformModel();
+//            model.setName(device.getName());
+//            model.setImage(device.getName());
+//            containerService.create(model);
+//        }
 
-        if(ImageTypeEnum.VM.toValue().equals(device.getImageType())) {
-            VmCreateCloudPlatformModel model = new VmCreateCloudPlatformModel();
-            model.setName(device.getName());
-            model.setImage(device.getName());
-            vmService.create(model);
-        }
-        else if(ImageTypeEnum.CONTAINER.toValue().equals(device.getImageType())) {
-            ContainerCreateCloudPlatformModel model = new ContainerCreateCloudPlatformModel();
-            model.setName(device.getName());
-            model.setImage(device.getName());
-            containerService.create(model);
-        }
+    }
 
+    @Override
+    public BaseCloudPlatformModel delete(ImagesDeleteInstanceRequest request) {
+        return scenariosSnapshotService.delete(new ImagesDeleteInstanceCloudPlatform(request.getUuid(),request.getImageType()));
     }
 
     /**
@@ -309,12 +317,12 @@ public class ImagesConverterImpl implements ImagesConverter {
         device.setCategory(request.getCategory());
         device.setSecondCategory(request.getSecondCategory());
         device.setL3Category(request.getThirdCategory());
-        device.setImageType(request.getVirtualType());
+        device.setImageType(request.getImageType());
         device.setMaintype(MainTypeEnum.NORMAL.ordinal());
         if (Objects.nonNull(role) && role != RoleEnum.NETWORK.toValue()) {
             final ExtVm extVm = request.getExtVm();
             if (Objects.nonNull(extVm) && CollectionUtils.isNotEmpty(request.getAccessProtocolList())) {
-                extVm.setAccessProtocols(JSONArray.toJSONString(request.getAccessProtocolList()));
+                extVm.setAccessProtocols(request.getAccessProtocolList());
             }
             device.setExtVm(extVm);
             device.setExtSystemInfo(request.getExtSystemInfo());
@@ -346,6 +354,7 @@ public class ImagesConverterImpl implements ImagesConverter {
         imageModel.setExtImageInfo(device.getExtImageInfo());
         imageModel.setExtVm(device.getExtVm());
         imageModel.setExtGateway(device.getExtGateway());
+        imageModel.setExtDocker(device.getExtDocker());
         return imageModel;
     }
 

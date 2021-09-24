@@ -8,8 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -38,12 +38,6 @@ public class InstallerByIdResponse extends BaseCloudPlatformResponse{
     private String description;
 
     /**
-     * logo文件流
-     */
-    @ApiModelProperty("logo文件流")
-    private MultipartFile logoFile;
-
-    /**
      * 图标
      */
     @ApiModelProperty(value = "图标")
@@ -64,12 +58,17 @@ public class InstallerByIdResponse extends BaseCloudPlatformResponse{
     @ApiModelProperty("docker参数")
     private DockerInstallerData dockerInstallerData;
 
-    @ApiModelProperty("windows服务资源流")
-    private List<MultipartFile> multipartFiles;
-
     /**
      * 资源列表
      */
     @ApiModelProperty(value = "资源列表")
-    private List<Resource> resourceList;
+    @Builder.Default
+    private List<Resource> resourceList = new ArrayList<>();
+
+
+    /**
+     * 关联镜像数量
+     */
+    @ApiModelProperty(value = "关联镜像数量")
+    private Integer deviceCount;
 }

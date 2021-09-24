@@ -10,7 +10,6 @@ import javax.validation.constraints.NotBlank;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-@ApiModel(value = "节点管理-重启/关机")
 public class HypervisorRequest extends BaseRequest {
 
     /**

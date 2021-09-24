@@ -1,10 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.converter.model;
 
 import cn.cyberpeace.mp.devops.cluster.enums.PublicEnum;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtGateway;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtImageInfo;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtVm;
+import cn.cyberpeace.mp.devops.cluster.model.common.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -80,6 +77,8 @@ public class ImageConvertModel extends BasePageConvertModel{
      * 网关信息
      */
     private ExtGateway extGateway;
+
+    private ExtDocker extDocker;
 
     /**
      * 是否公开
