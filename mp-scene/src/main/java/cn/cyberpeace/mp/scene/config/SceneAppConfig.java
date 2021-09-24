@@ -9,6 +9,13 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "mp.scene")
 @Data
 public class SceneAppConfig {
+
+    @Value("${mp.scene.report_pool_size:10}")
+    private Integer reportPoolSize;
+
+    @Value("${mp.scene.report_hold_size:200000}")
+    private Integer reportHoldSize;
+
     @Value("${mp.scene.windows_installer_dir:C:\\Users\\Public}")
     private String windowsInstallerDir;
 

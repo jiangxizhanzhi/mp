@@ -25,6 +25,26 @@ public class TaskPool {
         public static final Integer INTERRUPTED = 4;
     }
 
+    private void runTask(PoolTask<Runnable> poolTask) {
+        if (poolTask.getStatus() == null) {
+            return;
+        }
+
+        if (!poolTask.getStatus().equals(TaskStatus.WAITING)) {
+            return;
+        }
+
+        poolTask.setStatus(TaskStatus.RUNNING);
+        try {
+            poolTask.getTask().run();
+            poolTask.setStatus(TaskStatus.OVER);
+        } catch (Exception e) {
+            log.error("Task run error: ", e);
+            poolTask.setStatus(TaskStatus.ERROR);
+            poolTask.setException(e);
+        }
+    }
+
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
@@ -43,26 +63,19 @@ public class TaskPool {
                 new LinkedBlockingQueue<>(holdSize - poolSize));
     }
 
+    public PoolTask<Runnable> runTask(Runnable task) {
+        var poolTask = new PoolTask<>(task, TaskStatus.WAITING, null);
+        executor.execute(ThreadUtils.format(() -> runTask(poolTask)));
+        return poolTask;
+    }
+
     public List<PoolTask<Runnable>> runTasks(List<Runnable> tasks) {
         var latch = new CountDownLatch(tasks.size());
         List<PoolTask<Runnable>> poolTasks = tasks.stream()
                 .map(task -> new PoolTask<>(task, TaskStatus.WAITING, null))
                 .collect(Collectors.toList());
         poolTasks.forEach(poolTask -> executor.execute(ThreadUtils.format(() -> {
-            if (TaskStatus.INTERRUPTED.equals(poolTask.getStatus())) {
-                return;
-            }
-
-            poolTask.setStatus(TaskStatus.RUNNING);
-            try {
-                poolTask.getTask().run();
-                poolTask.setStatus(TaskStatus.OVER);
-            } catch (Exception e) {
-                log.error("Task run error: ", e);
-                poolTask.setStatus(TaskStatus.ERROR);
-                poolTask.setException(e);
-            }
-
+            runTask(poolTask);
             latch.countDown();
         })));
 

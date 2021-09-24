@@ -1,9 +1,11 @@
 package cn.cyberpeace.mp.base.util.thread.context;
 
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.stereotype.Component;
 
 import java.util.Locale;
 
+@Component
 public class LocaleTransferContext implements TransferContext<Locale> {
     @Override
     public Locale getValue() {

@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
-import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
@@ -112,7 +111,7 @@ public class DeleteHandler extends HandlerCommon {
         var deleteData = new VirtualMachineDeleteData();
         deleteData.setVms(List.of(resourceId));
         var extraInfo = collectElementExtraCloudInfo(cloudElement);
-        // TODO qos列表
+        deleteData.setQoses(extraInfo.getQosIds());
         deleteData.setConnections(extraInfo.getConnectionIds());
         deleteData.setPortMappings(extraInfo.getProxyIds());
         return vmClient.delete(deleteData);
@@ -127,7 +126,7 @@ public class DeleteHandler extends HandlerCommon {
         var deleteData = new ContainerDeleteData();
         deleteData.setContainers(List.of(resourceId));
         var extraInfo = collectElementExtraCloudInfo(cloudElement);
-        // TODO qos列表
+        deleteData.setQoses(extraInfo.getQosIds());
         deleteData.setConnections(extraInfo.getConnectionIds());
         deleteData.setPortMappings(extraInfo.getProxyIds());
         return containerClient.delete(deleteData);

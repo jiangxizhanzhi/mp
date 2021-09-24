@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
-import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.base.util.BoolUtils;
 import cn.cyberpeace.mp.base.util.IntUtils;
 import cn.cyberpeace.mp.base.util.TextUtils;

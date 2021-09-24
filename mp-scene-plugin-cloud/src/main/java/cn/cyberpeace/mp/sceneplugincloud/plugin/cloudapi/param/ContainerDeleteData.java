@@ -14,6 +14,6 @@ public class ContainerDeleteData implements CloudHttpData {
     private List<String> containers;
     private List<String> connections;
     private List<String> portMappings;
-    private String qos;
+    private List<String> qoses;
     private String floatingIp;
 }

@@ -14,6 +14,6 @@ public class VirtualMachineDeleteData implements CloudHttpData {
     private List<String> vms;
     private List<String> connections;
     private List<String> portMappings;
-    private String qos;
+    private List<String> qoses;
     private String floatingIp;
 }
