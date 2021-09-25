@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.scene.service.taskpool;
 
-import cn.cyberpeace.mp.base.util.thread.TaskPool;
+import cn.cyberpeace.mp.base.util.thread.taskpool.TaskPool;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import lombok.Data;
 
@@ -22,8 +22,8 @@ public class SceneTaskPool {
         return SceneTaskPoolInstance.INSTANCE;
     }
 
-    public TaskPool.PoolTask<Runnable> executeTask(Runnable task) {
-        return taskPool.executeTask(task);
+    public void executeTask(Runnable task) {
+        taskPool.executeTask(task);
     }
 
 }

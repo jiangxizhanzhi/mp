@@ -1,11 +1,14 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
+import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
+import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.InitiateTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -14,11 +17,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class InitiateHandler extends HandlerCommon {
+
+    public static class SceneProcess {
+        public static final EventProcess INITIATE_BASE_PROPERTIES = new EventProcess("initiate_base_properties", "sceneplugincloud.event.initiate_base_properties");
+        public static final EventProcess INITIATE_IP_POOL = new EventProcess("initiate_ip_pool", "sceneplugincloud.event.initiate_ip_pool");
+        public static final EventProcess INITIATE_PORTS = new EventProcess("initiate_ports", "sceneplugincloud.event.initiate_ports");
+    }
+
+    public static class ElementProcess {
+        public static final EventProcess INITIATE_BASE_PROPERTIES = new EventProcess("initiate_base_properties", "sceneplugincloud.event.initiate_base_properties");
+        public static final EventProcess INITIATE_IP_POOL = new EventProcess("initiate_ip_pool", "sceneplugincloud.event.initiate_ip_pool");
+        public static final EventProcess INITIATE_PORTS = new EventProcess("initiate_ports", "sceneplugincloud.event.initiate_ports");
+    }
 
     private List<String> existCidrs;
     private final Map<String, List<String>> networkNodeIdIpPool = new HashMap<>();
-    private InitiateTaskPool taskPool = InitiateTaskPool.getInstance();
 
     private void prepareExistCidrs() {
         if (existCidrs == null) {
@@ -217,6 +232,16 @@ public class InitiateHandler extends HandlerCommon {
             return;
         }
 
+        Integer virtualType = cloudElement.getVirtualType();
+        if (virtualType == null) {
+            return;
+        }
+        if (!virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)
+                && !virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)
+                && !virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
+            return;
+        }
+
         var portId = srcPort.getId();
         var connectedSrcElement = getPortConnectedOpaqueSrcElement(portId);
         var connectedCloudElement = connectedSrcElement == null ? null
@@ -230,7 +255,6 @@ public class InitiateHandler extends HandlerCommon {
         // 分配ip
         List<String> ipPool = networkNodeIdIpPool.get(auxiliaryNetworkCloudElement.getSrcElement().getId());
         if (ipPool == null || ipPool.isEmpty()) {
-            // TODO 异常
             return;
         }
 
@@ -252,20 +276,18 @@ public class InitiateHandler extends HandlerCommon {
         }
     }
 
-    public InitiateHandler(CloudScenePluginHandler pluginHandler) {
-        super(pluginHandler);
-    }
-
     /**
      * 初始化节点
      * @param cloudElement 网元节点
      */
-    public void initiateElement(CloudPluginSceneElementBO cloudElement) {
+    private void initiateElementBaseProperties(CloudPluginSceneElementBO cloudElement) {
         if (Boolean.TRUE.equals(cloudElement.getExternal())) {
             return;
         }
         Integer virtualType = cloudElement.getVirtualType();
         if (virtualType == null) {
+            log.warn("Element({}) {} has no virtual type", cloudElement.getSrcElement().getEid(),
+                    cloudElement.getSrcElement().getId());
             return;
         }
 
@@ -299,20 +321,62 @@ public class InitiateHandler extends HandlerCommon {
         }
     }
 
+    public InitiateHandler(CloudScenePluginHandler pluginHandler) {
+        super(pluginHandler, InitiateTaskPool.getInstance(), SceneModel.Event.INITIATE);
+    }
+
     public void initiate() {
+        prepareEventProcess(SceneModel.Event.INITIATE, SceneProcess.class, ElementProcess.class);
+
         var cloudElements = getPluginHandler().getElementMap().values();
+
         // 初始化节点属性
-        taskPool.runTasks(cloudElements.stream()
-                .map(cloudElement -> (Runnable) () -> initiateElement(cloudElement)).collect(Collectors.toList()));
+        var initiateElementTasks = cloudElements.stream()
+                .filter(cloudElement -> !Boolean.TRUE.equals(cloudElement.getExternal()))
+                .map(cloudElement -> (Runnable) () -> initiateElementBasePropertiesProcess(cloudElement))
+                .collect(Collectors.toList());
+        if (!initiateElementTasks.isEmpty()) {
+            runSceneProgress(SceneProcess.INITIATE_BASE_PROPERTIES, () -> runTasks(initiateElementTasks));
+        }
 
         // 初始化ip池
-        taskPool.runTasks(cloudElements.stream()
+        var initiateElementIpPoolTasks = cloudElements.stream()
                 .filter(cloudElement -> Boolean.TRUE.equals(cloudElement.getAuxiliaryNetworkOn()))
-                .map(cloudElement -> (Runnable) () -> initIpPool(cloudElement)).collect(Collectors.toList()));
+                .map(cloudElement -> (Runnable) () -> initiateElementIpPoolProcess(cloudElement))
+                .collect(Collectors.toList());
+        if (!initiateElementIpPoolTasks.isEmpty()) {
+            runSceneProgress(SceneProcess.INITIATE_IP_POOL, () -> runTasks(initiateElementIpPoolTasks));
+        }
 
         // 初始化端口
-        taskPool.runTasks(cloudElements.stream()
-                .map(cloudElement -> (Runnable) () -> initiateVirtualPorts(cloudElement)).collect(Collectors.toList()));
+        var initiateElementPortsTasks = cloudElements.stream()
+                .filter(cloudElement -> {
+                    Integer virtualType = cloudElement.getVirtualType();
+                    return virtualType != null
+                            && (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)
+                            || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)
+                            || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER));
+                })
+                .map(cloudElement -> (Runnable) () -> initiateElementPortsProcess(cloudElement))
+                .collect(Collectors.toList());
+        if (!initiateElementPortsTasks.isEmpty()) {
+            runSceneProgress(SceneProcess.INITIATE_PORTS, () -> runTasks(initiateElementPortsTasks));
+        }
+    }
+
+    public void initiateElementBasePropertiesProcess(CloudPluginSceneElementBO cloudElement) {
+        runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.INITIATE_BASE_PROPERTIES,
+                () -> initiateElementBaseProperties(cloudElement));
+    }
+
+    public void initiateElementIpPoolProcess(CloudPluginSceneElementBO cloudElement) {
+        runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.INITIATE_IP_POOL,
+                () -> initIpPool(cloudElement));
+    }
+
+    public void initiateElementPortsProcess(CloudPluginSceneElementBO cloudElement) {
+        runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.INITIATE_PORTS,
+                () -> initiateVirtualPorts(cloudElement));
     }
 
 }

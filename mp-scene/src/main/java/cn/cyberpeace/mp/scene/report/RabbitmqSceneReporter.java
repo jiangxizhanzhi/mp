@@ -11,11 +11,11 @@ import org.springframework.stereotype.Component;
 public class RabbitmqSceneReporter implements SceneReporter {
     @Override
     public void reportScene(CollectedSceneBO scene) {
-        log.info("Rabbitmq report scene: {}", scene);
+//        log.info("Rabbitmq report scene: {}", scene);
     }
 
     @Override
     public void reportElement(CollectedSceneElementBO sceneElement) {
-        log.info("Rabbitmq report scene element: {}", sceneElement);
+//        log.info("Rabbitmq report scene element: {}", sceneElement);
     }
 }

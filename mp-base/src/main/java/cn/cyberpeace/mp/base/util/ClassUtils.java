@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.base.util;
 import cn.cyberpeace.mp.base.annotation.ClassFieldClasses;
 import cn.cyberpeace.mp.base.annotation.ClassFieldNames;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanWrapper;
@@ -141,6 +142,22 @@ public class ClassUtils {
             return null;
         }
         return method;
+    }
+
+    public static Map<String, Object> getClassConstantFieldMap(Class<?> clazz) {
+        return getClassConstantFieldMap(clazz, Object.class);
+    }
+
+    public static <T> Map<String, T> getClassConstantFieldMap(Class<?> clazz, Class<T> expectedFieldType) {
+        Map<String, T> constantFieldMap = new HashMap<>();
+        Field[] fields = clazz.getDeclaredFields();
+        for (Field field : fields) {
+            String fieldName = field.getName();
+            if (StrUtil.isUpperCase(fieldName)) {
+                constantFieldMap.put(fieldName, castFieldType(getFieldValue(field, null), expectedFieldType));
+            }
+        }
+        return constantFieldMap;
     }
 
     public static String[] getBeanClassFields(Class<?> clazz) {
