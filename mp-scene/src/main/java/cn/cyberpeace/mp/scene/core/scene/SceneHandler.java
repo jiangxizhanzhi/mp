@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.scene.core.base.BaseSceneHandler;
 import cn.cyberpeace.mp.scene.core.bo.*;
 import cn.cyberpeace.mp.scene.core.event.SceneElementEventHandler;
 import cn.cyberpeace.mp.scene.core.event.SceneEventHandler;
+import cn.cyberpeace.mp.scene.core.event.base.EventFlag;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
 import cn.cyberpeace.mp.scene.model.*;
@@ -105,34 +106,56 @@ public class SceneHandler extends BaseSceneHandler<
         return elementEventHandlerMap.get(genEventKey(nodeId, event));
     }
 
-    private void startSceneEvent(int event) {
-        getSceneEventHandler(event).startEvent();
-        reportSceneUpdated();
+    private boolean isTriggerEventSuccess(int flag) {
+        return EventFlag.SUCCESS == flag;
     }
 
-    private void startElementEvent(String nodeId, int event) {
-        getElementEventHandler(nodeId, event).startEvent();
-        reportElementUpdated(nodeId);
+    private int startSceneEvent(int event) {
+        var flag = getSceneEventHandler(event).startEvent();
+        if (isTriggerEventSuccess(flag)) {
+            reportSceneUpdated();
+        }
+        return flag;
     }
 
-    private void overSceneEvent(int event) {
-        getSceneEventHandler(event).overEvent();
-        reportSceneUpdated();
+    private int startElementEvent(String nodeId, int event) {
+        var flag = getElementEventHandler(nodeId, event).startEvent();
+        if (isTriggerEventSuccess(flag)) {
+            reportElementUpdated(nodeId);
+        }
+        return flag;
     }
 
-    private void overElementEvent(String nodeId, int event) {
-        getElementEventHandler(nodeId, event).overEvent();
-        reportElementUpdated(nodeId);
+    private int overSceneEvent(int event) {
+        var flag = getSceneEventHandler(event).overEvent();
+        if (isTriggerEventSuccess(flag)) {
+            reportSceneUpdated();
+        }
+        return flag;
     }
 
-    public void errorScene(int event, String errorMessage) {
-        getSceneEventHandler(event).error(errorMessage);
-        reportSceneUpdated();
+    private int overElementEvent(String nodeId, int event) {
+        var flag = getElementEventHandler(nodeId, event).overEvent();
+        if (isTriggerEventSuccess(flag)) {
+            reportElementUpdated(nodeId);
+        }
+        return flag;
     }
 
-    public void errorElement(String nodeId, int event, String errorMessage) {
-        getElementEventHandler(nodeId, event).error(errorMessage);
-        reportElementUpdated(nodeId);
+    public int errorScene(int event, String errorMessage) {
+        var flag = getSceneEventHandler(event).error(errorMessage);
+        if (isTriggerEventSuccess(flag)) {
+            reportSceneUpdated();
+        }
+        return flag;
+    }
+
+    public int errorElement(String nodeId, int event, String errorMessage) {
+        var flag = getElementEventHandler(nodeId, event).error(errorMessage);
+        if (isTriggerEventSuccess(flag)) {
+            reportElementUpdated(nodeId);
+        }
+        return flag;
     }
 
     private void startAllEvent(int sceneEvent, int elementEvent) {
@@ -235,24 +258,36 @@ public class SceneHandler extends BaseSceneHandler<
         getElementEventHandler(nodeId, event).addProcess(eventProcesses);
     }
 
-    public void progressSceneProcess(int event, String process) {
-        getSceneEventHandler(event).progressProcess(process);
-        reportSceneUpdated();
+    public int progressSceneProcess(int event, String process) {
+        var flag = getSceneEventHandler(event).progressProcess(process);
+        if (isTriggerEventSuccess(flag)) {
+            reportSceneUpdated();
+        }
+        return flag;
     }
 
-    public void progressElementProcess(String nodeId, int event, String process) {
-        getElementEventHandler(nodeId, event).progressProcess(process);
-        reportElementUpdated(nodeId);
+    public int progressElementProcess(String nodeId, int event, String process) {
+        var flag = getElementEventHandler(nodeId, event).progressProcess(process);
+        if (isTriggerEventSuccess(flag)) {
+            reportElementUpdated(nodeId);
+        }
+        return flag;
     }
 
-    public void overSceneProcess(int event) {
-        getSceneEventHandler(event).overProcess();
-        reportSceneUpdated();
+    public int overSceneProcess(int event) {
+        var flag = getSceneEventHandler(event).overProcess();
+        if (isTriggerEventSuccess(flag)) {
+            reportSceneUpdated();
+        }
+        return flag;
     }
 
-    public void overElementProcess(String nodeId, int event) {
-        getElementEventHandler(nodeId, event).overProcess();
-        reportElementUpdated(nodeId);
+    public int overElementProcess(String nodeId, int event) {
+        var flag = getElementEventHandler(nodeId, event).overProcess();
+        if (isTriggerEventSuccess(flag)) {
+            reportElementUpdated(nodeId);
+        }
+        return flag;
     }
 
     public void initiate() {

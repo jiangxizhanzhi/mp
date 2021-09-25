@@ -30,28 +30,28 @@ public abstract class ScenePluginHandler<S, E, P, C> extends BasePluginHandler<S
         getSceneHandler().prepareElementProcess(nodeId, event, eventProcesses);
     }
 
-    public void progressSceneProcess(int event, String process) {
-        getSceneHandler().progressSceneProcess(event, process);
+    public int progressSceneProcess(int event, String process) {
+        return getSceneHandler().progressSceneProcess(event, process);
     }
 
-    public void progressElementProcess(String nodeId, int event, String process) {
-        getSceneHandler().progressElementProcess(nodeId, event, process);
+    public int progressElementProcess(String nodeId, int event, String process) {
+        return getSceneHandler().progressElementProcess(nodeId, event, process);
     }
 
-    public void overSceneProcess(int event) {
-        getSceneHandler().overSceneProcess(event);
+    public int overSceneProcess(int event) {
+        return getSceneHandler().overSceneProcess(event);
     }
 
-    public void overElementProcess(String nodeId, int event) {
-        getSceneHandler().overElementProcess(nodeId, event);
+    public int overElementProcess(String nodeId, int event) {
+        return getSceneHandler().overElementProcess(nodeId, event);
     }
 
-    public void errorScene(int event, String errorMessage) {
-        getSceneHandler().errorScene(event, errorMessage);
+    public int errorScene(int event, String errorMessage) {
+        return getSceneHandler().errorScene(event, errorMessage);
     }
 
-    public void errorElement(String nodeId, int event, String errorMessage) {
-        getSceneHandler().errorElement(nodeId, event, errorMessage);
+    public int errorElement(String nodeId, int event, String errorMessage) {
+        return getSceneHandler().errorElement(nodeId, event, errorMessage);
     }
 
     public void initiate() throws Exception {

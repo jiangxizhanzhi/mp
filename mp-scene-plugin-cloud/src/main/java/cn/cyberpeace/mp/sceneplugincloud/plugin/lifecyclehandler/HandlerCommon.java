@@ -1,16 +1,14 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
-import cn.cyberpeace.mp.base.util.ClassUtils;
+import cn.cyberpeace.mp.base.util.thread.taskpool.TaskPool;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
-import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
+import cn.cyberpeace.mp.scene.core.plugin.PluginSceneEventHandlerCommon;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CloudTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
-import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -18,17 +16,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Data
-public class HandlerCommon {
+public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePluginHandler> {
 
     private final List<String> cidrPool = CloudSingleton.cloudAppConfig.getCidrPool();
 
-    private final CloudScenePluginHandler pluginHandler;
-
-    private CloudTaskPool taskPool;
-
-    public HandlerCommon(CloudScenePluginHandler pluginHandler) {
-        this.pluginHandler = pluginHandler;
+    public HandlerCommon(CloudScenePluginHandler pluginHandler, TaskPool taskPool, int event) {
+        super(pluginHandler, taskPool, event);
     }
 
     public List<String> randomCidrs(int count, List<String> existCidrs) {
@@ -37,7 +30,7 @@ public class HandlerCommon {
 
     public List<String> statExistCidrs() {
         List<String> existCidrs = new ArrayList<>();
-        pluginHandler.getElementMap().forEach((nodeId, element) -> {
+        getPluginHandler().getElementMap().forEach((nodeId, element) -> {
             var cidr = element.getCidr();
             if (!StringUtils.isEmpty(cidr)) {
                 existCidrs.add(cidr);
@@ -56,33 +49,12 @@ public class HandlerCommon {
     }
 
     public String getRequestUser() {
-        var context = pluginHandler.getContext();
+        var context = getPluginHandler().getContext();
         if (context == null) {
             return null;
         }
 
         return context.getRequestUser();
-    }
-
-    public void prepareEventProcess(int event, Class<?> sceneProcessClass, Class<?> elementProcessClass) {
-        List<EventProcess> sceneEventProcesses = new ArrayList<>(ClassUtils.getClassConstantFieldMap(sceneProcessClass,
-                EventProcess.class).values());
-        getPluginHandler().prepareSceneProcess(event, sceneEventProcesses);
-
-        List<EventProcess> elementEventProcesses = new ArrayList<>(ClassUtils.getClassConstantFieldMap(
-                elementProcessClass, EventProcess.class).values());
-        getPluginHandler().getElementMap().keySet().forEach(nodeId -> {
-            getPluginHandler().prepareElementProcess(nodeId, event, elementEventProcesses);
-        });
-    }
-
-    public void runTasks(List<Runnable> tasks) throws Exception {
-        var poolTasks = taskPool.runTasks(tasks);
-        for (var poolTask: poolTasks) {
-            if (poolTask.getException() != null) {
-                throw poolTask.getException();
-            }
-        }
     }
 
     /**
@@ -145,7 +117,7 @@ public class HandlerCommon {
         Map<String, SceneElementBO> nodeIdSrcElementMap = new HashMap<>();
         List<SceneElementPortBO> connectedOpaqueSrcPorts = getEleConnectedOpaqueSrcPorts(nodeId);
         for (var connectedOpaqueSrcPort : connectedOpaqueSrcPorts) {
-            var connectedOpaqueSrcElement = pluginHandler.getPortSrcElement(connectedOpaqueSrcPort.getId());
+            var connectedOpaqueSrcElement = getPluginHandler().getPortSrcElement(connectedOpaqueSrcPort.getId());
             nodeIdSrcElementMap.put(connectedOpaqueSrcElement.getId(), connectedOpaqueSrcElement);
         }
 
@@ -159,7 +131,7 @@ public class HandlerCommon {
      */
     public List<SceneElementPortBO> getEleConnectedOpaqueSrcPorts(String nodeId) {
         List<SceneElementPortBO> connectedOpaqueSrcPorts = new ArrayList<>();
-        var srcElement = pluginHandler.getSrcElement(nodeId);
+        var srcElement = getPluginHandler().getSrcElement(nodeId);
         var srcPorts = srcElement.getPorts();
         if (srcPorts == null) {
             return connectedOpaqueSrcPorts;
@@ -181,17 +153,17 @@ public class HandlerCommon {
      * @return 节点连接的不透明元素
      */
     public SceneElementPortBO getPortConnectedOpaqueSrcPort(String portId) {
-        var connectedSrcPort = pluginHandler.getPortConnectedSrcPort(portId);
+        var connectedSrcPort = getPluginHandler().getPortConnectedSrcPort(portId);
         if (connectedSrcPort == null) {
             return null;
         }
 
-        var connectedSrcElement = pluginHandler.getPortConnectedSrcElement(portId);
+        var connectedSrcElement = getPluginHandler().getPortConnectedSrcElement(portId);
         if (connectedSrcElement == null) {
             return null;
         }
 
-        var connectedCloudElement = pluginHandler.getElement(connectedSrcElement.getId());
+        var connectedCloudElement = getPluginHandler().getElement(connectedSrcElement.getId());
         if (connectedCloudElement == null || !Boolean.TRUE.equals(connectedCloudElement.getTransparent())) {
             return connectedSrcPort;
         }
@@ -225,7 +197,7 @@ public class HandlerCommon {
             return null;
         }
 
-        return pluginHandler.getPortSrcElement(connectedSrcPort.getId());
+        return getPluginHandler().getPortSrcElement(connectedSrcPort.getId());
     }
 
 }
