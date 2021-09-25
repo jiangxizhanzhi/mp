@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.scene.core.base.BaseSceneHandler;
 import cn.cyberpeace.mp.scene.core.bo.*;
 import cn.cyberpeace.mp.scene.core.event.SceneElementEventHandler;
 import cn.cyberpeace.mp.scene.core.event.SceneEventHandler;
+import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
 import cn.cyberpeace.mp.scene.model.*;
 import cn.cyberpeace.mp.scene.repository.*;
@@ -124,6 +125,16 @@ public class SceneHandler extends BaseSceneHandler<
         reportElementUpdated(nodeId);
     }
 
+    public void errorScene(int event, String errorMessage) {
+        getSceneEventHandler(event).error(errorMessage);
+        reportSceneUpdated();
+    }
+
+    public void errorElement(String nodeId, int event, String errorMessage) {
+        getElementEventHandler(nodeId, event).error(errorMessage);
+        reportElementUpdated(nodeId);
+    }
+
     private void startAllEvent(int sceneEvent, int elementEvent) {
         startSceneEvent(sceneEvent);
         for (var element : getElementMap().values()) {
@@ -132,10 +143,10 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     private void overAllEvent(int sceneEvent, int elementEvent) {
-        overSceneEvent(sceneEvent);
         for (var element : getElementMap().values()) {
             overElementEvent(element.getId(), elementEvent);
         }
+        overSceneEvent(sceneEvent);
     }
 
     public SceneHandler() {}
@@ -216,33 +227,31 @@ public class SceneHandler extends BaseSceneHandler<
         reporters.forEach(reporter -> reportTaskPool.executeTask(() -> reporter.reportElement(collectedSceneElement)));
     }
 
-    public void progressSceneProcess(int event, String process, String processMessage) {
-        getSceneEventHandler(event).progressProcess(process, processMessage);
+    public void prepareSceneProcess(int event, List<EventProcess> eventProcesses) {
+        getSceneEventHandler(event).addProcess(eventProcesses);
+    }
+
+    public void prepareElementProcess(String nodeId, int event, List<EventProcess> eventProcesses) {
+        getElementEventHandler(nodeId, event).addProcess(eventProcesses);
+    }
+
+    public void progressSceneProcess(int event, String process) {
+        getSceneEventHandler(event).progressProcess(process);
         reportSceneUpdated();
     }
 
-    public void progressElementProcess(String nodeId, int event, String process, String processMessage) {
-        getElementEventHandler(nodeId, event).progressProcess(process, processMessage);
+    public void progressElementProcess(String nodeId, int event, String process) {
+        getElementEventHandler(nodeId, event).progressProcess(process);
         reportElementUpdated(nodeId);
     }
 
-    public void overSceneProcess(int event, String processMessage) {
-        getSceneEventHandler(event).overProcess(processMessage);
+    public void overSceneProcess(int event) {
+        getSceneEventHandler(event).overProcess();
         reportSceneUpdated();
     }
 
-    public void overElementProcess(String nodeId, int event, String processMessage) {
-        getElementEventHandler(nodeId, event).overProcess(processMessage);
-        reportElementUpdated(nodeId);
-    }
-
-    public void errorSceneProcess(int event, String processMessage) {
-        getSceneEventHandler(event).error(processMessage);
-        reportSceneUpdated();
-    }
-
-    public void errorElementProcess(String nodeId, int event, String processMessage) {
-        getElementEventHandler(nodeId, event).error(processMessage);
+    public void overElementProcess(String nodeId, int event) {
+        getElementEventHandler(nodeId, event).overProcess();
         reportElementUpdated(nodeId);
     }
 
@@ -254,7 +263,7 @@ public class SceneHandler extends BaseSceneHandler<
                 plugin.initiate();
             }
         } catch (Exception e) {
-            errorSceneProcess(SceneModel.Event.INITIATE, e.getMessage());
+            errorScene(SceneModel.Event.INITIATE, e.getMessage());
             return;
         }
         overAllEvent(SceneModel.Event.INITIATE, SceneElementModel.Event.INITIATE);
@@ -268,7 +277,7 @@ public class SceneHandler extends BaseSceneHandler<
                 plugin.create();
             }
         } catch (Exception e) {
-            errorSceneProcess(SceneModel.Event.INITIATE, e.getMessage());
+            errorScene(SceneModel.Event.CREATE, e.getMessage());
             return;
         }
         overAllEvent(SceneModel.Event.CREATE, SceneElementModel.Event.CREATE);
@@ -301,7 +310,7 @@ public class SceneHandler extends BaseSceneHandler<
                 plugin.delete();
             }
         } catch (Exception e) {
-            errorSceneProcess(SceneModel.Event.DELETE, e.getMessage());
+            errorScene(SceneModel.Event.DELETE, e.getMessage());
             return;
         }
         overAllEvent(SceneModel.Event.DELETE, SceneElementModel.Event.DELETE);
@@ -318,7 +327,7 @@ public class SceneHandler extends BaseSceneHandler<
                 plugin.delete();
             }
         } catch (Exception e) {
-            errorSceneProcess(SceneModel.Event.DELETE, e.getMessage());
+            errorScene(SceneModel.Event.DELETE, e.getMessage());
             return false;
         }
         overAllEvent(SceneModel.Event.DELETE, SceneElementModel.Event.DELETE);

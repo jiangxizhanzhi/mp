@@ -147,17 +147,17 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
     }
 
     @Override
-    public void initiate() {
+    public void initiate() throws Exception {
         initiateHandler.initiate();
     }
 
     @Override
-    public void create() {
+    public void create() throws Exception {
         createHandler.create();
     }
 
     @Override
-    public void delete() {
+    public void delete() throws Exception {
         deleteHandler.delete();
     }
 }

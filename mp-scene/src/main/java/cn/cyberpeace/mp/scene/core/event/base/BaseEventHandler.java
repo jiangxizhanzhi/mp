@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -41,6 +42,9 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
 
     /** 事件转移表 */
     private Map<String, List<Integer>> eventTransition;
+
+    /** 进程表 */
+    private Map<String, EventProcess> eventProcessMap;
 
     /**
      * 获取事件锁
@@ -107,6 +111,20 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
         }
     }
 
+    private String getProcessName(String process) {
+        var eventProcess = eventProcessMap.getOrDefault(process, null);
+        if (eventProcess == null) {
+            log.warn("{} event({}) process({}) not in process table", getTargetName(), event, process);
+            return StringUtils.EMPTY;
+        }
+
+        return eventProcess.getProcessNameText();
+    }
+
+    private String formatProcessMessage(String processMessage) {
+        return StringUtils.joinWith(" ", getTargetName(), processMessage);
+    }
+
     /**
      * 初始化
      * @param target 事件目标
@@ -118,6 +136,7 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
         this.event = event;
         this.eventName = eventName;
         this.eventTransition = eventTransition;
+        this.eventProcessMap = new HashMap<>();
         checkEvent();
     }
 
@@ -135,63 +154,83 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
         }
     }
 
+    public void addProcess(EventProcess eventProcess) {
+        eventProcessMap.put(eventProcess.getProcess(), eventProcess);
+    }
+
+    public void addProcess(List<EventProcess> eventProcesses) {
+        eventProcesses.forEach(this::addProcess);
+    }
+
     /**
      * 开始事件
      */
     public int startEvent() {
-        var processMessage = MessageUtils.get("scene.event.start_message", getTargetName(),
-                MessageUtils.get(eventName));
-        return triggerEvent(event, EventStatus.START, target.getProcess(), target.getProcessStatus(), processMessage);
+        var processMessage = MessageUtils.get("scene.event.start_message", MessageUtils.get(eventName));
+        return triggerEvent(event, EventStatus.START, target.getProcess(), target.getProcessStatus(),
+                formatProcessMessage(processMessage));
     }
 
     /**
      * 开始进程
      */
-    public int startProcess(String process, String processMessage) {
-        return triggerEvent(event, EventStatus.IN_PROGRESS, process, ProcessStatus.START, processMessage);
+    public int startProcess(String process) {
+        var processMessage = MessageUtils.get("scene.event.start_message", getProcessName(process));
+        return triggerEvent(event, EventStatus.IN_PROGRESS, process, ProcessStatus.START,
+                formatProcessMessage(processMessage));
     }
 
     /**
      * 进行中事件进程
      */
-    public int progressProcess(String process, String processMessage) {
-        return triggerEvent(event, EventStatus.IN_PROGRESS, process, ProcessStatus.IN_PROGRESS, processMessage);
+    public int progressProcess(String process) {
+        var processMessage = MessageUtils.get("scene.event.start_message", getProcessName(process));
+        return triggerEvent(event, EventStatus.IN_PROGRESS, process, ProcessStatus.IN_PROGRESS,
+                formatProcessMessage(processMessage));
     }
 
     /**
      * 暂停事件
      */
-    public int pauseProcess(String processMessage) {
-        processMessage = StringUtils.isEmpty(processMessage) ?
-                MessageUtils.get("scene.event.pause_message", getTargetName(), MessageUtils.get(eventName)) :
-                processMessage;
+    public int pauseProcess() {
+        var processMessage = MessageUtils.get("scene.event.pause_message",
+                getProcessName(target.getProcess()));
         return triggerEvent(target.getEvent(), EventStatus.PAUSE, target.getProcess(), ProcessStatus.PAUSE,
-                processMessage);
+                formatProcessMessage(processMessage));
     }
 
     /**
      * 结束事件进程
      */
-    public int overProcess(String processMessage) {
-        return triggerEvent(event, EventStatus.IN_PROGRESS, target.getProcess(), ProcessStatus.OVER, processMessage);
+    public int overProcess() {
+        var processMessage = MessageUtils.get("scene.event.over_message",
+                getProcessName(target.getProcess()));
+        return triggerEvent(event, EventStatus.IN_PROGRESS, target.getProcess(), ProcessStatus.OVER,
+                formatProcessMessage(processMessage));
     }
 
     /**
      * 结束事件
      */
     public int overEvent() {
-        var processMessage = MessageUtils.get("scene.event.over_message", getTargetName(),
-                MessageUtils.get(eventName));
-        return triggerEvent(event, EventStatus.OVER, target.getProcess(), target.getProcessStatus(), processMessage);
+        var processMessage = MessageUtils.get("scene.event.over_message", MessageUtils.get(eventName));
+        return triggerEvent(event, EventStatus.OVER, target.getProcess(), target.getProcessStatus(),
+                formatProcessMessage(processMessage));
     }
 
     /**
-     * 异常事件
+     * 异常
      */
-    public int error(String processMessage) {
-        processMessage = MessageUtils.get("scene.event.error_message", getTargetName(),
-                MessageUtils.get(eventName), processMessage);
-        return triggerEvent(event, EventStatus.ABNORMAL, target.getProcess(), ProcessStatus.ABNORMAL, processMessage);
+    public int error(String errorMessage) {
+        var processName = getProcessName(target.getProcess());
+        if (StringUtils.isEmpty(processName)) {
+            processName = MessageUtils.get(eventName);
+        }
+
+        var processMessage = MessageUtils.get("scene.event.error_message", processName,
+                errorMessage);
+        return triggerEvent(event, EventStatus.ABNORMAL, target.getProcess(), ProcessStatus.ABNORMAL,
+                formatProcessMessage(processMessage));
     }
 
 }

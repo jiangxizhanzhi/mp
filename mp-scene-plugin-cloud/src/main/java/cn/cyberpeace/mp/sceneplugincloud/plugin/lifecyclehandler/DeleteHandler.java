@@ -23,7 +23,6 @@ public class DeleteHandler extends HandlerCommon {
     private final VirtualMachine vmClient = new VirtualMachine();
     private final Container containerClient = new Container();
     private final EntityNode enClient = new EntityNode();
-    private final DeleteTaskPool taskPool = DeleteTaskPool.getInstance();
 
     @Data
     @AllArgsConstructor
@@ -166,23 +165,24 @@ public class DeleteHandler extends HandlerCommon {
 
     public DeleteHandler(CloudScenePluginHandler pluginHandler) {
         super(pluginHandler);
+        setTaskPool(DeleteTaskPool.getInstance());
     }
 
-    public void delete() {
+    public void delete() throws Exception {
         // 删除终端
-        taskPool.runTasks(getPluginHandler().getTerminalElementMap().values().stream()
+        runTasks(getPluginHandler().getTerminalElementMap().values().stream()
                 .map(cloudElement -> (Runnable) () -> deleteElement(cloudElement)).collect(Collectors.toList()));
 
         // 删除防火墙
-        taskPool.runTasks(getPluginHandler().getFirewallElementMap().values().stream()
+        runTasks(getPluginHandler().getFirewallElementMap().values().stream()
                 .map(cloudElement -> (Runnable) () -> deleteElement(cloudElement)).collect(Collectors.toList()));
 
         // 删除网关
-        taskPool.runTasks(getPluginHandler().getGatewayElementMap().values().stream()
+        runTasks(getPluginHandler().getGatewayElementMap().values().stream()
                 .map(cloudElement -> (Runnable) () -> deleteElement(cloudElement)).collect(Collectors.toList()));
 
         // 删除辅助网络(包含虚拟交换机)
-        taskPool.runTasks(getPluginHandler().getElementMap().values().stream()
+        runTasks(getPluginHandler().getElementMap().values().stream()
                 .filter(cloudElement -> Boolean.TRUE.equals(cloudElement.getAuxiliaryNetworkOn()))
                 .map(cloudElement -> (Runnable) () -> deleteAuxiliaryNetwork(cloudElement)).collect(Collectors.toList()));
     }

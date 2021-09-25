@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
+import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
+import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
@@ -16,9 +18,17 @@ import java.util.stream.Collectors;
 
 public class InitiateHandler extends HandlerCommon {
 
+    public static class SceneProcess {
+        public static final EventProcess INITIATE_ELEMENTS = new EventProcess("initiate elements", "sceneplugincloud.event.initiate_elements");
+        public static final EventProcess INITIATE_IP_POOL = new EventProcess("initiate ip pool", "sceneplugincloud.event.initiate_ip_pool");
+        public static final EventProcess INITIATE_PORTS = new EventProcess("initiate ports", "sceneplugincloud.event.initiate_ports");
+    }
+
+    public static class ElementProcess {
+    }
+
     private List<String> existCidrs;
     private final Map<String, List<String>> networkNodeIdIpPool = new HashMap<>();
-    private InitiateTaskPool taskPool = InitiateTaskPool.getInstance();
 
     private void prepareExistCidrs() {
         if (existCidrs == null) {
@@ -263,6 +273,7 @@ public class InitiateHandler extends HandlerCommon {
 
     public InitiateHandler(CloudScenePluginHandler pluginHandler) {
         super(pluginHandler);
+        setTaskPool(InitiateTaskPool.getInstance());
     }
 
     /**
@@ -308,20 +319,48 @@ public class InitiateHandler extends HandlerCommon {
         }
     }
 
-    public void initiate() {
+    public void initiate() throws Exception {
+        prepareEventProcess(SceneModel.Event.INITIATE, SceneProcess.class, ElementProcess.class);
+
         var cloudElements = getPluginHandler().getElementMap().values();
+
         // 初始化节点属性
-        taskPool.runTasks(cloudElements.stream()
-                .map(cloudElement -> (Runnable) () -> initiateElement(cloudElement)).collect(Collectors.toList()));
+        var initiateElementTasks = cloudElements.stream()
+                .map(cloudElement -> (Runnable) () -> initiateElement(cloudElement)).collect(Collectors.toList());
+        if (!initiateElementTasks.isEmpty()) {
+            getPluginHandler().progressSceneProcess(SceneModel.Event.INITIATE,
+                    SceneProcess.INITIATE_ELEMENTS.getProcess());
+            runTasks(initiateElementTasks);
+            getPluginHandler().overSceneProcess(SceneModel.Event.INITIATE);
+        }
 
         // 初始化ip池
-        taskPool.runTasks(cloudElements.stream()
+        var initiateIpPoolTasks = cloudElements.stream()
                 .filter(cloudElement -> Boolean.TRUE.equals(cloudElement.getAuxiliaryNetworkOn()))
-                .map(cloudElement -> (Runnable) () -> initIpPool(cloudElement)).collect(Collectors.toList()));
+                .map(cloudElement -> (Runnable) () -> initIpPool(cloudElement)).collect(Collectors.toList());
+        if (!initiateIpPoolTasks.isEmpty()) {
+            getPluginHandler().progressSceneProcess(SceneModel.Event.INITIATE,
+                    SceneProcess.INITIATE_IP_POOL.getProcess());
+            runTasks(initiateIpPoolTasks);
+            getPluginHandler().overSceneProcess(SceneModel.Event.INITIATE);
+        }
 
         // 初始化端口
-        taskPool.runTasks(cloudElements.stream()
-                .map(cloudElement -> (Runnable) () -> initiateVirtualPorts(cloudElement)).collect(Collectors.toList()));
+        var initiatePortsTasks = cloudElements.stream()
+                .filter(cloudElement -> {
+                    Integer virtualType = cloudElement.getVirtualType();
+                    return virtualType != null
+                            && (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)
+                            || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)
+                            || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER));
+                })
+                .map(cloudElement -> (Runnable) () -> initiateVirtualPorts(cloudElement)).collect(Collectors.toList());
+        if (!initiatePortsTasks.isEmpty()) {
+            getPluginHandler().progressSceneProcess(SceneModel.Event.INITIATE,
+                    SceneProcess.INITIATE_PORTS.getProcess());
+            runTasks(initiatePortsTasks);
+            getPluginHandler().overSceneProcess(SceneModel.Event.INITIATE);
+        }
     }
 
 }

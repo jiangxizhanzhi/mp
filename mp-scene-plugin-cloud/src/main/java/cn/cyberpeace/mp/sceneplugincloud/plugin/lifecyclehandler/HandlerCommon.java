@@ -1,11 +1,14 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.base.util.ClassUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
+import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CloudTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
@@ -21,6 +24,8 @@ public class HandlerCommon {
     private final List<String> cidrPool = CloudSingleton.cloudAppConfig.getCidrPool();
 
     private final CloudScenePluginHandler pluginHandler;
+
+    private CloudTaskPool taskPool;
 
     public HandlerCommon(CloudScenePluginHandler pluginHandler) {
         this.pluginHandler = pluginHandler;
@@ -57,6 +62,27 @@ public class HandlerCommon {
         }
 
         return context.getRequestUser();
+    }
+
+    public void prepareEventProcess(int event, Class<?> sceneProcessClass, Class<?> elementProcessClass) {
+        List<EventProcess> sceneEventProcesses = new ArrayList<>(ClassUtils.getClassConstantFieldMap(sceneProcessClass,
+                EventProcess.class).values());
+        getPluginHandler().prepareSceneProcess(event, sceneEventProcesses);
+
+        List<EventProcess> elementEventProcesses = new ArrayList<>(ClassUtils.getClassConstantFieldMap(
+                elementProcessClass, EventProcess.class).values());
+        getPluginHandler().getElementMap().keySet().forEach(nodeId -> {
+            getPluginHandler().prepareElementProcess(nodeId, event, elementEventProcesses);
+        });
+    }
+
+    public void runTasks(List<Runnable> tasks) throws Exception {
+        var poolTasks = taskPool.runTasks(tasks);
+        for (var poolTask: poolTasks) {
+            if (poolTask.getException() != null) {
+                throw poolTask.getException();
+            }
+        }
     }
 
     /**

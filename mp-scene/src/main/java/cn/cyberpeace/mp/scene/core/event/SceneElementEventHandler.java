@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.util.MessageUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.event.base.BaseEventHandler;
 import cn.cyberpeace.mp.scene.core.event.base.EventModel;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;
 
@@ -21,6 +22,10 @@ public class SceneElementEventHandler extends BaseEventHandler<SceneElementBO, E
 
     @Override
     public String getTargetName() {
-        return MessageUtils.get(SceneEventHandler.EVENT_NAME_PREFIX + "scene_element", getTarget().getName());
+        var targetName = getTarget().getName();
+        if (StringUtils.isEmpty(targetName)) {
+            targetName = getTarget().getId();
+        }
+        return MessageUtils.get(SceneEventHandler.EVENT_NAME_PREFIX + "scene_element", targetName);
     }
 }

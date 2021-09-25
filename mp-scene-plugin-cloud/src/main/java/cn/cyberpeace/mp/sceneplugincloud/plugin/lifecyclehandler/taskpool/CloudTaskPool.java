@@ -10,7 +10,7 @@ public abstract class CloudTaskPool {
 
     private TaskPool taskPool;
 
-    public List<TaskPool.PoolTask<Runnable>> runTasks(List<Runnable> tasks) {
+    public List<TaskPool.PoolTask> runTasks(List<Runnable> tasks) {
         return taskPool.runTasks(tasks);
     }
 

@@ -1,15 +1,12 @@
 package cn.cyberpeace.mp.base.util.thread;
 
-import lombok.AllArgsConstructor;
+import cn.cyberpeace.mp.base.util.ClassUtils;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -25,7 +22,7 @@ public class TaskPool {
         public static final Integer INTERRUPTED = 4;
     }
 
-    private void runTask(PoolTask<Runnable> poolTask) {
+    private <T, R> void invokeTask(BasePoolTask<T, R> poolTask) {
         if (poolTask.getStatus() == null) {
             return;
         }
@@ -36,7 +33,7 @@ public class TaskPool {
 
         poolTask.setStatus(TaskStatus.RUNNING);
         try {
-            poolTask.getTask().run();
+            poolTask.invoke();
             poolTask.setStatus(TaskStatus.OVER);
         } catch (Exception e) {
             log.error("Task run error: ", e);
@@ -45,13 +42,91 @@ public class TaskPool {
         }
     }
 
+    private void interruptTask(BasePoolTask<?, ?> poolTask, Exception e) {
+        if (TaskStatus.WAITING.equals(poolTask.getStatus())) {
+            poolTask.setStatus(TaskStatus.INTERRUPTED);
+            poolTask.setException(e);
+        }
+    }
+
+    /**
+     * 批量运行任务，多个任务为一个整体
+     * @param tasks 任务
+     * @param independent 任务间是否独立，false情况下任意一个任务的异常会取消掉所有队列任务
+     * @return 任务执行结果
+     */
+    private  <T, R, C extends BasePoolTask<T, R>> List<C> invokeTasks(List<T> tasks, boolean independent,
+                                                                      Class<C> poolTaskClass) {
+        var latch = new CountDownLatch(tasks.size());
+        List<C> poolTasks = tasks.stream()
+                .map(task -> {
+                    var poolTask = ClassUtils.createInstance(poolTaskClass);
+                    poolTask.setTask(task);
+                    return poolTask;
+                })
+                .collect(Collectors.toList());
+        poolTasks.forEach(poolTask -> executor.execute(ThreadUtils.format(() -> {
+            invokeTask(poolTask);
+            latch.countDown();
+
+            if (!independent && TaskStatus.ERROR.equals(poolTask.getStatus())) {
+                poolTasks.forEach(itemTask -> interruptTask(itemTask, poolTask.getException()));
+            }
+        })));
+
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            log.error("Interruption occurs, up to {} tasks will be cancelled", latch.getCount());
+            poolTasks.forEach(poolTask -> interruptTask(poolTask, e));
+            Thread.currentThread().interrupt();
+        }
+
+        return poolTasks;
+    }
+
     @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class PoolTask<T> {
+    public abstract static class BasePoolTask<T, R> {
         private T task;
-        private Integer status;
+        private Integer status = TaskStatus.WAITING;
         private Exception exception;
+        private R result;
+
+        public boolean isError() {
+            return TaskStatus.ERROR.equals(status);
+        }
+
+        public boolean isInterrupted() {
+            return TaskStatus.INTERRUPTED.equals(status);
+        }
+
+        public abstract void invoke() throws Exception;
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class PoolTask extends BasePoolTask<Runnable, Object> {
+        public PoolTask(Runnable task) {
+            setTask(task);
+        }
+
+        @Override
+        public void invoke() {
+            getTask().run();
+        }
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class ResultPoolTask<R> extends BasePoolTask<Callable<R>, R> {
+        public ResultPoolTask(Callable<R> task) {
+            setTask(task);
+        }
+
+        @Override
+        public void invoke() throws Exception {
+            setResult(getTask().call());
+        }
     }
 
     public TaskPool(int poolSize, int holdSize) {
@@ -63,34 +138,26 @@ public class TaskPool {
                 new LinkedBlockingQueue<>(holdSize - poolSize));
     }
 
-    public PoolTask<Runnable> executeTask(Runnable task) {
-        var poolTask = new PoolTask<>(task, TaskStatus.WAITING, null);
-        executor.execute(ThreadUtils.format(() -> runTask(poolTask)));
-        return poolTask;
+    public void executeTask(Runnable task) {
+        var poolTask = new PoolTask(task);
+        executor.execute(ThreadUtils.format(() -> invokeTask(poolTask)));
     }
 
-    public List<PoolTask<Runnable>> runTasks(List<Runnable> tasks) {
-        var latch = new CountDownLatch(tasks.size());
-        List<PoolTask<Runnable>> poolTasks = tasks.stream()
-                .map(task -> new PoolTask<>(task, TaskStatus.WAITING, null))
-                .collect(Collectors.toList());
-        poolTasks.forEach(poolTask -> executor.execute(ThreadUtils.format(() -> {
-            runTask(poolTask);
-            latch.countDown();
-        })));
+    public List<PoolTask> runTasks(List<Runnable> tasks) {
+        return runTasks(tasks, false);
+    }
 
-        try {
-            latch.await();
-        } catch (InterruptedException e) {
-            log.error("Interruption occurs, up to {} tasks will be cancelled", latch.getCount());
-            poolTasks.forEach(poolTask -> {
-                poolTask.setStatus(TaskStatus.INTERRUPTED);
-                poolTask.setException(e);
-            });
-            Thread.currentThread().interrupt();
-        }
+    public List<PoolTask> runTasks(List<Runnable> tasks, boolean independent) {
+        return invokeTasks(tasks, independent, PoolTask.class);
+    }
 
-        return poolTasks;
+    public <R> List<ResultPoolTask<R>> callTasks(List<Callable<R>> tasks, Class<ResultPoolTask<R>> poolTaskClass) {
+        return callTasks(tasks, poolTaskClass, false);
+    }
+
+    public <R> List<ResultPoolTask<R>> callTasks(List<Callable<R>> tasks, Class<ResultPoolTask<R>> poolTaskClass,
+                                                 boolean independent) {
+        return invokeTasks(tasks, independent, poolTaskClass);
     }
 
 }
