@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
-import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
@@ -10,6 +9,7 @@ import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCreateContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneStatBO;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
+import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -31,9 +31,12 @@ public class CsceneController implements BaseModelListControllerBase {
 
     private CsceneService modelService;
 
+    private CsceneSpecialService csceneSpecialService;
+
     @Autowired
-    public CsceneController(CsceneService csceneService) {
+    public CsceneController(CsceneService csceneService, CsceneSpecialService csceneSpecialService) {
         setModelService(csceneService);
+        setCsceneSpecialService(csceneSpecialService);
     }
 
     @ApiOperation("获取分页数据")
@@ -114,7 +117,7 @@ public class CsceneController implements BaseModelListControllerBase {
     @ApiOperation("获取场景模板统计数据")
     @GetMapping("/stat")
     public ServiceResult<List<CsceneStatBO>> stat(@RequestParam String[] ids) {
-        return getModelService().stat(ids, null).asResult();
+        return csceneSpecialService.stat(ids, null).asResult();
     }
 
 }

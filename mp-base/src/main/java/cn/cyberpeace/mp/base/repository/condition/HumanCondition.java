@@ -202,6 +202,17 @@ public class HumanCondition {
     }
 
     /**
+     * select字段并设置别名
+     * @param fieldGetter 字段get方法引用
+     * @param outputFieldGetter 返回字段get方法引用
+     * @return this
+     */
+    public <T, O> HumanCondition selectAs(SerializableFunction<T> fieldGetter,
+                                          SerializableFunction<O> outputFieldGetter) {
+        return selectAs(fieldGetter, BeanUtils.getBeanGetterFieldName(outputFieldGetter));
+    }
+
+    /**
      * select字段不设置别名
      * @param fieldNames 字段名称...
      * @return this
@@ -230,6 +241,16 @@ public class HumanCondition {
     public HumanCondition selectAs(Aggregation aggregation, String outputFieldName) {
         selectFields.put(aggregation.toSqlField(currentFieldName(aggregation.getFieldName())), outputFieldName);
         return this;
+    }
+
+    /**
+     * select聚合字段并设置别名
+     * @param aggregation 聚合字段
+     * @param outputFieldGetter 返回字段get方法引用
+     * @return this
+     */
+    public <O> HumanCondition selectAs(Aggregation aggregation, SerializableFunction<O> outputFieldGetter) {
+        return selectAs(aggregation, BeanUtils.getBeanGetterFieldName(outputFieldGetter));
     }
 
     /**
