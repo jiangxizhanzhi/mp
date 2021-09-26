@@ -212,7 +212,7 @@
                 #{inPosition,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
             </if>
             <if test="useStatus != null">
-                #{useStatus},
+                #{useStatus,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
             </if>
             <if test="referenceStatus != null">
                 #{referenceStatus},
