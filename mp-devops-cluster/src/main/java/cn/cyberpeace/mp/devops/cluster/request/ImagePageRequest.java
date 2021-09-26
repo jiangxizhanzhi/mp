@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.devops.cluster.request;
 
-import cn.cyberpeace.mp.devops.cluster.enums.ImageTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.QuickCreateSupportEnum;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -39,7 +38,7 @@ public class ImagePageRequest extends BasePageRequest {
      * 镜像类型
      */
     @ApiModelProperty(value = "镜像类型")
-    private ImageTypeEnum imageType;
+    private String imageType;
 
     /**
      * 镜像名称

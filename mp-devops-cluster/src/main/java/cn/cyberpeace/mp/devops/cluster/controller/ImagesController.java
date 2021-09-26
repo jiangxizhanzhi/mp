@@ -337,8 +337,11 @@ public class ImagesController {
     @ApiOperation("删除文件注入")
     @DeleteMapping("/inject-file")
     public ServiceResult deleteInjectFile(@RequestBody ImageInjectFileDeleteRequest request){
-        Boolean result = injectFileConverter.delete(Arrays.asList(request.getInjectUuid()));
-        return result ? ServiceResult.successful() : ServiceResult.fail("");
+        BaseCloudPlatformModel model = injectFileConverter.delete(Arrays.asList(request.getInjectUuid()));
+        if (Objects.isNull(model)){
+            return ServiceResult.fail("");
+        }
+        return model.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(model.getMessageZh());
     }
 
 
