@@ -18,10 +18,7 @@
         <result column="use_status" property="useStatus" typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler"/>
     </resultMap>
 
-    <sql id="commonWhere">
-        <if test=" owner != null">
-            left join mp_devops_target_auth a on i.id = a.target
-        </if>
+    <sql id="commonTargetWhere">
         <where>
             <if test=" name != null and name != ''">
                 and i.name like CONCAT('%',#{name},'%')
@@ -57,7 +54,7 @@
                 and i.quick_create_support = #{quickCreateSupport,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler}
             </if>
             <if test=" owner != null and searchPublicEnum == 1">
-                and ( a.owner = #{owner} or i.is_public in (0,2) )
+                and  i.is_public in (0,2)
             </if>
             <if test="systemType != null">
                 AND i.system_type = #{systemType}
@@ -72,26 +69,64 @@
                 and i.image_status = #{imageStatus}
             </if>
             <if test="baseImageSupport != null">
-                and base_image_support = #{baseImageSupport}
+                and i.base_image_support = #{baseImageSupport}
             </if>
         </where>
+    </sql>
+
+    <sql id="commonTargetAuthWhere">
+        <where>
+            <if test=" owner != null and searchPublicEnum == 1">
+                and  a.owner = #{owner}
+            </if>
+        </where>
+    </sql>
+
+    <sql id="commonTargetColumn">
+        i.pk,i.id,i.uuid,i.name,i.main_category,i.sub_category,i.third_category,i.image_type,i.is_public,i.quick_create_support,
+        i.in_position,i.reference_status,i.use_status,i.create_time
     </sql>
     
     <select id="totalCount" parameterType="cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO"  resultType="java.lang.Integer">
         select
                count(i.pk)
         from
+        (
+        select
+        <include refid="commonTargetColumn"/>
+        from
         mp_devops_target i
-        <include refid="commonWhere"/>
+        <include refid="commonTargetWhere"/>
+        UNION ALL
+
+        SELECT
+        <include refid="commonTargetColumn"/>
+        FROM
+        mp_devops_target_auth a
+        inner join  mp_devops_target i on a.target = i.uuid
+        <include refid="commonTargetAuthWhere"/>
+        ) as i
     </select>
 
     <select id="page" parameterType="cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO" resultMap="BaseResultMap">
         select
-            i.pk,i.id,i.uuid,i.name,i.main_category,i.sub_category,i.third_category,i.image_type,i.is_public,i.quick_create_support,
-               i.in_position,i.reference_status,i.use_status
+            <include refid="commonTargetColumn"/>
         from
-            mp_devops_target i
-        <include refid="commonWhere"/>
+        (
+            select
+                <include refid="commonTargetColumn"/>
+            from
+                mp_devops_target i
+            <include refid="commonTargetWhere"/>
+        UNION ALL
+
+            SELECT
+                <include refid="commonTargetColumn"/>
+            FROM
+                mp_devops_target_auth a
+            inner join  mp_devops_target i on a.target = i.uuid
+            <include refid="commonTargetAuthWhere"/>
+        ) as i
         ORDER BY i.create_time desc
         <if test="offset != null and limit != null">
             limit #{offset}, #{limit}
