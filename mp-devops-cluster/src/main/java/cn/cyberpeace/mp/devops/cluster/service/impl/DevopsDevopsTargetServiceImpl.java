@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Service
@@ -70,8 +69,8 @@ public class DevopsDevopsTargetServiceImpl implements DevopsTargetService {
         }else{
             targetModel.setQuickCreateSupport(QuickCreateSupportEnum.FALSE);
         }
-        targetModel.setCreateTime(LocalDateTime.parse(device.getCreatedAt(), LocalDateTimeUtils.dateTimeFormatter));
-        targetModel.setUpdateTime(LocalDateTime.parse(device.getUpdatedAt(), LocalDateTimeUtils.dateTimeFormatter));
+        targetModel.setCreateTime(LocalDateTimeUtils.convertToLocalDateTime(device.getCreatedAt()));
+        targetModel.setUpdateTime(LocalDateTimeUtils.convertToLocalDateTime(device.getUpdatedAt()));
         ExtEntity extEntity = device.getExtEntity();
         if (Objects.nonNull(extEntity)){
             targetModel.setInPosition(extEntity.getEntityStatus() ? StatusEnum.YES : StatusEnum.NO);
