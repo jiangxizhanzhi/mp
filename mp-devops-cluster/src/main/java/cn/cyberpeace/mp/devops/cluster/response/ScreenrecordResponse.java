@@ -32,7 +32,7 @@ public class ScreenrecordResponse extends ScreenshotModel {
         this.setUserName(record.getUsername());
         this.setUserOrgName(record.getDepartment());
         this.setRecortime(record.getRecortime());
-        this.setCreateTime(LocalDateTimeUtils.stringToLocalDateTime(record.getRecordate()));
+        this.setCreateTime(LocalDateTimeUtils.convertToLocalDateTime(record.getRecordate()));
     }
 
 }

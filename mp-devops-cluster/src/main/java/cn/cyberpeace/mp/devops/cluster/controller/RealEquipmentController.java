@@ -205,7 +205,7 @@ public class RealEquipmentController {
                 SnmpParams snmpParams = new SnmpParams();
                 SnmpConfig snmpConfigs = extEntity.getSnmpConfig();
                 if (extEntity.getSnmpVersion().equals("V1")) {
-                    snmpParams.setVersion(1);
+                    snmpParams.setVersion(2);
                     if (Objects.nonNull(snmpConfigs)) {
                         SnmpBaseAuth snmpAuth = new SnmpBaseAuth();
                         snmpAuth.setCommunityName(snmpConfigs.getCommunityName());

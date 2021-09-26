@@ -14,4 +14,6 @@ public interface ControllerConstant {
 
     String STR_PER_PAGE = "per_page";
 
+    String code = "0";
+
 }

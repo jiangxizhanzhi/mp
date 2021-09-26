@@ -13,8 +13,9 @@ import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devops.cluster.enums.ImageTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.MainTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.PublicEnum;
-import cn.cyberpeace.mp.devops.cluster.enums.RoleEnum;
+import cn.cyberpeace.mp.devops.cluster.enums.UploadTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.model.*;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtImageInfo;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtVm;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageAuthMapper;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
@@ -23,6 +24,7 @@ import cn.cyberpeace.mp.devops.cluster.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -83,7 +85,6 @@ public class ImagesConverterImpl implements ImagesConverter {
 
     @Override
     public ImageConvertPageModel page(ImagePageRequest request) {
-
         ImagePageDTO dto = new ImagePageDTO();
         dto.setRole(request.getRole());
         dto.setMainCategory(request.getMainCategory());
@@ -92,7 +93,7 @@ public class ImagesConverterImpl implements ImagesConverter {
         if (Objects.isNull(request.getImageType())){
             dto.setSearchType(1);
         }else {
-            dto.setImageType(Objects.nonNull(request.getImageType()) ? request.getImageType().toValue() : "");
+            dto.setImageType(request.getImageType());
         }
         dto.setName(request.getName());
         dto.setOwner(Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : null);
@@ -210,7 +211,7 @@ public class ImagesConverterImpl implements ImagesConverter {
         //镜像ID
         List<String> imageIds = request.getUuids();
         //先删除上次的权限数据
-        imageIds.forEach(imageId ->  imageAuthMapper.deleteByTarget(imageId));
+        imageAuthMapper.deleteByTargets(imageIds);
 
         PublicEnum isAllPublic = request.getIsAllPublic();
         imageIds.forEach(imageId -> {
@@ -317,20 +318,21 @@ public class ImagesConverterImpl implements ImagesConverter {
         device.setCategory(request.getCategory());
         device.setSecondCategory(request.getSecondCategory());
         device.setL3Category(request.getThirdCategory());
-        device.setImageType(request.getVirtualType());
+        device.setImageType(request.getImageType());
         device.setMaintype(MainTypeEnum.NORMAL.ordinal());
-        if (Objects.nonNull(role) && role != RoleEnum.NETWORK.toValue()) {
-            final ExtVm extVm = request.getExtVm();
-            if (Objects.nonNull(extVm) && CollectionUtils.isNotEmpty(request.getAccessProtocolList())) {
-                extVm.setAccessProtocols(request.getAccessProtocolList());
-            }
-            device.setExtVm(extVm);
-            device.setExtSystemInfo(request.getExtSystemInfo());
-            device.setExtImageInfo(request.getExtImageInfo());
-            if (role == RoleEnum.GATEWAY.toValue()) {
-                device.setExtGateway(request.getExtGateway());
-            }
+        final ExtVm extVm = request.getExtVm();
+        if (Objects.nonNull(extVm) && CollectionUtils.isNotEmpty(request.getAccessProtocolList())) {
+            extVm.setAccessProtocols(request.getAccessProtocolList());
         }
+        device.setExtVm(extVm);
+        device.setExtSystemInfo(request.getExtSystemInfo());
+        ExtImageInfo extImageInfo = request.getExtImageInfo();
+        if (Objects.nonNull(extImageInfo) && StringUtils.isNotBlank(extImageInfo.getUploadType())
+                && extImageInfo.getUploadType().equals(UploadTypeEnum.FTP.getDesc())){
+            extImageInfo.setUserFilename(extImageInfo.getFtpFilename());
+        }
+        device.setExtImageInfo(extImageInfo);
+        device.setExtGateway(request.getExtGateway());
         return device;
     }
 
@@ -351,7 +353,12 @@ public class ImagesConverterImpl implements ImagesConverter {
         imageModel.setImageType(device.getImageType());
         imageModel.setDescription(device.getDescription());
         imageModel.setExtSystemInfo(device.getExtSystemInfo());
-        imageModel.setExtImageInfo(device.getExtImageInfo());
+        ExtImageInfo extImageInfo = device.getExtImageInfo();
+        if (Objects.nonNull(extImageInfo) && StringUtils.isNotBlank(extImageInfo.getUploadType())
+                && extImageInfo.getUploadType().equals(UploadTypeEnum.FTP.getDesc())){
+            extImageInfo.setFtpFilename(extImageInfo.getUserFilename());
+        }
+        imageModel.setExtImageInfo(extImageInfo);
         imageModel.setExtVm(device.getExtVm());
         imageModel.setExtGateway(device.getExtGateway());
         imageModel.setExtDocker(device.getExtDocker());

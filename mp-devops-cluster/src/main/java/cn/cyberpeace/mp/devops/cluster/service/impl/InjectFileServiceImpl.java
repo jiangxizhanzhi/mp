@@ -31,10 +31,9 @@ public class InjectFileServiceImpl extends BaseOpenStackServiceImpl implements I
     }
 
     @Override
-    public Boolean delete(List<String> uuids) {
+    public BaseCloudPlatformModel delete(List<String> uuids) {
         var jsonObject = new JSONObject();
         jsonObject.put("inject_uuids", uuids);
-        BaseCloudPlatformModel model = super.sendDelete(CPCLOUD_DEVICE + URL_VERSION + "/inject_file",JSONObject.toJSONString(jsonObject), BaseCloudPlatformModel.class);
-        return model.isSuccess();
+        return super.sendDelete(CPCLOUD_DEVICE + URL_VERSION + "/inject_file",JSONObject.toJSONString(jsonObject), BaseCloudPlatformModel.class);
     }
 }

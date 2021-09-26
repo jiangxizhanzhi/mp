@@ -30,8 +30,8 @@ public class SerialPortConverterImpl implements SerialPortConverter {
         }
         return model.getInterfaces().stream().map(serialPort -> {
             SerialPortConvertModel convertModel = new SerialPortConvertModel();
-            convertModel.setComAliveT(serialPort.getComAliveT());
-            convertModel.setComLocalP(serialPort.getComLocalP());
+            convertModel.setComAliveT(serialPort.getComAliveTime());
+            convertModel.setComLocalP(serialPort.getComLocalIp());
             convertModel.setHost(serialPort.getHost());
             convertModel.setTcpLinkMax(serialPort.getTcpLinkMax());
             convertModel.setInterfaceId(Objects.nonNull(serialPort.getInterfaceId()) ?

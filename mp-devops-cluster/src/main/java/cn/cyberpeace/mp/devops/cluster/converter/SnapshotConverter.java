@@ -1,7 +1,8 @@
 package cn.cyberpeace.mp.devops.cluster.converter;
 
 import cn.cyberpeace.mp.devops.cluster.converter.model.SnapshotListConvertModel;
-import cn.cyberpeace.mp.devops.cluster.model.common.Snapshot;
+import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.request.SnapshotMergeRequest;
 import cn.cyberpeace.mp.devops.cluster.request.SnapshotRequest;
 
 import java.util.List;
@@ -17,14 +18,14 @@ public interface SnapshotConverter {
     /**
      * 创建
      */
-    Boolean create(SnapshotRequest request);
+    BaseCloudPlatformModel create(SnapshotRequest request);
 
     /**
      * 合并快照
-     * @param deviceUuid
+     * @param request
      * @return
      */
-    Snapshot merge(String deviceUuid);
+    BaseCloudPlatformModel merge(SnapshotMergeRequest request);
 
     /**
      * 删除

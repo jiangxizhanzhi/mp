@@ -18,10 +18,7 @@
         <result column="use_status" property="useStatus" typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler"/>
     </resultMap>
 
-    <sql id="commonWhere">
-        <if test=" owner != null">
-            left join mp_devops_target_auth a on i.id = a.target
-        </if>
+    <sql id="commonTargetWhere">
         <where>
             <if test=" name != null and name != ''">
                 and i.name like CONCAT('%',#{name},'%')
@@ -31,6 +28,9 @@
             </if>
             <if test=" subCategory != null">
                 and i.sub_category = #{subCategory}
+            </if>
+            <if test=" role != null">
+                and i.role = #{role}
             </if>
             <if test=" thirdCategory != null">
                 and i.third_category = #{thirdCategory}
@@ -57,38 +57,131 @@
                 and i.quick_create_support = #{quickCreateSupport,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler}
             </if>
             <if test=" owner != null and searchPublicEnum == 1">
-                and ( a.owner = #{owner} or i.is_public in (0,2) )
+                and  i.is_public in (0,2)
             </if>
             <if test="systemType != null">
-                AND i.system_type = #{systemType},
+                AND i.system_type = #{systemType}
             </if>
             <if test="systemArchitecure != null">
                 And i.system_architecure = #{systemArchitecure}
             </if>
             <if test="language != null">
-                and i.language = #{language},
+                and i.language = #{language}
             </if>
             <if test="imageStatus != null">
-                and i.image_status = #{imageStatus},
+                and i.image_status = #{imageStatus}
+            </if>
+            <if test="baseImageSupport != null">
+                and i.base_image_support = #{baseImageSupport}
             </if>
         </where>
+    </sql>
+
+    <sql id="commonTargetAuthWhere">
+
+        <where>
+            <if test=" name != null and name != ''">
+                and i.name like CONCAT('%',#{name},'%')
+            </if>
+            <if test=" mainCategory != null">
+                and i.main_category = #{mainCategory}
+            </if>
+            <if test=" subCategory != null">
+                and i.sub_category = #{subCategory}
+            </if>
+            <if test=" role != null">
+                and i.role = #{role}
+            </if>
+            <if test=" thirdCategory != null">
+                and i.third_category = #{thirdCategory}
+            </if>
+            <if test=" imageType != null and imageType != '' ">
+                and i.image_type = #{imageType}
+            </if>
+            <if test=" searchType != null and searchType == 1 ">
+                and i.image_type in ('vm','container','simple')
+            </if>
+            <if test=" searchType != null and searchType == 2 ">
+                and i.image_type = 'entity'
+            </if>
+            <if test=" inPosition != null  ">
+                and i.in_position = #{inPosition}
+            </if>
+            <if test=" useStatus != null and useStatus == 0 ">
+                and i.reference_status = 0
+            </if>
+            <if test=" useStatus != null and useStatus == 1 ">
+                and i.reference_status > 0
+            </if>
+            <if test=" quickCreateSupport != null">
+                and i.quick_create_support = #{quickCreateSupport,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler}
+            </if>
+            <if test=" owner != null and searchPublicEnum == 1">
+                and  a.owner = #{owner}
+            </if>
+            <if test="systemType != null">
+                AND i.system_type = #{systemType}
+            </if>
+            <if test="systemArchitecure != null">
+                And i.system_architecure = #{systemArchitecure}
+            </if>
+            <if test="language != null">
+                and i.language = #{language}
+            </if>
+            <if test="imageStatus != null">
+                and i.image_status = #{imageStatus}
+            </if>
+            <if test="baseImageSupport != null">
+                and i.base_image_support = #{baseImageSupport}
+            </if>
+        </where>
+    </sql>
+
+    <sql id="commonTargetColumn">
+        i.pk,i.id,i.uuid,i.name,i.main_category,i.sub_category,i.third_category,i.image_type,i.is_public,i.quick_create_support,
+        i.in_position,i.reference_status,i.use_status,i.create_time
     </sql>
     
     <select id="totalCount" parameterType="cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO"  resultType="java.lang.Integer">
         select
                count(i.pk)
         from
+        (
+        select
+        <include refid="commonTargetColumn"/>
+        from
         mp_devops_target i
-        <include refid="commonWhere"/>
+        <include refid="commonTargetWhere"/>
+        UNION
+
+        SELECT
+        <include refid="commonTargetColumn"/>
+        FROM
+        mp_devops_target_auth a
+        inner join  mp_devops_target i on a.target = i.uuid
+        <include refid="commonTargetAuthWhere"/>
+        ) as i
     </select>
 
     <select id="page" parameterType="cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO" resultMap="BaseResultMap">
         select
-            i.pk,i.id,i.uuid,i.name,i.main_category,i.sub_category,i.third_category,i.image_type,i.is_public,i.quick_create_support,
-               i.in_position,i.reference_status,i.use_status
+            <include refid="commonTargetColumn"/>
         from
-            mp_devops_target i
-        <include refid="commonWhere"/>
+        (
+            select
+                <include refid="commonTargetColumn"/>
+            from
+                mp_devops_target i
+            <include refid="commonTargetWhere"/>
+        UNION
+
+            SELECT
+                <include refid="commonTargetColumn"/>
+            FROM
+                mp_devops_target_auth a
+            inner join  mp_devops_target i on a.target = i.uuid
+            <include refid="commonTargetAuthWhere"/>
+        ) as i
         ORDER BY i.create_time desc
         <if test="offset != null and limit != null">
             limit #{offset}, #{limit}
@@ -164,6 +257,9 @@
             <if test="imageStatus != null">
                 image_status,
             </if>
+            <if test="baseImageSupport != null">
+                base_image_support,
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="id != null">
@@ -206,7 +302,7 @@
                 #{inPosition,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
             </if>
             <if test="useStatus != null">
-                #{useStatus},
+                #{useStatus,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
             </if>
             <if test="referenceStatus != null">
                 #{referenceStatus},
@@ -222,6 +318,9 @@
             </if>
             <if test="imageStatus != null">
                 #{imageStatus},
+            </if>
+            <if test="baseImageSupport != null">
+                #{baseImageSupport}
             </if>
         </trim>
     </insert>
@@ -274,6 +373,9 @@
             </if>
             <if test="imageStatus != null">
                 image_status = #{imageStatus},
+            </if>
+            <if test="baseImageSupport != null">
+                base_image_support = #{baseImageSupport},
             </if>
         </set>
         where uuid = #{uuid}
