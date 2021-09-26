@@ -11,7 +11,10 @@ import cn.cyberpeace.mp.devops.cluster.converter.InjectFileConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.SnapshotConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.*;
-import cn.cyberpeace.mp.devops.cluster.model.common.*;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtImageInfo;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtVm;
+import cn.cyberpeace.mp.devops.cluster.model.common.TargetConnection;
 import cn.cyberpeace.mp.devops.cluster.request.*;
 import cn.cyberpeace.mp.devops.cluster.response.ImagesByIdResponse;
 import cn.cyberpeace.mp.devops.cluster.response.ImagesPageResponse;
@@ -39,7 +42,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -236,7 +238,7 @@ public class ImagesController {
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
         }
-        return ControllerConstant.code.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessageZh());
+        return ControllerConstant.code.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
     }
 
     /**
@@ -337,7 +339,7 @@ public class ImagesController {
     @ApiOperation("删除文件注入")
     @DeleteMapping("/inject-file")
     public ServiceResult deleteInjectFile(@RequestBody ImageInjectFileDeleteRequest request){
-        BaseCloudPlatformModel model = injectFileConverter.delete(Arrays.asList(request.getInjectUuid()));
+        BaseCloudPlatformModel model = injectFileConverter.delete(request);
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
         }

@@ -32,6 +32,11 @@ public class ScenariosServiceImpl extends BaseOpenStackServiceImpl implements Sc
     }
 
     @Override
+    public BaseCloudPlatformModel deleteInjectFile(DeviceInjectFileDelete delete) {
+        return super.sendDelete(  URL_VERSION + "/scenarios/device_inject_file", JsonUtils.toUnderlineJSONString(delete), BaseCloudPlatformModel.class);
+    }
+
+    @Override
     public BaseCloudPlatformModel create(ImagesCreateInstanceCloudPlatform snapshotCreate) {
         return super.sendPost(  URL_VERSION + "/scenarios/device_scenario", JsonUtils.toUnderlineJSONString(snapshotCreate), BaseCloudPlatformModel.class);
     }

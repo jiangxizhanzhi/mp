@@ -23,6 +23,13 @@ public interface ScenariosSnapshotService extends BaseCloudPlatformService{
     BaseCloudPlatformModel injectFile(DeviceInjectFileCreate injectFileCreate);
 
     /**
+     * 删除注入文件
+     * @param delete
+     * @return
+     */
+    BaseCloudPlatformModel deleteInjectFile(DeviceInjectFileDelete delete);
+
+    /**
      * 创建虚拟靶标实例
      * @param snapshotCreate
      * @return
