@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.converter.impl;
 
+import cn.cyberpeace.mp.base.util.LocalDateTimeUtils;
 import cn.cyberpeace.mp.devops.cluster.converter.SnapshotConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.SnapshotConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.SnapshotListConvertModel;
@@ -39,7 +40,7 @@ public class SnapshotConverterImpl implements SnapshotConverter {
             return null;
         }
         List<SnapshotConvertModel> list = model.getItems().stream().map(item ->
-                new SnapshotConvertModel(item.getSnapshotUuid(), item.getName(), item.getDescription(), item.getCreatedAt()))
+                new SnapshotConvertModel(item.getSnapshotUuid(), item.getName(), item.getDescription(), LocalDateTimeUtils.convertToLocalDateTime(item.getCreatedAt())))
                 .collect(Collectors.toList());
         SnapshotListConvertModel convertModel = new SnapshotListConvertModel();
         convertModel.setModelList(list);

@@ -1,10 +1,16 @@
 package cn.cyberpeace.mp.base.util;
 
+import lombok.extern.slf4j.Slf4j;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.TimeZone;
 
+@Slf4j
 public class LocalDateTimeUtils {
 
     //yyyy-MM-dd HH:mm:ss
@@ -37,7 +43,14 @@ public class LocalDateTimeUtils {
         return LocalDateTime.parse(date, dateTimeFormatter);
     }
 
-    public static void main(String[] args) {
-        System.out.println(LocalDateTime.parse("2021-08-20T03:28:38Z",LocalDateTimeUtils.dateTimeFormatter));
+    public static LocalDateTime convertToLocalDateTime(String date){
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        df.setTimeZone(TimeZone.getTimeZone("UTC"));
+        try {
+            return LocalDateTimeUtils.dateToLocalDateTime(df.parse(date));
+        } catch (ParseException e) {
+           log.error("convert to local date time error:{}" , e.getMessage(),e);
+        }
+        return null;
     }
 }
