@@ -251,7 +251,7 @@ public class ImagesController {
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
         }
-        return ControllerConstant.code.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessageZh());
+        return ControllerConstant.code.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
     }
 
     /**
@@ -264,7 +264,7 @@ public class ImagesController {
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
         }
-        return ControllerConstant.code.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessageZh());
+        return ControllerConstant.code.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
     }
 
     /**
@@ -290,7 +290,7 @@ public class ImagesController {
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
         }
-        return ControllerConstant.code.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessageZh());
+        return ControllerConstant.code.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
     }
 
     /**
@@ -303,7 +303,7 @@ public class ImagesController {
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
         }
-        return ControllerConstant.code.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessageZh());
+        return ControllerConstant.code.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
     }
 
     /**
@@ -317,7 +317,7 @@ public class ImagesController {
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
         }
-        return ControllerConstant.code.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessageZh());
+        return ControllerConstant.code.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
     }
 
     /**
@@ -343,7 +343,7 @@ public class ImagesController {
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
         }
-        return model.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(model.getMessageZh());
+        return ControllerConstant.code.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
     }
 
 
