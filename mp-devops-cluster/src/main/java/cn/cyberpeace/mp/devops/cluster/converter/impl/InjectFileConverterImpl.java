@@ -3,11 +3,13 @@ package cn.cyberpeace.mp.devops.cluster.converter.impl;
 import cn.cyberpeace.mp.devops.cluster.converter.InjectFileConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InjectFileConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InjectFileListConvertModel;
-import cn.cyberpeace.mp.devops.cluster.model.*;
+import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.DeviceInjectFileDelete;
+import cn.cyberpeace.mp.devops.cluster.model.InjectFileCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.SnapshotCreate;
 import cn.cyberpeace.mp.devops.cluster.request.ImageInjectFileDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.service.InjectFileService;
 import cn.cyberpeace.mp.devops.cluster.service.ScenariosSnapshotService;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -31,7 +33,7 @@ public class InjectFileConverterImpl implements InjectFileConverter {
     @Override
     public InjectFileListConvertModel list(String deviceUuid) {
         InjectFileCloudPlatformModel model = injectFileService.list(deviceUuid);
-        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getItems())){
+        if (Objects.isNull(model)){
             return null;
         }
         List<InjectFileConvertModel> list = model.getItems().stream().map(item ->
@@ -41,11 +43,6 @@ public class InjectFileConverterImpl implements InjectFileConverter {
         convertModel.setModelList(list);
         convertModel.setSuccess(model.isSuccess());
         return convertModel;
-    }
-
-    @Override
-    public Boolean create(SnapshotCreate snapshotCreate) {
-        return null;
     }
 
     @Override
