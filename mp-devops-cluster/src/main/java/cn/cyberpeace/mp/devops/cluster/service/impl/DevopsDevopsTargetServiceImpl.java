@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtVm;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
 import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +35,8 @@ public class DevopsDevopsTargetServiceImpl implements DevopsTargetService {
         if (Objects.nonNull(device) && device.isSuccess()) {
             TargetModel targetModel = convertDevice(device);
             targetModel.setIsPublic(PublicEnum.ALL_PUBLIC);
+            targetModel.setUseStatus(StatusEnum.NO);
+            targetModel.setReferenceStatus(NumberUtils.INTEGER_ZERO);
             return imageMapper.insert(targetModel);
         }
         return 0;
