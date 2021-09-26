@@ -40,16 +40,17 @@ public class SceneService {
         SceneHandler sceneHandler;
         try {
             sceneHandler = new SceneHandler(sceneDataBO, false, context);
+            sceneHandler.setRealTimeUpdate(true);
             sceneHandler.save();
         } catch (SceneNotExistException e) {
             return new ServiceResult<>(null, SceneErrorCode.SCENE_NOT_EXIST);
         }
 
         SceneTaskPool.getInstance().executeTask(() -> {
-            sceneHandler.initiate();
-            sceneHandler.save();
+            if (!sceneHandler.initiate(false)) {
+                return;
+            }
             sceneHandler.create();
-            sceneHandler.save();
         });
 
         return new ServiceResult<>(sceneHandler.toData());
