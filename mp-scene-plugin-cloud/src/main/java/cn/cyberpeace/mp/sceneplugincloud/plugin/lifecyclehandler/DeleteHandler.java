@@ -1,18 +1,24 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
+import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.DeleteTaskPool;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
+@Slf4j
 public class DeleteHandler extends HandlerCommon {
 
     private final VirtualSwitch vsClient = new VirtualSwitch();
@@ -21,6 +27,24 @@ public class DeleteHandler extends HandlerCommon {
     private final VirtualMachine vmClient = new VirtualMachine();
     private final Container containerClient = new Container();
     private final EntityNode enClient = new EntityNode();
+
+    public static class SceneProcess {
+        public static final EventProcess DELETE_TERMINALS = new EventProcess("delete_terminals", "sceneplugincloud.event.delete_terminal");
+        public static final EventProcess DELETE_FIREWALLS = new EventProcess("delete_firewalls", "sceneplugincloud.event.delete_firewall");
+        public static final EventProcess DELETE_GATEWAYS = new EventProcess("delete_gateways", "sceneplugincloud.event.delete_gateway");
+        public static final EventProcess DELETE_AUXILIARY_NETWORKS = new EventProcess("delete_auxiliary_networks", "sceneplugincloud.event.delete_auxiliary_network");
+
+    }
+
+    public static class ElementProcess {
+        public static final EventProcess DELETE_AUXILIARY_NETWORK = new EventProcess("delete_auxiliary_network", "sceneplugincloud.event.delete_auxiliary_network");
+        public static final EventProcess DELETE_VIRTUAL_SWITCH = new EventProcess("delete_virtual_switch", "sceneplugincloud.event.delete_virtual_switch");
+        public static final EventProcess DELETE_VIRTUAL_ROUTER = new EventProcess("delete_virtual_router", "sceneplugincloud.event.delete_virtual_router");
+        public static final EventProcess DELETE_VIRTUAL_FIREWALL = new EventProcess("delete_virtual_firewall", "sceneplugincloud.event.delete_virtual_firewall");
+        public static final EventProcess DELETE_VIRTUAL_MACHINE = new EventProcess("delete_virtual_machine", "sceneplugincloud.event.delete_virtual_machine");
+        public static final EventProcess DELETE_CONTAINER = new EventProcess("delete_container", "sceneplugincloud.event.delete_container");
+        public static final EventProcess DELETE_ENTITY_NODE = new EventProcess("delete_entity_node", "sceneplugincloud.event.delete_entity_node");
+    }
 
     @Data
     @AllArgsConstructor
@@ -108,7 +132,7 @@ public class DeleteHandler extends HandlerCommon {
         var deleteData = new VirtualMachineDeleteData();
         deleteData.setVms(List.of(resourceId));
         var extraInfo = collectElementExtraCloudInfo(cloudElement);
-        // TODO qos列表
+        deleteData.setQoses(extraInfo.getQosIds());
         deleteData.setConnections(extraInfo.getConnectionIds());
         deleteData.setPortMappings(extraInfo.getProxyIds());
         return vmClient.delete(deleteData);
@@ -123,7 +147,7 @@ public class DeleteHandler extends HandlerCommon {
         var deleteData = new ContainerDeleteData();
         deleteData.setContainers(List.of(resourceId));
         var extraInfo = collectElementExtraCloudInfo(cloudElement);
-        // TODO qos列表
+        deleteData.setQoses(extraInfo.getQosIds());
         deleteData.setConnections(extraInfo.getConnectionIds());
         deleteData.setPortMappings(extraInfo.getProxyIds());
         return containerClient.delete(deleteData);
@@ -137,55 +161,75 @@ public class DeleteHandler extends HandlerCommon {
         return enClient.delete(deleteData);
     }
 
-    private boolean deleteElement(CloudPluginSceneElementBO cloudElement) {
-        if (Boolean.TRUE.equals(cloudElement.getExternal())) {
-            return true;
-        }
-        Integer virtualType = cloudElement.getVirtualType();
-        if (virtualType == null) {
-            return true;
-        }
-
-        if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
-            return deleteVirtualRouter(cloudElement);
-        } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_FIREWALL)) {
-            return deleteVirtualFirewall(cloudElement);
-        } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
-            return deleteVirtualMachine(cloudElement);
-        } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
-            return deleteContainer(cloudElement);
-        } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE)) {
-            return deleteEntityNode(cloudElement);
-        } else {
-            return true;
-        }
-    }
-
     public DeleteHandler(CloudScenePluginHandler pluginHandler) {
-        super(pluginHandler);
+        super(pluginHandler, DeleteTaskPool.getInstance(), SceneModel.Event.DELETE);
     }
 
     public void delete() {
+        prepareEventProcess(SceneModel.Event.DELETE, SceneProcess.class, ElementProcess.class);
+
         // 删除终端
-        for (var cloudElement : getPluginHandler().getTerminalElementMap().values()) {
-            deleteElement(cloudElement);
+        var deleteTerminalTasks = getPluginHandler().getTerminalElementMap().values().stream()
+                .map(cloudElement -> (Runnable) () -> deleteElementProcess(cloudElement)).collect(Collectors.toList());
+        if (!deleteTerminalTasks.isEmpty()) {
+            runSceneProgress(SceneProcess.DELETE_TERMINALS, () -> runTasks(deleteTerminalTasks));
         }
 
         // 删除防火墙
-        for (var cloudElement : getPluginHandler().getFirewallElementMap().values()) {
-            deleteElement(cloudElement);
+        var deleteFirewallTasks = getPluginHandler().getFirewallElementMap().values().stream()
+                .map(cloudElement -> (Runnable) () -> deleteElementProcess(cloudElement)).collect(Collectors.toList());
+        if (!deleteFirewallTasks.isEmpty()) {
+            runSceneProgress(SceneProcess.DELETE_FIREWALLS, () -> runTasks(deleteFirewallTasks));
         }
 
         // 删除网关
-        for (var cloudElement : getPluginHandler().getGatewayElementMap().values()) {
-            deleteElement(cloudElement);
+        var deleteGatewayTasks = getPluginHandler().getGatewayElementMap().values().stream()
+                .map(cloudElement -> (Runnable) () -> deleteElementProcess(cloudElement)).collect(Collectors.toList());
+        if (!deleteGatewayTasks.isEmpty()) {
+            runSceneProgress(SceneProcess.DELETE_GATEWAYS, () -> runTasks(deleteGatewayTasks));
         }
 
         // 删除辅助网络(包含虚拟交换机)
-        for (var cloudElement : getPluginHandler().getElementMap().values()) {
-            if (Boolean.TRUE.equals(cloudElement.getAuxiliaryNetworkOn())) {
-                deleteAuxiliaryNetwork(cloudElement);
-            }
+        var deleteAuxiliaryNetworkTasks = getPluginHandler().getElementMap().values().stream()
+                .filter(cloudElement -> Boolean.TRUE.equals(cloudElement.getAuxiliaryNetworkOn()))
+                .map(cloudElement -> (Runnable) () -> deleteAuxiliaryNetworkProcess(cloudElement))
+                .collect(Collectors.toList());
+        if (!deleteAuxiliaryNetworkTasks.isEmpty()) {
+            runSceneProgress(SceneProcess.DELETE_AUXILIARY_NETWORKS, () -> runTasks(deleteAuxiliaryNetworkTasks));
+        }
+    }
+
+    public void deleteAuxiliaryNetworkProcess(CloudPluginSceneElementBO cloudElement) {
+        runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.DELETE_AUXILIARY_NETWORK,
+                () -> deleteAuxiliaryNetwork(cloudElement));
+    }
+
+    private void deleteElementProcess(CloudPluginSceneElementBO cloudElement) {
+        if (Boolean.TRUE.equals(cloudElement.getExternal())) {
+            return;
+        }
+        Integer virtualType = cloudElement.getVirtualType();
+        if (virtualType == null) {
+            log.warn("Element({}) {} has no virtual type", cloudElement.getSrcElement().getEid(),
+                    cloudElement.getSrcElement().getId());
+            return;
+        }
+
+        if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
+            runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.DELETE_VIRTUAL_ROUTER,
+                    () -> deleteVirtualRouter(cloudElement));
+        } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_FIREWALL)) {
+            runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.DELETE_VIRTUAL_FIREWALL,
+                    () -> deleteVirtualFirewall(cloudElement));
+        } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
+            runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.DELETE_VIRTUAL_MACHINE,
+                    () -> deleteVirtualMachine(cloudElement));
+        } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
+            runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.DELETE_CONTAINER,
+                    () -> deleteContainer(cloudElement));
+        } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE)) {
+            runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.DELETE_ENTITY_NODE,
+                    () -> deleteEntityNode(cloudElement));
         }
     }
 }

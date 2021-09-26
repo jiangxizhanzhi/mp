@@ -60,11 +60,12 @@ public abstract class BaseSceneElementBO<M extends BaseSceneElementModel, P exte
 
     @Override
     public T export() {
+        var pObj = super.export();
         if (ports != null) {
-            setPorts(ports.stream().map(port -> port.export()).collect(Collectors.toList()));
+            pObj.setPorts(ports.stream().map(port -> port.export()).collect(Collectors.toList()));
         }
 
-        return (T) this;
+        return pObj;
     }
 
     @Override

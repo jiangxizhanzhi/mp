@@ -79,4 +79,9 @@ public class SceneConfigHandler extends BaseSceneHandler<
         init(sceneId, areaId, isAreaMode, context);
     }
 
+    @Override
+    public void beforeInitPlugin(SceneConfigPluginHandler<?, ?, ?, ?> plugin) {
+        plugin.setSceneHandler(this);
+    }
+
 }

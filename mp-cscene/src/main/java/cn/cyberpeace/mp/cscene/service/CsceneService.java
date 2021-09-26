@@ -78,6 +78,12 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     }
 
     @Transactional
+    public ServiceResult<CsceneBO> clone(String id, CsceneContextBO context) {
+        var csceneHandler = new CsceneHandler(id, context);
+        return sync(csceneHandler.toData(false).export(), context);
+    }
+
+    @Transactional
     public ServiceResult<CsceneBO> sync(CsceneBO csceneBO, CsceneContextBO context) {
         var csceneHandler = new CsceneHandler(csceneBO, context);
         csceneHandler.save();
@@ -121,7 +127,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     public ServiceResult<CsceneInstanceBO> createTestInstance(String csceneId, boolean unique,
                                                               CsceneInstanceCreateContextBO createContext) {
         if (createContext == null) {
-            return createTestInstance(csceneId, unique, null);
+            return createTestInstance(csceneId, unique, new CsceneContextBO());
         }
 
         var csceneHandler = new CsceneHandler(csceneId, createContext.toCsceneContext());
@@ -155,7 +161,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     public ServiceResult<CsceneInstanceBO> createAppInstance(String csceneId, boolean unique,
                                                              CsceneInstanceCreateContextBO createContext) {
         if (createContext == null) {
-            return createAppInstance(csceneId, unique, null);
+            return createAppInstance(csceneId, unique, new CsceneContextBO());
         }
 
         var csceneHandler = new CsceneHandler(csceneId, createContext.toCsceneContext());

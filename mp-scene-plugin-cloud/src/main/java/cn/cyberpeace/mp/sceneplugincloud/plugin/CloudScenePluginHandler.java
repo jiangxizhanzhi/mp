@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.CreateHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.DeleteHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.InitiateHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.modelhandler.CloudScenePluginModelHandler;
 import lombok.Data;
@@ -40,6 +41,7 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
 
     private InitiateHandler initiateHandler;
     private CreateHandler createHandler;
+    private DeleteHandler deleteHandler;
 
     private void loadRelated() {
         gatewayElementMap.clear();
@@ -88,6 +90,7 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         pluginModelHandler = new CloudScenePluginModelHandler(this);
         initiateHandler = new InitiateHandler(this);
         createHandler = new CreateHandler(this);
+        deleteHandler = new DeleteHandler(this);
     }
 
     @Override
@@ -151,5 +154,10 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
     @Override
     public void create() {
         createHandler.create();
+    }
+
+    @Override
+    public void delete() {
+        deleteHandler.delete();
     }
 }

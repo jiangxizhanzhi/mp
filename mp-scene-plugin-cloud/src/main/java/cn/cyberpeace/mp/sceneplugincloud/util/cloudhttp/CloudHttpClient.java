@@ -1,6 +1,9 @@
-package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common;
+package cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp;
 
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
+import cn.cyberpeace.mp.sceneplugincloud.util.http.HttpClient;
+import cn.cyberpeace.mp.sceneplugincloud.util.http.HttpData;
+import cn.cyberpeace.mp.sceneplugincloud.util.http.HttpParam;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;

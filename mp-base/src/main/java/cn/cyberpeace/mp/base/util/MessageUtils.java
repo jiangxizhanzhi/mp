@@ -25,4 +25,24 @@ public class MessageUtils {
             return msgKey;
         }
     }
+
+    public static String get(String msgKey, String... params) {
+        try {
+            return messageSource.getMessage(msgKey, params, LocaleContextHolder.getLocale());
+        } catch (Exception e) {
+            log.error("Get message by key `{}` params `{}` on locale {} failed: {}", msgKey, params,
+                    LocaleContextHolder.getLocale(), e.getMessage());
+            return msgKey;
+        }
+    }
+
+    public static String getOrDefault(String msgKey, String defaultMsg, String... params) {
+        try {
+            return messageSource.getMessage(msgKey, params, defaultMsg, LocaleContextHolder.getLocale());
+        } catch (Exception e) {
+            log.error("Get message by key `{}` params `{}` defaultMsg `{}` on locale {} failed: {}", msgKey, params,
+                    defaultMsg, LocaleContextHolder.getLocale(), e.getMessage());
+            return msgKey;
+        }
+    }
 }

@@ -66,6 +66,15 @@ public class CsceneController implements BaseModelListControllerBase {
         return modelService.sync(csceneBO, null).asResult();
     }
 
+    @ApiOperation("克隆指定id场景模板")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),
+    })
+    @GetMapping(value = "/clone", params = "id")
+    public ServiceResult<CsceneBO> clone(@RequestParam String id) {
+        return modelService.clone(id, null).asResult();
+    }
+
     @ApiOperation("删除场景模板")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),

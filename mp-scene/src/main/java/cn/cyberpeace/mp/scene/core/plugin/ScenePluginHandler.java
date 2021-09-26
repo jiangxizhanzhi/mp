@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.scene.core.plugin;
 
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
+import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.core.plugin.base.BasePluginHandler;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import lombok.Data;
@@ -16,120 +17,47 @@ import java.util.List;
  * @param <C> 插件上下文类
  */
 @Data
-public abstract class ScenePluginHandler<S, E, P, C> extends BasePluginHandler<S, E, P, C> {
+public abstract class ScenePluginHandler<S, E, P, C> extends BasePluginHandler<S, E, P, C>
+        implements PluginSceneHandlerCommon<SceneElementBO, SceneElementPortBO, SceneHandler> {
 
     private SceneHandler sceneHandler;
 
-    /**
-     * 获取其它插件全局数据
-     * @param pluginKey 插件代号
-     */
-    public <S9> S9 getPluginScene(String pluginKey) {
-        return getSceneHandler().getPluginScene(pluginKey);
+    public void prepareSceneProcess(int event, List<EventProcess> eventProcesses) {
+        getSceneHandler().prepareSceneProcess(event, eventProcesses);
     }
 
-    /**
-     * 获取网元其它插件数据
-     * @param pluginKey 插件代号
-     * @param nodeId 网元节点id
-     */
-    public <E9> E9 getPluginElement(String pluginKey, String nodeId) {
-        return getSceneHandler().getPluginElement(pluginKey, nodeId);
+    public void prepareElementProcess(String nodeId, int event, List<EventProcess> eventProcesses) {
+        getSceneHandler().prepareElementProcess(nodeId, event, eventProcesses);
     }
 
-    /**
-     * 获取端口其它插件数据
-     * @param pluginKey 插件代号
-     * @param portId 端口id
-     */
-    public <P9> P9 getPluginPort(String pluginKey, String portId) {
-        return getSceneHandler().getPluginPort(pluginKey, portId);
+    public int progressSceneProcess(int event, String process) {
+        return getSceneHandler().progressSceneProcess(event, process);
     }
 
-    /**
-     * 获取网元数据
-     * @param nodeId 网元节点id
-     */
-    public SceneElementBO getSrcElement(String nodeId) {
-        return getSceneHandler().getElement(nodeId);
+    public int progressElementProcess(String nodeId, int event, String process) {
+        return getSceneHandler().progressElementProcess(nodeId, event, process);
     }
 
-    /**
-     * 获取网元连接的网元
-     * @param nodeId 网元节点id
-     */
-    public List<SceneElementBO> getElementConnectedSrcElements(String nodeId) {
-        return getSceneHandler().getElementConnectedElements(nodeId);
+    public int overSceneProcess(int event) {
+        return getSceneHandler().overSceneProcess(event);
     }
 
-    /**
-     * 获取网元连接的网元
-     * @param nodeId 网元节点id
-     */
-    public List<SceneElementPortBO> getElementConnectedSrcPorts(String nodeId) {
-        return getSceneHandler().getElementConnectedPorts(nodeId);
+    public int overElementProcess(String nodeId, int event) {
+        return getSceneHandler().overElementProcess(nodeId, event);
     }
 
-    /**
-     * 获取端口数据
-     * @param portId 端口id
-     */
-    public SceneElementPortBO getSrcPort(String portId) {
-        return getSceneHandler().getPort(portId);
+    public int errorScene(int event, String errorMessage) {
+        return getSceneHandler().errorScene(event, errorMessage);
     }
 
-    /**
-     * 获取端口所属网元数据
-     * @param portId 端口id
-     */
-    public SceneElementBO getPortSrcElement(String portId) {
-        return getSceneHandler().getPortElement(portId);
+    public int errorElement(String nodeId, int event, String errorMessage) {
+        return getSceneHandler().errorElement(nodeId, event, errorMessage);
     }
 
-    /**
-     * 获取端口连接的端口
-     * @param portId 端口id
-     */
-    public SceneElementPortBO getPortConnectedSrcPort(String portId) {
-        return getSceneHandler().getPortConnectedPort(portId);
+    public void initiate() throws Exception {
     }
 
-    /**
-     * 获取端口连接的节点
-     * @param portId 端口id
-     */
-    public SceneElementBO getPortConnectedSrcElement(String portId) {
-        return getSceneHandler().getPortConnectedElement(portId);
-    }
-
-    public void progressSceneProcess(int event, String process, String processMessage) {
-        getSceneHandler().progressSceneProcess(event, process, processMessage);
-    }
-
-    public void progressElementProcess(String nodeId, int event, String process, String processMessage) {
-        getSceneHandler().progressElementProcess(nodeId, event, process, processMessage);
-    }
-
-    public void overSceneProcess(int event, String processMessage) {
-        getSceneHandler().overSceneProcess(event, processMessage);
-    }
-
-    public void overElementProcess(String nodeId, int event, String processMessage) {
-        getSceneHandler().overElementProcess(nodeId, event, processMessage);
-    }
-
-    public void errorSceneProcess(int event, String processMessage) {
-        getSceneHandler().errorSceneProcess(event, processMessage);
-    }
-
-    public void errorElementProcess(String nodeId, int event, String processMessage) {
-        getSceneHandler().errorElementProcess(nodeId, event, processMessage);
-    }
-
-    public void initiate() {
-    }
-
-    public void create() {
+    public void create() throws Exception {
 
     }
 
@@ -157,7 +85,7 @@ public abstract class ScenePluginHandler<S, E, P, C> extends BasePluginHandler<S
 
     }
 
-    public void delete() {
+    public void delete() throws Exception {
 
     }
 

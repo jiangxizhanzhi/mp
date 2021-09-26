@@ -1009,6 +1009,13 @@ public abstract class BaseSceneHandler<
     }
 
     /**
+     * 纠正场景数据
+     */
+    private void correctData() {
+        plugins.forEach(plugin -> plugin.correctData());
+    }
+
+    /**
      * 从场景业务数据初始化
      * @param sceneDataBO 场景业务数据
      * @param isAreaMode 是否区域模式
@@ -1023,6 +1030,11 @@ public abstract class BaseSceneHandler<
             throw new SceneNotExistException("Scene " + sceneId + " not exist");
         }
         initPlugins(scenePluginData);
+
+        // 新的场景数据需要纠正
+        if (StringUtils.isEmpty(sceneId)) {
+            correctData();
+        }
     }
 
     /**
@@ -1206,9 +1218,7 @@ public abstract class BaseSceneHandler<
         deleteTopology();
 
         // 删除插件数据
-        plugins.forEach(plugin -> {
-            plugin.deleteScene();
-        });
+        plugins.forEach(plugin -> plugin.deleteScene());
 
         sceneMapper.delete(sceneId);
     }
