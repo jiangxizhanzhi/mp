@@ -100,7 +100,7 @@ public class CreateHandler extends HandlerCommon {
         subnet.setGatewayIp(TextUtils.emptyNull(cloudElement.getAuxiliaryNetworkGateway()));
         subnet.setEnableDhcp(BoolUtils.bool(cloudElement.getAuxiliaryNetworkDhcp()));
         var srcAllocationPools = cloudElement.getAuxiliaryNetworkAllocationPools();
-        if (srcAllocationPools != null) {
+        if (srcAllocationPools != null && !srcAllocationPools.isEmpty()) {
             List<VirtualSwitchCreateData.Subnet.AllocationPool> allocationPools = new ArrayList<>();
             srcAllocationPools.forEach(srcAllocationPool -> {
                 allocationPools.add(new VirtualSwitchCreateData.Subnet.AllocationPool(srcAllocationPool.getStart(),
@@ -217,7 +217,7 @@ public class CreateHandler extends HandlerCommon {
             entityInterface.setInterfaceName(port.getName());
 
             var accessModes = cloudPort.getAccessModes();
-            if (accessModes != null) {
+            if (accessModes != null && !accessModes.isEmpty()) {
                 entityInterface.setAccessModes(accessModes.stream().map(accessMode -> {
                     var accessModeParam = new EntityNodeCreateData.Interface.AccessMode();
                     accessModeParam.setProtocol(accessMode.getProtocol());
@@ -283,7 +283,7 @@ public class CreateHandler extends HandlerCommon {
             cloudPort.setQosId(virtualNic.getQosId());
 
             var accessModesData = virtualNic.getAccessModes();
-            if (accessModesData != null) {
+            if (accessModesData != null && !accessModesData.isEmpty()) {
                 Map<String, VirtualNic.AccessMode> accessModeDataMap = accessModesData.stream()
                         .collect(Collectors.toMap(this::genAccessModeKey, accessMode -> accessMode));
                 cloudPort.getAccessModes().forEach(accessMode -> {
@@ -337,7 +337,7 @@ public class CreateHandler extends HandlerCommon {
             }
 
             var accessModesData = entityInterface.getAccessModes();
-            if (accessModesData != null) {
+            if (accessModesData != null && !accessModesData.isEmpty()) {
                 Map<String, EntityNodeCreateData.Interface.AccessMode> accessModeDataMap = accessModesData.stream()
                         .collect(Collectors.toMap(this::genAccessModeKey, accessMode -> accessMode));
                 cloudPort.getAccessModes().forEach(accessMode -> {
