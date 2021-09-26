@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.base.util.thread.context;
+package cn.cyberpeace.mp.base.context.transfercontext;
 
 import cn.cyberpeace.mp.base.util.BeanUtils;
 
@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public interface TransferContext<T> {
+    String getKey();
 
     T getValue();
 
@@ -14,14 +15,14 @@ public interface TransferContext<T> {
     static Map<String, Object> getContextMap() {
         Map<String, Object> contextMap = new HashMap<>();
         BeanUtils.getBeanType(TransferContext.class).forEach((name, transferContext) -> {
-            contextMap.put(name, transferContext.getValue());
+            contextMap.put(transferContext.getKey(), transferContext.getValue());
         });
         return contextMap;
     }
 
     static void setContextMap(Map<String, Object> contextMap) {
         BeanUtils.getBeanType(TransferContext.class).forEach((name, transferContext) -> {
-            transferContext.setValue(contextMap.getOrDefault(name, null));
+            transferContext.setValue(contextMap.getOrDefault(transferContext.getKey(), null));
         });
     }
 }
