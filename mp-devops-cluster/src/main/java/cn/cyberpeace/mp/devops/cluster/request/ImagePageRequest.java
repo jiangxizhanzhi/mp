@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.devops.cluster.request;
 
 import cn.cyberpeace.mp.devops.cluster.enums.ImageTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.QuickCreateSupportEnum;
-import cn.cyberpeace.mp.devops.cluster.enums.RoleEnum;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,7 +21,7 @@ public class ImagePageRequest extends BasePageRequest {
      * 角色
      */
     @ApiModelProperty(value = "角色")
-    private RoleEnum role;
+    private Integer role;
 
     /**
      * 系统类型
