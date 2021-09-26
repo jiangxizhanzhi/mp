@@ -9,7 +9,7 @@ import cn.cyberpeace.mp.cscene.bo.NodeSessionBO;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceDeleteRequest;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
-import cn.cyberpeace.mp.cscene.service.param.InstanceQueryParams;
+import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
 import cn.cyberpeace.mp.scenepluginflow.bo.base.Flow;
 import io.swagger.annotations.Api;
@@ -39,7 +39,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
     @ApiOperation("获取分页数据")
     @GetMapping
-    public ListObjServiceResult<CsceneInstanceBO> list(InstanceQueryParams queryParams) {
+    public ListObjServiceResult<CsceneInstanceBO> list(CsceneInstanceQueryParams queryParams) {
         handleQueryParams("list", queryParams);
         return getModelService().listBO(queryParams, new CsceneContextBO(queryParams.getAccessUserId(), null)).asResult();
     }

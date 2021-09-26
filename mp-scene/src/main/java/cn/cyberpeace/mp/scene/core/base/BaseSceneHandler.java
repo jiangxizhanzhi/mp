@@ -1214,13 +1214,13 @@ public abstract class BaseSceneHandler<
     /**
      * 删除场景数据
      */
-    public void delete() {
+    public boolean delete() {
         deleteTopology();
 
         // 删除插件数据
         plugins.forEach(plugin -> plugin.deleteScene());
 
-        sceneMapper.delete(sceneId);
+        return sceneMapper.delete(sceneId);
     }
 
     /**
@@ -1279,6 +1279,59 @@ public abstract class BaseSceneHandler<
         return sceneMapper.logicDelete(sceneId);
     }
 
+
+    /**
+     * 单独更新基础场景数据
+     */
+    public void updateScene() {
+        saveScene();
+    }
+
+    /**
+     * 单独更新基础场景数据及其插件数据
+     */
+    public void updateSceneWithPlugins() {
+        updateScene();
+        plugins.forEach(plugin -> {
+            plugin.saveScene();
+        });
+    }
+
+    /**
+     * 单独保存基础场景节点数据
+     */
+    public void updateSceneElement(String nodeId) {
+        var elementBO = getElement(nodeId);
+        E0 element = elementBO.toModel();
+        element.setScene(sceneId);
+        sceneElementMapper.update(element);
+
+        List<P> elementPortBOs = elementBO.getPorts();
+        if (elementPortBOs != null && !elementPortBOs.isEmpty()) {
+            List<P0> ports = elementPortBOs.stream().map(elementPortBO -> {
+                P0 port = elementPortBO.toModel();
+                port.setScene(sceneId);
+                port.setSceneElement(element.getId());
+                return port;
+            }).collect(Collectors.toList());
+            sceneElementPortMapper.bulkUpdate(ports);
+        }
+    }
+
+    /**
+     * 单独保存基础场景节点数据及其插件数据
+     */
+    public void updateSceneElementWithPlugins(String nodeId) {
+        updateSceneElement(nodeId);
+
+        List<P> elementPortBOs = getElement(nodeId).getPorts();
+        for (var plugin : plugins) {
+            plugin.updateElements(nodeId);
+            if (elementPortBOs != null && !elementPortBOs.isEmpty()) {
+                plugin.updateElementPorts(elementPortBOs.stream().map(EidBO::getEid).toArray(String[]::new));
+            }
+        }
+    }
 
     /**
      * 获取插件全局数据

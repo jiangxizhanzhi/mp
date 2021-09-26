@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.scene.report;
+package cn.cyberpeace.mp.cscene.report;
 
 import cn.cyberpeace.mp.scene.core.bo.CollectedSceneBO;
 import cn.cyberpeace.mp.scene.core.bo.CollectedSceneElementBO;

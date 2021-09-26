@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCreateContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneStatBO;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
+import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -37,7 +38,7 @@ public class CsceneController implements BaseModelListControllerBase {
 
     @ApiOperation("获取分页数据")
     @GetMapping
-    public ListObjServiceResult<CsceneBO> list(QueryParams queryParams) {
+    public ListObjServiceResult<CsceneBO> list(CsceneQueryParams queryParams) {
         handleQueryParams("list", queryParams);
         return getModelService().listBO(queryParams, false, null).asResult();
     }

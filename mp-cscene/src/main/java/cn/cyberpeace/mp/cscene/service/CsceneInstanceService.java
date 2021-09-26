@@ -15,7 +15,7 @@ import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceRoleModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
-import cn.cyberpeace.mp.cscene.service.param.InstanceQueryParams;
+import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
 import cn.cyberpeace.mp.scenepluginflow.bo.base.Flow;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceModel, CsceneInstanceMapper,
-        BaseModelFields, InstanceQueryParams> {
+        BaseModelFields, CsceneInstanceQueryParams> {
 
     @Autowired
     private CsceneInstanceRoleMapper csceneInstanceRoleMapper;
@@ -48,7 +48,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         setModelMapper(modelMapper);
     }
 
-    public ListObjServiceResult<CsceneInstanceBO> listBO(InstanceQueryParams queryParams, CsceneContextBO context) {
+    public ListObjServiceResult<CsceneInstanceBO> listBO(CsceneInstanceQueryParams queryParams, CsceneContextBO context) {
         var listResult = super.list(queryParams);
         if (listResult.getSource() == null) {
             new ListObjServiceResult<>(null, listResult.getServiceCode(), listResult.getDetail());
