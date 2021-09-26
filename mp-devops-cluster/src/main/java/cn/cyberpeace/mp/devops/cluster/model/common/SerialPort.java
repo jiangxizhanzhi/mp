@@ -9,13 +9,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SerialPort {
 
-    private Integer ComAliveT;
+    private Integer comAliveTime;
 
-    private Integer ComLocalP;
+    private Integer comLocalIp;
 
-    private Integer TcpLinkMax;
+    private Integer tcpLinkMax;
 
-    private String Host;
+    private String host;
 
-    private Integer InterfaceId;
+    private Integer interfaceId;
 }
