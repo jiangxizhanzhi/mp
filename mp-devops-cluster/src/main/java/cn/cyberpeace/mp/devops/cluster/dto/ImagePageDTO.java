@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.devops.cluster.dto;
 
 import cn.cyberpeace.mp.devops.cluster.enums.PublicEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.QuickCreateSupportEnum;
-import cn.cyberpeace.mp.devops.cluster.enums.RoleEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -17,7 +16,7 @@ public class ImagePageDTO extends BasePageDTO{
     /**
      * 角色
      */
-    private RoleEnum role;
+    private Integer role;
 
     /**
      * 系统类型
