@@ -19,6 +19,7 @@ import cn.cyberpeace.mp.devops.cluster.service.DeviceService;
 import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.devops.cluster.service.RealEquipmentService;
 import cn.cyberpeace.mp.devops.cluster.service.TargetLogoService;
+import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,8 +92,12 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
         dto.setLimit(request.getPerPage());
 
         Integer total = imageMapper.totalCount(dto);
+
+        RealEquipmentConvertModel convertModel = new RealEquipmentConvertModel();
+        convertModel.setTotal(total);
         if (total == 0){
-            return null;
+            convertModel.setModelList(Lists.newArrayList());
+            return convertModel;
         }
         List<TargetModel> targetModels = imageMapper.page(dto);
 
@@ -118,7 +123,6 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
             return realEquipment;
         }).collect(Collectors.toList());
 
-        RealEquipmentConvertModel convertModel = new RealEquipmentConvertModel();
         convertModel.setModelList(modelList);
         convertModel.setTotal(total);
         return convertModel;

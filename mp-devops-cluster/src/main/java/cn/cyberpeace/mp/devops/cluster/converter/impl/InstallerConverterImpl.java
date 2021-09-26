@@ -61,7 +61,7 @@ public class InstallerConverterImpl implements InstallerConverter {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         String getParams = BeanUtils.wrapperGetParamsByObject(Boolean.TRUE,request,ignoreFields);
         InstallerCloudPlatformModel model = installerService.page(getParams);
-        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getItems())){
+        if (Objects.isNull(model)){
             return null;
         }
         List<InstallerConvertModel> modelList = model.getItems().stream()
