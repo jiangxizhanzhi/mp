@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.devops.cluster.converter.impl;
 import cn.cyberpeace.mp.devops.cluster.converter.InjectFileConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InjectFileConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InjectFileListConvertModel;
+import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.InjectFileCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.SnapshotCreate;
 import cn.cyberpeace.mp.devops.cluster.service.InjectFileService;
@@ -31,7 +32,7 @@ public class InjectFileConverterImpl implements InjectFileConverter {
             return null;
         }
         List<InjectFileConvertModel> list = model.getItems().stream().map(item ->
-                new InjectFileConvertModel(item.getInjectUuid(), item.getName(), item.getDestPath(), item.getSize(),item.getStatus()))
+                new InjectFileConvertModel(item.getUuid(), item.getName(), item.getDestPath(), item.getSize(),item.getStatus()))
                 .collect(Collectors.toList());
         InjectFileListConvertModel convertModel = new InjectFileListConvertModel();
         convertModel.setModelList(list);
@@ -45,7 +46,7 @@ public class InjectFileConverterImpl implements InjectFileConverter {
     }
 
     @Override
-    public Boolean delete(List<String> uuids) {
-        return null;
+    public BaseCloudPlatformModel delete(List<String> uuids) {
+        return injectFileService.delete(uuids);
     }
 }

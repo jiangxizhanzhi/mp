@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.converter;
 
 import cn.cyberpeace.mp.devops.cluster.converter.model.InjectFileListConvertModel;
+import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.SnapshotCreate;
 
 import java.util.List;
@@ -22,5 +23,5 @@ public interface InjectFileConverter {
     /**
      * 删除
      */
-    Boolean delete(List<String> uuids);
+    BaseCloudPlatformModel delete(List<String> uuids);
 }

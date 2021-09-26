@@ -85,7 +85,6 @@ public class ImagesConverterImpl implements ImagesConverter {
 
     @Override
     public ImageConvertPageModel page(ImagePageRequest request) {
-
         ImagePageDTO dto = new ImagePageDTO();
         dto.setRole(request.getRole());
         dto.setMainCategory(request.getMainCategory());
@@ -94,7 +93,7 @@ public class ImagesConverterImpl implements ImagesConverter {
         if (Objects.isNull(request.getImageType())){
             dto.setSearchType(1);
         }else {
-            dto.setImageType(Objects.nonNull(request.getImageType()) ? request.getImageType().toValue() : "");
+            dto.setImageType(request.getImageType());
         }
         dto.setName(request.getName());
         dto.setOwner(Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : null);
