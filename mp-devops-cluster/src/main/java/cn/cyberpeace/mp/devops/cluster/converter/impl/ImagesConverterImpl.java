@@ -212,7 +212,7 @@ public class ImagesConverterImpl implements ImagesConverter {
         //镜像ID
         List<String> imageIds = request.getUuids();
         //先删除上次的权限数据
-        imageIds.forEach(imageId ->  imageAuthMapper.deleteByTarget(imageId));
+        imageAuthMapper.deleteByTargets(imageIds);
 
         PublicEnum isAllPublic = request.getIsAllPublic();
         imageIds.forEach(imageId -> {
