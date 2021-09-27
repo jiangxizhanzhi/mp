@@ -94,8 +94,8 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
         Integer total = imageMapper.totalCount(dto);
 
         RealEquipmentConvertModel convertModel = new RealEquipmentConvertModel();
-        convertModel.setTotal(total);
         if (total == 0){
+            convertModel.setTotal(0);
             convertModel.setModelList(Lists.newArrayList());
             return convertModel;
         }
@@ -103,12 +103,16 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
 
         List<Integer> ids = targetModels.stream().map(TargetModel::getId).map(Integer::parseInt).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(ids)){
-            return null;
+            convertModel.setTotal(0);
+            convertModel.setModelList(Lists.newArrayList());
+            return convertModel;
         }
         DeviceCloudPlatformModel model = deviceService.findByIds(ids);
 
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getItems())){
-            return null;
+            convertModel.setTotal(0);
+            convertModel.setModelList(Lists.newArrayList());
+            return convertModel;
         }
 
         Map<String, TargetModel> map = targetModels.stream().collect(Collectors.toMap(TargetModel::getUuid, Function.identity()));

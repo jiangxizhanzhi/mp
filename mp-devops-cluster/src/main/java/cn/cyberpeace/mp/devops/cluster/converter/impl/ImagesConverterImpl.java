@@ -108,8 +108,8 @@ public class ImagesConverterImpl implements ImagesConverter {
         Integer total = imageMapper.totalCount(dto);
 
         ImageConvertPageModel convertModel = new ImageConvertPageModel();
-        convertModel.setTotal(total);
         if (total == 0){
+            convertModel.setTotal(0);
             convertModel.setModelList(Lists.newArrayList());
             return convertModel;
         }
@@ -117,12 +117,14 @@ public class ImagesConverterImpl implements ImagesConverter {
 
         List<Integer> ids = targetModels.stream().map(TargetModel::getId).map(Integer::parseInt).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(ids)){
+            convertModel.setTotal(0);
             convertModel.setModelList(Lists.newArrayList());
             return convertModel;
         }
         DeviceCloudPlatformModel model = deviceService.findByIds(ids);
 
         if (Objects.isNull(model)){
+            convertModel.setTotal(0);
             convertModel.setModelList(Lists.newArrayList());
             return convertModel;
         }
