@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.base.message.rabbitmq;
 
 import cn.cyberpeace.mp.base.message.FormatMessage;
+import cn.cyberpeace.mp.base.message.MessageConverter;
 import lombok.Data;
 import org.springframework.amqp.core.AmqpTemplate;
 
@@ -11,24 +12,29 @@ public abstract class BaseSimpleMessageSender {
 
     private AmqpTemplate amqpTemplate;
 
+    private MessageConverter messageConverter;
+
     private SimpleMessageConfig messageConfig;
 
-    public void send(String message) {
-        send(message, null);
+    protected BaseSimpleMessageSender(AmqpTemplate amqpTemplate, MessageConverter messageConverter,
+                                      SimpleMessageConfig messageConfig) {
+        setAmqpTemplate(amqpTemplate);
+        setMessageConverter(messageConverter);
+        setMessageConfig(messageConfig);
     }
 
-    public void send(String message, String messageType) {
-        send(message, messageType, null);
+    public <T> void send(T data) {
+        send(data, null);
     }
 
-    public void send(String message, String messageType, Map<String, Object> context) {
-        var formatMessage = FormatMessage.fromMessage(message);
-        formatMessage.setType(messageType);
-        if (context != null) {
-            formatMessage.getContext().putAll(context);
-        }
+    public <T> void send(T data, String type) {
+        send(data, type, null);
+    }
+
+    public <T> void send(T data, String type, Map<String, Object> context) {
+        var formatMessage = new FormatMessage<T>(data, type, context);
         amqpTemplate.convertAndSend(messageConfig.getExchangeName(), messageConfig.getRoutingKey(),
-                formatMessage.toMessageString());
+                messageConverter.toMessageString(formatMessage));
     }
 
 }
