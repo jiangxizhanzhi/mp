@@ -5,7 +5,6 @@ import cn.cyberpeace.mp.base.annotation.ClassFieldClasses;
 import cn.cyberpeace.mp.scene.core.base.BaseSceneHandler;
 import cn.cyberpeace.mp.scene.core.bo.*;
 import cn.cyberpeace.mp.scene.core.plugin.SceneConfigPluginHandler;
-import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
 import cn.cyberpeace.mp.scene.model.*;
 import cn.cyberpeace.mp.scene.repository.*;
 

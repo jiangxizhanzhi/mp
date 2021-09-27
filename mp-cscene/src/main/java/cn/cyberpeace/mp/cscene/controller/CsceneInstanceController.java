@@ -9,7 +9,7 @@ import cn.cyberpeace.mp.cscene.bo.NodeSessionBO;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceDeleteRequest;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
-import cn.cyberpeace.mp.cscene.service.param.InstanceQueryParams;
+import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
 import cn.cyberpeace.mp.scenepluginflow.bo.base.Flow;
 import io.swagger.annotations.Api;
@@ -39,9 +39,9 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
     @ApiOperation("获取分页数据")
     @GetMapping
-    public ListObjServiceResult<CsceneInstanceBO> list(InstanceQueryParams queryParams) {
+    public ListObjServiceResult<CsceneInstanceBO> list(CsceneInstanceQueryParams queryParams) {
         handleQueryParams("list", queryParams);
-        return getModelService().listBO(queryParams, new CsceneContextBO(queryParams.getAccessUserId(), null));
+        return getModelService().listBO(queryParams, new CsceneContextBO(queryParams.getAccessUserId(), null)).asResult();
     }
 
     @ApiOperation("获取指定id场景实例")
@@ -50,7 +50,8 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             @ApiImplicitParam(name = "accessUserId", value = "场景访问用户id", dataTypeClass = String.class),
     })
     @GetMapping(params = "id")
-    public ServiceResult<CsceneInstanceBO> get(@RequestParam String id, @RequestParam String accessUserId) {
+    public ServiceResult<CsceneInstanceBO> get(@RequestParam String id,
+                                               @RequestParam(required = false) String accessUserId) {
         return modelService.getById(id, new CsceneContextBO(accessUserId, null)).asResult();
     }
 

@@ -9,6 +9,7 @@ package cn.cyberpeace.mp.scene.core.event.base;
  *  processMessage: 进程信息（这件事在这个阶段状态的具体说明信息）
  */
 public interface BaseEventModel {
+
     String genTarget();
 
     Integer getEvent();

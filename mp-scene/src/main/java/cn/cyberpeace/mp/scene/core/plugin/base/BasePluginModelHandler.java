@@ -162,9 +162,13 @@ public class BasePluginModelHandler<
      * 保存场景属性数据
      */
     public boolean saveScene() {
+        var scene = scenePluginHandler.getScene();
+        if (scene == null) {
+            return true;
+        }
+
         var existScene = readScene();
         var sceneId = scenePluginHandler.getSourceSceneId();
-        var scene = scenePluginHandler.getScene();
         S0 sceneObj = scene.toModel();
         sceneObj.setScene(sceneId);
         if (existScene != null) {

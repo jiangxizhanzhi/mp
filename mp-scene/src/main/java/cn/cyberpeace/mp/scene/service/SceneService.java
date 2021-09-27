@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import cn.cyberpeace.mp.scene.core.exception.SceneNotExistException;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.scene.service.taskpool.SceneTaskPool;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -39,14 +40,19 @@ public class SceneService {
         SceneHandler sceneHandler;
         try {
             sceneHandler = new SceneHandler(sceneDataBO, false, context);
-            sceneHandler.save();
-            sceneHandler.initiate();
-            sceneHandler.save();
-            sceneHandler.create();
+            sceneHandler.setRealTimeUpdate(true);
             sceneHandler.save();
         } catch (SceneNotExistException e) {
             return new ServiceResult<>(null, SceneErrorCode.SCENE_NOT_EXIST);
         }
+
+        SceneTaskPool.getInstance().executeTask(() -> {
+            if (!sceneHandler.initiate(false)) {
+                return;
+            }
+            sceneHandler.create();
+        });
+
         return new ServiceResult<>(sceneHandler.toData());
     }
 
@@ -71,13 +77,14 @@ public class SceneService {
         try {
             sceneHandler = new SceneHandler(id, null, false, context);
             if (logic) {
-                sceneHandler.logicDelete();
+                SceneTaskPool.getInstance().executeTask(() -> sceneHandler.logicDelete());
             } else {
-                sceneHandler.delete();
+                SceneTaskPool.getInstance().executeTask(() -> sceneHandler.delete());
             }
         } catch (SceneNotExistException e) {
             return new ServiceResult<>(false, SceneErrorCode.SCENE_NOT_EXIST);
         }
+
         return new ServiceResult<>(true);
     }
 

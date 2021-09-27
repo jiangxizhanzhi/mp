@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -33,5 +35,5 @@ public class SnapshotConvertModel extends BasePageConvertModel{
      * 创建时间
      */
     @ApiModelProperty("创建时间")
-    private String createdAt;
+    private LocalDateTime createdAt;
 }

@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.devops.cluster.service.impl;
 
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.*;
-import cn.cyberpeace.mp.devops.cluster.model.common.Snapshot;
 import cn.cyberpeace.mp.devops.cluster.service.ScenariosSnapshotService;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,8 +15,8 @@ public class ScenariosServiceImpl extends BaseOpenStackServiceImpl implements Sc
     }
 
     @Override
-    public Snapshot create(ScenariosSnapshot snapshotCreate) {
-        return super.sendPost(  URL_VERSION + "/scenarios/device_snapshot", JsonUtils.toUnderlineJSONString(snapshotCreate), Snapshot.class);
+    public BaseCloudPlatformModel create(ScenariosSnapshot snapshotCreate) {
+        return super.sendPost(  URL_VERSION + "/scenarios/device_snapshot", JsonUtils.toUnderlineJSONString(snapshotCreate), BaseCloudPlatformModel.class);
     }
 
     @Override
@@ -30,6 +29,11 @@ public class ScenariosServiceImpl extends BaseOpenStackServiceImpl implements Sc
     @Override
     public BaseCloudPlatformModel injectFile(DeviceInjectFileCreate injectFileCreate) {
         return super.sendPost(  URL_VERSION + "/scenarios/device_inject_file", JsonUtils.toUnderlineJSONString(injectFileCreate), BaseCloudPlatformModel.class);
+    }
+
+    @Override
+    public BaseCloudPlatformModel deleteInjectFile(DeviceInjectFileDelete delete) {
+        return super.sendDelete(  URL_VERSION + "/scenarios/device_inject_file", JsonUtils.toUnderlineJSONString(delete), BaseCloudPlatformModel.class);
     }
 
     @Override

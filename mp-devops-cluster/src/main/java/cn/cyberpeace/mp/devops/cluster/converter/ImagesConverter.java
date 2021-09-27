@@ -37,16 +37,11 @@ public interface ImagesConverter extends BaseConverter{
      */
     Device update(ImageRequest request);
 
-    /**
-     * 预览
-     * @param request
-     */
-    void look(ImagesLookRequest request);
 
     /**
      * 构建
      */
-    void build(ImagesBuildRequest request);
+    Device build(ImagesBuildRequest request);
 
     /**
      * 根据ID查询授权信息

@@ -1,32 +1,21 @@
 package cn.cyberpeace.mp.scene.core.scene;
 
-import cn.cyberpeace.mp.base.util.thread.TaskPool;
+import cn.cyberpeace.mp.base.util.thread.taskpool.TaskPool;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
-import lombok.Data;
 
-import java.util.List;
-
-@Data
-public class SceneReportTaskPool {
-
-    private TaskPool taskPool;
+public class SceneReportTaskPool extends TaskPool {
 
     private static class SceneReportTaskPoolInstance {
         public static final SceneReportTaskPool INSTANCE = new SceneReportTaskPool();
     }
 
     private SceneReportTaskPool() {
-        setTaskPool(new TaskPool(SceneSingleton.sceneAppConfig.getReportPoolSize(),
-                SceneSingleton.sceneAppConfig.getReportHoldSize(), 60L));
+        super(SceneSingleton.sceneAppConfig.getReportPoolSize(),
+                SceneSingleton.sceneAppConfig.getReportHoldSize(), 60L);
     }
 
     public static SceneReportTaskPool getInstance() {
         return SceneReportTaskPoolInstance.INSTANCE;
-    }
-
-
-    public TaskPool.PoolTask<Runnable> runTask(Runnable task) {
-        return taskPool.runTask(task);
     }
 
 }

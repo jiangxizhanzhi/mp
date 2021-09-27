@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.base.util.thread;
 
-import cn.cyberpeace.mp.base.util.thread.context.TransferContext;
+import cn.cyberpeace.mp.base.context.transfercontext.TransferContext;
 
 import java.util.concurrent.Callable;
 

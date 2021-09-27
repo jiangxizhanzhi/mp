@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.scene.core.plugin;
 
 import cn.cyberpeace.mp.scene.core.base.BaseSceneHandler;
-import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementPortBO;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementPortConnectionModel;

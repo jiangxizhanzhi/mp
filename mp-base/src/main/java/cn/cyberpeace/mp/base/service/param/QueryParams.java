@@ -39,10 +39,16 @@ public class QueryParams {
     /** @Deprecated 分页每页条数 */
     @ApiModelProperty(value = "分页每页条数(兼容)")
     private Integer perPage;
+    /** @Deprecated 排序字段 */
+    @ApiModelProperty(value = "排序字段(兼容)")
+    private String[] sort;
 
     public void ensure() {
         if (perPage != null) {
             pageSize = perPage;
+        }
+        if (sort != null && sort.length > 0) {
+            orders = sort;
         }
     }
 

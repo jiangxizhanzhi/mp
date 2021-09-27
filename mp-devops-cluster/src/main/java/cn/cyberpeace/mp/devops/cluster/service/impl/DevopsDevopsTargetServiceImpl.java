@@ -12,11 +12,11 @@ import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtVm;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
 import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Service
@@ -35,6 +35,8 @@ public class DevopsDevopsTargetServiceImpl implements DevopsTargetService {
         if (Objects.nonNull(device) && device.isSuccess()) {
             TargetModel targetModel = convertDevice(device);
             targetModel.setIsPublic(PublicEnum.ALL_PUBLIC);
+            targetModel.setUseStatus(StatusEnum.NO);
+            targetModel.setReferenceStatus(NumberUtils.INTEGER_ZERO);
             return imageMapper.insert(targetModel);
         }
         return 0;
@@ -65,13 +67,12 @@ public class DevopsDevopsTargetServiceImpl implements DevopsTargetService {
         targetModel.setImageType(device.getImageType());
         ExtVm extVm = device.getExtVm();
         if (Objects.nonNull(extVm)) {
-            targetModel.setQuickCreateSupport(Boolean.TRUE.equals(extVm.getQuickCreateSupport()) ?
-                    QuickCreateSupportEnum.TRUE : QuickCreateSupportEnum.FALSE);
+            targetModel.setQuickCreateSupport(extVm.getQuickCreateSupport());
         }else{
-            targetModel.setQuickCreateSupport(QuickCreateSupportEnum.FALSE);
+            targetModel.setQuickCreateSupport(Boolean.FALSE);
         }
-        targetModel.setCreateTime(LocalDateTime.parse(device.getCreatedAt(), LocalDateTimeUtils.dateTimeFormatter));
-        targetModel.setUpdateTime(LocalDateTime.parse(device.getUpdatedAt(), LocalDateTimeUtils.dateTimeFormatter));
+        targetModel.setCreateTime(LocalDateTimeUtils.convertToLocalDateTime(device.getCreatedAt()));
+        targetModel.setUpdateTime(LocalDateTimeUtils.convertToLocalDateTime(device.getUpdatedAt()));
         ExtEntity extEntity = device.getExtEntity();
         if (Objects.nonNull(extEntity)){
             targetModel.setInPosition(extEntity.getEntityStatus() ? StatusEnum.YES : StatusEnum.NO);

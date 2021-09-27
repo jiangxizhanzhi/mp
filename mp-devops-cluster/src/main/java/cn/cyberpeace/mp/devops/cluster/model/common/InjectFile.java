@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class InjectFile extends BaseCloudPlatformModel {
 
-    private String injectUuid;
+    private String uuid;
 
     private String name;
 
