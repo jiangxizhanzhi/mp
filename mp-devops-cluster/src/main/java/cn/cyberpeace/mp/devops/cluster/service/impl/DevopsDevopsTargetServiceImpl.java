@@ -67,10 +67,9 @@ public class DevopsDevopsTargetServiceImpl implements DevopsTargetService {
         targetModel.setImageType(device.getImageType());
         ExtVm extVm = device.getExtVm();
         if (Objects.nonNull(extVm)) {
-            targetModel.setQuickCreateSupport(Boolean.TRUE.equals(extVm.getQuickCreateSupport()) ?
-                    QuickCreateSupportEnum.TRUE : QuickCreateSupportEnum.FALSE);
+            targetModel.setQuickCreateSupport(extVm.getQuickCreateSupport());
         }else{
-            targetModel.setQuickCreateSupport(QuickCreateSupportEnum.FALSE);
+            targetModel.setQuickCreateSupport(Boolean.FALSE);
         }
         targetModel.setCreateTime(LocalDateTimeUtils.convertToLocalDateTime(device.getCreatedAt()));
         targetModel.setUpdateTime(LocalDateTimeUtils.convertToLocalDateTime(device.getUpdatedAt()));

@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.devops.cluster.model;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 import cn.cyberpeace.mp.devops.cluster.enums.PublicEnum;
-import cn.cyberpeace.mp.devops.cluster.enums.QuickCreateSupportEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.StatusEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -58,7 +57,7 @@ public class TargetModel extends BaseModel {
     /**
      * 是否支持快速创建
      */
-    private QuickCreateSupportEnum quickCreateSupport;
+    private Boolean quickCreateSupport;
 
     /**
      * 在位状态

@@ -175,12 +175,10 @@ public class ImagesConverterImpl implements ImagesConverter {
     }
 
     @Override
-    public void look(ImagesLookRequest request) {
-    }
-
-    @Override
-    public void build(ImagesBuildRequest request) {
-        imagesService.quickCreate(new DeviceQuickCreateCloudPlatformModel(request.getName(),request.getImageName(),request.getServiceIds()));
+    public Device build(ImagesBuildRequest request) {
+        Device device =  imagesService.quickCreate(new DeviceQuickCreateCloudPlatformModel(request.getName(),request.getImageName(),request.getServiceIds()));
+        devopsTargetService.insert(device);
+        return device;
     }
 
     @Override
