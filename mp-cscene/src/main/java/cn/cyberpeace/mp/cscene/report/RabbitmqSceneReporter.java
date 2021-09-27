@@ -23,19 +23,11 @@ public class RabbitmqSceneReporter implements SceneReporter {
 
     @Override
     public void reportScene(CollectedSceneBO scene) {
-        try {
-            messageSender.send(JsonUtils.toUnderlineJSONString(scene), MESSAGE_TYPE_SCENE);
-        } catch (JsonProcessingException e) {
-            log.error("Stringify scene data[{}] error: {}", scene, e);
-        }
+        messageSender.send(scene, MESSAGE_TYPE_SCENE);
     }
 
     @Override
     public void reportElement(CollectedSceneElementBO sceneElement) {
-        try {
-            messageSender.send(JsonUtils.toUnderlineJSONString(sceneElement), MESSAGE_TYPE_SCENE_ELEMENT);
-        } catch (JsonProcessingException e) {
-            log.error("Stringify scene element data[{}] error: {}", sceneElement, e);
-        }
+        messageSender.send(sceneElement, MESSAGE_TYPE_SCENE_ELEMENT);
     }
 }

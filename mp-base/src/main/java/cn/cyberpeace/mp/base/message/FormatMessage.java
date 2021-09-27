@@ -1,25 +1,34 @@
 package cn.cyberpeace.mp.base.message;
 
 import cn.cyberpeace.mp.base.context.transfercontext.TransferContext;
-import cn.cyberpeace.mp.base.util.JsonUtils;
 import lombok.Data;
 
 import java.util.Map;
 
 @Data
-public class FormatMessage {
+public class FormatMessage<T> {
     private Map<String, Object> context;
     private String type;
-    private String content;
+    private T data;
 
-    public static FormatMessage fromMessage(String message) {
-        var formatMessage = new FormatMessage();
-        formatMessage.setContext(TransferContext.getContextMap());
-        formatMessage.setContent(message);
-        return formatMessage;
+    public FormatMessage() {}
+
+    public FormatMessage(T data) {
+        this(data, null);
     }
 
-    public String toMessageString() {
-        return JsonUtils.toJsonString(this);
+    public FormatMessage(T data, String type) {
+        this(data, type, null);
     }
+
+    public FormatMessage(T data, String type, Map<String, Object> context) {
+        var allContext = TransferContext.getContextMap();
+        if (context != null) {
+            allContext.putAll(context);
+        }
+        setContext(allContext);
+        setData(data);
+        setType(type);
+    }
+
 }
