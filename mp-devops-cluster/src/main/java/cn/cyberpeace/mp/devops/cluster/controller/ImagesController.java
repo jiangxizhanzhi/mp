@@ -171,8 +171,11 @@ public class ImagesController {
     @ApiOperation("快速构建")
     @PostMapping("/build")
     public ServiceResult build(@RequestBody ImagesBuildRequest request){
-        imagesConverter.build(request);
-        return ServiceResult.successful();
+        Device device = imagesConverter.build(request);
+        if (Objects.isNull(device)){
+            return new Result();
+        }
+        return device.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(device.getMessage());
     }
 
 
