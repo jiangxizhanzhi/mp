@@ -371,14 +371,14 @@ public class HttpUtils {
     private static HttpResponse doGetRequestForDownload(String url, HttpClient client) throws IOException {
         // 替换url中的空格
         HttpGet httpget = new HttpGet(url);
-        HttpResponse resp = client.execute(httpget);
         // 设置请求和传输超时时间
         RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
         httpget.setConfig(Objects.nonNull(INSTANCE.requestConfig) ? INSTANCE.requestConfig : requestConfig);
+        HttpResponse resp = client.execute(httpget);
+
         // 获得返回值
         return resp;
     }
-
 }
 
 

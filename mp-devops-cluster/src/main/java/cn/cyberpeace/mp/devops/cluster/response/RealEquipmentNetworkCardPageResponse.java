@@ -24,12 +24,12 @@ public class RealEquipmentNetworkCardPageResponse extends BaseCloudPlatformRespo
      * 入流量
      */
     @ApiModelProperty("入流量")
-    private String inflow;
+    private Long inflow;
 
     /**
      * 出流量
      */
     @ApiModelProperty("出流量")
-    private String outflow;
+    private Long outflow;
 
 }

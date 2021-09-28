@@ -21,6 +21,7 @@ import cn.cyberpeace.mp.devops.cluster.utils.FileUtils;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import com.alibaba.fastjson.JSONArray;
 import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -61,13 +62,14 @@ public class InstallerConverterImpl implements InstallerConverter {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         String getParams = BeanUtils.wrapperGetParamsByObject(Boolean.TRUE,request,ignoreFields);
         InstallerCloudPlatformModel model = installerService.page(getParams);
+        InstallerConvertPageModel convertModel = new InstallerConvertPageModel();
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getItems())){
-            return null;
+            convertModel.setTotal(0);
+            convertModel.setModelList(Lists.newArrayList());
+            return convertModel;
         }
         List<InstallerConvertModel> modelList = model.getItems().stream()
                 .map(installer -> convertInstaller(installer)).collect(Collectors.toList());
-
-        InstallerConvertPageModel convertModel = new InstallerConvertPageModel();
         convertModel.setModelList(modelList);
         convertModel.setTotal(model.getTotal());
         return convertModel;

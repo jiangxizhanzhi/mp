@@ -6,9 +6,11 @@ import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.repository.RolePermissionMapper;
 import cn.cyberpeace.mp.auth.service.RolePermissionModelService;
 import cn.cyberpeace.mp.auth.service.RoleService;
+import cn.cyberpeace.mp.auth.service.fields.RolePermissionFields;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
+import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.lang.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,20 +25,26 @@ import java.util.List;
  * @Date：2021/8/31 11:13
  */
 @Service
-public class RolePermissionModelServiceImpl
+public class RolePermissionModelServiceImpl extends BaseModelServiceImpl<RolePermissionModel, RolePermissionMapper, RolePermissionFields, QueryParams>
         implements RolePermissionModelService {
 
     @Autowired
     private RoleService roleService;
 
+//    @Autowired
+//    private RolePermissionMapper rolePermissionMapper;
+
     @Autowired
-    private RolePermissionMapper rolePermissionMapper;
+    public RolePermissionModelServiceImpl(RolePermissionMapper modelMapper, RolePermissionFields modelFields) {
+        setModelMapper(modelMapper);
+        setModelFields(modelFields);
+    }
 
     @Override
     public List<TargetModel> listTargetsByRoleId(String roleId) {
         Assert.notBlank(roleId, "roleId不能为空！");
 
-        List<TargetModel> targets = rolePermissionMapper.listTargetsByRoleId(roleId);
+        List<TargetModel> targets = getModelMapper().listTargetsByRoleId(roleId);
         return targets;
     }
 
@@ -85,7 +93,7 @@ public class RolePermissionModelServiceImpl
 //        var result = roleService.get(roleId);
 //        ResultUtils.throwExceptionIfError(result, AuthConstant.ERROR_CODE_PREFIX + "role_not_existed");
 
-        rolePermissionMapper.deleteByOwner(roleId);
+        getModelMapper().deleteByOwner(roleId);
         return true;
     }
 
@@ -93,7 +101,7 @@ public class RolePermissionModelServiceImpl
     @Override
     public boolean deleteByTargetId(String targetId) {
         Assert.notNull(targetId, "targetId不能为空");
-        rolePermissionMapper.deleteByTarget(targetId);
+        getModelMapper().deleteByTarget(targetId);
         return true;
     }
 

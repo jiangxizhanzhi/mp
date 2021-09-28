@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
 @Data
@@ -13,5 +14,5 @@ public class SnmpCloudPlatform extends BaseCloudPlatformModel{
 
     private Boolean status;
 
-    private Map<String,Object> result;
+    private Map<String, BigDecimal> result;
 }

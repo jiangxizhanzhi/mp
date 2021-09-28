@@ -12,7 +12,7 @@
         <result column="third_category" property="thirdCategory"/>
         <result column="image_type" property="imageType"/>
         <result column="is_public" property="isPublic" typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler"/>
-        <result column="quick_create_support" property="quickCreateSupport" typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler"/>
+        <result column="quick_create_support" property="quickCreateSupport" />
         <result column="in_position" property="inPosition" typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler"/>
         <result column="reference_status" property="referenceStatus" />
         <result column="use_status" property="useStatus" typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler"/>
@@ -54,7 +54,7 @@
                 and i.reference_status > 0
             </if>
             <if test=" quickCreateSupport != null">
-                and i.quick_create_support = #{quickCreateSupport,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler}
+                and i.quick_create_support = #{quickCreateSupport}
             </if>
             <if test=" owner != null and searchPublicEnum == 1">
                 and  i.is_public in (0,2)
@@ -114,7 +114,7 @@
                 and i.reference_status > 0
             </if>
             <if test=" quickCreateSupport != null">
-                and i.quick_create_support = #{quickCreateSupport,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler}
+                and i.quick_create_support = #{quickCreateSupport}
             </if>
             <if test=" owner != null and searchPublicEnum == 1">
                 and  a.owner = #{owner}
@@ -144,7 +144,7 @@
     
     <select id="totalCount" parameterType="cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO"  resultType="java.lang.Integer">
         select
-               count(i.pk)
+               count(distinct i.pk)
         from
         (
         select
@@ -153,7 +153,6 @@
         mp_devops_target i
         <include refid="commonTargetWhere"/>
         UNION
-
         SELECT
         <include refid="commonTargetColumn"/>
         FROM
@@ -173,7 +172,8 @@
             from
                 mp_devops_target i
             <include refid="commonTargetWhere"/>
-        UNION
+
+            UNION
 
             SELECT
                 <include refid="commonTargetColumn"/>
@@ -260,6 +260,9 @@
             <if test="baseImageSupport != null">
                 base_image_support,
             </if>
+            <if test="initSupport != null">
+                init_support,
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="id != null">
@@ -290,7 +293,7 @@
                 #{isPublic,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
             </if>
             <if test="quickCreateSupport != null">
-                #{quickCreateSupport,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
+                #{quickCreateSupport},
             </if>
             <if test="createTime != null">
                 #{createTime},
@@ -320,7 +323,10 @@
                 #{imageStatus},
             </if>
             <if test="baseImageSupport != null">
-                #{baseImageSupport}
+                #{baseImageSupport},
+            </if>
+            <if test="initSupport != null">
+                #{initSupport},
             </if>
         </trim>
     </insert>
@@ -351,7 +357,7 @@
                 is_public = #{isPublic,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
             </if>
             <if test="quickCreateSupport != null">
-                quick_create_support = #{quickCreateSupport,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
+                quick_create_support = #{quickCreateSupport},
             </if>
             <if test="inPosition != null">
                 in_position = #{inPosition,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
@@ -376,6 +382,9 @@
             </if>
             <if test="baseImageSupport != null">
                 base_image_support = #{baseImageSupport},
+            </if>
+            <if test="initSupport != null">
+                init_support = #{initSupport}
             </if>
         </set>
         where uuid = #{uuid}

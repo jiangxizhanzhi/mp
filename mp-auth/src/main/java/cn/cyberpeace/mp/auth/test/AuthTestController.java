@@ -1,21 +1,25 @@
 package cn.cyberpeace.mp.auth.test;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
+import cn.cyberpeace.mp.auth.model.RolePermissionModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.model.UserPermissionModel;
 import cn.cyberpeace.mp.auth.repository.OrgMapper;
 import cn.cyberpeace.mp.auth.repository.SysConfigMapper;
 import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
 import cn.cyberpeace.mp.auth.service.OrgService;
+import cn.cyberpeace.mp.auth.service.RolePermissionModelService;
 import cn.cyberpeace.mp.auth.service.TargetService;
 import cn.cyberpeace.mp.auth.service.UserHeartbeatService;
 import cn.cyberpeace.mp.auth.service.UserLogService;
+import cn.cyberpeace.mp.auth.service.UserPermissionService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.sys.LicenseService;
 import cn.cyberpeace.mp.auth.service.sys.SysActivationService;
 import cn.cyberpeace.mp.auth.util.PasswordStrengthChecker;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.hutool.system.oshi.OshiUtil;
 import com.sun.jna.Library;
@@ -35,6 +39,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import oshi.hardware.ComputerSystem;
 import oshi.hardware.HWDiskStore;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -87,6 +92,12 @@ public class AuthTestController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private UserPermissionService userPermissionService;
+
+    @Autowired
+    private RolePermissionModelService rolePermissionModelService;
 
     @ApiOperation("DES加密")
     @PostMapping("/desEncryptPwd")
@@ -253,6 +264,7 @@ public class AuthTestController {
     }
 
 
+
     @GetMapping("/getSysUUID")
     public String getSysUUID() {
 //        String serialNumber = Dmidecode.querySerialNumber();
@@ -268,5 +280,29 @@ public class AuthTestController {
         return "";
     }
 
+
+    @ApiIgnore
+    @GetMapping("/permtest")
+    public String permtest() {
+        UserPermissionModel userPermissionModel = new UserPermissionModel();
+        userPermissionModel.setOwner("abcuuid");
+        userPermissionModel.setTarget("abctarget");
+        try {
+            ObjServiceResult<UserPermissionModel> result = userPermissionService.create(userPermissionModel);
+        } catch (Exception e) {
+            throw e;
+        }
+
+        RolePermissionModel rolePermissionModel = new RolePermissionModel();
+        rolePermissionModel.setOwner("abcroleid");
+        rolePermissionModel.setTarget("abctarget");
+        try {
+            ObjServiceResult<RolePermissionModel> result = rolePermissionModelService.create(rolePermissionModel);
+        } catch (Exception e) {
+            throw e;
+        }
+
+        return "success";
+    }
 
 }

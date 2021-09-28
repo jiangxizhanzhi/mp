@@ -2,16 +2,13 @@ package cn.cyberpeace.mp.devops.cluster.service.impl;
 
 import cn.cyberpeace.mp.base.util.LocalDateTimeUtils;
 import cn.cyberpeace.mp.devops.cluster.enums.PublicEnum;
-import cn.cyberpeace.mp.devops.cluster.enums.QuickCreateSupportEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.StatusEnum;
 import cn.cyberpeace.mp.devops.cluster.model.Device;
 import cn.cyberpeace.mp.devops.cluster.model.TargetModel;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntity;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtImageInfo;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtVm;
+import cn.cyberpeace.mp.devops.cluster.model.common.*;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
 import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -65,13 +62,21 @@ public class DevopsDevopsTargetServiceImpl implements DevopsTargetService {
         targetModel.setSubCategory(device.getSecondCategory());
         targetModel.setThirdCategory(device.getL3Category());
         targetModel.setImageType(device.getImageType());
+        String imageType = device.getImageType();
         ExtVm extVm = device.getExtVm();
-        if (Objects.nonNull(extVm)) {
-            targetModel.setQuickCreateSupport(Boolean.TRUE.equals(extVm.getQuickCreateSupport()) ?
-                    QuickCreateSupportEnum.TRUE : QuickCreateSupportEnum.FALSE);
-        }else{
-            targetModel.setQuickCreateSupport(QuickCreateSupportEnum.FALSE);
+        ExtDocker extDocker = device.getExtDocker();
+        if (StringUtils.isNotBlank(imageType) && imageType.equals("vm") && Objects.nonNull(extVm)){
+            targetModel.setQuickCreateSupport(extVm.getQuickCreateSupport());
+            targetModel.setInitSupport(extVm.getInitSupport());
         }
+        else if (StringUtils.isNotBlank(imageType) && imageType.equals("container") && Objects.nonNull(extDocker)){
+            targetModel.setQuickCreateSupport(extDocker.getQuickCreateSupport());
+            targetModel.setInitSupport(extDocker.getInitSupport());
+        }else{
+            targetModel.setQuickCreateSupport(Boolean.FALSE);
+            targetModel.setInitSupport(Boolean.FALSE);
+        }
+
         targetModel.setCreateTime(LocalDateTimeUtils.convertToLocalDateTime(device.getCreatedAt()));
         targetModel.setUpdateTime(LocalDateTimeUtils.convertToLocalDateTime(device.getUpdatedAt()));
         ExtEntity extEntity = device.getExtEntity();

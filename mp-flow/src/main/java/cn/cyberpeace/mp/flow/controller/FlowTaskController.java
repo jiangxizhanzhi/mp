@@ -17,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Objects;
+
 /**
  * @Description: 流量任务控制器
  * @Author qiaokang
@@ -58,6 +60,10 @@ public class FlowTaskController extends BaseModelController<FlowTaskModel, Query
     @ApiOperation("分页查询任务")
     @GetMapping("/page")
     public ListObjResult<FlowTaskModel> pageFlowTask(@Validated QueryParams queryParams) {
+        if (Objects.isNull(queryParams.getOrders()) && Objects.isNull(queryParams.getSort())) {
+            // 默认按时间降序
+            queryParams.setOrders(new String[]{"-createTime"});
+        }
         handleQueryParams(BaseConstants.STR_LIST, queryParams);
         return flowTaskService.pageFlowTask(queryParams);
     }

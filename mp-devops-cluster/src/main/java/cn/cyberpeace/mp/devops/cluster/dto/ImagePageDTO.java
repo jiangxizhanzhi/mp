@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.dto;
 
 import cn.cyberpeace.mp.devops.cluster.enums.PublicEnum;
-import cn.cyberpeace.mp.devops.cluster.enums.QuickCreateSupportEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -61,7 +60,7 @@ public class ImagePageDTO extends BasePageDTO{
     /**
      * 是否支持快速创建
      */
-    private QuickCreateSupportEnum quickCreateSupport;
+    private Boolean quickCreateSupport;
 
     /**
      * 在位状态

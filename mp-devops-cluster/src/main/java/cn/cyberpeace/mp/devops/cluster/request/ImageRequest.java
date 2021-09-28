@@ -113,5 +113,9 @@ public class ImageRequest extends BaseRequest {
     @ApiModelProperty(value = "系统镜像")
     private ExtImageInfo extImageInfo;
 
-
+    /**
+     * Docker信息
+     */
+    @ApiModelProperty(value = "Docker信息")
+    private ExtDocker extDocker;
 }
