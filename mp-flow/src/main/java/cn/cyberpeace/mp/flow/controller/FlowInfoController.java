@@ -20,6 +20,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Objects;
+
 /**
  * @Description: 流量信息控制器
  * @Author qiaokang
@@ -69,6 +71,11 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
     @ApiOperation("分页查询流量信息")
     @GetMapping("/page")
     public ListObjServiceResult<FlowInfoResponse> pageFlowInfo(FlowInfoQueryParams queryParams) {
+        if (Objects.isNull(queryParams.getOrders()) && Objects.isNull(queryParams.getSort())) {
+            // 默认按时间降序
+            queryParams.setOrders(new String[]{"-createTime"});
+        }
+
         handleQueryParams(BaseConstants.STR_LIST, queryParams);
         return flowServiceImpl.pageFlowInfo(queryParams);
     }
