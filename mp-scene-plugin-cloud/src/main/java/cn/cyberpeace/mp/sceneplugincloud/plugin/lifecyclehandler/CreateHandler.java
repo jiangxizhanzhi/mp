@@ -18,6 +18,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -90,6 +91,10 @@ public class CreateHandler extends HandlerCommon {
     }
 
     private void createAuxiliaryNetwork(CloudPluginSceneElementBO cloudElement) {
+        if (!StringUtils.isEmpty(cloudElement.getAuxiliaryNetworkId())) {
+            return;
+        }
+
         var srcElement = cloudElement.getSrcElement();
         var createData = new VirtualSwitchCreateData();
         createData.setName(genResourceName(srcElement.getEid()));
