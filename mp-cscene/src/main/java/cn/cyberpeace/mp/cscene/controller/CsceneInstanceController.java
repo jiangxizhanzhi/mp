@@ -5,10 +5,12 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
+import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
 import cn.cyberpeace.mp.cscene.bo.NodeSessionBO;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceDeleteRequest;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
+import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
 import cn.cyberpeace.mp.scenepluginflow.bo.base.Flow;
@@ -22,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Api(value = "场景实例", tags = "CSCENE-场景实例")
 @Slf4j
@@ -32,9 +35,13 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
     private CsceneInstanceService modelService;
 
+    private CsceneSpecialService csceneSpecialService;
+
     @Autowired
-    public CsceneInstanceController(CsceneInstanceService csceneInstanceService) {
+    public CsceneInstanceController(CsceneInstanceService csceneInstanceService,
+                                    CsceneSpecialService csceneSpecialService) {
         setModelService(csceneInstanceService);
+        setCsceneSpecialService(csceneSpecialService);
     }
 
     @ApiOperation("获取分页数据")
@@ -147,5 +154,15 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     public ServiceResult<List<NodeSessionBO>> getNodeSession(@RequestParam String id, @RequestParam String nodeId,
                                                              @RequestBody(required = false) CsceneContextBO context) {
         return null;
+    }
+
+    @ApiOperation("统计靶标对应引用该靶标的场景实例")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "images", value = "靶标名称", dataTypeClass = String.class, allowMultiple = true),
+    })
+    @GetMapping("/stat_device_refer_cscene_instances")
+    public ServiceResult<Map<String, List<DeviceReferCsceneStat>>> statDeviceReferCsceneInstances(
+            @RequestParam String[] images) {
+        return csceneSpecialService.statDeviceReferCsceneInstances(images).asResult();
     }
 }
