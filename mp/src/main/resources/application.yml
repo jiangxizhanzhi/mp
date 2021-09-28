@@ -54,7 +54,6 @@ mybatis:
 # 请求云平台组信息的url配置，必需填写
 mp:
   base:
-    mg-url: http://${ip.mg}:8077
     # fastdfs配置
     fastdfs:
       max-storage-connection: 8   # 最大连接数
