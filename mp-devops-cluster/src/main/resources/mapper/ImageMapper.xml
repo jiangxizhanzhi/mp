@@ -260,6 +260,9 @@
             <if test="baseImageSupport != null">
                 base_image_support,
             </if>
+            <if test="initSupport != null">
+                init_support,
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="id != null">
@@ -320,7 +323,10 @@
                 #{imageStatus},
             </if>
             <if test="baseImageSupport != null">
-                #{baseImageSupport}
+                #{baseImageSupport},
+            </if>
+            <if test="initSupport != null">
+                #{initSupport},
             </if>
         </trim>
     </insert>
@@ -376,6 +382,9 @@
             </if>
             <if test="baseImageSupport != null">
                 base_image_support = #{baseImageSupport},
+            </if>
+            <if test="initSupport != null">
+                init_support = #{initSupport}
             </if>
         </set>
         where uuid = #{uuid}

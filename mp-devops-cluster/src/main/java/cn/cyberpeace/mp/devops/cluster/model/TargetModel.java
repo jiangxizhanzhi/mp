@@ -98,4 +98,9 @@ public class TargetModel extends BaseModel {
      * 是否支持基础镜像
      */
     private Boolean baseImageSupport;
+
+    /**
+     * 是否支持cloud init
+     */
+    private Boolean initSupport;
 }
