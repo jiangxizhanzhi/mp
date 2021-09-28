@@ -274,8 +274,8 @@ public class ImagesConverterImpl implements ImagesConverter {
     }
 
     @Override
-    public HttpResponse export(String uuid) {
-        return imagesService.export(uuid);
+    public HttpResponse export(String uuid, String imageName) {
+        return imagesService.export(uuid,imageName);
     }
 
     @Override

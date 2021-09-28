@@ -43,8 +43,8 @@ public class ImagesServiceImpl extends BaseOpenStackServiceImpl implements Image
     }
 
     @Override
-    public HttpResponse export(String uuid) {
-        return super.downLoad(CPCLOUD_DEVICE + URL_VERSION + "/image/export?image_uuid=" + uuid);
+    public HttpResponse export(String uuid,String imageName) {
+        return super.downLoad(CPCLOUD_DEVICE + URL_VERSION + "/image/export?device_uuid=" + uuid + "&&image_name=" + imageName);
     }
 
 
