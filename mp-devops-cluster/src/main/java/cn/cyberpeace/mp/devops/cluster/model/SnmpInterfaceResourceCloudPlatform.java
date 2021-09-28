@@ -22,8 +22,8 @@ public class SnmpInterfaceResourceCloudPlatform extends BaseCloudPlatformModel{
 
         private String interfaceName;
 
-        private Long in_traffic;
+        private Long inTraffic;
 
-        private Long out_traffic;
+        private Long outTraffic;
     }
 }
