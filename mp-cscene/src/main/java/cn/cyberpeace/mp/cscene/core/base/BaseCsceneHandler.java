@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.cscene.core.base;
 
 import cn.cyberpeace.mp.base.annotation.BeanFieldNames;
 import cn.cyberpeace.mp.base.annotation.ClassFieldNames;
+import cn.cyberpeace.mp.base.context.SysContextUtils;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.BeanUtils;
@@ -253,13 +254,20 @@ public abstract class BaseCsceneHandler<
         BeanUtils.loadBeanFields(this);
     }
 
+    public void initContext(CsceneContextBO context) {
+        this.context = context;
+        if (context != null) {
+            SysContextUtils.setPassThroughMap(context.getContext());
+        }
+    }
+
     /**
      * 从完整的综合场景id初始化
      * @param csceneId 综合场景id
      */
     public void init(String csceneId, CsceneContextBO context) {
         initBase();
-        this.context = context;
+        initContext(context);
         this.csceneId = csceneId;
         reload();
     }
@@ -270,7 +278,7 @@ public abstract class BaseCsceneHandler<
      */
     public void init(C csceneBO, CsceneContextBO context) {
         initBase();
-        this.context = context;
+        initContext(context);
         fromData(csceneBO);
     }
 
@@ -281,7 +289,7 @@ public abstract class BaseCsceneHandler<
      */
     public void init(C0 csceneObj, List<R0> roleObjs, CsceneContextBO context) {
         initBase();
-        this.context = context;
+        initContext(context);
         var csceneBO = convertToCsceneBO(csceneObj);
         csceneBO.setRoles(convertToRoleBOs(roleObjs, csceneRoleBOClass));
         fromData(csceneBO);
