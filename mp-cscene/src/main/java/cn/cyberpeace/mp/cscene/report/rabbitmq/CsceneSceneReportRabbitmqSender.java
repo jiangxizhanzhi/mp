@@ -1,6 +1,5 @@
-package cn.cyberpeace.mp.cscene.report;
+package cn.cyberpeace.mp.cscene.report.rabbitmq;
 
-import cn.cyberpeace.mp.base.message.JsonMessageConverter;
 import cn.cyberpeace.mp.base.message.SnakeJsonMessageConverter;
 import cn.cyberpeace.mp.base.message.rabbitmq.BaseSimpleMessageSender;
 import cn.cyberpeace.mp.base.message.rabbitmq.SimpleMessageConfig;
@@ -13,14 +12,16 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SceneReportMessageSender extends BaseSimpleMessageSender {
-    public static final String CSCENE_EXCHANGE_NAME = SimpleMessageConfig.GROUP_NAME + ".cscene";
-    public static final String CSCENE_QUEUE_NAME = SimpleMessageConfig.GROUP_NAME + ".cscene_scene_report";
+public class CsceneSceneReportRabbitmqSender extends BaseSimpleMessageSender {
+    public static final String CSCENE_SCENE_REPORT_EXCHANGE_NAME = CsceneReportRabbitmqSender.CSCENE_EXCHANGE_NAME;
+    public static final String CSCENE_SCENE_REPORT_ROUTING_KEY = SimpleMessageConfig.GROUP_NAME + ".cscene_scene_report";
+    public static final String CSCENE_SCENE_REPORT_QUEUE_NAME = CSCENE_SCENE_REPORT_ROUTING_KEY;
 
     @Autowired
-    public SceneReportMessageSender(AmqpTemplate amqpTemplate, SnakeJsonMessageConverter messageConverter) {
+    public CsceneSceneReportRabbitmqSender(AmqpTemplate amqpTemplate, SnakeJsonMessageConverter messageConverter) {
         super(amqpTemplate, messageConverter,
-                new SimpleMessageConfig(CSCENE_EXCHANGE_NAME, CSCENE_QUEUE_NAME, CSCENE_QUEUE_NAME));
+                new SimpleMessageConfig(CSCENE_SCENE_REPORT_EXCHANGE_NAME,
+                        CSCENE_SCENE_REPORT_ROUTING_KEY, CSCENE_SCENE_REPORT_QUEUE_NAME));
     }
 
     @Bean
