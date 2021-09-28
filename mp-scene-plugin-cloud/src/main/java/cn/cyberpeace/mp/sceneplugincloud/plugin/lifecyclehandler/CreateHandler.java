@@ -98,7 +98,9 @@ public class CreateHandler extends HandlerCommon {
         var subnet = new VirtualSwitchCreateData.Subnet();
         subnet.setCidr(cloudElement.getAuxiliaryNetworkCidr());
         subnet.setGatewayIp(TextUtils.emptyNull(cloudElement.getAuxiliaryNetworkGateway()));
-        subnet.setEnableDhcp(BoolUtils.bool(cloudElement.getAuxiliaryNetworkDhcp()));
+        // 默认开启dhcp
+        var dhcp = cloudElement.getAuxiliaryNetworkDhcp();
+        subnet.setEnableDhcp(dhcp == null || dhcp);
         var srcAllocationPools = cloudElement.getAuxiliaryNetworkAllocationPools();
         if (srcAllocationPools != null && !srcAllocationPools.isEmpty()) {
             List<VirtualSwitchCreateData.Subnet.AllocationPool> allocationPools = new ArrayList<>();
