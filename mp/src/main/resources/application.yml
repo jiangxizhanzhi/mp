@@ -8,6 +8,7 @@ ip:
   wazuh: 10.100.0.102          # wazuh的IP地址
   es: 127.0.0.1                 # MP新中台ES地址
   trex: 10.100.7.158            # trex资源服务器地址
+  rabbitmq: 10.100.0.101           # rabbitmq地址
 
 server:
   servlet:
@@ -31,6 +32,11 @@ spring:
     multipart:
       max-file-size: 1000MB
       max-request-size: 10000MB
+  rabbitmq:
+    host: ${ip.rabbitmq}
+    port: 5673
+    username: guest
+    password: guest
 
 
 logging:

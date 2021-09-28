@@ -5,16 +5,20 @@ import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.fields.BaseModelFields;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
-import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.cscene.bo.*;
+import cn.cyberpeace.mp.cscene.bo.CsceneBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCreateContextBO;
 import cn.cyberpeace.mp.cscene.core.CsceneHandler;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.model.CsceneRoleModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneRoleMapper;
+import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,10 +31,10 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@Data
 public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMapper, BaseModelFields,
-        QueryParams> {
+        CsceneQueryParams> {
 
-    @Autowired
     private CsceneRoleMapper csceneRoleMapper;
 
     private List<CsceneRoleModel> readCsceneRoles(String[] csceneIds) {
@@ -42,11 +46,19 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     }
 
     @Autowired
-    public CsceneService(CsceneMapper modelMapper) {
+    public CsceneService(CsceneMapper modelMapper, CsceneRoleMapper csceneRoleMapper) {
         setModelMapper(modelMapper);
+        setCsceneRoleMapper(csceneRoleMapper);
     }
 
-    public ListObjServiceResult<CsceneBO> listBO(QueryParams queryParams, boolean withInstance,
+    public void loadListFilterCondition(HumanCondition humanCondition, CsceneQueryParams queryParams) {
+        Integer type = queryParams.getType();
+        if (type != null) {
+            humanCondition.filterEqual(CsceneModel::getType, type);
+        }
+    }
+
+    public ListObjServiceResult<CsceneBO> listBO(CsceneQueryParams queryParams, boolean withInstance,
                                                  CsceneContextBO context) {
         var listResult = super.list(queryParams);
         if (listResult.getSource() == null) {
@@ -182,8 +194,4 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         return new ServiceResult<>(csceneHandler.createAppInstance(unique, csceneInstance));
     }
 
-    public ServiceResult<List<CsceneStatBO>> stat(String[] ids, CsceneContextBO context) {
-        // TODO
-        return new ServiceResult<>(null);
-    }
 }

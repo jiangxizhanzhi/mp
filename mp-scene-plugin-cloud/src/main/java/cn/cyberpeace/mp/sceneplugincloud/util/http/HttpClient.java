@@ -1,23 +1,21 @@
 package cn.cyberpeace.mp.sceneplugincloud.util.http;
 
 import cn.cyberpeace.mp.base.util.ClassUtils;
-import cn.cyberpeace.mp.base.util.JsonUtils;
-import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.*;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
-import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 import java.net.URI;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,9 +25,9 @@ public class HttpClient {
 
     public static final int DEFAULT_TIMEOUT = 30000;
 
-    public static final String DEFAULT_CHARSET = "utf-8";
-
     public static final String DEFAULT_CONTENT_TYPE = "application/json";
+
+    private boolean logRequest;
 
     private org.apache.http.client.HttpClient innerHttpClient;
 
@@ -39,7 +37,7 @@ public class HttpClient {
 
     private Integer timeout = DEFAULT_TIMEOUT;
 
-    private String charset = DEFAULT_CHARSET;
+    private Charset charset = StandardCharsets.UTF_8;
 
     private String contentType = DEFAULT_CONTENT_TYPE;
 
@@ -80,57 +78,50 @@ public class HttpClient {
         }
         if (data != null && request instanceof HttpEntityEnclosingRequestBase) {
             var entity = new StringEntity(data.toContent(), charset);
-            entity.setContentEncoding(charset);
+            entity.setContentEncoding(charset.toString());
             entity.setContentType(contentType);
             ((HttpEntityEnclosingRequestBase) request).setEntity(entity);
         }
         return request;
     }
 
-    private <T extends HttpRequestBase> HttpResponse request(Class<T> requestClass, String url, HttpData data,
-                                                             HttpParam param, Map<String, String> headers,
-                                                             Integer timeout)
-            throws IOException {
+    private <T extends HttpRequestBase> HttpResult request(Class<T> requestClass, String url, HttpData data,
+                                                                  HttpParam param, Map<String, String> headers,
+                                                                  Integer timeout) {
         var request = genRequest(requestClass, url, param, data, headers, timeout);
-        return innerHttpClient.execute(request);
-    }
-
-    private <T extends HttpRequestBase> String successRequest(Class<T> requestClass, String url, HttpData data,
-                                                              HttpParam param, Map<String, String> headers,
-                                                              Integer timeout) {
-        var request = genRequest(requestClass, url, param, data, headers, timeout);
+        var result = new HttpResult();
+        result.setRequest(request);
         HttpResponse response;
+        if (logRequest) {
+            log.info("Http {} - url: {}, header: {}, body: {}", request.getMethod(), request.getURI(),
+                    request.getAllHeaders(), data == null ? StringUtils.EMPTY : data.toContent());
+        }
         try {
             response = innerHttpClient.execute(request);
         } catch (IOException e) {
             log.error("Http {} exception - url: {}, header: {}, body: {}, error: {}", request.getMethod(),
                     request.getURI(), request.getAllHeaders(),
                     data == null ? StringUtils.EMPTY : data.toContent(), e);
-            return null;
+            result.setException(e);
+            return result;
         }
+        result.setResponse(response);
 
-        if (!isSuccessResponse(response)) {
+        if (!result.isSuccess()) {
             log.error("Http {} status error - url: {}, header: {}, body: {}, error: {}", request.getMethod(),
                     request.getURI(), request.getAllHeaders(),
                     data == null ? StringUtils.EMPTY : data.toContent(), response.getStatusLine().getReasonPhrase());
-            return null;
         }
 
         try {
-            return result(response);
+            result.loadResult(charset);
         } catch (IOException e) {
             log.error("Http {} receive exception - url: {}, header: {}, body: {}, error: {}", request.getMethod(),
                     request.getURI(), request.getAllHeaders(), data == null ? StringUtils.EMPTY : data.toContent(), e);
-            return null;
+            result.setException(e);
         }
-    }
 
-    private boolean isSuccessStatusCode(int statusCode) {
-        return statusCode >= HttpStatus.SC_OK && statusCode < HttpStatus.SC_MULTIPLE_CHOICES;
-    }
-
-    private boolean isSuccessResponse(HttpResponse httpResponse) {
-        return isSuccessStatusCode(httpResponse.getStatusLine().getStatusCode());
+        return result;
     }
 
     public HttpClient(String server) {
@@ -143,83 +134,23 @@ public class HttpClient {
         this.timeout = timeout;
     }
 
-    public String result(HttpResponse httpResponse) throws IOException {
-        return EntityUtils.toString(httpResponse.getEntity(), charset);
-    }
-
-    public Map<String, Object> resultMap(String result) {
-        if (StringUtils.isNotBlank(result)) {
-            return JsonUtils.parse(result, new TypeReference<Map<String, Object>>() {});
-        } else {
-            return null;
-        }
-    }
-
-    public Map<String, Object> resultMap(HttpResponse httpResponse) throws IOException {
-        String result = result(httpResponse);
-        return resultMap(result);
-    }
-
-    public <T> T resultBean(String result, TypeReference<T> valueTypeRef) {
-        if (StringUtils.isNotBlank(result)) {
-            return JsonUtils.parse(result, valueTypeRef);
-        } else {
-            return null;
-        }
-    }
-
-    public <T> T resultBean(HttpResponse httpResponse, TypeReference<T> valueTypeRef) throws IOException {
-        String result = result(httpResponse);
-        return resultBean(result, valueTypeRef);
-    }
-
-    public HttpResponse get(String url, HttpParam param, Map<String, String> headers, Integer timeout)
-            throws IOException {
+    public HttpResult get(String url, HttpParam param, Map<String, String> headers, Integer timeout) {
         return request(HttpGet.class, url, null, param, headers, timeout);
     }
 
-    public HttpResponse post(String url, HttpData data, HttpParam param, Map<String, String> headers, Integer timeout)
-            throws IOException {
+    public HttpResult post(String url, HttpData data, HttpParam param, Map<String, String> headers, Integer timeout) {
         return request(HttpPost.class, url, data, param, headers, timeout);
     }
 
-    public HttpResponse put(String url, HttpData data, HttpParam param, Map<String, String> headers, Integer timeout)
-            throws IOException {
+    public HttpResult put(String url, HttpData data, HttpParam param, Map<String, String> headers, Integer timeout) {
         return request(HttpPut.class, url, data, param, headers, timeout);
     }
 
-    public HttpResponse patch(String url, HttpData data, HttpParam param, Map<String, String> headers, Integer timeout)
-            throws IOException {
+    public HttpResult patch(String url, HttpData data, HttpParam param, Map<String, String> headers, Integer timeout) {
         return request(HttpPatch.class, url, data, param, headers, timeout);
     }
 
-    public HttpResponse delete(String url, HttpData data, HttpParam param, Map<String, String> headers, Integer timeout)
-            throws IOException {
+    public HttpResult delete(String url, HttpData data, HttpParam param, Map<String, String> headers, Integer timeout) {
         return request(HttpDeleteWithBody.class, url, data, param, headers, timeout);
     }
-
-    public String successGet(String url, HttpParam param, Map<String, String> headers, Integer timeout) {
-        return successRequest(HttpGet.class, url, null, param, headers, timeout);
-    }
-
-    public String successPost(String url, HttpData data, HttpParam param, Map<String, String> headers,
-                              Integer timeout) {
-        return successRequest(HttpPost.class, url, data, param, headers, timeout);
-    }
-
-    public String successPut(String url, HttpData data, HttpParam param, Map<String, String> headers,
-                             Integer timeout) {
-        return successRequest(HttpPut.class, url, data, param, headers, timeout);
-    }
-
-    public String successPatch(String url, HttpData data, HttpParam param, Map<String, String> headers,
-                               Integer timeout) {
-        return successRequest(HttpPatch.class, url, data, param, headers, timeout);
-    }
-
-    public String successDelete(String url, HttpData data, HttpParam param, Map<String, String> headers,
-                                Integer timeout) {
-        return successRequest(HttpDeleteWithBody.class, url, data, param, headers, timeout);
-    }
-
 }

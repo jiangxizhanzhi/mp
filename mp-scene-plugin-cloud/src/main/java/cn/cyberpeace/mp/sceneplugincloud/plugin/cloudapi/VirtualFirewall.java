@@ -10,15 +10,14 @@ import com.fasterxml.jackson.core.type.TypeReference;
 public class VirtualFirewall extends CloudClient {
 
     public VirtualFirewallCreateData create(VirtualFirewallCreateData createData) {
-        CloudResponse<VirtualFirewallCreateData> result = getHttpClient().successPost(
-                CloudUrlConstant.VIRTUAL_FIREWALL_CREATE_URL, createData, null,
-                new TypeReference<CloudResponse<VirtualFirewallCreateData>>() {});
+        CloudResponse<VirtualFirewallCreateData> result = post(CloudUrlConstant.VIRTUAL_FIREWALL_CREATE_URL, createData,
+                null, new TypeReference<CloudResponse<VirtualFirewallCreateData>>() {}, true);
         return result.getData();
     }
 
     public boolean delete(VirtualFirewallDeleteData deleteData) {
-        CloudResponse<Object> result = getHttpClient().successDelete(CloudUrlConstant.VIRTUAL_FIREWALL_DELETE_URL,
-                deleteData, null, new TypeReference<CloudResponse<Object>>() {});
+        CloudResponse<Object> result = delete(CloudUrlConstant.VIRTUAL_FIREWALL_DELETE_URL, deleteData, null,
+                new TypeReference<CloudResponse<Object>>() {}, true);
         return true;
     }
 }
