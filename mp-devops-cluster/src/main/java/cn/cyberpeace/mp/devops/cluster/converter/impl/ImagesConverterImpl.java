@@ -319,6 +319,7 @@ public class ImagesConverterImpl implements ImagesConverter {
         }
         device.setExtImageInfo(extImageInfo);
         device.setExtGateway(request.getExtGateway());
+        device.setExtDocker(request.getExtDocker());
         return device;
     }
 
