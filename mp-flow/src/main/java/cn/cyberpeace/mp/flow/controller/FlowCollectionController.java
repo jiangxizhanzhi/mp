@@ -23,6 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Objects;
+
 /**
  * @Description: 流量集合控制器
  * @Author qiaokang
@@ -42,11 +44,33 @@ public class FlowCollectionController extends BaseModelController<FlowCollection
     @Autowired
     private FlowCollectionServiceImpl flowCollectionService;
 
+    /**
+     * 分页查询流量集合信息
+     * @param queryParams
+     * @return
+     */
+    @ApiOperation("分页查询流量集合信息")
+    @GetMapping("/page")
+    public ListObjServiceResult<FlowCollectionModel> pageFlowCollection(FlowCollectionQueryParams queryParams) {
+        if (Objects.isNull(queryParams.getOrders()) && Objects.isNull(queryParams.getSort())) {
+            // 默认按时间降序
+            queryParams.setOrders(new String[]{"-createTime"});
+        }
+
+        handleQueryParams(BaseConstants.STR_LIST, queryParams);
+        return getModelService().list(queryParams).asResult();
+    }
+
     @ApiOperation("根据集合id查询流量信息")
     @GetMapping("/detail/page")
     public ListObjServiceResult<FlowInfoModel> getByCollectionId(FlowCollectionRelQueryParams queryParams) {
         if (StringUtils.isBlank(queryParams.getCollectionId())) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+
+        if (Objects.isNull(queryParams.getOrders()) && Objects.isNull(queryParams.getSort())) {
+            // 默认按时间降序
+            queryParams.setOrders(new String[]{"-createTime"});
         }
         handleQueryParams(BaseConstants.STR_LIST, queryParams);
         return flowCollectionService.getByCollectionId(queryParams);
