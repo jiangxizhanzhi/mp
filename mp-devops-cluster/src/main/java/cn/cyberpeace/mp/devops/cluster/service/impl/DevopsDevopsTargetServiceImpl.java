@@ -67,11 +67,14 @@ public class DevopsDevopsTargetServiceImpl implements DevopsTargetService {
         ExtDocker extDocker = device.getExtDocker();
         if (StringUtils.isNotBlank(imageType) && imageType.equals("vm") && Objects.nonNull(extVm)){
             targetModel.setQuickCreateSupport(extVm.getQuickCreateSupport());
+            targetModel.setInitSupport(extVm.getInitSupport());
         }
         else if (StringUtils.isNotBlank(imageType) && imageType.equals("container") && Objects.nonNull(extDocker)){
             targetModel.setQuickCreateSupport(extDocker.getQuickCreateSupport());
+            targetModel.setInitSupport(extDocker.getInitSupport());
         }else{
             targetModel.setQuickCreateSupport(Boolean.FALSE);
+            targetModel.setInitSupport(Boolean.FALSE);
         }
 
         targetModel.setCreateTime(LocalDateTimeUtils.convertToLocalDateTime(device.getCreatedAt()));
