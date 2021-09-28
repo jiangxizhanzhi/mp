@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.devops.cluster.model.BaseModel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -90,6 +91,17 @@ public class BaseOpenStackServiceImpl extends BaseServiceImpl {
     @Override
     protected String sendPut(String api,String body){
         return super.sendPut(devopsConfig.getCpUrl().concat(api),body);
+    }
+
+    /**
+     * 通过PUT方式查询信息
+     * @param api
+     * @param body
+     * @return
+     */
+    @Override
+    protected HttpResponse downLoad(String api){
+        return super.downLoad(devopsConfig.getCpUrl().concat(api));
     }
 
     /**
