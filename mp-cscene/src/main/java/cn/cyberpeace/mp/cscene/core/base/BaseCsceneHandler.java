@@ -325,9 +325,9 @@ public abstract class BaseCsceneHandler<
     /**
      * 删除综合场景业务数据
      */
-    public void delete() {
+    public boolean delete() {
         deleteScene(cscene);
-        csceneMapper.logicDelete(cscene.getId());
+        return csceneMapper.logicDelete(cscene.getId());
     }
 
     /**

@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class TaskPool {
 
-    private final ThreadPoolExecutor executor;
+    private final ExecutorService executor;
 
     private <C, T, R> void invokeTask(BasePoolTask<C, T, R> poolTask) {
         if (poolTask.getStatus() == null) {
@@ -96,6 +96,10 @@ public class TaskPool {
     public TaskPool(int poolSize, int holdSize, long keepAliveTime) {
         executor = new ThreadPoolExecutor(poolSize, poolSize, keepAliveTime, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(holdSize - poolSize));
+    }
+
+    public TaskPool(ExecutorService executor) {
+        this.executor = executor;
     }
 
     public void executeTask(Runnable task) {

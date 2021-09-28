@@ -31,10 +31,27 @@ public abstract class BaseSimpleMessageReceiver extends BaseMessageReceiver {
         handleMessage(formatMessage);
     }
 
-    public abstract void handleMessage(FormatMessage<Map<String, Object>> formatMessage);
+    public abstract void handleMessage(FormatMessage<?> formatMessage);
 
-    public <T> FormatMessage<T> toFormatMessage(FormatMessage<Map<String, Object>> formatMessage, Class<T> dataClass) {
-        Map<String, Object> rawData = formatMessage.getData();
+    public <T> FormatMessage<T> toFormatMessage(FormatMessage<?> formatMessage) {
+        T data = null;
+        try {
+            data = (T) formatMessage.getData();
+        } catch (Exception e) {
+            log.error("Parse format message[{}] raw data error: {}", formatMessage, e);
+        }
+
+        return new FormatMessage<>(data, formatMessage.getType(), formatMessage.getContext());
+    }
+
+    public <T> FormatMessage<T> toFormatMessage(FormatMessage<?> formatMessage, Class<T> dataClass) {
+        Map<String, Object> rawData = null;
+        try {
+            rawData = (Map<String, Object>) formatMessage.getData();
+        } catch (Exception e) {
+            log.error("Parse format message[{}] raw data error: {}", formatMessage, e);
+        }
+
         T data = null;
         if (rawData != null) {
             data = JsonUtils.mapToBean(rawData, dataClass);

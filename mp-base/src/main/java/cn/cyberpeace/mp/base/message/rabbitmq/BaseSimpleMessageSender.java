@@ -32,7 +32,7 @@ public abstract class BaseSimpleMessageSender {
     }
 
     public <T> void send(T data, String type, Map<String, Object> context) {
-        var formatMessage = new FormatMessage<T>(data, type, context);
+        FormatMessage<T> formatMessage = new FormatMessage<>(data, type, context);
         amqpTemplate.convertAndSend(messageConfig.getExchangeName(), messageConfig.getRoutingKey(),
                 messageConverter.toMessageString(formatMessage));
     }

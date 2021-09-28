@@ -13,9 +13,11 @@ import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.core.CsceneInstanceHandler;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceRoleModel;
+import cn.cyberpeace.mp.cscene.report.rabbitmq.RabbitmqCsceneReporter;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceQueryParams;
+import cn.cyberpeace.mp.cscene.service.taskpool.CsceneReportTaskPool;
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
 import cn.cyberpeace.mp.scenepluginflow.bo.base.Flow;
 import lombok.Data;
@@ -35,6 +37,11 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         BaseModelFields, CsceneInstanceQueryParams> {
 
     private CsceneInstanceRoleMapper csceneInstanceRoleMapper;
+
+    @Autowired
+    private RabbitmqCsceneReporter csceneReporter;
+
+    private final CsceneReportTaskPool csceneReportTaskPool = CsceneReportTaskPool.getInstance();
 
     private List<CsceneInstanceRoleModel> readCsceneInstanceRoles(String[] csceneInstanceIds) {
         if (csceneInstanceIds == null || csceneInstanceIds.length == 0) {
@@ -77,8 +84,11 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     public ServiceResult<Boolean> deleteById(String id, CsceneContextBO context) {
         var instanceHandler = new CsceneInstanceHandler(id, context);
-        instanceHandler.delete();
-        return new ServiceResult<>(true);
+        var flag = instanceHandler.delete();
+        if (flag) {
+            CsceneReportTaskPool.getInstance().executeTask(() -> csceneReporter.reportDeleteCsceneInstance(id));
+        }
+        return new ServiceResult<>(flag);
     }
 
     public ServiceResult<Integer> bulkDeleteByIds(String[] ids, CsceneContextBO context) {
