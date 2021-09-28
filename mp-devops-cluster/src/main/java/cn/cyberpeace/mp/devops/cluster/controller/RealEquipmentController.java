@@ -10,10 +10,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.common.*;
 import cn.cyberpeace.mp.devops.cluster.request.*;
-import cn.cyberpeace.mp.devops.cluster.response.RealEquipmentByIdResponse;
-import cn.cyberpeace.mp.devops.cluster.response.RealEquipmentDevopsDetailResponse;
-import cn.cyberpeace.mp.devops.cluster.response.RealEquipmentPageResponse;
-import cn.cyberpeace.mp.devops.cluster.response.RealEquipmentScenesPageResponse;
+import cn.cyberpeace.mp.devops.cluster.response.*;
 import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
 import cn.cyberpeace.mp.devops.cluster.response.base.Result;
 import cn.cyberpeace.mp.devops.cluster.service.RealEquipmentService;
@@ -254,7 +251,7 @@ public class RealEquipmentController {
 
     @ApiOperation("接口资源")
     @GetMapping("/network-card")
-    public PageResult<SnmpInterfaceResourceCloudPlatform.Interfaces> pageNetworkCard(RealEquipmentNetworkCardPageRequest request){
+    public PageResult<RealEquipmentNetworkCardPageResponse> pageNetworkCard(RealEquipmentNetworkCardPageRequest request){
         RealEquipment realEquipment = realEquipmentConverter.findById(request.getUuid());
         if (Objects.isNull(realEquipment)){
             throw new MpRuntimeException(BaseErrorCode.ERROR);
@@ -292,7 +289,10 @@ public class RealEquipmentController {
         Integer page = request.getPage();
         Integer perPage = request.getPerPage();
         List<SnmpInterfaceResourceCloudPlatform.Interfaces> interfaces = model.getResult().subList((page - 1) * perPage, (page - 1) * perPage + perPage);
-        return new PageResult<>(interfaces,model.getResult().size());
+        List<RealEquipmentNetworkCardPageResponse> list = interfaces.stream().map(v ->
+                RealEquipmentNetworkCardPageResponse.builder().name(v.getInterfaceName()).inflow(v.getInTraffic()).outflow(v.getOutTraffic()).build())
+                .collect(Collectors.toList());
+        return new PageResult<>(list,model.getResult().size());
     }
 
     @ApiOperation("场景引用")
