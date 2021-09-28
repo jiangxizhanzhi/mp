@@ -1,6 +1,5 @@
 ip:
   mariadb: 10.100.0.101         # MP新中台mariadb数据库地址
-  mg: 10.100.14.252             # MG老中台地址
   fdfs: 10.100.14.252           # FastDFS地址
   cp: 10.100.7.25                # 云平台适配层接口地址
   cr: 10.100.2.21               # cr接口地址
@@ -49,7 +48,6 @@ mybatis:
 # 请求云平台组信息的url配置，必需填写
 mp:
   base:
-    mg-url: http://${ip.mg}:8077
     # fastdfs配置
     fastdfs:
       max-storage-connection: 8   # 最大连接数
