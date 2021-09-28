@@ -216,7 +216,7 @@ public class ImagesController {
      */
     @ApiOperation("导出")
     @GetMapping("/export")
-    public ResponseEntity<Resource> export(@RequestParam("id") String uuid,@RequestParam String imageName, HttpServletResponse httpServletResponse) {
+    public ResponseEntity<Resource> export(@RequestParam("id") String uuid,@RequestParam("image_name") String imageName, HttpServletResponse httpServletResponse) {
         HttpResponse httpResponse = imagesConverter.export(uuid,imageName);
         InputStreamResource resource = null;
         String filename = "";
