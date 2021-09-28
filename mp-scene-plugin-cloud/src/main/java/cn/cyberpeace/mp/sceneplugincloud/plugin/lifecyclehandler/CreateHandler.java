@@ -175,7 +175,6 @@ public class CreateHandler extends HandlerCommon {
                     accessModeParam.setPassword(accessMode.getPassword());
                     accessModeParam.setEnablePortMapping(accessMode.getProxy());
                     accessModeParam.setPortMappingProtocol(TextUtils.emptyNull(accessMode.getBaseProtocol()));
-                    accessModeParam.setIpAddress(TextUtils.emptyNull(port.getIp()));
                     return accessModeParam;
                 }).collect(Collectors.toList()));
             }
@@ -294,6 +293,7 @@ public class CreateHandler extends HandlerCommon {
 
                     var connection = accessModeData.getConnection();
                     if (connection != null) {
+                        accessMode.setConnectionUser(TextUtils.emptyNull(getRequestUser()));
                         accessMode.setConnectionId(connection.getConnectionId());
                         accessMode.setConnectionUrl(connection.getUrl());
                     }
@@ -348,6 +348,7 @@ public class CreateHandler extends HandlerCommon {
 
                     var connection = accessModeData.getConnection();
                     if (connection != null) {
+                        accessMode.setConnectionUser(TextUtils.emptyNull(getRequestUser()));
                         accessMode.setConnectionId(connection.getConnectionId());
                         accessMode.setConnectionUrl(connection.getUrl());
                     }

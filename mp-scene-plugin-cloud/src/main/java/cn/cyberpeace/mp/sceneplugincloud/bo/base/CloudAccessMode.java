@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.bo.base;
 
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -25,11 +24,12 @@ public class CloudAccessMode extends AccessMode {
     private String connectionUrl;
 
     @ApiModelProperty(value = "连接id")
-    @JsonIgnore
     private String connectionId;
 
+    @ApiModelProperty(value = "连接所属用户")
+    private String connectionUser;
+
     @ApiModelProperty(value = "代理id")
-    @JsonIgnore
     private String proxyId;
 
 }

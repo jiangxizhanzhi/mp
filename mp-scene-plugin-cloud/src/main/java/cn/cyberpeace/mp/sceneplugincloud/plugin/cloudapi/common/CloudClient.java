@@ -21,24 +21,24 @@ public abstract class CloudClient {
         return response;
     }
 
-    public <T> CloudResponse<T> get(String url, HttpParam param, TypeReference<CloudResponse<T>> valueTypeRef,
-                                    boolean throwException) {
-        return checkResponse(httpClient.get(url, param, valueTypeRef), throwException);
+    public <T> CloudResponse<T> cloudGet(String url, HttpParam param, TypeReference<CloudResponse<T>> valueTypeRef,
+                                         boolean throwException) {
+        return checkResponse(httpClient.cloudGet(url, param, valueTypeRef), throwException);
     }
 
-    public <T> CloudResponse<T> post(String url, HttpData data, HttpParam param,
-                                     TypeReference<CloudResponse<T>> valueTypeRef, boolean throwException) {
-        return checkResponse(httpClient.post(url, data, param, valueTypeRef), throwException);
+    public <T> CloudResponse<T> cloudPost(String url, HttpData data, HttpParam param,
+                                          TypeReference<CloudResponse<T>> valueTypeRef, boolean throwException) {
+        return checkResponse(httpClient.cloudPost(url, data, param, valueTypeRef), throwException);
     }
 
-    public <T> CloudResponse<T> patch(String url, HttpData data, HttpParam param,
-                                      TypeReference<CloudResponse<T>> valueTypeRef, boolean throwException) {
-        return checkResponse(httpClient.patch(url, data, param, valueTypeRef), throwException);
+    public <T> CloudResponse<T> cloudPatch(String url, HttpData data, HttpParam param,
+                                           TypeReference<CloudResponse<T>> valueTypeRef, boolean throwException) {
+        return checkResponse(httpClient.cloudPatch(url, data, param, valueTypeRef), throwException);
     }
 
-    public <T> CloudResponse<T> delete(String url, HttpData data, HttpParam param,
-                                       TypeReference<CloudResponse<T>> valueTypeRef, boolean throwException) {
-        return checkResponse(httpClient.delete(url, data, param, valueTypeRef), throwException);
+    public <T> CloudResponse<T> cloudDelete(String url, HttpData data, HttpParam param,
+                                            TypeReference<CloudResponse<T>> valueTypeRef, boolean throwException) {
+        return checkResponse(httpClient.cloudDelete(url, data, param, valueTypeRef), throwException);
     }
 
 }
