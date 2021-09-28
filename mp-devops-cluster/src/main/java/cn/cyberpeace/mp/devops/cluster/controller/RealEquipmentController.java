@@ -255,16 +255,26 @@ public class RealEquipmentController {
     @ApiOperation("接口资源")
     @GetMapping("/network-card")
     public PageResult<SnmpInterfaceResourceCloudPlatform.Interfaces> pageNetworkCard(RealEquipmentNetworkCardPageRequest request){
+        RealEquipment realEquipment = realEquipmentConverter.findById(request.getUuid());
+        if (Objects.isNull(realEquipment)){
+            throw new MpRuntimeException(BaseErrorCode.ERROR);
+        }
+        ExtEntity extEntity = realEquipment.getExtEntity();
+        if (Objects.isNull(extEntity) || StringUtils.isBlank(extEntity.getSnmpVersion()) || Objects.isNull(extEntity.getSnmpConfig())){
+            return new PageResult<>(Lists.newArrayList(),0);
+        }
         SnmpParams snmpParams = new SnmpParams();
-        snmpParams.setVersion(request.getVersion());
-        SnmpConfig snmpConfig = request.getSnmpConfig();
-        if (Objects.nonNull(snmpConfig)){
-            snmpParams.setIp(snmpConfig.getIp());
-            if (StringUtils.isNotBlank(snmpConfig.getCommunityName())){
+        SnmpConfig snmpConfig = extEntity.getSnmpConfig();
+        if (extEntity.getSnmpVersion().equals("V1") || extEntity.getSnmpVersion().equals("V2")) {
+            snmpParams.setVersion(2);
+            if (Objects.nonNull(snmpConfig)) {
                 SnmpBaseAuth snmpAuth = new SnmpBaseAuth();
                 snmpAuth.setCommunityName(snmpConfig.getCommunityName());
                 snmpParams.setAuth(snmpAuth);
-            }else{
+            }
+        } else if (extEntity.getSnmpVersion().equals("V3")) {
+            snmpParams.setVersion(3);
+            if (Objects.nonNull(snmpConfig)) {
                 SnmpAuth snmpAuth = new SnmpAuth();
                 snmpAuth.setAuthKey(snmpConfig.getAuthKey());
                 snmpAuth.setUsername(snmpConfig.getUsername());
@@ -272,10 +282,13 @@ public class RealEquipmentController {
                 snmpParams.setAuth(snmpAuth);
             }
         }
+        snmpParams.setIp(extEntity.getSnmpConfig().getIp());
+        snmpParams.setOid(extEntity.getSnmpCpuOid());
         SnmpInterfaceResourceCloudPlatform model = realEquipmentService.interfacesResource(snmpParams);
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getResult())){
             return new PageResult<>(Lists.newArrayList(),0);
         }
+
         Integer page = request.getPage();
         Integer perPage = request.getPerPage();
         List<SnmpInterfaceResourceCloudPlatform.Interfaces> interfaces = model.getResult().subList((page - 1) * perPage, (page - 1) * perPage + perPage);
