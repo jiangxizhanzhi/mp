@@ -7,6 +7,7 @@ ip:
   es: ${MP_ES_IP:10.100.14.104}            # MP新中台ES地址
   trex: ${MP_TREX_IP:10.100.7.158}         # trex资源服务器地址
   rabbitmq: ${RABBITMQ_IP:10.100.0.101}           # rabbitmq地址
+  log-es: ${LOG_ES_IP:10.100.0.103}        # 日志es
 server:
   servlet:
     context-path: /api/mp
@@ -25,6 +26,16 @@ spring:
     clean-disabled: true
   application:
     name: mp
+  servlet:
+    multipart:
+      max-file-size: 1000MB
+      max-request-size: 10000MB
+  rabbitmq:
+    host: ${ip.rabbitmq}
+    port: ${RABBITMQ_PORT:5673}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+
 
 logging:
   config: classpath:logback-spring.xml
@@ -84,13 +95,19 @@ mp:
       agent-script-windows-path: ${WAZUH_AGENT_SCRIPT_WINDOWS_PATH:C:\ossec-agent\shared\scripts\}
       task-enable: true
   log:
+    es-nodes: ${ip.log-es}:${LOG_ES_PORT:9200}
     exclude-uri: /login
     exclude-method: OPTIONS
+  auth:
+    activation:
+      enable: true
+      licenseDir: /home/mp/config/license
   flow:
     # 流量发生器资源地址
     actuator-resource-url: http://${ip.trex}:${TREX_PORT:80}/api/v1/resource
     trex-image: ${TREX_IMAGE:trex_0911}
-
+  sceneplugincloud:
+    cpcloud-server: http://${ip.cp}:${CP_PORT:11111}
 
 management:
   endpoints:
