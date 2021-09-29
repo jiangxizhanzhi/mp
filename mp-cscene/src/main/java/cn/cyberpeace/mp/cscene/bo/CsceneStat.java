@@ -8,7 +8,7 @@ import lombok.Data;
 @ApiModel(description = "场景模板统计数据")
 @Data
 @AllArgsConstructor
-public class CsceneStatBO {
+public class CsceneStat {
     @ApiModelProperty(value = "场景模板id")
     private String csceneId;
     @ApiModelProperty(value = "终端数量")

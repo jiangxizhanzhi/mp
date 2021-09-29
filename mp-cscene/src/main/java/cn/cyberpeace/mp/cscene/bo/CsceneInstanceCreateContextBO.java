@@ -16,6 +16,9 @@ public class CsceneInstanceCreateContextBO extends CsceneContextBO {
     @ApiModelProperty(value = "场景属性")
     private Integer sceneAttr;
 
+    @ApiModelProperty(value = "场景引用元数据")
+    private String referenceMetaData;
+
     @ApiModelProperty(value = "场景模板数据")
     private CsceneBO cscene;
 

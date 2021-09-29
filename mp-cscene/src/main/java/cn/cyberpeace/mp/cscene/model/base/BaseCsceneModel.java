@@ -11,6 +11,8 @@ public class BaseCsceneModel extends BaseModel {
     @DefaultInt
     private Integer referenceType;
     @DefaultStr
+    private String referenceMetaData;
+    @DefaultStr
     private String createUser;
     @DefaultStr
     private String createUsername;

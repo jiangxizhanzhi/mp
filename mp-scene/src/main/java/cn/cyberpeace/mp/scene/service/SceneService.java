@@ -13,6 +13,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 
 @Slf4j
@@ -47,10 +50,16 @@ public class SceneService {
         }
 
         SceneTaskPool.getInstance().executeTask(() -> {
+            var starTime = LocalDateTime.now();
             if (!sceneHandler.initiate(false)) {
                 return;
             }
             sceneHandler.create();
+
+            var endTime = LocalDateTime.now();
+            var consumeSeconds = Duration.between(endTime, starTime).toSeconds();
+            sceneHandler.getScene().setCreateConsumeSeconds(consumeSeconds);
+            sceneHandler.updateScene();
         });
 
         return new ServiceResult<>(sceneHandler.toData());
