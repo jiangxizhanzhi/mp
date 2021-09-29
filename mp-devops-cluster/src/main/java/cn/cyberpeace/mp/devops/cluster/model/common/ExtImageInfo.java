@@ -19,7 +19,7 @@ public class ExtImageInfo {
      * 基础镜像
      */
     @ApiModelProperty("基础镜像名称")
-    private String baseImage;
+    private String baseImageName;
 
     /**
      * 是否支持基础镜像
