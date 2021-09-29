@@ -18,6 +18,8 @@ public class SceneBO extends BaseSceneBO<SceneModel, SceneBO> implements BaseEve
     private Integer processStatus;
     @ApiModelProperty(value = "事件进程描述信息")
     private String processMessage;
+    @ApiModelProperty(value = "创建消耗时间(秒)")
+    private Long createConsumeSeconds;
 
     @Override
     public SceneModel createModel() {

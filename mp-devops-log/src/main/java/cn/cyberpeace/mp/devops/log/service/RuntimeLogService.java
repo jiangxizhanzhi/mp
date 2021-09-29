@@ -91,16 +91,15 @@ public class RuntimeLogService {
                 }
                 zout.flush();
                 zout.closeEntry();
-                zout.finish();
+
                 fileInputStream.close();
             }
+            zout.finish();
         } catch (Exception e) {
             log.error("file read path fail");
             throw new MpRuntimeException(BaseErrorCode.ERROR);
         }
 
         return new ByteArrayInputStream(bos.toByteArray());
-
     }
-
 }

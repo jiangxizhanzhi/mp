@@ -47,11 +47,8 @@
             <if test=" inPosition != null  ">
                 and i.in_position = #{inPosition}
             </if>
-            <if test=" useStatus != null and useStatus == 0 ">
-                and i.reference_status = 0
-            </if>
-            <if test=" useStatus != null and useStatus == 1 ">
-                and i.reference_status > 0
+            <if test=" useStatus != null ">
+                and i.use_status = #{useStatus}
             </if>
             <if test=" quickCreateSupport != null">
                 and i.quick_create_support = #{quickCreateSupport}
@@ -107,11 +104,8 @@
             <if test=" inPosition != null  ">
                 and i.in_position = #{inPosition}
             </if>
-            <if test=" useStatus != null and useStatus == 0 ">
-                and i.reference_status = 0
-            </if>
-            <if test=" useStatus != null and useStatus == 1 ">
-                and i.reference_status > 0
+            <if test=" useStatus != null ">
+                and i.use_status = #{useStatus}
             </if>
             <if test=" quickCreateSupport != null">
                 and i.quick_create_support = #{quickCreateSupport}
@@ -152,13 +146,16 @@
         from
         mp_devops_target i
         <include refid="commonTargetWhere"/>
-        UNION
-        SELECT
-        <include refid="commonTargetColumn"/>
-        FROM
-        mp_devops_target_auth a
-        inner join  mp_devops_target i on a.target = i.uuid
-        <include refid="commonTargetAuthWhere"/>
+
+        <if test=" owner != null">
+            UNION
+            SELECT
+            <include refid="commonTargetColumn"/>
+            FROM
+            mp_devops_target_auth a
+            inner join  mp_devops_target i on a.target = i.uuid
+            <include refid="commonTargetAuthWhere"/>
+        </if>
         ) as i
     </select>
 
@@ -173,14 +170,16 @@
                 mp_devops_target i
             <include refid="commonTargetWhere"/>
 
-            UNION
+            <if test=" owner != null">
+                UNION
 
-            SELECT
-                <include refid="commonTargetColumn"/>
-            FROM
-                mp_devops_target_auth a
-            inner join  mp_devops_target i on a.target = i.uuid
-            <include refid="commonTargetAuthWhere"/>
+                SELECT
+                    <include refid="commonTargetColumn"/>
+                FROM
+                    mp_devops_target_auth a
+                inner join  mp_devops_target i on a.target = i.uuid
+                <include refid="commonTargetAuthWhere"/>
+             </if>
         ) as i
         ORDER BY i.create_time desc
         <if test="offset != null and limit != null">
@@ -389,6 +388,22 @@
         </set>
         where uuid = #{uuid}
     </update>
+
+    <update id="updateBatch"  parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update mp_devops_target
+            <set>
+                <if test="item.referenceStatus != null">
+                    reference_status = #{item.referenceStatus},
+                </if>
+                <if test="item.useStatus != null">
+                    use_status = #{item.useStatus,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
+                </if>
+            </set>
+            where uuid = #{item.uuid}
+        </foreach>
+    </update>
+
 
     <delete id="delete" parameterType="cn.cyberpeace.mp.devops.cluster.dto.ImageDeleteDTO">
         delete from mp_devops_target

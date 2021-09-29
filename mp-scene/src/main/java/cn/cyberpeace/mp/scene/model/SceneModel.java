@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.scene.model;
 
 import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultLong;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 import cn.cyberpeace.mp.scene.core.event.base.BaseEventModel;
@@ -24,6 +25,8 @@ public class SceneModel extends BaseSceneModel implements BaseEventModel {
     private Integer processStatus;
     @DefaultStr
     private String processMessage;
+    @DefaultLong
+    private Long createConsumeSeconds;
 
     @Override
     public String genTarget() {

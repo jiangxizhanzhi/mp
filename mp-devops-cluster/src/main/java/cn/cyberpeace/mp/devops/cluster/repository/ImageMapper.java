@@ -59,4 +59,11 @@ public interface ImageMapper extends BaseModelMapper<TargetModel> {
      * @return
      */
     Integer delete(ImageDeleteDTO dto);
+
+    /**
+     * 批量更新
+     * @param list
+     * @return
+     */
+    Integer updateBatch(List<TargetModel> list);
 }

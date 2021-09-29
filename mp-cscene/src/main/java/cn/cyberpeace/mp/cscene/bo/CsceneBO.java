@@ -19,6 +19,8 @@ public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneR
     private Integer type;
     @ApiModelProperty(value = "场景模板引用类型")
     private Integer referenceType;
+    @ApiModelProperty(value = "场景模板引用元数据")
+    private String referenceMetaData;
     @ApiModelProperty(value = "场景模板logo")
     private String logo;
     @ApiModelProperty(value = "场景模板拓扑配置")

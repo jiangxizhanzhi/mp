@@ -65,7 +65,7 @@ mp:
         - group-name: ${FDFS_GROUP_NAME:DEFAULT}    # 集群名称
           tracker-servers: ${ip.fdfs}:${FDFS_TRACKER_SERVERS_PORT:22122}
           file-server-addr: ${FDFS_FILE-SERVER-ADDR:/fdfs}    # 外部文件服务器地址
-          inner-file-server-addr: http://${ip.fdfs}:{FDFS_INNER_FILE_SERVER_PORT:8888}   # 内部文件服务器地址
+          inner-file-server-addr: http://${ip.fdfs}:${FDFS_INNER_FILE_SERVER_PORT:8888}   # 内部文件服务器地址
   devops:
     cp-url: http://${ip.cp}:${CP_PORT:11111} #云平台地址
     #    cr-url: http://${ip.cr} #

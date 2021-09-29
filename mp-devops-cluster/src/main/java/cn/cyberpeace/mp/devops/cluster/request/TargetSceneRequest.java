@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.devops.cluster.request;
 
 
 import cn.cyberpeace.mp.devops.cluster.enums.ImageTypeEnum;
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -38,4 +37,7 @@ public class TargetSceneRequest implements Serializable {
      */
     @ApiModelProperty("镜像类型")
     private ImageTypeEnum imageType;
+
+    @ApiModelProperty("忽略用户Token")
+    private Boolean ignoreUser;
 }

@@ -114,8 +114,8 @@ public class CsceneController implements BaseModelListControllerBase {
 
     @ApiOperation("获取场景模板统计数据")
     @GetMapping("/stat")
-    public ServiceResult<List<CsceneStatBO>> stat(@RequestParam String[] ids) {
-        return csceneSpecialService.stat(ids).asResult();
+    public ServiceResult<List<CsceneStat>> statCscenes(@RequestParam String[] ids) {
+        return csceneSpecialService.statCscenes(ids).asResult();
     }
 
     @ApiOperation("统计靶标对应引用该靶标的场景模板")
