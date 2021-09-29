@@ -57,7 +57,7 @@ public class SceneService {
             sceneHandler.create();
 
             var endTime = LocalDateTime.now();
-            var consumeSeconds = Duration.between(endTime, starTime).toSeconds();
+            var consumeSeconds = Duration.between(starTime, endTime).toSeconds();
             sceneHandler.getScene().setCreateConsumeSeconds(consumeSeconds);
             sceneHandler.updateScene();
         });
