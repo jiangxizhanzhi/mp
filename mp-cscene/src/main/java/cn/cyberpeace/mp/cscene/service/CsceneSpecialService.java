@@ -134,7 +134,7 @@ public class CsceneSpecialService {
                         SceneModel::getId)
                 .filterLink(SceneModel.class, SceneModel::getId, SceneElementModel.class,
                         SceneElementModel::getScene)
-                .filterLink(SceneElementModel.class, SceneElementModel::getId, CloudPluginSceneElementModel.class,
+                .filterLink(SceneElementModel.class, SceneElementModel::getNodeId, CloudPluginSceneElementModel.class,
                         CloudPluginSceneElementModel::getSceneElement)
                 .pagination(queryParams.getPage(), queryParams.getPageSize())
                 .currentLink(CsceneInstanceModel.class)
