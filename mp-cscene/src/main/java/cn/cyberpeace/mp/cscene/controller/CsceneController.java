@@ -83,13 +83,13 @@ public class CsceneController implements BaseModelListControllerBase {
     })
     @DeleteMapping(params = "id")
     public ServiceResult<Boolean> delete(@RequestParam String id) {
-        return modelService.deleteById(id, false, null).asResult();
+        return modelService.deleteById(id, true, false, null).asResult();
     }
 
     @ApiOperation("批量删除场景模板")
     @DeleteMapping("/bulk_delete")
     public ServiceResult<Integer> bulkDelete(@RequestBody String[] ids) {
-        return modelService.bulkDeleteByIds(ids, false, null).asResult();
+        return modelService.bulkDeleteByIds(ids, true, false, null).asResult();
     }
 
     @ApiOperation("创建场景模板测试实例")

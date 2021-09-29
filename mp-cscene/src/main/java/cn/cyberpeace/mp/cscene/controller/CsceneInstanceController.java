@@ -78,13 +78,13 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @DeleteMapping(params = "id")
     public ServiceResult<Boolean> delete(@RequestParam String id,
                                          @RequestBody(required = false) CsceneContextBO context) {
-        return modelService.deleteById(id, context).asResult();
+        return modelService.deleteById(id, true, context).asResult();
     }
 
     @ApiOperation("批量删除场景实例")
     @DeleteMapping("/bulk_delete")
     public ServiceResult<Integer> bulkDelete(@RequestBody CsceneInstanceDeleteRequest deleteRequest) {
-        return modelService.bulkDeleteByIds(deleteRequest.getIds(), deleteRequest.getContext()).asResult();
+        return modelService.bulkDeleteByIds(deleteRequest.getIds(), true, deleteRequest.getContext()).asResult();
     }
 
     @ApiOperation("清理场景实例")
@@ -94,13 +94,13 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @DeleteMapping(value = "/clear", params = "id")
     public ServiceResult<Boolean> clear(@RequestParam String id,
                                         @RequestBody(required = false) CsceneContextBO context) {
-        return modelService.deleteById(id, context).asResult();
+        return modelService.deleteById(id, false, context).asResult();
     }
 
     @ApiOperation("批量清理场景实例")
     @DeleteMapping("/bulk_clear")
     public ServiceResult<Integer> bulkClear(@RequestBody CsceneInstanceDeleteRequest deleteRequest) {
-        return modelService.bulkDeleteByIds(deleteRequest.getIds(), deleteRequest.getContext()).asResult();
+        return modelService.bulkDeleteByIds(deleteRequest.getIds(), false, deleteRequest.getContext()).asResult();
     }
 
     @ApiOperation("场景实例启动节点流量")

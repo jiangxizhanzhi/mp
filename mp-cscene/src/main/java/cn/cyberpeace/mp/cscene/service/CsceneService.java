@@ -102,16 +102,17 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         return new ServiceResult<>(csceneHandler.toData());
     }
 
-    public ServiceResult<Boolean> deleteById(String id, boolean withInstance, CsceneContextBO context) {
+    public ServiceResult<Boolean> deleteById(String id, boolean logic, boolean withInstance, CsceneContextBO context) {
         var csceneHandler = new CsceneHandler(id, context);
-        csceneHandler.delete(withInstance);
-        return new ServiceResult<>(true);
+        var flag = csceneHandler.delete(logic, withInstance);
+        return new ServiceResult<>(flag);
     }
 
-    public ServiceResult<Integer> bulkDeleteByIds(String[] ids, boolean withInstance, CsceneContextBO context) {
+    public ServiceResult<Integer> bulkDeleteByIds(String[] ids, boolean logic, boolean withInstance,
+                                                  CsceneContextBO context) {
         var result = 0;
         for (String id: ids) {
-            if (Boolean.TRUE.equals(deleteById(id, withInstance, context).getSource())) {
+            if (Boolean.TRUE.equals(deleteById(id, logic, withInstance, context).getSource())) {
                 result += 1;
             }
         }
