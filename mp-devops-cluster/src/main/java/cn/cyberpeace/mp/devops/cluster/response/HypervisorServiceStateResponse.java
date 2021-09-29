@@ -56,6 +56,12 @@ public class HypervisorServiceStateResponse extends BaseCloudPlatformResponse {
         this.state = state;
     }
 
+    public HypervisorServiceStateResponse(String name, Boolean alive, String state) {
+        this.name = name;
+        this.alive = alive;
+        this.state = state;
+    }
+
     public String getState() {
         return StringUtils.isNotBlank(state) ?
                 state.equals(CloudPlatformEnum.UP.getState()) ?
