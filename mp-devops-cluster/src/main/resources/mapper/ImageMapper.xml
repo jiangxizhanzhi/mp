@@ -146,13 +146,16 @@
         from
         mp_devops_target i
         <include refid="commonTargetWhere"/>
-        UNION
-        SELECT
-        <include refid="commonTargetColumn"/>
-        FROM
-        mp_devops_target_auth a
-        inner join  mp_devops_target i on a.target = i.uuid
-        <include refid="commonTargetAuthWhere"/>
+
+        <if test=" owner != null">
+            UNION
+            SELECT
+            <include refid="commonTargetColumn"/>
+            FROM
+            mp_devops_target_auth a
+            inner join  mp_devops_target i on a.target = i.uuid
+            <include refid="commonTargetAuthWhere"/>
+        </if>
         ) as i
     </select>
 
@@ -167,14 +170,16 @@
                 mp_devops_target i
             <include refid="commonTargetWhere"/>
 
-            UNION
+            <if test=" owner != null">
+                UNION
 
-            SELECT
-                <include refid="commonTargetColumn"/>
-            FROM
-                mp_devops_target_auth a
-            inner join  mp_devops_target i on a.target = i.uuid
-            <include refid="commonTargetAuthWhere"/>
+                SELECT
+                    <include refid="commonTargetColumn"/>
+                FROM
+                    mp_devops_target_auth a
+                inner join  mp_devops_target i on a.target = i.uuid
+                <include refid="commonTargetAuthWhere"/>
+             </if>
         ) as i
         ORDER BY i.create_time desc
         <if test="offset != null and limit != null">

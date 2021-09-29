@@ -105,6 +105,7 @@ public class ImagesConverterImpl implements ImagesConverter {
         dto.setSystemArchitecure(request.getSystemArchitecure());
         dto.setLanguage(request.getLanguage());
         dto.setImageStatus(request.getImageStatus());
+        dto.setBaseImageSupport(request.getBaseImageSupport());
         Integer total = imageMapper.totalCount(dto);
 
         ImageConvertPageModel convertModel = new ImageConvertPageModel();
