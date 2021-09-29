@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.aggregation.service;
 
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.devops.cluster.converter.TargetConverter;
@@ -53,8 +54,8 @@ public class TargetAggregationService {
         Map<String, List<DeviceReferCsceneStat>> referStateMap = referStateServiceResult.getSource();
 
         //使用
-        ServiceResult<Map<String, List<DeviceReferCsceneStat>>> useStateServiceResult = csceneSpecialService.statDeviceReferCsceneInstances(imageNames);
-        Map<String, List<DeviceReferCsceneStat>> useStateMap = useStateServiceResult.getSource();
+        ServiceResult<Map<String, List<DeviceReferCsceneInstanceStat>>>  useStateServiceResult = csceneSpecialService.statDeviceReferCsceneInstances(imageNames);
+        Map<String, List<DeviceReferCsceneInstanceStat>> useStateMap = useStateServiceResult.getSource();
 
         if (MapUtils.isEmpty(referStateMap) && MapUtils.isEmpty(useStateMap)){
             return;
@@ -63,7 +64,7 @@ public class TargetAggregationService {
         String name;
         List<TargetModel> modelList = new ArrayList<>();
         List<DeviceReferCsceneStat> referStateList = new ArrayList<>();
-        List<DeviceReferCsceneStat> useStateList = new ArrayList<>();
+        List<DeviceReferCsceneInstanceStat> useStateList = new ArrayList<>();
         for (TargetModel targetModel : targetModels){
             name = targetModel.getName();
             if (MapUtils.isNotEmpty(referStateMap)){
