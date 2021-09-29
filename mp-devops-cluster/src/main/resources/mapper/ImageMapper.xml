@@ -390,6 +390,22 @@
         where uuid = #{uuid}
     </update>
 
+    <update id="updateBatch"  parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update mp_devops_target
+            <set>
+                <if test="item.referenceStatus != null">
+                    reference_status = #{item.referenceStatus},
+                </if>
+                <if test="item.useStatus != null">
+                    use_status = #{item.useStatus,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
+                </if>
+            </set>
+            where uuid = #{item.uuid}
+        </foreach>
+    </update>
+
+
     <delete id="delete" parameterType="cn.cyberpeace.mp.devops.cluster.dto.ImageDeleteDTO">
         delete from mp_devops_target
         <where>
