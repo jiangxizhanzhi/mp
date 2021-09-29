@@ -22,6 +22,7 @@ import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -134,10 +135,13 @@ public class CsceneSpecialService {
                         SceneModel::getId)
                 .filterLink(SceneModel.class, SceneModel::getId, SceneElementModel.class,
                         SceneElementModel::getScene)
+                .filterLink(SceneModel.class, SceneModel::getId, CloudPluginSceneElementModel.class,
+                        CloudPluginSceneElementModel::getScene)
                 .filterLink(SceneElementModel.class, SceneElementModel::getNodeId, CloudPluginSceneElementModel.class,
                         CloudPluginSceneElementModel::getSceneElement)
                 .pagination(queryParams.getPage(), queryParams.getPageSize())
                 .currentLink(CsceneInstanceModel.class)
+                .groupBy(CsceneInstanceModel::getId)
                 .selectAs(CsceneInstanceModel::getId, CsceneInstanceStat::getId)
                 .selectAs(CsceneInstanceModel::getReferenceType, CsceneInstanceStat::getReferenceType)
                 .selectAs(CsceneInstanceModel::getReferenceMetaData, CsceneInstanceStat::getReferenceMetaData)
@@ -156,10 +160,16 @@ public class CsceneSpecialService {
                 .selectAs(Sum.f(SceneElementModel::getCpu), CsceneInstanceStat::getCpu)
                 .selectAs(Sum.f(SceneElementModel::getRam), CsceneInstanceStat::getRam)
                 .selectAs(Sum.f(SceneElementModel::getDisk), CsceneInstanceStat::getDisk)
-//                .currentLink(CloudPluginSceneElementModel.class)
-//                .selectAs(Count.f(SceneElementModel::getCpu), CsceneInstanceStat::getVmCount)
-//                .selectAs(Count.f(SceneElementModel::getRam), CsceneInstanceStat::getContainerCount)
-//                .selectAs(Count.f(SceneElementModel::getDisk), CsceneInstanceStat::getEntityCount)
+                .currentLink(CloudPluginSceneElementModel.class)
+                .selectAs(Count.f(CloudPluginSceneElementModel::getVirtualType)
+                        .calcEqual(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE),
+                        CsceneInstanceStat::getVmCount)
+                .selectAs(Count.f(CloudPluginSceneElementModel::getVirtualType)
+                        .calcEqual(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER),
+                        CsceneInstanceStat::getContainerCount)
+                .selectAs(Count.f(CloudPluginSceneElementModel::getVirtualType)
+                        .calcEqual(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE),
+                        CsceneInstanceStat::getEntityCount)
                 .distinct();
 
         humanCondition.currentLink(CsceneInstanceModel.class);
