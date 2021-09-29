@@ -1,11 +1,12 @@
 ip:
   mariadb: ${MP_DB_IP:10.100.0.101}         # MP新中台mariadb数据库地址
-  fdfs: ${FDFS_IP:10.100.14.252}            # FastDFS地址
-  cp: ${CP_IP:10.100.7.1}                   # 云平台适配层接口地址
-  moloch: ${MOLOCH_IP:10.100.7.104}         # moloch的IP地址
-  wazuh: ${WAZUH_IP:10.100.0.102}           # wazuh的IP地址
-  es: ${MP_ES_IP:10.100.14.104}             # MP新中台ES地址
-  trex: 10.100.7.158                        # trex资源服务器地址
+  fdfs: ${FDFS_IP:10.100.14.252}           # FastDFS地址
+  cp: ${CP_IP:10.100.7.1}                # 云平台适配层接口地址
+  moloch: ${MOLOCH_IP:10.100.7.104}        # moloch的IP地址
+  wazuh: ${WAZUH_IP:10.100.0.102}          # wazuh的IP地址
+  es: ${MP_ES_IP:10.100.14.104}            # MP新中台ES地址
+  trex: ${MP_TREX_IP:10.100.7.158}         # trex资源服务器地址
+  rabbitmq: ${RABBITMQ_IP:10.100.0.101}           # rabbitmq地址
 server:
   servlet:
     context-path: /api/mp
@@ -47,48 +48,48 @@ mp:
       connect-timeout-in-seconds: 10
       network-timeout-in-seconds: 30
       charset: UTF-8
-      http-tracker-http-port: 80
+      http-tracker-http-port: ${FDFS_HTTP_TRACKER_HTTP_PORT:80}
       groups:
         # 集群配置：每增加一个集群，参考下例添加相应配置即可，同时在FdfsGroupEnum.java枚举类中添加该集群名称
-        - group-name: DEFAULT    # 集群名称
-          tracker-servers: ${ip.fdfs}:22122
-          file-server-addr: /fdfs    # 外部文件服务器地址
-          inner-file-server-addr: http://${ip.fdfs}:8888   # 内部文件服务器地址
+        - group-name: ${FDFS_GROUP_NAME:DEFAULT}    # 集群名称
+          tracker-servers: ${ip.fdfs}:${FDFS_TRACKER_SERVERS_PORT:22122}
+          file-server-addr: ${FDFS_FILE-SERVER-ADDR:/fdfs}    # 外部文件服务器地址
+          inner-file-server-addr: http://${ip.fdfs}:{FDFS_INNER_FILE_SERVER_PORT:8888}   # 内部文件服务器地址
   devops:
-    cp-url: http://${ip.cp}:11111 #云平台地址
-#    cr-url: http://${ip.cr} #
+    cp-url: http://${ip.cp}:${CP_PORT:11111} #云平台地址
+    #    cr-url: http://${ip.cr} #
     hostname: controller  #主机名称
     es-nodes: ${ip.es}:${MP_ES_PORT:9200}
   situationaware:
-    group-url: http://10.100.14.107:5079/v1/scenes
+    group-url: http://${SITUATION_AWARE_IP:10.100.14.107}:${SITUATION_AWARE_PORT:5079}/v1/scenes
     moloch:
-      username: api
-      password: api
+      username: ${MOLOCH_USERNAME:api}
+      password: ${MOLOCH_PASSWORD:api}
     #moloch es节点地址
-    es-nodes: ${ip.moloch}:9200
+    es-nodes: ${ip.moloch}:${MOLOCH_PORT:9200}
     wazuh:
       #wazuh 开放接口地址
-      base-url: https://${ip.wazuh}:55000
+      base-url: https://${ip.wazuh}:${WAZUH_PORT:55000}
       #wazuh 开放接口用户名密码
-      username: acme-user
-      password: MyS3cr37P450r.*-
+      username: ${WAZUH_USERNAME:acme-user}
+      password: ${WAZUH_PASSWORD:MyS3cr37P450r.*-}
       #wazuh es地址用户名密码
       es-url: ${ip.wazuh}
-      es-port: 9200
-      es-username: admin
-      es-password: admin
+      es-port: ${WAZUH_ES_PORT:9200}
+      es-username: ${WAZUH_ES_USERNAME:admin}
+      es-password: ${WAZUH_ES_PASSWORD:admin}
     wazuh-probe-manager:
-      url: http://10.100.0.102:8002
-      agent-script-linux-path: /var/ossec/etc/shared/scripts/
-      agent-script-windows-path: C:\ossec-agent\shared\scripts\
+      url: http://${ip.wazuh}:${WAZUH_PORT:8002}
+      agent-script-linux-path: ${WAZUH_AGENT_SCRIPT_LINUX_PATH:/var/ossec/etc/shared/scripts/}
+      agent-script-windows-path: ${WAZUH_AGENT_SCRIPT_WINDOWS_PATH:C:\ossec-agent\shared\scripts\}
       task-enable: true
   log:
     exclude-uri: /login
     exclude-method: OPTIONS
   flow:
     # 流量发生器资源地址
-    actuator-resource-url: http://${ip.trex}:80/api/v1/resource
-    trex-image: trex_0911
+    actuator-resource-url: http://${ip.trex}:${TREX_PORT:80}/api/v1/resource
+    trex-image: ${TREX_IMAGE:trex_0911}
 
 
 management:
