@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.base.util.ClassUtils;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.base.BaseCsceneBO;
 import cn.cyberpeace.mp.cscene.bo.base.BaseCsceneRoleBO;
+import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.model.base.BaseCsceneModel;
 import cn.cyberpeace.mp.cscene.model.base.BaseCsceneRoleModel;
 import cn.cyberpeace.mp.cscene.repository.base.BaseCsceneMapper;
@@ -198,6 +199,12 @@ public abstract class BaseCsceneHandler<
             // 场景id变化了删除原来的
             if (!StringUtils.isEmpty(originSceneId) && !originSceneId.equals(sceneId)) {
                 deleteScene(originSceneId);
+            }
+        } else {
+            var user = UserCommon.getUserWithContext(context);
+            if (user != null) {
+                cscene.setCreateUser(user.getId());
+                cscene.setCreateUsername(user.getUsername());
             }
         }
         saveScene(cscene);

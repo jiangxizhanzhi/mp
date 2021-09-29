@@ -136,6 +136,7 @@ CREATE TABLE mp_scene_scene (
    `process` varchar(64) NOT NULL COMMENT '当前事件进程',
    `process_status` int(10) NOT NULL COMMENT '当前事件进程状态',
    `process_message` varchar(2048) NOT NULL COMMENT '当前事件进程描述',
+   `create_consume_seconds` int(10) NOT NULL COMMENT '创建消耗时间',
    `deleted` tinyint(1) NOT NULL COMMENT '是否删除',
    `create_time` datetime(6) NOT NULL COMMENT '创建时间',
    `update_time` datetime(6) NOT NULL COMMENT '更新时间',

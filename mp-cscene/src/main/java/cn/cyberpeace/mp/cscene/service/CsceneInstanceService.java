@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.fields.BaseModelFields;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
+import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -16,7 +17,6 @@ import cn.cyberpeace.mp.cscene.model.CsceneInstanceRoleModel;
 import cn.cyberpeace.mp.cscene.report.rabbitmq.RabbitmqCsceneReporter;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
-import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceQueryParams;
 import cn.cyberpeace.mp.cscene.service.taskpool.CsceneReportTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 @Service
 @Data
 public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceModel, CsceneInstanceMapper,
-        BaseModelFields, CsceneInstanceQueryParams> {
+        BaseModelFields, QueryParams> {
 
     private CsceneInstanceRoleMapper csceneInstanceRoleMapper;
 
@@ -63,7 +63,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         setCsceneInstanceRoleMapper(csceneInstanceRoleMapper);
     }
 
-    public ListObjServiceResult<CsceneInstanceBO> listBO(CsceneInstanceQueryParams queryParams, CsceneContextBO context) {
+    public ListObjServiceResult<CsceneInstanceBO> listBO(QueryParams queryParams, CsceneContextBO context) {
         var listResult = super.list(queryParams);
         if (listResult.getSource() == null) {
             new ListObjServiceResult<>(null, listResult.getServiceCode(), listResult.getDetail());
