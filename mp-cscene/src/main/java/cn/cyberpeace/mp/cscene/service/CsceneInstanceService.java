@@ -88,19 +88,19 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return new ServiceResult<>(instanceHandler.toData());
     }
 
-    public ServiceResult<Boolean> deleteById(String id, CsceneContextBO context) {
+    public ServiceResult<Boolean> deleteById(String id, boolean logic, CsceneContextBO context) {
         var instanceHandler = new CsceneInstanceHandler(id, context);
-        var flag = instanceHandler.delete();
+        var flag = instanceHandler.delete(logic);
         if (flag) {
             CsceneReportTaskPool.getInstance().executeTask(() -> csceneReporter.reportDeleteCsceneInstance(id));
         }
         return new ServiceResult<>(flag);
     }
 
-    public ServiceResult<Integer> bulkDeleteByIds(String[] ids, CsceneContextBO context) {
+    public ServiceResult<Integer> bulkDeleteByIds(String[] ids, boolean logic, CsceneContextBO context) {
         var result = 0;
         for (String id: ids) {
-            if (Boolean.TRUE.equals(deleteById(id, context).getSource())) {
+            if (Boolean.TRUE.equals(deleteById(id, logic, context).getSource())) {
                 result += 1;
             }
         }

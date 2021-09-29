@@ -569,7 +569,7 @@ public abstract class BaseSceneHandler<
      * @return 表模型-场景对象
      */
     private S0 readScene() {
-        return sceneMapper.logicGet(sceneId);
+        return sceneMapper.get(sceneId);
     }
 
     /**
