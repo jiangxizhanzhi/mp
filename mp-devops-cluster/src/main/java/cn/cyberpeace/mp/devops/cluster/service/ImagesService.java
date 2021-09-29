@@ -34,7 +34,7 @@ public interface ImagesService extends BaseCloudPlatformService  {
     /**
      * 导出
      */
-    HttpResponse export(String uuid);
+    HttpResponse export(String uuid,String imageName);
 
     /**
      * 根据快速构建查询

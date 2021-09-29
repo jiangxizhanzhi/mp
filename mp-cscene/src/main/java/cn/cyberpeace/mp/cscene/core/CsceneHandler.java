@@ -225,11 +225,11 @@ public class CsceneHandler extends BaseCsceneHandler<
     }
 
     @Override
-    public void delete() {
-        delete(true);
+    public boolean delete() {
+        return delete(true);
     }
 
-    public void delete(boolean withInstance) {
+    public boolean delete(boolean withInstance) {
         if (withInstance) {
             reloadCsceneInstances();
             for (var csceneInstance: ListUtils.union(getCscene().getTestScenes(), getCscene().getAppScenes())) {
@@ -238,7 +238,7 @@ public class CsceneHandler extends BaseCsceneHandler<
             }
         }
 
-        super.delete();
+        return super.delete();
     }
 
     @Override

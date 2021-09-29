@@ -3,15 +3,19 @@ package cn.cyberpeace.mp.cscene.service;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.repository.condition.aggregation.Count;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneStatBO;
+import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
+import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
 import cn.cyberpeace.mp.scene.model.SceneConfigElementModel;
+import cn.cyberpeace.mp.scene.model.SceneConfigModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +49,12 @@ public class CsceneSpecialService {
         private Integer testInstanceCount;
     }
 
-    public ServiceResult<List<CsceneStatBO>> stat(String[] ids, CsceneContextBO context) {
+    /**
+     * 统计场景模板中各类型节点数量，测试场景数量
+     * @param ids 场景模板id列表
+     * @return 统计结果
+     */
+    public ServiceResult<List<CsceneStatBO>> stat(String[] ids) {
         if (ids == null || ids.length == 0) {
             return new ServiceResult<>(new ArrayList<>());
         }
@@ -95,7 +104,7 @@ public class CsceneSpecialService {
                 .selectAs(Count.f(CsceneInstanceModel::getCscene), CsceneTestInstanceStat::getTestInstanceCount)
                 .currentLink(SceneModel.class)
                 .filterEqual(SceneModel::getDeleted, false);
-        List<CsceneTestInstanceStat> csceneTestInstanceStats = csceneMapper.list(testSceneStatCondition,
+        List<CsceneTestInstanceStat> csceneTestInstanceStats = csceneInstanceMapper.list(testSceneStatCondition,
                 CsceneTestInstanceStat.class);
         csceneTestInstanceStats.forEach(testInstanceStat -> {
             var stat = statMap.get(testInstanceStat.getCsceneId());
@@ -103,5 +112,86 @@ public class CsceneSpecialService {
         });
 
         return new ServiceResult<>(new ArrayList<>(statMap.values()));
+    }
+
+    /**
+     * 统计靶标名称 对应 引用了靶标的场景模板
+     * @param imageNames 靶标名称
+     * @return 靶标名称 对应 引用了靶标的场景模板
+     */
+    public ServiceResult<Map<String, List<DeviceReferCsceneStat>>> statDeviceReferCscenes(String[] imageNames) {
+        var deviceReferCondition = new HumanCondition()
+                .link(CsceneModel.class, SceneConfigModel.class, CloudPluginSceneConfigElementModel.class)
+                .filterLink(CsceneModel.class, CsceneModel::getSceneConfig,
+                        SceneConfigModel.class, SceneConfigModel::getId)
+                .filterLink(SceneConfigModel.class, SceneConfigModel::getId,
+                        CloudPluginSceneConfigElementModel.class, CloudPluginSceneConfigElementModel::getScene)
+                .currentLink(CsceneModel.class)
+                .filterEqual(CsceneModel::getDeleted, false)
+                .selectAs(CsceneModel::getId, DeviceReferCsceneStat::getCsceneId)
+                .selectAs(CsceneModel::getCreateUser, DeviceReferCsceneStat::getCreateUser)
+                .selectAs(CsceneModel::getCreateUsername, DeviceReferCsceneStat::getCreateUsername)
+                .currentLink(SceneConfigModel.class)
+                .filterEqual(SceneConfigModel::getDeleted, false)
+                .selectAs(SceneConfigModel::getName, DeviceReferCsceneStat::getName)
+                .currentLink(CloudPluginSceneConfigElementModel.class)
+                .filterIn(CloudPluginSceneConfigElementModel::getImage, imageNames)
+                .selectAs(CloudPluginSceneConfigElementModel::getImage, DeviceReferCsceneStat::getReferenceImage)
+                .distinct();
+
+        List<DeviceReferCsceneStat> deviceReferCsceneStats = csceneMapper.list(deviceReferCondition,
+                DeviceReferCsceneStat.class);
+
+        Map<String, List<DeviceReferCsceneStat>> result = new HashMap<>();
+        deviceReferCsceneStats.forEach(stat -> {
+            var image = stat.getReferenceImage();
+            var referList = result.getOrDefault(image, new ArrayList<>());
+            referList.add(stat);
+            result.put(image, referList);
+        });
+
+        return new ServiceResult<>(result);
+    }
+
+    /**
+     * 统计靶标名称 对应 引用了靶标的场景实例
+     * @param imageNames 靶标名称
+     * @return 靶标名称 对应 引用了靶标的场景实例
+     */
+    public ServiceResult<Map<String, List<DeviceReferCsceneInstanceStat>>> statDeviceReferCsceneInstances(
+            String[] imageNames) {
+        var deviceReferCondition = new HumanCondition()
+                .link(CsceneInstanceModel.class, SceneModel.class, CloudPluginSceneElementModel.class)
+                .filterLink(CsceneInstanceModel.class, CsceneInstanceModel::getScene,
+                        SceneModel.class, SceneModel::getId)
+                .filterLink(SceneModel.class, SceneModel::getId,
+                        CloudPluginSceneElementModel.class, CloudPluginSceneElementModel::getScene)
+                .currentLink(CsceneInstanceModel.class)
+                .filterEqual(CsceneInstanceModel::getDeleted, false)
+                .selectAs(CsceneInstanceModel::getId, DeviceReferCsceneInstanceStat::getCsceneId)
+                .selectAs(CsceneInstanceModel::getCreateUser, DeviceReferCsceneInstanceStat::getCreateUser)
+                .selectAs(CsceneInstanceModel::getCreateUsername, DeviceReferCsceneInstanceStat::getCreateUsername)
+                .currentLink(SceneModel.class)
+                .filterEqual(SceneModel::getDeleted, false)
+                .selectAs(SceneModel::getName, DeviceReferCsceneInstanceStat::getName)
+                .selectAs(SceneModel::getEvent, DeviceReferCsceneInstanceStat::getEvent)
+                .selectAs(SceneModel::getEventStatus, DeviceReferCsceneInstanceStat::getEventStatus)
+                .currentLink(CloudPluginSceneElementModel.class)
+                .filterIn(CloudPluginSceneElementModel::getImage, imageNames)
+                .selectAs(CloudPluginSceneElementModel::getImage, DeviceReferCsceneInstanceStat::getReferenceImage)
+                .distinct();
+
+        List<DeviceReferCsceneInstanceStat> deviceReferCsceneStats = csceneInstanceMapper.list(deviceReferCondition,
+                DeviceReferCsceneInstanceStat.class);
+
+        Map<String, List<DeviceReferCsceneInstanceStat>> result = new HashMap<>();
+        deviceReferCsceneStats.forEach(stat -> {
+            var image = stat.getReferenceImage();
+            var referList = result.getOrDefault(image, new ArrayList<>());
+            referList.add(stat);
+            result.put(image, referList);
+        });
+
+        return new ServiceResult<>(result);
     }
 }

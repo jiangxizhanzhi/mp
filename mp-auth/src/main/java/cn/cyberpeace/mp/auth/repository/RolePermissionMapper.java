@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.auth.repository;
 
-import cn.cyberpeace.mp.auth.base.repository.BasePermissionMapper;
 import cn.cyberpeace.mp.auth.model.RolePermissionModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
@@ -19,8 +18,12 @@ import java.util.List;
 @Mapper
 @Repository
 @ModelClass(RolePermissionModel.class)
-public interface RolePermissionMapper extends BasePermissionMapper<RolePermissionModel, TargetModel>, BaseModelMapper {
+public interface RolePermissionMapper extends BaseModelMapper<RolePermissionModel> {
 
     List<TargetModel> listTargetsByRoleId(@Param("roleId") String roleId);
+
+    int deleteByOwner(@Param("owner") String owner);
+
+    int deleteByTarget(@Param("target") String target);
 
 }

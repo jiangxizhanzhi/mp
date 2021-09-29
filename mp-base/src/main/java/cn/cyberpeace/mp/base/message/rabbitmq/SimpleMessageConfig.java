@@ -15,19 +15,15 @@ public class SimpleMessageConfig {
 
     public static final String DEFAULT_MP_EXCHANGE = GROUP_NAME + ".default";
 
-    public static final String DEFAULT_MP_QUEUE = DEFAULT_MP_EXCHANGE;
-
     public static final String DEFAULT_MP_ROUTING_KEY = DEFAULT_MP_EXCHANGE;
+
+    public static final String DEFAULT_MP_QUEUE = DEFAULT_MP_EXCHANGE;
 
     private String exchangeName = DEFAULT_MP_EXCHANGE;
 
-    private String queueName = DEFAULT_MP_QUEUE;
-
     private String routingKey = DEFAULT_MP_ROUTING_KEY;
 
-    public Queue queue() {
-        return new Queue(getQueueName());
-    }
+    private String queueName = DEFAULT_MP_QUEUE;
 
     public DirectExchange directExchange() {
         return new DirectExchange(getExchangeName());
@@ -39,6 +35,10 @@ public class SimpleMessageConfig {
 
     public FanoutExchange fanoutExchange() {
         return new FanoutExchange(getExchangeName());
+    }
+
+    public Queue queue() {
+        return new Queue(getQueueName());
     }
 
     public Binding directBinding() {

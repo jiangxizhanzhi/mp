@@ -18,6 +18,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -90,6 +91,10 @@ public class CreateHandler extends HandlerCommon {
     }
 
     private void createAuxiliaryNetwork(CloudPluginSceneElementBO cloudElement) {
+        if (!StringUtils.isEmpty(cloudElement.getAuxiliaryNetworkId())) {
+            return;
+        }
+
         var srcElement = cloudElement.getSrcElement();
         var createData = new VirtualSwitchCreateData();
         createData.setName(genResourceName(srcElement.getEid()));
@@ -98,7 +103,9 @@ public class CreateHandler extends HandlerCommon {
         var subnet = new VirtualSwitchCreateData.Subnet();
         subnet.setCidr(cloudElement.getAuxiliaryNetworkCidr());
         subnet.setGatewayIp(TextUtils.emptyNull(cloudElement.getAuxiliaryNetworkGateway()));
-        subnet.setEnableDhcp(BoolUtils.bool(cloudElement.getAuxiliaryNetworkDhcp()));
+        // 默认开启dhcp
+        var dhcp = cloudElement.getAuxiliaryNetworkDhcp();
+        subnet.setEnableDhcp(dhcp == null || dhcp);
         var srcAllocationPools = cloudElement.getAuxiliaryNetworkAllocationPools();
         if (srcAllocationPools != null && !srcAllocationPools.isEmpty()) {
             List<VirtualSwitchCreateData.Subnet.AllocationPool> allocationPools = new ArrayList<>();
@@ -175,7 +182,6 @@ public class CreateHandler extends HandlerCommon {
                     accessModeParam.setPassword(accessMode.getPassword());
                     accessModeParam.setEnablePortMapping(accessMode.getProxy());
                     accessModeParam.setPortMappingProtocol(TextUtils.emptyNull(accessMode.getBaseProtocol()));
-                    accessModeParam.setIpAddress(TextUtils.emptyNull(port.getIp()));
                     return accessModeParam;
                 }).collect(Collectors.toList()));
             }
@@ -294,6 +300,7 @@ public class CreateHandler extends HandlerCommon {
 
                     var connection = accessModeData.getConnection();
                     if (connection != null) {
+                        accessMode.setConnectionUser(TextUtils.emptyNull(getRequestUser()));
                         accessMode.setConnectionId(connection.getConnectionId());
                         accessMode.setConnectionUrl(connection.getUrl());
                     }
@@ -348,6 +355,7 @@ public class CreateHandler extends HandlerCommon {
 
                     var connection = accessModeData.getConnection();
                     if (connection != null) {
+                        accessMode.setConnectionUser(TextUtils.emptyNull(getRequestUser()));
                         accessMode.setConnectionId(connection.getConnectionId());
                         accessMode.setConnectionUrl(connection.getUrl());
                     }

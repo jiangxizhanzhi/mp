@@ -144,7 +144,7 @@
     
     <select id="totalCount" parameterType="cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO"  resultType="java.lang.Integer">
         select
-               count(i.pk)
+               count(distinct i.pk)
         from
         (
         select
@@ -153,7 +153,6 @@
         mp_devops_target i
         <include refid="commonTargetWhere"/>
         UNION
-
         SELECT
         <include refid="commonTargetColumn"/>
         FROM
@@ -173,7 +172,8 @@
             from
                 mp_devops_target i
             <include refid="commonTargetWhere"/>
-        UNION
+
+            UNION
 
             SELECT
                 <include refid="commonTargetColumn"/>
@@ -260,6 +260,9 @@
             <if test="baseImageSupport != null">
                 base_image_support,
             </if>
+            <if test="initSupport != null">
+                init_support,
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="id != null">
@@ -320,7 +323,10 @@
                 #{imageStatus},
             </if>
             <if test="baseImageSupport != null">
-                #{baseImageSupport}
+                #{baseImageSupport},
+            </if>
+            <if test="initSupport != null">
+                #{initSupport},
             </if>
         </trim>
     </insert>
@@ -376,6 +382,9 @@
             </if>
             <if test="baseImageSupport != null">
                 base_image_support = #{baseImageSupport},
+            </if>
+            <if test="initSupport != null">
+                init_support = #{initSupport}
             </if>
         </set>
         where uuid = #{uuid}

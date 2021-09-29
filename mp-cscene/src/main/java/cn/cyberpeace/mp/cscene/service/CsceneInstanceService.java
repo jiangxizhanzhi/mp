@@ -13,13 +13,18 @@ import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.core.CsceneInstanceHandler;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceRoleModel;
+import cn.cyberpeace.mp.cscene.report.rabbitmq.RabbitmqCsceneReporter;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceQueryParams;
+import cn.cyberpeace.mp.cscene.service.taskpool.CsceneReportTaskPool;
+import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
+import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
 import cn.cyberpeace.mp.scenepluginflow.bo.base.Flow;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +40,14 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         BaseModelFields, CsceneInstanceQueryParams> {
 
     private CsceneInstanceRoleMapper csceneInstanceRoleMapper;
+
+    @Autowired
+    private RabbitmqCsceneReporter csceneReporter;
+
+    @Autowired
+    private ScenePluginCloudSceneService scenePluginCloudSceneService;
+
+    private final CsceneReportTaskPool csceneReportTaskPool = CsceneReportTaskPool.getInstance();
 
     private List<CsceneInstanceRoleModel> readCsceneInstanceRoles(String[] csceneInstanceIds) {
         if (csceneInstanceIds == null || csceneInstanceIds.length == 0) {
@@ -77,8 +90,11 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     public ServiceResult<Boolean> deleteById(String id, CsceneContextBO context) {
         var instanceHandler = new CsceneInstanceHandler(id, context);
-        instanceHandler.delete();
-        return new ServiceResult<>(true);
+        var flag = instanceHandler.delete();
+        if (flag) {
+            CsceneReportTaskPool.getInstance().executeTask(() -> csceneReporter.reportDeleteCsceneInstance(id));
+        }
+        return new ServiceResult<>(flag);
     }
 
     public ServiceResult<Integer> bulkDeleteByIds(String[] ids, CsceneContextBO context) {
@@ -95,6 +111,21 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         } else {
             return new ServiceResult<>(result);
         }
+    }
+
+    public ServiceResult<List<NodeSessionBO>> getNodeSessions(String id, String nodeId) {
+        var csceneInstanceResult = get(id).getSource();
+        if (csceneInstanceResult == null) {
+            return new ServiceResult<>(new ArrayList<>());
+        }
+        var csceneInstance = csceneInstanceResult.getObj();
+        var sceneId = csceneInstance.getScene();
+        if (StringUtils.isEmpty(sceneId)) {
+            return new ServiceResult<>(new ArrayList<>());
+        }
+
+        return scenePluginCloudSceneService.getSceneRemoteSessions(sceneId,
+                StringUtils.isEmpty(nodeId) ? null : new String[]{nodeId}, true, false);
     }
 
     public ServiceResult<Flow> startFlow(String id, String toNodeId, String flowId, CsceneContextBO context) {

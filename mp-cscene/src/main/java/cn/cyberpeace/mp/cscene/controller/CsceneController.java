@@ -3,10 +3,7 @@ package cn.cyberpeace.mp.cscene.controller;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.cscene.bo.CsceneBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCreateContextBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneStatBO;
+import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
@@ -21,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Api(value = "场景模板", tags = "CSCENE-场景模板")
 @Slf4j
@@ -74,7 +72,7 @@ public class CsceneController implements BaseModelListControllerBase {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),
     })
-    @GetMapping(value = "/clone", params = "id")
+    @PostMapping(value = "/clone", params = "id")
     public ServiceResult<CsceneBO> clone(@RequestParam String id) {
         return modelService.clone(id, null).asResult();
     }
@@ -117,7 +115,17 @@ public class CsceneController implements BaseModelListControllerBase {
     @ApiOperation("获取场景模板统计数据")
     @GetMapping("/stat")
     public ServiceResult<List<CsceneStatBO>> stat(@RequestParam String[] ids) {
-        return csceneSpecialService.stat(ids, null).asResult();
+        return csceneSpecialService.stat(ids).asResult();
+    }
+
+    @ApiOperation("统计靶标对应引用该靶标的场景模板")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "images", value = "靶标名称", dataTypeClass = String.class, allowMultiple = true),
+    })
+    @GetMapping("/stat_device_refer_cscenes")
+    public ServiceResult<Map<String, List<DeviceReferCsceneStat>>> statDeviceReferCscenes(
+            @RequestParam String[] images) {
+        return csceneSpecialService.statDeviceReferCscenes(images).asResult();
     }
 
 }

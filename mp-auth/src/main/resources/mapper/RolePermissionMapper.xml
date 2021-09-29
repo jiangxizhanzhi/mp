@@ -3,16 +3,22 @@
 <mapper namespace="cn.cyberpeace.mp.auth.repository.RolePermissionMapper">
 
     <select id="listTargetsByRoleId" resultType="cn.cyberpeace.mp.auth.model.TargetModel">
-        select distinct * from mp_auth_target where id in
-            (select target from mp_auth_role_permission where owner = #{roleId})
+        select distinct *
+        from mp_auth_target
+        where id in
+              (select target from mp_auth_role_permission where owner = #{roleId})
     </select>
 
-    <delete id="deleteByRoleId">
-        delete from mp_auth_role_permission where owner = #{roleId}
+    <delete id="deleteByOwner">
+        delete
+        from mp_auth_role_permission
+        where owner = #{owner}
     </delete>
 
-    <delete id="deleteByTargetId">
-        delete from mp_auth_role_permission where target = #{targetId}
+    <delete id="deleteByTarget">
+        delete
+        from mp_auth_role_permission
+        where target = #{target}
     </delete>
-    
+
 </mapper>

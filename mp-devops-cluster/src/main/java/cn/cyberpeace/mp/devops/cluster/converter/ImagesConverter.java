@@ -63,7 +63,7 @@ public interface ImagesConverter extends BaseConverter{
     /**
      * 导出
      */
-    HttpResponse export(String uuid);
+    HttpResponse export(String uuid,String imageName);
 
     /**
      * 创建虚拟机/容器
