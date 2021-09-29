@@ -42,12 +42,12 @@ public class HttpClient {
     private String contentType = DEFAULT_CONTENT_TYPE;
 
     private String formatUrl(String url, HttpParam param) {
-        String serverUrl = StringUtils.join(server, url);
+        var serverUrl = StringUtils.join(server, url);
         if (param == null) {
             return serverUrl;
         }
 
-        return StringUtils.joinWith("?", serverUrl, param.toPathString());
+        return StringUtils.join(serverUrl, param.toPathString());
     }
 
     private Map<String, String> mergeHeaders(Map<String, String> mergingHeaders) {

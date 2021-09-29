@@ -72,7 +72,7 @@ public class CsceneController implements BaseModelListControllerBase {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),
     })
-    @GetMapping(value = "/clone", params = "id")
+    @PostMapping(value = "/clone", params = "id")
     public ServiceResult<CsceneBO> clone(@RequestParam String id) {
         return modelService.clone(id, null).asResult();
     }

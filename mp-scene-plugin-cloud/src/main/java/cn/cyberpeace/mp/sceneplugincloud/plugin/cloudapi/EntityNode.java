@@ -10,13 +10,13 @@ import com.fasterxml.jackson.core.type.TypeReference;
 public class EntityNode extends CloudClient {
 
     public EntityNodeCreateData create(EntityNodeCreateData createData) {
-        CloudResponse<EntityNodeCreateData> result = post(CloudUrlConstant.ENTITY_NODE_CREATE_URL, createData, null,
+        CloudResponse<EntityNodeCreateData> result = cloudPost(CloudUrlConstant.ENTITY_NODE_CREATE_URL, createData, null,
                 new TypeReference<CloudResponse<EntityNodeCreateData>>() {}, true);
         return result.getData();
     }
 
     public boolean delete(EntityNodeDeleteData deleteData) {
-        CloudResponse<Object> result = delete(CloudUrlConstant.ENTITY_NODE_DELETE_URL, deleteData, null,
+        CloudResponse<Object> result = cloudDelete(CloudUrlConstant.ENTITY_NODE_DELETE_URL, deleteData, null,
                 new TypeReference<CloudResponse<Object>>() {}, true);
         return true;
     }

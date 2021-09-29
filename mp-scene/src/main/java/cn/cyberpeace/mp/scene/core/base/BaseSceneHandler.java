@@ -1334,6 +1334,15 @@ public abstract class BaseSceneHandler<
     }
 
     /**
+     * 获取插件handler
+     * @param pluginKey 插件代号
+     */
+    public <H9> H9 getPluginHandler(String pluginKey) {
+        var plugin = pluginMap.getOrDefault(pluginKey, null);
+        return (H9) plugin;
+    }
+
+    /**
      * 获取插件全局数据
      * @param pluginKey 插件代号
      */
