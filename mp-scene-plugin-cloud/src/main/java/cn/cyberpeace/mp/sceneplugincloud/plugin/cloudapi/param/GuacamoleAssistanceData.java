@@ -13,4 +13,6 @@ public class GuacamoleAssistanceData implements CloudHttpData {
     private String assistanceUrl;
     private Boolean success;
     private String requestId;
+
+    private String message;
 }

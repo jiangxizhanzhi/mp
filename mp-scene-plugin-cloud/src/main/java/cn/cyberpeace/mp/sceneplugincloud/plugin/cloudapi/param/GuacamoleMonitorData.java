@@ -13,4 +13,6 @@ public class GuacamoleMonitorData implements CloudHttpData {
     private String monitorUrl;
     private Boolean success;
     private String requestId;
+
+    private String message;
 }
