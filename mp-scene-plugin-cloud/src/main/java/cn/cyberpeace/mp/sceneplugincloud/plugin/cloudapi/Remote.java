@@ -16,6 +16,9 @@ public class Remote extends CloudClient {
         var params = new GetGuacamoleMonitorParams(connectionId);
         GuacamoleMonitorData result = getHttpClient().get(CloudUrlConstant.GET_MONITOR_URL, params,
                 GuacamoleMonitorData.class);
+        if (result == null) {
+            return null;
+        }
         if (!Boolean.TRUE.equals(result.getSuccess())) {
             return null;
         }
@@ -37,6 +40,9 @@ public class Remote extends CloudClient {
         var params = new GetGuacamoleAssistanceParams(connectionId);
         GuacamoleAssistanceData result = getHttpClient().get(CloudUrlConstant.GET_ASSISTANCE_URL, params,
                 GuacamoleAssistanceData.class);
+        if (result == null) {
+            return null;
+        }
         if (!Boolean.TRUE.equals(result.getSuccess())) {
             return null;
         }
