@@ -16,7 +16,6 @@ import cn.cyberpeace.mp.devops.cluster.request.InstallerDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerRequest;
 import cn.cyberpeace.mp.devops.cluster.service.InstallerService;
-import cn.cyberpeace.mp.devops.cluster.service.TargetLogoService;
 import cn.cyberpeace.mp.devops.cluster.utils.FileUtils;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import com.alibaba.fastjson.JSONArray;
@@ -39,12 +38,9 @@ public class InstallerConverterImpl implements InstallerConverter {
 
     private InstallerService installerService;
 
-    private TargetLogoService targetLogoService;
-
     @Autowired
-    public InstallerConverterImpl(InstallerService installerService,TargetLogoService targetLogoService) {
+    public InstallerConverterImpl(InstallerService installerService) {
         this.installerService = installerService;
-        this.targetLogoService = targetLogoService;
     }
 
     @Override
@@ -83,10 +79,6 @@ public class InstallerConverterImpl implements InstallerConverter {
 
     @Override
     public InstallerConvertModel add(InstallerRequest request) {
-        if (Objects.nonNull(request.getLogoFile()) && request.getLogoFile().getSize() > 0 ){
-            String logo = targetLogoService.uploadLogo(request.getLogoFile());
-            request.setLogo(logo);
-        }
         InstallerFormDataCloudPlatformModel installer = convertInstallerRequest(request);
         installer.setUuid(request.getUuid());
         List<MultipartFile> multipartFiles = new ArrayList<>();

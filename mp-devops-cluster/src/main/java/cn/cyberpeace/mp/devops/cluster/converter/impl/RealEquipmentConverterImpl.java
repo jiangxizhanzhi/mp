@@ -18,7 +18,6 @@ import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentRequest;
 import cn.cyberpeace.mp.devops.cluster.service.DeviceService;
 import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.devops.cluster.service.RealEquipmentService;
-import cn.cyberpeace.mp.devops.cluster.service.TargetLogoService;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -43,20 +42,16 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
 
     private ImageMapper imageMapper;
 
-    private TargetLogoService targetLogoService;
-
-
     private ImageAuthMapper imageAuthMapper;
 
     @Autowired
     public RealEquipmentConverterImpl(RealEquipmentService realEquipmentService, DeviceService deviceService,
                                       DevopsTargetService devopsTargetService, ImageMapper imageMapper,
-                                      TargetLogoService targetLogoService,ImageAuthMapper imageAuthMapper) {
+                                      ImageAuthMapper imageAuthMapper) {
         this.realEquipmentService = realEquipmentService;
         this.deviceService = deviceService;
         this.devopsTargetService = devopsTargetService;
         this.imageMapper = imageMapper;
-        this.targetLogoService = targetLogoService;
         this.imageAuthMapper = imageAuthMapper;
     }
 
@@ -142,10 +137,6 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
     @Transactional
     @Override
     public Device add(RealEquipmentRequest request) {
-        if (Objects.nonNull(request.getLogoFile()) && request.getLogoFile().getSize() > 0 ){
-            String logo = targetLogoService.uploadLogo(request.getLogoFile());
-            request.setLogo(logo);
-        }
         Device device = convertRequest(request);
         if (Objects.isNull(device)){
             return null;
@@ -158,10 +149,6 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
     @Transactional
     @Override
     public Device update(RealEquipmentRequest request) {
-        if (Objects.nonNull(request.getLogoFile()) && request.getLogoFile().getSize() > 0 ){
-            String logo = targetLogoService.uploadLogo(request.getLogoFile());
-            request.setLogo(logo);
-        }
         Device device = convertRequest(request);
         Device result = realEquipmentService.update(request.getUuid(),device);
         devopsTargetService.updateById(result);

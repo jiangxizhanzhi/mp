@@ -5,9 +5,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 
+@Slf4j
 public class JsonUtils {
 
     /**
@@ -23,7 +25,7 @@ public class JsonUtils {
         try {
             return mapper.writeValueAsString(object);
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            log.error("toUnderlineJSONString error",e);
         }
         return null;
     }
@@ -43,7 +45,7 @@ public class JsonUtils {
         try {
            return mapper.readValue(json, clazz);
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            log.error("toSnakeObject error",e);
         }
         return null;
     }
