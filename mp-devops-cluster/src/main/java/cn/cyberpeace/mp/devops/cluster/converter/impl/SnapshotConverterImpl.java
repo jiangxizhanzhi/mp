@@ -67,9 +67,4 @@ public class SnapshotConverterImpl implements SnapshotConverter {
         mergeCloudPlatform.setImageType(request.getImageType());
         return scenariosSnapshotService.mergeSnapshot(mergeCloudPlatform);
     }
-
-    @Override
-    public Boolean delete(List<String> uuids) {
-        return null;
-    }
 }

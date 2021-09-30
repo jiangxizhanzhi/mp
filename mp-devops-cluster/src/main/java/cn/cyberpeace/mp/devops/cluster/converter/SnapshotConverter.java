@@ -5,8 +5,6 @@ import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.request.SnapshotMergeRequest;
 import cn.cyberpeace.mp.devops.cluster.request.SnapshotRequest;
 
-import java.util.List;
-
 public interface SnapshotConverter {
 
     /**
@@ -26,9 +24,4 @@ public interface SnapshotConverter {
      * @return
      */
     BaseCloudPlatformModel merge(SnapshotMergeRequest request);
-
-    /**
-     * 删除
-     */
-    Boolean delete(List<String> uuids);
 }

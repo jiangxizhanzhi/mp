@@ -249,6 +249,7 @@ public class ImagesConverterImpl implements ImagesConverter {
      * @param uuid
      * @return
      */
+    @Override
     public List<UserDto> findUsersByUuid(String uuid){
         List<TargetAuthModel> targetAuthModels = imageAuthMapper.findByTarget(uuid);
         if (CollectionUtils.isEmpty(targetAuthModels)){
