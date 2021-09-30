@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
-import cn.cyberpeace.mp.base.util.BoolUtils;
 import cn.cyberpeace.mp.base.util.CollectionUtils;
 import cn.cyberpeace.mp.base.util.IntUtils;
 import cn.cyberpeace.mp.base.util.TextUtils;
@@ -418,13 +417,13 @@ public class CreateHandler extends HandlerCommon {
         var connectedSrcPorts = getPluginHandler().getElementConnectedSrcPorts(srcElement.getId());
         for (var connectedSrcPort : connectedSrcPorts) {
             var connectedCloudPort = getPluginHandler().getPort(connectedSrcPort.getId());
-            if (connectedCloudPort == null || connectedCloudPort.getResourceId() == null) {
+            if (connectedCloudPort == null || StringUtils.isEmpty(connectedCloudPort.getResourceId())) {
                 continue;
             }
             var connectedSrcElement = getPluginHandler().getPortSrcElement(connectedSrcPort.getId());
-            var connectedCloutElement = getPluginHandler().getElement(connectedSrcElement.getId());
-            if (connectedCloutElement == null || connectedCloutElement.getVirtualType() == null
-                    || connectedCloutElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
+            var connectedCloudElement = getPluginHandler().getElement(connectedSrcElement.getId());
+            if (connectedCloudElement == null || connectedCloudElement.getVirtualType() == null
+                    || !connectedCloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
                 continue;
             }
             targetPorts.add(connectedCloudPort.getResourceId());
