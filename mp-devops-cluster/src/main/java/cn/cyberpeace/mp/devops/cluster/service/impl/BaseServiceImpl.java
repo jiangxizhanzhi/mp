@@ -22,6 +22,7 @@ import java.util.Map;
 
 /**
  * 基础对接接口层
+ * @author wanggang
  */
 @Slf4j
 @Service
