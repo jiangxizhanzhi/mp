@@ -96,7 +96,6 @@ public class BaseOpenStackServiceImpl extends BaseServiceImpl {
     /**
      * 通过PUT方式查询信息
      * @param api
-     * @param body
      * @return
      */
     @Override
