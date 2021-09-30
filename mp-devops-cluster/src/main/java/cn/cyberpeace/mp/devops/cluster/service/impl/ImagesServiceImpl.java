@@ -38,19 +38,8 @@ public class ImagesServiceImpl extends BaseOpenStackServiceImpl implements Image
     }
 
     @Override
-    public void build() {
-
-    }
-
-    @Override
     public HttpResponse export(String uuid,String imageName) {
         return super.downLoad(CPCLOUD_DEVICE + URL_VERSION + "/image/export?device_uuid=" + uuid + "&&image_name=" + imageName);
-    }
-
-
-    @Override
-    public DeviceCloudPlatformModel pageForQuickCreate(String getParams) {
-        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + "/quick_create"+ getParams, DeviceCloudPlatformModel.class);
     }
 
     @Override
