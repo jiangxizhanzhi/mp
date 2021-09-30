@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.devops.cluster.request.TargetSceneRequest;
 import cn.cyberpeace.mp.devops.cluster.service.DeviceService;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,6 +25,7 @@ public class TargetConverterImpl implements TargetConverter {
 
     private DeviceService deviceService;
 
+    @Autowired
     public TargetConverterImpl(ImageMapper imageMapper, DeviceService deviceService) {
         this.imageMapper = imageMapper;
         this.deviceService = deviceService;
