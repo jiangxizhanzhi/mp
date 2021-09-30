@@ -100,7 +100,7 @@ public class DevopsTargetController {
         try {
             fileList = FileUtils.transferToFileMap(Arrays.asList(file));
         } catch (IOException e) {
-           log.error("file transfer error");
+           log.error("file transfer error",e);
         }
         BaseCloudPlatformModel model = imagesService.upload(fileList,type);
         if (Objects.isNull(model) || !model.isSuccess()){

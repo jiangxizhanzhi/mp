@@ -65,6 +65,7 @@ public class BaseOpenStackServiceImpl extends BaseServiceImpl {
      * @param body
      * @return
      */
+    @Override
     protected String sendPost(String api,String body){
         return super.sendPost(devopsConfig.getCpUrl().concat(api),body);
     }
