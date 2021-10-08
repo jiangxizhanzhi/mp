@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @Description
+ * @Description 构建 HttpHeader
  * @Author maojun
  * @Date 2021/9/8
  */

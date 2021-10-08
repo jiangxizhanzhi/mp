@@ -13,7 +13,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * @Description
+ * @Description 将对象转成请求参数,支持指定部分参数或者移除部分参数
  * @Author maojun
  * @Date 2021/9/9
  */

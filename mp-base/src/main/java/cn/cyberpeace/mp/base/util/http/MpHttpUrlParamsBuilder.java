@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.base.util.http;
 
 /**
- * @Description
+ * @Description 构建 url params
  * @Author maojun
  * @Date 2021/9/9
  */
@@ -10,7 +10,7 @@ public class MpHttpUrlParamsBuilder {
     private static InputParser LINE_STR_PARSER = new LineStrParser();
 
     public static <T> PlainObjBuilder<T> builderForObj(T data) {
-        return builderForObj(data, ParseMode.SNAKE_JSON);
+        return builderForObj(data, ParseMode.SNAKE);
     }
 
     public static <T> PlainObjBuilder<T> builderForObj(T data, ParseMode mode) {
@@ -18,7 +18,7 @@ public class MpHttpUrlParamsBuilder {
     }
 
     public static MapBuilder builderForMap() {
-        return builderForMap(ParseMode.SNAKE_JSON);
+        return builderForMap(ParseMode.SNAKE);
     }
 
     public static MapBuilder builderForMap(ParseMode mode) {

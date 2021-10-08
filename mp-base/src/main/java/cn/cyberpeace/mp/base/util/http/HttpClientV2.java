@@ -7,7 +7,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @Description
+ * @Description HttpClient , http请求复用一个 HttpClient
  * @Author maojun
  * @Date 2021/9/8
  */

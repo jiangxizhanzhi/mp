@@ -7,11 +7,11 @@ package cn.cyberpeace.mp.base.util.http;
  */
 public enum ParseMode {
     /**
-     * 直接转换成json,不转换任何的key
+     * 保持key的格式,不做任何转换
      */
-    JUST_JSON,
+    KEEP,
     /**
-     * 转成json,将key转成小写字母+下划线的写法, userName->user_name
+     * 将key转成小写字母+下划线的写法, userName->user_name
      */
-    SNAKE_JSON
+    SNAKE
 }

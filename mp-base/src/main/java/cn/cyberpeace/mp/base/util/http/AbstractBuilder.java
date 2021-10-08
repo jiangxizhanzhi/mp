@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @Description
+ * @Description 构建请求参数的基类
  * @Author maojun
  * @Date 2021/9/9
  */

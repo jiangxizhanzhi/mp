@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.base.util.http;
 import java.util.Map;
 
 /**
- * @Description
+ * @Description 借助 map 构建请求参数
  * @Author maojun
  * @Date 2021/9/9
  */

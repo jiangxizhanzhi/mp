@@ -9,14 +9,14 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * @Description
+ * @Description 将业务参数转成url请求参数的格式, a=1&b=2
  * @Author maojun
  * @Date 2021/9/9
  */
 class LineStrParser implements InputParser {
     @Override
     public String parse(Map<String, Object> values, ParseMode mode) {
-        if (mode == ParseMode.SNAKE_JSON) {
+        if (mode == ParseMode.SNAKE) {
             Map<String, Object> snakeKeyMap = Maps.newHashMapWithExpectedSize(values.size());
             for (Map.Entry<String, Object> entry : values.entrySet()) {
                 snakeKeyMap.put(BeanUtils.humpToLine(entry.getKey()), entry.getValue());

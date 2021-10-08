@@ -27,7 +27,7 @@ public class HttpTest {
                 .build();
 
         // 通过对象 构建body key转成蛇形写法
-        MpHttpReqBodyBuilder.builderFor(user, ParseMode.SNAKE_JSON)
+        MpHttpReqBodyBuilder.builderFor(user, ParseMode.SNAKE)
                 // 排除user特定的属性
                 .addExcludeFields(User::getName, User::getPassword)
                 // 选取user特定的属性

@@ -18,7 +18,7 @@ import java.util.Collections;
 import java.util.Map;
 
 /**
- * @Description
+ * @Description Http 操作的入口工具类
  * @Author maojun
  * @Date 2021/9/8
  */

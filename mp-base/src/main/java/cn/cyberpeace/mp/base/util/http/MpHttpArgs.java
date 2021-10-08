@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.Map;
 
 /**
- * @Description
+ * @Description http请求中所需参数的容器,包括 header、request_body、url_params、request_config
  * @Author maojun
  * @Date 2021/9/8
  */
