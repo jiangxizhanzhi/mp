@@ -23,13 +23,6 @@ public interface SnapshotService extends BaseCloudPlatformService{
     Snapshot create(SnapshotCreate snapshotCreate);
 
     /**
-     * 合并快照
-     * @param deviceUuid
-     * @return
-     */
-    Snapshot merge(String deviceUuid);
-
-    /**
      * 删除
      */
     Boolean delete(List<String> uuids);

@@ -25,6 +25,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * 服务应用管理
+ * @author wanggang
+ */
 @Service
 public class InstallerServiceImpl extends BaseOpenStackServiceImpl implements InstallerService {
 

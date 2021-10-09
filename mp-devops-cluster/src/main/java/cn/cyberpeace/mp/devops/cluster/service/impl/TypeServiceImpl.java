@@ -6,6 +6,9 @@ import cn.cyberpeace.mp.devops.cluster.service.TypeService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 
+/**
+ * @author wanggang
+ */
 @Service
 public class TypeServiceImpl extends BaseOpenStackServiceImpl implements TypeService {
 

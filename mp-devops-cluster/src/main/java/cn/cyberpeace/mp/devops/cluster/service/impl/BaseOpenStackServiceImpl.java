@@ -13,6 +13,7 @@ import java.util.Map;
 
 /**
  * 基础对接云平台接口层
+ * @author wanggang
  */
 @Slf4j
 @Service
