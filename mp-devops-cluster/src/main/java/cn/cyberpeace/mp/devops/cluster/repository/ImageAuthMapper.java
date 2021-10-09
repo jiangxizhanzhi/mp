@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.devops.cluster.model.ImageAuthTotalCount;
 import cn.cyberpeace.mp.devops.cluster.model.TargetAuthModel;
 import cn.cyberpeace.mp.devops.cluster.model.TargetModel;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -22,7 +23,7 @@ public interface ImageAuthMapper extends BasePermissionMapper {
      * @param ids
      * @return
      */
-    List<ImageAuthTotalCount> totalCount(List<String> ids);
+    List<ImageAuthTotalCount> totalCount(@Param("ids") List<String> ids);
 
     /**
      * 根据镜像ID查询用户信息
@@ -36,5 +37,5 @@ public interface ImageAuthMapper extends BasePermissionMapper {
      * @param ids
      * @return
      */
-    Integer deleteByTargets(List<String> ids);
+    Integer deleteByTargets(@Param("ids") List<String> ids);
 }
