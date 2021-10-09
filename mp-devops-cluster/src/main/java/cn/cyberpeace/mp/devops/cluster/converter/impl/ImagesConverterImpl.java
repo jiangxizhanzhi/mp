@@ -105,6 +105,8 @@ public class ImagesConverterImpl implements ImagesConverter {
         dto.setSystemArchitecure(request.getSystemArchitecure());
         dto.setLanguage(request.getLanguage());
         dto.setImageStatus(request.getImageStatus());
+        dto.setBaseImageSupport(request.getBaseImageSupport());
+
         Integer total = imageMapper.totalCount(dto);
 
         ImageConvertPageModel convertModel = new ImageConvertPageModel();
@@ -123,7 +125,7 @@ public class ImagesConverterImpl implements ImagesConverter {
         }
         DeviceCloudPlatformModel model = deviceService.findByIds(ids);
 
-        if (Objects.isNull(model)){
+        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getItems())){
             convertModel.setTotal(0);
             convertModel.setModelList(Lists.newArrayList());
             return convertModel;
@@ -247,6 +249,7 @@ public class ImagesConverterImpl implements ImagesConverter {
      * @param uuid
      * @return
      */
+    @Override
     public List<UserDto> findUsersByUuid(String uuid){
         List<TargetAuthModel> targetAuthModels = imageAuthMapper.findByTarget(uuid);
         if (CollectionUtils.isEmpty(targetAuthModels)){

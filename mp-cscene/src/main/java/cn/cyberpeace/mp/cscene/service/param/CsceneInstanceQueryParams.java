@@ -15,18 +15,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @ApiModel
 public class CsceneInstanceQueryParams extends QueryParams {
-    @ApiModelProperty(value = "引用类型")
-    private String referenceType;
-    @ApiModelProperty(value = "场景实例状态")
-    private String sceneStatus;
-    @ApiModelProperty(value = "是否只显示活动状态")
-    private Boolean active;
-    @ApiModelProperty(value = "是否只显示已结束")
-    private Boolean over;
-    @ApiModelProperty(value = "是否只显示异常")
-    private Boolean error;
-    @ApiModelProperty(value = "是否只显示自己的场景")
-    private Boolean self;
     @ApiModelProperty(value = "场景访问用户id")
     private String accessUserId;
 }

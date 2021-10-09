@@ -13,7 +13,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.AnnotationUtils;
-import springfox.documentation.builders.*;
+import springfox.documentation.builders.ApiInfoBuilder;
+import springfox.documentation.builders.ModelPropertyBuilder;
+import springfox.documentation.builders.PathSelectors;
+import springfox.documentation.builders.RequestHandlerSelectors;
+import springfox.documentation.builders.RequestParameterBuilder;
 import springfox.documentation.schema.Annotations;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.ParameterType;
@@ -252,17 +256,14 @@ public class Swagger2Config implements ModelPropertyBuilderPlugin {
 
     @Override
     public void apply(ModelPropertyContext context) {
-        //获取当前字段的类型
-        final Class fieldType = context.getBeanPropertyDefinition().get().getField().getRawType();
-
         //为枚举字段设置注释
-        descForEnumFields(context, fieldType);
+        descForEnumFields(context);
     }
 
     /**
      * 为枚举字段设置注释
      */
-    private void descForEnumFields(ModelPropertyContext context, Class fieldType) {
+    private void descForEnumFields(ModelPropertyContext context) {
         Optional<ApiModelProperty> annotation = Optional.empty();
 
         // 找到 @ApiModelProperty 注解修饰的枚举类

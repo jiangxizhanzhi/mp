@@ -15,6 +15,8 @@ public class BaseSceneModel extends BaseModel {
     private String description;
     @DefaultStr
     private String file;
+    @DefaultStr
+    private String displayContext;
     @DefaultBool
     private Boolean deleted;
 

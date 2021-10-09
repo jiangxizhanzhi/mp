@@ -27,21 +27,9 @@ public interface ImagesService extends BaseCloudPlatformService  {
     Device update(String uuid,Device device);
 
     /**
-     * 构建
-     */
-    void build();
-
-    /**
      * 导出
      */
     HttpResponse export(String uuid,String imageName);
-
-    /**
-     * 根据快速构建查询
-     * @param getParams
-     * @return
-     */
-    DeviceCloudPlatformModel pageForQuickCreate(String getParams);
 
 
     Device quickCreate(DeviceQuickCreateCloudPlatformModel model);

@@ -242,8 +242,7 @@ public class CloudPlatformMonitorController {
     public Result<List<HypervisorServiceStateResponse>> serviceState(){
         List<HypervisorServiceStateConvertModel> modelList = hypervisorConverter.serviceState();
         List<HypervisorServiceStateResponse> result = modelList.stream().map(m ->
-            HypervisorServiceStateResponse.builder().name(m.getName()).state(m.getState()).alive(m.getAlive()).build()
-        ).collect(Collectors.toList());
+                new HypervisorServiceStateResponse(m.getName(),m.getAlive(),m.getState())).collect(Collectors.toList());
         return new Result<>(result);
     }
 

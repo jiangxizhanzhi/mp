@@ -13,6 +13,7 @@ import java.util.Map;
 
 /**
  * 基础对接云平台接口层
+ * @author wanggang
  */
 @Slf4j
 @Service
@@ -65,6 +66,7 @@ public class BaseOpenStackServiceImpl extends BaseServiceImpl {
      * @param body
      * @return
      */
+    @Override
     protected String sendPost(String api,String body){
         return super.sendPost(devopsConfig.getCpUrl().concat(api),body);
     }
@@ -96,7 +98,6 @@ public class BaseOpenStackServiceImpl extends BaseServiceImpl {
     /**
      * 通过PUT方式查询信息
      * @param api
-     * @param body
      * @return
      */
     @Override

@@ -199,6 +199,34 @@ public class RealEquipmentController {
         if (CollectionUtils.isNotEmpty(realEquipment.getExtEntityAccess())) {
             response.setAddress(realEquipment.getExtEntityAccess().stream().map(ExtEntityAccess::getIp).collect(Collectors.toList()));
         }
+        TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type();
+        TypeAllConvertModel language = typeConverter.findLanguage();
+        TypeAllConvertModel systemArchitecure = typeConverter.findSystemArchitecure();
+
+        ExtSystemInfo extSystemInfo = realEquipment.getExtSystemInfo();
+        if (Objects.nonNull(extSystemInfo)){
+            if (Objects.nonNull(l1AndL2AndL3Type) && CollectionUtils.isNotEmpty(l1AndL2AndL3Type.getThirdTypeList())) {
+                List<String> systemTypeList = l1AndL2AndL3Type.getThirdTypeList().stream()
+                        .filter(typeConvertModel -> typeConvertModel.getId().equals(extSystemInfo.getSystemType()))
+                        .map(TypeConvertModel::getName).collect(Collectors.toList());
+                extSystemInfo.setSystemTypeName(CollectionUtils.isEmpty(systemTypeList) ? null : systemTypeList.get(0));
+            }
+            if (Objects.nonNull(language) && CollectionUtils.isNotEmpty(language.getIdStringModelList())){
+                List<String> languageTypeList = language.getIdStringModelList().stream()
+                        .filter(typeConvertModel -> typeConvertModel.getId().equals(extSystemInfo.getLanguage()))
+                        .map(TypeIdStringConvertModel::getName).collect(Collectors.toList());
+                extSystemInfo.setLanguageName(CollectionUtils.isEmpty(languageTypeList) ? null : languageTypeList.get(0));
+            }
+
+            if (Objects.nonNull(systemArchitecure) && CollectionUtils.isNotEmpty(systemArchitecure.getIdStringModelList())){
+                List<String> systemArchitecureTypeList = systemArchitecure.getIdStringModelList().stream()
+                        .filter(typeConvertModel -> typeConvertModel.getId().equals(extSystemInfo.getSystemArchitecture()))
+                        .map(TypeIdStringConvertModel::getName).collect(Collectors.toList());
+                extSystemInfo.setSystemArchitectureName(CollectionUtils.isEmpty(systemArchitecureTypeList) ? null : systemArchitecureTypeList.get(0));
+            }
+            response.setExtSystemInfo(extSystemInfo);
+        }
+
         if (Objects.nonNull(realEquipment.getExtEntity())){
             ExtEntity extEntity = realEquipment.getExtEntity();
             response.setModel(extEntity.getStyle());
@@ -288,7 +316,8 @@ public class RealEquipmentController {
 
         Integer page = request.getPage();
         Integer perPage = request.getPerPage();
-        List<SnmpInterfaceResourceCloudPlatform.Interfaces> interfaces = model.getResult().subList((page - 1) * perPage, (page - 1) * perPage + perPage);
+        Integer to = (page * perPage) > model.getResult().size() ? model.getResult().size() : page * perPage;
+        List<SnmpInterfaceResourceCloudPlatform.Interfaces> interfaces = model.getResult().subList((page - 1) * perPage, to);
         List<RealEquipmentNetworkCardPageResponse> list = interfaces.stream().map(v ->
                 RealEquipmentNetworkCardPageResponse.builder().name(v.getInterfaceName()).inflow(v.getInTraffic()).outflow(v.getOutTraffic()).build())
                 .collect(Collectors.toList());

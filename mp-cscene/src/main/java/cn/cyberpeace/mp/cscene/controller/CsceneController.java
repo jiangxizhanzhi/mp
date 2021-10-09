@@ -83,13 +83,13 @@ public class CsceneController implements BaseModelListControllerBase {
     })
     @DeleteMapping(params = "id")
     public ServiceResult<Boolean> delete(@RequestParam String id) {
-        return modelService.deleteById(id, false, null).asResult();
+        return modelService.deleteById(id, true, false, null).asResult();
     }
 
     @ApiOperation("批量删除场景模板")
     @DeleteMapping("/bulk_delete")
     public ServiceResult<Integer> bulkDelete(@RequestBody String[] ids) {
-        return modelService.bulkDeleteByIds(ids, false, null).asResult();
+        return modelService.bulkDeleteByIds(ids, true, false, null).asResult();
     }
 
     @ApiOperation("创建场景模板测试实例")
@@ -114,8 +114,8 @@ public class CsceneController implements BaseModelListControllerBase {
 
     @ApiOperation("获取场景模板统计数据")
     @GetMapping("/stat")
-    public ServiceResult<List<CsceneStatBO>> stat(@RequestParam String[] ids) {
-        return csceneSpecialService.stat(ids).asResult();
+    public ServiceResult<List<CsceneStat>> statCscenes(@RequestParam String[] ids) {
+        return csceneSpecialService.statCscenes(ids).asResult();
     }
 
     @ApiOperation("统计靶标对应引用该靶标的场景模板")

@@ -1,10 +1,10 @@
 package cn.cyberpeace.mp.auth.base.repository;
 
+import cn.cyberpeace.mp.auth.base.model.BasePermissionModel;
 import cn.cyberpeace.mp.auth.base.repository.stereotype.PermissionModelClass;
 import cn.cyberpeace.mp.base.annotation.Recommendation;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;
-import cn.cyberpeace.mp.base.model.auth.BasePermissionModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.condition.AndCondition;
 import cn.cyberpeace.mp.base.repository.condition.ConnectorCond;

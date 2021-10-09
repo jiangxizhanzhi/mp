@@ -44,11 +44,6 @@ public class VmServiceImpl extends BaseOpenStackServiceImpl implements VmService
     }
 
     @Override
-    public void create(VmCreateCloudPlatformModel vmCreateCloudPlatformModel) {
-        super.sendPost(URL_VERSION + "/scenarios/vm", JsonUtils.toUnderlineJSONString(vmCreateCloudPlatformModel));
-    }
-
-    @Override
     public BaseCloudPlatformModel action(VmActionCloudPlatformModel model, String uuid) {
         return super.sendPost(URL_VERSION + "/instances/" + uuid  + "/action", JsonUtils.toUnderlineJSONString(model),BaseCloudPlatformModel.class);
     }

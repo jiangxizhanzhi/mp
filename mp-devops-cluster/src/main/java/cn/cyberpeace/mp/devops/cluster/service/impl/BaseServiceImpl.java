@@ -22,6 +22,7 @@ import java.util.Map;
 
 /**
  * 基础对接接口层
+ * @author wanggang
  */
 @Slf4j
 @Service
@@ -45,7 +46,7 @@ public class BaseServiceImpl {
     protected String sendGet(String url){
         String result = "";
         try {
-            result = HttpUtils.getInstance().sendGet(url);
+            result = HttpUtils.sendGet(url);
             if (log.isInfoEnabled()) {
                 log.info("=====GET调用url：{},对应返回结果信息：{}", url, result);
             }
@@ -63,7 +64,7 @@ public class BaseServiceImpl {
     protected HttpResponse downLoad(String url){
         HttpResponse result = null;
         try {
-            result = HttpUtils.getInstance().sendGetForDownLoad(url);
+            result = HttpUtils.sendGetForDownLoad(url);
             if (log.isInfoEnabled()) {
                 log.info("=====GET调用url：{},对应返回结果信息：{}", url, result);
             }
@@ -81,7 +82,7 @@ public class BaseServiceImpl {
     protected String sendGet(String url,Map<String,String> headers){
         String result = "";
         try {
-            result = HttpUtils.getInstance().sendGet(url,headers);
+            result = HttpUtils.sendGet(url,headers);
             if (log.isInfoEnabled()) {
                 log.info("=====GET调用url：{},对应返回结果信息：{}", url, result);
             }
@@ -102,7 +103,7 @@ public class BaseServiceImpl {
         T model = null;
         String result = "";
         try {
-            result =  HttpUtils.getInstance().sendGet(url);
+            result =  HttpUtils.sendGet(url);
             if (log.isInfoEnabled()) {
                 log.info("=====GET调用url：{},对应返回结果信息：{}", url, result);
             }
@@ -125,7 +126,7 @@ public class BaseServiceImpl {
         T model = null;
         String result = "";
         try {
-            result =  HttpUtils.getInstance().sendGet(url,headers);
+            result =  HttpUtils.sendGet(url,headers);
             if (log.isInfoEnabled()) {
                 log.info("=====GET调用url：{},对应返回结果信息：{}", url, result);
             }
@@ -145,7 +146,7 @@ public class BaseServiceImpl {
     protected String sendPost(String url,String body){
         String result = "";
         try {
-            result = HttpUtils.getInstance().sendPost(url,body);
+            result = HttpUtils.sendPost(url,body);
             if (log.isInfoEnabled()) {
                 log.info("=====POST调用url：{},参数：{},对应返回结果信息：{}", url, body, result);
             }
@@ -167,7 +168,7 @@ public class BaseServiceImpl {
         T model = null;
         String result = "";
         try {
-            result = HttpUtils.getInstance().sendPost(url,body);
+            result = HttpUtils.sendPost(url,body);
             if (log.isInfoEnabled()) {
                 log.info("=====POST调用url：{},参数：{},对应返回结果信息：{}", url, body, result);
             }
@@ -187,7 +188,7 @@ public class BaseServiceImpl {
     protected String sendPut(String url,String body){
         String result = "";
         try {
-            result = HttpUtils.getInstance().sendPut(url,body);
+            result = HttpUtils.sendPut(url,body);
             if (log.isInfoEnabled()) {
                 log.info("=====PUT调用url：{},参数：{},对应返回结果信息：{}", url, body, result);
             }
@@ -209,7 +210,7 @@ public class BaseServiceImpl {
         T model = null;
         String result = "";
         try {
-            result =  HttpUtils.getInstance().sendPut(url,body);
+            result =  HttpUtils.sendPut(url,body);
             if (log.isInfoEnabled()) {
                 log.info("=====PUT调用url：{},参数：{},对应返回结果信息：{}", url, body, result);
             }

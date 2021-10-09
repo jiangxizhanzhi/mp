@@ -1,23 +1,31 @@
 package cn.cyberpeace.mp.cscene.service;
 
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.repository.condition.aggregation.Count;
+import cn.cyberpeace.mp.base.repository.condition.aggregation.Sum;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.cscene.bo.CsceneStatBO;
-import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
-import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
+import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
+import cn.cyberpeace.mp.cscene.core.common.UserCommon;
+import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
+import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.model.SceneConfigElementModel;
 import cn.cyberpeace.mp.scene.model.SceneConfigModel;
+import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -54,14 +62,14 @@ public class CsceneSpecialService {
      * @param ids 场景模板id列表
      * @return 统计结果
      */
-    public ServiceResult<List<CsceneStatBO>> stat(String[] ids) {
+    public ServiceResult<List<CsceneStat>> statCscenes(String[] ids) {
         if (ids == null || ids.length == 0) {
             return new ServiceResult<>(new ArrayList<>());
         }
 
-        Map<String, CsceneStatBO> statMap = new HashMap<>();
+        Map<String, CsceneStat> statMap = new HashMap<>();
         for (String id : ids) {
-            var csceneStat = new CsceneStatBO(id, 0, 0, 0, 0, 0);
+            var csceneStat = new CsceneStat(id, 0, 0, 0, 0, 0);
             statMap.put(id, csceneStat);
         }
 
@@ -112,6 +120,162 @@ public class CsceneSpecialService {
         });
 
         return new ServiceResult<>(new ArrayList<>(statMap.values()));
+    }
+
+    /**
+     * 场景实例数据
+     * @param queryParams 查询参数
+     * @return 统计结果
+     */
+    public ListObjServiceResult<CsceneInstanceStat> listCsceneInstanceStats(CsceneInstanceStatQueryParams queryParams) {
+        var humanCondition = new HumanCondition()
+                .link(CsceneInstanceModel.class, SceneModel.class, SceneElementModel.class,
+                        CloudPluginSceneElementModel.class)
+                .filterLink(CsceneInstanceModel.class, CsceneInstanceModel::getScene, SceneModel.class,
+                        SceneModel::getId)
+                .filterLink(SceneModel.class, SceneModel::getId, SceneElementModel.class,
+                        SceneElementModel::getScene)
+                .filterLink(SceneModel.class, SceneModel::getId, CloudPluginSceneElementModel.class,
+                        CloudPluginSceneElementModel::getScene)
+                .filterLink(SceneElementModel.class, SceneElementModel::getNodeId, CloudPluginSceneElementModel.class,
+                        CloudPluginSceneElementModel::getSceneElement)
+                .pagination(queryParams.getPage(), queryParams.getPageSize())
+                .currentLink(CsceneInstanceModel.class)
+                .groupBy(CsceneInstanceModel::getId)
+                .selectAs(CsceneInstanceModel::getId, CsceneInstanceStat::getId)
+                .selectAs(CsceneInstanceModel::getReferenceType, CsceneInstanceStat::getReferenceType)
+                .selectAs(CsceneInstanceModel::getReferenceMetaData, CsceneInstanceStat::getReferenceMetaData)
+                .selectAs(CsceneInstanceModel::getCreateUsername, CsceneInstanceStat::getCreateUsername)
+                .selectAs(CsceneInstanceModel::getCreateTime, CsceneInstanceStat::getCreateTime)
+                .selectAs(CsceneInstanceModel::getSceneTtl, CsceneInstanceStat::getSceneTtl)
+                .selectAs(CsceneInstanceModel::getSceneAttr, CsceneInstanceStat::getSceneAttr)
+                .selectAs(CsceneInstanceModel::getSceneTtl, CsceneInstanceStat::getSceneTtl)
+                .currentLink(SceneModel.class)
+                .selectAs(SceneModel::getName, CsceneInstanceStat::getName)
+                .selectAs(SceneModel::getEvent, CsceneInstanceStat::getEvent)
+                .selectAs(SceneModel::getEventStatus, CsceneInstanceStat::getEventStatus)
+                .selectAs(SceneModel::getProcessMessage, CsceneInstanceStat::getEventMessage)
+                .selectAs(SceneModel::getCreateConsumeSeconds, CsceneInstanceStat::getCreateConsumeSeconds)
+                .currentLink(SceneElementModel.class)
+                .selectAs(Sum.f(SceneElementModel::getCpu), CsceneInstanceStat::getCpu)
+                .selectAs(Sum.f(SceneElementModel::getRam), CsceneInstanceStat::getRam)
+                .selectAs(Sum.f(SceneElementModel::getDisk), CsceneInstanceStat::getDisk)
+                .currentLink(CloudPluginSceneElementModel.class)
+                .selectAs(Count.f(CloudPluginSceneElementModel::getVirtualType)
+                        .calcEqual(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE),
+                        CsceneInstanceStat::getVmCount)
+                .selectAs(Count.f(CloudPluginSceneElementModel::getVirtualType)
+                        .calcEqual(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER),
+                        CsceneInstanceStat::getContainerCount)
+                .selectAs(Count.f(CloudPluginSceneElementModel::getVirtualType)
+                        .calcEqual(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE),
+                        CsceneInstanceStat::getEntityCount)
+                .distinct();
+
+        humanCondition.currentLink(CsceneInstanceModel.class);
+        var ids = queryParams.getIds();
+        if (ids != null && ids.length > 0) {
+            humanCondition.filterIn(CsceneInstanceModel::getId, ids);
+        }
+        var referenceTypes = queryParams.getReferenceTypes();
+        if (referenceTypes != null && referenceTypes.length > 0) {
+            humanCondition.filterIn(CsceneInstanceModel::getReferenceType, referenceTypes);
+        }
+        var self = queryParams.getSelf();
+        if (Boolean.TRUE.equals(self)) {
+            var currentUser = UserCommon.getCurrentUser();
+            if (currentUser != null) {
+                humanCondition.filterEqual(CsceneInstanceModel::getCreateUser, currentUser.getId());
+            }
+        }
+
+        humanCondition.currentLink(SceneModel.class);
+        var search = queryParams.getSearch();
+        if (!StringUtils.isEmpty(search)) {
+            humanCondition.filterIContains(SceneModel::getName, search);
+        }
+        var error = queryParams.getError();
+        if (Boolean.TRUE.equals(error)) {
+            humanCondition.filterEqual(SceneModel::getEventStatus, EventStatus.ABNORMAL);
+        }
+        var over = queryParams.getOver();
+        if (Boolean.TRUE.equals(over)) {
+            humanCondition.filterEqual(SceneModel::getEvent, SceneModel.Event.DELETE);
+        }
+        var active = queryParams.getActive();
+        if (Boolean.TRUE.equals(active)) {
+            humanCondition.filterNotEqual(SceneModel::getEvent, SceneModel.Event.DELETE)
+                    .filterNotEqual(SceneModel::getEventStatus, EventStatus.ABNORMAL);
+        }
+
+
+        var sceneStatus = queryParams.getSceneStatus();
+        if (sceneStatus != null) {
+            if (sceneStatus.equals(CsceneInstanceStatQueryParams.SceneStatus.CREATING)) {
+                humanCondition.filterOrStart()
+                        .orAndStart()
+                        .andEqual(SceneModel::getEvent, SceneModel.Event.INITIATE)
+                        .andNotEqual(SceneModel::getEventStatus, EventStatus.ABNORMAL)
+                        .orAndEnd()
+                        .orAndStart()
+                        .andEqual(SceneModel::getEvent, SceneModel.Event.CREATE)
+                        .andIn(SceneModel::getEventStatus, new Integer[] {
+                                EventStatus.START, EventStatus.IN_PROGRESS
+                        })
+                        .orAndEnd()
+                        .filterOrEnd();
+            } else if (sceneStatus.equals(CsceneInstanceStatQueryParams.SceneStatus.QUEUE)) {
+                humanCondition.filterEqual(SceneModel::getEvent, SceneModel.Event.DEFAULT);
+            } else if (sceneStatus.equals(CsceneInstanceStatQueryParams.SceneStatus.RUNNING)) {
+                humanCondition.filterOrStart()
+                        .orAndStart()
+                        .andEqual(SceneModel::getEvent, SceneModel.Event.CREATE)
+                        .andEqual(SceneModel::getEventStatus, EventStatus.OVER)
+                        .orAndEnd()
+                        .orAndStart()
+                        .andEqual(SceneModel::getEvent, SceneModel.Event.UNPAUSE)
+                        .andEqual(SceneModel::getEventStatus, EventStatus.OVER)
+                        .orAndEnd()
+                        .orAndStart()
+                        .andIn(SceneModel::getEvent, new Integer[] {
+                                SceneModel.Event.START, SceneModel.Event.STOP, SceneModel.Event.RESTART,
+                                SceneModel.Event.SNAPSHOT, SceneModel.Event.MODIFY
+                        })
+                        .andNotEqual(SceneModel::getEventStatus, EventStatus.ABNORMAL)
+                        .orAndEnd()
+                        .filterOrEnd();
+            } else if (sceneStatus.equals(CsceneInstanceStatQueryParams.SceneStatus.PAUSE)) {
+                humanCondition.filterOrStart()
+                        .orAndStart()
+                        .andEqual(SceneModel::getEvent, SceneModel.Event.PAUSE)
+                        .andNotEqual(SceneModel::getEventStatus, EventStatus.ABNORMAL)
+                        .orAndEnd()
+                        .orAndStart()
+                        .andEqual(SceneModel::getEvent, SceneModel.Event.UNPAUSE)
+                        .andIn(SceneModel::getEventStatus, new Integer[] {
+                                EventStatus.START, EventStatus.IN_PROGRESS
+                        })
+                        .orAndEnd()
+                        .filterOrEnd();
+            } else if (sceneStatus.equals(CsceneInstanceStatQueryParams.SceneStatus.ERROR)) {
+                humanCondition.filterEqual(SceneModel::getEventStatus, EventStatus.ABNORMAL);
+            } else if (sceneStatus.equals(CsceneInstanceStatQueryParams.SceneStatus.DELETED)) {
+                humanCondition.filterEqual(SceneModel::getEvent, SceneModel.Event.DELETE)
+                        .filterNotEqual(SceneModel::getEventStatus, EventStatus.ABNORMAL);
+            }
+        }
+
+        List<CsceneInstanceStat> data;
+        int total;
+        try {
+            data = csceneInstanceMapper.list(humanCondition, CsceneInstanceStat.class);
+            total = csceneInstanceMapper.total(humanCondition);
+        } catch (Exception e) {
+            log.error("Service list error: {}", e.getMessage());
+            return new ListObjServiceResult<>(null, BaseErrorCode.ERROR, e.getMessage());
+        }
+
+        return new ListObjServiceResult<>(new ListObjResult<>(data, total));
     }
 
     /**

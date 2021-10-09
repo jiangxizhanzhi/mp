@@ -5,12 +5,14 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceDeleteRequest;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceQueryParams;
+import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
 import cn.cyberpeace.mp.scenepluginflow.bo.base.Flow;
@@ -51,6 +53,13 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return getModelService().listBO(queryParams, new CsceneContextBO(queryParams.getAccessUserId(), null)).asResult();
     }
 
+    @ApiOperation("获取分页的聚合数据")
+    @GetMapping("/list_stat")
+    public ListObjServiceResult<CsceneInstanceStat> listStat(CsceneInstanceStatQueryParams queryParams) {
+        handleQueryParams("listStat", queryParams);
+        return csceneSpecialService.listCsceneInstanceStats(queryParams).asResult();
+    }
+
     @ApiOperation("获取指定id场景实例")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
@@ -69,13 +78,13 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @DeleteMapping(params = "id")
     public ServiceResult<Boolean> delete(@RequestParam String id,
                                          @RequestBody(required = false) CsceneContextBO context) {
-        return modelService.deleteById(id, context).asResult();
+        return modelService.deleteById(id, true, context).asResult();
     }
 
     @ApiOperation("批量删除场景实例")
     @DeleteMapping("/bulk_delete")
     public ServiceResult<Integer> bulkDelete(@RequestBody CsceneInstanceDeleteRequest deleteRequest) {
-        return modelService.bulkDeleteByIds(deleteRequest.getIds(), deleteRequest.getContext()).asResult();
+        return modelService.bulkDeleteByIds(deleteRequest.getIds(), true, deleteRequest.getContext()).asResult();
     }
 
     @ApiOperation("清理场景实例")
@@ -85,13 +94,13 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @DeleteMapping(value = "/clear", params = "id")
     public ServiceResult<Boolean> clear(@RequestParam String id,
                                         @RequestBody(required = false) CsceneContextBO context) {
-        return modelService.deleteById(id, context).asResult();
+        return modelService.deleteById(id, false, context).asResult();
     }
 
     @ApiOperation("批量清理场景实例")
     @DeleteMapping("/bulk_clear")
     public ServiceResult<Integer> bulkClear(@RequestBody CsceneInstanceDeleteRequest deleteRequest) {
-        return modelService.bulkDeleteByIds(deleteRequest.getIds(), deleteRequest.getContext()).asResult();
+        return modelService.bulkDeleteByIds(deleteRequest.getIds(), false, deleteRequest.getContext()).asResult();
     }
 
     @ApiOperation("场景实例启动节点流量")

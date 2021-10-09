@@ -9,12 +9,6 @@ public interface ScenariosSnapshotService extends BaseCloudPlatformService{
      */
     BaseCloudPlatformModel create(ScenariosSnapshot snapshotCreate);
 
-
-    /**
-     * 删除
-     */
-    Boolean deleteDeviceScenario(ScenarioDeleteDeviceParams params);
-
     /**
      * 注入文件
      * @param injectFileCreate
