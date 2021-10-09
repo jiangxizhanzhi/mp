@@ -31,13 +31,6 @@ public class SnapshotServiceImpl extends BaseOpenStackServiceImpl implements Sna
     }
 
     @Override
-    public Snapshot merge(String deviceUuid) {
-        var jsonObject = new JSONObject();
-        jsonObject.put("device_uuid", deviceUuid);
-        return super.sendPut(CPCLOUD_DEVICE + URL_VERSION + "/snapshot", JSONObject.toJSONString(jsonObject), Snapshot.class);
-    }
-
-    @Override
     public Boolean delete(List<String> uuids) {
         var jsonObject = new JSONObject();
         jsonObject.put("snapshot_uuids", uuids);

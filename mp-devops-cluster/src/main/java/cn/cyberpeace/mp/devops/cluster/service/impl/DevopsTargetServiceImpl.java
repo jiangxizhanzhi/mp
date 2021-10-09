@@ -16,13 +16,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
 
+/**
+ * @author wanggang
+ */
 @Service
-public class DevopsDevopsTargetServiceImpl implements DevopsTargetService {
+public class DevopsTargetServiceImpl implements DevopsTargetService {
 
     private ImageMapper imageMapper;
 
     @Autowired
-    public DevopsDevopsTargetServiceImpl(ImageMapper imageMapper) {
+    public DevopsTargetServiceImpl(ImageMapper imageMapper) {
         this.imageMapper = imageMapper;
     }
 
@@ -39,6 +42,7 @@ public class DevopsDevopsTargetServiceImpl implements DevopsTargetService {
         return 0;
     }
 
+    @Transactional
     @Override
     public Integer updateById(Device device) {
         if (Objects.nonNull(device) && device.isSuccess()) {
@@ -52,6 +56,11 @@ public class DevopsDevopsTargetServiceImpl implements DevopsTargetService {
         return 0;
     }
 
+    /**
+     * 转换Device
+     * @param device
+     * @return
+     */
     protected TargetModel convertDevice(Device device){
         TargetModel targetModel = new TargetModel();
         targetModel.setId(device.getId().toString());

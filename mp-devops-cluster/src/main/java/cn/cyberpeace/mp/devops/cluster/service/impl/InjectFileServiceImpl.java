@@ -13,6 +13,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * 文件注入
+ * @author wanggang
+ */
 @Service
 public class InjectFileServiceImpl extends BaseOpenStackServiceImpl implements InjectFileService {
 

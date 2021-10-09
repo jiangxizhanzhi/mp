@@ -8,6 +8,10 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+/**
+ * 防火墙分页
+ * @author wanggang
+ */
 @EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor

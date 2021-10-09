@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.devops.cluster.model.*;
 import cn.cyberpeace.mp.devops.cluster.service.ImagesService;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
@@ -14,6 +15,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
+/**
+ * 镜像管理
+ * @author wanggang
+ */
+@Slf4j
 @Service
 public class ImagesServiceImpl extends BaseOpenStackServiceImpl implements ImagesService {
 
@@ -58,7 +64,7 @@ public class ImagesServiceImpl extends BaseOpenStackServiceImpl implements Image
         try {
             return super.sendFormDataPost(CPCLOUD_DEVICE + URL_VERSION + "/file_upload?type=" + type, builder.build(), BaseCloudPlatformModel.class);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("upload file error",e);
         }
         return null;
     }

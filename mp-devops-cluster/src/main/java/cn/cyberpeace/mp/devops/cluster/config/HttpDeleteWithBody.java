@@ -1,9 +1,13 @@
-package cn.cyberpeace.mp.devops.cluster.config;//package cn.cyberpeace.mp.base.config;
+package cn.cyberpeace.mp.devops.cluster.config;
 
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 
 import java.net.URI;
 
+/**
+ * 重写HttpClient DELETE方法
+ * @author wanggang
+ */
 public class HttpDeleteWithBody extends HttpEntityEnclosingRequestBase {
 
     public static final String METHOD_NAME = "DELETE";
