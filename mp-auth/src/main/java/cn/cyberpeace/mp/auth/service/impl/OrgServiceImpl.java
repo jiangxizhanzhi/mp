@@ -117,6 +117,14 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
             obj.setPath(newPath);
         }
 
+        // 查看组织path是否重复
+        if (StringUtils.isNotBlank(obj.getPath())) {
+            String path = obj.getPath();
+            if (Objects.nonNull(getByPath(path))) {
+                throw new MpRuntimeException("同一父级组织下，已有同名的子组织存在！");
+            }
+        }
+
         // 1.先更新OrgModel信息
         ObjServiceResult<OrgModel> result = super.update(obj, fields);
         OrgModel orgUpdated = result.getSource().getObj();

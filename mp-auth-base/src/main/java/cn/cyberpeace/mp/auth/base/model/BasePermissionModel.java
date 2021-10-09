@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.base.model.auth;
+package cn.cyberpeace.mp.auth.base.model;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultBool;
