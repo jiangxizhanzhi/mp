@@ -71,6 +71,7 @@ public class HypervisorServiceImpl extends BaseOpenStackServiceImpl implements H
      * 
      * @return
      */
+    @Override
     public InstanceOsServiceCloudPlatformModel osServicesStateFromInstances(){
         InstanceOsServicePageResult pageResult = super.sendGet(URL_VERSION + "/instances/os-services", InstanceOsServicePageResult.class);
         if (Objects.isNull(pageResult) || Objects.isNull(pageResult.getData())){
@@ -89,6 +90,7 @@ public class HypervisorServiceImpl extends BaseOpenStackServiceImpl implements H
      *
      * @return
      */
+    @Override
     public NetworkAgentCloudPlatformModel agentsStateFromNetworks(){
         NetworkAgentPageResult pageResult = super.sendGet(URL_VERSION + "/networks/agents", NetworkAgentPageResult.class);
         if (Objects.isNull(pageResult) || Objects.isNull(pageResult.getData())){
@@ -101,12 +103,6 @@ public class HypervisorServiceImpl extends BaseOpenStackServiceImpl implements H
         model.setTotal(data.getTotal());
         model.setCode(pageResult.getCode());
         return model;
-    }
-
-
-    @Override
-    public VirtualRealSwitchCloudPlatformModel listVirtualRealSwitch() {
-        return super.sendGet(CPCLOUD_SWITCH_URL + URL_VERSION + "/switchs" , VirtualRealSwitchCloudPlatformModel.class);
     }
 
 }

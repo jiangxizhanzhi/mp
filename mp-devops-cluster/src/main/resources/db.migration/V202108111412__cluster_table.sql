@@ -32,7 +32,7 @@ CREATE TABLE `mp_devops_target` (
                                     `base_image_support` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否支持基础镜像,0:不支持，1：支持',
                                     `init_support` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否支持Cloud init,0:不支持，1：支持',
                                     PRIMARY KEY (`pk`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='镜像管理';
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='靶标管理';
 
 
 CREATE TABLE `mp_devops_target_auth` (
@@ -48,4 +48,4 @@ CREATE TABLE `mp_devops_target_auth` (
                                          `create_time` datetime(6) NOT NULL COMMENT '创建时间',
                                          `update_time` datetime(6) NOT NULL COMMENT '更新时间',
                                          PRIMARY KEY (`pk`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='镜像授权表';
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='靶标授权表';

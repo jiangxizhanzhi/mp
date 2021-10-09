@@ -42,10 +42,4 @@ public interface HypervisorService extends BaseCloudPlatformService {
      * @return
      */
     NetworkAgentCloudPlatformModel agentsStateFromNetworks();
-
-    /**
-     * 查询虚拟结合交换机状态列表
-     * @return
-     */
-    VirtualRealSwitchCloudPlatformModel listVirtualRealSwitch();
 }

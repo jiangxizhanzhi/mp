@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * 实装管理接口
+ * @author wanggang
  */
 @Service
 public class RealEquipmentServiceImpl extends BaseOpenStackServiceImpl implements RealEquipmentService {

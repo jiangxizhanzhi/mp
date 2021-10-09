@@ -189,8 +189,7 @@
 
     <select id="findByUuid" parameterType="java.lang.String" resultMap="BaseResultMap">
         select
-        i.pk,i.id,i.uuid,i.name,i.main_category,i.sub_category,i.third_category,i.image_type,i.is_public,i.quick_create_support,
-        i.in_position,i.reference_status,i.use_status
+        <include refid="commonTargetColumn"/>
         from
         mp_devops_target i
         where i.uuid = #{uuid}

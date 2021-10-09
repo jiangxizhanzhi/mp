@@ -7,6 +7,9 @@ import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 
+/**
+ * @author wanggang
+ */
 @Service
 public class ScenariosServiceImpl extends BaseOpenStackServiceImpl implements ScenariosSnapshotService {
 
@@ -17,12 +20,6 @@ public class ScenariosServiceImpl extends BaseOpenStackServiceImpl implements Sc
     @Override
     public BaseCloudPlatformModel create(ScenariosSnapshot snapshotCreate) {
         return super.sendPost(  URL_VERSION + "/scenarios/device_snapshot", JsonUtils.toUnderlineJSONString(snapshotCreate), BaseCloudPlatformModel.class);
-    }
-
-    @Override
-    public Boolean deleteDeviceScenario(ScenarioDeleteDeviceParams params) {
-        BaseCloudPlatformModel model = super.sendDelete( URL_VERSION + "/scenarios/device_scenario",JsonUtils.toUnderlineJSONString(params), BaseCloudPlatformModel.class);
-        return model.isSuccess();
     }
 
 

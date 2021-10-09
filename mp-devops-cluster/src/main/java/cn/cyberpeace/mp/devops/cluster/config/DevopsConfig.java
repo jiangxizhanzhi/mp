@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * 对接云平台配置类
+ * @author wanggang
  */
 @Configuration
 @ConfigurationProperties(prefix = "mp.devops",ignoreInvalidFields = true)
