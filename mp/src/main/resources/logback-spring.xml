@@ -37,11 +37,13 @@
     <springProperty scope="context" name="LOG_FILE_PATH" source="logging.file.path" defaultValue="/logs"/>
     <!--日志级别-->
     <springProperty scope="context" name="LOG_LEVEL_ROOT" source="logging.level.root" defaultValue="ERROR"/>
+    <!--日志最大天数-->
+    <springProperty scope="context" name="LOG_FILE_MAX_HISTORY" source="logging.level.maxdays" defaultValue="7"/>
 
     <property name="LOG_HOME" value="${LOG_FILE_PATH}"/>
     <property name="LOG_LEVEL" value="${LOG_LEVEL_ROOT}"/>
     <property name="LOG_FILE_MAX_SIZE" value="300MB"/>
-    <property name="LOG_FILE_MAX_HISTORY" value="15"/>
+    <property name="LOG_FILE_MAX_HISTORY" value="${LOG_FILE_MAX_HISTORY}"/>
 
     <!-- 控制台日志输出 -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
