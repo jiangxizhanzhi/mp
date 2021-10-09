@@ -30,7 +30,7 @@
     <property name="LOG_HOME" value="${LOG_FILE_PATH}"/>
     <property name="LOG_LEVEL" value="${LOG_LEVEL_ROOT}"/>
     <property name="LOG_FILE_MAX_SIZE" value="300MB"/>
-    <property name="LOG_FILE_MAX_HISTORY" value="15"/>
+    <property name="LOG_FILE_MAX_HISTORY" value="7"/>
 
     <!-- 控制台日志输出 -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
