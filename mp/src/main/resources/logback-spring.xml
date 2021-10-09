@@ -38,7 +38,7 @@
     <!--日志级别-->
     <springProperty scope="context" name="LOG_LEVEL_ROOT" source="logging.level.root" defaultValue="ERROR"/>
     <!--日志最大天数-->
-    <springProperty scope="context" name="LOG_FILE_MAX_HISTORY" source="logging.level.maxdays" defaultValue="7"/>
+    <springProperty scope="context" name="LOG_FILE_MAX_HISTORY" source="logging.logback.rollingpolicy.max-history" defaultValue="7"/>
 
     <property name="LOG_HOME" value="${LOG_FILE_PATH}"/>
     <property name="LOG_LEVEL" value="${LOG_LEVEL_ROOT}"/>

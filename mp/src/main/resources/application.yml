@@ -41,10 +41,11 @@ logging:
   config: classpath:logback-spring.xml
   level:
     root: INFO
-    maxdays: 7
   file:
     path: ${user.home}/logs
-
+  logback:
+    rollingpolicy:
+      max-history: 7
 mybatis:
   mapper-locations: classpath*:mapper/*.xml
   configuration:
