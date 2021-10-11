@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.flow.model.FlowCollectionModel;
 import cn.cyberpeace.mp.flow.model.FlowCollectionRelModel;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
 import cn.cyberpeace.mp.flow.repository.FlowCollectionMapper;
+import cn.cyberpeace.mp.flow.repository.FlowInfoMapper;
 import cn.cyberpeace.mp.flow.request.AddFlowCollectionRelRequest;
 import cn.cyberpeace.mp.flow.request.DelFlowCollectionRelRequest;
 import cn.cyberpeace.mp.flow.request.queryparam.FlowCollectionQueryParams;
@@ -47,7 +48,7 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
     private FlowCollectionRelServiceImpl flowCollectionRelService;
 
     @Autowired
-    private FlowInfoServiceImpl flowInfoService;
+    private FlowInfoMapper flowInfoMapper;
 
     /**
      * 重写list查询方法
@@ -75,7 +76,7 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
             if (CollectionUtils.isNotEmpty(relModels)) {
                 List<String> idList =
                         relModels.stream().map(FlowCollectionRelModel::getFlowId).collect(Collectors.toList());
-                flowInfoModels = flowInfoService.selectByFlowIds(idList);
+                flowInfoModels = flowInfoMapper.selectByFlowIds(idList);
             }
         }
 
@@ -152,7 +153,7 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
      */
     private void updateRelFlowCount(FlowCollectionModel collectionModel, List<String> flowIds, boolean isIncrease) {
         // 更新关联流量数量
-        List<FlowInfoModel> flowInfoModels = flowInfoService.selectByFlowIds(flowIds);
+        List<FlowInfoModel> flowInfoModels = flowInfoMapper.selectByFlowIds(flowIds);
         if (CollectionUtils.isNotEmpty(flowInfoModels)) {
             // 背景流量数量
             int backgroundCount = (int) flowInfoModels.stream().filter(model -> InteractiveTypeEnum.BACKGROUND.toValue() == model.getInteractiveType()).count();

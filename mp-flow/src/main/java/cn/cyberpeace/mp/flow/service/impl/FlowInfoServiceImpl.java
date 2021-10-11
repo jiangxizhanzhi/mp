@@ -16,10 +16,7 @@ import cn.cyberpeace.mp.flow.model.FlowTaskModel;
 import cn.cyberpeace.mp.flow.repository.FlowCollectionRelMapper;
 import cn.cyberpeace.mp.flow.repository.FlowInfoMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskMapper;
-import cn.cyberpeace.mp.flow.request.AddAttackFlowRequest;
-import cn.cyberpeace.mp.flow.request.AddBackgroundFlowRequest;
-import cn.cyberpeace.mp.flow.request.ModifyAttackFlowRequest;
-import cn.cyberpeace.mp.flow.request.ModifyBackgroundFlowRequest;
+import cn.cyberpeace.mp.flow.request.*;
 import cn.cyberpeace.mp.flow.request.queryparam.FlowInfoQueryParams;
 import cn.cyberpeace.mp.flow.response.AttackFlowResponse;
 import cn.cyberpeace.mp.flow.response.BackgroundFlowResponse;
@@ -68,6 +65,9 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
     @Autowired
     private AsyncPlatFlowTaskService asyncPlatFlowTaskService;
 
+    @Autowired
+    private FlowCollectionServiceImpl flowCollectionService;
+
     /**
      * 补充list查询条件
      * @param humanCondition
@@ -101,7 +101,13 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         List<FlowCollectionRelModel> flowCollectionRelModels =
                 flowCollectionRelMapper.selectByFlowIds(Collections.singletonList(id));
         if (CollectionUtils.isNotEmpty(flowCollectionRelModels)) {
-            return ServiceResult.fail("Can not delete flow collection related flow info");
+            // 遍历删除流量集合关联信息
+            flowCollectionRelModels.forEach(rel -> {
+                DelFlowCollectionRelRequest delRelRequest = new DelFlowCollectionRelRequest();
+                delRelRequest.setCollectionId(rel.getCollectionId());
+                delRelRequest.setFlowIds(Collections.singletonList(id));
+                flowCollectionService.delCollectionRel(delRelRequest);
+            });
         }
 
         ObjServiceResult<FlowInfoModel> serviceResult = get(id);
@@ -135,8 +141,17 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         List<FlowCollectionRelModel> flowCollectionRelModels =
                 flowCollectionRelMapper.selectByFlowIds(idList);
         if (CollectionUtils.isNotEmpty(flowCollectionRelModels)) {
-            log.info("flow info related flow collection can not delete: {}", flowCollectionRelModels);
-            return ServiceResult.fail("Can not delete flow collection related flow info");
+            // 按流量集合id分组关联信息
+            Map<String, List<String>> relMap =
+                    flowCollectionRelModels.stream().collect(Collectors.groupingBy(FlowCollectionRelModel::getCollectionId,
+                            Collectors.mapping(FlowCollectionRelModel::getFlowId, Collectors.toList())));
+            // 遍历删除流量集合关联信息
+            relMap.forEach((collectionId, flowIds) -> {
+                DelFlowCollectionRelRequest delRelRequest = new DelFlowCollectionRelRequest();
+                delRelRequest.setCollectionId(collectionId);
+                delRelRequest.setFlowIds(flowIds);
+                flowCollectionService.delCollectionRel(delRelRequest);
+            });
         }
 
         List<FlowInfoModel> flowInfoModels = this.selectByFlowIds(idList);
