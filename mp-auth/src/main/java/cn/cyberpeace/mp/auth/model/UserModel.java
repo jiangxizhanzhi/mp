@@ -51,6 +51,7 @@ public class UserModel extends BaseModel implements Serializable {
     private String tenant;
 
     @ApiModelProperty(value = "编号")
+    @DefaultStr
     private String identifier;
 
     @ApiModelProperty(value = "用户名")
