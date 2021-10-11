@@ -105,6 +105,13 @@ public class ProbeService {
             BeanUtils.copyProperties(model, probeResult);
             probeResult.setScriptContent(new String(model.getScriptContent(), StandardCharsets.UTF_8));
             probeResult.setProbeStatus(model.getProbeStatus().ordinal());
+            List<ProbeParamsResult> probeParamsResults = probeParamModelMapper.queryProbeParamList(model.getId()).stream()
+                .map(paramModel -> {
+                    var paramsResult = new ProbeParamsResult();
+                    BeanUtils.copyProperties(paramModel, paramsResult);
+                    return paramsResult;
+                }).collect(Collectors.toList());
+            probeResult.setParamsResultList(probeParamsResults);
             return probeResult;
         })).collect(Collectors.toList());
 

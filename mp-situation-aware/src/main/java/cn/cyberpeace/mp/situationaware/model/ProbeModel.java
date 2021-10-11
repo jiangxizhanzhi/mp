@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.situationaware.model;
 
 import cn.cyberpeace.mp.situationaware.model.enums.ProbeStatus;
+import cn.cyberpeace.mp.situationaware.model.enums.SourceCategory;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -16,6 +17,8 @@ public class ProbeModel implements Serializable {
     private Integer osType;
 
     private Integer probeCategory;
+
+    private SourceCategory sourceCategory;
 
     private Integer scriptType;
 
@@ -135,5 +138,13 @@ public class ProbeModel implements Serializable {
 
     public void setProbeStatus(ProbeStatus probeStatus) {
         this.probeStatus = probeStatus;
+    }
+
+    public SourceCategory getSourceCategory() {
+        return sourceCategory;
+    }
+
+    public void setSourceCategory(SourceCategory sourceCategory) {
+        this.sourceCategory = sourceCategory;
     }
 }

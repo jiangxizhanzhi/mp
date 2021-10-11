@@ -8,6 +8,7 @@
         <result column="des" jdbcType="VARCHAR" property="des"/>
         <result column="OS_type" jdbcType="VARCHAR" property="osType"/>
         <result column="probe_category" jdbcType="INTEGER" property="probeCategory"/>
+        <result column="source_category" jdbcType="INTEGER" property="sourceCategory" typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler"/>
         <result column="script_type" jdbcType="INTEGER" property="scriptType"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
@@ -40,16 +41,16 @@
     </delete>
     <insert id="insert" parameterType="cn.cyberpeace.mp.situationaware.model.ProbeModel">
         insert into mp_situation_probe (pk, id, probe_name,
-                                        des, OS_type, probe_category,
+                                        des, OS_type, probe_category,source_category,
                                         script_type, create_time, update_time,
                                         script_content, command_interval)
         values (#{pk,jdbcType=INTEGER}, #{id,jdbcType=VARCHAR}, #{probeName,jdbcType=VARCHAR},
-                #{des,jdbcType=VARCHAR}, #{osType,jdbcType=INTEGER}, #{probeCategory,jdbcType=INTEGER},
+                #{des,jdbcType=VARCHAR}, #{osType,jdbcType=INTEGER}, #{probeCategory,jdbcType=INTEGER},#{sourceCategory, jdbcType=INTEGER,
+            javaType=cn.cyberpeace.mp.situationaware.model.enums.SourceCategory,
+            typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
                 #{scriptType,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
                    , #{scriptContent,jdbcType=LONGVARBINARY}, #{commandInterval,jdbcType=VARCHAR})
     </insert>
-
-
     <update id="deleteByProbeId" parameterType="java.lang.String">
         update mp_situation_probe
         set del_flag=1
@@ -76,6 +77,11 @@
         <if test="probeSearchRequest.keyWord !=null">
             and probe_name like concat('%', #{probeSearchRequest.keyWord}, '%')
         </if>
+        <if test="probeSearchRequest.sourceCategory != null">
+            and source_category = #{probeSearchRequest.sourceCategory, jdbcType=INTEGER,
+            javaType=cn.cyberpeace.mp.situationaware.model.enums.SourceCategory,
+            typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler}
+        </if>
         order by update_time desc limit #{offset}, #{probeSearchRequest.pageSize}
     </select>
 
@@ -87,6 +93,11 @@
         del_flag != 1
         <if test="keyWord !=null">
             and probe_name like concat('%', #{keyWord}, '%')
+        </if>
+        <if test="sourceCategory != null">
+            and source_category = #{sourceCategory, jdbcType=INTEGER,
+            javaType=cn.cyberpeace.mp.situationaware.model.enums.SourceCategory,
+            typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler}
         </if>
         order by update_time desc
     </select>
