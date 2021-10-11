@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
@@ -155,7 +156,9 @@ public class DeleteHandler extends HandlerCommon {
 
     private boolean deleteEntityNode(CloudPluginSceneElementBO cloudElement) {
         var deleteData = new EntityNodeDeleteData();
-        deleteData.setName(cloudElement.getImage());
+        List<String> interfaceNames = cloudElement.getSrcElement().getPorts().stream()
+                .map(BaseSceneElementPortBO::getName).collect(Collectors.toList());
+        deleteData.setInterfaces(interfaceNames);
         var extraInfo = collectElementExtraCloudInfo(cloudElement);
         deleteData.setConnections(extraInfo.getConnectionIds());
         return enClient.delete(deleteData);
