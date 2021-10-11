@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -32,6 +33,7 @@ public class TargetSceneReferController {
         this.csceneSpecialService = csceneSpecialService;
     }
 
+    @ApiOperation("分页查询")
     @GetMapping("/page")
     public ServiceResult<DeviceReferCsceneInstanceStat> page(@RequestParam("name") String name,@RequestParam(value = "per_page",defaultValue = "10") Integer perPage,
                      @RequestParam(value = "page",defaultValue = "1") Integer page){

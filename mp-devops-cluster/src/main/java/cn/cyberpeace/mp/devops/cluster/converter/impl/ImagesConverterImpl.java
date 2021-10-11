@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.devops.cluster.converter.ImagesConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageAuthConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertModel;
@@ -31,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -76,12 +78,13 @@ public class ImagesConverterImpl implements ImagesConverter {
 
     @Override
     public String[] getDefaultPageIgnoreField() {
-        return new String[0];
+        return BeanUtils.getBeanGetterFieldNames(ImagePageRequest::getPage,ImagePageRequest::getPerPage);
     }
 
     @Override
     public String[] getTotalPageIgnoreField() {
-        return new String[0];
+        return BeanUtils.getBeanGetterFieldNames(ImagePageRequest::getLimit,ImagePageRequest::getOffset,
+                ImagePageRequest::getPage,ImagePageRequest::getPerPage);
     }
 
     @Override
@@ -293,6 +296,28 @@ public class ImagesConverterImpl implements ImagesConverter {
     }
 
     /**
+     * 根据ID集合（非UUID）查询靶标数据
+     * @param ids
+     */
+    public List<Device> findByIds(List<Integer> ids){
+        DeviceCloudPlatformModel model = deviceService.findByIds(ids);
+        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getItems())){
+            return Lists.newArrayList();
+        }
+        return model.getItems();
+    }
+
+    @Transactional
+    @Override
+    public Integer async(ImageAsyncRequest request){
+        List<Device> deviceList = this.findByIds(request.getIds());
+        if (CollectionUtils.isEmpty(deviceList)){
+            return 0;
+        }
+        return devopsTargetService.insert(deviceList);
+    }
+
+    /**
      * 转换ImageRequest
      * @param request
      * @return
@@ -354,5 +379,7 @@ public class ImagesConverterImpl implements ImagesConverter {
         imageModel.setExtDocker(device.getExtDocker());
         return imageModel;
     }
+
+
 
 }
