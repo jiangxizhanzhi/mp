@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.devops.cluster.model.common.ExtDocker;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtNormal;
 import cn.cyberpeace.mp.devops.cluster.model.common.Resource;
 import cn.cyberpeace.mp.devops.cluster.model.common.StartUpParameter;
+import cn.cyberpeace.mp.devops.cluster.request.ImagePageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerRequest;
@@ -45,12 +46,13 @@ public class InstallerConverterImpl implements InstallerConverter {
 
     @Override
     public String[] getDefaultPageIgnoreField() {
-        return new String[0];
+        return BeanUtils.getBeanGetterFieldNames(InstallerPageRequest::getPage,InstallerPageRequest::getPerPage);
     }
 
     @Override
     public String[] getTotalPageIgnoreField() {
-        return new String[0];
+        return BeanUtils.getBeanGetterFieldNames(InstallerPageRequest::getLimit,InstallerPageRequest::getOffset,
+                InstallerPageRequest::getPage,InstallerPageRequest::getPerPage);
     }
 
     @Override
