@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.situationaware.model;
 
+import cn.cyberpeace.mp.situationaware.model.enums.SourceCategory;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import javax.validation.constraints.Min;
@@ -34,4 +35,6 @@ public class ProbeSearchRequest {
     @ApiModelProperty("关键字查询")
     private String keyWord;
 
+    @ApiModelProperty("是否是定制探针 0：默认探针 1：定制探针")
+    private SourceCategory sourceCategory;
 }
