@@ -25,6 +25,18 @@ public class PageRequest {
     @ApiModelProperty(value = "分页每页条数(兼容)")
     private Integer perPage;
 
+    /**
+     * 排序字段
+     */
+    @ApiModelProperty(value = "排序字段")
+    private String[] orders;
+
+    /**
+     * @Deprecated 排序字段
+     */
+    @ApiModelProperty(value = "排序字段(兼容)")
+    private String[] sort;
+
     public void ensure() {
         if (perPage != null) {
             pageSize = perPage;
@@ -36,6 +48,10 @@ public class PageRequest {
         }
         if (Objects.isNull(pageSize)) {
             pageSize = 10;
+        }
+
+        if (sort != null && sort.length > 0) {
+            orders = sort;
         }
     }
 
