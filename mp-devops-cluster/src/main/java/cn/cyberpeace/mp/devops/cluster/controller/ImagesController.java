@@ -380,4 +380,11 @@ public class ImagesController {
         }
         return new Result<>(connection.getItems());
     }
+
+    @ApiOperation("同步镜像数据")
+    @PostMapping("/async")
+    public ServiceResult async(@RequestBody ImageAsyncRequest request){
+        Integer result = imagesConverter.async(request);
+        return result > 0 ? ServiceResult.successful() : ServiceResult.fail("");
+    }
 }

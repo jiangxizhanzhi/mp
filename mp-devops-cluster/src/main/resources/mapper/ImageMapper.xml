@@ -415,4 +415,140 @@
             </if>
         </where>
     </delete>
+
+    <insert id="batchInsert" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+        insert into mp_devops_target
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="item.id != null">
+                id,
+            </if>
+            <if test="item.uuid != null">
+                uuid,
+            </if>
+            <if test="item.name != null">
+                name,
+            </if>
+            <if test="item.mainCategory != null">
+                main_category,
+            </if>
+            <if test="item.subCategory != null">
+                sub_category,
+            </if>
+            <if test="item.thirdCategory != null">
+                third_category,
+            </if>
+            <if test="item.role != null">
+                role,
+            </if>
+            <if test="item.imageType != null">
+                image_type,
+            </if>
+            <if test="item.isPublic != null">
+                is_public,
+            </if>
+            <if test="item.quickCreateSupport != null">
+                quick_create_support,
+            </if>
+            <if test="item.createTime != null">
+                create_time,
+            </if>
+            <if test="item.updateTime != null">
+                update_time,
+            </if>
+            <if test="item.inPosition != null">
+                in_position,
+            </if>
+            <if test="item.useStatus != null">
+                use_status,
+            </if>
+            <if test="item.referenceStatus != null">
+                reference_status,
+            </if>
+            <if test="item.systemType != null">
+                system_type,
+            </if>
+            <if test="item.systemArchitecure != null">
+                system_architecure,
+            </if>
+            <if test="item.language != null">
+                language,
+            </if>
+            <if test="item.imageStatus != null">
+                image_status,
+            </if>
+            <if test="item.baseImageSupport != null">
+                base_image_support,
+            </if>
+            <if test="item.initSupport != null">
+                init_support,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="item.id != null">
+                #{id},
+            </if>
+            <if test="item.uuid != null">
+                #{uuid},
+            </if>
+            <if test="item.name != null">
+                #{name},
+            </if>
+            <if test="item.mainCategory != null">
+                #{mainCategory},
+            </if>
+            <if test="item.subCategory != null">
+                #{subCategory},
+            </if>
+            <if test="item.thirdCategory != null">
+                #{thirdCategory},
+            </if>
+            <if test="item.role != null">
+                #{role},
+            </if>
+            <if test="item.imageType != null">
+                #{imageType},
+            </if>
+            <if test="item.isPublic != null">
+                #{isPublic,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
+            </if>
+            <if test="item.quickCreateSupport != null">
+                #{quickCreateSupport},
+            </if>
+            <if test="item.createTime != null">
+                #{createTime},
+            </if>
+            <if test="item.updateTime != null">
+                #{updateTime},
+            </if>
+            <if test="item.inPosition != null">
+                #{inPosition,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
+            </if>
+            <if test="item.useStatus != null">
+                #{useStatus,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
+            </if>
+            <if test="item.referenceStatus != null">
+                #{referenceStatus},
+            </if>
+            <if test="item.systemType != null">
+                #{systemType},
+            </if>
+            <if test="item.systemArchitecure != null">
+                #{systemArchitecure},
+            </if>
+            <if test="item.language != null">
+                #{language},
+            </if>
+            <if test="item.imageStatus != null">
+                #{imageStatus},
+            </if>
+            <if test="item.baseImageSupport != null">
+                #{baseImageSupport},
+            </if>
+            <if test="item.initSupport != null">
+                #{initSupport},
+            </if>
+        </trim>
+        </foreach>
+    </insert>
 </mapper>
