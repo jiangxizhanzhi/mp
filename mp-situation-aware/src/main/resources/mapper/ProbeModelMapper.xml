@@ -41,16 +41,16 @@
     </delete>
     <insert id="insert" parameterType="cn.cyberpeace.mp.situationaware.model.ProbeModel">
         insert into mp_situation_probe (pk, id, probe_name,
-                                        des, OS_type, probe_category,
+                                        des, OS_type, probe_category,source_category,
                                         script_type, create_time, update_time,
                                         script_content, command_interval)
         values (#{pk,jdbcType=INTEGER}, #{id,jdbcType=VARCHAR}, #{probeName,jdbcType=VARCHAR},
-                #{des,jdbcType=VARCHAR}, #{osType,jdbcType=INTEGER}, #{probeCategory,jdbcType=INTEGER},
+                #{des,jdbcType=VARCHAR}, #{osType,jdbcType=INTEGER}, #{probeCategory,jdbcType=INTEGER},#{sourceCategory, jdbcType=INTEGER,
+            javaType=cn.cyberpeace.mp.situationaware.model.enums.SourceCategory,
+            typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
                 #{scriptType,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
                    , #{scriptContent,jdbcType=LONGVARBINARY}, #{commandInterval,jdbcType=VARCHAR})
     </insert>
-
-
     <update id="deleteByProbeId" parameterType="java.lang.String">
         update mp_situation_probe
         set del_flag=1
