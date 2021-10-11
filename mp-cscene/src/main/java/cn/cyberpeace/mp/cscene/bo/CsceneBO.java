@@ -45,7 +45,7 @@ public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneR
     public CsceneModel toModel(String... ignoreFields) {
         var obj = super.toModel(ArrayUtils.addAll(ignoreFields,
                 BeanUtils.getBeanGetterFieldName(CsceneModel::getSceneConfig)));
-        if (sceneConfig != null) {
+        if (sceneConfig != null && sceneConfig.getTopology() != null && sceneConfig.getTopology().getScene() != null) {
             obj.setSceneConfig(sceneConfig.getTopology().getScene().getEid());
         }
         return obj;

@@ -1,6 +1,9 @@
 package cn.cyberpeace.mp.sceneplugincloud.config;
 
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Network;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualInternet;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NetworkData;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -51,6 +54,12 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.external_net_id:}")
     private String externalNetId;
 
+    @Value("${mp.sceneplugincloud.mgmt_name:mgmt}")
+    private String mgmtName;
+
+    @Value("${mp.sceneplugincloud.mgmt_net_id:}")
+    private String mgmtNetId;
+
     public List<String> getCidrPool() {
         List<String> cidrPool = new ArrayList<>();
         IntStream.range(172, 173).forEach(cidrA -> IntStream.range(0, 255)
@@ -72,5 +81,29 @@ public class CloudAppConfig {
         }
 
         return externalNetId;
+    }
+
+    public String getMgmtNetId() {
+        if (!StringUtils.isEmpty(mgmtNetId)) {
+            return mgmtNetId;
+        }
+
+        NetworkData networkData;
+        try {
+            networkData = new Network().getByName(mgmtName);
+        } catch (Exception e) {
+            log.error("Try to get mgmt net failed: ", e);
+            throw e;
+        }
+
+        if (networkData != null) {
+            mgmtNetId = networkData.getId();
+        } else {
+            var message = "Unable to find mgmt network with name `mgmt`";
+            log.error("Try to get mgmt net failed: {}", message);
+            throw new MpRuntimeException(message);
+        }
+
+        return mgmtNetId;
     }
 }
