@@ -38,7 +38,6 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.BeanUtils;
-import cn.cyberpeace.mp.base.util.IdGenerator;
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.hutool.core.collection.CollectionUtil;
@@ -768,7 +767,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                         .password(importUser.getPassword())
                         .build();
 
-        userModel.setIdentifier(IdGenerator.generateGlobalId() + "");
+//        userModel.setIdentifier(IdGenerator.generateGlobalId() + "");
 
         return userModel;
     }
