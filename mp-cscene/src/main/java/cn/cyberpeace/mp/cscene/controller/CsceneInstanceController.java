@@ -109,7 +109,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             @ApiImplicitParam(name = "nodeId", value = "节点id", dataTypeClass = String.class),
             @ApiImplicitParam(name = "flowId", value = "流量id", dataTypeClass = String.class),
     })
-    @GetMapping(value = "/start_flow", params = {"id", "nodeId", "flowId"})
+    @PostMapping(value = "/start_flow", params = {"id", "nodeId", "flowId"})
     public ServiceResult<Flow> startFlow(@RequestParam String id, @RequestParam String nodeId,
                                          @RequestParam String flowId,
                                          @RequestBody(required = false) CsceneContextBO context) {
@@ -122,7 +122,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             @ApiImplicitParam(name = "nodeId", value = "节点id", dataTypeClass = String.class),
             @ApiImplicitParam(name = "flowId", value = "流量id", dataTypeClass = String.class),
     })
-    @GetMapping(value = "/stop_flow", params = {"id", "nodeId", "flowId"})
+    @PostMapping(value = "/stop_flow", params = {"id", "nodeId", "flowId"})
     public ServiceResult<Flow> stopFlow(@RequestParam String id, @RequestParam String nodeId,
                                         @RequestParam String flowId,
                                         @RequestBody(required = false) CsceneContextBO context) {
@@ -135,7 +135,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             @ApiImplicitParam(name = "nodeId", value = "节点id", dataTypeClass = String.class),
             @ApiImplicitParam(name = "probeId", value = "探针id", dataTypeClass = String.class),
     })
-    @GetMapping(value = "/start_probe", params = {"id", "nodeId", "probeId"})
+    @PostMapping(value = "/start_probe", params = {"id", "nodeId", "probeId"})
     public ServiceResult<Probe> startProbe(@RequestParam String id, @RequestParam String nodeId,
                                            @RequestParam String probeId,
                                            @RequestBody(required = false) CsceneContextBO context) {
@@ -148,7 +148,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             @ApiImplicitParam(name = "nodeId", value = "节点id", dataTypeClass = String.class),
             @ApiImplicitParam(name = "probeId", value = "探针id", dataTypeClass = String.class),
     })
-    @GetMapping(value = "/stop_probe", params = {"id", "nodeId", "probeId"})
+    @PostMapping(value = "/stop_probe", params = {"id", "nodeId", "probeId"})
     public ServiceResult<Probe> stopProbe(@RequestParam String id, @RequestParam String nodeId,
                                           @RequestParam String probeId,
                                           @RequestBody(required = false) CsceneContextBO context) {

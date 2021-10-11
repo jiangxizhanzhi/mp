@@ -94,7 +94,9 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
     @Override
     public void deleteScene(CsceneInstanceBO csceneBO, boolean logic) {
         var sceneData = csceneBO.getScene();
-        String sceneId = sceneData == null ? null : sceneData.getTopology().getScene().getEid();
+        String sceneId = (sceneData == null
+                || sceneData.getTopology() == null
+                || sceneData.getTopology().getScene() == null) ? null : sceneData.getTopology().getScene().getEid();
         deleteScene(sceneId, logic);
         csceneBO.setScene(null);
     }
