@@ -336,11 +336,11 @@ public class InitiateHandler extends HandlerCommon {
             cloudElement.setVlanId(cloudElement.getAuxiliaryNetworkVlanId());
         }
 
-//        // 虚拟机/容器 默认开启管理网络
-//        if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)
-//                || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
-//            cloudElement.setEnableMgmt(true);
-//        }
+        // 虚拟机/容器 默认开启管理网络
+        if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)
+                || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
+            cloudElement.setEnableMgmt(true);
+        }
     }
 
     public InitiateHandler(CloudScenePluginHandler pluginHandler) {

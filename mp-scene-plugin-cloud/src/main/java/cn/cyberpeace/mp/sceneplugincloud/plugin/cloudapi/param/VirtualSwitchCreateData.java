@@ -19,6 +19,7 @@ public class VirtualSwitchCreateData implements CloudHttpData {
 
     private String id;
     private String networkType;
+    private String physicalNetwork;
 
     @Data
     @AllArgsConstructor
