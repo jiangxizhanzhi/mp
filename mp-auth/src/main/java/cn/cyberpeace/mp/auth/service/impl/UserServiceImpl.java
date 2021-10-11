@@ -173,6 +173,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         if (StringUtils.isBlank(obj.getIdentifier())) {
             obj.setIdentifier(null);
         }
+        obj.setUpdateTime(LocalDateTime.now());
         return super.update(obj, fields);
     }
 

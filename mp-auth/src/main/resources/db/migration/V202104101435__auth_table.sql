@@ -1,28 +1,30 @@
 # 租户表
-CREATE TABLE mp_auth_tenant (
-    `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `id` varchar(64)  NOT NULL COMMENT 'id',
-    `identifier` varchar(64)  NOT NULL COMMENT '编号',
-    `name` varchar(64) NOT NULL COMMENT '名称',
-    `create_time` datetime(6) NOT NULL COMMENT '创建时间',
-    `update_time` datetime(6) NOT NULL COMMENT '更新时间',
+CREATE TABLE mp_auth_tenant
+(
+    `pk`          int(11)     NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `id`          varchar(64) NOT NULL COMMENT 'id',
+    `identifier`  varchar(64) NOT NULL COMMENT '编号',
+    `name`        varchar(64) NOT NULL COMMENT '名称',
+    `create_time` datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`pk`),
     UNIQUE (`id`),
     UNIQUE (`identifier`)
 ) comment '租户表';
 
 # 组织表
-CREATE TABLE mp_auth_org (
-    `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `id` varchar(64)  NOT NULL COMMENT 'id',
-    `tenant` varchar(64)  NOT NULL COMMENT '所属租户' default '',
-    `parent` varchar(64)  NOT NULL COMMENT '父组织' default '',
-    `identifier` varchar(64)  NOT NULL COMMENT '编号',
-    `name` varchar(64) NOT NULL COMMENT '名称',
-    `path` varchar(180) NOT NULL COMMENT '组织结构路径',
+CREATE TABLE mp_auth_org
+(
+    `pk`          int(11)       NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `id`          varchar(64)   NOT NULL COMMENT 'id',
+    `tenant`      varchar(64)   NOT NULL COMMENT '所属租户' default '',
+    `parent`      varchar(64)   NOT NULL COMMENT '父组织'  default '',
+    `identifier`  varchar(64)   NOT NULL COMMENT '编号',
+    `name`        varchar(64)   NOT NULL COMMENT '名称',
+    `path`        varchar(180)  NOT NULL COMMENT '组织结构路径',
     `description` varchar(1024) NOT NULL COMMENT '描述',
-    `create_time` datetime(6) NOT NULL COMMENT '创建时间',
-    `update_time` datetime(6) NOT NULL COMMENT '更新时间',
+    `create_time` datetime      NOT NULL                DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` datetime      NOT NULL                DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`pk`),
     UNIQUE (`id`),
     UNIQUE (`tenant`, `identifier`),
@@ -30,16 +32,17 @@ CREATE TABLE mp_auth_org (
 ) comment '组织表';
 
 # 角色表
-CREATE TABLE mp_auth_role (
-    `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `id` varchar(64)  NOT NULL COMMENT 'id',
-    `tenant` varchar(64)  NOT NULL COMMENT '所属租户' default '',
-    `org` varchar(64)  NOT NULL COMMENT '所属组织' default '',
-    `identifier` varchar(64)  NOT NULL COMMENT '编号',
-    `name` varchar(64) NOT NULL COMMENT '名称',
+CREATE TABLE mp_auth_role
+(
+    `pk`          int(11)       NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `id`          varchar(64)   NOT NULL COMMENT 'id',
+    `tenant`      varchar(64)   NOT NULL COMMENT '所属租户' default '',
+    `org`         varchar(64)   NOT NULL COMMENT '所属组织' default '',
+    `identifier`  varchar(64)   NOT NULL COMMENT '编号',
+    `name`        varchar(64)   NOT NULL COMMENT '名称',
     `description` varchar(1024) NOT NULL COMMENT '描述',
-    `create_time` datetime(6) NOT NULL COMMENT '创建时间',
-    `update_time` datetime(6) NOT NULL COMMENT '更新时间',
+    `create_time` datetime      NOT NULL                DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` datetime      NOT NULL                DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`pk`),
     UNIQUE (`id`),
     UNIQUE (`tenant`, `identifier`),
@@ -47,47 +50,50 @@ CREATE TABLE mp_auth_role (
 ) comment '角色表';
 
 # 用户表
-CREATE TABLE mp_auth_user (
-    `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `id` varchar(64)  NOT NULL COMMENT 'id',
-    `tenant` varchar(64)  NOT NULL COMMENT '原生租户' default '',
-    `identifier` varchar(64)  NULL COMMENT '编号',
-    `username` varchar(64) NOT NULL COMMENT '用户名',
-    `password` varchar(128) NOT NULL COMMENT '密码',
-    `token_secret` varchar(128) NOT NULL COMMENT 'token密钥',
-    `name` varchar(128) NOT NULL COMMENT '姓名',
-    `nickname` varchar(128) NOT NULL COMMENT '昵称',
-    `avatar` varchar(2048) NOT NULL COMMENT '头像',
-    `birthday` date NOT NULL COMMENT '生日',
-    `email` varchar(255) NOT NULL COMMENT '邮箱',
-    `mobile` varchar(64) NOT NULL COMMENT '手机号',
-    `id_card` varchar(64) NOT NULL COMMENT '身份证号',
-    `address` varchar(255) NOT NULL COMMENT '地址',
-    `is_enabled` int NOT NULL COMMENT '1:启用 0：禁用',
-    `is_audited` int NOT NULL COMMENT '1:已审核 0：待审核',
-    `init_check` int NOT NULL DEFAULT 0 COMMENT '是否首次登陆需要强制修改密码 0:否，1:是',
-    `description` varchar(1024) NULL COMMENT '描述',
-    `date_joined` datetime(6) NOT NULL COMMENT '加入时间',
-    `expired_time` datetime(6) NOT NULL COMMENT '过期时间',
-    `last_login` datetime(6) NOT NULL COMMENT '最后登录时间',
-    `res` varchar(255) NULL COMMENT '保留字段',
-    `create_time` datetime(6) NOT NULL COMMENT '创建时间',
-    `update_time` datetime(6) NOT NULL COMMENT '更新时间',
+CREATE TABLE mp_auth_user
+(
+    `pk`           int(11)       NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `id`           varchar(64)   NOT NULL COMMENT 'id',
+    `tenant`       varchar(64)   NOT NULL COMMENT '原生租户' default '',
+    `identifier`   varchar(64)   NULL COMMENT '编号',
+    `username`     varchar(64)   NOT NULL COMMENT '用户名',
+    `password`     varchar(128)  NOT NULL COMMENT '密码',
+    `token_secret` varchar(128)  NOT NULL COMMENT 'token密钥',
+    `name`         varchar(128)  NOT NULL COMMENT '姓名',
+    `nickname`     varchar(128)  NOT NULL COMMENT '昵称',
+    `avatar`       varchar(2048) NOT NULL COMMENT '头像',
+    `birthday`     date          NOT NULL COMMENT '生日',
+    `email`        varchar(255)  NOT NULL COMMENT '邮箱',
+    `mobile`       varchar(64)   NOT NULL COMMENT '手机号',
+    `id_card`      varchar(64)   NOT NULL COMMENT '身份证号',
+    `address`      varchar(255)  NOT NULL COMMENT '地址',
+    `is_enabled`   int           NOT NULL COMMENT '1:启用 0：禁用',
+    `is_audited`   int           NOT NULL COMMENT '1:已审核 0：待审核',
+    `init_check`   int           NOT NULL                DEFAULT 0 COMMENT '是否首次登陆需要强制修改密码 0:否，1:是',
+    `description`  varchar(1024) NULL COMMENT '描述',
+    `date_joined`  datetime      NULL COMMENT '加入时间',
+    `expired_time` datetime      NOT NULL COMMENT '过期时间',
+    `last_login`   datetime      NULL COMMENT '最后登录时间',
+    `res`          varchar(255)  NULL COMMENT '保留字段',
+    `create_time`  datetime      NOT NULL                DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time`  datetime      NOT NULL                DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`pk`),
     UNIQUE (`id`),
     UNIQUE (`identifier`),
-    UNIQUE (`username`)
+    UNIQUE (`username`),
+    KEY (`update_time`)
 ) comment '用户表';
 
 # 租户用户
-CREATE TABLE mp_auth_tenant_user (
-    `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `id` varchar(64)  NOT NULL COMMENT 'id',
-    `tenant` varchar(64)  NOT NULL COMMENT '所属租户',
-    `org` varchar(64)  NOT NULL COMMENT '所属组织',
-    `user` varchar(64)  NOT NULL COMMENT '用户',
-    `create_time` datetime(6) NOT NULL COMMENT '创建时间',
-    `update_time` datetime(6) NOT NULL COMMENT '更新时间',
+CREATE TABLE mp_auth_tenant_user
+(
+    `pk`          int(11)     NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `id`          varchar(64) NOT NULL COMMENT 'id',
+    `tenant`      varchar(64) NOT NULL COMMENT '所属租户',
+    `org`         varchar(64) NOT NULL COMMENT '所属组织',
+    `user`        varchar(64) NOT NULL COMMENT '用户',
+    `create_time` datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`pk`),
     UNIQUE (`id`),
     UNIQUE (`tenant`, `user`)
@@ -95,36 +101,38 @@ CREATE TABLE mp_auth_tenant_user (
 
 
 # 用户心跳表
-CREATE TABLE mp_auth_user_heartbeat (
-     `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
-     `id` varchar(64)  NOT NULL COMMENT 'id',
-     `user` varchar(64)  NOT NULL COMMENT '用户id',
-     `tenant` varchar(64)  NOT NULL COMMENT '所属租户',
-     `create_time` datetime(6) NOT NULL COMMENT '创建时间',
-     `update_time` datetime(6) NOT NULL COMMENT '更新时间',
-     PRIMARY KEY (`pk`),
-     UNIQUE (`id`)
+CREATE TABLE mp_auth_user_heartbeat
+(
+    `pk`          int(11)     NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `id`          varchar(64) NOT NULL COMMENT 'id',
+    `user`        varchar(64) NOT NULL COMMENT '用户id',
+    `tenant`      varchar(64) NOT NULL COMMENT '所属租户',
+    `create_time` datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`pk`),
+    UNIQUE (`id`)
 ) comment '用户心跳表';
 create index idx_user_hb_uid on mp_auth_user_heartbeat (user);
 create index idx_user_hb_time on mp_auth_user_heartbeat (create_time);
 
 
 # 用户在线报告统计表
-CREATE TABLE mp_auth_user_online_report (
-    `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `id` varchar(64)  NOT NULL COMMENT 'id',
-    `user` varchar(64)  NOT NULL COMMENT '用户id',
-    `tenant` varchar(64)  NOT NULL COMMENT '所属租户',
-    `username` varchar(64) NOT NULL COMMENT '用户名',
-    `name` varchar(64) NOT NULL COMMENT '用户姓名',
-    `org` varchar(200) NOT NULL COMMENT '组织',
-    `action` varchar(64) NOT NULL COMMENT '动作',
-    `subject` varchar(64) NOT NULL COMMENT '对象',
-    `total_online_hours` float NOT NULL DEFAULT 0 COMMENT '累计在线时长',
-    `monitor` varchar(64) NOT NULL COMMENT '监控',
-    `is_online` int DEFAULT 0 COMMENT '是否在线 0:不在线 1:在线',
-    `create_time` datetime(6) NOT NULL COMMENT '创建时间',
-    `update_time` datetime(6) NOT NULL COMMENT '更新时间',
+CREATE TABLE mp_auth_user_online_report
+(
+    `pk`                 int(11)      NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `id`                 varchar(64)  NOT NULL COMMENT 'id',
+    `user`               varchar(64)  NOT NULL COMMENT '用户id',
+    `tenant`             varchar(64)  NOT NULL COMMENT '所属租户',
+    `username`           varchar(64)  NOT NULL COMMENT '用户名',
+    `name`               varchar(64)  NOT NULL COMMENT '用户姓名',
+    `org`                varchar(200) NOT NULL COMMENT '组织',
+    `action`             varchar(64)  NOT NULL COMMENT '动作',
+    `subject`            varchar(64)  NOT NULL COMMENT '对象',
+    `total_online_hours` float        NOT NULL DEFAULT 0 COMMENT '累计在线时长',
+    `monitor`            varchar(64)  NOT NULL COMMENT '监控',
+    `is_online`          int                   DEFAULT 0 COMMENT '是否在线 0:不在线 1:在线',
+    `create_time`        datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time`        datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`pk`),
     UNIQUE (`id`),
     UNIQUE (`user`)
@@ -134,85 +142,90 @@ create index idx_user_olrpt_uname on mp_auth_user_online_report (username);
 
 
 # 用户角色表
-CREATE TABLE mp_auth_user_role (
-    `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `id` varchar(64)  NOT NULL COMMENT 'id',
-    `tenant` varchar(64)  NOT NULL COMMENT '所属租户',
-    `user` varchar(64)  NOT NULL COMMENT '用户',
-    `role` varchar(64)  NOT NULL COMMENT '角色',
-    `create_time` datetime(6) NOT NULL COMMENT '创建时间',
-    `update_time` datetime(6) NOT NULL COMMENT '更新时间',
+CREATE TABLE mp_auth_user_role
+(
+    `pk`          int(11)     NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `id`          varchar(64) NOT NULL COMMENT 'id',
+    `tenant`      varchar(64) NOT NULL COMMENT '所属租户',
+    `user`        varchar(64) NOT NULL COMMENT '用户',
+    `role`        varchar(64) NOT NULL COMMENT '角色',
+    `create_time` datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`pk`),
     UNIQUE (`id`),
     UNIQUE (`tenant`, `user`, `role`)
 ) comment '用户角色表';
 
 # 资源目标表(有哪些资源)
-CREATE TABLE mp_auth_target (
-   `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
-   `id` varchar(64)  NOT NULL COMMENT 'id',
-   `parent` varchar(64) NULL COMMENT '父权限ID',
-   `identifier` varchar(64)  NOT NULL COMMENT '编号',
-   `tenant` varchar(64)  NOT NULL COMMENT '所属租户',
-   `name` varchar(64) NOT NULL COMMENT '名称',
-   `path` varchar(255) NULL COMMENT '路径',
-   `type` int NOT NULL COMMENT '资源类型 1:菜单, 2:API, 3:数据',
-   `create_time` datetime(6) NOT NULL COMMENT '创建时间',
-   `update_time` datetime(6) NOT NULL COMMENT '更新时间',
-   PRIMARY KEY (`pk`),
-   UNIQUE (`id`),
-   UNIQUE (`identifier`)
+CREATE TABLE mp_auth_target
+(
+    `pk`          int(11)      NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `id`          varchar(64)  NOT NULL COMMENT 'id',
+    `parent`      varchar(64)  NULL COMMENT '父权限ID',
+    `identifier`  varchar(64)  NOT NULL COMMENT '编号',
+    `tenant`      varchar(64)  NOT NULL COMMENT '所属租户',
+    `name`        varchar(64)  NOT NULL COMMENT '名称',
+    `path`        varchar(255) NULL COMMENT '路径',
+    `type`        int          NOT NULL COMMENT '资源类型 1:菜单, 2:API, 3:数据',
+    `create_time` datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`pk`),
+    UNIQUE (`id`),
+    UNIQUE (`identifier`)
 ) comment '权限（资源）表';
 
 # 组织资源权限表
-CREATE TABLE mp_auth_org_permission (
-    `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `id` varchar(64)  NOT NULL COMMENT 'id',
-    `tenant` varchar(64)  NOT NULL COMMENT '所属租户',
-    `owner` varchar(64)  NOT NULL COMMENT '权限所有者(组织)',
-    `target` varchar(64) NOT NULL COMMENT '资源目标',
-    `can_read` tinyint(1) NOT NULL COMMENT '读权限',
-    `can_create` tinyint(1) NOT NULL COMMENT '创建权限',
-    `can_update` tinyint(1) NOT NULL COMMENT '更新权限',
-    `can_delete` tinyint(1) NOT NULL COMMENT '删除权限',
-    `create_time` datetime(6) NOT NULL COMMENT '创建时间',
-    `update_time` datetime(6) NOT NULL COMMENT '更新时间',
+CREATE TABLE mp_auth_org_permission
+(
+    `pk`          int(11)     NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `id`          varchar(64) NOT NULL COMMENT 'id',
+    `tenant`      varchar(64) NOT NULL COMMENT '所属租户',
+    `owner`       varchar(64) NOT NULL COMMENT '权限所有者(组织)',
+    `target`      varchar(64) NOT NULL COMMENT '资源目标',
+    `can_read`    tinyint(1)  NOT NULL COMMENT '读权限',
+    `can_create`  tinyint(1)  NOT NULL COMMENT '创建权限',
+    `can_update`  tinyint(1)  NOT NULL COMMENT '更新权限',
+    `can_delete`  tinyint(1)  NOT NULL COMMENT '删除权限',
+    `create_time` datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`pk`),
     UNIQUE (`id`),
     UNIQUE (`tenant`, `owner`, `target`)
 ) comment '组织权限表';
 
 # 角色资源权限表
-CREATE TABLE mp_auth_role_permission (
-    `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `id` varchar(64)  NOT NULL COMMENT 'id',
-    `tenant` varchar(64)  NOT NULL COMMENT '所属租户',
-    `owner` varchar(64)  NOT NULL COMMENT '权限所有者(角色)',
-    `target` varchar(64)  NOT NULL COMMENT '资源目标',
-    `can_read` tinyint(1) NOT NULL COMMENT '读权限',
-    `can_create` tinyint(1) NOT NULL COMMENT '创建权限',
-    `can_update` tinyint(1) NOT NULL COMMENT '更新权限',
-    `can_delete` tinyint(1) NOT NULL COMMENT '删除权限',
-    `create_time` datetime(6) NOT NULL COMMENT '创建时间',
-    `update_time` datetime(6) NOT NULL COMMENT '更新时间',
+CREATE TABLE mp_auth_role_permission
+(
+    `pk`          int(11)     NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `id`          varchar(64) NOT NULL COMMENT 'id',
+    `tenant`      varchar(64) NOT NULL COMMENT '所属租户',
+    `owner`       varchar(64) NOT NULL COMMENT '权限所有者(角色)',
+    `target`      varchar(64) NOT NULL COMMENT '资源目标',
+    `can_read`    tinyint(1)  NOT NULL COMMENT '读权限',
+    `can_create`  tinyint(1)  NOT NULL COMMENT '创建权限',
+    `can_update`  tinyint(1)  NOT NULL COMMENT '更新权限',
+    `can_delete`  tinyint(1)  NOT NULL COMMENT '删除权限',
+    `create_time` datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`pk`),
     UNIQUE (`id`),
     UNIQUE (`tenant`, `owner`, `target`)
 ) comment '角色权限表';
 
 # 用户资源权限表
-CREATE TABLE mp_auth_user_permission (
-    `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `id` varchar(64)  NOT NULL COMMENT 'id',
-    `tenant` varchar(64)  NOT NULL COMMENT '所属租户',
-    `owner` varchar(64)  NOT NULL COMMENT '权限所有者(用户)',
-    `target` varchar(64)  NOT NULL COMMENT '资源目标',
-    `can_read` tinyint(1) NOT NULL COMMENT '读权限',
-    `can_create` tinyint(1) NOT NULL COMMENT '创建权限',
-    `can_update` tinyint(1) NOT NULL COMMENT '更新权限',
-    `can_delete` tinyint(1) NOT NULL COMMENT '删除权限',
-    `create_time` datetime(6) NOT NULL COMMENT '创建时间',
-    `update_time` datetime(6) NOT NULL COMMENT '更新时间',
+CREATE TABLE mp_auth_user_permission
+(
+    `pk`          int(11)     NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `id`          varchar(64) NOT NULL COMMENT 'id',
+    `tenant`      varchar(64) NOT NULL COMMENT '所属租户',
+    `owner`       varchar(64) NOT NULL COMMENT '权限所有者(用户)',
+    `target`      varchar(64) NOT NULL COMMENT '资源目标',
+    `can_read`    tinyint(1)  NOT NULL COMMENT '读权限',
+    `can_create`  tinyint(1)  NOT NULL COMMENT '创建权限',
+    `can_update`  tinyint(1)  NOT NULL COMMENT '更新权限',
+    `can_delete`  tinyint(1)  NOT NULL COMMENT '删除权限',
+    `create_time` datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`pk`),
     UNIQUE (`id`),
     UNIQUE (`tenant`, `owner`, `target`)
@@ -221,16 +234,17 @@ CREATE TABLE mp_auth_user_permission (
 
 
 # 组织-用户关系表
-CREATE TABLE mp_auth_org_user (
-     `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
-     `id` varchar(64)  NOT NULL COMMENT 'id',
-     `tenant` varchar(64)  NOT NULL COMMENT '所属租户' default '',
-     `org` varchar(64)  NOT NULL COMMENT '组织id',
-     `user` varchar(64)  NOT NULL COMMENT '账号id',
-     `create_time` datetime(6) NOT NULL COMMENT '创建时间',
-     `update_time` datetime(6) NOT NULL COMMENT '更新时间',
-     PRIMARY KEY (`pk`),
-     UNIQUE (`id`)
+CREATE TABLE mp_auth_org_user
+(
+    `pk`          int(11)     NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `id`          varchar(64) NOT NULL COMMENT 'id',
+    `tenant`      varchar(64) NOT NULL COMMENT '所属租户' default '',
+    `org`         varchar(64) NOT NULL COMMENT '组织id',
+    `user`        varchar(64) NOT NULL COMMENT '账号id',
+    `create_time` datetime    NOT NULL                DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` datetime    NOT NULL                DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`pk`),
+    UNIQUE (`id`)
 ) comment '组织用户表';
 
 
@@ -333,81 +347,95 @@ CREATE TABLE mp_sys_notice_role (
 
 
 # 系统公告消息(已读/推送)统计表
-CREATE TABLE mp_sys_notice_read (
-    `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `id` varchar(64)  NOT NULL COMMENT 'id',
-    `tenant` varchar(64) NOT NULL COMMENT '租户',
-    `notice_id` varchar(64) NOT NULL COMMENT '公告ID',
-    `user` varchar(64) NULL COMMENT '读者',
-    `is_readed` int NOT NULL DEFAULT 1 COMMENT '是否已读 1:已读 0:未读  首次创建一条数据即为已读',
-    `is_need_push` int NOT NULL DEFAULT 1 COMMENT '是否推送本条公告 1:是（需要推送）； 0:否（不再推送）默认为1',
-    `read_count` int NOT NULL DEFAULT 1 COMMENT '已读次数 首次创建一条数据即为已读次数为1',
-    `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-     PRIMARY KEY (`pk`),
-     UNIQUE (`id`),
-     KEY (`notice_id`),
-     KEY (`user`, `notice_id`)
+CREATE TABLE mp_sys_notice_read
+(
+    `pk`           int(11)     NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `id`           varchar(64) NOT NULL COMMENT 'id',
+    `tenant`       varchar(64) NOT NULL COMMENT '租户',
+    `notice_id`    varchar(64) NOT NULL COMMENT '公告ID',
+    `user`         varchar(64) NULL COMMENT '读者',
+    `is_readed`    int         NOT NULL DEFAULT 1 COMMENT '是否已读 1:已读 0:未读  首次创建一条数据即为已读',
+    `is_need_push` int         NOT NULL DEFAULT 1 COMMENT '是否推送本条公告 1:是（需要推送）； 0:否（不再推送）默认为1',
+    `read_count`   int         NOT NULL DEFAULT 1 COMMENT '已读次数 首次创建一条数据即为已读次数为1',
+    `create_time`  datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time`  datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`pk`),
+    UNIQUE (`id`),
+    KEY (`notice_id`),
+    KEY (`user`, `notice_id`)
 ) COMMENT '系统公告消息(已读/推送)统计表';
 
 
-
-
-
-
 -- 默认管理员用户，首次登陆需修改密码
-INSERT INTO mp_auth_user (id, tenant, identifier, username, password, token_secret, name, nickname, avatar, birthday, email, mobile, id_card, address, is_enabled, is_audited, init_check, description, date_joined, expired_time, last_login, create_time, update_time) VALUES ('3f655d87112f4ae094bbaf70830e20aa', 'default', 'admin', 'admin', '1f670a02678a6cbcc9d38ce57f97f4a3724574dfa3a69b73f2930586110b4619265c87c9874df4cc', '351672ff8854438eaaa48c46efdfa947', '管理员', '管理员', '', '2021-06-23', 'example@123.com', '13988888888', '', '北京路101号', 1, 1, 1, '', '2021-06-23 09:37:29.084709', '2121-07-29 00:00:00.000000', '2021-06-23 09:37:29.084667', '2021-06-23 09:37:29.084805', '2021-07-08 20:16:47.878994');
+INSERT INTO mp_auth_user (id, tenant, identifier, username, password, token_secret, name, nickname, avatar, birthday,
+                          email, mobile, id_card, address, is_enabled, is_audited, init_check, description, date_joined,
+                          expired_time, last_login)
+VALUES ('3f655d87112f4ae094bbaf70830e20aa', 'default', 'admin', 'admin',
+        '1f670a02678a6cbcc9d38ce57f97f4a3724574dfa3a69b73f2930586110b4619265c87c9874df4cc',
+        '351672ff8854438eaaa48c46efdfa947', '管理员', '管理员', '', '2021-06-23', 'example@123.com', '13988888888', '',
+        '北京路101号', 1, 1, 1, '', CURRENT_TIMESTAMP, '2121-07-29 00:00:00', null);
 
 -- 默认管理员角色
-INSERT INTO mp_auth_role (id, tenant, org, identifier, name, description, create_time, update_time) VALUES ('5827ff7847504ffd806e0a85c417228d', 'default', 'default', 'ADMIN', '管理员', '管理员角色', '2021-06-23 06:20:05.000000', '2021-07-08 20:59:14.037209');
-INSERT INTO mp_auth_role (id, tenant, org, identifier, name, description, create_time, update_time) VALUES ('e12bb08a9bc545bbba46a2fb3c92533a', 'default', 'default', 'SUPERUSER', '超级用户', '超级用户角色', '2021-06-23 06:20:05.000000', '2021-07-08 20:59:14.037209');
+INSERT INTO mp_auth_role (id, tenant, org, identifier, name, description)
+VALUES ('5827ff7847504ffd806e0a85c417228d', 'default', 'default', 'ADMIN', '管理员', '管理员角色');
+INSERT INTO mp_auth_role (id, tenant, org, identifier, name, description)
+VALUES ('e12bb08a9bc545bbba46a2fb3c92533a', 'default', 'default', 'SUPERUSER', '超级用户', '超级用户角色');
 -- 特定需求角色？
-INSERT INTO mp_auth_role (id, tenant, org, identifier, name, description, create_time, update_time) VALUES ('7454c07d331841f4a58b17e4fb933b94', 'default', 'default', 'TEACHER', '教员', '教员角色', '2021-06-23 06:20:05.000000', '2021-07-08 20:59:14.037209');
-INSERT INTO mp_auth_role (id, tenant, org, identifier, name, description, create_time, update_time) VALUES ('1e9748bd16c4406f8a5790b645b6c5d1', 'default', 'default', 'STUDENT', '学员', '学员角色', '2021-06-23 06:20:05.000000', '2021-07-08 20:59:14.037209');
+INSERT INTO mp_auth_role (id, tenant, org, identifier, name, description)
+VALUES ('7454c07d331841f4a58b17e4fb933b94', 'default', 'default', 'TEACHER', '教员', '教员角色');
+INSERT INTO mp_auth_role (id, tenant, org, identifier, name, description)
+VALUES ('1e9748bd16c4406f8a5790b645b6c5d1', 'default', 'default', 'STUDENT', '学员', '学员角色');
 
 
 -- 用户-角色关系
-INSERT INTO mp_auth_user_role (id, tenant, user, role, create_time, update_time) VALUES ('791088e33dd44de3899f3c105597c354', 'default', '3f655d87112f4ae094bbaf70830e20aa', '5827ff7847504ffd806e0a85c417228d', '2021-07-08 20:16:47.896726', '2021-07-08 20:16:47.896733');
-INSERT INTO mp_auth_user_role (id, tenant, user, role, create_time, update_time) VALUES ('088e79133dd44de105597c3543899f3c', 'default', '3f655d87112f4ae094bbaf70830e20aa', 'e12bb08a9bc545bbba46a2fb3c92533a', '2021-07-08 20:16:47.896726', '2021-07-08 20:16:47.896733');
+INSERT INTO mp_auth_user_role (id, tenant, user, role)
+VALUES ('791088e33dd44de3899f3c105597c354', 'default', '3f655d87112f4ae094bbaf70830e20aa',
+        '5827ff7847504ffd806e0a85c417228d');
+INSERT INTO mp_auth_user_role (id, tenant, user, role)
+VALUES ('088e79133dd44de105597c3543899f3c', 'default', '3f655d87112f4ae094bbaf70830e20aa',
+        'e12bb08a9bc545bbba46a2fb3c92533a');
 
 -- 客户端授权
-INSERT INTO mp_auth_client_details (client_id, resource_ids, client_secret, type, scope, authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity, refresh_token_validity, additional_information, autoapprove) VALUES ('84261d495c414e', 'all', '2112f4b855264ad7b1a4209737fc7836', 2, 'all', 'all', null, null, null, null, null, null);
+INSERT INTO mp_auth_client_details (client_id, resource_ids, client_secret, type, scope, authorized_grant_types,
+                                    web_server_redirect_uri, authorities, access_token_validity, refresh_token_validity,
+                                    additional_information, autoapprove)
+VALUES ('84261d495c414e', 'all', '2112f4b855264ad7b1a4209737fc7836', 2, 'all', 'all', null, null, null, null, null,
+        null);
 
 -- 组织
-INSERT INTO mp_auth_org (id, tenant, parent, identifier, name, path, description, create_time, update_time) VALUES ('a13262d600fe40c799d63dce5c1485af', 'default', '', 'default-org', '一级组织', '一级组织', '一级组织', '2021-07-21 09:36:33.835950', '2021-07-21 10:13:33.281078');
+INSERT INTO mp_auth_org (id, tenant, parent, identifier, name, path, description)
+VALUES ('a13262d600fe40c799d63dce5c1485af', 'default', '', 'default-org', '一级组织', '一级组织', '一级组织');
 
 -- 用户-组织
-INSERT INTO mp_auth_org_user (id, tenant, org, user, create_time, update_time) VALUES ('06c3e74d568a4937812c8f9ba6ef5df9', 'default', 'a13262d600fe40c799d63dce5c1485af', '3f655d87112f4ae094bbaf70830e20aa', '2021-07-21 21:47:14.517567', '2021-07-21 21:47:14.517572');
+INSERT INTO mp_auth_org_user (id, tenant, org, user)
+VALUES ('06c3e74d568a4937812c8f9ba6ef5df9', 'default', 'a13262d600fe40c799d63dce5c1485af',
+        '3f655d87112f4ae094bbaf70830e20aa');
 
 -- 租户
-INSERT INTO mp_auth_tenant (id, identifier, name, create_time, update_time) VALUES ('defaulttenantid', 'default', '默认租户', '2021-06-23 07:14:03.000000', '2021-06-23 07:14:05.000000');
+INSERT INTO mp_auth_tenant (id, identifier, name)
+VALUES ('defaulttenantid', 'default', '默认租户');
 
 -- 系统配置
-INSERT INTO mp_sys_config (pk, id, tenant, key_name, value, create_time, update_time) VALUES (1, 'ec8bda8f239d4967b9ace3d425c829fb', 'default', 'system_name', '浙江能源', '2021-07-05 11:41:29.435932', '2021-07-05 11:41:29.435944');
-INSERT INTO mp_sys_config (pk, id, tenant, key_name, value, create_time, update_time) VALUES (2, '4a3d2ecc528e4b77b3d518a81bd01335', 'default', 'copyright', '@2021-2023，南京赛宁信息技术有限公司，版权所有', '2021-07-05 11:41:29.436008', '2021-07-05 11:41:29.436010');
-INSERT INTO mp_sys_config (pk, id, tenant, key_name, value, create_time, update_time)
-VALUES (3, 'bbd330a0fa7646fc937c8a875996ee8c', 'default', 'env_per_person', '12', '2021-07-05 11:41:29.436067',
-        '2021-07-05 11:41:29.436070');
-INSERT INTO mp_sys_config (pk, id, tenant, key_name, value, create_time, update_time)
-VALUES (4, '9efaf1686331402f814e266f740cba74', 'default', 'public_register', '0', '2021-07-05 11:41:29.436128',
-        '2021-07-07 17:33:35.000000');
-INSERT INTO mp_sys_config (pk, id, tenant, key_name, value, create_time, update_time)
-VALUES (5, 'b64cfb718fe64d7797d361aa8f806743', 'default', 'user_audit', '1', '2021-07-05 11:41:29.436235',
-        '2021-07-14 15:13:46.000000');
-INSERT INTO mp_sys_config (pk, id, tenant, key_name, value, create_time, update_time)
-VALUES (6, '3c20e18b430c4387aa3ac98dd0bebbfe', 'default', 'flag_length', '8', '2021-07-05 11:41:29.436292',
-        '2021-07-05 11:41:29.436295');
-INSERT INTO mp_sys_config (pk, id, tenant, key_name, value, create_time, update_time)
-VALUES (7, 'ecf0293f69d84dbdb430ebf96e323404', 'default', 'flag_prefix', '12345', '2021-07-05 11:41:29.436337',
-        '2021-07-05 11:41:29.436339');
-INSERT INTO mp_sys_config (pk, id, tenant, key_name, value, create_time, update_time)
-VALUES (8, '308666a1b1614a0bae80f838f35fff97', 'default', 'vlan_bucket', '100-200', '2021-07-05 11:41:29.436392',
-        '2021-07-14 15:22:20.320849');
-INSERT INTO mp_sys_config (pk, id, tenant, key_name, value, create_time, update_time)
-VALUES (9, 'x23fasdbda1b161bae80f833ac98dd0b', 'default', 'logo', '', '2021-07-05 11:41:29', '2021-07-14 15:22:20');
-INSERT INTO mp_sys_config (pk, id, tenant, key_name, value, create_time, update_time)
-VALUES (10, 'q03a9asdbd0f833ac98dd0ba1b161ba8', 'default', 'vpn_packages', '', '2021-07-05 11:41:29.000000',
-        '2021-07-14 15:22:20.000000');
+INSERT INTO mp_sys_config (pk, id, tenant, key_name, value)
+VALUES (1, 'ec8bda8f239d4967b9ace3d425c829fb', 'default', 'system_name', '浙江能源');
+INSERT INTO mp_sys_config (pk, id, tenant, key_name, value)
+VALUES (2, '4a3d2ecc528e4b77b3d518a81bd01335', 'default', 'copyright', '@2021-2023，南京赛宁信息技术有限公司，版权所有');
+INSERT INTO mp_sys_config (pk, id, tenant, key_name, value)
+VALUES (3, 'bbd330a0fa7646fc937c8a875996ee8c', 'default', 'env_per_person', '12');
+INSERT INTO mp_sys_config (pk, id, tenant, key_name, value)
+VALUES (4, '9efaf1686331402f814e266f740cba74', 'default', 'public_register', '0');
+INSERT INTO mp_sys_config (pk, id, tenant, key_name, value)
+VALUES (5, 'b64cfb718fe64d7797d361aa8f806743', 'default', 'user_audit', '1');
+INSERT INTO mp_sys_config (pk, id, tenant, key_name, value)
+VALUES (6, '3c20e18b430c4387aa3ac98dd0bebbfe', 'default', 'flag_length', '8');
+INSERT INTO mp_sys_config (pk, id, tenant, key_name, value)
+VALUES (7, 'ecf0293f69d84dbdb430ebf96e323404', 'default', 'flag_prefix', '12345');
+INSERT INTO mp_sys_config (pk, id, tenant, key_name, value)
+VALUES (8, '308666a1b1614a0bae80f838f35fff97', 'default', 'vlan_bucket', '100-200');
+INSERT INTO mp_sys_config (pk, id, tenant, key_name, value)
+VALUES (9, 'x23fasdbda1b161bae80f833ac98dd0b', 'default', 'logo', '');
+INSERT INTO mp_sys_config (pk, id, tenant, key_name, value)
+VALUES (10, 'q03a9asdbd0f833ac98dd0ba1b161ba8', 'default', 'vpn_packages', '');
 
 -- 菜单
 INSERT INTO mp_auth_target (pk, id, parent, identifier, tenant, name, path, type, create_time, update_time)

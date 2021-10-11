@@ -6,7 +6,10 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.flow.constant.ControllerConstant;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
-import cn.cyberpeace.mp.flow.request.*;
+import cn.cyberpeace.mp.flow.request.AddAttackFlowRequest;
+import cn.cyberpeace.mp.flow.request.AddBackgroundFlowRequest;
+import cn.cyberpeace.mp.flow.request.ModifyAttackFlowRequest;
+import cn.cyberpeace.mp.flow.request.ModifyBackgroundFlowRequest;
 import cn.cyberpeace.mp.flow.request.queryparam.FlowInfoQueryParams;
 import cn.cyberpeace.mp.flow.response.AttackFlowResponse;
 import cn.cyberpeace.mp.flow.response.BackgroundFlowResponse;
@@ -54,13 +57,16 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
 
     /**
      * 批量删除流量信息
-     * @param request
+     * @param ids
      * @return
      */
     @ApiOperation("批量删除流量信息")
     @DeleteMapping("/batch_delete")
-    public ServiceResult<Integer> batchDeleteFlowInfo(@Validated BatchDeleteFlowInfoRequest request) {
-        return flowServiceImpl.batchDeleteFlowInfo(request);
+    public ServiceResult<Integer> batchDeleteFlowInfo(@RequestBody String[] ids) {
+        if (Objects.isNull(ids)) {
+            return ServiceResult.fail("ids can not be empty");
+        }
+        return flowServiceImpl.batchDeleteFlowInfo(ids);
     }
 
     /**

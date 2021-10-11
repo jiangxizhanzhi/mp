@@ -42,6 +42,9 @@ logging:
     root: INFO
   file:
     path: ${user.home}/logs
+  logback:
+    rollingpolicy:
+      max-history: 7
 
 mybatis:
   mapper-locations: classpath*:mapper/*.xml
