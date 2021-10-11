@@ -16,7 +16,10 @@ import cn.cyberpeace.mp.flow.model.FlowTaskModel;
 import cn.cyberpeace.mp.flow.repository.FlowCollectionRelMapper;
 import cn.cyberpeace.mp.flow.repository.FlowInfoMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskMapper;
-import cn.cyberpeace.mp.flow.request.*;
+import cn.cyberpeace.mp.flow.request.AddAttackFlowRequest;
+import cn.cyberpeace.mp.flow.request.AddBackgroundFlowRequest;
+import cn.cyberpeace.mp.flow.request.ModifyAttackFlowRequest;
+import cn.cyberpeace.mp.flow.request.ModifyBackgroundFlowRequest;
 import cn.cyberpeace.mp.flow.request.queryparam.FlowInfoQueryParams;
 import cn.cyberpeace.mp.flow.response.AttackFlowResponse;
 import cn.cyberpeace.mp.flow.response.BackgroundFlowResponse;
@@ -33,10 +36,7 @@ import org.springframework.stereotype.Service;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -119,12 +119,13 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
     /**
      * 批量删除流量信息
      *
-     * @param request
+     * @param ids
      * @return
      */
-    public ServiceResult<Integer> batchDeleteFlowInfo(BatchDeleteFlowInfoRequest request) {
+    public ServiceResult<Integer> batchDeleteFlowInfo(String[] ids) {
+        List<String> idList = Arrays.asList(ids);
         // 判断流量任务是否关联该流量信息
-        List<FlowTaskModel> flowTaskList = flowTaskMapper.listByFlowIds(request.getIdList());
+        List<FlowTaskModel> flowTaskList = flowTaskMapper.listByFlowIds(Arrays.asList(ids));
         if (CollectionUtils.isNotEmpty(flowTaskList)) {
             log.info("flow info related flow task can not delete: {}", flowTaskList);
             return ServiceResult.fail("Can not delete flow task related flow info");
@@ -132,18 +133,17 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
 
         // 判断流量是否关联流量集合信息
         List<FlowCollectionRelModel> flowCollectionRelModels =
-                flowCollectionRelMapper.selectByFlowIds(request.getIdList());
+                flowCollectionRelMapper.selectByFlowIds(idList);
         if (CollectionUtils.isNotEmpty(flowCollectionRelModels)) {
             log.info("flow info related flow collection can not delete: {}", flowCollectionRelModels);
             return ServiceResult.fail("Can not delete flow collection related flow info");
         }
 
-        List<FlowInfoModel> flowInfoModels = this.selectByFlowIds(request.getIdList());
+        List<FlowInfoModel> flowInfoModels = this.selectByFlowIds(idList);
         if (CollectionUtils.isNotEmpty(flowInfoModels)) {
-            String[] delIds = request.getIdList().toArray(new String[0]);
             // 异步删除流量文件
             asyncPlatFlowTaskService.deleteFlowFile(flowInfoModels);
-            return bulkDelete(delIds);
+            return bulkDelete(ids);
         } else {
             log.error("flow files to delete not exist");
         }
