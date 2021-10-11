@@ -86,7 +86,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
             orgIds.addAll(childOrgDtos.stream().map(OrgDto::getId).collect(Collectors.toList()));
         }
 
-        List<UserModel> users = getModelMapper().listUsers(orgIds, uname, userIds);
+        List<UserModel> users = getModelMapper().listUsers(orgIds, uname, userIds, null);
         return users;
     }
 
@@ -181,8 +181,14 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
         }
 
         log.info("orgIds: {}", orgIds);
+
+        ArrayList<String> orders = null;
+        if (req.getOrders() != null && req.getOrders().length > 0) {
+            orders = CollectionUtil.newArrayList(req.getOrders());
+        }
+
         PageHelper.startPage(req.getPage(), req.getPageSize());
-        List<UserModel> users = getModelMapper().listUsers(orgIds, req.getUsername(), idsList);
+        List<UserModel> users = getModelMapper().listUsers(orgIds, req.getUsername(), idsList, orders);
         PageInfo pageInfo = new PageInfo(users);
 
         List<UserDto> userDtos = users.stream().map(u -> {

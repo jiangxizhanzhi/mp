@@ -33,10 +33,7 @@ import org.springframework.stereotype.Service;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -67,6 +64,9 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
 
     @Autowired
     private AsyncPlatFlowTaskService asyncPlatFlowTaskService;
+
+    @Autowired
+    private FlowCollectionServiceImpl flowCollectionService;
 
     /**
      * 补充list查询条件
@@ -101,7 +101,13 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         List<FlowCollectionRelModel> flowCollectionRelModels =
                 flowCollectionRelMapper.selectByFlowIds(Collections.singletonList(id));
         if (CollectionUtils.isNotEmpty(flowCollectionRelModels)) {
-            return ServiceResult.fail("Can not delete flow collection related flow info");
+            // 遍历删除流量集合关联信息
+            flowCollectionRelModels.forEach(rel -> {
+                DelFlowCollectionRelRequest delRelRequest = new DelFlowCollectionRelRequest();
+                delRelRequest.setCollectionId(rel.getCollectionId());
+                delRelRequest.setFlowIds(Collections.singletonList(id));
+                flowCollectionService.delCollectionRel(delRelRequest);
+            });
         }
 
         ObjServiceResult<FlowInfoModel> serviceResult = get(id);
@@ -119,12 +125,13 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
     /**
      * 批量删除流量信息
      *
-     * @param request
+     * @param ids
      * @return
      */
-    public ServiceResult<Integer> batchDeleteFlowInfo(BatchDeleteFlowInfoRequest request) {
+    public ServiceResult<Integer> batchDeleteFlowInfo(String[] ids) {
+        List<String> idList = Arrays.asList(ids);
         // 判断流量任务是否关联该流量信息
-        List<FlowTaskModel> flowTaskList = flowTaskMapper.listByFlowIds(request.getIdList());
+        List<FlowTaskModel> flowTaskList = flowTaskMapper.listByFlowIds(Arrays.asList(ids));
         if (CollectionUtils.isNotEmpty(flowTaskList)) {
             log.info("flow info related flow task can not delete: {}", flowTaskList);
             return ServiceResult.fail("Can not delete flow task related flow info");
@@ -132,18 +139,26 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
 
         // 判断流量是否关联流量集合信息
         List<FlowCollectionRelModel> flowCollectionRelModels =
-                flowCollectionRelMapper.selectByFlowIds(request.getIdList());
+                flowCollectionRelMapper.selectByFlowIds(idList);
         if (CollectionUtils.isNotEmpty(flowCollectionRelModels)) {
-            log.info("flow info related flow collection can not delete: {}", flowCollectionRelModels);
-            return ServiceResult.fail("Can not delete flow collection related flow info");
+            // 按流量集合id分组关联信息
+            Map<String, List<String>> relMap =
+                    flowCollectionRelModels.stream().collect(Collectors.groupingBy(FlowCollectionRelModel::getCollectionId,
+                            Collectors.mapping(FlowCollectionRelModel::getFlowId, Collectors.toList())));
+            // 遍历删除流量集合关联信息
+            relMap.forEach((collectionId, flowIds) -> {
+                DelFlowCollectionRelRequest delRelRequest = new DelFlowCollectionRelRequest();
+                delRelRequest.setCollectionId(collectionId);
+                delRelRequest.setFlowIds(flowIds);
+                flowCollectionService.delCollectionRel(delRelRequest);
+            });
         }
 
-        List<FlowInfoModel> flowInfoModels = this.selectByFlowIds(request.getIdList());
+        List<FlowInfoModel> flowInfoModels = this.selectByFlowIds(idList);
         if (CollectionUtils.isNotEmpty(flowInfoModels)) {
-            String[] delIds = request.getIdList().toArray(new String[0]);
             // 异步删除流量文件
             asyncPlatFlowTaskService.deleteFlowFile(flowInfoModels);
-            return bulkDelete(delIds);
+            return bulkDelete(ids);
         } else {
             log.error("flow files to delete not exist");
         }

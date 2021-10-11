@@ -24,12 +24,19 @@
     </select>
 
     <select id="listWithUserCnt" resultType="cn.cyberpeace.mp.auth.dto.role.RoleDto">
-        select r.*, (select count(distinct user) from mp_auth_user_role ru where r.id = ru.role) userCnt from mp_auth_role r
+        select r.*, (select count(distinct user) from mp_auth_user_role ru where r.id = ru.role) userCnt from
+        mp_auth_role r
         <where>
             <if test="roleName != null and roleName != ''">
                 AND r.name like CONCAT('%', #{roleName}, '%')
             </if>
         </where>
+        <if test="orders != null and orders.size() > 0">
+            ORDER BY
+            <foreach item="order" index="index" collection="orders"
+                     open="" separator="," close="">${order}
+            </foreach>
+        </if>
     </select>
 
 </mapper>

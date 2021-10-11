@@ -3,8 +3,6 @@ package cn.cyberpeace.mp.auth.dto.org;
 import cn.cyberpeace.mp.auth.dto.common.PageRequest;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-
-import java.util.Objects;
 /**
  * @Description:
  * @Author zhouxinghuai
@@ -25,4 +23,11 @@ public class OrgUserPageRequest extends PageRequest {
     @ApiModelProperty(value = "是否展示该组织以下所有层级的用户，默认为true")
     private boolean showAllUnderLevel = true;
 
+    @Override
+    public void ensure() {
+        super.ensure();
+        if (super.getOrders() == null || super.getOrders().length == 0) {
+            super.setOrders(new String[]{"-update_time"});
+        }
+    }
 }

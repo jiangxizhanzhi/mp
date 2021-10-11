@@ -8,13 +8,16 @@ import cn.cyberpeace.mp.devops.cluster.model.TargetModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.*;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
 import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author wanggang
@@ -33,10 +36,7 @@ public class DevopsTargetServiceImpl implements DevopsTargetService {
     @Override
     public Integer insert(Device device) {
         if (Objects.nonNull(device) && device.isSuccess()) {
-            TargetModel targetModel = convertDevice(device);
-            targetModel.setIsPublic(PublicEnum.ALL_PUBLIC);
-            targetModel.setUseStatus(StatusEnum.NO);
-            targetModel.setReferenceStatus(NumberUtils.INTEGER_ZERO);
+            TargetModel targetModel = convertToTargetModel(device);
             return imageMapper.insert(targetModel);
         }
         return 0;
@@ -54,6 +54,25 @@ public class DevopsTargetServiceImpl implements DevopsTargetService {
             }
         }
         return 0;
+    }
+
+    @Transactional
+    @Override
+    public Integer insert(List<Device> deviceList) {
+        if (CollectionUtils.isEmpty(deviceList)){
+            return 0;
+        }
+        List<TargetModel> targetModels = deviceList.stream().map(device -> convertToTargetModel(device))
+                .collect(Collectors.toList());
+        return imageMapper.batchInsert(targetModels);
+    }
+
+    protected TargetModel convertToTargetModel(Device device){
+        TargetModel targetModel = convertDevice(device);
+        targetModel.setIsPublic(PublicEnum.ALL_PUBLIC);
+        targetModel.setUseStatus(StatusEnum.NO);
+        targetModel.setReferenceStatus(NumberUtils.INTEGER_ZERO);
+        return targetModel;
     }
 
     /**

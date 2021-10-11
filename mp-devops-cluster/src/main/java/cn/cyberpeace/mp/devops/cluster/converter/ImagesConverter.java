@@ -89,4 +89,11 @@ public interface ImagesConverter extends BaseConverter{
      * @param request
      */
     BaseCloudPlatformModel reboot(ImagesRebootInstanceRequest request);
+
+    /**
+     * 同步镜像
+     * @param request
+     * @return
+     */
+    Integer async(ImageAsyncRequest request);
 }

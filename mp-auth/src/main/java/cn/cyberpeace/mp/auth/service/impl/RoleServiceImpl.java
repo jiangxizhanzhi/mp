@@ -137,8 +137,14 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
     @Override
     public PageInfo getPageWithUserCnt(RolePageRequest rolePageRequest) {
+
+        ArrayList<String> orders = null;
+        if (rolePageRequest.getOrders() != null && rolePageRequest.getOrders().length > 0) {
+            orders = CollectionUtil.newArrayList(rolePageRequest.getOrders());
+        }
+
         PageHelper.startPage(rolePageRequest.getPage(), rolePageRequest.getPageSize());
-        List<RoleDto> roleDtos = getModelMapper().listWithUserCnt(rolePageRequest.getName());
+        List<RoleDto> roleDtos = getModelMapper().listWithUserCnt(rolePageRequest.getName(), orders);
         PageInfo pageInfo = new PageInfo(roleDtos);
 
         roleDtos.forEach(r -> {
