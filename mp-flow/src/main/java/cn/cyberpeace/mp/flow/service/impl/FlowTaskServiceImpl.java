@@ -178,10 +178,11 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
     /**
      * 新增流量任务
      *
-     * @param flowTaskModel
+     * @param request
      * @return
      */
-    public ServiceResult<FlowTaskModel> addFlowTask(FlowTaskModel flowTaskModel) {
+    public ServiceResult<FlowTaskModel> addFlowTask(AddFlowTaskRequest request) {
+        FlowTaskModel flowTaskModel = request;
         ObjResult<FlowInfoModel> flowInfoObjResult = flowInfoService.get(flowTaskModel.getFlowId()).getSource();
         if (Objects.nonNull(flowInfoObjResult)) {
             FlowInfoModel flowInfoModel = flowInfoObjResult.asResult();
@@ -191,7 +192,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                     create(flowTaskModel);
 
                     // 异步新增流量发生平台流量任务
-                    asyncPlatFlowTaskService.savePlatFlowTask(flowTaskModel, false);
+                    asyncPlatFlowTaskService.savePlatFlowTask(request, false);
                     return ServiceResult.success(flowTaskModel);
                 } else {
                     return ServiceResult.fail("Add flow task error");
@@ -309,10 +310,11 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
     /**
      * 更新流量任务
      *
-     * @param flowTaskModel
+     * @param request
      * @return
      */
-    public ServiceResult<FlowTaskModel> updateFlowTask(FlowTaskModel flowTaskModel) {
+    public ServiceResult<FlowTaskModel> updateFlowTask(AddFlowTaskRequest request) {
+        FlowTaskModel flowTaskModel = request;
         ObjResult<FlowTaskModel> flowTaskResult = this.get(flowTaskModel.getId()).getSource();
         if (Objects.isNull(flowTaskResult)) {
             log.error("flow task not exist");
@@ -364,7 +366,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
             }
 
             // 异步更新流量发生平台任务
-            asyncPlatFlowTaskService.savePlatFlowTask(flowTaskModel, true);
+            asyncPlatFlowTaskService.savePlatFlowTask(request, true);
         }
 
         // 更新本地信息
