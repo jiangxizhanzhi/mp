@@ -1,36 +1,32 @@
 package cn.cyberpeace.mp.auth.service.sys.impl;
 
-import ch.qos.logback.core.joran.action.IADataForComplexProperty;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.dto.OrgDto;
 import cn.cyberpeace.mp.auth.dto.notice.SysNoticeDto;
 import cn.cyberpeace.mp.auth.dto.notice.SysNoticePageRequest;
 import cn.cyberpeace.mp.auth.dto.notice.SysNoticeRequest;
-import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.RoleModel;
-import cn.cyberpeace.mp.auth.model.SysNoticeOrgModel;
 import cn.cyberpeace.mp.auth.model.SysNoticeModel;
+import cn.cyberpeace.mp.auth.model.SysNoticeOrgModel;
 import cn.cyberpeace.mp.auth.model.SysNoticeReadModel;
 import cn.cyberpeace.mp.auth.model.SysNoticeRoleModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
-import cn.cyberpeace.mp.auth.repository.SysNoticeOrgMapper;
 import cn.cyberpeace.mp.auth.repository.SysNoticeMapper;
+import cn.cyberpeace.mp.auth.repository.SysNoticeOrgMapper;
 import cn.cyberpeace.mp.auth.repository.SysNoticeReadMapper;
 import cn.cyberpeace.mp.auth.repository.SysNoticeRoleMapper;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.service.UserService;
-import cn.cyberpeace.mp.auth.service.sys.SysNoticeService;
 import cn.cyberpeace.mp.auth.service.fields.SysNoticeFields;
+import cn.cyberpeace.mp.auth.service.sys.SysNoticeService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
-import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
-import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.hutool.core.collection.CollectionUtil;
@@ -46,7 +42,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -262,6 +257,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
     public PageInfo<SysNoticeModel> currentUserPage(SysNoticePageRequest req) {
         UserModel userModel = UserUtils.getLoginUser();
         if(Objects.isNull(userModel)) {
+            log.error("未查询到当前登录用户！");
             return new PageInfo<>();
         }
 
@@ -271,6 +267,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         boolean isAdmin = roleModels.stream().anyMatch(r -> r.getIdentifier().equals(AuthConstant.ROLE_ADMIN));
 
         if (isAdmin) {
+            log.info("current user is admin!");
             PageHelper.startPage(req.getPage(), req.getPageSize());
             List<SysNoticeModel> notices = getModelMapper().listCurrentUserNotices(null, null, null, null,null, null, userModel.getId());
             PageInfo pageInfo = new PageInfo(notices);
@@ -278,6 +275,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
             return pageInfo;
         }
 
+        log.info("current user is admin!");
         // 非管理员...
         List<String> allRoleIds = roleModels.stream().map(RoleModel::getId).collect(Collectors.toList());
 
