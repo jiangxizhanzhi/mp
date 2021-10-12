@@ -52,6 +52,8 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     }
 
     public void loadListFilterCondition(HumanCondition humanCondition, CsceneQueryParams queryParams) {
+        humanCondition.filterEqual(CsceneModel::getDeleted, false);
+
         Integer type = queryParams.getType();
         if (type != null) {
             humanCondition.filterEqual(CsceneModel::getType, type);
