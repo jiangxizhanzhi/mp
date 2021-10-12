@@ -82,7 +82,7 @@
             javaType=cn.cyberpeace.mp.situationaware.model.enums.SourceCategory,
             typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler}
         </if>
-        order by update_time desc limit #{offset}, #{probeSearchRequest.pageSize}
+        order by update_time desc limit #{offset}, #{probeSearchRequest.page}
     </select>
 
     <select id="countQuery" parameterType="cn.cyberpeace.mp.situationaware.model.ProbeSearchRequest"
