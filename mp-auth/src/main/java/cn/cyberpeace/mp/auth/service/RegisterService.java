@@ -54,6 +54,8 @@ public class RegisterService {
             }
         }
 
+        userService.initDefaultAvatar(user);
+
         // 查看系统设置，注册用户是否需要审核
         if (sysConfigService.isNewUserNeedAudit()) {
             log.info("need registration audit...");

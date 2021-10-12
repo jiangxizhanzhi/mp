@@ -34,6 +34,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
      * @param uploadDAO
      */
     public UploadDataListener(UserService userService) {
+        log.info("New UploadDataListener Instance...");
         this.userService = userService;
     }
 
