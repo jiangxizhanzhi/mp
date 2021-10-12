@@ -24,7 +24,7 @@ public class TargetConnection {
     @ApiModelProperty("密码")
     private String password;
 
-    @ApiModelProperty("IP")
+    @ApiModelProperty("IP：实装")
     private String hostname;
 
     @ApiModelProperty("链接ID")
@@ -33,6 +33,9 @@ public class TargetConnection {
     @ApiModelProperty("登录URL")
     private String url;
 
-    @ApiModelProperty("内部IP")
+    @ApiModelProperty("内部IP:实装")
     private String internalIp;
+
+    @ApiModelProperty("内部IP:镜像")
+    private String ipAddress;
 }
