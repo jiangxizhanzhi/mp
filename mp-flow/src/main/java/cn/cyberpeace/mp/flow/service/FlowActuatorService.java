@@ -6,4 +6,6 @@ import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
 
 public interface FlowActuatorService extends BaseModelService<FlowActuatorModel, QueryParams> {
 
+    void delVmInstance(String actuatorId);
+
 }
