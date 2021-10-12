@@ -12,17 +12,27 @@ import java.util.regex.Pattern;
  * @Date 2021/10/11
  */
 class YamlPropertyParseUtils extends PropertyUtils {
-    private static final Pattern linePattern = Pattern.compile("-([a-z])");
+    private static final Pattern middleLinePattern = Pattern.compile("-([a-z])");
+
+    private static final Pattern underLinePattern = Pattern.compile("_([a-z])");
+
+    public YamlPropertyParseUtils() {
+        this.setSkipMissingProperties(true);
+    }
 
     @Override
     public Property getProperty(Class<?> type, String name) {
-        if (name.contains("-")) {
-            return super.getProperty(type, this.lineToHump(name));
+        String formatName = name;
+        if (formatName.contains("-")) {
+            formatName = this.lineToHump(formatName, middleLinePattern);
         }
-        return super.getProperty(type, name);
+        if (formatName.contains("_")) {
+            formatName = this.lineToHump(formatName, underLinePattern);
+        }
+        return super.getProperty(type, formatName);
     }
 
-    public String lineToHump(String str) {
+    public String lineToHump(String str, Pattern linePattern) {
         StringBuilder sb = new StringBuilder();
         Matcher matcher = linePattern.matcher(str);
         while (matcher.find()) {

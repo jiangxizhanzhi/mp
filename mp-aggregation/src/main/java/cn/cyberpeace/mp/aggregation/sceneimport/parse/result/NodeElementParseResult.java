@@ -17,4 +17,5 @@ public class NodeElementParseResult {
     private String name;
     private String image;
     private List<NetElementParseResult> net;
+    private List<InitCommandParseResult> initCommands;
 }

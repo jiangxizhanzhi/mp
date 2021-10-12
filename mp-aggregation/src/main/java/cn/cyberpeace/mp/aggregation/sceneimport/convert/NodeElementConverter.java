@@ -12,6 +12,7 @@ import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @Description 将解析出的node节点转成BO
@@ -38,6 +39,12 @@ class NodeElementConverter implements IConverter {
 
         sceneConfigElementBO.setId(node.getId());
         sceneConfigElementBO.setName(node.getName());
+        if (CollectionUtils.isNotEmpty(node.getInitCommands())) {
+            List<String> initCommands = node.getInitCommands().stream()
+                    .map(command -> command.getO())
+                    .collect(Collectors.toList());
+            sceneConfigElementBO.setInitCommands(initCommands);
+        }
         if (node.getId().startsWith("server")) {
             sceneConfigElementBO.setType(BaseSceneElementModel.Type.TERMINAL);
         } else {
