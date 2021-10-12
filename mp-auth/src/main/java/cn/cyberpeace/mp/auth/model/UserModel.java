@@ -51,6 +51,7 @@ public class UserModel extends BaseModel implements Serializable {
     private String tenant;
 
     @ApiModelProperty(value = "编号")
+    @DefaultStr
     private String identifier;
 
     @ApiModelProperty(value = "用户名")
@@ -183,11 +184,12 @@ public class UserModel extends BaseModel implements Serializable {
         }
     }
 
+   /* 删除这部分逻辑 @see http://10.10.10.10/biz/bug-view-3522.html
     public void initDefaultIdentifier() {
         if (StringUtils.isEmpty(identifier) && !StringUtils.isEmpty(username)) {
             identifier = username;
         }
-    }
+    }*/
 
     public void initDefaultExpiredTime() {
         if (expiredTime == null) {

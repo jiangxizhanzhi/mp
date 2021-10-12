@@ -109,6 +109,19 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     @JsonIgnore
     private Integer auxiliaryNetworkVlanId;
 
+    @ApiModelProperty(value = "是否开启管理网卡", hidden = true)
+    @JsonIgnore
+    private Boolean enableMgmt;
+    @ApiModelProperty(value = "管理网卡端口资源id", hidden = true)
+    @JsonIgnore
+    private String mgmtPortResourceId;
+    @ApiModelProperty(value = "管理网卡ip", hidden = true)
+    @JsonIgnore
+    private String mgmtIp;
+    @ApiModelProperty(value = "管理网卡mac地址", hidden = true)
+    @JsonIgnore
+    private String mgmtMacAddr;
+
     @Override
     public void fromModel(M obj, String... ignoreFields) {
         super.fromModel(obj, ArrayUtils.addAll(ignoreFields,

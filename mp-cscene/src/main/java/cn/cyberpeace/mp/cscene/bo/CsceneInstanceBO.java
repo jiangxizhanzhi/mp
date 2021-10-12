@@ -44,7 +44,7 @@ public class CsceneInstanceBO extends BaseCsceneBO<CsceneInstanceModel, CsceneIn
     public CsceneInstanceModel toModel(String... ignoreFields) {
         var obj = super.toModel(ArrayUtils.addAll(ignoreFields,
                 BeanUtils.getBeanGetterFieldName(CsceneInstanceModel::getScene)));
-        if (scene != null) {
+        if (scene != null && scene.getTopology() != null && scene.getTopology().getScene() != null) {
             obj.setScene(scene.getTopology().getScene().getEid());
         }
         return obj;
