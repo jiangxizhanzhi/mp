@@ -97,7 +97,7 @@ public class ProbeService {
     @Transactional(rollbackFor = Exception.class, readOnly = true)
     public ListObjServiceResult<ProbeResult> queryProbeListWithPageable(ProbeSearchRequest probeSearchRequest) {
         int count = probeModelMapper.countQuery(probeSearchRequest);
-        List<ProbeModel> probeModelList = probeModelMapper.queryListWithPage(probeSearchRequest, (probeSearchRequest.getPerPage() - 1) * probeSearchRequest.getPage());
+        List<ProbeModel> probeModelList = probeModelMapper.queryListWithPage(probeSearchRequest, (probeSearchRequest.getPage() - 1) * probeSearchRequest.getPerPage());
         List<ProbeResult> probeResults = probeModelList.stream().map((model -> {
             var probeResult = new ProbeResult();
             BeanUtils.copyProperties(model, probeResult);
