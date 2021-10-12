@@ -316,7 +316,7 @@ public class RealEquipmentController {
 
         Integer page = request.getPage();
         Integer perPage = request.getPerPage();
-        Integer to = (page * perPage) > model.getResult().size() ? model.getResult().size() : page * perPage;
+        Integer to = Math.min((page * perPage), model.getResult().size());
         List<SnmpInterfaceResourceCloudPlatform.Interfaces> interfaces = model.getResult().subList((page - 1) * perPage, to);
         List<RealEquipmentNetworkCardPageResponse> list = interfaces.stream().map(v ->
                 RealEquipmentNetworkCardPageResponse.builder().name(v.getInterfaceName()).inflow(v.getInTraffic()).outflow(v.getOutTraffic()).build())
