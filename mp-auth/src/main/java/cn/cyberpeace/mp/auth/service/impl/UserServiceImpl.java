@@ -784,6 +784,13 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         }
     }
 
+    @Override
+    public boolean isAdmin(String userId) {
+        List<RoleModel> roleModels = userRoleService.listByUserId(userId);
+        boolean isAdmin = roleModels.stream().anyMatch(r -> r.getIdentifier().equals(AuthConstant.ROLE_ADMIN));
+        return isAdmin;
+    }
+
     private UserModel importUser2UserModel(ImportUser importUser) {
         if (Objects.isNull(importUser)) {
             return null;
