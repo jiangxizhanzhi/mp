@@ -4,10 +4,7 @@ import cn.cyberpeace.mp.situationaware.model.enums.SourceCategory;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import javax.validation.constraints.Min;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
 @Builder
@@ -22,7 +19,7 @@ public class ProbeSearchRequest {
     @ApiModelProperty("默认分页数量")
     @Min(1)
     @Builder.Default
-    private Integer pageSize = 10;
+    private Integer perPage = 10;
 
     /**
      * 分页页码
@@ -30,7 +27,7 @@ public class ProbeSearchRequest {
     @ApiModelProperty("分页页码")
     @Min(1)
     @Builder.Default
-    private Integer pageNum = 1;
+    private Integer page = 1;
 
     @ApiModelProperty("关键字查询")
     private String keyWord;

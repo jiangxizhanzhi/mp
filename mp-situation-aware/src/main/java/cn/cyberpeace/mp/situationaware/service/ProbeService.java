@@ -18,7 +18,6 @@ import cn.cyberpeace.mp.situationaware.model.enums.ScriptType;
 import cn.cyberpeace.mp.situationaware.repository.ProbeModelMapper;
 import cn.cyberpeace.mp.situationaware.repository.ProbeParamModelMapper;
 import cn.cyberpeace.mp.situationaware.repository.WazuhProbeManagerRepository;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
@@ -31,7 +30,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 
 /**
   *@Desciption
@@ -99,7 +97,7 @@ public class ProbeService {
     @Transactional(rollbackFor = Exception.class, readOnly = true)
     public ListObjServiceResult<ProbeResult> queryProbeListWithPageable(ProbeSearchRequest probeSearchRequest) {
         int count = probeModelMapper.countQuery(probeSearchRequest);
-        List<ProbeModel> probeModelList = probeModelMapper.queryListWithPage(probeSearchRequest, (probeSearchRequest.getPageNum() - 1) * probeSearchRequest.getPageSize());
+        List<ProbeModel> probeModelList = probeModelMapper.queryListWithPage(probeSearchRequest, (probeSearchRequest.getPage() - 1) * probeSearchRequest.getPerPage());
         List<ProbeResult> probeResults = probeModelList.stream().map((model -> {
             var probeResult = new ProbeResult();
             BeanUtils.copyProperties(model, probeResult);
