@@ -40,7 +40,7 @@ public class FlowActuatorServiceImpl extends BaseModelServiceImpl<FlowActuatorMo
      * @param actuatorId
      */
     @Override
-    public void delVmInstance(String actuatorId) {
+    public void delExecutor(String actuatorId) {
         FlowActuatorModel flowActuatorModel = this.getModelMapper().get(actuatorId);
         if (Objects.isNull(flowActuatorModel)) {
             log.error("flowActuatorModel not exist for [{}]", actuatorId);
