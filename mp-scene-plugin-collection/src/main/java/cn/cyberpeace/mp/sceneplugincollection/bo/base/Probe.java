@@ -9,6 +9,8 @@ import java.util.List;
 public class Probe {
     @ApiModelProperty(value = "探针id")
     private String id;
+    @ApiModelProperty(value = "是否通用探针")
+    private Boolean common;
     @ApiModelProperty(value = "名称")
     private String name;
     @ApiModelProperty(value = "描述")
