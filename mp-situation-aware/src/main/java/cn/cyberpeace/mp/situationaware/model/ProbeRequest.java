@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.situationaware.model;
 
 import cn.cyberpeace.mp.situationaware.model.enums.OsType;
 import cn.cyberpeace.mp.situationaware.model.enums.ScriptType;
+import cn.cyberpeace.mp.situationaware.model.enums.SourceCategory;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.List;
@@ -41,6 +42,11 @@ public class ProbeRequest {
 
     @ApiModelProperty(value = "单位分钟")
     private Integer commandInterval;
+
+
+    @ApiModelProperty("是否是定制探针 0：默认探针 1：定制探针")
+    @Builder.Default
+    private SourceCategory sourceCategory=SourceCategory.DEFAULT;
 
     @ApiModelProperty(value = "脚本参数 建议 ##包裹参数，方便替换")
     private List<ProbeParamsRequest> paramsResultList;

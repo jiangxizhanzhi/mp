@@ -69,17 +69,17 @@ CREATE TABLE mp_auth_user
     `address`      varchar(255)  NOT NULL COMMENT '地址',
     `is_enabled`   int           NOT NULL COMMENT '1:启用 0：禁用',
     `is_audited`   int           NOT NULL COMMENT '1:已审核 0：待审核',
-    `init_check`   int           NOT NULL                DEFAULT 0 COMMENT '是否首次登陆需要强制修改密码 0:否，1:是',
+    `init_check`   int           NOT NULL DEFAULT 0 COMMENT '是否首次登陆需要强制修改密码 0:否，1:是',
     `description`  varchar(1024) NULL COMMENT '描述',
     `date_joined`  datetime      NULL COMMENT '加入时间',
     `expired_time` datetime      NOT NULL COMMENT '过期时间',
     `last_login`   datetime      NULL COMMENT '最后登录时间',
     `res`          varchar(255)  NULL COMMENT '保留字段',
-    `create_time`  datetime      NOT NULL                DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_time`  datetime      NOT NULL                DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `create_time`  datetime      NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time`  datetime      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`pk`),
     UNIQUE (`id`),
-    UNIQUE (`identifier`),
+    KEY (`identifier`),
     UNIQUE (`username`),
     KEY (`update_time`)
 ) comment '用户表';
@@ -380,11 +380,11 @@ INSERT INTO mp_auth_role (id, tenant, org, identifier, name, description)
 VALUES ('5827ff7847504ffd806e0a85c417228d', 'default', 'default', 'ADMIN', '管理员', '管理员角色');
 INSERT INTO mp_auth_role (id, tenant, org, identifier, name, description)
 VALUES ('e12bb08a9bc545bbba46a2fb3c92533a', 'default', 'default', 'SUPERUSER', '超级用户', '超级用户角色');
--- 特定需求角色？
-INSERT INTO mp_auth_role (id, tenant, org, identifier, name, description)
-VALUES ('7454c07d331841f4a58b17e4fb933b94', 'default', 'default', 'TEACHER', '教员', '教员角色');
-INSERT INTO mp_auth_role (id, tenant, org, identifier, name, description)
-VALUES ('1e9748bd16c4406f8a5790b645b6c5d1', 'default', 'default', 'STUDENT', '学员', '学员角色');
+-- LGD项目 特定需求角色？
+# INSERT INTO mp_auth_role (id, tenant, org, identifier, name, description)
+# VALUES ('7454c07d331841f4a58b17e4fb933b94', 'default', 'default', 'TEACHER', '教员', '教员角色');
+# INSERT INTO mp_auth_role (id, tenant, org, identifier, name, description)
+# VALUES ('1e9748bd16c4406f8a5790b645b6c5d1', 'default', 'default', 'STUDENT', '学员', '学员角色');
 
 
 -- 用户-角色关系

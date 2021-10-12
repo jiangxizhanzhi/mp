@@ -999,12 +999,19 @@ public abstract class BaseSceneHandler<
      */
     private void fromData(D sceneDataBO) {
         var topology = sceneDataBO.getTopology();
-        loadSceneBO(topology.getScene());
+        var srcScene = (topology == null || topology.getScene() == null) ? ClassUtils.createInstance(sceneBOClass)
+                : topology.getScene();
+        loadSceneBO(srcScene);
         sceneId = scene.getEid();
-        areaId = topology.getAreaId();
-        loadAreaBOs(topology.getAreas());
-        loadElementBOs(topology.getElements());
-        loadConnectionBOs(topology.getConnections());
+
+        if (topology != null) {
+            loadSceneBO(topology.getScene());
+            areaId = topology.getAreaId();
+            loadAreaBOs(topology.getAreas());
+            loadElementBOs(topology.getElements());
+            loadConnectionBOs(topology.getConnections());
+        }
+
         loadScenePluginData(sceneDataBO.getPlugins());
     }
 

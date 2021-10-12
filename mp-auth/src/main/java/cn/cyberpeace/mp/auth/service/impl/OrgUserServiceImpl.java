@@ -86,7 +86,6 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
             orgIds.addAll(childOrgDtos.stream().map(OrgDto::getId).collect(Collectors.toList()));
         }
 
-//        ArrayList<String> orders = CollectionUtil.newArrayList("username");
         List<UserModel> users = getModelMapper().listUsers(orgIds, uname, userIds, null);
         return users;
     }
@@ -183,7 +182,6 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
 
         log.info("orgIds: {}", orgIds);
 
-//        ArrayList<String> orders = CollectionUtil.newArrayList("username");
         ArrayList<String> orders = null;
         if (req.getOrders() != null && req.getOrders().length > 0) {
             orders = CollectionUtil.newArrayList(req.getOrders());

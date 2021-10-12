@@ -14,10 +14,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @Description: 流量执行控制器
@@ -49,6 +46,18 @@ public class FlowActuatorController extends BaseModelController<FlowActuatorMode
         String uuid = TextUtils.uuid();
         asyncPlatFlowTaskService.addVmInstance(request, uuid);
         return ServiceResult.success(uuid);
+    }
+
+    /**
+     * 删除虚拟机实例
+     * @param actuatorId
+     * @return
+     */
+    @ApiOperation("删除虚拟机实例")
+    @DeleteMapping("/vm/{actuatorId}")
+    public ServiceResult<String> delVmInstance(@PathVariable String actuatorId) {
+        getModelService().delVmInstance(actuatorId);
+        return ServiceResult.successful();
     }
 
 }

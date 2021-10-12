@@ -6,9 +6,6 @@ import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Result;
-import org.apache.ibatis.annotations.Results;
-import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -33,6 +30,6 @@ public interface RoleMapper extends BaseModelMapper<RoleModel> {
 
     RoleModel selectByName(@Param("name") String name);
 
-    List<RoleDto> listWithUserCnt(@Param("roleName") String roleName);
+    List<RoleDto> listWithUserCnt(@Param("roleName") String roleName, @Param("orders") List<String> orders);
 
 }

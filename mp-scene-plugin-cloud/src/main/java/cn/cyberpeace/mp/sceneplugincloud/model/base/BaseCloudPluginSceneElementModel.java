@@ -151,4 +151,14 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     @DefaultInt
     private Integer auxiliaryNetworkVlanId;
 
+    // 用于管理网卡
+    @DefaultBool
+    private Boolean enableMgmt;
+    @DefaultStr
+    private String mgmtPortResourceId;
+    @DefaultStr
+    private String mgmtIp;
+    @DefaultStr
+    private String mgmtMacAddr;
+
 }

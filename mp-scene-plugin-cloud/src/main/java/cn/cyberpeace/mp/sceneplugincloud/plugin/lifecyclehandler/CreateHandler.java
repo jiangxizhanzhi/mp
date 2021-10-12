@@ -9,6 +9,8 @@ import cn.cyberpeace.mp.scene.util.CommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
+import cn.cyberpeace.mp.sceneplugincloud.config.CloudAppConfig;
+import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.FirewallRuleDirection;
 import cn.cyberpeace.mp.sceneplugincloud.constant.QosRuleDirection;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
@@ -122,6 +124,13 @@ public class CreateHandler extends HandlerCommon {
 
     private List<VirtualNic> genVirutalNics(CloudPluginSceneElementBO cloudElement) {
         List<VirtualNic> virtualNics = new ArrayList<>();
+        // 添加管理网卡
+        if (Boolean.TRUE.equals(cloudElement.getEnableMgmt())) {
+            var virtualNic = new VirtualNic();
+            virtualNic.setNetworkId(CloudSingleton.cloudAppConfig.getMgmtNetId());
+            virtualNics.add(virtualNic);
+        }
+
         var srcElement = cloudElement.getSrcElement();
         var ports = srcElement.getPorts();
         if (ports == null) {
@@ -264,18 +273,26 @@ public class CreateHandler extends HandlerCommon {
         }
 
         var srcPorts = cloudElement.getSrcElement().getPorts();
-        if (srcPorts == null) {
-            return;
+        Map<String, CloudPluginSceneElementPortBO> networkIdCloudPortMap = new HashMap<>();
+        if (srcPorts != null) {
+            srcPorts.forEach(srcPort -> {
+                var cloudPort = getPluginHandler().getPort(srcPort.getId());
+                networkIdCloudPortMap.put(cloudPort.getAuxiliaryNetworkId(), cloudPort);
+            });
         }
 
-        Map<String, CloudPluginSceneElementPortBO> networkIdCloudPortMap = new HashMap<>();
-        srcPorts.forEach(srcPort -> {
-            var cloudPort = getPluginHandler().getPort(srcPort.getId());
-            networkIdCloudPortMap.put(cloudPort.getAuxiliaryNetworkId(), cloudPort);
-        });
-
         virtualNics.forEach(virtualNic -> {
-            var cloudPort = networkIdCloudPortMap.getOrDefault(virtualNic.getNetworkId(), null);
+            var networkId = virtualNic.getNetworkId();
+            // 管理网卡判断
+            if (Boolean.TRUE.equals(cloudElement.getEnableMgmt())
+                    && CloudSingleton.cloudAppConfig.getMgmtNetId().equals(networkId)) {
+                cloudElement.setMgmtPortResourceId(virtualNic.getPortId());
+                cloudElement.setMgmtIp(virtualNic.getFixedIp());
+                cloudElement.setMgmtMacAddr(virtualNic.getMacAddress());
+                return;
+            }
+
+            var cloudPort = networkIdCloudPortMap.getOrDefault(networkId, null);
             if (cloudPort == null) {
                 return;
             }

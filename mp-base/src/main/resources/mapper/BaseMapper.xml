@@ -155,7 +155,7 @@
     <sql id="createFields">
         <if test="createFields != null">
             <foreach item="field" index="index" collection="createFields"
-                     open="(" separator="," close=")">${field}</foreach>
+                     open="(" separator="," close=")">`${field}`</foreach>
         </if>
     </sql>
     <sql id="createFieldValues">
@@ -166,7 +166,7 @@
         <foreach item="field" index="index" collection="updateFields"
                  open="" separator="," close="">
             <if test="field != 'id'">
-                ${field} = #{updateFieldValues[${index}]}
+                `${field}` = #{updateFieldValues[${index}]}
             </if>
         </foreach>
     </sql>
