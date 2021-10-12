@@ -228,7 +228,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
         createCheckService.check(userModel);
 
-        chooseDefaultAvatar(userModel);
+        initDefaultAvatar(userModel);
         // create中会对密码加密，外层不需要再次加密
         ObjServiceResult<UserModel> result = create(userModel);
         ResultUtils.throwExceptionIfError(result, "创建用户失败！");
@@ -559,6 +559,14 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void importExcel(List<ImportUser> list) {
+        if (CollectionUtil.isEmpty(list)) {
+            throw new MpRuntimeException("列表为空！");
+        }
+
+        if (list.size() > 100) {
+            throw new MpRuntimeException("导入的用户数量大于100！");
+        }
+
         for (ImportUser importUser : list) {
             // 1.保存用户信息
             UserModel userModel = importUser2UserModel(importUser);
@@ -566,34 +574,37 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                 continue;
             }
 
-            chooseDefaultAvatar(userModel);
+            initDefaultAvatar(userModel);
             var result = create(userModel);
             ResultUtils.throwExceptionIfError(result, "创建用户失败！");
             UserModel userCreated = result.getSource().getObj();
             String userId = userCreated.getId();
 
             // 2. 保存用户-角色关系
-            String roles = importUser.getRoles().trim();
-            Arrays.stream(StringUtils.split(roles, ",")).forEach(rname -> {
-                RoleModel roleModel = roleService.getByName(rname.trim());
-                if (Objects.nonNull(roleModel)) {
-                    UserRoleModel userRoleModel = UserRoleModel.builder().user(userId).role(roleModel.getId()).build();
-                    var re = userRoleService.create(userRoleModel);
-                    ResultUtils.throwExceptionIfError(re, "创建用户-角色关系失败！");
-                }
-            });
+            if (Objects.nonNull(importUser.getRoles())) {
+                String roles = importUser.getRoles().trim();
+                Arrays.stream(StringUtils.split(roles, ",")).forEach(rname -> {
+                    RoleModel roleModel = roleService.getByName(rname.trim());
+                    if (Objects.nonNull(roleModel)) {
+                        UserRoleModel userRoleModel = UserRoleModel.builder().user(userId).role(roleModel.getId()).build();
+                        var re = userRoleService.create(userRoleModel);
+                        ResultUtils.throwExceptionIfError(re, "创建用户-角色关系失败！");
+                    }
+                });
+            }
 
             // 3. 保存组织-用户关系
-            String orgPaths = importUser.getOrgpath().trim();
-            Arrays.stream(StringUtils.split(orgPaths, ",")).forEach(path -> {
-                OrgModel orgModel = orgService.getByPath(path);
-                if (Objects.nonNull(orgModel)) {
-                    OrgUserModel orgUserModel = OrgUserModel.builder().user(userId).org(orgModel.getId()).build();
-                    var re = orgUserService.create(orgUserModel);
-                    ResultUtils.throwExceptionIfError(re, "创建组织-用户关系失败！");
-                }
-            });
-
+            if (Objects.nonNull(importUser.getOrgpath())) {
+                String orgPaths = importUser.getOrgpath().trim();
+                Arrays.stream(StringUtils.split(orgPaths, ",")).forEach(path -> {
+                    OrgModel orgModel = orgService.getByPath(path);
+                    if (Objects.nonNull(orgModel)) {
+                        OrgUserModel orgUserModel = OrgUserModel.builder().user(userId).org(orgModel.getId()).build();
+                        var re = orgUserService.create(orgUserModel);
+                        ResultUtils.throwExceptionIfError(re, "创建组织-用户关系失败！");
+                    }
+                });
+            }
         }
     }
 
@@ -756,6 +767,23 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return getModelMapper().getUserCnt();
     }
 
+
+    @Override
+    public void setModelMapper(UserMapper modelMapper) {
+        super.setModelMapper(modelMapper);
+    }
+
+    @Override
+    public void initDefaultAvatar(UserModel userModel) {
+        if (Objects.isNull(userModel) || StringUtils.isNotBlank(userModel.getAvatar())) {
+            return;
+        }
+        List<AvatarModel> avatarModels = avatarService.listAll();
+        if (CollectionUtil.isNotEmpty(avatarModels)) {
+            userModel.setAvatar(avatarModels.get(0).getUrl());
+        }
+    }
+
     private UserModel importUser2UserModel(ImportUser importUser) {
         if (Objects.isNull(importUser)) {
             return null;
@@ -766,8 +794,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                         // 此处不需要加密，后面的create()方法会加密
                         .password(importUser.getPassword())
                         .build();
-
-//        userModel.setIdentifier(IdGenerator.generateGlobalId() + "");
 
         return userModel;
     }
@@ -828,16 +854,5 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             throw new MpRuntimeException("删除失败！");
         }
     }
-
-    private void chooseDefaultAvatar(UserModel userModel) {
-        if (Objects.isNull(userModel) || StringUtils.isNotBlank(userModel.getAvatar())) {
-            return;
-        }
-        List<AvatarModel> avatarModels = avatarService.listAll();
-        if (CollectionUtil.isNotEmpty(avatarModels)) {
-            userModel.setAvatar(avatarModels.get(0).getUrl());
-        }
-    }
-
 
 }
