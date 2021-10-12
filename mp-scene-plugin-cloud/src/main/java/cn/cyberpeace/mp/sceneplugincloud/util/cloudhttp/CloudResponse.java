@@ -16,7 +16,7 @@ public class CloudResponse<T> {
     private T data;
     private String code;
     private String message;
-    private String detail;
+    private Object detail;
     private Integer timestamp;
     private Float timeElapse;
 
