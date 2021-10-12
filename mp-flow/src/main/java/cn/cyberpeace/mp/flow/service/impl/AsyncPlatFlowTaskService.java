@@ -15,10 +15,7 @@ import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
 import cn.cyberpeace.mp.flow.repository.FlowInfoMapper;
 import cn.cyberpeace.mp.flow.repository.FlowPortMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskMapper;
-import cn.cyberpeace.mp.flow.request.AddAppTaskRequest;
-import cn.cyberpeace.mp.flow.request.AddStandardsTaskRequest;
-import cn.cyberpeace.mp.flow.request.AddVmInstanceRequest;
-import cn.cyberpeace.mp.flow.request.AddVmRequest;
+import cn.cyberpeace.mp.flow.request.*;
 import cn.cyberpeace.mp.flow.util.CommonUtil;
 import cn.cyberpeace.mp.flow.util.HttpDeleteUtil;
 import cn.cyberpeace.mp.flow.util.ResponseUtils;
@@ -78,13 +75,14 @@ public class AsyncPlatFlowTaskService {
     /**
      * 异步保存流量发生平台任务
      *
-     * @param flowTaskModel
+     * @param request
      * @param isUpdate
      */
     @Async
-    public void savePlatFlowTask(FlowTaskModel flowTaskModel, boolean isUpdate) {
+    public void savePlatFlowTask(AddFlowTaskRequest request, boolean isUpdate) {
         log.info("start to " + (isUpdate ? "update" : "add") + "platform flow task");
 
+        FlowTaskModel flowTaskModel = request;
         // 流量任务存在校验
         if (Objects.isNull(flowTaskModel)) {
             log.error("flow task not exist");
@@ -116,6 +114,9 @@ public class AsyncPlatFlowTaskService {
         FlowActuatorModel flowActuatorModel = this.getFlowActuatorModel(actuatorId);
         if (Objects.isNull(flowActuatorModel)) {
             return;
+        } else {
+            // 传入任务所属网络id
+            flowActuatorModel.setNetworkId(request.getNetworkId());
         }
 
         // 获取网口信息
@@ -321,7 +322,6 @@ public class AsyncPlatFlowTaskService {
                 // 新增流量执行器信息
                 flowActuatorModel.setId(uuid);
                 flowActuatorModel.setTitle(addVmRequest.getName());
-                flowActuatorModel.setNetworkId(request.getNetworkId());
                 flowActuatorModel.setInstanceId(instanceId);
                 flowActuatorModel.setIp(ip);
                 flowActuatorMapper.create(flowActuatorModel);

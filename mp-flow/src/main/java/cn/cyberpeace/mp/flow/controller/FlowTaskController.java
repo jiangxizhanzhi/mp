@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.flow.constant.ControllerConstant;
 import cn.cyberpeace.mp.flow.model.FlowTaskModel;
+import cn.cyberpeace.mp.flow.request.AddFlowTaskRequest;
 import cn.cyberpeace.mp.flow.request.BatchDeleteFlowTaskRequest;
 import cn.cyberpeace.mp.flow.service.FlowTaskService;
 import cn.cyberpeace.mp.flow.service.impl.FlowTaskServiceImpl;
@@ -71,25 +72,25 @@ public class FlowTaskController extends BaseModelController<FlowTaskModel, Query
     /**
      * 新增流量任务
      *
-     * @param model
+     * @param request
      * @return
      */
     @ApiOperation("新增流量任务")
     @PostMapping("/add")
-    public ServiceResult<FlowTaskModel> addFlowTask(@RequestBody @Validated FlowTaskModel model) {
-        return flowTaskService.addFlowTask(model);
+    public ServiceResult<FlowTaskModel> addFlowTask(@RequestBody @Validated AddFlowTaskRequest request) {
+        return flowTaskService.addFlowTask(request);
     }
 
     /**
      * 更新流量任务
      *
-     * @param flowTaskModel
+     * @param request
      * @return
      */
     @ApiOperation("更新流量任务")
     @PatchMapping("/update")
-    public ServiceResult<FlowTaskModel> updateFlowTask(@RequestBody @Validated FlowTaskModel flowTaskModel) {
-        return flowTaskService.updateFlowTask(flowTaskModel);
+    public ServiceResult<FlowTaskModel> updateFlowTask(@RequestBody @Validated AddFlowTaskRequest request) {
+        return flowTaskService.updateFlowTask(request);
     }
 
     /**
