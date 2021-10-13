@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin;
 
 import cn.cyberpeace.mp.base.annotation.ClassFieldClasses;
+import cn.cyberpeace.mp.base.util.ClassUtils;
+import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneBO;
@@ -23,6 +25,26 @@ public class CollectionScenePluginHandler extends ScenePluginHandler<CollectionP
         CollectionPluginSceneElementBO, CollectionPluginSceneElementPortBO, Object> {
 
     private CollectionScenePluginModelHandler pluginModelHandler;
+
+    private void loadRelated() {
+        getElementMap().forEach((nodeId, element) -> {
+            var srcElement = getSrcElement(nodeId);
+            element.setSrcElement(srcElement);
+        });
+    }
+
+    @Override
+    public void fromData(ScenePluginDataBO pluginData) {
+        super.fromData(pluginData);
+        loadRelated();
+    }
+
+    @Override
+    public void correctData() {
+        if (getScene() == null) {
+            setScene(ClassUtils.createInstance(getSceneBOClass()));
+        }
+    }
 
     @Override
     public void initBase() {

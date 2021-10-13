@@ -23,6 +23,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
 import cn.cyberpeace.mp.scenepluginflow.bo.base.Flow;
+import cn.cyberpeace.mp.scenepluginflow.service.ScenePluginFlowSceneService;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -47,6 +48,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     @Autowired
     private ScenePluginCloudSceneService scenePluginCloudSceneService;
+
+    @Autowired
+    private ScenePluginFlowSceneService scenePluginFlowSceneService;
 
     private final CsceneReportTaskPool csceneReportTaskPool = CsceneReportTaskPool.getInstance();
 
@@ -129,12 +133,32 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 StringUtils.isEmpty(nodeId) ? null : new String[]{nodeId}, true, false);
     }
 
-    public ServiceResult<Flow> startFlow(String id, String toNodeId, String flowId, CsceneContextBO context) {
-        return new ServiceResult<>(null);
+    public ServiceResult<Boolean> startFlow(String id, String toNodeId, String flowId, CsceneContextBO context) {
+        var csceneInstanceResult = get(id).getSource();
+        if (csceneInstanceResult == null) {
+            return new ServiceResult<>(false);
+        }
+        var csceneInstance = csceneInstanceResult.getObj();
+        var sceneId = csceneInstance.getScene();
+        if (StringUtils.isEmpty(sceneId)) {
+            return new ServiceResult<>(false);
+        }
+
+        return scenePluginFlowSceneService.startFlow(sceneId, toNodeId, flowId);
     }
 
-    public ServiceResult<Flow> stopFlow(String id, String toNodeId, String flowId, CsceneContextBO context) {
-        return new ServiceResult<>(null);
+    public ServiceResult<Boolean> stopFlow(String id, String toNodeId, String flowId, CsceneContextBO context) {
+        var csceneInstanceResult = get(id).getSource();
+        if (csceneInstanceResult == null) {
+            return new ServiceResult<>(false);
+        }
+        var csceneInstance = csceneInstanceResult.getObj();
+        var sceneId = csceneInstance.getScene();
+        if (StringUtils.isEmpty(sceneId)) {
+            return new ServiceResult<>(false);
+        }
+
+        return scenePluginFlowSceneService.stopFlow(sceneId, toNodeId, flowId);
     }
 
     public ServiceResult<Probe> startProbe(String id, String toNodeId, String probeId, CsceneContextBO context) {
