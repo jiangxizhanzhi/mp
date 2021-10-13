@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 import cn.cyberpeace.mp.devops.cluster.enums.PublicEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.StatusEnum;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -93,6 +94,11 @@ public class TargetModel extends BaseModel {
      * 镜像状态
      */
     private Integer imageStatus;
+
+    /**
+     * 系统镜像类型，1：基础镜像，2：openstack已有镜像，3：自定义上传
+     */
+    private Integer imageSource;
 
     /**
      * 是否支持基础镜像

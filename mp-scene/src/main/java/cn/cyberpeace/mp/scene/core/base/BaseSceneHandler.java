@@ -1346,7 +1346,7 @@ public abstract class BaseSceneHandler<
      */
     public <H9> H9 getPluginHandler(String pluginKey) {
         var plugin = pluginMap.getOrDefault(pluginKey, null);
-        return (H9) plugin;
+        return plugin == null ? null : (H9) plugin;
     }
 
     /**

@@ -38,12 +38,12 @@ public class InitiateHandler extends HandlerCommon {
 
     private void prepareExistCidrs() {
         if (existCidrs == null) {
-            existCidrs = statExistCidrs();
+            existCidrs = getHandlerUtils().statExistCidrs();
         }
     }
 
     private synchronized List<String> allocateCidrs(int count) {
-        var cidrs = randomCidrs(count, existCidrs);
+        var cidrs = getHandlerUtils().randomCidrs(count, existCidrs);
         existCidrs.addAll(cidrs);
         return cidrs;
     }
@@ -136,7 +136,8 @@ public class InitiateHandler extends HandlerCommon {
             return false;
         }
 
-        var connectedOpaqueSrcElements = getEleConnectedOpaqueSrcElements(cloudElement.getSrcElement().getId());
+        var connectedOpaqueSrcElements = getHandlerUtils().getEleConnectedOpaqueSrcElements(
+                cloudElement.getSrcElement().getId());
         if (connectedOpaqueSrcElements.isEmpty()) {
             return true;
         }
@@ -200,7 +201,7 @@ public class InitiateHandler extends HandlerCommon {
         }
 
         var auxiliaryNetworkNodeId = auxiliaryNetworkCloudElement.getSrcElement().getId();
-        var connectedOpaqueSrcPorts = getEleConnectedOpaqueSrcPorts(auxiliaryNetworkNodeId);
+        var connectedOpaqueSrcPorts = getHandlerUtils().getEleConnectedOpaqueSrcPorts(auxiliaryNetworkNodeId);
         Integer virtualType = auxiliaryNetworkCloudElement.getVirtualType();
         if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)
                 || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)
@@ -249,10 +250,10 @@ public class InitiateHandler extends HandlerCommon {
         }
 
         var portId = srcPort.getId();
-        var connectedSrcElement = getPortConnectedOpaqueSrcElement(portId);
+        var connectedSrcElement = getHandlerUtils().getPortConnectedOpaqueSrcElement(portId);
         var connectedCloudElement = connectedSrcElement == null ? null
                 : getPluginHandler().getElement(connectedSrcElement.getId());
-        var auxiliaryNetworkCloudElement = confirmAuxiliaryNetworkCloudElement(cloudElement,
+        var auxiliaryNetworkCloudElement = getHandlerUtils().confirmAuxiliaryNetworkCloudElement(cloudElement,
                 connectedCloudElement);
         if (auxiliaryNetworkCloudElement == null) {
             return;

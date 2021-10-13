@@ -142,7 +142,8 @@ public class CreateHandler extends HandlerCommon {
             var connectedSrcElement = getPluginHandler().getPortConnectedSrcElement(port.getId());
             var connectedCloudElement = connectedSrcElement == null ? null
                     : getPluginHandler().getElement(connectedSrcElement.getId());
-            var auxiliaryNetworkCloudElement = confirmAuxiliaryNetworkCloudElement(cloudElement, connectedCloudElement);
+            var auxiliaryNetworkCloudElement = getHandlerUtils().confirmAuxiliaryNetworkCloudElement(
+                    cloudElement, connectedCloudElement);
             if (auxiliaryNetworkCloudElement == null) {
                 continue;
             }
@@ -213,7 +214,7 @@ public class CreateHandler extends HandlerCommon {
                 continue;
             }
             var connectedCloudElement = getPluginHandler().getElement(connectedSrcElement.getId());
-            var auxiliaryNetworkCloudElement = confirmAuxiliaryNetworkCloudElement(cloudElement, connectedCloudElement);
+            var auxiliaryNetworkCloudElement = getHandlerUtils().confirmAuxiliaryNetworkCloudElement(cloudElement, connectedCloudElement);
             if (auxiliaryNetworkCloudElement == null) {
                 continue;
             }

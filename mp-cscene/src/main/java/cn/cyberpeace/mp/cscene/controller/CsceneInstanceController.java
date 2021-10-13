@@ -110,9 +110,9 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             @ApiImplicitParam(name = "flowId", value = "流量id", dataTypeClass = String.class),
     })
     @PostMapping(value = "/start_flow", params = {"id", "nodeId", "flowId"})
-    public ServiceResult<Flow> startFlow(@RequestParam String id, @RequestParam String nodeId,
-                                         @RequestParam String flowId,
-                                         @RequestBody(required = false) CsceneContextBO context) {
+    public ServiceResult<Boolean> startFlow(@RequestParam String id, @RequestParam String nodeId,
+                                            @RequestParam String flowId,
+                                            @RequestBody(required = false) CsceneContextBO context) {
         return modelService.startFlow(id, nodeId, flowId, context).asResult();
     }
 
@@ -123,9 +123,9 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             @ApiImplicitParam(name = "flowId", value = "流量id", dataTypeClass = String.class),
     })
     @PostMapping(value = "/stop_flow", params = {"id", "nodeId", "flowId"})
-    public ServiceResult<Flow> stopFlow(@RequestParam String id, @RequestParam String nodeId,
-                                        @RequestParam String flowId,
-                                        @RequestBody(required = false) CsceneContextBO context) {
+    public ServiceResult<Boolean> stopFlow(@RequestParam String id, @RequestParam String nodeId,
+                                           @RequestParam String flowId,
+                                           @RequestBody(required = false) CsceneContextBO context) {
         return modelService.stopFlow(id, nodeId, flowId, context).asResult();
     }
 

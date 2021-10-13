@@ -35,13 +35,6 @@ public interface ImageMapper extends BaseModelMapper<TargetModel> {
 
     /**
      * 新增
-     * @param targetModel
-     * @return
-     */
-    Integer insert(TargetModel targetModel);
-
-    /**
-     * 新增
      * @param uuid
      * @return
      */

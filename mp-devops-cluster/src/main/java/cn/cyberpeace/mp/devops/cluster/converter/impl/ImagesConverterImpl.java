@@ -162,7 +162,7 @@ public class ImagesConverterImpl implements ImagesConverter {
     @Transactional
     public Device add(ImageRequest request) {
         Device device = imagesService.add(convertRequest(request));
-        devopsTargetService.insert(device);
+        devopsTargetService.insert(Arrays.asList(device));
         return device;
     }
 
@@ -184,7 +184,7 @@ public class ImagesConverterImpl implements ImagesConverter {
     @Override
     public Device build(ImagesBuildRequest request) {
         Device device =  imagesService.quickCreate(new DeviceQuickCreateCloudPlatformModel(request.getName(),request.getImageName(),request.getServiceIds()));
-        devopsTargetService.insert(device);
+        devopsTargetService.insert(Arrays.asList(device));
         return device;
     }
 
