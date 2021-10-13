@@ -1,13 +1,3 @@
-CREATE TABLE `mp_devops_target_logo` (
-                                         `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
-                                         `id` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'id',
-                                         `url` varchar(1024) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'url',
-                                         `create_time` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) COMMENT '创建时间',
-                                         `update_time` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6) COMMENT '更新时间',
-                                         PRIMARY KEY (`pk`),
-                                         UNIQUE KEY `id` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='靶标默认logo';
-
 CREATE TABLE `mp_devops_target` (
                                     `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
                                     `id` varchar(64) NOT NULL COMMENT '镜像ID',
@@ -20,8 +10,6 @@ CREATE TABLE `mp_devops_target` (
                                     `image_type` varchar(32) DEFAULT NULL COMMENT '镜像类型：vm，container,simple, entity',
                                     `is_public` tinyint(1) NOT NULL COMMENT '是否公开，0：私有，1：自定义，2：公开',
                                     `quick_create_support` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否支持快速构建，0：不支持，1：支持',
-                                    `create_time` datetime(6) NOT NULL COMMENT '创建时间',
-                                    `update_time` datetime(6) NOT NULL COMMENT '更新时间',
                                     `in_position` tinyint(1) DEFAULT NULL COMMENT '在位状态',
                                     `reference_status` int(8) NOT NULL DEFAULT '0' COMMENT '引用状态',
                                     `use_status` tinyint(1) NOT NULL DEFAULT '0' COMMENT '使用状态',
@@ -31,7 +19,11 @@ CREATE TABLE `mp_devops_target` (
                                     `image_status` tinyint(2) DEFAULT NULL COMMENT '镜像状态',
                                     `base_image_support` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否支持基础镜像,0:不支持，1：支持',
                                     `init_support` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否支持Cloud init,0:不支持，1：支持',
-                                    PRIMARY KEY (`pk`) USING BTREE
+                                    `create_time` datetime(6) NOT NULL COMMENT '创建时间',
+                                    `update_time` datetime(6) NOT NULL COMMENT '更新时间',
+                                    `image_source` tinyint(2) DEFAULT NULL COMMENT '系统镜像类型，1：基础镜像，2：openstack已有镜像，3：自定义上传',
+                                    PRIMARY KEY (`pk`) USING BTREE,
+                                    UNIQUE KEY `idx_name` (`name`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='靶标管理';
 
 
