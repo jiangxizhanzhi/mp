@@ -13,6 +13,7 @@ import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.OrgUserFields;
+import cn.cyberpeace.mp.auth.util.SQLUtils;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.hutool.core.collection.CollectionUtil;
@@ -85,8 +86,8 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
             List<OrgDto> childOrgDtos = orgService.listAllChildIgnoreLevelExcludeSelf(orgId);
             orgIds.addAll(childOrgDtos.stream().map(OrgDto::getId).collect(Collectors.toList()));
         }
-
-        List<UserModel> users = getModelMapper().listUsers(orgIds, uname, userIds, null);
+        String likeUname = SQLUtils.escapeLike(uname);
+        List<UserModel> users = getModelMapper().listUsers(orgIds, likeUname, userIds, null);
         return users;
     }
 
@@ -188,7 +189,8 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
         }
 
         PageHelper.startPage(req.getPage(), req.getPageSize());
-        List<UserModel> users = getModelMapper().listUsers(orgIds, req.getUsername(), idsList, orders);
+        String likeUsername = SQLUtils.escapeLike(req.getUsername());
+        List<UserModel> users = getModelMapper().listUsers(orgIds, likeUsername, idsList, orders);
         PageInfo pageInfo = new PageInfo(users);
 
         List<UserDto> userDtos = users.stream().map(u -> {
