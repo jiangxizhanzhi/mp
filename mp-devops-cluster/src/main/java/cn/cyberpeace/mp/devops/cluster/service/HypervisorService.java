@@ -7,6 +7,8 @@ import cn.cyberpeace.mp.devops.cluster.model.*;
  */
 public interface HypervisorService extends BaseCloudPlatformService {
 
+    String HYPERVISORS = "/hypervisors";
+
     /**
      * 资源统计
      * @return
@@ -31,15 +33,4 @@ public interface HypervisorService extends BaseCloudPlatformService {
      */
     void rebootOrPowerOff(String json);
 
-    /**
-     *
-     * @return
-     */
-    InstanceOsServiceCloudPlatformModel osServicesStateFromInstances();
-
-    /**
-     *
-     * @return
-     */
-    NetworkAgentCloudPlatformModel agentsStateFromNetworks();
 }

@@ -6,9 +6,11 @@ import cn.cyberpeace.mp.aggregation.dto.UserResourceResponse;
 import cn.cyberpeace.mp.aggregation.dto.UserSummarySceneResponse;
 import cn.cyberpeace.mp.aggregation.dto.cluster.SystemClusterUsed;
 import cn.cyberpeace.mp.aggregation.dto.resource.ResourceStatisticsResponse;
+import cn.cyberpeace.mp.aggregation.service.DashboardService;
 import cn.cyberpeace.mp.aggregation.service.MockService;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,16 +31,23 @@ public class DashboardController {
     @Autowired
     private MockService mockService;
 
+    private DashboardService dashboardService;
+
+    @Autowired
+    public DashboardController(DashboardService dashboardService) {
+        this.dashboardService = dashboardService;
+    }
+
     @GetMapping("/daily_user_activity")
     public ServiceResult<DailyUserActivityResponse> getDailyUserActivity() {
         DailyUserActivityResponse response = mockService.mockDailyUserActivityResponse();
         return ServiceResult.success(response);
     }
 
-
+    @ApiOperation("资源统计")
     @GetMapping("/resource_statistics")
     public ServiceResult<ResourceStatisticsResponse> getResourceStatistics() {
-        ResourceStatisticsResponse response = mockService.mockResourceStatisticsResponse();
+        ResourceStatisticsResponse response = dashboardService.resourceStatistics();
         return ServiceResult.success(response);
     }
 
@@ -49,9 +58,10 @@ public class DashboardController {
         return ServiceResult.success(response);
     }
 
+    @ApiOperation("查询活动场景数")
     @GetMapping("/user_summary")
     public ServiceResult<UserSummarySceneResponse> userSummary() {
-        UserSummarySceneResponse response = mockService.mockUserSummarySceneResponse();
+        UserSummarySceneResponse response = dashboardService.countActivityScene();
         return ServiceResult.success(response);
     }
 

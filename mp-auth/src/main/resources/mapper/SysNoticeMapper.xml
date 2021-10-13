@@ -61,6 +61,7 @@
 
 
     <select id="listCurrentUserNotices" resultType="cn.cyberpeace.mp.auth.model.SysNoticeModel">
+        select * from (
         select distinct n.* from mp_sys_notice n
         left join mp_sys_notice_org no on n.id = no.notice_id
         left join mp_sys_notice_role nr on n.id = nr.notice_id
@@ -112,12 +113,11 @@
             <if test="title != null and title != ''">
                 AND n.title like concat('%', #{title}, '%')
             </if>
-            <if test="userId != null and userId != ''">
-                AND n.id not in (select notice_id from mp_sys_notice_read where user = #{userId} and notice_id = n.id and is_need_push = 0)
-            </if>
             OR n.is_public = 1
         </where>
-        ORDER BY n.pk desc
+        ) as tabA
+        WHERE tabA.id not in (select notice_id from mp_sys_notice_read where user = #{userId} and is_need_push = 0)
+        ORDER BY tabA.pk desc
     </select>
 
 </mapper>

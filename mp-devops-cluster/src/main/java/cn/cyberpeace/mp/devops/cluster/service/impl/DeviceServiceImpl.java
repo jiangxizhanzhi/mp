@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.Device;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.DeviceStaticsCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.service.DeviceService;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,12 +26,12 @@ public class DeviceServiceImpl extends BaseOpenStackServiceImpl implements Devic
 
     @Override
     public Device findById(String id) {
-        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + "/device/" + id, Device.class);
+        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + DEVICE + "/" + id, Device.class);
     }
 
     @Override
     public DeviceCloudPlatformModel findByIds(List<Integer> ids) {
-        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + "/device/byid?ids=" + Joiner.on(",").join(ids), DeviceCloudPlatformModel.class);
+        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION +  DEVICE + "/byid?ids=" + Joiner.on(",").join(ids), DeviceCloudPlatformModel.class);
     }
 
     @Override
@@ -39,5 +40,10 @@ public class DeviceServiceImpl extends BaseOpenStackServiceImpl implements Devic
         jsonObject.put("uuids", ids);
         BaseCloudPlatformModel model = super.sendDelete(CPCLOUD_DEVICE + URL_VERSION + "/device/batch_delete",JSONObject.toJSONString(jsonObject), BaseCloudPlatformModel.class);
         return model.isSuccess();
+    }
+
+    @Override
+    public DeviceStaticsCloudPlatformModel statics() {
+        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + "/statics", DeviceStaticsCloudPlatformModel.class);
     }
 }

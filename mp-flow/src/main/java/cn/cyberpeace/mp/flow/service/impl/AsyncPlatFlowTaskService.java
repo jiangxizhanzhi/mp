@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.constant.BaseConstants;
 import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.JsonUtils;
+import cn.cyberpeace.mp.base.util.TextUtils;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.cyberpeace.mp.flow.enums.FlowPlatformEnum;
 import cn.cyberpeace.mp.flow.enums.ResourceTypeEnum;
@@ -15,7 +16,10 @@ import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
 import cn.cyberpeace.mp.flow.repository.FlowInfoMapper;
 import cn.cyberpeace.mp.flow.repository.FlowPortMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskMapper;
-import cn.cyberpeace.mp.flow.request.*;
+import cn.cyberpeace.mp.flow.request.AddAppTaskRequest;
+import cn.cyberpeace.mp.flow.request.AddFlowTaskRequest;
+import cn.cyberpeace.mp.flow.request.AddStandardsTaskRequest;
+import cn.cyberpeace.mp.flow.request.AddVmRequest;
 import cn.cyberpeace.mp.flow.util.CommonUtil;
 import cn.cyberpeace.mp.flow.util.HttpDeleteUtil;
 import cn.cyberpeace.mp.flow.util.ResponseUtils;
@@ -267,13 +271,29 @@ public class AsyncPlatFlowTaskService {
     }
 
     /**
+     * 同步新增流量执行器
+     * @return
+     */
+    public String addExecutor() {
+        String uuid = TextUtils.uuid();
+        this.addFlowExecutor(uuid);
+        return uuid;
+    }
+
+    /**
      * 异步新增虚拟机、添加网口
      *
-     * @param request
-     * @param uuid
      */
     @Async
-    public void addVmInstance(AddVmInstanceRequest request, String uuid) {
+    public void addExecutor(String uuid) {
+        this.addFlowExecutor(uuid);
+    }
+
+    /**
+     * 新增流量执行器
+     * @param uuid
+     */
+    private void addFlowExecutor(String uuid) {
         log.info("================ Add vm instance start ==================");
         // 获取外部networkId，用于管理端口
         String externalNetId = "";

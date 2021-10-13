@@ -378,8 +378,8 @@ VALUES ('3f655d87112f4ae094bbaf70830e20aa', 'default', 'admin', 'admin',
 -- 默认管理员角色
 INSERT INTO mp_auth_role (id, tenant, org, identifier, name, description)
 VALUES ('5827ff7847504ffd806e0a85c417228d', 'default', 'default', 'ADMIN', '管理员', '管理员角色');
-INSERT INTO mp_auth_role (id, tenant, org, identifier, name, description)
-VALUES ('e12bb08a9bc545bbba46a2fb3c92533a', 'default', 'default', 'SUPERUSER', '超级用户', '超级用户角色');
+# INSERT INTO mp_auth_role (id, tenant, org, identifier, name, description)
+# VALUES ('e12bb08a9bc545bbba46a2fb3c92533a', 'default', 'default', 'SUPERUSER', '超级用户', '超级用户角色');
 -- LGD项目 特定需求角色？
 # INSERT INTO mp_auth_role (id, tenant, org, identifier, name, description)
 # VALUES ('7454c07d331841f4a58b17e4fb933b94', 'default', 'default', 'TEACHER', '教员', '教员角色');
@@ -391,9 +391,9 @@ VALUES ('e12bb08a9bc545bbba46a2fb3c92533a', 'default', 'default', 'SUPERUSER', '
 INSERT INTO mp_auth_user_role (id, tenant, user, role)
 VALUES ('791088e33dd44de3899f3c105597c354', 'default', '3f655d87112f4ae094bbaf70830e20aa',
         '5827ff7847504ffd806e0a85c417228d');
-INSERT INTO mp_auth_user_role (id, tenant, user, role)
-VALUES ('088e79133dd44de105597c3543899f3c', 'default', '3f655d87112f4ae094bbaf70830e20aa',
-        'e12bb08a9bc545bbba46a2fb3c92533a');
+# INSERT INTO mp_auth_user_role (id, tenant, user, role)
+# VALUES ('088e79133dd44de105597c3543899f3c', 'default', '3f655d87112f4ae094bbaf70830e20aa',
+#         'e12bb08a9bc545bbba46a2fb3c92533a');
 
 -- 客户端授权
 INSERT INTO mp_auth_client_details (client_id, resource_ids, client_secret, type, scope, authorized_grant_types,

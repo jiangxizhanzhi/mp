@@ -8,11 +8,13 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.TypeAllConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeConvertModel;
 import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.Device;
+import cn.cyberpeace.mp.devops.cluster.model.DeviceStaticsCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.request.TargetSceneRequest;
 import cn.cyberpeace.mp.devops.cluster.response.TargetScene;
 import cn.cyberpeace.mp.devops.cluster.response.TargetSceneResponse;
 import cn.cyberpeace.mp.devops.cluster.response.TargetUploadResponse;
 import cn.cyberpeace.mp.devops.cluster.response.base.Result;
+import cn.cyberpeace.mp.devops.cluster.service.DeviceService;
 import cn.cyberpeace.mp.devops.cluster.service.ImagesService;
 import cn.cyberpeace.mp.devops.cluster.utils.FileUtils;
 import io.swagger.annotations.Api;
@@ -43,12 +45,15 @@ public class DevopsTargetController {
 
     private ImagesService imagesService;
 
+    private DeviceService deviceService;
+
     @Autowired
     public DevopsTargetController(TargetConverter targetConverter,TypeConverter typeConverter,
-                                  ImagesService imagesService) {
+                                  ImagesService imagesService,DeviceService deviceService) {
         this.targetConverter = targetConverter;
         this.typeConverter = typeConverter;
         this.imagesService = imagesService;
+        this.deviceService = deviceService;
     }
 
     /**

@@ -4,6 +4,8 @@ import cn.cyberpeace.mp.devops.cluster.model.*;
 
 public interface TypeService extends BaseCloudPlatformService{
 
+    String TYPE = "/type";
+
     /**
      * 查询所有类型数据
      * @return

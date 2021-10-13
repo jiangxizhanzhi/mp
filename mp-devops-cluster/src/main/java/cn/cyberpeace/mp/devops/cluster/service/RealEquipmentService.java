@@ -7,6 +7,8 @@ import cn.cyberpeace.mp.devops.cluster.model.*;
  */
 public interface RealEquipmentService extends BaseCloudPlatformService {
 
+    String ENTITY = "/entity";
+
     /**
      * 分页查询
      * @param getParams

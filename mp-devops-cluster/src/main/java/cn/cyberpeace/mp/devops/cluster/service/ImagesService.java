@@ -11,6 +11,8 @@ import java.util.Map;
  */
 public interface ImagesService extends BaseCloudPlatformService  {
 
+    String NORMAL = "/normal";
+
     /**
      * 分页查询
      */

@@ -710,7 +710,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             userDto.setRoles(roles);
 
             boolean isAdmin = roles.stream().anyMatch(r -> r.getIdentifier().equals(AuthConstant.ROLE_ADMIN));
-            boolean isSuperUser = roles.stream().anyMatch(r -> r.getIdentifier().equals(AuthConstant.ROLE_SUPERUSER));
+            boolean isSuperUser = userModel.getId().equals(AuthConstant.ROOT_USER_ID);
 
             if (isAdmin) {
                 userDto.setIsAdmin(1);
@@ -782,6 +782,13 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         if (CollectionUtil.isNotEmpty(avatarModels)) {
             userModel.setAvatar(avatarModels.get(0).getUrl());
         }
+    }
+
+    @Override
+    public boolean isAdmin(String userId) {
+        List<RoleModel> roleModels = userRoleService.listByUserId(userId);
+        boolean isAdmin = roleModels.stream().anyMatch(r -> r.getIdentifier().equals(AuthConstant.ROLE_ADMIN));
+        return isAdmin;
     }
 
     private UserModel importUser2UserModel(ImportUser importUser) {

@@ -6,14 +6,12 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.TextUtils;
 import cn.cyberpeace.mp.flow.constant.ControllerConstant;
 import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
-import cn.cyberpeace.mp.flow.request.AddVmInstanceRequest;
 import cn.cyberpeace.mp.flow.service.FlowActuatorService;
 import cn.cyberpeace.mp.flow.service.impl.AsyncPlatFlowTaskService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -37,14 +35,13 @@ public class FlowActuatorController extends BaseModelController<FlowActuatorMode
 
     /**
      * 创建trex虚拟机
-     * @param request
      * @return
      */
     @ApiOperation("创建trex虚拟机")
     @PostMapping("/vm/add")
-    public ServiceResult<String> addVmInstance(@Validated @RequestBody AddVmInstanceRequest request) {
+    public ServiceResult<String> addExecutor() {
         String uuid = TextUtils.uuid();
-        asyncPlatFlowTaskService.addVmInstance(request, uuid);
+        asyncPlatFlowTaskService.addExecutor(uuid);
         return ServiceResult.success(uuid);
     }
 
@@ -55,8 +52,8 @@ public class FlowActuatorController extends BaseModelController<FlowActuatorMode
      */
     @ApiOperation("删除虚拟机实例")
     @DeleteMapping("/vm/{actuatorId}")
-    public ServiceResult<String> delVmInstance(@PathVariable String actuatorId) {
-        getModelService().delVmInstance(actuatorId);
+    public ServiceResult<String> delExecutor(@PathVariable String actuatorId) {
+        getModelService().delExecutor(actuatorId);
         return ServiceResult.successful();
     }
 
