@@ -2,7 +2,7 @@ ip:
   mariadb: 10.100.0.101         # MP新中台mariadb数据库地址
   fdfs: 10.100.14.252           # FastDFS地址
   cp: 10.100.7.1               # 云平台适配层接口地址
-  moloch: 10.100.14.107         # moloch的IP地址
+  moloch: 10.100.7.112         # moloch的IP地址
   wazuh: 10.100.0.102          # wazuh的IP地址
   es: 127.0.0.1                 # MP新中台ES地址
   trex: 10.100.7.158            # trex资源服务器地址
@@ -73,7 +73,7 @@ mp:
     cp-url: http://${ip.cp}:11111 #云平台地址
     hostname: controller  #主机名称
   situationaware:
-    group-url: http://10.100.14.107:5079/v1/scenes
+    group-url: http://${ip.moloch}:5079/v1/scenes
     moloch:
       username: api
       password: api
