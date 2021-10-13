@@ -38,7 +38,7 @@ public class InstallerServiceImpl extends BaseOpenStackServiceImpl implements In
 
     @Override
     public InstallerCloudPlatformModel page(String getParams) {
-        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + "/installer/lists" + getParams, InstallerCloudPlatformModel.class);
+        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + INSTALLER + "/lists" + getParams, InstallerCloudPlatformModel.class);
     }
 
     @Override
@@ -60,27 +60,27 @@ public class InstallerServiceImpl extends BaseOpenStackServiceImpl implements In
             }
         }
         if (StringUtils.isNotBlank(installer.getUuid())){
-            return super.sendFormDataPut(CPCLOUD_DEVICE + URL_VERSION + "/installer", builder.build(), Installer.class);
+            return super.sendFormDataPut(CPCLOUD_DEVICE + URL_VERSION + INSTALLER, builder.build(), Installer.class);
         }else {
-            return super.sendFormDataPost(CPCLOUD_DEVICE + URL_VERSION + "/installer/lists", builder.build(), Installer.class);
+            return super.sendFormDataPost(CPCLOUD_DEVICE + URL_VERSION + INSTALLER + "/lists", builder.build(), Installer.class);
         }
     }
 
 
     @Override
     public Installer update(String uuid, Installer installer) {
-        return super.sendPut(CPCLOUD_DEVICE + URL_VERSION + "/installer/" + uuid,JsonUtils.toUnderlineJSONString(installer),Installer.class);
+        return super.sendPut(CPCLOUD_DEVICE + URL_VERSION + INSTALLER + "/" + uuid,JsonUtils.toUnderlineJSONString(installer),Installer.class);
     }
 
     @Override
     public Installer findById(String id) {
-        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + "/installer/" + id, Installer.class);
+        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + INSTALLER + "/" + id, Installer.class);
     }
 
     @Override
     public BaseCloudPlatformModel deleteByIds(List<String> ids) {
         var jsonObject = new JSONObject();
         jsonObject.put("uuids", ids);
-        return super.sendDelete(CPCLOUD_DEVICE + URL_VERSION + "/installer/lists",JSONObject.toJSONString(jsonObject),BaseCloudPlatformModel.class);
+        return super.sendDelete(CPCLOUD_DEVICE + URL_VERSION + INSTALLER + "/lists",JSONObject.toJSONString(jsonObject),BaseCloudPlatformModel.class);
     }
 }

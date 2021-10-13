@@ -26,12 +26,12 @@ public class DeviceServiceImpl extends BaseOpenStackServiceImpl implements Devic
 
     @Override
     public Device findById(String id) {
-        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + "/device/" + id, Device.class);
+        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + DEVICE + "/" + id, Device.class);
     }
 
     @Override
     public DeviceCloudPlatformModel findByIds(List<Integer> ids) {
-        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + "/device/byid?ids=" + Joiner.on(",").join(ids), DeviceCloudPlatformModel.class);
+        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION +  DEVICE + "/byid?ids=" + Joiner.on(",").join(ids), DeviceCloudPlatformModel.class);
     }
 
     @Override

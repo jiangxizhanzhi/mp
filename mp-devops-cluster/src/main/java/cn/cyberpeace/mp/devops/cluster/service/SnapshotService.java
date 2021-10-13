@@ -11,6 +11,8 @@ import java.util.List;
  */
 public interface SnapshotService extends BaseCloudPlatformService{
 
+    String SNAPSHOT = "/snapshot";
+
     /**
      * 查询列表
      * @param deviceUuid

@@ -26,18 +26,18 @@ public class InjectFileServiceImpl extends BaseOpenStackServiceImpl implements I
 
     @Override
     public InjectFileCloudPlatformModel list(String deviceUuid) {
-        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + "/inject_file?device_uuid=" + deviceUuid, InjectFileCloudPlatformModel.class);
+        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + INJECT_FILE + "?device_uuid=" + deviceUuid, InjectFileCloudPlatformModel.class);
     }
 
     @Override
     public Snapshot create(SnapshotCreate snapshotCreate) {
-        return super.sendPost(CPCLOUD_DEVICE + URL_VERSION + "/inject_file", JsonUtils.toUnderlineJSONString(snapshotCreate), Snapshot.class);
+        return super.sendPost(CPCLOUD_DEVICE + URL_VERSION + INJECT_FILE, JsonUtils.toUnderlineJSONString(snapshotCreate), Snapshot.class);
     }
 
     @Override
     public BaseCloudPlatformModel delete(List<String> uuids) {
         var jsonObject = new JSONObject();
         jsonObject.put("inject_uuids", uuids);
-        return super.sendDelete(CPCLOUD_DEVICE + URL_VERSION + "/inject_file",JSONObject.toJSONString(jsonObject), BaseCloudPlatformModel.class);
+        return super.sendDelete(CPCLOUD_DEVICE + URL_VERSION + INJECT_FILE,JSONObject.toJSONString(jsonObject), BaseCloudPlatformModel.class);
     }
 }

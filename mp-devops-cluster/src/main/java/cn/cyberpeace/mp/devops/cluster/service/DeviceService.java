@@ -12,6 +12,8 @@ import java.util.List;
  */
 public interface DeviceService extends BaseCloudPlatformService {
 
+    String DEVICE = "/device";
+
     /**
      * 根据ID查询
      * @param id

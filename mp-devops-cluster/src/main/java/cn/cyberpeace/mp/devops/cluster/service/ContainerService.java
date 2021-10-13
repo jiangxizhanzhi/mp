@@ -11,6 +11,11 @@ import cn.cyberpeace.mp.devops.cluster.model.ContainerCloudPlatformModel;
 public interface ContainerService extends BaseCloudPlatformService {
 
     /**
+     * 基础容器url
+     */
+    String CONTAINERS = "/containers";
+
+    /**
      * 分页查询容器信息
      * @param getParams
      * @return
