@@ -11,10 +11,11 @@ import cn.cyberpeace.mp.devops.cluster.model.common.PortConfig;
 import cn.cyberpeace.mp.devops.cluster.request.TargetSceneRequest;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortBO;
-import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementPortBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,9 +61,9 @@ class DeviceInfoConverter implements IConverter {
     private void loadDeviceInfo(Params params, Device device) {
         SceneConfigElementBO element = params.element;
         CloudPluginSceneConfigElementBO pluginElement = params.pluginElement;
-        Map<String, CloudPluginSceneConfigElementPortBO> pluginPorts = params.pluginPorts;
 
         element.setIcon2(device.getLogo());
+        element.setDescription(device.getDescription());
         pluginElement.setCategory(device.getCategory());
         pluginElement.setImageType(device.getImageType());
         pluginElement.setImage(device.getName());
@@ -96,34 +97,25 @@ class DeviceInfoConverter implements IConverter {
 
         int originPortsNum = element.getPorts().size();
         for (int i = 0; i < accesses.size(); i++) {
+            PortParams portParams = new PortParams(i, originPortsNum, params);
+            SceneConfigElementPortBO port = portParams.getPort();
+            CloudPluginSceneConfigElementPortBO pluginPort = portParams.getPluginPort();
             ExtEntityAccess access = accesses.get(i);
-            SceneConfigElementPortBO port = null;
-            CloudPluginSceneConfigElementPortBO pluginPort = null;
-            if (originPortsNum > i) {
-                port = element.getPorts().get(i);
-                pluginPort = pluginPorts.get(port.getId());
-            } else {
-                port = new SceneConfigElementPortBO();
-                pluginPort = new CloudPluginSceneConfigElementPortBO();
-                port.setId(TextUtils.uuid());
-                element.getPorts().add(port);
-                pluginPorts.put(port.getId(), pluginPort);
-            }
 
-            port.setAccessModes(this.createAccessModes(access.getAccessProtocols()));
             port.setIp(access.getIp());
             port.setMacAddr(access.getMac());
             port.setName(access.getPortName());
+            pluginPort.setAccessModes(this.createAccessModes(access.getAccessProtocols()));
             pluginPort.setEntitySwitchName(access.getSwitchName());
             pluginPort.setEntitySwitchPort(access.getSwitchPort());
         }
     }
 
-    private List<AccessMode> createAccessModes(List<AccessProtocol> accessProtocols) {
+    private List<CloudAccessMode> createAccessModes(List<AccessProtocol> accessProtocols) {
         if (CollectionUtils.isNotEmpty(accessProtocols)) {
             return accessProtocols.stream()
                     .map(protocol -> {
-                        AccessMode mode = new AccessMode();
+                        CloudAccessMode mode = new CloudAccessMode();
                         mode.setPassword(protocol.getPassword());
                         mode.setDesc(protocol.getDescription());
                         mode.setPort(protocol.getPort());
@@ -152,11 +144,10 @@ class DeviceInfoConverter implements IConverter {
     }
 
     private void loadExtSystemInfo(SceneConfigElementBO element, ExtSystemInfo extSystemInfo) {
-        // todo language和language_name哪个存的是key就用哪个
-//        element.setSystemLanguage(extSystemInfo.getLanguageName());
+        // language_name systemTypeName systemTypeName 都是null?
         element.setSystemLanguage(extSystemInfo.getLanguage());
         element.setSystemArchitecture(extSystemInfo.getSystemArchitecture());
-        element.setSystemType(extSystemInfo.getSystemTypeName());
+        element.setSystemType(extSystemInfo.getSystemType() == null ? StringUtils.EMPTY : String.valueOf(extSystemInfo.getSystemType()));
     }
 
     private void loadExtVm(Params params, ExtVm extVm) {
@@ -171,7 +162,7 @@ class DeviceInfoConverter implements IConverter {
         pluginElement.setQuickCreateSupport(extVm.getQuickCreateSupport());
 
         PortParams portParams = new PortParams(0, element.getPorts().size(), params);
-        SceneConfigElementPortBO port = portParams.getPort();
+        CloudPluginSceneConfigElementPortBO port = portParams.getPluginPort();
         port.setAccessModes(this.createAccessModes(extVm.getAccessProtocols()));
     }
 
@@ -193,7 +184,6 @@ class DeviceInfoConverter implements IConverter {
 
         PortParams(int index, int originPortNum, Params params) {
             SceneConfigElementBO element = params.element;
-            CloudPluginSceneConfigElementBO pluginElement = params.pluginElement;
             Map<String, CloudPluginSceneConfigElementPortBO> pluginPorts = params.pluginPorts;
 
             if (originPortNum > index) {
