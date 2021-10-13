@@ -4,6 +4,5 @@ dependencies {
     implementation project(':mp-scene')
     implementation project(':mp-scene-plugin-cloud')
     implementation project(':mp-devops-cluster')
-    implementation project(':mp-scene')
     task wrapper() {}
 }
