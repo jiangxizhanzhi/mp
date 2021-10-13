@@ -31,38 +31,6 @@ public class MockService {
         return response;
     }
 
-    public ResourceStatisticsResponse mockResourceStatisticsResponse() {
-        PhysicalTarget physicalTarget = PhysicalTarget.builder().application(0).network(2).operateSystem(7).security(0).build();
-        VirtualTargetSummary virtualTargetSummary = VirtualTargetSummary.builder().application(173).network(35).operateSystem(75).security(0).build();
-        SceneSummary sceneSummary = SceneSummary.builder()
-                .competitiveDrillScene(0)
-                .comprehensiveAssessment(0)
-                .comprehensiveTraining(0)
-                .comprehensiveTrainingScene(5)
-                .courseTraining(0)
-                .courseTrainingScene(12)
-                .cyberTestScene(58)
-                .redvsblueScene(29)
-                .skillsAssessment(0)
-                .tacticalAssessment(0)
-                .tacticalTraining(0)
-                .build();
-        TargetSummary targetSummary = TargetSummary.builder().containerTarget(160).physicalTarget(9).tgmTarget(8).vmTarget(91).build();
-        ResourceStatisticsResponse response = ResourceStatisticsResponse.builder()
-                .physicalTarget(physicalTarget)
-                .sceneSummary(sceneSummary)
-                .targetSummary(targetSummary)
-                .virtualTargetSummary(virtualTargetSummary)
-                .build();
-        return response;
-    }
-
-
-    public UserSummarySceneResponse mockUserSummarySceneResponse() {
-        UserSummarySceneResponse response = UserSummarySceneResponse.builder().runningSceneCount(113).runningScenePercent(29.97).build();
-        return response;
-    }
-
 
     public UserResourceResponse mockUserResourceResponse() {
         UserResourceResponse response = UserResourceResponse.builder()

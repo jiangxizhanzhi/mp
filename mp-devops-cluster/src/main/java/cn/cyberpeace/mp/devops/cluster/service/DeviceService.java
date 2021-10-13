@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.devops.cluster.service;
 
 import cn.cyberpeace.mp.devops.cluster.model.Device;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.DeviceStaticsCloudPlatformModel;
 
 import java.util.List;
 
@@ -31,4 +32,10 @@ public interface DeviceService extends BaseCloudPlatformService {
      * @param ids
      */
     Boolean deleteByIds(List<String> ids);
+
+    /**
+     * 靶标统计
+     * @return
+     */
+    DeviceStaticsCloudPlatformModel statics();
 }
