@@ -68,8 +68,8 @@
             <if test="imageStatus != null">
                 and i.image_status = #{imageStatus}
             </if>
-            <if test="baseImageSupport != null">
-                and i.base_image_support = #{baseImageSupport}
+            <if test="baseImageSupport != null and baseImageSupport == true">
+                and i.image_source in (2,3)
             </if>
         </where>
     </sql>
@@ -125,9 +125,10 @@
             <if test="imageStatus != null">
                 and i.image_status = #{imageStatus}
             </if>
-            <if test="baseImageSupport != null">
-                and i.base_image_support = #{baseImageSupport}
+            <if test="baseImageSupport != null and baseImageSupport == true">
+                and i.image_source in (2,3)
             </if>
+
         </where>
     </sql>
 
@@ -195,140 +196,6 @@
         where i.uuid = #{uuid}
     </select>
 
-    <insert id="insert" parameterType="cn.cyberpeace.mp.devops.cluster.model.TargetModel">
-        insert into mp_devops_target
-        <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="id != null">
-                id,
-            </if>
-            <if test="uuid != null">
-                uuid,
-            </if>
-            <if test="name != null">
-                name,
-            </if>
-            <if test="mainCategory != null">
-                main_category,
-            </if>
-            <if test="subCategory != null">
-                sub_category,
-            </if>
-            <if test="thirdCategory != null">
-                third_category,
-            </if>
-            <if test="role != null">
-                role,
-            </if>
-            <if test="imageType != null">
-                image_type,
-            </if>
-            <if test="isPublic != null">
-                is_public,
-            </if>
-            <if test="quickCreateSupport != null">
-                quick_create_support,
-            </if>
-            <if test="createTime != null">
-                create_time,
-            </if>
-            <if test="updateTime != null">
-                update_time,
-            </if>
-            <if test="inPosition != null">
-                in_position,
-            </if>
-            <if test="useStatus != null">
-                use_status,
-            </if>
-            <if test="referenceStatus != null">
-                reference_status,
-            </if>
-            <if test="systemType != null">
-                system_type,
-            </if>
-            <if test="systemArchitecure != null">
-                system_architecure,
-            </if>
-            <if test="language != null">
-                language,
-            </if>
-            <if test="imageStatus != null">
-                image_status,
-            </if>
-            <if test="baseImageSupport != null">
-                base_image_support,
-            </if>
-            <if test="initSupport != null">
-                init_support,
-            </if>
-        </trim>
-        <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="id != null">
-                #{id},
-            </if>
-            <if test="uuid != null">
-                #{uuid},
-            </if>
-            <if test="name != null">
-                #{name},
-            </if>
-            <if test="mainCategory != null">
-                #{mainCategory},
-            </if>
-            <if test="subCategory != null">
-                #{subCategory},
-            </if>
-            <if test="thirdCategory != null">
-                #{thirdCategory},
-            </if>
-            <if test="role != null">
-                #{role},
-            </if>
-            <if test="imageType != null">
-                #{imageType},
-            </if>
-            <if test="isPublic != null">
-                #{isPublic,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
-            </if>
-            <if test="quickCreateSupport != null">
-                #{quickCreateSupport},
-            </if>
-            <if test="createTime != null">
-                #{createTime},
-            </if>
-            <if test="updateTime != null">
-                #{updateTime},
-            </if>
-            <if test="inPosition != null">
-                #{inPosition,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
-            </if>
-            <if test="useStatus != null">
-                #{useStatus,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
-            </if>
-            <if test="referenceStatus != null">
-                #{referenceStatus},
-            </if>
-            <if test="systemType != null">
-                #{systemType},
-            </if>
-            <if test="systemArchitecure != null">
-                #{systemArchitecure},
-            </if>
-            <if test="language != null">
-                #{language},
-            </if>
-            <if test="imageStatus != null">
-                #{imageStatus},
-            </if>
-            <if test="baseImageSupport != null">
-                #{baseImageSupport},
-            </if>
-            <if test="initSupport != null">
-                #{initSupport},
-            </if>
-        </trim>
-    </insert>
-
     <update id="updateById"
             parameterType="cn.cyberpeace.mp.devops.cluster.model.TargetModel">
         update mp_devops_target
@@ -382,7 +249,10 @@
                 base_image_support = #{baseImageSupport},
             </if>
             <if test="initSupport != null">
-                init_support = #{initSupport}
+                init_support = #{initSupport},
+            </if>
+            <if test="imageSource != null">
+                image_source = #{imageSource},
             </if>
         </set>
         where uuid = #{uuid}
@@ -483,70 +353,76 @@
             <if test="item.initSupport != null">
                 init_support,
             </if>
+            <if test="item.imageSource != null">
+                image_source,
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="item.id != null">
-                #{id},
+                #{item.id},
             </if>
             <if test="item.uuid != null">
-                #{uuid},
+                #{item.uuid},
             </if>
             <if test="item.name != null">
-                #{name},
+                #{item.name},
             </if>
             <if test="item.mainCategory != null">
-                #{mainCategory},
+                #{item.mainCategory},
             </if>
             <if test="item.subCategory != null">
-                #{subCategory},
+                #{item.subCategory},
             </if>
             <if test="item.thirdCategory != null">
-                #{thirdCategory},
+                #{item.thirdCategory},
             </if>
             <if test="item.role != null">
-                #{role},
+                #{item.role},
             </if>
             <if test="item.imageType != null">
-                #{imageType},
+                #{item.imageType},
             </if>
             <if test="item.isPublic != null">
-                #{isPublic,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
+                #{item.isPublic,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
             </if>
             <if test="item.quickCreateSupport != null">
-                #{quickCreateSupport},
+                #{item.quickCreateSupport},
             </if>
             <if test="item.createTime != null">
-                #{createTime},
+                #{item.createTime},
             </if>
             <if test="item.updateTime != null">
-                #{updateTime},
+                #{item.updateTime},
             </if>
             <if test="item.inPosition != null">
-                #{inPosition,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
+                #{item.inPosition,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
             </if>
             <if test="item.useStatus != null">
-                #{useStatus,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
+                #{item.useStatus,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
             </if>
             <if test="item.referenceStatus != null">
-                #{referenceStatus},
+                #{item.referenceStatus},
             </if>
             <if test="item.systemType != null">
-                #{systemType},
+                #{item.systemType},
             </if>
             <if test="item.systemArchitecure != null">
-                #{systemArchitecure},
+                #{item.systemArchitecure},
             </if>
             <if test="item.language != null">
-                #{language},
+                #{item.language},
             </if>
             <if test="item.imageStatus != null">
-                #{imageStatus},
+                #{item.imageStatus},
             </if>
             <if test="item.baseImageSupport != null">
-                #{baseImageSupport},
+                #{item.baseImageSupport},
             </if>
             <if test="item.initSupport != null">
-                #{initSupport},
+                #{item.initSupport},
+            </if>
+            <if test="item.imageSource != null">
+                #{item.imageSource},
             </if>
         </trim>
         </foreach>

@@ -11,13 +11,6 @@ import java.util.List;
 public interface DevopsTargetService {
 
     /**
-     * 新增
-     * @param device
-     * @return
-     */
-    Integer insert(Device device);
-
-    /**
      * 更新
      * @param device
      * @return
