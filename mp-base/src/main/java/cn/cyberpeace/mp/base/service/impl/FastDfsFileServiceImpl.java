@@ -41,7 +41,12 @@ public class FastDfsFileServiceImpl implements FileService {
     @Override
     public ServiceResult<FileResponseData> uploadFile(MultipartFile file, HttpServletRequest request) {
         FileResponseData responseData = uploadSample(file, request);
-        return ServiceResult.success(responseData);
+        if (responseData.isSuccess()) {
+            return ServiceResult.success(responseData);
+        } else {
+            return ServiceResult.fail(responseData.getMessage());
+        }
+
     }
 
     /**
