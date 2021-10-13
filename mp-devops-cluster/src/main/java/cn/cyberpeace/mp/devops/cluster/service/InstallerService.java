@@ -15,6 +15,8 @@ import java.util.List;
  */
 public interface InstallerService extends BaseCloudPlatformService {
 
+    String INSTALLER = "/installer";
+
     /**
      * 分页查询
      * @param getParams

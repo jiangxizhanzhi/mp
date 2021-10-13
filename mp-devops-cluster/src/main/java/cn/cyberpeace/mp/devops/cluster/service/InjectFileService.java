@@ -12,6 +12,8 @@ import java.util.List;
  */
 public interface InjectFileService extends BaseCloudPlatformService{
 
+    String INJECT_FILE = "/inject_file";
+
     /**
      * 查询列表
      * @param deviceUuid

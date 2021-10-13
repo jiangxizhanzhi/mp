@@ -4,6 +4,8 @@ import cn.cyberpeace.mp.devops.cluster.model.*;
 
 public interface ScenariosSnapshotService extends BaseCloudPlatformService{
 
+    String SCENARIOS = "/scenarios";
+
     /**
      * 创建
      */

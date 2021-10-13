@@ -22,4 +22,12 @@
             i.reference_type
     </select>
 
+    <select id="countActivityScene" resultType="cn.cyberpeace.mp.cscene.model.CsceneInstanceCountActivitySceneModel">
+        SELECT
+            count( s.pk ) AS total,
+            sum( CASE WHEN s.EVENT > 2 OR ( s.EVENT = 2 AND s.event_status = 4 ) THEN 1 ELSE 0 END ) AS activitySceneTotal
+        FROM
+            mp_scene_scene s
+    </select>
+
 </mapper>

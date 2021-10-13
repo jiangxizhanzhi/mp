@@ -12,7 +12,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CsceneInstanceCountByReferenceTypeModel {
 
-    private String target;
+    /**
+     * 综合场景实例引用类型
+     */
+    private Integer referenceType;
 
+    /**
+     * 统计总数
+     */
     private Integer total;
 }

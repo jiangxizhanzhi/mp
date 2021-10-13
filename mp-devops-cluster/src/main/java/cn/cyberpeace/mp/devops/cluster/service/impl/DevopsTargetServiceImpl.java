@@ -25,6 +25,10 @@ import java.util.stream.Collectors;
 @Service
 public class DevopsTargetServiceImpl implements DevopsTargetService {
 
+    private static final String VM = "vm";
+
+    private static final String CONTAINER = "container";
+
     private ImageMapper imageMapper;
 
     @Autowired
@@ -93,11 +97,11 @@ public class DevopsTargetServiceImpl implements DevopsTargetService {
         String imageType = device.getImageType();
         ExtVm extVm = device.getExtVm();
         ExtDocker extDocker = device.getExtDocker();
-        if (StringUtils.isNotBlank(imageType) && imageType.equals("vm") && Objects.nonNull(extVm)){
+        if (StringUtils.isNotBlank(imageType) && imageType.equals(VM) && Objects.nonNull(extVm)){
             targetModel.setQuickCreateSupport(extVm.getQuickCreateSupport());
             targetModel.setInitSupport(extVm.getInitSupport());
         }
-        else if (StringUtils.isNotBlank(imageType) && imageType.equals("container") && Objects.nonNull(extDocker)){
+        else if (StringUtils.isNotBlank(imageType) && imageType.equals(CONTAINER) && Objects.nonNull(extDocker)){
             targetModel.setQuickCreateSupport(extDocker.getQuickCreateSupport());
             targetModel.setInitSupport(extDocker.getInitSupport());
         }else{

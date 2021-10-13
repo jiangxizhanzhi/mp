@@ -9,7 +9,9 @@ import cn.cyberpeace.mp.devops.cluster.request.HypervisorPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.HypervisorRequest;
 import cn.cyberpeace.mp.devops.cluster.request.HypervisorWeightAndMaxInstanceRequest;
 import cn.cyberpeace.mp.devops.cluster.service.HypervisorService;
+import cn.cyberpeace.mp.devops.cluster.service.NetworkService;
 import cn.cyberpeace.mp.devops.cluster.service.SwitchService;
+import cn.cyberpeace.mp.devops.cluster.service.VmService;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,10 +30,17 @@ public class HypervisorConverterImpl implements HypervisorConverter {
 
     private SwitchService switchService;
 
+    private NetworkService networkService;
+
+    private VmService vmService;
+
     @Autowired
-    public HypervisorConverterImpl(HypervisorService hypervisorService, SwitchService switchService) {
+    public HypervisorConverterImpl(HypervisorService hypervisorService, SwitchService switchService,
+                                   NetworkService networkService,VmService vmService) {
         this.hypervisorService = hypervisorService;
         this.switchService = switchService;
+        this.networkService = networkService;
+        this.vmService = vmService;
     }
 
     @Override
@@ -92,8 +101,8 @@ public class HypervisorConverterImpl implements HypervisorConverter {
 
     @Override
     public List<HypervisorServiceStateConvertModel> serviceState() {
-        InstanceOsServiceCloudPlatformModel osServiceOpenStackModel = hypervisorService.osServicesStateFromInstances();
-        NetworkAgentCloudPlatformModel networkAgentOpenStackModel = hypervisorService.agentsStateFromNetworks();
+        InstanceOsServiceCloudPlatformModel osServiceOpenStackModel = vmService.osServicesStateFromInstances();
+        NetworkAgentCloudPlatformModel networkAgentOpenStackModel = networkService.agentsStateFromNetworks();
 
         List<HypervisorServiceStateConvertModel> resultList = new ArrayList<>();
 
