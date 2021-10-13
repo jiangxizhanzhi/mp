@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.aggregation.sceneimport.convert;
 
+import cn.cyberpeace.mp.base.util.JsonUtils;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
@@ -18,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -112,17 +112,17 @@ class ConvertDataContainer {
 
     private ScenePluginDataBO getCloudPlugin() {
         ScenePluginDataBO scenePluginDataBO = new ScenePluginDataBO();
-        scenePluginDataBO.setScene(this.bean2Map(this.cloudPluginConfig));
+        scenePluginDataBO.setScene(JsonUtils.beanToMap(this.cloudPluginConfig));
 
         Map<String, Map<String, Object>> mapPluginElements = new HashMap<>();
         for (Map.Entry<String, CloudPluginSceneConfigElementBO> entry : this.cloudPluginElements.entrySet()) {
-            mapPluginElements.put(entry.getKey(), this.bean2Map(entry.getValue()));
+            mapPluginElements.put(entry.getKey(), JsonUtils.beanToMap(entry.getValue()));
         }
         scenePluginDataBO.setElements(mapPluginElements);
 
         Map<String, Map<String, Object>> mapPluginPorts = new HashMap<>();
         for (Map.Entry<String, CloudPluginSceneConfigElementPortBO> entry : this.cloudPluginPorts.entrySet()) {
-            mapPluginPorts.put(entry.getKey(), this.bean2Map(entry.getValue()));
+            mapPluginPorts.put(entry.getKey(), JsonUtils.beanToMap(entry.getValue()));
         }
         scenePluginDataBO.setElementPorts(mapPluginPorts);
         return scenePluginDataBO;
@@ -136,19 +136,4 @@ class ConvertDataContainer {
         return topology;
     }
 
-    private Map<String, Object> bean2Map(Object bean) {
-        Map<String, Object> result = new HashMap<>();
-        Arrays.asList(bean.getClass().getFields()).forEach(field -> {
-            field.setAccessible(true);
-            try {
-                Object value = field.get(bean);
-                if (value != null) {
-                    result.put(field.getName(), value);
-                }
-            } catch (Exception e) {
-                logger.error("failed where parse bean to map", e);
-            }
-        });
-        return result;
-    }
 }
