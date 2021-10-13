@@ -41,7 +41,6 @@ public class UserModel extends BaseModel implements Serializable {
 
     public static final int INT_CHECK_YES = 1;
 
-
     @ApiModelProperty(value = "主键")
     @DefaultInt(0)
     private Integer pk;
