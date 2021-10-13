@@ -183,8 +183,12 @@ public class BasePluginModelHandler<
      * 删除场景属性数据
      */
     public boolean deleteScene() {
-        var sceneId = scenePluginHandler.getSourceSceneId();
         var scene = scenePluginHandler.getScene();
+        if (scene == null) {
+            return true;
+        }
+
+        var sceneId = scenePluginHandler.getSourceSceneId();
         S0 sceneObj = scene.toModel();
         sceneObj.setScene(sceneId);
         var result = pluginSceneMapper.filterDelete(new HumanCondition()
