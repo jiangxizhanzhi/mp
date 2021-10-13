@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.cscene.core.base;
 
 import cn.cyberpeace.mp.base.annotation.BeanFieldNames;
 import cn.cyberpeace.mp.base.annotation.ClassFieldNames;
-import cn.cyberpeace.mp.base.context.SysContextUtils;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.BeanUtils;
@@ -264,7 +263,7 @@ public abstract class BaseCsceneHandler<
     public void initContext(CsceneContextBO context) {
         this.context = context;
         if (context != null) {
-            SysContextUtils.setPassThroughMap(context.getContext());
+            context.loadTransparentContext();
         }
     }
 

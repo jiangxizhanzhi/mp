@@ -9,7 +9,11 @@ import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.CreateHandler;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.DeleteHandler;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.InitiateHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.modelhandler.CollectionScenePluginModelHandler;
+import lombok.Data;
 import org.springframework.stereotype.Component;
 
 
@@ -21,15 +25,24 @@ import org.springframework.stereotype.Component;
 })
 @Component
 @PluginKey(value = PluginConstant.PLUGIN_KEY, priority = PluginConstant.PLUGIN_PRIORITY)
+@Data
 public class CollectionScenePluginHandler extends ScenePluginHandler<CollectionPluginSceneBO,
         CollectionPluginSceneElementBO, CollectionPluginSceneElementPortBO, Object> {
 
     private CollectionScenePluginModelHandler pluginModelHandler;
 
+    private InitiateHandler initiateHandler;
+    private CreateHandler createHandler;
+    private DeleteHandler deleteHandler;
+
     private void loadRelated() {
         getElementMap().forEach((nodeId, element) -> {
             var srcElement = getSrcElement(nodeId);
             element.setSrcElement(srcElement);
+        });
+        getElementPortMap().forEach((portId, port) -> {
+            var srcPort = getSrcPort(portId);
+            port.setSrcPort(srcPort);
         });
     }
 
@@ -50,6 +63,9 @@ public class CollectionScenePluginHandler extends ScenePluginHandler<CollectionP
     public void initBase() {
         super.initBase();
         pluginModelHandler = new CollectionScenePluginModelHandler(this);
+        initiateHandler = new InitiateHandler(this);
+        createHandler = new CreateHandler(this);
+        deleteHandler = new DeleteHandler(this);
     }
 
     @Override
@@ -104,4 +120,18 @@ public class CollectionScenePluginHandler extends ScenePluginHandler<CollectionP
         pluginModelHandler.deleteElementPorts(elementPortIds);
     }
 
+    @Override
+    public void initiate() {
+        initiateHandler.initiate();
+    }
+
+    @Override
+    public void create() {
+        createHandler.create();
+    }
+
+    @Override
+    public void delete() {
+        deleteHandler.delete();
+    }
 }
