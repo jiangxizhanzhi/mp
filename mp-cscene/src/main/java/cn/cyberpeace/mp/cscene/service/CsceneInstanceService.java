@@ -11,7 +11,10 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCountActivitySceneBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCountByReferenceTypeBO;
 import cn.cyberpeace.mp.cscene.core.CsceneInstanceHandler;
+import cn.cyberpeace.mp.cscene.model.CsceneInstanceCountActivitySceneModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceCountByReferenceTypeModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceRoleModel;
@@ -23,8 +26,10 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
 import cn.cyberpeace.mp.scenepluginflow.bo.base.Flow;
+import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -147,10 +152,24 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     /**
      * 根据引用类型分组统计
-     * @param events
+     * @param events 需要排除的event
      * @return
      */
-    public List<CsceneInstanceCountByReferenceTypeModel> countGroupByReferenceType(List<Integer> events){
-        return getModelMapper().countGroupByReferenceType(events);
+    public List<CsceneInstanceCountByReferenceTypeBO> countGroupByReferenceType(List<Integer> events){
+        List<CsceneInstanceCountByReferenceTypeModel> csceneInstanceCountByReferenceTypeModels = getModelMapper().countGroupByReferenceType(events);
+        if (CollectionUtils.isEmpty(csceneInstanceCountByReferenceTypeModels)){
+            return Lists.newArrayList();
+        }
+        return csceneInstanceCountByReferenceTypeModels.stream()
+                .map(model -> new CsceneInstanceCountByReferenceTypeBO(model.getReferenceType(),model.getTotal())).collect(Collectors.toList());
+    }
+
+    /**
+     * 统计活动场景总数和场景总数
+     * @return
+     */
+    public CsceneInstanceCountActivitySceneBO countActivityScene(){
+        CsceneInstanceCountActivitySceneModel model = getModelMapper().countActivityScene();
+        return CsceneInstanceCountActivitySceneBO.builder().activitySceneTotal(model.getActivitySceneTotal()).total(model.getTotal()).build();
     }
 }
