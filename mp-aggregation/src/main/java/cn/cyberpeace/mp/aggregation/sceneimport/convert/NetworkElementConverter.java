@@ -57,7 +57,7 @@ class NetworkElementConverter implements IConverter {
             SceneConfigElementPortBO newPort = new SceneConfigElementPortBO();
             newPort.setId(TextUtils.uuid());
             newPort.setGateway(network.getGateway());
-            newPort.setDhcp("on".equals(network.getDhcp()));
+            newPort.setDhcp("on".equals(network.getDhcp()) || "true".equals(network.getDhcp()));
             newPort.setName(network.getName());
             newPort.setDns(network.getDns());
             ports.add(newPort);
