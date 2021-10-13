@@ -29,18 +29,18 @@ public class ImagesServiceImpl extends BaseOpenStackServiceImpl implements Image
 
     @Override
     public DeviceCloudPlatformModel page(String getParams) {
-        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + "/normal/lists" + getParams, DeviceCloudPlatformModel.class);
+        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + NORMAL + "/lists" + getParams, DeviceCloudPlatformModel.class);
     }
 
     @Override
     public Device add(Device device) {
-        return super.sendPost(CPCLOUD_DEVICE + URL_VERSION + "/normal/lists", JsonUtils.toUnderlineJSONString(device), Device.class);
+        return super.sendPost(CPCLOUD_DEVICE + URL_VERSION + NORMAL + "/lists", JsonUtils.toUnderlineJSONString(device), Device.class);
     }
 
 
     @Override
     public Device update(String uuid,Device device) {
-        return super.sendPut(CPCLOUD_DEVICE + URL_VERSION + "/normal/" + uuid,JsonUtils.toUnderlineJSONString(device),Device.class);
+        return super.sendPut(CPCLOUD_DEVICE + URL_VERSION + NORMAL + "/" + uuid,JsonUtils.toUnderlineJSONString(device),Device.class);
     }
 
     @Override
@@ -71,6 +71,6 @@ public class ImagesServiceImpl extends BaseOpenStackServiceImpl implements Image
 
     @Override
     public ImageConnectionCloudPlatform connection(String deviceUuid){
-        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + "/normal/connection?device_uuid=" + deviceUuid,ImageConnectionCloudPlatform.class);
+        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + NORMAL + "/connection?device_uuid=" + deviceUuid,ImageConnectionCloudPlatform.class);
     }
 }

@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.devops.cluster.service;
 
 import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.InstanceCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.InstanceOsServiceCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.VmActionCloudPlatformModel;
 
 /**
@@ -9,6 +10,8 @@ import cn.cyberpeace.mp.devops.cluster.model.VmActionCloudPlatformModel;
  * @author wanggang
  */
 public interface VmService extends BaseCloudPlatformService {
+
+    String INSTANCES = "/instances";
 
     /**
      * 分页查询虚拟机信息
@@ -24,4 +27,10 @@ public interface VmService extends BaseCloudPlatformService {
      * @return
      */
     BaseCloudPlatformModel action(VmActionCloudPlatformModel model, String uuid);
+
+    /**
+     *
+     * @return
+     */
+    InstanceOsServiceCloudPlatformModel osServicesStateFromInstances();
 }

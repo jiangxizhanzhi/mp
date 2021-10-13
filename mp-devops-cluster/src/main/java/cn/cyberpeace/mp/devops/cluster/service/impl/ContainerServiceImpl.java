@@ -32,7 +32,7 @@ public class ContainerServiceImpl extends BaseOpenStackServiceImpl implements Co
 
     @Override
     public ContainerCloudPlatformModel page(String getParams) {
-        ContainerPageResult pageResult =  super.sendGet(URL_VERSION + "/containers" + getParams, ContainerPageResult.class);
+        ContainerPageResult pageResult =  super.sendGet(URL_VERSION + CONTAINERS + getParams, ContainerPageResult.class);
         if (Objects.isNull(pageResult) || Objects.isNull(pageResult.getData())){
             return null;
         }
@@ -47,6 +47,6 @@ public class ContainerServiceImpl extends BaseOpenStackServiceImpl implements Co
 
     @Override
     public BaseCloudPlatformModel action(ContainerActionCloudPlatformModel model,String uuid) {
-       return super.sendPost(URL_VERSION + "/containers/"+ uuid +"/action", JsonUtils.toUnderlineJSONString(model), BaseCloudPlatformModel.class);
+       return super.sendPost(URL_VERSION + CONTAINERS + uuid +"/action", JsonUtils.toUnderlineJSONString(model), BaseCloudPlatformModel.class);
     }
 }
