@@ -126,7 +126,7 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
     }
 
     @Override
-    public void reload() {
+    public void reloadData() {
         setScene(null);
         getElementMap().clear();
         getElementPortMap().clear();

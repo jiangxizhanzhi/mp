@@ -2,6 +2,9 @@ package cn.cyberpeace.mp.sceneplugincollection.plugin.modelhandler;
 
 import cn.cyberpeace.mp.base.annotation.BeanFieldClasses;
 import cn.cyberpeace.mp.base.annotation.ClassFieldClasses;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortBO;
 import cn.cyberpeace.mp.scene.core.plugin.base.BasePluginModelHandler;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneConfigBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneConfigElementBO;
@@ -33,6 +36,9 @@ import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginSceneCo
         CollectionPluginSceneConfigElementPortMapper.class,
 })
 public class CollectionSceneConfigPluginModelHandler extends BasePluginModelHandler<
+        SceneConfigBO,
+        SceneConfigElementBO,
+        SceneConfigElementPortBO,
         CollectionPluginSceneConfigModel,
         CollectionPluginSceneConfigElementModel,
         CollectionPluginSceneConfigElementPortModel,

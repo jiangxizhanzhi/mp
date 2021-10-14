@@ -1,9 +1,13 @@
 package cn.cyberpeace.mp.scene.core.plugin;
 
+import cn.cyberpeace.mp.scene.core.bo.SceneBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
-import cn.cyberpeace.mp.scene.core.plugin.base.BasePluginHandler;
+import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneBO;
+import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementBO;
+import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementPortBO;
+import cn.cyberpeace.mp.scene.core.plugin.common.BasePluginCommonHandler;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import lombok.Data;
 
@@ -17,8 +21,10 @@ import java.util.List;
  * @param <C> 插件上下文类
  */
 @Data
-public abstract class ScenePluginHandler<S, E, P, C> extends BasePluginHandler<S, E, P, C>
-        implements PluginSceneHandlerCommon<SceneElementBO, SceneElementPortBO, SceneHandler> {
+public abstract class ScenePluginHandler<S extends BasePluginSceneBO<?, S, SceneBO>,
+        E extends BasePluginSceneElementBO<?, E, SceneElementBO>,
+        P extends BasePluginSceneElementPortBO<?, P, SceneElementPortBO>,
+        C> extends BasePluginCommonHandler<SceneBO, SceneElementBO, SceneElementPortBO, S, E, P, C, SceneHandler> {
 
     private SceneHandler sceneHandler;
 

@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.scenepluginflow.constant;
 
 import cn.cyberpeace.mp.base.util.BeanUtils;
-import cn.cyberpeace.mp.sceneplugincloud.config.CloudAppConfig;
 import cn.cyberpeace.mp.scenepluginflow.config.FlowAppConfig;
 
 public class FlowSingleton {
