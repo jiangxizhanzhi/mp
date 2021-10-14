@@ -91,7 +91,9 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         pageRequest.ensure();
         PageInfo pageInfo = currentUserPage(pageRequest);
         int noticeCnt = (int) pageInfo.getTotal();
-        int readedOrUnpushCnt = noticeReadMapper.countIsReadedOrIsUnPush();
+
+        UserModel userModel = UserUtils.getLoginUser();
+        int readedOrUnpushCnt = noticeReadMapper.countIsReadedOrIsUnPush(userModel.getId());
         int unreadCnt = noticeCnt - readedOrUnpushCnt;
         return unreadCnt <= 0 ? 0 : unreadCnt;
     }
@@ -251,7 +253,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         String likeTitle = SQLUtils.escapeLike(req.getTitle());
         List<SysNoticeModel> notices = getModelMapper().listNotices(likeTitle, ids, req.getOrgIds(), req.getRoleIds(), null, null);
         PageInfo pageInfo = new PageInfo(notices);
-        convertPageInfo(pageInfo);
+        convert2NoticeDtoPageInfo(pageInfo);
         return pageInfo;
     }
 
@@ -273,11 +275,11 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
             PageHelper.startPage(req.getPage(), req.getPageSize());
             List<SysNoticeModel> notices = getModelMapper().listCurrentUserNotices(null, null, null, null,null, null, userModel.getId());
             PageInfo pageInfo = new PageInfo(notices);
-            convertPageInfo(pageInfo);
+            convert2NoticeDtoPageInfo(pageInfo);
             return pageInfo;
         }
 
-        log.info("current user is admin!");
+        log.info("current user is not admin!");
         // 非管理员...
         List<String> allRoleIds = roleModels.stream().map(RoleModel::getId).collect(Collectors.toList());
 
@@ -296,7 +298,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         List<SysNoticeModel> notices = getModelMapper().listCurrentUserNotices(null, null, allOrgIds, allRoleIds,null, null, userModel.getId());
         PageInfo pageInfo = new PageInfo(notices);
 
-        convertPageInfo(pageInfo);
+        convert2NoticeDtoPageInfo(pageInfo);
         return pageInfo;
     }
 
@@ -351,7 +353,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         return noticeDto;
     }
 
-    private void convertPageInfo(PageInfo pageInfo) {
+    private void convert2NoticeDtoPageInfo(PageInfo pageInfo) {
         List<SysNoticeModel> noticeModels = pageInfo.getList();
 
         List<SysNoticeDto> noticeDtos = noticeModels.stream().map(n -> {

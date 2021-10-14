@@ -20,8 +20,10 @@
     </update>
 
     <select id="countIsReadedOrIsUnPush" resultType="integer">
-        select count(distinct notice_id) from mp_sys_notice_read
-        where is_readed = 1 or is_need_push = 0;
+        select count(distinct notice_id)
+        from mp_sys_notice_read
+        where user = #{user}
+          and (is_readed = 1 or is_need_push = 0)
     </select>
 
 
