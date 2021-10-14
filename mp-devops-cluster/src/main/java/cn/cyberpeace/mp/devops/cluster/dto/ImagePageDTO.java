@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.dto;
 
 import cn.cyberpeace.mp.devops.cluster.enums.PublicEnum;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -101,5 +102,10 @@ public class ImagePageDTO extends BasePageDTO{
      * 是否支持基础镜像
      */
     private Boolean baseImageSupport;
+
+    /**
+     * 靶标分类，1：内置靶标，2：实体靶标，3：自定义靶标
+     */
+    private Integer targetCategory;
 
 }
