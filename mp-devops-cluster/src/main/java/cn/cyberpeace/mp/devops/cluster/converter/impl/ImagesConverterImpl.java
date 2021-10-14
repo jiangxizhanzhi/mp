@@ -213,7 +213,7 @@ public class ImagesConverterImpl implements ImagesConverter {
         return result;
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void auth(ImagesAuthRequest request) {
         //镜像ID
