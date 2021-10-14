@@ -40,10 +40,11 @@ public class CreateHandler extends HandlerCommon {
             }
         });
         if (!flowCollectMacAddrs.isEmpty()) {
-            var flowCollectorId = getFlowCollector().createCollector(flowCollectMacAddrs);
-            getPluginHandler().getScene().setFlowCollector(flowCollectorId);
+            runSceneProgress(SceneProcess.CREATE_FLOW_COLLECTION, () -> {
+                var flowCollectorId = getFlowCollector().createCollector(flowCollectMacAddrs);
+                getPluginHandler().getScene().setFlowCollector(flowCollectorId);
+            });
         }
-
     }
 
 }
