@@ -40,4 +40,7 @@ public class TargetSceneRequest implements Serializable {
 
     @ApiModelProperty("忽略用户Token")
     private Boolean ignoreUser;
+
+    @ApiModelProperty("靶标分类，1：内置靶标，2：实体靶标，3：自定义靶标")
+    private Integer targetCategory;
 }

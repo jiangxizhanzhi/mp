@@ -44,6 +44,7 @@ public class TargetConverterImpl implements TargetConverter {
     @Override
     public List<TargetModel> page(TargetSceneRequest request) {
         ImagePageDTO dto = new ImagePageDTO();
+        dto.setTargetCategory(request.getTargetCategory());
         dto.setMainCategory(request.getCategory());
         dto.setSubCategory(request.getSecondCategory());
         dto.setImageType(Objects.nonNull(request.getImageType()) ? request.getImageType().toValue() : "");

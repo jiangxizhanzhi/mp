@@ -51,6 +51,11 @@ public class TargetModel extends BaseModel {
     private String imageType;
 
     /**
+     * 是否导入
+     */
+    private Boolean isImport;
+
+    /**
      * 是否公开
      */
     private PublicEnum isPublic;

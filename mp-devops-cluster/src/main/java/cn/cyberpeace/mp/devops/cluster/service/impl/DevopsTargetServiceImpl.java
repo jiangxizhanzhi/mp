@@ -85,6 +85,7 @@ public class DevopsTargetServiceImpl implements DevopsTargetService {
         targetModel.setThirdCategory(device.getL3Category());
         targetModel.setImageType(device.getImageType());
         String imageType = device.getImageType();
+        targetModel.setIsImport(device.getIsImport());
         ExtVm extVm = device.getExtVm();
         ExtDocker extDocker = device.getExtDocker();
         if (StringUtils.isNotBlank(imageType) && imageType.equals(VM) && Objects.nonNull(extVm)){
