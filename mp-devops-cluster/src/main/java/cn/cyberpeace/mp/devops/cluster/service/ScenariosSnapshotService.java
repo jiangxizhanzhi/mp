@@ -4,16 +4,12 @@ import cn.cyberpeace.mp.devops.cluster.model.*;
 
 public interface ScenariosSnapshotService extends BaseCloudPlatformService{
 
+    String SCENARIOS = "/scenarios";
+
     /**
      * 创建
      */
     BaseCloudPlatformModel create(ScenariosSnapshot snapshotCreate);
-
-
-    /**
-     * 删除
-     */
-    Boolean deleteDeviceScenario(ScenarioDeleteDeviceParams params);
 
     /**
      * 注入文件
@@ -21,6 +17,13 @@ public interface ScenariosSnapshotService extends BaseCloudPlatformService{
      * @return
      */
     BaseCloudPlatformModel injectFile(DeviceInjectFileCreate injectFileCreate);
+
+    /**
+     * 删除注入文件
+     * @param delete
+     * @return
+     */
+    BaseCloudPlatformModel deleteInjectFile(DeviceInjectFileDelete delete);
 
     /**
      * 创建虚拟靶标实例

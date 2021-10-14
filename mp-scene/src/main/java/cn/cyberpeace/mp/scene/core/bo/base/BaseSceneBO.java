@@ -12,4 +12,6 @@ public abstract class BaseSceneBO<M extends BaseSceneModel, T extends BaseSceneB
     private String description;
     @ApiModelProperty(value = "场景文件")
     private String file;
+    @ApiModelProperty(value = "显示上下文")
+    private String displayContext;
 }

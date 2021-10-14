@@ -7,6 +7,8 @@ import cn.cyberpeace.mp.devops.cluster.model.*;
  */
 public interface RealEquipmentService extends BaseCloudPlatformService {
 
+    String ENTITY = "/entity";
+
     /**
      * 分页查询
      * @param getParams
@@ -29,16 +31,46 @@ public interface RealEquipmentService extends BaseCloudPlatformService {
      */
     Device update(String uuid,Device device);
 
+    /**
+     * 接口
+     * @param snmp
+     * @return
+     */
     SnmpInterfaceResourceCloudPlatform interfacesResource(SnmpParams snmp);
 
+    /**
+     * CPU
+     * @param snmp
+     * @return
+     */
     SnmpCloudPlatform snmpForCpu(SnmpParams snmp);
 
+    /**
+     * 内存
+     * @param snmp
+     * @return
+     */
     SnmpCloudPlatform snmpForMem(SnmpParams snmp);
 
+    /**
+     * 磁盘
+     * @param snmp
+     * @return
+     */
     SnmpCloudPlatform snmpForDisk(SnmpParams snmp);
 
+    /**
+     * 根据交换机名称查询
+     * @param switchName
+     * @return
+     */
     RealEquipmentBySwitchNameCloudPlatform findBySwitchName(String switchName);
 
+    /**
+     * 根据串口查询
+     * @param serialPort
+     * @return
+     */
     RealEquipmentBySerialPortCloudPlatform findBySerialPort(String serialPort);
 
     /**

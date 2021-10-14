@@ -33,7 +33,6 @@ mybatis:
 # 请求云平台组信息的url配置，必需填写
 mp:
   base:
-    mg-url: http://10.100.14.252:8077
     fdfs-url: 10.100.14.252  # fdfs服务器地址
     # fastdfs配置
     fastdfs:

@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.sceneplugincollection.bo.base;
 
 import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.base.util.JsonUtils;
+import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementBO;
 import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.model.base.BaseCollectionPluginSceneElementModel;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -15,7 +16,8 @@ import java.util.List;
 
 @Data
 public abstract class BaseCollectionPluginSceneElementBO<M extends BaseCollectionPluginSceneElementModel,
-        T extends BaseCollectionPluginSceneElementBO<M, T>> extends BasePluginSceneElementBO<M, T> {
+        T extends BaseCollectionPluginSceneElementBO<M, T, S>, S extends BaseSceneElementBO<?, ?, S>>
+        extends BasePluginSceneElementBO<M, T, S> {
 
     @ApiModelProperty(value = "探针列表")
     private List<Probe> probes;

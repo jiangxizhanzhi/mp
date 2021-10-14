@@ -37,16 +37,11 @@ public interface ImagesConverter extends BaseConverter{
      */
     Device update(ImageRequest request);
 
-    /**
-     * 预览
-     * @param request
-     */
-    void look(ImagesLookRequest request);
 
     /**
      * 构建
      */
-    void build(ImagesBuildRequest request);
+    Device build(ImagesBuildRequest request);
 
     /**
      * 根据ID查询授权信息
@@ -68,7 +63,7 @@ public interface ImagesConverter extends BaseConverter{
     /**
      * 导出
      */
-    HttpResponse export(String uuid);
+    HttpResponse export(String uuid,String imageName);
 
     /**
      * 创建虚拟机/容器
@@ -94,4 +89,11 @@ public interface ImagesConverter extends BaseConverter{
      * @param request
      */
     BaseCloudPlatformModel reboot(ImagesRebootInstanceRequest request);
+
+    /**
+     * 同步镜像
+     * @param request
+     * @return
+     */
+    Integer async(ImageAsyncRequest request);
 }

@@ -1,10 +1,12 @@
 package cn.cyberpeace.mp.devops.cluster.service.impl;
 
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.CloudPlatformPageResult;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.InstanceOsServicePageResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.InstancePageResult;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.common.InstanceModel;
+import cn.cyberpeace.mp.devops.cluster.model.common.InstanceOsServiceModel;
 import cn.cyberpeace.mp.devops.cluster.service.VmService;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,7 +32,7 @@ public class VmServiceImpl extends BaseOpenStackServiceImpl implements VmService
 
     @Override
     public InstanceCloudPlatformModel page(String getParams) {
-        InstancePageResult pageResult = super.sendGet(URL_VERSION + "/instances" + getParams, InstancePageResult.class);
+        InstancePageResult pageResult = super.sendGet(URL_VERSION + INSTANCES + getParams, InstancePageResult.class);
         if (Objects.isNull(pageResult) || Objects.isNull(pageResult.getData())){
             return null;
         }
@@ -44,13 +46,26 @@ public class VmServiceImpl extends BaseOpenStackServiceImpl implements VmService
     }
 
     @Override
-    public void create(VmCreateCloudPlatformModel vmCreateCloudPlatformModel) {
-        super.sendPost(URL_VERSION + "/scenarios/vm", JsonUtils.toUnderlineJSONString(vmCreateCloudPlatformModel));
-    }
-
-    @Override
     public BaseCloudPlatformModel action(VmActionCloudPlatformModel model, String uuid) {
-        return super.sendPost(URL_VERSION + "/instances/" + uuid  + "/action", JsonUtils.toUnderlineJSONString(model),BaseCloudPlatformModel.class);
+        return super.sendPost(URL_VERSION + INSTANCES + uuid  + "/action", JsonUtils.toUnderlineJSONString(model),BaseCloudPlatformModel.class);
     }
 
+    /**
+     *
+     * @return
+     */
+    @Override
+    public InstanceOsServiceCloudPlatformModel osServicesStateFromInstances(){
+        InstanceOsServicePageResult pageResult = super.sendGet(URL_VERSION + INSTANCES + "/os-services", InstanceOsServicePageResult.class);
+        if (Objects.isNull(pageResult) || Objects.isNull(pageResult.getData())){
+            return null;
+        }
+        CloudPlatformPageResult<InstanceOsServiceModel> data = pageResult.getData();
+        List<InstanceOsServiceModel> list = data.getList();
+        InstanceOsServiceCloudPlatformModel model = new InstanceOsServiceCloudPlatformModel();
+        model.setServices(CollectionUtils.isEmpty(list) ? Lists.newArrayList() : list);
+        model.setTotal(data.getTotal());
+        model.setCode(pageResult.getCode());
+        return model;
+    }
 }

@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
 import cn.cyberpeace.mp.scene.model.*;
 import cn.cyberpeace.mp.scene.repository.*;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
@@ -71,6 +72,9 @@ public class SceneHandler extends BaseSceneHandler<
         ScenePluginHandler<?, ?, ?, ?>,
         SceneHandler> {
 
+    @Setter
+    private boolean realTimeUpdate;
+
     private final Map<String, SceneEventHandler> sceneEventHandlerMap = new HashMap<>();
 
     private final Map<String, SceneElementEventHandler> elementEventHandlerMap = new HashMap<>();
@@ -113,6 +117,9 @@ public class SceneHandler extends BaseSceneHandler<
     private int startSceneEvent(int event) {
         var flag = getSceneEventHandler(event).startEvent();
         if (isTriggerEventSuccess(flag)) {
+            if (realTimeUpdate) {
+                updateScene();
+            }
             reportSceneUpdated();
         }
         return flag;
@@ -121,6 +128,9 @@ public class SceneHandler extends BaseSceneHandler<
     private int startElementEvent(String nodeId, int event) {
         var flag = getElementEventHandler(nodeId, event).startEvent();
         if (isTriggerEventSuccess(flag)) {
+            if (realTimeUpdate) {
+                updateSceneElement(nodeId);
+            }
             reportElementUpdated(nodeId);
         }
         return flag;
@@ -129,6 +139,9 @@ public class SceneHandler extends BaseSceneHandler<
     private int overSceneEvent(int event) {
         var flag = getSceneEventHandler(event).overEvent();
         if (isTriggerEventSuccess(flag)) {
+            if (realTimeUpdate) {
+                updateScene();
+            }
             reportSceneUpdated();
         }
         return flag;
@@ -137,6 +150,9 @@ public class SceneHandler extends BaseSceneHandler<
     private int overElementEvent(String nodeId, int event) {
         var flag = getElementEventHandler(nodeId, event).overEvent();
         if (isTriggerEventSuccess(flag)) {
+            if (realTimeUpdate) {
+                updateSceneElement(nodeId);
+            }
             reportElementUpdated(nodeId);
         }
         return flag;
@@ -145,6 +161,7 @@ public class SceneHandler extends BaseSceneHandler<
     public int errorScene(int event, String errorMessage) {
         var flag = getSceneEventHandler(event).error(errorMessage);
         if (isTriggerEventSuccess(flag)) {
+            save();
             reportSceneUpdated();
         }
         return flag;
@@ -153,6 +170,9 @@ public class SceneHandler extends BaseSceneHandler<
     public int errorElement(String nodeId, int event, String errorMessage) {
         var flag = getElementEventHandler(nodeId, event).error(errorMessage);
         if (isTriggerEventSuccess(flag)) {
+            if (realTimeUpdate) {
+                updateSceneElementWithPlugins(nodeId);
+            }
             reportElementUpdated(nodeId);
         }
         return flag;
@@ -261,6 +281,9 @@ public class SceneHandler extends BaseSceneHandler<
     public int progressSceneProcess(int event, String process) {
         var flag = getSceneEventHandler(event).progressProcess(process);
         if (isTriggerEventSuccess(flag)) {
+            if (realTimeUpdate) {
+                updateScene();
+            }
             reportSceneUpdated();
         }
         return flag;
@@ -269,6 +292,9 @@ public class SceneHandler extends BaseSceneHandler<
     public int progressElementProcess(String nodeId, int event, String process) {
         var flag = getElementEventHandler(nodeId, event).progressProcess(process);
         if (isTriggerEventSuccess(flag)) {
+            if (realTimeUpdate) {
+                updateSceneElement(nodeId);
+            }
             reportElementUpdated(nodeId);
         }
         return flag;
@@ -277,6 +303,9 @@ public class SceneHandler extends BaseSceneHandler<
     public int overSceneProcess(int event) {
         var flag = getSceneEventHandler(event).overProcess();
         if (isTriggerEventSuccess(flag)) {
+            if (realTimeUpdate) {
+                updateSceneWithPlugins();
+            }
             reportSceneUpdated();
         }
         return flag;
@@ -285,12 +314,19 @@ public class SceneHandler extends BaseSceneHandler<
     public int overElementProcess(String nodeId, int event) {
         var flag = getElementEventHandler(nodeId, event).overProcess();
         if (isTriggerEventSuccess(flag)) {
+            if (realTimeUpdate) {
+                updateSceneElementWithPlugins(nodeId);
+            }
             reportElementUpdated(nodeId);
         }
         return flag;
     }
 
-    public void initiate() {
+    public boolean initiate() {
+        return initiate(true);
+    }
+
+    public boolean initiate(boolean isSave) {
         prepareAllEvent(SceneModel.Event.INITIATE, SceneElementModel.Event.INITIATE);
         startAllEvent(SceneModel.Event.INITIATE, SceneElementModel.Event.INITIATE);
         try {
@@ -299,12 +335,16 @@ public class SceneHandler extends BaseSceneHandler<
             }
         } catch (Exception e) {
             errorScene(SceneModel.Event.INITIATE, e.getMessage());
-            return;
+            return false;
         }
         overAllEvent(SceneModel.Event.INITIATE, SceneElementModel.Event.INITIATE);
+        if (isSave) {
+            save();
+        }
+        return true;
     }
 
-    public void create() {
+    public boolean create() {
         prepareAllEvent(SceneModel.Event.CREATE, SceneElementModel.Event.CREATE);
         startAllEvent(SceneModel.Event.CREATE, SceneElementModel.Event.CREATE);
         try {
@@ -313,9 +353,11 @@ public class SceneHandler extends BaseSceneHandler<
             }
         } catch (Exception e) {
             errorScene(SceneModel.Event.CREATE, e.getMessage());
-            return;
+            return false;
         }
         overAllEvent(SceneModel.Event.CREATE, SceneElementModel.Event.CREATE);
+        save();
+        return true;
     }
 
     public void start() {
@@ -337,7 +379,7 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     @Override
-    public void delete() {
+    public boolean delete() {
         prepareAllEvent(SceneModel.Event.DELETE, SceneElementModel.Event.DELETE);
         startAllEvent(SceneModel.Event.DELETE, SceneElementModel.Event.DELETE);
         try {
@@ -346,11 +388,11 @@ public class SceneHandler extends BaseSceneHandler<
             }
         } catch (Exception e) {
             errorScene(SceneModel.Event.DELETE, e.getMessage());
-            return;
+            return false;
         }
         overAllEvent(SceneModel.Event.DELETE, SceneElementModel.Event.DELETE);
 
-        super.delete();
+        return super.delete();
     }
 
     @Override

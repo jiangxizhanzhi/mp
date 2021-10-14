@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.CreateHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.DeleteHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.InitiateHandler;
@@ -39,6 +40,7 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
     private final Map<String, CloudPluginSceneElementBO> firewallElementMap = new HashMap<>();
     private final Map<String, CloudPluginSceneElementBO> terminalElementMap = new HashMap<>();
 
+    private HandlerUtils<CloudScenePluginHandler> handlerUtils;
     private InitiateHandler initiateHandler;
     private CreateHandler createHandler;
     private DeleteHandler deleteHandler;
@@ -48,10 +50,7 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         firewallElementMap.clear();
         terminalElementMap.clear();
         getElementMap().forEach((nodeId, element) -> {
-            var srcElement = getSrcElement(nodeId);
-            element.setSrcElement(srcElement);
-
-            Integer elementType = srcElement.getType();
+            Integer elementType = element.getSrcElement().getType();
             if (elementType == null) {
                 terminalElementMap.put(nodeId, element);
             } else if (elementType.equals(BaseSceneElementModel.Type.SWITCH)
@@ -71,11 +70,6 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
                 element.setTransparent(true);
             }
         });
-
-        getElementPortMap().forEach((portId, port) -> {
-            var srcPort = getSrcPort(portId);
-            port.setSrcPort(srcPort);
-        });
     }
 
     @Override
@@ -87,6 +81,7 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
     @Override
     public void initBase() {
         super.initBase();
+        handlerUtils = new HandlerUtils<>(this);
         pluginModelHandler = new CloudScenePluginModelHandler(this);
         initiateHandler = new InitiateHandler(this);
         createHandler = new CreateHandler(this);
@@ -95,6 +90,12 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
 
     @Override
     public void reload() {
+        super.reload();
+        loadRelated();
+    }
+
+    @Override
+    public void reloadData() {
         setScene(null);
         getElementMap().clear();
         getElementPortMap().clear();
@@ -103,7 +104,6 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         pluginModelHandler.loadElements(pluginModelHandler.readElements(getElementIds().toArray(new String[0])));
         pluginModelHandler.loadElementPorts(pluginModelHandler.readElementPorts(getElementPortIds()
                 .toArray(new String[0])));
-        loadRelated();
     }
 
     @Override
@@ -160,4 +160,5 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
     public void delete() {
         deleteHandler.delete();
     }
+
 }

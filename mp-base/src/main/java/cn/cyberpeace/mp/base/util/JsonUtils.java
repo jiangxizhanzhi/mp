@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -102,6 +103,7 @@ public class JsonUtils {
         ObjectMapper mapper = new ObjectMapper();
         mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
         String reqJson = mapper.writeValueAsString(object);
         return reqJson;
     }
@@ -119,6 +121,7 @@ public class JsonUtils {
         // mapper的configure方法可以设置多种配置（例如：多字段 少字段的处理）　　　　　　
         // mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
+        mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
         return mapper.readValue(json, clazz);
     }
 

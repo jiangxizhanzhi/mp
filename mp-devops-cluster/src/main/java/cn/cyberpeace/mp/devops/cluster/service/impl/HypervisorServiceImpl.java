@@ -32,7 +32,7 @@ public class HypervisorServiceImpl extends BaseOpenStackServiceImpl implements H
 
     @Override
     public HypervisorStatisticsCloudPlatformModel statistics() {
-        HypervisorStatisticsResult result = super.sendGet(URL_VERSION + "/hypervisors/statistics", HypervisorStatisticsResult.class);
+        HypervisorStatisticsResult result = super.sendGet(URL_VERSION + HYPERVISORS + "/statistics", HypervisorStatisticsResult.class);
         if (Objects.isNull(result)){
             return null;
         }
@@ -44,7 +44,7 @@ public class HypervisorServiceImpl extends BaseOpenStackServiceImpl implements H
 
     @Override
     public HypervisorCloudPlatformModel page(String getParams) {
-        HypervisorPageResult pageResult =  super.sendGet(URL_VERSION + "/hypervisors" + getParams, HypervisorPageResult.class);
+        HypervisorPageResult pageResult =  super.sendGet(URL_VERSION + HYPERVISORS + getParams, HypervisorPageResult.class);
         if (Objects.isNull(pageResult) || Objects.isNull(pageResult.getData())){
             return null;
         }
@@ -65,48 +65,6 @@ public class HypervisorServiceImpl extends BaseOpenStackServiceImpl implements H
     @Override
     public void rebootOrPowerOff(String json) {
         super.sendPost(CPCLOUD_INFO_URL + URL_VERSION + "/compute_control", json);
-    }
-
-    /**
-     * 
-     * @return
-     */
-    public InstanceOsServiceCloudPlatformModel osServicesStateFromInstances(){
-        InstanceOsServicePageResult pageResult = super.sendGet(URL_VERSION + "/instances/os-services", InstanceOsServicePageResult.class);
-        if (Objects.isNull(pageResult) || Objects.isNull(pageResult.getData())){
-            return null;
-        }
-        CloudPlatformPageResult<InstanceOsServiceModel> data = pageResult.getData();
-        List<InstanceOsServiceModel> list = data.getList();
-        InstanceOsServiceCloudPlatformModel model = new InstanceOsServiceCloudPlatformModel();
-        model.setServices(CollectionUtils.isEmpty(list) ? Lists.newArrayList() : list);
-        model.setTotal(data.getTotal());
-        model.setCode(pageResult.getCode());
-        return model;
-    }
-
-    /**
-     *
-     * @return
-     */
-    public NetworkAgentCloudPlatformModel agentsStateFromNetworks(){
-        NetworkAgentPageResult pageResult = super.sendGet(URL_VERSION + "/networks/agents", NetworkAgentPageResult.class);
-        if (Objects.isNull(pageResult) || Objects.isNull(pageResult.getData())){
-            return null;
-        }
-        CloudPlatformPageResult<NetworkAgentModel> data = pageResult.getData();
-        List<NetworkAgentModel> list = data.getList();
-        NetworkAgentCloudPlatformModel model = new NetworkAgentCloudPlatformModel();
-        model.setAgents(CollectionUtils.isEmpty(list) ? Lists.newArrayList() : list);
-        model.setTotal(data.getTotal());
-        model.setCode(pageResult.getCode());
-        return model;
-    }
-
-
-    @Override
-    public VirtualRealSwitchCloudPlatformModel listVirtualRealSwitch() {
-        return super.sendGet(CPCLOUD_SWITCH_URL + URL_VERSION + "/switchs" , VirtualRealSwitchCloudPlatformModel.class);
     }
 
 }

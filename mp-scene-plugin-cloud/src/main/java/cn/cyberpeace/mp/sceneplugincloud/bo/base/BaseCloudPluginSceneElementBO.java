@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.sceneplugincloud.bo.base;
 
 import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.base.util.JsonUtils;
+import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementBO;
 import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -16,7 +17,8 @@ import java.util.List;
 
 @Data
 public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSceneElementModel,
-        T extends BaseCloudPluginSceneElementBO<M, T>> extends BasePluginSceneElementBO<M, T> {
+        T extends BaseCloudPluginSceneElementBO<M, T, S>, S extends BaseSceneElementBO<?, ?, S>>
+        extends BasePluginSceneElementBO<M, T, S> {
     @ApiModelProperty(value = "是否外部引用资源")
     private Boolean external;
     @ApiModelProperty(value = "云平台虚拟化类型")
@@ -108,6 +110,19 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     @ApiModelProperty(value = "辅助网络vlanId", hidden = true)
     @JsonIgnore
     private Integer auxiliaryNetworkVlanId;
+
+    @ApiModelProperty(value = "是否开启管理网卡", hidden = true)
+    @JsonIgnore
+    private Boolean enableMgmt;
+    @ApiModelProperty(value = "管理网卡端口资源id", hidden = true)
+    @JsonIgnore
+    private String mgmtPortResourceId;
+    @ApiModelProperty(value = "管理网卡ip", hidden = true)
+    @JsonIgnore
+    private String mgmtIp;
+    @ApiModelProperty(value = "管理网卡mac地址", hidden = true)
+    @JsonIgnore
+    private String mgmtMacAddr;
 
     @Override
     public void fromModel(M obj, String... ignoreFields) {

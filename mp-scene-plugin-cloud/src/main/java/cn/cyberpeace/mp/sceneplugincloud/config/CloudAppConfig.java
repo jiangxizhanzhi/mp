@@ -1,6 +1,12 @@
 package cn.cyberpeace.mp.sceneplugincloud.config;
 
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Network;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualInternet;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NetworkData;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -9,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
+@Slf4j
 @Configuration
 @ConfigurationProperties(prefix = "mp.sceneplugincloud")
 @Data
@@ -16,6 +23,9 @@ public class CloudAppConfig {
 
     @Value("${mp.sceneplugincloud.cpcloud_server:http://127.0.0.1:10009}")
     private String cpcloudServer;
+
+    @Value("${mp.sceneplugincloud.cpcloud_guacamole_server:http://127.0.0.1:9999}")
+    private String cpcloudGuacamoleServer;
 
     @Value("${mp.sceneplugincloud.cpcloud_server_timeout:600000}")
     private Integer cpcloudServerTimeout;
@@ -41,11 +51,59 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.delete_hold_size:200000}")
     private Integer deleteHoldSize;
 
+    @Value("${mp.sceneplugincloud.external_net_id:}")
+    private String externalNetId;
+
+    @Value("${mp.sceneplugincloud.mgmt_name:mgmt}")
+    private String mgmtName;
+
+    @Value("${mp.sceneplugincloud.mgmt_net_id:}")
+    private String mgmtNetId;
+
     public List<String> getCidrPool() {
         List<String> cidrPool = new ArrayList<>();
         IntStream.range(172, 173).forEach(cidrA -> IntStream.range(0, 255)
                 .forEach(cidrB -> IntStream.range(0, 255)
                         .forEach(cidrC -> cidrPool.add(String.format("%d.%d.%d.0/24", cidrA, cidrB, cidrC)))));
         return cidrPool;
+    }
+
+    public String getExternalNetId() {
+        if (!StringUtils.isEmpty(externalNetId)) {
+            return externalNetId;
+        }
+
+        try {
+            externalNetId = new VirtualInternet().create().getExternalNetId();
+        } catch (Exception e) {
+            log.error("Try to get external net failed: ", e);
+            throw e;
+        }
+
+        return externalNetId;
+    }
+
+    public String getMgmtNetId() {
+        if (!StringUtils.isEmpty(mgmtNetId)) {
+            return mgmtNetId;
+        }
+
+        NetworkData networkData;
+        try {
+            networkData = new Network().getByName(mgmtName);
+        } catch (Exception e) {
+            log.error("Try to get mgmt net failed: ", e);
+            throw e;
+        }
+
+        if (networkData != null) {
+            mgmtNetId = networkData.getId();
+        } else {
+            var message = "Unable to find mgmt network with name `mgmt`";
+            log.error("Try to get mgmt net failed: {}", message);
+            throw new MpRuntimeException(message);
+        }
+
+        return mgmtNetId;
     }
 }

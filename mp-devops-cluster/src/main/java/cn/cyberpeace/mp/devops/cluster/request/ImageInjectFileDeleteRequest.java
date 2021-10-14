@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.request;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -16,6 +17,11 @@ import javax.validation.constraints.NotBlank;
 @EqualsAndHashCode(callSuper = true)
 public class ImageInjectFileDeleteRequest extends BaseRequest {
 
+    @ApiModelProperty("文件ID")
     @NotBlank
     private String injectUuid;
+
+    @ApiModelProperty("镜像ID")
+    @NotBlank
+    private String deviceUuid;
 }

@@ -13,6 +13,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * 文件注入
+ * @author wanggang
+ */
 @Service
 public class InjectFileServiceImpl extends BaseOpenStackServiceImpl implements InjectFileService {
 
@@ -22,19 +26,18 @@ public class InjectFileServiceImpl extends BaseOpenStackServiceImpl implements I
 
     @Override
     public InjectFileCloudPlatformModel list(String deviceUuid) {
-        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + "/inject_file?device_uuid=" + deviceUuid, InjectFileCloudPlatformModel.class);
+        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + INJECT_FILE + "?device_uuid=" + deviceUuid, InjectFileCloudPlatformModel.class);
     }
 
     @Override
     public Snapshot create(SnapshotCreate snapshotCreate) {
-        return super.sendPost(CPCLOUD_DEVICE + URL_VERSION + "/inject_file", JsonUtils.toUnderlineJSONString(snapshotCreate), Snapshot.class);
+        return super.sendPost(CPCLOUD_DEVICE + URL_VERSION + INJECT_FILE, JsonUtils.toUnderlineJSONString(snapshotCreate), Snapshot.class);
     }
 
     @Override
-    public Boolean delete(List<String> uuids) {
+    public BaseCloudPlatformModel delete(List<String> uuids) {
         var jsonObject = new JSONObject();
         jsonObject.put("inject_uuids", uuids);
-        BaseCloudPlatformModel model = super.sendDelete(CPCLOUD_DEVICE + URL_VERSION + "/inject_file",JSONObject.toJSONString(jsonObject), BaseCloudPlatformModel.class);
-        return model.isSuccess();
+        return super.sendDelete(CPCLOUD_DEVICE + URL_VERSION + INJECT_FILE,JSONObject.toJSONString(jsonObject), BaseCloudPlatformModel.class);
     }
 }

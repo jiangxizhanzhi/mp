@@ -1,14 +1,22 @@
 package cn.cyberpeace.mp.scenepluginflow.plugin;
 
 import cn.cyberpeace.mp.base.annotation.ClassFieldClasses;
+import cn.cyberpeace.mp.base.util.ClassUtils;
 import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneBO;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneElementBO;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneElementPortBO;
+import cn.cyberpeace.mp.scenepluginflow.bo.base.Flow;
 import cn.cyberpeace.mp.scenepluginflow.constant.PluginConstant;
+import cn.cyberpeace.mp.scenepluginflow.plugin.common.SceneHandlerUtils;
+import cn.cyberpeace.mp.scenepluginflow.plugin.lifecyclehandler.CreateHandler;
+import cn.cyberpeace.mp.scenepluginflow.plugin.lifecyclehandler.DeleteHandler;
 import cn.cyberpeace.mp.scenepluginflow.plugin.modelhandler.FlowScenePluginModelHandler;
+import lombok.Data;
 import org.springframework.stereotype.Component;
+
+import java.util.stream.Collectors;
 
 
 @ClassFieldClasses({
@@ -19,19 +27,34 @@ import org.springframework.stereotype.Component;
 })
 @Component
 @PluginKey(value = PluginConstant.PLUGIN_KEY, priority = PluginConstant.PLUGIN_PRIORITY)
+@Data
 public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO,
         FlowPluginSceneElementBO, FlowPluginSceneElementPortBO, Object> {
 
     private FlowScenePluginModelHandler pluginModelHandler;
 
+    private SceneHandlerUtils handlerUtils;
+    private CreateHandler createHandler;
+    private DeleteHandler deleteHandler;
+
+    @Override
+    public void correctData() {
+        if (getScene() == null) {
+            setScene(ClassUtils.createInstance(getSceneBOClass()));
+        }
+    }
+
     @Override
     public void initBase() {
         super.initBase();
         pluginModelHandler = new FlowScenePluginModelHandler(this);
+        handlerUtils = new SceneHandlerUtils(this);
+        createHandler = new CreateHandler(this);
+        deleteHandler = new DeleteHandler(this);
     }
 
     @Override
-    public void reload() {
+    public void reloadData() {
         setScene(null);
         getElementMap().clear();
         getElementPortMap().clear();
@@ -82,4 +105,53 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
         pluginModelHandler.deleteElementPorts(elementPortIds);
     }
 
+    @Override
+    public void create() {
+        createHandler.create();
+    }
+
+    @Override
+    public void delete() {
+        deleteHandler.delete();
+    }
+
+    public boolean startFlow(String nodeId, String flowId) {
+        var flowElement = getElement(nodeId);
+        if (flowElement == null) {
+            return false;
+        }
+
+        var flows = flowElement.getFlows();
+        if (flows == null) {
+            return false;
+        }
+
+        var flowMap = flows.stream().collect(Collectors.toMap(Flow::getId, flow -> flow));
+        var flow = flowMap.getOrDefault(flowId, null);
+        if (flow == null) {
+            return false;
+        }
+
+        return handlerUtils.startFlow(flowElement, flow);
+    }
+
+    public boolean stopFlow(String nodeId, String flowId) {
+        var flowElement = getElement(nodeId);
+        if (flowElement == null) {
+            return false;
+        }
+
+        var flows = flowElement.getFlows();
+        if (flows == null) {
+            return false;
+        }
+
+        var flowMap = flows.stream().collect(Collectors.toMap(Flow::getId, flow -> flow));
+        var flow = flowMap.getOrDefault(flowId, null);
+        if (flow == null) {
+            return false;
+        }
+
+        return handlerUtils.stopFlow(flow);
+    }
 }

@@ -20,6 +20,8 @@ public class CsceneInstanceBO extends BaseCsceneBO<CsceneInstanceModel, CsceneIn
     private Integer type;
     @ApiModelProperty(value = "场景实例引用类型")
     private Integer referenceType;
+    @ApiModelProperty(value = "场景实例引用元数据")
+    private String referenceMetaData;
     @ApiModelProperty(value = "场景实例拓扑数据")
     private SceneDataBO scene;
     @ApiModelProperty(value = "场景实例存活时间")
@@ -42,7 +44,7 @@ public class CsceneInstanceBO extends BaseCsceneBO<CsceneInstanceModel, CsceneIn
     public CsceneInstanceModel toModel(String... ignoreFields) {
         var obj = super.toModel(ArrayUtils.addAll(ignoreFields,
                 BeanUtils.getBeanGetterFieldName(CsceneInstanceModel::getScene)));
-        if (scene != null) {
+        if (scene != null && scene.getTopology() != null && scene.getTopology().getScene() != null) {
             obj.setScene(scene.getTopology().getScene().getEid());
         }
         return obj;

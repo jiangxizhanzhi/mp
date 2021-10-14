@@ -1,13 +1,12 @@
 ip:
   mariadb: 10.100.0.101         # MP新中台mariadb数据库地址
-  mg: 10.100.14.252             # MG老中台地址
   fdfs: 10.100.14.252           # FastDFS地址
-  cp: 10.100.7.25               # 云平台适配层接口地址
-  cr: 10.100.2.21               # cr接口地址
-  moloch: 10.100.14.107         # moloch的IP地址
+  cp: 10.100.7.1               # 云平台适配层接口地址
+  moloch: 10.100.7.112         # moloch的IP地址
   wazuh: 10.100.0.102          # wazuh的IP地址
   es: 127.0.0.1                 # MP新中台ES地址
   trex: 10.100.7.141            # trex资源服务器地址
+  rabbitmq: 10.100.0.101        # rabbitmq地址
 
 server:
   servlet:
@@ -31,6 +30,11 @@ spring:
     multipart:
       max-file-size: 1000MB
       max-request-size: 10000MB
+  rabbitmq:
+    host: ${ip.rabbitmq}
+    port: 5673
+    username: guest
+    password: guest
 
 
 logging:
@@ -39,7 +43,9 @@ logging:
     root: INFO
   file:
     path: ${user.home}/logs
-
+  logback:
+    rollingpolicy:
+      max-history: 7
 mybatis:
   mapper-locations: classpath*:mapper/*.xml
   configuration:
@@ -49,7 +55,6 @@ mybatis:
 # 请求云平台组信息的url配置，必需填写
 mp:
   base:
-    mg-url: http://${ip.mg}:8077
     # fastdfs配置
     fastdfs:
       max-storage-connection: 8   # 最大连接数
@@ -64,11 +69,11 @@ mp:
           file-server-addr: /fdfs    # 外部文件服务器地址
           inner-file-server-addr: http://${ip.fdfs}:8888   # 内部文件服务器地址
   devops:
-#    cp-url: http://10.100.7.25:10009 #云平台地址
+#    cp-url: http://10.100.7.1:111 #云平台地址
     cp-url: http://${ip.cp}:11111 #云平台地址
     hostname: controller  #主机名称
   situationaware:
-    group-url: http://10.100.14.107:5079/v1/scenes
+    group-url: http://${ip.moloch}:5079/v1/scenes
     moloch:
       username: api
       password: api
@@ -86,7 +91,7 @@ mp:
       es-username: admin
       es-password: admin
     wazuh-probe-manager:
-      url: http://10.100.0.102:8002
+      url: http://10.100.0.111:8002
       agent-script-linux-path: /var/ossec/etc/shared/scripts/
       agent-script-windows-path: C:\ossec-agent\shared\scripts\
       task-enable: false
@@ -104,7 +109,7 @@ mp:
     actuator-resource-url: http://${ip.trex}:80/api/v1/resource
     trex-image: tgn-1013
   sceneplugincloud:
-    cpcloud-server: http://${ip.cp}:10009
+    cpcloud-server: http://${ip.cp}:11111
 
 management:
   endpoints:

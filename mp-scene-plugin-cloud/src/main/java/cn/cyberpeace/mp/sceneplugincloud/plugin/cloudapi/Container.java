@@ -10,15 +10,14 @@ import com.fasterxml.jackson.core.type.TypeReference;
 public class Container extends CloudClient {
 
     public ContainerCreateData create(ContainerCreateData createData) {
-        CloudResponse<ContainerCreateData> result = getHttpClient().successPost(
-                CloudUrlConstant.CONTAINER_CREATE_URL, createData, null,
-                new TypeReference<CloudResponse<ContainerCreateData>>() {});
+        CloudResponse<ContainerCreateData> result = cloudPost(CloudUrlConstant.CONTAINER_CREATE_URL, createData, null,
+                new TypeReference<CloudResponse<ContainerCreateData>>() {}, true);
         return result.getData();
     }
 
     public boolean delete(ContainerDeleteData deleteData) {
-        CloudResponse<Object> result = getHttpClient().successDelete(CloudUrlConstant.CONTAINER_DELETE_URL,
-                deleteData, null, new TypeReference<CloudResponse<Object>>() {});
+        CloudResponse<Object> result = cloudDelete(CloudUrlConstant.CONTAINER_DELETE_URL, deleteData, null,
+                new TypeReference<CloudResponse<Object>>() {}, true);
         return true;
     }
 }

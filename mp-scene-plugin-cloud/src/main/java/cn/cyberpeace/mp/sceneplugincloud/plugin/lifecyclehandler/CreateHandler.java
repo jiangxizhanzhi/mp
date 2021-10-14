@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
-import cn.cyberpeace.mp.base.util.BoolUtils;
 import cn.cyberpeace.mp.base.util.CollectionUtils;
 import cn.cyberpeace.mp.base.util.IntUtils;
 import cn.cyberpeace.mp.base.util.TextUtils;
@@ -10,6 +9,7 @@ import cn.cyberpeace.mp.scene.util.CommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
+import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.FirewallRuleDirection;
 import cn.cyberpeace.mp.sceneplugincloud.constant.QosRuleDirection;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
@@ -18,6 +18,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -90,6 +91,10 @@ public class CreateHandler extends HandlerCommon {
     }
 
     private void createAuxiliaryNetwork(CloudPluginSceneElementBO cloudElement) {
+        if (!StringUtils.isEmpty(cloudElement.getAuxiliaryNetworkId())) {
+            return;
+        }
+
         var srcElement = cloudElement.getSrcElement();
         var createData = new VirtualSwitchCreateData();
         createData.setName(genResourceName(srcElement.getEid()));
@@ -98,9 +103,11 @@ public class CreateHandler extends HandlerCommon {
         var subnet = new VirtualSwitchCreateData.Subnet();
         subnet.setCidr(cloudElement.getAuxiliaryNetworkCidr());
         subnet.setGatewayIp(TextUtils.emptyNull(cloudElement.getAuxiliaryNetworkGateway()));
-        subnet.setEnableDhcp(BoolUtils.bool(cloudElement.getAuxiliaryNetworkDhcp()));
+        // 默认开启dhcp
+        var dhcp = cloudElement.getAuxiliaryNetworkDhcp();
+        subnet.setEnableDhcp(dhcp == null || dhcp);
         var srcAllocationPools = cloudElement.getAuxiliaryNetworkAllocationPools();
-        if (srcAllocationPools != null) {
+        if (srcAllocationPools != null && !srcAllocationPools.isEmpty()) {
             List<VirtualSwitchCreateData.Subnet.AllocationPool> allocationPools = new ArrayList<>();
             srcAllocationPools.forEach(srcAllocationPool -> {
                 allocationPools.add(new VirtualSwitchCreateData.Subnet.AllocationPool(srcAllocationPool.getStart(),
@@ -116,6 +123,13 @@ public class CreateHandler extends HandlerCommon {
 
     private List<VirtualNic> genVirutalNics(CloudPluginSceneElementBO cloudElement) {
         List<VirtualNic> virtualNics = new ArrayList<>();
+        // 添加管理网卡
+        if (Boolean.TRUE.equals(cloudElement.getEnableMgmt())) {
+            var virtualNic = new VirtualNic();
+            virtualNic.setNetworkId(CloudSingleton.cloudAppConfig.getMgmtNetId());
+            virtualNics.add(virtualNic);
+        }
+
         var srcElement = cloudElement.getSrcElement();
         var ports = srcElement.getPorts();
         if (ports == null) {
@@ -127,7 +141,8 @@ public class CreateHandler extends HandlerCommon {
             var connectedSrcElement = getPluginHandler().getPortConnectedSrcElement(port.getId());
             var connectedCloudElement = connectedSrcElement == null ? null
                     : getPluginHandler().getElement(connectedSrcElement.getId());
-            var auxiliaryNetworkCloudElement = confirmAuxiliaryNetworkCloudElement(cloudElement, connectedCloudElement);
+            var auxiliaryNetworkCloudElement = getHandlerUtils().confirmAuxiliaryNetworkCloudElement(
+                    cloudElement, connectedCloudElement);
             if (auxiliaryNetworkCloudElement == null) {
                 continue;
             }
@@ -175,7 +190,6 @@ public class CreateHandler extends HandlerCommon {
                     accessModeParam.setPassword(accessMode.getPassword());
                     accessModeParam.setEnablePortMapping(accessMode.getProxy());
                     accessModeParam.setPortMappingProtocol(TextUtils.emptyNull(accessMode.getBaseProtocol()));
-                    accessModeParam.setIpAddress(TextUtils.emptyNull(port.getIp()));
                     return accessModeParam;
                 }).collect(Collectors.toList()));
             }
@@ -199,7 +213,7 @@ public class CreateHandler extends HandlerCommon {
                 continue;
             }
             var connectedCloudElement = getPluginHandler().getElement(connectedSrcElement.getId());
-            var auxiliaryNetworkCloudElement = confirmAuxiliaryNetworkCloudElement(cloudElement, connectedCloudElement);
+            var auxiliaryNetworkCloudElement = getHandlerUtils().confirmAuxiliaryNetworkCloudElement(cloudElement, connectedCloudElement);
             if (auxiliaryNetworkCloudElement == null) {
                 continue;
             }
@@ -217,7 +231,7 @@ public class CreateHandler extends HandlerCommon {
             entityInterface.setInterfaceName(port.getName());
 
             var accessModes = cloudPort.getAccessModes();
-            if (accessModes != null) {
+            if (accessModes != null && !accessModes.isEmpty()) {
                 entityInterface.setAccessModes(accessModes.stream().map(accessMode -> {
                     var accessModeParam = new EntityNodeCreateData.Interface.AccessMode();
                     accessModeParam.setProtocol(accessMode.getProtocol());
@@ -259,18 +273,26 @@ public class CreateHandler extends HandlerCommon {
         }
 
         var srcPorts = cloudElement.getSrcElement().getPorts();
-        if (srcPorts == null) {
-            return;
+        Map<String, CloudPluginSceneElementPortBO> networkIdCloudPortMap = new HashMap<>();
+        if (srcPorts != null) {
+            srcPorts.forEach(srcPort -> {
+                var cloudPort = getPluginHandler().getPort(srcPort.getId());
+                networkIdCloudPortMap.put(cloudPort.getAuxiliaryNetworkId(), cloudPort);
+            });
         }
 
-        Map<String, CloudPluginSceneElementPortBO> networkIdCloudPortMap = new HashMap<>();
-        srcPorts.forEach(srcPort -> {
-            var cloudPort = getPluginHandler().getPort(srcPort.getId());
-            networkIdCloudPortMap.put(cloudPort.getAuxiliaryNetworkId(), cloudPort);
-        });
-
         virtualNics.forEach(virtualNic -> {
-            var cloudPort = networkIdCloudPortMap.getOrDefault(virtualNic.getNetworkId(), null);
+            var networkId = virtualNic.getNetworkId();
+            // 管理网卡判断
+            if (Boolean.TRUE.equals(cloudElement.getEnableMgmt())
+                    && CloudSingleton.cloudAppConfig.getMgmtNetId().equals(networkId)) {
+                cloudElement.setMgmtPortResourceId(virtualNic.getPortId());
+                cloudElement.setMgmtIp(virtualNic.getFixedIp());
+                cloudElement.setMgmtMacAddr(virtualNic.getMacAddress());
+                return;
+            }
+
+            var cloudPort = networkIdCloudPortMap.getOrDefault(networkId, null);
             if (cloudPort == null) {
                 return;
             }
@@ -283,7 +305,7 @@ public class CreateHandler extends HandlerCommon {
             cloudPort.setQosId(virtualNic.getQosId());
 
             var accessModesData = virtualNic.getAccessModes();
-            if (accessModesData != null) {
+            if (accessModesData != null && !accessModesData.isEmpty()) {
                 Map<String, VirtualNic.AccessMode> accessModeDataMap = accessModesData.stream()
                         .collect(Collectors.toMap(this::genAccessModeKey, accessMode -> accessMode));
                 cloudPort.getAccessModes().forEach(accessMode -> {
@@ -294,6 +316,7 @@ public class CreateHandler extends HandlerCommon {
 
                     var connection = accessModeData.getConnection();
                     if (connection != null) {
+                        accessMode.setConnectionUser(TextUtils.emptyNull(getRequestUser()));
                         accessMode.setConnectionId(connection.getConnectionId());
                         accessMode.setConnectionUrl(connection.getUrl());
                     }
@@ -337,7 +360,7 @@ public class CreateHandler extends HandlerCommon {
             }
 
             var accessModesData = entityInterface.getAccessModes();
-            if (accessModesData != null) {
+            if (accessModesData != null && !accessModesData.isEmpty()) {
                 Map<String, EntityNodeCreateData.Interface.AccessMode> accessModeDataMap = accessModesData.stream()
                         .collect(Collectors.toMap(this::genAccessModeKey, accessMode -> accessMode));
                 cloudPort.getAccessModes().forEach(accessMode -> {
@@ -348,6 +371,7 @@ public class CreateHandler extends HandlerCommon {
 
                     var connection = accessModeData.getConnection();
                     if (connection != null) {
+                        accessMode.setConnectionUser(TextUtils.emptyNull(getRequestUser()));
                         accessMode.setConnectionId(connection.getConnectionId());
                         accessMode.setConnectionUrl(connection.getUrl());
                     }
@@ -410,13 +434,13 @@ public class CreateHandler extends HandlerCommon {
         var connectedSrcPorts = getPluginHandler().getElementConnectedSrcPorts(srcElement.getId());
         for (var connectedSrcPort : connectedSrcPorts) {
             var connectedCloudPort = getPluginHandler().getPort(connectedSrcPort.getId());
-            if (connectedCloudPort == null || connectedCloudPort.getResourceId() == null) {
+            if (connectedCloudPort == null || StringUtils.isEmpty(connectedCloudPort.getResourceId())) {
                 continue;
             }
             var connectedSrcElement = getPluginHandler().getPortSrcElement(connectedSrcPort.getId());
-            var connectedCloutElement = getPluginHandler().getElement(connectedSrcElement.getId());
-            if (connectedCloutElement == null || connectedCloutElement.getVirtualType() == null
-                    || connectedCloutElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
+            var connectedCloudElement = getPluginHandler().getElement(connectedSrcElement.getId());
+            if (connectedCloudElement == null || connectedCloudElement.getVirtualType() == null
+                    || !connectedCloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
                 continue;
             }
             targetPorts.add(connectedCloudPort.getResourceId());

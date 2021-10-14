@@ -70,6 +70,7 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
                 srcElement.setType(BaseSceneElementModel.Type.FIREWALL);
             }
             cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_FIREWALL);
+            cloudElement.setTransparent(true);
         } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_IMAGE_GATEWAY)) {
             if (isForceCorrectElementType) {
                 // TODO 暂定 - 三层镜像网关就是仿真路由
@@ -125,7 +126,7 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
     }
 
     @Override
-    public void reload() {
+    public void reloadData() {
         setScene(null);
         getElementMap().clear();
         getElementPortMap().clear();

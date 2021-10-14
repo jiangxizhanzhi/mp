@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.devops.cluster.converter.ImagesConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageAuthConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertModel;
@@ -21,6 +22,7 @@ import cn.cyberpeace.mp.devops.cluster.repository.ImageAuthMapper;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
 import cn.cyberpeace.mp.devops.cluster.request.*;
 import cn.cyberpeace.mp.devops.cluster.service.*;
+import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -30,9 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -75,17 +75,17 @@ public class ImagesConverterImpl implements ImagesConverter {
 
     @Override
     public String[] getDefaultPageIgnoreField() {
-        return new String[0];
+        return BeanUtils.getBeanGetterFieldNames(ImagePageRequest::getPage,ImagePageRequest::getPerPage);
     }
 
     @Override
     public String[] getTotalPageIgnoreField() {
-        return new String[0];
+        return BeanUtils.getBeanGetterFieldNames(ImagePageRequest::getLimit,ImagePageRequest::getOffset,
+                ImagePageRequest::getPage,ImagePageRequest::getPerPage);
     }
 
     @Override
     public ImageConvertPageModel page(ImagePageRequest request) {
-
         ImagePageDTO dto = new ImagePageDTO();
         dto.setRole(request.getRole());
         dto.setMainCategory(request.getMainCategory());
@@ -94,7 +94,7 @@ public class ImagesConverterImpl implements ImagesConverter {
         if (Objects.isNull(request.getImageType())){
             dto.setSearchType(1);
         }else {
-            dto.setImageType(Objects.nonNull(request.getImageType()) ? request.getImageType().toValue() : "");
+            dto.setImageType(request.getImageType());
         }
         dto.setName(request.getName());
         dto.setOwner(Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : null);
@@ -105,20 +105,30 @@ public class ImagesConverterImpl implements ImagesConverter {
         dto.setSystemArchitecure(request.getSystemArchitecure());
         dto.setLanguage(request.getLanguage());
         dto.setImageStatus(request.getImageStatus());
+        dto.setBaseImageSupport(request.getBaseImageSupport());
+
         Integer total = imageMapper.totalCount(dto);
+
+        ImageConvertPageModel convertModel = new ImageConvertPageModel();
         if (total == 0){
-            return null;
+            convertModel.setTotal(0);
+            convertModel.setModelList(Lists.newArrayList());
+            return convertModel;
         }
         List<TargetModel> targetModels = imageMapper.page(dto);
 
         List<Integer> ids = targetModels.stream().map(TargetModel::getId).map(Integer::parseInt).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(ids)){
-            return null;
+            convertModel.setTotal(0);
+            convertModel.setModelList(Lists.newArrayList());
+            return convertModel;
         }
         DeviceCloudPlatformModel model = deviceService.findByIds(ids);
 
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getItems())){
-            return null;
+            convertModel.setTotal(0);
+            convertModel.setModelList(Lists.newArrayList());
+            return convertModel;
         }
 
         List<String> targetUuids = targetModels.stream().map(TargetModel::getUuid).collect(Collectors.toList());
@@ -140,7 +150,6 @@ public class ImagesConverterImpl implements ImagesConverter {
             }
         }
 
-        ImageConvertPageModel convertModel = new ImageConvertPageModel();
         convertModel.setModelList(modelList);
         convertModel.setTotal(total);
         return convertModel;
@@ -150,7 +159,7 @@ public class ImagesConverterImpl implements ImagesConverter {
     @Transactional
     public Device add(ImageRequest request) {
         Device device = imagesService.add(convertRequest(request));
-        devopsTargetService.insert(device);
+        devopsTargetService.insert(Arrays.asList(device));
         return device;
     }
 
@@ -170,12 +179,10 @@ public class ImagesConverterImpl implements ImagesConverter {
     }
 
     @Override
-    public void look(ImagesLookRequest request) {
-    }
-
-    @Override
-    public void build(ImagesBuildRequest request) {
-        imagesService.quickCreate(new DeviceQuickCreateCloudPlatformModel(request.getName(),request.getImageName(),request.getServiceIds()));
+    public Device build(ImagesBuildRequest request) {
+        Device device =  imagesService.quickCreate(new DeviceQuickCreateCloudPlatformModel(request.getName(),request.getImageName(),request.getServiceIds()));
+        devopsTargetService.insert(Arrays.asList(device));
+        return device;
     }
 
     @Override
@@ -206,13 +213,13 @@ public class ImagesConverterImpl implements ImagesConverter {
         return result;
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void auth(ImagesAuthRequest request) {
         //镜像ID
         List<String> imageIds = request.getUuids();
         //先删除上次的权限数据
-        imageIds.forEach(imageId ->  imageAuthMapper.deleteByTarget(imageId));
+        imageAuthMapper.deleteByTargets(imageIds);
 
         PublicEnum isAllPublic = request.getIsAllPublic();
         imageIds.forEach(imageId -> {
@@ -223,12 +230,10 @@ public class ImagesConverterImpl implements ImagesConverter {
         });
         //再新增权限数据
         List<String> userIds = request.getUserIds();
-        if (PublicEnum.ALL_PUBLIC != isAllPublic && PublicEnum.PRIVATE != isAllPublic && CollectionUtils.isNotEmpty(userIds)){
-//            if (CollectionUtils.isEmpty(userIds)){
-//                //私有的
-//                UserModel loginUser = UserUtils.getLoginUser();
-//                userIds.add(loginUser.getId());
-//            }
+        if (PublicEnum.PRIVATE == isAllPublic){
+            userIds.add(UserUtils.getLoginUser().getId());
+        }
+        if (PublicEnum.ALL_PUBLIC != isAllPublic && CollectionUtils.isNotEmpty(userIds)){
             imageIds.forEach(imageId -> {
                 List<TargetAuthModel> authModelList = userIds.stream().map(userId -> {
                     TargetAuthModel targetAuthModel = new TargetAuthModel();
@@ -247,10 +252,11 @@ public class ImagesConverterImpl implements ImagesConverter {
      * @param uuid
      * @return
      */
+    @Override
     public List<UserDto> findUsersByUuid(String uuid){
         List<TargetAuthModel> targetAuthModels = imageAuthMapper.findByTarget(uuid);
         if (CollectionUtils.isEmpty(targetAuthModels)){
-            return null;
+            return Lists.newArrayList();
         }
         List<String> userIds = targetAuthModels.stream().map(TargetAuthModel::getOwner).collect(Collectors.toList());
         return userService.listByUserIds(userIds.stream().toArray(String[]::new));
@@ -274,34 +280,41 @@ public class ImagesConverterImpl implements ImagesConverter {
     }
 
     @Override
-    public HttpResponse export(String uuid) {
-        return imagesService.export(uuid);
+    public HttpResponse export(String uuid, String imageName) {
+        return imagesService.export(uuid,imageName);
     }
 
     @Override
     public BaseCloudPlatformModel create(String uuid) {
         return scenariosSnapshotService.create(new ImagesCreateInstanceCloudPlatform(uuid,
                 Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getUsername() : ""));
-//        Device device = deviceService.findById(uuid);
-//
-//        if(ImageTypeEnum.VM.toValue().equals(device.getImageType())) {
-//            VmCreateCloudPlatformModel model = new VmCreateCloudPlatformModel();
-//            model.setName(device.getName());
-//            model.setImage(device.getName());
-//            vmService.create(model);
-//        }
-//        else if(ImageTypeEnum.CONTAINER.toValue().equals(device.getImageType())) {
-//            ContainerCreateCloudPlatformModel model = new ContainerCreateCloudPlatformModel();
-//            model.setName(device.getName());
-//            model.setImage(device.getName());
-//            containerService.create(model);
-//        }
-
     }
 
     @Override
     public BaseCloudPlatformModel delete(ImagesDeleteInstanceRequest request) {
         return scenariosSnapshotService.delete(new ImagesDeleteInstanceCloudPlatform(request.getUuid(),request.getImageType()));
+    }
+
+    /**
+     * 根据ID集合（非UUID）查询靶标数据
+     * @param ids
+     */
+    public List<Device> findByIds(List<Integer> ids){
+        DeviceCloudPlatformModel model = deviceService.findByIds(ids);
+        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getItems())){
+            return Lists.newArrayList();
+        }
+        return model.getItems();
+    }
+
+    @Transactional
+    @Override
+    public Integer async(ImageAsyncRequest request){
+        List<Device> deviceList = this.findByIds(request.getIds());
+        if (CollectionUtils.isEmpty(deviceList)){
+            return 0;
+        }
+        return devopsTargetService.insert(deviceList);
     }
 
     /**
@@ -334,6 +347,7 @@ public class ImagesConverterImpl implements ImagesConverter {
         }
         device.setExtImageInfo(extImageInfo);
         device.setExtGateway(request.getExtGateway());
+        device.setExtDocker(request.getExtDocker());
         return device;
     }
 
@@ -365,5 +379,7 @@ public class ImagesConverterImpl implements ImagesConverter {
         imageModel.setExtDocker(device.getExtDocker());
         return imageModel;
     }
+
+
 
 }

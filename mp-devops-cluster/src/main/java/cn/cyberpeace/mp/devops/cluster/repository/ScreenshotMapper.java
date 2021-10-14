@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import cn.cyberpeace.mp.devops.cluster.model.ScreenshotModel;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -36,6 +37,6 @@ public interface ScreenshotMapper extends BaseModelMapper<ScreenshotModel> {
      * @param ids
      * @return
      */
-    List<ScreenshotModel> selectByIds(List<String> ids);
+    List<ScreenshotModel> selectByIds(@Param("ids") List<String> ids);
 	
 }

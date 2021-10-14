@@ -6,7 +6,6 @@ import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.ContainerActionCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.ContainerCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.ContainerCreateCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.ContainerModel;
 import cn.cyberpeace.mp.devops.cluster.service.ContainerService;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
@@ -33,7 +32,7 @@ public class ContainerServiceImpl extends BaseOpenStackServiceImpl implements Co
 
     @Override
     public ContainerCloudPlatformModel page(String getParams) {
-        ContainerPageResult pageResult =  super.sendGet(URL_VERSION + "/containers" + getParams, ContainerPageResult.class);
+        ContainerPageResult pageResult =  super.sendGet(URL_VERSION + CONTAINERS + getParams, ContainerPageResult.class);
         if (Objects.isNull(pageResult) || Objects.isNull(pageResult.getData())){
             return null;
         }
@@ -47,12 +46,7 @@ public class ContainerServiceImpl extends BaseOpenStackServiceImpl implements Co
     }
 
     @Override
-    public void create(ContainerCreateCloudPlatformModel model) {
-        super.sendPost(URL_VERSION + "/scenarios/container", JsonUtils.toUnderlineJSONString(model));
-    }
-
-    @Override
     public BaseCloudPlatformModel action(ContainerActionCloudPlatformModel model,String uuid) {
-       return super.sendPost(URL_VERSION + "/containers/"+ uuid +"/action", JsonUtils.toUnderlineJSONString(model), BaseCloudPlatformModel.class);
+       return super.sendPost(URL_VERSION + CONTAINERS + uuid +"/action", JsonUtils.toUnderlineJSONString(model), BaseCloudPlatformModel.class);
     }
 }

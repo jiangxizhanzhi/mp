@@ -10,10 +10,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.common.*;
 import cn.cyberpeace.mp.devops.cluster.request.*;
-import cn.cyberpeace.mp.devops.cluster.response.RealEquipmentByIdResponse;
-import cn.cyberpeace.mp.devops.cluster.response.RealEquipmentDevopsDetailResponse;
-import cn.cyberpeace.mp.devops.cluster.response.RealEquipmentPageResponse;
-import cn.cyberpeace.mp.devops.cluster.response.RealEquipmentScenesPageResponse;
+import cn.cyberpeace.mp.devops.cluster.response.*;
 import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
 import cn.cyberpeace.mp.devops.cluster.response.base.Result;
 import cn.cyberpeace.mp.devops.cluster.service.RealEquipmentService;
@@ -193,25 +190,51 @@ public class RealEquipmentController {
     @GetMapping("/get-devops-details")
     public Result<RealEquipmentDevopsDetailResponse> findDevopsDetails(@RequestParam("uuid") String id){
         RealEquipment realEquipment = realEquipmentConverter.findById(id);
+        if (Objects.isNull(realEquipment)){
+            throw new MpRuntimeException(BaseErrorCode.ERROR);
+        }
         RealEquipmentDevopsDetailResponse response = RealEquipmentDevopsDetailResponse.builder()
                 .name(realEquipment.getName()).logo(realEquipment.getLogo())
                 .extSystemInfo(realEquipment.getExtSystemInfo()).extEntity(realEquipment.getExtEntity()).build();
-        response.setAddress(realEquipment.getExtEntityAccess().stream().map(ExtEntityAccess::getIp).collect(Collectors.toList()));
-        if (Objects.nonNull(realEquipment) && Objects.nonNull(realEquipment.getExtEntity())){
+        if (CollectionUtils.isNotEmpty(realEquipment.getExtEntityAccess())) {
+            response.setAddress(realEquipment.getExtEntityAccess().stream().map(ExtEntityAccess::getIp).collect(Collectors.toList()));
+        }
+        TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type();
+        TypeAllConvertModel language = typeConverter.findLanguage();
+        TypeAllConvertModel systemArchitecure = typeConverter.findSystemArchitecure();
+
+        ExtSystemInfo extSystemInfo = realEquipment.getExtSystemInfo();
+        if (Objects.nonNull(extSystemInfo)){
+            if (Objects.nonNull(l1AndL2AndL3Type) && CollectionUtils.isNotEmpty(l1AndL2AndL3Type.getThirdTypeList())) {
+                List<String> systemTypeList = l1AndL2AndL3Type.getThirdTypeList().stream()
+                        .filter(typeConvertModel -> typeConvertModel.getId().equals(extSystemInfo.getSystemType()))
+                        .map(TypeConvertModel::getName).collect(Collectors.toList());
+                extSystemInfo.setSystemTypeName(CollectionUtils.isEmpty(systemTypeList) ? null : systemTypeList.get(0));
+            }
+            if (Objects.nonNull(language) && CollectionUtils.isNotEmpty(language.getIdStringModelList())){
+                List<String> languageTypeList = language.getIdStringModelList().stream()
+                        .filter(typeConvertModel -> typeConvertModel.getId().equals(extSystemInfo.getLanguage()))
+                        .map(TypeIdStringConvertModel::getName).collect(Collectors.toList());
+                extSystemInfo.setLanguageName(CollectionUtils.isEmpty(languageTypeList) ? null : languageTypeList.get(0));
+            }
+
+            if (Objects.nonNull(systemArchitecure) && CollectionUtils.isNotEmpty(systemArchitecure.getIdStringModelList())){
+                List<String> systemArchitecureTypeList = systemArchitecure.getIdStringModelList().stream()
+                        .filter(typeConvertModel -> typeConvertModel.getId().equals(extSystemInfo.getSystemArchitecture()))
+                        .map(TypeIdStringConvertModel::getName).collect(Collectors.toList());
+                extSystemInfo.setSystemArchitectureName(CollectionUtils.isEmpty(systemArchitecureTypeList) ? null : systemArchitecureTypeList.get(0));
+            }
+            response.setExtSystemInfo(extSystemInfo);
+        }
+
+        if (Objects.nonNull(realEquipment.getExtEntity())){
             ExtEntity extEntity = realEquipment.getExtEntity();
             response.setModel(extEntity.getStyle());
             response.setParams(extEntity.getParams());
-            if (Objects.nonNull(extEntity.getSnmpConfig())) {
+            if (Objects.nonNull(extEntity.getSnmpConfig()) && StringUtils.isNotBlank(extEntity.getSnmpVersion())) {
                 SnmpParams snmpParams = new SnmpParams();
                 SnmpConfig snmpConfigs = extEntity.getSnmpConfig();
-                if (extEntity.getSnmpVersion().equals("V1")) {
-                    snmpParams.setVersion(2);
-                    if (Objects.nonNull(snmpConfigs)) {
-                        SnmpBaseAuth snmpAuth = new SnmpBaseAuth();
-                        snmpAuth.setCommunityName(snmpConfigs.getCommunityName());
-                        snmpParams.setAuth(snmpAuth);
-                    }
-                } else if (extEntity.getSnmpVersion().equals("V2")) {
+                if (extEntity.getSnmpVersion().equals("V1") || extEntity.getSnmpVersion().equals("V2")) {
                     snmpParams.setVersion(2);
                     if (Objects.nonNull(snmpConfigs)) {
                         SnmpBaseAuth snmpAuth = new SnmpBaseAuth();
@@ -231,10 +254,19 @@ public class RealEquipmentController {
                 snmpParams.setIp(extEntity.getSnmpConfig().getIp());
                 snmpParams.setOid(extEntity.getSnmpCpuOid());
                 SnmpCloudPlatform cpu = realEquipmentService.snmpForCpu(snmpParams);
+                if (Objects.nonNull(cpu) && Objects.nonNull(cpu.getStatus()) && cpu.getStatus()){
+                    response.setCpuPercent(cpu.getResult().get(extEntity.getSnmpCpuOid()));
+                }
                 snmpParams.setOid(extEntity.getSnmpMemOid());
                 SnmpCloudPlatform mem = realEquipmentService.snmpForMem(snmpParams);
+                if (Objects.nonNull(mem) &&  Objects.nonNull(mem.getStatus()) && mem.getStatus()){
+                    response.setRamPercent(mem.getResult().get(extEntity.getSnmpMemOid()));
+                }
                 snmpParams.setOid(extEntity.getSnmpDiskOid());
                 var disk = realEquipmentService.snmpForDisk(snmpParams);
+                if (Objects.nonNull(disk) &&  Objects.nonNull(disk.getStatus()) && disk.getStatus()){
+                    response.setDiskPercent(disk.getResult().get(extEntity.getSnmpDiskOid()));
+                }
             }
         }
         RealEquipmentConnectionCloudPlatform connection = realEquipmentService.connection(id);
@@ -247,17 +279,27 @@ public class RealEquipmentController {
 
     @ApiOperation("接口资源")
     @GetMapping("/network-card")
-    public PageResult<SnmpInterfaceResourceCloudPlatform.Interfaces> pageNetworkCard(RealEquipmentNetworkCardPageRequest request){
+    public PageResult<RealEquipmentNetworkCardPageResponse> pageNetworkCard(RealEquipmentNetworkCardPageRequest request){
+        RealEquipment realEquipment = realEquipmentConverter.findById(request.getUuid());
+        if (Objects.isNull(realEquipment)){
+            throw new MpRuntimeException(BaseErrorCode.ERROR);
+        }
+        ExtEntity extEntity = realEquipment.getExtEntity();
+        if (Objects.isNull(extEntity) || StringUtils.isBlank(extEntity.getSnmpVersion()) || Objects.isNull(extEntity.getSnmpConfig())){
+            return new PageResult<>(Lists.newArrayList(),0);
+        }
         SnmpParams snmpParams = new SnmpParams();
-        snmpParams.setVersion(request.getVersion());
-        SnmpConfig snmpConfig = request.getSnmpConfig();
-        if (Objects.nonNull(snmpConfig)){
-            snmpParams.setIp(snmpConfig.getIp());
-            if (StringUtils.isNotBlank(snmpConfig.getCommunityName())){
+        SnmpConfig snmpConfig = extEntity.getSnmpConfig();
+        if (extEntity.getSnmpVersion().equals("V1") || extEntity.getSnmpVersion().equals("V2")) {
+            snmpParams.setVersion(2);
+            if (Objects.nonNull(snmpConfig)) {
                 SnmpBaseAuth snmpAuth = new SnmpBaseAuth();
                 snmpAuth.setCommunityName(snmpConfig.getCommunityName());
                 snmpParams.setAuth(snmpAuth);
-            }else{
+            }
+        } else if (extEntity.getSnmpVersion().equals("V3")) {
+            snmpParams.setVersion(3);
+            if (Objects.nonNull(snmpConfig)) {
                 SnmpAuth snmpAuth = new SnmpAuth();
                 snmpAuth.setAuthKey(snmpConfig.getAuthKey());
                 snmpAuth.setUsername(snmpConfig.getUsername());
@@ -265,14 +307,21 @@ public class RealEquipmentController {
                 snmpParams.setAuth(snmpAuth);
             }
         }
+        snmpParams.setIp(extEntity.getSnmpConfig().getIp());
+        snmpParams.setOid(extEntity.getSnmpCpuOid());
         SnmpInterfaceResourceCloudPlatform model = realEquipmentService.interfacesResource(snmpParams);
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getResult())){
             return new PageResult<>(Lists.newArrayList(),0);
         }
+
         Integer page = request.getPage();
         Integer perPage = request.getPerPage();
-        List<SnmpInterfaceResourceCloudPlatform.Interfaces> interfaces = model.getResult().subList((page - 1) * perPage, (page - 1) * perPage + perPage);
-        return new PageResult<>(interfaces,model.getResult().size());
+        Integer to = Math.min((page * perPage), model.getResult().size());
+        List<SnmpInterfaceResourceCloudPlatform.Interfaces> interfaces = model.getResult().subList((page - 1) * perPage, to);
+        List<RealEquipmentNetworkCardPageResponse> list = interfaces.stream().map(v ->
+                RealEquipmentNetworkCardPageResponse.builder().name(v.getInterfaceName()).inflow(v.getInTraffic()).outflow(v.getOutTraffic()).build())
+                .collect(Collectors.toList());
+        return new PageResult<>(list,model.getResult().size());
     }
 
     @ApiOperation("场景引用")

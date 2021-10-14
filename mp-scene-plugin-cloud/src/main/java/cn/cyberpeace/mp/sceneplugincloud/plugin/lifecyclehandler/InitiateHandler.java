@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.InitiateTaskPool;
@@ -37,12 +38,12 @@ public class InitiateHandler extends HandlerCommon {
 
     private void prepareExistCidrs() {
         if (existCidrs == null) {
-            existCidrs = statExistCidrs();
+            existCidrs = getHandlerUtils().statExistCidrs();
         }
     }
 
     private synchronized List<String> allocateCidrs(int count) {
-        var cidrs = randomCidrs(count, existCidrs);
+        var cidrs = getHandlerUtils().randomCidrs(count, existCidrs);
         existCidrs.addAll(cidrs);
         return cidrs;
     }
@@ -135,7 +136,8 @@ public class InitiateHandler extends HandlerCommon {
             return false;
         }
 
-        var connectedOpaqueSrcElements = getEleConnectedOpaqueSrcElements(cloudElement.getSrcElement().getId());
+        var connectedOpaqueSrcElements = getHandlerUtils().getEleConnectedOpaqueSrcElements(
+                cloudElement.getSrcElement().getId());
         if (connectedOpaqueSrcElements.isEmpty()) {
             return true;
         }
@@ -193,8 +195,13 @@ public class InitiateHandler extends HandlerCommon {
      * @param auxiliaryNetworkCloudElement 辅助网络节点
      */
     private void initIpPool(CloudPluginSceneElementBO auxiliaryNetworkCloudElement) {
+        var cidr = auxiliaryNetworkCloudElement.getAuxiliaryNetworkCidr();
+        if (StringUtils.isEmpty(cidr)) {
+            return;
+        }
+
         var auxiliaryNetworkNodeId = auxiliaryNetworkCloudElement.getSrcElement().getId();
-        var connectedOpaqueSrcPorts = getEleConnectedOpaqueSrcPorts(auxiliaryNetworkNodeId);
+        var connectedOpaqueSrcPorts = getHandlerUtils().getEleConnectedOpaqueSrcPorts(auxiliaryNetworkNodeId);
         Integer virtualType = auxiliaryNetworkCloudElement.getVirtualType();
         if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)
                 || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)
@@ -217,8 +224,8 @@ public class InitiateHandler extends HandlerCommon {
             }
         }
 
-        List<String> ipPool = IpUtils.randomIps(auxiliaryNetworkCloudElement.getAuxiliaryNetworkCidr(), requireCount,
-                existIps, auxiliaryNetworkCloudElement.getAllocationPools());
+        List<String> ipPool = IpUtils.randomIps(cidr, requireCount, existIps,
+                auxiliaryNetworkCloudElement.getAllocationPools());
         networkNodeIdIpPool.put(auxiliaryNetworkNodeId, ipPool);
     }
 
@@ -243,10 +250,10 @@ public class InitiateHandler extends HandlerCommon {
         }
 
         var portId = srcPort.getId();
-        var connectedSrcElement = getPortConnectedOpaqueSrcElement(portId);
+        var connectedSrcElement = getHandlerUtils().getPortConnectedOpaqueSrcElement(portId);
         var connectedCloudElement = connectedSrcElement == null ? null
                 : getPluginHandler().getElement(connectedSrcElement.getId());
-        var auxiliaryNetworkCloudElement = confirmAuxiliaryNetworkCloudElement(cloudElement,
+        var auxiliaryNetworkCloudElement = getHandlerUtils().confirmAuxiliaryNetworkCloudElement(cloudElement,
                 connectedCloudElement);
         if (auxiliaryNetworkCloudElement == null) {
             return;
@@ -281,9 +288,19 @@ public class InitiateHandler extends HandlerCommon {
      * @param cloudElement 网元节点
      */
     private void initiateElementBaseProperties(CloudPluginSceneElementBO cloudElement) {
+        // 外部网络预先初始化
+        var role = cloudElement.getRole();
+        if (role != null && role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK)) {
+            cloudElement.setExternal(true);
+            cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH);
+            cloudElement.setAuxiliaryNetworkOn(true);
+            cloudElement.setAuxiliaryNetworkId(CloudSingleton.cloudAppConfig.getExternalNetId());
+        }
+
         if (Boolean.TRUE.equals(cloudElement.getExternal())) {
             return;
         }
+
         Integer virtualType = cloudElement.getVirtualType();
         if (virtualType == null) {
             log.warn("Element({}) {} has no virtual type", cloudElement.getSrcElement().getEid(),
@@ -319,6 +336,12 @@ public class InitiateHandler extends HandlerCommon {
             cloudElement.setVlan(cloudElement.getAuxiliaryNetworkVlan());
             cloudElement.setVlanId(cloudElement.getAuxiliaryNetworkVlanId());
         }
+
+        // 虚拟机/容器 默认开启管理网络
+//        if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)
+//                || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
+//            cloudElement.setEnableMgmt(true);
+//        }
     }
 
     public InitiateHandler(CloudScenePluginHandler pluginHandler) {
@@ -332,7 +355,6 @@ public class InitiateHandler extends HandlerCommon {
 
         // 初始化节点属性
         var initiateElementTasks = cloudElements.stream()
-                .filter(cloudElement -> !Boolean.TRUE.equals(cloudElement.getExternal()))
                 .map(cloudElement -> (Runnable) () -> initiateElementBasePropertiesProcess(cloudElement))
                 .collect(Collectors.toList());
         if (!initiateElementTasks.isEmpty()) {

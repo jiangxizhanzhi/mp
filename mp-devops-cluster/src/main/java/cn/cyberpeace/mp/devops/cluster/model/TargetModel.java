@@ -3,8 +3,8 @@ package cn.cyberpeace.mp.devops.cluster.model;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 import cn.cyberpeace.mp.devops.cluster.enums.PublicEnum;
-import cn.cyberpeace.mp.devops.cluster.enums.QuickCreateSupportEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.StatusEnum;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -58,7 +58,7 @@ public class TargetModel extends BaseModel {
     /**
      * 是否支持快速创建
      */
-    private QuickCreateSupportEnum quickCreateSupport;
+    private Boolean quickCreateSupport;
 
     /**
      * 在位状态
@@ -96,7 +96,17 @@ public class TargetModel extends BaseModel {
     private Integer imageStatus;
 
     /**
+     * 系统镜像类型，1：基础镜像，2：openstack已有镜像，3：自定义上传
+     */
+    private Integer imageSource;
+
+    /**
      * 是否支持基础镜像
      */
     private Boolean baseImageSupport;
+
+    /**
+     * 是否支持cloud init
+     */
+    private Boolean initSupport;
 }

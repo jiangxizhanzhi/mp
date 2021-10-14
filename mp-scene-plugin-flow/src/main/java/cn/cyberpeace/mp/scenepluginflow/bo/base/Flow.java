@@ -17,6 +17,8 @@ public class Flow {
     private Integer status;
     @ApiModelProperty(value = "状态描述")
     private String statusText;
+    @ApiModelProperty(value = "流量任务id")
+    private String taskId;
 
     public static class Status {
         public static final int OFF = 0;

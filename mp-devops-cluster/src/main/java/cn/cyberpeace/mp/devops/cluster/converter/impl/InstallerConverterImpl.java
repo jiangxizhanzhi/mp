@@ -12,15 +12,16 @@ import cn.cyberpeace.mp.devops.cluster.model.common.ExtDocker;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtNormal;
 import cn.cyberpeace.mp.devops.cluster.model.common.Resource;
 import cn.cyberpeace.mp.devops.cluster.model.common.StartUpParameter;
+import cn.cyberpeace.mp.devops.cluster.request.ImagePageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerRequest;
 import cn.cyberpeace.mp.devops.cluster.service.InstallerService;
-import cn.cyberpeace.mp.devops.cluster.service.TargetLogoService;
 import cn.cyberpeace.mp.devops.cluster.utils.FileUtils;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import com.alibaba.fastjson.JSONArray;
 import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -38,22 +39,20 @@ public class InstallerConverterImpl implements InstallerConverter {
 
     private InstallerService installerService;
 
-    private TargetLogoService targetLogoService;
-
     @Autowired
-    public InstallerConverterImpl(InstallerService installerService,TargetLogoService targetLogoService) {
+    public InstallerConverterImpl(InstallerService installerService) {
         this.installerService = installerService;
-        this.targetLogoService = targetLogoService;
     }
 
     @Override
     public String[] getDefaultPageIgnoreField() {
-        return new String[0];
+        return BeanUtils.getBeanGetterFieldNames(InstallerPageRequest::getPage,InstallerPageRequest::getPerPage);
     }
 
     @Override
     public String[] getTotalPageIgnoreField() {
-        return new String[0];
+        return BeanUtils.getBeanGetterFieldNames(InstallerPageRequest::getLimit,InstallerPageRequest::getOffset,
+                InstallerPageRequest::getPage,InstallerPageRequest::getPerPage);
     }
 
     @Override
@@ -61,13 +60,14 @@ public class InstallerConverterImpl implements InstallerConverter {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         String getParams = BeanUtils.wrapperGetParamsByObject(Boolean.TRUE,request,ignoreFields);
         InstallerCloudPlatformModel model = installerService.page(getParams);
+        InstallerConvertPageModel convertModel = new InstallerConvertPageModel();
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getItems())){
-            return null;
+            convertModel.setTotal(0);
+            convertModel.setModelList(Lists.newArrayList());
+            return convertModel;
         }
         List<InstallerConvertModel> modelList = model.getItems().stream()
                 .map(installer -> convertInstaller(installer)).collect(Collectors.toList());
-
-        InstallerConvertPageModel convertModel = new InstallerConvertPageModel();
         convertModel.setModelList(modelList);
         convertModel.setTotal(model.getTotal());
         return convertModel;
@@ -81,10 +81,6 @@ public class InstallerConverterImpl implements InstallerConverter {
 
     @Override
     public InstallerConvertModel add(InstallerRequest request) {
-        if (Objects.nonNull(request.getLogoFile()) && request.getLogoFile().getSize() > 0 ){
-            String logo = targetLogoService.uploadLogo(request.getLogoFile());
-            request.setLogo(logo);
-        }
         InstallerFormDataCloudPlatformModel installer = convertInstallerRequest(request);
         installer.setUuid(request.getUuid());
         List<MultipartFile> multipartFiles = new ArrayList<>();

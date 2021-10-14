@@ -15,10 +15,21 @@
     <conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter" />
     <conversionRule conversionWord="wex" converterClass="org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter" />
     <conversionRule conversionWord="wEx" converterClass="org.springframework.boot.logging.logback.ExtendedWhitespaceThrowableProxyConverter" />
-    <!-- 控制台日志格式 -->
-    <property name="CONSOLE_LOG_PATTERN" value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%thread]){faint} %clr(%-40.40logger{39}){cyan} %L %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
-    <!-- 文件日志格式 -->
-    <property name="FILE_LOG_PATTERN" value="%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}} ${LOG_LEVEL_PATTERN:-%5p} ${PID:- } --- [%t] %-40.40logger{39} %L : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
+
+    <conversionRule conversionWord="CALL_CHAIN_ID" converterClass="cn.cyberpeace.mp.base.config.log.CallChainIdConverter"/>
+
+    <!-- 日志格式 -->
+    <!-- 时间 [线程名称] 日志等级 调用模块 - 调用源id | {具体的message} -->
+    <!-- 线程名称为 ${PID}-${thread}   -->
+    <!-- 调用模块为 logger -->
+    <!-- 调用源id为 追踪id -->
+
+    <!-- 控制台日志 -->
+    <property name="CONSOLE_LOG_PATTERN" value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr([${PID}-%thread]){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(%-40.40logger{39}){cyan} %L %clr(-){faint} %clr(%CALL_CHAIN_ID){faint} %clr(|){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
+    <!-- 同步输出文件日志 使用 %CALL_CHAIN_ID 打印追踪id  -->
+<!--    <property name="FILE_LOG_PATTERN" value="%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}} [${PID:-}-%thread] ${LOG_LEVEL_PATTERN:-%5p} %-40.40logger{39} %L - %CALL_CHAIN_ID | %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>-->
+    <!-- 异步输出文件日志 使用 %X{CALL_CHAIN_ID} 打印追踪id  -->
+    <property name="FILE_LOG_PATTERN" value="%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}} [${PID:-}-%thread] ${LOG_LEVEL_PATTERN:-%5p} %-40.40logger{39} %L - %X{CALL_CHAIN_ID} | %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
 
     <!--应用名称-->
     <springProperty scope="context" name="APP_NAME" source="spring.application.name" defaultValue="mp"/>
@@ -26,11 +37,13 @@
     <springProperty scope="context" name="LOG_FILE_PATH" source="logging.file.path" defaultValue="/logs"/>
     <!--日志级别-->
     <springProperty scope="context" name="LOG_LEVEL_ROOT" source="logging.level.root" defaultValue="ERROR"/>
+    <!--日志最大天数-->
+    <springProperty scope="context" name="LOG_FILE_MAX_HISTORY" source="logging.logback.rollingpolicy.max-history" defaultValue="7"/>
 
     <property name="LOG_HOME" value="${LOG_FILE_PATH}"/>
     <property name="LOG_LEVEL" value="${LOG_LEVEL_ROOT}"/>
     <property name="LOG_FILE_MAX_SIZE" value="300MB"/>
-    <property name="LOG_FILE_MAX_HISTORY" value="15"/>
+    <property name="LOG_FILE_MAX_HISTORY" value="${LOG_FILE_MAX_HISTORY}"/>
 
     <!-- 控制台日志输出 -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
@@ -58,7 +71,7 @@
     </appender>
 
     <!--异步打印日志,任务放在阻塞队列中，如果队列达到80%，将会丢弃TRACE,DEBUG,INFO级别的日志任务，对性能要求不是太高的话不用启用-->
-    <appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+    <appender name="ASYNC" class="cn.cyberpeace.mp.base.config.log.MpAsyncAppender">
         <!--队列的深度，该值会影响性能，默认256-->
         <queueSize>512</queueSize>
         <!--设为0表示队列达到80%，也不丢弃任务-->
@@ -77,7 +90,7 @@
     <root level="${LOG_LEVEL}">
         <!-- 控制台输出 -->
         <appender-ref ref="CONSOLE"/>
-        <!-- 文件输出 -->
+        <!-- 文件输出 需要注意选择同步或者异步输出的格式 -->
         <appender-ref ref="ASYNC"/>
     </root>
 

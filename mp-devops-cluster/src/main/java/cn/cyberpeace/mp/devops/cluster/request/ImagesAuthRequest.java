@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotEmpty;
 import java.util.List;
 
 /**
@@ -23,6 +24,7 @@ public class ImagesAuthRequest extends BaseRequest {
      * 镜像ID
      */
     @ApiModelProperty("镜像UUID集合")
+    @NotEmpty
     private List<String> uuids;
 
     /**

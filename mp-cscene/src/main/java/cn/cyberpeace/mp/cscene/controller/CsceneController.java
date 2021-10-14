@@ -1,15 +1,13 @@
 package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
-import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.cscene.bo.CsceneBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCreateContextBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneStatBO;
+import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
+import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
+import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -20,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Api(value = "场景模板", tags = "CSCENE-场景模板")
 @Slf4j
@@ -30,14 +29,17 @@ public class CsceneController implements BaseModelListControllerBase {
 
     private CsceneService modelService;
 
+    private CsceneSpecialService csceneSpecialService;
+
     @Autowired
-    public CsceneController(CsceneService csceneService) {
+    public CsceneController(CsceneService csceneService, CsceneSpecialService csceneSpecialService) {
         setModelService(csceneService);
+        setCsceneSpecialService(csceneSpecialService);
     }
 
     @ApiOperation("获取分页数据")
     @GetMapping
-    public ListObjServiceResult<CsceneBO> list(QueryParams queryParams) {
+    public ListObjServiceResult<CsceneBO> list(CsceneQueryParams queryParams) {
         handleQueryParams("list", queryParams);
         return getModelService().listBO(queryParams, false, null).asResult();
     }
@@ -70,7 +72,7 @@ public class CsceneController implements BaseModelListControllerBase {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),
     })
-    @GetMapping(value = "/clone", params = "id")
+    @PostMapping(value = "/clone", params = "id")
     public ServiceResult<CsceneBO> clone(@RequestParam String id) {
         return modelService.clone(id, null).asResult();
     }
@@ -81,13 +83,13 @@ public class CsceneController implements BaseModelListControllerBase {
     })
     @DeleteMapping(params = "id")
     public ServiceResult<Boolean> delete(@RequestParam String id) {
-        return modelService.deleteById(id, false, null).asResult();
+        return modelService.deleteById(id, true, false, null).asResult();
     }
 
     @ApiOperation("批量删除场景模板")
     @DeleteMapping("/bulk_delete")
     public ServiceResult<Integer> bulkDelete(@RequestBody String[] ids) {
-        return modelService.bulkDeleteByIds(ids, false, null).asResult();
+        return modelService.bulkDeleteByIds(ids, true, false, null).asResult();
     }
 
     @ApiOperation("创建场景模板测试实例")
@@ -112,8 +114,18 @@ public class CsceneController implements BaseModelListControllerBase {
 
     @ApiOperation("获取场景模板统计数据")
     @GetMapping("/stat")
-    public ServiceResult<List<CsceneStatBO>> stat(@RequestParam String[] ids) {
-        return getModelService().stat(ids, null).asResult();
+    public ServiceResult<List<CsceneStat>> statCscenes(@RequestParam String[] ids) {
+        return csceneSpecialService.statCscenes(ids).asResult();
+    }
+
+    @ApiOperation("统计靶标对应引用该靶标的场景模板")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "images", value = "靶标名称", dataTypeClass = String.class, allowMultiple = true),
+    })
+    @GetMapping("/stat_device_refer_cscenes")
+    public ServiceResult<Map<String, List<DeviceReferCsceneStat>>> statDeviceReferCscenes(
+            @RequestParam String[] images) {
+        return csceneSpecialService.statDeviceReferCscenes(images).asResult();
     }
 
 }

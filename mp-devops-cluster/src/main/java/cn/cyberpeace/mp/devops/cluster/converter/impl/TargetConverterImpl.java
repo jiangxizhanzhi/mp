@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.devops.cluster.request.TargetSceneRequest;
 import cn.cyberpeace.mp.devops.cluster.service.DeviceService;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,6 +25,7 @@ public class TargetConverterImpl implements TargetConverter {
 
     private DeviceService deviceService;
 
+    @Autowired
     public TargetConverterImpl(ImageMapper imageMapper, DeviceService deviceService) {
         this.imageMapper = imageMapper;
         this.deviceService = deviceService;
@@ -40,22 +42,33 @@ public class TargetConverterImpl implements TargetConverter {
     }
 
     @Override
-    public List<Device> allTarget(TargetSceneRequest request) {
+    public List<TargetModel> page(TargetSceneRequest request) {
         ImagePageDTO dto = new ImagePageDTO();
         dto.setMainCategory(request.getCategory());
         dto.setSubCategory(request.getSecondCategory());
         dto.setImageType(Objects.nonNull(request.getImageType()) ? request.getImageType().toValue() : "");
         dto.setName(request.getName());
-        dto.setOwner(Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : null);
+        dto.setSearchPublicEnum(1);
+        if (Objects.isNull(request.getIgnoreUser()) || !request.getIgnoreUser()) {
+            dto.setOwner(Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : null);
+        }
+        if (Objects.isNull(request.getImageType())){
+            dto.setSearchType(1);
+        }
         Integer total = imageMapper.totalCount(dto);
         if (total == 0){
-            return null;
+            return Lists.newArrayList();
         }
-        List<TargetModel> targetModels = imageMapper.page(dto);
+        return imageMapper.page(dto);
+    }
+
+    @Override
+    public List<Device> allTarget(TargetSceneRequest request) {
+        List<TargetModel> targetModels = this.page(request);
 
         List<Integer> ids = targetModels.stream().map(TargetModel::getId).map(Integer::parseInt).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(ids)){
-            return null;
+            return Lists.newArrayList();
         }
         DeviceCloudPlatformModel model = deviceService.findByIds(ids);
 

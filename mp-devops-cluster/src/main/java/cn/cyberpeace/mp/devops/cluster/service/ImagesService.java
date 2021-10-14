@@ -11,6 +11,8 @@ import java.util.Map;
  */
 public interface ImagesService extends BaseCloudPlatformService  {
 
+    String NORMAL = "/normal";
+
     /**
      * 分页查询
      */
@@ -27,21 +29,9 @@ public interface ImagesService extends BaseCloudPlatformService  {
     Device update(String uuid,Device device);
 
     /**
-     * 构建
-     */
-    void build();
-
-    /**
      * 导出
      */
-    HttpResponse export(String uuid);
-
-    /**
-     * 根据快速构建查询
-     * @param getParams
-     * @return
-     */
-    DeviceCloudPlatformModel pageForQuickCreate(String getParams);
+    HttpResponse export(String uuid,String imageName);
 
 
     Device quickCreate(DeviceQuickCreateCloudPlatformModel model);

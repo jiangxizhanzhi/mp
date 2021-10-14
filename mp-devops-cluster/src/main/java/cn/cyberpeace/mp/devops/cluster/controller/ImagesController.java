@@ -11,7 +11,10 @@ import cn.cyberpeace.mp.devops.cluster.converter.InjectFileConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.SnapshotConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.*;
-import cn.cyberpeace.mp.devops.cluster.model.common.*;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtImageInfo;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtVm;
+import cn.cyberpeace.mp.devops.cluster.model.common.TargetConnection;
 import cn.cyberpeace.mp.devops.cluster.request.*;
 import cn.cyberpeace.mp.devops.cluster.response.ImagesByIdResponse;
 import cn.cyberpeace.mp.devops.cluster.response.ImagesPageResponse;
@@ -39,7 +42,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.IOException;
-import java.util.Arrays;
+import java.io.InputStream;
+import java.net.URLEncoder;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -169,8 +173,11 @@ public class ImagesController {
     @ApiOperation("快速构建")
     @PostMapping("/build")
     public ServiceResult build(@RequestBody ImagesBuildRequest request){
-        imagesConverter.build(request);
-        return ServiceResult.successful();
+        Device device = imagesConverter.build(request);
+        if (Objects.isNull(device)){
+            return new Result();
+        }
+        return device.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(device.getMessage());
     }
 
 
@@ -208,20 +215,23 @@ public class ImagesController {
      * 导出
      */
     @ApiOperation("导出")
-    @GetMapping("/{id}/export")
-    public ResponseEntity<Resource> export(@PathVariable("id") String uuid, HttpServletResponse httpServletResponse) {
-        HttpResponse httpResponse = imagesConverter.export(uuid);
+    @GetMapping("/export")
+    public ResponseEntity<Resource> export(@RequestParam("id") String uuid,@RequestParam("image_name") String imageName, HttpServletResponse httpServletResponse) {
+        HttpResponse httpResponse = imagesConverter.export(uuid,imageName);
         InputStreamResource resource = null;
-        try {
-            resource = new InputStreamResource(httpResponse.getEntity().getContent());
-        } catch (IOException e) {
-            throw new MpRuntimeException("获取文件流失败");
+        String filename = "";
+        try{
+            InputStream inputStream = httpResponse.getEntity().getContent();
+            resource = new InputStreamResource(inputStream);
+            filename = URLEncoder.encode(imageName + ".img","utf-8");
+        }catch (IOException e) {
+            log.error("export image error : {}",e.getMessage(),e);
+            throw new MpRuntimeException(BaseErrorCode.ERROR);
         }
 
         var httpHeaders = new HttpHeaders();
-
         httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        httpServletResponse.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", resource.getFilename()));
+        httpServletResponse.setHeader("Content-Disposition", String.format("attachment; filename=%s",filename) );
         return ResponseEntity.ok().headers(httpHeaders)
                 .contentType(MediaType.parseMediaType("application/octet-stream")).body(resource);
     }
@@ -236,7 +246,7 @@ public class ImagesController {
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
         }
-        return ControllerConstant.code.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessageZh());
+        return ControllerConstant.code.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
     }
 
     /**
@@ -249,7 +259,7 @@ public class ImagesController {
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
         }
-        return ControllerConstant.code.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessageZh());
+        return ControllerConstant.code.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
     }
 
     /**
@@ -262,7 +272,7 @@ public class ImagesController {
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
         }
-        return ControllerConstant.code.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessageZh());
+        return ControllerConstant.code.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
     }
 
     /**
@@ -288,7 +298,7 @@ public class ImagesController {
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
         }
-        return ControllerConstant.code.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessageZh());
+        return ControllerConstant.code.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
     }
 
     /**
@@ -301,7 +311,7 @@ public class ImagesController {
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
         }
-        return ControllerConstant.code.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessageZh());
+        return ControllerConstant.code.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
     }
 
     /**
@@ -315,7 +325,7 @@ public class ImagesController {
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
         }
-        return ControllerConstant.code.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessageZh());
+        return ControllerConstant.code.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
     }
 
     /**
@@ -337,8 +347,11 @@ public class ImagesController {
     @ApiOperation("删除文件注入")
     @DeleteMapping("/inject-file")
     public ServiceResult deleteInjectFile(@RequestBody ImageInjectFileDeleteRequest request){
-        Boolean result = injectFileConverter.delete(Arrays.asList(request.getInjectUuid()));
-        return result ? ServiceResult.successful() : ServiceResult.fail("");
+        BaseCloudPlatformModel model = injectFileConverter.delete(request);
+        if (Objects.isNull(model)){
+            return ServiceResult.fail("");
+        }
+        return ControllerConstant.code.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
     }
 
 
@@ -366,5 +379,12 @@ public class ImagesController {
             return new Result<>();
         }
         return new Result<>(connection.getItems());
+    }
+
+    @ApiOperation("同步镜像数据")
+    @PostMapping("/async")
+    public ServiceResult async(@RequestBody ImageAsyncRequest request){
+        Integer result = imagesConverter.async(request);
+        return result > 0 ? ServiceResult.successful() : ServiceResult.fail("");
     }
 }

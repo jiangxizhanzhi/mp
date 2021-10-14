@@ -44,7 +44,7 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     private String gateway;
     @DefaultStr
     private String dnsNameservers;
-    @DefaultBool
+    @DefaultBool(true)
     private Boolean dhcp;
     @DefaultStr
     private String allocationPools;
@@ -142,7 +142,7 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     private String auxiliaryNetworkGateway;
     @DefaultStr
     private String auxiliaryNetworkDnsNameservers;
-    @DefaultBool
+    @DefaultBool(true)
     private Boolean auxiliaryNetworkDhcp;
     @DefaultStr
     private String auxiliaryNetworkAllocationPools;
@@ -150,5 +150,15 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     private Boolean auxiliaryNetworkVlan;
     @DefaultInt
     private Integer auxiliaryNetworkVlanId;
+
+    // 用于管理网卡
+    @DefaultBool
+    private Boolean enableMgmt;
+    @DefaultStr
+    private String mgmtPortResourceId;
+    @DefaultStr
+    private String mgmtIp;
+    @DefaultStr
+    private String mgmtMacAddr;
 
 }

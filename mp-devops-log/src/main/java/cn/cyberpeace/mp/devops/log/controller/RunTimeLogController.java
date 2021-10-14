@@ -7,15 +7,7 @@ import cn.cyberpeace.mp.devops.log.response.RunTimeLogResponse;
 import cn.cyberpeace.mp.devops.log.service.RuntimeLogService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-import java.util.zip.ZipOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
@@ -30,10 +22,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
-  *@Desciption 运行日志管理
-  *@Author zhangjin
-  *@Date 9/13/21 9:41 上午
-**/
+ *
+ **/
 @RestController
 @RequestMapping("/runtime_log")
 @Api(value = "日志模块", tags = "日志模块")
@@ -50,7 +40,8 @@ public class RunTimeLogController {
 
     @PostMapping()
     @ApiOperation(value = "日志下载", notes = "")
-    public ResponseEntity<Resource> downloadLogFiles(HttpServletResponse response, @RequestBody List<String> logFileNames) {
+    public ResponseEntity<Resource> downloadLogFiles(HttpServletResponse response,
+        @RequestBody List<String> logFileNames) {
         InputStreamResource resource = null;
         try {
             resource = new InputStreamResource(runTimeLogService.zipDownLoadFile(logFileNames));

@@ -45,9 +45,13 @@ public class TmpMenuService {
 
         log.info("size:{}", targets.size());
 
-        for (TargetModel target : targets) {
+        /*for (TargetModel target : targets) {
             // 需要把 cn.cyberpeace.mp.base.service.fields.BaseModelFields.readonlyFields这个里面的`BaseModel::getId`拿掉，不然塞入的id不起作用
             targetService.create(target);
+        }*/
+
+        for (int i = 0; i < targets.size(); i++) {
+            targetService.create(targets.get(i));
         }
     }
 

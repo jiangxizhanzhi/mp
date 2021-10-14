@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.bo;
 
+import cn.cyberpeace.mp.base.context.SysContextUtils;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,4 +19,9 @@ public class CsceneContextBO {
     @ApiModelProperty(value = "透明上下文")
     private Map<String, Object> context;
 
+    public void loadTransparentContext() {
+        if (context != null) {
+            SysContextUtils.setPassThroughMap(context);
+        }
+    }
 }

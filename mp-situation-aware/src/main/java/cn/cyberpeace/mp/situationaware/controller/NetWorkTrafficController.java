@@ -6,7 +6,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.situationaware.model.SPIViewRequest;
 import cn.cyberpeace.mp.situationaware.model.SessionRequest;
 import cn.cyberpeace.mp.situationaware.model.SessionResult;
-import cn.cyberpeace.mp.situationaware.service.NetWorkTrafficService;
+import cn.cyberpeace.mp.situationaware.service.NetworkTrafficService;
 import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.*;
 public class NetWorkTrafficController {
 
     @Autowired
-    private NetWorkTrafficService netWorkTrafficService;
+    private NetworkTrafficService netWorkTrafficService;
 
     @GetMapping("/pcap/{groupId}/{sessionId}")
     @ApiOperation(value = "流量下载", notes = "")

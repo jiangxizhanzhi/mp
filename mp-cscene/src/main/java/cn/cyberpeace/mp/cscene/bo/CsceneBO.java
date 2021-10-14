@@ -19,6 +19,8 @@ public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneR
     private Integer type;
     @ApiModelProperty(value = "场景模板引用类型")
     private Integer referenceType;
+    @ApiModelProperty(value = "场景模板引用元数据")
+    private String referenceMetaData;
     @ApiModelProperty(value = "场景模板logo")
     private String logo;
     @ApiModelProperty(value = "场景模板拓扑配置")
@@ -43,7 +45,7 @@ public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneR
     public CsceneModel toModel(String... ignoreFields) {
         var obj = super.toModel(ArrayUtils.addAll(ignoreFields,
                 BeanUtils.getBeanGetterFieldName(CsceneModel::getSceneConfig)));
-        if (sceneConfig != null) {
+        if (sceneConfig != null && sceneConfig.getTopology() != null && sceneConfig.getTopology().getScene() != null) {
             obj.setSceneConfig(sceneConfig.getTopology().getScene().getEid());
         }
         return obj;

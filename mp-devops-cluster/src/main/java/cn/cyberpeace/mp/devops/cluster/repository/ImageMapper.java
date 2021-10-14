@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.devops.cluster.dto.ImageDeleteDTO;
 import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devops.cluster.model.TargetModel;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -34,13 +35,6 @@ public interface ImageMapper extends BaseModelMapper<TargetModel> {
 
     /**
      * 新增
-     * @param targetModel
-     * @return
-     */
-    Integer insert(TargetModel targetModel);
-
-    /**
-     * 新增
      * @param uuid
      * @return
      */
@@ -59,4 +53,18 @@ public interface ImageMapper extends BaseModelMapper<TargetModel> {
      * @return
      */
     Integer delete(ImageDeleteDTO dto);
+
+    /**
+     * 批量更新
+     * @param list
+     * @return
+     */
+    Integer updateBatch(@Param("list") List<TargetModel> list);
+
+    /**
+     * 新增
+     * @param list
+     * @return
+     */
+    Integer batchInsert(List<TargetModel> list);
 }

@@ -10,16 +10,14 @@ import com.fasterxml.jackson.core.type.TypeReference;
 public class VirtualSwitch extends CloudClient {
 
     public VirtualSwitchCreateData create(VirtualSwitchCreateData createData) {
-        CloudResponse<VirtualSwitchCreateData> result = getHttpClient().successPost(
-                CloudUrlConstant.VIRTUAL_SWITCH_CREATE_URL, createData, null,
-                new TypeReference<>() {});
-        // TODO 错误码
+        CloudResponse<VirtualSwitchCreateData> result = cloudPost(CloudUrlConstant.VIRTUAL_SWITCH_CREATE_URL, createData,
+                null, new TypeReference<>() {}, true);
         return result.getData();
     }
 
     public boolean delete(VirtualSwitchDeleteData deleteData) {
-        CloudResponse<Object> result = getHttpClient().successDelete(CloudUrlConstant.VIRTUAL_SWITCH_DELETE_URL,
-                deleteData, null, new TypeReference<CloudResponse<Object>>() {});
+        CloudResponse<Object> result = cloudDelete(CloudUrlConstant.VIRTUAL_SWITCH_DELETE_URL, deleteData, null,
+                new TypeReference<CloudResponse<Object>>() {}, true);
         return true;
     }
 }

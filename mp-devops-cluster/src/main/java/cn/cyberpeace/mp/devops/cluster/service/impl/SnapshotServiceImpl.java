@@ -22,26 +22,19 @@ public class SnapshotServiceImpl extends BaseOpenStackServiceImpl implements Sna
 
     @Override
     public SnapshotCloudPlatformModel list(String deviceUuid) {
-        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + "/snapshot?device_uuid=" + deviceUuid, SnapshotCloudPlatformModel.class);
+        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + SNAPSHOT + "?device_uuid=" + deviceUuid, SnapshotCloudPlatformModel.class);
     }
 
     @Override
     public Snapshot create(SnapshotCreate snapshotCreate) {
-        return super.sendPost(CPCLOUD_DEVICE + URL_VERSION + "/snapshot", JsonUtils.toUnderlineJSONString(snapshotCreate), Snapshot.class);
-    }
-
-    @Override
-    public Snapshot merge(String deviceUuid) {
-        var jsonObject = new JSONObject();
-        jsonObject.put("device_uuid", deviceUuid);
-        return super.sendPut(CPCLOUD_DEVICE + URL_VERSION + "/snapshot", JSONObject.toJSONString(jsonObject), Snapshot.class);
+        return super.sendPost(CPCLOUD_DEVICE + URL_VERSION + SNAPSHOT, JsonUtils.toUnderlineJSONString(snapshotCreate), Snapshot.class);
     }
 
     @Override
     public Boolean delete(List<String> uuids) {
         var jsonObject = new JSONObject();
         jsonObject.put("snapshot_uuids", uuids);
-        BaseCloudPlatformModel model = super.sendDelete(CPCLOUD_DEVICE + URL_VERSION + "/snapshot",JSONObject.toJSONString(jsonObject), BaseCloudPlatformModel.class);
+        BaseCloudPlatformModel model = super.sendDelete(CPCLOUD_DEVICE + URL_VERSION + SNAPSHOT,JSONObject.toJSONString(jsonObject), BaseCloudPlatformModel.class);
         return model.isSuccess();
     }
 }
