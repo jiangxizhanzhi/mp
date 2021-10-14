@@ -32,10 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -233,7 +230,10 @@ public class ImagesConverterImpl implements ImagesConverter {
         });
         //再新增权限数据
         List<String> userIds = request.getUserIds();
-        if (PublicEnum.ALL_PUBLIC != isAllPublic && PublicEnum.PRIVATE != isAllPublic && CollectionUtils.isNotEmpty(userIds)){
+        if (PublicEnum.PRIVATE == isAllPublic){
+            userIds.add(UserUtils.getLoginUser().getId());
+        }
+        if (PublicEnum.ALL_PUBLIC != isAllPublic && CollectionUtils.isNotEmpty(userIds)){
             imageIds.forEach(imageId -> {
                 List<TargetAuthModel> authModelList = userIds.stream().map(userId -> {
                     TargetAuthModel targetAuthModel = new TargetAuthModel();

@@ -54,7 +54,7 @@
                 and i.quick_create_support = #{quickCreateSupport}
             </if>
             <if test=" owner != null and searchPublicEnum == 1">
-                and  i.is_public in (0,2)
+                and  i.is_public in (2)
             </if>
             <if test="systemType != null">
                 AND i.system_type = #{systemType}
