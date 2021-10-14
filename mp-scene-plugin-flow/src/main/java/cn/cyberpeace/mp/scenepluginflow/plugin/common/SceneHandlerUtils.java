@@ -72,7 +72,7 @@ public class SceneHandlerUtils {
             return false;
         }
 
-        taskId = flowExecutor.createFlow(executorId, networkId, flowId, null, ip, null, null, null);
+        taskId = flowExecutor.createFlow(executorId, networkId, flowId, StringUtils.EMPTY, ip, null, null, null);
         flow.setTaskId(taskId);
         flow.setStatus(Flow.Status.ON);
         return true;
