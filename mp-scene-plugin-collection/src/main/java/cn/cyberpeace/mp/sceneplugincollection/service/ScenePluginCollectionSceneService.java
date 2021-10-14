@@ -85,7 +85,7 @@ public class ScenePluginCollectionSceneService {
         var endTimeStr = queryParams.getEndTime();
         if (!StringUtils.isEmpty(endTimeStr)) {
             // TODO 统一转换调用
-            sessionRequest.setStartTime(LocalDateTime.parse(endTimeStr, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+            sessionRequest.setEndTime(LocalDateTime.parse(endTimeStr, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         }
         sessionRequest.setMacIds(flowCollectMacAddrs);
         ListObjResult<SessionResult> result = networkTrafficService.querySessionWithPage(sessionRequest);

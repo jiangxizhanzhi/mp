@@ -33,7 +33,7 @@ public interface BaseModelListControllerBase {
     default void handleQueryParams(String listFuncName, QueryParams queryParams) {
         queryParams.ensure();
 
-        int page = queryParams.getPage() == null ? 0 : queryParams.getPage();
+        int page = queryParams.getPage() == null ? 1 : queryParams.getPage();
         int pageSize = queryParams.getPageSize() == null ? 0 : queryParams.getPageSize();
         if (pageSize <= 0) {
             pageSize = BaseSingleton.baseAppConfig.getDefaultPageSize();
