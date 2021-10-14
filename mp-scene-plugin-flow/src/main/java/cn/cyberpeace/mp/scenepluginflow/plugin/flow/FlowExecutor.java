@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.scenepluginflow.plugin.flow;
 
+import cn.cyberpeace.mp.base.util.TextUtils;
 import cn.cyberpeace.mp.flow.enums.TaskActionEnum;
+import cn.cyberpeace.mp.flow.model.FlowTaskModel;
 import cn.cyberpeace.mp.flow.request.AddFlowTaskRequest;
 import cn.cyberpeace.mp.flow.service.FlowActuatorService;
 import cn.cyberpeace.mp.flow.service.impl.AsyncPlatFlowTaskService;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Component;
 @Data
 @Component
 public class FlowExecutor {
+    private static FlowTaskModel DEFAULT_INSTANCE;
 
     private AsyncPlatFlowTaskService flowService1;
 
@@ -43,10 +46,15 @@ public class FlowExecutor {
         addFlowTaskRequest.setFlowId(flowId);
         addFlowTaskRequest.setOriginIps(fromIps);
         addFlowTaskRequest.setTargetIps(toIps);
-        addFlowTaskRequest.setDelay(delay);
-        addFlowTaskRequest.setCount(count);
-        addFlowTaskRequest.setIntervalTime(interval);
-        var task = flowService3.addFlowTask(addFlowTaskRequest).getSource();
+        addFlowTaskRequest.setTitle(TextUtils.uuid());
+        if (DEFAULT_INSTANCE == null) {
+            this.initDefaultInstance();
+        }
+        addFlowTaskRequest.setFlowPlatform(DEFAULT_INSTANCE.getFlowPlatform());
+        addFlowTaskRequest.setDelay(delay == null ? DEFAULT_INSTANCE.getDelay() : delay);
+        addFlowTaskRequest.setCount(count == null ? DEFAULT_INSTANCE.getCount() : delay);
+        addFlowTaskRequest.setIntervalTime(interval == null ? DEFAULT_INSTANCE.getIntervalTime() : interval);
+        var task = flowService3.addFlowTask(addFlowTaskRequest).getData();
         return task == null ? null : task.getId();
     }
 
@@ -60,6 +68,13 @@ public class FlowExecutor {
 
     public void deleteFlow(String taskId) {
         flowService3.deleteFlowTask(taskId);
+    }
+
+    private synchronized void initDefaultInstance() {
+        if (DEFAULT_INSTANCE == null) {
+            DEFAULT_INSTANCE = new FlowTaskModel();
+            DEFAULT_INSTANCE.initDefault();
+        }
     }
 
 }
