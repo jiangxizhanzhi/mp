@@ -48,8 +48,12 @@ public class TargetConverterImpl implements TargetConverter {
         dto.setSubCategory(request.getSecondCategory());
         dto.setImageType(Objects.nonNull(request.getImageType()) ? request.getImageType().toValue() : "");
         dto.setName(request.getName());
+        dto.setSearchPublicEnum(1);
         if (Objects.isNull(request.getIgnoreUser()) || !request.getIgnoreUser()) {
             dto.setOwner(Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : null);
+        }
+        if (Objects.isNull(request.getImageType())){
+            dto.setSearchType(1);
         }
         Integer total = imageMapper.totalCount(dto);
         if (total == 0){
