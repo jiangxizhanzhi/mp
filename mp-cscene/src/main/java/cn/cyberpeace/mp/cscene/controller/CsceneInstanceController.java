@@ -14,8 +14,9 @@ import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceQueryParams;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionFlowBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
-import cn.cyberpeace.mp.scenepluginflow.bo.base.Flow;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -164,6 +165,16 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     public ServiceResult<List<NodeSessionBO>> getNodeSessions(@RequestParam String id,
                                                               @RequestParam(required = false) String nodeId) {
         return modelService.getNodeSessions(id, nodeId).asResult();
+    }
+
+    @ApiOperation("场景实例获取分页流量列表")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
+    })
+    @GetMapping(value = "/list_flows", params = "id")
+    public ListObjServiceResult<CollectionFlowBO> listFlows(@RequestParam String id, FlowQueryParams queryParams) {
+        handleQueryParams("listFlows", queryParams);
+        return modelService.listFlows(id, queryParams).asResult();
     }
 
     @ApiOperation("统计靶标对应引用该靶标的场景实例")
