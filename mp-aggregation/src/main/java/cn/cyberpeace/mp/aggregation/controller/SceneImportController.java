@@ -35,7 +35,7 @@ public class SceneImportController {
         if (StringUtils.isEmpty(request.getPath())) {
             return ServiceResult.fail(BaseErrorCode.PARAMS_INVALID);
         }
-        ServiceResult<CsceneBO> serviceResult = resourceCenterService.importByYmlConfig(request.getPath());
+        ServiceResult<CsceneBO> serviceResult = resourceCenterService.importByYmlConfig(request.getPath()+"/topo.yml");
         return ServiceResult.success(serviceResult.getSource().getId());
     }
 }
