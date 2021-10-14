@@ -21,7 +21,6 @@ public class CreateHandler extends HandlerCommon {
     public static class ElementProcess {
     }
 
-
     public CreateHandler(CollectionScenePluginHandler pluginHandler) {
         super(pluginHandler, CreateTaskPool.getInstance(), SceneModel.Event.CREATE);
     }
