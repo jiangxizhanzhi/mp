@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.sceneplugincloud.bo.base;
 
 import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.base.util.JsonUtils;
+import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementPortModel;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -15,7 +16,8 @@ import java.util.List;
 
 @Data
 public abstract class BaseCloudPluginSceneElementPortBO<M extends BaseCloudPluginSceneElementPortModel,
-        T extends BaseCloudPluginSceneElementPortBO<M, T>> extends BasePluginSceneElementPortBO<M, T> {
+        T extends BaseCloudPluginSceneElementPortBO<M, T, S>, S extends BaseSceneElementPortBO<?, S>>
+        extends BasePluginSceneElementPortBO<M, T, S> {
     @ApiModelProperty(value = "云平台虚拟化资源id")
     private String resourceId;
     @ApiModelProperty(value = "是否nat外网")

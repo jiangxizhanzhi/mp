@@ -5,6 +5,9 @@ import cn.cyberpeace.mp.base.annotation.ClassFieldNames;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.base.util.ClassUtils;
+import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneBO;
+import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementBO;
+import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneBO;
 import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementBO;
 import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementPortBO;
@@ -47,12 +50,15 @@ import java.util.List;
     "pluginSceneElementPortMapper",
 })
 public class BasePluginModelHandler<
+        S9 extends BaseSceneBO<?, S9>,
+        E9 extends BaseSceneElementBO<?, P9, E9>,
+        P9 extends BaseSceneElementPortBO<?, P9>,
         S0 extends BasePluginSceneModel,
         E0 extends BasePluginSceneElementModel,
         P0 extends BasePluginSceneElementPortModel,
-        S extends BasePluginSceneBO<S0, S>,
-        E extends BasePluginSceneElementBO<E0, E>,
-        P extends BasePluginSceneElementPortBO<P0, P>,
+        S extends BasePluginSceneBO<S0, S, S9>,
+        E extends BasePluginSceneElementBO<E0, E, E9>,
+        P extends BasePluginSceneElementPortBO<P0, P, P9>,
         M1 extends BasePluginSceneMapper<S0>,
         M2 extends BasePluginSceneElementMapper<E0>,
         M3 extends BasePluginSceneElementPortMapper<P0>,
