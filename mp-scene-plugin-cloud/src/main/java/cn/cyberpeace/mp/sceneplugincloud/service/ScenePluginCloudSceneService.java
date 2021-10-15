@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
+import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
@@ -165,6 +166,8 @@ public class ScenePluginCloudSceneService {
             recording.setProtocol(accessMode.getProtocol());
             recording.setName(rawRecording.getRecordingName());
             recording.setFilename(rawRecording.getRecordingFile());
+            recording.setFileUrl(String.format(CloudUrlConstant.RECORDING_DOWNLOAD_URL,
+                    rawRecording.getRecordingName()));
             var filesizeStr = rawRecording.getFileSize();
             if (!StringUtils.isEmpty(filesizeStr)) {
                 recording.setFilesize(IntUtils.fromStr(filesizeStr));
