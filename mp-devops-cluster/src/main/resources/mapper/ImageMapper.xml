@@ -95,6 +95,9 @@
             <if test=" subCategory != null">
                 and i.sub_category = #{subCategory}
             </if>
+            <if test=" thirdCategory != null">
+                and i.third_category = #{thirdCategory}
+            </if>
             <if test=" role != null">
                 and i.role = #{role}
             </if>
