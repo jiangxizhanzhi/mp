@@ -21,6 +21,8 @@ public class NodeRecordingBO {
     private String name;
     @ApiModelProperty(value = "录屏文件名称")
     private String filename;
+    @ApiModelProperty(value = "录屏文件地址")
+    private String fileUrl;
     @ApiModelProperty(value = "录屏大小")
     private Integer filesize;
     @ApiModelProperty(value = "录屏时长")
