@@ -22,6 +22,7 @@ CREATE TABLE `mp_devops_target` (
                                     `create_time` datetime(6) NOT NULL COMMENT '创建时间',
                                     `update_time` datetime(6) NOT NULL COMMENT '更新时间',
                                     `image_source` tinyint(2) DEFAULT NULL COMMENT '系统镜像类型，1：基础镜像，2：openstack已有镜像，3：自定义上传',
+                                    `is_import` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否导入，0：false,1:true',
                                     PRIMARY KEY (`pk`) USING BTREE,
                                     UNIQUE KEY `idx_name` (`name`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='靶标管理';
