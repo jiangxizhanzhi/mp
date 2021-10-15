@@ -358,7 +358,7 @@ public class AsyncPlatFlowTaskService {
                         log.info("trex host[{}] connect success", fixedIp);
                     } else {
                         long endTime = System.currentTimeMillis();
-                        if (endTime - startTime > 1000 * 60 * 10) {
+                        if ((endTime - startTime) > (1000 * 60 * 10)) {
                             // 十分钟服务没起来，结束轮询
                             log.error("trex vm start error:{}", addVmRequest.getName());
                             isConnectable = true;
