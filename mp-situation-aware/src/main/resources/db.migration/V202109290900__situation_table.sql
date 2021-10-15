@@ -19,7 +19,7 @@ create table mp_situation_probe
     constraint mp_situation_probe_id_uindex
         unique (id)
 )
-    comment '探针基本信息';≠
+    comment '探针基本信息';
 
 
 
