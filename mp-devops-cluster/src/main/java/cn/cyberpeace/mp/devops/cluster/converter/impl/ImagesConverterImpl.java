@@ -90,6 +90,7 @@ public class ImagesConverterImpl implements ImagesConverter {
         dto.setRole(request.getRole());
         dto.setMainCategory(request.getMainCategory());
         dto.setSubCategory(request.getSubCategory());
+        dto.setThirdCategory(request.getThirdCategory());
         dto.setQuickCreateSupport(request.getQuickCreateSupport());
         if (Objects.isNull(request.getImageType())){
             dto.setSearchType(1);
