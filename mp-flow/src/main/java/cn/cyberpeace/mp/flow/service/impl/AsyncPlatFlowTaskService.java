@@ -362,6 +362,8 @@ public class AsyncPlatFlowTaskService {
                             // 十分钟服务没起来，结束轮询
                             log.error("trex vm start error:{}", addVmRequest.getName());
                             isConnectable = true;
+                        } else {
+                            Thread.sleep(1000);
                         }
                     }
                 }
