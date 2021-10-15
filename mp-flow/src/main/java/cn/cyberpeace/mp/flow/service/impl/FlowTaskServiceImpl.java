@@ -182,6 +182,10 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
      * @return
      */
     public ServiceResult<FlowTaskModel> addFlowTask(AddFlowTaskRequest request) {
+        if (StringUtils.isBlank(request.getOriginIps())) {
+            // 设置默认来源ip
+            request.setOriginIps("127.0.0.1-127.0.0.1");
+        }
         FlowTaskModel flowTaskModel = request;
         ObjResult<FlowInfoModel> flowInfoObjResult = flowInfoService.get(flowTaskModel.getFlowId()).getSource();
         if (Objects.nonNull(flowInfoObjResult)) {
@@ -314,6 +318,10 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
      * @return
      */
     public ServiceResult<FlowTaskModel> updateFlowTask(AddFlowTaskRequest request) {
+        if (StringUtils.isBlank(request.getOriginIps())) {
+            // 设置默认来源ip
+            request.setOriginIps("127.0.0.1-127.0.0.1");
+        }
         FlowTaskModel flowTaskModel = request;
         ObjResult<FlowTaskModel> flowTaskResult = this.get(flowTaskModel.getId()).getSource();
         if (Objects.isNull(flowTaskResult)) {
