@@ -35,6 +35,8 @@ public class CsceneInstanceStatQueryParams extends QueryParams {
     private Boolean error;
     @ApiModelProperty(value = "是否只显示自己的场景")
     private Boolean self;
+    @ApiModelProperty(value = "是否已删除未清理")
+    private Boolean valid;
 
     public static class SceneStatus {
         public static final Integer DELETED = 0;
