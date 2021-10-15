@@ -29,6 +29,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.net.telnet.TelnetClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
@@ -329,10 +330,12 @@ public class AsyncPlatFlowTaskService {
             JSONObject addVmObj = JSONObject.parseObject(addVmRsp);
             log.info("add trex vm response:{}", addVmObj.toJSONString());
 
+            String fixedIp = null;
             if (BaseConstants.SUCCESS_ZERO.equals(addVmObj.getString(BaseConstants.STR_CODE))) {
                 JSONObject vmObj = addVmObj.getJSONObject(BaseConstants.STR_DATA);
                 String instanceId = vmObj.getString("id");
                 JSONObject netWorkObj = vmObj.getJSONArray("networks").getJSONObject(0);
+                fixedIp = netWorkObj.getString("fixed_ip");
                 JSONObject portMappingObj = netWorkObj.getJSONArray("access_modes").getJSONObject(0).getJSONObject(
                         "port_mapping");
                 String host = portMappingObj.getString("host");
@@ -345,6 +348,23 @@ public class AsyncPlatFlowTaskService {
                 flowActuatorModel.setInstanceId(instanceId);
                 flowActuatorModel.setIp(ip);
                 flowActuatorMapper.create(flowActuatorModel);
+
+                // 轮询流量发生器端口，直到端口可访问才返回
+                long startTime = System.currentTimeMillis();
+                boolean isConnectable = isHostConnectable(fixedIp);
+                while (!isConnectable) {
+                    isConnectable = isHostConnectable(fixedIp);
+                    if (isConnectable) {
+                        log.info("trex host[{}] connect success", fixedIp);
+                    } else {
+                        long endTime = System.currentTimeMillis();
+                        if (endTime - startTime > 1000 * 60 * 10) {
+                            // 十分钟服务没起来，结束轮询
+                            log.error("trex vm start error:{}", addVmRequest.getName());
+                            isConnectable = true;
+                        }
+                    }
+                }
             } else {
                 log.error("add trex vm error");
             }
@@ -353,6 +373,31 @@ public class AsyncPlatFlowTaskService {
         }
 
         log.info("================ Add vm instance end ==================");
+    }
+
+    /**
+     * 判断端口是否能连接
+     * @param host
+     * @return
+     */
+    public static boolean isHostConnectable(String host) {
+        TelnetClient client = new TelnetClient();
+        // 超时时间设为2s
+        client.setConnectTimeout(2000);
+        try {
+            client.connect(host, 5001);
+        } catch (IOException e) {
+            log.warn("trex host[{}] connect error", host);
+            return false;
+        } finally {
+            try {
+                client.disconnect();
+            } catch (IOException e) {
+                log.error("client disconnect error", e);
+            }
+        }
+
+        return true;
     }
 
     /**
