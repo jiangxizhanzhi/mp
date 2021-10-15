@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.extensions.security;
 
+import cn.cyberpeace.mp.auth.base.context.LoginUserContext;
 import cn.cyberpeace.mp.auth.extensions.security.common.JwtCommon;
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetails;
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetailsService;
@@ -59,6 +60,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
 
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+
+            LoginUserContext loginUserContext = new LoginUserContext();
+            if (user != null) {
+                loginUserContext.setValue(user.getId());
+            }
         }
 
         filterChain.doFilter(request, response);

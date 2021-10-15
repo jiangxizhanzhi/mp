@@ -6,10 +6,8 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GetGuacamoleAssis
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GetGuacamoleMonitorData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleAssistanceData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleMonitorData;
-import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 

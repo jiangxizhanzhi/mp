@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.scenepluginflow.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.base.util.thread.taskpool.TaskPool;
-import cn.cyberpeace.mp.scene.core.plugin.PluginSceneEventHandlerCommon;
+import cn.cyberpeace.mp.scene.core.plugin.common.PluginSceneEventHandlerCommon;
 import cn.cyberpeace.mp.scenepluginflow.plugin.FlowScenePluginHandler;
 import cn.cyberpeace.mp.scenepluginflow.plugin.common.SceneHandlerUtils;
 import lombok.Getter;

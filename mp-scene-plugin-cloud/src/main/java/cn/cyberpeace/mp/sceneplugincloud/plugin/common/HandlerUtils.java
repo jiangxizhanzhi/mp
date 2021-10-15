@@ -19,8 +19,8 @@ import java.util.List;
 import java.util.Map;
 
 @Data
-public class HandlerUtils<H extends ScenePluginHandler<? extends BaseCloudPluginSceneBO<?, ?>,
-        ? extends BaseCloudPluginSceneElementBO<?, ?>, ? extends BaseCloudPluginSceneElementPortBO<?, ?>, ?>> {
+public class HandlerUtils<H extends ScenePluginHandler<? extends BaseCloudPluginSceneBO<?, ?, ?>,
+        ? extends BaseCloudPluginSceneElementBO<?, ?, ?>, ? extends BaseCloudPluginSceneElementPortBO<?, ?, ?>, ?>> {
 
     private H pluginHandler;
 

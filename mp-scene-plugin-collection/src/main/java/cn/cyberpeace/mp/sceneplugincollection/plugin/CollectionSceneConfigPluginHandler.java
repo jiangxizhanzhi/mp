@@ -31,7 +31,7 @@ public class CollectionSceneConfigPluginHandler extends SceneConfigPluginHandler
     }
 
     @Override
-    public void reload() {
+    public void reloadData() {
         setScene(null);
         getElementMap().clear();
         getElementPortMap().clear();

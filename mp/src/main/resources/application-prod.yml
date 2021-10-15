@@ -73,7 +73,7 @@ mp:
     #    cr-url: http://${ip.cr} #
     hostname: controller  #主机名称
   situationaware:
-    group-url: http://${SITUATION_AWARE_IP:10.100.14.107}:${SITUATION_AWARE_PORT:5079}/v1/scenes
+    group-url: http://${SITUATION_AWARE_IP:10.100.7.112}:${SITUATION_AWARE_PORT:5079}/v1/scenes
     moloch:
       username: ${MOLOCH_USERNAME:api}
       password: ${MOLOCH_PASSWORD:api}

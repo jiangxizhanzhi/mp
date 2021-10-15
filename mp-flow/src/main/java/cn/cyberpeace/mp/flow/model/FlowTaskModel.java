@@ -91,28 +91,28 @@ public class FlowTaskModel extends BaseModel {
      */
     @ApiModelProperty(value = "执行次数")
     @DefaultInt(1)
-    private int count;
+    private Integer count;
 
     /**
      * 首次执行延迟时间，单位：秒(可以为0)
      */
     @ApiModelProperty(value = "首次执行延迟时间，单位：秒(可以为0)")
     @DefaultInt()
-    private int delay;
+    private Integer delay;
 
     /**
      * 周期执行间隔，单位：秒
      */
     @ApiModelProperty(value = "周期执行间隔，单位：秒")
     @DefaultInt(1)
-    private int intervalTime;
+    private Integer intervalTime;
 
     /**
      * 任务状态: 0 初始化，1 正在运行，2 正在停止， 3 已停止
      */
     @ApiModelProperty(value = "任务状态: 0 初始化，1 正在运行，2 正在停止， 3 已停止")
     @DefaultInt()
-    private int taskStatus;
+    private Integer taskStatus;
 
     /**
      * 源ip范围
