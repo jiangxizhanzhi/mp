@@ -181,6 +181,10 @@ public class CsceneSpecialService {
         if (referenceTypes != null && referenceTypes.length > 0) {
             humanCondition.filterIn(CsceneInstanceModel::getReferenceType, referenceTypes);
         }
+        var valid = queryParams.getValid();
+        if (Boolean.TRUE.equals(valid)) {
+            humanCondition.filterEqual(CsceneInstanceModel::getDeleted, false);
+        }
         var self = queryParams.getSelf();
         if (Boolean.TRUE.equals(self)) {
             var currentUser = UserCommon.getCurrentUser();
@@ -204,10 +208,8 @@ public class CsceneSpecialService {
         }
         var active = queryParams.getActive();
         if (Boolean.TRUE.equals(active)) {
-            humanCondition.filterNotEqual(SceneModel::getEvent, SceneModel.Event.DELETE)
-                    .filterNotEqual(SceneModel::getEventStatus, EventStatus.ABNORMAL);
+            humanCondition.filterNotEqual(SceneModel::getEvent, SceneModel.Event.DELETE);
         }
-
 
         var sceneStatus = queryParams.getSceneStatus();
         if (sceneStatus != null) {
