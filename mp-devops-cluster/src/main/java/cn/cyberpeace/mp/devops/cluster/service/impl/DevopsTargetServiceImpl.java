@@ -38,16 +38,6 @@ public class DevopsTargetServiceImpl implements DevopsTargetService {
 
     @Transactional
     @Override
-    public Integer insert(Device device) {
-        if (Objects.nonNull(device) && device.isSuccess()) {
-            TargetModel targetModel = convertToTargetModel(device);
-            return imageMapper.insert(targetModel);
-        }
-        return 0;
-    }
-
-    @Transactional
-    @Override
     public Integer updateById(Device device) {
         if (Objects.nonNull(device) && device.isSuccess()) {
             TargetModel oldTargetModel = imageMapper.findByUuid(device.getUuid());
@@ -119,6 +109,7 @@ public class DevopsTargetServiceImpl implements DevopsTargetService {
         ExtImageInfo extImageInfo = device.getExtImageInfo();
         if (Objects.nonNull(extImageInfo)){
             targetModel.setImageStatus(extImageInfo.getImageStatus());
+            targetModel.setImageSource(extImageInfo.getImageSource());
             targetModel.setBaseImageSupport(extImageInfo.getBaseImageSupport());
         }
 
