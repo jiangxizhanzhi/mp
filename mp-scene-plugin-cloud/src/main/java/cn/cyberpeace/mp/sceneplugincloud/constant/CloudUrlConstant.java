@@ -24,6 +24,7 @@ public class CloudUrlConstant {
 
     public static final String GET_MONITOR_URL = "/cpcloud/guacamole/v1/monitor";
     public static final String GET_ASSISTANCE_URL = "/cpcloud/guacamole/v1/assistance";
+    public static final String GET_RECORDING_URL = "/cpcloud/guacamole/v1/recordfile";
 
     private CloudUrlConstant() {}
 }

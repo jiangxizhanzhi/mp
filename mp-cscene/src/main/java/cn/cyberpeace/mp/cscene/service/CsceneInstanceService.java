@@ -22,8 +22,10 @@ import cn.cyberpeace.mp.cscene.report.rabbitmq.RabbitmqCsceneReporter;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
 import cn.cyberpeace.mp.cscene.service.taskpool.CsceneReportTaskPool;
+import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
+import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionFlowBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
@@ -70,6 +72,16 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
         return csceneInstanceRoleMapper.list(new HumanCondition()
                 .filterIn(CsceneInstanceRoleModel::getCscene, csceneInstanceIds));
+    }
+
+    private String getSceneId(String csceneId) {
+        var csceneInstanceResult = get(csceneId).getSource();
+        if (csceneInstanceResult == null) {
+            return null;
+        }
+        var csceneInstance = csceneInstanceResult.getObj();
+        var sceneId = csceneInstance.getScene();
+        return sceneId;
     }
 
     @Autowired
@@ -129,12 +141,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     public ServiceResult<List<NodeSessionBO>> getNodeSessions(String id, String nodeId) {
-        var csceneInstanceResult = get(id).getSource();
-        if (csceneInstanceResult == null) {
-            return new ServiceResult<>(new ArrayList<>());
-        }
-        var csceneInstance = csceneInstanceResult.getObj();
-        var sceneId = csceneInstance.getScene();
+        var sceneId = getSceneId(id);
         if (StringUtils.isEmpty(sceneId)) {
             return new ServiceResult<>(new ArrayList<>());
         }
@@ -143,13 +150,18 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 StringUtils.isEmpty(nodeId) ? null : new String[]{nodeId}, true, false);
     }
 
-    public ListObjServiceResult<CollectionFlowBO> listFlows(String id, FlowQueryParams queryParams) {
-        var csceneInstanceResult = get(id).getSource();
-        if (csceneInstanceResult == null) {
+    public ListObjServiceResult<NodeRecordingBO> listRecordings(String id, String[] nodeIds,
+                                                                RecordingQueryParams queryParams) {
+        var sceneId = getSceneId(id);
+        if (StringUtils.isEmpty(sceneId)) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
-        var csceneInstance = csceneInstanceResult.getObj();
-        var sceneId = csceneInstance.getScene();
+
+        return scenePluginCloudSceneService.getSceneRemoteRecordings(sceneId, nodeIds, queryParams);
+    }
+
+    public ListObjServiceResult<CollectionFlowBO> listFlows(String id, FlowQueryParams queryParams) {
+        var sceneId = getSceneId(id);
         if (StringUtils.isEmpty(sceneId)) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
@@ -158,12 +170,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     public ServiceResult<Boolean> startFlow(String id, String toNodeId, String flowId, CsceneContextBO context) {
-        var csceneInstanceResult = get(id).getSource();
-        if (csceneInstanceResult == null) {
-            return new ServiceResult<>(false);
-        }
-        var csceneInstance = csceneInstanceResult.getObj();
-        var sceneId = csceneInstance.getScene();
+        var sceneId = getSceneId(id);
         if (StringUtils.isEmpty(sceneId)) {
             return new ServiceResult<>(false);
         }
@@ -172,12 +179,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     public ServiceResult<Boolean> stopFlow(String id, String toNodeId, String flowId, CsceneContextBO context) {
-        var csceneInstanceResult = get(id).getSource();
-        if (csceneInstanceResult == null) {
-            return new ServiceResult<>(false);
-        }
-        var csceneInstance = csceneInstanceResult.getObj();
-        var sceneId = csceneInstance.getScene();
+        var sceneId = getSceneId(id);
         if (StringUtils.isEmpty(sceneId)) {
             return new ServiceResult<>(false);
         }

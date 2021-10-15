@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.sceneplugincollection.service;
 
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.util.IntUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionFlowBO;
@@ -104,7 +105,7 @@ public class ScenePluginCollectionSceneService {
             flow.setSize(srcFlow.getTotalBytes());
 
             var timestampStr = srcFlow.getTimestamp();
-            int timestamp = StringUtils.isNumeric(timestampStr) ? Integer.parseInt(timestampStr) : 0;
+            int timestamp = IntUtils.fromStr(timestampStr);
             flow.setTime(LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault()));
 
             var sourceMac = flow.getSourceMac();
