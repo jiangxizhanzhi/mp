@@ -376,8 +376,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         // 检查新密码强度是否合法
         Assert.isFalse(PasswordUtils.isPasswordStrengthLowLevel(newPwd), AuthConstant.ERROR_CODE_PREFIX + "password_strength_invalid");
 
-        UserModel userUpdate = UserModel.builder().password(newPwd).build();
-        userUpdate.setId(currentUser.getId());
+        UserModel userUpdate = UserModel.builder().id(currentUser.getId()).password(newPwd).initCheck(UserModel.INT_CHECK_NO).build();
         update(userUpdate);
         return true;
     }
@@ -391,7 +390,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         UserModel user = Objects.isNull(source) ? null : source.getObj();
         Assert.notNull(user, AuthConstant.ERROR_CODE_PREFIX + "account_not_existed");
 
-        UserModel userUpdate = UserModel.builder().id(user.getId()).password(newPwd).build();
+        UserModel userUpdate = UserModel.builder().id(userId).password(newPwd).initCheck(UserModel.INT_CHECK_NO).build();
         update(userUpdate);
         return true;
     }

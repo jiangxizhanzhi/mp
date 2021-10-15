@@ -2,7 +2,7 @@ ip:
   mariadb: ${MP_DB_IP:10.100.0.101}         # MP新中台mariadb数据库地址
   fdfs: ${FDFS_IP:10.100.14.252}           # FastDFS地址
   cp: ${CP_IP:10.100.7.1}                # 云平台适配层接口地址
-  moloch: ${MOLOCH_IP:10.100.7.104}        # moloch的IP地址
+  moloch: ${MOLOCH_IP:10.100.7.101}        # moloch的IP地址
   wazuh: ${WAZUH_IP:10.100.0.111}          # wazuh的IP地址
   trex: ${MP_TREX_IP:10.100.7.158}         # trex资源服务器地址
   rabbitmq: ${RABBITMQ_IP:10.100.0.101}           # rabbitmq地址
@@ -73,7 +73,7 @@ mp:
     #    cr-url: http://${ip.cr} #
     hostname: controller  #主机名称
   situationaware:
-    group-url: http://${SITUATION_AWARE_IP:10.100.14.107}:${SITUATION_AWARE_PORT:5079}/v1/scenes
+    group-url: http://${SITUATION_AWARE_IP:10.100.7.112}:${SITUATION_AWARE_PORT:5079}/v1/scenes
     moloch:
       username: ${MOLOCH_USERNAME:api}
       password: ${MOLOCH_PASSWORD:api}

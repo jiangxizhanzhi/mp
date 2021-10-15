@@ -24,7 +24,10 @@ import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
 import cn.cyberpeace.mp.cscene.service.taskpool.CsceneReportTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionFlowBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
+import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
 import cn.cyberpeace.mp.scenepluginflow.service.ScenePluginFlowSceneService;
 import com.google.common.collect.Lists;
 import lombok.Data;
@@ -55,6 +58,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     @Autowired
     private ScenePluginFlowSceneService scenePluginFlowSceneService;
+
+    @Autowired
+    private ScenePluginCollectionSceneService scenePluginCollectionSceneService;
 
     private final CsceneReportTaskPool csceneReportTaskPool = CsceneReportTaskPool.getInstance();
 
@@ -135,6 +141,20 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
         return scenePluginCloudSceneService.getSceneRemoteSessions(sceneId,
                 StringUtils.isEmpty(nodeId) ? null : new String[]{nodeId}, true, false);
+    }
+
+    public ListObjServiceResult<CollectionFlowBO> listFlows(String id, FlowQueryParams queryParams) {
+        var csceneInstanceResult = get(id).getSource();
+        if (csceneInstanceResult == null) {
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
+        }
+        var csceneInstance = csceneInstanceResult.getObj();
+        var sceneId = csceneInstance.getScene();
+        if (StringUtils.isEmpty(sceneId)) {
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
+        }
+
+        return scenePluginCollectionSceneService.listFlows(sceneId, queryParams);
     }
 
     public ServiceResult<Boolean> startFlow(String id, String toNodeId, String flowId, CsceneContextBO context) {

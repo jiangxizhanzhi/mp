@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.scenepluginflow.plugin;
 
 import cn.cyberpeace.mp.base.annotation.ClassFieldClasses;
 import cn.cyberpeace.mp.base.util.ClassUtils;
-import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneBO;
@@ -38,19 +37,6 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
     private CreateHandler createHandler;
     private DeleteHandler deleteHandler;
 
-    private void loadRelated() {
-        getElementMap().forEach((nodeId, element) -> {
-            var srcElement = getSrcElement(nodeId);
-            element.setSrcElement(srcElement);
-        });
-    }
-
-    @Override
-    public void fromData(ScenePluginDataBO pluginData) {
-        super.fromData(pluginData);
-        loadRelated();
-    }
-
     @Override
     public void correctData() {
         if (getScene() == null) {
@@ -68,7 +54,7 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
     }
 
     @Override
-    public void reload() {
+    public void reloadData() {
         setScene(null);
         getElementMap().clear();
         getElementPortMap().clear();

@@ -66,5 +66,5 @@ public interface ImageMapper extends BaseModelMapper<TargetModel> {
      * @param list
      * @return
      */
-    Integer batchInsert(List<TargetModel> list);
+    Integer batchInsert(@Param("list") List<TargetModel> list);
 }

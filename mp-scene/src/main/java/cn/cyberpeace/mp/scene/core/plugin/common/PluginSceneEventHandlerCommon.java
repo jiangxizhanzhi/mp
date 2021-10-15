@@ -1,9 +1,10 @@
-package cn.cyberpeace.mp.scene.core.plugin;
+package cn.cyberpeace.mp.scene.core.plugin.common;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.ClassUtils;
 import cn.cyberpeace.mp.base.util.thread.taskpool.TaskPool;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
+import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
 import lombok.Data;
 
 import java.util.ArrayList;

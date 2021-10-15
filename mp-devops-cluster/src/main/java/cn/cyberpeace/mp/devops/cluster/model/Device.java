@@ -93,6 +93,11 @@ public class Device extends BaseCloudPlatformModel{
     private Integer l3Category;
 
     /**
+     * 是否导入
+     */
+    private Boolean isImport;
+
+    /**
      * 实体信息
      */
     private ExtEntity extEntity;

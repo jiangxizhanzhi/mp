@@ -13,10 +13,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @SpringBootTest(classes = TestSituationAwareApplciation.class)
 @RunWith(SpringRunner.class)
-public class NetWorkTrafficServiceTest {
+public class NetworkTrafficServiceTest {
 
     @Autowired
-    private NetWorkTrafficService service;
+    private NetworkTrafficService service;
 
     @Test
     public void testQuerySessionByGroup(){

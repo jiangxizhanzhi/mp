@@ -1,6 +1,7 @@
-package cn.cyberpeace.mp.scene.core.plugin;
+package cn.cyberpeace.mp.scene.core.plugin.common;
 
 import cn.cyberpeace.mp.scene.core.base.BaseSceneHandler;
+import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementPortBO;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementPortConnectionModel;
@@ -13,10 +14,10 @@ import java.util.List;
  * @param <P>
  * @param <H>
  */
-public interface PluginSceneHandlerCommon<E extends BaseSceneElementBO<?, P, E>,
+public interface PluginSceneHandlerCommon<S extends BaseSceneBO<?, S>, E extends BaseSceneElementBO<?, P, E>,
         P extends BaseSceneElementPortBO<?, P>,
         H extends BaseSceneHandler<?, ?, ?, ?,
-                ? extends BaseSceneElementPortConnectionModel, ?, ?, ?, P, E, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, H>> {
+                ? extends BaseSceneElementPortConnectionModel, ?, S, ?, P, E, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, H>> {
 
     H getSceneHandler();
 
@@ -68,6 +69,13 @@ public interface PluginSceneHandlerCommon<E extends BaseSceneElementBO<?, P, E>,
      */
     default List<P> getElementConnectedSrcPorts(String nodeId) {
         return getSceneHandler().getElementConnectedPorts(nodeId);
+    }
+
+    /**
+     * 获取场景基础数据
+     */
+    default S getSrcScene() {
+        return getSceneHandler().getScene();
     }
 
     /**
