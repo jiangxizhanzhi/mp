@@ -2,7 +2,7 @@ ip:
   mariadb: 10.100.0.101         # MP新中台mariadb数据库地址
   fdfs: 10.100.14.252           # FastDFS地址
   cp: 10.100.7.1               # 云平台适配层接口地址
-  moloch: 10.100.7.112         # moloch的IP地址
+  moloch: 10.100.7.101         # moloch的IP地址
   wazuh: 10.100.0.102          # wazuh的IP地址
   es: 127.0.0.1                 # MP新中台ES地址
   trex: 10.100.7.161            # trex资源服务器地址
