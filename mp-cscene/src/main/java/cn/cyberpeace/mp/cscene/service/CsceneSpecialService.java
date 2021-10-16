@@ -172,8 +172,7 @@ public class CsceneSpecialService {
                         CsceneInstanceStat::getContainerCount)
                 .selectAs(Count.f(CloudPluginSceneElementModel::getVirtualType)
                         .calcEqual(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE),
-                        CsceneInstanceStat::getEntityCount)
-                .distinct();
+                        CsceneInstanceStat::getEntityCount);
 
         humanCondition.currentLink(CsceneInstanceModel.class);
         var ids = queryParams.getIds();
