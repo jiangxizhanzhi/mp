@@ -16,7 +16,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -57,9 +59,9 @@ public class DeleteHandler extends HandlerCommon {
     }
 
     private ElementExtraCloudInfo collectElementExtraCloudInfo(CloudPluginSceneElementBO cloudElement) {
-        List<String> qosIds = new ArrayList<>();
-        List<String> connectionIds = new ArrayList<>();
-        List<String> proxyIds = new ArrayList<>();
+        Set<String> qosIds = new HashSet<>();
+        Set<String> connectionIds = new HashSet<>();
+        Set<String> proxyIds = new HashSet<>();
         var srcPorts = cloudElement.getSrcElement().getPorts();
         srcPorts.forEach(srcPort -> {
             var cloudPort = getPluginHandler().getPort(srcPort.getId());
@@ -87,7 +89,8 @@ public class DeleteHandler extends HandlerCommon {
                 });
             }
         });
-        return new ElementExtraCloudInfo(qosIds, connectionIds, proxyIds);
+        return new ElementExtraCloudInfo(new ArrayList<>(qosIds), new ArrayList<>(connectionIds),
+                new ArrayList<>(proxyIds));
     }
 
     private boolean deleteAuxiliaryNetwork(CloudPluginSceneElementBO cloudElement) {

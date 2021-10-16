@@ -136,6 +136,8 @@ public class CreateHandler extends HandlerCommon {
             return virtualNics;
         }
 
+        // TODO: 多个端口复用
+        Map<String, List<CloudPluginSceneElementPortBO>> networkIdCloudPortsMap = new HashMap<>();
         for (var port : ports) {
             var cloudPort = getPluginHandler().getPort(port.getId());
             var connectedSrcElement = getPluginHandler().getPortConnectedSrcElement(port.getId());
@@ -152,7 +154,16 @@ public class CreateHandler extends HandlerCommon {
                 cloudPort = new CloudPluginSceneElementPortBO();
                 addCloudPort(port.getId(), cloudPort);
             }
-            cloudPort.setAuxiliaryNetworkId(auxiliaryNetworkCloudElement.getAuxiliaryNetworkId());
+            var auxiliaryNetworkId = auxiliaryNetworkCloudElement.getAuxiliaryNetworkId();
+            cloudPort.setAuxiliaryNetworkId(auxiliaryNetworkId);
+            var networkIdCloudPorts = networkIdCloudPortsMap.getOrDefault(
+                    auxiliaryNetworkId, new ArrayList<>());
+            networkIdCloudPorts.add(cloudPort);
+            networkIdCloudPortsMap.put(auxiliaryNetworkId, networkIdCloudPorts);
+            // TODO: 多个端口连到同一个网络上的时候暂时当做一个端口处理
+            if (networkIdCloudPorts.size() > 1) {
+                continue;
+            }
 
             var virtualNic = new VirtualNic();
             virtualNic.setNetworkId(auxiliaryNetworkCloudElement.getAuxiliaryNetworkId());
@@ -273,11 +284,15 @@ public class CreateHandler extends HandlerCommon {
         }
 
         var srcPorts = cloudElement.getSrcElement().getPorts();
-        Map<String, CloudPluginSceneElementPortBO> networkIdCloudPortMap = new HashMap<>();
+        Map<String, List<CloudPluginSceneElementPortBO>> networkIdCloudPortsMap = new HashMap<>();
         if (srcPorts != null) {
             srcPorts.forEach(srcPort -> {
                 var cloudPort = getPluginHandler().getPort(srcPort.getId());
-                networkIdCloudPortMap.put(cloudPort.getAuxiliaryNetworkId(), cloudPort);
+                var auxiliaryNetworkId = cloudPort.getAuxiliaryNetworkId();
+                var networkIdCloudPorts = networkIdCloudPortsMap.getOrDefault(
+                        auxiliaryNetworkId, new ArrayList<>());
+                networkIdCloudPorts.add(cloudPort);
+                networkIdCloudPortsMap.put(auxiliaryNetworkId, networkIdCloudPorts);
             });
         }
 
@@ -292,47 +307,49 @@ public class CreateHandler extends HandlerCommon {
                 return;
             }
 
-            var cloudPort = networkIdCloudPortMap.getOrDefault(networkId, null);
-            if (cloudPort == null) {
+            var cloudPorts = networkIdCloudPortsMap.getOrDefault(networkId, null);
+            if (cloudPorts == null) {
                 return;
             }
 
-            var srcPort = cloudPort.getSrcPort();
-            srcPort.setIp(virtualNic.getFixedIp());
-            srcPort.setMacAddr(virtualNic.getMacAddress());
+            // TODO: 多个端口连到同一个网络上的时候暂时当做一个端口处理
+            cloudPorts.forEach(cloudPort -> {
+                var srcPort = cloudPort.getSrcPort();
+                srcPort.setIp(virtualNic.getFixedIp());
+                srcPort.setMacAddr(virtualNic.getMacAddress());
 
-            cloudPort.setResourceId(virtualNic.getPortId());
-            cloudPort.setQosId(virtualNic.getQosId());
+                cloudPort.setResourceId(virtualNic.getPortId());
+                cloudPort.setQosId(virtualNic.getQosId());
 
-            var accessModesData = virtualNic.getAccessModes();
-            if (accessModesData != null && !accessModesData.isEmpty()) {
-                Map<String, VirtualNic.AccessMode> accessModeDataMap = accessModesData.stream()
-                        .collect(Collectors.toMap(this::genAccessModeKey, accessMode -> accessMode));
-                cloudPort.getAccessModes().forEach(accessMode -> {
-                    var accessModeData = accessModeDataMap.getOrDefault(genAccessModeKey(accessMode), null);
-                    if (accessModeData == null) {
-                        return;
-                    }
+                var accessModesData = virtualNic.getAccessModes();
+                if (accessModesData != null && !accessModesData.isEmpty()) {
+                    Map<String, VirtualNic.AccessMode> accessModeDataMap = accessModesData.stream()
+                            .collect(Collectors.toMap(this::genAccessModeKey, accessMode -> accessMode));
+                    cloudPort.getAccessModes().forEach(accessMode -> {
+                        var accessModeData = accessModeDataMap.getOrDefault(genAccessModeKey(accessMode), null);
+                        if (accessModeData == null) {
+                            return;
+                        }
 
-                    var connection = accessModeData.getConnection();
-                    if (connection != null) {
-                        accessMode.setConnectionUser(TextUtils.emptyNull(getRequestUser()));
-                        accessMode.setConnectionId(connection.getConnectionId());
-                        accessMode.setConnectionUrl(connection.getUrl());
-                    }
+                        var connection = accessModeData.getConnection();
+                        if (connection != null) {
+                            accessMode.setConnectionUser(TextUtils.emptyNull(getRequestUser()));
+                            accessMode.setConnectionId(connection.getConnectionId());
+                            accessMode.setConnectionUrl(connection.getUrl());
+                        }
 
-                    var portMapping = accessModeData.getPortMapping();
-                    if (portMapping != null) {
-                        accessMode.setProxyId(portMapping.getId());
-                        accessMode.setAccessIp(portMapping.getHost());
-                        accessMode.setAccessPort(portMapping.getHostPort());
-                    } else {
-                        accessMode.setAccessIp(accessModeData.getIpAddress());
-                        accessMode.setAccessPort(accessModeData.getPort());
-                    }
-                });
-            }
-
+                        var portMapping = accessModeData.getPortMapping();
+                        if (portMapping != null) {
+                            accessMode.setProxyId(portMapping.getId());
+                            accessMode.setAccessIp(portMapping.getHost());
+                            accessMode.setAccessPort(portMapping.getHostPort());
+                        } else {
+                            accessMode.setAccessIp(accessModeData.getIpAddress());
+                            accessMode.setAccessPort(accessModeData.getPort());
+                        }
+                    });
+                }
+            });
         });
     }
 
