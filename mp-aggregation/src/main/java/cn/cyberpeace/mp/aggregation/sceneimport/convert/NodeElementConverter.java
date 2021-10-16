@@ -55,6 +55,7 @@ class NodeElementConverter implements IConverter {
 
         // 插件表
         CloudPluginSceneConfigElementBO pluginElement = new CloudPluginSceneConfigElementBO();
+        pluginElement.setImage(node.getImage());
         container.putPluginElement(sceneConfigElementBO.getId(), pluginElement);
 
         for (NetElementParseResult ymlNetParseResult : node.getNet()) {
