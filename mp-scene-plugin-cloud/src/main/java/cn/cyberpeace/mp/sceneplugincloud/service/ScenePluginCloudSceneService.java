@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
+import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
@@ -166,8 +167,8 @@ public class ScenePluginCloudSceneService {
             recording.setProtocol(accessMode.getProtocol());
             recording.setName(rawRecording.getRecordingName());
             recording.setFilename(rawRecording.getRecordingFile());
-            recording.setFileUrl(String.format(CloudUrlConstant.RECORDING_DOWNLOAD_URL,
-                    rawRecording.getRecordingName()));
+            recording.setFileUrl(StringUtils.join(CloudSingleton.cloudAppConfig.getCpcloudServer(),
+                    String.format(CloudUrlConstant.RECORDING_DOWNLOAD_URL, rawRecording.getRecordingFile())));
             var filesizeStr = rawRecording.getFileSize();
             if (!StringUtils.isEmpty(filesizeStr)) {
                 recording.setFilesize(IntUtils.fromStr(filesizeStr));
@@ -179,7 +180,7 @@ public class ScenePluginCloudSceneService {
             var timeStr = rawRecording.getRecordate();
             if (!StringUtils.isEmpty(timeStr)) {
                 // TODO 统一转换调用
-                recording.setTime(LocalDateTime.parse(timeStr, DateTimeFormatter.ofPattern("yyyy-MM-ddTHH:mm:ssZ")));
+                recording.setTime(LocalDateTime.parse(timeStr, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssz")));
             }
 
             return recording;
