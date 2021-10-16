@@ -16,8 +16,18 @@
         <include refid="cn.cyberpeace.mp.base.pagination" />
     </select>
     <select id="total" resultType="int">
-        <include refid="cn.cyberpeace.mp.base.totalTemplate" />
-        <include refid="filterCondition" />
+        <choose>
+            <when test="condition.group != null and !condition.group.isEmpty()">
+                SELECT <include refid="cn.cyberpeace.mp.base.countStar" />
+                FROM (<include refid="cn.cyberpeace.mp.base.totalTemplate"/>
+                <include refid="filterCondition"/>
+                <include refid="cn.cyberpeace.mp.base.group" />) tmp
+            </when>
+            <otherwise>
+                <include refid="cn.cyberpeace.mp.base.totalTemplate" />
+                <include refid="filterCondition" />
+            </otherwise>
+        </choose>
     </select>
     <select id="exist" resultType="boolean">
         SELECT EXISTS(SELECT 1 FROM ${table} <include refid="filterCondition" /> LIMIT 1)
