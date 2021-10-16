@@ -14,8 +14,19 @@ import cn.cyberpeace.mp.sceneplugincloud.constant.FirewallRuleDirection;
 import cn.cyberpeace.mp.sceneplugincloud.constant.QosRuleDirection;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.*;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.EntityNode;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualFirewall;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualRouter;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualSwitch;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.EntityNodeCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualFirewallCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -79,7 +90,7 @@ public class CreateHandler extends HandlerCommon {
         if (Boolean.TRUE.equals(accessMode.getEnablePortMapping()) && accessMode.getPortMapping() != null) {
             port = accessMode.getPortMapping().getInstancePort();
         } else {
-            port = accessMode.getPort().toString();
+            port = accessMode.getPort() == null ? "0" : accessMode.getPort().toString();
         }
         return genAccessModeKey(accessMode.getProtocol(), port, accessMode.getUsername(),
                 accessMode.getPassword());
