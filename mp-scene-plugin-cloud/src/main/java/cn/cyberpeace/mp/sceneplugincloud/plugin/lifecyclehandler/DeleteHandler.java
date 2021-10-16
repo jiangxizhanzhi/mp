@@ -194,7 +194,21 @@ public class DeleteHandler extends HandlerCommon {
 
         // 删除辅助网络(包含虚拟交换机)
         var deleteAuxiliaryNetworkTasks = getPluginHandler().getElementMap().values().stream()
-                .filter(cloudElement -> Boolean.TRUE.equals(cloudElement.getAuxiliaryNetworkOn()))
+                .filter(cloudElement -> {
+                    if (!Boolean.TRUE.equals(cloudElement.getAuxiliaryNetworkOn())) {
+                        return false;
+                    }
+
+                    // 外部虚拟交换机不能删除
+                    Integer virtualType = cloudElement.getVirtualType();
+                    if (virtualType != null
+                            && virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH)
+                            && Boolean.TRUE.equals(cloudElement.getExternal())) {
+                        return false;
+                    }
+
+                    return true;
+                })
                 .map(cloudElement -> (Runnable) () -> deleteAuxiliaryNetworkProcess(cloudElement))
                 .collect(Collectors.toList());
         if (!deleteAuxiliaryNetworkTasks.isEmpty()) {
