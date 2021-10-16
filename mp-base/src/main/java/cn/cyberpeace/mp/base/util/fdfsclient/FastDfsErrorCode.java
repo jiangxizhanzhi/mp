@@ -23,7 +23,7 @@ public enum FastDfsErrorCode implements ErrorCode {
 
     FILE_SERVER_CONNECTION_FAILED("MP-110106", "file_server_connection_failed"),
 
-    FILE_OUT_SIZE("MP-110107", "file_server_connection_failed"),
+    FILE_OUT_SIZE("MP-110107", "file_out_of_size"),
 
     FILE_TYPE_ERROR_IMAGE("MP-110108", "type.image"),
 

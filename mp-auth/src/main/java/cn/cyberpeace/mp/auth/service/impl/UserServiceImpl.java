@@ -558,12 +558,11 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void importExcel(List<ImportUser> list) {
-        if (CollectionUtil.isEmpty(list)) {
-            throw new MpRuntimeException("列表为空！");
-        }
-
-        if (list.size() > 100) {
-            throw new MpRuntimeException("导入的用户数量大于100！");
+        // 初始化默认头像信息
+        List<AvatarModel> avatarModels = avatarService.listAll();
+        String defaultAvatarUrl = null;
+        if (CollectionUtil.isNotEmpty(avatarModels)) {
+            defaultAvatarUrl = avatarModels.get(0).getUrl();
         }
 
         for (ImportUser importUser : list) {
@@ -573,7 +572,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                 continue;
             }
 
-            initDefaultAvatar(userModel);
+            userModel.setAvatar(defaultAvatarUrl);
             var result = create(userModel);
             ResultUtils.throwExceptionIfError(result, "创建用户失败！");
             UserModel userCreated = result.getSource().getObj();
@@ -800,7 +799,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                         // 此处不需要加密，后面的create()方法会加密
                         .password(importUser.getPassword())
                         .build();
-
         return userModel;
     }
 

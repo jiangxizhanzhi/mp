@@ -13,7 +13,9 @@ import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceQueryParams;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
+import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
+import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionFlowBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
@@ -165,6 +167,19 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     public ServiceResult<List<NodeSessionBO>> getNodeSessions(@RequestParam String id,
                                                               @RequestParam(required = false) String nodeId) {
         return modelService.getNodeSessions(id, nodeId).asResult();
+    }
+
+    @ApiOperation("场景实例获取分页录屏列表")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "nodeIds", value = "场景节点id", allowMultiple = true, dataTypeClass = String.class),
+    })
+    @GetMapping(value = "/list_recordings", params = "id")
+    public ListObjServiceResult<NodeRecordingBO> listRecordings(@RequestParam String id,
+                                                                @RequestParam(required = false) String[] nodeIds,
+                                                                RecordingQueryParams queryParams) {
+        handleQueryParams("listRecordings", queryParams);
+        return modelService.listRecordings(id, nodeIds, queryParams).asResult();
     }
 
     @ApiOperation("场景实例获取分页流量列表")

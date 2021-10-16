@@ -72,7 +72,6 @@ public class ProbeService {
         probeModelMapper.insert(probeModel);
         insertProbeParams(probeRequest, probeModel.getId());
         probeRequest.setProbeId(probeModel.getId());
-        wazuhProbeManagerRepository.addScript(probeRequest);
     }
 
     /**
@@ -88,9 +87,7 @@ public class ProbeService {
         }
         probeParamModelMapper.deleteParamByProbeIds(probeIds);
 
-        probeIds.forEach(probeId -> {
-            wazuhProbeManagerRepository.deleteProbeByProbeId(probeId);
-        });
+
         return probeModelMapper.deleteByProbeIds(probeIds) > 0;
     }
 
@@ -164,12 +161,7 @@ public class ProbeService {
             throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_NAME_EXIST);
         }
 
-        var rows = probeModelMapper.updateByProbeId(probeModel);
-        //wazuh 远程操作
-        wazuhProbeManagerRepository.deleteProbeByProbeId(probeModel.getId());
-        wazuhProbeManagerRepository.addScript(mergedRequest);
-
-        return rows;
+        return probeModelMapper.updateByProbeId(probeModel);
     }
 
     /**
