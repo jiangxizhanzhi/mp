@@ -85,22 +85,25 @@ public abstract class BaseSceneHandler<
         P0 extends BaseSceneElementPortModel,
         C0 extends BaseSceneElementPortConnectionModel,
         P1 extends BaseSceneElementPluginModel,
-        S extends BaseSceneBO<S0>,
-        A extends BaseSceneAreaBO<A0>,
-        P extends BaseSceneElementPortBO<P0>,
-        E extends BaseSceneElementBO<E0, P>,
-        C extends BaseSceneElementPortConnectionBO<C0>,
-        T extends BaseSceneTopologyBO<S0, A0, E0, P0, C0, S, A, P, E, C>,
-        D extends BaseSceneDataBO<T>,
+        S extends BaseSceneBO<S0, S>,
+        A extends BaseSceneAreaBO<A0, A>,
+        P extends BaseSceneElementPortBO<P0, P>,
+        E extends BaseSceneElementBO<E0, P, E>,
+        C extends BaseSceneElementPortConnectionBO<C0, C>,
+        T extends BaseSceneTopologyBO<S0, A0, E0, P0, C0, S, A, P, E, C, T>,
+        D extends BaseSceneDataBO<S0, A0, E0, P0, C0, S, A, P, E, C, T, D>,
         M1 extends BaseSceneMapper<S0>,
         M2 extends BaseSceneAreaMapper<A0>,
         M3 extends BaseSceneElementMapper<E0>,
         M4 extends BaseSceneElementPortMapper<P0>,
         M5 extends BaseSceneElementPortConnectionMapper<C0>,
         M6 extends BaseSceneElementPluginMapper<P1>,
-        P2 extends BasePluginHandler<?, ?, ?>,
-        H extends BaseSceneHandler<S0, A0, E0, P0, C0, P1, S, A, P, E, C, T, D, M1, M2, M3, M4, M5, M6, P2, H>> {
+        C2 extends BaseSceneContextBO,
+        P2 extends BasePluginHandler<?, ?, ?, ?>,
+        H extends BaseSceneHandler<S0, A0, E0, P0, C0, P1, S, A, P, E, C, T, D, M1, M2, M3, M4, M5, M6, C2, P2, H>> {
 
+    /** 上下文 */
+    private C2 context;
     /** 是否区域模式 */
     private boolean isAreaMode;
     /** 场景模板/场景实例id */
@@ -121,6 +124,12 @@ public abstract class BaseSceneHandler<
     private final Set<String> outerConnectionPortIds = new HashSet<>();
     /** 场景插件数据，key为插件代号 */
     private final Map<String, ScenePluginDataBO> scenePluginData = new HashMap<>();
+
+    // 辅助变量
+    /** 端口所属节点映射 */
+    private final Map<String, E> portIdElementMap = new HashMap<>();
+    /** 端口连接端口映射 */
+    private final Map<String, String> portIdConnectedPortIdMap = new HashMap<>();
 
     // 通过ClassFieldNames注解和实现类ClassFieldClasses注解，初始化调用ClassUtils.loadClassFields(this)设置
     private Class<D> sceneDataBOClass;
@@ -147,16 +156,31 @@ public abstract class BaseSceneHandler<
     private M5 sceneElementPortConnectionMapper;
     private M6 sceneElementPluginMapper;
 
-    /** 插件数据处理对象集合，key为插件代号 */
+    /** 插件数据处理对象集合 */
+    private final List<P2> plugins = new ArrayList<>();
     private final Map<String, P2> pluginMap = new HashMap<>();
     /** 网元对应节点插件关系，一个网元节点对于多个插件 */
     private final Map<String, List<P1>> elementIdPluginsMap = new HashMap<>();
+
+    private Object getPluginContext(String pluginKey) {
+        if (context == null) {
+            return null;
+        }
+
+        var pluginsContexts = context.getPlugins();
+        if (pluginsContexts == null) {
+            return null;
+        }
+
+        return pluginsContexts.getOrDefault(pluginKey, null);
+    }
 
     /**
      * 初始化插件集合
      */
     @SuppressWarnings("unchecked")
-    private void initPluginMap(Map<String, ScenePluginDataBO> scenePluginData) {
+    private void initPlugins(Map<String, ScenePluginDataBO> scenePluginData) {
+        plugins.clear();
         pluginMap.clear();
         BeanUtils.getBeanType(scenePluginHandlerInterface).forEach((name, pluginInstance) -> {
             Class<?> pluginClass = pluginInstance.getClass();
@@ -172,17 +196,22 @@ public abstract class BaseSceneHandler<
             }
 
             P2 plugin = (P2) ClassUtils.createInstance(pluginClass);
-            plugin.init(sceneId, pluginData);
+            beforeInitPlugin(plugin);
+            plugin.init(sceneId, pluginData, getPluginContext(pluginKey));
+            afterInitPlugin(plugin);
+            plugins.add(plugin);
             pluginMap.put(pluginKey, plugin);
         });
+        plugins.sort(Comparator.comparing(BasePluginHandler::getPriority));
     }
 
     /**
      * 初始化插件集合
      */
     @SuppressWarnings("unchecked")
-    private void initPluginMap(Map<String, List<String>> pluginKeyElementIds,
-                               Map<String, List<String>> pluginKeyElementPortIds) {
+    private void initPlugins(Map<String, List<String>> pluginKeyElementIds,
+                             Map<String, List<String>> pluginKeyElementPortIds) {
+        plugins.clear();
         pluginMap.clear();
         BeanUtils.getBeanType(scenePluginHandlerInterface).forEach((name, pluginInstance) -> {
             Class<?> pluginClass = pluginInstance.getClass();
@@ -199,10 +228,14 @@ public abstract class BaseSceneHandler<
             }
 
             P2 plugin = (P2) ClassUtils.createInstance(pluginClass);
-            plugin.init(sceneId, elementIds, elementPortIds);
+            beforeInitPlugin(plugin);
+            plugin.init(sceneId, elementIds, elementPortIds, getPluginContext(pluginKey));
+            afterInitPlugin(plugin);
             scenePluginData.put(pluginKey, plugin.toData());
+            plugins.add(plugin);
             pluginMap.put(pluginKey, plugin);
         });
+        plugins.sort(Comparator.comparing(BasePluginHandler::getPriority));
     }
 
     /**
@@ -365,7 +398,10 @@ public abstract class BaseSceneHandler<
             if (elementPorts == null) {
                 return;
             }
-            elementPorts.forEach(elementPort -> elementPortMap.put(elementPort.getId(), elementPort));
+            elementPorts.forEach(elementPort -> {
+                elementPortMap.put(elementPort.getId(), elementPort);
+                portIdElementMap.put(elementPort.getId(), element);
+            });
         });
     }
 
@@ -394,6 +430,8 @@ public abstract class BaseSceneHandler<
             }
 
             elementPortConnectionMap.put(elementPortConnectionKey(connection), connection);
+            portIdConnectedPortIdMap.put(connection.getSource(), connection.getTarget());
+            portIdConnectedPortIdMap.put(connection.getTarget(), connection.getSource());
         });
     }
 
@@ -472,6 +510,7 @@ public abstract class BaseSceneHandler<
             var elementPortBO = ClassUtils.createInstance(sceneElementPortBOClass);
             elementPortBO.fromModel(elementPort);
             elementPortMap.put(elementPortBO.getId(), elementPortBO);
+            portIdElementMap.put(elementPortBO.getId(), elementBO);
 
             if (elementBO.getPorts() == null) {
                 elementBO.setPorts(new ArrayList<>());
@@ -507,6 +546,8 @@ public abstract class BaseSceneHandler<
             var elementPortConnectionBO = ClassUtils.createInstance(sceneElementPortConnectionBOClass);
             elementPortConnectionBO.fromModel(connection);
             elementPortConnectionMap.put(elementPortConnectionKey(elementPortConnectionBO), elementPortConnectionBO);
+            portIdConnectedPortIdMap.put(elementPortConnectionBO.getSource(), elementPortConnectionBO.getTarget());
+            portIdConnectedPortIdMap.put(elementPortConnectionBO.getTarget(), elementPortConnectionBO.getSource());
         });
     }
 
@@ -528,7 +569,7 @@ public abstract class BaseSceneHandler<
      * @return 表模型-场景对象
      */
     private S0 readScene() {
-        return sceneMapper.logicGet(sceneId);
+        return sceneMapper.get(sceneId);
     }
 
     /**
@@ -734,9 +775,7 @@ public abstract class BaseSceneHandler<
         sceneId = sceneObj.getId();
         scene.fromModel(sceneObj);
 
-        pluginMap.forEach((key, plugin) -> {
-            plugin.setSourceSceneId(sceneId);
-        });
+        plugins.forEach(plugin -> plugin.setSourceSceneId(sceneId));
 
         return result;
     }
@@ -759,7 +798,7 @@ public abstract class BaseSceneHandler<
             for (var removingArea: diff.getRemovingTargets()) {
                 if (!Boolean.TRUE.equals(removingArea.getOpen())) {
                     var sceneHandler = ClassUtils.createInstance(sceneHandlerClass);
-                    sceneHandler.init(sceneId, removingArea.getNodeId(), isAreaMode);
+                    sceneHandler.init(sceneId, removingArea.getNodeId(), isAreaMode, context);
                     sceneHandler.deleteTopology();
                 }
             }
@@ -960,13 +999,27 @@ public abstract class BaseSceneHandler<
      */
     private void fromData(D sceneDataBO) {
         var topology = sceneDataBO.getTopology();
-        loadSceneBO(topology.getScene());
+        var srcScene = (topology == null || topology.getScene() == null) ? ClassUtils.createInstance(sceneBOClass)
+                : topology.getScene();
+        loadSceneBO(srcScene);
         sceneId = scene.getEid();
-        areaId = topology.getAreaId();
-        loadAreaBOs(topology.getAreas());
-        loadElementBOs(topology.getElements());
-        loadConnectionBOs(topology.getConnections());
+
+        if (topology != null) {
+            loadSceneBO(topology.getScene());
+            areaId = topology.getAreaId();
+            loadAreaBOs(topology.getAreas());
+            loadElementBOs(topology.getElements());
+            loadConnectionBOs(topology.getConnections());
+        }
+
         loadScenePluginData(sceneDataBO.getPlugins());
+    }
+
+    /**
+     * 纠正场景数据
+     */
+    private void correctData() {
+        plugins.forEach(plugin -> plugin.correctData());
     }
 
     /**
@@ -974,15 +1027,21 @@ public abstract class BaseSceneHandler<
      * @param sceneDataBO 场景业务数据
      * @param isAreaMode 是否区域模式
      */
-    public void init(D sceneDataBO, boolean isAreaMode) {
+    public void init(D sceneDataBO, boolean isAreaMode, C2 context) {
         ClassUtils.loadClassFields(this);
         BeanUtils.loadBeanFields(this);
+        this.context = context;
         this.isAreaMode = isAreaMode;
         fromData(sceneDataBO);
         if (!StringUtils.isEmpty(sceneId) && readScene() == null) {
             throw new SceneNotExistException("Scene " + sceneId + " not exist");
         }
-        initPluginMap(scenePluginData);
+        initPlugins(scenePluginData);
+
+        // 新的场景数据需要纠正
+        if (StringUtils.isEmpty(sceneId)) {
+            correctData();
+        }
     }
 
     /**
@@ -991,9 +1050,10 @@ public abstract class BaseSceneHandler<
      * @param areaId 区域id
      * @param isAreaMode 是否区域模式
      */
-    public void init(String sceneId, String areaId, boolean isAreaMode) {
+    public void init(String sceneId, String areaId, boolean isAreaMode, C2 context) {
         ClassUtils.loadClassFields(this);
         BeanUtils.loadBeanFields(this);
+        this.context = context;
         this.sceneId = sceneId;
         this.areaId = areaId;
         this.isAreaMode = isAreaMode;
@@ -1002,6 +1062,9 @@ public abstract class BaseSceneHandler<
             throw new SceneNotExistException("Scene " + sceneId + " not exist");
         }
     }
+
+    public void beforeInitPlugin(P2 plugin) {}
+    public void afterInitPlugin(P2 plugin) {}
 
     /**
      * 切换区域
@@ -1041,10 +1104,13 @@ public abstract class BaseSceneHandler<
         areaMap.clear();
         elementMap.clear();
         elementPortMap.clear();
+        portIdElementMap.clear();
         elementPortConnectionMap.clear();
+        portIdConnectedPortIdMap.clear();
         outerConnectionPortIds.clear();
         scenePluginData.clear();
         elementIdPluginsMap.clear();
+        plugins.clear();
         pluginMap.clear();
 
         loadScene(readScene());
@@ -1092,7 +1158,7 @@ public abstract class BaseSceneHandler<
                 }
             });
         });
-        initPluginMap(pluginKeyElementIds, pluginKeyElementPortIds);
+        initPlugins(pluginKeyElementIds, pluginKeyElementPortIds);
     }
 
     /**
@@ -1135,7 +1201,7 @@ public abstract class BaseSceneHandler<
         DiffTargets<P1> diffElementPlugins = saveElementPlugins(existElementPluginMap);
 
         // 保存插件数据
-        pluginMap.forEach((key, plugin) -> {
+        plugins.forEach(plugin -> {
             plugin.saveScene();
             plugin.createElements(diffElements.getAddingTargets().stream().map(BaseSceneNodeModel::getNodeId)
                     .toArray(String[]::new));
@@ -1155,15 +1221,13 @@ public abstract class BaseSceneHandler<
     /**
      * 删除场景数据
      */
-    public void delete() {
+    public boolean delete() {
         deleteTopology();
 
-        sceneMapper.delete(sceneId);
-
         // 删除插件数据
-        pluginMap.forEach((key, plugin) -> {
-            plugin.deleteScene();
-        });
+        plugins.forEach(plugin -> plugin.deleteScene());
+
+        return sceneMapper.delete(sceneId);
     }
 
     /**
@@ -1177,7 +1241,7 @@ public abstract class BaseSceneHandler<
             for (var removingArea: areas) {
                 if (!Boolean.TRUE.equals(removingArea.getOpen())) {
                     var sceneHandler = ClassUtils.createInstance(sceneHandlerClass);
-                    sceneHandler.init(sceneId, removingArea.getNodeId(), isAreaMode);
+                    sceneHandler.init(sceneId, removingArea.getNodeId(), isAreaMode, context);
                     sceneHandler.deleteTopology();
                 }
             }
@@ -1208,7 +1272,7 @@ public abstract class BaseSceneHandler<
         }
 
         // 删除插件数据
-        pluginMap.forEach((key, plugin) -> {
+        plugins.forEach(plugin -> {
             plugin.deleteElements(elements.stream().map(BaseSceneNodeModel::getNodeId).toArray(String[]::new));
             plugin.deleteElementPorts(elementPorts.stream().map(BaseSceneElementPortModel::getPortId)
                     .toArray(String[]::new));
@@ -1220,6 +1284,206 @@ public abstract class BaseSceneHandler<
      */
     public boolean logicDelete() {
         return sceneMapper.logicDelete(sceneId);
+    }
+
+
+    /**
+     * 单独更新基础场景数据
+     */
+    public void updateScene() {
+        saveScene();
+    }
+
+    /**
+     * 单独更新基础场景数据及其插件数据
+     */
+    public void updateSceneWithPlugins() {
+        updateScene();
+        plugins.forEach(plugin -> {
+            plugin.saveScene();
+        });
+    }
+
+    /**
+     * 单独保存基础场景节点数据
+     */
+    public void updateSceneElement(String nodeId) {
+        var elementBO = getElement(nodeId);
+        E0 element = elementBO.toModel();
+        element.setScene(sceneId);
+        sceneElementMapper.update(element);
+
+        List<P> elementPortBOs = elementBO.getPorts();
+        if (elementPortBOs != null && !elementPortBOs.isEmpty()) {
+            List<P0> ports = elementPortBOs.stream().map(elementPortBO -> {
+                P0 port = elementPortBO.toModel();
+                port.setScene(sceneId);
+                port.setSceneElement(element.getId());
+                return port;
+            }).collect(Collectors.toList());
+            sceneElementPortMapper.bulkUpdate(ports);
+        }
+    }
+
+    /**
+     * 单独保存基础场景节点数据及其插件数据
+     */
+    public void updateSceneElementWithPlugins(String nodeId) {
+        updateSceneElement(nodeId);
+
+        List<P> elementPortBOs = getElement(nodeId).getPorts();
+        for (var plugin : plugins) {
+            plugin.updateElements(nodeId);
+            if (elementPortBOs != null && !elementPortBOs.isEmpty()) {
+                plugin.updateElementPorts(elementPortBOs.stream().map(EidBO::getEid).toArray(String[]::new));
+            }
+        }
+    }
+
+    /**
+     * 获取插件handler
+     * @param pluginKey 插件代号
+     */
+    public <H9> H9 getPluginHandler(String pluginKey) {
+        var plugin = pluginMap.getOrDefault(pluginKey, null);
+        return plugin == null ? null : (H9) plugin;
+    }
+
+    /**
+     * 获取插件全局数据
+     * @param pluginKey 插件代号
+     */
+    public <S9> S9 getPluginScene(String pluginKey) {
+        var plugin = pluginMap.getOrDefault(pluginKey, null);
+        if (plugin == null) {
+            return null;
+        }
+
+        var pluginScene = plugin.getScene();
+        if (pluginScene == null) {
+            return null;
+        }
+
+        return (S9) pluginScene;
+    }
+
+    /**
+     * 获取网元插件数据
+     * @param pluginKey 插件代号
+     * @param nodeId 网元节点id
+     */
+    public <E9> E9 getPluginElement(String pluginKey, String nodeId) {
+        var plugin = pluginMap.getOrDefault(pluginKey, null);
+        if (plugin == null) {
+            return null;
+        }
+
+        var pluginElement = plugin.getElement(nodeId);
+        if (pluginElement == null) {
+            return null;
+        }
+
+        return (E9) pluginElement;
+    }
+
+    /**
+     * 获取端口插件数据
+     * @param pluginKey 插件代号
+     * @param portId 端口id
+     */
+    public <P9> P9 getPluginPort(String pluginKey, String portId) {
+        var plugin = pluginMap.getOrDefault(pluginKey, null);
+        if (plugin == null) {
+            return null;
+        }
+
+        var pluginPort = plugin.getPort(portId);
+        if (pluginPort == null) {
+            return null;
+        }
+
+        return (P9) pluginPort;
+    }
+
+
+    /**
+     * 获取网元数据
+     * @param nodeId 网元节点id
+     */
+    public E getElement(String nodeId) {
+        return elementMap.getOrDefault(nodeId, null);
+    }
+
+    /**
+     * 获取网元连接的网元
+     * @param nodeId 网元节点id
+     */
+    public List<E> getElementConnectedElements(String nodeId) {
+        var connectedPorts = getElementConnectedPorts(nodeId);
+        Map<String, E> connectedElementMap = new HashMap<>();
+        connectedPorts.forEach(port -> {
+            var element = getPortElement(port.getId());
+            if (element == null) {
+                return;
+            }
+            connectedElementMap.put(element.getId(), element);
+        });
+        return new ArrayList<>(connectedElementMap.values());
+    }
+
+    /**
+     * 获取网元连接的网元
+     * @param nodeId 网元节点id
+     */
+    public List<P> getElementConnectedPorts(String nodeId) {
+        var ele = getElement(nodeId);
+        var ports = ele.getPorts();
+        if (ports == null) {
+            return new ArrayList<>();
+        }
+        List<P> connectedPorts = new ArrayList<>();
+        ports.forEach(port -> {
+            var connectedPort = getPortConnectedPort(port.getId());
+            if (connectedPort == null) {
+                return;
+            }
+            connectedPorts.add(connectedPort);
+        });
+        return connectedPorts;
+    }
+
+    /**
+     * 获取端口数据
+     * @param portId 端口id
+     */
+    public P getPort(String portId) {
+        return elementPortMap.getOrDefault(portId, null);
+    }
+
+    /**
+     * 获取端口所属网元数据
+     * @param portId 端口id
+     */
+    public E getPortElement(String portId) {
+        return portIdElementMap.getOrDefault(portId, null);
+    }
+
+    /**
+     * 获取端口连接的端口
+     * @param portId 端口id
+     */
+    public P getPortConnectedPort(String portId) {
+        var connectedPortId = portIdConnectedPortIdMap.getOrDefault(portId, null);
+        return getPort(connectedPortId);
+    }
+
+    /**
+     * 获取端口连接的节点
+     * @param portId 端口id
+     */
+    public E getPortConnectedElement(String portId) {
+        var connectedPortId = portIdConnectedPortIdMap.getOrDefault(portId, null);
+        return getPortElement(connectedPortId);
     }
 
 }

@@ -13,7 +13,6 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-@ApiModel(value = "路由分页请求信息")
 public class RouterPageRequest extends BasePageRequest implements Serializable {
 
     /**

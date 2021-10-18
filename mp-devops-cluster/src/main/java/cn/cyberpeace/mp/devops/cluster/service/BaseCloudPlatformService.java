@@ -17,6 +17,16 @@ public interface BaseCloudPlatformService {
     String CPCLOUD_INFO_URL = CPCLOUD_URL + "/info";
 
     /**
+     * cpcloud平台device
+     */
+    String CPCLOUD_DEVICE = CPCLOUD_URL + "/device";
+
+    /**
+     * cpcloud平台ccm
+     */
+    String CPCLOUD_CCM = CPCLOUD_URL + "/ccm";
+
+    /**
      * cpcloud平台NPC模块URL前缀
      */
     String CPCLOUD_NPC_URL = CPCLOUD_URL + "/npc_node";
@@ -40,5 +50,10 @@ public interface BaseCloudPlatformService {
      * 流表监控操作
      */
     String OPENFLOW_ACTION_METHOD = "list";
+
+    /**
+     * 截屏模块URL前缀
+     */
+    String SCREENRECORD_METHOD = CPCLOUD_URL + "/guacamole" + URL_VERSION;
 
 }

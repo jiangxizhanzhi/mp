@@ -57,25 +57,31 @@ public class SceneConfigHandler extends BaseSceneHandler<
         SceneConfigElementPortMapper,
         SceneConfigElementPortConnectionMapper,
         SceneConfigElementPluginMapper,
-        SceneConfigPluginHandler<?, ?, ?>,
+        SceneConfigContextBO,
+        SceneConfigPluginHandler<?, ?, ?, ?>,
         SceneConfigHandler> {
 
     public SceneConfigHandler() {}
 
-    public SceneConfigHandler(SceneConfigDataBO sceneConfigDataBO) {
-        init(sceneConfigDataBO, false);
+    public SceneConfigHandler(SceneConfigDataBO sceneConfigDataBO, SceneConfigContextBO context) {
+        init(sceneConfigDataBO, false, context);
     }
 
-    public SceneConfigHandler(SceneConfigDataBO sceneConfigDataBO, boolean isAreaMode) {
-        init(sceneConfigDataBO, isAreaMode);
+    public SceneConfigHandler(SceneConfigDataBO sceneConfigDataBO, boolean isAreaMode, SceneConfigContextBO context) {
+        init(sceneConfigDataBO, isAreaMode, context);
     }
 
-    public SceneConfigHandler(String sceneId, String areaId) {
-        init(sceneId, areaId, false);
+    public SceneConfigHandler(String sceneId, String areaId, SceneConfigContextBO context) {
+        init(sceneId, areaId, false, context);
     }
 
-    public SceneConfigHandler(String sceneId, String areaId, boolean isAreaMode) {
-        init(sceneId, areaId, isAreaMode);
+    public SceneConfigHandler(String sceneId, String areaId, boolean isAreaMode, SceneConfigContextBO context) {
+        init(sceneId, areaId, isAreaMode, context);
+    }
+
+    @Override
+    public void beforeInitPlugin(SceneConfigPluginHandler<?, ?, ?, ?> plugin) {
+        plugin.setSceneHandler(this);
     }
 
 }

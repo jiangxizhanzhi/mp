@@ -1,0 +1,30 @@
+package cn.cyberpeace.mp.scenepluginflow.bo.base;
+
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+
+@Data
+public class Flow {
+    @ApiModelProperty(value = "流量id")
+    private String id;
+    @ApiModelProperty(value = "名称")
+    private String name;
+    @ApiModelProperty(value = "描述")
+    private String desc;
+    @ApiModelProperty(value = "分类")
+    private String type;
+    @ApiModelProperty(value = "状态")
+    private Integer status;
+    @ApiModelProperty(value = "状态描述")
+    private String statusText;
+    @ApiModelProperty(value = "流量任务id")
+    private String taskId;
+
+    public static class Status {
+        public static final int OFF = 0;
+        public static final int ON = 1;
+        public static final int ERROR = 2;
+
+        private Status() {}
+    }
+}

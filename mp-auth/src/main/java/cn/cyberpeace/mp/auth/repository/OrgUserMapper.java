@@ -11,6 +11,11 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @Mapper
 @Repository
 @ModelClass(OrgUserModel.class)
@@ -26,7 +31,9 @@ public interface OrgUserMapper extends BaseModelMapper<OrgUserModel> {
      * @param userIds
      * @return
      */
-    List<UserModel> listUsers(@Param("orgIds") List<String> orgIds, @Param("username") String username, @Param("userIds") List<String> userIds);
+    List<UserModel> listUsers(@Param("orgIds") List<String> orgIds, @Param("username") String username, @Param("userIds") List<String> userIds, @Param("orders") List<String> orders);
+
+    Integer selectUserCnt(@Param("orgId") String orgId);
 
     void deleteByUserId(@Param("userId") String userId);
 

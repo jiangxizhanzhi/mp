@@ -4,10 +4,14 @@ import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.devops.cluster.converter.HypervisorConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.*;
+import cn.cyberpeace.mp.devops.cluster.model.common.HypervisorStatistics;
 import cn.cyberpeace.mp.devops.cluster.request.HypervisorPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.HypervisorRequest;
 import cn.cyberpeace.mp.devops.cluster.request.HypervisorWeightAndMaxInstanceRequest;
 import cn.cyberpeace.mp.devops.cluster.service.HypervisorService;
+import cn.cyberpeace.mp.devops.cluster.service.NetworkService;
+import cn.cyberpeace.mp.devops.cluster.service.SwitchService;
+import cn.cyberpeace.mp.devops.cluster.service.VmService;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,9 +28,19 @@ public class HypervisorConverterImpl implements HypervisorConverter {
 
     private HypervisorService hypervisorService;
 
+    private SwitchService switchService;
+
+    private NetworkService networkService;
+
+    private VmService vmService;
+
     @Autowired
-    public HypervisorConverterImpl(HypervisorService hypervisorService) {
+    public HypervisorConverterImpl(HypervisorService hypervisorService, SwitchService switchService,
+                                   NetworkService networkService,VmService vmService) {
         this.hypervisorService = hypervisorService;
+        this.switchService = switchService;
+        this.networkService = networkService;
+        this.vmService = vmService;
     }
 
     @Override
@@ -43,10 +57,10 @@ public class HypervisorConverterImpl implements HypervisorConverter {
     @Override
     public HypervisorStatisticsConvertModel statistics() {
         HypervisorStatisticsCloudPlatformModel statistics = hypervisorService.statistics();
-        HypervisorStatisticsCloudPlatformModel.HypervisorStatistics hypervisorStatistics = statistics.getHypervisor_statistics();
-        return new HypervisorStatisticsConvertModel(hypervisorStatistics.getVcpus(),hypervisorStatistics.getMemory_mb()
-                ,hypervisorStatistics.getLocal_gb(),hypervisorStatistics.getVcpus_used(),hypervisorStatistics.getMemory_mb_used()
-                ,hypervisorStatistics.getLocal_gb_used(),hypervisorStatistics.getFree_ram_mb(),hypervisorStatistics.getFree_disk_gb());
+        HypervisorStatistics hypervisorStatistics = statistics.getHypervisorStatistics();
+        return new HypervisorStatisticsConvertModel(hypervisorStatistics.getVcpus(),hypervisorStatistics.getMemoryMb()
+                ,hypervisorStatistics.getLocalGb(),hypervisorStatistics.getVcpusUsed(),hypervisorStatistics.getMemoryMbUsed()
+                ,hypervisorStatistics.getLocalGbUsed(),hypervisorStatistics.getFreeRamMb(),hypervisorStatistics.getFreeDiskGb());
     }
 
     @Override
@@ -59,10 +73,10 @@ public class HypervisorConverterImpl implements HypervisorConverter {
         }
         List<HypervisorPageConvertModel.Model> list = model.getHypervisors().stream().map(hypervisor ->
                 HypervisorPageConvertModel.Model.builder().name(hypervisor.getHostname())
-                        .ip(hypervisor.getHost_ip()).status(hypervisor.getStatus()).state(hypervisor.getState())
+                        .ip(hypervisor.getHostIp()).status(hypervisor.getStatus()).state(hypervisor.getState())
                         .cpu(hypervisor.getCpu()).ram(hypervisor.getRam()).disk(hypervisor.getDisk())
-                        .cpuUsed(hypervisor.getCpu_used()).ramUsed(hypervisor.getRam_used())
-                        .diskUsed(hypervisor.getDisk_used()).build()
+                        .cpuUsed(hypervisor.getCpuUsed()).ramUsed(hypervisor.getRamUsed())
+                        .diskUsed(hypervisor.getDiskUsed()).build()
         ).collect(Collectors.toList());
 
         HypervisorPageConvertModel convertModel = new HypervisorPageConvertModel();
@@ -77,7 +91,7 @@ public class HypervisorConverterImpl implements HypervisorConverter {
         if (Objects.isNull(model)){
             return null;
         }
-        return new HypervisorWeightAndMaxInstanceConvertModel(model.getWeight(),model.getMax_instances());
+        return new HypervisorWeightAndMaxInstanceConvertModel(model.getWeight(),model.getMaxInstances());
     }
 
     @Override
@@ -87,18 +101,18 @@ public class HypervisorConverterImpl implements HypervisorConverter {
 
     @Override
     public List<HypervisorServiceStateConvertModel> serviceState() {
-        InstanceOsServiceCloudPlatformModel osServiceOpenStackModel = hypervisorService.osServicesStateFromInstances();
-        NetworkAgentCloudPlatformModel networkAgentOpenStackModel = hypervisorService.agentsStateFromNetworks();
+        InstanceOsServiceCloudPlatformModel osServiceOpenStackModel = vmService.osServicesStateFromInstances();
+        NetworkAgentCloudPlatformModel networkAgentOpenStackModel = networkService.agentsStateFromNetworks();
 
         List<HypervisorServiceStateConvertModel> resultList = new ArrayList<>();
 
-        if (Objects.nonNull(osServiceOpenStackModel)){
+        if (Objects.nonNull(osServiceOpenStackModel) && CollectionUtils.isNotEmpty(osServiceOpenStackModel.getServices())){
             resultList.addAll(osServiceOpenStackModel.getServices().stream().map(instanceOsServiceModel ->
                     new HypervisorServiceStateConvertModel(instanceOsServiceModel.getBinary(),instanceOsServiceModel.getState())
             ).collect(Collectors.toList()));
         }
 
-        if (Objects.nonNull(networkAgentOpenStackModel)){
+        if (Objects.nonNull(networkAgentOpenStackModel) && CollectionUtils.isNotEmpty(networkAgentOpenStackModel.getAgents())){
             resultList.addAll(networkAgentOpenStackModel.getAgents().stream().map(networkAgentModel ->
                     new HypervisorServiceStateConvertModel(networkAgentModel.getBinary(),networkAgentModel.getAlive())).collect(Collectors.toList())
             );
@@ -108,13 +122,13 @@ public class HypervisorConverterImpl implements HypervisorConverter {
 
     @Override
     public VirtualRealSwitchConvertModel listVirtualRealSwitch() {
-        VirtualRealSwitchCloudPlatformModel model = hypervisorService.listVirtualRealSwitch();
+        SwitchesCloudPlatform model = switchService.list();
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getSwitchs())){
             return null;
         }
         List<VirtualRealSwitchConvertModel.Model> list = model.getSwitchs().stream().map(v ->
-                VirtualRealSwitchConvertModel.Model.builder().name(v.getName()).managementIp(v.getManagement_ip()).state(v.getStatus())
-                        .usedPorts(Integer.valueOf(v.getInterfaces_used())).ports(Integer.valueOf(v.getInterfaces_summary())).build()
+                VirtualRealSwitchConvertModel.Model.builder().name(v.getName()).managementIp(v.getManagementIp()).state(v.getStatus())
+                        .usedPorts(v.getInterfaceUpNums()).ports(v.getInterfaceNums()).build()
         ).collect(Collectors.toList());
 
         VirtualRealSwitchConvertModel convertModel = new VirtualRealSwitchConvertModel();

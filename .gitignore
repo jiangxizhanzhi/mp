@@ -38,4 +38,6 @@ out/
 
 ### mp ###
 logs/
-log/
+mp/log/
+/log/
+mp-situation-aware/log

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.cyberpeace.mp.flow.repository.FlowCollectionRelMapper">
+
+    <select id="selectByCollectionIds" resultType="cn.cyberpeace.mp.flow.model.FlowCollectionRelModel">
+        select f.* from mp_flow_collection_rel f
+        <where>
+            1 = 1
+            <if test="collectionIds != null and collectionIds.size() > 0">
+                AND f.collection_id in
+                <foreach item="collection_id" index="index" collection="collectionIds" open="(" separator="," close=")">
+                    #{collection_id}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <select id="selectByFlowIds" resultType="cn.cyberpeace.mp.flow.model.FlowCollectionRelModel">
+        select f.* from mp_flow_collection_rel f
+        <where>
+            1 = 1
+            <if test="flowIds != null and flowIds.size() > 0">
+                AND f.flow_id in
+                <foreach item="flow_id" index="index" collection="flowIds" open="(" separator="," close=")">
+                    #{flow_id}
+                </foreach>
+            </if>
+        </where>
+    </select>
+</mapper>

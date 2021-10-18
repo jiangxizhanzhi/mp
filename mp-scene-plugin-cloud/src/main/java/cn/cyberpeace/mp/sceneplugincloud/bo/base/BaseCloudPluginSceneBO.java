@@ -1,9 +1,11 @@
 package cn.cyberpeace.mp.sceneplugincloud.bo.base;
 
+import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneBO;
 import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneModel;
 import lombok.Data;
 
 @Data
-public abstract class BaseCloudPluginSceneBO<M extends BaseCloudPluginSceneModel> extends BasePluginSceneBO<M> {
+public abstract class BaseCloudPluginSceneBO<M extends BaseCloudPluginSceneModel,
+        T extends BaseCloudPluginSceneBO<M, T, S>, S extends BaseSceneBO<?, S>> extends BasePluginSceneBO<M, T, S> {
 }

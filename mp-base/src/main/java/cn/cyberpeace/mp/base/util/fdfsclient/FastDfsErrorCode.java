@@ -4,39 +4,39 @@ import cn.cyberpeace.mp.base.service.code.ErrorCode;
 
 /**
  * @Description: FastDFS错误码
- * @Autho qiaokang
+ * @Author qiaokang
  * @Date：2021/6/21 15:01
  */
 public enum FastDfsErrorCode implements ErrorCode {
 
-    FILE_PATH_ISNULL("error.fastdfs.file_path_isnull", "文件路径为空"),
+    FILE_PATH_ISNULL("MP-110100", "file_path_isnull"),
 
-    FILE_ISNULL("error.fastdfs.file_isnull", "文件为空"),
+    FILE_ISNULL("MP-110101", "file_isnull"),
 
-    FILE_UPLOAD_FAILED("error.fastdfs.file_upload_failed", "文件上传失败"),
+    FILE_UPLOAD_FAILED("MP-110102", "file_upload_failed"),
 
-    FILE_NOT_EXIST("error.fastdfs.file_not_exist", "文件不存在"),
+    FILE_NOT_EXIST("MP-110103", "file_not_exist"),
 
-    FILE_DOWNLOAD_FAILED("error.fastdfs.file_download_failed", "文件下载失败"),
+    FILE_DOWNLOAD_FAILED("MP-110104", "file_download_failed"),
 
-    FILE_DELETE_FAILED("error.fastdfs.file_delete_failed", "删除文件失败"),
+    FILE_DELETE_FAILED("MP-110105", "file_delete_failed"),
 
-    FILE_SERVER_CONNECTION_FAILED("error.fastdfs.file_server_connection_failed", "文件服务器连接失败"),
+    FILE_SERVER_CONNECTION_FAILED("MP-110106", "file_server_connection_failed"),
 
-    FILE_OUT_SIZE("error.fastdfs.file_server_connection_failed", "文件超过大小"),
+    FILE_OUT_SIZE("MP-110107", "file_out_of_size"),
 
-    FILE_TYPE_ERROR_IMAGE("error.file.type.image", "图片类型错误"),
+    FILE_TYPE_ERROR_IMAGE("MP-110108", "type.image"),
 
-    FILE_TYPE_ERROR_DOC("error.file.type.doc", "文档类型错误"),
+    FILE_TYPE_ERROR_DOC("MP-110109", "type.doc"),
 
-    FILE_TYPE_ERROR_VIDEO("error.file.type.video", "音频类型错误"),
+    FILE_TYPE_ERROR_VIDEO("MP-110110", "type.video"),
 
-    FILE_TYPE_ERROR_COMPRESS("error.file.type.compress", "压缩文件类型错误"),
+    FILE_TYPE_ERROR_COMPRESS("MP-110111", "type.compress"),
 
-    FILE_SERVER_INIT_FAILED("error.fastdfs.file_server_init_failed", "文件服务器初始化失败");
+    FILE_SERVER_INIT_FAILED("MP-110112", "file_server_init_failed");
 
     FastDfsErrorCode(String code, String message) {
-        setCode(code, message);
+        setCode(code, "fastdfs.error_code." + message);
     }
 
 }

@@ -13,7 +13,7 @@ import javax.validation.constraints.NotEmpty;
 
 /**
  * @Description: 节点监控请求
- * @Autho qiaokang
+ * @Author qiaokang
  * @Date：2021/7/9 09:23
  */
 @Data

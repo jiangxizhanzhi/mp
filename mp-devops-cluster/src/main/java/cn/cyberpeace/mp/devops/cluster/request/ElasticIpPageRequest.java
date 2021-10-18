@@ -13,7 +13,6 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-@ApiModel(value = "弹性IP分页请求信息")
 public class ElasticIpPageRequest extends BasePageRequest implements Serializable {
 
     /**

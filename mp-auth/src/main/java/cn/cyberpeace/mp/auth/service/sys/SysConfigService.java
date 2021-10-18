@@ -6,6 +6,11 @@ import cn.cyberpeace.mp.base.service.param.QueryParams;
 
 import java.util.List;
 
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 public interface SysConfigService extends BaseModelService<SysConfigModel, QueryParams> {
 
     List<SysConfigModel> listAll();
@@ -21,14 +26,5 @@ public interface SysConfigService extends BaseModelService<SysConfigModel, Query
      * @return
      */
     boolean isNewUserNeedAudit();
-
-
-//    /**
-//     * 系统初始化（加载默认头像，默认下载模板等）
-//     * @return
-//     */
-//    boolean initDefaultAvatars();
-
-    void checkAndInitDefaultAvatars();
 
 }

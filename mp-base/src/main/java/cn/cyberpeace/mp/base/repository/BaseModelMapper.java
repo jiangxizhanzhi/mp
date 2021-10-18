@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.base.util.ClassUtils;
 import cn.cyberpeace.mp.base.util.ModelUtils;
 import cn.cyberpeace.mp.base.util.TextUtils;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.mapping.MappedStatement;
@@ -23,10 +24,7 @@ import java.lang.reflect.Proxy;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public interface BaseModelMapper<M extends BaseModel> {
 
@@ -43,6 +41,53 @@ public interface BaseModelMapper<M extends BaseModel> {
     private static Class<?> getMapperInterface(Proxy proxy) {
         return ClassUtils.getObjFieldValue(Proxy.getInvocationHandler(proxy),
                 "mapperInterface", Class.class);
+    }
+
+    private static Object handleRawFieldValue(Class<?> fieldType, Object fieldValue) {
+        if (fieldType == LocalDateTime.class && fieldValue instanceof java.sql.Timestamp) {
+            return ((java.sql.Timestamp) fieldValue).toLocalDateTime();
+        } else if (fieldType == LocalDate.class && fieldValue instanceof java.sql.Date) {
+            return ((java.sql.Date) fieldValue).toLocalDate();
+        } else if (fieldType == LocalTime.class && fieldValue instanceof java.sql.Time) {
+            return ((java.sql.Time) fieldValue).toLocalTime();
+        } else {
+            return fieldValue;
+        }
+    }
+
+    private static <T> T mapToObj(Map<String, Object> map, Class<T> objClass) {
+        if (map == null) {
+            return null;
+        }
+
+        T obj;
+        try {
+            obj = objClass.getDeclaredConstructor().newInstance();
+        } catch (Exception e) {
+            log.error("Convert {} to {} instance failed: {}", map, objClass, e);
+            return null;
+        }
+
+        Map<String, Class<?>> fieldTypes = ClassUtils.getBeanClassFieldTypes(objClass);
+        final BeanWrapper objWrapper = new BeanWrapperImpl(obj);
+        fieldTypes.forEach((fieldName, fieldType) -> {
+            String mapFieldName = null;
+            if (map.containsKey(fieldName)) {
+                mapFieldName = fieldName;
+            } else {
+                String columnName = TextUtils.humpToLine(fieldName);
+                if (map.containsKey(columnName)) {
+                    mapFieldName = columnName;
+                }
+            }
+
+            if (mapFieldName != null) {
+                Object fieldValue = handleRawFieldValue(fieldType, map.get(mapFieldName));
+                objWrapper.setPropertyValue(fieldName, fieldValue);
+            }
+        });
+
+        return obj;
     }
 
     private Class<?> getMapperInterface() {
@@ -110,18 +155,6 @@ public interface BaseModelMapper<M extends BaseModel> {
         return selectFields;
     }
 
-    private Object handleRawFieldValue(Class<?> fieldType, Object fieldValue) {
-        if (fieldType == LocalDateTime.class && fieldValue instanceof java.sql.Timestamp) {
-            return ((java.sql.Timestamp) fieldValue).toLocalDateTime();
-        } else if (fieldType == LocalDate.class && fieldValue instanceof java.sql.Date) {
-            return ((java.sql.Date) fieldValue).toLocalDate();
-        } else if (fieldType == LocalTime.class && fieldValue instanceof java.sql.Time) {
-            return ((java.sql.Time) fieldValue).toLocalTime();
-        } else {
-            return fieldValue;
-        }
-    }
-
     private M mapToObj(Map<String, Object> map) {
         if (map == null) {
             return null;
@@ -132,25 +165,7 @@ public interface BaseModelMapper<M extends BaseModel> {
             return null;
         }
 
-        M obj;
-        try {
-            obj = actualModelClass.getDeclaredConstructor().newInstance();
-        } catch (Exception e) {
-            log.error("Convert {} to {} instance failed: {}", map, actualModelClass, e);
-            return null;
-        }
-
-        Map<String, Class<?>> fieldTypes = ClassUtils.getBeanClassFieldTypes(actualModelClass);
-        final BeanWrapper objWrapper = new BeanWrapperImpl(obj);
-        fieldTypes.forEach((fieldName, fieldType) -> {
-            String columnName = TextUtils.humpToLine(fieldName);
-            if (map.containsKey(columnName)) {
-                Object fieldValue = handleRawFieldValue(fieldType, map.get(columnName));
-                objWrapper.setPropertyValue(fieldName, fieldValue);
-            }
-        });
-
-        return obj;
+        return mapToObj(map, actualModelClass);
     }
 
     private Object[] convertCreateParams(List<M> objs) {
@@ -220,6 +235,22 @@ public interface BaseModelMapper<M extends BaseModel> {
         return new Object[]{ updateColumnFields.toArray(new String[0]), updateFieldValuesList };
     }
 
+    /**
+     * 按有效字段分组对象
+     * @param objs 数据对象
+     * @return 有效字段分组对象
+     */
+    private Map<String, List<M>> groupValidFieldsObjs(List<M> objs) {
+        Map<String, List<M>> validFieldsObjs = new HashMap<>();
+        objs.forEach(obj -> {
+            String key = DigestUtils.md5Hex(StringUtils.joinWith(":", BeanUtils.getNotNullPropertyNames(obj)));
+            var keyObjs = validFieldsObjs.getOrDefault(key, new ArrayList<>());
+            keyObjs.add(obj);
+            validFieldsObjs.put(key, keyObjs);
+        });
+        return validFieldsObjs;
+    }
+
     @Recommendation
     default List<M> list(HumanCondition humanCondition) {
         if (humanCondition.getLimit() != null && humanCondition.getLimit() == 0) {
@@ -244,6 +275,22 @@ public interface BaseModelMapper<M extends BaseModel> {
 
         return getCommonMapper().list(getTableName(humanCondition), humanCondition.toCondition(),
                 getSelectFields(humanCondition));
+    }
+
+    /**
+     * 返回自定义数据，适用于关联查询跨表结果
+     */
+    @Recommendation
+    default <T> List<T> list(HumanCondition humanCondition, Class<T> objClass) {
+        List<Map<String, Object>> mapList = originList(humanCondition);
+        List<T> objs = new ArrayList<>();
+        mapList.forEach(map -> {
+            var obj = mapToObj(map, objClass);
+            if (obj != null) {
+                objs.add(obj);
+            }
+        });
+        return objs;
     }
 
     @Recommendation
@@ -356,13 +403,17 @@ public interface BaseModelMapper<M extends BaseModel> {
             return 0;
         }
 
-        Object[] updateParams = convertUpdateParams(objs);
-        if (updateParams.length == 0) {
-            log.error("Service bulk update {} has empty field", objs);
-            return 0;
+        var successCount = 0;
+        for (var validFieldsObjs: groupValidFieldsObjs(objs).values()) {
+            Object[] updateParams = convertUpdateParams(validFieldsObjs);
+            if (updateParams.length == 0) {
+                log.error("Service bulk update {} has empty field", objs);
+                continue;
+            }
+            successCount += bulkUpdate((String[]) updateParams[0], (Object[][]) updateParams[1]);
         }
 
-        return bulkUpdate((String[]) updateParams[0], (Object[][]) updateParams[1]);
+        return successCount;
     }
 
     default List<M> commonList(String tableName, @Param("condition") Condition condition, String[] selectFields) {

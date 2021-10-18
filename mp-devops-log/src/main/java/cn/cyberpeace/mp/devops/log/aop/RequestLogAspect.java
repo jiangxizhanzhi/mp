@@ -111,12 +111,12 @@ public class RequestLogAspect {
         }else {
             try {
 
-                if (log.isInfoEnabled()) {
-                    log.info("【前置增强】>>  来源IP: {}, 请求地址URL: {}, 头部header: {}, 全路径类名class: {},方法名称method: {}, 参数信息params: {} ", SnUtils.getRealRemoteIp(request), uri, SnUtils.getRequestHeaders(request), signature.getDeclaringTypeName(), methodName, Arrays.asList(args));
+                if (log.isDebugEnabled()) {
+                    log.debug("【前置增强】>>  来源IP: {}, 请求地址URL: {}, 头部header: {}, 全路径类名class: {},方法名称method: {}, 参数信息params: {} ", SnUtils.getRealRemoteIp(request), uri, SnUtils.getRequestHeaders(request), signature.getDeclaringTypeName(), methodName, Arrays.asList(args));
                 }
                 result = joinPoint.proceed();
-                if (log.isInfoEnabled()) {
-                    log.info("【返回增强】>> 请求地址URL: {},  方法名称method: {}, 结果: {}, 耗费时长: {},状态码: {}", uri, methodName,Objects.isNull(result) ? null : truncString(result.toString(), maxResultLength), System.currentTimeMillis() - startTime, response.getStatus());
+                if (log.isDebugEnabled()) {
+                    log.debug("【返回增强】>> 请求地址URL: {},  方法名称method: {}, 结果: {}, 耗费时长: {},状态码: {}", uri, methodName,Objects.isNull(result) ? null : truncString(result.toString(), maxResultLength), System.currentTimeMillis() - startTime, response.getStatus());
                 }
             } catch (Throwable e) {
                 String exMsg = SnUtils.getExceptionMessage(e);
@@ -125,8 +125,8 @@ public class RequestLogAspect {
                 }
                 throw e;
             }
-            if (log.isInfoEnabled()) {
-                log.info("【后置增强】>> 请求地址URL: {} 结束啦 >>>>>>>>>", uri);
+            if (log.isDebugEnabled()) {
+                log.debug("【后置增强】>> 请求地址URL: {} 结束啦 >>>>>>>>>", uri);
             }
         }
         return  result;

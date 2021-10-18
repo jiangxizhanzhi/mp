@@ -1,35 +1,33 @@
 package cn.cyberpeace.mp.auth.service.sys.impl;
 
-import ch.qos.logback.core.joran.action.IADataForComplexProperty;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.dto.OrgDto;
 import cn.cyberpeace.mp.auth.dto.notice.SysNoticeDto;
 import cn.cyberpeace.mp.auth.dto.notice.SysNoticePageRequest;
 import cn.cyberpeace.mp.auth.dto.notice.SysNoticeRequest;
-import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.RoleModel;
-import cn.cyberpeace.mp.auth.model.SysNoticeOrgModel;
 import cn.cyberpeace.mp.auth.model.SysNoticeModel;
+import cn.cyberpeace.mp.auth.model.SysNoticeOrgModel;
 import cn.cyberpeace.mp.auth.model.SysNoticeReadModel;
 import cn.cyberpeace.mp.auth.model.SysNoticeRoleModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
-import cn.cyberpeace.mp.auth.repository.SysNoticeOrgMapper;
 import cn.cyberpeace.mp.auth.repository.SysNoticeMapper;
+import cn.cyberpeace.mp.auth.repository.SysNoticeOrgMapper;
 import cn.cyberpeace.mp.auth.repository.SysNoticeReadMapper;
 import cn.cyberpeace.mp.auth.repository.SysNoticeRoleMapper;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.service.UserService;
-import cn.cyberpeace.mp.auth.service.sys.SysNoticeService;
 import cn.cyberpeace.mp.auth.service.fields.SysNoticeFields;
+import cn.cyberpeace.mp.auth.service.sys.SysNoticeService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
+import cn.cyberpeace.mp.auth.util.SQLUtils;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
-import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.hutool.core.collection.CollectionUtil;
@@ -45,11 +43,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @Service
 @Slf4j
 public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, SysNoticeMapper, SysNoticeFields, QueryParams>
@@ -82,10 +84,48 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         setModelFields(modelFields);
     }
 
-    public void unpush(String noticeId) {
+
+    @Override
+    public int unReadCount() {
+        SysNoticePageRequest pageRequest = new SysNoticePageRequest();
+        pageRequest.ensure();
+        PageInfo pageInfo = currentUserPage(pageRequest);
+        int noticeCnt = (int) pageInfo.getTotal();
+
+        UserModel userModel = UserUtils.getLoginUser();
+        int readedOrUnpushCnt = noticeReadMapper.countIsReadedOrIsUnPush(userModel.getId());
+        int unreadCnt = noticeCnt - readedOrUnpushCnt;
+        return unreadCnt <= 0 ? 0 : unreadCnt;
+    }
+
+    @Override
+    public void unpush(List<String> noticeIds) {
+        UserModel userModel = UserUtils.getLoginUser();
+        Assert.notNull(userModel, "未获取到当前登录用户信息");
+
+        for (String noticeId : noticeIds) {
+//            SysNoticeModel noticeModel = getModelMapper().get(noticeId);
+//            Assert.notNull(noticeModel, "公告不存在！ID:{}", noticeId);
+
+            SysNoticeReadModel noticeReadModel = noticeReadMapper.selectByUserIdAndNoticeId(userModel.getId(), noticeId);
+
+            if (Objects.isNull(noticeReadModel)) {
+                // 创建一个
+                SysNoticeReadModel noticeReadModelNew = SysNoticeReadModel.builder().noticeId(noticeId).user(userModel.getId()).isReaded(0).readCount(0).isNeedPush(0).build();
+                noticeReadMapper.create(noticeReadModelNew);
+            } else {
+                // increase read cound
+                SysNoticeReadModel noticeReadModelUpdate = new SysNoticeReadModel();
+                noticeReadModelUpdate.setId(noticeReadModel.getId());
+                noticeReadModelUpdate.setIsNeedPush(0);
+                noticeReadMapper.update(noticeReadModelUpdate);
+            }
+        }
 
     }
 
+
+    @Override
     public void read(String noticeId) {
         UserModel userModel = UserUtils.getLoginUser();
         Assert.notNull(userModel, "未获取到当前登录用户信息");
@@ -97,15 +137,13 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
         if (Objects.isNull(noticeReadModel)) {
             // 创建一个
-            SysNoticeReadModel noticeReadModelNew = SysNoticeReadModel.builder().noticeId(noticeId).user(userModel.getId()).build();
+            SysNoticeReadModel noticeReadModelNew = SysNoticeReadModel.builder().noticeId(noticeId).user(userModel.getId()).isReaded(1).readCount(1).isNeedPush(1).build();
             noticeReadMapper.create(noticeReadModelNew);
         } else {
-            // add read cound
-            SysNoticeReadModel noticeReadModelUpdate = new SysNoticeReadModel();
-            noticeReadModelUpdate.setNoticeId(noticeReadModel.getNoticeId());
-            noticeReadModelUpdate.setReadCount(noticeReadModel.getReadCount() + 1);
-            noticeReadMapper.update(noticeReadModelUpdate);
+            // increase read cound
+            noticeReadMapper.increaseReadCount(noticeReadModel.getId());
         }
+
     }
 
     @Override
@@ -136,7 +174,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         noticeOrgMapper.bulkCreate(noticeGroupModelList);
 
         // 角色，如果是公开的，则忽略角色字段内的值
-        if (sysNoticeRequest.getIsPublic().equals(SysNoticeModel.NOTICE_NOT_PUBLIC)) {
+        if (Objects.nonNull(sysNoticeRequest.getIsPublic()) && sysNoticeRequest.getIsPublic().equals(SysNoticeModel.NOTICE_NOT_PUBLIC)) {
             List<SysNoticeRoleModel> noticeRoleModelList = new ArrayList<>();
             if (CollectionUtil.isNotEmpty(sysNoticeRequest.getRoleIds())) {
                 sysNoticeRequest.getRoleIds().forEach(roleId -> {
@@ -156,14 +194,15 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public SysNoticeModel modify(SysNoticeRequest sysNoticeRequest) {
+    public SysNoticeModel modify(String id, SysNoticeRequest sysNoticeRequest) {
         Assert.notNull(sysNoticeRequest, "公告更新请求不能为空！");
 
-        ObjServiceResult<SysNoticeModel> noticeModelResult = get(sysNoticeRequest.getId());
-        ResultUtils.throwExceptionIfError(noticeModelResult, "ID:" + sysNoticeRequest.getId() + "对应的公告信息不存在！");
+        ObjServiceResult<SysNoticeModel> noticeModelResult = get(id);
+        ResultUtils.throwExceptionIfError(noticeModelResult, "ID:" + id + "对应的公告信息不存在！");
 
         SysNoticeModel noticeModel = new SysNoticeModel();
         BeanUtils.copyProperties(sysNoticeRequest, noticeModel);
+        noticeModel.setId(id);
 
         ObjServiceResult<SysNoticeModel> result = update(noticeModel);
         ResultUtils.throwExceptionIfError(result, "更新公告失败！");
@@ -187,7 +226,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         noticeOrgMapper.bulkCreate(noticeGroupModelList);
 
         // 角色，如果是公开的，则忽略角色字段内的值
-        if (sysNoticeRequest.getIsPublic().equals(SysNoticeModel.NOTICE_NOT_PUBLIC)) {
+        if (Objects.nonNull(sysNoticeRequest.getIsPublic()) && sysNoticeRequest.getIsPublic().equals(SysNoticeModel.NOTICE_NOT_PUBLIC)) {
             List<SysNoticeRoleModel> noticeRoleModelList = new ArrayList<>();
             if (CollectionUtil.isNotEmpty(sysNoticeRequest.getRoleIds())) {
                 sysNoticeRequest.getRoleIds().forEach(roleId -> {
@@ -211,9 +250,10 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         }
 
         PageHelper.startPage(req.getPage(), req.getPageSize());
-        List<SysNoticeModel> notices = getModelMapper().listNotices(req.getTitle(), ids, req.getOrgIds(), req.getRoleIds(), null, null);
+        String likeTitle = SQLUtils.escapeLike(req.getTitle());
+        List<SysNoticeModel> notices = getModelMapper().listNotices(likeTitle, ids, req.getOrgIds(), req.getRoleIds(), null, null);
         PageInfo pageInfo = new PageInfo(notices);
-        convertPageInfo(pageInfo);
+        convert2NoticeDtoPageInfo(pageInfo);
         return pageInfo;
     }
 
@@ -221,6 +261,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
     public PageInfo<SysNoticeModel> currentUserPage(SysNoticePageRequest req) {
         UserModel userModel = UserUtils.getLoginUser();
         if(Objects.isNull(userModel)) {
+            log.error("未查询到当前登录用户！");
             return new PageInfo<>();
         }
 
@@ -230,13 +271,15 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         boolean isAdmin = roleModels.stream().anyMatch(r -> r.getIdentifier().equals(AuthConstant.ROLE_ADMIN));
 
         if (isAdmin) {
+            log.info("current user is admin!");
             PageHelper.startPage(req.getPage(), req.getPageSize());
-            List<SysNoticeModel> notices = getModelMapper().listNotices(null, null, null, null,null, null);
+            List<SysNoticeModel> notices = getModelMapper().listCurrentUserNotices(null, null, null, null,null, null, userModel.getId());
             PageInfo pageInfo = new PageInfo(notices);
-            convertPageInfo(pageInfo);
+            convert2NoticeDtoPageInfo(pageInfo);
             return pageInfo;
         }
 
+        log.info("current user is not admin!");
         // 非管理员...
         List<String> allRoleIds = roleModels.stream().map(RoleModel::getId).collect(Collectors.toList());
 
@@ -252,10 +295,10 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         });
 
         PageHelper.startPage(req.getPage(), req.getPageSize());
-        List<SysNoticeModel> notices = getModelMapper().listNotices(null, null, allOrgIds, allRoleIds,null, null);
+        List<SysNoticeModel> notices = getModelMapper().listCurrentUserNotices(null, null, allOrgIds, allRoleIds,null, null, userModel.getId());
         PageInfo pageInfo = new PageInfo(notices);
 
-        convertPageInfo(pageInfo);
+        convert2NoticeDtoPageInfo(pageInfo);
         return pageInfo;
     }
 
@@ -270,12 +313,12 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
             noticeOrgMapper.deleteByNoticeIds(CollectionUtil.toList(ids));
             noticeRoleMapper.deleteByNoticeIds(CollectionUtil.toList(ids));
         }
-        // todo 群组
 
         return result;
     }
 
 
+    @Override
     public SysNoticeDto noticeModel2NoticeDto(SysNoticeModel noticeModel) {
         if (Objects.isNull(noticeModel)) {
             return null;
@@ -310,7 +353,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         return noticeDto;
     }
 
-    private void convertPageInfo(PageInfo pageInfo) {
+    private void convert2NoticeDtoPageInfo(PageInfo pageInfo) {
         List<SysNoticeModel> noticeModels = pageInfo.getList();
 
         List<SysNoticeDto> noticeDtos = noticeModels.stream().map(n -> {

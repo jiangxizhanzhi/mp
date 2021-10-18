@@ -5,21 +5,10 @@ import lombok.Data;
 import java.util.Map;
 
 @Data
-public class ScenePluginDataBO {
+public class ScenePluginDataBO extends BaseScenePluginDataBO<Map<String, Object>, Map<String, Object>,
+        Map<String, Object>> {
 
-    /**
-     * key: pluginConfig
-     */
-    private Map<String, Object> scene;
-
-    /**
-     * nodeId: pluginNodeData
-     */
-    private Map<String, Map<String, Object>> elements;
-
-    /**
-     * portId: pluginPortData
-     */
-    private Map<String, Map<String, Object>> elementPorts;
-
+    public ScenePluginDataBO export() {
+        return this;
+    }
 }

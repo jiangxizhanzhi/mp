@@ -44,6 +44,11 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @Service
 @Slf4j
 public class UserOnlineReportServiceImpl extends BaseModelServiceImpl<UserOnlineReportModel, UserOnlineReportMapper, UserOnlineReportFields, QueryParams> implements UserOnlineReportService {
@@ -196,40 +201,5 @@ public class UserOnlineReportServiceImpl extends BaseModelServiceImpl<UserOnline
         private static ExecutorService threadPoolExecutor = new ThreadPoolExecutor(20, 100, 20, TimeUnit.SECONDS,
                 new ArrayBlockingQueue(100), namedThreadFactory, new ThreadPoolExecutor.DiscardOldestPolicy());
     }
-
-
-    /*private String convertOpType2Desc(String opType) {
-        if(Objects.equals(opType, AuthLogConstant.TYPE_LOGIN)) {
-            return "登录";
-        }
-        if(Objects.equals(opType, AuthLogConstant.TYPE_LOGOUT)) {
-            return "登出";
-        }
-        if(Objects.equals(opType, AuthLogConstant.TYPE_ADD)) {
-            return "添加";
-        }
-        if(Objects.equals(opType, AuthLogConstant.TYPE_REGISTER)) {
-            return "注册";
-        }
-        if(Objects.equals(opType, AuthLogConstant.TYPE_UPDATE)) {
-            return "更新";
-        }
-        if(Objects.equals(opType, AuthLogConstant.TYPE_DELETE)) {
-            return "删除";
-        }
-        if(Objects.equals(opType, AuthLogConstant.TYPE_BATCH_ADD)) {
-            return "批量添加";
-        }
-        if(Objects.equals(opType, AuthLogConstant.TYPE_BATCH_UPDATE)) {
-            return "批量更新";
-        }
-        if(Objects.equals(opType, AuthLogConstant.TYPE_BATCH_DELETE)) {
-            return "批量删除";
-        }
-
-        log.info("opType: {}", opType);
-        return opType;
-    }*/
-
 
 }

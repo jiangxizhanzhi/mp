@@ -1,0 +1,14 @@
+package cn.cyberpeace.mp.devops.cluster.model;
+
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.CloudPlatformPageResult;
+import lombok.*;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@EqualsAndHashCode(callSuper = true)
+public class FlavorCloudPlatformModel extends BaseCloudPlatformModel {
+
+    private CloudPlatformPageResult<Flavor> data;
+}

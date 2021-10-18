@@ -1,13 +1,14 @@
 package cn.cyberpeace.mp.auth.service.sys.impl;
 
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.SysConfigConstant;
-import cn.cyberpeace.mp.auth.model.AvatarModel;
 import cn.cyberpeace.mp.auth.model.SysConfigModel;
+import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.repository.SysConfigMapper;
 import cn.cyberpeace.mp.auth.service.AvatarService;
-import cn.cyberpeace.mp.auth.service.sys.SysConfigService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.SysConfigFields;
+import cn.cyberpeace.mp.auth.service.sys.SysConfigService;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
@@ -19,13 +20,17 @@ import cn.hutool.core.lang.Assert;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @Service
 @Slf4j
 public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, SysConfigMapper, SysConfigFields, QueryParams>
@@ -42,11 +47,6 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
 
     @Autowired
     private UserService userService;
-
-    @Scheduled(initialDelay = 10000, fixedDelay = Long.MAX_VALUE)
-    public void defaultAvatarsInit() {
-        checkAndInitDefaultAvatars();
-    }
 
 
     @Override
@@ -74,6 +74,14 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
     public boolean updateByKeyName(SysConfigModel sysConfigModel) {
         Assert.notBlank(sysConfigModel.getKeyName(), "key不能为空！");
         Assert.notNull(sysConfigModel.getValue(), "value不能为null！");
+
+        if (sysConfigModel.getKeyName().equals(SysConfigConstant.KEY_USER_AUDIT) && sysConfigModel.getValue().equals("0")) {
+            // 如果要关闭审核功能，需要检查用户中有没有处于待审核状态的
+            List<UserModel> list = userService.listNotAudited();
+            if (CollectionUtil.isNotEmpty(list)) {
+                throw new MpRuntimeException(AuthErrorCode.SYS_CONFIG_CANNOT_CLOSE_AUDIT);
+            }
+        }
 
         int cnt = getModelMapper().updateByKeyName(sysConfigModel.getKeyName(), sysConfigModel.getValue());
 
@@ -126,18 +134,4 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
         return false;
     }
 
-
-
-    @Override
-    public void checkAndInitDefaultAvatars() {
-        // 检查是否需要自动上传默认头像
-        log.info("check if need to upload default avatar!");
-        List<AvatarModel> avatarModels = avatarService.listAll();
-        if (CollectionUtil.isNotEmpty(avatarModels) && avatarModels.size() == 9) {
-            log.info("no need to upload default avatar!");
-            return;
-        } else {
-            avatarService.initDefaultAvatars();
-        }
-    }
 }

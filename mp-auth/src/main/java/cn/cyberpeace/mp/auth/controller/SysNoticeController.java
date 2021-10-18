@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.auth.service.sys.SysNoticeService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.hutool.core.collection.CollectionUtil;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -30,6 +31,11 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Collections;
 import java.util.Objects;
 
+/**
+ * @Description: 系统公告管理接口
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @Api(value = "公告管理接口", tags = "AUTH-公告管理接口")
 @Slf4j
 @RestController
@@ -54,9 +60,26 @@ public class SysNoticeController {
 
 
     @ApiOperation("阅读公告接口")
-    @GetMapping("/read/{id}")
-    public ServiceResult<SysNoticeDto> read(@PathVariable String id) {
-        return null;
+    @PostMapping("/read/{id}")
+    public ServiceResult read(@PathVariable String id) {
+        noticeService.read(id);
+        return ServiceResult.successful();
+    }
+
+
+    @ApiOperation("不再推送公告消息")
+    @PostMapping("/unpush")
+    public ServiceResult unpush(@RequestBody String[] ids) {
+        noticeService.unpush(CollectionUtil.toList(ids));
+        return ServiceResult.successful();
+    }
+
+
+    @ApiOperation("未读公告数量")
+    @GetMapping("/unread_count")
+    public ServiceResult<Integer> unReadCount() {
+        int unreadCnt = noticeService.unReadCount();
+        return ServiceResult.success(unreadCnt);
     }
 
     @ApiOperation("分页查询所有公告")
@@ -69,7 +92,7 @@ public class SysNoticeController {
     }
 
 
-    @ApiOperation("分页查询当前用户有权看到的公告")
+    @ApiOperation("分页查询当前用户有权看到的公告（公告消息）")
     @GetMapping("/currentuser/page")
     public ServiceResult<SysNoticeDto> currentUserPage(SysNoticePageRequest pageRequest) {
         pageRequest.ensure();
@@ -83,13 +106,13 @@ public class SysNoticeController {
     @PostMapping
     public ServiceResult<SysNoticeModel> create(@RequestBody @Validated(AddGroup.class) SysNoticeRequest noticeReq) {
         SysNoticeModel noticeModel = noticeService.add(noticeReq);
-        return ResultUtils.commonResult(true, noticeModel);
+        return ServiceResult.success(noticeModel);
     }
 
     @ApiOperation("更新公告")
-    @PatchMapping
-    public ServiceResult modify(@RequestBody @Validated(UpdateGroup.class) SysNoticeRequest noticeReq) {
-        SysNoticeModel noticeModel = noticeService.modify(noticeReq);
+    @PatchMapping("/{id}")
+    public ServiceResult modify(@PathVariable String id, @RequestBody @Validated(UpdateGroup.class) SysNoticeRequest noticeReq) {
+        SysNoticeModel noticeModel = noticeService.modify(id, noticeReq);
 
         return ServiceResult.builder().source(noticeModel).build().asResult();
     }

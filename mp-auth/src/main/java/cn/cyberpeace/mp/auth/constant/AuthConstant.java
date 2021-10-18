@@ -1,6 +1,14 @@
 package cn.cyberpeace.mp.auth.constant;
 
+/**
+ * @Description: 全局变量
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 public class AuthConstant {
+
+    public static final String ROOT_USER_ID = "3f655d87112f4ae094bbaf70830e20aa";
+
     public static final String PASSWORD_SECRET = "99bdfe0886604c49be29c977635572d5";
 
     public static final String PASSWORD_DES_KEY = "B13H089Y";
@@ -20,8 +28,6 @@ public class AuthConstant {
     public static final String DEFAULT_TENANT = "default";
 
     public static final String ROLE_ADMIN = "ADMIN";
-
-    public static final String ROLE_SUPERUSER = "SUPERUSER";
 
     public static final String ORG_PATH_SEPARATOR = "/";
 

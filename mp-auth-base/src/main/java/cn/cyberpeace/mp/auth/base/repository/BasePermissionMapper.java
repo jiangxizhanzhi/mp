@@ -1,10 +1,10 @@
 package cn.cyberpeace.mp.auth.base.repository;
 
+import cn.cyberpeace.mp.auth.base.model.BasePermissionModel;
 import cn.cyberpeace.mp.auth.base.repository.stereotype.PermissionModelClass;
 import cn.cyberpeace.mp.base.annotation.Recommendation;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;
-import cn.cyberpeace.mp.base.model.auth.BasePermissionModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.condition.AndCondition;
 import cn.cyberpeace.mp.base.repository.condition.ConnectorCond;
@@ -33,26 +33,9 @@ public interface BasePermissionMapper<P extends BasePermissionModel, T extends B
 
     @Recommendation
     default List<T> listTargetsByOwner(String owner, HumanCondition outerCondition) {
-        HumanCondition innerCondition = getInnerCondition(owner);
-        String currentLinkName = innerCondition.getCurrentLinkName();
-
-        // distinct
-        innerCondition.setDistinct(outerCondition.getDistinct());
-        // select fields
-        innerCondition.getSelectFields().putAll(convertSelectFields(currentLinkName, outerCondition));
-        // paging
-        innerCondition.setLimit(outerCondition.getLimit());
-        innerCondition.setOffset(outerCondition.getOffset());
-        // group
-        innerCondition.getGroupFields().addAll(convertGroupFields(currentLinkName, outerCondition));
-        // orders
-        innerCondition.getOrders().addAll(convertOrders(currentLinkName, outerCondition));
-        // andi
-        innerCondition.getAndCondition().addCondition(convertAndCondition(currentLinkName, outerCondition));
+        HumanCondition innerCondition = processOuterCondition(owner, outerCondition);
 
         List<Map<String, Object>> mapList = originList(innerCondition);
-
-        Class targetClz = getTargetClass();
 
         List<T> objs = new ArrayList<>();
         mapList.forEach(map -> {
@@ -64,12 +47,20 @@ public interface BasePermissionMapper<P extends BasePermissionModel, T extends B
         return objs;
     }
 
+    @Recommendation
+    default int totalTargetsByOwner(String owner, HumanCondition outerCondition) {
+        HumanCondition innerCondition = processOuterCondition(owner, outerCondition);
+
+        return total(innerCondition);
+    }
+
     /*
     @Recommendation
     default List<P> listPermissionsByOwner(String owner) {
 
         HumanCondition humanCondition = new HumanCondition();
         humanCondition.filterEqual("owner", owner);
+
 
         return list(humanCondition);
     }
@@ -102,6 +93,25 @@ public interface BasePermissionMapper<P extends BasePermissionModel, T extends B
         return filterDelete(humanCondition);
     }
 
+    private HumanCondition processOuterCondition(String owner, HumanCondition outerCondition) {
+        HumanCondition innerCondition = getInnerCondition(owner);
+        String currentLinkName = innerCondition.getCurrentLinkName();
+
+        // distinct
+        innerCondition.setDistinct(outerCondition.getDistinct());
+        // select fields
+        innerCondition.getSelectFields().putAll(convertSelectFields(currentLinkName, outerCondition));
+        // paging
+        innerCondition.setLimit(outerCondition.getLimit());
+        innerCondition.setOffset(outerCondition.getOffset());
+        // group
+        innerCondition.getGroupFields().addAll(convertGroupFields(currentLinkName, outerCondition));
+        // orders
+        innerCondition.getOrders().addAll(convertOrders(currentLinkName, outerCondition));
+        // andi
+        innerCondition.getAndCondition().addCondition(convertAndCondition(currentLinkName, outerCondition));
+        return innerCondition;
+    }
 
 
     private Class<P> getPermissionClass() {
@@ -218,7 +228,11 @@ public interface BasePermissionMapper<P extends BasePermissionModel, T extends B
 
 
     private String convertFieldName(String currentLinkName, String fieldName) {
-        return currentLinkName + "." + fieldName;
+        String prefix = currentLinkName + ".";
+        if(fieldName.contains(prefix)) {
+            return fieldName;
+        }
+        return prefix + fieldName;
     }
 
     private Map<String, String> convertSelectFields(String currentLinkName, HumanCondition condition) {

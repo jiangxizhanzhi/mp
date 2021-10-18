@@ -1,5 +1,23 @@
 dependencies {
     implementation project(':mp-base')
+
     implementation project(':mp-auth')
+
     implementation project(':mp-devops-log')
+
+    implementation project(':mp-auth-base')
+
+    implementation 'org.apache.httpcomponents:httpmime:4.4.1'
+
+    implementation 'org.mapstruct:mapstruct:1.4.2.Final'
+
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.4.2.Final'
+
+}
+
+compileJava {
+    options.compilerArgs = [
+            '-Amapstruct.suppressGeneratorTimestamp=true',
+            '-Amapstruct.suppressGeneratorVersionInfoComment=true'
+    ]
 }

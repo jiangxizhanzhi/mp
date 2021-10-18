@@ -11,6 +11,11 @@ import com.github.pagehelper.PageInfo;
 
 import java.util.List;
 
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 public interface UserRoleService extends BaseModelService<UserRoleModel, QueryParams> {
 
     List<RoleModel> listByUserId(String userId);

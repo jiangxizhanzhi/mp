@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.auth.repository;
 
-import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.SysNoticeRoleModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
@@ -11,6 +10,11 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @Mapper
 @Repository
 @ModelClass(SysNoticeRoleModel.class)

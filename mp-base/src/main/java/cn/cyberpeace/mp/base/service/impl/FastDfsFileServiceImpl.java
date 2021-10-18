@@ -19,7 +19,7 @@ import java.io.File;
 /**
  * @Description: FastDFS文件操作实现类
  *               trackerServers每个接口初始化一次，便于不同业务对接不同集群的FastDFS
- * @Autho qiaokang
+ * @Author qiaokang
  * @Date：2021/7/29 14:47
  */
 @Slf4j
@@ -39,9 +39,14 @@ public class FastDfsFileServiceImpl implements FileService {
      * @return
      */
     @Override
-    public ServiceResult uploadFile(MultipartFile file, HttpServletRequest request) {
+    public ServiceResult<FileResponseData> uploadFile(MultipartFile file, HttpServletRequest request) {
         FileResponseData responseData = uploadSample(file, request);
-        return ServiceResult.success(responseData);
+        if (responseData.isSuccess()) {
+            return ServiceResult.success(responseData);
+        } else {
+            return ServiceResult.fail(responseData.getMessage());
+        }
+
     }
 
     /**
@@ -97,6 +102,7 @@ public class FastDfsFileServiceImpl implements FileService {
             responseData.setFileType(FastDFSClient.getFilenameSuffix(file.getOriginalFilename()));
             responseData.setHttpUrl(group.getFileServerAddr() + File.separator + filepath);
             responseData.setInnerHttpUrl(group.getInnerFileServerAddr() + File.separator + filepath);
+            responseData.setFileSize(file.getSize());
         } catch (MpRuntimeException e) {
             responseData.setSuccess(false);
             responseData.setCode(e.getErrorCode());

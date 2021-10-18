@@ -2,9 +2,7 @@ package cn.cyberpeace.mp.auth.test;
 
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.service.TargetService;
-import cn.cyberpeace.mp.base.util.IdGenerator;
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.json.JSONObject;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,9 +16,12 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
 
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @Service
 @Slf4j
 public class TmpMenuService {
@@ -29,7 +30,7 @@ public class TmpMenuService {
     private TargetService targetService;
 
     public void process() {
-//        String path = "/Users/sternberg/work/saining/all_permissions_json_0712_96.240.json";
+//        String path = "/Users/sternberg/work/saining/all_permissions_json_0908.json";
         String path = "";
         String s = readJsonFile(path);
         List<TmpMenuDTO> menus = JSON.parseArray(s, TmpMenuDTO.class);
@@ -44,9 +45,13 @@ public class TmpMenuService {
 
         log.info("size:{}", targets.size());
 
-        for (TargetModel target : targets) {
-            // 需要把 cn.cyberpeace.mp.base.service.fields.BaseModelFields.readonlyFields这个里面的ID拿掉，不然塞入的id不起作用
+        /*for (TargetModel target : targets) {
+            // 需要把 cn.cyberpeace.mp.base.service.fields.BaseModelFields.readonlyFields这个里面的`BaseModel::getId`拿掉，不然塞入的id不起作用
             targetService.create(target);
+        }*/
+
+        for (int i = 0; i < targets.size(); i++) {
+            targetService.create(targets.get(i));
         }
     }
 

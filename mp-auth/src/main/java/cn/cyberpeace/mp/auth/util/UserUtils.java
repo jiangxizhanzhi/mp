@@ -1,9 +1,11 @@
 package cn.cyberpeace.mp.auth.util;
 
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetails;
 import cn.cyberpeace.mp.auth.model.ClientDetailsModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.devops.log.constant.LogConstant;
@@ -15,6 +17,11 @@ import org.springframework.stereotype.Component;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Objects;
 
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @Component
 @Slf4j
 public class UserUtils {
@@ -60,7 +67,8 @@ public class UserUtils {
         }
 
         if (principal instanceof ClientDetailsModel) {
-            log.info("Login user is Client:{}", principal);
+            log.error("Login account type Client:{}", principal);
+            throw new MpRuntimeException(AuthErrorCode.ACCOUNT_TYPE_ERROR);
         }
 
         return user;

@@ -5,26 +5,32 @@ import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
+/**
+ * @Description: 激活请求体
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @Data
 public class ActivationRequest {
 
-    @ApiModelProperty(value = "机器码")
+    @ApiModelProperty(value = "系统序列号")
     @NotBlank
-    private String machinecode;
+    private String machineCode;
 
-    @ApiModelProperty(value = "授权月份（多少个月）")
-    @NotBlank
+    @ApiModelProperty(value = "授权月数")
+    @NotNull
     private Integer deadline;
 
-    @ApiModelProperty(value = "产品模块")
-    @NotEmpty
-    private List<String> products;
+    @ApiModelProperty(value = "激活版本 0:标准版 1:专业版")
+    @NotNull
+    private Integer edition;
 
-    @ApiModelProperty(value = "授权控制项列表")
+    @ApiModelProperty(value = "授权项列表")
     @NotEmpty
-    private List<ActivationAuthItem> items;
+    private List<ActivationItem> items;
 
     @ApiModelProperty(value = "校验码")
     @NotBlank

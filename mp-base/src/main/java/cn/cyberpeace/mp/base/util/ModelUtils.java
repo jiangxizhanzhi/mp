@@ -29,6 +29,11 @@ public class ModelUtils {
                 defaultValue = defaultIntAnnotation.value();
             }
 
+            var defaultLongAnnotation = field.getAnnotation(DefaultLong.class);
+            if (defaultLongAnnotation != null) {
+                defaultValue = defaultLongAnnotation.value();
+            }
+
             var defaultStrAnnotation = field.getAnnotation(DefaultStr.class);
             if (defaultStrAnnotation != null) {
                 defaultValue = defaultStrAnnotation.value();

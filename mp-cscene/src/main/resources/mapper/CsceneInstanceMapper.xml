@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper">
+
+    <select id="countGroupByReferenceType" resultType="cn.cyberpeace.mp.cscene.model.CsceneInstanceCountByReferenceTypeModel">
+        SELECT
+            i.reference_type,
+            count( i.pk ) AS total
+        FROM
+            mp_cscene_cscene_instance i
+        LEFT JOIN
+            mp_scene_scene s ON i.scene = s.id
+        <where>
+            <if test="events != null and events.size > 0">
+                s.event NOT IN
+                <foreach collection="events" item="item" index="index"  open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+        GROUP BY
+            i.reference_type
+    </select>
+
+    <select id="countActivityScene" resultType="cn.cyberpeace.mp.cscene.model.CsceneInstanceCountActivitySceneModel">
+        SELECT
+            count( s.pk ) AS total,
+            sum( CASE WHEN s.EVENT > 2 OR ( s.EVENT = 2 AND s.event_status = 4 ) THEN 1 ELSE 0 END ) AS activitySceneTotal
+        FROM
+            mp_scene_scene s
+    </select>
+
+</mapper>

@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.cyberpeace.mp.situationaware.repository.ProbeModelMapper">
+    <resultMap id="BaseResultMap" type="cn.cyberpeace.mp.situationaware.model.ProbeModel">
+        <id column="pk" jdbcType="INTEGER" property="pk"/>
+        <result column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="probe_name" jdbcType="VARCHAR" property="probeName"/>
+        <result column="des" jdbcType="VARCHAR" property="des"/>
+        <result column="OS_type" jdbcType="VARCHAR" property="osType"/>
+        <result column="probe_category" jdbcType="INTEGER" property="probeCategory"/>
+        <result column="source_category" jdbcType="INTEGER" property="sourceCategory" typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler"/>
+        <result column="script_type" jdbcType="INTEGER" property="scriptType"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="del_flag" jdbcType="INTEGER" property="delFlag"/>
+        <result column="command_interval" jdbcType="VARCHAR" property="commandInterval"/>
+        <result column="probe_status" jdbcType="VARCHAR" property="probeStatus" typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler"/>
+    </resultMap>
+    <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="cn.cyberpeace.mp.situationaware.model.ProbeModel">
+        <result column="script_content" jdbcType="LONGVARBINARY" property="scriptContent"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        pk
+        , id, probe_name, des, OS_type, probe_category, script_type, create_time, update_time, del_flag, command_interval, probe_status
+    </sql>
+    <sql id="Blob_Column_List">
+        script_content
+    </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="ResultMapWithBLOBs">
+        select
+        <include refid="Base_Column_List"/>
+        ,
+        <include refid="Blob_Column_List"/>
+        from mp_situation_probe
+        where pk = #{pk,jdbcType=INTEGER}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+        delete
+        from mp_situation_probe
+        where pk = #{pk,jdbcType=INTEGER}
+    </delete>
+    <insert id="insert" parameterType="cn.cyberpeace.mp.situationaware.model.ProbeModel">
+        insert into mp_situation_probe (pk, id, probe_name,
+                                        des, OS_type, probe_category,source_category,
+                                        script_type, create_time, update_time,
+                                        script_content, command_interval)
+        values (#{pk,jdbcType=INTEGER}, #{id,jdbcType=VARCHAR}, #{probeName,jdbcType=VARCHAR},
+                #{des,jdbcType=VARCHAR}, #{osType,jdbcType=INTEGER}, #{probeCategory,jdbcType=INTEGER},#{sourceCategory, jdbcType=INTEGER,
+            javaType=cn.cyberpeace.mp.situationaware.model.enums.SourceCategory,
+            typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
+                #{scriptType,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
+                   , #{scriptContent,jdbcType=LONGVARBINARY}, #{commandInterval,jdbcType=VARCHAR})
+    </insert>
+    <update id="deleteByProbeId" parameterType="java.lang.String">
+        update mp_situation_probe
+        set del_flag=1
+        where id = #{probeId,jdbcType=VARCHAR}
+    </update>
+
+    <update id="deleteByProbeIds" parameterType="java.util.List">
+        update mp_situation_probe
+        set del_flag=1
+        where id in
+        <foreach collection="probeIds" item="probeId" index="index" open="(" close=")" separator=",">
+            #{probeId}
+        </foreach>
+    </update>
+
+    <select id="queryListWithPage"
+            resultMap="ResultMapWithBLOBs">
+        select
+        <include refid="Base_Column_List"/>,
+        <include refid="Blob_Column_List"/>
+        from mp_situation_probe
+        where
+        del_flag != 1
+        <if test="probeSearchRequest.keyWord !=null">
+            and probe_name like concat('%', #{probeSearchRequest.keyWord}, '%')
+        </if>
+        <if test="probeSearchRequest.sourceCategory != null">
+            and source_category = #{probeSearchRequest.sourceCategory, jdbcType=INTEGER,
+            javaType=cn.cyberpeace.mp.situationaware.model.enums.SourceCategory,
+            typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler}
+        </if>
+        order by update_time desc limit #{offset}, #{probeSearchRequest.perPage}
+    </select>
+
+    <select id="countQuery" parameterType="cn.cyberpeace.mp.situationaware.model.ProbeSearchRequest"
+            resultType="java.lang.Integer">
+        select count(*)
+        from mp_situation_probe
+        where
+        del_flag != 1
+        <if test="keyWord !=null">
+            and probe_name like concat('%', #{keyWord}, '%')
+        </if>
+        <if test="sourceCategory != null">
+            and source_category = #{sourceCategory, jdbcType=INTEGER,
+            javaType=cn.cyberpeace.mp.situationaware.model.enums.SourceCategory,
+            typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler}
+        </if>
+        order by update_time desc
+    </select>
+
+    <select id="queryByProbeId" parameterType="java.lang.String"
+            resultMap="ResultMapWithBLOBs">
+        select
+        <include refid="Base_Column_List"/>
+        ,
+        <include refid="Blob_Column_List"/>
+        from mp_situation_probe
+        where
+        del_flag != 1
+        <if test="probeId !=null">
+            and id = #{probeId,jdbcType=VARCHAR}
+        </if>
+    </select>
+
+    <update id="updateByProbeId" parameterType="cn.cyberpeace.mp.situationaware.model.ProbeModel">
+        update mp_situation_probe
+        set probe_name       = #{probeName,jdbcType=VARCHAR},
+            des              = #{des,jdbcType=VARCHAR},
+            OS_type          = #{osType,jdbcType=VARCHAR},
+            probe_category   = #{probeCategory,jdbcType=INTEGER},
+            script_type      = #{scriptType,jdbcType=INTEGER},
+            update_time      = #{updateTime,jdbcType=TIMESTAMP},
+            script_content   = #{scriptContent,jdbcType=LONGVARBINARY},
+            command_interval = #{commandInterval,jdbcType=VARCHAR}
+        where id = #{id,jdbcType=VARCHAR}
+    </update>
+
+    <select id="countQueryByProbeName" parameterType="java.lang.String"
+            resultType="java.lang.Integer">
+        select count(*)
+        from mp_situation_probe
+        where del_flag != 1
+        and probe_name = #{probeName,jdbcType=VARCHAR}
+    </select>
+
+    <select id="countQueryModifyByProbeName" parameterType="java.lang.String"
+            resultType="java.lang.Integer">
+        select count(*)
+        from mp_situation_probe
+        where del_flag != 1
+            and probe_name = #{probeName,jdbcType=VARCHAR}
+          and id != #{probeId}
+    </select>
+
+    <update id="updateProbeStatus">
+        update mp_situation_probe
+        set probe_status = #{probeStatus, jdbcType=INTEGER,
+            javaType=cn.cyberpeace.mp.situationaware.model.enums.ProbeStatus,
+            typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler}
+        where id = #{probeId,jdbcType=VARCHAR}
+    </update>
+
+    <select id="queryAllProbes" parameterType="java.lang.String"
+            resultMap="ResultMapWithBLOBs">
+        select
+        <include refid="Base_Column_List"/>
+        from mp_situation_probe
+        where
+        del_flag != 1
+    </select>
+</mapper>

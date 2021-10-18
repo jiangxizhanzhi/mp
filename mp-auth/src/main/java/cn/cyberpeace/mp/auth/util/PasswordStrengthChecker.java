@@ -9,6 +9,11 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.Objects;
 
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 public class PasswordStrengthChecker {
 
     private final static int[] SIZE_TABLE = {9, 99, 999, 9999, 99999, 999999, 9999999, 99999999, 999999999,

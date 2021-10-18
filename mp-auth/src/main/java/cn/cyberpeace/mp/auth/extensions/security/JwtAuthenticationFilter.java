@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.extensions.security;
 
+import cn.cyberpeace.mp.auth.base.context.LoginUserContext;
 import cn.cyberpeace.mp.auth.extensions.security.common.JwtCommon;
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetails;
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetailsService;
@@ -25,6 +26,11 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @Component
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -54,6 +60,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
 
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+
+            LoginUserContext loginUserContext = new LoginUserContext();
+            if (user != null) {
+                loginUserContext.setValue(user.getId());
+            }
         }
 
         filterChain.doFilter(request, response);

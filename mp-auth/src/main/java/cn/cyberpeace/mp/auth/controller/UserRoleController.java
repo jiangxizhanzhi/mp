@@ -27,6 +27,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+/**
+ * @Description: 用户角色管理接口
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @Api(value = "用户-角色管理接口", tags = "AUTH-用户-角色管理接口")
 @Slf4j
 @RestController
@@ -65,7 +70,11 @@ public class UserRoleController extends BaseModelController<UserRoleModel, Query
     @PostMapping("/bind/userRoles")
     public ServiceResult bindUserRoles(@RequestBody @Validated UserRolesRequest userRolesReq) {
         boolean success = getModelService().bindUserRoles(userRolesReq.getUserId(), userRolesReq.getRoleIds(), true);
-        return ResultUtils.commonResult(success, null);
+        if (success) {
+            return ServiceResult.successful();
+        } else {
+            return ServiceResult.fail("绑定用户角色失败!");
+        }
     }
 
 
@@ -73,7 +82,11 @@ public class UserRoleController extends BaseModelController<UserRoleModel, Query
     @PostMapping("/bind/roleUsers")
     public ServiceResult bindRoleUsers(@RequestBody @Validated RoleUsersRequest roleUsersReq) {
         boolean success = getModelService().bindRoleUsers(roleUsersReq.getRoleId(), roleUsersReq.getUserIds());
-        return ResultUtils.commonResult(success, null);
+        if (success) {
+            return ServiceResult.successful();
+        } else {
+            return ServiceResult.fail("绑定用户角色失败!");
+        }
     }
 
 
@@ -81,7 +94,11 @@ public class UserRoleController extends BaseModelController<UserRoleModel, Query
     @PostMapping("/delete/byRoleUsers")
     public ServiceResult deleteByRoleIdAnUserIds(@RequestBody @Validated RoleUsersRequest roleUsersReq) {
         boolean success = getModelService().deleteByRoleIdAndUserIds(roleUsersReq.getRoleId(), roleUsersReq.getUserIds());
-        return ResultUtils.commonResult(success, null);
+        if (success) {
+            return ServiceResult.successful();
+        } else {
+            return ServiceResult.fail("删除用户角色关系失败!");
+        }
     }
 
 }

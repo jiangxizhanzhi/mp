@@ -16,7 +16,7 @@ import org.springframework.util.ObjectUtils;
 @Configuration(value = "LogElasticsearchConfig")
 public class ElasticsearchConfig {
 
-    @Value("${mp.datasandtable.es-nodes}")
+    @Value("${mp.log.es-nodes}")
     private String elasticsearchNodes;
 
     @Bean(name="logRestHighLevelClient")
@@ -24,7 +24,7 @@ public class ElasticsearchConfig {
         return new RestHighLevelClient(RestClient.builder(this.createHttpHost()));
     }
 
-    /**cn.cyberpeace.mp.datasandtable
+    /**cn.cyberpeace.mp.situationaware
      * 创建 HttpHost 对象
      *
      * @return 返回 HttpHost 对象数组

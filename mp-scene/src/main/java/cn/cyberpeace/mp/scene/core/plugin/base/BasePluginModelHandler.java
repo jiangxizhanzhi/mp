@@ -5,6 +5,9 @@ import cn.cyberpeace.mp.base.annotation.ClassFieldNames;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.base.util.ClassUtils;
+import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneBO;
+import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementBO;
+import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneBO;
 import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementBO;
 import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementPortBO;
@@ -47,16 +50,19 @@ import java.util.List;
     "pluginSceneElementPortMapper",
 })
 public class BasePluginModelHandler<
+        S9 extends BaseSceneBO<?, S9>,
+        E9 extends BaseSceneElementBO<?, P9, E9>,
+        P9 extends BaseSceneElementPortBO<?, P9>,
         S0 extends BasePluginSceneModel,
         E0 extends BasePluginSceneElementModel,
         P0 extends BasePluginSceneElementPortModel,
-        S extends BasePluginSceneBO<S0>,
-        E extends BasePluginSceneElementBO<E0>,
-        P extends BasePluginSceneElementPortBO<P0>,
+        S extends BasePluginSceneBO<S0, S, S9>,
+        E extends BasePluginSceneElementBO<E0, E, E9>,
+        P extends BasePluginSceneElementPortBO<P0, P, P9>,
         M1 extends BasePluginSceneMapper<S0>,
         M2 extends BasePluginSceneElementMapper<E0>,
         M3 extends BasePluginSceneElementPortMapper<P0>,
-        H extends BasePluginHandler<S, E, P>> {
+        H extends BasePluginHandler<S, E, P, ?>> {
     private H scenePluginHandler;
 
     // 通过ClassFieldNames注解和实现类ClassFieldClasses注解，初始化调用ClassUtils.loadClassFields(this)设置
@@ -162,10 +168,18 @@ public class BasePluginModelHandler<
      * 保存场景属性数据
      */
     public boolean saveScene() {
-        var sceneId = scenePluginHandler.getSourceSceneId();
         var scene = scenePluginHandler.getScene();
+        if (scene == null) {
+            return true;
+        }
+
+        var existScene = readScene();
+        var sceneId = scenePluginHandler.getSourceSceneId();
         S0 sceneObj = scene.toModel();
         sceneObj.setScene(sceneId);
+        if (existScene != null) {
+            sceneObj.setId(existScene.getId());
+        }
         var result = pluginSceneMapper.save(sceneObj);
         scene.fromModel(sceneObj);
         return result;
@@ -175,8 +189,12 @@ public class BasePluginModelHandler<
      * 删除场景属性数据
      */
     public boolean deleteScene() {
-        var sceneId = scenePluginHandler.getSourceSceneId();
         var scene = scenePluginHandler.getScene();
+        if (scene == null) {
+            return true;
+        }
+
+        var sceneId = scenePluginHandler.getSourceSceneId();
         S0 sceneObj = scene.toModel();
         sceneObj.setScene(sceneId);
         var result = pluginSceneMapper.filterDelete(new HumanCondition()
@@ -219,7 +237,7 @@ public class BasePluginModelHandler<
     public int updateElements(String... elementIds) {
         var elementMap = scenePluginHandler.getElementMap();
         List<E0> updatingElements = new ArrayList<>();
-        List<String> creatingElementIds = Arrays.asList(elementIds);
+        List<String> creatingElementIds = new ArrayList<>(Arrays.asList(elementIds));
         // 更新已存在的
         List<E0> existElements = readElements(elementIds);
         existElements.forEach(existElement -> {
@@ -289,7 +307,7 @@ public class BasePluginModelHandler<
     public int updateElementPorts(String... elementPortIds) {
         var elementPortMap = scenePluginHandler.getElementPortMap();
         List<P0> updatingElementPorts = new ArrayList<>();
-        List<String> creatingElementPortIds = Arrays.asList(elementPortIds);
+        List<String> creatingElementPortIds = new ArrayList<>(Arrays.asList(elementPortIds));
         // 更新已存在的
         List<P0> existElementPorts = readElementPorts(elementPortIds);
         existElementPorts.forEach(existElementPort -> {

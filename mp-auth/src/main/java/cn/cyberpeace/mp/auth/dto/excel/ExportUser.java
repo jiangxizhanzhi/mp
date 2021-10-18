@@ -7,7 +7,11 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.util.Date;
-
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @Data
 @HeadRowHeight(20)
 @Builder

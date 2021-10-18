@@ -11,7 +11,6 @@ import java.io.Serializable;
  */
 @Data
 @NoArgsConstructor
-@ApiModel(description = "基础类")
 public class BaseModel implements Serializable {
 
 }

@@ -58,4 +58,66 @@
         ORDER BY n.pk desc
     </select>
 
+
+
+    <select id="listCurrentUserNotices" resultType="cn.cyberpeace.mp.auth.model.SysNoticeModel">
+        select * from (
+        select distinct n.* from mp_sys_notice n
+        left join mp_sys_notice_org no on n.id = no.notice_id
+        left join mp_sys_notice_role nr on n.id = nr.notice_id
+        left join mp_sys_notice_read nre on n.id = nre.notice_id
+        <where>
+            1=1
+            <if test="ids != null and ids.size() > 0">
+                AND n.id in
+                <foreach item="id" index="index" collection="ids" open="(" separator="," close=")">
+                    #{id}
+                </foreach>
+            </if>
+
+            <if test="(orgs != null and orgs.size() > 0) and (roles != null and roles.size() > 0)">
+                AND
+                (
+                no.org in
+                <foreach item="org" index="index" collection="orgs" open="(" separator="," close=")">
+                    #{org}
+                </foreach>
+                OR
+                nr.role in
+                <foreach item="role" index="index" collection="roles" open="(" separator="," close=")">
+                    #{role}
+                </foreach>
+                )
+            </if>
+
+            <if test="(orgs != null and orgs.size() > 0) and (roles == null or roles.size() == 0)">
+                AND no.org in
+                <foreach item="org" index="index" collection="orgs" open="(" separator="," close=")">
+                    #{org}
+                </foreach>
+            </if>
+
+            <if test="(roles != null and roles.size() > 0) and (orgs == null or orgs.size() == 0)">
+                AND nr.role in
+                <foreach item="role" index="index" collection="roles" open="(" separator="," close=")">
+                    #{role}
+                </foreach>
+            </if>
+
+            <if test="publisher != null and publisher != ''">
+                AND n.publisher = #{publisher}
+            </if>
+            <if test="type != null">
+                AND n.type = #{type}
+            </if>
+            <if test="title != null and title != ''">
+                AND n.title like concat('%', #{title}, '%')
+            </if>
+            OR n.is_public = 1
+        </where>
+        ) as tabA
+        WHERE tabA.id not in (select notice_id from mp_sys_notice_read where user = #{userId} and is_need_push = 0)
+        ORDER BY tabA.pk desc
+    </select>
+
 </mapper>

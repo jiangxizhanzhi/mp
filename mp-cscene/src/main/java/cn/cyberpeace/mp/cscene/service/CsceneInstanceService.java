@@ -1,0 +1,220 @@
+package cn.cyberpeace.mp.cscene.service;
+
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.model.BaseModel;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.service.fields.BaseModelFields;
+import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
+import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCountActivitySceneBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCountByReferenceTypeBO;
+import cn.cyberpeace.mp.cscene.core.CsceneInstanceHandler;
+import cn.cyberpeace.mp.cscene.model.CsceneInstanceCountActivitySceneModel;
+import cn.cyberpeace.mp.cscene.model.CsceneInstanceCountByReferenceTypeModel;
+import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
+import cn.cyberpeace.mp.cscene.model.CsceneInstanceRoleModel;
+import cn.cyberpeace.mp.cscene.report.rabbitmq.RabbitmqCsceneReporter;
+import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
+import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
+import cn.cyberpeace.mp.cscene.service.taskpool.CsceneReportTaskPool;
+import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
+import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
+import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionFlowBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
+import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
+import cn.cyberpeace.mp.scenepluginflow.service.ScenePluginFlowSceneService;
+import com.google.common.collect.Lists;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Slf4j
+@Service
+@Data
+public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceModel, CsceneInstanceMapper,
+        BaseModelFields, QueryParams> {
+
+    private CsceneInstanceRoleMapper csceneInstanceRoleMapper;
+
+    @Autowired
+    private RabbitmqCsceneReporter csceneReporter;
+
+    @Autowired
+    private ScenePluginCloudSceneService scenePluginCloudSceneService;
+
+    @Autowired
+    private ScenePluginFlowSceneService scenePluginFlowSceneService;
+
+    @Autowired
+    private ScenePluginCollectionSceneService scenePluginCollectionSceneService;
+
+    private final CsceneReportTaskPool csceneReportTaskPool = CsceneReportTaskPool.getInstance();
+
+    private List<CsceneInstanceRoleModel> readCsceneInstanceRoles(String[] csceneInstanceIds) {
+        if (csceneInstanceIds == null || csceneInstanceIds.length == 0) {
+            return new ArrayList<>();
+        }
+        return csceneInstanceRoleMapper.list(new HumanCondition()
+                .filterIn(CsceneInstanceRoleModel::getCscene, csceneInstanceIds));
+    }
+
+    private String getSceneId(String csceneId) {
+        var csceneInstanceResult = get(csceneId).getSource();
+        if (csceneInstanceResult == null) {
+            return null;
+        }
+        var csceneInstance = csceneInstanceResult.getObj();
+        var sceneId = csceneInstance.getScene();
+        return sceneId;
+    }
+
+    @Autowired
+    public CsceneInstanceService(CsceneInstanceMapper modelMapper, CsceneInstanceRoleMapper csceneInstanceRoleMapper) {
+        setModelMapper(modelMapper);
+        setCsceneInstanceRoleMapper(csceneInstanceRoleMapper);
+    }
+
+    public ListObjServiceResult<CsceneInstanceBO> listBO(QueryParams queryParams, CsceneContextBO context) {
+        var listResult = super.list(queryParams);
+        if (listResult.getSource() == null) {
+            new ListObjServiceResult<>(null, listResult.getServiceCode(), listResult.getDetail());
+        }
+
+        var instanceObjMap = listResult.getSource().getList().stream()
+                .collect(Collectors.toMap(BaseModel::getId, x -> x));
+        var instanceRoleObjMap = readCsceneInstanceRoles(instanceObjMap.keySet()
+                .toArray(new String[0])).stream().collect(Collectors.groupingBy(CsceneInstanceRoleModel::getCscene));
+        List<CsceneInstanceBO> instanceBOs = new ArrayList<>();
+        instanceObjMap.forEach((instanceId, instanceObj) -> {
+            var roleObjs = instanceRoleObjMap.getOrDefault(instanceId, new ArrayList<>());
+            var instanceHandler = new CsceneInstanceHandler(instanceObj, roleObjs, context);
+            instanceBOs.add(instanceHandler.toData());
+        });
+        return new ListObjServiceResult<>(new ListObjResult<>(instanceBOs, listResult.getSource().getTotal(),
+                listResult.getSource().getFields()));
+    }
+
+    public ServiceResult<CsceneInstanceBO> getById(String id, CsceneContextBO context) {
+        var instanceHandler = new CsceneInstanceHandler(id, context);
+        return new ServiceResult<>(instanceHandler.toData());
+    }
+
+    public ServiceResult<Boolean> deleteById(String id, boolean logic, CsceneContextBO context) {
+        var instanceHandler = new CsceneInstanceHandler(id, context);
+        var flag = instanceHandler.delete(logic);
+        if (flag) {
+            CsceneReportTaskPool.getInstance().executeTask(() -> csceneReporter.reportDeleteCsceneInstance(id));
+        }
+        return new ServiceResult<>(flag);
+    }
+
+    public ServiceResult<Integer> bulkDeleteByIds(String[] ids, boolean logic, CsceneContextBO context) {
+        var result = 0;
+        for (String id: ids) {
+            if (Boolean.TRUE.equals(deleteById(id, logic, context).getSource())) {
+                result += 1;
+            }
+        }
+
+        if (result < ids.length) {
+            log.error("Service bulk delete cscene instance {} with some failed", Arrays.toString(ids));
+            return new ServiceResult<>(result, BaseErrorCode.DATA_PARTIAL_SUCCESS);
+        } else {
+            return new ServiceResult<>(result);
+        }
+    }
+
+    public ServiceResult<List<NodeSessionBO>> getNodeSessions(String id, String nodeId) {
+        var sceneId = getSceneId(id);
+        if (StringUtils.isEmpty(sceneId)) {
+            return new ServiceResult<>(new ArrayList<>());
+        }
+
+        return scenePluginCloudSceneService.getSceneRemoteSessions(sceneId,
+                StringUtils.isEmpty(nodeId) ? null : new String[]{nodeId}, true, false);
+    }
+
+    public ListObjServiceResult<NodeRecordingBO> listRecordings(String id, String[] nodeIds,
+                                                                RecordingQueryParams queryParams) {
+        var sceneId = getSceneId(id);
+        if (StringUtils.isEmpty(sceneId)) {
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
+        }
+
+        return scenePluginCloudSceneService.getSceneRemoteRecordings(sceneId, nodeIds, queryParams);
+    }
+
+    public ListObjServiceResult<CollectionFlowBO> listFlows(String id, FlowQueryParams queryParams) {
+        var sceneId = getSceneId(id);
+        if (StringUtils.isEmpty(sceneId)) {
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
+        }
+
+        return scenePluginCollectionSceneService.listFlows(sceneId, queryParams);
+    }
+
+    public ServiceResult<Boolean> startFlow(String id, String toNodeId, String flowId, CsceneContextBO context) {
+        var sceneId = getSceneId(id);
+        if (StringUtils.isEmpty(sceneId)) {
+            return new ServiceResult<>(false);
+        }
+
+        return scenePluginFlowSceneService.startFlow(sceneId, toNodeId, flowId);
+    }
+
+    public ServiceResult<Boolean> stopFlow(String id, String toNodeId, String flowId, CsceneContextBO context) {
+        var sceneId = getSceneId(id);
+        if (StringUtils.isEmpty(sceneId)) {
+            return new ServiceResult<>(false);
+        }
+
+        return scenePluginFlowSceneService.stopFlow(sceneId, toNodeId, flowId);
+    }
+
+    public ServiceResult<Probe> startProbe(String id, String toNodeId, String probeId, CsceneContextBO context) {
+        return new ServiceResult<>(null);
+    }
+
+    public ServiceResult<Probe> stopProbe(String id, String toNodeId, String probeId, CsceneContextBO context) {
+        return new ServiceResult<>(null);
+    }
+
+    /**
+     * 根据引用类型分组统计
+     * @param events 需要排除的event
+     * @return
+     */
+    public List<CsceneInstanceCountByReferenceTypeBO> countGroupByReferenceType(List<Integer> events){
+        List<CsceneInstanceCountByReferenceTypeModel> csceneInstanceCountByReferenceTypeModels = getModelMapper().countGroupByReferenceType(events);
+        if (CollectionUtils.isEmpty(csceneInstanceCountByReferenceTypeModels)){
+            return Lists.newArrayList();
+        }
+        return csceneInstanceCountByReferenceTypeModels.stream()
+                .map(model -> new CsceneInstanceCountByReferenceTypeBO(model.getReferenceType(),model.getTotal())).collect(Collectors.toList());
+    }
+
+    /**
+     * 统计活动场景总数和场景总数
+     * @return
+     */
+    public CsceneInstanceCountActivitySceneBO countActivityScene(){
+        CsceneInstanceCountActivitySceneModel model = getModelMapper().countActivityScene();
+        return CsceneInstanceCountActivitySceneBO.builder().activitySceneTotal(model.getActivitySceneTotal()).total(model.getTotal()).build();
+    }
+}

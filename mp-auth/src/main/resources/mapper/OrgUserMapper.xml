@@ -35,15 +35,30 @@
                 AND ( username like CONCAT('%', #{username}, '%') or name like CONCAT('%', #{username}, '%'))
             </if>
         </where>
-        order by username
+        <if test="orders != null and orders.size() > 0">
+            ORDER BY
+            <foreach item="order" index="index" collection="orders"
+                     open="" separator="," close="">${order}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="selectUserCnt" resultType="integer">
+        select count(*)
+        from mp_auth_org_user
+        where org = #{orgId}
     </select>
 
     <delete id="deleteByUserId">
-        delete from mp_auth_org_user where user = #{userId}
+        delete
+        from mp_auth_org_user
+        where user = #{userId}
     </delete>
 
     <delete id="deleteByOrgId">
-        delete from mp_auth_org_user where org = #{orgId}
+        delete
+        from mp_auth_org_user
+        where org = #{orgId}
     </delete>
 
 </mapper>

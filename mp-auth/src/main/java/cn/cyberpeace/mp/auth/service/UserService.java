@@ -4,17 +4,20 @@ import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.dto.user.UserHeartbeatRequest;
-import cn.cyberpeace.mp.auth.dto.user.UserOnlineReportPageRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserRequest;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.BaseModelService;
-import com.github.pagehelper.PageInfo;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 public interface UserService extends BaseModelService<UserModel, UserQueryParams> {
 
     UserDto getUserDto(String id);
@@ -76,12 +79,21 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
     // userModel转换为userdto，附加组织，角色信息
     UserDto userModel2UserDto(UserModel userModel);
 
+    // userModel转换为userdto，附加角色信息，不包括组织相关信息
+    UserDto userModel2UserDtoWithoutOrg(UserModel userModel);
+
     void heartbeat(UserHeartbeatRequest heartbeat);
 
 //    PageInfo onlineReport(UserOnlineReportPageRequest pageRequest);
 
     List<UserModel> listNotAudited();
 
+    List<UserDto> listByUserIds(String[] userIds);
+
     int totalUserCnt();
+
+    void initDefaultAvatar(UserModel userModel);
+
+    boolean isAdmin(String userId);
 
 }

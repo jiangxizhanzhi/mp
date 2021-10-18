@@ -25,6 +25,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -36,7 +41,6 @@ public class UserModel extends BaseModel implements Serializable {
 
     public static final int INT_CHECK_YES = 1;
 
-
     @ApiModelProperty(value = "主键")
     @DefaultInt(0)
     private Integer pk;
@@ -46,6 +50,7 @@ public class UserModel extends BaseModel implements Serializable {
     private String tenant;
 
     @ApiModelProperty(value = "编号")
+    @DefaultStr
     private String identifier;
 
     @ApiModelProperty(value = "用户名")
@@ -123,9 +128,14 @@ public class UserModel extends BaseModel implements Serializable {
     @DefaultGen(DateTimeGenerator.class)
     private LocalDateTime lastLogin;
 
+    @ApiModelProperty(value = "保留字段")
+    @DefaultStr
+    private String res;
+
+
 
     @Builder
-    public UserModel(String id, LocalDateTime createTime, LocalDateTime updateTime, String tenant, String identifier, String username, String password, String tokenSecret, String name, String nickname, String avatar, LocalDate birthday, String email, String mobile, String idCard, String address, Integer initCheck, String description, Integer isEnabled, Integer isAudited, LocalDateTime dateJoined, LocalDateTime expiredTime, LocalDateTime lastLogin) {
+    public UserModel(String id, LocalDateTime createTime, LocalDateTime updateTime, String tenant, String identifier, String username, String password, String tokenSecret, String name, String nickname, String avatar, LocalDate birthday, String email, String mobile, String idCard, String address, Integer initCheck, String description, Integer isEnabled, Integer isAudited, LocalDateTime dateJoined, LocalDateTime expiredTime, LocalDateTime lastLogin, String res) {
         super(id, createTime, updateTime);
         this.tenant = tenant;
         this.identifier = identifier;
@@ -147,6 +157,7 @@ public class UserModel extends BaseModel implements Serializable {
         this.dateJoined = dateJoined;
         this.expiredTime = expiredTime;
         this.lastLogin = lastLogin;
+        this.res = res;
     }
 
     public static class Status {
@@ -172,11 +183,12 @@ public class UserModel extends BaseModel implements Serializable {
         }
     }
 
+   /* 删除这部分逻辑 @see http://10.10.10.10/biz/bug-view-3522.html
     public void initDefaultIdentifier() {
         if (StringUtils.isEmpty(identifier) && !StringUtils.isEmpty(username)) {
             identifier = username;
         }
-    }
+    }*/
 
     public void initDefaultExpiredTime() {
         if (expiredTime == null) {

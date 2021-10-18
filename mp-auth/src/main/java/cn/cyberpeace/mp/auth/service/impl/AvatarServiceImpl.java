@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.model.AvatarModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.repository.AvatarMapper;
@@ -14,9 +15,9 @@ import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,11 +25,17 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * @Description: 头像管理service
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @Service
 @Slf4j
 public class AvatarServiceImpl extends BaseModelServiceImpl<AvatarModel, AvatarMapper, AvatarFields, QueryParams> implements AvatarService {
@@ -48,8 +55,6 @@ public class AvatarServiceImpl extends BaseModelServiceImpl<AvatarModel, AvatarM
 
     @Autowired
     private UserService userService;
-
-    private static final String DEFAULT_USER_ID = "3f655d87112f4ae094bbaf70830e20aa";
 
     @Override
     public List<AvatarModel> listAll() {
@@ -118,12 +123,27 @@ public class AvatarServiceImpl extends BaseModelServiceImpl<AvatarModel, AvatarM
         return httpUrl;
     }
 
+
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean initDefaultAvatars() {
-        log.info("uploading default avatar manually!");
+    public void clearAndReUploadAvatars(List<AvatarModel> avatarModels) {
+        if (CollectionUtil.isEmpty(avatarModels) || avatarModels.size() != 9) {
+            log.error("默认头像数量不正确！");
+            throw new MpRuntimeException("默认头像数量不正确！");
+        }
+
         deleteAll();
 
+        for (int i = 0; i < avatarModels.size(); i++) {
+            create(avatarModels.get(i));
+
+            if(i == 0) {
+                updateDefaultUserAvatar(avatarModels.get(i).getUrl());
+            }
+        }
+    }
+
+    public List<AvatarModel> uploadDefaultAvatars() {
         // 默认头像
         InputStream avatar01 = Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("avatar/1.png"));
         InputStream avatar02 = Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("avatar/2.png"));
@@ -135,30 +155,25 @@ public class AvatarServiceImpl extends BaseModelServiceImpl<AvatarModel, AvatarM
         InputStream avatar08 = Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("avatar/8.png"));
         InputStream avatar09 = Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("avatar/9.png"));
 
-
         List<InputStream> avatarlist = Arrays.asList(avatar01, avatar02, avatar03, avatar04, avatar05, avatar06, avatar07, avatar08, avatar09);
 
+        List<AvatarModel> avatarModels = new ArrayList<>();
         for (int i = 0; i < avatarlist.size(); i++) {
             InputStream ava = avatarlist.get(i);
             String url = uploadIs(ava, i + ".png", null);
             AvatarModel avatarModel = new AvatarModel();
             avatarModel.setUrl(url);
-            create(avatarModel);
-
-            if(i == 0) {
-                updateDefaultUserAvatar(url);
-            }
+            avatarModels.add(avatarModel);
         }
-
-        return true;
+        return avatarModels;
     }
 
     // 更新默认用户的头像
     private void updateDefaultUserAvatar(String avatarUrl) {
-        ObjServiceResult<UserModel> result = userService.get(DEFAULT_USER_ID);
+        ObjServiceResult<UserModel> result = userService.get(AuthConstant.ROOT_USER_ID);
         if (Objects.nonNull(result.getSource())) {
             UserModel userUpdate = new UserModel();
-            userUpdate.setId(DEFAULT_USER_ID);
+            userUpdate.setId(AuthConstant.ROOT_USER_ID);
             userUpdate.setAvatar(avatarUrl);
             userService.update(userUpdate);
         }

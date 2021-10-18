@@ -24,6 +24,11 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @Slf4j
 @Component
 public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {

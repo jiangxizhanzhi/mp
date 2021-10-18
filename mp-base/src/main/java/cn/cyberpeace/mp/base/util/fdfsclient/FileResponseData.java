@@ -6,7 +6,7 @@ import lombok.Data;
 
 /**
  * @Description: FastDFS返回对象
- * @Autho qiaokang
+ * @Author qiaokang
  * @Date：2021/6/21 15:01
  */
 @Data
@@ -64,6 +64,12 @@ public class FileResponseData {
      */
     @JsonInclude(Include.NON_NULL)
     private String token;
+
+    /**
+     * 文件大小
+     */
+    @JsonInclude(Include.NON_NULL)
+    private Long fileSize;
 
 
     public FileResponseData() {

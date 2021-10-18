@@ -29,6 +29,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @Service
 @Slf4j
 public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, OrgFields, QueryParams>
@@ -110,6 +115,14 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
                 newPath = obj.getName();
             }
             obj.setPath(newPath);
+        }
+
+        // 查看组织path是否重复
+        if (StringUtils.isNotBlank(obj.getPath())) {
+            String path = obj.getPath();
+            if (Objects.nonNull(getByPath(path))) {
+                throw new MpRuntimeException("同一父级组织下，已有同名的子组织存在！");
+            }
         }
 
         // 1.先更新OrgModel信息

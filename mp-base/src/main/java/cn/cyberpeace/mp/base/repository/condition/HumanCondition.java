@@ -202,6 +202,17 @@ public class HumanCondition {
     }
 
     /**
+     * select字段并设置别名
+     * @param fieldGetter 字段get方法引用
+     * @param outputFieldGetter 返回字段get方法引用
+     * @return this
+     */
+    public <T, O> HumanCondition selectAs(SerializableFunction<T> fieldGetter,
+                                          SerializableFunction<O> outputFieldGetter) {
+        return selectAs(fieldGetter, BeanUtils.getBeanGetterFieldName(outputFieldGetter));
+    }
+
+    /**
      * select字段不设置别名
      * @param fieldNames 字段名称...
      * @return this
@@ -230,6 +241,16 @@ public class HumanCondition {
     public HumanCondition selectAs(Aggregation aggregation, String outputFieldName) {
         selectFields.put(aggregation.toSqlField(currentFieldName(aggregation.getFieldName())), outputFieldName);
         return this;
+    }
+
+    /**
+     * select聚合字段并设置别名
+     * @param aggregation 聚合字段
+     * @param outputFieldGetter 返回字段get方法引用
+     * @return this
+     */
+    public <O> HumanCondition selectAs(Aggregation aggregation, SerializableFunction<O> outputFieldGetter) {
+        return selectAs(aggregation, BeanUtils.getBeanGetterFieldName(outputFieldGetter));
     }
 
     /**
@@ -849,215 +870,219 @@ public class HumanCondition {
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class OrConditionPoxy {
-
+    public static class OrConditionProxy {
         private HumanCondition humanCondition;
 
         private final OrCondition orCondition = new OrCondition();
 
-        public OrConditionPoxy orLink(Class<?> sourceModel, String sourceFieldName,
-                                      Class<?> targetModel, String targetFieldName) {
+        public OrConditionProxy currentLink(Class<?> model) {
+            humanCondition.currentLink(model);
+            return this;
+        }
+
+        public OrConditionProxy orLink(Class<?> sourceModel, String sourceFieldName,
+                                       Class<?> targetModel, String targetFieldName) {
             orCondition.addLink(humanCondition.genLinkFieldName(sourceModel, TextUtils.humpToLine(sourceFieldName)),
                     humanCondition.genLinkFieldName(targetModel, TextUtils.humpToLine(targetFieldName)));
             return this;
         }
 
-        public <S, T> OrConditionPoxy orLink(Class<?> sourceModel, SerializableFunction<S> sourceFieldGetter,
-                                          Class<?> targetModel, SerializableFunction<T> targetFieldGetter) {
+        public <S, T> OrConditionProxy orLink(Class<?> sourceModel, SerializableFunction<S> sourceFieldGetter,
+                                              Class<?> targetModel, SerializableFunction<T> targetFieldGetter) {
             return orLink(sourceModel, BeanUtils.getBeanGetterFieldName(sourceFieldGetter),
                     targetModel, BeanUtils.getBeanGetterFieldName(targetFieldGetter));
         }
 
-        public OrConditionPoxy orLink(String sourceLinkName, String sourceFieldName,
-                                      String targetLinkName, String targetFieldName) {
+        public OrConditionProxy orLink(String sourceLinkName, String sourceFieldName,
+                                       String targetLinkName, String targetFieldName) {
             orCondition.addLink(humanCondition.genLinkFieldName(sourceLinkName, TextUtils.humpToLine(sourceFieldName)),
                     humanCondition.genLinkFieldName(targetLinkName, TextUtils.humpToLine(targetFieldName)));
             return this;
         }
 
-        public <S, T> OrConditionPoxy orLink(String sourceLinkName, SerializableFunction<S> sourceFieldGetter,
-                                          String targetLinkName, SerializableFunction<T> targetFieldGetter) {
+        public <S, T> OrConditionProxy orLink(String sourceLinkName, SerializableFunction<S> sourceFieldGetter,
+                                              String targetLinkName, SerializableFunction<T> targetFieldGetter) {
             return orLink(sourceLinkName, BeanUtils.getBeanGetterFieldName(sourceFieldGetter),
                     targetLinkName, BeanUtils.getBeanGetterFieldName(targetFieldGetter));
         }
 
-        public OrConditionPoxy orIn(String fieldName, Object[] fieldValue) {
+        public OrConditionProxy orIn(String fieldName, Object[] fieldValue) {
             orCondition.addIn(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
         }
 
-        public <T> OrConditionPoxy orIn(SerializableFunction<T> fieldGetter, Object[] fieldValue) {
+        public <T> OrConditionProxy orIn(SerializableFunction<T> fieldGetter, Object[] fieldValue) {
             return orIn(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
         }
 
-        public OrConditionPoxy orNotIn(String fieldName, Object[] fieldValue) {
+        public OrConditionProxy orNotIn(String fieldName, Object[] fieldValue) {
             orCondition.addNotIn(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
         }
 
-        public <T> OrConditionPoxy orNotIn(SerializableFunction<T> fieldGetter, Object[] fieldValue) {
+        public <T> OrConditionProxy orNotIn(SerializableFunction<T> fieldGetter, Object[] fieldValue) {
             return orNotIn(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
         }
 
-        public OrConditionPoxy orEqual(String fieldName, Object fieldValue) {
+        public OrConditionProxy orEqual(String fieldName, Object fieldValue) {
             orCondition.addEqual(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
         }
 
-        public <T> OrConditionPoxy orEqual(SerializableFunction<T> fieldGetter, Object fieldValue) {
+        public <T> OrConditionProxy orEqual(SerializableFunction<T> fieldGetter, Object fieldValue) {
             return orEqual(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
         }
 
-        public OrConditionPoxy orNotEqual(String fieldName, Object fieldValue) {
+        public OrConditionProxy orNotEqual(String fieldName, Object fieldValue) {
             orCondition.addNotEqual(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
         }
 
-        public <T> OrConditionPoxy orNotEqual(SerializableFunction<T> fieldGetter, Object fieldValue) {
+        public <T> OrConditionProxy orNotEqual(SerializableFunction<T> fieldGetter, Object fieldValue) {
             return orNotEqual(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
         }
 
-        public OrConditionPoxy orGreaterThan(String fieldName, Object fieldValue) {
+        public OrConditionProxy orGreaterThan(String fieldName, Object fieldValue) {
             orCondition.addGreaterThan(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
         }
 
-        public <T> OrConditionPoxy orGreaterThan(SerializableFunction<T> fieldGetter, Object fieldValue) {
+        public <T> OrConditionProxy orGreaterThan(SerializableFunction<T> fieldGetter, Object fieldValue) {
             return orGreaterThan(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
         }
 
-        public OrConditionPoxy orGreaterThanOrEqual(String fieldName, Object fieldValue) {
+        public OrConditionProxy orGreaterThanOrEqual(String fieldName, Object fieldValue) {
             orCondition.addGreaterThanOrEqual(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
         }
 
-        public <T> OrConditionPoxy orGreaterThanOrEqual(SerializableFunction<T> fieldGetter, Object fieldValue) {
+        public <T> OrConditionProxy orGreaterThanOrEqual(SerializableFunction<T> fieldGetter, Object fieldValue) {
             return orGreaterThanOrEqual(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
         }
 
-        public OrConditionPoxy orLessThan(String fieldName, Object fieldValue) {
+        public OrConditionProxy orLessThan(String fieldName, Object fieldValue) {
             orCondition.addLessThan(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
         }
 
-        public <T> OrConditionPoxy orLessThan(SerializableFunction<T> fieldGetter, Object fieldValue) {
+        public <T> OrConditionProxy orLessThan(SerializableFunction<T> fieldGetter, Object fieldValue) {
             return orLessThan(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
         }
 
-        public OrConditionPoxy orLessThanOrEqual(String fieldName, Object fieldValue) {
+        public OrConditionProxy orLessThanOrEqual(String fieldName, Object fieldValue) {
             orCondition.addLessThanOrEqual(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
         }
 
-        public <T> OrConditionPoxy orLessThanOrEqual(SerializableFunction<T> fieldGetter, Object fieldValue) {
+        public <T> OrConditionProxy orLessThanOrEqual(SerializableFunction<T> fieldGetter, Object fieldValue) {
             return orLessThanOrEqual(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
         }
 
-        public OrConditionPoxy orContains(String fieldName, Object fieldValue) {
+        public OrConditionProxy orContains(String fieldName, Object fieldValue) {
             orCondition.addContains(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
         }
 
-        public <T> OrConditionPoxy orContains(SerializableFunction<T> fieldGetter, Object fieldValue) {
+        public <T> OrConditionProxy orContains(SerializableFunction<T> fieldGetter, Object fieldValue) {
             return orContains(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
         }
 
-        public OrConditionPoxy orIContains(String fieldName, Object fieldValue) {
+        public OrConditionProxy orIContains(String fieldName, Object fieldValue) {
             orCondition.addIContains(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
         }
 
-        public <T> OrConditionPoxy orIContains(SerializableFunction<T> fieldGetter, Object fieldValue) {
+        public <T> OrConditionProxy orIContains(SerializableFunction<T> fieldGetter, Object fieldValue) {
             return orIContains(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
         }
 
-        public OrConditionPoxy orStartsWith(String fieldName, Object fieldValue) {
+        public OrConditionProxy orStartsWith(String fieldName, Object fieldValue) {
             orCondition.addStartsWith(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
         }
 
-        public <T> OrConditionPoxy orStartsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
+        public <T> OrConditionProxy orStartsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
             return orStartsWith(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
         }
 
-        public OrConditionPoxy orIStartsWith(String fieldName, Object fieldValue) {
+        public OrConditionProxy orIStartsWith(String fieldName, Object fieldValue) {
             orCondition.addIStartsWith(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
         }
 
-        public <T> OrConditionPoxy orIStartsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
+        public <T> OrConditionProxy orIStartsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
             return orIStartsWith(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
         }
 
-        public OrConditionPoxy orEndsWith(String fieldName, Object fieldValue) {
+        public OrConditionProxy orEndsWith(String fieldName, Object fieldValue) {
             orCondition.addEndsWith(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
         }
 
-        public <T> OrConditionPoxy orEndsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
+        public <T> OrConditionProxy orEndsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
             return orEndsWith(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
         }
 
-        public OrConditionPoxy orIEndsWith(String fieldName, Object fieldValue) {
+        public OrConditionProxy orIEndsWith(String fieldName, Object fieldValue) {
             orCondition.addIEndsWith(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
         }
 
-        public <T> OrConditionPoxy orIEndsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
+        public <T> OrConditionProxy orIEndsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
             return orIEndsWith(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
         }
 
-        public OrConditionPoxy orNotContains(String fieldName, Object fieldValue) {
+        public OrConditionProxy orNotContains(String fieldName, Object fieldValue) {
             orCondition.addNotContains(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
         }
 
-        public <T> OrConditionPoxy orNotContains(SerializableFunction<T> fieldGetter, Object fieldValue) {
+        public <T> OrConditionProxy orNotContains(SerializableFunction<T> fieldGetter, Object fieldValue) {
             return orNotContains(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
         }
 
-        public OrConditionPoxy orNotIContains(String fieldName, Object fieldValue) {
+        public OrConditionProxy orNotIContains(String fieldName, Object fieldValue) {
             orCondition.addNotIContains(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
         }
 
-        public <T> OrConditionPoxy orNotIContains(SerializableFunction<T> fieldGetter, Object fieldValue) {
+        public <T> OrConditionProxy orNotIContains(SerializableFunction<T> fieldGetter, Object fieldValue) {
             return orNotIContains(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
         }
 
-        public OrConditionPoxy orNotStartsWith(String fieldName, Object fieldValue) {
+        public OrConditionProxy orNotStartsWith(String fieldName, Object fieldValue) {
             orCondition.addNotStartsWith(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
         }
 
-        public <T> OrConditionPoxy orNotStartsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
+        public <T> OrConditionProxy orNotStartsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
             return orNotStartsWith(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
         }
 
-        public OrConditionPoxy orNotIStartsWith(String fieldName, Object fieldValue) {
+        public OrConditionProxy orNotIStartsWith(String fieldName, Object fieldValue) {
             orCondition.addNotIStartsWith(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
         }
 
-        public <T> OrConditionPoxy orNotIStartsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
+        public <T> OrConditionProxy orNotIStartsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
             return orNotIStartsWith(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
         }
 
-        public OrConditionPoxy orNotEndsWith(String fieldName, Object fieldValue) {
+        public OrConditionProxy orNotEndsWith(String fieldName, Object fieldValue) {
             orCondition.addNotEndsWith(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
         }
 
-        public <T> OrConditionPoxy orNotEndsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
+        public <T> OrConditionProxy orNotEndsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
             return orNotEndsWith(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
         }
 
-        public OrConditionPoxy orNotIEndsWith(String fieldName, Object fieldValue) {
+        public OrConditionProxy orNotIEndsWith(String fieldName, Object fieldValue) {
             orCondition.addNotIEndsWith(humanCondition.currentColumnName(fieldName), fieldValue);
             return this;
         }
 
-        public <T> OrConditionPoxy orNotIEndsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
+        public <T> OrConditionProxy orNotIEndsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
             return orNotIEndsWith(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
         }
 
@@ -1074,6 +1099,256 @@ public class HumanCondition {
             humanCondition.getAndCondition().addCondition(orCondition);
             return humanCondition;
         }
+
+        /**
+         * 在or条件中添加一组and条件，sql形如 ...AND (id = 1 or id = 2 or (id =3 AND id =4 AND id=5))
+         * 例：
+         * humanCondition.filterOrStart()
+         *               .orEqual(Model::getId, 1)
+         *               .orEqual(Model::getId, 2)
+         *               .orAndStart()
+         *                  .andEqual(Model::getId, 3)
+         *                  .andEqual(Model::getId, 4)
+         *                  .andEqual(Model::getId, 5)
+         *               .orAndEnd()
+         *               .filterOrEnd()
+         * @param
+         * @return AndConditionProxy
+         */
+        public AndConditionProxy orAndStart() {
+            return new AndConditionProxy(this);
+        }
+
+        public static class AndConditionProxy {
+            private HumanCondition humanCondition;
+
+            private OrConditionProxy orConditionProxy;
+
+            private AndCondition andCondition;
+
+            private AndConditionProxy(OrConditionProxy orConditionProxy) {
+                this.orConditionProxy = orConditionProxy;
+                this.humanCondition = orConditionProxy.humanCondition;
+                this.andCondition = new AndCondition();
+            }
+
+            public OrConditionProxy orAndEnd() {
+                this.orConditionProxy.getOrCondition().addCondition(this.andCondition);
+                return this.orConditionProxy;
+            }
+
+            public AndConditionProxy currentLink(Class<?> model) {
+                humanCondition.currentLink(model);
+                return this;
+            }
+
+            public AndConditionProxy andLink(Class<?> sourceModel, String sourceFieldName,
+                                            Class<?> targetModel, String targetFieldName) {
+                this.andCondition.addLink(humanCondition.genLinkFieldName(sourceModel, TextUtils.humpToLine(sourceFieldName)),
+                        humanCondition.genLinkFieldName(targetModel, TextUtils.humpToLine(targetFieldName)));
+                return this;
+            }
+
+            public <S, T> AndConditionProxy andLink(Class<?> sourceModel, SerializableFunction<S> sourceFieldGetter,
+                                                   Class<?> targetModel, SerializableFunction<T> targetFieldGetter) {
+                return this.andLink(sourceModel, BeanUtils.getBeanGetterFieldName(sourceFieldGetter),
+                        targetModel, BeanUtils.getBeanGetterFieldName(targetFieldGetter));
+            }
+
+            public AndConditionProxy andLink(String sourceLinkName, String sourceFieldName,
+                                            String targetLinkName, String targetFieldName) {
+                this.andCondition.addLink(humanCondition.genLinkFieldName(sourceLinkName, TextUtils.humpToLine(sourceFieldName)),
+                        humanCondition.genLinkFieldName(targetLinkName, TextUtils.humpToLine(targetFieldName)));
+                return this;
+            }
+
+            public <S, T> AndConditionProxy andLink(String sourceLinkName, SerializableFunction<S> sourceFieldGetter,
+                                                   String targetLinkName, SerializableFunction<T> targetFieldGetter) {
+                return this.andLink(sourceLinkName, BeanUtils.getBeanGetterFieldName(sourceFieldGetter),
+                        targetLinkName, BeanUtils.getBeanGetterFieldName(targetFieldGetter));
+            }
+
+            public AndConditionProxy andIn(String fieldName, Object[] fieldValue) {
+                this.andCondition.addCondition(fieldName, Connector.IN, fieldValue);
+                return this;
+            }
+
+            public <T> AndConditionProxy andIn(SerializableFunction<T> fieldGetter, Object[] fieldValue) {
+                return andIn(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+            }
+
+            public AndConditionProxy andNotIn(String fieldName, Object[] fieldValue) {
+                this.andCondition.addCondition(fieldName, Connector.NOT_IN, fieldValue);
+                return this;
+            }
+
+            public <T> AndConditionProxy andNotIn(SerializableFunction<T> fieldGetter, Object[] fieldValue) {
+                return andNotIn(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+            }
+
+            public AndConditionProxy andEqual(String fieldName, Object fieldValue) {
+                this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.EQUAL, fieldValue);
+                return this;
+            }
+
+            public <T> AndConditionProxy andEqual(SerializableFunction<T> fieldGetter, Object fieldValue) {
+                return andEqual(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+            }
+
+            public AndConditionProxy andNotEqual(String fieldName, Object fieldValue) {
+                this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.NOT_EQUAL, fieldValue);
+                return this;
+            }
+
+            public <T> AndConditionProxy andNotEqual(SerializableFunction<T> fieldGetter, Object fieldValue) {
+                return andNotEqual(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+            }
+
+            public AndConditionProxy andGreaterThan(String fieldName, Object fieldValue) {
+                this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.GREATER_THAN, fieldValue);
+                return this;
+            }
+
+            public <T> AndConditionProxy andGreaterThan(SerializableFunction<T> fieldGetter, Object fieldValue) {
+                return andGreaterThan(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+            }
+
+            public AndConditionProxy andGreaterThanOrEqual(String fieldName, Object fieldValue) {
+                this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.GREATER_THAN_OR_EQUAL, fieldValue);
+                return this;
+            }
+
+            public <T> AndConditionProxy andGreaterThanOrEqual(SerializableFunction<T> fieldGetter, Object fieldValue) {
+                return andGreaterThanOrEqual(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+            }
+
+            public AndConditionProxy andLessThan(String fieldName, Object fieldValue) {
+                this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.LESS_THAN, fieldValue);
+                return this;
+            }
+
+            public <T> AndConditionProxy andLessThan(SerializableFunction<T> fieldGetter, Object fieldValue) {
+                return andLessThan(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+            }
+
+            public AndConditionProxy andLessThanOrEqual(String fieldName, Object fieldValue) {
+                this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.LESS_THAN_OR_EQUAL, fieldValue);
+                return this;
+            }
+
+            public <T> AndConditionProxy andLessThanOrEqual(SerializableFunction<T> fieldGetter, Object fieldValue) {
+                return andLessThanOrEqual(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+            }
+
+            public AndConditionProxy andContains(String fieldName, Object fieldValue) {
+                this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.CONTAINS, fieldValue);
+                return this;
+            }
+
+            public <T> AndConditionProxy andContains(SerializableFunction<T> fieldGetter, Object fieldValue) {
+                return andContains(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+            }
+
+            public AndConditionProxy andIContains(String fieldName, Object fieldValue) {
+                this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.I_CONTAINS, fieldValue);
+                return this;
+            }
+
+            public <T> AndConditionProxy andIContains(SerializableFunction<T> fieldGetter, Object fieldValue) {
+                return andIContains(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+            }
+
+            public AndConditionProxy andStartsWith(String fieldName, Object fieldValue) {
+                this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.STARTS_WITH, fieldValue);
+                return this;
+            }
+
+            public <T> AndConditionProxy andStartsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
+                return andStartsWith(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+            }
+
+
+            public AndConditionProxy andIStartsWith(String fieldName, Object fieldValue) {
+                this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.I_STARTS_WITH, fieldValue);
+                return this;
+            }
+
+            public <T> AndConditionProxy andIStartsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
+                return andIStartsWith(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+            }
+
+            public AndConditionProxy andEndsWith(String fieldName, Object fieldValue) {
+                this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.ENDS_WITH, fieldValue);
+                return this;
+            }
+
+            public <T> AndConditionProxy andEndsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
+                return andEndsWith(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+            }
+
+            public AndConditionProxy andIEndsWith(String fieldName, Object fieldValue) {
+                this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.I_ENDS_WITH, fieldValue);
+                return this;
+            }
+
+            public <T> AndConditionProxy andIEndsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
+                return andIEndsWith(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+            }
+
+            public AndConditionProxy andNotContains(String fieldName, Object fieldValue) {
+                this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.NOT_CONTAINS, fieldValue);
+                return this;
+            }
+
+            public <T> AndConditionProxy andNotContains(SerializableFunction<T> fieldGetter, Object fieldValue) {
+                return andNotContains(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+            }
+
+            public AndConditionProxy andNotIContains(String fieldName, Object fieldValue) {
+                this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.NOT_I_CONTAINS, fieldValue);
+                return this;
+            }
+
+            public <T> AndConditionProxy andNotIContains(SerializableFunction<T> fieldGetter, Object fieldValue) {
+                return andNotIContains(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+            }
+
+            public AndConditionProxy andNotStartsWith(String fieldName, Object fieldValue) {
+                this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.NOT_STARTS_WITH, fieldValue);
+                return this;
+            }
+
+            public <T> AndConditionProxy andNotStartsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
+                return andNotStartsWith(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+            }
+
+            public AndConditionProxy andNotIStartsWith(String fieldName, Object fieldValue) {
+                this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.NOT_I_STARTS_WITH, fieldValue);
+                return this;
+            }
+
+            public <T> AndConditionProxy andNotIStartsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
+                return andNotIStartsWith(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+            }
+
+            public AndConditionProxy andNotEndsWith(String fieldName, Object fieldValue) {
+                this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.NOT_ENDS_WITH, fieldValue);
+                return this;
+            }
+
+            public <T> AndConditionProxy andNotEndsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
+                return andNotEndsWith(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+            }
+
+            public AndConditionProxy andNotIEndsWith(String fieldName, Object fieldValue) {
+                this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.NOT_I_ENDS_WITH, fieldValue);
+                return this;
+            }
+
+            public <T> AndConditionProxy andNotIEndsWith(SerializableFunction<T> fieldGetter, Object fieldValue) {
+                return andNotIEndsWith(BeanUtils.getBeanGetterFieldName(fieldGetter), fieldValue);
+            }
+        }
     }
 
     /**
@@ -1085,8 +1360,8 @@ public class HumanCondition {
      *               .filterOrEnd()
      * @return this
      */
-    public OrConditionPoxy filterOrStart() {
-        return new OrConditionPoxy(this);
+    public OrConditionProxy filterOrStart() {
+        return new OrConditionProxy(this);
     }
 
 }

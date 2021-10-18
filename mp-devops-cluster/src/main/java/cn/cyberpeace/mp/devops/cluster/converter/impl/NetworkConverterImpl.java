@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.NetworkConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.NetworkPageConverterModel;
 import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
 import cn.cyberpeace.mp.devops.cluster.model.NetworkCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.common.NetworkModel;
 import cn.cyberpeace.mp.devops.cluster.request.NetworkPageRequest;
 import cn.cyberpeace.mp.devops.cluster.service.NetworkService;
 import com.google.common.collect.Lists;
@@ -47,14 +48,14 @@ public class NetworkConverterImpl implements NetworkConverter {
             return null;
         }
         List<NetworkPageConverterModel.Model> list = model.getNetworks().stream().map(networkModel -> {
-            NetworkCloudPlatformModel.NetworkModel.Subnet subnet = networkModel.getSubnet();
+            NetworkModel.Subnet subnet = networkModel.getSubnet();
             List<NetworkPageConverterModel.Model.Subnet> subnets = Lists.newArrayList();
             if (Objects.nonNull(subnet)) {
-                subnets = List.of(new NetworkPageConverterModel.Model.Subnet(subnet.getId(), subnet.getCidr(), subnet.getGateway_ip()));
+                subnets = List.of(new NetworkPageConverterModel.Model.Subnet(subnet.getId(), subnet.getCidr(), subnet.getGatewayIp()));
             }
-            return  NetworkPageConverterModel.Model.builder().name(networkModel.getName()).networkType(networkModel.getNetwork_type())
+            return  NetworkPageConverterModel.Model.builder().name(networkModel.getName()).networkType(networkModel.getNetworkType())
                     .status(CloudPlatformEnum.fromValue(networkModel.getStatus()))
-                    .subnets(subnets).createdAt(networkModel.getCreated_at()).build();
+                    .subnets(subnets).createdAt(networkModel.getCreatedAt()).build();
         }).collect(Collectors.toList());
         NetworkPageConverterModel convertModel = new NetworkPageConverterModel();
         convertModel.setModelList(list);

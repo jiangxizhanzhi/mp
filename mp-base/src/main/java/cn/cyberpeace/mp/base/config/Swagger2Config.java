@@ -13,7 +13,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.AnnotationUtils;
-import springfox.documentation.builders.*;
+import springfox.documentation.builders.ApiInfoBuilder;
+import springfox.documentation.builders.ModelPropertyBuilder;
+import springfox.documentation.builders.PathSelectors;
+import springfox.documentation.builders.RequestHandlerSelectors;
+import springfox.documentation.builders.RequestParameterBuilder;
 import springfox.documentation.schema.Annotations;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.ParameterType;
@@ -38,17 +42,21 @@ import java.util.stream.Collectors;
 @EnableSwagger2
 public class Swagger2Config implements ModelPropertyBuilderPlugin {
 
+    private static RequestParameter parameter =
+            new RequestParameterBuilder()
+                    .name("Authorization")
+                    .description("认证")
+                    .in(ParameterType.HEADER)
+                    .query(q ->
+                            q.defaultValue("abc")
+                                    .allowEmptyValue(true))
+                    .required(false)
+                    .build();
+
     @Bean
     public Docket createRestApi() {
 
-//        ParameterBuilder ticketPar = new ParameterBuilder();
-//        List<Parameter> pars = new ArrayList<Parameter>();
-//        ticketPar.name("Authorization").description("登录校验")//name表示名称，description表示描述
-//                .modelRef(new ModelRef("string")).parameterType("header")
-//                .required(false).defaultValue("Bearer SSSS ").build();//required表示是否必填，defaultvalue表示默认值
-//        pars.add(ticketPar.build());//添加完此处一定要把下边的带***的也加上否则不生效
-
-        String defaultJwt = "JWT eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjZmYjZmNWQ0N2Q4YTQwOGQ5ZjZlNTMzNzE2NWNmNjQ5IiwiZXhwIjoxNjI3NjM1ODYzLCJrZXkiOiIzNTE2NzJmZjg4NTQ0MzhlYWFhNDhjNDZlZmRmYTk0NyIsInVzZXJuYW1lIjoiZGVtbzQifQ.CK6861lgss2BGH-fHBK2EHPzVfO3o5Bo4vIdURmlmPE";
+        String defaultJwt = "";
         //在配置好的配置类中增加此段代码即可
         RequestParameter parameter =
                 new RequestParameterBuilder()
@@ -69,12 +77,171 @@ public class Swagger2Config implements ModelPropertyBuilderPlugin {
 
         return new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(apiInfo())
+                .enableUrlTemplating(true)
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp"))
                 .paths(PathSelectors.any())
                 .build()
                 .globalRequestParameters(CollectionUtil.toList(parameter));
 
+    }
+
+    @Bean
+    public Docket apiBase() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .apiInfo(apiInfo())
+                .enableUrlTemplating(true)
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.base"))
+                .paths(PathSelectors.any())
+                .build()
+                .globalRequestParameters(CollectionUtil.toList(parameter)).groupName("base");
+    }
+
+    @Bean
+    public Docket apiAuth() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .apiInfo(apiInfo())
+                .enableUrlTemplating(true)
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.auth"))
+                .paths(PathSelectors.any())
+                .build()
+                .globalRequestParameters(CollectionUtil.toList(parameter)).groupName("auth");
+    }
+
+    @Bean
+    public Docket apiCScene() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .apiInfo(apiInfo())
+                .enableUrlTemplating(true)
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.cscene"))
+                .paths(PathSelectors.any())
+                .build()
+                .globalRequestParameters(CollectionUtil.toList(parameter)).groupName("cscene");
+    }
+
+    @Bean
+    public Docket apiDevopsCluster() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .apiInfo(apiInfo())
+                .enableUrlTemplating(true)
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.devops.cluster"))
+                .paths(PathSelectors.any())
+                .build()
+                .globalRequestParameters(CollectionUtil.toList(parameter)).groupName("devops-cluster");
+    }
+
+    @Bean
+    public Docket apiDevopsLog() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .apiInfo(apiInfo())
+                .enableUrlTemplating(true)
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.devops.log"))
+                .paths(PathSelectors.any())
+                .build()
+                .globalRequestParameters(CollectionUtil.toList(parameter)).groupName("devops-log");
+    }
+
+    @Bean
+    public Docket apiMpFlow() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .apiInfo(apiInfo())
+                .enableUrlTemplating(true)
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.flow"))
+                .paths(PathSelectors.any())
+                .build()
+                .globalRequestParameters(CollectionUtil.toList(parameter)).groupName("flow");
+    }
+
+    @Bean
+    public Docket apiScene() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .apiInfo(apiInfo())
+                .enableUrlTemplating(true)
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.scene"))
+                .paths(PathSelectors.any())
+                .build()
+                .globalRequestParameters(CollectionUtil.toList(parameter)).groupName("scene");
+    }
+
+    @Bean
+    public Docket apiScenePluginCloud() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .apiInfo(apiInfo())
+                .enableUrlTemplating(true)
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.sceneplugincloud"))
+                .paths(PathSelectors.any())
+                .build()
+                .globalRequestParameters(CollectionUtil.toList(parameter)).groupName("scene-plugin-cloud");
+    }
+
+    @Bean
+    public Docket apiScenePluginCollection() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .apiInfo(apiInfo())
+                .enableUrlTemplating(true)
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.sceneplugincollection"))
+                .paths(PathSelectors.any())
+                .build()
+                .globalRequestParameters(CollectionUtil.toList(parameter)).groupName("scene-plugin-collection");
+    }
+
+    @Bean
+    public Docket apiScenePluginFlow() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .apiInfo(apiInfo())
+                .enableUrlTemplating(true)
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.scenepluginflow"))
+                .paths(PathSelectors.any())
+                .build()
+                .globalRequestParameters(CollectionUtil.toList(parameter)).groupName("scene-plugin-flow");
+    }
+
+    @Bean
+    public Docket apiSituationAware() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .apiInfo(apiInfo())
+                .enableUrlTemplating(true)
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.situationaware"))
+                .paths(PathSelectors.any())
+                .build()
+                .globalRequestParameters(CollectionUtil.toList(parameter)).groupName("situation-aware");
+    }
+
+
+    @Bean
+    public Docket apiAgg() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .apiInfo(apiInfo())
+                .enableUrlTemplating(true)
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.aggregation"))
+                .paths(PathSelectors.any())
+                .build()
+                .globalRequestParameters(CollectionUtil.toList(parameter)).groupName("aggregation");
+    }
+
+    @Bean
+    public Docket apiOther() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .apiInfo(apiInfo())
+                .enableUrlTemplating(true)
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp"))
+                .paths(PathSelectors.any())
+                .build()
+                .globalRequestParameters(CollectionUtil.toList(parameter))
+                .groupName("other");
     }
 
     private ApiInfo apiInfo() {
@@ -89,17 +256,14 @@ public class Swagger2Config implements ModelPropertyBuilderPlugin {
 
     @Override
     public void apply(ModelPropertyContext context) {
-        //获取当前字段的类型
-        final Class fieldType = context.getBeanPropertyDefinition().get().getField().getRawType();
-
         //为枚举字段设置注释
-        descForEnumFields(context, fieldType);
+        descForEnumFields(context);
     }
 
     /**
      * 为枚举字段设置注释
      */
-    private void descForEnumFields(ModelPropertyContext context, Class fieldType) {
+    private void descForEnumFields(ModelPropertyContext context) {
         Optional<ApiModelProperty> annotation = Optional.empty();
 
         // 找到 @ApiModelProperty 注解修饰的枚举类

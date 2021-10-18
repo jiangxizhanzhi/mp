@@ -17,6 +17,7 @@ import cn.cyberpeace.mp.auth.service.TargetService;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.service.fields.RoleFields;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
+import cn.cyberpeace.mp.auth.util.SQLUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
@@ -39,6 +40,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
 @Service
 @Slf4j
 public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper, RoleFields, QueryParams>
@@ -132,8 +138,15 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
     @Override
     public PageInfo getPageWithUserCnt(RolePageRequest rolePageRequest) {
+
+        ArrayList<String> orders = null;
+        if (rolePageRequest.getOrders() != null && rolePageRequest.getOrders().length > 0) {
+            orders = CollectionUtil.newArrayList(rolePageRequest.getOrders());
+        }
+
         PageHelper.startPage(rolePageRequest.getPage(), rolePageRequest.getPageSize());
-        List<RoleDto> roleDtos = getModelMapper().listWithUserCnt(rolePageRequest.getName());
+        String likeRoleName = SQLUtils.escapeLike(rolePageRequest.getName());
+        List<RoleDto> roleDtos = getModelMapper().listWithUserCnt(likeRoleName, orders);
         PageInfo pageInfo = new PageInfo(roleDtos);
 
         roleDtos.forEach(r -> {

@@ -1,13 +1,17 @@
 package cn.cyberpeace.mp.base.util;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -87,4 +91,38 @@ public class JsonUtils {
     public static <T> Map<String, Object> beanToMap(T obj) {
         return parse(toJsonString(obj), new TypeReference<Map<String, Object>>() {});
     }
+
+    /**
+     * 将对象的大写转换为下划线加小写，例如：userName-->user_name
+     *
+     * @param object
+     * @return
+     * @throws JsonProcessingException
+     */
+    public static String toUnderlineJSONString(Object object) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+        String reqJson = mapper.writeValueAsString(object);
+        return reqJson;
+    }
+
+    /**
+     * 将下划线转换为驼峰的形式，例如：user_name-->userName
+     * @param json
+     * @param clazz
+     * @param <T>
+     * @return
+     * @throws IOException
+     */
+    public static <T> T toSnakeObject(String json, Class<T> clazz) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        // mapper的configure方法可以设置多种配置（例如：多字段 少字段的处理）　　　　　　
+        // mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
+        mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+        return mapper.readValue(json, clazz);
+    }
+
 }

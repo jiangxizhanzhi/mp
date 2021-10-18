@@ -6,7 +6,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.ElasticIpConvertModel;
 import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
 import cn.cyberpeace.mp.devops.cluster.model.ElasticIpCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.request.ElasticIpPageRequest;
-import cn.cyberpeace.mp.devops.cluster.service.ElasticIpService;
+import cn.cyberpeace.mp.devops.cluster.service.NetworkService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,11 +19,12 @@ import java.util.stream.Collectors;
 @Service
 public class ElasticIpConvertImpl implements ElasticIpConverter {
 
-    private ElasticIpService elasticIpService;
+
+    private NetworkService networkService;
 
     @Autowired
-    public ElasticIpConvertImpl(ElasticIpService elasticIpService) {
-        this.elasticIpService = elasticIpService;
+    public ElasticIpConvertImpl(NetworkService networkService) {
+        this.networkService = networkService;
     }
 
     @Override
@@ -41,15 +42,15 @@ public class ElasticIpConvertImpl implements ElasticIpConverter {
     public ElasticIpConvertModel page(ElasticIpPageRequest request, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         String getParams = BeanUtils.wrapperGetParamsByObject(request,ignoreFields);
-        final ElasticIpCloudPlatformModel model = elasticIpService.page(getParams);
+        final ElasticIpCloudPlatformModel model = networkService.pageElasticIp(getParams);
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getFloatingips())){
             return null;
         }
         List<ElasticIpConvertModel.Model> list = model.getFloatingips().stream().map(elasticIpModel ->
-                ElasticIpConvertModel.Model.builder().floatIpAddress(elasticIpModel.getFloating_ip_address())
-                        .fixedIpAddress(elasticIpModel.getFixed_ip_address())
+                ElasticIpConvertModel.Model.builder().floatIpAddress(elasticIpModel.getFloatingIpAddress())
+                        .fixedIpAddress(elasticIpModel.getFixedIpAddress())
                         .status(CloudPlatformEnum.fromValue(elasticIpModel.getStatus()))
-                        .createdAt(elasticIpModel.getCreated_at()).build()
+                        .createdAt(elasticIpModel.getCreatedAt()).build()
         ).collect(Collectors.toList());
 
         ElasticIpConvertModel convertModel = new ElasticIpConvertModel();
