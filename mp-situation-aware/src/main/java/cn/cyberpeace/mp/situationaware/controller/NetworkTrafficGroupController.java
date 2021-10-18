@@ -8,10 +8,11 @@ import cn.cyberpeace.mp.situationaware.model.GroupRequest;
 import cn.cyberpeace.mp.situationaware.service.NetworkTrafficGroupService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import java.util.List;
-import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/flow_group")
@@ -25,14 +26,14 @@ public class NetworkTrafficGroupController {
     @ApiOperation(value = "查询所有分组信息", notes = "")
     public ServiceResult<List<GroupModel>> queryAllGroups() {
         List<GroupModel> groupModels = networkTrafficGroupService.queryAllGroups();
-        return ServiceResult.<List<GroupModel>>builder().data(groupModels).build();
+        return ServiceResult.<List<GroupModel>>builder().data(groupModels).build().asResult();
     }
 
     @GetMapping("/{groupId}")
     @ApiOperation(value = "根据groupId查询分组信息", notes = "")
     public ServiceResult<GroupModel> queryGroupModelById(@PathVariable("groupId") String groupId){
         var groupModel = networkTrafficGroupService.queryGroupById(groupId);
-        return ServiceResult.<GroupModel>builder().data(groupModel).build();
+        return ServiceResult.<GroupModel>builder().data(groupModel).build().asResult();
     }
 
     @DeleteMapping("/{groupId}")

@@ -10,10 +10,6 @@ import cn.cyberpeace.mp.situationaware.service.NetWorkTrafficService;
 import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import java.io.IOException;
-import java.util.List;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
@@ -21,6 +17,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/sessions")
@@ -59,7 +60,7 @@ public class NetWorkTrafficController {
     @PostMapping
     public ServiceResult<List<SessionResult>> querySessionListWithGroup(
         @RequestBody @Valid SessionRequest sessionRequest) {
-        return ServiceResult.<List<SessionResult>>builder().data(netWorkTrafficService.querySessionListWithGroup(sessionRequest)).build();
+        return ServiceResult.<List<SessionResult>>builder().data(netWorkTrafficService.querySessionListWithGroup(sessionRequest)).build().asResult();
     }
 
     /**
@@ -71,7 +72,7 @@ public class NetWorkTrafficController {
     @PostMapping("pageable")
     public ListObjServiceResult<SessionResult> querySessionListWithGroupWithPage(
         @RequestBody @Valid SessionRequest sessionRequest) {
-        return new ListObjServiceResult<>(netWorkTrafficService.querySessionWithPage(sessionRequest));
+        return new ListObjServiceResult<>(netWorkTrafficService.querySessionWithPage(sessionRequest)).asResult();
     }
 
     @PostMapping("spiview")

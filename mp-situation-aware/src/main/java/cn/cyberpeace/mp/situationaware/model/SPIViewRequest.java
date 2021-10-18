@@ -1,9 +1,10 @@
 package cn.cyberpeace.mp.situationaware.model;
 
-import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * 聚合分析的实体
