@@ -34,15 +34,11 @@ public interface SysNoticeService extends BaseModelService<SysNoticeModel, Query
     PageInfo page(SysNoticePageRequest pageRequest);
 
     /**
-     * 分页查询当前用户有权看到的公告
+     * 分页查询当前用户有权看到的公告消息列表
      *
      * @param pageRequest
      * @return
      */
-    @Deprecated
-    PageInfo currentUserPage(SysNoticePageRequest pageRequest);
-
-
     PageInfo currentUserNoticeMessages(SysNoticePageRequest pageRequest);
 
     SysNoticeDto noticeModel2NoticeDto(SysNoticeModel noticeModel);
