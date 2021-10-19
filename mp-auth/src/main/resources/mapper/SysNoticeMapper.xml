@@ -82,7 +82,7 @@
                 <foreach item="org" index="index" collection="orgs" open="(" separator="," close=")">
                     #{org}
                 </foreach>
-                OR
+                AND
                 nr.role in
                 <foreach item="role" index="index" collection="roles" open="(" separator="," close=")">
                     #{role}
