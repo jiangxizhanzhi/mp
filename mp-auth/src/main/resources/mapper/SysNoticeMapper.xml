@@ -161,6 +161,8 @@
             AND
             (
             <if test="orgs != null and orgs.size() > 0">
+                no.org is null
+                OR
                 no.org in
                 <foreach item="org" index="index" collection="orgs" open="(" separator="," close=")">
                     #{org}
