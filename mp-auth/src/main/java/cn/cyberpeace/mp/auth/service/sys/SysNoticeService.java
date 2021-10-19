@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.auth.model.SysNoticeModel;
 import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import com.github.pagehelper.PageInfo;
+
 import java.util.List;
 
 /**
@@ -34,10 +35,15 @@ public interface SysNoticeService extends BaseModelService<SysNoticeModel, Query
 
     /**
      * 分页查询当前用户有权看到的公告
+     *
      * @param pageRequest
      * @return
      */
+    @Deprecated
     PageInfo currentUserPage(SysNoticePageRequest pageRequest);
+
+
+    PageInfo currentUserNoticeMessages(SysNoticePageRequest pageRequest);
 
     SysNoticeDto noticeModel2NoticeDto(SysNoticeModel noticeModel);
 

@@ -89,7 +89,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
     public int unReadCount() {
         SysNoticePageRequest pageRequest = new SysNoticePageRequest();
         pageRequest.ensure();
-        PageInfo pageInfo = currentUserPage(pageRequest);
+        PageInfo pageInfo = currentUserNoticeMessages(pageRequest);
         int noticeCnt = (int) pageInfo.getTotal();
 
         UserModel userModel = UserUtils.getLoginUser();
@@ -295,7 +295,87 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         });
 
         PageHelper.startPage(req.getPage(), req.getPageSize());
-        List<SysNoticeModel> notices = getModelMapper().listCurrentUserNotices(null, null, allOrgIds, allRoleIds,null, null, userModel.getId());
+        List<SysNoticeModel> notices = getModelMapper().listCurrentUserNotices(null, null, allOrgIds, allRoleIds, null, null, userModel.getId());
+        PageInfo pageInfo = new PageInfo(notices);
+
+        convert2NoticeDtoPageInfo(pageInfo);
+        return pageInfo;
+    }
+
+
+    @Override
+    public PageInfo<SysNoticeModel> currentUserNoticeMessages(SysNoticePageRequest req) {
+        UserModel userModel = UserUtils.getLoginUser();
+        if (Objects.isNull(userModel)) {
+            log.error("未查询到当前登录用户！");
+            return new PageInfo<>();
+        }
+
+        // 查找当前用户所有的角色
+        // 是否是管理员，管理员拥有所有公告权限
+        List<RoleModel> roleModels = userRoleService.listByUserId(userModel.getId());
+        boolean isAdmin = roleModels.stream().anyMatch(r -> r.getIdentifier().equals(AuthConstant.ROLE_ADMIN));
+
+        // 管理员，查看所有公告消息
+        if (isAdmin) {
+            log.info("current user is admin!");
+            PageHelper.startPage(req.getPage(), req.getPageSize());
+            List<SysNoticeModel> notices = getModelMapper().listNoticeMessageByCurrentAdminUser(userModel.getId());
+            PageInfo pageInfo = new PageInfo(notices);
+            convert2NoticeDtoPageInfo(pageInfo);
+            return pageInfo;
+        }
+
+        log.info("current user is not admin!");
+        // 非管理员...
+        List<String> allRoleIds = roleModels.stream().map(RoleModel::getId).collect(Collectors.toList());
+
+        // 根据当前登录用户查出所有的组织，包括组织的上级，直到顶级组织
+        List<String> allOrgIds = new ArrayList<>();
+        List<OrgModel> orgModels = orgUserService.listOrgsByUserId(userModel.getId());
+        orgModels.forEach(o -> {
+            // 添加自己的id
+            allOrgIds.add(o.getId());
+            // 查找所有上级组织id
+            List<OrgDto> orgDtos = orgService.listAllParentIgnoreLevelExcludeSelf(o.getId());
+            allOrgIds.addAll(orgDtos.stream().map(OrgDto::getId).collect(Collectors.toList()));
+        });
+
+
+        /*
+        // 用户没有角色，没有组织
+        if (CollectionUtil.isEmpty(allRoleIds) && CollectionUtil.isEmpty(allOrgIds)) {
+            log.info("current has no roles and orgs");
+            // 查询 is_public = 1 && notice_org.org is null的
+            // todo
+        }
+
+        // 用户有角色，没有组织
+        if (CollectionUtil.isNotEmpty(allRoleIds) && CollectionUtil.isEmpty(allOrgIds)) {
+            log.info("current has roles but no orgs");
+            // 查询 (is_public = 1 || notice_role in roles) && notice_org.org is null的
+            // todo
+        }
+
+
+        // 用户没有角色，有组织
+        if (CollectionUtil.isEmpty(allRoleIds) && CollectionUtil.isNotEmpty(allOrgIds)) {
+            log.info("current has no roles and orgs");
+            // 查询 is_public = 1 && notice_org.org in orgs
+            // todo
+        }
+
+
+        // 用户有角色，有组织
+        if (CollectionUtil.isEmpty(allRoleIds) && CollectionUtil.isNotEmpty(allOrgIds)) {
+            log.info("current has no roles and orgs");
+            // 查询 (is_public = 1 || notice_role in roles) && notice_org.org in orgs
+            // todo
+        }
+        */
+
+        PageHelper.startPage(req.getPage(), req.getPageSize());
+        List<SysNoticeModel> notices = getModelMapper().listNoticeMessageByCurrentNormalUser(allOrgIds, allRoleIds, userModel.getId());
         PageInfo pageInfo = new PageInfo(notices);
 
         convert2NoticeDtoPageInfo(pageInfo);
