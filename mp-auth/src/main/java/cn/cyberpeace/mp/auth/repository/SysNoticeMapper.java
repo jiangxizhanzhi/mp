@@ -24,8 +24,31 @@ public interface SysNoticeMapper extends BaseModelMapper<SysNoticeModel> {
                                      @Param("publisher") String publisher, @Param("type") Integer type);
 
 
+    @Deprecated
     List<SysNoticeModel> listCurrentUserNotices(@Param("title") String title, @Param("ids") List<String> ids,
-                                     @Param("orgs") List<String> orgs, @Param("roles") List<String> roles,
-                                     @Param("publisher") String publisher, @Param("type") Integer type, @Param("userId") String userId);
+                                                @Param("orgs") List<String> orgs, @Param("roles") List<String> roles,
+                                                @Param("publisher") String publisher, @Param("type") Integer type, @Param("userId") String userId);
+
+
+    /**
+     * 管理员消息推送列表
+     *
+     * @param userId
+     * @return
+     */
+    List<SysNoticeModel> listNoticeMessageByCurrentAdminUser(@Param("userId") String userId);
+
+    /**
+     * 普通用户消息推送列表
+     *
+     * @param orgs
+     * @param roles
+     * @param userId
+     * @return
+     */
+    List<SysNoticeModel> listNoticeMessageByCurrentNormalUser(@Param("orgs") List<String> orgs,
+                                                              @Param("roles") List<String> roles,
+                                                              @Param("userId") String userId);
+
 
 }

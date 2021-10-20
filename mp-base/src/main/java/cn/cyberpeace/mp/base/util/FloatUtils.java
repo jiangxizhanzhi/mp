@@ -1,7 +1,5 @@
 package cn.cyberpeace.mp.base.util;
 
-import org.apache.commons.lang3.StringUtils;
-
 public class FloatUtils {
 
     private FloatUtils() {}
@@ -11,7 +9,7 @@ public class FloatUtils {
     }
 
     public static Float fromStr(String str) {
-        return StringUtils.isNumeric(str) ? Float.parseFloat(str) : 0;
+        return str != null ? Float.parseFloat(str) : 0;
     }
 
 }
