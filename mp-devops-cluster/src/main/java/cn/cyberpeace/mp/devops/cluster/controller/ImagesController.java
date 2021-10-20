@@ -23,6 +23,7 @@ import cn.cyberpeace.mp.devops.cluster.response.base.Result;
 import cn.cyberpeace.mp.devops.cluster.service.FlavorService;
 import cn.cyberpeace.mp.devops.cluster.service.ImagesService;
 import cn.cyberpeace.mp.devops.cluster.service.ScenariosSnapshotService;
+import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -30,7 +31,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
@@ -221,7 +224,12 @@ public class ImagesController {
         InputStreamResource resource = null;
         String filename = "";
         try{
-            InputStream inputStream = httpResponse.getEntity().getContent();
+            HttpEntity entity = httpResponse.getEntity();
+            String contentType = entity.getContentType().getValue();
+            if (contentType.equals(MediaType.APPLICATION_JSON_VALUE)){
+                throw new MpRuntimeException(BaseErrorCode.ERROR);
+            }
+            InputStream inputStream = entity.getContent();
             resource = new InputStreamResource(inputStream);
             filename = URLEncoder.encode(imageName + ".img","utf-8");
         }catch (IOException e) {
