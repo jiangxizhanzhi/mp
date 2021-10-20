@@ -417,4 +417,32 @@ public class SceneHandler extends BaseSceneHandler<
      */
     public void modify() {
     }
+
+    public void startElement(String nodeId) {
+    }
+
+    public void stopElement(String nodeId) {
+    }
+
+    public void restartElement(String nodeId) {
+    }
+
+    public void pauseElement(String nodeId) {
+    }
+
+    public void unpauseElement(String nodeId) {
+    }
+
+    public void snapshotElement(String nodeId) {
+    }
+
+    public void deleteElement(String nodeId) {
+    }
+
+    public void modifyElement(String nodeId) {
+    }
+
+    public void recreateElement(String nodeId) {
+    }
+
 }
