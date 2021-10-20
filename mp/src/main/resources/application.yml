@@ -68,7 +68,7 @@ mp:
     cp-url: http://${ip.cp}:11111 #云平台地址
     hostname: controller  #主机名称
   situationaware:
-    group-url: http://10.100.14.107:5079/v1/scenes
+    group-url: http://${ip.moloch}:5079/v1/scenes
     moloch:
       username: api
       password: api
@@ -86,13 +86,13 @@ mp:
       es-username: admin
       es-password: admin
     wazuh-probe-manager:
-      url: http://10.100.0.102:8002
+      url: http://${ip.wazuh}:8002
       agent-script-linux-path: /var/ossec/etc/shared/scripts/
       agent-script-windows-path: C:\ossec-agent\shared\scripts\
       task-enable: false
 
   log:
-    es-nodes: 10.100.0.103:9200
+    es-nodes: ${ip.moloch}:9200
     exclude-uri: /login
     exclude-method: OPTIONS
   auth:
