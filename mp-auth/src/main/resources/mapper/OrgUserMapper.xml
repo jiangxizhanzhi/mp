@@ -31,8 +31,21 @@
                     #{userId}
                 </foreach>
             </if>
-            <if test="username != null and username != ''">
-                AND ( username like CONCAT('%', #{username}, '%') or name like CONCAT('%', #{username}, '%'))
+            <if test="userCondition.isEnabled != null">
+                AND is_enabled = #{userCondition.isEnabled}
+            </if>
+            <if test="userCondition.isAudited != null">
+                AND is_audited = #{userCondition.isAudited}
+            </if>
+            <if test="userCondition.isExpired != null and userCondition.isExpired == 0">
+                AND expired_time > now()
+            </if>
+            <if test="userCondition.isExpired != null and userCondition.isExpired != 0">
+                AND expired_time &lt;= now()
+            </if>
+            <if test="userCondition.username != null and userCondition.username != ''">
+                AND ( username like CONCAT('%', #{userCondition.username}, '%') or name like CONCAT('%',
+                #{userCondition.username}, '%'))
             </if>
         </where>
         <if test="orders != null and orders.size() > 0">
