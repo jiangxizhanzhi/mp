@@ -12,4 +12,6 @@ public interface ControllerConstant {
 
     String code = "0";
 
+    String ERROR_CODE_PREFIX = "devops.error_code.";
+
 }

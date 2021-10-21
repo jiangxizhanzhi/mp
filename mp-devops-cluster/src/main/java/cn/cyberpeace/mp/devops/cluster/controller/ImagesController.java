@@ -1,11 +1,13 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
+import cn.cyberpeace.mp.devops.cluster.constant.DevopsClusterErrorCode;
 import cn.cyberpeace.mp.devops.cluster.converter.ImagesConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.InjectFileConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.SnapshotConverter;
@@ -227,14 +229,14 @@ public class ImagesController {
             HttpEntity entity = httpResponse.getEntity();
             String contentType = entity.getContentType().getValue();
             if (contentType.equals(MediaType.APPLICATION_JSON_VALUE)){
-                throw new MpRuntimeException(BaseErrorCode.ERROR);
+                throw new MpRuntimeException(DevopsClusterErrorCode.EXPORT_IMAGE_ERROR);
             }
             InputStream inputStream = entity.getContent();
             resource = new InputStreamResource(inputStream);
             filename = URLEncoder.encode(imageName + ".img","utf-8");
         }catch (IOException e) {
             log.error("export image error : {}",e.getMessage(),e);
-            throw new MpRuntimeException(BaseErrorCode.ERROR);
+            throw new MpRuntimeException(DevopsClusterErrorCode.EXPORT_IMAGE_ERROR);
         }
 
         var httpHeaders = new HttpHeaders();
