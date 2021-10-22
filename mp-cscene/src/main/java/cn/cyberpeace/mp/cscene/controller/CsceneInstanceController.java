@@ -27,13 +27,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -167,26 +161,26 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
     @ApiOperation("场景实例获取会话列表")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
-            @ApiImplicitParam(name = "nodeId", value = "节点id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "ids", value = "场景实例id", allowMultiple = true, dataTypeClass = String.class),
+            @ApiImplicitParam(name = "nodeIds", value = "节点id", allowMultiple = true, dataTypeClass = String.class),
     })
-    @GetMapping(value = "/node_sessions", params = "id")
-    public ServiceResult<List<NodeSessionBO>> getNodeSessions(@RequestParam String id,
-                                                              @RequestParam(required = false) String nodeId) {
-        return modelService.getNodeSessions(id, nodeId).asResult();
+    @GetMapping(value = "/node_sessions", params = "ids")
+    public ServiceResult<List<NodeSessionBO>> getNodeSessions(@RequestParam List<String> ids,
+                                                              @RequestParam(required = false) List<String> nodeIds) {
+        return modelService.getNodeSessions(ids, nodeIds).asResult();
     }
 
     @ApiOperation("场景实例获取分页录屏列表")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "ids", value = "场景实例id", allowMultiple = true, dataTypeClass = String.class),
             @ApiImplicitParam(name = "nodeIds", value = "场景节点id", allowMultiple = true, dataTypeClass = String.class),
     })
-    @GetMapping(value = "/list_recordings", params = "id")
-    public ListObjServiceResult<NodeRecordingBO> listRecordings(@RequestParam String id,
-                                                                @RequestParam(required = false) String[] nodeIds,
+    @GetMapping(value = "/list_recordings", params = "ids")
+    public ListObjServiceResult<NodeRecordingBO> listRecordings(@RequestParam List<String> ids,
+                                                                @RequestParam(required = false) List<String> nodeIds,
                                                                 RecordingQueryParams queryParams) {
         handleQueryParams("listRecordings", queryParams);
-        return modelService.listRecordings(id, nodeIds, queryParams).asResult();
+        return modelService.listRecordings(ids, nodeIds, queryParams).asResult();
     }
 
     @ApiOperation("场景实例获取分页流量列表")

@@ -86,6 +86,16 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return sceneId;
     }
 
+    private List<CsceneInstanceModel> getCsceneInstanceObjs(List<String> csceneIds) {
+        var queryParams = new QueryParams();
+        queryParams.setIds(csceneIds.toArray(new String[0]));
+        var csceneInstancesResult = list(queryParams).getSource();
+        if (csceneInstancesResult == null) {
+            return new ArrayList<>();
+        }
+        return csceneInstancesResult.getObjs();
+    }
+
     @Autowired
     public CsceneInstanceService(CsceneInstanceMapper modelMapper, CsceneInstanceRoleMapper csceneInstanceRoleMapper) {
         setModelMapper(modelMapper);
@@ -142,24 +152,47 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
     }
 
-    public ServiceResult<List<NodeSessionBO>> getNodeSessions(String id, String nodeId) {
-        var sceneId = getSceneId(id);
-        if (StringUtils.isEmpty(sceneId)) {
+    public ServiceResult<List<NodeSessionBO>> getNodeSessions(List<String> ids, List<String> nodeIds) {
+        var csceneInstances = getCsceneInstanceObjs(ids);
+        if (csceneInstances.isEmpty()) {
             return new ServiceResult<>(new ArrayList<>());
         }
-
-        return scenePluginCloudSceneService.getSceneRemoteSessions(sceneId,
-                StringUtils.isEmpty(nodeId) ? null : new String[]{ nodeId }, true, false);
+        var sceneIdCsceneInstanceMap = csceneInstances.stream()
+                .collect(Collectors.toMap(csceneInstance -> csceneInstance.getScene(), csceneInstance -> csceneInstance));
+        List<String> sceneIds = new ArrayList<>(sceneIdCsceneInstanceMap.keySet());
+        var nodeSessionResult = scenePluginCloudSceneService.getSceneRemoteSessions(
+                sceneIds, nodeIds, true, false);
+        nodeSessionResult.getSource().forEach(nodeSession -> {
+            var sceneId = nodeSession.getSceneId();
+            var csceneInstance = sceneIdCsceneInstanceMap.getOrDefault(sceneId, null);
+            if (csceneInstance == null) {
+                return;
+            }
+            nodeSession.setSceneId(csceneInstance.getId());
+        });
+        return nodeSessionResult;
     }
 
-    public ListObjServiceResult<NodeRecordingBO> listRecordings(String id, String[] nodeIds,
+    public ListObjServiceResult<NodeRecordingBO> listRecordings(List<String> ids, List<String> nodeIds,
                                                                 RecordingQueryParams queryParams) {
-        var sceneId = getSceneId(id);
-        if (StringUtils.isEmpty(sceneId)) {
+        var csceneInstances = getCsceneInstanceObjs(ids);
+        if (csceneInstances.isEmpty()) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
-
-        return scenePluginCloudSceneService.getSceneRemoteRecordings(sceneId, nodeIds, queryParams);
+        var sceneIdCsceneInstanceMap = csceneInstances.stream()
+                .collect(Collectors.toMap(csceneInstance -> csceneInstance.getScene(), csceneInstance -> csceneInstance));
+        List<String> sceneIds = new ArrayList<>(sceneIdCsceneInstanceMap.keySet());
+        var nodeRecordingResult = scenePluginCloudSceneService.getSceneRemoteRecordings(
+                sceneIds, nodeIds, queryParams);
+        nodeRecordingResult.getSource().getObjs().forEach(nodeRecording -> {
+            var sceneId = nodeRecording.getSceneId();
+            var csceneInstance = sceneIdCsceneInstanceMap.getOrDefault(sceneId, null);
+            if (csceneInstance == null) {
+                return;
+            }
+            nodeRecording.setSceneId(csceneInstance.getId());
+        });
+        return nodeRecordingResult;
     }
 
     public ListObjServiceResult<CollectionFlowBO> listFlows(String id, FlowQueryParams queryParams) {
