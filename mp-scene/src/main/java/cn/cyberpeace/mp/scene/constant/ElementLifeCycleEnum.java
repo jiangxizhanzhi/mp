@@ -13,7 +13,7 @@ public enum ElementLifeCycleEnum {
     /**
      * 重启节点
      */
-    RESTART("restart", SceneElementModel.Event.RESTART),
+    RESTART("reboot", SceneElementModel.Event.RESTART),
     /**
      * 挂起节点
      */
@@ -28,21 +28,18 @@ public enum ElementLifeCycleEnum {
 //     */
 //    RECREATE("recreate", Integer.MAX_VALUE);
 
+    /**
+     * 对应云平台接口提供的操作名称
+     */
     private String action;
 
+    /**
+     * 对应 SceneElementModel.Event
+     */
     private int event;
 
     ElementLifeCycleEnum(String action, int event) {
         this.action = action;
         this.event = event;
-    }
-
-    public static ElementLifeCycleEnum getBy(int event) {
-        for (ElementLifeCycleEnum lifeCycleEnum : ElementLifeCycleEnum.values()) {
-            if (lifeCycleEnum.event == event) {
-                return lifeCycleEnum;
-            }
-        }
-        return null;
     }
 }

@@ -2,7 +2,9 @@ package cn.cyberpeace.mp.scene.service;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.scene.constant.ElementLifeCycleEnum;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
+import cn.cyberpeace.mp.scene.constant.SceneLifeCycleEnum;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
@@ -98,7 +100,7 @@ public class SceneService {
 
     public ServiceResult<Integer> bulkDelete(String[] ids, boolean logic, SceneContextBO context) {
         var result = 0;
-        for (String id: ids) {
+        for (String id : ids) {
             if (Boolean.TRUE.equals(delete(id, logic, context).getSource())) {
                 result += 1;
             }
@@ -112,4 +114,34 @@ public class SceneService {
         }
     }
 
+    /**
+     * 控制场景生命周期
+     * @param id
+     * @param lifeCycle
+     * @return
+     */
+    public boolean lifeCycleControl(String id, SceneLifeCycleEnum lifeCycle) {
+        SceneHandler sceneHandler = new SceneHandler(id, null, false, null);
+        sceneHandler.setRealTimeUpdate(true);
+        if (lifeCycle == SceneLifeCycleEnum.PAUSE) {
+            sceneHandler.pause();
+        } else if (lifeCycle == SceneLifeCycleEnum.UNPAUSE) {
+            sceneHandler.unpause();
+        }
+        return true;
+    }
+
+    /**
+     * 控制节点生命周期
+     * @param id
+     * @param nodeId
+     * @param lifeCycle
+     * @return
+     */
+    public boolean elementLifeCycleControl(String id, String nodeId, ElementLifeCycleEnum lifeCycle) {
+        SceneHandler sceneHandler = new SceneHandler(id, null, false, null);
+        sceneHandler.setRealTimeUpdate(true);
+        boolean result = sceneHandler.elementLifeCycleControl(nodeId, lifeCycle, true, false);
+        return result;
+    }
 }

@@ -2,15 +2,19 @@ package cn.cyberpeace.mp.cscene.core;
 
 import cn.cyberpeace.mp.base.annotation.BeanFieldClasses;
 import cn.cyberpeace.mp.base.annotation.ClassFieldClasses;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstaneRoleBO;
+import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.core.base.BaseCsceneHandler;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceRoleModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
+import cn.cyberpeace.mp.scene.constant.ElementLifeCycleEnum;
+import cn.cyberpeace.mp.scene.constant.SceneLifeCycleEnum;
 import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
 import cn.cyberpeace.mp.scene.service.SceneService;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginContext;
@@ -89,7 +93,8 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
     }
 
     @Override
-    public void saveScene(CsceneInstanceBO csceneBO) {}
+    public void saveScene(CsceneInstanceBO csceneBO) {
+    }
 
     @Override
     public void deleteScene(CsceneInstanceBO csceneBO, boolean logic) {
@@ -106,5 +111,34 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         if (sceneId != null) {
             sceneService.delete(sceneId, logic, generateSceneContext());
         }
+    }
+
+    /**
+     * 控制当前场景的生命周期
+     * @param lifeCycle
+     * @return
+     */
+    public boolean lifeCycleControl(SceneLifeCycleEnum lifeCycle) {
+        String sceneId = null;
+        // 场景不存在
+        if (getCscene() == null || (sceneId = getSceneId(getCscene().toModel())) == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return this.sceneService.lifeCycleControl(sceneId, lifeCycle);
+    }
+
+    /**
+     * 控制当前场景中某个节点的生命周期
+     * @param nodeId
+     * @param lifeCycle
+     * @return
+     */
+    public boolean elementLifeCycleControl(String nodeId, ElementLifeCycleEnum lifeCycle) {
+        String sceneId = null;
+        // 场景不存在
+        if (getCscene() == null || (sceneId = getSceneId(getCscene().toModel())) == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return this.sceneService.elementLifeCycleControl(sceneId, nodeId, lifeCycle);
     }
 }
