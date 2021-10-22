@@ -22,6 +22,7 @@ import cn.cyberpeace.mp.cscene.report.rabbitmq.RabbitmqCsceneReporter;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
 import cn.cyberpeace.mp.cscene.service.taskpool.CsceneReportTaskPool;
+import cn.cyberpeace.mp.scene.constant.ElementLifeCycleEnum;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
@@ -126,7 +127,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     public ServiceResult<Integer> bulkDeleteByIds(String[] ids, boolean logic, CsceneContextBO context) {
         var result = 0;
-        for (String id: ids) {
+        for (String id : ids) {
             if (Boolean.TRUE.equals(deleteById(id, logic, context).getSource())) {
                 result += 1;
             }
@@ -147,7 +148,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
 
         return scenePluginCloudSceneService.getSceneRemoteSessions(sceneId,
-                StringUtils.isEmpty(nodeId) ? null : new String[]{nodeId}, true, false);
+                StringUtils.isEmpty(nodeId) ? null : new String[]{ nodeId }, true, false);
     }
 
     public ListObjServiceResult<NodeRecordingBO> listRecordings(String id, String[] nodeIds,
@@ -200,21 +201,38 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
      * @param events 需要排除的event
      * @return
      */
-    public List<CsceneInstanceCountByReferenceTypeBO> countGroupByReferenceType(List<Integer> events){
+    public List<CsceneInstanceCountByReferenceTypeBO> countGroupByReferenceType(List<Integer> events) {
         List<CsceneInstanceCountByReferenceTypeModel> csceneInstanceCountByReferenceTypeModels = getModelMapper().countGroupByReferenceType(events);
-        if (CollectionUtils.isEmpty(csceneInstanceCountByReferenceTypeModels)){
+        if (CollectionUtils.isEmpty(csceneInstanceCountByReferenceTypeModels)) {
             return Lists.newArrayList();
         }
         return csceneInstanceCountByReferenceTypeModels.stream()
-                .map(model -> new CsceneInstanceCountByReferenceTypeBO(model.getReferenceType(),model.getTotal())).collect(Collectors.toList());
+                .map(model -> new CsceneInstanceCountByReferenceTypeBO(model.getReferenceType(), model.getTotal())).collect(Collectors.toList());
     }
 
     /**
      * 统计活动场景总数和场景总数
      * @return
      */
-    public CsceneInstanceCountActivitySceneBO countActivityScene(){
+    public CsceneInstanceCountActivitySceneBO countActivityScene() {
         CsceneInstanceCountActivitySceneModel model = getModelMapper().countActivityScene();
         return CsceneInstanceCountActivitySceneBO.builder().activitySceneTotal(model.getActivitySceneTotal()).total(model.getTotal()).build();
     }
+
+    /**
+     * 控制单个节点的生命周期
+     * 重启、挂起、停止挂起、重建等
+     * @param id
+     * @param nodeId
+     * @param lifeCycle
+     * @return
+     */
+    public ServiceResult<Boolean> lifeControlElement(String id, String nodeId, ElementLifeCycleEnum lifeCycle) {
+        String sceneId = getSceneId(id);
+        if (StringUtils.isEmpty(sceneId)) {
+            return new ServiceResult<>(false);
+        }
+        return this.scenePluginCloudSceneService.elementLifeCycleControl(sceneId, nodeId, lifeCycle);
+    }
+
 }

@@ -19,6 +19,9 @@ public class CloudUrlConstant {
     public static final String VIRTUAL_MACHINE_CREATE_URL = "/v1/scenarios/vm";
     public static final String VIRTUAL_MACHINE_DELETE_URL = "/v1/scenarios/vm";
 
+    public static final String VIRTUAL_MACHINE_LIFE_CONTROL_URL = "/v1/instances/{instance_id}/action";
+    public static final String CONTAINER_LIFE_CONTROL_URL = "/v1/container/{instance_id}/action";
+
     public static final String VIRTUAL_INTERNET_CREATE_URL = "/v1/scenarios/virtual_internet";
     public static final String NETWORK_QUERY_URL = "/v1/networks";
 

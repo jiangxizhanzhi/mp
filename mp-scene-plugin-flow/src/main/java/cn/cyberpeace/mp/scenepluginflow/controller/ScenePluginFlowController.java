@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.scenepluginflow.controller;
 
-import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneConfigDataBO;
+import cn.cyberpeace.mp.base.util.MessageUtils;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneDataBO;
 import cn.cyberpeace.mp.scenepluginflow.constant.ControllerConstant;
 import io.swagger.annotations.Api;
@@ -21,7 +21,9 @@ public class ScenePluginFlowController {
 
     @ApiOperation("场景模板流量插件数据，非API")
     @GetMapping("/scene_config")
-    public String loadSceneConfig(@RequestBody FlowPluginSceneConfigDataBO data) {
+    public String loadSceneConfig() {
+        System.out.println(MessageUtils.get("sceneplugincloud.event.initiate_base_properties"));
+        System.out.println(MessageUtils.get("scenepluginflow.event.create_executor"));
         return null;
     }
 
