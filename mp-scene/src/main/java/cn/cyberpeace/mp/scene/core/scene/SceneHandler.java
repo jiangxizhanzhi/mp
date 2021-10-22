@@ -109,12 +109,12 @@ public class SceneHandler extends BaseSceneHandler<
 
     private final SceneReportTaskPool reportTaskPool = SceneReportTaskPool.getInstance();
 
-    private void prepareSceneEvent(int event) {
-        sceneEventHandlerMap.put(genEventKey(getScene().getEid(), event), new SceneEventHandler(getScene(), event));
-    }
-
     private String genEventKey(String targetId, int event) {
         return String.format("%s:%d", targetId, event);
+    }
+
+    private void prepareSceneEvent(int event) {
+        sceneEventHandlerMap.put(genEventKey(getScene().getEid(), event), new SceneEventHandler(getScene(), event));
     }
 
     private void prepareElementEvent(SceneElementBO element, int event) {
