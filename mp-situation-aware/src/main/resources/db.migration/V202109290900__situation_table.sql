@@ -62,3 +62,5 @@ create table mp_situation_script
 )
     comment '探针元信息表,中台不使用';
 
+alter table mp_situation_probe_param modify default_val varchar(50) null comment '默认值';
+
