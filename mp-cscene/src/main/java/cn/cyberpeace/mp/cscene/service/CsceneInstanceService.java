@@ -23,6 +23,7 @@ import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
 import cn.cyberpeace.mp.cscene.service.taskpool.CsceneReportTaskPool;
 import cn.cyberpeace.mp.scene.constant.ElementLifeCycleEnum;
+import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
@@ -219,6 +220,21 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return CsceneInstanceCountActivitySceneBO.builder().activitySceneTotal(model.getActivitySceneTotal()).total(model.getTotal()).build();
     }
 
+//    /**
+//     * 控制场景的生命周期
+//     * 重启、挂起、停止挂起、重建等
+//     * @param id
+//     * @param lifeCycle
+//     * @return
+//     */
+//    public ServiceResult<Boolean> lifeControl(String id, ElementLifeCycleEnum lifeCycle) {
+//        String sceneId = getSceneId(id);
+//        if (StringUtils.isEmpty(sceneId)) {
+//            return new ServiceResult<>(false);
+//        }
+//        return this.scenePluginCloudSceneService.elementLifeCycleControl(sceneId, lifeCycle);
+//    }
+
     /**
      * 控制单个节点的生命周期
      * 重启、挂起、停止挂起、重建等
@@ -232,7 +248,10 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         if (StringUtils.isEmpty(sceneId)) {
             return new ServiceResult<>(false);
         }
-        return this.scenePluginCloudSceneService.elementLifeCycleControl(sceneId, nodeId, lifeCycle);
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
+        sceneHandler.setRealTimeUpdate(true);
+        boolean result = sceneHandler.elementLifeCycleControl(nodeId, lifeCycle);
+        return new ServiceResult<>(result);
     }
 
 }
