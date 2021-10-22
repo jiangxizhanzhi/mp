@@ -209,33 +209,51 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return csceneSpecialService.statDeviceReferCsceneInstances(images).asResult();
     }
 
+    @ApiOperation("暂停场景实例")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class)
+    })
+    @PostMapping("/pause")
+    public ServiceResult<Boolean> parseScene(@RequestParam String id, @RequestBody(required = false) CsceneContextBO context) {
+        return modelService.lifeControl(id, ElementLifeCycleEnum.PAUSE).asResult();
+    }
+
+    @ApiOperation("恢复场景实例")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class)
+    })
+    @PostMapping("/unpause")
+    public ServiceResult<Boolean> unparseScene(@RequestParam String id, @RequestBody(required = false) CsceneContextBO context) {
+        return modelService.lifeControl(id, ElementLifeCycleEnum.UNPAUSE).asResult();
+    }
+
     @ApiOperation("重启节点")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
-            @ApiImplicitParam(name = "nodeId", value = "节点id", dataTypeClass = String.class)
+            @ApiImplicitParam(name = "node_id", value = "节点id", dataTypeClass = String.class)
     })
     @PostMapping("/restart_element")
-    public ServiceResult<Boolean> restartElement(@RequestParam String id, @RequestParam("node_id") String nodeId) {
+    public ServiceResult<Boolean> restartElement(@RequestParam String id, @RequestParam("node_id") String nodeId, @RequestBody(required = false) CsceneContextBO context) {
         return modelService.lifeControlElement(id, nodeId, ElementLifeCycleEnum.RESTART).asResult();
     }
 
-    @ApiOperation("挂起节点")
+    @ApiOperation("暂停节点")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
-            @ApiImplicitParam(name = "nodeId", value = "节点id", dataTypeClass = String.class)
+            @ApiImplicitParam(name = "node_id", value = "节点id", dataTypeClass = String.class)
     })
     @PostMapping("/pause_element")
-    public ServiceResult<Boolean> pauseElement(@RequestParam String id, @RequestParam("node_id") String nodeId) {
+    public ServiceResult<Boolean> pauseElement(@RequestParam String id, @RequestParam("node_id") String nodeId, @RequestBody(required = false) CsceneContextBO context) {
         return modelService.lifeControlElement(id, nodeId, ElementLifeCycleEnum.PAUSE).asResult();
     }
 
-    @ApiOperation("停止挂起")
+    @ApiOperation("恢复节点")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
-            @ApiImplicitParam(name = "nodeId", value = "节点id", dataTypeClass = String.class)
+            @ApiImplicitParam(name = "node_id", value = "节点id", dataTypeClass = String.class)
     })
     @PostMapping("/unpause_element")
-    public ServiceResult<Boolean> unpauseElement(@RequestParam String id, @RequestParam("node_id") String nodeId) {
+    public ServiceResult<Boolean> unpauseElement(@RequestParam String id, @RequestParam("node_id") String nodeId, @RequestBody(required = false) CsceneContextBO context) {
         return modelService.lifeControlElement(id, nodeId, ElementLifeCycleEnum.UNPAUSE).asResult();
     }
 }
