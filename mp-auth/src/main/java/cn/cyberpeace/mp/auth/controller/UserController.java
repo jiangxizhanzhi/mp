@@ -5,7 +5,6 @@ import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.ResetPwdRequest;
 import cn.cyberpeace.mp.auth.dto.ResetSelfPwdRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
-import cn.cyberpeace.mp.auth.dto.user.UserHeartbeatRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserLogPageRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineCntDto;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineReportPageRequest;
@@ -14,6 +13,7 @@ import cn.cyberpeace.mp.auth.dto.validate.AddGroup;
 import cn.cyberpeace.mp.auth.dto.validate.UpdateGroup;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
+import cn.cyberpeace.mp.auth.service.UserHeartbeatService;
 import cn.cyberpeace.mp.auth.service.UserLogService;
 import cn.cyberpeace.mp.auth.service.UserOnlineReportService;
 import cn.cyberpeace.mp.auth.service.UserService;
@@ -70,6 +70,9 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
 
     @Autowired
     private UserOnlineReportService userOnlineReportService;
+
+    @Autowired
+    private UserHeartbeatService heartbeatService;
 
     @Autowired
     public UserController(UserService modelService) {
@@ -224,8 +227,8 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
 
     @ApiOperation(value = "用户心跳-统计在线用户信息", notes = "")
     @PostMapping("/heartbeat")
-    public ServiceResult heartbeat(@RequestBody(required = false) UserHeartbeatRequest heartbeat) throws MpRuntimeException {
-        getModelService().heartbeat(heartbeat);
+    public ServiceResult heartbeat() throws MpRuntimeException {
+        heartbeatService.heartbeat();
         return ServiceResult.successful();
     }
 

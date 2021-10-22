@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.base.service.param.QueryParams;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @Description:
@@ -16,5 +17,11 @@ import java.util.List;
 public interface UserHeartbeatService extends BaseModelService<UserHeartbeatModel, QueryParams> {
 
     List<UserOlReportCntDto> groupCntByUserId(LocalDateTime time);
+
+    void heartbeat();
+
+    ConcurrentHashMap<String, Integer> getHeartbeatMap();
+
+    void clearHeartbeatmap();
 
 }

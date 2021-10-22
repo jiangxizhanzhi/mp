@@ -1,29 +1,24 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
-import cn.cyberpeace.mp.auth.constant.AuthLogConstant;
-import cn.cyberpeace.mp.auth.dto.user.UserLogPageRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserOlReportCntDto;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineCntDto;
+import cn.cyberpeace.mp.auth.dto.user.UserOnlineRecordTask;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineReportPageRequest;
-import cn.cyberpeace.mp.auth.dto.user.UserOnlineReportTask;
-import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.UserOnlineReportModel;
 import cn.cyberpeace.mp.auth.repository.UserOnlineReportMapper;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.service.UserHeartbeatService;
 import cn.cyberpeace.mp.auth.service.UserLogService;
+import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
 import cn.cyberpeace.mp.auth.service.UserOnlineReportService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.UserOnlineReportFields;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
-import cn.cyberpeace.mp.devops.log.model.OperationLogModel;
 import cn.cyberpeace.mp.devops.log.request.OperationLogPageRequest;
-import cn.cyberpeace.mp.devops.log.request.OperationLogRequest;
 import cn.cyberpeace.mp.devops.log.response.OperationLogPageResponse;
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.lang.Assert;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
@@ -32,13 +27,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -53,13 +46,14 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class UserOnlineReportServiceImpl extends BaseModelServiceImpl<UserOnlineReportModel, UserOnlineReportMapper, UserOnlineReportFields, QueryParams> implements UserOnlineReportService {
 
-    // 每15分钟统计一次
-    public static final long REFRESH_RATE_MINUTES = 15;
+    // 每2分钟统计一次
+    public static final long REFRESH_RATE_MINUTES = 2;
 
     public static final long REFRESH_RATE_MILLISECONDS = 60000 * REFRESH_RATE_MINUTES;
 
-    // 每次间隔的次数(每分钟一次，15分钟就是15次，80% 就是12次）
-    public static final double HEARTBEAT_PER_RATE = 0.8 * 15;
+    //    // 每次间隔的次数(每分钟一次，15分钟就是15次，80% 就是12次）
+//    public static final double HEARTBEAT_PER_RATE = 0.8 * 15;
+    public static final int HEARTBEAT_COUNT_THRESHOLD = 1;
 
     @Autowired
     public UserOnlineReportServiceImpl(UserOnlineReportMapper modelMapper, UserOnlineReportFields modelFields) {
@@ -73,7 +67,7 @@ public class UserOnlineReportServiceImpl extends BaseModelServiceImpl<UserOnline
     private UserHeartbeatService heartbeatService;
 
     @Autowired
-    private UserOnlineReportService userOnlineReportService;
+    private UserOnlineRecordService userOnlineRecordService;
 
     @Autowired
     private OrgUserService orgUserService;
@@ -90,14 +84,24 @@ public class UserOnlineReportServiceImpl extends BaseModelServiceImpl<UserOnline
         if (threadPool == null) {
             threadPool = getSingletonThreadPool();
         }
-
-        log.info("schedule user online report task...");
-        List<UserOlReportCntDto> list = heartbeatService.groupCntByUserId(LocalDateTime.now().minusMinutes(REFRESH_RATE_MINUTES));
-        log.info("{}", list);
-        for (UserOlReportCntDto userOlReportCntDto : list) {
-            UserOnlineReportTask task = new UserOnlineReportTask(userOlReportCntDto, userOnlineReportService);
-            threadPool.submit(task);
+        log.info("start user online record task...");
+//        List<UserOlReportCntDto> list = heartbeatService.groupCntByUserId(LocalDateTime.now().minusMinutes(REFRESH_RATE_MINUTES));
+        ConcurrentHashMap<String, Integer> heartbeatMap = heartbeatService.getHeartbeatMap();
+//        for (UserOlReportCntDto userOlReportCntDto : list) {
+//            UserOnlineReportTask task = new UserOnlineReportTask(userOlReportCntDto, userOnlineReportService);
+//            threadPool.submit(task);
+//        }
+        for (Map.Entry<String, Integer> entry : heartbeatMap.entrySet()) {
+            String userId = entry.getKey();
+            Integer count = entry.getValue();
+            if (count >= HEARTBEAT_COUNT_THRESHOLD) {
+                // 一段时间内，心跳次数超过阈值，更新在线记录表
+                UserOnlineRecordTask recordTask = new UserOnlineRecordTask(userId, userOnlineRecordService);
+                threadPool.submit(recordTask);
+                heartbeatMap.remove(userId);
+            }
         }
+        log.info("finish user online record task...");
     }
 
 
@@ -140,6 +144,7 @@ public class UserOnlineReportServiceImpl extends BaseModelServiceImpl<UserOnline
 
     @Override
     public boolean createOrUpdate(UserOlReportCntDto userOlReportCntDto) {
+        /*
         Assert.notNull(userOlReportCntDto, "userOlReportCntDto不能为空！");
 
         UserOnlineReportModel onlineReportNew = new UserOnlineReportModel();
@@ -184,6 +189,7 @@ public class UserOnlineReportServiceImpl extends BaseModelServiceImpl<UserOnline
             getModelMapper().create(onlineReportNew);
         }
 
+         */
         return true;
     }
 
