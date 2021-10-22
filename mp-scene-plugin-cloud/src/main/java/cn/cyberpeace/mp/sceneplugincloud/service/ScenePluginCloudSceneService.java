@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.FloatUtils;
 import cn.cyberpeace.mp.base.util.IntUtils;
+import cn.cyberpeace.mp.scene.constant.ElementLifeCycleEnum;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
@@ -26,7 +27,11 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -98,7 +103,7 @@ public class ScenePluginCloudSceneService {
         if (monitor) {
             var monitors = remoteClient.getMonitors(connectionIds);
             if (monitors != null) {
-                monitors.forEach((connectionId, monitorData) ->{
+                monitors.forEach((connectionId, monitorData) -> {
                     var nodeSession = connectionIdSessionMap.getOrDefault(connectionId,
                             new NodeSessionBO());
                     nodeSession.setMonitorUrl(monitorData.getMonitorUrl());
@@ -110,7 +115,7 @@ public class ScenePluginCloudSceneService {
         if (assistance) {
             var assistances = remoteClient.getAssistances(connectionIds);
             if (assistances != null) {
-                assistances.forEach((connectionId, assistanceData) ->{
+                assistances.forEach((connectionId, assistanceData) -> {
                     var nodeSession = connectionIdSessionMap.getOrDefault(connectionId,
                             new NodeSessionBO());
                     nodeSession.setAssistanceUrl(assistanceData.getAssistanceUrl());
@@ -189,4 +194,10 @@ public class ScenePluginCloudSceneService {
         return new ListObjServiceResult<>(new ListObjResult<>(recordings, rawRecordings.getTotal()));
     }
 
+    public ServiceResult<Boolean> elementLifeCycleControl(String sceneId, String nodeId, ElementLifeCycleEnum lifeCycle) {
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
+        sceneHandler.setRealTimeUpdate(true);
+        sceneHandler.elementLifeCycleControl(nodeId, lifeCycle);
+        return new ServiceResult<>(true);
+    }
 }

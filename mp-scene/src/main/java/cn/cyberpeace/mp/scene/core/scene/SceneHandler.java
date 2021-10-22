@@ -2,15 +2,35 @@ package cn.cyberpeace.mp.scene.core.scene;
 
 import cn.cyberpeace.mp.base.annotation.BeanFieldClasses;
 import cn.cyberpeace.mp.base.annotation.ClassFieldClasses;
+import cn.cyberpeace.mp.scene.constant.ElementLifeCycleEnum;
 import cn.cyberpeace.mp.scene.core.base.BaseSceneHandler;
-import cn.cyberpeace.mp.scene.core.bo.*;
+import cn.cyberpeace.mp.scene.core.bo.CollectedSceneBO;
+import cn.cyberpeace.mp.scene.core.bo.CollectedSceneElementBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneAreaBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementPortConnectionBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneTopologyBO;
 import cn.cyberpeace.mp.scene.core.event.SceneElementEventHandler;
 import cn.cyberpeace.mp.scene.core.event.SceneEventHandler;
 import cn.cyberpeace.mp.scene.core.event.base.EventFlag;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
-import cn.cyberpeace.mp.scene.model.*;
-import cn.cyberpeace.mp.scene.repository.*;
+import cn.cyberpeace.mp.scene.model.SceneAreaModel;
+import cn.cyberpeace.mp.scene.model.SceneElementModel;
+import cn.cyberpeace.mp.scene.model.SceneElementPluginModel;
+import cn.cyberpeace.mp.scene.model.SceneElementPortConnectionModel;
+import cn.cyberpeace.mp.scene.model.SceneElementPortModel;
+import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.repository.SceneAreaMapper;
+import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
+import cn.cyberpeace.mp.scene.repository.SceneElementPluginMapper;
+import cn.cyberpeace.mp.scene.repository.SceneElementPortConnectionMapper;
+import cn.cyberpeace.mp.scene.repository.SceneElementPortMapper;
+import cn.cyberpeace.mp.scene.repository.SceneMapper;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -192,7 +212,8 @@ public class SceneHandler extends BaseSceneHandler<
         overSceneEvent(sceneEvent);
     }
 
-    public SceneHandler() {}
+    public SceneHandler() {
+    }
 
     public SceneHandler(SceneDataBO sceneDataBO, SceneContextBO context) {
         init(sceneDataBO, false, context);
@@ -376,6 +397,21 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public void snapshot() {
+    }
+
+    public boolean elementLifeCycleControl(String nodeId, ElementLifeCycleEnum lifeCycle) {
+        prepareElementEvent(getElement(nodeId), lifeCycle.getEvent());
+        startElementEvent(nodeId, lifeCycle.getEvent());
+        try {
+            for (ScenePluginHandler pluginHandler : getPlugins()) {
+                pluginHandler.elementLifeCycle(nodeId, lifeCycle);
+            }
+        } catch (Exception e) {
+            log.error("failed to {} element,nodeId:{}", lifeCycle.getAction(), nodeId, e);
+            return false;
+        }
+        overElementEvent(nodeId, lifeCycle.getEvent());
+        return true;
     }
 
     @Override

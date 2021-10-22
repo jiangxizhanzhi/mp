@@ -13,6 +13,7 @@ import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceQueryParams;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
+import cn.cyberpeace.mp.scene.constant.ElementLifeCycleEnum;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
@@ -26,7 +27,13 @@ import io.swagger.annotations.ApiOperation;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
@@ -112,7 +119,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             @ApiImplicitParam(name = "nodeId", value = "节点id", dataTypeClass = String.class),
             @ApiImplicitParam(name = "flowId", value = "流量id", dataTypeClass = String.class),
     })
-    @PostMapping(value = "/start_flow", params = {"id", "nodeId", "flowId"})
+    @PostMapping(value = "/start_flow", params = { "id", "nodeId", "flowId" })
     public ServiceResult<Boolean> startFlow(@RequestParam String id, @RequestParam String nodeId,
                                             @RequestParam String flowId,
                                             @RequestBody(required = false) CsceneContextBO context) {
@@ -125,7 +132,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             @ApiImplicitParam(name = "nodeId", value = "节点id", dataTypeClass = String.class),
             @ApiImplicitParam(name = "flowId", value = "流量id", dataTypeClass = String.class),
     })
-    @PostMapping(value = "/stop_flow", params = {"id", "nodeId", "flowId"})
+    @PostMapping(value = "/stop_flow", params = { "id", "nodeId", "flowId" })
     public ServiceResult<Boolean> stopFlow(@RequestParam String id, @RequestParam String nodeId,
                                            @RequestParam String flowId,
                                            @RequestBody(required = false) CsceneContextBO context) {
@@ -138,7 +145,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             @ApiImplicitParam(name = "nodeId", value = "节点id", dataTypeClass = String.class),
             @ApiImplicitParam(name = "probeId", value = "探针id", dataTypeClass = String.class),
     })
-    @PostMapping(value = "/start_probe", params = {"id", "nodeId", "probeId"})
+    @PostMapping(value = "/start_probe", params = { "id", "nodeId", "probeId" })
     public ServiceResult<Probe> startProbe(@RequestParam String id, @RequestParam String nodeId,
                                            @RequestParam String probeId,
                                            @RequestBody(required = false) CsceneContextBO context) {
@@ -151,7 +158,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             @ApiImplicitParam(name = "nodeId", value = "节点id", dataTypeClass = String.class),
             @ApiImplicitParam(name = "probeId", value = "探针id", dataTypeClass = String.class),
     })
-    @PostMapping(value = "/stop_probe", params = {"id", "nodeId", "probeId"})
+    @PostMapping(value = "/stop_probe", params = { "id", "nodeId", "probeId" })
     public ServiceResult<Probe> stopProbe(@RequestParam String id, @RequestParam String nodeId,
                                           @RequestParam String probeId,
                                           @RequestBody(required = false) CsceneContextBO context) {
@@ -200,5 +207,35 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     public ServiceResult<Map<String, List<DeviceReferCsceneInstanceStat>>> statDeviceReferCsceneInstances(
             @RequestParam String[] images) {
         return csceneSpecialService.statDeviceReferCsceneInstances(images).asResult();
+    }
+
+    @ApiOperation("重启节点")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "nodeId", value = "节点id", dataTypeClass = String.class)
+    })
+    @PostMapping("/restart_element")
+    public ServiceResult<Boolean> restartElement(@RequestParam String id, @RequestParam("node_id") String nodeId) {
+        return modelService.lifeControlElement(id, nodeId, ElementLifeCycleEnum.RESTART).asResult();
+    }
+
+    @ApiOperation("挂起节点")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "nodeId", value = "节点id", dataTypeClass = String.class)
+    })
+    @PostMapping("/pause_element")
+    public ServiceResult<Boolean> pauseElement(@RequestParam String id, @RequestParam("node_id") String nodeId) {
+        return modelService.lifeControlElement(id, nodeId, ElementLifeCycleEnum.PAUSE).asResult();
+    }
+
+    @ApiOperation("停止挂起")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "nodeId", value = "节点id", dataTypeClass = String.class)
+    })
+    @PostMapping("/unpause_element")
+    public ServiceResult<Boolean> unpauseElement(@RequestParam String id, @RequestParam("node_id") String nodeId) {
+        return modelService.lifeControlElement(id, nodeId, ElementLifeCycleEnum.UNPAUSE).asResult();
     }
 }
