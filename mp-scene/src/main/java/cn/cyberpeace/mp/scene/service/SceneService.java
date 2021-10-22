@@ -130,21 +130,21 @@ public class SceneService {
     public ServiceResult<Boolean> pauseElement(String id, String nodeId) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, null);
         sceneHandler.setRealTimeUpdate(true);
-        sceneHandler.elementLifeCycleControl(nodeId, ElementLifeCycleEnum.PAUSE, true, false);
-        return new ServiceResult<>(true);
+        boolean result = sceneHandler.elementLifeCycleControl(nodeId, ElementLifeCycleEnum.PAUSE, true, false);
+        return new ServiceResult<>(result);
     }
 
     public ServiceResult<Boolean> unpauseElement(String id, String nodeId) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, null);
         sceneHandler.setRealTimeUpdate(true);
-        sceneHandler.elementLifeCycleControl(nodeId, ElementLifeCycleEnum.UNPAUSE, true, false);
-        return new ServiceResult<>(true);
+        boolean result = sceneHandler.elementLifeCycleControl(nodeId, ElementLifeCycleEnum.UNPAUSE, true, false);
+        return new ServiceResult<>(result);
     }
 
     public ServiceResult<Boolean> restartElement(String id, String nodeId) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, null);
         sceneHandler.setRealTimeUpdate(true);
-        sceneHandler.elementLifeCycleControl(nodeId, ElementLifeCycleEnum.RESTART, true, false);
-        return new ServiceResult<>(true);
+        boolean result = sceneHandler.elementLifeCycleControl(nodeId, ElementLifeCycleEnum.RESTART, true, false);
+        return new ServiceResult<>(result);
     }
 }
