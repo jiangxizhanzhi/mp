@@ -48,6 +48,8 @@ public class HumanCondition {
     /** 当前表别名，设置后构造条件对应于该关联表 */
     private String currentLinkName;
 
+    public static final Integer maxLineNumber = 999999999;
+
     public String genLinkFieldName(String linkName, String fieldName) {
         return StringUtils.joinWith(".",linkName, fieldName);
     }
@@ -284,19 +286,19 @@ public class HumanCondition {
      * @param pageSize 每页数量
      * @return this
      */
-    public HumanCondition pagination(int page, int pageSize) {
-        if (pageSize >= 0) {
-            limit = pageSize;
-        } else {
+    public HumanCondition pagination(Integer page, Integer pageSize) {
+        // 不分页
+        if (pageSize == null || pageSize < 0) {
             limit = null;
             offset = null;
             return this;
         }
 
-        if (page > 0) {
-            offset = (page - 1) * limit;
-        } else {
+        limit = pageSize;
+        if (page == null || page <= 0) {
             offset = null;
+        } else {
+            offset = (page - 1) * limit;
         }
 
         return this;
@@ -308,9 +310,9 @@ public class HumanCondition {
      * @param endIndex 结束下标
      * @return this
      */
-    public HumanCondition slice(int startIndex, int endIndex) {
-        offset = Math.max(startIndex, 0);
-        limit = Math.max(endIndex - offset, 0);
+    public HumanCondition slice(Integer startIndex, Integer endIndex) {
+        offset = (startIndex == null || startIndex < 0) ? 0 : startIndex;
+        limit = (endIndex == null || endIndex - offset < 0) ? maxLineNumber : endIndex - offset;
         return this;
     }
 
