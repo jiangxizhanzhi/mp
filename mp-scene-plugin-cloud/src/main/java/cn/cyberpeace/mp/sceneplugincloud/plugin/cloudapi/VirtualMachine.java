@@ -10,9 +10,8 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineLif
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
 
-import java.lang.reflect.Method;
+import java.lang.reflect.Field;
 import java.util.Collections;
-import java.util.Map;
 
 public class VirtualMachine extends CloudClient implements ILifeCycleControlHandler {
 
@@ -34,9 +33,9 @@ public class VirtualMachine extends CloudClient implements ILifeCycleControlHand
     public boolean lifeControl(String instanceId, String action) {
         VirtualMachineLifeControllData lifeControllData = new VirtualMachineLifeControllData();
         try {
-            Method method = lifeControllData.getClass().getDeclaredMethod("set" + action.toUpperCase().charAt(0) + action.substring(1), Map.class);
-            method.setAccessible(true);
-            method.invoke(lifeControllData, Collections.EMPTY_MAP);
+            Field field = lifeControllData.getClass().getDeclaredField(action);
+            field.setAccessible(true);
+            field.set(lifeControllData, Collections.EMPTY_MAP);
             cloudPost(CloudUrlConstant.VIRTUAL_MACHINE_LIFE_CONTROL_URL.replace("{instance_id}", instanceId), lifeControllData, null, new TypeReference<CloudResponse<Object>>() {
             }, true);
             return true;

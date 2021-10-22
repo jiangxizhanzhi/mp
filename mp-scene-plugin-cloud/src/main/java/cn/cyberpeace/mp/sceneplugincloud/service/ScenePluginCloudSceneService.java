@@ -5,7 +5,6 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.FloatUtils;
 import cn.cyberpeace.mp.base.util.IntUtils;
-import cn.cyberpeace.mp.scene.constant.ElementLifeCycleEnum;
 import cn.cyberpeace.mp.scene.core.bo.SceneBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
@@ -200,12 +199,5 @@ public class ScenePluginCloudSceneService {
         }).collect(Collectors.toList());
 
         return new ListObjServiceResult<>(new ListObjResult<>(recordings, rawRecordings.getTotal()));
-    }
-
-    public ServiceResult<Boolean> elementLifeCycleControl(String sceneId, String nodeId, ElementLifeCycleEnum lifeCycle) {
-        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
-        sceneHandler.setRealTimeUpdate(true);
-        sceneHandler.elementLifeCycleControl(nodeId, lifeCycle);
-        return new ServiceResult<>(true);
     }
 }
