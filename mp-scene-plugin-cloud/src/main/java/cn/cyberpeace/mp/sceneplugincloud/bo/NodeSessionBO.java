@@ -7,6 +7,10 @@ import lombok.Data;
 @ApiModel(description = "场景接入会话数据")
 @Data
 public class NodeSessionBO {
+    @ApiModelProperty(value = "场景id")
+    private String sceneId;
+    @ApiModelProperty(value = "场景名称")
+    private String sceneName;
     @ApiModelProperty(value = "节点id")
     private String nodeId;
     @ApiModelProperty(value = "节点名称")
