@@ -22,8 +22,6 @@ import cn.cyberpeace.mp.cscene.report.rabbitmq.RabbitmqCsceneReporter;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
 import cn.cyberpeace.mp.cscene.service.taskpool.CsceneReportTaskPool;
-import cn.cyberpeace.mp.scene.constant.ElementLifeCycleEnum;
-import cn.cyberpeace.mp.scene.constant.SceneLifeCycleEnum;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
@@ -220,31 +218,33 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return CsceneInstanceCountActivitySceneBO.builder().activitySceneTotal(model.getActivitySceneTotal()).total(model.getTotal()).build();
     }
 
-    /**
-     * 控制场景的生命周期
-     * 重启、挂起、停止挂起、重建等
-     * @param id
-     * @param lifeCycle
-     * @return
-     */
-    public ServiceResult<Boolean> lifeControl(String id, SceneLifeCycleEnum lifeCycle, CsceneContextBO context) {
+    public ServiceResult<Boolean> pause(String id, CsceneContextBO context) {
         CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context);
-        boolean result = instanceHandler.lifeCycleControl(lifeCycle);
+        boolean result = instanceHandler.pause();
         return new ServiceResult<>(result);
     }
 
-    /**
-     * 控制单个节点的生命周期
-     * 重启、挂起、停止挂起、重建等
-     * @param id
-     * @param nodeId
-     * @param lifeCycle
-     * @return
-     */
-    public ServiceResult<Boolean> lifeControlElement(String id, String nodeId, ElementLifeCycleEnum lifeCycle, CsceneContextBO context) {
+    public ServiceResult<Boolean> unpause(String id, CsceneContextBO context) {
         CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context);
-        boolean result = instanceHandler.elementLifeCycleControl(nodeId, lifeCycle);
+        boolean result = instanceHandler.unpause();
         return new ServiceResult<>(result);
     }
 
+    public ServiceResult<Boolean> pauseElement(String id, String nodeId, CsceneContextBO context) {
+        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context);
+        boolean result = instanceHandler.pauseElement(nodeId);
+        return new ServiceResult<>(result);
+    }
+
+    public ServiceResult<Boolean> unpauseElement(String id, String nodeId, CsceneContextBO context) {
+        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context);
+        boolean result = instanceHandler.unpauseElement(nodeId);
+        return new ServiceResult<>(result);
+    }
+
+    public ServiceResult<Boolean> restartElement(String id, String nodeId, CsceneContextBO context) {
+        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context);
+        boolean result = instanceHandler.restartElement(nodeId);
+        return new ServiceResult<>(result);
+    }
 }

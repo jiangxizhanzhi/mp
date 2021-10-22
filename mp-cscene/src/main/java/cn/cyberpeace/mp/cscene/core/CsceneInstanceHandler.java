@@ -13,8 +13,6 @@ import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceRoleModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
-import cn.cyberpeace.mp.scene.constant.ElementLifeCycleEnum;
-import cn.cyberpeace.mp.scene.constant.SceneLifeCycleEnum;
 import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
 import cn.cyberpeace.mp.scene.service.SceneService;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginContext;
@@ -113,32 +111,47 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         }
     }
 
-    /**
-     * 控制当前场景的生命周期
-     * @param lifeCycle
-     * @return
-     */
-    public boolean lifeCycleControl(SceneLifeCycleEnum lifeCycle) {
-        String sceneId = null;
-        // 场景不存在
-        if (getCscene() == null || (sceneId = getSceneId(getCscene().toModel())) == null) {
+    public boolean pause() {
+        String sceneId = this.getSceneId();
+        if (sceneId == null) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
         }
-        return this.sceneService.lifeCycleControl(sceneId, lifeCycle);
+        return this.sceneService.pause(sceneId).getSource();
     }
 
-    /**
-     * 控制当前场景中某个节点的生命周期
-     * @param nodeId
-     * @param lifeCycle
-     * @return
-     */
-    public boolean elementLifeCycleControl(String nodeId, ElementLifeCycleEnum lifeCycle) {
-        String sceneId = null;
-        // 场景不存在
-        if (getCscene() == null || (sceneId = getSceneId(getCscene().toModel())) == null) {
+    public boolean unpause() {
+        String sceneId = this.getSceneId();
+        if (sceneId == null) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
         }
-        return this.sceneService.elementLifeCycleControl(sceneId, nodeId, lifeCycle);
+        return this.sceneService.unpause(sceneId).getSource();
+    }
+
+    public boolean pauseElement(String nodeId) {
+        String sceneId = this.getSceneId();
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return this.sceneService.pauseElement(sceneId, nodeId).getSource();
+    }
+
+    public boolean unpauseElement(String nodeId) {
+        String sceneId = this.getSceneId();
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return this.sceneService.unpauseElement(sceneId, nodeId).getSource();
+    }
+
+    public boolean restartElement(String nodeId) {
+        String sceneId = this.getSceneId();
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return this.sceneService.restartElement(sceneId, nodeId).getSource();
+    }
+
+    private String getSceneId() {
+        return getCscene() == null ? null : getSceneId(getCscene().toModel());
     }
 }
