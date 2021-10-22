@@ -220,20 +220,27 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return CsceneInstanceCountActivitySceneBO.builder().activitySceneTotal(model.getActivitySceneTotal()).total(model.getTotal()).build();
     }
 
-//    /**
-//     * 控制场景的生命周期
-//     * 重启、挂起、停止挂起、重建等
-//     * @param id
-//     * @param lifeCycle
-//     * @return
-//     */
-//    public ServiceResult<Boolean> lifeControl(String id, ElementLifeCycleEnum lifeCycle) {
-//        String sceneId = getSceneId(id);
-//        if (StringUtils.isEmpty(sceneId)) {
-//            return new ServiceResult<>(false);
-//        }
-//        return this.scenePluginCloudSceneService.elementLifeCycleControl(sceneId, lifeCycle);
-//    }
+    /**
+     * 控制场景的生命周期
+     * 重启、挂起、停止挂起、重建等
+     * @param id
+     * @param lifeCycle
+     * @return
+     */
+    public ServiceResult<Boolean> lifeControl(String id, ElementLifeCycleEnum lifeCycle) {
+        String sceneId = getSceneId(id);
+        if (StringUtils.isEmpty(sceneId)) {
+            return new ServiceResult<>(false);
+        }
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
+        sceneHandler.setRealTimeUpdate(true);
+        if (lifeCycle == ElementLifeCycleEnum.PAUSE) {
+            sceneHandler.pause();
+        } else if (lifeCycle == ElementLifeCycleEnum.UNPAUSE) {
+            sceneHandler.unpause();
+        }
+        return new ServiceResult<>(true);
+    }
 
     /**
      * 控制单个节点的生命周期

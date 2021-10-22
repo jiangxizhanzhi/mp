@@ -391,9 +391,21 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public void pause() {
+        prepareSceneEvent(SceneModel.Event.PAUSE);
+        startSceneEvent(SceneModel.Event.PAUSE);
+        for (String nodeId : getElementMap().keySet()) {
+            this.elementLifeCycleControl(nodeId, ElementLifeCycleEnum.PAUSE);
+        }
+        overSceneEvent(SceneModel.Event.PAUSE);
     }
 
     public void unpause() {
+        prepareSceneEvent(SceneModel.Event.UNPAUSE);
+        startSceneEvent(SceneModel.Event.UNPAUSE);
+        for (String nodeId : getElementMap().keySet()) {
+            this.elementLifeCycleControl(nodeId, ElementLifeCycleEnum.UNPAUSE);
+        }
+        overSceneEvent(SceneModel.Event.UNPAUSE);
     }
 
     public void snapshot() {
