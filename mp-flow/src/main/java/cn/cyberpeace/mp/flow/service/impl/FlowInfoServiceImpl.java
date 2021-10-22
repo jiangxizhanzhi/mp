@@ -33,6 +33,7 @@ import org.springframework.stereotype.Service;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -230,7 +231,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
 
             // 下载攻击脚本
             byte[] fileByte = fastDFSClient.download(flowInfoModel.getScriptFile(), FdfsGroupEnum.DEFAULT.toString());
-            String code = new String(fileByte);
+            String code = new String(fileByte, StandardCharsets.UTF_8);
             response.setCode(code);
         } else {
             return ServiceResult.fail("No flow exist!");
@@ -397,7 +398,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
 
             InputStream is = null;
             try {
-                is = new ByteArrayInputStream(modifyRequest.getCode().getBytes());
+                is = new ByteArrayInputStream(modifyRequest.getCode().getBytes(StandardCharsets.UTF_8));
                 String filePath = fastDFSClient.upload(is, fileName, null, FdfsGroupEnum.DEFAULT.toString());
                 modifyRequest.setFilePath(filePath);
             } catch (MpRuntimeException e) {
