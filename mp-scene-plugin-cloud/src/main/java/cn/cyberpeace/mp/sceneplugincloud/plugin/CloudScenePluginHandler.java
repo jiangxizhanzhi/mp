@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin;
 
 import cn.cyberpeace.mp.base.annotation.ClassFieldClasses;
+import cn.cyberpeace.mp.scene.constant.ElementLifeCycleEnum;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
@@ -13,6 +14,7 @@ import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementM
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.CreateHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.DeleteHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ElementLifeCycleHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.InitiateHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.modelhandler.CloudScenePluginModelHandler;
 import lombok.Data;
@@ -161,4 +163,13 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         deleteHandler.delete();
     }
 
+    @Override
+    public void elementLifeCycle(String nodeId, ElementLifeCycleEnum lifeCycle) {
+        CloudPluginSceneElementBO element = getElement(nodeId);
+        if (element == null) {
+            return;
+        }
+        ElementLifeCycleHandler lifeCycleHandler = new ElementLifeCycleHandler(this, lifeCycle.getEvent());
+        lifeCycleHandler.lifeControl(nodeId, element, lifeCycle);
+    }
 }

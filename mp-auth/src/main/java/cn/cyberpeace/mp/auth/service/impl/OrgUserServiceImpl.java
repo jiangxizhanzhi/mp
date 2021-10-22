@@ -87,7 +87,10 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
             orgIds.addAll(childOrgDtos.stream().map(OrgDto::getId).collect(Collectors.toList()));
         }
         String likeUname = SQLUtils.escapeLike(uname);
-        List<UserModel> users = getModelMapper().listUsers(orgIds, likeUname, userIds, null);
+        UserDto userCondition = new UserDto();
+        userCondition.setUsername(likeUname);
+
+        List<UserModel> users = getModelMapper().listUsers(orgIds, userIds, null, userCondition);
         return users;
     }
 
@@ -188,9 +191,15 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
             orders = CollectionUtil.newArrayList(req.getOrders());
         }
 
-        PageHelper.startPage(req.getPage(), req.getPageSize());
         String likeUsername = SQLUtils.escapeLike(req.getUsername());
-        List<UserModel> users = getModelMapper().listUsers(orgIds, likeUsername, idsList, orders);
+        UserDto userCondition = new UserDto();
+        userCondition.setUsername(likeUsername);
+        userCondition.setIsEnabled(req.getIsEnabled());
+        userCondition.setIsAudited(req.getIsAudited());
+        userCondition.setIsExpired(req.getIsExpired());
+
+        PageHelper.startPage(req.getPage(), req.getPageSize());
+        List<UserModel> users = getModelMapper().listUsers(orgIds, idsList, orders, userCondition);
         PageInfo pageInfo = new PageInfo(users);
 
         List<UserDto> userDtos = users.stream().map(u -> {

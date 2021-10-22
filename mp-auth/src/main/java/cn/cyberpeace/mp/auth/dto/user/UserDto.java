@@ -7,7 +7,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import java.beans.Transient;
 import java.util.List;
 
 /**
@@ -18,7 +17,6 @@ import java.util.List;
 @Data
 @ApiModel
 public class UserDto extends UserModel {
-
 
     // 1：已过期  0：未过期，数据库中没有该字段，由expiredtime字段判断
     @ApiModelProperty(value = "1：已过期 0：未过期")

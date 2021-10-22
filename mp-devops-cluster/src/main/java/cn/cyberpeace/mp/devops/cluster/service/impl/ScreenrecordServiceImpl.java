@@ -66,7 +66,7 @@ public class ScreenrecordServiceImpl extends BaseOpenStackServiceImpl {
         }
 
         ScreenrecordPageResponse pageResponse = super.sendGet(BaseCloudPlatformService.SCREENRECORD_METHOD +
-                "/recordfile_list/" + getParams, ScreenrecordPageResponse.class);
+                "/recordfile_list" + getParams, ScreenrecordPageResponse.class);
         log.info("page screenrecord response: {}", pageResponse);
 
         List<ScreenrecordResponse> responseList = new ArrayList<>();

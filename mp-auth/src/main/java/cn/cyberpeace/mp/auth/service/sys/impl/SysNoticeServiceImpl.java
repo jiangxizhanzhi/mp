@@ -89,7 +89,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
     public int unReadCount() {
         SysNoticePageRequest pageRequest = new SysNoticePageRequest();
         pageRequest.ensure();
-        PageInfo pageInfo = currentUserPage(pageRequest);
+        PageInfo pageInfo = currentUserNoticeMessages(pageRequest);
         int noticeCnt = (int) pageInfo.getTotal();
 
         UserModel userModel = UserUtils.getLoginUser();
@@ -258,9 +258,9 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
     }
 
     @Override
-    public PageInfo<SysNoticeModel> currentUserPage(SysNoticePageRequest req) {
+    public PageInfo<SysNoticeModel> currentUserNoticeMessages(SysNoticePageRequest req) {
         UserModel userModel = UserUtils.getLoginUser();
-        if(Objects.isNull(userModel)) {
+        if (Objects.isNull(userModel)) {
             log.error("未查询到当前登录用户！");
             return new PageInfo<>();
         }
@@ -270,10 +270,11 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         List<RoleModel> roleModels = userRoleService.listByUserId(userModel.getId());
         boolean isAdmin = roleModels.stream().anyMatch(r -> r.getIdentifier().equals(AuthConstant.ROLE_ADMIN));
 
+        // 管理员，查看所有公告消息
         if (isAdmin) {
             log.info("current user is admin!");
             PageHelper.startPage(req.getPage(), req.getPageSize());
-            List<SysNoticeModel> notices = getModelMapper().listCurrentUserNotices(null, null, null, null,null, null, userModel.getId());
+            List<SysNoticeModel> notices = getModelMapper().listNoticeMessageByCurrentAdminUser(userModel.getId());
             PageInfo pageInfo = new PageInfo(notices);
             convert2NoticeDtoPageInfo(pageInfo);
             return pageInfo;
@@ -294,8 +295,22 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
             allOrgIds.addAll(orgDtos.stream().map(OrgDto::getId).collect(Collectors.toList()));
         });
 
+
+        /*
+        1. 用户没有角色，没有组织
+        (is_public = 1) and (notice_org.org is null)
+
+        2. 用户有角色，没有组织
+        (is_public = 1 or notice_role in roles) and (notice_org.org is null)
+
+        3. 用户没有角色，有组织
+        (is_public = 1) and (notice_org.org is null or notice_org.org in orgs)
+
+        4. 用户有角色，有组织
+        (is_public = 1 or notice_role in roles) and (notice_org.org is null or notice_org.org in orgs)
+        */
         PageHelper.startPage(req.getPage(), req.getPageSize());
-        List<SysNoticeModel> notices = getModelMapper().listCurrentUserNotices(null, null, allOrgIds, allRoleIds,null, null, userModel.getId());
+        List<SysNoticeModel> notices = getModelMapper().listNoticeMessageByCurrentNormalUser(allOrgIds, allRoleIds, userModel.getId());
         PageInfo pageInfo = new PageInfo(notices);
 
         convert2NoticeDtoPageInfo(pageInfo);

@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.scene.core.plugin;
 
+import cn.cyberpeace.mp.scene.constant.ElementLifeCycleEnum;
 import cn.cyberpeace.mp.scene.core.bo.SceneBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
@@ -92,6 +93,10 @@ public abstract class ScenePluginHandler<S extends BasePluginSceneBO<?, S, Scene
     }
 
     public void delete() throws Exception {
+
+    }
+
+    public void elementLifeCycle(String nodeId, ElementLifeCycleEnum lifeCycle) {
 
     }
 
