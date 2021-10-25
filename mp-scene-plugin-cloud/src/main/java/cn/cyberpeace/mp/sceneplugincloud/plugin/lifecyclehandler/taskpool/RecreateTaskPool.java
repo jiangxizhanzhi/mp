@@ -10,8 +10,8 @@ public class RecreateTaskPool extends TaskPool {
     }
 
     private RecreateTaskPool() {
-        super(CloudSingleton.cloudAppConfig.getCreatePoolSize(),
-                CloudSingleton.cloudAppConfig.getRecreatePoolSize(), 60L);
+        super(CloudSingleton.cloudAppConfig.getRecreatePoolSize(),
+                CloudSingleton.cloudAppConfig.getRecreateHoldSize(), 60L);
     }
 
     public static RecreateTaskPool getInstance() {
