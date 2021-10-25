@@ -13,8 +13,8 @@ public class LifeCycleControlTaskPool extends TaskPool {
     private static final LifeCycleControlTaskPool INSTANCE = new LifeCycleControlTaskPool();
 
     private LifeCycleControlTaskPool() {
-        super(CloudSingleton.cloudAppConfig.getRecreatePoolSize(),
-                CloudSingleton.cloudAppConfig.getRecreateHoldSize(), 60L);
+        super(CloudSingleton.cloudAppConfig.getLifecyclePoolSize(),
+                CloudSingleton.cloudAppConfig.getLifecycleHoldSize(), 60L);
     }
 
     public static LifeCycleControlTaskPool getInstance() {
