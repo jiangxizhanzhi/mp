@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.util.MessageUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneBO;
 import cn.cyberpeace.mp.scene.core.event.base.BaseEventHandler;
 import cn.cyberpeace.mp.scene.core.event.base.EventModel;
+import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import org.apache.commons.collections4.MapUtils;
 
@@ -32,6 +33,23 @@ public class SceneEventHandler extends BaseEventHandler<SceneBO, EventModel> {
                     SceneModel.Event.SNAPSHOT, EVENT_NAME_PREFIX + "snapshot",
                     SceneModel.Event.DELETE, EVENT_NAME_PREFIX + "delete",
                     SceneModel.Event.MODIFY, EVENT_NAME_PREFIX + "modify",
+            });
+
+    public static final Map<Integer, String> ELEMENT_NAME_MAP = MapUtils.putAll(
+            new HashMap<>(),
+            new Object[]{
+                    SceneElementModel.Event.DEFAULT, EVENT_NAME_PREFIX + "default",
+                    SceneElementModel.Event.INITIATE, EVENT_NAME_PREFIX + "initiate",
+                    SceneElementModel.Event.CREATE, EVENT_NAME_PREFIX + "create",
+                    SceneElementModel.Event.START, EVENT_NAME_PREFIX + "start",
+                    SceneElementModel.Event.STOP, EVENT_NAME_PREFIX + "stop",
+                    SceneElementModel.Event.RESTART, EVENT_NAME_PREFIX + "restart",
+                    SceneElementModel.Event.PAUSE, EVENT_NAME_PREFIX + "pause",
+                    SceneElementModel.Event.UNPAUSE, EVENT_NAME_PREFIX + "unpause",
+                    SceneElementModel.Event.SNAPSHOT, EVENT_NAME_PREFIX + "snapshot",
+                    SceneElementModel.Event.DELETE, EVENT_NAME_PREFIX + "delete",
+                    SceneElementModel.Event.MODIFY, EVENT_NAME_PREFIX + "modify",
+                    SceneElementModel.Event.RECREATE, EVENT_NAME_PREFIX + "recreate",
             });
 
     public SceneEventHandler(SceneBO target, int event) {
