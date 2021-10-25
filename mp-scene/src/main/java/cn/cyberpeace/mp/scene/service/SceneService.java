@@ -151,7 +151,8 @@ public class SceneService {
     public ServiceResult<Boolean> recreateElement(String id, String nodeId) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, null);
         sceneHandler.setRealTimeUpdate(true);
-        sceneHandler.recreateElement(nodeId);
+        // 异步处理
+        SceneTaskPool.getInstance().executeTask(() -> sceneHandler.recreateElement(nodeId));
         return new ServiceResult<>(true);
     }
 }
