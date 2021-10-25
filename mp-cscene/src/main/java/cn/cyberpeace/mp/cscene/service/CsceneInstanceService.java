@@ -280,4 +280,10 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         boolean result = instanceHandler.restartElement(nodeId);
         return new ServiceResult<>(result);
     }
+
+    public ServiceResult<Boolean> recreateElement(String id, String nodeId, CsceneContextBO context) {
+        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context);
+        boolean result = instanceHandler.recreateElement(nodeId);
+        return new ServiceResult<>(result);
+    }
 }

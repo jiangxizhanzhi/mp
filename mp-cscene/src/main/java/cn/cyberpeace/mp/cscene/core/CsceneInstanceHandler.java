@@ -151,6 +151,14 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         return this.sceneService.restartElement(sceneId, nodeId).getSource();
     }
 
+    public boolean recreateElement(String nodeId) {
+        String sceneId = this.getSceneId();
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return this.sceneService.recreateElement(sceneId, nodeId).getSource();
+    }
+
     private String getSceneId() {
         return getCscene() == null ? null : getSceneId(getCscene().toModel());
     }

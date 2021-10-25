@@ -410,7 +410,7 @@ public class CreateHandler extends HandlerCommon {
         });
     }
 
-    private void createVirtualRouter(CloudPluginSceneElementBO cloudElement) {
+    protected void createVirtualRouter(CloudPluginSceneElementBO cloudElement) {
         var createData = new VirtualRouterCreateData();
         createData.setName(genResourceName(cloudElement.getSrcElement().getEid()));
         var srcStaticRoutes = cloudElement.getStaticRoutes();
@@ -429,7 +429,7 @@ public class CreateHandler extends HandlerCommon {
         receiveVirtualPortInfo(cloudElement, virtualRouter.getNetworks());
     }
 
-    private void createVirtualFirewall(CloudPluginSceneElementBO cloudElement) {
+    protected void createVirtualFirewall(CloudPluginSceneElementBO cloudElement) {
         var srcElement = cloudElement.getSrcElement();
         var createData = new VirtualFirewallCreateData();
         createData.setName(genResourceName(srcElement.getEid()));
@@ -479,7 +479,7 @@ public class CreateHandler extends HandlerCommon {
         cloudElement.setResourceId(virtualFirewall.getId());
     }
 
-    private void createVirtualMachine(CloudPluginSceneElementBO cloudElement) {
+    protected void createVirtualMachine(CloudPluginSceneElementBO cloudElement) {
         var srcElement = cloudElement.getSrcElement();
         var createData = new VirtualMachineCreateData();
         createData.setRequestUser(TextUtils.emptyNull(getRequestUser()));
@@ -498,7 +498,7 @@ public class CreateHandler extends HandlerCommon {
         receiveVirtualPortInfo(cloudElement, virtualMachine.getNetworks());
     }
 
-    private void createContainer(CloudPluginSceneElementBO cloudElement) {
+    protected void createContainer(CloudPluginSceneElementBO cloudElement) {
         var srcElement = cloudElement.getSrcElement();
         var createData = new ContainerCreateData();
         createData.setRequestUser(TextUtils.emptyNull(getRequestUser()));
@@ -517,7 +517,7 @@ public class CreateHandler extends HandlerCommon {
         receiveVirtualPortInfo(cloudElement, container.getNetworks());
     }
 
-    private void createEntityNode(CloudPluginSceneElementBO cloudElement) {
+    protected void createEntityNode(CloudPluginSceneElementBO cloudElement) {
         var createData = new EntityNodeCreateData();
         createData.setRequestUser(TextUtils.emptyNull(getRequestUser()));
         createData.setName(cloudElement.getImage());

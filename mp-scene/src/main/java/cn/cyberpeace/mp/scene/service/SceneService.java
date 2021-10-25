@@ -147,4 +147,11 @@ public class SceneService {
         boolean result = sceneHandler.elementLifeCycleControl(nodeId, ElementLifeCycleEnum.RESTART, true, false);
         return new ServiceResult<>(result);
     }
+
+    public ServiceResult<Boolean> recreateElement(String id, String nodeId) {
+        SceneHandler sceneHandler = new SceneHandler(id, null, false, null);
+        sceneHandler.setRealTimeUpdate(true);
+        sceneHandler.recreateElement(nodeId);
+        return new ServiceResult<>(true);
+    }
 }

@@ -536,6 +536,16 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public void recreateElement(String nodeId) {
+        SceneElementBO element = getElement(nodeId);
+        prepareElementEvent(element, SceneElementModel.Event.RECREATE);
+        try {
+            for (ScenePluginHandler plugin : getPlugins()) {
+                plugin.recreateElement(nodeId);
+            }
+        } catch (Exception e) {
+            errorElement(nodeId, SceneElementModel.Event.RECREATE, e.getMessage());
+        }
+        overElementEvent(nodeId, SceneElementModel.Event.RECREATE);
     }
 
 }
