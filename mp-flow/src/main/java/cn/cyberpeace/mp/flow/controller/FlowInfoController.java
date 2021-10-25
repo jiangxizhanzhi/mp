@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.flow.constant.ControllerConstant;
+import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
 import cn.cyberpeace.mp.flow.request.AddAttackFlowRequest;
 import cn.cyberpeace.mp.flow.request.AddBackgroundFlowRequest;
@@ -64,7 +65,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
     @DeleteMapping("/batch_delete")
     public ServiceResult<Integer> batchDeleteFlowInfo(@RequestBody String[] ids) {
         if (Objects.isNull(ids)) {
-            return ServiceResult.fail("ids can not be empty");
+            return ServiceResult.fail(FlowErrorCode.IDS_CAN_NOT_EMPTY);
         }
         return flowServiceImpl.batchDeleteFlowInfo(ids);
     }
