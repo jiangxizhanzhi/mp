@@ -2,21 +2,47 @@ package cn.cyberpeace.mp.scene.core.scene;
 
 import cn.cyberpeace.mp.base.annotation.BeanFieldClasses;
 import cn.cyberpeace.mp.base.annotation.ClassFieldClasses;
+import cn.cyberpeace.mp.base.util.thread.taskpool.BasePoolTask;
+import cn.cyberpeace.mp.base.util.thread.taskpool.DefaultPoolTask;
+import cn.cyberpeace.mp.scene.constant.ElementLifeCycleEnum;
+import cn.cyberpeace.mp.scene.constant.SceneLifeCycleEnum;
 import cn.cyberpeace.mp.scene.core.base.BaseSceneHandler;
-import cn.cyberpeace.mp.scene.core.bo.*;
+import cn.cyberpeace.mp.scene.core.bo.CollectedSceneBO;
+import cn.cyberpeace.mp.scene.core.bo.CollectedSceneElementBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneAreaBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementPortConnectionBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneTopologyBO;
 import cn.cyberpeace.mp.scene.core.event.SceneElementEventHandler;
 import cn.cyberpeace.mp.scene.core.event.SceneEventHandler;
 import cn.cyberpeace.mp.scene.core.event.base.EventFlag;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
-import cn.cyberpeace.mp.scene.model.*;
-import cn.cyberpeace.mp.scene.repository.*;
+import cn.cyberpeace.mp.scene.model.SceneAreaModel;
+import cn.cyberpeace.mp.scene.model.SceneElementModel;
+import cn.cyberpeace.mp.scene.model.SceneElementPluginModel;
+import cn.cyberpeace.mp.scene.model.SceneElementPortConnectionModel;
+import cn.cyberpeace.mp.scene.model.SceneElementPortModel;
+import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.repository.SceneAreaMapper;
+import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
+import cn.cyberpeace.mp.scene.repository.SceneElementPluginMapper;
+import cn.cyberpeace.mp.scene.repository.SceneElementPortConnectionMapper;
+import cn.cyberpeace.mp.scene.repository.SceneElementPortMapper;
+import cn.cyberpeace.mp.scene.repository.SceneMapper;
+import cn.cyberpeace.mp.scene.service.taskpool.SceneTaskPool;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * 场景实例的处理
@@ -75,9 +101,9 @@ public class SceneHandler extends BaseSceneHandler<
     @Setter
     private boolean realTimeUpdate;
 
-    private final Map<String, SceneEventHandler> sceneEventHandlerMap = new HashMap<>();
+    private final Map<String, SceneEventHandler> sceneEventHandlerMap = new ConcurrentHashMap<>();
 
-    private final Map<String, SceneElementEventHandler> elementEventHandlerMap = new HashMap<>();
+    private final Map<String, SceneElementEventHandler> elementEventHandlerMap = new ConcurrentHashMap<>();
 
     private final List<SceneReporter> reporters = SceneReporter.getReporters();
 
@@ -192,7 +218,8 @@ public class SceneHandler extends BaseSceneHandler<
         overSceneEvent(sceneEvent);
     }
 
-    public SceneHandler() {}
+    public SceneHandler() {
+    }
 
     public SceneHandler(SceneDataBO sceneDataBO, SceneContextBO context) {
         init(sceneDataBO, false, context);
@@ -370,12 +397,78 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public void pause() {
+        this.lifeCycle(SceneLifeCycleEnum.PAUSE, ElementLifeCycleEnum.PAUSE);
     }
 
     public void unpause() {
+        this.lifeCycle(SceneLifeCycleEnum.UNPAUSE, ElementLifeCycleEnum.UNPAUSE);
+    }
+
+    private void lifeCycle(SceneLifeCycleEnum sceneLifeCycle, ElementLifeCycleEnum elementLifeCycle) {
+        // 先锁定场景和节点的事件状态
+        prepareAllEvent(sceneLifeCycle.getEvent(), elementLifeCycle.getEvent());
+        startAllEvent(sceneLifeCycle.getEvent(), elementLifeCycle.getEvent());
+        // 异步执行操作 节点内部无需再记录事件状态,节点内部使用同步操作即可
+        List<Runnable> tasks = getElementMap().keySet().stream()
+                .map(nodeId -> (Runnable) () -> this.elementLifeCycleControl(nodeId, elementLifeCycle, false, true))
+                .collect(Collectors.toList());
+        SceneTaskPool.getInstance().executeTask(() -> {
+            // 并行操作节点
+            List<DefaultPoolTask> poolTasks = SceneTaskPool.getInstance().runTasks(tasks);
+            List<DefaultPoolTask> errorTasks = poolTasks.stream()
+                    .filter(BasePoolTask::isError)
+                    .collect(Collectors.toList());
+            // 记录场景操作的最终状态
+            if (!errorTasks.isEmpty()) {
+                errorScene(sceneLifeCycle.getEvent(), errorTasks.size() + " tasks error");
+            } else {
+                overSceneEvent(sceneLifeCycle.getEvent());
+            }
+        });
     }
 
     public void snapshot() {
+    }
+
+    /**
+     * @param nodeId 节点id
+     * @param lifeCycle 操作
+     * @param prepareEvent 是否需要内部准备事件
+     * @param sync 是否同步调用云平台操作
+     * @return
+     */
+    public boolean elementLifeCycleControl(String nodeId, ElementLifeCycleEnum lifeCycle, boolean prepareEvent, boolean sync) {
+        if (prepareEvent) {
+            prepareElementEvent(getElement(nodeId), lifeCycle.getEvent());
+            startElementEvent(nodeId, lifeCycle.getEvent());
+        }
+        if (sync) {
+            return this.doElementLifeCycleControl(nodeId, lifeCycle);
+        } else {
+            SceneTaskPool.getInstance().executeTask(() -> this.doElementLifeCycleControl(nodeId, lifeCycle));
+            return true;
+        }
+    }
+
+    /**
+     * 操作节点生命周期
+     * 插件执行完之后再更新节点的事件状态,这两个步骤是同步的
+     * @param nodeId
+     * @param lifeCycle
+     * @return
+     */
+    private boolean doElementLifeCycleControl(String nodeId, ElementLifeCycleEnum lifeCycle) {
+        try {
+            for (ScenePluginHandler pluginHandler : getPlugins()) {
+                pluginHandler.elementLifeCycle(nodeId, lifeCycle);
+            }
+        } catch (Exception e) {
+            log.error("failed to {} element,nodeId:{}", lifeCycle.getAction(), nodeId, e);
+            errorElement(nodeId, lifeCycle.getEvent(), e.getMessage());
+            return false;
+        }
+        overElementEvent(nodeId, lifeCycle.getEvent());
+        return true;
     }
 
     @Override
@@ -417,4 +510,32 @@ public class SceneHandler extends BaseSceneHandler<
      */
     public void modify() {
     }
+
+    public void startElement(String nodeId) {
+    }
+
+    public void stopElement(String nodeId) {
+    }
+
+    public void restartElement(String nodeId) {
+    }
+
+    public void pauseElement(String nodeId) {
+    }
+
+    public void unpauseElement(String nodeId) {
+    }
+
+    public void snapshotElement(String nodeId) {
+    }
+
+    public void deleteElement(String nodeId) {
+    }
+
+    public void modifyElement(String nodeId) {
+    }
+
+    public void recreateElement(String nodeId) {
+    }
+
 }

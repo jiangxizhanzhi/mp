@@ -7,12 +7,15 @@ import cn.cyberpeace.mp.base.repository.condition.aggregation.Sum;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.cscene.bo.*;
+import cn.cyberpeace.mp.cscene.bo.CsceneInstanceStat;
+import cn.cyberpeace.mp.cscene.bo.CsceneStat;
+import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
+import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
+import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
-import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.model.SceneConfigElementModel;
@@ -169,8 +172,7 @@ public class CsceneSpecialService {
                         CsceneInstanceStat::getContainerCount)
                 .selectAs(Count.f(CloudPluginSceneElementModel::getVirtualType)
                         .calcEqual(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE),
-                        CsceneInstanceStat::getEntityCount)
-                .distinct();
+                        CsceneInstanceStat::getEntityCount);
 
         humanCondition.currentLink(CsceneInstanceModel.class);
         var ids = queryParams.getIds();
@@ -180,6 +182,10 @@ public class CsceneSpecialService {
         var referenceTypes = queryParams.getReferenceTypes();
         if (referenceTypes != null && referenceTypes.length > 0) {
             humanCondition.filterIn(CsceneInstanceModel::getReferenceType, referenceTypes);
+        }
+        var valid = queryParams.getValid();
+        if (Boolean.TRUE.equals(valid)) {
+            humanCondition.filterEqual(CsceneInstanceModel::getDeleted, false);
         }
         var self = queryParams.getSelf();
         if (Boolean.TRUE.equals(self)) {
@@ -204,10 +210,8 @@ public class CsceneSpecialService {
         }
         var active = queryParams.getActive();
         if (Boolean.TRUE.equals(active)) {
-            humanCondition.filterNotEqual(SceneModel::getEvent, SceneModel.Event.DELETE)
-                    .filterNotEqual(SceneModel::getEventStatus, EventStatus.ABNORMAL);
+            humanCondition.filterNotEqual(SceneModel::getEvent, SceneModel.Event.DELETE);
         }
-
 
         var sceneStatus = queryParams.getSceneStatus();
         if (sceneStatus != null) {

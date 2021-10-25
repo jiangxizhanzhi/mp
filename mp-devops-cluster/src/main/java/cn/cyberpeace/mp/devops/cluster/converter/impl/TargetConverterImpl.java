@@ -44,6 +44,7 @@ public class TargetConverterImpl implements TargetConverter {
     @Override
     public List<TargetModel> page(TargetSceneRequest request) {
         ImagePageDTO dto = new ImagePageDTO();
+        dto.setTargetCategory(request.getTargetCategory());
         dto.setMainCategory(request.getCategory());
         dto.setSubCategory(request.getSecondCategory());
         dto.setImageType(Objects.nonNull(request.getImageType()) ? request.getImageType().toValue() : "");
@@ -53,7 +54,7 @@ public class TargetConverterImpl implements TargetConverter {
             dto.setOwner(Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : null);
         }
         if (Objects.isNull(request.getImageType())){
-            dto.setSearchType(1);
+            dto.setSearchType(0);
         }
         Integer total = imageMapper.totalCount(dto);
         if (total == 0){

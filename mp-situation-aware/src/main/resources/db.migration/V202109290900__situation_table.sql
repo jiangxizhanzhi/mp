@@ -19,7 +19,7 @@ create table mp_situation_probe
     constraint mp_situation_probe_id_uindex
         unique (id)
 )
-    comment '探针基本信息';≠
+    comment '探针基本信息';
 
 
 
@@ -61,4 +61,6 @@ create table mp_situation_script
         unique (probe_id)
 )
     comment '探针元信息表,中台不使用';
+
+alter table mp_situation_probe_param modify default_val varchar(50) null comment '默认值';
 

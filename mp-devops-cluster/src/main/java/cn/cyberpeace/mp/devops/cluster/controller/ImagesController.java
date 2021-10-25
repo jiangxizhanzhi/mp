@@ -1,11 +1,13 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
+import cn.cyberpeace.mp.devops.cluster.constant.DevopsClusterErrorCode;
 import cn.cyberpeace.mp.devops.cluster.converter.ImagesConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.InjectFileConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.SnapshotConverter;
@@ -23,6 +25,7 @@ import cn.cyberpeace.mp.devops.cluster.response.base.Result;
 import cn.cyberpeace.mp.devops.cluster.service.FlavorService;
 import cn.cyberpeace.mp.devops.cluster.service.ImagesService;
 import cn.cyberpeace.mp.devops.cluster.service.ScenariosSnapshotService;
+import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -30,7 +33,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
@@ -221,12 +226,17 @@ public class ImagesController {
         InputStreamResource resource = null;
         String filename = "";
         try{
-            InputStream inputStream = httpResponse.getEntity().getContent();
+            HttpEntity entity = httpResponse.getEntity();
+            String contentType = entity.getContentType().getValue();
+            if (contentType.equals(MediaType.APPLICATION_JSON_VALUE)){
+                throw new MpRuntimeException(DevopsClusterErrorCode.EXPORT_IMAGE_ERROR);
+            }
+            InputStream inputStream = entity.getContent();
             resource = new InputStreamResource(inputStream);
             filename = URLEncoder.encode(imageName + ".img","utf-8");
         }catch (IOException e) {
             log.error("export image error : {}",e.getMessage(),e);
-            throw new MpRuntimeException(BaseErrorCode.ERROR);
+            throw new MpRuntimeException(DevopsClusterErrorCode.EXPORT_IMAGE_ERROR);
         }
 
         var httpHeaders = new HttpHeaders();

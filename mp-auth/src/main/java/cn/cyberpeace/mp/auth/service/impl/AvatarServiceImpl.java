@@ -15,7 +15,6 @@ import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
-import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -127,11 +126,6 @@ public class AvatarServiceImpl extends BaseModelServiceImpl<AvatarModel, AvatarM
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void clearAndReUploadAvatars(List<AvatarModel> avatarModels) {
-        if (CollectionUtil.isEmpty(avatarModels) || avatarModels.size() != 9) {
-            log.error("默认头像数量不正确！");
-            throw new MpRuntimeException("默认头像数量不正确！");
-        }
-
         deleteAll();
 
         for (int i = 0; i < avatarModels.size(); i++) {
@@ -170,6 +164,7 @@ public class AvatarServiceImpl extends BaseModelServiceImpl<AvatarModel, AvatarM
 
     // 更新默认用户的头像
     private void updateDefaultUserAvatar(String avatarUrl) {
+        log.info("update default user's avatar");
         ObjServiceResult<UserModel> result = userService.get(AuthConstant.ROOT_USER_ID);
         if (Objects.nonNull(result.getSource())) {
             UserModel userUpdate = new UserModel();

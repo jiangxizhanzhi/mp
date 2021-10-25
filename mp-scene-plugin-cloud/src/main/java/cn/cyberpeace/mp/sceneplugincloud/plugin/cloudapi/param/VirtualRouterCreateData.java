@@ -16,6 +16,7 @@ public class VirtualRouterCreateData implements CloudHttpData {
     private List<VirtualNic> networks;
 
     private String id;
+    private ExternalGatewayInfo externalGatewayInfo;
 
     @Data
     @AllArgsConstructor

@@ -417,19 +417,19 @@ VALUES ('defaulttenantid', 'default', '默认租户');
 
 -- 系统配置
 INSERT INTO mp_sys_config (pk, id, tenant, key_name, value)
-VALUES (1, 'ec8bda8f239d4967b9ace3d425c829fb', 'default', 'system_name', '浙江能源');
+VALUES (1, 'ec8bda8f239d4967b9ace3d425c829fb', 'default', 'system_name', '下一代网络靶场');
 INSERT INTO mp_sys_config (pk, id, tenant, key_name, value)
 VALUES (2, '4a3d2ecc528e4b77b3d518a81bd01335', 'default', 'copyright', '@2021-2023，南京赛宁信息技术有限公司，版权所有');
 INSERT INTO mp_sys_config (pk, id, tenant, key_name, value)
-VALUES (3, 'bbd330a0fa7646fc937c8a875996ee8c', 'default', 'env_per_person', '12');
+VALUES (3, 'bbd330a0fa7646fc937c8a875996ee8c', 'default', 'env_per_person', '20');
 INSERT INTO mp_sys_config (pk, id, tenant, key_name, value)
-VALUES (4, '9efaf1686331402f814e266f740cba74', 'default', 'public_register', '0');
+VALUES (4, '9efaf1686331402f814e266f740cba74', 'default', 'public_register', '1');
 INSERT INTO mp_sys_config (pk, id, tenant, key_name, value)
 VALUES (5, 'b64cfb718fe64d7797d361aa8f806743', 'default', 'user_audit', '1');
 INSERT INTO mp_sys_config (pk, id, tenant, key_name, value)
-VALUES (6, '3c20e18b430c4387aa3ac98dd0bebbfe', 'default', 'flag_length', '8');
+VALUES (6, '3c20e18b430c4387aa3ac98dd0bebbfe', 'default', 'flag_length', '16');
 INSERT INTO mp_sys_config (pk, id, tenant, key_name, value)
-VALUES (7, 'ecf0293f69d84dbdb430ebf96e323404', 'default', 'flag_prefix', '12345');
+VALUES (7, 'ecf0293f69d84dbdb430ebf96e323404', 'default', 'flag_prefix', 'xctf');
 INSERT INTO mp_sys_config (pk, id, tenant, key_name, value)
 VALUES (8, '308666a1b1614a0bae80f838f35fff97', 'default', 'vlan_bucket', '100-200');
 INSERT INTO mp_sys_config (pk, id, tenant, key_name, value)

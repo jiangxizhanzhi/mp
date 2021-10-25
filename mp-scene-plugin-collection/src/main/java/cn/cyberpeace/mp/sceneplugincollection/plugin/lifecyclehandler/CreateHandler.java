@@ -21,7 +21,6 @@ public class CreateHandler extends HandlerCommon {
     public static class ElementProcess {
     }
 
-
     public CreateHandler(CollectionScenePluginHandler pluginHandler) {
         super(pluginHandler, CreateTaskPool.getInstance(), SceneModel.Event.CREATE);
     }
@@ -40,10 +39,11 @@ public class CreateHandler extends HandlerCommon {
             }
         });
         if (!flowCollectMacAddrs.isEmpty()) {
-            var flowCollectorId = getFlowCollector().createCollector(flowCollectMacAddrs);
-            getPluginHandler().getScene().setFlowCollector(flowCollectorId);
+            runSceneProgress(SceneProcess.CREATE_FLOW_COLLECTION, () -> {
+                var flowCollectorId = getFlowCollector().createCollector(flowCollectMacAddrs);
+                getPluginHandler().getScene().setFlowCollector(flowCollectorId);
+            });
         }
-
     }
 
 }

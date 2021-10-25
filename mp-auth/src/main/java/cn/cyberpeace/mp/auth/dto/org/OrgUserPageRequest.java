@@ -23,6 +23,17 @@ public class OrgUserPageRequest extends PageRequest {
     @ApiModelProperty(value = "是否展示该组织以下所有层级的用户，默认为true")
     private boolean showAllUnderLevel = true;
 
+    @ApiModelProperty(value = "1: 正常 0：禁用")
+    private Integer isEnabled;
+
+    // 1：已审核 0：待审核
+    @ApiModelProperty(value = "1：已审核 0：待审核")
+    private Integer isAudited;
+
+    @ApiModelProperty(value = "1：已过期 0：未过期")
+    private Integer isExpired;
+
+
     @Override
     public void ensure() {
         super.ensure();

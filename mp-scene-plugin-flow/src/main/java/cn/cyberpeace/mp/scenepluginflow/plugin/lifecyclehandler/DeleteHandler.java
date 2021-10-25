@@ -2,10 +2,15 @@ package cn.cyberpeace.mp.scenepluginflow.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneBO;
+import cn.cyberpeace.mp.scenepluginflow.bo.base.Flow;
 import cn.cyberpeace.mp.scenepluginflow.plugin.FlowScenePluginHandler;
 import cn.cyberpeace.mp.scenepluginflow.plugin.lifecyclehandler.taskpool.DeleteTaskPool;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 public class DeleteHandler extends HandlerCommon {
@@ -26,23 +31,29 @@ public class DeleteHandler extends HandlerCommon {
     public void delete() {
         prepareEventProcess(SceneModel.Event.DELETE, SceneProcess.class, ElementProcess.class);
 
-        // TODO event
-        var scene = getPluginHandler().getScene();
-
-        // TODO 并发
+        // 删除流量任务
+        FlowPluginSceneBO scene = getPluginHandler().getScene();
+        List<Runnable> deleteFlowTasks = new ArrayList<>();
         getPluginHandler().getElementMap().forEach((nodeId, flowElement) -> {
-            var flows = flowElement.getFlows();
+            List<Flow> flows = flowElement.getFlows();
             if (flows == null) {
                 return;
             }
-
-            flows.forEach(getHandlerUtils()::deleteFlow);
+            flows.forEach(flow -> deleteFlowTasks.add(this.createDeleteFlowTask(nodeId, flow)));
         });
+        runSceneProgress(SceneProcess.DELETE_FLOW, () -> runTasks(deleteFlowTasks));
 
-        var executorId = scene.getExecutor();
+        // 删除执行器
+        String executorId = scene.getExecutor();
         if (StringUtils.isEmpty(executorId)) {
-            getHandlerUtils().deleteExecutor(executorId);
+            runSceneProgress(SceneProcess.DELETE_EXECUTOR, () -> {
+                getHandlerUtils().deleteExecutor(executorId);
+            });
         }
+    }
+
+    private Runnable createDeleteFlowTask(String nodeId, Flow flow) {
+        return () -> runElementProgress(nodeId, ElementProcess.DELETE_FLOW, () -> getHandlerUtils().deleteFlow(flow));
     }
 
 }

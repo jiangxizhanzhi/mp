@@ -13,9 +13,12 @@ import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceQueryParams;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
+import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
+import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionFlowBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
-import cn.cyberpeace.mp.scenepluginflow.bo.base.Flow;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -109,7 +112,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             @ApiImplicitParam(name = "nodeId", value = "节点id", dataTypeClass = String.class),
             @ApiImplicitParam(name = "flowId", value = "流量id", dataTypeClass = String.class),
     })
-    @PostMapping(value = "/start_flow", params = {"id", "nodeId", "flowId"})
+    @PostMapping(value = "/start_flow", params = { "id", "nodeId", "flowId" })
     public ServiceResult<Boolean> startFlow(@RequestParam String id, @RequestParam String nodeId,
                                             @RequestParam String flowId,
                                             @RequestBody(required = false) CsceneContextBO context) {
@@ -122,7 +125,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             @ApiImplicitParam(name = "nodeId", value = "节点id", dataTypeClass = String.class),
             @ApiImplicitParam(name = "flowId", value = "流量id", dataTypeClass = String.class),
     })
-    @PostMapping(value = "/stop_flow", params = {"id", "nodeId", "flowId"})
+    @PostMapping(value = "/stop_flow", params = { "id", "nodeId", "flowId" })
     public ServiceResult<Boolean> stopFlow(@RequestParam String id, @RequestParam String nodeId,
                                            @RequestParam String flowId,
                                            @RequestBody(required = false) CsceneContextBO context) {
@@ -135,7 +138,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             @ApiImplicitParam(name = "nodeId", value = "节点id", dataTypeClass = String.class),
             @ApiImplicitParam(name = "probeId", value = "探针id", dataTypeClass = String.class),
     })
-    @PostMapping(value = "/start_probe", params = {"id", "nodeId", "probeId"})
+    @PostMapping(value = "/start_probe", params = { "id", "nodeId", "probeId" })
     public ServiceResult<Probe> startProbe(@RequestParam String id, @RequestParam String nodeId,
                                            @RequestParam String probeId,
                                            @RequestBody(required = false) CsceneContextBO context) {
@@ -148,7 +151,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             @ApiImplicitParam(name = "nodeId", value = "节点id", dataTypeClass = String.class),
             @ApiImplicitParam(name = "probeId", value = "探针id", dataTypeClass = String.class),
     })
-    @PostMapping(value = "/stop_probe", params = {"id", "nodeId", "probeId"})
+    @PostMapping(value = "/stop_probe", params = { "id", "nodeId", "probeId" })
     public ServiceResult<Probe> stopProbe(@RequestParam String id, @RequestParam String nodeId,
                                           @RequestParam String probeId,
                                           @RequestBody(required = false) CsceneContextBO context) {
@@ -157,13 +160,36 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
     @ApiOperation("场景实例获取会话列表")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
-            @ApiImplicitParam(name = "nodeId", value = "节点id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "ids", value = "场景实例id", allowMultiple = true, dataTypeClass = String.class),
+            @ApiImplicitParam(name = "nodeIds", value = "节点id", allowMultiple = true, dataTypeClass = String.class),
     })
-    @GetMapping(value = "/node_sessions", params = "id")
-    public ServiceResult<List<NodeSessionBO>> getNodeSessions(@RequestParam String id,
-                                                              @RequestParam(required = false) String nodeId) {
-        return modelService.getNodeSessions(id, nodeId).asResult();
+    @GetMapping(value = "/node_sessions", params = "ids")
+    public ServiceResult<List<NodeSessionBO>> getNodeSessions(@RequestParam List<String> ids,
+                                                              @RequestParam(required = false) List<String> nodeIds) {
+        return modelService.getNodeSessions(ids, nodeIds).asResult();
+    }
+
+    @ApiOperation("场景实例获取分页录屏列表")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "ids", value = "场景实例id", allowMultiple = true, dataTypeClass = String.class),
+            @ApiImplicitParam(name = "nodeIds", value = "场景节点id", allowMultiple = true, dataTypeClass = String.class),
+    })
+    @GetMapping(value = "/list_recordings", params = "ids")
+    public ListObjServiceResult<NodeRecordingBO> listRecordings(@RequestParam List<String> ids,
+                                                                @RequestParam(required = false) List<String> nodeIds,
+                                                                RecordingQueryParams queryParams) {
+        handleQueryParams("listRecordings", queryParams);
+        return modelService.listRecordings(ids, nodeIds, queryParams).asResult();
+    }
+
+    @ApiOperation("场景实例获取分页流量列表")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
+    })
+    @GetMapping(value = "/list_flows", params = "id")
+    public ListObjServiceResult<CollectionFlowBO> listFlows(@RequestParam String id, FlowQueryParams queryParams) {
+        handleQueryParams("listFlows", queryParams);
+        return modelService.listFlows(id, queryParams).asResult();
     }
 
     @ApiOperation("统计靶标对应引用该靶标的场景实例")
@@ -174,5 +200,53 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     public ServiceResult<Map<String, List<DeviceReferCsceneInstanceStat>>> statDeviceReferCsceneInstances(
             @RequestParam String[] images) {
         return csceneSpecialService.statDeviceReferCsceneInstances(images).asResult();
+    }
+
+    @ApiOperation("暂停场景实例")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class)
+    })
+    @PostMapping("/pause")
+    public ServiceResult<Boolean> parseScene(@RequestParam String id, @RequestBody(required = false) CsceneContextBO context) {
+        return modelService.pause(id, context).asResult();
+    }
+
+    @ApiOperation("恢复场景实例")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class)
+    })
+    @PostMapping("/unpause")
+    public ServiceResult<Boolean> unparseScene(@RequestParam String id, @RequestBody(required = false) CsceneContextBO context) {
+        return modelService.unpause(id, context).asResult();
+    }
+
+    @ApiOperation("重启节点")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "node_id", value = "节点id", dataTypeClass = String.class)
+    })
+    @PostMapping("/restart_element")
+    public ServiceResult<Boolean> restartElement(@RequestParam String id, @RequestParam("node_id") String nodeId, @RequestBody(required = false) CsceneContextBO context) {
+        return modelService.restartElement(id, nodeId, context).asResult();
+    }
+
+    @ApiOperation("暂停节点")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "node_id", value = "节点id", dataTypeClass = String.class)
+    })
+    @PostMapping("/pause_element")
+    public ServiceResult<Boolean> pauseElement(@RequestParam String id, @RequestParam("node_id") String nodeId, @RequestBody(required = false) CsceneContextBO context) {
+        return modelService.pauseElement(id, nodeId, context).asResult();
+    }
+
+    @ApiOperation("恢复节点")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "node_id", value = "节点id", dataTypeClass = String.class)
+    })
+    @PostMapping("/unpause_element")
+    public ServiceResult<Boolean> unpauseElement(@RequestParam String id, @RequestParam("node_id") String nodeId, @RequestBody(required = false) CsceneContextBO context) {
+        return modelService.unpauseElement(id, nodeId, context).asResult();
     }
 }

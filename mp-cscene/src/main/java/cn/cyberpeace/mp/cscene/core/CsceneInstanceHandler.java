@@ -2,10 +2,12 @@ package cn.cyberpeace.mp.cscene.core;
 
 import cn.cyberpeace.mp.base.annotation.BeanFieldClasses;
 import cn.cyberpeace.mp.base.annotation.ClassFieldClasses;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.BeanUtils;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstaneRoleBO;
+import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.core.base.BaseCsceneHandler;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceRoleModel;
@@ -89,7 +91,8 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
     }
 
     @Override
-    public void saveScene(CsceneInstanceBO csceneBO) {}
+    public void saveScene(CsceneInstanceBO csceneBO) {
+    }
 
     @Override
     public void deleteScene(CsceneInstanceBO csceneBO, boolean logic) {
@@ -106,5 +109,49 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         if (sceneId != null) {
             sceneService.delete(sceneId, logic, generateSceneContext());
         }
+    }
+
+    public boolean pause() {
+        String sceneId = this.getSceneId();
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return this.sceneService.pause(sceneId).getSource();
+    }
+
+    public boolean unpause() {
+        String sceneId = this.getSceneId();
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return this.sceneService.unpause(sceneId).getSource();
+    }
+
+    public boolean pauseElement(String nodeId) {
+        String sceneId = this.getSceneId();
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return this.sceneService.pauseElement(sceneId, nodeId).getSource();
+    }
+
+    public boolean unpauseElement(String nodeId) {
+        String sceneId = this.getSceneId();
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return this.sceneService.unpauseElement(sceneId, nodeId).getSource();
+    }
+
+    public boolean restartElement(String nodeId) {
+        String sceneId = this.getSceneId();
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return this.sceneService.restartElement(sceneId, nodeId).getSource();
+    }
+
+    private String getSceneId() {
+        return getCscene() == null ? null : getSceneId(getCscene().toModel());
     }
 }

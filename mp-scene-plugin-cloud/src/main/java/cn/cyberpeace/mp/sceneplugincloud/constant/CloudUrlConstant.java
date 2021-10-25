@@ -19,11 +19,16 @@ public class CloudUrlConstant {
     public static final String VIRTUAL_MACHINE_CREATE_URL = "/v1/scenarios/vm";
     public static final String VIRTUAL_MACHINE_DELETE_URL = "/v1/scenarios/vm";
 
+    public static final String VIRTUAL_MACHINE_LIFE_CONTROL_URL = "/v1/instances/{instance_id}/action";
+    public static final String CONTAINER_LIFE_CONTROL_URL = "/v1/container/{instance_id}/action";
+
     public static final String VIRTUAL_INTERNET_CREATE_URL = "/v1/scenarios/virtual_internet";
     public static final String NETWORK_QUERY_URL = "/v1/networks";
 
     public static final String GET_MONITOR_URL = "/cpcloud/guacamole/v1/monitor";
     public static final String GET_ASSISTANCE_URL = "/cpcloud/guacamole/v1/assistance";
+    public static final String GET_RECORDING_URL = "/cpcloud/guacamole/v1/recordfile";
+    public static final String RECORDING_DOWNLOAD_URL = "/cpcloud/guacamole/v1/downloadfile?recordfilename=%s";
 
     private CloudUrlConstant() {}
 }

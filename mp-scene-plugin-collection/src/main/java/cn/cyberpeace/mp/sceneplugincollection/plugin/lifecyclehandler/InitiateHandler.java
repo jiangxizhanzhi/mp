@@ -12,6 +12,7 @@ public class InitiateHandler extends HandlerCommon {
 
 
     public static class SceneProcess {
+        public static final EventProcess INITIATE_FLOW_COLLECTION = new EventProcess("initiate_flow_collection", "sceneplugincollection.event.initiate_flow_collection");
         public static final EventProcess INITIATE_PROBES = new EventProcess("initiate_probes", "sceneplugincollection.event.initiate_probes");
     }
 
@@ -36,13 +37,15 @@ public class InitiateHandler extends HandlerCommon {
         var scene = getPluginHandler().getScene();
         // 全局开启流量采集
         if (Boolean.TRUE.equals(scene.getEnableFlowCollect())) {
-            getPluginHandler().getSceneHandler().getElementPortMap().forEach((portId, srcPort) -> {
-                var collectionPort = getPluginHandler().getPort(portId);
-                if (collectionPort == null) {
-                    collectionPort = new CollectionPluginSceneElementPortBO();
-                    addCollectionPort(portId, collectionPort);
-                }
-                collectionPort.setEnableFlowCollect(true);
+            runSceneProgress(SceneProcess.INITIATE_FLOW_COLLECTION, () -> {
+                getPluginHandler().getSceneHandler().getElementPortMap().forEach((portId, srcPort) -> {
+                    var collectionPort = getPluginHandler().getPort(portId);
+                    if (collectionPort == null) {
+                        collectionPort = new CollectionPluginSceneElementPortBO();
+                        addCollectionPort(portId, collectionPort);
+                    }
+                    collectionPort.setEnableFlowCollect(true);
+                });
             });
         }
     }

@@ -144,6 +144,13 @@ public class AsyncPlatFlowTaskService {
 
         flowTaskModel.setFlowPortId(flowPortModel.getId());
 
+        try {
+            // 校验任务接口网络是否正常，正常才继续;异常时也正常往下走
+            this.checkTaskJobStatus(flowActuatorModel);
+        } catch (InterruptedException e) {
+            log.error("checkTaskJobStatus error", e);
+        }
+
         String thirdTaskId = "";
         if (ResourceTypeEnum.PACP.toValue() == flowInfoModel.getResourceType()) {
             // 构建保存app任务请求
@@ -358,7 +365,7 @@ public class AsyncPlatFlowTaskService {
                         log.info("trex host[{}] connect success", fixedIp);
                     } else {
                         long endTime = System.currentTimeMillis();
-                        if (endTime - startTime > 1000 * 60 * 10) {
+                        if ((endTime - startTime) > (1000 * 60 * 10)) {
                             // 十分钟服务没起来，结束轮询
                             log.error("trex vm start error:{}", addVmRequest.getName());
                             isConnectable = true;
@@ -382,14 +389,14 @@ public class AsyncPlatFlowTaskService {
      * @param host
      * @return
      */
-    public static boolean isHostConnectable(String host) {
+    private boolean isHostConnectable(String host) {
         TelnetClient client = new TelnetClient();
         // 超时时间设为2s
-        client.setConnectTimeout(2000);
+        client.setConnectTimeout(1000);
         try {
             client.connect(host, 5001);
         } catch (IOException e) {
-            log.warn("trex host[{}] connect error", host);
+            log.warn("trex host[{}] connect failed", host);
             return false;
         } finally {
             try {
@@ -400,6 +407,59 @@ public class AsyncPlatFlowTaskService {
         }
 
         return true;
+    }
+
+    /**
+     * 校验任务接口状态
+     * @param flowActuatorModel
+     * @return
+     */
+    private void checkTaskJobStatus(FlowActuatorModel flowActuatorModel) throws InterruptedException {
+        // 根据任务接口状态
+        long startTime = System.currentTimeMillis();
+        boolean isActive = getTaskJobStatus(flowActuatorModel);
+        while (!isActive) {
+            isActive = getTaskJobStatus(flowActuatorModel);
+            if (isActive) {
+                log.info("task job status is active：[{}]", flowActuatorModel.getIp());
+            } else {
+                log.warn("task job status is not ready：[{}]", flowActuatorModel.getIp());
+                long endTime = System.currentTimeMillis();
+                if ((endTime - startTime) > (1000 * 60 * 5)) {
+                    // 5分钟服务没起来，结束轮询
+                    log.error("task job status check failed：[{}]", flowActuatorModel.getIp());
+                    isActive = true;
+                } else {
+                    Thread.sleep(1000);
+                }
+            }
+        }
+    }
+
+    /**
+     * 获取任务接口状态
+     * @param flowActuatorModel
+     * @return
+     */
+    private boolean getTaskJobStatus(FlowActuatorModel flowActuatorModel) {
+        boolean isActive = false;
+        try {
+            JSONObject getTaskObj = new JSONObject();
+            JSONArray getTaskArray = new JSONArray();
+            getTaskArray.add("test_standardTask");
+            getTaskObj.put("uuids", getTaskArray);
+            String getTaskRsp = HttpUtils.sendPostWithTimeOut(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks/standards/many",
+                    getTaskObj.toJSONString(), 10000);
+            JSONObject taskResultObj = JSONObject.parseObject(getTaskRsp);
+            log.info("get tasks info response:{}", taskResultObj.toJSONString());
+            if ("1000".equalsIgnoreCase(taskResultObj.getString("code"))) {
+                isActive = true;
+            }
+        } catch (Exception e) {
+            log.error("get tasks info error", e);
+        }
+
+        return isActive;
     }
 
     /**

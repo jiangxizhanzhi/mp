@@ -17,11 +17,12 @@ CREATE TABLE `mp_devops_target` (
                                     `system_architecure` varchar(16) DEFAULT NULL COMMENT '系统架构',
                                     `language` varchar(16) DEFAULT NULL COMMENT '系统语言',
                                     `image_status` tinyint(2) DEFAULT NULL COMMENT '镜像状态',
-                                    `base_image_support` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否支持基础镜像,0:不支持，1：支持',
+                                    `base_image_support` tinyint(1) DEFAULT '0' COMMENT '是否支持基础镜像,0:不支持，1：支持',
                                     `init_support` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否支持Cloud init,0:不支持，1：支持',
                                     `create_time` datetime(6) NOT NULL COMMENT '创建时间',
                                     `update_time` datetime(6) NOT NULL COMMENT '更新时间',
                                     `image_source` tinyint(2) DEFAULT NULL COMMENT '系统镜像类型，1：基础镜像，2：openstack已有镜像，3：自定义上传',
+                                    `is_import` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否导入，0：false,1:true',
                                     PRIMARY KEY (`pk`) USING BTREE,
                                     UNIQUE KEY `idx_name` (`name`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='靶标管理';

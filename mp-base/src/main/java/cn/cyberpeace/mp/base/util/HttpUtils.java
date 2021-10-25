@@ -51,6 +51,19 @@ public class HttpUtils {
     }
 
     /**
+     * 带超时时间post请求
+     * @param url
+     * @param content
+     * @param timeOut
+     * @return
+     * @throws IOException
+     */
+    public static String sendPostWithTimeOut(String url, String content, int timeOut) throws IOException {
+        HttpClient client = HttpClientBuilder.create().build();
+        return doPost(url, content, client, timeOut);
+    }
+
+    /**
      * 对接需要授权
      *
      * @param url
@@ -109,6 +122,23 @@ public class HttpUtils {
         // 设置请求和传输超时时间
         RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
         httpPost.setConfig(requestConfig);
+        // 获得返回值
+        return EntityUtils.toString(resp.getEntity(), StandardCharsets.UTF_8);
+    }
+
+    private static String doPost(String url, String content, HttpClient client, int timeOut) throws IOException {
+        log.info("请求地址================>{}", url);
+        log.info("请求参数================>{}", content);
+        HttpPost httpPost = new HttpPost(url);
+        // 解决中文乱码问题
+        StringEntity entity = new StringEntity(content, StandardCharsets.UTF_8);
+        entity.setContentType(ContentType.APPLICATION_JSON.getMimeType());
+        httpPost.setEntity(entity);
+        // 设置请求和传输超时时间
+        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(timeOut).build();
+        httpPost.setConfig(requestConfig);
+        HttpResponse resp = client.execute(httpPost);
+
         // 获得返回值
         return EntityUtils.toString(resp.getEntity(), StandardCharsets.UTF_8);
     }

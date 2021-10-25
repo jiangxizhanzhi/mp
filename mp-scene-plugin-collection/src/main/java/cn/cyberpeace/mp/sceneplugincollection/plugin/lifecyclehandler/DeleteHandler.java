@@ -27,7 +27,9 @@ public class DeleteHandler extends HandlerCommon {
         var scene = getPluginHandler().getScene();
         var flowCollectorId = scene.getFlowCollector();
         if (!StringUtils.isEmpty(flowCollectorId)) {
-            getFlowCollector().deleteCollector(flowCollectorId);
+            runSceneProgress(SceneProcess.DELETE_FLOW_COLLECTION, () -> {
+                getFlowCollector().deleteCollector(flowCollectorId);
+            });
         }
     }
 

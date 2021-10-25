@@ -63,7 +63,7 @@ public class FlowTaskModel extends BaseModel {
      */
     @ApiModelProperty(value = "流量发生平台：0 通用，1 Trex流量发生器")
     @DefaultInt(1)
-    private int flowPlatform;
+    private Integer flowPlatform;
 
     /**
      * 流量第三方id
