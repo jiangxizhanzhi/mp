@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.base.exception;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.MessageUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
@@ -29,7 +30,7 @@ public class MpRuntimeExceptionHandler {
     @ResponseBody
     public ServiceResult<String> b2bRuntimeExceptionHandler(MpRuntimeException ex) {
         log.error(LOGGER_FORMAT, ex.getServiceCode().getMessage(), ex.getDetail());
-        return ServiceResult.fail(ex.getServiceCode(), ex.getServiceCode().getMessage(), ex.getDetail());
+        return ServiceResult.fail(ex.getServiceCode(), MessageUtils.get(ex.getServiceCode().getMessage()), ex.getDetail());
     }
 
     @ExceptionHandler({BindException.class})

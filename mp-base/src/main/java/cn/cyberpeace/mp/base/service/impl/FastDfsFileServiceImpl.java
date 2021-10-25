@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.FileService;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.MessageUtils;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +41,7 @@ public class FastDfsFileServiceImpl implements FileService {
      */
     @Override
     public ServiceResult<FileResponseData> uploadFile(MultipartFile file, HttpServletRequest request) {
-        FileResponseData responseData = uploadSample(file, request);
+        FileResponseData responseData = uploadSample(file);
         if (responseData.isSuccess()) {
             return ServiceResult.success(responseData);
         } else {
@@ -85,10 +86,9 @@ public class FastDfsFileServiceImpl implements FileService {
      * 上传通用方法，只上传到服务器，不保存记录到数据库
      *
      * @param file
-     * @param request
      * @return
      */
-    private FileResponseData uploadSample(MultipartFile file, HttpServletRequest request) {
+    private FileResponseData uploadSample(MultipartFile file) {
         FileResponseData responseData = new FileResponseData();
         try {
             // 上传到服务器
@@ -106,7 +106,7 @@ public class FastDfsFileServiceImpl implements FileService {
         } catch (MpRuntimeException e) {
             responseData.setSuccess(false);
             responseData.setCode(e.getErrorCode());
-            responseData.setMessage(e.getMessage());
+            responseData.setMessage(MessageUtils.get(e.getMessage()));
         }
 
         return responseData;
