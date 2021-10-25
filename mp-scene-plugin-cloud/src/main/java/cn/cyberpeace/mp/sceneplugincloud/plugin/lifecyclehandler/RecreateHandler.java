@@ -5,7 +5,7 @@ import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.RecreateTaskPool;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
@@ -30,7 +30,7 @@ public class RecreateHandler extends HandlerCommon {
     private CreateInRecreateHandler createHandler;
 
     public RecreateHandler(CloudScenePluginHandler pluginHandler, int event) {
-        super(pluginHandler, CreateTaskPool.getInstance(), event);
+        super(pluginHandler, RecreateTaskPool.getInstance(), event);
         this.createHandler = new CreateInRecreateHandler(pluginHandler);
         this.deleteHandler = new DeleteInRecreateHandler(pluginHandler);
     }
