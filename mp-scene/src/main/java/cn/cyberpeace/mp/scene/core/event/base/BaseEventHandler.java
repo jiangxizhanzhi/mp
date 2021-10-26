@@ -28,6 +28,8 @@ import java.util.Map;
 @Data
 public abstract class BaseEventHandler<M extends BaseEventModel, E extends EventModel> {
 
+    public static final String EVENT_NAME_PREFIX = "scene.event.";
+
     /** 事件目标 */
     private M target;
 
