@@ -160,6 +160,9 @@ public class ImagesConverterImpl implements ImagesConverter {
     @Transactional
     public Device add(ImageRequest request) {
         Device device = imagesService.add(convertRequest(request));
+        if (Objects.isNull(device) || !device.isSuccess()){
+            return device;
+        }
         devopsTargetService.insert(Arrays.asList(device));
         return device;
     }
