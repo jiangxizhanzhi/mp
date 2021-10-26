@@ -7,11 +7,13 @@ import cn.cyberpeace.mp.base.repository.condition.aggregation.Sum;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCountActivitySceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.bo.CsceneStat;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
+import cn.cyberpeace.mp.cscene.model.CsceneInstanceCountActivitySceneModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
@@ -361,5 +363,14 @@ public class CsceneSpecialService {
         });
 
         return new ServiceResult<>(result);
+    }
+
+    /**
+     * 统计活动场景总数和场景总数
+     * @return
+     */
+    public CsceneInstanceCountActivitySceneBO countActivityScene() {
+        CsceneInstanceCountActivitySceneModel model = csceneInstanceMapper.countActivityScene();
+        return CsceneInstanceCountActivitySceneBO.builder().activitySceneTotal(model.getActivitySceneTotal()).total(model.getTotal()).build();
     }
 }
