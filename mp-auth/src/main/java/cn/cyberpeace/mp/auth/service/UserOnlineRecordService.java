@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import com.github.pagehelper.PageInfo;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -42,6 +43,13 @@ public interface UserOnlineRecordService extends BaseModelService<UserOnlineReco
      * @return
      */
     List<UserOnlineRecordModel> listCurrentOnlinedUser();
+
+    /**
+     * 根据时间段查找在线用户
+     *
+     * @return
+     */
+    List<UserOnlineRecordModel> listOnlinedUserByPeriod(LocalDateTime startTime, LocalDateTime endTime);
 
 
     UserOnlineCntDto onlineUserCnt();

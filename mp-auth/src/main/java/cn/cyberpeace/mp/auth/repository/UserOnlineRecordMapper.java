@@ -43,12 +43,19 @@ public interface UserOnlineRecordMapper extends BaseModelMapper<UserOnlineRecord
 
 
     /**
-     * 判断在线的依据：
-     * end_time > (now() - 5m) && status = 0
+     * 查询当前在线用户（group by user)
+     * @param deadline
+     * @return
+     */
+//    List<UserOnlineRecordModel> listCurrentOnlinedUser(@Param("deadline") LocalDateTime deadline);
+
+    /**
+     * 查询一定时间段内的在线用户（group by user)
+     * 如果是查询当前在线用户，则筛选时间段为 now()-5m < period < now()
      *
      * @param deadline
      * @return
      */
-    List<UserOnlineRecordModel> listCurrentOnlinedUser(@Param("deadline") LocalDateTime deadline);
+    List<UserOnlineRecordModel> listOnlinedUserByPeriod(@Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
 
 }

@@ -107,30 +107,32 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
     public List<UserOnlineRecordModel> listCurrentOnlined(String userId) {
         LocalDateTime deadline = LocalDateTime.now().minusMinutes(5);
         List<UserOnlineRecordModel> onlineList = getModelMapper().listCurrentOnlined(userId, deadline);
-        log.info("{}", onlineList);
         return onlineList;
     }
 
     @Override
     public List<UserOnlineRecordModel> listCurrentOfflined(String userId) {
         LocalDateTime deadline = LocalDateTime.now().minusMinutes(5);
-        List<UserOnlineRecordModel> offlineList = getModelMapper().listCurrentOfflined(userId, deadline);
-        log.info("{}", offlineList);
-        return offlineList;
+        List<UserOnlineRecordModel> list = getModelMapper().listCurrentOfflined(userId, deadline);
+        return list;
     }
 
     @Override
     public List<UserOnlineRecordModel> listCurrentOnlinedUser() {
-        LocalDateTime deadline = LocalDateTime.now().minusMinutes(5);
-        List<UserOnlineRecordModel> onlineList = getModelMapper().listCurrentOnlinedUser(deadline);
-        log.info("{}", onlineList);
-        return onlineList;
+        LocalDateTime endTime = LocalDateTime.now();
+        LocalDateTime startTime = endTime.minusMinutes(5);
+        List<UserOnlineRecordModel> list = getModelMapper().listOnlinedUserByPeriod(startTime, endTime);
+        return list;
     }
 
+    @Override
+    public List<UserOnlineRecordModel> listOnlinedUserByPeriod(LocalDateTime startTime, LocalDateTime endTime) {
+        List<UserOnlineRecordModel> list = getModelMapper().listOnlinedUserByPeriod(startTime, endTime);
+        return list;
+    }
 
     @Override
     public UserOnlineCntDto onlineUserCnt() {
-//        int olcnt = getModelMapper().total(new HumanCondition().filterEqual("is_online", UserOnlineReportModel.ONLINE));
         List<UserOnlineRecordModel> onlineRecordModels = listCurrentOnlinedUser();
         int olcnt = onlineRecordModels.size();
         int totalUser = userService.totalUserCnt();

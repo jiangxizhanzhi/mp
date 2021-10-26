@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.auth.test;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.constant.CustomAuthErrorCode;
+import cn.cyberpeace.mp.auth.model.UserOnlineRecordModel;
 import cn.cyberpeace.mp.auth.repository.OrgMapper;
 import cn.cyberpeace.mp.auth.repository.SysConfigMapper;
 import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
@@ -33,7 +34,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -171,6 +175,15 @@ public class AuthTestController {
     @GetMapping("/olrecord/check")
     public void checkUserOlRecord() {
         userOnlineReportService.checkUserOlRecord();
+    }
+
+    @GetMapping("/olrecord/period")
+    public void period() {
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime startTime = LocalDateTime.parse("2021-10-26 10:14:00", df);
+        LocalDateTime endTime = LocalDateTime.parse("2021-10-26 18:50:00", df);
+        List<UserOnlineRecordModel> list = userOnlineRecordService.listOnlinedUserByPeriod(startTime, endTime);
+        log.info("{}", list);
     }
 
 }
