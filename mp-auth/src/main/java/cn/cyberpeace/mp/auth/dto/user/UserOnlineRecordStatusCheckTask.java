@@ -2,7 +2,9 @@ package cn.cyberpeace.mp.auth.dto.user;
 
 import cn.cyberpeace.mp.auth.model.UserOnlineRecordModel;
 import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
+import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,32 +17,33 @@ import java.util.List;
 @Slf4j
 public class UserOnlineRecordStatusCheckTask implements Runnable {
 
+    private ApplicationContext applicationContext;
 
-    private String userId;
-
-    private UserOnlineRecordService userOnlineRecordService;
-
-    public UserOnlineRecordStatusCheckTask(String userId, UserOnlineRecordService userOnlineRecordService) {
-        this.userId = userId;
-        this.userOnlineRecordService = userOnlineRecordService;
+    public UserOnlineRecordStatusCheckTask(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
     }
 
     @Override
     public void run() {
+        log.info("FINISH用户在线记录信息...");
         // 更新用户在线记录信息
         // 1. 查找end_time超过一定时间，status还是0的记录
-        List<UserOnlineRecordModel> offlineList = userOnlineRecordService.listOfflined(null);
+        UserOnlineRecordService userOnlineRecordService = applicationContext.getBean(UserOnlineRecordService.class);
 
-        // 2. 更改为已下线，即status改为1
-        List<UserOnlineRecordModel> bulkUpdateList = new ArrayList<>();
-        for (UserOnlineRecordModel model : offlineList) {
-            UserOnlineRecordModel updateRecord = UserOnlineRecordModel.builder()
-                    .id(model.getId())
-                    .status(UserOnlineRecordModel.STATUS_FINISHED)
-                    .build();
-            bulkUpdateList.add(updateRecord);
+        List<UserOnlineRecordModel> offlineList = userOnlineRecordService.listCurrentOfflined(null);
+
+        if (CollectionUtil.isNotEmpty(offlineList)) {
+            // 2. 更改为已下线，即status改为1
+            List<UserOnlineRecordModel> bulkUpdateList = new ArrayList<>();
+            for (UserOnlineRecordModel model : offlineList) {
+                UserOnlineRecordModel updateRecord = UserOnlineRecordModel.builder()
+                        .id(model.getId())
+                        .status(UserOnlineRecordModel.STATUS_FINISHED)
+                        .build();
+                bulkUpdateList.add(updateRecord);
+            }
+            userOnlineRecordService.bulkUpdate(bulkUpdateList);
         }
-        userOnlineRecordService.bulkUpdate(bulkUpdateList);
     }
 
 }

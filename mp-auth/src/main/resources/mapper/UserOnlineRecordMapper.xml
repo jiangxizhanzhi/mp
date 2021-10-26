@@ -2,29 +2,54 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="cn.cyberpeace.mp.auth.repository.UserOnlineRecordMapper">
 
-    <select id="listOnlined" resultType="cn.cyberpeace.mp.auth.model.UserOnlineRecordModel">
-        select * from mp_auth_user_online_record
+    <select id="listRecordSummary" resultType="cn.cyberpeace.mp.auth.dto.user.UserOnlineRecordSummaryDto">
+        select user, username, name, format(sum(duration_minutes) / 60, 2) total_online_hours
+        from mp_auth_user_online_record
         <where>
-            <if test="#{userId} != null and #{userId} != ''">
+            <if test="userId != null and userId != ''">
                 AND user = #{userId}
             </if>
-            <if test="#{deadline} != null">
+        </where>
+        group by user
+    </select>
+
+    <select id="listCurrentOnlined" resultType="cn.cyberpeace.mp.auth.model.UserOnlineRecordModel">
+        select * from mp_auth_user_online_record
+        <where>
+            <if test="userId != null and userId != ''">
+                AND user = #{userId}
+            </if>
+            <if test="deadline != null">
                 AND end_time > #{deadline}
             </if>
             AND status = 0
         </where>
     </select>
 
-    <select id="listOfflined" resultType="cn.cyberpeace.mp.auth.model.UserOnlineRecordModel">
+    <select id="listCurrentOfflined" resultType="cn.cyberpeace.mp.auth.model.UserOnlineRecordModel">
         select * from mp_auth_user_online_record
         <where>
-            <if test="#{userId} != null and #{userId} != ''">
+            <if test="userId != null and userId != ''">
                 AND user = #{userId}
             </if>
-            <if test="#{deadline} != null">
+            <if test="deadline != null">
                 AND end_time &lt; #{deadline}
             </if>
             AND status = 0
+        </where>
+    </select>
+
+    <select id="listCurrentOnlinedUser" resultType="cn.cyberpeace.mp.auth.model.UserOnlineRecordModel">
+        select * from mp_auth_user_online_record
+        <where>
+            <if test="userId != null and userId != ''">
+                AND user = #{userId}
+            </if>
+            <if test="deadline != null">
+                AND end_time > #{deadline}
+            </if>
+            AND status = 0
+            group by user
         </where>
     </select>
 

@@ -2,6 +2,9 @@ package cn.cyberpeace.mp.auth.model;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.base.model.BaseModel;
+import cn.cyberpeace.mp.base.model.generator.DateTimeGenerator;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultGen;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 import io.swagger.annotations.ApiModelProperty;
@@ -38,29 +41,29 @@ public class UserOnlineRecordModel extends BaseModel {
     @ApiModelProperty(value = "用户姓名")
     private String name;
 
-    @ApiModelProperty(value = "组织")
-    private String org;
-
     @ApiModelProperty(value = "开始时间")
+    @DefaultGen(DateTimeGenerator.class)
     private LocalDateTime startTime;
 
     @ApiModelProperty(value = "结束时间")
+    @DefaultGen(DateTimeGenerator.class)
     private LocalDateTime endTime;
 
     @ApiModelProperty(value = "累计在线分钟数")
+    @DefaultInt(0)
     private Integer durationMinutes;
 
     @ApiModelProperty("记录完成与否 0:未完成 1:已完成")
+    @DefaultInt(0)
     private Integer status;
 
     @Builder
-    public UserOnlineRecordModel(String id, LocalDateTime createTime, LocalDateTime updateTime, String user, String tenant, String username, String name, String org, LocalDateTime startTime, LocalDateTime endTime, Integer durationMinutes, Integer status) {
+    public UserOnlineRecordModel(String id, LocalDateTime createTime, LocalDateTime updateTime, String user, String tenant, String username, String name, LocalDateTime startTime, LocalDateTime endTime, Integer durationMinutes, Integer status) {
         super(id, createTime, updateTime);
         this.user = user;
         this.tenant = tenant;
         this.username = username;
         this.name = name;
-        this.org = org;
         this.startTime = startTime;
         this.endTime = endTime;
         this.durationMinutes = durationMinutes;

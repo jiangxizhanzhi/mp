@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.auth.test;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
+import cn.cyberpeace.mp.auth.constant.CustomAuthErrorCode;
 import cn.cyberpeace.mp.auth.repository.OrgMapper;
 import cn.cyberpeace.mp.auth.repository.SysConfigMapper;
 import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
@@ -10,12 +11,15 @@ import cn.cyberpeace.mp.auth.service.TargetService;
 import cn.cyberpeace.mp.auth.service.UserHeartbeatService;
 import cn.cyberpeace.mp.auth.service.UserLogService;
 import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
+import cn.cyberpeace.mp.auth.service.UserOnlineReportService;
 import cn.cyberpeace.mp.auth.service.UserPermissionService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.sys.LicenseService;
 import cn.cyberpeace.mp.auth.service.sys.SysActivationService;
 import cn.cyberpeace.mp.auth.util.PasswordStrengthChecker;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -88,6 +92,9 @@ public class AuthTestController {
     @Autowired
     private UserOnlineRecordService userOnlineRecordService;
 
+    @Autowired
+    private UserOnlineReportService userOnlineReportService;
+
     @ApiOperation("DES加密")
     @PostMapping("/desEncryptPwd")
     @ApiImplicitParams({
@@ -138,6 +145,15 @@ public class AuthTestController {
     public String sysUUID() {
         String code = activationService.querySysUUID();
         return code;
+
+    }
+
+    @GetMapping("testErrorcode")
+    public ServiceResult testErrorCode() {
+        String errorMsg = "auth.error_code.account_not_existed";
+        CustomAuthErrorCode customAuthErrorCode = new CustomAuthErrorCode();
+        customAuthErrorCode.setCode(BaseErrorCode.PARAMS_INVALID.getCode(), errorMsg);
+        return ServiceResult.<String>builder().serviceCode(customAuthErrorCode).build().asResult();
     }
 
     @GetMapping("/tmpmenu")
@@ -146,9 +162,15 @@ public class AuthTestController {
 //        tmpMenuService.process();
     }
 
-    @GetMapping("/online_record")
-    public void testOnlineRecord() {
-        userOnlineRecordService.getOnlineUserPage();
+    @GetMapping("/olrecord/schedule")
+    public void scheduleUserOlRecord() {
+        userOnlineReportService.scheduleUserOlRecord();
+    }
+
+
+    @GetMapping("/olrecord/check")
+    public void checkUserOlRecord() {
+        userOnlineReportService.checkUserOlRecord();
     }
 
 }

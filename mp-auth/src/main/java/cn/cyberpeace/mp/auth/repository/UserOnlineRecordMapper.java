@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.repository;
 
+import cn.cyberpeace.mp.auth.dto.user.UserOnlineRecordSummaryDto;
 import cn.cyberpeace.mp.auth.model.UserOnlineRecordModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
@@ -20,6 +21,8 @@ import java.util.List;
 @ModelClass(UserOnlineRecordModel.class)
 public interface UserOnlineRecordMapper extends BaseModelMapper<UserOnlineRecordModel> {
 
+    List<UserOnlineRecordSummaryDto> listRecordSummary(@Param("userId") String userId, @Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
+
     /**
      * 判断在线的依据：
      * end_time > (now() - 5m) && status = 0
@@ -27,7 +30,7 @@ public interface UserOnlineRecordMapper extends BaseModelMapper<UserOnlineRecord
      * @param deadline
      * @return
      */
-    List<UserOnlineRecordModel> listOnlined(@Param("userId") String userId, @Param("deadline") LocalDateTime deadline);
+    List<UserOnlineRecordModel> listCurrentOnlined(@Param("userId") String userId, @Param("deadline") LocalDateTime deadline);
 
     /**
      * 判断离线的依据:
@@ -36,6 +39,16 @@ public interface UserOnlineRecordMapper extends BaseModelMapper<UserOnlineRecord
      * @param deadline
      * @return
      */
-    List<UserOnlineRecordModel> listOfflined(@Param("userId") String userId, @Param("deadline") LocalDateTime deadline);
+    List<UserOnlineRecordModel> listCurrentOfflined(@Param("userId") String userId, @Param("deadline") LocalDateTime deadline);
+
+
+    /**
+     * 判断在线的依据：
+     * end_time > (now() - 5m) && status = 0
+     *
+     * @param deadline
+     * @return
+     */
+    List<UserOnlineRecordModel> listCurrentOnlinedUser(@Param("deadline") LocalDateTime deadline);
 
 }

@@ -682,7 +682,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return doModel2Dto(userModel, false, true);
     }
 
-    private UserDto doModel2Dto(UserModel userModel, boolean needOrg, boolean needRole) {
+    public UserDto doModel2Dto(UserModel userModel, boolean needOrg, boolean needRole) {
         Assert.notEmpty(userModel.getId(), "用户ID不能为空！");
 
         UserDto userDto = new UserDto();

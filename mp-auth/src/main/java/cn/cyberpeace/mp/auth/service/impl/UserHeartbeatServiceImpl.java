@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @Description:
@@ -27,7 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class UserHeartbeatServiceImpl extends BaseModelServiceImpl<UserHeartbeatModel, UserHeartbeatMapper, UserHeartbeatFields, QueryParams> implements UserHeartbeatService {
 
-    private static ConcurrentHashMap<String, Integer> heartbeatMap = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<UserModel, CopyOnWriteArrayList<LocalDateTime>> heartbeatMap = new ConcurrentHashMap<>();
 
 
     @Autowired
@@ -45,12 +46,13 @@ public class UserHeartbeatServiceImpl extends BaseModelServiceImpl<UserHeartbeat
     public void heartbeat() {
         UserModel userModel = UserUtils.getLoginUser();
         if (Objects.nonNull(userModel)) {
-            String userId = userModel.getId();
-            Integer count = heartbeatMap.get(userId);
-            if (Objects.nonNull(count)) {
-                heartbeatMap.put(userId, count++);
+            CopyOnWriteArrayList<LocalDateTime> timestampList = heartbeatMap.get(userModel);
+            if (Objects.nonNull(timestampList)) {
+                timestampList.add(LocalDateTime.now());
             } else {
-                heartbeatMap.put(userId, 1);
+                timestampList = new CopyOnWriteArrayList();
+                timestampList.add(LocalDateTime.now());
+                heartbeatMap.put(userModel, timestampList);
             }
         } else {
             log.error("没有查询到有效登录用户信息！");
@@ -58,7 +60,7 @@ public class UserHeartbeatServiceImpl extends BaseModelServiceImpl<UserHeartbeat
     }
 
     @Override
-    public ConcurrentHashMap<String, Integer> getHeartbeatMap() {
+    public ConcurrentHashMap<UserModel, CopyOnWriteArrayList<LocalDateTime>> getHeartbeatMap() {
         return heartbeatMap;
     }
 

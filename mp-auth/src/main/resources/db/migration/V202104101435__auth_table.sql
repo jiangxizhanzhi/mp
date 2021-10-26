@@ -143,25 +143,25 @@ create index idx_user_olrpt_uname on mp_auth_user_online_report (username);
 # 用户在线记录表
 CREATE TABLE mp_auth_user_online_record
 (
-    `pk`               int(11)      NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `id`               varchar(64)  NOT NULL COMMENT 'id',
-    `user`             varchar(64)  NOT NULL COMMENT '用户id',
-    `tenant`           varchar(64)  NOT NULL COMMENT '所属租户',
-    `username`         varchar(64)  NOT NULL COMMENT '用户名',
-    `name`             varchar(64)  NOT NULL COMMENT '用户姓名',
-    `org`              varchar(200) NOT NULL COMMENT '组织',
-    `start_time`       datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '开始时间',
-    `end_time`         datetime              DEFAULT CURRENT_TIMESTAMP COMMENT '结束时间',
-    `duration_minutes` int          NOT NULL DEFAULT 0 COMMENT '本轮累计在线分钟数',
-    `status`           int          NOT NULL DEFAULT 0 COMMENT '记录完成与否 0:未完成 1:已完成',
-    `create_time`      datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_time`      datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `pk`               int(11)     NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `id`               varchar(64) NOT NULL COMMENT 'id',
+    `user`             varchar(64) NOT NULL COMMENT '用户id',
+    `tenant`           varchar(64) NOT NULL COMMENT '所属租户',
+    `username`         varchar(64) NOT NULL COMMENT '用户名',
+    `name`             varchar(64) NOT NULL COMMENT '用户姓名',
+    `start_time`       datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '开始时间',
+    `end_time`         datetime             DEFAULT CURRENT_TIMESTAMP COMMENT '结束时间',
+    `duration_minutes` int         NOT NULL DEFAULT 0 COMMENT '本轮累计在线分钟数',
+    `status`           int         NOT NULL DEFAULT 0 COMMENT '记录完成与否 0:未完成 1:已完成',
+    `create_time`      datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time`      datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`pk`),
     UNIQUE (`id`)
 ) comment '用户在线记录表';
 create index idx_olrec_user on mp_auth_user_online_record (user);
 create index idx_olrec_uname on mp_auth_user_online_record (username);
 create index idx_olrec_endtime_stat on mp_auth_user_online_record (end_time, status);
+create index idx_olrec_startend_stat on mp_auth_user_online_record (start_time, end_time, status);
 
 
 # 用户角色表
