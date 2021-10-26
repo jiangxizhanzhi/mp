@@ -44,6 +44,7 @@ public class EntityNodeCreateData implements CloudHttpData {
             private String macAddress;
 
             private Connection connection;
+            private String security;
 
             @Data
             @AllArgsConstructor

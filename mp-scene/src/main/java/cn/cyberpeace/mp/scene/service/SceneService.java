@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.scene.service;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.scene.constant.ElementLifeCycleEnum;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
@@ -98,7 +99,7 @@ public class SceneService {
 
     public ServiceResult<Integer> bulkDelete(String[] ids, boolean logic, SceneContextBO context) {
         var result = 0;
-        for (String id: ids) {
+        for (String id : ids) {
             if (Boolean.TRUE.equals(delete(id, logic, context).getSource())) {
                 result += 1;
             }
@@ -112,4 +113,46 @@ public class SceneService {
         }
     }
 
+    public ServiceResult<Boolean> pause(String id) {
+        SceneHandler sceneHandler = new SceneHandler(id, null, false, null);
+        sceneHandler.setRealTimeUpdate(true);
+        sceneHandler.pause();
+        return new ServiceResult<>(true);
+    }
+
+    public ServiceResult<Boolean> unpause(String id) {
+        SceneHandler sceneHandler = new SceneHandler(id, null, false, null);
+        sceneHandler.setRealTimeUpdate(true);
+        sceneHandler.unpause();
+        return new ServiceResult<>(true);
+    }
+
+    public ServiceResult<Boolean> pauseElement(String id, String nodeId) {
+        SceneHandler sceneHandler = new SceneHandler(id, null, false, null);
+        sceneHandler.setRealTimeUpdate(true);
+        boolean result = sceneHandler.elementLifeCycleControl(nodeId, ElementLifeCycleEnum.PAUSE, true, false);
+        return new ServiceResult<>(result);
+    }
+
+    public ServiceResult<Boolean> unpauseElement(String id, String nodeId) {
+        SceneHandler sceneHandler = new SceneHandler(id, null, false, null);
+        sceneHandler.setRealTimeUpdate(true);
+        boolean result = sceneHandler.elementLifeCycleControl(nodeId, ElementLifeCycleEnum.UNPAUSE, true, false);
+        return new ServiceResult<>(result);
+    }
+
+    public ServiceResult<Boolean> restartElement(String id, String nodeId) {
+        SceneHandler sceneHandler = new SceneHandler(id, null, false, null);
+        sceneHandler.setRealTimeUpdate(true);
+        boolean result = sceneHandler.elementLifeCycleControl(nodeId, ElementLifeCycleEnum.RESTART, true, false);
+        return new ServiceResult<>(result);
+    }
+
+    public ServiceResult<Boolean> recreateElement(String id, String nodeId) {
+        SceneHandler sceneHandler = new SceneHandler(id, null, false, null);
+        sceneHandler.setRealTimeUpdate(true);
+        // 异步处理
+        SceneTaskPool.getInstance().executeTask(() -> sceneHandler.recreateElement(nodeId));
+        return new ServiceResult<>(true);
+    }
 }

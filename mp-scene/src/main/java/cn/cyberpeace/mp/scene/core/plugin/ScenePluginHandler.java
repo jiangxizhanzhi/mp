@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.scene.core.plugin;
 
+import cn.cyberpeace.mp.scene.constant.ElementLifeCycleEnum;
 import cn.cyberpeace.mp.scene.core.bo.SceneBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
@@ -95,11 +96,18 @@ public abstract class ScenePluginHandler<S extends BasePluginSceneBO<?, S, Scene
 
     }
 
+    public void elementLifeCycle(String nodeId, ElementLifeCycleEnum lifeCycle) {
+
+    }
+
     /**
      * TODO: 修改场景
      */
     public void modify() {
 
+    }
+
+    public void recreateElement(String nodeId) {
     }
 
 }

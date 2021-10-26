@@ -6,8 +6,18 @@ import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.*;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.EntityNode;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualFirewall;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualRouter;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualSwitch;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerDeleteData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.EntityNodeDeleteData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualFirewallDeleteData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineDeleteData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterDeleteData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchDeleteData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.DeleteTaskPool;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -105,7 +115,7 @@ public class DeleteHandler extends HandlerCommon {
         return vsClient.delete(deleteData);
     }
 
-    private boolean deleteVirtualRouter(CloudPluginSceneElementBO cloudElement) {
+    protected boolean deleteVirtualRouter(CloudPluginSceneElementBO cloudElement) {
         var resourceId = cloudElement.getResourceId();
         if (StringUtils.isEmpty(resourceId)) {
             return true;
@@ -116,7 +126,7 @@ public class DeleteHandler extends HandlerCommon {
         return vrClient.delete(deleteData);
     }
 
-    private boolean deleteVirtualFirewall(CloudPluginSceneElementBO cloudElement) {
+    protected boolean deleteVirtualFirewall(CloudPluginSceneElementBO cloudElement) {
         var resourceId = cloudElement.getResourceId();
         if (StringUtils.isEmpty(resourceId)) {
             return true;
@@ -127,7 +137,7 @@ public class DeleteHandler extends HandlerCommon {
         return vfClient.delete(deleteData);
     }
 
-    private boolean deleteVirtualMachine(CloudPluginSceneElementBO cloudElement) {
+    protected boolean deleteVirtualMachine(CloudPluginSceneElementBO cloudElement) {
         var resourceId = cloudElement.getResourceId();
         if (StringUtils.isEmpty(resourceId)) {
             return true;
@@ -142,7 +152,7 @@ public class DeleteHandler extends HandlerCommon {
         return vmClient.delete(deleteData);
     }
 
-    private boolean deleteContainer(CloudPluginSceneElementBO cloudElement) {
+    protected boolean deleteContainer(CloudPluginSceneElementBO cloudElement) {
         var resourceId = cloudElement.getResourceId();
         if (StringUtils.isEmpty(resourceId)) {
             return true;
@@ -157,7 +167,7 @@ public class DeleteHandler extends HandlerCommon {
         return containerClient.delete(deleteData);
     }
 
-    private boolean deleteEntityNode(CloudPluginSceneElementBO cloudElement) {
+    protected boolean deleteEntityNode(CloudPluginSceneElementBO cloudElement) {
         var deleteData = new EntityNodeDeleteData();
         List<String> interfaceNames = cloudElement.getSrcElement().getPorts().stream()
                 .map(BaseSceneElementPortBO::getName).collect(Collectors.toList());

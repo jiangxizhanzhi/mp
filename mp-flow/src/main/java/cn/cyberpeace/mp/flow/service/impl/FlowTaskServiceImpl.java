@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.JsonUtils;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
+import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
 import cn.cyberpeace.mp.flow.enums.FlowPlatformEnum;
 import cn.cyberpeace.mp.flow.enums.ResourceTypeEnum;
 import cn.cyberpeace.mp.flow.enums.TaskActionEnum;
@@ -199,7 +200,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                     asyncPlatFlowTaskService.savePlatFlowTask(request, false);
                     return ServiceResult.success(flowTaskModel);
                 } else {
-                    return ServiceResult.fail("Add flow task error");
+                    return ServiceResult.fail(FlowErrorCode.ADD_TASK_ERROR);
                 }
             } else {
                 // 暂无其他流量发生器，直接保存
@@ -208,7 +209,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
             }
         } else {
             log.error("flow file be chosen not existed");
-            return ServiceResult.fail("Flow file be chosen not existed");
+            return ServiceResult.fail(FlowErrorCode.FLOW_NOT_EXIST);
         }
     }
 
@@ -326,7 +327,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
         ObjResult<FlowTaskModel> flowTaskResult = this.get(flowTaskModel.getId()).getSource();
         if (Objects.isNull(flowTaskResult)) {
             log.error("flow task not exist");
-            return ServiceResult.fail("Flow task not exist");
+            return ServiceResult.fail(FlowErrorCode.TASK_NOT_EXIST);
         }
         FlowTaskModel oldTaskModel = flowTaskResult.asResult();
 
@@ -349,11 +350,11 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                     if (Objects.nonNull(newFlowInfoResult)) {
                         FlowInfoModel newFlowInfoModel = newFlowInfoResult.asResult();
                         if (!this.uploadFlowInfo(newFlowInfoModel, flowTaskModel)) {
-                            return ServiceResult.fail("Update flow task error");
+                            return ServiceResult.fail(FlowErrorCode.UPDATE_TASK_ERROR);
                         }
                     } else {
                         log.error("flow info not exist:{}", flowTaskModel.getFlowId());
-                        return ServiceResult.fail("Update flow task error");
+                        return ServiceResult.fail(FlowErrorCode.UPDATE_TASK_ERROR);
                     }
                 } else {
                     log.info("no need to update flow file");
@@ -365,11 +366,11 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                 if (Objects.nonNull(newFlowInfoResult)) {
                     FlowInfoModel newFlowInfoModel = newFlowInfoResult.asResult();
                     if (!this.uploadFlowInfo(newFlowInfoModel, flowTaskModel)) {
-                        return ServiceResult.fail("Update flow task error");
+                        return ServiceResult.fail(FlowErrorCode.UPDATE_TASK_ERROR);
                     }
                 } else {
                     log.error("flow info not exist:{}", flowTaskModel.getFlowId());
-                    return ServiceResult.fail("Update flow task error");
+                    return ServiceResult.fail(FlowErrorCode.UPDATE_TASK_ERROR);
                 }
             }
 
@@ -415,7 +416,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
             return delete(id);
         } else {
             log.error("flow task not exist: {}", id);
-            return ServiceResult.fail("Flow task not exist");
+            return ServiceResult.fail(FlowErrorCode.TASK_NOT_EXIST);
         }
 
     }
@@ -478,7 +479,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
             }
         } else {
             log.error("no flow task to delete");
-            return ServiceResult.fail("No flow task to delete");
+            return ServiceResult.fail(FlowErrorCode.NO_TASK_TO_DELETE);
         }
 
         ServiceResult<Integer> buldDelResult = bulkDelete(taskDelIds);
@@ -552,7 +553,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
         ObjResult<FlowTaskModel> flowTaskResult = get(flowTaskId).getSource();
         if (Objects.isNull(flowTaskResult)) {
             log.error("flow task not exist:{}", flowTaskId);
-            return ServiceResult.fail("Flow task not exist");
+            return ServiceResult.fail(FlowErrorCode.TASK_NOT_EXIST);
         }
         FlowTaskModel flowTaskModel = flowTaskResult.getObj();
 
@@ -560,7 +561,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
         if (FlowPlatformEnum.TREX.toValue() == flowTaskModel.getFlowPlatform()) {
             return this.actuatorTrex(flowTaskModel, taskAction);
         } else {
-            return ServiceResult.fail("No flow actuator to use");
+            return ServiceResult.fail(FlowErrorCode.NO_ACTUATOR_TO_USE);
         }
     }
 
@@ -576,7 +577,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
         ObjResult<FlowInfoModel> flowInfoResult = flowInfoService.get(flowTaskModel.getFlowId()).getSource();
         if (Objects.isNull(flowInfoResult)) {
             log.error("flow info in task not exist:{}", flowTaskModel.getFlowId());
-            return ServiceResult.fail("Flow info in task not exist");
+            return ServiceResult.fail(FlowErrorCode.FLOW_IN_TASK_NOT_EXIST);
         }
         FlowInfoModel flowInfoModel = flowInfoResult.getObj();
 
@@ -584,13 +585,13 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
         String actuatorId = flowTaskModel.getActuatorId();
         FlowActuatorModel flowActuatorModel = asyncPlatFlowTaskService.getFlowActuatorModel(actuatorId);
         if (Objects.isNull(flowActuatorModel)) {
-            return ServiceResult.fail("Actuator flow task error");
+            return ServiceResult.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
         }
 
         ObjResult<FlowPortModel> portObjResult = flowPortService.get(flowTaskModel.getFlowPortId()).getSource();
         if (Objects.isNull(portObjResult)) {
             log.error("flow port info is empty");
-            return ServiceResult.fail("Actuator flow task error");
+            return ServiceResult.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
         }
         FlowPortModel flowPortModel = portObjResult.asResult();
 
@@ -602,18 +603,18 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                 if (Objects.nonNull(rows)) {
                     int taskStatus = rows.getJSONObject(0).getInteger("status");
                     if (TaskStatusEnum.RUNNING.toValue() == taskStatus || TaskStatusEnum.STOPING.toValue() == taskStatus) {
-                        return ServiceResult.fail("The task is already running");
+                        return ServiceResult.fail(FlowErrorCode.TASK_IS_RUNNING);
                     }
                 } else {
                     log.error("query task status failed");
-                    return ServiceResult.fail("Actuator flow task error");
+                    return ServiceResult.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
                 }
             }
         } else {
             // 流量平台未创建过任务，并且是停止任务，提示错误
             if (TaskActionEnum.STOP.toValue() == taskAction) {
                 log.error("third task not exist");
-                return ServiceResult.fail("No running task to stop");
+                return ServiceResult.fail(FlowErrorCode.NO_RUNNING_TASK_TO_STOP);
             }
         }
 
@@ -637,11 +638,11 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
 
                     } else {
                         log.error("add app task failed");
-                        return ServiceResult.fail("Actuator flow task error");
+                        return ServiceResult.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
                     }
                 } catch (Exception e) {
                     log.error("add app task error", e);
-                    return ServiceResult.fail("Actuator flow task error");
+                    return ServiceResult.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
                 }
             }
         } else {
@@ -663,11 +664,11 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                         thirdTaskId = addStandTaskObj.getString(BaseConstants.STR_DATA);
                     } else {
                         log.error("add standard task failed");
-                        return ServiceResult.fail("Actuator flow task error");
+                        return ServiceResult.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
                     }
                 } catch (Exception e) {
                     log.error("add standard task error", e);
-                    return ServiceResult.fail("Actuator flow task error");
+                    return ServiceResult.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
                 }
             }
         }

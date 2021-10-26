@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
 import cn.cyberpeace.mp.flow.enums.InteractiveTypeEnum;
 import cn.cyberpeace.mp.flow.model.FlowCollectionModel;
 import cn.cyberpeace.mp.flow.model.FlowCollectionRelModel;
@@ -93,7 +94,7 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
         ObjResult<FlowCollectionModel> modelResult = get(addRequest.getCollectionId()).getSource();
         if (Objects.isNull(modelResult)) {
             log.error("collection is empty for:{}", addRequest.getCollectionId());
-            return ServiceResult.fail("collection is not exist");
+            return ServiceResult.fail(FlowErrorCode.COLLECTION_NOT_EXIST);
         }
 
         // 查询已有关联信息
@@ -133,7 +134,7 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
         ObjResult<FlowCollectionModel> modelResult = get(delRequest.getCollectionId()).getSource();
         if (Objects.isNull(modelResult)) {
             log.error("collection is empty for:{}", delRequest.getCollectionId());
-            return ServiceResult.fail("collection is not exist");
+            return ServiceResult.fail(FlowErrorCode.COLLECTION_NOT_EXIST);
         }
 
         if (CollectionUtils.isEmpty(delRequest.getFlowIds())) {

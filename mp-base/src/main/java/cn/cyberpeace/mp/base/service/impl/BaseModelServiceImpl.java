@@ -70,7 +70,7 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
 
 
     public HumanCondition getHumanCondition(String[] selectFields, String[] ids, String search, String[] searchFields,
-                                            String[] orders, int page, int pageSize) {
+                                            String[] orders, Integer page, Integer pageSize) {
         var humanCondition = getHumanCondition(selectFields);
         if (ids != null && ids.length > 0) {
             humanCondition.filterIn(BaseModel::getId, ids);

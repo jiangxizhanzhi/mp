@@ -47,6 +47,7 @@ public class VirtualNic {
 
         private Connection connection;
         private PortMapping portMapping;
+        private String security;
 
         @Data
         @AllArgsConstructor
