@@ -70,6 +70,9 @@ public class InstanceModel implements Serializable {
     /**
      * 节点名称
      */
+    private String host;
+
+
     private String hostname;
 
     /**

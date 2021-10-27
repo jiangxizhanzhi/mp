@@ -10,6 +10,7 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.BaseConstructor;
 import org.yaml.snakeyaml.constructor.Constructor;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -26,7 +27,8 @@ public final class ResourceCenterYmlParser {
     public static YmlParseResult parse(String filePath) {
         InputStream inputStream = null;
         try {
-            inputStream = new FileInputStream(filePath);
+            File file = new File(filePath);
+            inputStream = new FileInputStream(file);
             BaseConstructor constructor = new Constructor();
             constructor.setPropertyUtils(new YamlPropertyParseUtils());
             Yaml yaml = new Yaml(constructor);
