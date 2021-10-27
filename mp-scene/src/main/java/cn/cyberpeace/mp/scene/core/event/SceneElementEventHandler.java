@@ -14,7 +14,7 @@ import java.util.Map;
 })
 public class SceneElementEventHandler extends BaseEventHandler<SceneElementBO, EventModel> {
 
-    public static final Map<Integer, String> EVENT_NAME_MAP = SceneEventHandler.EVENT_NAME_MAP;
+    public static final Map<Integer, String> EVENT_NAME_MAP = SceneEventHandler.ELEMENT_NAME_MAP;
 
     public SceneElementEventHandler(SceneElementBO target, int event) {
         super(target, event, EVENT_NAME_MAP.get(event), SceneElementEventTransition.SCENE_ELEMENT_EVENT_TRANSITION);

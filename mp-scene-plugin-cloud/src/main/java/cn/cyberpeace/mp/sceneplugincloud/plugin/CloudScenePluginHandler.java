@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.CreateHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.DeleteHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ElementLifeCycleHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.InitiateHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.RecreateHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.modelhandler.CloudScenePluginModelHandler;
 import lombok.Data;
 import org.springframework.stereotype.Component;
@@ -172,4 +173,9 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         ElementLifeCycleHandler lifeCycleHandler = new ElementLifeCycleHandler(this, lifeCycle.getEvent());
         lifeCycleHandler.lifeControl(nodeId, element, lifeCycle);
     }
+
+    public void recreateElement(String nodeId) {
+        new RecreateHandler(this, getSceneHandler().getScene().getEvent()).recreateElement(nodeId);
+    }
+
 }

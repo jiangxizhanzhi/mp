@@ -11,10 +11,8 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCountActivitySceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCountByReferenceTypeBO;
 import cn.cyberpeace.mp.cscene.core.CsceneInstanceHandler;
-import cn.cyberpeace.mp.cscene.model.CsceneInstanceCountActivitySceneModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceCountByReferenceTypeModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceRoleModel;
@@ -242,15 +240,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 .map(model -> new CsceneInstanceCountByReferenceTypeBO(model.getReferenceType(), model.getTotal())).collect(Collectors.toList());
     }
 
-    /**
-     * 统计活动场景总数和场景总数
-     * @return
-     */
-    public CsceneInstanceCountActivitySceneBO countActivityScene() {
-        CsceneInstanceCountActivitySceneModel model = getModelMapper().countActivityScene();
-        return CsceneInstanceCountActivitySceneBO.builder().activitySceneTotal(model.getActivitySceneTotal()).total(model.getTotal()).build();
-    }
-
     public ServiceResult<Boolean> pause(String id, CsceneContextBO context) {
         CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context);
         boolean result = instanceHandler.pause();
@@ -278,6 +267,12 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     public ServiceResult<Boolean> restartElement(String id, String nodeId, CsceneContextBO context) {
         CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context);
         boolean result = instanceHandler.restartElement(nodeId);
+        return new ServiceResult<>(result);
+    }
+
+    public ServiceResult<Boolean> recreateElement(String id, String nodeId, CsceneContextBO context) {
+        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context);
+        boolean result = instanceHandler.recreateElement(nodeId);
         return new ServiceResult<>(result);
     }
 }
