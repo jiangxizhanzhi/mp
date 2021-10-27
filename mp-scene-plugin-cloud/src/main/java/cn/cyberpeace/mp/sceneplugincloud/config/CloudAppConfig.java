@@ -42,14 +42,14 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.create_pool_size:10}")
     private Integer createPoolSize;
 
+    @Value("${mp.sceneplugincloud.create_hold_size:200000}")
+    private Integer createHoldSize;
+
     @Value("${mp.sceneplugincloud.recreate_pool_size:10}")
     private Integer recreatePoolSize;
 
     @Value("${mp.sceneplugincloud.recreate_hold_size:200000}")
     private Integer recreateHoldSize;
-
-    @Value("${mp.sceneplugincloud.create_hold_size:200000}")
-    private Integer createHoldSize;
 
     @Value("${mp.sceneplugincloud.lifecycle_pool_size:10}")
     private Integer lifecyclePoolSize;
