@@ -324,12 +324,6 @@ public class RealEquipmentController {
         return new PageResult<>(list,model.getResult().size());
     }
 
-    @ApiOperation("场景引用")
-    @GetMapping("/scenes")
-    public PageResult<RealEquipmentScenesPageResponse> pageScenes(RealEquipmentScenesPageRequest request){
-        return new PageResult<>(Lists.newArrayList(),100);
-    }
-
     @ApiOperation("根据设备ID获取登录链接信息")
     @GetMapping("/connection")
     public Result<List<TargetConnection>> connection(@RequestParam String uuid){
