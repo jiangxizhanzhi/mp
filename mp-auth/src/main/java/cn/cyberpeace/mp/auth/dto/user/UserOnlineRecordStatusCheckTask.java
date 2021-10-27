@@ -27,7 +27,7 @@ public class UserOnlineRecordStatusCheckTask implements Runnable {
     public void run() {
         log.info("FINISH用户在线记录信息...");
         // 更新用户在线记录信息
-        // 1. 查找end_time超过一定时间，status还是0的记录
+        // 1. 查找end_time超过5分钟，且status还是0的记录
         UserOnlineRecordService userOnlineRecordService = applicationContext.getBean(UserOnlineRecordService.class);
 
         List<UserOnlineRecordModel> offlineList = userOnlineRecordService.listCurrentOfflined(null);

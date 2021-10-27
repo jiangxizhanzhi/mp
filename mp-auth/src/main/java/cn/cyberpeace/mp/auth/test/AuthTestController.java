@@ -36,6 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -183,13 +184,19 @@ public class AuthTestController {
     }
 
     @GetMapping("/olrecord/period")
-    public void period(@RequestParam LocalDateTime startTime, @RequestParam LocalDateTime endTime) {
+    public List<UserOnlineRecordModel> period(@RequestParam String startTime, @RequestParam String endTime) {
         log.info("{}", startTime);
-//        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-//        LocalDateTime startTime = LocalDateTime.parse("2021-10-26 10:14:00", df);
-//        LocalDateTime endTime = LocalDateTime.parse("2021-10-26 18:50:00", df);
-        List<UserOnlineRecordModel> list = userOnlineRecordService.listOnlinedUserByPeriod(startTime, endTime);
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime stime = LocalDateTime.parse(startTime, df);
+        LocalDateTime etime = LocalDateTime.parse(endTime, df);
+        List<UserOnlineRecordModel> list = userOnlineRecordService.listOnlinedUserByPeriod(stime, etime);
         log.info("{}", list);
+        return list;
+    }
+
+    @GetMapping("/olrecord/current_onlined")
+    public List<UserOnlineRecordModel> currentOnlined(@RequestParam(required = false) String userId) {
+        return userOnlineRecordService.listCurrentOnlined(userId);
     }
 
     @GetMapping("/olrecord/heartmap")

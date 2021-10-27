@@ -112,6 +112,7 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
 
     @Override
     public List<UserOnlineRecordModel> listCurrentOfflined(String userId) {
+        // 默认超过5分钟没有更新end_time既判定为离线
         LocalDateTime deadline = LocalDateTime.now().minusMinutes(5);
         List<UserOnlineRecordModel> list = getModelMapper().listCurrentOfflined(userId, deadline);
         return list;
