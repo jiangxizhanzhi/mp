@@ -89,6 +89,7 @@ public class UserOnlineRecordTask implements Runnable {
                 Duration duration = Duration.between(startTime, endTime);
                 long durationMinutes = duration.toMinutes();
                 Integer durationMin = Integer.valueOf(String.valueOf(durationMinutes));
+                durationMin = durationMin < 1 ? 1 : durationMin;
 
                 UserOnlineRecordModel onlineRecordModel = UserOnlineRecordModel.builder()
                         .user(userId)

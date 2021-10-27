@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.auth.test;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.constant.CustomAuthErrorCode;
+import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserOnlineRecordModel;
 import cn.cyberpeace.mp.auth.repository.OrgMapper;
 import cn.cyberpeace.mp.auth.repository.SysConfigMapper;
@@ -35,10 +36,11 @@ import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @Description:
@@ -95,6 +97,9 @@ public class AuthTestController {
 
     @Autowired
     private UserOnlineRecordService userOnlineRecordService;
+
+    @Autowired
+    private UserHeartbeatService userHeartbeatService;
 
     @Autowired
     private UserOnlineReportService userOnlineReportService;
@@ -178,12 +183,18 @@ public class AuthTestController {
     }
 
     @GetMapping("/olrecord/period")
-    public void period() {
-        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTime startTime = LocalDateTime.parse("2021-10-26 10:14:00", df);
-        LocalDateTime endTime = LocalDateTime.parse("2021-10-26 18:50:00", df);
+    public void period(@RequestParam LocalDateTime startTime, @RequestParam LocalDateTime endTime) {
+        log.info("{}", startTime);
+//        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+//        LocalDateTime startTime = LocalDateTime.parse("2021-10-26 10:14:00", df);
+//        LocalDateTime endTime = LocalDateTime.parse("2021-10-26 18:50:00", df);
         List<UserOnlineRecordModel> list = userOnlineRecordService.listOnlinedUserByPeriod(startTime, endTime);
         log.info("{}", list);
+    }
+
+    @GetMapping("/olrecord/heartmap")
+    public ConcurrentHashMap<UserModel, CopyOnWriteArrayList<LocalDateTime>> heartmap() {
+        return userHeartbeatService.getHeartbeatMap();
     }
 
 }
