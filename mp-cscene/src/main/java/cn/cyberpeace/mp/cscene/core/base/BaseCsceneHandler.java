@@ -50,6 +50,8 @@ public abstract class BaseCsceneHandler<
 
     private CsceneContextBO context;
 
+    protected boolean initLazy;
+
     /** 综合场景id */
     private String csceneId;
     /** 综合场景业务数据 */
@@ -69,7 +71,7 @@ public abstract class BaseCsceneHandler<
      * 从数据库读取综合场景信息
      * @return 综合场景信息
      */
-    private C0 readCscene() {
+    protected C0 readCscene() {
         return csceneMapper.get(csceneId);
     }
 
@@ -265,6 +267,13 @@ public abstract class BaseCsceneHandler<
         if (context != null) {
             context.loadTransparentContext();
         }
+    }
+
+    public void initLazy(String csceneId, CsceneContextBO context) {
+        initBase();
+        initContext(context);
+        this.csceneId = csceneId;
+        this.initLazy = true;
     }
 
     /**
