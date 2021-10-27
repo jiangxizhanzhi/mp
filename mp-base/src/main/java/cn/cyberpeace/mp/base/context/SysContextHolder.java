@@ -25,7 +25,7 @@ public class SysContextHolder {
     public static void set(SysContext sysContext) {
         if (Optional.ofNullable(contextLocal.get()).isPresent()) {
             // 如果重复设置上下文，打印错误日志，但是不影响后续处理
-            log.error("BaseSysContext has already been created!");
+            log.info("BaseSysContext has already been created!");
         }
         contextLocal.set(sysContext);
     }
