@@ -51,6 +51,16 @@ public interface UserOnlineRecordService extends BaseModelService<UserOnlineReco
      */
     List<UserOnlineRecordModel> listOnlinedUserByPeriod(LocalDateTime startTime, LocalDateTime endTime);
 
+    /**
+     * 查询一定时间段内单个用户的在线记录（在线活动轨迹）
+     *
+     * @param userId
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    List<UserOnlineRecordModel> listOnlineHistoryTrackByUser(String userId, LocalDateTime startTime, LocalDateTime endTime);
+
 
     UserOnlineCntDto onlineUserCnt();
 

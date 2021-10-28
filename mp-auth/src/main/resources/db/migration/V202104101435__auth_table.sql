@@ -100,21 +100,6 @@ CREATE TABLE mp_auth_tenant_user
 ) comment '租户用户表';
 
 
-# 用户心跳表
-CREATE TABLE mp_auth_user_heartbeat
-(
-    `pk`          int(11)     NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `id`          varchar(64) NOT NULL COMMENT 'id',
-    `user`        varchar(64) NOT NULL COMMENT '用户id',
-    `tenant`      varchar(64) NOT NULL COMMENT '所属租户',
-    `create_time` datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_time` datetime    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    PRIMARY KEY (`pk`),
-    UNIQUE (`id`)
-) comment '用户心跳表';
-create index idx_user_hb_uid on mp_auth_user_heartbeat (user);
-create index idx_user_hb_time on mp_auth_user_heartbeat (create_time);
-
 
 # 用户在线报告统计表
 CREATE TABLE mp_auth_user_online_report

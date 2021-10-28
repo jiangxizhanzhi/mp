@@ -183,6 +183,7 @@ public class AuthTestController {
         userOnlineReportService.checkUserOlRecord();
     }
 
+
     @GetMapping("/olrecord/period")
     public List<UserOnlineRecordModel> period(@RequestParam String startTime, @RequestParam String endTime) {
         log.info("{}", startTime);
@@ -190,6 +191,17 @@ public class AuthTestController {
         LocalDateTime stime = LocalDateTime.parse(startTime, df);
         LocalDateTime etime = LocalDateTime.parse(endTime, df);
         List<UserOnlineRecordModel> list = userOnlineRecordService.listOnlinedUserByPeriod(stime, etime);
+        log.info("{}", list);
+        return list;
+    }
+
+    @GetMapping("/olrecord/track/period")
+    public List<UserOnlineRecordModel> onlineTrack(@RequestParam String userId, @RequestParam String startTime, @RequestParam String endTime) {
+        log.info("{}", startTime);
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime stime = LocalDateTime.parse(startTime, df);
+        LocalDateTime etime = LocalDateTime.parse(endTime, df);
+        List<UserOnlineRecordModel> list = userOnlineRecordService.listOnlineHistoryTrackByUser(userId, stime, etime);
         log.info("{}", list);
         return list;
     }

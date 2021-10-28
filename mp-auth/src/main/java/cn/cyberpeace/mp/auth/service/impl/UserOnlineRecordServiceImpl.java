@@ -132,6 +132,13 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
         return list;
     }
 
+
+    @Override
+    public List<UserOnlineRecordModel> listOnlineHistoryTrackByUser(String userId, LocalDateTime startTime, LocalDateTime endTime) {
+        List<UserOnlineRecordModel> list = getModelMapper().listOnlineHistoryTrackByUser(userId, startTime, endTime);
+        return list;
+    }
+
     @Override
     public UserOnlineCntDto onlineUserCnt() {
         List<UserOnlineRecordModel> onlineRecordModels = listCurrentOnlinedUser();
