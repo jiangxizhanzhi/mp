@@ -47,7 +47,7 @@ class DeviceInfoConverter implements IConverter {
     private void doConvert(List<SceneConfigElementBO> list, Map<String, CloudPluginSceneConfigElementBO> pluginElements, Map<String, CloudPluginSceneConfigElementPortBO> pluginPorts) {
         for (SceneConfigElementBO element : list) {
             CloudPluginSceneConfigElementBO elementBO = pluginElements.get(element.getId());
-            if (elementBO == null) {
+            if (elementBO == null || elementBO.getImage() == null) {
                 continue;
             }
             TargetSceneRequest request = new TargetSceneRequest();
