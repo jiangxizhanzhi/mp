@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -81,9 +82,20 @@ class NetworkElementConverter implements IConverter {
         sceneConfigElementBO.setPorts(ports);
 
         CloudPluginSceneConfigElementBO pluginElement = new CloudPluginSceneConfigElementBO();
+        pluginElement.setCidr(network.getCidr());
+        pluginElement.setGateway(network.getGateway());
+        pluginElement.setDhcp("on".equals(network.getDhcp()) || "true".equals(network.getDhcp()));
+        // TODO: 设置地址池
+//        pluginElement.setAllocationPools();
+        if (!StringUtils.isEmpty(network.getDns())) {
+            pluginElement.setDnsNameservers(List.of(network.getDns()));
+        }
+        pluginElement.setGateway(network.getGateway());
         if (network.getId().toLowerCase().startsWith("internet")) {
             // id以internet开头,则是外部网络
             pluginElement.setRole(BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK);
+        } else {
+            pluginElement.setRole(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_2_GATEWAY);
         }
         container.putPluginElement(sceneConfigElementBO.getId(), pluginElement);
 
