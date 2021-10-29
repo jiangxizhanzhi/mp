@@ -23,6 +23,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -308,6 +309,7 @@ public class HttpUtils {
         log.info("请求地址================>{}", url);
         String result = StringUtils.EMPTY;
         // 向流量发生平台导入pcap包
+        Response response = null;
         try {
             OkHttpClient client = new OkHttpClient().newBuilder().build();
             MultipartBody.Builder builder = new MultipartBody.Builder();
@@ -336,7 +338,7 @@ public class HttpUtils {
                     .method("POST", body)
                     .addHeader("Content-Type", ContentType.MULTIPART_FORM_DATA.getMimeType())
                     .build();
-            Response response = client.newCall(request).execute();
+            response = client.newCall(request).execute();
             if (response.isSuccessful()) {
                 result = response.body().string();
             } else {
@@ -345,6 +347,8 @@ public class HttpUtils {
             }
         } catch (Exception e) {
             log.error("post file error", e);
+        } finally {
+            IOUtils.closeQuietly(response);
         }
 
         return result;

@@ -63,6 +63,19 @@
         group by user
     </select>
 
+    <select id="getOnlinedUserCntByPeriod" resultType="integer">
+        select count(*)
+        from (
+                 select pk
+                 from mp_auth_user_online_record
+                 where pk not in
+                       (select pk
+                        from mp_auth_user_online_record
+                        where start_time >= #{endTime} or end_time &lt;= #{startTime})
+                 group by user
+             ) as tabA
+    </select>
+
     <select id="listOnlineHistoryTrackByUser" resultType="cn.cyberpeace.mp.auth.model.UserOnlineRecordModel">
         select *
         from mp_auth_user_online_record

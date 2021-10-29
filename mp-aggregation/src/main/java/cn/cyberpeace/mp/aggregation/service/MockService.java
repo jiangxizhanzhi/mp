@@ -2,15 +2,10 @@ package cn.cyberpeace.mp.aggregation.service;
 
 import cn.cyberpeace.mp.aggregation.dto.DailyUserActivityResponse;
 import cn.cyberpeace.mp.aggregation.dto.UserResourceResponse;
-import cn.cyberpeace.mp.aggregation.dto.UserSummarySceneResponse;
 import cn.cyberpeace.mp.aggregation.dto.cluster.ClusterData;
 import cn.cyberpeace.mp.aggregation.dto.cluster.SystemClusterUsed;
 import cn.cyberpeace.mp.aggregation.dto.cluster.SystemData;
-import cn.cyberpeace.mp.aggregation.dto.resource.PhysicalTarget;
-import cn.cyberpeace.mp.aggregation.dto.resource.ResourceStatisticsResponse;
-import cn.cyberpeace.mp.aggregation.dto.resource.SceneSummary;
-import cn.cyberpeace.mp.aggregation.dto.resource.TargetSummary;
-import cn.cyberpeace.mp.aggregation.dto.resource.VirtualTargetSummary;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
@@ -19,7 +14,9 @@ import org.springframework.stereotype.Service;
  * @Date：2021/9/13 15:45
  */
 @Service
+@Slf4j
 public class MockService {
+
 
     public DailyUserActivityResponse mockDailyUserActivityResponse() {
 

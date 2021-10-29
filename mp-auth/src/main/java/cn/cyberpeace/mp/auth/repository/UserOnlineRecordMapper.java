@@ -50,6 +50,13 @@ public interface UserOnlineRecordMapper extends BaseModelMapper<UserOnlineRecord
      */
     List<UserOnlineRecordModel> listOnlinedUserByPeriod(@Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
 
+    /**
+     * 查询一定时间段内的在线用户数量（group by user)
+     * 如果是查询当前在线用户，则筛选时间段为 now()-5m < period < now()
+     *
+     * @return
+     */
+    Integer getOnlinedUserCntByPeriod(@Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
 
     /**
      * 查询一定时间段内单个用户的在线记录（在线活动轨迹）

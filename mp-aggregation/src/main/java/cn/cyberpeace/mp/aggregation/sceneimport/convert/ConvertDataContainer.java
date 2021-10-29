@@ -48,12 +48,19 @@ class ConvertDataContainer {
     private Map<String, Map<String, SceneConfigElementPortBO>> node2NetworkPorts = new HashMap<>();
     private List<SceneConfigElementPortConnectionBO> connections = new ArrayList<>();
 
+    // 未连接任何网络的节点
+    private List<SceneConfigElementBO> noNetworkNodeElements = new ArrayList<>();
+
     public void addNetworkElement(SceneConfigElementBO element) {
         this.networkElements.add(element);
     }
 
     public void addNodeElement(SceneConfigElementBO element) {
         this.nodeElements.add(element);
+    }
+
+    public void addNoNetworkNodeElements(SceneConfigElementBO element) {
+        this.noNetworkNodeElements.add(element);
     }
 
     public void putNode2NetworkPorts(String nodeId, String networkId, SceneConfigElementPortBO sceneConfigElementPortBO) {
