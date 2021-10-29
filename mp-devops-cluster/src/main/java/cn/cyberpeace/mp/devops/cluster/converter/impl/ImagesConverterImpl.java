@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.devops.cluster.enums.MainTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.PublicEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.UploadTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.model.*;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtDocker;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtImageInfo;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtVm;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageAuthMapper;
@@ -351,7 +352,12 @@ public class ImagesConverterImpl implements ImagesConverter {
         }
         device.setExtImageInfo(extImageInfo);
         device.setExtGateway(request.getExtGateway());
-        device.setExtDocker(request.getExtDocker());
+        ExtDocker extDocker = request.getExtDocker();
+        if (request.getImageType().equals("container") && Objects.nonNull(extDocker)
+                && CollectionUtils.isNotEmpty(request.getAccessProtocolList())){
+           extDocker.setAccessProtocols(request.getAccessProtocolList());
+        }
+        device.setExtDocker(extDocker);
         return device;
     }
 

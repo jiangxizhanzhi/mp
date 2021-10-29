@@ -12,10 +12,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.InjectFileConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.SnapshotConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.*;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtImageInfo;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtVm;
-import cn.cyberpeace.mp.devops.cluster.model.common.TargetConnection;
+import cn.cyberpeace.mp.devops.cluster.model.common.*;
 import cn.cyberpeace.mp.devops.cluster.request.*;
 import cn.cyberpeace.mp.devops.cluster.response.ImagesByIdResponse;
 import cn.cyberpeace.mp.devops.cluster.response.ImagesPageResponse;
@@ -158,13 +155,17 @@ public class ImagesController {
         imagesByIdResponse.setLogo(model.getLogo());
         ExtVm extVm = model.getExtVm();
         imagesByIdResponse.setAccessProtocolList(Objects.nonNull(extVm) ? extVm.getAccessProtocols() : null);
+        ExtDocker extDocker = model.getExtDocker();
+        if (model.getImageType().equals("container")){
+            imagesByIdResponse.setAccessProtocolList(Objects.nonNull(extDocker) ? extDocker.getAccessProtocols() : null);
+        }
         imagesByIdResponse.setImageType(model.getImageType());
         imagesByIdResponse.setDescription(model.getDescription());
         imagesByIdResponse.setExtImageInfo(model.getExtImageInfo());
         imagesByIdResponse.setExtGateway(model.getExtGateway());
         imagesByIdResponse.setExtVm(extVm);
         imagesByIdResponse.setExtSystemInfo(model.getExtSystemInfo());
-        imagesByIdResponse.setExtDocker(model.getExtDocker());
+        imagesByIdResponse.setExtDocker(extDocker);
         return new Result<>(imagesByIdResponse);
     }
 
