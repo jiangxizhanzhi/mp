@@ -164,6 +164,8 @@ CREATE TABLE mp_auth_user_role
     UNIQUE (`tenant`, `user`, `role`)
 ) comment '用户角色表';
 
+
+# @Deprecated
 # 资源目标表(有哪些资源)
 CREATE TABLE mp_auth_target
 (
@@ -181,6 +183,61 @@ CREATE TABLE mp_auth_target
     UNIQUE (`id`),
     UNIQUE (`identifier`)
 ) comment '权限（资源）表';
+
+
+# 菜单表
+CREATE TABLE mp_auth_target_menu
+(
+    `pk`          int(11)      NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `id`          varchar(64)  NOT NULL COMMENT 'id',
+    `parent`      varchar(64)  NULL COMMENT '父菜单ID',
+    `identifier`  varchar(64)  NOT NULL COMMENT '编号',
+    `tenant`      varchar(64)  NOT NULL COMMENT '所属租户',
+    `name`        varchar(64)  NOT NULL COMMENT '名称',
+    `path`        varchar(255) NULL COMMENT '路径',
+    `description` varchar(400) NOT NULL COMMENT '说明',
+    `create_time` datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`pk`),
+    UNIQUE (`id`),
+    UNIQUE (`identifier`)
+) comment '权限（资源）表';
+
+
+# api权限表
+CREATE TABLE mp_auth_target_api
+(
+    `pk`          int(11)      NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `id`          varchar(64)  NOT NULL COMMENT 'id',
+    `identifier`  varchar(64)  NOT NULL COMMENT '编号',
+    `tenant`      varchar(64)  NOT NULL COMMENT '所属租户',
+    `name`        varchar(64)  NOT NULL COMMENT '名称',
+    `path`        varchar(255) NULL COMMENT '路径',
+    `description` varchar(400) NOT NULL COMMENT '说明',
+    `create_time` datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`pk`),
+    UNIQUE (`id`),
+    UNIQUE (`identifier`)
+) comment '权限（资源）表';
+
+
+# 数据权限表
+CREATE TABLE mp_auth_target_data
+(
+    `pk`          int(11)      NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `id`          varchar(64)  NOT NULL COMMENT 'id',
+    `identifier`  varchar(64)  NOT NULL COMMENT '编号',
+    `tenant`      varchar(64)  NOT NULL COMMENT '所属租户',
+    `name`        varchar(64)  NOT NULL COMMENT '名称',
+    `description` varchar(400) NOT NULL COMMENT '说明',
+    `create_time` datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`pk`),
+    UNIQUE (`id`),
+    UNIQUE (`identifier`)
+) comment '权限（资源）表';
+
 
 # 组织资源权限表
 CREATE TABLE mp_auth_org_permission
