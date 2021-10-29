@@ -58,15 +58,20 @@ class NodeElementConverter implements IConverter {
         pluginElement.setImage(node.getImage());
         container.putPluginElement(sceneConfigElementBO.getId(), pluginElement);
 
-        for (NetElementParseResult ymlNetParseResult : node.getNet()) {
-            SceneConfigElementPortBO portBO = new SceneConfigElementPortBO();
-            portBO.setIp(ymlNetParseResult.getIp());
-            portBO.setId(TextUtils.uuid());
-            portBOS.add(portBO);
-            container.putNode2NetworkPorts(node.getId(), ymlNetParseResult.getId(), portBO);
+        if (CollectionUtils.isEmpty(node.getNet())) {
+            // 节点未连接任何网络
+            container.addNoNetworkNodeElements(sceneConfigElementBO);
+        } else {
+            for (NetElementParseResult ymlNetParseResult : node.getNet()) {
+                SceneConfigElementPortBO portBO = new SceneConfigElementPortBO();
+                portBO.setIp(ymlNetParseResult.getIp());
+                portBO.setId(TextUtils.uuid());
+                portBOS.add(portBO);
+                container.putNode2NetworkPorts(node.getId(), ymlNetParseResult.getId(), portBO);
 
-            CloudPluginSceneConfigElementPortBO pluginPort = new CloudPluginSceneConfigElementPortBO();
-            container.putPluginElementPort(portBO.getId(), pluginPort);
+                CloudPluginSceneConfigElementPortBO pluginPort = new CloudPluginSceneConfigElementPortBO();
+                container.putPluginElementPort(portBO.getId(), pluginPort);
+            }
         }
     }
 }
