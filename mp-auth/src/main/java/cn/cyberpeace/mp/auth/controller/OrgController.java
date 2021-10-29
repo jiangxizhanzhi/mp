@@ -81,12 +81,6 @@ public class OrgController extends BaseModelController<OrgModel, QueryParams, Or
         return super.delete(id);
     }
 
-    @ApiOperation(value = "获取所有parent组织", notes = "")
-    @GetMapping("/parents")
-    public ServiceResult getParentOrg() {
-        List<OrgModel> orgs = getModelService().listParents();
-        return ServiceResult.builder().source(orgs).build().asResult();
-    }
 
     @ApiOperation(value = "根据parent组织获取下级组织", notes = "")
     @GetMapping("/byparent")
