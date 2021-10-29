@@ -538,6 +538,7 @@ public class SceneHandler extends BaseSceneHandler<
     public void recreateElement(String nodeId) {
         SceneElementBO element = getElement(nodeId);
         prepareElementEvent(element, SceneElementModel.Event.RECREATE);
+        startElementEvent(nodeId, SceneElementModel.Event.RECREATE);
         try {
             for (ScenePluginHandler plugin : getPlugins()) {
                 plugin.recreateElement(nodeId);
