@@ -134,6 +134,12 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
 
 
     @Override
+    public Integer getOnlinedUserCntByPeriod(LocalDateTime startTime, LocalDateTime endTime) {
+        Integer cnt = getModelMapper().getOnlinedUserCntByPeriod(startTime, endTime);
+        return cnt;
+    }
+
+    @Override
     public List<UserOnlineRecordModel> listOnlineHistoryTrackByUser(String userId, LocalDateTime startTime, LocalDateTime endTime) {
         List<UserOnlineRecordModel> list = getModelMapper().listOnlineHistoryTrackByUser(userId, startTime, endTime);
         return list;

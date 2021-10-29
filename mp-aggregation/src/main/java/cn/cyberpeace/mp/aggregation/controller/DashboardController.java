@@ -40,7 +40,7 @@ public class DashboardController {
 
     @GetMapping("/daily_user_activity")
     public ServiceResult<DailyUserActivityResponse> getDailyUserActivity() {
-        DailyUserActivityResponse response = mockService.mockDailyUserActivityResponse();
+        DailyUserActivityResponse response = dashboardService.dailyUserActivity();
         return ServiceResult.success(response);
     }
 
