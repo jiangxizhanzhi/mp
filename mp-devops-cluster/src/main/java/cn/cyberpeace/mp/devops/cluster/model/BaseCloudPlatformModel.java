@@ -71,4 +71,16 @@ public class BaseCloudPlatformModel extends BaseModel {
 
     @ApiModelProperty(hidden = true)
     private Object detail;
+
+    /**
+     * 消息体
+     */
+    @ApiModelProperty(hidden = true)
+    private String msg;
+
+    /**
+     * 消息体
+     */
+    @ApiModelProperty(hidden = true)
+    private String msgZh;
 }
