@@ -54,7 +54,7 @@ public class TargetConverterImpl implements TargetConverter {
             dto.setOwner(Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : null);
         }
         if (Objects.isNull(request.getImageType())){
-            dto.setSearchType(1);
+            dto.setSearchType(0);
         }
         Integer total = imageMapper.totalCount(dto);
         if (total == 0){

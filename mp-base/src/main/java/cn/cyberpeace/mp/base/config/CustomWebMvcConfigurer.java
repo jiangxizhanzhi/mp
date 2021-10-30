@@ -1,10 +1,8 @@
 package cn.cyberpeace.mp.base.config;
 
 
-import cn.cyberpeace.mp.base.context.http.HttpContextHandlerInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.List;
@@ -22,10 +20,4 @@ public class CustomWebMvcConfigurer implements WebMvcConfigurer {
         argumentResolvers.add(new CustomServletModelAttributeMethodProcessor(true));
     }
 
-    @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        // HttpContextHandlerInterceptor 用于构建 SysContext ， 必须作为第一个拦截器
-        registry.addInterceptor(new HttpContextHandlerInterceptor());
-        WebMvcConfigurer.super.addInterceptors(registry);
-    }
 }

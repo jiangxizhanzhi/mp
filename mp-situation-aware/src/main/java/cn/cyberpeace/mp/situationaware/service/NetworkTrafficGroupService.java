@@ -10,6 +10,7 @@ import com.alibaba.fastjson.JSONPath;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,26 +58,27 @@ public class NetworkTrafficGroupService {
      * @return GroupModel
      */
     public GroupModel queryGroupById(String groupId) {
-        if (ObjectUtils.isEmpty(groupId)) {
-            throw new MpRuntimeException("groupId 不为空");
-        }
-
-        String requestUri = situationAwareConfig.getGroupUrl() + "/" + groupId;
-
-        String res;
-        try {
-            res = HttpUtils.sendGet(requestUri);
-        } catch (IOException e) {
-            log.error("查询所有分组错误:"+ e);
-            throw new MpRuntimeException("查询分组错误:"+ e);
-        }
-        JSONObject jsonObject = JSONObject.parseObject(res);
-
-        String groupIdRes = (String) JSONPath.eval(jsonObject, "$.scene.id");
-        JSONArray  macIdJsonArray= (JSONArray) JSONPath.eval(jsonObject, "$.scene.macs");
-        String  url= (String) JSONPath.eval(jsonObject, "$.scene.viewer_url");
-        List<String> macIds = macIdJsonArray.stream().map(String.class::cast).collect(Collectors.toList());
-        return GroupModel.builder().groupId(groupIdRes).macIds(macIds).url(url).build();
+//        if (ObjectUtils.isEmpty(groupId)) {
+//            throw new MpRuntimeException("groupId 不为空");
+//        }
+//
+//        String requestUri = situationAwareConfig.getGroupUrl() + "/" + groupId;
+//
+//        String res;
+//        try {
+//            res = HttpUtils.sendGet(requestUri);
+//        } catch (IOException e) {
+//            log.error("查询所有分组错误:"+ e);
+//            throw new MpRuntimeException("查询分组错误:"+ e);
+//        }
+//        JSONObject jsonObject = JSONObject.parseObject(res);
+//
+//        String groupIdRes = (String) JSONPath.eval(jsonObject, "$.scene.id");
+//        JSONArray  macIdJsonArray= (JSONArray) JSONPath.eval(jsonObject, "$.scene.macs");
+//        String  url= (String) JSONPath.eval(jsonObject, "$.scene.viewer_url");
+//        List<String> macIds = macIdJsonArray.stream().map(String.class::cast).collect(Collectors.toList());
+//        return GroupModel.builder().groupId(groupIdRes).macIds(macIds).url(url).build();
+        return new GroupModel();
     }
 
     /**
@@ -84,13 +86,14 @@ public class NetworkTrafficGroupService {
      * @param groupId
      */
     public void deleteByGroupId(String groupId) {
-        try {
-            String requestUri = situationAwareConfig.getGroupUrl() + "/" + groupId;
-            HttpUtils.sendDelete(requestUri);
-        } catch (IOException e) {
-            log.error("删除分组失败:"+ e);
-            throw new MpRuntimeException("删除分组失败:"+ e);
-        }
+//        try {
+//            String requestUri = situationAwareConfig.getGroupUrl() + "/" + groupId;
+//            HttpUtils.sendDelete(requestUri);
+//        } catch (IOException e) {
+//            log.error("删除分组失败:"+ e);
+//            throw new MpRuntimeException("删除分组失败:"+ e);
+//        }
+        return;
     }
 
 
@@ -99,20 +102,22 @@ public class NetworkTrafficGroupService {
      * @param groupModel
      */
     public String addGroup(GroupModel groupModel) {
-        var jsonObject = new JSONObject();
-        if (ObjectUtils.isEmpty(groupModel.getGroupId()) || CollectionUtils.isEmpty(groupModel.getMacIds())) {
-            log.error("新增分组参数为空");
-            throw new MpRuntimeException("新增分组参数为空:");
-        }
-        jsonObject.put("scene_id", groupModel.getGroupId());
-        jsonObject.put("macs", groupModel.getMacIds());
-        try {
-            String res = HttpUtils.sendPost(situationAwareConfig.getGroupUrl(), jsonObject.toJSONString());
-            log.info("add group res: {}", res);
-            return res;
-        } catch (IOException e) {
-            log.error("删除分组失败:"+ e);
-            throw new MpRuntimeException("删除分组失败:"+ e);
-        }
+//        var jsonObject = new JSONObject();
+//        if (ObjectUtils.isEmpty(groupModel.getGroupId()) || CollectionUtils.isEmpty(groupModel.getMacIds())) {
+//            log.error("新增分组参数为空");
+//            throw new MpRuntimeException("新增分组参数为空:");
+//        }
+//        jsonObject.put("scene_id", groupModel.getGroupId());
+//        jsonObject.put("macs", groupModel.getMacIds());
+//        try {
+//            String res = HttpUtils.sendPost(situationAwareConfig.getGroupUrl(), jsonObject.toJSONString());
+//            log.info("add group res: {}", res);
+//            return res;
+//        } catch (IOException e) {
+//            log.error("删除分组失败:"+ e);
+//            throw new MpRuntimeException("删除分组失败:"+ e);
+//        }
+//    }
+        return UUID.randomUUID().toString();
     }
 }

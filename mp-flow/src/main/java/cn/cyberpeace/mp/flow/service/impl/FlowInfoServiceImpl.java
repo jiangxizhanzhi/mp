@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.result.*;
 import cn.cyberpeace.mp.base.util.TextUtils;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
+import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
 import cn.cyberpeace.mp.flow.enums.InteractiveTypeEnum;
 import cn.cyberpeace.mp.flow.enums.ResourceTypeEnum;
 import cn.cyberpeace.mp.flow.model.FlowCollectionRelModel;
@@ -33,6 +34,7 @@ import org.springframework.stereotype.Service;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -94,7 +96,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         // 判断流量任务是否关联该流量信息
         List<FlowTaskModel> flowTaskList = flowTaskMapper.listByFlowIds(Collections.singletonList(id));
         if (CollectionUtils.isNotEmpty(flowTaskList)) {
-            return ServiceResult.fail("Can not delete flow task related flow info");
+            return ServiceResult.fail(FlowErrorCode.TASK_DELETE_FAILED);
         }
 
         // 判断流量是否关联流量集合信息
@@ -134,7 +136,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         List<FlowTaskModel> flowTaskList = flowTaskMapper.listByFlowIds(Arrays.asList(ids));
         if (CollectionUtils.isNotEmpty(flowTaskList)) {
             log.info("flow info related flow task can not delete: {}", flowTaskList);
-            return ServiceResult.fail("Can not delete flow task related flow info");
+            return ServiceResult.fail(FlowErrorCode.TASK_DELETE_FAILED);
         }
 
         // 判断流量是否关联流量集合信息
@@ -200,11 +202,11 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         if (Objects.nonNull(objResult)) {
             FlowInfoModel flowInfoModel = objResult.getObj();
             if (InteractiveTypeEnum.BACKGROUND.toValue() != flowInfoModel.getInteractiveType()) {
-                return ServiceResult.fail("Not background flow!");
+                return ServiceResult.fail(FlowErrorCode.NOT_BACKGROUND_FLOW);
             }
             response = new BackgroundFlowResponse(flowInfoModel, prefixUrl);
         } else {
-            return ServiceResult.fail("No flow exist!");
+            return ServiceResult.fail(FlowErrorCode.FLOW_NOT_EXIST);
         }
 
         return ServiceResult.success(response);
@@ -224,16 +226,16 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         if (Objects.nonNull(objResult)) {
             FlowInfoModel flowInfoModel = objResult.getObj();
             if (InteractiveTypeEnum.ATTACK.toValue() != flowInfoModel.getInteractiveType()) {
-                return ServiceResult.fail("Not attack flow!");
+                return ServiceResult.fail(FlowErrorCode.NOT_ATTACK_FLOW);
             }
             response = new AttackFlowResponse(flowInfoModel, prefixUrl);
 
             // 下载攻击脚本
             byte[] fileByte = fastDFSClient.download(flowInfoModel.getScriptFile(), FdfsGroupEnum.DEFAULT.toString());
-            String code = new String(fileByte);
+            String code = new String(fileByte, StandardCharsets.UTF_8);
             response.setCode(code);
         } else {
-            return ServiceResult.fail("No flow exist!");
+            return ServiceResult.fail(FlowErrorCode.FLOW_NOT_EXIST);
         }
 
         return ServiceResult.success(response);
@@ -246,11 +248,11 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
      */
     public ServiceResult<BackgroundFlowResponse> addBackgroundFlow(AddBackgroundFlowRequest addRequest) {
         if (!checkNameUnique(addRequest.getTitle(), org.apache.commons.lang3.StringUtils.EMPTY)) {
-            return ServiceResult.fail("Title must be unique");
+            return ServiceResult.fail(FlowErrorCode.TITLE_UNIQUE);
         }
 
         if (!addRequest.getFileName().endsWith(".pcap")) {
-            return ServiceResult.fail("Not pcap file");
+            return ServiceResult.fail(FlowErrorCode.NOT_PCAP_FILE);
         }
 
         // 上传文件获取路径
@@ -276,7 +278,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
      */
     public ServiceResult<AttackFlowResponse> addAttackFlow(AddAttackFlowRequest addRequest) {
         if (!checkNameUnique(addRequest.getTitle(), org.apache.commons.lang3.StringUtils.EMPTY)) {
-            return ServiceResult.fail("Title must be unique");
+            return ServiceResult.fail(FlowErrorCode.TITLE_UNIQUE);
         }
 
         // 判断是否有文件名，没有则根据脚本语言默认生成一个
@@ -295,7 +297,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             addRequest.setFilePath(filePath);
         } catch (MpRuntimeException e) {
             log.error("add attack flow error", e);
-            return ServiceResult.fail("Add attack flow error");
+            return ServiceResult.fail(FlowErrorCode.ADD_ATTACK_FLOW_ERROR);
         } finally {
             IOUtils.closeQuietly(is);
         }
@@ -320,21 +322,21 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
      */
     public ServiceResult<BackgroundFlowResponse> modifyBackgroundFlow(ModifyBackgroundFlowRequest modifyRequest) {
         if (!checkNameUnique(modifyRequest.getTitle(), modifyRequest.getId())) {
-            return ServiceResult.fail("Title must be unique");
+            return ServiceResult.fail(FlowErrorCode.TITLE_UNIQUE);
         }
 
         if (StringUtils.isNotBlank(modifyRequest.getFileName()) && !modifyRequest.getFileName().endsWith(".pcap")) {
-            return ServiceResult.fail("Not pcap file");
+            return ServiceResult.fail(FlowErrorCode.NOT_PCAP_FILE);
         }
 
         ObjServiceResult<FlowInfoModel> oldServiceResult = get(modifyRequest.getId());
         if (Objects.isNull(oldServiceResult.getSource())) {
             // 判断流量是否存在
-            return ServiceResult.fail("Flow info not exist");
+            return ServiceResult.fail(FlowErrorCode.FLOW_NOT_EXIST);
         } else {
             // 判断是否背景流量
             if (InteractiveTypeEnum.BACKGROUND.toValue() != oldServiceResult.getSource().getObj().getInteractiveType()) {
-                return ServiceResult.fail("Not background flow");
+                return ServiceResult.fail(FlowErrorCode.NOT_BACKGROUND_FLOW);
             }
         }
 
@@ -363,17 +365,17 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
      */
     public ServiceResult<AttackFlowResponse> modifyAttackFlow(ModifyAttackFlowRequest modifyRequest) {
         if (!checkNameUnique(modifyRequest.getTitle(), modifyRequest.getId())) {
-            return ServiceResult.fail("Title must be unique");
+            return ServiceResult.fail(FlowErrorCode.TITLE_UNIQUE);
         }
 
         ObjServiceResult<FlowInfoModel> oldServiceResult = get(modifyRequest.getId());
         if (Objects.isNull(oldServiceResult.getSource())) {
             // 判断流量是否存在
-            return ServiceResult.fail("Flow info not exist");
+            return ServiceResult.fail(FlowErrorCode.FLOW_NOT_EXIST);
         } else {
             // 判断是否攻击流量
             if (InteractiveTypeEnum.ATTACK.toValue() != oldServiceResult.getSource().getObj().getInteractiveType()) {
-                return ServiceResult.fail("Not attack flow");
+                return ServiceResult.fail(FlowErrorCode.NOT_ATTACK_FLOW);
             }
         }
 
@@ -397,12 +399,12 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
 
             InputStream is = null;
             try {
-                is = new ByteArrayInputStream(modifyRequest.getCode().getBytes());
+                is = new ByteArrayInputStream(modifyRequest.getCode().getBytes(StandardCharsets.UTF_8));
                 String filePath = fastDFSClient.upload(is, fileName, null, FdfsGroupEnum.DEFAULT.toString());
                 modifyRequest.setFilePath(filePath);
             } catch (MpRuntimeException e) {
                 log.error("modify attack flow error", e);
-                return ServiceResult.fail("Modify attack flow error");
+                return ServiceResult.fail(FlowErrorCode.MODIFY_ATTACK_FLOW_ERROR);
             } finally {
                 IOUtils.closeQuietly(is);
             }

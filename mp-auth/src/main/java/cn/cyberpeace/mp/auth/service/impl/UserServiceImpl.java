@@ -4,13 +4,11 @@ import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
-import cn.cyberpeace.mp.auth.dto.user.UserHeartbeatRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserRequest;
 import cn.cyberpeace.mp.auth.model.AvatarModel;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.OrgUserModel;
 import cn.cyberpeace.mp.auth.model.RoleModel;
-import cn.cyberpeace.mp.auth.model.UserHeartbeatModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
@@ -684,7 +682,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return doModel2Dto(userModel, false, true);
     }
 
-    private UserDto doModel2Dto(UserModel userModel, boolean needOrg, boolean needRole) {
+    public UserDto doModel2Dto(UserModel userModel, boolean needOrg, boolean needRole) {
         Assert.notEmpty(userModel.getId(), "用户ID不能为空！");
 
         UserDto userDto = new UserDto();
@@ -727,15 +725,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     }
 
-    @Override
-    public void heartbeat(UserHeartbeatRequest hbrequest) {
-        UserModel userModel = UserUtils.getLoginUser();
-
-        UserHeartbeatModel heartbeat = new UserHeartbeatModel();
-        heartbeat.setUser(userModel.getId());
-
-        userHeartbeatService.create(heartbeat);
-    }
 
 //    @Override
 //    public PageInfo onlineReport(UserOnlineReportPageRequest pageRequest) {

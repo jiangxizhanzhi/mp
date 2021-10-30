@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.devops.cluster.enums.MainTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.PublicEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.UploadTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.model.*;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtDocker;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtImageInfo;
 import cn.cyberpeace.mp.devops.cluster.model.common.ExtVm;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageAuthMapper;
@@ -160,6 +161,9 @@ public class ImagesConverterImpl implements ImagesConverter {
     @Transactional
     public Device add(ImageRequest request) {
         Device device = imagesService.add(convertRequest(request));
+        if (Objects.isNull(device) || !device.isSuccess()){
+            return device;
+        }
         devopsTargetService.insert(Arrays.asList(device));
         return device;
     }
@@ -175,6 +179,9 @@ public class ImagesConverterImpl implements ImagesConverter {
     @Override
     public Device update(ImageRequest request) {
         Device device = imagesService.update(request.getUuid(),convertRequest(request));
+        if (Objects.isNull(device) || !device.isSuccess()){
+            return device;
+        }
         devopsTargetService.updateById(device);
         return device;
     }
@@ -348,7 +355,12 @@ public class ImagesConverterImpl implements ImagesConverter {
         }
         device.setExtImageInfo(extImageInfo);
         device.setExtGateway(request.getExtGateway());
-        device.setExtDocker(request.getExtDocker());
+        ExtDocker extDocker = request.getExtDocker();
+        if (request.getImageType().equals("container") && Objects.nonNull(extDocker)
+                && CollectionUtils.isNotEmpty(request.getAccessProtocolList())){
+           extDocker.setAccessProtocols(request.getAccessProtocolList());
+        }
+        device.setExtDocker(extDocker);
         return device;
     }
 

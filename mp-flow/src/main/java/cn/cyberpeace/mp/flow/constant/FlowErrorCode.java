@@ -4,7 +4,25 @@ import cn.cyberpeace.mp.base.service.code.ErrorCode;
 
 public enum FlowErrorCode implements ErrorCode {
 
-    FLOW_NOT_EXIST("MP-110300", "flow_not_exist");
+    FLOW_NOT_EXIST("MP-110300", "flow_not_exist"),
+    TASK_DELETE_FAILED("MP-110301", "task_delete_failed"),
+    TITLE_UNIQUE("MP-110302", "title_unique"),
+    NOT_ATTACK_FLOW("MP-110303", "not_attack_flow"),
+    IDS_CAN_NOT_EMPTY("MP-110304", "ids_can_not_empty"),
+    NOT_BACKGROUND_FLOW("MP-110305", "not_background_flow"),
+    COLLECTION_NOT_EXIST("MP-110306", "collection_not_exist"),
+    NOT_PCAP_FILE("MP-110307", "not_pcap_file"),
+    UPDATE_TASK_ERROR("MP-110308", "update_task_error"),
+    ACTUATOR_TASK_ERROR("MP-110309", "actuator_task_error"),
+    TASK_NOT_EXIST("MP-110310", "task_not_exist"),
+    ADD_TASK_ERROR("MP-110311", "add_task_error"),
+    ADD_ATTACK_FLOW_ERROR("MP-110312", "add_attack_flow_error"),
+    NO_TASK_TO_DELETE("MP-110313", "no_task_to_delete"),
+    NO_ACTUATOR_TO_USE("MP-110314", "no_actuator_to_use"),
+    MODIFY_ATTACK_FLOW_ERROR("MP-110315", "modify_attack_flow_error"),
+    FLOW_IN_TASK_NOT_EXIST("MP-110316", "fow_in_task_not_exist"),
+    TASK_IS_RUNNING("MP-110317", "task_is_running"),
+    NO_RUNNING_TASK_TO_STOP("MP-110318", "no_running_task_to_stop");
 
     FlowErrorCode(String code, String message) {
         setCode(code, "flow.error_code." + message);

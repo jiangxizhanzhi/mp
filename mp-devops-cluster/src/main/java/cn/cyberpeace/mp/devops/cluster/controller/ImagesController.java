@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
-import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -13,10 +12,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.InjectFileConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.SnapshotConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.*;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtImageInfo;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtVm;
-import cn.cyberpeace.mp.devops.cluster.model.common.TargetConnection;
+import cn.cyberpeace.mp.devops.cluster.model.common.*;
 import cn.cyberpeace.mp.devops.cluster.request.*;
 import cn.cyberpeace.mp.devops.cluster.response.ImagesByIdResponse;
 import cn.cyberpeace.mp.devops.cluster.response.ImagesPageResponse;
@@ -25,7 +21,6 @@ import cn.cyberpeace.mp.devops.cluster.response.base.Result;
 import cn.cyberpeace.mp.devops.cluster.service.FlavorService;
 import cn.cyberpeace.mp.devops.cluster.service.ImagesService;
 import cn.cyberpeace.mp.devops.cluster.service.ScenariosSnapshotService;
-import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -35,7 +30,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
@@ -125,7 +119,11 @@ public class ImagesController {
         if (Objects.isNull(device)){
             return new Result();
         }
-        return device.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(device.getMessage());
+        return device.isSuccess() ? ServiceResult.successful() : ServiceResult.builder()
+                .code(BaseErrorCode.ERROR.getCode())
+                .message(device.getMsgZh())
+                .timestamp(System.currentTimeMillis())
+                .build();
     }
 
     /**
@@ -141,7 +139,11 @@ public class ImagesController {
         if (Objects.isNull(device)){
             return new Result();
         }
-        return device.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(device.getMessage());
+        return device.isSuccess() ? ServiceResult.successful() : ServiceResult.builder()
+                .code(BaseErrorCode.ERROR.getCode())
+                .message(device.getMsgZh())
+                .timestamp(System.currentTimeMillis())
+                .build();
     }
 
     /**
@@ -161,13 +163,17 @@ public class ImagesController {
         imagesByIdResponse.setLogo(model.getLogo());
         ExtVm extVm = model.getExtVm();
         imagesByIdResponse.setAccessProtocolList(Objects.nonNull(extVm) ? extVm.getAccessProtocols() : null);
+        ExtDocker extDocker = model.getExtDocker();
+        if (model.getImageType().equals("container")){
+            imagesByIdResponse.setAccessProtocolList(Objects.nonNull(extDocker) ? extDocker.getAccessProtocols() : null);
+        }
         imagesByIdResponse.setImageType(model.getImageType());
         imagesByIdResponse.setDescription(model.getDescription());
         imagesByIdResponse.setExtImageInfo(model.getExtImageInfo());
         imagesByIdResponse.setExtGateway(model.getExtGateway());
         imagesByIdResponse.setExtVm(extVm);
         imagesByIdResponse.setExtSystemInfo(model.getExtSystemInfo());
-        imagesByIdResponse.setExtDocker(model.getExtDocker());
+        imagesByIdResponse.setExtDocker(extDocker);
         return new Result<>(imagesByIdResponse);
     }
 

@@ -16,8 +16,6 @@ import java.util.Map;
 })
 public class SceneEventHandler extends BaseEventHandler<SceneBO, EventModel> {
 
-    public static final String EVENT_NAME_PREFIX = "scene.event.";
-
     public static final Map<Integer, String> EVENT_NAME_MAP = MapUtils.putAll(
             new HashMap<>(),
             new Object[]{

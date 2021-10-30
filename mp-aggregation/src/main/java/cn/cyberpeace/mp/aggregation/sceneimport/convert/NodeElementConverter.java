@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortBO;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementPortBO;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.ArrayList;
@@ -56,17 +57,33 @@ class NodeElementConverter implements IConverter {
         // 插件表
         CloudPluginSceneConfigElementBO pluginElement = new CloudPluginSceneConfigElementBO();
         pluginElement.setImage(node.getImage());
+        // 初步加载role imageType (部分简单靶标不会导入), 这里不一定准确
+        if (node.getId().startsWith("router")) {
+            pluginElement.setRole(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_GATEWAY);
+            pluginElement.setImageType(BaseCloudPluginSceneElementModel.ImageType.SIMPLE);
+        } else if (node.getId().startsWith("firewall")) {
+            pluginElement.setRole(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_GATEWAY);
+            pluginElement.setImageType(BaseCloudPluginSceneElementModel.ImageType.SIMPLE);
+        } else if (node.getId().startsWith("server")) {
+            pluginElement.setRole(BaseCloudPluginSceneElementModel.Role.VIRTUAL_TERMINAL);
+            pluginElement.setImageType(BaseCloudPluginSceneElementModel.ImageType.VM);
+        }
         container.putPluginElement(sceneConfigElementBO.getId(), pluginElement);
 
-        for (NetElementParseResult ymlNetParseResult : node.getNet()) {
-            SceneConfigElementPortBO portBO = new SceneConfigElementPortBO();
-            portBO.setIp(ymlNetParseResult.getIp());
-            portBO.setId(TextUtils.uuid());
-            portBOS.add(portBO);
-            container.putNode2NetworkPorts(node.getId(), ymlNetParseResult.getId(), portBO);
+        if (CollectionUtils.isEmpty(node.getNet())) {
+            // 节点未连接任何网络
+            container.addNoNetworkNodeElements(sceneConfigElementBO);
+        } else {
+            for (NetElementParseResult ymlNetParseResult : node.getNet()) {
+                SceneConfigElementPortBO portBO = new SceneConfigElementPortBO();
+                portBO.setIp(ymlNetParseResult.getIp());
+                portBO.setId(TextUtils.uuid());
+                portBOS.add(portBO);
+                container.putNode2NetworkPorts(node.getId(), ymlNetParseResult.getId(), portBO);
 
-            CloudPluginSceneConfigElementPortBO pluginPort = new CloudPluginSceneConfigElementPortBO();
-            container.putPluginElementPort(portBO.getId(), pluginPort);
+                CloudPluginSceneConfigElementPortBO pluginPort = new CloudPluginSceneConfigElementPortBO();
+                container.putPluginElementPort(portBO.getId(), pluginPort);
+            }
         }
     }
 }

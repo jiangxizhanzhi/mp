@@ -1,7 +1,9 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin;
 
 import cn.cyberpeace.mp.base.annotation.ClassFieldClasses;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.scene.constant.ElementLifeCycleEnum;
+import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
@@ -16,6 +18,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.CreateHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.DeleteHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ElementLifeCycleHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.InitiateHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.RecreateHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.modelhandler.CloudScenePluginModelHandler;
 import lombok.Data;
 import org.springframework.stereotype.Component;
@@ -172,4 +175,13 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         ElementLifeCycleHandler lifeCycleHandler = new ElementLifeCycleHandler(this, lifeCycle.getEvent());
         lifeCycleHandler.lifeControl(nodeId, element, lifeCycle);
     }
+
+    public void recreateElement(String nodeId) {
+        CloudPluginSceneElementBO element = getElement(nodeId);
+        if (element == null) {
+            throw new MpRuntimeException(SceneErrorCode.ELEMENT_NOT_EXIST);
+        }
+        new RecreateHandler(this, getSceneHandler().getScene().getEvent()).recreateElement(element);
+    }
+
 }

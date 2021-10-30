@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -56,4 +58,11 @@ public class ExtDocker{
      */
     @ApiModelProperty("支持快速创建")
     private Boolean quickCreateSupport;
+
+
+    /**
+     * 接入方式
+     */
+    @ApiModelProperty("接入方式")
+    private List<AccessProtocol> accessProtocols;
 }
