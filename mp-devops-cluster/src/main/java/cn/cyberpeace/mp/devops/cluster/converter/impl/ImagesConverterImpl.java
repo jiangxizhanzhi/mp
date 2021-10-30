@@ -179,6 +179,9 @@ public class ImagesConverterImpl implements ImagesConverter {
     @Override
     public Device update(ImageRequest request) {
         Device device = imagesService.update(request.getUuid(),convertRequest(request));
+        if (Objects.isNull(device) || !device.isSuccess()){
+            return device;
+        }
         devopsTargetService.updateById(device);
         return device;
     }

@@ -119,7 +119,11 @@ public class ImagesController {
         if (Objects.isNull(device)){
             return new Result();
         }
-        return device.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(device.getMessage());
+        return device.isSuccess() ? ServiceResult.successful() : ServiceResult.builder()
+                .code(BaseErrorCode.ERROR.getCode())
+                .message(device.getMsgZh())
+                .timestamp(System.currentTimeMillis())
+                .build();
     }
 
     /**
@@ -135,7 +139,11 @@ public class ImagesController {
         if (Objects.isNull(device)){
             return new Result();
         }
-        return device.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(device.getMessage());
+        return device.isSuccess() ? ServiceResult.successful() : ServiceResult.builder()
+                .code(BaseErrorCode.ERROR.getCode())
+                .message(device.getMsgZh())
+                .timestamp(System.currentTimeMillis())
+                .build();
     }
 
     /**
