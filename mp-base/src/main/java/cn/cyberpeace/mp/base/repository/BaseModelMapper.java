@@ -496,6 +496,10 @@ public interface BaseModelMapper<M extends BaseModel> {
 
     @Recommendation
     default int bulkDelete(String[] ids) {
+        if (ids.length == 0) {
+            return 0;
+        }
+
         return getCommonMapper().bulkDelete(getTableName(), ids);
     }
 
