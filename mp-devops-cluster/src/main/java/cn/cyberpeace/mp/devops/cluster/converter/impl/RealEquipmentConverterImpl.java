@@ -116,7 +116,6 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
             RealEquipment realEquipment = convertDevice(device);
             TargetModel targetModel = map.get(device.getUuid());
             if (Objects.nonNull(targetModel)){
-               realEquipment.setInPosition(targetModel.getInPosition());
                realEquipment.setReferenceStatus(targetModel.getReferenceStatus());
                realEquipment.setUseStatus(targetModel.getUseStatus());
             }
