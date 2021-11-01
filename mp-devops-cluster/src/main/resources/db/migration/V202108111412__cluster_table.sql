@@ -2,7 +2,7 @@ CREATE TABLE `mp_devops_target` (
                                     `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
                                     `id` varchar(64) NOT NULL COMMENT '镜像ID',
                                     `uuid` varchar(64) NOT NULL COMMENT '镜像UUID',
-                                    `name` varchar(64) NOT NULL COMMENT '镜像名称',
+                                    `name` varchar(164) NOT NULL COMMENT '镜像名称',
                                     `role` tinyint(8) DEFAULT NULL COMMENT '角色',
                                     `main_category` int(8) DEFAULT NULL COMMENT '一级分类',
                                     `sub_category` int(8) DEFAULT NULL COMMENT '二级分类',
