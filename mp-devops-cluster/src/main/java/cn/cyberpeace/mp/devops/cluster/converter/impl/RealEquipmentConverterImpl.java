@@ -7,9 +7,11 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.RealEquipmentConvertModel
 import cn.cyberpeace.mp.devops.cluster.dto.ImageDeleteDTO;
 import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devops.cluster.enums.ImageTypeEnum;
+import cn.cyberpeace.mp.devops.cluster.enums.StatusEnum;
 import cn.cyberpeace.mp.devops.cluster.model.Device;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.TargetModel;
+import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntity;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageAuthMapper;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentDeleteRequest;
@@ -116,8 +118,8 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
             RealEquipment realEquipment = convertDevice(device);
             TargetModel targetModel = map.get(device.getUuid());
             if (Objects.nonNull(targetModel)){
-               realEquipment.setReferenceStatus(targetModel.getReferenceStatus());
-               realEquipment.setUseStatus(targetModel.getUseStatus());
+                realEquipment.setReferenceStatus(targetModel.getReferenceStatus());
+                realEquipment.setUseStatus(targetModel.getUseStatus());
             }
             return realEquipment;
         }).collect(Collectors.toList());
@@ -185,6 +187,10 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
         convertModel.setExtEntity(device.getExtEntity());
         convertModel.setExtSystemInfo(device.getExtSystemInfo());
         convertModel.setExtGateway(device.getExtGateway());
+        ExtEntity extEntity = device.getExtEntity();
+        if (Objects.nonNull(extEntity)){
+            convertModel.setInPosition(extEntity.getEntityStatus() ? StatusEnum.YES : StatusEnum.NO);
+        }
         return convertModel;
     }
 
