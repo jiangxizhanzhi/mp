@@ -126,6 +126,8 @@ class DeviceInfoConverter implements IConverter {
                         mode.setPort(protocol.getPort());
                         mode.setProtocol(protocol.getProtocol());
                         mode.setUsername(protocol.getUsername());
+                        // TODO 20211101 目前资管导入的场景无proxy信息，默认开启
+                        mode.setProxy(true);
                         return mode;
                     }).collect(Collectors.toList());
         } else {
