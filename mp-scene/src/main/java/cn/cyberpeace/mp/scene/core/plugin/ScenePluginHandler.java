@@ -96,10 +96,6 @@ public abstract class ScenePluginHandler<S extends BasePluginSceneBO<?, S, Scene
 
     }
 
-    public void elementLifeCycle(String nodeId, ElementLifeCycleEnum lifeCycle) {
-
-    }
-
     /**
      * TODO: 修改场景
      */
@@ -108,6 +104,17 @@ public abstract class ScenePluginHandler<S extends BasePluginSceneBO<?, S, Scene
     }
 
     public void recreateElement(String nodeId) {
+
+    }
+
+    public void restartElement(String nodeId) {
+
+    }
+
+    public void pauseElement(String nodeId) {
+    }
+
+    public void unpauseElement(String nodeId) {
     }
 
 }
