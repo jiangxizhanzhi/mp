@@ -16,6 +16,12 @@ public class SceneAppConfig {
     @Value("${mp.scene.scene_hold_size:10000}")
     private Integer sceneHoldSize;
 
+    @Value("${mp.scene.element_pool_size:100}")
+    private Integer elementPoolSize;
+
+    @Value("${mp.scene.element_hold_size:10000}")
+    private Integer elementHoldSize;
+
     @Value("${mp.scene.report_pool_size:10}")
     private Integer reportPoolSize;
 

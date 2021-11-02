@@ -39,7 +39,7 @@ public class PluginSceneEventHandlerCommon<H extends ScenePluginHandler<?, ?, ?,
 
     public void runTasks(List<Runnable> tasks) {
         var poolTasks = taskPool.runTasks(tasks);
-        for (var poolTask: poolTasks) {
+        for (var poolTask : poolTasks) {
             if (poolTask.getException() != null) {
                 throw new MpRuntimeException(poolTask.getException().getMessage());
             }
@@ -50,6 +50,17 @@ public class PluginSceneEventHandlerCommon<H extends ScenePluginHandler<?, ?, ?,
         getPluginHandler().progressSceneProcess(event, eventProcess.getProcess());
         runner.run();
         getPluginHandler().overSceneProcess(event);
+    }
+
+    public void runElementProgress(String nodeId, int event, EventProcess eventProcess, Runnable runner) {
+        getPluginHandler().progressElementProcess(nodeId, event, eventProcess.getProcess());
+        try {
+            runner.run();
+        } catch (Exception e) {
+            getPluginHandler().errorElement(nodeId, event, e.getMessage());
+            throw e;
+        }
+        getPluginHandler().overElementProcess(nodeId, event);
     }
 
     public void runElementProgress(String nodeId, EventProcess eventProcess, Runnable runner) {
