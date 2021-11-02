@@ -15,6 +15,7 @@ import cn.cyberpeace.mp.devops.cluster.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.common.*;
 import cn.cyberpeace.mp.devops.cluster.request.*;
 import cn.cyberpeace.mp.devops.cluster.response.ImagesByIdResponse;
+import cn.cyberpeace.mp.devops.cluster.response.ImagesByUuidsResponse;
 import cn.cyberpeace.mp.devops.cluster.response.ImagesPageResponse;
 import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
 import cn.cyberpeace.mp.devops.cluster.response.base.Result;
@@ -177,6 +178,22 @@ public class ImagesController {
         return new Result<>(imagesByIdResponse);
     }
 
+
+    /**
+     * 根据UUID集合查询
+     */
+    @ApiOperation("根据UUID集合查询")
+    @PostMapping("/search/uuids")
+    public Result<List<ImagesByUuidsResponse>> findByIds(@RequestBody ImageByUuidsRequest request){
+        List<ImageTargetConvertModel> models = imagesConverter.findByUuids(request.getUuids());
+        List<ImagesByUuidsResponse> responseList = models.stream().map(model -> {
+            ImagesByUuidsResponse response = new ImagesByUuidsResponse();
+            response.setName(model.getName());
+            response.setUuid(model.getUuid());
+            return response;
+        }).collect(Collectors.toList());
+        return  new Result<>(responseList);
+    }
 
     /**
      * 构建

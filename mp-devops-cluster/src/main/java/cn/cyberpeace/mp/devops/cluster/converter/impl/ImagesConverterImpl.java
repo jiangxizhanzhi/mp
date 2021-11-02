@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.ImagesConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageAuthConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertPageModel;
+import cn.cyberpeace.mp.devops.cluster.converter.model.ImageTargetConvertModel;
 import cn.cyberpeace.mp.devops.cluster.dto.ImageDeleteDTO;
 import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devops.cluster.enums.ImageTypeEnum;
@@ -172,6 +173,17 @@ public class ImagesConverterImpl implements ImagesConverter {
     public ImageConvertModel findById(String id) {
         Device device = deviceService.findById(id);
         return wrapperImageConvertModel(device);
+    }
+
+    @Override
+    public List<ImageTargetConvertModel> findByUuids(List<String> uuids) {
+        List<TargetModel> targetModelList = imageMapper.findByUuids(uuids);
+        return targetModelList.stream().map(v -> {
+            ImageTargetConvertModel model = new ImageTargetConvertModel();
+            model.setUuid(v.getUuid());
+            model.setName(v.getName());
+            return model;
+        }).collect(Collectors.toList());
     }
 
 

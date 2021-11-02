@@ -216,6 +216,21 @@
         where i.uuid = #{uuid}
     </select>
 
+    <select id="findByUuids"  resultMap="BaseResultMap">
+        select
+        <include refid="commonTargetColumn"/>
+        from
+        mp_devops_target i
+        <where>
+            <if test="uuids != null and uuids.size > 0">
+                i.uuid in
+                <foreach collection="uuids" item="item" index="index"  open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
     <update id="updateById"
             parameterType="cn.cyberpeace.mp.devops.cluster.model.TargetModel">
         update mp_devops_target

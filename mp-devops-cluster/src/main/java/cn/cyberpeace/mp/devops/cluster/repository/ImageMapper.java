@@ -34,11 +34,18 @@ public interface ImageMapper extends BaseModelMapper<TargetModel> {
     Integer totalCount(ImagePageDTO dto);
 
     /**
-     * 新增
+     * 查询
      * @param uuid
      * @return
      */
     TargetModel findByUuid(String uuid);
+
+    /**
+     * 批量查询
+     * @param uuids
+     * @return
+     */
+    List<TargetModel> findByUuids(@Param("uuids") List<String> uuids);
 
     /**
      * 根据ID更新信息
