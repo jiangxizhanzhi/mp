@@ -241,37 +241,37 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     public ServiceResult<Boolean> pause(String id, CsceneContextBO context) {
-        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context);
+        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
         boolean result = instanceHandler.pause();
         return new ServiceResult<>(result);
     }
 
     public ServiceResult<Boolean> unpause(String id, CsceneContextBO context) {
-        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context);
+        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
         boolean result = instanceHandler.unpause();
         return new ServiceResult<>(result);
     }
 
     public ServiceResult<Boolean> pauseElement(String id, String nodeId, CsceneContextBO context) {
-        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context);
+        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
         boolean result = instanceHandler.pauseElement(nodeId);
         return new ServiceResult<>(result);
     }
 
     public ServiceResult<Boolean> unpauseElement(String id, String nodeId, CsceneContextBO context) {
-        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context);
+        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
         boolean result = instanceHandler.unpauseElement(nodeId);
         return new ServiceResult<>(result);
     }
 
     public ServiceResult<Boolean> restartElement(String id, String nodeId, CsceneContextBO context) {
-        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context);
+        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
         boolean result = instanceHandler.restartElement(nodeId);
         return new ServiceResult<>(result);
     }
 
     public ServiceResult<Boolean> recreateElement(String id, String nodeId, CsceneContextBO context) {
-        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context);
+        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
         boolean result = instanceHandler.recreateElement(nodeId);
         return new ServiceResult<>(result);
     }

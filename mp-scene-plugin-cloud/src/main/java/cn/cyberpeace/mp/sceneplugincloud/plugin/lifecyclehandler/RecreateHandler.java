@@ -35,11 +35,8 @@ public class RecreateHandler extends HandlerCommon {
         this.deleteHandler = new DeleteInRecreateHandler(pluginHandler);
     }
 
-    public void recreateElement(String nodeId) {
-        CloudPluginSceneElementBO element = getPluginHandler().getElement(nodeId);
-        if (element == null) {
-            return;
-        }
+    public void recreateElement(CloudPluginSceneElementBO element) {
+        String nodeId = element.getSrcElement().getId();
         Integer virtualType = element.getVirtualType();
         if (virtualType == null) {
             log.warn("Element({}) {} has no virtual type", element.getSrcElement().getEid(),

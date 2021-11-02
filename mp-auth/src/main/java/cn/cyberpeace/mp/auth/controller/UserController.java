@@ -5,17 +5,15 @@ import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.ResetPwdRequest;
 import cn.cyberpeace.mp.auth.dto.ResetSelfPwdRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
-import cn.cyberpeace.mp.auth.dto.user.UserHeartbeatRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserLogPageRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineCntDto;
-import cn.cyberpeace.mp.auth.dto.user.UserOnlineReportPageRequest;
+import cn.cyberpeace.mp.auth.dto.user.UserOnlineRecordSummaryPageRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserRequest;
 import cn.cyberpeace.mp.auth.dto.validate.AddGroup;
 import cn.cyberpeace.mp.auth.dto.validate.UpdateGroup;
 import cn.cyberpeace.mp.auth.model.UserModel;
-import cn.cyberpeace.mp.auth.service.OrgUserService;
-import cn.cyberpeace.mp.auth.service.UserLogService;
-import cn.cyberpeace.mp.auth.service.UserOnlineReportService;
+import cn.cyberpeace.mp.auth.service.UserHeartbeatService;
+import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
@@ -63,13 +61,10 @@ import java.util.List;
 public class UserController extends BaseModelController<UserModel, UserQueryParams, UserService> {
 
     @Autowired
-    private UserLogService userLogService;
+    private UserOnlineRecordService userOnlineRecordService;
 
     @Autowired
-    private OrgUserService orgUserService;
-
-    @Autowired
-    private UserOnlineReportService userOnlineReportService;
+    private UserHeartbeatService heartbeatService;
 
     @Autowired
     public UserController(UserService modelService) {
@@ -224,24 +219,34 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
 
     @ApiOperation(value = "用户心跳-统计在线用户信息", notes = "")
     @PostMapping("/heartbeat")
-    public ServiceResult heartbeat(@RequestBody(required = false) UserHeartbeatRequest heartbeat) throws MpRuntimeException {
-        getModelService().heartbeat(heartbeat);
+    public ServiceResult heartbeat() throws MpRuntimeException {
+        heartbeatService.heartbeat();
         return ServiceResult.successful();
     }
 
 
+    /*
     @ApiOperation(value = "用户在线报告", notes = "")
     @GetMapping("/olreport")
     public ServiceResult onlineReport(UserOnlineReportPageRequest pageRequest) {
         pageRequest.ensure();
         PageInfo pageInfo = userOnlineReportService.page(pageRequest);
         return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
+    }*/
+
+
+    @ApiOperation(value = "用户在线报告", notes = "")
+    @GetMapping("/olreport")
+    public ServiceResult onlineReport(UserOnlineRecordSummaryPageRequest pageRequest) {
+        pageRequest.ensure();
+        PageInfo pageInfo = userOnlineRecordService.recordSummaryPage(pageRequest);
+        return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
     }
 
     @ApiOperation(value = "在线用户数量", notes = "")
     @GetMapping("/olUserCnt")
     public ServiceResult<UserOnlineCntDto> onlineUserCnt() {
-        UserOnlineCntDto userOnlineCntDto = userOnlineReportService.onlineUserCnt();
+        UserOnlineCntDto userOnlineCntDto = userOnlineRecordService.onlineUserCnt();
         return ServiceResult.success(userOnlineCntDto);
     }
 

@@ -59,6 +59,14 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         init(csceneBO, context);
     }
 
+    public CsceneInstanceHandler(String csceneId, CsceneContextBO context, boolean initLazy) {
+        if (initLazy) {
+            initLazy(csceneId, context);
+        } else {
+            init(csceneId, context);
+        }
+    }
+
     public CsceneInstanceHandler(String csceneId, CsceneContextBO context) {
         init(csceneId, context);
     }
@@ -116,7 +124,7 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         if (sceneId == null) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
         }
-        return this.sceneService.pause(sceneId).getSource();
+        return this.sceneService.pause(sceneId, generateSceneContext()).getSource();
     }
 
     public boolean unpause() {
@@ -124,7 +132,7 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         if (sceneId == null) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
         }
-        return this.sceneService.unpause(sceneId).getSource();
+        return this.sceneService.unpause(sceneId, generateSceneContext()).getSource();
     }
 
     public boolean pauseElement(String nodeId) {
@@ -132,7 +140,7 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         if (sceneId == null) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
         }
-        return this.sceneService.pauseElement(sceneId, nodeId).getSource();
+        return this.sceneService.pauseElement(sceneId, nodeId, generateSceneContext()).getSource();
     }
 
     public boolean unpauseElement(String nodeId) {
@@ -140,7 +148,7 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         if (sceneId == null) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
         }
-        return this.sceneService.unpauseElement(sceneId, nodeId).getSource();
+        return this.sceneService.unpauseElement(sceneId, nodeId, generateSceneContext()).getSource();
     }
 
     public boolean restartElement(String nodeId) {
@@ -148,7 +156,7 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         if (sceneId == null) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
         }
-        return this.sceneService.restartElement(sceneId, nodeId).getSource();
+        return this.sceneService.restartElement(sceneId, nodeId, generateSceneContext()).getSource();
     }
 
     public boolean recreateElement(String nodeId) {
@@ -156,10 +164,15 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         if (sceneId == null) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
         }
-        return this.sceneService.recreateElement(sceneId, nodeId).getSource();
+        return this.sceneService.recreateElement(sceneId, nodeId, generateSceneContext()).getSource();
     }
 
     private String getSceneId() {
-        return getCscene() == null ? null : getSceneId(getCscene().toModel());
+        if (this.initLazy) {
+            CsceneInstanceModel instance = readCscene();
+            return instance == null ? null : instance.getScene();
+        } else {
+            return getCscene() == null ? null : getSceneId(getCscene().toModel());
+        }
     }
 }

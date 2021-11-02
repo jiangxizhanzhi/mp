@@ -47,7 +47,7 @@ class DeviceInfoConverter implements IConverter {
     private void doConvert(List<SceneConfigElementBO> list, Map<String, CloudPluginSceneConfigElementBO> pluginElements, Map<String, CloudPluginSceneConfigElementPortBO> pluginPorts) {
         for (SceneConfigElementBO element : list) {
             CloudPluginSceneConfigElementBO elementBO = pluginElements.get(element.getId());
-            if (elementBO == null) {
+            if (elementBO == null || elementBO.getImage() == null) {
                 continue;
             }
             TargetSceneRequest request = new TargetSceneRequest();
@@ -71,7 +71,8 @@ class DeviceInfoConverter implements IConverter {
         pluginElement.setCategory(device.getCategory());
         pluginElement.setImageType(device.getImageType());
         pluginElement.setImage(device.getName());
-        pluginElement.setRole(device.getRole());
+        // TODO 20211030 目前资管导入的靶标无正确的角色信息
+//        pluginElement.setRole(device.getRole());
 
         if (device.getExtSystemInfo() != null) {
             this.loadExtSystemInfo(params.element, device.getExtSystemInfo());
@@ -125,6 +126,8 @@ class DeviceInfoConverter implements IConverter {
                         mode.setPort(protocol.getPort());
                         mode.setProtocol(protocol.getProtocol());
                         mode.setUsername(protocol.getUsername());
+                        // TODO 20211101 目前资管导入的场景无proxy信息，默认开启
+                        mode.setProxy(true);
                         return mode;
                     }).collect(Collectors.toList());
         } else {

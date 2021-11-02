@@ -81,21 +81,28 @@ public class AddAppTaskRequest {
         int duration = flowTaskModel.getCount() * flowTaskModel.getIntervalTime();
         specifics.setDuration(duration);
         specifics.setSrcIpRange(flowTaskModel.getOriginIps());
-        specifics.setDstIpRange(flowTaskModel.getTargetIps());
+        String[] targetIps = flowTaskModel.getTargetIps().split(BaseConstants.SHORT_DASH);
+        String dstIpRange;
+        if (targetIps.length < 2) {
+            dstIpRange = targetIps[0] + BaseConstants.SHORT_DASH + targetIps[0];
+        } else {
+            dstIpRange = flowTaskModel.getTargetIps();
+        }
+        specifics.setDstIpRange(dstIpRange);
         specifics.setCapList(Collections.singletonList(capList));
 
         AddAppTaskRequest.Client client = new AddAppTaskRequest.Client();
         client.setIp(flowPortModel.getClientIp());
         client.setPort(flowPortModel.getClientMac());
         // 目标ip作为客户端网关
-        String serverGw = flowTaskModel.getTargetIps().split(BaseConstants.SHORT_DASH)[0];
-        client.setDefaultGw(serverGw);
+        String clientGw = targetIps[0];
+        client.setDefaultGw(clientGw);
 
         AddAppTaskRequest.Server server = new AddAppTaskRequest.Server();
         server.setIp(flowPortModel.getServerIp());
         server.setPort(flowPortModel.getServerMac());
-        // 源ip作为服务端网关
-        String clientGw = flowTaskModel.getOriginIps().split(BaseConstants.SHORT_DASH)[0];
+        // 目标ip作为服务端网关
+//        String serverGw = flowTaskModel.getOriginIps().split(BaseConstants.SHORT_DASH)[0];
         server.setDefaultGw(clientGw);
 
         AddAppTaskRequest.NetworkConfig networkConfig = new AddAppTaskRequest.NetworkConfig();

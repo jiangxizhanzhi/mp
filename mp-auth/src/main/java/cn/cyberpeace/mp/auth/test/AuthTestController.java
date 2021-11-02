@@ -1,9 +1,9 @@
 package cn.cyberpeace.mp.auth.test;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
-import cn.cyberpeace.mp.auth.model.RolePermissionModel;
-import cn.cyberpeace.mp.auth.model.TargetModel;
-import cn.cyberpeace.mp.auth.model.UserPermissionModel;
+import cn.cyberpeace.mp.auth.constant.CustomAuthErrorCode;
+import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.model.UserOnlineRecordModel;
 import cn.cyberpeace.mp.auth.repository.OrgMapper;
 import cn.cyberpeace.mp.auth.repository.SysConfigMapper;
 import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
@@ -12,19 +12,16 @@ import cn.cyberpeace.mp.auth.service.RolePermissionModelService;
 import cn.cyberpeace.mp.auth.service.TargetService;
 import cn.cyberpeace.mp.auth.service.UserHeartbeatService;
 import cn.cyberpeace.mp.auth.service.UserLogService;
+import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
+import cn.cyberpeace.mp.auth.service.UserOnlineReportService;
 import cn.cyberpeace.mp.auth.service.UserPermissionService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.sys.LicenseService;
 import cn.cyberpeace.mp.auth.service.sys.SysActivationService;
 import cn.cyberpeace.mp.auth.util.PasswordStrengthChecker;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
-import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
-import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.hutool.system.oshi.OshiUtil;
-import com.sun.jna.Library;
-import com.sun.jna.Native;
-import com.sun.jna.Structure;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -33,18 +30,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import oshi.hardware.ComputerSystem;
-import oshi.hardware.HWDiskStore;
 import springfox.documentation.annotations.ApiIgnore;
 
-import java.util.Arrays;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @Description:
@@ -99,6 +96,15 @@ public class AuthTestController {
     @Autowired
     private RolePermissionModelService rolePermissionModelService;
 
+    @Autowired
+    private UserOnlineRecordService userOnlineRecordService;
+
+    @Autowired
+    private UserHeartbeatService userHeartbeatService;
+
+    @Autowired
+    private UserOnlineReportService userOnlineReportService;
+
     @ApiOperation("DES加密")
     @PostMapping("/desEncryptPwd")
     @ApiImplicitParams({
@@ -144,165 +150,70 @@ public class AuthTestController {
         return map;
     }
 
+
     @GetMapping("/sysUUID")
     public String sysUUID() {
         String code = activationService.querySysUUID();
         return code;
+
+    }
+
+    @GetMapping("testErrorcode")
+    public ServiceResult testErrorCode() {
+        String errorMsg = "auth.error_code.account_not_existed";
+        CustomAuthErrorCode customAuthErrorCode = new CustomAuthErrorCode();
+        customAuthErrorCode.setCode(BaseErrorCode.PARAMS_INVALID.getCode(), errorMsg);
+        return ServiceResult.<String>builder().serviceCode(customAuthErrorCode).build().asResult();
     }
 
     @GetMapping("/tmpmenu")
-//    @ApiIgnore
+    @ApiIgnore
     public void testTmpMenu() {
 //        tmpMenuService.process();
     }
 
-    @GetMapping("/testmapper")
-    public void testmapper(HumanCondition condition) {
-
+    @GetMapping("/olrecord/schedule")
+    public void scheduleUserOlRecord() {
+        userOnlineReportService.scheduleUserOlRecord();
     }
 
 
-    public interface Awesome extends Library {
-
-        AuthTestController.Awesome INSTANCE = (AuthTestController.Awesome) Native.loadLibrary("/home/go_test/stack1/main.so", AuthTestController.Awesome.class);
-
-        public class GoString extends Structure {
-            public static class ByValue extends LicenseService.Awesome.GoString implements Structure.ByValue {
-            }
-
-            public String p;
-            public long n;
-
-            protected List getFieldOrder() {
-                return Arrays.asList(new String[]{"p", "n"});
-            }
-
-
-        }
-
-        String hello();
-
+    @GetMapping("/olrecord/check")
+    public void checkUserOlRecord() {
+        userOnlineReportService.checkUserOlRecord();
     }
 
-    @GetMapping("/invokeso")
-    public void tetso() {
-        String res = AuthTestController.Awesome.INSTANCE.hello();
-        log.info("invoke so success! res:{}", res);
-    }
 
-    @GetMapping("/testpermlist")
-    public List<TargetModel> testPermList() {
-        String userId = "3fsss655d87112f4ae094bbaf7083";
-
-        // 自定义条件
-        HumanCondition outerCondition = new HumanCondition();
-        outerCondition.filterContains("name", "题");
-        outerCondition.filterEqual("parent", "item-bank-folder");
-        outerCondition.filterEqual("tenant", "default");
-        outerCondition.pagination(1, 10);
-        outerCondition.orderBy(TargetModel::getId);
-        outerCondition.groupBy(TargetModel::getParent);
-        // 自定义返回field
-        outerCondition.select(TargetModel::getId, TargetModel::getName, TargetModel::getPath, TargetModel::getIdentifier, TargetModel::getParent);
-        outerCondition.setDistinct(true);
-
-        List<TargetModel> list = userPermissionTestMapper.listTargetsByOwner(userId, outerCondition);
-        int total = userPermissionTestMapper.totalTargetsByOwner(userId, outerCondition);
-        log.info("{}, {}", list, total);
-
-
-        UserPermissionModel upmodel = new UserPermissionModel();
-        upmodel.setTarget("123abcde");
-        upmodel.setOwner("123abcd4567");
-        boolean result = userPermissionTestMapper.create(upmodel);
-        log.info("{}", result);
-
+    @GetMapping("/olrecord/period")
+    public List<UserOnlineRecordModel> period(@RequestParam String startTime, @RequestParam String endTime) {
+        log.info("{}", startTime);
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime stime = LocalDateTime.parse(startTime, df);
+        LocalDateTime etime = LocalDateTime.parse(endTime, df);
+        List<UserOnlineRecordModel> list = userOnlineRecordService.listOnlinedUserByPeriod(stime, etime);
+        log.info("{}", list);
         return list;
     }
 
-    @PostMapping("/testlicense")
-    public ServiceResult testlicense(@RequestBody TestVerifyRequest testVerifyRequest) {
-//        licenseJdkDemo.testlicense();
-
-//        str.p = "{\"machinecode\": \"CHTF-12H1-34S8-HV23-123S\", \"deadline\": 1, \"info\": {\"thj\":2}}";
-//        ActivationRequest activationRequest = new ActivationRequest();
-//        activationRequest.setDeadline(1);
-//        activationRequest.setMachinecode("CHTF-12H1-34S8-HV23-123S");
-//        activationRequest.setVerifyCode("");
-
-//        activationService.activate(activationRequest);
-//
-//        ActivationResponse activationResponse = activationService.status();
-//        log.info("activationContent:{}", activationResponse);
-        log.info("{}", testVerifyRequest.getVerifyCode());
-        log.info("{}", testVerifyRequest.getVerifyStr());
-
-        boolean success = licenseService.verify(testVerifyRequest.getVerifyStr(), testVerifyRequest.getVerifyCode());
-        if (success) {
-            return ServiceResult.success(success);
-        }
-        return ServiceResult.fail("校验失败");
+    @GetMapping("/olrecord/track/period")
+    public List<UserOnlineRecordModel> onlineTrack(@RequestParam String userId, @RequestParam String startTime, @RequestParam String endTime) {
+        log.info("{}", startTime);
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime stime = LocalDateTime.parse(startTime, df);
+        LocalDateTime etime = LocalDateTime.parse(endTime, df);
+        List<UserOnlineRecordModel> list = userOnlineRecordService.listOnlineHistoryTrackByUser(userId, stime, etime);
+        log.info("{}", list);
+        return list;
     }
 
-    @GetMapping("/getDiskInfo")
-    public List<HWDiskStore> getDiskInfo() {
-        ComputerSystem computerSystem = OshiUtil.getSystem();
-        List<HWDiskStore> diskStores = OshiUtil.getDiskStores();
-
-        log.error("system:{}", computerSystem);
-        log.error("disk:{}", diskStores);
-
-
-        log.error("--------------####------------");
-        diskStores.forEach(e -> {
-            log.error("e1 {}:{}", e.getName(), e.getSerial());
-        });
-
-        log.error("--------------####------------");
-
-        return diskStores;
+    @GetMapping("/olrecord/current_onlined")
+    public List<UserOnlineRecordModel> currentOnlined(@RequestParam(required = false) String userId) {
+        return userOnlineRecordService.listCurrentOnlined(userId);
     }
 
-
-
-    @GetMapping("/getSysUUID")
-    public String getSysUUID() {
-//        String serialNumber = Dmidecode.querySerialNumber();
-//        log.error("serialNumber:{}", serialNumber);
-//
-//        String uuid = activationService.querySysUUID();
-//        log.error("uuid:{}", uuid);
-//
-//        return uuid;
-//        String[] ids = {"1f581231da924094ac2c5f892936169f", "5ffc5f6891e54371ad63c4ecf6bda692", "3fsss655d87112f4ae094bbaf7083"};
-//        List<UserDto> userDtos = userService.listByUserIds(ids);
-//        log.info("{}", userDtos);
-        return "";
-    }
-
-
-    @ApiIgnore
-    @GetMapping("/permtest")
-    public String permtest() {
-        UserPermissionModel userPermissionModel = new UserPermissionModel();
-        userPermissionModel.setOwner("abcuuid");
-        userPermissionModel.setTarget("abctarget");
-        try {
-            ObjServiceResult<UserPermissionModel> result = userPermissionService.create(userPermissionModel);
-        } catch (Exception e) {
-            throw e;
-        }
-
-        RolePermissionModel rolePermissionModel = new RolePermissionModel();
-        rolePermissionModel.setOwner("abcroleid");
-        rolePermissionModel.setTarget("abctarget");
-        try {
-            ObjServiceResult<RolePermissionModel> result = rolePermissionModelService.create(rolePermissionModel);
-        } catch (Exception e) {
-            throw e;
-        }
-
-        return "success";
+    @GetMapping("/olrecord/heartmap")
+    public ConcurrentHashMap<UserModel, CopyOnWriteArrayList<LocalDateTime>> heartmap() {
+        return userHeartbeatService.getHeartbeatMap();
     }
 
 }

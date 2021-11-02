@@ -1,0 +1,75 @@
+package cn.cyberpeace.mp.auth.service;
+
+import cn.cyberpeace.mp.auth.dto.user.UserOnlineCntDto;
+import cn.cyberpeace.mp.auth.dto.user.UserOnlineRecordSummaryDto;
+import cn.cyberpeace.mp.auth.dto.user.UserOnlineRecordSummaryPageRequest;
+import cn.cyberpeace.mp.auth.model.UserOnlineRecordModel;
+import cn.cyberpeace.mp.base.service.BaseModelService;
+import cn.cyberpeace.mp.base.service.param.QueryParams;
+import com.github.pagehelper.PageInfo;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
+public interface UserOnlineRecordService extends BaseModelService<UserOnlineRecordModel, QueryParams> {
+
+    PageInfo<UserOnlineRecordSummaryDto> recordSummaryPage(UserOnlineRecordSummaryPageRequest req);
+
+    /**
+     * 判断在线的依据：
+     * end_time > (now() - 5m) && status = 0
+     *
+     * @return
+     */
+    List<UserOnlineRecordModel> listCurrentOnlined(String userId);
+
+    /**
+     * 判断离线的依据:
+     * end_time <= (now() - 5m) && status = 0
+     *
+     * @return
+     */
+    List<UserOnlineRecordModel> listCurrentOfflined(String userId);
+
+
+    /**
+     * 在线用户
+     *
+     * @return
+     */
+    List<UserOnlineRecordModel> listCurrentOnlinedUser();
+
+    /**
+     * 根据时间段查找在线用户
+     *
+     * @return
+     */
+    List<UserOnlineRecordModel> listOnlinedUserByPeriod(LocalDateTime startTime, LocalDateTime endTime);
+
+
+    /**
+     * 根据时间段查找在线用户数量
+     *
+     * @return
+     */
+    Integer getOnlinedUserCntByPeriod(LocalDateTime startTime, LocalDateTime endTime);
+
+    /**
+     * 查询一定时间段内单个用户的在线记录（在线活动轨迹）
+     *
+     * @param userId
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    List<UserOnlineRecordModel> listOnlineHistoryTrackByUser(String userId, LocalDateTime startTime, LocalDateTime endTime);
+
+
+    UserOnlineCntDto onlineUserCnt();
+
+}
