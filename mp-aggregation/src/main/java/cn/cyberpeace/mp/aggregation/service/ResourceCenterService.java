@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.aggregation.service;
 import cn.cyberpeace.mp.aggregation.sceneimport.convert.ResourceCenterConverter;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.ResourceCenterYmlParser;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.YmlParseResult;
+import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.ImageParseResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
@@ -10,6 +11,7 @@ import cn.cyberpeace.mp.cscene.service.CsceneService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * @Description
@@ -26,10 +28,12 @@ public class ResourceCenterService {
     private ResourceCenterConverter cSceneBoConverter;
 
     public ServiceResult<CsceneBO> importByYmlConfig(String ymlFilePath) {
-        // 解析yml
-        YmlParseResult ymlParseResult = ResourceCenterYmlParser.parse(ymlFilePath);
+        // 解析 topo.yml
+        YmlParseResult ymlParseResult = ResourceCenterYmlParser.parseTopoYml(ymlFilePath);
+        // 解析 image/services.yml
+        List<ImageParseResult> imageInfos = ResourceCenterYmlParser.parseImageServicesYml(ymlFilePath);
         // 转换bo
-        CsceneBO csceneBO = cSceneBoConverter.convert(ymlParseResult);
+        CsceneBO csceneBO = cSceneBoConverter.convert(ymlParseResult, imageInfos);
         // 保存
         return csceneService.sync(csceneBO, new CsceneContextBO());
     }
