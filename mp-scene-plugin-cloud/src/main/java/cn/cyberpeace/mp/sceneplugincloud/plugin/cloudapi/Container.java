@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.ILifeCycleControlHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerDeleteData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineLifeControllData;
@@ -13,7 +12,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import java.lang.reflect.Field;
 import java.util.Collections;
 
-public class Container extends CloudClient implements ILifeCycleControlHandler {
+public class Container extends CloudClient {
 
     public ContainerCreateData create(ContainerCreateData createData) {
         CloudResponse<ContainerCreateData> result = cloudPost(CloudUrlConstant.CONTAINER_CREATE_URL, createData, null,
@@ -27,7 +26,6 @@ public class Container extends CloudClient implements ILifeCycleControlHandler {
         return true;
     }
 
-    @Override
     public boolean lifeControl(String instanceId, String action) {
         VirtualMachineLifeControllData lifeControllData = new VirtualMachineLifeControllData();
         try {
