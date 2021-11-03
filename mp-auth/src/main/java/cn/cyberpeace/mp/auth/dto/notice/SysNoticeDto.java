@@ -50,6 +50,9 @@ public class SysNoticeDto {
     @ApiModelProperty(value = "角色，多个用逗号隔开")
     private String roleNames;
 
+    @ApiModelProperty(value = "是否已读")
+    private Integer isRead;
+
     @ApiModelProperty(value = "发布时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime createTime;
