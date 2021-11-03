@@ -110,28 +110,8 @@ class DeviceInfoConverter implements IConverter {
             port.setIp(access.getIp());
             port.setMacAddr(access.getMac());
             port.setName(access.getPortName());
-            pluginPort.setAccessModes(this.createAccessModes(access.getAccessProtocols()));
             pluginPort.setEntitySwitchName(access.getSwitchName());
             pluginPort.setEntitySwitchPort(access.getSwitchPort());
-        }
-    }
-
-    private List<CloudAccessMode> createAccessModes(List<AccessProtocol> accessProtocols) {
-        if (CollectionUtils.isNotEmpty(accessProtocols)) {
-            return accessProtocols.stream()
-                    .map(protocol -> {
-                        CloudAccessMode mode = new CloudAccessMode();
-                        mode.setPassword(protocol.getPassword());
-                        mode.setDesc(protocol.getDescription());
-                        mode.setPort(protocol.getPort());
-                        mode.setProtocol(protocol.getProtocol());
-                        mode.setUsername(protocol.getUsername());
-                        // TODO 20211101 目前资管导入的场景无proxy信息，默认开启
-                        mode.setProxy(true);
-                        return mode;
-                    }).collect(Collectors.toList());
-        } else {
-            return new ArrayList<>();
         }
     }
 
@@ -168,9 +148,6 @@ class DeviceInfoConverter implements IConverter {
         pluginElement.setInitSupport(extVm.getInitSupport());
         pluginElement.setQuickCreateSupport(extVm.getQuickCreateSupport());
 
-        PortParams portParams = new PortParams(0, element.getPorts().size(), params);
-        CloudPluginSceneConfigElementPortBO port = portParams.getPluginPort();
-        port.setAccessModes(this.createAccessModes(extVm.getAccessProtocols()));
     }
 
     private static class Params {
