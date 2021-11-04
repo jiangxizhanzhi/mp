@@ -193,4 +193,10 @@ public class HandlerUtils<H extends ScenePluginHandler<? extends BaseCloudPlugin
         return getPluginHandler().getPortSrcElement(connectedSrcPort.getId());
     }
 
+    public boolean isExternalNetwork(String networkId) {
+        if (StringUtils.isEmpty(networkId)) {
+            return false;
+        }
+        return networkId.equals(CloudSingleton.cloudAppConfig.getExternalNetId());
+    }
 }
