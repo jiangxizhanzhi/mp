@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageAuthConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertPageModel;
+import cn.cyberpeace.mp.devops.cluster.converter.model.ImageTargetConvertModel;
 import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.Device;
 import cn.cyberpeace.mp.devops.cluster.request.*;
@@ -30,6 +31,13 @@ public interface ImagesConverter extends BaseConverter{
      * @return
      */
     ImageConvertModel findById(String id);
+
+    /**
+     * 根据UUID集合查询
+     * @param uuids
+     * @return
+     */
+    List<ImageTargetConvertModel> findByUuids(List<String> uuids);
 
     /**
      * 更新

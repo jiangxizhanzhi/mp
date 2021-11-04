@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.aggregation.sceneimport.convert;
 
+import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.ImageInfoParseResult;
 import cn.cyberpeace.mp.base.util.JsonUtils;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigBO;
@@ -50,6 +51,12 @@ class ConvertDataContainer {
 
     // 未连接任何网络的节点
     private List<SceneConfigElementBO> noNetworkNodeElements = new ArrayList<>();
+
+    private Map<String, ImageInfoParseResult> imageInfos = new HashMap<>();
+
+    public void putImageInfo(String image, ImageInfoParseResult result) {
+        this.imageInfos.put(image, result);
+    }
 
     public void addNetworkElement(SceneConfigElementBO element) {
         this.networkElements.add(element);

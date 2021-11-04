@@ -253,7 +253,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         String likeTitle = SQLUtils.escapeLike(req.getTitle());
         List<SysNoticeModel> notices = getModelMapper().listNotices(likeTitle, ids, req.getOrgIds(), req.getRoleIds(), null, null);
         PageInfo pageInfo = new PageInfo(notices);
-        convert2NoticeDtoPageInfo(pageInfo);
+        convert2NoticeDtoPageInfo(pageInfo, false);
         return pageInfo;
     }
 
@@ -276,7 +276,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
             PageHelper.startPage(req.getPage(), req.getPageSize());
             List<SysNoticeModel> notices = getModelMapper().listNoticeMessageByCurrentAdminUser(userModel.getId());
             PageInfo pageInfo = new PageInfo(notices);
-            convert2NoticeDtoPageInfo(pageInfo);
+            convert2NoticeDtoPageInfo(pageInfo, true);
             return pageInfo;
         }
 
@@ -313,7 +313,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         List<SysNoticeModel> notices = getModelMapper().listNoticeMessageByCurrentNormalUser(allOrgIds, allRoleIds, userModel.getId());
         PageInfo pageInfo = new PageInfo(notices);
 
-        convert2NoticeDtoPageInfo(pageInfo);
+        convert2NoticeDtoPageInfo(pageInfo, true);
         return pageInfo;
     }
 
@@ -334,7 +334,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
 
     @Override
-    public SysNoticeDto noticeModel2NoticeDto(SysNoticeModel noticeModel) {
+    public SysNoticeDto noticeModel2NoticeDto(SysNoticeModel noticeModel, boolean checkCurrentUserIsRead) {
         if (Objects.isNull(noticeModel)) {
             return null;
         }
@@ -365,14 +365,28 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
             noticeDto.setRoleNames(roleModels.stream().map(RoleModel::getName).collect(Collectors.joining(",")));
         }
 
+        // 检查当前用户对此条公告是否已读
+        if (checkCurrentUserIsRead) {
+            UserModel userModel = UserUtils.getLoginUser();
+            String currentUserId = userModel.getId();
+            SysNoticeReadModel noticeReadModel = noticeReadMapper.selectByUserIdAndNoticeId(currentUserId, noticeModel.getId());
+            if (Objects.isNull(noticeReadModel)) {
+                // 未读
+                noticeDto.setIsRead(0);
+            } else {
+                // 已读
+                noticeDto.setIsRead(1);
+            }
+        }
+
         return noticeDto;
     }
 
-    private void convert2NoticeDtoPageInfo(PageInfo pageInfo) {
+    private void convert2NoticeDtoPageInfo(PageInfo pageInfo, boolean checkCurrentUserIsRead) {
         List<SysNoticeModel> noticeModels = pageInfo.getList();
 
         List<SysNoticeDto> noticeDtos = noticeModels.stream().map(n -> {
-            SysNoticeDto noticeDto = noticeModel2NoticeDto(n);
+            SysNoticeDto noticeDto = noticeModel2NoticeDto(n, checkCurrentUserIsRead);
             return noticeDto;
         }).collect(Collectors.toList());
 //

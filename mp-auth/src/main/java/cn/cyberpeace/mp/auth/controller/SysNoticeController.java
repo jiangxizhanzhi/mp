@@ -51,7 +51,7 @@ public class SysNoticeController {
         ObjServiceResult<SysNoticeModel> result = noticeService.get(id);
         if (Objects.nonNull(result.getSource())) {
             SysNoticeModel noticeModel = result.getSource().getObj();
-            SysNoticeDto noticeDto = noticeService.noticeModel2NoticeDto(noticeModel);
+            SysNoticeDto noticeDto = noticeService.noticeModel2NoticeDto(noticeModel, false);
             return ServiceResult.success(noticeDto);
         } else {
             return ServiceResult.fail("没有查询到ID为:" + id + "的公告！");

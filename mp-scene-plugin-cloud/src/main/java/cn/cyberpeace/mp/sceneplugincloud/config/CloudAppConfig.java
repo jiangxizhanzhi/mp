@@ -51,11 +51,23 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.recreate_hold_size:200000}")
     private Integer recreateHoldSize;
 
-    @Value("${mp.sceneplugincloud.lifecycle_pool_size:10}")
-    private Integer lifecyclePoolSize;
+    @Value("${mp.sceneplugincloud.restart_pool_size:10}")
+    private Integer restartPoolSize;
 
-    @Value("${mp.sceneplugincloud.lifecycle_hold_size:200000}")
-    private Integer lifecycleHoldSize;
+    @Value("${mp.sceneplugincloud.restart_hold_size:200000}")
+    private Integer restartHoldSize;
+
+    @Value("${mp.sceneplugincloud.pause_pool_size:10}")
+    private Integer pausePoolSize;
+
+    @Value("${mp.sceneplugincloud.pause_hold_size:200000}")
+    private Integer pauseHoldSize;
+
+    @Value("${mp.sceneplugincloud.unpause_pool_size:10}")
+    private Integer unpausePoolSize;
+
+    @Value("${mp.sceneplugincloud.unpause_hold_size:200000}")
+    private Integer unpauseHoldSize;
 
     @Value("${mp.sceneplugincloud.delete_pool_size:10}")
     private Integer deletePoolSize;

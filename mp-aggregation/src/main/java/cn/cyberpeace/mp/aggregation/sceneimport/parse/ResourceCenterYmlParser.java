@@ -1,20 +1,16 @@
 package cn.cyberpeace.mp.aggregation.sceneimport.parse;
 
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.YmlParseResult;
-import cn.cyberpeace.mp.base.constant.BaseErrorCode;
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import org.apache.lucene.util.IOUtils;
+import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.ImageParseResult;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.BaseConstructor;
-import org.yaml.snakeyaml.constructor.Constructor;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @Description 解析资管的yml
@@ -22,31 +18,31 @@ import java.io.InputStream;
  * @Date 2021/10/12
  */
 public final class ResourceCenterYmlParser {
+    private static String FILE_PATH_SEPARATOR = "/";
+
     private static Logger log = LoggerFactory.getLogger(ResourceCenterYmlParser.class);
 
-    public static YmlParseResult parse(String filePath) {
-        InputStream inputStream = null;
-        try {
-            File file = new File(filePath);
-            inputStream = new FileInputStream(file);
-            BaseConstructor constructor = new Constructor();
-            constructor.setPropertyUtils(new YamlPropertyParseUtils());
-            Yaml yaml = new Yaml(constructor);
-            return yaml.loadAs(inputStream, YmlParseResult.class);
-        } catch (FileNotFoundException e) {
-            log.error("yml file not exists , file path is {}", filePath, e);
-            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
-        } catch (Exception e) {
-            log.error("failed to parse yml , file path is {}", filePath, e);
-            throw new MpRuntimeException(BaseErrorCode.ERROR);
-        } finally {
-            try {
-                if (inputStream != null) {
-                    IOUtils.close(inputStream);
-                }
-            } catch (IOException e) {
-                log.error("failed to close the inputStream");
-            }
+    public static YmlParseResult parseTopoYml(String filePath) {
+        return new FilePathYmlParser<>(filePath + FILE_PATH_SEPARATOR + "topo.yml", YmlParseResult.class).parse();
+    }
+
+    public static List<ImageParseResult> parseImageServicesYml(String filePath) {
+        File file = new File(filePath + FILE_PATH_SEPARATOR + "images");
+        if (!file.exists() || !file.isDirectory() || file.listFiles() == null || file.listFiles().length == 0) {
+            return new ArrayList<>();
         }
+        File[] imageFiles = file.listFiles();
+        // 取images目录下存在的servers.yml文件路径
+        List<String> serversYmlPaths = Arrays.asList(imageFiles).stream()
+                .map(imageFile -> imageFile.getPath() + FILE_PATH_SEPARATOR + "servers.yml")
+                .filter(serversYmlPath -> new File(serversYmlPath).exists())
+                .collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(serversYmlPaths)) {
+            return new ArrayList<>();
+        }
+        // 解析所有的 servers.yml
+        return serversYmlPaths.stream()
+                .map(serversYmlPath -> new FilePathYmlParser<>(serversYmlPath, ImageParseResult.class).parse())
+                .collect(Collectors.toList());
     }
 }
