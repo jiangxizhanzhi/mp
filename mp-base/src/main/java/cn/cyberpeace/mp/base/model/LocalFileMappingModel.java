@@ -6,6 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * 本地文件和远程文件映射模型
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

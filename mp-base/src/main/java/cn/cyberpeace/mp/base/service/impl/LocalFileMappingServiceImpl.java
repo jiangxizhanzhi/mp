@@ -37,6 +37,12 @@ public class LocalFileMappingServiceImpl
         return new ServiceResult<>(getObjMappings(group));
     }
 
+    /**
+     * 同步本地文件和远程文件映射，本地文件有变化就更新，根据文件最后修改时间判断
+     * @param group 文件映射组
+     * @param mappings 文件映射本地文件信息
+     * @return 最新的本地文件和远程文件映射关系
+     */
     @Override
     public ServiceResult<List<LocalFileMappingModel>> syncMappings(String group, List<LocalFileMappingModel> mappings) {
         for (var mapping : mappings) {

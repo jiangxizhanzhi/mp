@@ -46,7 +46,7 @@ public abstract class BaseObjMappingServiceImpl<M extends BaseObjMappingModel, P
             }
         }
 
-        return DiffTargets.diff(nameMapping, existNameMapping, this::judgeKeepObjMapping);
+        return DiffTargets.keyDiff(nameMapping, existNameMapping, this::judgeKeepObjMapping);
     }
 
     protected void saveDiffObjMappings(DiffTargets<M> diff) {
