@@ -45,6 +45,9 @@ public class IpUtils {
             ips.remove(0);
         }
         if (!ips.isEmpty()) {
+            ips.remove(0);
+        }
+        if (!ips.isEmpty()) {
             ips.remove(ips.size() - 1);
         }
 
