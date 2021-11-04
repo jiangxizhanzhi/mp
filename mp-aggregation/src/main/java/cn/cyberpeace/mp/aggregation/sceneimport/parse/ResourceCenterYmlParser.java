@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.aggregation.sceneimport.parse;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.YmlParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.ImageParseResult;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,8 +27,29 @@ public final class ResourceCenterYmlParser {
         return new FilePathYmlParser<>(filePath + FILE_PATH_SEPARATOR + "topo.yml", YmlParseResult.class).parse();
     }
 
-    public static List<ImageParseResult> parseImageServicesYml(String filePath) {
-        File file = new File(filePath + FILE_PATH_SEPARATOR + "images");
+
+    public static List<ImageParseResult> parseImageServicesYml(String filePath, String imageFilePath) {
+        List<ImageParseResult> results = new ArrayList<>();
+        // env/images 下的目录
+        results.addAll(parseServicesYml(filePath + FILE_PATH_SEPARATOR + "images"));
+
+        // imageFilePath 下的目录
+        if (!StringUtils.isEmpty(imageFilePath)) {
+            results.addAll(parseServicesYml(imageFilePath));
+        }
+
+        // env 下的server.yml
+        String envServerYmlPath = filePath + FILE_PATH_SEPARATOR + "servers.yml";
+        File file = new File(envServerYmlPath);
+        if (file.exists()) {
+            ImageParseResult imageParseResult = new FilePathYmlParser<>(envServerYmlPath, ImageParseResult.class).parse();
+            results.add(imageParseResult);
+        }
+        return results;
+    }
+
+    private static List<ImageParseResult> parseServicesYml(String dirPath) {
+        File file = new File(dirPath);
         if (!file.exists() || !file.isDirectory() || file.listFiles() == null || file.listFiles().length == 0) {
             return new ArrayList<>();
         }
