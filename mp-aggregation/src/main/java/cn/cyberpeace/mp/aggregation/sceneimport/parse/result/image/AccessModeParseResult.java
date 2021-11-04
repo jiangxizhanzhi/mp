@@ -12,7 +12,7 @@ import lombok.Setter;
 @Setter
 public class AccessModeParseResult {
     private String protocol;
-    private Integer port;
+    private String port;
     private String username;
     private String password;
     private String desc;
