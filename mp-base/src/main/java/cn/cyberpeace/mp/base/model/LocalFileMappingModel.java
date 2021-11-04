@@ -19,12 +19,12 @@ public class LocalFileMappingModel extends BaseObjMappingModel {
     private String remoteFile;
 
     @Override
-    public String getSource() {
+    public String retrieveSource() {
         return localFile;
     }
 
     @Override
-    public String getTarget() {
+    public String retrieveTarget() {
         return remoteFile;
     }
 }

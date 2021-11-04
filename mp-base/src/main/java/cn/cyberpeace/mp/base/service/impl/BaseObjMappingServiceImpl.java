@@ -10,9 +10,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -23,45 +21,54 @@ public abstract class BaseObjMappingServiceImpl<M extends BaseObjMappingModel, P
     @Setter
     private P modelMapper;
 
-    protected boolean judgeMergeObjChanged(M newObjMapping, M existObjMapping) {
-        var flag = false;
-        if (existObjMapping == null) {
-            return true;
-        }
-
-        if (!existObjMapping.getSeq().equals(newObjMapping.getSeq())) {
-            flag = true;
-            existObjMapping.setSeq(newObjMapping.getSeq());
-        }
-        return flag;
+    protected boolean judgeKeepObjMapping(M newObjMapping, M existObjMapping) {
+        return existObjMapping.getSeq().equals(newObjMapping.getSeq());
     }
 
-    protected DiffTargets<M> diffObjMappings(List<M> objMappings, List<M> existObjMappings) {
-        Map<String, M> existNameMapping = existObjMappings.stream()
+    protected DiffTargets<M> diffObjMappings(String group, List<M> objMappings) {
+        List<M> existMappings = modelMapper.list(new HumanCondition()
+                .filterEqual(BaseObjMappingModel::getGroup, group));
+        Map<String, M> existNameMapping = existMappings.stream()
                 .collect(Collectors.toMap(BaseObjMappingModel::getName, m -> m));
 
-        DiffTargets<M> diff = new DiffTargets<>();
-        List<M> addingObjMappings = diff.getAddingTargets();
-        List<M> updatingObjMappings = diff.getUpdatingTargets();
-        List<M> removingTargets = diff.getRemovingTargets();
+        Map<String, M> nameMapping = new HashMap<>();
         for (var i = 0; i < objMappings.size(); i++) {
             var objMapping = objMappings.get(i);
+            objMapping.setGroup(group);
             objMapping.setSeq(i + 1);
             objMapping.initDefault(BaseObjMappingModel::getName);
-
             var name = objMapping.getName();
-            if (existNameMapping.containsKey(name)) {
-                var existMapping = existNameMapping.remove(name);
-                if (judgeMergeObjChanged(objMapping, existMapping)) {
-                    updatingObjMappings.add(existMapping);
-                }
-            } else {
-                judgeMergeObjChanged(objMapping, null);
-                addingObjMappings.add(objMapping);
+            nameMapping.put(name, objMapping);
+
+            var existObjMapping = existNameMapping.getOrDefault(name, null);
+            if (existObjMapping != null) {
+                objMapping.setId(existObjMapping.getId());
             }
         }
-        removingTargets.addAll(existNameMapping.values());
-        return diff;
+
+        return DiffTargets.diff(nameMapping, existNameMapping, this::judgeKeepObjMapping);
+    }
+
+    protected void saveDiffObjMappings(DiffTargets<M> diff) {
+        try {
+            modelMapper.bulkDelete(diff.getRemovingTargets().stream()
+                    .map(BaseModel::getId).toArray(String[]::new));
+            modelMapper.bulkCreate(diff.getAddingTargets());
+            modelMapper.bulkUpdate(diff.getUpdatingTargets());
+        } catch (Exception e) {
+            log.error("Sync save obj mapping error: ", e);
+            throw e;
+        }
+    }
+
+    protected List<M> collectDiffObjMappings(DiffTargets<M> diff) {
+        List<M> resultObjMappings = new ArrayList<>();
+        resultObjMappings.addAll(diff.getAddingTargets());
+        resultObjMappings.addAll(diff.getUpdatingTargets());
+        resultObjMappings.addAll(diff.getKeepTargets());
+        resultObjMappings = resultObjMappings.stream()
+                .sorted(Comparator.comparing(BaseObjMappingModel::getSeq)).collect(Collectors.toList());
+        return resultObjMappings;
     }
 
     protected List<M> getObjMappings(String group) {
@@ -71,43 +78,8 @@ public abstract class BaseObjMappingServiceImpl<M extends BaseObjMappingModel, P
     }
 
     protected List<M> syncObjMappings(String group, List<M> objMappings) {
-        List<M> existMappings = modelMapper.list(new HumanCondition()
-                .filterEqual(BaseObjMappingModel::getGroup, group));
-        Map<String, M> existNameMapping = existMappings.stream()
-                .collect(Collectors.toMap(BaseObjMappingModel::getName, m -> m));
-
-        List<M> resultObjMappings = new ArrayList<>();
-        List<M> savingObjMappings = new ArrayList<>();
-        List<M> updatingObjMappings = new ArrayList<>();
-        for (var i = 0; i < objMappings.size(); i++) {
-            var objMapping = objMappings.get(i);
-            objMapping.setSeq(i + 1);
-            objMapping.initDefault(BaseObjMappingModel::getName);
-
-            var name = objMapping.getName();
-            if (existNameMapping.containsKey(name)) {
-                var existMapping = existNameMapping.remove(name);
-                resultObjMappings.add(existMapping);
-                if (judgeMergeObjChanged(objMapping, existMapping)) {
-                    updatingObjMappings.add(existMapping);
-                }
-            } else {
-                judgeMergeObjChanged(objMapping, null);
-                resultObjMappings.add(objMapping);
-                savingObjMappings.add(objMapping);
-            }
-        }
-        List<String> deletingIds = existNameMapping.values().stream()
-                .map(BaseModel::getId).collect(Collectors.toList());
-        try {
-            modelMapper.bulkDelete(deletingIds.toArray(new String[0]));
-            modelMapper.bulkCreate(savingObjMappings);
-            modelMapper.bulkUpdate(updatingObjMappings);
-        } catch (Exception e) {
-            log.error("Sync save obj mapping error: ", e);
-            throw e;
-        }
-
-        return resultObjMappings;
+        DiffTargets<M> diff = diffObjMappings(group, objMappings);
+        saveDiffObjMappings(diff);
+        return collectDiffObjMappings(diff);
     }
 }

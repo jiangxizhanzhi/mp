@@ -15,7 +15,7 @@ public abstract class BaseObjMappingModel extends BaseModel {
     @DefaultGen(UuidGenerator.class)
     private String name;
 
-    public abstract String getSource();
+    public abstract String retrieveSource();
 
-    public abstract String getTarget();
+    public abstract String retrieveTarget();
 }

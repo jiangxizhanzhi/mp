@@ -9,6 +9,7 @@ bootJar {
 }
 
 dependencies {
+    implementation project(':mp-base')
     gradle.ext.appmodules.each {
         implementation project(":${it}")
     }

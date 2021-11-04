@@ -33,6 +33,8 @@ import java.util.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class HumanCondition {
+    public static final Integer MAX_LINE_NUMBER = 999999999;
+
     private Boolean distinct = false;
     private final Map<String, String> selectFields = new HashMap<>();
     private Integer limit;
@@ -48,10 +50,12 @@ public class HumanCondition {
     /** 当前表别名，设置后构造条件对应于该关联表 */
     private String currentLinkName;
 
-    public static final Integer maxLineNumber = 999999999;
+    public static String formatSqlElement(String sqlElement) {
+        return String.format("`%s`", sqlElement);
+    }
 
     public String genLinkFieldName(String linkName, String fieldName) {
-        return StringUtils.joinWith(".",linkName, fieldName);
+        return StringUtils.joinWith(".", linkName, fieldName);
     }
 
     public String genLinkFieldName(Class<?> model, String fieldName) {
@@ -61,7 +65,7 @@ public class HumanCondition {
 
     public String currentFieldName(String fieldName) {
         if (currentLinkName == null) {
-            return fieldName;
+            return formatSqlElement(fieldName);
         } else {
             return genLinkFieldName(currentLinkName, fieldName);
         }
@@ -81,7 +85,8 @@ public class HumanCondition {
             if (StringUtils.isEmpty(outputFieldName)) {
                 selectFieldTexts.add(TextUtils.humpToLine(fieldName));
             } else {
-                selectFieldTexts.add(StringUtils.joinWith(" ", TextUtils.humpToLine(fieldName), outputFieldName));
+                selectFieldTexts.add(StringUtils.joinWith(" ", TextUtils.humpToLine(fieldName),
+                        formatSqlElement(outputFieldName)));
             }
         });
         return selectFieldTexts.toArray(new String[0]);
@@ -312,7 +317,7 @@ public class HumanCondition {
      */
     public HumanCondition slice(Integer startIndex, Integer endIndex) {
         offset = (startIndex == null || startIndex < 0) ? 0 : startIndex;
-        limit = (endIndex == null || endIndex - offset < 0) ? maxLineNumber : endIndex - offset;
+        limit = (endIndex == null || endIndex - offset < 0) ? MAX_LINE_NUMBER : endIndex - offset;
         return this;
     }
 
