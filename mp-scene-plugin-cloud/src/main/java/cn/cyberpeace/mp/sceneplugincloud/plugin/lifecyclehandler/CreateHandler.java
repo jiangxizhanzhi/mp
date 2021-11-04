@@ -335,6 +335,8 @@ public class CreateHandler extends HandlerCommon {
 
                 cloudPort.setResourceId(virtualNic.getPortId());
                 cloudPort.setQosId(virtualNic.getQosId());
+                cloudPort.setFloatingIp(virtualNic.getFloatingip());
+                cloudPort.setFloatingIpId(virtualNic.getFloatingipId());
 
                 var accessModesData = virtualNic.getAccessModes();
                 if (accessModesData != null && !accessModesData.isEmpty()) {

@@ -20,6 +20,8 @@ public class VirtualNic {
 
     private String portId;
     private String qosId;
+    private String floatingip;
+    private String floatingipId;
 
     @Data
     @AllArgsConstructor

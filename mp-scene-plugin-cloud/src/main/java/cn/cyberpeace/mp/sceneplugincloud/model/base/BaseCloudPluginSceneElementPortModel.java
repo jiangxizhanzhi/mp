@@ -36,4 +36,9 @@ public class BaseCloudPluginSceneElementPortModel extends BasePluginSceneElement
     @DefaultStr
     private String accessModes;
 
+    @DefaultStr
+    private String floatingIp;
+    @DefaultStr
+    private String floatingIpId;
+
 }
