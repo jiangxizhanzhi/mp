@@ -66,12 +66,14 @@ public class DeleteHandler extends HandlerCommon {
         private List<String> qosIds;
         private List<String> connectionIds;
         private List<String> proxyIds;
+        private List<String> floatingIpIds;
     }
 
     private ElementExtraCloudInfo collectElementExtraCloudInfo(CloudPluginSceneElementBO cloudElement) {
         Set<String> qosIds = new HashSet<>();
         Set<String> connectionIds = new HashSet<>();
         Set<String> proxyIds = new HashSet<>();
+        Set<String> floatingIpIds = new HashSet<>();
         var srcPorts = cloudElement.getSrcElement().getPorts();
         srcPorts.forEach(srcPort -> {
             var cloudPort = getPluginHandler().getPort(srcPort.getId());
@@ -98,9 +100,14 @@ public class DeleteHandler extends HandlerCommon {
                     }
                 });
             }
+
+            String floatingIpId = cloudPort.getFloatingIpId();
+            if (!StringUtils.isEmpty(floatingIpId)) {
+                floatingIpIds.add(floatingIpId);
+            }
         });
         return new ElementExtraCloudInfo(new ArrayList<>(qosIds), new ArrayList<>(connectionIds),
-                new ArrayList<>(proxyIds));
+                new ArrayList<>(proxyIds), new ArrayList<>(floatingIpIds));
     }
 
     private boolean deleteAuxiliaryNetwork(CloudPluginSceneElementBO cloudElement) {
@@ -149,6 +156,7 @@ public class DeleteHandler extends HandlerCommon {
         deleteData.setQoses(extraInfo.getQosIds());
         deleteData.setConnections(extraInfo.getConnectionIds());
         deleteData.setPortMappings(extraInfo.getProxyIds());
+        deleteData.setFloatingIps(extraInfo.getFloatingIpIds());
         return vmClient.delete(deleteData);
     }
 
@@ -164,6 +172,7 @@ public class DeleteHandler extends HandlerCommon {
         deleteData.setQoses(extraInfo.getQosIds());
         deleteData.setConnections(extraInfo.getConnectionIds());
         deleteData.setPortMappings(extraInfo.getProxyIds());
+        deleteData.setFloatingIps(extraInfo.getFloatingIpIds());
         return containerClient.delete(deleteData);
     }
 
