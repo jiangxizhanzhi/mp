@@ -21,4 +21,13 @@ public class BaseAppConfig {
     @Value("${mp.base.max-page-size:1000}")
     private Integer maxPageSize;
 
+    @Value("${mp.base.date-time-pattern:yyyy-MM-dd HH:mm:ss}")
+    private String dateTimePattern;
+
+    @Value("${mp.base.date-pattern:yyyy-MM-dd}")
+    private String datePattern;
+
+    @Value("${mp.base.time-pattern:HH:mm:ss}")
+    private String timePattern;
+
 }

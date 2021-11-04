@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.base.context.transfercontext;
 
-import cn.cyberpeace.mp.base.context.SysContextUtils;
+import cn.cyberpeace.mp.base.context.SysContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -15,11 +15,11 @@ public class PassThroughTransferContext implements TransferContext<Map<String, O
 
     @Override
     public Map<String, Object> getValue() {
-        return SysContextUtils.getPassThroughMap();
+        return SysContextHolder.getPassThroughMap();
     }
 
     @Override
     public void setValue(Map<String, Object> value) {
-        SysContextUtils.setPassThroughMap(value);
+        SysContextHolder.setPassThroughMap(value);
     }
 }

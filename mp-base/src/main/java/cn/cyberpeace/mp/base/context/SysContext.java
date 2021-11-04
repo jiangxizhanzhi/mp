@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.base.context;
 
+import lombok.Data;
+
 import java.util.Map;
 
 /**
@@ -7,28 +9,17 @@ import java.util.Map;
  * @Author maojun
  * @Date 2021/8/31
  */
-public interface SysContext {
-    /**
-     * 查询调用链路id
-     * @return
-     */
-    String getCallChainId();
+@Data
+public class SysContext {
 
     /**
-     * 设置调用链路id
-     * @return
+     * 调用链路id
      */
-    void setCallChainId(String callChainId);
+    private String callChainId;
 
     /**
-     * 用于透传内容
-     * @param map
+     * 透传内容
      */
-    void setPassThroughMap(Map<String, Object> map);
+    private Map<String, Object> passThroughMap;
 
-    /**
-     * 获取透传内容
-     * @return
-     */
-    Map<String, Object> getPassThroughMap();
 }

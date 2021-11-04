@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.base.context.http;
 
 import cn.cyberpeace.mp.base.context.SysContextHolder;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -20,12 +21,10 @@ public class HttpContextFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        try {
-            IHttpContext sysContext = new HttpContext(request.getHeader(X_REQUEST_ID));
-            SysContextHolder.set(sysContext);
-            filterChain.doFilter(request, response);
-        } finally {
-            SysContextHolder.clear();
+        var requestId = request.getHeader(X_REQUEST_ID);
+        if (!StringUtils.isEmpty(requestId)) {
+            SysContextHolder.setCallChainId(requestId);
         }
+        filterChain.doFilter(request, response);
     }
 }
