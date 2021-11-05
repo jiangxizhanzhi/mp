@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.situationaware.controller;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.base.util.BeanUtils;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.situationaware.model.GroupModel;
 import cn.cyberpeace.mp.situationaware.model.GroupRequest;
 import cn.cyberpeace.mp.situationaware.service.NetworkTrafficGroupService;

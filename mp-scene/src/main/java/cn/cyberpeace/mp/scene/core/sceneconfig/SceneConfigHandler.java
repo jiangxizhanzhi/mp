@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.scene.core.sceneconfig;
 
-import cn.cyberpeace.mp.base.annotation.BeanFieldClasses;
-import cn.cyberpeace.mp.base.annotation.ClassFieldClasses;
+import cn.cyberpeace.mp.base.util.basic.stereotype.BeanFieldClasses;
+import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.scene.core.base.BaseSceneHandler;
 import cn.cyberpeace.mp.scene.core.bo.*;
 import cn.cyberpeace.mp.scene.core.plugin.SceneConfigPluginHandler;

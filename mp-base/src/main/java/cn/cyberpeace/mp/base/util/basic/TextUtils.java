@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.base.util;
+package cn.cyberpeace.mp.base.util.basic;
 
 import org.apache.commons.lang3.StringUtils;
 

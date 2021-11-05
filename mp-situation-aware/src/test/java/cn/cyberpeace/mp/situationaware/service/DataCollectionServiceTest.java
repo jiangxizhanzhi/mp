@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.situationaware.service;
 
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
-import cn.cyberpeace.mp.base.util.TimeUtils;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.base.util.es.EsConstants;
 import cn.cyberpeace.mp.situationaware.TestSituationAwareApplciation;
 import cn.cyberpeace.mp.situationaware.model.FileEventModel;

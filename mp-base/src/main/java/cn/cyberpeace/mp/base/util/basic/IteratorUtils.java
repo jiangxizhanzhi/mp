@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.base.util;
+package cn.cyberpeace.mp.base.util.basic;
 
 import org.apache.commons.collections4.CollectionUtils;
 

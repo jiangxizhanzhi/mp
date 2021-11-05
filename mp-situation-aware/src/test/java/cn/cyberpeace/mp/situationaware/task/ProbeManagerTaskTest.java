@@ -1,11 +1,11 @@
 package cn.cyberpeace.mp.situationaware.task;
 
-import cn.cyberpeace.mp.base.util.BeanUtils;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.situationaware.TestSituationAwareApplciation;
 import cn.cyberpeace.mp.situationaware.model.ProbeModel;
 import cn.cyberpeace.mp.situationaware.model.enums.ProbeStatus;
 import cn.cyberpeace.mp.situationaware.repository.ProbeModelMapper;
-import java.util.Map;
+
 import java.util.UUID;
 import org.junit.Assert;
 import org.junit.Test;
@@ -48,7 +48,7 @@ public class ProbeManagerTaskTest {
         ProbeModel toUpdate = new ProbeModel();
         toUpdate.setCommandInterval("3m");
         toUpdate.setProbeStatus(ProbeStatus.RUNNING);
-        BeanUtils.merge(probeModel, toUpdate);
+        BeanUtils.copyPropertiesIgnoreNull(toUpdate, probeModel);
         Assert.assertEquals(probeModel.getProbeStatus(), ProbeStatus.RUNNING);
     }
 }

@@ -4,7 +4,7 @@ import ch.qos.logback.classic.AsyncAppender;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.LoggingEvent;
 import cn.cyberpeace.mp.base.context.SysContextHolder;
-import cn.cyberpeace.mp.base.util.ClassUtils;
+import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import org.slf4j.MDC;
 
 import java.lang.reflect.Field;

@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.scene.core.bo.base;
 
-import cn.cyberpeace.mp.base.util.ClassUtils;
+import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.scene.model.base.*;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;

@@ -30,4 +30,7 @@ public class BaseAppConfig {
     @Value("${mp.base.time-pattern:HH:mm:ss}")
     private String timePattern;
 
+    @Value("${mp.base.scheduled-thread-pool-core-size:50}")
+    private Integer scheduledThreadPoolCoreSize;
+
 }

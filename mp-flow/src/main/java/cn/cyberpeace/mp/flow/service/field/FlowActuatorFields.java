@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.flow.service.field;
 
 import cn.cyberpeace.mp.base.repository.fields.DynamicFields;
 import cn.cyberpeace.mp.base.service.fields.BaseModelFields;
-import cn.cyberpeace.mp.base.util.ClassUtils;
+import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
 import org.springframework.stereotype.Component;
 

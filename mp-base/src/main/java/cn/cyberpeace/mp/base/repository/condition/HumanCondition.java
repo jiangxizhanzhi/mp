@@ -1,7 +1,11 @@
 package cn.cyberpeace.mp.base.repository.condition;
 
 import cn.cyberpeace.mp.base.repository.condition.aggregation.Aggregation;
-import cn.cyberpeace.mp.base.util.*;
+import cn.cyberpeace.mp.base.util.ModelUtils;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
+import cn.cyberpeace.mp.base.util.basic.ClassUtils;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.base.util.define.SerializableFunction;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

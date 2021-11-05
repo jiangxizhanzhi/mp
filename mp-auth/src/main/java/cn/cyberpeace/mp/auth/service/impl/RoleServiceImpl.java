@@ -276,7 +276,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         }
 
         RoleDto roleDto = new RoleDto();
-        cn.cyberpeace.mp.base.util.BeanUtils.copyProperties(roleModel, roleDto);
+        cn.cyberpeace.mp.base.util.basic.BeanUtils.copyProperties(roleModel, roleDto);
 
         List<TargetModel> targets = getRoleTargets(roleModel);
 
@@ -291,7 +291,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         }
 
         RolePermDto rolePermDto = new RolePermDto();
-        cn.cyberpeace.mp.base.util.BeanUtils.copyProperties(roleModel, rolePermDto);
+        cn.cyberpeace.mp.base.util.basic.BeanUtils.copyProperties(roleModel, rolePermDto);
 
         List<TargetModel> targets = getRoleTargets(roleModel);
 

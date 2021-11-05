@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.auth.service.sys;
 import cn.cyberpeace.mp.auth.config.ActivationConfig;
 import cn.cyberpeace.mp.auth.dto.activation.*;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
-import cn.cyberpeace.mp.base.util.BeanUtils;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Assert;

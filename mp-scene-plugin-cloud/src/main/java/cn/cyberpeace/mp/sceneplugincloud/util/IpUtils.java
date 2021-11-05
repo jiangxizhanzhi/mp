@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.util;
 
-import cn.cyberpeace.mp.base.util.RandomUtils;
+import cn.cyberpeace.mp.base.util.basic.RandomUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.AllocationPool;
 import cn.hutool.core.net.Ipv4Util;
 

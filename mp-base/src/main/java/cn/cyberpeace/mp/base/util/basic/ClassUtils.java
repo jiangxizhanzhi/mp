@@ -1,8 +1,9 @@
-package cn.cyberpeace.mp.base.util;
+package cn.cyberpeace.mp.base.util.basic;
 
-import cn.cyberpeace.mp.base.annotation.ClassFieldClasses;
-import cn.cyberpeace.mp.base.annotation.ClassFieldNames;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
+import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldNames;
+import cn.cyberpeace.mp.base.util.define.SerializableFunction;
 import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;

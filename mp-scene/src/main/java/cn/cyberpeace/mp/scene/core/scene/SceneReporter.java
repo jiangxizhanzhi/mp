@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.scene.core.scene;
 
-import cn.cyberpeace.mp.base.util.BeanUtils;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.scene.core.bo.CollectedSceneBO;
 import cn.cyberpeace.mp.scene.core.bo.CollectedSceneElementBO;
 

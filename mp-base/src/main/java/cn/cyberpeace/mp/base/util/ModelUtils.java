@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.base.util;
 
 import cn.cyberpeace.mp.base.model.stereotype.*;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
+import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;

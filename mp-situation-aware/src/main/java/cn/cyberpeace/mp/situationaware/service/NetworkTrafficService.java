@@ -4,7 +4,7 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.util.HttpUtils;
-import cn.cyberpeace.mp.base.util.TimeUtils;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.base.util.es.EsConstants;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;

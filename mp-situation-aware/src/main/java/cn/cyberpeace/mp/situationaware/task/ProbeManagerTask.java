@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.situationaware.task;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.util.TimeUtils;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.base.util.es.EsConstants;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;

@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.base.service.fields;
 
 import cn.cyberpeace.mp.base.repository.fields.DynamicFields;
-import cn.cyberpeace.mp.base.util.ClassUtils;
+import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 

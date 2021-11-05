@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.converter.impl;
 
-import cn.cyberpeace.mp.base.util.BeanUtils;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
+import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.converter.FirewallConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.FirewallPageConverterModel;
 import cn.cyberpeace.mp.devops.cluster.model.FirewallCloudPlatformModel;
@@ -37,7 +38,7 @@ public class FirewallConverterImpl implements FirewallConverter {
     @Override
     public FirewallPageConverterModel page(FirewallPageRequest request, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
-        String getParams = BeanUtils.wrapperGetParamsByObject(request,ignoreFields);
+        String getParams = ParamUtils.wrapperGetParamsByObject(request,ignoreFields);
         FirewallCloudPlatformModel model = firewallService.page(getParams);
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getFirewalls())){
             return null;

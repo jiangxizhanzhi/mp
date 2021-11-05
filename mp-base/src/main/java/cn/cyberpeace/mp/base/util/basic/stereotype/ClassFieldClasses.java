@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.base.annotation;
+package cn.cyberpeace.mp.base.util.basic.stereotype;
 
 
 import java.lang.annotation.*;

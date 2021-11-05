@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.util.http;
 
-import cn.cyberpeace.mp.base.util.ClassUtils;
+import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;

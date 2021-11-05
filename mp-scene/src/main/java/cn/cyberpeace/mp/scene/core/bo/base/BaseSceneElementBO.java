@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.scene.core.bo.base;
 
-import cn.cyberpeace.mp.base.util.BeanUtils;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.JsonUtils;
-import cn.cyberpeace.mp.base.util.SerializableFunction;
+import cn.cyberpeace.mp.base.util.define.SerializableFunction;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.swagger.annotations.ApiModelProperty;

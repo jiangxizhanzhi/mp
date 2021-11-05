@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.base.util;
+package cn.cyberpeace.mp.base.util.define;
 
 import java.util.ArrayList;
 import java.util.Arrays;

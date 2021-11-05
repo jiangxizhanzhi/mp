@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.response;
 
-import cn.cyberpeace.mp.base.util.TimeUtils;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.devops.cluster.model.ScreenshotModel;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

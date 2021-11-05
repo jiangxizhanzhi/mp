@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.base.context.transfercontext;
 
-import cn.cyberpeace.mp.base.util.BeanUtils;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 
 import java.util.HashMap;
 import java.util.Map;

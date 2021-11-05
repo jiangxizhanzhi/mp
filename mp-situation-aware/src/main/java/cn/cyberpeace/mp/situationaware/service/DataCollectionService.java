@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.situationaware.service;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
-import cn.cyberpeace.mp.base.util.TimeUtils;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.base.util.es.EsConstants;
 import cn.cyberpeace.mp.situationaware.repository.WazuhRepository;
 import cn.cyberpeace.mp.situationaware.model.*;

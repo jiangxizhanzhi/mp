@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.converter.impl;
 
-import cn.cyberpeace.mp.base.util.BeanUtils;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
+import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.converter.RealEquipmentConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.RealEquipment;
 import cn.cyberpeace.mp.devops.cluster.converter.model.RealEquipmentConvertModel;
@@ -71,7 +72,7 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
 
     @Override
     public Integer getTotalRealEquipment(RealEquipmentPageRequest request) {
-        String getParams = BeanUtils.wrapperGetParamsByObject(request,this.getTotalPageIgnoreField());
+        String getParams = ParamUtils.wrapperGetParamsByObject(request,this.getTotalPageIgnoreField());
         DeviceCloudPlatformModel page = realEquipmentService.page(getParams);
         return Objects.isNull(page) || Objects.isNull(page.getTotal()) ? NumberUtils.INTEGER_ZERO : page.getTotal();
     }

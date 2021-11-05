@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.converter.impl;
 
-import cn.cyberpeace.mp.base.util.BeanUtils;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
+import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.converter.HypervisorConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.*;
@@ -66,7 +67,7 @@ public class HypervisorConverterImpl implements HypervisorConverter {
     @Override
     public HypervisorPageConvertModel page(HypervisorPageRequest request, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
-        String getParams = BeanUtils.wrapperGetParamsByObject(request,ignoreFields);
+        String getParams = ParamUtils.wrapperGetParamsByObject(request,ignoreFields);
         final HypervisorCloudPlatformModel model = hypervisorService.page(getParams);
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getHypervisors())){
             return null;
@@ -87,7 +88,7 @@ public class HypervisorConverterImpl implements HypervisorConverter {
 
     @Override
     public HypervisorWeightAndMaxInstanceConvertModel getWeightAndMaxInstances(HypervisorWeightAndMaxInstanceRequest request) {
-        HypervisorWeightAndMaxInstanceCloudPlatformModel model = hypervisorService.getWeightAndMaxInstances(BeanUtils.wrapperGetParamsByObject(request));
+        HypervisorWeightAndMaxInstanceCloudPlatformModel model = hypervisorService.getWeightAndMaxInstances(ParamUtils.wrapperGetParamsByObject(request));
         if (Objects.isNull(model)){
             return null;
         }

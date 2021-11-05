@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.base.model.generator;
 
-import cn.cyberpeace.mp.base.util.TextUtils;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import org.springframework.stereotype.Component;
 
 @Component
