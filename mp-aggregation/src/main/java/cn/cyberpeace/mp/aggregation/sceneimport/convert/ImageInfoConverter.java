@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -92,6 +93,9 @@ class ImageInfoConverter implements IConverter {
         accessMode.setProtocol(result.getProtocol());
         accessMode.setDesc(result.getDesc());
         accessMode.setProxy(Boolean.valueOf(result.getIsproxy()));
-        accessMode.setPort(result.getPort());
+        accessMode.setPassword(result.getPassword());
+        if (NumberUtils.isCreatable(result.getPort())) {
+            accessMode.setPort(Integer.valueOf(result.getPort()));
+        }
     }
 }

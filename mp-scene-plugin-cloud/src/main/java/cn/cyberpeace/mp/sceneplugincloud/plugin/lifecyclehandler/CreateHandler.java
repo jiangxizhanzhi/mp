@@ -178,7 +178,7 @@ public class CreateHandler extends HandlerCommon {
             }
 
             var virtualNic = new VirtualNic();
-            virtualNic.setNetworkId(auxiliaryNetworkCloudElement.getAuxiliaryNetworkId());
+            virtualNic.setNetworkId(auxiliaryNetworkId);
             virtualNic.setFixedIp(TextUtils.emptyNull(port.getIp()));
             virtualNic.setMacAddress(TextUtils.emptyNull(port.getMacAddr()));
 
@@ -200,7 +200,10 @@ public class CreateHandler extends HandlerCommon {
                 qosRules.add(qosRule);
             }
             virtualNic.setQosRules(CollectionUtils.emptyNull(qosRules));
-            virtualNic.setEnableExternal(cloudPort.getNat());
+            if (!getHandlerUtils().isExternalNetwork(auxiliaryNetworkId)) {
+                virtualNic.setEnableExternal(cloudPort.getNat());
+            }
+
             virtualNic.setFirewallId(null);
 
             var accessModes = cloudPort.getAccessModes();
@@ -332,6 +335,8 @@ public class CreateHandler extends HandlerCommon {
 
                 cloudPort.setResourceId(virtualNic.getPortId());
                 cloudPort.setQosId(virtualNic.getQosId());
+                cloudPort.setFloatingIp(virtualNic.getFloatingip());
+                cloudPort.setFloatingIpId(virtualNic.getFloatingipId());
 
                 var accessModesData = virtualNic.getAccessModes();
                 if (accessModesData != null && !accessModesData.isEmpty()) {

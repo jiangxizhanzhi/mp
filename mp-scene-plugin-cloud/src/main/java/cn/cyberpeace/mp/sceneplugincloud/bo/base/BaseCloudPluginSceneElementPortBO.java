@@ -42,6 +42,10 @@ public abstract class BaseCloudPluginSceneElementPortBO<M extends BaseCloudPlugi
     private String qosId;
     @ApiModelProperty(value = "接入方式")
     private List<CloudAccessMode> accessModes;
+    @ApiModelProperty(value = "弹性ip")
+    private String floatingIp;
+    @ApiModelProperty(value = "弹性ip的id")
+    private String floatingIpId;
 
     @Override
     public void fromModel(M obj, String... ignoreFields) {
