@@ -1,9 +1,5 @@
 package cn.cyberpeace.mp.devops.cluster.response;
 
-import cn.cyberpeace.mp.base.serializer.CustomLocalDateTimeDeserializer;
-import cn.cyberpeace.mp.base.serializer.CustomLocalDateTimeSerializer;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -50,8 +46,6 @@ public class HostMonitorResponse {
     @ApiModelProperty("内存利用率")
     private BigDecimal memory_percent;
 
-    @JsonSerialize(using = CustomLocalDateTimeSerializer.class)
-    @JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)
     @ApiModelProperty("时间")
     private LocalDateTime time;
 

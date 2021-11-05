@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.service.impl;
 
-import cn.cyberpeace.mp.base.util.LocalDateTimeUtils;
+import cn.cyberpeace.mp.base.util.TimeUtils;
 import cn.cyberpeace.mp.devops.cluster.enums.PublicEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.StatusEnum;
 import cn.cyberpeace.mp.devops.cluster.model.Device;
@@ -100,8 +100,8 @@ public class DevopsTargetServiceImpl implements DevopsTargetService {
             targetModel.setInitSupport(Boolean.FALSE);
         }
 
-        targetModel.setCreateTime(LocalDateTimeUtils.convertToLocalDateTime(device.getCreatedAt()));
-        targetModel.setUpdateTime(LocalDateTimeUtils.convertToLocalDateTime(device.getUpdatedAt()));
+        targetModel.setCreateTime(TimeUtils.utcStringToLocalDateTime(device.getCreatedAt()));
+        targetModel.setUpdateTime(TimeUtils.utcStringToLocalDateTime(device.getUpdatedAt()));
         ExtEntity extEntity = device.getExtEntity();
         if (Objects.nonNull(extEntity)){
             targetModel.setInPosition(extEntity.getEntityStatus() ? StatusEnum.YES : StatusEnum.NO);

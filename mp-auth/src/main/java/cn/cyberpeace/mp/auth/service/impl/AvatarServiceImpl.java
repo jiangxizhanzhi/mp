@@ -84,7 +84,7 @@ public class AvatarServiceImpl extends BaseModelServiceImpl<AvatarModel, AvatarM
             responseData.setInnerHttpUrl(group.getInnerFileServerAddr() + File.separator + filepath);
         } catch (MpRuntimeException e) {
             responseData.setSuccess(false);
-            responseData.setCode(e.getErrorCode());
+//            responseData.setCode(e.getErrorCode());
             responseData.setMessage(e.getMessage());
         }
 

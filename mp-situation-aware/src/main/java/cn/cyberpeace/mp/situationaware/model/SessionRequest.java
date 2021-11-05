@@ -1,15 +1,14 @@
 package cn.cyberpeace.mp.situationaware.model;
 
-import cn.cyberpeace.mp.base.serializer.CustomLocalDateTimeDeserializer;
-import cn.cyberpeace.mp.base.serializer.CustomLocalDateTimeSerializer;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
-import javax.validation.constraints.NotNull;
-import lombok.*;
 
 @Data
 @AllArgsConstructor
@@ -20,8 +19,6 @@ public class SessionRequest {
     /**
      * 查询开始时间
      */
-    @JsonSerialize(using = CustomLocalDateTimeSerializer.class)
-    @JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)
     @ApiModelProperty("开始时间-yyyy-MM-dd HH:mm:ss")
     @NotNull(message = "开始时间不能为空")
     private LocalDateTime startTime;
@@ -29,8 +26,6 @@ public class SessionRequest {
     /**
      * 查询
      */
-    @JsonSerialize(using = CustomLocalDateTimeSerializer.class)
-    @JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)
     @ApiModelProperty("结束时间-yyyy-MM-dd HH:mm:ss")
     @NotNull(message = "结束时间不能为空")
     private LocalDateTime endTime;
