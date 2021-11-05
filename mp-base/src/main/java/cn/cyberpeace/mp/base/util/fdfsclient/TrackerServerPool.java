@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.base.util.fdfsclient;
 
 import cn.cyberpeace.mp.base.config.FastDfsConfig;
-import cn.cyberpeace.mp.base.constant.BaseConstants;
 import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import io.micrometer.core.instrument.util.StringUtils;
@@ -70,7 +69,7 @@ public class TrackerServerPool {
             if (i == 0) {
                 serversBuffer.append(servers);
             } else {
-                serversBuffer.append(BaseConstants.COMMA).append(servers);
+                serversBuffer.append(",").append(servers);
             }
         }
 
@@ -87,8 +86,8 @@ public class TrackerServerPool {
      */
     private static TrackerGroup initTrackerGroup(String trackerServers) {
         List<InetSocketAddress> list = new ArrayList();
-        String spr1 = BaseConstants.COMMA;
-        String spr2 = BaseConstants.COLON;
+        String spr1 = ",";
+        String spr2 = ":";
         String[] arr1 = trackerServers.trim().split(spr1);
         for (String addrStr : arr1) {
             String[] arr2 = addrStr.trim().split(spr2);

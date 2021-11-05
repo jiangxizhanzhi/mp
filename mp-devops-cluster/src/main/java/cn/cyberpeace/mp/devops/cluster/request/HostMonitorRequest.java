@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.request;
 
-import cn.cyberpeace.mp.base.constant.BaseConstants;
+import cn.cyberpeace.mp.devops.cluster.constant.BaseConstants;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

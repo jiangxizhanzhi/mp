@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.base.constant;
+package cn.cyberpeace.mp.devops.cluster.constant;
 
 public interface BaseConstants {
 

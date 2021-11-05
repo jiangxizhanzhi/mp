@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.flow.request;
 
-import cn.cyberpeace.mp.base.constant.BaseConstants;
+import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.model.FlowTaskModel;
 import lombok.AllArgsConstructor;
 import lombok.Data;

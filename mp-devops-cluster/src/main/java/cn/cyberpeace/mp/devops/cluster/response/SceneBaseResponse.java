@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.response;
 
-import cn.cyberpeace.mp.base.constant.BaseConstants;
+import cn.cyberpeace.mp.devops.cluster.constant.BaseConstants;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.ApiModel;

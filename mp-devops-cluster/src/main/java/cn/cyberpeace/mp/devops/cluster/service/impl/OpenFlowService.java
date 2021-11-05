@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.service.impl;
 
-import cn.cyberpeace.mp.base.constant.BaseConstants;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
+import cn.cyberpeace.mp.devops.cluster.constant.BaseConstants;
 import cn.cyberpeace.mp.devops.cluster.request.OpenflowActionRequest;
 import cn.cyberpeace.mp.devops.cluster.response.OpenflowActionResponse;
 import cn.cyberpeace.mp.devops.cluster.service.BaseCloudPlatformService;
