@@ -96,7 +96,7 @@ public class SysNoticeController {
     @GetMapping("/currentuser/page")
     public ServiceResult<SysNoticeDto> currentUserPage(SysNoticePageRequest pageRequest) {
         pageRequest.ensure();
-        PageInfo pageInfo = noticeService.currentUserNoticeMessages(pageRequest);
+        PageInfo pageInfo = noticeService.getCurrentUserNoticeMessagesPage(pageRequest);
 
         return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
     }

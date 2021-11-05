@@ -39,6 +39,14 @@ public interface SysNoticeMapper extends BaseModelMapper<SysNoticeModel> {
     List<SysNoticeModel> listNoticeMessageByCurrentAdminUser(@Param("userId") String userId);
 
     /**
+     * 管理员消息推送列表总数
+     *
+     * @param userId
+     * @return
+     */
+    int getUnreadCountByCurrentAdminUser(@Param("userId") String userId);
+
+    /**
      * 普通用户消息推送列表
      *
      * @param orgs
@@ -49,6 +57,19 @@ public interface SysNoticeMapper extends BaseModelMapper<SysNoticeModel> {
     List<SysNoticeModel> listNoticeMessageByCurrentNormalUser(@Param("orgs") List<String> orgs,
                                                               @Param("roles") List<String> roles,
                                                               @Param("userId") String userId);
+
+
+    /**
+     * 普通用户消息推送列表总数
+     *
+     * @param orgs
+     * @param roles
+     * @param userId
+     * @return
+     */
+    int getUnreadCountByCurrentNormalUser(@Param("orgs") List<String> orgs,
+                                          @Param("roles") List<String> roles,
+                                          @Param("userId") String userId);
 
 
 }

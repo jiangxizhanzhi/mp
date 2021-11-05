@@ -87,15 +87,8 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
     @Override
     public int unReadCount() {
-        SysNoticePageRequest pageRequest = new SysNoticePageRequest();
-        pageRequest.ensure();
-        PageInfo pageInfo = currentUserNoticeMessages(pageRequest);
-        int noticeCnt = (int) pageInfo.getTotal();
-
-        UserModel userModel = UserUtils.getLoginUser();
-        int readedOrUnpushCnt = noticeReadMapper.countIsReadedOrIsUnPush(userModel.getId());
-        int unreadCnt = noticeCnt - readedOrUnpushCnt;
-        return unreadCnt <= 0 ? 0 : unreadCnt;
+        int totalCnt = getCurrentUserNoticeMessagesUnreadCount();
+        return totalCnt;
     }
 
     @Override
@@ -258,7 +251,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
     }
 
     @Override
-    public PageInfo<SysNoticeModel> currentUserNoticeMessages(SysNoticePageRequest req) {
+    public PageInfo<SysNoticeModel> getCurrentUserNoticeMessagesPage(SysNoticePageRequest req) {
         UserModel userModel = UserUtils.getLoginUser();
         if (Objects.isNull(userModel)) {
             log.error("未查询到当前登录用户！");
@@ -317,6 +310,59 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         return pageInfo;
     }
 
+    @Override
+    public int getCurrentUserNoticeMessagesUnreadCount() {
+        UserModel userModel = UserUtils.getLoginUser();
+        if (Objects.isNull(userModel)) {
+            log.error("未查询到当前登录用户！");
+            return 0;
+        }
+
+        // 查找当前用户所有的角色
+        // 是否是管理员，管理员拥有所有公告权限
+        List<RoleModel> roleModels = userRoleService.listByUserId(userModel.getId());
+        boolean isAdmin = roleModels.stream().anyMatch(r -> r.getIdentifier().equals(AuthConstant.ROLE_ADMIN));
+
+        // 管理员，查看所有公告消息
+        if (isAdmin) {
+            log.info("current user is admin!");
+            int totalCnt = getModelMapper().getUnreadCountByCurrentAdminUser(userModel.getId());
+            return totalCnt;
+        }
+
+        log.info("current user is not admin!");
+        // 非管理员...
+        List<String> allRoleIds = roleModels.stream().map(RoleModel::getId).collect(Collectors.toList());
+
+        // 根据当前登录用户查出所有的组织，包括组织的上级，直到顶级组织
+        List<String> allOrgIds = new ArrayList<>();
+        List<OrgModel> orgModels = orgUserService.listOrgsByUserId(userModel.getId());
+        orgModels.forEach(o -> {
+            // 添加自己的id
+            allOrgIds.add(o.getId());
+            // 查找所有上级组织id
+            List<OrgDto> orgDtos = orgService.listAllParentIgnoreLevelExcludeSelf(o.getId());
+            allOrgIds.addAll(orgDtos.stream().map(OrgDto::getId).collect(Collectors.toList()));
+        });
+
+
+        /*
+        1. 用户没有角色，没有组织
+        (is_public = 1) and (notice_org.org is null)
+
+        2. 用户有角色，没有组织
+        (is_public = 1 or notice_role in roles) and (notice_org.org is null)
+
+        3. 用户没有角色，有组织
+        (is_public = 1) and (notice_org.org is null or notice_org.org in orgs)
+
+        4. 用户有角色，有组织
+        (is_public = 1 or notice_role in roles) and (notice_org.org is null or notice_org.org in orgs)
+        */
+        int totalCnt = getModelMapper().getUnreadCountByCurrentNormalUser(allOrgIds, allRoleIds, userModel.getId());
+
+        return totalCnt;
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
