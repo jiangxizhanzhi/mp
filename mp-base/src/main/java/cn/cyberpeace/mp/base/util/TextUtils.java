@@ -10,6 +10,8 @@ public class TextUtils {
 
     private static final Pattern humpPattern = Pattern.compile("\\B(\\p{Upper})(\\p{Lower}*)");
 
+    private static final Pattern chinesePattern = Pattern.compile("[\u4E00-\u9FA5|\\！|\\，|\\。|\\（|\\）|\\《|\\》|\\“|\\”|\\？|\\：|\\；|\\【|\\】]");
+
     private TextUtils() {}
 
     public static String emptyNull(String str) {
@@ -73,9 +75,7 @@ public class TextUtils {
     }
 
     public static boolean containChinese(String str) {
-        var p = Pattern.compile("[\u4E00-\u9FA5|\\！|\\，|\\。|\\（|\\）|\\《|\\》|\\“|\\”|\\？|\\：|\\；|\\【|\\】]");
-        var m = p.matcher(str);
-        return m.find();
+        return chinesePattern.matcher(str).find();
     }
 }
 
