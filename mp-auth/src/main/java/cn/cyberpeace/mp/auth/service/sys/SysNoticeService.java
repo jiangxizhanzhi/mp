@@ -39,7 +39,9 @@ public interface SysNoticeService extends BaseModelService<SysNoticeModel, Query
      * @param pageRequest
      * @return
      */
-    PageInfo currentUserNoticeMessages(SysNoticePageRequest pageRequest);
+    PageInfo getCurrentUserNoticeMessagesPage(SysNoticePageRequest pageRequest);
+
+    int getCurrentUserNoticeMessagesUnreadCount();
 
     SysNoticeDto noticeModel2NoticeDto(SysNoticeModel noticeModel, boolean checkCurrentUserIsRead);
 
