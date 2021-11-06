@@ -1180,7 +1180,7 @@ public class HumanCondition {
             }
 
             public AndConditionProxy andIn(String fieldName, Object[] fieldValue) {
-                this.andCondition.addCondition(fieldName, Connector.IN, fieldValue);
+                this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.IN, fieldValue);
                 return this;
             }
 
@@ -1189,7 +1189,7 @@ public class HumanCondition {
             }
 
             public AndConditionProxy andNotIn(String fieldName, Object[] fieldValue) {
-                this.andCondition.addCondition(fieldName, Connector.NOT_IN, fieldValue);
+                this.andCondition.addCondition(humanCondition.currentColumnName(fieldName), Connector.NOT_IN, fieldValue);
                 return this;
             }
 
