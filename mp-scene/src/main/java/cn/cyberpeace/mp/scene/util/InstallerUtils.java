@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.scene.util;
 
-import cn.cyberpeace.mp.base.util.TextUtils;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;

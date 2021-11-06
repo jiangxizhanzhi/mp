@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.base.constant;
 
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
-import cn.cyberpeace.mp.base.util.BeanUtils;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 
 /**
  * 模块下单例对象的快捷引用

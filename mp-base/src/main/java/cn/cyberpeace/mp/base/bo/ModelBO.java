@@ -1,9 +1,9 @@
 package cn.cyberpeace.mp.base.bo;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
-import cn.cyberpeace.mp.base.util.BeanUtils;
-import cn.cyberpeace.mp.base.util.ClassUtils;
-import cn.cyberpeace.mp.base.util.SerializableFunction;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
+import cn.cyberpeace.mp.base.util.basic.ClassUtils;
+import cn.cyberpeace.mp.base.util.define.SerializableFunction;
 import lombok.Data;
 
 import java.util.Arrays;

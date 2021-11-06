@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.scenepluginflow.plugin.flow;
 
-import cn.cyberpeace.mp.base.util.TextUtils;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.flow.enums.TaskActionEnum;
 import cn.cyberpeace.mp.flow.model.FlowTaskModel;
 import cn.cyberpeace.mp.flow.request.AddFlowTaskRequest;

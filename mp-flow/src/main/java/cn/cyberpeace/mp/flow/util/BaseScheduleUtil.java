@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.flow.util;
 
-import cn.cyberpeace.mp.base.util.ScheduledThreadPoolUtils;
+import cn.cyberpeace.mp.base.util.thread.ThreadPoolUtils;
 import cn.cyberpeace.mp.flow.model.base.FlowBaseModel;
 import cn.cyberpeace.mp.flow.service.ScheduleMethod;
 import lombok.Data;
@@ -43,7 +43,7 @@ public class BaseScheduleUtil<B extends FlowBaseModel, M extends ScheduleMethod>
         log.info("start task==> delay：{}，interval：{}，count：{}", delay, interval, count);
 
         if (count > 0) {
-            future = ScheduledThreadPoolUtils.getInstance().scheduleAtFixedRate (
+            future = ThreadPoolUtils.getScheduledExecutorService().scheduleAtFixedRate (
                     this::executor, delay, interval, TimeUnit.SECONDS
             );
         } else {

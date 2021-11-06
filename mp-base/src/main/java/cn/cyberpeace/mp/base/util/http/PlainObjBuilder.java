@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.base.util.http;
 
-import cn.cyberpeace.mp.base.util.BeanUtils;
-import cn.cyberpeace.mp.base.util.SerializableFunction;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
+import cn.cyberpeace.mp.base.util.define.SerializableFunction;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 
@@ -44,7 +44,7 @@ public class PlainObjBuilder<T> extends AbstractBuilder {
     @Override
     public ParamsContainer build() {
         // 默认全部
-        List<Field> finalList = BeanUtils.getFieldsByObject(this.data);
+        List<Field> finalList = ParamUtils.getFieldsByObject(this.data);
         if (!this.includeFields.isEmpty()) {
             // 只取包含的
             finalList = finalList.stream().filter(field -> this.includeFields.contains(field.getName())).collect(Collectors.toList());

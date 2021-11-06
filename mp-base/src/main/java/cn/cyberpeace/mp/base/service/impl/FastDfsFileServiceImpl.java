@@ -105,7 +105,7 @@ public class FastDfsFileServiceImpl implements FileService {
             responseData.setFileSize(file.getSize());
         } catch (MpRuntimeException e) {
             responseData.setSuccess(false);
-            responseData.setCode(e.getErrorCode());
+//            responseData.setCode(e.getErrorCode());
             responseData.setMessage(MessageUtils.get(e.getMessage()));
         }
 

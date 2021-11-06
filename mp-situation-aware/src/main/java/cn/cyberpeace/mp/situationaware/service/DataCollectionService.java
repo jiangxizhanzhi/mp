@@ -3,7 +3,8 @@ package cn.cyberpeace.mp.situationaware.service;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
-import cn.cyberpeace.mp.base.util.LocalDateTimeUtils;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
+import cn.cyberpeace.mp.base.util.es.EsConstants;
 import cn.cyberpeace.mp.situationaware.repository.WazuhRepository;
 import cn.cyberpeace.mp.situationaware.model.*;
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
@@ -134,7 +135,7 @@ public class DataCollectionService {
                     result.setAgentId(model.getAgent().getId());
                     result.setAgentName(model.getAgent().getName());
                     result.setMacIds(multiValueMap.get(model.getAgent().getId()));
-                    result.setTime(LocalDateTimeUtils.dateToLocalDateTime(model.getTimestamp()));
+                    result.setTime(TimeUtils.dateToLocalDateTime(model.getTimestamp()));
                     return result;
                 }).collect(Collectors.toList());
 
@@ -248,7 +249,7 @@ public class DataCollectionService {
         return FileEventModel.builder()
             .filePath(wazuhFileRoot.getSyscheck().getPath())
             .size(wazuhFileRoot.getSyscheck().getSizeAfter())
-            .updateTime(LocalDateTimeUtils.dateToLocalDateTime(wazuhFileRoot.getTimestamp()))
+            .updateTime(TimeUtils.dateToLocalDateTime(wazuhFileRoot.getTimestamp()))
             .user(wazuhFileRoot.getSyscheck().getUnameAfter())
             .action(wazuhFileRoot.getSyscheck().getEvent())
             .macIds(multiValueMap.get(wazuhFileRoot.getAgent().getId()))
@@ -310,8 +311,8 @@ public class DataCollectionService {
 
         //时间查询
         boolQueryBuilder.must(QueryBuilders.rangeQuery("timestamp")
-            .from(LocalDateTimeUtils.localDateTimeToString(wazuhEventRequest.getStartTime(), LocalDateTimeUtils.esdateTimeFormatter))
-            .to(LocalDateTimeUtils.localDateTimeToString(wazuhEventRequest.getEndTime(), LocalDateTimeUtils.esdateTimeFormatter)));
+            .from(TimeUtils.localDateTimeToString(wazuhEventRequest.getStartTime(), EsConstants.esDateTimeFormatter))
+            .to(TimeUtils.localDateTimeToString(wazuhEventRequest.getEndTime(), EsConstants.esDateTimeFormatter)));
     }
 
     private void buildAgentNameQuery(List<String> names, BoolQueryBuilder boolQueryBuilder) {

@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.cscene.bo;
 
-import cn.cyberpeace.mp.base.context.SysContextUtils;
+import cn.cyberpeace.mp.base.context.SysContextHolder;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,7 +21,7 @@ public class CsceneContextBO {
 
     public void loadTransparentContext() {
         if (context != null) {
-            SysContextUtils.setPassThroughMap(context);
+            SysContextHolder.setPassThroughMap(context);
         }
     }
 }

@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.base.service.result;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.service.code.MessageServiceCode;
 import cn.cyberpeace.mp.base.service.code.ServiceCode;
 import cn.cyberpeace.mp.base.util.MessageUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -30,6 +31,9 @@ public class BaseServiceResult<T, R> {
     @ApiModelProperty(value = "错误详细说明")
     private String detail;
 
+    @ApiModelProperty(value = "服务器时间UTC毫秒")
+    private Long timestamp = System.currentTimeMillis();
+
     @JsonIgnore
     private ServiceCode serviceCode = BaseErrorCode.SUCCESS;
 
@@ -42,15 +46,12 @@ public class BaseServiceResult<T, R> {
     }
 
     public BaseServiceResult(T source, ServiceCode code) {
-        this();
-        setSource(source);
+        this(source);
         setServiceCode(code);
     }
 
     public BaseServiceResult(T source, ServiceCode code, String detail) {
-        this();
-        setSource(source);
-        setServiceCode(code);
+        this(source, code);
         setDetail(detail);
     }
 
@@ -72,7 +73,11 @@ public class BaseServiceResult<T, R> {
         ServiceCode actualServiceCode = getServiceCode();
         if (actualServiceCode != null) {
             setCode(actualServiceCode.getCode());
-            setMessage(MessageUtils.get(actualServiceCode.getMessage()));
+            if (actualServiceCode instanceof MessageServiceCode) {
+                setMessage(((MessageServiceCode) actualServiceCode).generateMessage());
+            } else {
+                setMessage(MessageUtils.get(actualServiceCode.getMessage()));
+            }
         }
 
         return this;

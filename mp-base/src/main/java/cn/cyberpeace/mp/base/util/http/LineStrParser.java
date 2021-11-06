@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.base.util.http;
 
-import cn.cyberpeace.mp.base.util.BeanUtils;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
 
@@ -19,7 +19,7 @@ class LineStrParser implements InputParser {
         if (mode == ParseMode.SNAKE) {
             Map<String, Object> snakeKeyMap = Maps.newHashMapWithExpectedSize(values.size());
             for (Map.Entry<String, Object> entry : values.entrySet()) {
-                snakeKeyMap.put(BeanUtils.humpToLine(entry.getKey()), entry.getValue());
+                snakeKeyMap.put(TextUtils.humpToLine(entry.getKey()), entry.getValue());
             }
             return doParse(snakeKeyMap);
         } else {

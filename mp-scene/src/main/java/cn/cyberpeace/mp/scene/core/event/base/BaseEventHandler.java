@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.scene.core.event.base;
 
-import cn.cyberpeace.mp.base.annotation.ClassFieldNames;
+import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldNames;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.util.ClassUtils;
+import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.base.util.MessageUtils;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
 import lombok.Data;

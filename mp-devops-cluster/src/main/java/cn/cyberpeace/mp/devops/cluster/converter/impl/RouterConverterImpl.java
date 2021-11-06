@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.converter.impl;
 
-import cn.cyberpeace.mp.base.util.BeanUtils;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
+import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.converter.RouterConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.RouterPageConverterModel;
 import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
@@ -40,7 +41,7 @@ public class RouterConverterImpl implements RouterConverter {
     @Override
     public RouterPageConverterModel page(RouterPageRequest request, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
-        String getParams = BeanUtils.wrapperGetParamsByObject(request,ignoreFields);
+        String getParams = ParamUtils.wrapperGetParamsByObject(request,ignoreFields);
         RouterCloudPlatformModel model = routerService.page(getParams);
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getRouters())){
             return null;
@@ -58,7 +59,7 @@ public class RouterConverterImpl implements RouterConverter {
 
     @Override
     public Integer getTotalRouters(RouterPageRequest request) {
-        String getParams = BeanUtils.wrapperGetParamsByObject(request,this.getTotalPageIgnoreField());
+        String getParams = ParamUtils.wrapperGetParamsByObject(request,this.getTotalPageIgnoreField());
         RouterCloudPlatformModel page = routerService.page(getParams);
         return Objects.isNull(page) || Objects.isNull(page.getTotal()) ? NumberUtils.INTEGER_ZERO : page.getTotal();
     }

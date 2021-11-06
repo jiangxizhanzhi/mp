@@ -4,7 +4,7 @@ import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.base.util.BeanUtils;
+import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.constant.DevopsClusterErrorCode;
 import cn.cyberpeace.mp.devops.cluster.converter.ImagesConverter;
@@ -396,7 +396,7 @@ public class ImagesController {
     public Result<List<Flavor>> pageFlavor(){
         BasePageRequest request = new BasePageRequest();
         request.setPerPage(1000);
-        String getParams = BeanUtils.wrapperGetParamsByObject(Boolean.TRUE,request);
+        String getParams = ParamUtils.wrapperGetParamsByObject(Boolean.TRUE,request);
         FlavorCloudPlatformModel page = flavorService.page(getParams);
         if (Objects.isNull(page) ||  Objects.isNull(page.getData())){
             return new Result();

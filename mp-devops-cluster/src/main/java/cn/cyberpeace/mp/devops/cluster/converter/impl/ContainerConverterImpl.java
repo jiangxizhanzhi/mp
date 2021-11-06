@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.converter.impl;
 
-import cn.cyberpeace.mp.base.util.BeanUtils;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
+import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.converter.ContainerConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ContainerConvertModel;
 import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
@@ -45,7 +46,7 @@ public class ContainerConverterImpl implements ContainerConverter {
     @Override
     public ContainerConvertModel page(ContainerPageRequest request, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
-        String getParams = BeanUtils.wrapperGetParamsByObject(request,ignoreFields);
+        String getParams = ParamUtils.wrapperGetParamsByObject(request,ignoreFields);
         ContainerCloudPlatformModel model = containerService.page(getParams);
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getContainers())){
             return null;
@@ -71,7 +72,7 @@ public class ContainerConverterImpl implements ContainerConverter {
 
     @Override
     public Integer getTotalContainers(ContainerPageRequest request) {
-        String getParams = BeanUtils.wrapperGetParamsByObject(request,this.getTotalPageIgnoreField());
+        String getParams = ParamUtils.wrapperGetParamsByObject(request,this.getTotalPageIgnoreField());
         ContainerCloudPlatformModel page = containerService.page(getParams);
         return Objects.isNull(page) || Objects.isNull(page.getTotal()) ? NumberUtils.INTEGER_ZERO : page.getTotal();
     }

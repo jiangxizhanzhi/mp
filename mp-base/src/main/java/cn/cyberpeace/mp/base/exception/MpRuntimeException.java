@@ -7,13 +7,10 @@ import lombok.Data;
  * 监控运行时异常
  */
 @Data
-public class MpRuntimeException extends RuntimeException{
-    private String errorCode;
+public class MpRuntimeException extends RuntimeException {
 
     private ServiceCode serviceCode;
-    /**
-     * stack info
-     */
+
     private String detail;
 
     public MpRuntimeException(String message) {
@@ -30,4 +27,6 @@ public class MpRuntimeException extends RuntimeException{
         this.serviceCode = serviceCode;
         this.detail = detail;
     }
+
+
 }

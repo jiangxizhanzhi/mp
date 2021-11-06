@@ -4,7 +4,8 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.util.HttpUtils;
-import cn.cyberpeace.mp.base.util.LocalDateTimeUtils;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
+import cn.cyberpeace.mp.base.util.es.EsConstants;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
 import cn.cyberpeace.mp.situationaware.model.SPIViewRequest;
@@ -122,8 +123,8 @@ public class NetworkTrafficService {
         var boolQueryBuilder = QueryBuilders.boolQuery();
         //时间查询
         boolQueryBuilder.must(QueryBuilders.rangeQuery("timestamp")
-            .from(LocalDateTimeUtils.localDateTimeToString(sessionRequest.getStartTime(), LocalDateTimeUtils.esdateTimeFormatter))
-            .to(LocalDateTimeUtils.localDateTimeToString(sessionRequest.getEndTime(), LocalDateTimeUtils.esdateTimeFormatter)));
+            .from(TimeUtils.localDateTimeToString(sessionRequest.getStartTime(), EsConstants.esDateTimeFormatter))
+            .to(TimeUtils.localDateTimeToString(sessionRequest.getEndTime(), EsConstants.esDateTimeFormatter)));
 
         //构造动态条件查询
         buildDynamicQuery(sessionRequest, boolQueryBuilder);

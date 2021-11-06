@@ -1,15 +1,9 @@
 package cn.cyberpeace.mp.auth.service.sys;
 
 import cn.cyberpeace.mp.auth.config.ActivationConfig;
-import cn.cyberpeace.mp.auth.dto.activation.ActivationItem;
-import cn.cyberpeace.mp.auth.dto.activation.ActivationModuleItem;
-import cn.cyberpeace.mp.auth.dto.activation.ActivationRequest;
-import cn.cyberpeace.mp.auth.dto.activation.ActivationResourceItem;
-import cn.cyberpeace.mp.auth.dto.activation.ActivationResponse;
-import cn.cyberpeace.mp.auth.dto.activation.ActivationVerifyInfo;
+import cn.cyberpeace.mp.auth.dto.activation.*;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
-import cn.cyberpeace.mp.base.util.BeanUtils;
-import cn.cyberpeace.mp.base.util.IdGenerator;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Assert;
@@ -19,6 +13,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -164,7 +159,7 @@ public class SysActivationService {
         String expiredDate = dateTime.toString("yyyy-MM-dd");
         activationResponse.setExpiredDate(expiredDate);
 
-        String salt = IdGenerator.generateRandomStrNum(8);
+        String salt = RandomStringUtils.random(8);
         String jsonStr = JSON.toJSONString(activationResponse);
         String content = salt + jsonStr;
         log.info("salt:{}", salt);

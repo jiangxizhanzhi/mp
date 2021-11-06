@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.scenepluginflow.plugin;
 
-import cn.cyberpeace.mp.base.annotation.ClassFieldClasses;
+import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.scene.core.plugin.SceneConfigPluginHandler;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneConfigBO;

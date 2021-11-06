@@ -23,7 +23,7 @@ import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.base.util.IdGenerator;
+import cn.cyberpeace.mp.base.util.IdUtils;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.lang.Assert;
 import com.github.pagehelper.PageHelper;
@@ -189,7 +189,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
         if (StringUtils.isBlank(roleModel.getIdentifier())) {
             // 如果ident为空，则随机生成一个
-            roleModel.setIdentifier(String.valueOf(IdGenerator.generateGlobalId()));
+            roleModel.setIdentifier(IdUtils.globalId());
         }
 
         ObjServiceResult<RoleModel> result = create(roleModel);
@@ -276,7 +276,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         }
 
         RoleDto roleDto = new RoleDto();
-        cn.cyberpeace.mp.base.util.BeanUtils.copyProperties(roleModel, roleDto);
+        cn.cyberpeace.mp.base.util.basic.BeanUtils.copyProperties(roleModel, roleDto);
 
         List<TargetModel> targets = getRoleTargets(roleModel);
 
@@ -291,7 +291,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         }
 
         RolePermDto rolePermDto = new RolePermDto();
-        cn.cyberpeace.mp.base.util.BeanUtils.copyProperties(roleModel, rolePermDto);
+        cn.cyberpeace.mp.base.util.basic.BeanUtils.copyProperties(roleModel, rolePermDto);
 
         List<TargetModel> targets = getRoleTargets(roleModel);
 

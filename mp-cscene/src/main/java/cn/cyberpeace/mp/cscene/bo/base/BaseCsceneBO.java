@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.cscene.bo.base;
 
 import cn.cyberpeace.mp.base.bo.ModelBO;
-import cn.cyberpeace.mp.base.util.SerializableFunction;
+import cn.cyberpeace.mp.base.util.define.SerializableFunction;
 import cn.cyberpeace.mp.cscene.model.base.BaseCsceneModel;
 import cn.cyberpeace.mp.cscene.model.base.BaseCsceneRoleModel;
 import io.swagger.annotations.ApiModelProperty;

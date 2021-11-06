@@ -71,7 +71,7 @@
     </appender>
 
     <!--异步打印日志,任务放在阻塞队列中，如果队列达到80%，将会丢弃TRACE,DEBUG,INFO级别的日志任务，对性能要求不是太高的话不用启用-->
-    <appender name="ASYNC" class="cn.cyberpeace.mp.base.config.log.MpAsyncAppender">
+    <appender name="ASYNC" class="cn.cyberpeace.mp.base.config.log.LogAsyncAppender">
         <!--队列的深度，该值会影响性能，默认256-->
         <queueSize>512</queueSize>
         <!--设为0表示队列达到80%，也不丢弃任务-->

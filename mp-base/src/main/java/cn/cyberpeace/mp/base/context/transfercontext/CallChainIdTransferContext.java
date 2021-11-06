@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.base.context.transfercontext;
 
-import cn.cyberpeace.mp.base.context.SysContextUtils;
+import cn.cyberpeace.mp.base.context.SysContextHolder;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -12,11 +12,11 @@ public class CallChainIdTransferContext implements TransferContext<String> {
 
     @Override
     public String getValue() {
-        return SysContextUtils.getCallChainId();
+        return SysContextHolder.getCallChainId();
     }
 
     @Override
     public void setValue(String value) {
-        SysContextUtils.setCallChainId(value);
+        SysContextHolder.setCallChainId(value);
     }
 }

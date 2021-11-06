@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.converter.impl;
 
-import cn.cyberpeace.mp.base.util.BeanUtils;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
+import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.converter.ElasticIpConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ElasticIpConvertModel;
 import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
@@ -41,7 +42,7 @@ public class ElasticIpConvertImpl implements ElasticIpConverter {
     @Override
     public ElasticIpConvertModel page(ElasticIpPageRequest request, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
-        String getParams = BeanUtils.wrapperGetParamsByObject(request,ignoreFields);
+        String getParams = ParamUtils.wrapperGetParamsByObject(request,ignoreFields);
         final ElasticIpCloudPlatformModel model = networkService.pageElasticIp(getParams);
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getFloatingips())){
             return null;

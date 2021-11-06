@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.base.repository.condition;
 
-import cn.cyberpeace.mp.base.util.ClassUtils;
+import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.beans.BeanWrapper;

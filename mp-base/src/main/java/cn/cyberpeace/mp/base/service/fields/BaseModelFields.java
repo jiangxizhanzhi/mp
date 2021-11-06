@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.base.service.fields;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.fields.DynamicFields;
-import cn.cyberpeace.mp.base.util.ClassUtils;
+import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 
 public abstract class BaseModelFields extends BaseFields {
     public static final DynamicFields allFields = new DynamicFields(ClassUtils.getBeanClassFields(BaseModel.class));

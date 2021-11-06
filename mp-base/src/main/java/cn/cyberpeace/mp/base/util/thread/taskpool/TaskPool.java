@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.base.util.thread.taskpool;
 
-import cn.cyberpeace.mp.base.util.ClassUtils;
+import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.base.util.thread.ThreadUtils;
 import lombok.extern.slf4j.Slf4j;
 

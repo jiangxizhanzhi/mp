@@ -30,7 +30,7 @@ public class ServiceResult<T> extends BaseServiceResult<T, T> {
     @ApiModelProperty(value = "错误详细说明")
     private String detail;
     @ApiModelProperty(value = "服务器时间UTC毫秒")
-    private Long timestamp;
+    private Long timestamp = System.currentTimeMillis();
     @JsonIgnore
     @Builder.Default
     private ServiceCode serviceCode = BaseErrorCode.SUCCESS;
@@ -40,22 +40,16 @@ public class ServiceResult<T> extends BaseServiceResult<T, T> {
     public ServiceResult(T source) {
         this();
         setSource(source);
-        setTimestamp(System.currentTimeMillis());
     }
 
     public ServiceResult(T source, ServiceCode code) {
-        this();
-        setSource(source);
+        this(source);
         setServiceCode(code);
-        setTimestamp(System.currentTimeMillis());
     }
 
     public ServiceResult(T source, ServiceCode code, String detail) {
-        this();
-        setSource(source);
-        setServiceCode(code);
+        this(source, code);
         setDetail(detail);
-        setTimestamp(System.currentTimeMillis());
     }
 
     @Override
@@ -65,6 +59,7 @@ public class ServiceResult<T> extends BaseServiceResult<T, T> {
     }
 
     /**
+     * @Deprecated 不允许返回没有类型的ServiceResult
      * 返回成功
      * @return
      */
@@ -76,6 +71,7 @@ public class ServiceResult<T> extends BaseServiceResult<T, T> {
     }
 
     /**
+     * @Deprecated 不允许返回没有类型的ServiceResult
      * 返回成功，带数据
      * @param source
      * @return
@@ -90,6 +86,7 @@ public class ServiceResult<T> extends BaseServiceResult<T, T> {
     }
 
     /**
+     * @Deprecated 不允许返回没有类型的ServiceResult
      * 返回失败
      * @param errorCode
      * @return
@@ -99,6 +96,7 @@ public class ServiceResult<T> extends BaseServiceResult<T, T> {
     }
 
     /**
+     * @Deprecated 不允许返回没有类型的ServiceResult
      * 返回通用失败信息
      * @param msg
      * @return
@@ -111,6 +109,7 @@ public class ServiceResult<T> extends BaseServiceResult<T, T> {
     }
 
     /**
+     * @Deprecated 不允许返回没有类型的ServiceResult
      * 返回自定义失败信息
      * @param errorCode
      * @param msg
@@ -121,20 +120,6 @@ public class ServiceResult<T> extends BaseServiceResult<T, T> {
                 .code(errorCode.getCode())
                 .message(msg)
                 .build();
-    }
-
-    /**
-     * 返回自定义失败信息
-     * @param errorCode
-     * @param msg
-     * @return
-     */
-    public static ServiceResult fail(ServiceCode errorCode, String msg, String detail) {
-        return ServiceResult.builder()
-            .code(errorCode.getCode())
-            .detail(detail)
-            .message(msg)
-            .build();
     }
 
 }

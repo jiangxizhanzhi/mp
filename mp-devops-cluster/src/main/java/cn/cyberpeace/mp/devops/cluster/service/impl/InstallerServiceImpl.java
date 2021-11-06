@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.service.impl;
 
-import cn.cyberpeace.mp.base.util.BeanUtils;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.Installer;
@@ -49,7 +49,7 @@ public class InstallerServiceImpl extends BaseOpenStackServiceImpl implements In
         MultipartEntityBuilder builder = MultipartEntityBuilder.create();
         for (String key : keySet) {
             if (Objects.nonNull(installerMap.get(key)))
-                builder.addPart(BeanUtils.humpToLine(key), new StringBody(installerMap.get(key).toString(), ContentType.create("text/plain", Consts.UTF_8)));
+                builder.addPart(TextUtils.humpToLine(key), new StringBody(installerMap.get(key).toString(), ContentType.create("text/plain", Consts.UTF_8)));
         }
 
         int count = 1;

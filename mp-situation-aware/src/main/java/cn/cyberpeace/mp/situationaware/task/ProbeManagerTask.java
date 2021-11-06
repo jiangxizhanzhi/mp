@@ -1,7 +1,8 @@
 package cn.cyberpeace.mp.situationaware.task;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.util.LocalDateTimeUtils;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
+import cn.cyberpeace.mp.base.util.es.EsConstants;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
 import cn.cyberpeace.mp.situationaware.model.ProbeModel;
@@ -9,11 +10,6 @@ import cn.cyberpeace.mp.situationaware.model.enums.ProbeStatus;
 import cn.cyberpeace.mp.situationaware.repository.ProbeModelMapper;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import com.google.common.annotations.VisibleForTesting;
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-import javax.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.elasticsearch.action.search.SearchRequest;
@@ -27,6 +23,12 @@ import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
 
 /**
  *
@@ -73,8 +75,8 @@ public class ProbeManagerTask {
         boolQueryBuilder.must(QueryBuilders.termQuery("location", "command_" + probeModel.getProbeName()));
         //时间查询
         boolQueryBuilder.must(QueryBuilders.rangeQuery("timestamp")
-            .from(LocalDateTimeUtils.localDateTimeToString(startTime, LocalDateTimeUtils.esdateTimeFormatter))
-            .to(LocalDateTimeUtils.localDateTimeToString(endTime, LocalDateTimeUtils.esdateTimeFormatter)));
+            .from(TimeUtils.localDateTimeToString(startTime, EsConstants.esDateTimeFormatter))
+            .to(TimeUtils.localDateTimeToString(endTime, EsConstants.esDateTimeFormatter)));
         sourceBuilder.sort("timestamp", SortOrder.DESC);
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));

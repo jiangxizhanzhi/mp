@@ -1,36 +1,50 @@
 package cn.cyberpeace.mp.base.context;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import lombok.extern.slf4j.Slf4j;
 
-import java.util.Optional;
+import java.util.Map;
 
 /**
  * @Description 用于保存业务线程的上下文信息
  * @Author maojun
  * @Date 2021/8/31
  */
+@Slf4j
 public class SysContextHolder {
-    private static Logger log = LoggerFactory.getLogger(SysContextHolder.class);
 
-    private static ThreadLocal<SysContext> contextLocal = new ThreadLocal<>();
+    private static final ThreadLocal<SysContext> localSysContextHolder = new ThreadLocal<>();
 
-    public static SysContext get() {
-        if (contextLocal.get() == null) {
-            contextLocal.set(new BaseSysContext());
+    private SysContextHolder() {}
+
+    public static void resetSysContext() {
+        localSysContextHolder.remove();
+    }
+
+    public static SysContext getSysContext() {
+        var sysContext = localSysContextHolder.get();
+        if (sysContext == null) {
+            sysContext = new SysContext();
+            sysContext.setCallChainId(TextUtils.uuid());
+            localSysContextHolder.set(sysContext);
         }
-        return contextLocal.get();
+        return sysContext;
     }
 
-    public static void set(SysContext sysContext) {
-        if (Optional.ofNullable(contextLocal.get()).isPresent()) {
-            // 如果重复设置上下文，打印错误日志，但是不影响后续处理
-            log.info("BaseSysContext has already been created!");
-        }
-        contextLocal.set(sysContext);
+    public static String getCallChainId() {
+        return getSysContext().getCallChainId();
     }
 
-    public static void clear() {
-        contextLocal.remove();
+    public static void setCallChainId(String callChainId) {
+        getSysContext().setCallChainId(callChainId);
     }
+
+    public static void setPassThroughMap(Map<String, Object> map) {
+        getSysContext().setPassThroughMap(map);
+    }
+
+    public static Map<String, Object> getPassThroughMap() {
+        return getSysContext().getPassThroughMap();
+    }
+
 }

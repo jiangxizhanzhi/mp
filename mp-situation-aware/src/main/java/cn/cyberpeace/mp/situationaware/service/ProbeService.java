@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.situationaware.service;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
-import cn.cyberpeace.mp.base.util.TextUtils;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
 import cn.cyberpeace.mp.situationaware.model.ProbeModel;
 import cn.cyberpeace.mp.situationaware.model.ProbeParamModel;
@@ -138,7 +138,7 @@ public class ProbeService {
     public int modifyProbe(ProbeRequest probeRequest) {
         ProbeRequest mergedRequest = buildMergedRequest(probeRequest);
         try {
-            cn.cyberpeace.mp.base.util.BeanUtils.merge(mergedRequest, probeRequest);
+            cn.cyberpeace.mp.base.util.basic.BeanUtils.copyPropertiesIgnoreNull(probeRequest, mergedRequest);
         } catch (Exception e) {
             log.error("patch probe error probeId : {}", mergedRequest.getProbeId());
             throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_MODIFY_FAIL);
