@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.base.util;
+package cn.cyberpeace.mp.base.common;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
@@ -7,13 +7,13 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class MessageUtils {
+public class MessageCommon {
 
     private static MessageSource messageSource;
 
     @SuppressWarnings({"java:S1144", "java:S3010"})
-    private MessageUtils(MessageSource messageSource) {
-        MessageUtils.messageSource = messageSource;
+    private MessageCommon(MessageSource messageSource) {
+        MessageCommon.messageSource = messageSource;
     }
 
     public static String get(String msgKey) {

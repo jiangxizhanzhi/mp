@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.scene.core.event.base;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldNames;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
-import cn.cyberpeace.mp.base.util.MessageUtils;
+import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -168,7 +168,7 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
      * 开始事件
      */
     public int startEvent() {
-        var processMessage = MessageUtils.get("scene.event.start_message", MessageUtils.get(eventName));
+        var processMessage = MessageCommon.get("scene.event.start_message", MessageCommon.get(eventName));
         return triggerEvent(event, EventStatus.START, target.getProcess(), target.getProcessStatus(),
                 formatProcessMessage(processMessage));
     }
@@ -177,7 +177,7 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
      * 开始进程
      */
     public int startProcess(String process) {
-        var processMessage = MessageUtils.get("scene.event.start_message", getProcessName(process));
+        var processMessage = MessageCommon.get("scene.event.start_message", getProcessName(process));
         return triggerEvent(event, EventStatus.IN_PROGRESS, process, ProcessStatus.START,
                 formatProcessMessage(processMessage));
     }
@@ -186,7 +186,7 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
      * 进行中事件进程
      */
     public int progressProcess(String process) {
-        var processMessage = MessageUtils.get("scene.event.start_message", getProcessName(process));
+        var processMessage = MessageCommon.get("scene.event.start_message", getProcessName(process));
         return triggerEvent(event, EventStatus.IN_PROGRESS, process, ProcessStatus.IN_PROGRESS,
                 formatProcessMessage(processMessage));
     }
@@ -195,7 +195,7 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
      * 暂停事件
      */
     public int pauseProcess() {
-        var processMessage = MessageUtils.get("scene.event.pause_message",
+        var processMessage = MessageCommon.get("scene.event.pause_message",
                 getProcessName(target.getProcess()));
         return triggerEvent(target.getEvent(), EventStatus.PAUSE, target.getProcess(), ProcessStatus.PAUSE,
                 formatProcessMessage(processMessage));
@@ -205,7 +205,7 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
      * 结束事件进程
      */
     public int overProcess() {
-        var processMessage = MessageUtils.get("scene.event.over_message",
+        var processMessage = MessageCommon.get("scene.event.over_message",
                 getProcessName(target.getProcess()));
         return triggerEvent(event, EventStatus.IN_PROGRESS, target.getProcess(), ProcessStatus.OVER,
                 formatProcessMessage(processMessage));
@@ -215,7 +215,7 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
      * 结束事件
      */
     public int overEvent() {
-        var processMessage = MessageUtils.get("scene.event.over_message", MessageUtils.get(eventName));
+        var processMessage = MessageCommon.get("scene.event.over_message", MessageCommon.get(eventName));
         return triggerEvent(event, EventStatus.OVER, target.getProcess(), target.getProcessStatus(),
                 formatProcessMessage(processMessage));
     }
@@ -226,10 +226,10 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
     public int error(String errorMessage) {
         var processName = getProcessName(target.getProcess());
         if (StringUtils.isEmpty(processName)) {
-            processName = MessageUtils.get(eventName);
+            processName = MessageCommon.get(eventName);
         }
 
-        var processMessage = MessageUtils.get("scene.event.error_message", processName,
+        var processMessage = MessageCommon.get("scene.event.error_message", processName,
                 errorMessage);
         return triggerEvent(event, EventStatus.ABNORMAL, target.getProcess(), ProcessStatus.ABNORMAL,
                 formatProcessMessage(processMessage));

@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.scene.core.event.base;
 
-import cn.cyberpeace.mp.base.util.MessageUtils;
+import cn.cyberpeace.mp.base.common.MessageCommon;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,6 +13,6 @@ public class EventProcess {
     private String processName;
 
     public String getProcessNameText() {
-        return MessageUtils.get(processName);
+        return MessageCommon.get(processName);
     }
 }

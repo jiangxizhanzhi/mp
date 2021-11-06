@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp;
 
-import cn.cyberpeace.mp.base.util.MessageUtils;
+import cn.cyberpeace.mp.base.common.MessageCommon;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,12 +22,12 @@ public class CloudResponse<T> {
 
     public void setRequestError() {
         setCode(EXCEPTION_CODE);
-        setMessage(MessageUtils.get("sceneplugincloud.http.request_error"));
+        setMessage(MessageCommon.get("sceneplugincloud.http.request_error"));
     }
 
     public void setParseError() {
         setCode(EXCEPTION_CODE);
-        setMessage(MessageUtils.get("sceneplugincloud.http.parse_error"));
+        setMessage(MessageCommon.get("sceneplugincloud.http.parse_error"));
     }
 
     public boolean isSuccess() {

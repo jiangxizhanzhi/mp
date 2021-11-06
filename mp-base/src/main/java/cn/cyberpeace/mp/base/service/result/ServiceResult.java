@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.base.service.result;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.code.ServiceCode;
-import cn.cyberpeace.mp.base.util.MessageUtils;
+import cn.cyberpeace.mp.base.common.MessageCommon;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -92,7 +92,7 @@ public class ServiceResult<T> extends BaseServiceResult<T, T> {
      * @return
      */
     public static ServiceResult fail(ServiceCode errorCode) {
-        return new ServiceResult<>("", errorCode, MessageUtils.get(errorCode.getMessage())).asResult();
+        return new ServiceResult<>("", errorCode, MessageCommon.get(errorCode.getMessage())).asResult();
     }
 
     /**
