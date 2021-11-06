@@ -1,7 +1,8 @@
 package cn.cyberpeace.mp.aggregation.sceneimport.convert;
 
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.ImageInfoParseResult;
-import cn.cyberpeace.mp.base.util.JsonUtils;
+import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
@@ -126,17 +127,17 @@ class ConvertDataContainer {
 
     private ScenePluginDataBO getCloudPlugin() {
         ScenePluginDataBO scenePluginDataBO = new ScenePluginDataBO();
-        scenePluginDataBO.setScene(JsonUtils.beanToMap(this.cloudPluginConfig));
+        scenePluginDataBO.setScene(JsonCommon.beanToMap(this.cloudPluginConfig));
 
         Map<String, Map<String, Object>> mapPluginElements = new HashMap<>();
         for (Map.Entry<String, CloudPluginSceneConfigElementBO> entry : this.cloudPluginElements.entrySet()) {
-            mapPluginElements.put(entry.getKey(), JsonUtils.beanToMap(entry.getValue()));
+            mapPluginElements.put(entry.getKey(), JsonCommon.beanToMap(entry.getValue()));
         }
         scenePluginDataBO.setElements(mapPluginElements);
 
         Map<String, Map<String, Object>> mapPluginPorts = new HashMap<>();
         for (Map.Entry<String, CloudPluginSceneConfigElementPortBO> entry : this.cloudPluginPorts.entrySet()) {
-            mapPluginPorts.put(entry.getKey(), JsonUtils.beanToMap(entry.getValue()));
+            mapPluginPorts.put(entry.getKey(), JsonCommon.beanToMap(entry.getValue()));
         }
         scenePluginDataBO.setElementPorts(mapPluginPorts);
         return scenePluginDataBO;

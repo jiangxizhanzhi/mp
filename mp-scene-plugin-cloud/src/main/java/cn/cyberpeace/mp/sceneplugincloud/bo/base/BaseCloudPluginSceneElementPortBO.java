@@ -1,7 +1,8 @@
 package cn.cyberpeace.mp.sceneplugincloud.bo.base;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
-import cn.cyberpeace.mp.base.util.JsonUtils;
+import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementPortModel;
@@ -52,7 +53,7 @@ public abstract class BaseCloudPluginSceneElementPortBO<M extends BaseCloudPlugi
         super.fromModel(obj, ArrayUtils.addAll(ignoreFields,
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementPortModel::getAccessModes)));
         accessModes = StringUtils.isEmpty(obj.getAccessModes()) ? new ArrayList<>()
-                : JsonUtils.parse(obj.getAccessModes(), new TypeReference<List<CloudAccessMode>>(){});
+                : JsonCommon.parse(obj.getAccessModes(), new TypeReference<List<CloudAccessMode>>(){});
     }
 
     @Override
@@ -60,7 +61,7 @@ public abstract class BaseCloudPluginSceneElementPortBO<M extends BaseCloudPlugi
         var obj = super.toModel(ArrayUtils.addAll(ignoreFields,
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementPortModel::getAccessModes)));
         if (accessModes != null) {
-            obj.setAccessModes(JsonUtils.toJsonString(accessModes));
+            obj.setAccessModes(JsonCommon.stringify(accessModes));
         }
         return obj;
     }

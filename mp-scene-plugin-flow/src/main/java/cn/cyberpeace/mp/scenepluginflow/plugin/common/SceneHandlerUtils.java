@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.scenepluginflow.plugin.common;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneElementBO;
@@ -18,7 +19,7 @@ public class SceneHandlerUtils {
 
     public SceneHandlerUtils(FlowScenePluginHandler pluginHandler) {
         this.pluginHandler = pluginHandler;
-        flowExecutor = BeanUtils.getBean(FlowExecutor.class);
+        flowExecutor = BeanCommon.getBean(FlowExecutor.class);
     }
 
     public String createExecutor() {

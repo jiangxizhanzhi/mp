@@ -1,8 +1,9 @@
 package cn.cyberpeace.mp.cscene.bo.base;
 
 import cn.cyberpeace.mp.base.bo.ModelBO;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
-import cn.cyberpeace.mp.base.util.JsonUtils;
+import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.base.util.define.SerializableFunction;
 import cn.cyberpeace.mp.cscene.model.base.BaseCsceneRoleModel;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -42,11 +43,11 @@ public abstract class BaseCsceneRoleBO<M extends BaseCsceneRoleModel, T extends 
                 BeanUtils.getBeanGetterFieldName(BaseCsceneRoleModel::getVisibleNodes),
                 BeanUtils.getBeanGetterFieldName(BaseCsceneRoleModel::getUsers)));
         assetNodes = StringUtils.isEmpty(obj.getAssetNodes()) ? new ArrayList<>()
-                : JsonUtils.parse(obj.getAssetNodes(), new TypeReference<List<RoleNode>>(){});
+                : JsonCommon.parse(obj.getAssetNodes(), new TypeReference<List<RoleNode>>(){});
         visibleNodes = StringUtils.isEmpty(obj.getVisibleNodes()) ? new ArrayList<>()
-                : JsonUtils.parse(obj.getVisibleNodes(), new TypeReference<List<RoleNode>>(){});
+                : JsonCommon.parse(obj.getVisibleNodes(), new TypeReference<List<RoleNode>>(){});
         users = StringUtils.isEmpty(obj.getUsers()) ? new ArrayList<>()
-                : JsonUtils.parse(obj.getUsers(), new TypeReference<List<String>>(){});
+                : JsonCommon.parse(obj.getUsers(), new TypeReference<List<String>>(){});
     }
 
     @Override
@@ -56,13 +57,13 @@ public abstract class BaseCsceneRoleBO<M extends BaseCsceneRoleModel, T extends 
                 BeanUtils.getBeanGetterFieldName(BaseCsceneRoleModel::getVisibleNodes),
                 BeanUtils.getBeanGetterFieldName(BaseCsceneRoleModel::getUsers)));
         if (assetNodes != null) {
-            obj.setAssetNodes(JsonUtils.toJsonString(assetNodes));
+            obj.setAssetNodes(JsonCommon.stringify(assetNodes));
         }
         if (visibleNodes != null) {
-            obj.setVisibleNodes(JsonUtils.toJsonString(visibleNodes));
+            obj.setVisibleNodes(JsonCommon.stringify(visibleNodes));
         }
         if (users != null) {
-            obj.setUsers(JsonUtils.toJsonString(users));
+            obj.setUsers(JsonCommon.stringify(users));
         }
         return obj;
     }

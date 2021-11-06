@@ -1,12 +1,12 @@
 package cn.cyberpeace.mp.scene.core.base;
 
-import cn.cyberpeace.mp.base.util.basic.stereotype.BeanFieldNames;
-import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldNames;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
-import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
+import cn.cyberpeace.mp.base.common.stereotype.BeanFieldNames;
+import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldNames;
 import cn.cyberpeace.mp.base.util.define.ListTreeNode;
 import cn.cyberpeace.mp.scene.core.bo.base.*;
 import cn.cyberpeace.mp.scene.core.exception.SceneNotExistException;
@@ -182,7 +182,7 @@ public abstract class BaseSceneHandler<
     private void initPlugins(Map<String, ScenePluginDataBO> scenePluginData) {
         plugins.clear();
         pluginMap.clear();
-        BeanUtils.getBeanType(scenePluginHandlerInterface).forEach((name, pluginInstance) -> {
+        BeanCommon.getBeanType(scenePluginHandlerInterface).forEach((name, pluginInstance) -> {
             Class<?> pluginClass = pluginInstance.getClass();
             var pluginKeyAnnotation = pluginClass.getAnnotation(PluginKey.class);
             if (pluginKeyAnnotation == null) {
@@ -213,7 +213,7 @@ public abstract class BaseSceneHandler<
                              Map<String, List<String>> pluginKeyElementPortIds) {
         plugins.clear();
         pluginMap.clear();
-        BeanUtils.getBeanType(scenePluginHandlerInterface).forEach((name, pluginInstance) -> {
+        BeanCommon.getBeanType(scenePluginHandlerInterface).forEach((name, pluginInstance) -> {
             Class<?> pluginClass = pluginInstance.getClass();
             var pluginKeyAnnotation = pluginClass.getAnnotation(PluginKey.class);
             if (pluginKeyAnnotation == null) {
@@ -1029,7 +1029,7 @@ public abstract class BaseSceneHandler<
      */
     public void init(D sceneDataBO, boolean isAreaMode, C2 context) {
         ClassUtils.loadClassFields(this);
-        BeanUtils.loadBeanFields(this);
+        BeanCommon.loadBeanFields(this);
         this.context = context;
         this.isAreaMode = isAreaMode;
         fromData(sceneDataBO);
@@ -1052,7 +1052,7 @@ public abstract class BaseSceneHandler<
      */
     public void init(String sceneId, String areaId, boolean isAreaMode, C2 context) {
         ClassUtils.loadClassFields(this);
-        BeanUtils.loadBeanFields(this);
+        BeanCommon.loadBeanFields(this);
         this.context = context;
         this.sceneId = sceneId;
         this.areaId = areaId;

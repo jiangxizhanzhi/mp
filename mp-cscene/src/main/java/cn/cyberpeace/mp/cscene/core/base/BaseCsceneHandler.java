@@ -1,10 +1,10 @@
 package cn.cyberpeace.mp.cscene.core.base;
 
-import cn.cyberpeace.mp.base.util.basic.stereotype.BeanFieldNames;
+import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.stereotype.BeanFieldNames;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldNames;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
-import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.base.BaseCsceneBO;
@@ -259,7 +259,7 @@ public abstract class BaseCsceneHandler<
 
     public void initBase() {
         ClassUtils.loadClassFields(this);
-        BeanUtils.loadBeanFields(this);
+        BeanCommon.loadBeanFields(this);
     }
 
     public void initContext(CsceneContextBO context) {

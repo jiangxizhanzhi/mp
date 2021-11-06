@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.base.util;
+package cn.cyberpeace.mp.base.common;
 
 import cn.cyberpeace.mp.base.constant.BaseSingleton;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -20,13 +20,10 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
-/**
- * 基于base模块工具
- */
 @Component
-public class BaseUtils {
+public class BaseCommon {
 
-    private BaseUtils() {}
+    private BaseCommon() {}
 
     /**
      * 创建通用的object mapper对象 （设定了项目默认值）
@@ -56,7 +53,7 @@ public class BaseUtils {
      * @return 通用的object mapper对象
      */
     public static ObjectMapper createSnakeObjectMapper() {
-        var objectMapper = BaseUtils.createCommonObjectMapper();
+        var objectMapper = createCommonObjectMapper();
         objectMapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
         return objectMapper;
     }

@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.scene.core.scene;
 
-import cn.cyberpeace.mp.base.util.basic.BeanUtils;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.scene.core.bo.CollectedSceneBO;
 import cn.cyberpeace.mp.scene.core.bo.CollectedSceneElementBO;
 
@@ -10,7 +10,7 @@ import java.util.List;
 public interface SceneReporter {
 
     static List<SceneReporter> getReporters() {
-        return new ArrayList<>(BeanUtils.getBeanType(SceneReporter.class).values());
+        return new ArrayList<>(BeanCommon.getBeanType(SceneReporter.class).values());
     }
 
     void reportScene(CollectedSceneBO scene);

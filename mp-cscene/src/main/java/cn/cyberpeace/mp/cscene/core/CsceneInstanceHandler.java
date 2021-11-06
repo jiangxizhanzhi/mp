@@ -1,9 +1,9 @@
 package cn.cyberpeace.mp.cscene.core;
 
-import cn.cyberpeace.mp.base.util.basic.stereotype.BeanFieldClasses;
+import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstaneRoleBO;
@@ -79,7 +79,7 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
     @Override
     public void initBase() {
         super.initBase();
-        sceneService = BeanUtils.getBean(SceneService.class);
+        sceneService = BeanCommon.getBean(SceneService.class);
     }
 
     public void create() {

@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.base.util.basic;
 
-import cn.cyberpeace.mp.base.constant.BaseSingleton;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.*;
@@ -11,12 +10,6 @@ import java.util.TimeZone;
 @Slf4j
 public class TimeUtils {
 
-    public static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(BaseSingleton.baseAppConfig.getDateTimePattern());
-
-    public static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(BaseSingleton.baseAppConfig.getDatePattern());
-
-    public static final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern(BaseSingleton.baseAppConfig.getTimePattern());
-
     public static final DateTimeFormatter tzDateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
     public static final TimeZone utcTimeZone = TimeZone.getTimeZone("UTC");
@@ -25,46 +18,16 @@ public class TimeUtils {
 
     public static final DateTimeFormatter utcDateTimeFormatter = tzDateTimeFormatter.withZone(utcZoneId);
 
-    public static String localDateTimeToString(LocalDateTime localDateTime) {
-        return localDateTimeToString(localDateTime, dateTimeFormatter);
-    }
-
-    public static String localDateToString(LocalDate localDate) {
-        return localDateToString(localDate, dateFormatter);
-    }
-
-    public static String localTimeToString(LocalTime localTime) {
-        return localTimeToString(localTime, timeFormatter);
-    }
-
-    public static LocalDateTime stringToLocalDateTime(String localDateTimeStr) {
-        return stringToLocalDateTime(localDateTimeStr, dateTimeFormatter);
-    }
-
-    public static LocalDate stringToLocalDate(String localDateStr) {
-        return stringToLocalDate(localDateStr, dateFormatter);
-    }
-
-    public static LocalTime stringToLocalTime(String localTimeStr) {
-        return stringToLocalTime(localTimeStr, timeFormatter);
-    }
+    private TimeUtils() {}
 
     public static LocalDateTime utcStringToLocalDateTime(String utcDateTimeStr) {
         var zonedDatetime = ZonedDateTime.parse(utcDateTimeStr, utcDateTimeFormatter);
         return zonedDatetime.withZoneSameInstant(TimeZone.getDefault().toZoneId()).toLocalDateTime();
     }
 
-    public static String utcStringToLocalDateTimeString(String utcDateTimeStr) {
-        return localDateTimeToString(utcStringToLocalDateTime(utcDateTimeStr));
-    }
-
     public static String localDateTimeToUtcString(LocalDateTime localDateTime) {
         var zonedDatetime = localDateTime.atZone(TimeZone.getDefault().toZoneId());
         return zonedDatetime.format(utcDateTimeFormatter);
-    }
-
-    public static String localDateTimeStringToUtcString(String localDateTimeStr) {
-        return localDateTimeToUtcString(stringToLocalDateTime(localDateTimeStr));
     }
 
     public static String localDateTimeToString(LocalDateTime localDateTime, DateTimeFormatter dateTimeFormatter) {

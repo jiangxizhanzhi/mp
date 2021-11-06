@@ -1,8 +1,9 @@
 package cn.cyberpeace.mp.scene.core.plugin.base;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldNames;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
-import cn.cyberpeace.mp.base.util.JsonUtils;
+import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
 import lombok.Data;
@@ -59,7 +60,7 @@ public abstract class BasePluginHandler<S, E, P, C> {
             if (contextClass.equals(context.getClass())) {
                 this.context = (C) context;
             } else if (context instanceof Map) {
-                this.context = JsonUtils.mapToBean((Map<String, Object>) context, contextClass);
+                this.context = JsonCommon.mapToBean((Map<String, Object>) context, contextClass);
             } else {
                 this.context = (C) context;
             }
@@ -75,20 +76,20 @@ public abstract class BasePluginHandler<S, E, P, C> {
     public void fromData(ScenePluginDataBO pluginData) {
         var sceneSrc = pluginData.getScene();
         if (sceneSrc != null) {
-            scene = JsonUtils.mapToBean(sceneSrc, sceneBOClass);
+            scene = JsonCommon.mapToBean(sceneSrc, sceneBOClass);
         }
 
         var elementMapSrc = pluginData.getElements();
         if (elementMapSrc != null) {
             elementMapSrc.forEach((nodeId, elementData) -> {
-                elementMap.put(nodeId, JsonUtils.mapToBean(elementData, elementBOClass));
+                elementMap.put(nodeId, JsonCommon.mapToBean(elementData, elementBOClass));
             });
         }
 
         var elementPortMapSrc = pluginData.getElementPorts();
         if (elementPortMapSrc != null) {
             elementPortMapSrc.forEach((portId, elementPortData) -> {
-                elementPortMap.put(portId, JsonUtils.mapToBean(elementPortData, elementPortBOClass));
+                elementPortMap.put(portId, JsonCommon.mapToBean(elementPortData, elementPortBOClass));
             });
         }
     }
@@ -105,19 +106,19 @@ public abstract class BasePluginHandler<S, E, P, C> {
     public ScenePluginDataBO toData() {
         var pluginData = new ScenePluginDataBO();
         if (scene != null) {
-            pluginData.setScene(JsonUtils.beanToMap(scene));
+            pluginData.setScene(JsonCommon.beanToMap(scene));
         }
 
         Map<String, Map<String, Object>> elements = new HashMap<>();
         elementMap.forEach((nodeId, elementBO) -> {
-            elements.put(nodeId, JsonUtils.beanToMap(elementBO));
+            elements.put(nodeId, JsonCommon.beanToMap(elementBO));
             elementIds.add(nodeId);
         });
         pluginData.setElements(elements);
 
         Map<String, Map<String, Object>> elementPorts = new HashMap<>();
         elementPortMap.forEach((portId, elementPortBO) -> {
-            elementPorts.put(portId, JsonUtils.beanToMap(elementPortBO));
+            elementPorts.put(portId, JsonCommon.beanToMap(elementPortBO));
             elementPortIds.add(portId);
         });
         pluginData.setElementPorts(elementPorts);

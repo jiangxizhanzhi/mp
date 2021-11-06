@@ -1,7 +1,8 @@
 package cn.cyberpeace.mp.sceneplugincollection.bo.base;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
-import cn.cyberpeace.mp.base.util.JsonUtils;
+import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementBO;
 import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.model.base.BaseCollectionPluginSceneElementModel;
@@ -27,7 +28,7 @@ public abstract class BaseCollectionPluginSceneElementBO<M extends BaseCollectio
         super.fromModel(obj, ArrayUtils.addAll(ignoreFields,
                 BeanUtils.getBeanGetterFieldName(BaseCollectionPluginSceneElementModel::getProbes)));
         probes = StringUtils.isEmpty(obj.getProbes()) ? new ArrayList<>()
-                : JsonUtils.parse(obj.getProbes(), new TypeReference<List<Probe>>(){});
+                : JsonCommon.parse(obj.getProbes(), new TypeReference<List<Probe>>(){});
     }
 
     @Override
@@ -35,7 +36,7 @@ public abstract class BaseCollectionPluginSceneElementBO<M extends BaseCollectio
         var obj = super.toModel(ArrayUtils.addAll(ignoreFields,
                 BeanUtils.getBeanGetterFieldName(BaseCollectionPluginSceneElementModel::getProbes)));
         if (probes != null) {
-            obj.setProbes(JsonUtils.toJsonString(probes));
+            obj.setProbes(JsonCommon.stringify(probes));
         }
         return obj;
     }

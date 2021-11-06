@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.base.config.jackson;
 
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
-import cn.cyberpeace.mp.base.util.BaseUtils;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
