@@ -1,7 +1,5 @@
 package cn.cyberpeace.mp.auth.dto.login;
 
-import cn.cyberpeace.mp.auth.model.UserModel;
-import cn.cyberpeace.mp.base.service.result.ObjResult;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;

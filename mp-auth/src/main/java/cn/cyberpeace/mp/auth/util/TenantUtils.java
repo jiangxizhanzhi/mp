@@ -1,7 +1,5 @@
 package cn.cyberpeace.mp.auth.util;
 
-import org.apache.commons.lang3.StringUtils;
-
 /**
  * @Description:
  * @Author zhouxinghuai

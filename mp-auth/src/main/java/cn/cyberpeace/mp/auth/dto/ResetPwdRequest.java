@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.auth.dto.validate.UpdateGroup;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+
 import javax.validation.constraints.NotEmpty;
 
 /**

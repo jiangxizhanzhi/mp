@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.auth.service.fields;
 import cn.cyberpeace.mp.auth.model.TargetMenuModel;
 import cn.cyberpeace.mp.base.repository.fields.DynamicFields;
 import cn.cyberpeace.mp.base.service.fields.BaseModelFields;
-import cn.cyberpeace.mp.base.util.ClassUtils;
+import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import org.springframework.stereotype.Component;
 
 /**
