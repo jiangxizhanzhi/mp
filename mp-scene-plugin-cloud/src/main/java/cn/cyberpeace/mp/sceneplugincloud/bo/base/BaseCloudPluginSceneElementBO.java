@@ -1,7 +1,8 @@
 package cn.cyberpeace.mp.sceneplugincloud.bo.base;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
-import cn.cyberpeace.mp.base.util.JsonUtils;
+import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementBO;
 import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
@@ -136,21 +137,21 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAuxiliaryNetworkDnsNameservers),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAuxiliaryNetworkAllocationPools)));
         dnsNameservers = StringUtils.isEmpty(obj.getDnsNameservers()) ? new ArrayList<>()
-                : JsonUtils.parse(obj.getDnsNameservers(), new TypeReference<List<String>>(){});
+                : JsonCommon.parse(obj.getDnsNameservers(), new TypeReference<List<String>>(){});
         allocationPools = StringUtils.isEmpty(obj.getAllocationPools()) ? new ArrayList<>()
-                : JsonUtils.parse(obj.getAllocationPools(), new TypeReference<List<AllocationPool>>(){});
+                : JsonCommon.parse(obj.getAllocationPools(), new TypeReference<List<AllocationPool>>(){});
         staticRoutes = StringUtils.isEmpty(obj.getStaticRoutes()) ? new ArrayList<>()
-                : JsonUtils.parse(obj.getStaticRoutes(), new TypeReference<List<StaticRoute>>(){});
+                : JsonCommon.parse(obj.getStaticRoutes(), new TypeReference<List<StaticRoute>>(){});
         firewallRules = StringUtils.isEmpty(obj.getFirewallRules()) ? new ArrayList<>()
-                : JsonUtils.parse(obj.getFirewallRules(), new TypeReference<List<FirewallRule>>(){});
+                : JsonCommon.parse(obj.getFirewallRules(), new TypeReference<List<FirewallRule>>(){});
         initialTools = StringUtils.isEmpty(obj.getInitialTools()) ? new ArrayList<>()
-                : JsonUtils.parse(obj.getInitialTools(), new TypeReference<List<InitialTool>>(){});
+                : JsonCommon.parse(obj.getInitialTools(), new TypeReference<List<InitialTool>>(){});
         quickCreateParams = StringUtils.isEmpty(obj.getQuickCreateParams()) ? new ArrayList<>()
-                : JsonUtils.parse(obj.getQuickCreateParams(), new TypeReference<List<QuickCreateParam>>(){});
+                : JsonCommon.parse(obj.getQuickCreateParams(), new TypeReference<List<QuickCreateParam>>(){});
         auxiliaryNetworkDnsNameservers = StringUtils.isEmpty(obj.getAuxiliaryNetworkDnsNameservers()) ? new ArrayList<>()
-                : JsonUtils.parse(obj.getAuxiliaryNetworkDnsNameservers(), new TypeReference<List<String>>(){});
+                : JsonCommon.parse(obj.getAuxiliaryNetworkDnsNameservers(), new TypeReference<List<String>>(){});
         auxiliaryNetworkAllocationPools = StringUtils.isEmpty(obj.getAuxiliaryNetworkAllocationPools()) ? new ArrayList<>()
-                : JsonUtils.parse(obj.getAuxiliaryNetworkAllocationPools(), new TypeReference<List<AllocationPool>>(){});
+                : JsonCommon.parse(obj.getAuxiliaryNetworkAllocationPools(), new TypeReference<List<AllocationPool>>(){});
     }
 
     @Override
@@ -165,28 +166,28 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAuxiliaryNetworkDnsNameservers),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAuxiliaryNetworkAllocationPools)));
         if (dnsNameservers != null) {
-            obj.setDnsNameservers(JsonUtils.toJsonString(dnsNameservers));
+            obj.setDnsNameservers(JsonCommon.stringify(dnsNameservers));
         }
         if (allocationPools != null) {
-            obj.setAllocationPools(JsonUtils.toJsonString(allocationPools));
+            obj.setAllocationPools(JsonCommon.stringify(allocationPools));
         }
         if (staticRoutes != null) {
-            obj.setStaticRoutes(JsonUtils.toJsonString(staticRoutes));
+            obj.setStaticRoutes(JsonCommon.stringify(staticRoutes));
         }
         if (firewallRules != null) {
-            obj.setFirewallRules(JsonUtils.toJsonString(firewallRules));
+            obj.setFirewallRules(JsonCommon.stringify(firewallRules));
         }
         if (initialTools != null) {
-            obj.setInitialTools(JsonUtils.toJsonString(initialTools));
+            obj.setInitialTools(JsonCommon.stringify(initialTools));
         }
         if (quickCreateParams != null) {
-            obj.setQuickCreateParams(JsonUtils.toJsonString(quickCreateParams));
+            obj.setQuickCreateParams(JsonCommon.stringify(quickCreateParams));
         }
         if (auxiliaryNetworkDnsNameservers != null) {
-            obj.setAuxiliaryNetworkDnsNameservers(JsonUtils.toJsonString(auxiliaryNetworkDnsNameservers));
+            obj.setAuxiliaryNetworkDnsNameservers(JsonCommon.stringify(auxiliaryNetworkDnsNameservers));
         }
         if (auxiliaryNetworkAllocationPools != null) {
-            obj.setAuxiliaryNetworkAllocationPools(JsonUtils.toJsonString(auxiliaryNetworkAllocationPools));
+            obj.setAuxiliaryNetworkAllocationPools(JsonCommon.stringify(auxiliaryNetworkAllocationPools));
         }
         return obj;
     }

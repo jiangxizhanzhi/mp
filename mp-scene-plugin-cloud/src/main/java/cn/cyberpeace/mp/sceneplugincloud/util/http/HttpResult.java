@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincloud.util.http;
 
-import cn.cyberpeace.mp.base.util.JsonUtils;
+import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -36,7 +37,7 @@ public class HttpResult {
 
     public static Map<String, Object> parseResultMap(String result) {
         if (StringUtils.isNotBlank(result)) {
-            return JsonUtils.parse(result, new TypeReference<Map<String, Object>>() {});
+            return JsonCommon.parse(result, new TypeReference<Map<String, Object>>() {});
         } else {
             return null;
         }
@@ -44,7 +45,7 @@ public class HttpResult {
 
     public static <T> T parseResultBean(String result, TypeReference<T> valueTypeRef) {
         if (StringUtils.isNotBlank(result)) {
-            return JsonUtils.parse(result, valueTypeRef);
+            return JsonCommon.parse(result, valueTypeRef);
         } else {
             return null;
         }

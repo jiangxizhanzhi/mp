@@ -1,10 +1,10 @@
 package cn.cyberpeace.mp.base.message.rabbitmq;
 
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.context.transfercontext.TransferContext;
 import cn.cyberpeace.mp.base.message.FormatMessage;
 import cn.cyberpeace.mp.base.message.MessageConverter;
-import cn.cyberpeace.mp.base.util.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
 
@@ -54,7 +54,7 @@ public abstract class BaseSimpleMessageReceiver extends BaseMessageReceiver {
 
         T data = null;
         if (rawData != null) {
-            data = JsonUtils.mapToBean(rawData, dataClass);
+            data = JsonCommon.mapToBean(rawData, dataClass);
         }
         return new FormatMessage<>(data, formatMessage.getType(), formatMessage.getContext());
     }

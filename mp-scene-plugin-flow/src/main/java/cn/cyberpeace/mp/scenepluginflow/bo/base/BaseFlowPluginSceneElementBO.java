@@ -1,7 +1,8 @@
 package cn.cyberpeace.mp.scenepluginflow.bo.base;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
-import cn.cyberpeace.mp.base.util.JsonUtils;
+import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementBO;
 import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementBO;
 import cn.cyberpeace.mp.scenepluginflow.model.base.BaseFlowPluginSceneElementModel;
@@ -27,7 +28,7 @@ public abstract class BaseFlowPluginSceneElementBO<M extends BaseFlowPluginScene
         super.fromModel(obj, ArrayUtils.addAll(ignoreFields,
                 BeanUtils.getBeanGetterFieldName(BaseFlowPluginSceneElementModel::getFlows)));
         flows = StringUtils.isEmpty(obj.getFlows()) ? new ArrayList<>()
-                : JsonUtils.parse(obj.getFlows(), new TypeReference<List<Flow>>(){});
+                : JsonCommon.parse(obj.getFlows(), new TypeReference<List<Flow>>(){});
     }
 
     @Override
@@ -35,7 +36,7 @@ public abstract class BaseFlowPluginSceneElementBO<M extends BaseFlowPluginScene
         var obj = super.toModel(ArrayUtils.addAll(ignoreFields,
                 BeanUtils.getBeanGetterFieldName(BaseFlowPluginSceneElementModel::getFlows)));
         if (flows != null) {
-            obj.setFlows(JsonUtils.toJsonString(flows));
+            obj.setFlows(JsonCommon.stringify(flows));
         }
         return obj;
     }

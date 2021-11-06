@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.base.service.impl;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
@@ -11,7 +12,6 @@ import cn.cyberpeace.mp.base.service.fields.BaseModelFields;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.*;
 import cn.cyberpeace.mp.base.service.stereotype.CustomConditionClass;
-import cn.cyberpeace.mp.base.util.JsonUtils;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -120,7 +120,7 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
                 queryParams.getSearch(), queryParams.getSearchFields(), queryParams.getOrders(), queryParams.getPage(),
                 queryParams.getPageSize());
         loadListFilterCondition(humanCondition, queryParams);
-        humanCondition.setCustomCondition(getCustomCondition(JsonUtils.beanToMap(queryParams),
+        humanCondition.setCustomCondition(getCustomCondition(JsonCommon.beanToMap(queryParams),
                 CustomConditionClass.class));
 
         List<M> data;

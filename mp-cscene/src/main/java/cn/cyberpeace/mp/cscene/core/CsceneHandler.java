@@ -1,10 +1,10 @@
 package cn.cyberpeace.mp.cscene.core;
 
-import cn.cyberpeace.mp.base.util.basic.stereotype.BeanFieldClasses;
+import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
-import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
@@ -141,10 +141,10 @@ public class CsceneHandler extends BaseCsceneHandler<
     @Override
     public void initBase() {
         super.initBase();
-        sceneService = BeanUtils.getBean(SceneService.class);
-        sceneConfigService = BeanUtils.getBean(SceneConfigService.class);
-        csceneInstanceMapper = BeanUtils.getBean(CsceneInstanceMapper.class);
-        csceneInstanceRoleMapper = BeanUtils.getBean(CsceneInstanceRoleMapper.class);
+        sceneService = BeanCommon.getBean(SceneService.class);
+        sceneConfigService = BeanCommon.getBean(SceneConfigService.class);
+        csceneInstanceMapper = BeanCommon.getBean(CsceneInstanceMapper.class);
+        csceneInstanceRoleMapper = BeanCommon.getBean(CsceneInstanceRoleMapper.class);
     }
 
     public CsceneBO toData(boolean withInstance) {

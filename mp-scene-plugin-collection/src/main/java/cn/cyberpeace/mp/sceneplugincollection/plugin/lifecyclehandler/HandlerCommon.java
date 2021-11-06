@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.thread.taskpool.TaskPool;
 import cn.cyberpeace.mp.scene.core.plugin.common.PluginSceneEventHandlerCommon;
@@ -14,7 +15,7 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CollectionScene
 
     public HandlerCommon(CollectionScenePluginHandler pluginHandler, TaskPool taskPool, int event) {
         super(pluginHandler, taskPool, event);
-        flowCollector = BeanUtils.getBean(FlowCollector.class);
+        flowCollector = BeanCommon.getBean(FlowCollector.class);
     }
 
 }

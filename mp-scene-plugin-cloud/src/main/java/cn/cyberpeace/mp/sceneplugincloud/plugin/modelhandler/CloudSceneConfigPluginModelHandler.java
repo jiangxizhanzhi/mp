@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.modelhandler;
 
-import cn.cyberpeace.mp.base.util.basic.stereotype.BeanFieldClasses;
+import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;

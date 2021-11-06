@@ -1,9 +1,9 @@
 package cn.cyberpeace.mp.scene.core.plugin.base;
 
-import cn.cyberpeace.mp.base.util.basic.stereotype.BeanFieldNames;
+import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.stereotype.BeanFieldNames;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldNames;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
-import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementBO;
@@ -349,7 +349,7 @@ public class BasePluginModelHandler<
      */
     public void init(H scenePluginHandler) {
         ClassUtils.loadClassFields(this);
-        BeanUtils.loadBeanFields(this);
+        BeanCommon.loadBeanFields(this);
 
         this.scenePluginHandler = scenePluginHandler;
     }

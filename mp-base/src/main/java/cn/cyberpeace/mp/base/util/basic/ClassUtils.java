@@ -27,7 +27,6 @@ public class ClassUtils {
 
     private static final Map<Class<?>, Map<String, Class<?>>> beanClassFieldTypesCache = new ConcurrentHashMap<>();
 
-
     private ClassUtils() {}
 
     public static Field getField(Class<?> clazz, String fieldName, boolean findSuper, boolean ignoreNotFound) {

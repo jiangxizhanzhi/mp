@@ -1,7 +1,8 @@
 package cn.cyberpeace.mp.scene.core.bo.base;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
-import cn.cyberpeace.mp.base.util.JsonUtils;
+import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.base.util.define.SerializableFunction;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -45,7 +46,7 @@ public abstract class BaseSceneElementBO<M extends BaseSceneElementModel, P exte
         super.fromModel(obj, ArrayUtils.addAll(ignoreFields,
                 BeanUtils.getBeanGetterFieldName(BaseSceneElementModel::getInitCommands)));
         initCommands = StringUtils.isEmpty(obj.getInitCommands()) ? new ArrayList<>()
-                : JsonUtils.parse(obj.getInitCommands(), new TypeReference<List<String>>(){});
+                : JsonCommon.parse(obj.getInitCommands(), new TypeReference<List<String>>(){});
     }
 
     @Override
@@ -53,7 +54,7 @@ public abstract class BaseSceneElementBO<M extends BaseSceneElementModel, P exte
         var obj = super.toModel(ArrayUtils.addAll(ignoreFields,
                 BeanUtils.getBeanGetterFieldName(BaseSceneElementModel::getInitCommands)));
         if (initCommands != null) {
-            obj.setInitCommands(JsonUtils.toJsonString(initCommands));
+            obj.setInitCommands(JsonCommon.stringify(initCommands));
         }
         return obj;
     }

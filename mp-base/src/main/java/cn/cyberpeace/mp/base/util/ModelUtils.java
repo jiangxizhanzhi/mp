@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.base.util;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.model.stereotype.*;
-import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 
 import java.lang.reflect.Field;
@@ -44,7 +44,7 @@ public class ModelUtils {
             var defaultGenAnnotation = field.getAnnotation(DefaultGen.class);
             if (defaultGenAnnotation != null) {
                 var generatorClass = defaultGenAnnotation.value();
-                defaultValue = BeanUtils.getBean(generatorClass);
+                defaultValue = BeanCommon.getBean(generatorClass);
             }
         }
 

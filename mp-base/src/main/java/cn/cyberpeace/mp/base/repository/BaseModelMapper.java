@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.base.repository;
 
 import cn.cyberpeace.mp.base.annotation.Recommendation;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.Condition;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
@@ -35,7 +36,7 @@ public interface BaseModelMapper<M extends BaseModel> {
     Class<?> modelClass = null;
 
     private static CommonMapper getCommonMapper() {
-        return BeanUtils.getBean(CommonMapper.class);
+        return BeanCommon.getBean(CommonMapper.class);
     }
 
     private static Class<?> getMapperInterface(Proxy proxy) {
@@ -134,7 +135,7 @@ public interface BaseModelMapper<M extends BaseModel> {
         String mapperId = getMapperInterface().getName() + "." + humanName;
         MappedStatement mappedStatement;
         try {
-            mappedStatement = BeanUtils.getBean(SqlSessionFactory.class).getConfiguration().getMappedStatement(
+            mappedStatement = BeanCommon.getBean(SqlSessionFactory.class).getConfiguration().getMappedStatement(
                     mapperId);
         } catch (Exception e) {
             return null;

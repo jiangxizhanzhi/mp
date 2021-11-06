@@ -1,7 +1,8 @@
 package cn.cyberpeace.mp.scene.core.bo.base;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
-import cn.cyberpeace.mp.base.util.JsonUtils;
+import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementPortModel;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.swagger.annotations.ApiModelProperty;
@@ -50,7 +51,7 @@ public abstract class BaseSceneElementPortBO<M extends BaseSceneElementPortModel
                 BeanUtils.getBeanGetterFieldName(BaseSceneElementPortModel::getAccessModes)));
         setId(obj.getPortId());
         accessModes = StringUtils.isEmpty(obj.getAccessModes()) ? new ArrayList<>()
-                : JsonUtils.parse(obj.getAccessModes(), new TypeReference<List<AccessMode>>(){});
+                : JsonCommon.parse(obj.getAccessModes(), new TypeReference<List<AccessMode>>(){});
     }
 
     @Override
@@ -59,7 +60,7 @@ public abstract class BaseSceneElementPortBO<M extends BaseSceneElementPortModel
                 BeanUtils.getBeanGetterFieldName(BaseSceneElementPortModel::getAccessModes)));
         obj.setPortId(id);
         if (accessModes != null) {
-            obj.setAccessModes(JsonUtils.toJsonString(accessModes));
+            obj.setAccessModes(JsonCommon.stringify(accessModes));
         }
         return obj;
     }
