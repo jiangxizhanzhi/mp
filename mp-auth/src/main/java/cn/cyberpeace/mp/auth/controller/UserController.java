@@ -115,6 +115,7 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
         return super.delete(id);
     }
 
+
     @Override
     @ApiOperation(value = "查询指定id数据 附带组织，角色信息", notes = "")
     @ApiImplicitParams({
@@ -126,6 +127,7 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
         UserDto userDto = getModelService().getUserDto(id);
         return ResultUtils.obj2ObjServiceResult(userDto);
     }
+
 
     @ApiOperation(value = "查询当前登录用户信息 附带组织，角色信息", notes = "")
     @GetMapping("/current")
@@ -152,6 +154,7 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
     }
 
 
+    /*
     @ApiOperation(value = "修改密码", notes = "")
     @PostMapping("/resetpwd")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "重置密码", target = AuthLogConstant.TARGET_USER)
@@ -225,16 +228,6 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
     }
 
 
-    /*
-    @ApiOperation(value = "用户在线报告", notes = "")
-    @GetMapping("/olreport")
-    public ServiceResult onlineReport(UserOnlineReportPageRequest pageRequest) {
-        pageRequest.ensure();
-        PageInfo pageInfo = userOnlineReportService.page(pageRequest);
-        return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
-    }*/
-
-
     @ApiOperation(value = "用户在线报告", notes = "")
     @GetMapping("/olreport")
     public ServiceResult onlineReport(UserOnlineRecordSummaryPageRequest pageRequest) {
@@ -248,17 +241,7 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
     public ServiceResult<UserOnlineCntDto> onlineUserCnt() {
         UserOnlineCntDto userOnlineCntDto = userOnlineRecordService.onlineUserCnt();
         return ServiceResult.success(userOnlineCntDto);
-    }
-
-
-
-    @ApiOperation(value = "查询用户操作日志", notes = "")
-    @GetMapping("/log")
-    public ListObjServiceResult userlog(UserLogPageRequest logPageRequest) {
-//        PageInfo pageInfo = userLogService.getUserLog(logPageRequest);
-//        return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
-        throw new MpRuntimeException("Not Support Method!");
-    }
+    }*/
 
 
 }

@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.auth.controller.register;
+package cn.cyberpeace.mp.front.business.controller.register;
 
 
 import cn.cyberpeace.mp.auth.constant.AuthLogConstant;
@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import springfox.documentation.annotations.ApiIgnore;
 
 /**
  * @Description: 注册接口
@@ -40,14 +41,13 @@ public class RegisterController {
     @Autowired
     private RegisterService registerService;
 
-
+    @ApiIgnore
     @ApiOperation(value = "获取注册短信", notes = "")
     @GetMapping("/sms")
     public ServiceResult sms(@RequestParam String mobile) {
         log.info("mobile:{}", mobile);
 
         return ServiceResult.builder().message("OK").data("no sms support!").serviceCode(BaseErrorCode.SUCCESS).build();
-
     }
 
     @ApiOperation(value = "注册接口", notes = "")

@@ -82,6 +82,7 @@ public class OrgController extends BaseModelController<OrgModel, QueryParams, Or
     }
 
 
+    /*
     @ApiOperation(value = "根据parent组织获取下级组织", notes = "")
     @GetMapping("/byparent")
     public ServiceResult getByParent(@RequestParam String parentId) {
@@ -95,5 +96,6 @@ public class OrgController extends BaseModelController<OrgModel, QueryParams, Or
         List<OrgDto> tree = getModelService().getTree(orgId);
         return ServiceResult.builder().source(tree).build().asResult();
     }
+    */
 
 }

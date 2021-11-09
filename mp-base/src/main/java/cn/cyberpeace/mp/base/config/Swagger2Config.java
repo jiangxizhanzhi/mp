@@ -237,8 +237,22 @@ public class Swagger2Config implements ModelPropertyBuilderPlugin {
                 .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.front.admin"))
                 .paths(PathSelectors.any())
                 .build()
-                .globalRequestParameters(CollectionUtil.toList(parameter)).groupName("admin");
+                .globalRequestParameters(CollectionUtil.toList(parameter)).groupName("front-admin");
     }
+
+
+    @Bean
+    public Docket apiFrontBusiness() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .apiInfo(apiInfo())
+                .enableUrlTemplating(true)
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.front.business"))
+                .paths(PathSelectors.any())
+                .build()
+                .globalRequestParameters(CollectionUtil.toList(parameter)).groupName("front-business");
+    }
+
 
     @Bean
     public Docket apiOther() {
