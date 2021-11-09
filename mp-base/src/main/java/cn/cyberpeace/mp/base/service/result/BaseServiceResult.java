@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.base.service.result;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.code.MessageServiceCode;
 import cn.cyberpeace.mp.base.service.code.ServiceCode;
-import cn.cyberpeace.mp.base.util.MessageUtils;
+import cn.cyberpeace.mp.base.common.MessageCommon;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -76,7 +76,7 @@ public class BaseServiceResult<T, R> {
             if (actualServiceCode instanceof MessageServiceCode) {
                 setMessage(((MessageServiceCode) actualServiceCode).generateMessage());
             } else {
-                setMessage(MessageUtils.get(actualServiceCode.getMessage()));
+                setMessage(MessageCommon.get(actualServiceCode.getMessage()));
             }
         }
 

@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.scene.core.event;
 
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
-import cn.cyberpeace.mp.base.util.MessageUtils;
+import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.event.base.BaseEventHandler;
 import cn.cyberpeace.mp.scene.core.event.base.EventModel;
@@ -44,6 +44,6 @@ public class SceneElementEventHandler extends BaseEventHandler<SceneElementBO, E
         if (StringUtils.isEmpty(targetName)) {
             targetName = getTarget().getId();
         }
-        return MessageUtils.get(SceneEventHandler.EVENT_NAME_PREFIX + "scene_element", targetName);
+        return MessageCommon.get(SceneEventHandler.EVENT_NAME_PREFIX + "scene_element", targetName);
     }
 }

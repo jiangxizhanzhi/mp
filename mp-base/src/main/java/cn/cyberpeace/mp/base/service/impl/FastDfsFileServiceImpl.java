@@ -5,7 +5,7 @@ import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.FileService;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.base.util.MessageUtils;
+import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
 import lombok.extern.slf4j.Slf4j;
@@ -106,7 +106,7 @@ public class FastDfsFileServiceImpl implements FileService {
         } catch (MpRuntimeException e) {
             responseData.setSuccess(false);
 //            responseData.setCode(e.getErrorCode());
-            responseData.setMessage(MessageUtils.get(e.getMessage()));
+            responseData.setMessage(MessageCommon.get(e.getMessage()));
         }
 
         return responseData;

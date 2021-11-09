@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.base.service.code;
 
-import cn.cyberpeace.mp.base.util.MessageUtils;
+import cn.cyberpeace.mp.base.common.MessageCommon;
 import lombok.Getter;
 
 public class MessageServiceCode implements ServiceCode {
@@ -23,9 +23,9 @@ public class MessageServiceCode implements ServiceCode {
 
     public String generateMessage() {
         if (params == null || params.length == 0) {
-            return MessageUtils.get(getMessage());
+            return MessageCommon.get(getMessage());
         } else {
-            return MessageUtils.get(getMessage(), params);
+            return MessageCommon.get(getMessage(), params);
         }
     }
 
