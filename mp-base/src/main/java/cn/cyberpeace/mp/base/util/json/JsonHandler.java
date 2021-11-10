@@ -13,7 +13,7 @@ import java.util.Map;
 public class JsonHandler {
 
     @Getter
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
     public JsonHandler(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
