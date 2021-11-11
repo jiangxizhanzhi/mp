@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 场景实例的处理
@@ -563,12 +564,16 @@ public class SceneHandler extends BaseSceneHandler<
             }
             // mock 一个进度
             int newProcess = Math.abs(new Random().nextInt(10));
-            if (this.progressPercentage + newProcess >= 100) {
-                this.progressPercentage = 99;
-            } else {
-                this.progressPercentage += newProcess;
-            }
+            this.addProgressPercentage(newProcess);
             return this.progressPercentage;
+        }
+    }
+
+    private synchronized void addProgressPercentage(int newProcess) {
+        if (this.progressPercentage + newProcess >= 100) {
+            this.progressPercentage = 99;
+        } else {
+            this.progressPercentage += newProcess;
         }
     }
 }
