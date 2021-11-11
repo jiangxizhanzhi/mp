@@ -15,7 +15,7 @@ public class JsonCommon {
 
     private static JsonHandler snakeJsonHandler;
 
-    private JsonCommon() {
+    private JsonCommon(BaseCommon baseCommon) {
         JsonCommon.jsonHandler = new JsonHandler(BaseCommon.createCommonObjectMapper());
         JsonCommon.snakeJsonHandler = new JsonHandler(BaseCommon.createSnakeObjectMapper());
     }

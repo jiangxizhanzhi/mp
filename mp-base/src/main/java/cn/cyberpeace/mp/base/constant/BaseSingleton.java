@@ -8,7 +8,7 @@ import cn.cyberpeace.mp.base.config.BaseAppConfig;
  */
 public class BaseSingleton {
 
-    /** 模块配置bean的引用 TODO: 适配配置热更新场景 */
+    /** 模块配置bean的引用, 需要在bean初始化完成之后调用 TODO: 适配配置热更新场景 */
     public static final BaseAppConfig baseAppConfig = BeanCommon.getBean(BaseAppConfig.class);
 
     private BaseSingleton() {}
