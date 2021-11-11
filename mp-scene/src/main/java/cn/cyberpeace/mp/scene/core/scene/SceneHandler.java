@@ -17,6 +17,7 @@ import cn.cyberpeace.mp.scene.core.event.SceneElementEventHandler;
 import cn.cyberpeace.mp.scene.core.event.SceneEventHandler;
 import cn.cyberpeace.mp.scene.core.event.base.EventFlag;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
+import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
 import cn.cyberpeace.mp.scene.model.SceneAreaModel;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
@@ -32,10 +33,12 @@ import cn.cyberpeace.mp.scene.repository.SceneElementPortMapper;
 import cn.cyberpeace.mp.scene.repository.SceneMapper;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -91,6 +94,9 @@ public class SceneHandler extends BaseSceneHandler<
         SceneContextBO,
         ScenePluginHandler<?, ?, ?, ?>,
         SceneHandler> {
+
+    // mock的进度
+    private int progressPercentage = 0;
 
     @Setter
     private boolean realTimeUpdate;
@@ -158,6 +164,7 @@ public class SceneHandler extends BaseSceneHandler<
 
     private int overSceneEvent(int event) {
         var flag = getSceneEventHandler(event).overEvent();
+        this.getScene().setProgressPercentage(this.calculateProgressPercentage());
         if (isTriggerEventSuccess(flag)) {
             if (realTimeUpdate) {
                 updateScene();
@@ -334,6 +341,7 @@ public class SceneHandler extends BaseSceneHandler<
 
     public int overElementProcess(String nodeId, int event) {
         var flag = getElementEventHandler(nodeId, event).overProcess();
+        this.getScene().setProgressPercentage(this.calculateProgressPercentage());
         if (isTriggerEventSuccess(flag)) {
             if (realTimeUpdate) {
                 updateSceneElementWithPlugins(nodeId);
@@ -536,5 +544,31 @@ public class SceneHandler extends BaseSceneHandler<
             return;
         }
         overElementEvent(nodeId, SceneElementModel.Event.RECREATE);
+    }
+
+    @Override
+    public SceneDataBO toData() {
+        SceneDataBO sceneDataBO = super.toData();
+        sceneDataBO.getTopology().getScene().setProgressPercentage(this.calculateProgressPercentage());
+        return sceneDataBO;
+    }
+
+    // TODO
+    private Integer calculateProgressPercentage() {
+        if (CollectionUtils.isEmpty(this.getElementMap().values())) {
+            return 100;
+        } else {
+            if (getScene().getEvent() == SceneModel.Event.CREATE && getScene().getEventStatus() == EventStatus.OVER) {
+                return 100;
+            }
+            // mock 一个进度
+            int newProcess = Math.abs(new Random().nextInt(10));
+            if (this.progressPercentage + newProcess >= 100) {
+                this.progressPercentage = 99;
+            } else {
+                this.progressPercentage += newProcess;
+            }
+            return this.progressPercentage;
+        }
     }
 }
