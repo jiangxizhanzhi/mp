@@ -1,9 +1,8 @@
 package cn.cyberpeace.mp.scene.core.plugin.base;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
-import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldNames;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
-import cn.cyberpeace.mp.base.util.json.JsonUtils;
+import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldNames;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
 import lombok.Data;
@@ -106,19 +105,19 @@ public abstract class BasePluginHandler<S, E, P, C> {
     public ScenePluginDataBO toData() {
         var pluginData = new ScenePluginDataBO();
         if (scene != null) {
-            pluginData.setScene(JsonCommon.beanToMap(scene));
+            pluginData.setScene(JsonCommon.beanToSnakeMap(scene));
         }
 
         Map<String, Map<String, Object>> elements = new HashMap<>();
         elementMap.forEach((nodeId, elementBO) -> {
-            elements.put(nodeId, JsonCommon.beanToMap(elementBO));
+            elements.put(nodeId, JsonCommon.beanToSnakeMap(elementBO));
             elementIds.add(nodeId);
         });
         pluginData.setElements(elements);
 
         Map<String, Map<String, Object>> elementPorts = new HashMap<>();
         elementPortMap.forEach((portId, elementPortBO) -> {
-            elementPorts.put(portId, JsonCommon.beanToMap(elementPortBO));
+            elementPorts.put(portId, JsonCommon.beanToSnakeMap(elementPortBO));
             elementPortIds.add(portId);
         });
         pluginData.setElementPorts(elementPorts);

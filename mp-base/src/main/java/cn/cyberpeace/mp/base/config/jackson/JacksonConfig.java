@@ -43,7 +43,9 @@ public class JacksonConfig {
         objectMapper.registerModule(javaTimeModule);
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        if (Boolean.FALSE.equals(baseAppConfig.getJsonStringifyIncludeNull())) {
+            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        }
         objectMapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
         return objectMapper;
     }

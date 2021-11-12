@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.base.common;
 
-import cn.cyberpeace.mp.base.constant.BaseSingleton;
+import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,28 +23,40 @@ import java.time.format.DateTimeFormatter;
 @Component
 public class BaseCommon {
 
-    private BaseCommon() {}
+    public static DateTimeFormatter dateTimeFormatter;
+
+    public static DateTimeFormatter dateFormatter;
+
+    public static DateTimeFormatter timeFormatter;
+
+    public static BaseAppConfig baseAppConfig;
+
+    private BaseCommon(BaseAppConfig baseAppConfig) {
+        BaseCommon.baseAppConfig = baseAppConfig;
+        BaseCommon.dateTimeFormatter = DateTimeFormatter.ofPattern(baseAppConfig.getDateTimePattern());
+        BaseCommon.dateFormatter = DateTimeFormatter.ofPattern(baseAppConfig.getDatePattern());
+        BaseCommon.timeFormatter = DateTimeFormatter.ofPattern(baseAppConfig.getTimePattern());
+    }
 
     /**
      * 创建通用的object mapper对象 （设定了项目默认值）
      * @return 通用的object mapper对象
      */
     public static ObjectMapper createCommonObjectMapper() {
-        var dateTimePattern = BaseSingleton.baseAppConfig.getDateTimePattern();
-        var datePattern = BaseSingleton.baseAppConfig.getDatePattern();
-        var timePattern = BaseSingleton.baseAppConfig.getTimePattern();
         var objectMapper = new ObjectMapper();
         var javaTimeModule = new JavaTimeModule();
-        javaTimeModule.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(DateTimeFormatter.ofPattern(dateTimePattern)));
-        javaTimeModule.addSerializer(LocalDate.class, new LocalDateSerializer(DateTimeFormatter.ofPattern(datePattern)));
-        javaTimeModule.addSerializer(LocalTime.class, new LocalTimeSerializer(DateTimeFormatter.ofPattern(timePattern)));
-        javaTimeModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(DateTimeFormatter.ofPattern(dateTimePattern)));
-        javaTimeModule.addDeserializer(LocalDate.class, new LocalDateDeserializer(DateTimeFormatter.ofPattern(datePattern)));
-        javaTimeModule.addDeserializer(LocalTime.class, new LocalTimeDeserializer(DateTimeFormatter.ofPattern(timePattern)));
+        javaTimeModule.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(dateTimeFormatter));
+        javaTimeModule.addSerializer(LocalDate.class, new LocalDateSerializer(dateFormatter));
+        javaTimeModule.addSerializer(LocalTime.class, new LocalTimeSerializer(timeFormatter));
+        javaTimeModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(dateTimeFormatter));
+        javaTimeModule.addDeserializer(LocalDate.class, new LocalDateDeserializer(dateFormatter));
+        javaTimeModule.addDeserializer(LocalTime.class, new LocalTimeDeserializer(timeFormatter));
         objectMapper.registerModule(javaTimeModule);
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        if (Boolean.FALSE.equals(baseAppConfig.getJsonStringifyIncludeNull())) {
+            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        }
         return objectMapper;
     }
 
