@@ -33,4 +33,7 @@ public class BaseAppConfig {
     @Value("${mp.base.scheduled-thread-pool-core-size:50}")
     private Integer scheduledThreadPoolCoreSize;
 
+    @Value("${mp.base.json-stringify-include-null:true}")
+    private Boolean jsonStringifyIncludeNull;
+
 }

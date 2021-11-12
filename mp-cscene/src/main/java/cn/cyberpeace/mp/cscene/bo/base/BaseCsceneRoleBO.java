@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.cscene.bo.base;
 import cn.cyberpeace.mp.base.bo.ModelBO;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
-import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.base.util.define.SerializableFunction;
 import cn.cyberpeace.mp.cscene.model.base.BaseCsceneRoleModel;
 import com.fasterxml.jackson.core.type.TypeReference;

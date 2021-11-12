@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.util.http;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
-import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;

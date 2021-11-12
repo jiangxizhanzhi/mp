@@ -29,7 +29,10 @@ public class BaseCommon {
 
     public static DateTimeFormatter timeFormatter;
 
+    public static BaseAppConfig baseAppConfig;
+
     private BaseCommon(BaseAppConfig baseAppConfig) {
+        BaseCommon.baseAppConfig = baseAppConfig;
         BaseCommon.dateTimeFormatter = DateTimeFormatter.ofPattern(baseAppConfig.getDateTimePattern());
         BaseCommon.dateFormatter = DateTimeFormatter.ofPattern(baseAppConfig.getDatePattern());
         BaseCommon.timeFormatter = DateTimeFormatter.ofPattern(baseAppConfig.getTimePattern());
@@ -51,7 +54,9 @@ public class BaseCommon {
         objectMapper.registerModule(javaTimeModule);
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        if (Boolean.FALSE.equals(baseAppConfig.getJsonStringifyIncludeNull())) {
+            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        }
         return objectMapper;
     }
 
