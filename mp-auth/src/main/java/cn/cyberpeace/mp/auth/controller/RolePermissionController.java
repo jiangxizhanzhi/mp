@@ -38,26 +38,4 @@ public class RolePermissionController extends BaseModelController<RolePermission
         setModelService(modelService);
     }
 
-    @ApiOperation(value = "查询角色权限", notes = "")
-    @GetMapping("/byrole")
-    public ServiceResult<List<TargetModel>> getTargetsByRole(@RequestParam String roleId) {
-        List<TargetModel> targets = getModelService().listTargetsByRoleId(roleId);
-
-        return ServiceResult.success(targets);
-    }
-
-    @ApiOperation(value = "绑定角色-权限关系，注意，如果targetIds为空，表示删除角色所有权限！", notes = "")
-    @PostMapping("/bind")
-    public ServiceResult bindRolePermission(@RequestBody @Validated BindRoleTargetsRequest bindRoleTargetsReq) {
-        boolean success = getModelService().bindRoleTargets(bindRoleTargetsReq.getRoleId(), bindRoleTargetsReq.getTargetIds(), true);
-        if (success) {
-            return ServiceResult.successful();
-        } else {
-            return ServiceResult.fail("绑定角色权限失败!");
-        }
-    }
-
-
-
-
 }

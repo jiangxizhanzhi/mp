@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.auth.controller;
+package cn.cyberpeace.mp.front.business.controller;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.model.ClientDetailsModel;
@@ -17,9 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
  * @Author zhouxinghuai
  * @Date：2021/8/31 11:13
  */
-@Api(value = "Client客户端管理接口", tags = "AUTH-Client客户端管理接口")
+@Api(value = "Client客户端管理接口(业务)", tags = "AUTH-Client客户端管理接口(业务)")
 @Slf4j
-@RestController
+@RestController("clientDetailsFrontController")
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/client_details")
 public class ClientDetailsController extends BaseModelController<ClientDetailsModel, QueryParams, ClientDetailsService> {
 

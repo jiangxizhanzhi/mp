@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.auth.controller;
+package cn.cyberpeace.mp.front.business.controller;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.model.AvatarModel;
@@ -25,21 +25,19 @@ import java.util.List;
  * @Author zhouxinghuai
  * @Date：2021/8/31 11:13
  */
-@Api(value = "头像管理接口", tags = "AUTH-头像管理接口")
+@Api(value = "头像管理接口(业务)", tags = "AUTH-头像管理接口(业务)")
 @Slf4j
-@RestController
+@RestController("avatarFrontController")
 @RequestMapping(ControllerConstant.BASE_UNAUTH_API_PATH + "/avatar")
-public class AvatarController extends BaseModelController<AvatarModel, QueryParams, AvatarService> {
+public class AvatarController {
 
     @Autowired
-    public AvatarController(AvatarService modelService) {
-        setModelService(modelService);
-    }
+    private AvatarService avatarService;
 
     @ApiOperation(value = "查询所有头像", notes = "")
     @GetMapping("/all")
     public ServiceResult<List<AvatarModel>> getAll() {
-        List<AvatarModel> avatars = getModelService().listAll();
+        List<AvatarModel> avatars = avatarService.listAll();
         return ServiceResult.success(avatars);
     }
 
@@ -48,7 +46,7 @@ public class AvatarController extends BaseModelController<AvatarModel, QueryPara
     @PostMapping("/upload")
     @ResponseBody
     public ServiceResult<String> upload(MultipartFile file) {
-        FileResponseData responseData = getModelService().upload(file);
+        FileResponseData responseData = avatarService.upload(file);
         return ServiceResult.success(responseData.getHttpUrl());
     }
 

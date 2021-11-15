@@ -56,40 +56,6 @@ public class UserController {
     private UserHeartbeatService heartbeatService;
 
 
-    /*@ApiOperation(value = "查询指定id数据 附带组织，角色信息", notes = "")
-    @GetMapping("/get/{id}")
-    public ObjServiceResult getUser(@PathVariable String id) {
-        UserDto userDto = userService.getUserDto(id);
-        return ResultUtils.obj2ObjServiceResult(userDto);
-    }*/
-
-    /*
-    @ApiOperation(value = "查询当前登录用户信息 附带组织，角色信息", notes = "")
-    @GetMapping("/current")
-    public ServiceResult<UserDto> getCurrentUser() {
-        UserDto userDto = userService.getCurrentUserDto();
-        return ServiceResult.success(userDto);
-    }
-
-
-    @ApiOperation(value = "创建用户，同时完成组织，角色绑定关系", notes = "")
-    @PostMapping("/add")
-    @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.CREATE, title = "新增用户", target = AuthLogConstant.TARGET_USER)
-    public ServiceResult<UserModel> add(@RequestBody UserRequest createRequest) {
-        UserModel userModel = userService.add(createRequest);
-        return ServiceResult.success(userModel);
-    }
-
-    @ApiOperation(value = "修改用户，同时完成组织，角色绑定关系", notes = "")
-    @PostMapping("/modify")
-    @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "更新用户", target = AuthLogConstant.TARGET_USER)
-    public ServiceResult<UserModel> modify(@RequestBody UserRequest modifyRequest) {
-        UserModel userModel = userService.modify(modifyRequest);
-        return ServiceResult.success(userModel);
-    }
-    */
-
-
     @ApiOperation(value = "修改密码", notes = "")
     @PostMapping("/resetpwd")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "重置密码", target = AuthLogConstant.TARGET_USER)
