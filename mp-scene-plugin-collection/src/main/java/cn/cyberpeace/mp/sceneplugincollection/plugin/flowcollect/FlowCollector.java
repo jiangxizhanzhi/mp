@@ -30,12 +30,12 @@ public class FlowCollector {
         String collectorId = TextUtils.uuid();
         groupData.setGroupId(collectorId);
         groupData.setMacIds(macAddrs);
-        networkTrafficGroupService.addGroup(groupData);
+        networkTrafficGroupService.addArkimeImageInstance(groupData);
         return collectorId;
     }
 
     public void deleteCollector(String collectorId) {
-        networkTrafficGroupService.deleteByGroupId(collectorId);
+        networkTrafficGroupService.deleteArkimeInstance(collectorId);
     }
 
 }

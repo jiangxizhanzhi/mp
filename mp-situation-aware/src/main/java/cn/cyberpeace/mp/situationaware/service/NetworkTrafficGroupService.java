@@ -88,11 +88,13 @@ public class NetworkTrafficGroupService {
     }
 
     /**
-     * 删除分组
+     * 删除流量arkime镜像
      * @param groupId
      */
     @Transactional(rollbackFor = Exception.class)
-    public void deleteByGroupId(String groupId) {
+    public void deleteArkimeInstance(String groupId) {
+        //todo 调用云平台接口删除实例
+        trafficGroupModelMapper.deleteByTrafficGroupId(groupId);
         return;
     }
 
@@ -102,7 +104,7 @@ public class NetworkTrafficGroupService {
      * @param groupModel
      */
     @Transactional(rollbackFor = Exception.class)
-    public String addGroup(GroupModel groupModel) {
+    public String addArkimeImageInstance(GroupModel groupModel) {
         String groupId = UUID.randomUUID().toString();
         groupModel.setGroupId(groupId);
         //todo 调用云平台接口新增实例

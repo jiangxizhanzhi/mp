@@ -34,7 +34,7 @@ public class NetworkTrafficGroupServiceTest {
      */
     @Test
     public void testdeleteByGroupById() {
-        networkTrafficGroupService.deleteByGroupId("9787c63b-d79f-4644-8027-b268f89aa8a9");
+        networkTrafficGroupService.deleteArkimeInstance("9787c63b-d79f-4644-8027-b268f89aa8a9");
     }
 
 
@@ -48,6 +48,6 @@ public class NetworkTrafficGroupServiceTest {
         macIds.add("fa:16:3e:00:00:02");
         macIds.add("fc:16:3e:00:00:02");
         GroupModel groupModel1 = GroupModel.builder().groupId("9787c63b-d79f-4644-8027-b268f89aa8a9").macIds(macIds).build();
-        networkTrafficGroupService.addGroup(groupModel1);
+        networkTrafficGroupService.addArkimeImageInstance(groupModel1);
     }
 }
