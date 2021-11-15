@@ -97,18 +97,6 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
         return ResultUtils.obj2ObjServiceResult(roleDto);
     }
 
-    @ApiOperation("查询指定id角色（附带权限、用户数）")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class),
-            @ApiImplicitParam(name="fields", value="需要返回的字段",dataTypeClass = String[].class),
-    })
-    @GetMapping("/perm/{id}")
-    public ObjServiceResult getRolePerm(@PathVariable String id, @RequestParam(required = false) String[] fields) {
-        RolePermDto rolePermDto = getModelService().getRolePermDto(id);
-
-        return ResultUtils.obj2ObjServiceResult(rolePermDto);
-    }
-
     @ApiOperation(value = "创建角色，同时完成角色-权限绑定关系", notes = "")
     @PostMapping("/add")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.CREATE, title = "新增角色", target = AuthLogConstant.TARGET_ROLE)
@@ -126,6 +114,14 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
         return ServiceResult.success(roleModel);
     }
 
+    @ApiOperation(value = "查询所有角色", notes = "")
+    @GetMapping("/all")
+    public ServiceResult<List<RoleModel>> getRoleByTenant() {
+        List<RoleModel> roles = getModelService().listAll();
+        return ServiceResult.success(roles);
+    }
+
+    /*
     @ApiOperation(value = "根据租户查询所有角色", notes = "")
     @GetMapping("/bytenant")
     public ServiceResult<List<RoleModel>> getRoleByTenant(@RequestParam(required = false) String tenant) {
@@ -148,13 +144,7 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
         return ResultUtils.pageInfo2ObjServiceResult(page);
     }
 
-
-    @ApiOperation(value = "查询所有角色", notes = "")
-    @GetMapping("/all")
-    public ServiceResult<List<RoleModel>> getRoleByTenant() {
-        List<RoleModel> roles = getModelService().listAll();
-        return ServiceResult.success(roles);
-    }
+    */
 
 
 }

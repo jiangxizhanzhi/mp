@@ -1,21 +1,11 @@
 package cn.cyberpeace.mp.auth.util;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.hutool.core.lang.Assert;
-import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.crypto.SecureUtil;
-import cn.hutool.crypto.symmetric.AES;
 import cn.hutool.crypto.symmetric.DES;
-import cn.hutool.crypto.symmetric.SymmetricAlgorithm;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.CharSet;
 import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
 import org.springframework.stereotype.Component;
-
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 
 /**
  * @Description:

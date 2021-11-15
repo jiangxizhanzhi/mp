@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.auth.dto.user;
 
-import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

@@ -5,7 +5,6 @@ import cn.cyberpeace.mp.auth.constant.CustomAuthErrorCode;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserOnlineRecordModel;
 import cn.cyberpeace.mp.auth.repository.OrgMapper;
-import cn.cyberpeace.mp.auth.repository.SysConfigMapper;
 import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.RolePermissionModelService;
@@ -16,8 +15,6 @@ import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
 import cn.cyberpeace.mp.auth.service.UserOnlineReportService;
 import cn.cyberpeace.mp.auth.service.UserPermissionService;
 import cn.cyberpeace.mp.auth.service.UserService;
-import cn.cyberpeace.mp.auth.service.sys.LicenseService;
-import cn.cyberpeace.mp.auth.service.sys.SysActivationService;
 import cn.cyberpeace.mp.auth.util.PasswordStrengthChecker;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
@@ -67,16 +64,7 @@ public class AuthTestController {
     private OrgMapper orgMapper;
 
     @Autowired
-    private SysConfigMapper sysConfigMapper;
-
-    @Autowired
     private UserHeartbeatService heartbeatService;
-
-    @Autowired
-    private LicenseService licenseService;
-
-    @Autowired
-    private SysActivationService activationService;
 
     @Autowired
     private OrgService orgService;
@@ -150,13 +138,6 @@ public class AuthTestController {
         return map;
     }
 
-
-    @GetMapping("/sysUUID")
-    public String sysUUID() {
-        String code = activationService.querySysUUID();
-        return code;
-
-    }
 
     @GetMapping("testErrorcode")
     public ServiceResult testErrorCode() {
