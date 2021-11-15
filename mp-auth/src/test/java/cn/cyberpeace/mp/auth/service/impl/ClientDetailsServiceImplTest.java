@@ -17,8 +17,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-//@RunWith(MockitoJUnitRunner.class)
-//@ExtendWith(SpringExtension.class)
+@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(SpringExtension.class)
 //@SpringBootTest(classes = {Application.class})
 public class ClientDetailsServiceImplTest {
 
@@ -30,7 +30,7 @@ public class ClientDetailsServiceImplTest {
         MockitoAnnotations.initMocks(this);
     }
 
-    @Test
+//    @Test
     public void testGetClient() {
         when(clientDetailsService.getByClientId("abc")).thenReturn(createClientDetailsModel());
         ClientDetailsModel model = clientDetailsService.getByClientId("abc");
