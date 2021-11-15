@@ -4,6 +4,8 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.model.GroupModel;
+import cn.cyberpeace.mp.situationaware.model.TrafficGroupModel;
+import cn.cyberpeace.mp.situationaware.repository.TrafficGroupModelMapper;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
@@ -15,6 +17,7 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
@@ -27,6 +30,9 @@ public class NetworkTrafficGroupService {
 
     @Autowired
     private SituationAwareConfig situationAwareConfig;
+
+    @Autowired
+    private TrafficGroupModelMapper trafficGroupModelMapper;
 
     /**
      * 查询底层所有分组数据
@@ -85,14 +91,8 @@ public class NetworkTrafficGroupService {
      * 删除分组
      * @param groupId
      */
+    @Transactional(rollbackFor = Exception.class)
     public void deleteByGroupId(String groupId) {
-//        try {
-//            String requestUri = situationAwareConfig.getGroupUrl() + "/" + groupId;
-//            HttpUtils.sendDelete(requestUri);
-//        } catch (IOException e) {
-//            log.error("删除分组失败:"+ e);
-//            throw new MpRuntimeException("删除分组失败:"+ e);
-//        }
         return;
     }
 
@@ -101,23 +101,14 @@ public class NetworkTrafficGroupService {
      * 新增分组
      * @param groupModel
      */
+    @Transactional(rollbackFor = Exception.class)
     public String addGroup(GroupModel groupModel) {
-//        var jsonObject = new JSONObject();
-//        if (ObjectUtils.isEmpty(groupModel.getGroupId()) || CollectionUtils.isEmpty(groupModel.getMacIds())) {
-//            log.error("新增分组参数为空");
-//            throw new MpRuntimeException("新增分组参数为空:");
-//        }
-//        jsonObject.put("scene_id", groupModel.getGroupId());
-//        jsonObject.put("macs", groupModel.getMacIds());
-//        try {
-//            String res = HttpUtils.sendPost(situationAwareConfig.getGroupUrl(), jsonObject.toJSONString());
-//            log.info("add group res: {}", res);
-//            return res;
-//        } catch (IOException e) {
-//            log.error("删除分组失败:"+ e);
-//            throw new MpRuntimeException("删除分组失败:"+ e);
-//        }
-//    }
-        return UUID.randomUUID().toString();
+        String groupId = UUID.randomUUID().toString();
+        groupModel.setGroupId(groupId);
+        //todo 调用云平台接口新增实例
+        TrafficGroupModel trafficGroupModel = new TrafficGroupModel();
+        trafficGroupModel.setTrafficGroupId(groupId);
+        trafficGroupModelMapper.insert(trafficGroupModel);
+        return groupId;
     }
 }
