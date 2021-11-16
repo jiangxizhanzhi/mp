@@ -36,4 +36,10 @@ public class BaseAppConfig {
     @Value("${mp.base.json-stringify-include-null:true}")
     private Boolean jsonStringifyIncludeNull;
 
+    @Value("${mp.base.task_pool_size:1000}")
+    private Integer taskPoolSize;
+
+    @Value("${mp.base.task_hold_size:200000}")
+    private Integer taskHoldSize;
+
 }
