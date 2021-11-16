@@ -1335,7 +1335,7 @@ public abstract class BaseSceneHandler<
         for (var plugin : plugins) {
             plugin.updateElements(nodeId);
             if (elementPortBOs != null && !elementPortBOs.isEmpty()) {
-                plugin.updateElementPorts(elementPortBOs.stream().map(EidBO::getEid).toArray(String[]::new));
+                plugin.updateElementPorts(elementPortBOs.stream().map(BaseSceneElementPortBO::getId).toArray(String[]::new));
             }
         }
     }
