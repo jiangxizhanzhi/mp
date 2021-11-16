@@ -1,0 +1,2 @@
+rename table mp_auth_target to mp_auth_target_menu;
+
