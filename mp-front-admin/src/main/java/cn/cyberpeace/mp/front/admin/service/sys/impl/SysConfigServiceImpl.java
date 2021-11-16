@@ -47,12 +47,20 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
 
     @Override
     public ObjServiceResult<SysConfigModel> create(SysConfigModel obj, String[] fields) {
-        throw new MpRuntimeException("不允许新增操作");
+        SysConfigModel config = getByKeyName(obj.getKeyName());
+        if (Objects.nonNull(config)) {
+            throw new MpRuntimeException("该项配置已经存在，不能允许新增！" + obj.getKeyName());
+        }
+        return create(obj);
     }
 
     @Override
+    @Transactional
     public ServiceResult<Integer> bulkCreate(List<SysConfigModel> objs) {
-        throw new MpRuntimeException("不允许新增操作");
+        for (SysConfigModel obj : objs) {
+            create(obj);
+        }
+        return new ServiceResult<>(objs.size());
     }
 
     @Override
