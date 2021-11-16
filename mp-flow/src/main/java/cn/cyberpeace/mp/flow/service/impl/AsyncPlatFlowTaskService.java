@@ -1,10 +1,10 @@
 package cn.cyberpeace.mp.flow.service.impl;
 
-import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
+import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.enums.FlowPlatformEnum;
 import cn.cyberpeace.mp.flow.enums.ResourceTypeEnum;
@@ -161,11 +161,11 @@ public class AsyncPlatFlowTaskService {
                 if (isUpdate) {
                     // 更新
                     saveAppTaskRsp = HttpUtils.sendPatch(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks/app/"
-                                    + flowTaskModel.getThirdTaskId(), JsonCommon.snakeStringify(appTaskRequest));
+                                    + flowTaskModel.getThirdTaskId(), JsonUtils.snakeStringify(appTaskRequest));
                 } else {
                     // 新增
                     saveAppTaskRsp = HttpUtils.sendPost(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks/app",
-                            JsonCommon.snakeStringify(appTaskRequest));
+                            JsonUtils.snakeStringify(appTaskRequest));
                 }
 
                 JSONObject saveAppTaskObj = JSONObject.parseObject(saveAppTaskRsp);
@@ -187,10 +187,10 @@ public class AsyncPlatFlowTaskService {
                 String saveStandTaskRsp = null;
                 if (isUpdate) {
                     saveStandTaskRsp = HttpUtils.sendPatch(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks/standards/" +
-                                    flowTaskModel.getThirdTaskId(), JsonCommon.snakeStringify(standTaskRequest));
+                                    flowTaskModel.getThirdTaskId(), JsonUtils.snakeStringify(standTaskRequest));
                 } else {
                     saveStandTaskRsp = HttpUtils.sendPost(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks/standards",
-                            JsonCommon.snakeStringify(standTaskRequest));
+                            JsonUtils.snakeStringify(standTaskRequest));
                 }
 
                 JSONObject saveStandTaskObj = JSONObject.parseObject(saveStandTaskRsp);
@@ -333,7 +333,7 @@ public class AsyncPlatFlowTaskService {
         try {
             // 创建trex虚拟机
             String addVmRsp = HttpUtils.sendPost(cpUrl + "/v1/scenarios/vm",
-                    JsonCommon.snakeStringify(addVmRequest));
+                    JsonUtils.snakeStringify(addVmRequest));
             JSONObject addVmObj = JSONObject.parseObject(addVmRsp);
             log.info("add trex vm response:{}", addVmObj.toJSONString());
 
