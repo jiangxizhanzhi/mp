@@ -234,7 +234,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                 // 先向流量发生平台导入pcap包
                 JSONObject object = new JSONObject();
                 object.put("fileName",
-                        flowInfoModel.getTitle() + "." + flowInfoModel.getPcapFile().split(BaseConstants.SPOT)[1]);
+                        flowInfoModel.getTitle() + System.currentTimeMillis() + "." + flowInfoModel.getPcapFile().split(BaseConstants.SPOT)[1]);
                 String pcapRsp = HttpUtils.postFile(actuatorResourceUrl + "/pcap/import", fileByte, "file", object);
                 JSONObject jsonObject = JSONObject.parseObject(pcapRsp);
                 log.info("upload pcap file response:{}", jsonObject.toJSONString());
