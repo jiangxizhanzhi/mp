@@ -2,13 +2,14 @@ package cn.cyberpeace.mp.situationaware.listener;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.HttpUtils;
-import cn.cyberpeace.mp.base.util.http.HttpUtilsV2;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
 import cn.cyberpeace.mp.situationaware.repository.WazuhRepository;
 import cn.cyberpeace.mp.situationaware.model.GroupModel;
 import cn.cyberpeace.mp.situationaware.service.NetworkTrafficGroupService;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSONPath;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import java.io.IOException;
@@ -38,6 +39,8 @@ public class SituationAwareInitListener implements ApplicationListener<Applicati
 
     @Value("${mp.situationaware.wazuh-probe-manager.cpcloud-container-create-url}")
     private String cpCloudUrl;
+
+    private static String ARKIMENETWORKNAME = "oj_ext";
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
@@ -71,7 +74,7 @@ public class SituationAwareInitListener implements ApplicationListener<Applicati
                 }
             });
 
-//        initArkimeNetwork();
+        initArkimeNetwork();
     }
 
     /**
@@ -81,7 +84,10 @@ public class SituationAwareInitListener implements ApplicationListener<Applicati
         log.info("init arkime network");
         try {
             String result = HttpUtils.sendGet(cpCloudUrl + "/networks");
-            JSON.parse(result);
+            JSONArray networkList = (JSONArray) JSONPath.eval(JSON.parse(result), "$.data.list");
+            networkList.stream().filter(json -> json instanceof JSONObject).map(JSONObject.class::cast).filter(json -> ARKIMENETWORKNAME.equals(json.get("name"))).findFirst().ifPresent(network ->{
+                SituationalAwareConstant.ArkimeNetworkId = (String) network.get("id");
+            });
         } catch (IOException e) {
             log.info("init arkime network error {}", ExceptionUtils.getMessage(e));
             e.printStackTrace();

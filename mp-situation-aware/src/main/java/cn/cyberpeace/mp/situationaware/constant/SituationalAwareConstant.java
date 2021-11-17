@@ -19,5 +19,5 @@ public class SituationalAwareConstant {
     /**
      * openstack network查询
      */
-    public static String arkimeNetwork;
+    public static String ArkimeNetworkId;
 }

@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.situationaware.service;
 
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.situationaware.TestSituationAwareApplciation;
+import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
 import cn.cyberpeace.mp.situationaware.model.GroupModel;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -10,8 +11,6 @@ import com.alibaba.fastjson.JSONPath;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,7 +67,9 @@ public class NetworkTrafficGroupServiceTest {
         try {
             String result = HttpUtils.sendGet(cpCloudUrl + "/networks");
             JSONArray networkList = (JSONArray)JSONPath.eval(JSON.parse(result), "$.data.list");
-//            String arkimeNetwork = networkList.stream().filter(json -> json instanceof JSONObject).map(JSONObject.class::cast).filter(json -> json.get("name").equals(""));
+            networkList.stream().filter(json -> json instanceof JSONObject).map(JSONObject.class::cast).filter(json -> json.get("name").equals("oj_ext")).findFirst().ifPresent(network ->{
+                SituationalAwareConstant.ArkimeNetworkId = (String) network.get("id");
+            });
         } catch (IOException e) {
             e.printStackTrace();
         }
