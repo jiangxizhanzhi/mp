@@ -14,8 +14,8 @@ public enum SituationalAwareErrorCode implements ErrorCode {
     PROBE_MANAGER_ADD_ERROR("MP-110404", "probe manager add script error"),
     PROBE_NAME_EXIST("MP-110405", "probe name already exit"),
     PROBE_MANAGER_ES_QUERY_ERROR("MP-110406", "probe es query error"),
-    PROBE_MANAGER_DELETE_PARAM_ERROR("MP-110407", "probe delete param is empty")
-    ;
+    PROBE_MANAGER_DELETE_PARAM_ERROR("MP-110407", "probe delete param is empty"),
+    ARKIME_ADD_ERROR("MP-110407", "arkime instance add error");
 
     SituationalAwareErrorCode(String code, String message) {
         setCode(code, message);

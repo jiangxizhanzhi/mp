@@ -75,9 +75,10 @@ mp:
     hostname: controller  #主机名称
   situationaware:
     group-url: http://${ip.moloch}:5079/v1/scenes
-    moloch:
-      username: api
-      password: api
+    arkime:
+      cpcloud-container-create-url: http://${ip.container-create}:11111/v1
+      es-host: 10.100.0.111
+      image-name: centos-arkime_arkime:v2
     #moloch es节点地址
     es-nodes: ${ip.moloch}:9200
     wazuh:
@@ -96,7 +97,6 @@ mp:
       agent-script-linux-path: /var/ossec/etc/shared/scripts/
       agent-script-windows-path: C:\ossec-agent\shared\scripts\
       task-enable: false
-      cpcloud-container-create-url: http://${ip.container-create}:11111/v1
 
   log:
     es-nodes: 10.100.0.103:9200
