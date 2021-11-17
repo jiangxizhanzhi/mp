@@ -25,6 +25,7 @@ spring:
     time-zone: GMT+8
   flyway:
     clean-disabled: true
+    enabled: false
   application:
     name: mp
   servlet:
@@ -79,6 +80,8 @@ mp:
       cpcloud-container-create-url: http://${ip.container-create}:11111/v1
       es-host: 10.100.0.111
       image-name: centos-arkime_arkime:v2
+      username: api
+      password: api
     #moloch es节点地址
     es-nodes: ${ip.moloch}:9200
     wazuh:

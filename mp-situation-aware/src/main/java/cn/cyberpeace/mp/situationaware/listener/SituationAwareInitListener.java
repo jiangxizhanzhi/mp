@@ -37,7 +37,7 @@ public class SituationAwareInitListener implements ApplicationListener<Applicati
     @Autowired
     private WazuhRepository wazuhRepository;
 
-    @Value("${mp.situationaware.wazuh-probe-manager.cpcloud-container-create-url}")
+    @Value("${mp.situationaware.arkime.cpcloud-container-create-url}")
     private String cpCloudUrl;
 
     private static String ARKIMENETWORKNAME = "oj_ext";

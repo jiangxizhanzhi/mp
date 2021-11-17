@@ -59,7 +59,7 @@ public class NetworkTrafficGroupServiceTest {
         networkTrafficGroupService.addArkimeImageInstance(groupModel1);
     }
 
-    @Value("${mp.situationaware.wazuh-probe-manager.cpcloud-container-create-url}")
+    @Value("${mp.situationaware.arkime.cpcloud-container-create-url}")
     private String cpCloudUrl;
 
     @Test
@@ -73,5 +73,11 @@ public class NetworkTrafficGroupServiceTest {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Test
+    public void testCreateArkimeImageInstance() {
+        String arkimePrefixId = "mp_" + String.valueOf(System.currentTimeMillis());
+        networkTrafficGroupService.createArkimeImageInstance(arkimePrefixId);
     }
 }

@@ -11,10 +11,10 @@ public class SituationAwareConfig {
     @Value("${mp.situationaware.group-url}")
     private String groupUrl;
 
-    @Value("${mp.situationaware.moloch.username}")
+    @Value("${mp.situationaware.arkime.username}")
     private String userName;
 
-    @Value("${mp.situationaware.moloch.password}")
+    @Value("${mp.situationaware.arkime.password}")
     private String password;
 
     @Value("${mp.situationaware.wazuh-probe-manager.url}")
