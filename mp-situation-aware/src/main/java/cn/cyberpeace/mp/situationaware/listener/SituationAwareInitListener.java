@@ -1,16 +1,22 @@
 package cn.cyberpeace.mp.situationaware.listener;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.util.HttpUtils;
+import cn.cyberpeace.mp.base.util.http.HttpUtilsV2;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
 import cn.cyberpeace.mp.situationaware.repository.WazuhRepository;
 import cn.cyberpeace.mp.situationaware.model.GroupModel;
 import cn.cyberpeace.mp.situationaware.service.NetworkTrafficGroupService;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
@@ -20,7 +26,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Slf4j
-public class DataSandtableInitListener implements ApplicationListener<ApplicationReadyEvent> {
+public class SituationAwareInitListener implements ApplicationListener<ApplicationReadyEvent> {
 
 
 
@@ -29,6 +35,9 @@ public class DataSandtableInitListener implements ApplicationListener<Applicatio
 
     @Autowired
     private WazuhRepository wazuhRepository;
+
+    @Value("${mp.situationaware.wazuh-probe-manager.cpcloud-container-create-url}")
+    private String cpCloudUrl;
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
@@ -61,5 +70,21 @@ public class DataSandtableInitListener implements ApplicationListener<Applicatio
                     return token;
                 }
             });
+
+//        initArkimeNetwork();
+    }
+
+    /**
+     * 初始化arkime网络配置
+     */
+    public void initArkimeNetwork() {
+        log.info("init arkime network");
+        try {
+            String result = HttpUtils.sendGet(cpCloudUrl + "/networks");
+            JSON.parse(result);
+        } catch (IOException e) {
+            log.info("init arkime network error {}", ExceptionUtils.getMessage(e));
+            e.printStackTrace();
+        }
     }
 }

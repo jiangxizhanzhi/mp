@@ -100,7 +100,7 @@ public class NetworkTrafficGroupService {
 
 
     /**
-     * 新增分组
+     * 新增arkime 镜像
      * @param groupModel
      */
     @Transactional(rollbackFor = Exception.class)

@@ -1,3 +1,14 @@
+ip:
+  mariadb: 10.100.0.101         # MP新中台mariadb数据库地址
+  fdfs: 10.100.14.252           # FastDFS地址
+  cp: 10.100.7.1               # 云平台适配层接口地址
+  moloch: 10.100.7.101         # moloch的IP地址
+  wazuh: 10.100.0.102          # wazuh的IP地址
+  es: 127.0.0.1                 # MP新中台ES地址
+  trex: 10.100.7.161            # trex资源服务器地址
+  rabbitmq: 10.100.0.101        # rabbitmq地址
+  container-create: 10.100.7.1        # 云平台编辑dockerImage地址
+
 server:
   servlet:
     context-path: /api/mp
@@ -5,7 +16,7 @@ server:
 
 spring:
   datasource:
-    url: jdbc:mysql://10.100.0.101:3306/mp?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&createDatabaseIfNotExist=true
+    url: jdbc:mysql://${ip.mariadb}:3306/mp?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&createDatabaseIfNotExist=true&allowMultiQueries=true
     username: root
     password: root
     driver-class-name: org.mariadb.jdbc.Driver
@@ -14,8 +25,19 @@ spring:
     time-zone: GMT+8
   flyway:
     clean-disabled: true
+    enabled: false
   application:
     name: mp
+  servlet:
+    multipart:
+      max-file-size: 1000MB
+      max-request-size: 10000MB
+  rabbitmq:
+    host: ${ip.rabbitmq}
+    port: 5673
+    username: guest
+    password: guest
+
 
 logging:
   config: classpath:logback-spring.xml
@@ -23,7 +45,9 @@ logging:
     root: INFO
   file:
     path: ${user.home}/logs
-
+  logback:
+    rollingpolicy:
+      max-history: 7
 mybatis:
   mapper-locations: classpath*:mapper/*.xml
   configuration:
@@ -33,7 +57,6 @@ mybatis:
 # 请求云平台组信息的url配置，必需填写
 mp:
   base:
-    fdfs-url: 10.100.14.252  # fdfs服务器地址
     # fastdfs配置
     fastdfs:
       max-storage-connection: 8   # 最大连接数
@@ -44,45 +67,61 @@ mp:
       groups:
         # 集群配置：每增加一个集群，参考下例添加相应配置即可，同时在FdfsGroupEnum.java枚举类中添加该集群名称
         - group-name: DEFAULT    # 集群名称
-          tracker-servers: ${mp.base.fdfs-url}:22122
+          tracker-servers: ${ip.fdfs}:22122
           file-server-addr: /fdfs    # 外部文件服务器地址
-          inner-file-server-addr: http://${mp.base.fdfs-url}:8888   # 内部文件服务器地址
+          inner-file-server-addr: http://${ip.fdfs}:8888   # 内部文件服务器地址
   devops:
-    cp-url: http://10.100.7.5:11111 #云平台地址
-    cr-url: http://10.100.2.21 #
+    #    cp-url: http://10.100.7.1:111 #云平台地址
+    cp-url: http://${ip.cp}:11111 #云平台地址
     hostname: controller  #主机名称
   situationaware:
-    group-url: http://10.100.14.107:5079/v1/scenes
+    group-url: http://${ip.moloch}:5079/v1/scenes
     moloch:
       username: api
       password: api
     #moloch es节点地址
-    es-nodes: 10.100.14.107:9200
+    es-nodes: ${ip.moloch}:9200
     wazuh:
       #wazuh 开放接口地址
-      base-url: https://10.100.14.106:55000
+      base-url: https://${ip.wazuh}:55000
       #wazuh 开放接口用户名密码
       username: acme-user
       password: MyS3cr37P450r.*-
       #wazuh es地址用户名密码
-      es-url: 10.100.0.102
+      es-url: ${ip.wazuh}
       es-port: 9200
       es-username: admin
       es-password: admin
     wazuh-probe-manager:
-      url: http://10.100.0.102:8002
+      url: http://10.100.0.111:8002
       agent-script-linux-path: /var/ossec/etc/shared/scripts/
       agent-script-windows-path: C:\ossec-agent\shared\scripts\
+      task-enable: false
+      cpcloud-container-create-url: http://${ip.container-create}:11111/v1
+
   log:
+    es-nodes: 10.100.0.103:9200
     exclude-uri: /login
     exclude-method: OPTIONS
-
+  auth:
+    activation:
+      enable: true
+      licenseDir: /home/mp/config/license
+  flow:
+    # 流量发生器资源地址
+    actuator-resource-url: http://${ip.trex}:80/api/v1/resource
+    trex-image: tgn-1015
+  sceneplugincloud:
+    cpcloud-server: http://${ip.cp}:11111
 
 management:
   endpoints:
     web:
       exposure:
         include: health, info, mappings
+  info:
+    git:
+      mode: full
 
 ---
 spring:
@@ -93,6 +132,8 @@ logging:
   file:
     path: ${user.home}/logs
 
+
+
 ---
 spring:
   config:
@@ -100,4 +141,5 @@ spring:
       on-profile: prod
 logging:
   file:
-    path: /home/mp/logs
+    path: ${user.home}/logs
+

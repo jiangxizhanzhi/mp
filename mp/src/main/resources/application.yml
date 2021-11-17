@@ -96,7 +96,7 @@ mp:
       agent-script-linux-path: /var/ossec/etc/shared/scripts/
       agent-script-windows-path: C:\ossec-agent\shared\scripts\
       task-enable: false
-      cpcloud-container-create-url: http://${container-create}/v1:11111
+      cpcloud-container-create-url: http://${ip.container-create}:11111/v1
 
   log:
     es-nodes: 10.100.0.103:9200

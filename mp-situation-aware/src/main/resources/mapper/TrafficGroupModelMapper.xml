@@ -21,11 +21,6 @@
     where pk = #{pk,jdbcType=INTEGER}
   </delete>
 
-  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
-    delete from mp_situation_traffic_group
-    where pk = #{pk,jdbcType=INTEGER}
-  </delete>
-
   <update id="deleteByTrafficGroupId" parameterType="java.lang.String">
     update mp_situation_traffic_group
     set del_flag=1
