@@ -97,7 +97,7 @@ public class SceneHandler extends BaseSceneHandler<
         SceneHandler> {
 
     // mock的进度
-    private int progressPercentage = 0;
+    private static Map<String, Integer> progressPercentageMap = new ConcurrentHashMap<>();
 
     @Setter
     private boolean realTimeUpdate;
@@ -575,23 +575,28 @@ public class SceneHandler extends BaseSceneHandler<
     // TODO
     private Integer calculateProgressPercentage() {
         if (CollectionUtils.isEmpty(this.getElementMap().values())) {
+            progressPercentageMap.remove(getSceneId());
             return 100;
         } else {
             if (getScene().getEvent() == SceneModel.Event.CREATE && getScene().getEventStatus() == EventStatus.OVER) {
+                progressPercentageMap.remove(getSceneId());
                 return 100;
             }
             // mock 一个进度
             int newProcess = Math.abs(new Random().nextInt(10));
-            this.addProgressPercentage(newProcess);
-            return this.progressPercentage;
+            return this.addProgressPercentage(newProcess);
         }
     }
 
-    private synchronized void addProgressPercentage(int newProcess) {
-        if (this.progressPercentage + newProcess >= 100) {
-            this.progressPercentage = 99;
+    private synchronized int addProgressPercentage(int newProcess) {
+        Integer progressPercentage = progressPercentageMap.getOrDefault(getSceneId(), 0);
+        int result = progressPercentage + newProcess;
+        if (result >= 100) {
+            progressPercentageMap.put(getSceneId(), 99);
+            return 99;
         } else {
-            this.progressPercentage += newProcess;
+            progressPercentageMap.put(getSceneId(), result);
+            return result;
         }
     }
 }
