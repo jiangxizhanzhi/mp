@@ -43,11 +43,6 @@ public class LocalFileMappingServiceImpl
                 && existObjMapping.getLocalFileModifiedTime().equals(newObjMapping.getLocalFileModifiedTime());
     }
 
-    @Override
-    public ServiceResult<List<LocalFileMappingModel>> getMappings(String group) {
-        return new ServiceResult<>(getObjMappings(group));
-    }
-
     /**
      * 同步本地文件和远程文件映射，本地文件有变化就更新，根据文件最后修改时间判断
      * @param group 文件映射组

@@ -49,4 +49,8 @@ public class LocalFileMappingCommon {
         return syncMap(group, namePathMap);
     }
 
+    public static int deleteMappings(String group) {
+        return localFileMappingService.deleteMappings(group).getSource();
+    }
+
 }
