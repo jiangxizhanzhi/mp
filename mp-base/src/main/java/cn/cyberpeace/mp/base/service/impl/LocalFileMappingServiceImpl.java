@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.base.service.impl;
 
 import cn.cyberpeace.mp.base.bo.DiffTargets;
+import cn.cyberpeace.mp.base.common.FdfsCommon;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.base.repository.LocalFileMappingMapper;
 import cn.cyberpeace.mp.base.service.LocalFileMappingService;
@@ -24,6 +25,16 @@ public class LocalFileMappingServiceImpl
     @Autowired
     public LocalFileMappingServiceImpl(LocalFileMappingMapper modelMapper) {
         setModelMapper(modelMapper);
+    }
+
+    private void removeRemoteFiles(List<String> remoteFiles) {
+        for (var remoteFile : remoteFiles) {
+            try {
+                FdfsCommon.delete(remoteFile);
+            } catch (Exception e) {
+                log.error("Remove remote file error: ", e);
+            }
+        }
     }
 
     protected boolean judgeKeepObjMapping(LocalFileMappingModel newObjMapping, LocalFileMappingModel existObjMapping) {
@@ -62,11 +73,10 @@ public class LocalFileMappingServiceImpl
 
             String remoteFile;
             try {
-                // TODO 上传远程文件
-                remoteFile = "";
+                remoteFile = FdfsCommon.upload(mapping.getLocalFile());
             } catch (Exception e) {
                 log.error("Upload local file({}) error: {}", mapping.getLocalFile(), e);
-                // TODO 删除上传的远程文件
+                removeRemoteFiles(savedRemoteFiles);
                 throw e;
             }
             savedRemoteFiles.add(remoteFile);
@@ -77,7 +87,7 @@ public class LocalFileMappingServiceImpl
             saveDiffObjMappings(diff);
         } catch (Exception e) {
             log.error("Save local file mappings error: ", e);
-            // TODO 删除上传的远程文件
+            removeRemoteFiles(savedRemoteFiles);
             throw e;
         }
 

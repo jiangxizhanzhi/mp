@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.List;
+
 /**
  * 模块下定义的独立配置信息
  * 约定：各模块的独立配置命名 {模块名}AppConfig
@@ -36,10 +38,19 @@ public class BaseAppConfig {
     @Value("${mp.base.json-stringify-include-null:true}")
     private Boolean jsonStringifyIncludeNull;
 
-    @Value("${mp.base.task_pool_size:1000}")
+    @Value("${mp.base.task-pool-size:1000}")
     private Integer taskPoolSize;
 
-    @Value("${mp.base.task_hold_size:200000}")
+    @Value("${mp.base.task-hold-size:200000}")
     private Integer taskHoldSize;
+
+    @Value("${mp.base.fdfs-tracker-servers:127.0.0.1:11211}")
+    private List<String> fdfsTrackerServers;
+
+    @Value("${mp.base.fdfs-inner-http-server:127.0.0.1:8888}")
+    private String fdfsInnerHttpServer;
+
+    @Value("${mp.base.fdfs-outer-http-server:127.0.0.1:8888}")
+    private String fdfsOuterHttpServer;
 
 }
