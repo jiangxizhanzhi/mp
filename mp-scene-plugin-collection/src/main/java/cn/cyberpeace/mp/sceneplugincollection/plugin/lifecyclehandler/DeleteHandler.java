@@ -11,7 +11,8 @@ import org.apache.commons.lang3.StringUtils;
 public class DeleteHandler extends HandlerCommon {
 
     public static class SceneProcess {
-        public static final EventProcess DELETE_FLOW_COLLECTION = new EventProcess("delete_flow_collection", "scenepluginflow.event.delete_flow_collection");
+        public static final EventProcess DELETE_FLOW_COLLECTION = new EventProcess("delete_flow_collection", "sceneplugincollection.event.delete_flow_collection");
+        public static final EventProcess DELETE_PROBE_COLLECTION = new EventProcess("delete_probe_collection", "sceneplugincollection.event.delete_probe_collection");
     }
 
     public static class ElementProcess {
@@ -29,6 +30,13 @@ public class DeleteHandler extends HandlerCommon {
         if (!StringUtils.isEmpty(flowCollectorId)) {
             runSceneProgress(SceneProcess.DELETE_FLOW_COLLECTION, () -> {
                 getFlowCollector().deleteCollector(flowCollectorId);
+            });
+        }
+
+        var probeCollectorId = scene.getProbeCollector();
+        if (!StringUtils.isEmpty(probeCollectorId)) {
+            runSceneProgress(SceneProcess.DELETE_PROBE_COLLECTION, () -> {
+                getProbeCollector().deleteCollector(probeCollectorId);
             });
         }
     }

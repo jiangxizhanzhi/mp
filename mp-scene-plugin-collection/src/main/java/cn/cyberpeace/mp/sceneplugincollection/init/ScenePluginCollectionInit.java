@@ -2,8 +2,7 @@ package cn.cyberpeace.mp.sceneplugincollection.init;
 
 import cn.cyberpeace.mp.base.common.LocalFileMappingCommon;
 import cn.cyberpeace.mp.sceneplugincollection.config.CollectionAppConfig;
-import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
-import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.common.WazuhCommon;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.WazuhCommon;
 import cn.hutool.core.io.FileUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;

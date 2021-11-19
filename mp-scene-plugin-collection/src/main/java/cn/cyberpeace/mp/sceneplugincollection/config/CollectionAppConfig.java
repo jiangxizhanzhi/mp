@@ -34,6 +34,9 @@ public class CollectionAppConfig {
     @Value("${mp.sceneplugincollection.delete_hold_size:200000}")
     private Integer deleteHoldSize;
 
+    @Value("${mp.sceneplugincollection.wazuh_server_host:127.0.0.1}")
+    private String wazuhServerHost;
+
     @Value("${mp.sceneplugincollection.wazuh_agent_installer_dir:}")
     private String wazuhAgentInstallerDir;
 

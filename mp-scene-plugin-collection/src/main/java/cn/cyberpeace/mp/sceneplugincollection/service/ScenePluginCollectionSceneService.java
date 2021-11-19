@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.sceneplugincollection.service;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionFlowBO;
@@ -80,13 +81,11 @@ public class ScenePluginCollectionSceneService {
         sessionRequest.setProtocol(queryParams.getProtocol());
         var startTimeStr = queryParams.getStartTime();
         if (!StringUtils.isEmpty(startTimeStr)) {
-            // TODO 统一转换调用
-            sessionRequest.setStartTime(LocalDateTime.parse(startTimeStr, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+            sessionRequest.setStartTime(TimeUtils.stringToLocalDateTime(startTimeStr));
         }
         var endTimeStr = queryParams.getEndTime();
         if (!StringUtils.isEmpty(endTimeStr)) {
-            // TODO 统一转换调用
-            sessionRequest.setEndTime(LocalDateTime.parse(endTimeStr, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+            sessionRequest.setEndTime(TimeUtils.stringToLocalDateTime(endTimeStr));
         }
         sessionRequest.setMacIds(flowCollectMacAddrs);
         ListObjResult<SessionResult> result = networkTrafficService.querySessionWithPage(sessionRequest);
