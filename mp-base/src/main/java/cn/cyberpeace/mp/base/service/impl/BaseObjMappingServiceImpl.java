@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.model.BaseObjMappingModel;
 import cn.cyberpeace.mp.base.repository.BaseObjMappingMapper;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.BaseObjMappingService;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -82,4 +83,18 @@ public abstract class BaseObjMappingServiceImpl<M extends BaseObjMappingModel, P
         saveDiffObjMappings(diff);
         return collectDiffObjMappings(diff);
     }
+
+    protected int deleteObjMappings(String group) {
+        return modelMapper.filterDelete(new HumanCondition()
+                .filterEqual(BaseObjMappingModel::getGroup, group));
+    }
+
+    public ServiceResult<List<M>> getMappings(String group) {
+        return new ServiceResult<>(getObjMappings(group));
+    }
+
+    public ServiceResult<Integer> deleteMappings(String group) {
+        return new ServiceResult<>(deleteObjMappings(group));
+    }
+
 }

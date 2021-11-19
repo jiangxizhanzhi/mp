@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.scene.util;
 
+import cn.cyberpeace.mp.base.common.LocalFileMappingCommon;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -117,6 +119,8 @@ public class InstallerUtils {
     public static final String LINUX_DEB_DEFAULT_INSTALL_SOFTWARE = "apt-get install %s";
 
     public static final String INSTALLER_REPLACEMENT = "\\{this\\}";
+
+    public static final String WINDOWS_HELP_INSTALLER_GROUP = "windows_help_installer";
 
     private static FastDFSClient fileClient;
 
@@ -292,7 +296,13 @@ public class InstallerUtils {
      * @return windows安装工具
      */
     private static List<Installer> getWindowsInstallerTools() {
-        return new ArrayList<>();
+        var mappings = LocalFileMappingCommon.getMappings(WINDOWS_HELP_INSTALLER_GROUP);
+        return mappings.stream().map(mapping -> {
+            var installer = new Installer();
+            installer.setName(mapping.getName());
+            installer.setFile(mapping.getRemoteFile());
+            return installer;
+        }).collect(Collectors.toList());
     }
 
     /**

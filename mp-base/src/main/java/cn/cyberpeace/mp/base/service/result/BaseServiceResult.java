@@ -55,6 +55,10 @@ public class BaseServiceResult<T, R> {
         setDetail(detail);
     }
 
+    public boolean isSuccess() {
+        return BaseErrorCode.SUCCESS.getCode().equals(getServiceCode().getCode());
+    }
+
     public R sourceToData(T source) {
         if (source == null) {
             return null;
