@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.base.util;
 
 import com.alibaba.fastjson.JSONObject;
+import java.net.URI;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.apache.commons.collections4.MapUtils;
@@ -266,6 +267,27 @@ public class HttpUtils {
         return EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
     }
 
+
+    /**
+     * 删除请求
+     *
+     * @param url
+     * @return
+     * @throws IOException
+     */
+    public static String sendDelete(String url, String content) throws IOException {
+        log.info("请求地址================>{}", url);
+        HttpClient client = HttpClientBuilder.create().build();
+        StringEntity entity = new StringEntity(content, StandardCharsets.UTF_8);
+        entity.setContentType(ContentType.APPLICATION_JSON.getMimeType());
+        HttpDeleteWithBody httpDelete = new HttpDeleteWithBody(url);
+        httpDelete.setEntity(entity);
+        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
+        HttpResponse response = client.execute(httpDelete);
+        httpDelete.setConfig(requestConfig);
+        return EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+    }
+
     /**
      * get请求下载文件
      *
@@ -398,7 +420,32 @@ public class HttpUtils {
         // 获得返回值
         return resp;
     }
+
+    static class HttpDeleteWithBody extends HttpEntityEnclosingRequestBase {
+        public static final String METHOD_NAME = "DELETE";
+
+        @Override
+        public String getMethod() {
+            return METHOD_NAME;
+        }
+
+        public HttpDeleteWithBody(final String uri) {
+            super();
+            setURI(URI.create(uri));
+        }
+
+        public HttpDeleteWithBody(final URI uri) {
+            super();
+            setURI(uri);
+        }
+
+        public HttpDeleteWithBody() {
+            super();
+        }
+    }
 }
+
+
 
 
 
