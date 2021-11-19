@@ -578,7 +578,7 @@ public class SceneHandler extends BaseSceneHandler<
             progressPercentageMap.remove(getSceneId());
             return 100;
         } else {
-            if (getScene().getEvent() == SceneModel.Event.CREATE && getScene().getEventStatus() == EventStatus.OVER) {
+            if (getScene().getEventStatus() == EventStatus.OVER) {
                 progressPercentageMap.remove(getSceneId());
                 return 100;
             }
