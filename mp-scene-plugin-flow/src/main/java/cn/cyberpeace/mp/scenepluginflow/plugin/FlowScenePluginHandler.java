@@ -132,7 +132,9 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
             return false;
         }
 
-        return handlerUtils.startFlow(flowElement, flow);
+        var flag = handlerUtils.startFlow(flowElement, flow);
+        ackElementChanged(nodeId, true);
+        return flag;
     }
 
     public boolean stopFlow(String nodeId, String flowId) {
@@ -152,6 +154,8 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
             return false;
         }
 
-        return handlerUtils.stopFlow(flow);
+        var flag = handlerUtils.stopFlow(flow);
+        ackElementChanged(nodeId, true);
+        return flag;
     }
 }

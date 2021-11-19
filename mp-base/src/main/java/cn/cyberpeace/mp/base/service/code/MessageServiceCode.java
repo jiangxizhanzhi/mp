@@ -29,4 +29,12 @@ public class MessageServiceCode implements ServiceCode {
         }
     }
 
+    public static String calcMessage(ServiceCode serviceCode) {
+        if (serviceCode instanceof MessageServiceCode) {
+            return ((MessageServiceCode) serviceCode).generateMessage();
+        } else {
+            return MessageCommon.get(serviceCode.getMessage());
+        }
+    }
+
 }
