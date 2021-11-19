@@ -80,4 +80,10 @@ public class NetworkTrafficGroupServiceTest {
         String arkimePrefixId = "mp_" + String.valueOf(System.currentTimeMillis());
         networkTrafficGroupService.createArkimeImageInstance(arkimePrefixId);
     }
+
+    @Test
+    public void testDeleteArkimeInstance() {
+        String instanceName = "mp_1637285914623";
+        networkTrafficGroupService.deleteArkimeInstance(instanceName);
+    }
 }
