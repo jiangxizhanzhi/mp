@@ -32,7 +32,7 @@ class DeviceInfoConverter implements IConverter {
     }
 
     public void convert2BO(ConvertDataContainer container) {
-        if (CollectionUtils.isNotEmpty(container.getNodeElements())) {
+        if (CollectionUtils.isNotEmpty(container.getNetworkElements())) {
             this.doConvert(container.getNetworkElements(), container.getCloudPluginElements(), container.getCloudPluginPorts());
         }
         if (CollectionUtils.isNotEmpty(container.getNodeElements())) {

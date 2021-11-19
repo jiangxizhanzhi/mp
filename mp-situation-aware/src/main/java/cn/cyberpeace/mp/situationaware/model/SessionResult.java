@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @Builder
@@ -23,10 +25,10 @@ public class SessionResult {
     private String targetIp;
 
     @ApiModelProperty("源Mac")
-    private String sourceMac;
+    private List<String> sourceMac;
 
     @ApiModelProperty("目的Mac")
-    private String targetMac;
+    private List<String> targetMac;
 
     @ApiModelProperty("源端口")
     private String srcPort;
@@ -38,10 +40,10 @@ public class SessionResult {
      * 协议类型
      */
     @ApiModelProperty("协议类型")
-    private String protocolType;
+    private List<String> protocolType;
 
     @ApiModelProperty("时间")
-    private String timestamp;
+    private Long timestamp;
 
     @ApiModelProperty("流量大小")
     private Integer totalBytes;

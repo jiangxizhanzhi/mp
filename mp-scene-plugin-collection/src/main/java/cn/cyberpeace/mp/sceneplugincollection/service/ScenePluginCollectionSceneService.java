@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.sceneplugincollection.service;
 
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
-import cn.cyberpeace.mp.base.util.basic.IntUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
@@ -20,7 +19,6 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -103,17 +101,18 @@ public class ScenePluginCollectionSceneService {
             flow.setProtocol(srcFlow.getProtocolType());
             flow.setSize(srcFlow.getTotalBytes());
 
-            var timestampStr = srcFlow.getTimestamp();
-            int timestamp = IntUtils.fromStr(timestampStr);
+            var timestamp = srcFlow.getTimestamp();
             flow.setTime(LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault()));
 
             var sourceMac = flow.getSourceMac();
+            //todo 多个mac使用map获取存在问题
             var sourceElement = macElementMap.getOrDefault(sourceMac, null);
             if (sourceElement != null) {
                 flow.setSourceNodeId(sourceElement.getId());
                 flow.setSourceNodeName(sourceElement.getName());
             }
             var targetMac = flow.getTargetMac();
+            //todo 多个mac使用map获取存在问题
             var targetElement = macElementMap.getOrDefault(targetMac, null);
             if (targetElement != null) {
                 flow.setTargetNodeId(targetElement.getId());
