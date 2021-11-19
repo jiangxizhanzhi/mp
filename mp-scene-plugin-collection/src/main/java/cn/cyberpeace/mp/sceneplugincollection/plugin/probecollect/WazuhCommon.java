@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.common;
+package cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect;
 
 import cn.cyberpeace.mp.base.common.LocalFileMappingCommon;
 import cn.cyberpeace.mp.base.model.BaseObjMappingModel;
@@ -30,7 +30,7 @@ public class WazuhCommon {
         agentName = StringUtils.isEmpty(agentName) ? TextUtils.uuid() : agentName;
         List<LocalFileMappingModel> mappings = LocalFileMappingCommon.getMappings(WAZUH_AGENT_GROUP);
         Map<String, String> nameFileMap = mappings.stream().collect(Collectors.toMap(BaseObjMappingModel::getName,
-                LocalFileMappingModel::getLocalFile));
+                LocalFileMappingModel::getRemoteFile));
 
         InstallerUtils.Installer resource = null;
         if (List.of(BaseSceneElementModel.SystemType.WINDOWS_10,
@@ -44,7 +44,8 @@ public class WazuhCommon {
                 BaseSceneElementModel.SystemType.WINDOWS_SERVER_2010,
                 BaseSceneElementModel.SystemType.WINDOWS_SERVER_2008,
                 BaseSceneElementModel.SystemType.WINDOWS_SERVER_2003,
-                BaseSceneElementModel.SystemType.WINDOWS_SERVER_2000).contains(systemType)) {
+                BaseSceneElementModel.SystemType.WINDOWS_SERVER_2000,
+                BaseSceneElementModel.SystemType.WINDOWS).contains(systemType)) {
             resource = new InstallerUtils.Installer();
             resource.setFile(nameFileMap.getOrDefault(WAZUH_AGENT_WINDOWS_FILE_NAME, StringUtils.EMPTY));
             resource.setInstallCommand(
@@ -55,7 +56,8 @@ public class WazuhCommon {
                             SceneSingleton.sceneAppConfig.getWindowsInstallerDir()),
                     String.format(".\\wazuh-install.exe --server=%s --agent=%s", wazuhHost, agentName)
             ));
-        } else if (List.of(BaseSceneElementModel.SystemType.CENTOS).contains(systemType)) {
+        } else if (List.of(BaseSceneElementModel.SystemType.CENTOS,
+                BaseSceneElementModel.SystemType.LINUX).contains(systemType)) {
             resource = new InstallerUtils.Installer();
             resource.setFile(nameFileMap.getOrDefault(WAZUH_AGENT_CENTOS_FILE_NAME, StringUtils.EMPTY));
             resource.setInstallCommand(
