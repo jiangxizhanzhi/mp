@@ -2,16 +2,20 @@ package cn.cyberpeace.mp.situationaware.service;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.HttpUtils;
+import cn.cyberpeace.mp.base.util.http.HttpUtilsV2;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
 import cn.cyberpeace.mp.situationaware.model.GroupModel;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSONPath;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -106,8 +110,32 @@ public class NetworkTrafficGroupService {
      * @param groupId
      */
     public void deleteArkimeInstance(String groupId) {
-        //todo 调用云平台接口删除实例
-        return;
+        //查询groupId对应的实例镜像
+        String result = null;
+        try {
+            result = HttpUtils.sendGet(cpCloudUrl + "/containers");
+        } catch (IOException e) {
+            log.error("query cloud containers error");
+        }
+        JSONArray networkList = (JSONArray) JSONPath.eval(JSON.parse(result), "$.data.list");
+        AtomicReference<String> containerId = new AtomicReference<>("");
+        networkList.stream().filter(json -> json instanceof JSONObject).map(JSONObject.class::cast).filter(json -> groupId.equals(json.get("name"))).findFirst().ifPresent(container ->{
+            containerId.set((String) container.get("id"));
+        });
+
+        //删除实例镜像
+        var deleteParam = new JSONObject();
+        var deleteUrl = cpCloudUrl + "/scenarios/container";
+        var containerArray = new JSONArray();
+        containerArray.add(0, containerId.get());
+        deleteParam.put("containers", containerArray);
+        try {
+            HttpUtils.sendDelete(deleteUrl, deleteParam.toJSONString());
+        } catch (IOException e) {
+            log.error("deleete  arkime Image instance error");
+            log.error(SituationalAwareErrorCode.ARKIME_DELETE_ERROR.getMessage(), ExceptionUtils.getStackTrace(e));
+            throw new MpRuntimeException(SituationalAwareErrorCode.ARKIME_DELETE_ERROR, ExceptionUtils.getStackTrace(e));
+        }
     }
 
     /**
