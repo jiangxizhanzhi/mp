@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.cyberpeace.mp.front.admin.repository.SysNoticeOrgMapper">
+
+    <select id="listByNoticeIds" resultType="cn.cyberpeace.mp.auth.model.OrgModel">
+        select distinct o.* from mp_auth_org o left join mp_sys_notice_org no on o.id = no.org
+        <where>
+            <if test="noticeIds != null and noticeIds.size() > 0">
+                AND no.notice_id in
+                <foreach item="noticeId" index="index" collection="noticeIds" open="(" separator="," close=")">
+                    #{noticeId}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <delete id="deleteByNoticeIds">
+        delete from mp_sys_notice_org
+        <where>
+            <if test="noticeIds != null and noticeIds.size() > 0">
+                AND notice_id in
+                <foreach item="noticeId" index="index" collection="noticeIds" open="(" separator="," close=")">
+                    #{noticeId}
+                </foreach>
+            </if>
+        </where>
+    </delete>
+
+    <delete id="deleteByOrg">
+        delete from mp_sys_notice_org where org = #{orgId}
+    </delete>
+
+</mapper>

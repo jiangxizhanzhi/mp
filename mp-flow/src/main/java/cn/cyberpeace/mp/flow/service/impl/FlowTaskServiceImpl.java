@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.flow.service.impl;
 
-import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseSingleton;
 import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
@@ -11,6 +10,7 @@ import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
+import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
 import cn.cyberpeace.mp.flow.enums.FlowPlatformEnum;
@@ -200,7 +200,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                     asyncPlatFlowTaskService.savePlatFlowTask(request, false);
                     return ServiceResult.success(flowTaskModel);
                 } else {
-                    return ServiceResult.fail(FlowErrorCode.ADD_TASK_ERROR);
+                    return new ServiceResult<>(null, FlowErrorCode.ADD_TASK_ERROR);
                 }
             } else {
                 // 暂无其他流量发生器，直接保存
@@ -209,7 +209,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
             }
         } else {
             log.error("flow file be chosen not existed");
-            return ServiceResult.fail(FlowErrorCode.FLOW_NOT_EXIST);
+            return new ServiceResult<>(null, FlowErrorCode.ADD_TASK_ERROR);
         }
     }
 
@@ -234,7 +234,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                 // 先向流量发生平台导入pcap包
                 JSONObject object = new JSONObject();
                 object.put("fileName",
-                        flowInfoModel.getTitle() + "." + flowInfoModel.getPcapFile().split(BaseConstants.SPOT)[1]);
+                        flowInfoModel.getTitle() + System.currentTimeMillis() + "." + flowInfoModel.getPcapFile().split(BaseConstants.SPOT)[1]);
                 String pcapRsp = HttpUtils.postFile(actuatorResourceUrl + "/pcap/import", fileByte, "file", object);
                 JSONObject jsonObject = JSONObject.parseObject(pcapRsp);
                 log.info("upload pcap file response:{}", jsonObject.toJSONString());
@@ -248,7 +248,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                     AddPcapRequest addPcapRequest = new AddPcapRequest();
                     addPcapRequest.setFileName(fileName);
                     String addPcapRsp = HttpUtils.sendPost(actuatorResourceUrl + "/pcap",
-                            JsonCommon.snakeStringify(addPcapRequest));
+                            JsonUtils.snakeStringify(addPcapRequest));
 
                     JSONObject addPcapObj = JSONObject.parseObject(addPcapRsp);
                     log.info("add pcap file response:{}", addPcapObj.toJSONString());
@@ -286,7 +286,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                     runCmd = runCmd + " " + flowInfoModel.getRunCmd();
                 }
                 scriptsRequest.setRunCmd(runCmd);
-                JSONObject object = JSONObject.parseObject(JsonCommon.snakeStringify(scriptsRequest));
+                JSONObject object = JSONObject.parseObject(JsonUtils.snakeStringify(scriptsRequest));
                 object.put("fileName", flowName);
 
                 // 先向流量发生平台新增资源文件
@@ -629,7 +629,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                 AddAppTaskRequest appTaskRequest = new AddAppTaskRequest(flowTaskModel, flowPortModel);
                 try {
                     String addAppTaskRsp = HttpUtils.sendPost(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks/app",
-                            JsonCommon.snakeStringify(appTaskRequest));
+                            JsonUtils.snakeStringify(appTaskRequest));
                     JSONObject addAppTaskObj = JSONObject.parseObject(addAppTaskRsp);
                     log.info("add app task response:{}", addAppTaskObj.toJSONString());
                     if (ResponseUtils.checkResponse(addAppTaskObj)) {
@@ -656,7 +656,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
 
                 try {
                     String addStandTaskRsp = HttpUtils.sendPost(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks/standards",
-                            JsonCommon.snakeStringify(standTaskRequest));
+                            JsonUtils.snakeStringify(standTaskRequest));
                     JSONObject addStandTaskObj = JSONObject.parseObject(addStandTaskRsp);
                     log.info("add standard task response:{}", addStandTaskObj.toJSONString());
                     if (ResponseUtils.checkResponse(addStandTaskObj)) {

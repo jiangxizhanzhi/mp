@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.cyberpeace.mp.front.admin.repository.SysConfigMapper">
+    
+    <select id="selectAll" resultType="cn.cyberpeace.mp.front.admin.model.SysConfigModel">
+        select * from mp_sys_config
+    </select>
+
+    <select id="selectByKey" resultType="cn.cyberpeace.mp.front.admin.model.SysConfigModel">
+        select * from mp_sys_config where key_name = #{keyName}
+    </select>
+
+    <update id="updateByKeyName">
+        update mp_sys_config set value = #{value}, update_time = CURRENT_TIMESTAMP where key_name = #{key}
+    </update>
+
+</mapper>

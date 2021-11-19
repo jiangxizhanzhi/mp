@@ -10,7 +10,6 @@ import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
-import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import com.github.pagehelper.PageInfo;
@@ -41,64 +40,6 @@ public class UserRoleController extends BaseModelController<UserRoleModel, Query
     @Autowired
     public UserRoleController(UserRoleService modelService) {
         setModelService(modelService);
-    }
-
-
-    @ApiOperation(value = "分页查询 根据userId查询用户所有角色", notes = "")
-    @GetMapping("/roles/page/byuser")
-    public ListObjServiceResult getRolesByUser(UserRolePageRequest pageRequest) {
-        PageInfo pageInfo = getModelService().pageByUserId(pageRequest);
-        return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
-    }
-
-    @ApiOperation(value = "分页查询 根据roleId查询角色绑定的所有用户", notes = "")
-    @GetMapping("/users/page/byrole")
-    public ListObjServiceResult getUsersByRole(UserRolePageRequest pageRequest) {
-        PageInfo pageInfo = getModelService().pageByRoleId(pageRequest);
-        return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
-    }
-
-    @ApiOperation(value = "查询所有角色以及绑定的用户数量", notes = "")
-    @GetMapping("/statistics")
-    public ServiceResult<List<UserRoleStatistic>> getUserRoleStatistics() {
-        List statistics = getModelService().getUserRoleStatistics();
-        return ResultUtils.objList2ListObjServiceResult(statistics, statistics.size());
-    }
-
-
-    @ApiOperation(value = "绑定用户-角色关系(单个用户 -> 多个角色)，注意，该操作会删除原有用户的所有角色。 如果roleIds为空，表示删除用户所有角色！", notes = "")
-    @PostMapping("/bind/userRoles")
-    public ServiceResult bindUserRoles(@RequestBody @Validated UserRolesRequest userRolesReq) {
-        boolean success = getModelService().bindUserRoles(userRolesReq.getUserId(), userRolesReq.getRoleIds(), true);
-        if (success) {
-            return ServiceResult.successful();
-        } else {
-            return ServiceResult.fail("绑定用户角色失败!");
-        }
-    }
-
-
-    @ApiOperation(value = "绑定用户-角色关系(单个角色 -> 多个用户)", notes = "")
-    @PostMapping("/bind/roleUsers")
-    public ServiceResult bindRoleUsers(@RequestBody @Validated RoleUsersRequest roleUsersReq) {
-        boolean success = getModelService().bindRoleUsers(roleUsersReq.getRoleId(), roleUsersReq.getUserIds());
-        if (success) {
-            return ServiceResult.successful();
-        } else {
-            return ServiceResult.fail("绑定用户角色失败!");
-        }
-    }
-
-
-    @ApiOperation(value = "删除用户-角色关系(通过 role_id 和 user_ids组合)", notes = "")
-    @PostMapping("/delete/byRoleUsers")
-    public ServiceResult deleteByRoleIdAnUserIds(@RequestBody @Validated RoleUsersRequest roleUsersReq) {
-        boolean success = getModelService().deleteByRoleIdAndUserIds(roleUsersReq.getRoleId(), roleUsersReq.getUserIds());
-        if (success) {
-            return ServiceResult.successful();
-        } else {
-            return ServiceResult.fail("删除用户角色关系失败!");
-        }
     }
 
 }

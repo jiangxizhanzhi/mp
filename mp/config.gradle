@@ -12,7 +12,9 @@ gradle.ext {
         'mp-cscene',
         'mp-situation-aware',
         'mp-devops-log',
-        'mp-flow'
+        'mp-flow',
+        'mp-front-admin',
+        'mp-front-business',
     ]
 
     flyway = [

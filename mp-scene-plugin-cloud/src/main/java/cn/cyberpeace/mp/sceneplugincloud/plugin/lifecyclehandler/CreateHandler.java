@@ -502,6 +502,8 @@ public class CreateHandler extends HandlerCommon {
         cloudElement.setResourceId(virtualMachine.getId());
 
         receiveVirtualPortInfo(cloudElement, virtualMachine.getNetworks());
+
+        checkAccessModes(cloudElement);
     }
 
     protected void createContainer(CloudPluginSceneElementBO cloudElement) {
@@ -521,6 +523,8 @@ public class CreateHandler extends HandlerCommon {
         cloudElement.setResourceId(container.getId());
 
         receiveVirtualPortInfo(cloudElement, container.getNetworks());
+
+        checkAccessModes(cloudElement);
     }
 
     protected void createEntityNode(CloudPluginSceneElementBO cloudElement) {
@@ -531,6 +535,8 @@ public class CreateHandler extends HandlerCommon {
         var entityNode = enClient.create(createData);
 
         receiveEntityInterfaceInfo(cloudElement, entityNode.getInterfaces());
+
+        checkAccessModes(cloudElement);
     }
 
     public CreateHandler(CloudScenePluginHandler pluginHandler) {

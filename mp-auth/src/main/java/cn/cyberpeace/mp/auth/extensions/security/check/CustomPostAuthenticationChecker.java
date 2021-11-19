@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.auth.extensions.security.check;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.CredentialsExpiredException;
-import org.springframework.security.authentication.dao.AbstractUserDetailsAuthenticationProvider;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsChecker;
 
