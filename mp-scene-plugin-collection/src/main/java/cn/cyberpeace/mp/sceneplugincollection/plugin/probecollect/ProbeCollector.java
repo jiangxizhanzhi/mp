@@ -6,6 +6,7 @@ import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+// TODO 对接
 @Data
 @Component
 public class ProbeCollector {
@@ -20,6 +21,12 @@ public class ProbeCollector {
 
     public String createCollector() {
         return TextUtils.uuid();
+    }
+
+    public void bindAgents(String collectorId) {
+    }
+
+    public void unbindAgents(String collectorId) {
     }
 
     public void deleteCollector(String collectorId) {

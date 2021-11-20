@@ -5,7 +5,6 @@ import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
-import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.WazuhCommon;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.taskpool.CreateTaskPool;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -61,7 +60,7 @@ public class InitiateHandler extends HandlerCommon {
                 .filter(collectionElement -> !CollectionUtils.isEmpty(collectionElement.getProbes()))
                 .collect(Collectors.toList());
         if (!probeCollectionElements.isEmpty()) {
-            // 创建采集器
+            // 创建探针采集器
             runSceneProgress(SceneProcess.CREATE_PROBE_COLLECTOR, () -> {
                 var collectionId = getProbeCollector().createCollector();
                 getPluginHandler().getScene().setProbeCollector(collectionId);
