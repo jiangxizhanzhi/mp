@@ -291,8 +291,17 @@ public class CreateHandler extends HandlerCommon {
 //
 //        }
 
-        return CommandUtils.joinCommands(commands.toArray(new String[0]),
-                SystemTypeUtils.getStandardSystemType(srcElement.getSystemType()));
+        var standardSystemType = SystemTypeUtils.getStandardSystemType(srcElement.getSystemType());
+        var command = CommandUtils.joinCommands(commands.toArray(new String[0]), standardSystemType);
+        if (!StringUtils.isEmpty(command)) {
+            if (CommandUtils.isWindows(standardSystemType)) {
+                command = CommandUtils.appendBeforeCommand(command, "rem cmd", standardSystemType);
+            } else {
+                command = CommandUtils.appendBeforeCommand(command, "#!/bin/sh", standardSystemType);
+            }
+        }
+
+        return command;
     }
 
     private void receiveVirtualPortInfo(CloudPluginSceneElementBO cloudElement, List<VirtualNic> virtualNics) {
