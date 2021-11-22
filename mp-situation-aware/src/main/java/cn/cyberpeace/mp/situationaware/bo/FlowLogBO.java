@@ -15,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AttackLogBO {
+public class FlowLogBO {
 
     /**
      * 来源
