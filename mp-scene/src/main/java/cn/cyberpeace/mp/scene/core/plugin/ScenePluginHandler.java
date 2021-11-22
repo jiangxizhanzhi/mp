@@ -96,6 +96,14 @@ public abstract class ScenePluginHandler<S extends BasePluginSceneBO<?, S, Scene
 
     }
 
+    public void suspend() {
+
+    }
+
+    public void resume() {
+
+    }
+
     public void snapshot() {
 
     }
@@ -112,6 +120,14 @@ public abstract class ScenePluginHandler<S extends BasePluginSceneBO<?, S, Scene
     }
 
     public void recreateElement(String nodeId) {
+
+    }
+
+    public void suspendElement(String nodeId) {
+
+    }
+
+    public void resumeElement(String nodeId) {
 
     }
 

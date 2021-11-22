@@ -45,6 +45,8 @@ public class SceneModel extends BaseSceneModel implements BaseEventModel {
         public static final int SNAPSHOT = 8;
         public static final int DELETE = 9;
         public static final int MODIFY = 10;
+        public static final int SUSPEND = 12;
+        public static final int RESUME = 13;
 
         private Event() {}
     }

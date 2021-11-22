@@ -28,6 +28,8 @@ public class SceneElementEventHandler extends BaseEventHandler<SceneElementBO, E
                     SceneElementModel.Event.RESTART, EVENT_NAME_PREFIX + "restart",
                     SceneElementModel.Event.PAUSE, EVENT_NAME_PREFIX + "pause",
                     SceneElementModel.Event.UNPAUSE, EVENT_NAME_PREFIX + "unpause",
+                    SceneElementModel.Event.SUSPEND, EVENT_NAME_PREFIX + "suspend",
+                    SceneElementModel.Event.RESUME, EVENT_NAME_PREFIX + "resume",
                     SceneElementModel.Event.SNAPSHOT, EVENT_NAME_PREFIX + "snapshot",
                     SceneElementModel.Event.DELETE, EVENT_NAME_PREFIX + "delete",
                     SceneElementModel.Event.MODIFY, EVENT_NAME_PREFIX + "modify",

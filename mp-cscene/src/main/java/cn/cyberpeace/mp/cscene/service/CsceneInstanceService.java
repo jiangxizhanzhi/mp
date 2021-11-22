@@ -254,6 +254,18 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return new ServiceResult<>(result);
     }
 
+    public ServiceResult<Boolean> suspend(String id, CsceneContextBO context) {
+        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
+        boolean result = instanceHandler.suspend();
+        return new ServiceResult<>(result);
+    }
+
+    public ServiceResult<Boolean> resume(String id, CsceneContextBO context) {
+        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
+        boolean result = instanceHandler.resume();
+        return new ServiceResult<>(result);
+    }
+
     public ServiceResult<Boolean> pauseElement(String id, String nodeId, CsceneContextBO context) {
         CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
         boolean result = instanceHandler.pauseElement(nodeId);
@@ -275,6 +287,18 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     public ServiceResult<Boolean> recreateElement(String id, String nodeId, CsceneContextBO context) {
         CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
         boolean result = instanceHandler.recreateElement(nodeId);
+        return new ServiceResult<>(result);
+    }
+
+    public ServiceResult<Boolean> suspendElement(String id, String nodeId, CsceneContextBO context) {
+        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
+        boolean result = instanceHandler.suspendElement(nodeId);
+        return new ServiceResult<>(result);
+    }
+
+    public ServiceResult<Boolean> resumeElement(String id, String nodeId, CsceneContextBO context) {
+        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
+        boolean result = instanceHandler.resumeElement(nodeId);
         return new ServiceResult<>(result);
     }
 }

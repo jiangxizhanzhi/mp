@@ -40,6 +40,16 @@ public class VirtualMachine extends CloudClient {
         return doAction(instanceId, new VirtualMachineRestartData());
     }
 
+    public boolean resume(String instanceId) {
+        // todo
+        return true;
+    }
+
+    public boolean suspend(String instanceId) {
+        // todo
+        return true;
+    }
+
     private boolean doAction(String instanceId, CloudHttpData httpData) {
         try {
             cloudPost(CloudUrlConstant.VIRTUAL_MACHINE_LIFE_CONTROL_URL.replace("{instance_id}", instanceId), httpData, null, new TypeReference<CloudResponse<Object>>() {
