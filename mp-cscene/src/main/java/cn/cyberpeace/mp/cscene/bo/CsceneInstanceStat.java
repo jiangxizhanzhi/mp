@@ -13,6 +13,8 @@ public class CsceneInstanceStat {
     private String id;
     @ApiModelProperty(value = "名称")
     private String name;
+    @ApiModelProperty(value = "类型")
+    private Integer type;
     @ApiModelProperty(value = "引用类型")
     private Integer referenceType;
     @ApiModelProperty(value = "引用元数据")

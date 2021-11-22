@@ -148,6 +148,7 @@ public class CsceneSpecialService {
                 .currentLink(CsceneInstanceModel.class)
                 .groupBy(CsceneInstanceModel::getId)
                 .selectAs(CsceneInstanceModel::getId, CsceneInstanceStat::getId)
+                .selectAs(CsceneInstanceModel::getType, CsceneInstanceStat::getType)
                 .selectAs(CsceneInstanceModel::getReferenceType, CsceneInstanceStat::getReferenceType)
                 .selectAs(CsceneInstanceModel::getReferenceMetaData, CsceneInstanceStat::getReferenceMetaData)
                 .selectAs(CsceneInstanceModel::getCreateUsername, CsceneInstanceStat::getCreateUsername)
