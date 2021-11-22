@@ -36,11 +36,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 场景实例的处理
@@ -578,7 +579,7 @@ public class SceneHandler extends BaseSceneHandler<
             progressPercentageMap.remove(getSceneId());
             return 100;
         } else {
-            if (getScene().getEventStatus() == EventStatus.OVER) {
+            if (this.isTerminateEvent(getScene().getEvent()) && getScene().getEventStatus() == EventStatus.OVER) {
                 progressPercentageMap.remove(getSceneId());
                 return 100;
             }
@@ -586,6 +587,21 @@ public class SceneHandler extends BaseSceneHandler<
             int newProcess = Math.abs(new Random().nextInt(10));
             return this.addProgressPercentage(newProcess);
         }
+    }
+
+    private boolean isTerminateEvent(int state) {
+        Set<Integer> terminateStates = new HashSet<>() {{
+            this.add(SceneModel.Event.CREATE);
+            this.add(SceneModel.Event.START);
+            this.add(SceneModel.Event.STOP);
+            this.add(SceneModel.Event.RESTART);
+            this.add(SceneModel.Event.PAUSE);
+            this.add(SceneModel.Event.UNPAUSE);
+            this.add(SceneModel.Event.SNAPSHOT);
+            this.add(SceneModel.Event.DELETE);
+            this.add(SceneModel.Event.MODIFY);
+        }};
+        return terminateStates.contains(state);
     }
 
     private synchronized int addProgressPercentage(int newProcess) {
