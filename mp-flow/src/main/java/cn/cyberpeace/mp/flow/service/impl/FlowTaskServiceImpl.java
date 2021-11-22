@@ -413,7 +413,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                 log.warn("delete flow file not exit");
             }
 
-            return delete(id);
+            return delete(id).asResult();
         } else {
             log.error("flow task not exist: {}", id);
             return ServiceResult.fail(FlowErrorCode.TASK_NOT_EXIST);
