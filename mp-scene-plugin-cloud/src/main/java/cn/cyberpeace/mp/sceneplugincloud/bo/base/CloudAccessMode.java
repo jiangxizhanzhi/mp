@@ -32,4 +32,7 @@ public class CloudAccessMode extends AccessMode {
     @ApiModelProperty(value = "代理id")
     private String proxyId;
 
+    @ApiModelProperty(value = "是否连通")
+    private Boolean available;
+
 }

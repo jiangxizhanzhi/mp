@@ -1,9 +1,13 @@
 package cn.cyberpeace.mp.base.config;
 
+import cn.hutool.core.io.FileUtil;
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
 
 /**
  * 模块下定义的独立配置信息
@@ -14,6 +18,9 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "mp.base")
 @Data
 public class BaseAppConfig {
+
+    @Value("${mp.base.project-name:mp}")
+    private String projectName;
 
     @Value("${mp.base.default-page-size:10}")
     private Integer defaultPageSize;
@@ -35,5 +42,44 @@ public class BaseAppConfig {
 
     @Value("${mp.base.json-stringify-include-null:true}")
     private Boolean jsonStringifyIncludeNull;
+
+    @Value("${mp.base.task-pool-size:1000}")
+    private Integer taskPoolSize;
+
+    @Value("${mp.base.task-hold-size:200000}")
+    private Integer taskHoldSize;
+
+    @Value("${mp.base.fdfs-tracker-servers:127.0.0.1:11211}")
+    private List<String> fdfsTrackerServers;
+
+    @Value("${mp.base.fdfs-inner-http-server:127.0.0.1:8888}")
+    private String fdfsInnerHttpServer;
+
+    @Value("${mp.base.fdfs-outer-http-server:127.0.0.1:8888}")
+    private String fdfsOuterHttpServer;
+
+    @Value("${mp.base.resources_dir:}")
+    private String homeDir;
+
+    @Value("${mp.base.resources_dir:}")
+    private String resourcesDir;
+
+    public String getHomeDir() {
+        if (!StringUtils.isEmpty(homeDir)) {
+            return homeDir;
+        }
+
+        homeDir = StringUtils.joinWith(FileUtil.FILE_SEPARATOR, FileUtil.getUserHomePath(), "." + projectName);
+        return homeDir;
+    }
+
+    public String getResourcesDir() {
+        if (!StringUtils.isEmpty(resourcesDir)) {
+            return resourcesDir;
+        }
+
+        resourcesDir = StringUtils.joinWith(FileUtil.FILE_SEPARATOR, getHomeDir(), "resources");
+        return resourcesDir;
+    }
 
 }

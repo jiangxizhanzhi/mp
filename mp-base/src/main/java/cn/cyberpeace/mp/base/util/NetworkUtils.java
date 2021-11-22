@@ -53,13 +53,11 @@ public class NetworkUtils {
         }
     }
 
-    public static void probePort(String host, int port, Runnable callback, Runnable timeoutCallback)
-            throws Exception {
+    public static void probePort(String host, int port, Runnable callback, Runnable timeoutCallback) {
         probePort(host, port, 0, callback, timeoutCallback);
     }
 
-    public static void probePort(String host, int port, int timeout, Runnable callback, Runnable timeoutCallback)
-            throws Exception {
+    public static void probePort(String host, int port, int timeout, Runnable callback, Runnable timeoutCallback) {
         probePort(host, port, 0, 0, timeout, null, 0, callback, timeoutCallback);
     }
 
@@ -68,7 +66,7 @@ public class NetworkUtils {
      */
     public static void probePort(String host, int port, int perCheckTimeout, int stepTime, int timeout,
                           Callable<Boolean> stopCheck, int stopCheckIntervalCount,
-                          Runnable callback, Runnable timeoutCallback) throws Exception {
+                          Runnable callback, Runnable timeoutCallback) {
         final var probeTimeout = timeout <= 0 ? DEFAULT_PROBE_TIMEOUT : timeout;
         final var everyCheckTimeout = Math.max(perCheckTimeout, 0);
         CheckUtils.loopCheck(() -> checkPortConnectable(host, port, everyCheckTimeout),
@@ -76,13 +74,11 @@ public class NetworkUtils {
                 String.format("host port[%s:%d]", host, port));
     }
 
-    public static void probeHost(String host, Runnable callback, Runnable timeoutCallback)
-            throws Exception {
+    public static void probeHost(String host, Runnable callback, Runnable timeoutCallback) {
         probeHost(host, 0, callback, timeoutCallback);
     }
 
-    public static void probeHost(String host, int timeout, Runnable callback, Runnable timeoutCallback)
-            throws Exception {
+    public static void probeHost(String host, int timeout, Runnable callback, Runnable timeoutCallback) {
         probeHost(host, 0, 0, timeout, null, 0, callback, timeoutCallback);
     }
 
@@ -91,7 +87,7 @@ public class NetworkUtils {
      */
     public static void probeHost(String host, int perCheckTimeout, int stepTime, int timeout,
                           Callable<Boolean> stopCheck, int stopCheckIntervalCount,
-                          Runnable callback, Runnable timeoutCallback) throws Exception {
+                          Runnable callback, Runnable timeoutCallback) {
         final var probeTimeout = timeout <= 0 ? DEFAULT_PROBE_TIMEOUT : timeout;
         final var everyCheckTimeout = Math.max(perCheckTimeout, 0);
         CheckUtils.loopCheck(() -> checkHostReachable(host, everyCheckTimeout),

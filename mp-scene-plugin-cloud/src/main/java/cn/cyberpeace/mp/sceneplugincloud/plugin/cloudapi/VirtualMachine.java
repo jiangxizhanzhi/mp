@@ -5,12 +5,12 @@ import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineDeleteData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineLifeControllData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachinePauseData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineRestartData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineUnPauseData;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
-
-import java.lang.reflect.Field;
-import java.util.Collections;
 
 public class VirtualMachine extends CloudClient {
 
@@ -28,13 +28,21 @@ public class VirtualMachine extends CloudClient {
         return true;
     }
 
-    public boolean lifeControl(String instanceId, String action) {
-        VirtualMachineLifeControllData lifeControllData = new VirtualMachineLifeControllData();
+    public boolean pause(String instanceId) {
+        return doAction(instanceId, new VirtualMachinePauseData());
+    }
+
+    public boolean unpause(String instanceId) {
+        return doAction(instanceId, new VirtualMachineUnPauseData());
+    }
+
+    public boolean restart(String instanceId) {
+        return doAction(instanceId, new VirtualMachineRestartData());
+    }
+
+    private boolean doAction(String instanceId, CloudHttpData httpData) {
         try {
-            Field field = lifeControllData.getClass().getDeclaredField(action);
-            field.setAccessible(true);
-            field.set(lifeControllData, Collections.EMPTY_MAP);
-            cloudPost(CloudUrlConstant.VIRTUAL_MACHINE_LIFE_CONTROL_URL.replace("{instance_id}", instanceId), lifeControllData, null, new TypeReference<CloudResponse<Object>>() {
+            cloudPost(CloudUrlConstant.VIRTUAL_MACHINE_LIFE_CONTROL_URL.replace("{instance_id}", instanceId), httpData, null, new TypeReference<CloudResponse<Object>>() {
             }, true);
             return true;
         } catch (Exception e) {

@@ -41,7 +41,7 @@ public abstract class BaseSceneElementPortBO<M extends BaseSceneElementPortModel
     private Integer delay;
     @ApiModelProperty(value = "丢包率")
     private Integer loss;
-    @ApiModelProperty(value = "接入方式")
+    @ApiModelProperty(value = "【即将废弃】接入方式")
     private List<AccessMode> accessModes;
 
     @Override

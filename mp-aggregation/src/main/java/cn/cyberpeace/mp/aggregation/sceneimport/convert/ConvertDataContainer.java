@@ -125,13 +125,15 @@ class ConvertDataContainer {
 
         Map<String, Map<String, Object>> mapPluginElements = new HashMap<>();
         for (Map.Entry<String, CloudPluginSceneConfigElementBO> entry : this.cloudPluginElements.entrySet()) {
-            mapPluginElements.put(entry.getKey(), JsonCommon.beanToMap(entry.getValue()));
+            // TODO: 去除snake依赖
+            mapPluginElements.put(entry.getKey(), JsonCommon.beanToSnakeMap(entry.getValue()));
         }
         scenePluginDataBO.setElements(mapPluginElements);
 
         Map<String, Map<String, Object>> mapPluginPorts = new HashMap<>();
         for (Map.Entry<String, CloudPluginSceneConfigElementPortBO> entry : this.cloudPluginPorts.entrySet()) {
-            mapPluginPorts.put(entry.getKey(), JsonCommon.beanToMap(entry.getValue()));
+            // TODO: 去除snake依赖
+            mapPluginPorts.put(entry.getKey(), JsonCommon.beanToSnakeMap(entry.getValue()));
         }
         scenePluginDataBO.setElementPorts(mapPluginPorts);
         return scenePluginDataBO;

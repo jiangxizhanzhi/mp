@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.situationaware.model;
 
+import cn.cyberpeace.mp.situationaware.model.enums.SeverityEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -70,4 +71,9 @@ public class SessionRequest {
 
     @ApiModelProperty("场景source macId")
     private List<String> macIds;
+
+    /**
+     * 严重性
+     */
+    private SeverityEnum severityEnum;
 }

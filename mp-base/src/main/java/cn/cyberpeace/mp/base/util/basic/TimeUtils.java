@@ -10,6 +10,12 @@ import java.util.TimeZone;
 @Slf4j
 public class TimeUtils {
 
+    public static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    public static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+    public static final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+
     public static final DateTimeFormatter tzDateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
     public static final TimeZone utcTimeZone = TimeZone.getTimeZone("UTC");
@@ -19,6 +25,38 @@ public class TimeUtils {
     public static final DateTimeFormatter utcDateTimeFormatter = tzDateTimeFormatter.withZone(utcZoneId);
 
     private TimeUtils() {}
+
+    public static String localDateTimeToString(LocalDateTime localDateTime) {
+        return localDateTimeToString(localDateTime, dateTimeFormatter);
+    }
+
+    public static String localDateToString(LocalDate localDate) {
+        return localDateToString(localDate, dateFormatter);
+    }
+
+    public static String localTimeToString(LocalTime localTime) {
+        return localTimeToString(localTime, timeFormatter);
+    }
+
+    public static LocalDateTime stringToLocalDateTime(String localDateTimeStr) {
+        return stringToLocalDateTime(localDateTimeStr, dateTimeFormatter);
+    }
+
+    public static LocalDate stringToLocalDate(String localDateStr) {
+        return stringToLocalDate(localDateStr, dateFormatter);
+    }
+
+    public static LocalTime stringToLocalTime(String localTimeStr) {
+        return stringToLocalTime(localTimeStr, timeFormatter);
+    }
+
+    public static String utcStringToLocalDateTimeString(String utcDateTimeStr) {
+        return localDateTimeToString(utcStringToLocalDateTime(utcDateTimeStr));
+    }
+
+    public static String localDateTimeStringToUtcString(String localDateTimeStr) {
+        return localDateTimeToUtcString(stringToLocalDateTime(localDateTimeStr));
+    }
 
     public static LocalDateTime utcStringToLocalDateTime(String utcDateTimeStr) {
         var zonedDatetime = ZonedDateTime.parse(utcDateTimeStr, utcDateTimeFormatter);

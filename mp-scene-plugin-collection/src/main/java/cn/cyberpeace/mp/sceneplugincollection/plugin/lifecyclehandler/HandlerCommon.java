@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.util.thread.taskpool.TaskPool;
 import cn.cyberpeace.mp.scene.core.plugin.common.PluginSceneEventHandlerCommon;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.flowcollect.FlowCollector;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.ProbeCollector;
 import lombok.Getter;
 
 public class HandlerCommon extends PluginSceneEventHandlerCommon<CollectionScenePluginHandler> {
@@ -13,9 +14,13 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CollectionScene
     @Getter
     private FlowCollector flowCollector;
 
+    @Getter
+    private ProbeCollector probeCollector;
+
     public HandlerCommon(CollectionScenePluginHandler pluginHandler, TaskPool taskPool, int event) {
         super(pluginHandler, taskPool, event);
         flowCollector = BeanCommon.getBean(FlowCollector.class);
+        probeCollector = BeanCommon.getBean(ProbeCollector.class);
     }
 
 }

@@ -21,7 +21,7 @@ public class CheckUtils {
      */
     public static void loopCheck(Callable<Boolean> check, int stepTime, int timeout,
                                  Callable<Boolean> stopCheck, int stopCheckIntervalCount,
-                                 Runnable callback, Runnable timeoutCallback, String targetName) throws Exception {
+                                 Runnable callback, Runnable timeoutCallback, String targetName) {
         stepTime = stepTime <= 0 ? 2000 : stepTime;
         timeout = timeout <= 0 ? DEFAULT_LOOP_CHECK_TIMEOUT : timeout;
         stopCheckIntervalCount = stopCheckIntervalCount <= 0 ? 1 : stopCheckIntervalCount;
@@ -32,8 +32,14 @@ public class CheckUtils {
             var enterMoment = System.currentTimeMillis();
             log.info("Loop check {} - {}s", targetName, allTime / 1000);
 
+            var checkFlag = false;
+            try {
+                checkFlag = check.call();
+            } catch (Exception e) {
+                log.error("Loop check call check error: ", e);
+            }
             // 探测成功
-            if (Boolean.TRUE.equals(check.call())) {
+            if (Boolean.TRUE.equals(checkFlag)) {
                 log.info("Loop check {} ok", targetName);
                 if (callback != null) {
                     callback.run();
@@ -66,7 +72,14 @@ public class CheckUtils {
                 // 每隔一定次数进行停止检查
                 stopCheckCount += 1;
                 if (stopCheckCount == stopCheckIntervalCount) {
-                    if (Boolean.TRUE.equals(stopCheck.call())) {
+                    var stopCheckFlag = false;
+                    try {
+                        stopCheckFlag = stopCheck.call();
+                    } catch (Exception e) {
+                        log.error("Loop check call stop check error: ", e);
+                    }
+
+                    if (Boolean.TRUE.equals(stopCheckFlag)) {
                         break;
                     }
                     stopCheckCount = 0;

@@ -85,6 +85,7 @@ public class SceneService {
         SceneHandler sceneHandler;
         try {
             sceneHandler = new SceneHandler(id, null, false, context);
+            sceneHandler.setRealTimeUpdate(true);
             if (logic) {
                 SceneTaskPool.getInstance().executeTask(() -> sceneHandler.logicDelete());
             } else {
