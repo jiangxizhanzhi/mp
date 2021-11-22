@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.scenepluginflow.plugin.common;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
-import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneElementBO;
 import cn.cyberpeace.mp.scenepluginflow.bo.base.Flow;
@@ -16,6 +15,21 @@ public class SceneHandlerUtils {
     private FlowScenePluginHandler pluginHandler;
 
     private FlowExecutor flowExecutor;
+
+    private void successOnFLow(Flow flow) {
+        flow.setStatus(Flow.Status.ON);
+        flow.setStatusText(null);
+    }
+
+    private void successOffFLow(Flow flow) {
+        flow.setStatus(Flow.Status.OFF);
+        flow.setStatusText(null);
+    }
+
+    private void errorFLow(Flow flow, String error) {
+        flow.setStatus(Flow.Status.ERROR);
+        flow.setStatusText(error);
+    }
 
     public SceneHandlerUtils(FlowScenePluginHandler pluginHandler) {
         this.pluginHandler = pluginHandler;
@@ -33,28 +47,38 @@ public class SceneHandlerUtils {
     public boolean startFlow(FlowPluginSceneElementBO flowElement, Flow flow) {
         var taskId = flow.getTaskId();
         if (!StringUtils.isEmpty(taskId)) {
-            flowExecutor.startFlow(taskId);
+            try {
+                flowExecutor.startFlow(taskId);
+            } catch (Exception e) {
+                errorFLow(flow, e.getMessage());
+                return false;
+            }
+            successOnFLow(flow);
             return true;
         }
         var flowId = flow.getId();
         if (StringUtils.isEmpty(flowId)) {
+            errorFLow(flow, "Empty flow id");
             return false;
         }
 
         var executorId = pluginHandler.getScene().getExecutor();
         if (StringUtils.isEmpty(executorId)) {
+            errorFLow(flow, "Empty executor id");
             return false;
         }
 
         CloudScenePluginHandler cloudPluginHandler = pluginHandler.getSceneHandler()
                 .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
         if (cloudPluginHandler == null) {
+            errorFLow(flow, "Cloud plugin not found");
             return false;
         }
 
         var srcElement = flowElement.getSrcElement();
         var srcPorts = srcElement.getPorts();
         if (srcPorts == null) {
+            errorFLow(flow, "Network port not found");
             return false;
         }
 
@@ -69,31 +93,58 @@ public class SceneHandlerUtils {
             }
         }
 
-        if (StringUtils.isEmpty(networkId) || StringUtils.isEmpty(ip)) {
+        if (StringUtils.isEmpty(networkId)) {
+            errorFLow(flow, "Empty network id");
             return false;
         }
 
-        taskId = flowExecutor.createFlow(executorId, networkId, flowId, StringUtils.EMPTY, ip, null, null, null);
+        if (StringUtils.isEmpty(ip)) {
+            errorFLow(flow, "Empty ip");
+            return false;
+        }
+
+        try {
+            taskId = flowExecutor.createFlow(executorId, networkId, flowId, StringUtils.EMPTY, ip, null, null, null);
+        } catch (Exception e) {
+            errorFLow(flow, e.getMessage());
+            return false;
+        }
+
         flow.setTaskId(taskId);
-        flow.setStatus(Flow.Status.ON);
+        successOnFLow(flow);
         return true;
     }
 
     public boolean stopFlow(Flow flow) {
         var taskId = flow.getTaskId();
         if (StringUtils.isEmpty(taskId)) {
+            errorFLow(flow, "Empty task id");
             return false;
         }
-        flowExecutor.stopFlow(taskId);
-        flow.setStatus(Flow.Status.OFF);
+
+        try {
+            flowExecutor.stopFlow(taskId);
+        } catch (Exception e) {
+            errorFLow(flow, e.getMessage());
+            return false;
+        }
+        successOffFLow(flow);
         return true;
     }
 
-    public void deleteFlow(Flow flow) {
+    public boolean deleteFlow(Flow flow) {
         var taskId = flow.getTaskId();
         if (!StringUtils.isEmpty(taskId)) {
-            flowExecutor.deleteFlow(taskId);
-            flow.setStatus(Flow.Status.OFF);
+            try {
+                flowExecutor.deleteFlow(taskId);
+            } catch (Exception e) {
+                errorFLow(flow, e.getMessage());
+                return false;
+            }
+            successOffFLow(flow);
+            return true;
+        } else {
+            return true;
         }
     }
 }

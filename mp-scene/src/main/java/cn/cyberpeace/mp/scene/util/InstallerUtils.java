@@ -1,9 +1,13 @@
 package cn.cyberpeace.mp.scene.util;
 
+import cn.cyberpeace.mp.base.common.FdfsCommon;
+import cn.cyberpeace.mp.base.common.LocalFileMappingCommon;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
+import cn.cyberpeace.mp.base.util.fdfsclient.FdfsClient;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
+import cn.hutool.core.io.FileUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,6 +19,7 @@ import org.springframework.stereotype.Component;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -116,14 +121,14 @@ public class InstallerUtils {
      */
     public static final String LINUX_DEB_DEFAULT_INSTALL_SOFTWARE = "apt-get install %s";
 
-    public static final String INSTALLER_REPLACEMENT = "\\{this\\}";
+    public static final String INSTALLER_REPLACEMENT = "{this}";
 
-    private static FastDFSClient fileClient;
+    public static final String WINDOWS_HELP_INSTALLER_GROUP = "windows_help_installer";
+
+    public static final String FILE_URL_SEPARATOR = "/";
 
     @SuppressWarnings({"java:S1144", "java:S3010"})
-    private InstallerUtils(FastDFSClient fileClient) {
-        InstallerUtils.fileClient = fileClient;
-    }
+    private InstallerUtils() {}
 
     public static boolean isWindows(String systemType) {
         return CommandUtils.OS_TYPE_WINDOWS.equals(CommandUtils.getOsType(systemType));
@@ -162,22 +167,6 @@ public class InstallerUtils {
         }
     }
 
-    public static String getFileUrlBasename(String fileUrl) {
-        var parts = fileUrl.split("/");
-        return parts[parts.length - 1];
-    }
-
-    public static String getFilePathBasename(String filePathUrl) {
-        var parts = filePathUrl.split("\\\\");
-        parts = parts[parts.length - 1].split("/");
-        return parts[parts.length - 1];
-    }
-
-    public static String getFileSuffix(String filePath) {
-        var parts = filePath.split("\\.");
-        return parts[parts.length - 1];
-    }
-
     public static String generateFilename(String name, String suffix) {
         return StringUtils.joinWith("\\.", name, suffix);
     }
@@ -207,7 +196,7 @@ public class InstallerUtils {
      */
     public static FileDownloadInfo generateFileDownloadCommand(String systemType, String fileUrl, String fileName) {
         if (StringUtils.isEmpty(fileName)) {
-            fileName = getFileUrlBasename(fileUrl);
+            fileName = FileUtil.getName(fileUrl);
         }
         var installerDir = getDefaultInstallDir(systemType);
         String filePath;
@@ -259,7 +248,7 @@ public class InstallerUtils {
         var installerDir = getDefaultInstallDir(systemType);
         if (isWindows(systemType)) {
             if (installCommand.contains(INSTALLER_REPLACEMENT)) {
-                var fileName = getFilePathBasename(filePath);
+                var fileName = FileUtil.getName(filePath);
                 installCommand = installCommand.replace(INSTALLER_REPLACEMENT, fileName);
                 return String.format(CommandUtils.joinCommands(WINDOWS_CUSTOM_NORMAL_INSTALL, systemType), installerDir,
                         installCommand);
@@ -272,7 +261,7 @@ public class InstallerUtils {
             }
         } else {
             if (installCommand.contains(INSTALLER_REPLACEMENT)) {
-                var fileName = getFilePathBasename(filePath);
+                var fileName = FileUtil.getName(filePath);
                 installCommand = installCommand.replace(INSTALLER_REPLACEMENT, fileName);
                 return String.format(CommandUtils.joinCommands(LINUX_CUSTOM_NORMAL_INSTALL, systemType), installerDir,
                         installCommand);
@@ -292,7 +281,13 @@ public class InstallerUtils {
      * @return windows安装工具
      */
     private static List<Installer> getWindowsInstallerTools() {
-        return new ArrayList<>();
+        var mappings = LocalFileMappingCommon.getMappings(WINDOWS_HELP_INSTALLER_GROUP);
+        return mappings.stream().map(mapping -> {
+            var installer = new Installer();
+            installer.setName(mapping.getName());
+            installer.setFile(mapping.getRemoteFile());
+            return installer;
+        }).collect(Collectors.toList());
     }
 
     /**
@@ -317,7 +312,7 @@ public class InstallerUtils {
         if (hasDefaultInstaller && isNewerWindows(systemType)) {
             var windowsInstallerTools = getWindowsInstallerTools();
             for (var installerTool : windowsInstallerTools) {
-                var installerToolUrl = StringUtils.join(metadataFileServer, installerTool.getFile());
+                var installerToolUrl = StringUtils.joinWith(FILE_URL_SEPARATOR, metadataFileServer, installerTool.getFile());
                 var fileDownloadInfo = generateFileDownloadCommand(systemType,
                         installerToolUrl, installerTool.getName());
                 subInstallCommands.add(fileDownloadInfo.getDownloadCommand());
@@ -340,12 +335,12 @@ public class InstallerUtils {
 
                 subInstallCommands.add(installCommand);
             } else {
-                var fileName = getFileUrlBasename(installerFile);
-                var fileUrl = StringUtils.join(metadataFileServer, installerFile);
+                var fileName = FileUtil.getName(installerFile);
+                var fileUrl = StringUtils.joinWith(FILE_URL_SEPARATOR, metadataFileServer, installerFile);
                 boolean isWinFileContainZh = isWindowsOS && TextUtils.containChinese(fileName);
                 String downloadFileName;
                 if (isWinFileContainZh) {
-                    downloadFileName = generateFilename(TextUtils.uuid(), getFileSuffix(fileName));
+                    downloadFileName = generateFilename(TextUtils.uuid(), FileUtil.getSuffix(fileName));
                 } else {
                     downloadFileName = fileName;
                 }
@@ -390,10 +385,9 @@ public class InstallerUtils {
             // windows做成脚本文件安装
             var subInstallCommand = CommandUtils.joinCommands(subInstallCommands.toArray(new String[0]),
                     systemType);
-            byte[] bytesContent = subInstallCommand.getBytes(StandardCharsets.UTF_8);
             String tmpFile = null;
             try {
-                tmpFile = fileClient.uploadFileWithBase64(Base64.encodeBase64String(bytesContent));
+                tmpFile = FdfsCommon.uploadContent(subInstallCommand);
             } catch (Exception e) {
                 log.error("Upload windows installer script error: ", e);
                 installCommands.addAll(subInstallCommands);
@@ -401,7 +395,7 @@ public class InstallerUtils {
 
             if (tmpFile != null) {
                 installCommands.add(String.format(CommandUtils.joinCommands(WINDOWS_MAKE_SCRIPT_INSTALL, systemType),
-                        installerDir, StringUtils.join(metadataFileServer, tmpFile), installerDir));
+                        installerDir, StringUtils.joinWith(FILE_URL_SEPARATOR, metadataFileServer, tmpFile), installerDir));
             }
         } else {
             installCommands.addAll(subInstallCommands);

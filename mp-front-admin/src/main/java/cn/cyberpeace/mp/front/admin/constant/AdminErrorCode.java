@@ -1,0 +1,16 @@
+package cn.cyberpeace.mp.front.admin.constant;
+
+import cn.cyberpeace.mp.base.service.code.ErrorCode;
+
+/**
+ * @Description: 全局错误枚举
+ * @Author zhouxinghuai
+ * @Date：2021/8/31 11:13
+ */
+public enum AdminErrorCode implements ErrorCode {
+    SYS_CONFIG_CANNOT_CLOSE_AUDIT("MP-110021", "sysconfig_cannot_close_audit");
+
+    AdminErrorCode(String code, String message) {
+        setCode(code, AdminConstant.ERROR_CODE_PREFIX + message);
+    }
+}

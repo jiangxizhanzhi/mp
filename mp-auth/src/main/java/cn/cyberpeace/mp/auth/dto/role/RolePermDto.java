@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.auth.dto.role;
 
 import cn.cyberpeace.mp.auth.dto.target.PermissionDto;
 import cn.cyberpeace.mp.auth.model.RoleModel;
-import cn.cyberpeace.mp.auth.model.TargetModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 

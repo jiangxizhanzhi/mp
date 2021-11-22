@@ -43,12 +43,16 @@ public class RestartHandler extends HandlerCommon {
         if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
             getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.RESTART, Arrays.asList(ElementProcess.RESTART_VIRTUAL_MACHINE));
             runElementProgress(nodeId, SceneElementModel.Event.RESTART, ElementProcess.RESTART_VIRTUAL_MACHINE, () -> {
-                virtualMachine.lifeControl(instanceId, "reboot");
+                closeAccessModes(element);
+                virtualMachine.restart(instanceId);
+                checkAccessModes(element);
             });
         } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
             getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.RESTART, Arrays.asList(ElementProcess.RESTART_CONTAINER));
             runElementProgress(nodeId, SceneElementModel.Event.RESTART, ElementProcess.RESTART_CONTAINER, () -> {
+                closeAccessModes(element);
                 container.lifeControl(instanceId, "reboot");
+                checkAccessModes(element);
             });
         }
     }

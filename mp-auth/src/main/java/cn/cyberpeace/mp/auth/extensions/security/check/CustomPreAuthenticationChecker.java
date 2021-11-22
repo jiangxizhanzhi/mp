@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
-import org.springframework.security.authentication.dao.AbstractUserDetailsAuthenticationProvider;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsChecker;
 

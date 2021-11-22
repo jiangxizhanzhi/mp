@@ -1,6 +1,11 @@
 package cn.cyberpeace.mp.scene.config;
 
+import cn.cyberpeace.mp.base.config.BaseAppConfig;
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.file.PathUtil;
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -35,6 +40,23 @@ public class SceneAppConfig {
     private String linuxInstallerDir;
 
     // TODO: 迁移到cloud
-    @Value("${mp.scene.metadata_file_server:http://169.254.169.254/file")
+    @Value("${mp.scene.metadata_file_server:http://169.254.169.254/file}")
     private String metadataFileServer;
+
+    @Value("${mp.scene.windows_help_installer_dir:}")
+    private String windowsHelpInstallerDir;
+
+    @Autowired
+    private BaseAppConfig baseAppConfig;
+
+    public String getWindowsHelpInstallerDir() {
+        if (!StringUtils.isEmpty(windowsHelpInstallerDir)) {
+            return windowsHelpInstallerDir;
+        }
+
+        windowsHelpInstallerDir = StringUtils.joinWith(FileUtil.FILE_SEPARATOR, baseAppConfig.getResourcesDir(),
+                "scene/windows_installer");
+        return windowsHelpInstallerDir;
+    }
+
 }

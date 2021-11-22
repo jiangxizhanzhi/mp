@@ -14,4 +14,7 @@ import lombok.NoArgsConstructor;
 public class CollectionPluginSceneModel extends BaseCollectionPluginSceneModel {
     @DefaultStr
     private String flowCollector;
+
+    @DefaultStr
+    private String probeCollector;
 }

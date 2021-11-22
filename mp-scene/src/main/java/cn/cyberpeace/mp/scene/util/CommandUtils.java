@@ -44,6 +44,14 @@ public class CommandUtils {
         return SYSTEM_TYPE_OS_TYPE.getOrDefault(systemType.toLowerCase(), OS_TYPE_LINUX);
     }
 
+    public static boolean isWindows(String systemType) {
+        return OS_TYPE_WINDOWS.equals(getOsType(systemType));
+    }
+
+    public static boolean isLinux(String systemType) {
+        return OS_TYPE_LINUX.equals(getOsType(systemType));
+    }
+
     public static String getLineBreak(String systemType) {
         var osType = getOsType(systemType);
         if (OS_TYPE_WINDOWS.equals(osType)) {
@@ -66,6 +74,14 @@ public class CommandUtils {
 
     public static String joinCommands(String[] commands, String systemType) {
         return StringUtils.joinWith(getLineBreak(systemType), commands);
+    }
+
+    public static String appendBeforeCommand(String command, String beforeCommand, String systemType) {
+        return StringUtils.joinWith(getLineBreak(systemType), beforeCommand, command);
+    }
+
+    public static String appendAfterCommand(String command, String afterCommand, String systemType) {
+        return StringUtils.joinWith(getLineBreak(systemType), command, afterCommand);
     }
 
 }

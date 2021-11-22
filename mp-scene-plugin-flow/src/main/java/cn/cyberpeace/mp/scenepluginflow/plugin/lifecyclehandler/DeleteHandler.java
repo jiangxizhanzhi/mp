@@ -45,7 +45,7 @@ public class DeleteHandler extends HandlerCommon {
 
         // 删除执行器
         String executorId = scene.getExecutor();
-        if (StringUtils.isEmpty(executorId)) {
+        if (StringUtils.isNotBlank(executorId)) {
             runSceneProgress(SceneProcess.DELETE_EXECUTOR, () -> {
                 getHandlerUtils().deleteExecutor(executorId);
             });

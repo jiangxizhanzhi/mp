@@ -4,7 +4,6 @@ import cn.cyberpeace.mp.auth.dto.register.RegisterRequest;
 import cn.cyberpeace.mp.auth.model.AvatarModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.impl.UserCreateCheckService;
-import cn.cyberpeace.mp.auth.service.sys.SysConfigService;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +29,7 @@ public class RegisterService {
     private UserCreateCheckService createCheckService;
 
     @Autowired
-    private SysConfigService sysConfigService;
+    private AdminConfigService adminConfigService;
 
     @Autowired
     private AvatarService avatarService;
@@ -57,7 +56,7 @@ public class RegisterService {
         userService.initDefaultAvatar(user);
 
         // 查看系统设置，注册用户是否需要审核
-        if (sysConfigService.isNewUserNeedAudit()) {
+        if (adminConfigService.isNewUserNeedAudit()) {
             log.info("need registration audit...");
             user.setIsAudited(UserModel.Status.NOT_AUDITED);
         }

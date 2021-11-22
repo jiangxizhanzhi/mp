@@ -46,15 +46,4 @@ public class TargetController extends BaseModelController<TargetModel, QueryPara
     }
 
 
-    @ApiOperation(value = "查询权限树", notes = "")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "targetId", value = "权限id", paramType = "query"),
-            @ApiImplicitParam(name = "type", value = "权限类型 1：菜单，2：API，3：数据权限 不传默认为1：菜单", paramType = "query")
-    })
-    @GetMapping("/tree")
-    public ServiceResult getTree(@RequestParam(required = false) String targetId, @RequestParam(required = false) Integer type) {
-        List<TargetDto> tree = getModelService().getTree(targetId, type);
-        return ServiceResult.builder().source(tree).build().asResult();
-    }
-
 }

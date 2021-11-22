@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.cyberpeace.mp.front.admin.repository.SysNoticeReadMapper">
+
+    <select id="selectByUserIdAndNoticeId" resultType="cn.cyberpeace.mp.front.admin.model.SysNoticeReadModel">
+        select * from mp_sys_notice_read
+        <where>
+            <if test="user != null and user != ''">
+                AND user = #{user}
+            </if>
+            <if test="noticeId != null and noticeId != ''">
+                AND notice_id = #{noticeId}
+            </if>
+        </where>
+    </select>
+
+
+    <update id="increaseReadCount">
+        update mp_sys_notice_read set is_readed = 1, read_count = read_count + 1 where id = #{id}
+    </update>
+
+    <select id="countIsReadedOrIsUnPush" resultType="integer">
+        select count(distinct notice_id)
+        from mp_sys_notice_read
+        where user = #{user}
+          and (is_readed = 1 or is_need_push = 0)
+    </select>
+
+
+</mapper>

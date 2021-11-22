@@ -1,36 +1,5 @@
 package cn.cyberpeace.mp.auth.config.mybatis;
 
-import cn.cyberpeace.mp.auth.constant.AuthConstant;
-import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.expression.BinaryExpression;
-import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.expression.StringValue;
-import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
-import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
-import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
-import net.sf.jsqlparser.schema.Column;
-import net.sf.jsqlparser.statement.Statement;
-import net.sf.jsqlparser.statement.insert.Insert;
-import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.Select;
-import net.sf.jsqlparser.statement.update.Update;
-import net.sf.jsqlparser.util.TablesNamesFinder;
-import org.apache.ibatis.executor.Executor;
-import org.apache.ibatis.mapping.BoundSql;
-import org.apache.ibatis.mapping.MappedStatement;
-import org.apache.ibatis.mapping.SqlSource;
-import org.apache.ibatis.plugin.Interceptor;
-import org.apache.ibatis.plugin.Intercepts;
-import org.apache.ibatis.plugin.Invocation;
-import org.apache.ibatis.plugin.Plugin;
-import org.apache.ibatis.plugin.Signature;
-import org.apache.ibatis.session.ResultHandler;
-import org.apache.ibatis.session.RowBounds;
-
-import java.util.List;
-import java.util.Properties;
-
 /**
  *共享数据库的多租户系统实现
  * TODO 白名单模式

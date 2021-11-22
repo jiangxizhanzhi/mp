@@ -33,14 +33,14 @@ public class FlowAnalysisRequest {
      * 开始日期
      */
     @ApiModelProperty("开始日期：yyyy-MM-dd")
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime startDate;
 
     /**
      * 结束日期
      */
     @ApiModelProperty("结束日期：yyyy-MM-dd")
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime endDate;
 
     /**

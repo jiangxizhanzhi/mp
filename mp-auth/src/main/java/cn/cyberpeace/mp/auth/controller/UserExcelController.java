@@ -9,7 +9,6 @@ import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.service.UploadDataListener;
 import cn.cyberpeace.mp.auth.service.UserService;
-import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.excel.EasyExcel;
