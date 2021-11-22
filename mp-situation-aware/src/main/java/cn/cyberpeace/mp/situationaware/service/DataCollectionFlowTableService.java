@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 **/
 @Service
 @Slf4j
-public class DataCollectionFlowTableService implements IDataCollectionFlowService{
+public class DataCollectionFlowTableService{
 
     @Value("${mp.situationaware.wazuh.flow-table-url}")
     private String flowUrl;
