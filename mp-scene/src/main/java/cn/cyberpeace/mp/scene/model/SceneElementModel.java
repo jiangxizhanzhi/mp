@@ -43,6 +43,8 @@ public class SceneElementModel extends BaseSceneElementModel implements BaseEven
         public static final int DELETE = 9;
         public static final int MODIFY = 10;
         public static final int RECREATE = 11;
+        public static final int SUSPEND = 12;
+        public static final int RESUME = 13;
         private Event() {}
     }
 }
