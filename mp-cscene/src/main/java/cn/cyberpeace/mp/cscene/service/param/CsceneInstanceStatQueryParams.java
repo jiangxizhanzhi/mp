@@ -15,6 +15,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @ApiModel
 public class CsceneInstanceStatQueryParams extends QueryParams {
+    @ApiModelProperty(value = "场景实例类型 1测试场景 2应用场景")
+    private Integer type;
     @ApiModelProperty(value = "引用类型")
     private String[] referenceTypes;
     /**
