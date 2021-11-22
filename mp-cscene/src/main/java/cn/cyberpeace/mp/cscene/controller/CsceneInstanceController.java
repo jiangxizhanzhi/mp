@@ -17,8 +17,12 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionFlowBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -196,6 +200,28 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     public ListObjServiceResult<CollectionFlowBO> listFlows(@RequestParam String id, FlowQueryParams queryParams) {
         handleQueryParams("listFlows", queryParams);
         return modelService.listFlows(id, queryParams).asResult();
+    }
+
+    @ApiOperation("场景实例获取分页主机采集数据列表")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
+    })
+    @GetMapping(value = "/list_host_states", params = "id")
+    public ListObjServiceResult<CollectionHostStateBO> listHostStates(@RequestParam String id,
+                                                                      HostStateQueryParams queryParams) {
+        handleQueryParams("listHostStates", queryParams);
+        return modelService.listHostStates(id, queryParams).asResult();
+    }
+
+    @ApiOperation("场景实例获取分页主机采集事件列表")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
+    })
+    @GetMapping(value = "/list_host_events", params = "id")
+    public ListObjServiceResult<CollectionHostEventBO> listHostEvents(@RequestParam String id,
+                                                                      HostEventQueryParams queryParams) {
+        handleQueryParams("listHostEvents", queryParams);
+        return modelService.listHostEvents(id, queryParams).asResult();
     }
 
     @ApiOperation("统计靶标对应引用该靶标的场景实例")
