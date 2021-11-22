@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -26,5 +27,5 @@ public class FlowQueryParams extends QueryParams {
     private String endTime;
 
     @ApiModelProperty(value = "节点id列表")
-    private String[] nodeIds;
+    private List<String> nodeIds;
 }

@@ -1,0 +1,33 @@
+package cn.cyberpeace.mp.sceneplugincollection.bo;
+
+import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class CollectionHostEventBO {
+
+    @ApiModelProperty("场景id")
+    private String sceneId;
+
+    @ApiModelProperty("节点id")
+    private String nodeId;
+
+    @ApiModelProperty("节点名称")
+    private String nodeName;
+
+    @ApiModelProperty("时间")
+    private LocalDateTime time;
+
+    @ApiModelProperty("事件类型")
+    private String eventType;
+
+    @ApiModelProperty("事件描述")
+    private String eventDesc;
+
+}
