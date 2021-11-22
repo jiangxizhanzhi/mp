@@ -206,7 +206,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             return new ServiceResult<>(false);
         }
 
-        return scenePluginFlowSceneService.startFlow(sceneId, toNodeId, flowId);
+        return scenePluginFlowSceneService.startFlow(sceneId, toNodeId, flowId,
+                context == null ? null : context.toSceneContext());
     }
 
     public ServiceResult<Boolean> stopFlow(String id, String toNodeId, String flowId, CsceneContextBO context) {
@@ -215,7 +216,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             return new ServiceResult<>(false);
         }
 
-        return scenePluginFlowSceneService.stopFlow(sceneId, toNodeId, flowId);
+        return scenePluginFlowSceneService.stopFlow(sceneId, toNodeId, flowId,
+                context == null ? null : context.toSceneContext());
     }
 
     public ServiceResult<Probe> startProbe(String id, String toNodeId, String probeId, CsceneContextBO context) {

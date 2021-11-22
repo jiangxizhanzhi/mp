@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * @Deprecated
  * @Description: FastDFS文件上传下载工具类
  * @Author qiaokang
  * @Date：2021/6/21 15:01

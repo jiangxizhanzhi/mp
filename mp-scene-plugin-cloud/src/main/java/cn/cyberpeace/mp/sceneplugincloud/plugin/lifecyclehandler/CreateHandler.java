@@ -28,6 +28,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineCre
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -290,7 +291,17 @@ public class CreateHandler extends HandlerCommon {
 //
 //        }
 
-        return CommandUtils.joinCommands(commands.toArray(new String[0]), srcElement.getSystemType());
+        var standardSystemType = SystemTypeUtils.getStandardSystemType(srcElement.getSystemType());
+        var command = CommandUtils.joinCommands(commands.toArray(new String[0]), standardSystemType);
+        if (!StringUtils.isEmpty(command)) {
+            if (CommandUtils.isWindows(standardSystemType)) {
+                command = CommandUtils.appendBeforeCommand(command, "rem cmd", standardSystemType);
+            } else {
+                command = CommandUtils.appendBeforeCommand(command, "#!/bin/sh", standardSystemType);
+            }
+        }
+
+        return command;
     }
 
     private void receiveVirtualPortInfo(CloudPluginSceneElementBO cloudElement, List<VirtualNic> virtualNics) {
