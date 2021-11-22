@@ -15,6 +15,7 @@ gradle.ext {
         'mp-flow',
         'mp-front-admin',
         'mp-front-business',
+        'mp-front-scene',
     ]
 
     flyway = [
