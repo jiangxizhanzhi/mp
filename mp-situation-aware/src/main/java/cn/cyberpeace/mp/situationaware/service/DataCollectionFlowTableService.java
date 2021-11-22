@@ -26,7 +26,6 @@ public class DataCollectionFlowTableService{
      * wazuh agent 创建流表
      * @param agentInstanceId
      */
-    @Override
     public void createDataCollectionFlow(String agentInstanceId) {
         String createUrl = flowUrl + "/probe/flows";
         var param = new JSONObject();
@@ -43,7 +42,6 @@ public class DataCollectionFlowTableService{
      * 根据agentInstanceId删除流表
      * @param agentInstanceId agentInstanceId
      */
-    @Override
     public void deleteDataCollectionFlow(String agentInstanceId) {
         String deleteUrl = flowUrl + "/probe/flows" + "/" + agentInstanceId;
         try {
