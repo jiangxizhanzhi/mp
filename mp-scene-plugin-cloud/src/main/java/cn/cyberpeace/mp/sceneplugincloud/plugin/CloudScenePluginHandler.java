@@ -20,6 +20,8 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.InitiateHandler
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.PauseHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.RecreateHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.RestartHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ResumeHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.SuspendHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.UnpauseHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.modelhandler.CloudScenePluginModelHandler;
 import lombok.Data;
@@ -179,6 +181,16 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
     }
 
     @Override
+    public void suspend() {
+        new SuspendHandler(this, SceneModel.Event.SUSPEND).suspend();
+    }
+
+    @Override
+    public void resume() {
+        new ResumeHandler(this, SceneModel.Event.RESUME).resume();
+    }
+
+    @Override
     public void recreateElement(String nodeId) {
         CloudPluginSceneElementBO element = getElement(nodeId);
         if (element == null) {
@@ -212,6 +224,24 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
             throw new MpRuntimeException(SceneErrorCode.ELEMENT_NOT_EXIST);
         }
         new UnpauseHandler(this, getSceneHandler().getScene().getEvent()).unpauseElement(element);
+    }
+
+    @Override
+    public void suspendElement(String nodeId) {
+        CloudPluginSceneElementBO element = getElement(nodeId);
+        if (element == null) {
+            throw new MpRuntimeException(SceneErrorCode.ELEMENT_NOT_EXIST);
+        }
+        new SuspendHandler(this, getSceneHandler().getScene().getEvent()).suspendElement(element);
+    }
+
+    @Override
+    public void resumeElement(String nodeId) {
+        CloudPluginSceneElementBO element = getElement(nodeId);
+        if (element == null) {
+            throw new MpRuntimeException(SceneErrorCode.ELEMENT_NOT_EXIST);
+        }
+        new ResumeHandler(this, getSceneHandler().getScene().getEvent()).resumeElement(element);
     }
 
 }
