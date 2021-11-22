@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.cscene.core.CsceneInstanceHandler;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceCountByReferenceTypeModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceRoleModel;
+import cn.cyberpeace.mp.cscene.model.base.BaseCsceneModel;
 import cn.cyberpeace.mp.cscene.report.rabbitmq.RabbitmqCsceneReporter;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
@@ -83,6 +84,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     private List<CsceneInstanceModel> getCsceneInstanceObjs(List<String> csceneIds) {
+        if (csceneIds.isEmpty()) {
+            return new ArrayList<>();
+        }
         var queryParams = new QueryParams();
         queryParams.setIds(csceneIds.toArray(new String[0]));
         var csceneInstancesResult = list(queryParams).getSource();
@@ -146,6 +150,21 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         } else {
             return new ServiceResult<>(result);
         }
+    }
+
+    public ServiceResult<Boolean> clearById(String id, CsceneContextBO context) {
+        var csceneInstanceObjs = getCsceneInstanceObjs(List.of(id)).stream()
+                .filter(BaseCsceneModel::getDeleted).collect(Collectors.toList());
+        if (csceneInstanceObjs.isEmpty()) {
+            return new ServiceResult<>(false);
+        }
+        return deleteById(csceneInstanceObjs.get(0).getId(), false, context);
+    }
+
+    public ServiceResult<Integer> bulkClearByIds(String[] ids, CsceneContextBO context) {
+        var csceneInstanceObjs = getCsceneInstanceObjs(Arrays.asList(ids)).stream()
+                .filter(BaseCsceneModel::getDeleted).collect(Collectors.toList());
+        return bulkDeleteByIds(csceneInstanceObjs.stream().map(BaseModel::getId).toArray(String[]::new), false, context);
     }
 
     public ServiceResult<List<NodeSessionBO>> getNodeSessions(List<String> ids, List<String> nodeIds) {
