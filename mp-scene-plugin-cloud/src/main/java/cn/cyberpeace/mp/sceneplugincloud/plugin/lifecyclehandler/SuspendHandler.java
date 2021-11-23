@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.SuspendTaskPool;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SuspendHandler extends HandlerCommon {
     private final VirtualMachine virtualMachine = new VirtualMachine();
+    private final Container container = new Container();
 
     public static class SceneProcess {
         public static final EventProcess SUSPEND_TERMINALS = new EventProcess("suspend_terminals", "sceneplugincloud.event.suspend_terminals");
@@ -29,6 +31,7 @@ public class SuspendHandler extends HandlerCommon {
 
     public static class ElementProcess {
         public static final EventProcess SUSPEND_VIRTUAL_MACHINE = new EventProcess("suspend_virtual_machine", "sceneplugincloud.event.suspend_virtual_machine");
+        public static final EventProcess SUSPEND_CONTAINER = new EventProcess("suspend_container", "sceneplugincloud.event.suspend_container");
     }
 
     public SuspendHandler(CloudScenePluginHandler pluginHandler, int event) {
@@ -56,6 +59,12 @@ public class SuspendHandler extends HandlerCommon {
             getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.SUSPEND, Arrays.asList(ElementProcess.SUSPEND_VIRTUAL_MACHINE));
             runElementProgress(nodeId, SceneElementModel.Event.SUSPEND, ElementProcess.SUSPEND_VIRTUAL_MACHINE, () -> {
                 virtualMachine.suspend(instanceId);
+                checkAccessModes(element);
+            });
+        } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
+            getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.SUSPEND, Arrays.asList(ElementProcess.SUSPEND_CONTAINER));
+            runElementProgress(nodeId, SceneElementModel.Event.SUSPEND, ElementProcess.SUSPEND_CONTAINER, () -> {
+                container.suspend(instanceId);
                 checkAccessModes(element);
             });
         }
