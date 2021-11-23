@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.enums.FlowPlatformEnum;
 import cn.cyberpeace.mp.flow.enums.ResourceTypeEnum;
+import cn.cyberpeace.mp.flow.enums.TaskStatusEnum;
 import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
 import cn.cyberpeace.mp.flow.model.FlowPortModel;
@@ -617,5 +618,102 @@ public class AsyncPlatFlowTaskService {
             log.error("delete flow file error", e);
         }
     }
+
+    /**
+     * 5秒一次轮询任务状态，当任务结束时执行回调方法
+     * @param taskId
+     * @param flowActuatorModel
+     * @param call
+     * @throws InterruptedException
+     */
+    @Async
+    public void refreshTaskStatus(String taskId, FlowActuatorModel flowActuatorModel, Runnable call) throws InterruptedException {
+        // 根据任务接口状态
+        long startTime = System.currentTimeMillis();
+        boolean isStopped = false;
+        String host = flowActuatorModel.getIp();
+        FlowTaskModel flowTaskModel = flowTaskMapper.get(taskId);
+        if (Objects.isNull(flowTaskModel)) {
+            log.error("flowTaskModel is empty for [{}]", taskId);
+            return;
+        }
+
+        String thirdTaskId = flowTaskModel.getThirdTaskId();
+        while (!isStopped) {
+            JSONArray rows = this.getTaskJobStatusResult(thirdTaskId, host);
+            if (Objects.nonNull(rows)) {
+                int taskStatus = rows.getJSONObject(0).getInteger("status");
+                if (TaskStatusEnum.STOPED.toValue() == taskStatus) {
+                    isStopped = true;
+                    // 执行回调通知方法
+                    if (Objects.nonNull(call)) {
+                        log.info("start to run callback function");
+                        call.run();
+                    }
+
+                    flowTaskModel.setTaskStatus(taskStatus);
+                    // 更新本地任务状态
+                    flowTaskMapper.update(flowTaskModel);
+                }
+            }
+
+            if (isStopped) {
+                log.info("task job running status is stopped：[{}]", taskId);
+            } else {
+                log.warn("task job is still running：[{}]", taskId);
+                long endTime = System.currentTimeMillis();
+                if ((endTime - startTime) > (1000 * 60 * 20)) {
+                    // 20分钟服务没跑完，结束轮询
+                    log.error("task job running status get failed：[{}]", taskId);
+                    isStopped = true;
+                } else {
+                    Thread.sleep(5000);
+                }
+            }
+        }
+    }
+
+    /**
+     * 获取任务接口状态结果
+     * @param thirdTaskId
+     * @param hostUrl
+     * @return
+     */
+    private JSONArray getTaskJobStatusResult(String thirdTaskId, String hostUrl) {
+        JSONArray rows = null;
+        if (StringUtils.isBlank(thirdTaskId)) {
+            log.warn("no thirdTaskIds to query");
+            return rows;
+        }
+
+        if (StringUtils.isBlank(hostUrl)) {
+            log.error("hostUrl is empty");
+            return rows;
+        }
+
+        try {
+            JSONObject statusObj = new JSONObject();
+            JSONArray statusArray = new JSONArray();
+            statusArray.addAll(Collections.singletonList(thirdTaskId));
+            statusObj.put("uuids", statusArray);
+
+            String statusRsp = HttpUtils.sendPost(CommonUtil.getHostUrl(hostUrl) + "/tasks/standards/many",
+                    statusObj.toJSONString());
+            JSONObject statusRspObj = JSONObject.parseObject(statusRsp);
+            log.info("query task status response:{}", statusRspObj.toJSONString());
+            if (ResponseUtils.checkResponse(statusRspObj)) {
+                rows = statusRspObj.getJSONObject(BaseConstants.STR_DATA).getJSONArray("rows");
+            } else {
+                log.error("query task status failed");
+            }
+        } catch (Exception e) {
+            log.error("query task status error", e);
+        }
+
+        return rows;
+    }
+
+
+
 
 }

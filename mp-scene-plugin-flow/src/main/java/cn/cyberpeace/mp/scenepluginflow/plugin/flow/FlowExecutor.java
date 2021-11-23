@@ -59,11 +59,11 @@ public class FlowExecutor {
     }
 
     public void startFlow(String taskId) {
-        flowService3.actuator(taskId, TaskActionEnum.START.toValue());
+        flowService3.actuator(taskId, TaskActionEnum.START.toValue(), null);
     }
 
     public void stopFlow(String taskId) {
-        flowService3.actuator(taskId, TaskActionEnum.STOP.toValue());
+        flowService3.actuator(taskId, TaskActionEnum.STOP.toValue(), null);
     }
 
     public void deleteFlow(String taskId) {
