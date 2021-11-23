@@ -213,7 +213,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class)
     })
     @PostMapping("/pause")
-    public ServiceResult<Boolean> parseScene(@RequestParam String id, @RequestBody(required = false) CsceneContextBO context) {
+    public ServiceResult<Boolean> pauseScene(@RequestParam String id, @RequestBody(required = false) CsceneContextBO context) {
         return modelService.pause(id, context).asResult();
     }
 
