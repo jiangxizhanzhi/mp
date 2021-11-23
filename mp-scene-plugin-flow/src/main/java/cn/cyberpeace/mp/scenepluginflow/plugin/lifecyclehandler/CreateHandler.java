@@ -36,7 +36,7 @@ public class CreateHandler extends HandlerCommon {
         // 创建 trex 虚拟机
         runSceneProgress(SceneProcess.CREATE_EXECUTOR, () -> {
             FlowPluginSceneBO scene = getPluginHandler().getScene();
-            var executorId = getHandlerUtils().createExecutor();
+            var executorId = getHandlerUtils().createExecutor(getPluginHandler().getSourceSceneId());
             scene.setExecutor(executorId);
             getPluginHandler().saveScene();
         });
