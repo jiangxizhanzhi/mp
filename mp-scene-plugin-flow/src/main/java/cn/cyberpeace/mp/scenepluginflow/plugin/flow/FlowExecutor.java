@@ -63,14 +63,14 @@ public class FlowExecutor {
     }
 
     public void startFlow(String taskId) {
-        var result = flowService3.actuator(taskId, TaskActionEnum.START.toValue());
+        var result = flowService3.actuator(taskId, TaskActionEnum.START.toValue(), null);
         if (!result.isSuccess()) {
             throw new MpRuntimeException(result.getServiceCode());
         }
     }
 
     public void stopFlow(String taskId) {
-        var result = flowService3.actuator(taskId, TaskActionEnum.STOP.toValue());
+        var result = flowService3.actuator(taskId, TaskActionEnum.STOP.toValue(), null);
         if (!result.isSuccess()) {
             throw new MpRuntimeException(result.getServiceCode());
         }
