@@ -15,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AttackLogBO {
+public class FlowLogBO {
 
     /**
      * 来源
@@ -47,6 +47,9 @@ public class AttackLogBO {
     @AllArgsConstructor
     public static final class AttackSource{
 
+        /**
+         * 源IP
+         */
         private String ip;
 
     }
@@ -56,6 +59,9 @@ public class AttackLogBO {
     @AllArgsConstructor
     public static final class AttackDestination{
 
+        /**
+         * 目标IP
+         */
         private String ip;
 
     }
@@ -65,6 +71,9 @@ public class AttackLogBO {
     @AllArgsConstructor
     public static final class AttackNetwork{
 
+        /**
+         * 流量大小
+         */
         private Long bytes;
 
     }
@@ -74,7 +83,20 @@ public class AttackLogBO {
     @AllArgsConstructor
     public static final class AttackSuricata{
 
+        /**
+         * 分类
+         */
         private List<String> category;
+
+        /**
+         * 分类名称
+         */
+        private List<String> categoryZh;
+
+        /**
+         * 严重性
+         */
+        private List<Integer> severity;
 
     }
 }

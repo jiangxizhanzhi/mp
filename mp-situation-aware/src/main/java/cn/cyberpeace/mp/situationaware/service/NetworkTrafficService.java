@@ -249,16 +249,16 @@ public class NetworkTrafficService extends AbstractBaseService{
     private void buildDynamicQuery(SessionRequest sessionRequest,
         BoolQueryBuilder boolQueryBuilder) {
         if (!ObjectUtils.isEmpty(sessionRequest.getSourceIp())) {
-            boolQueryBuilder.must(QueryBuilders.termQuery("srcIp", sessionRequest.getSourceIp()));
+            boolQueryBuilder.must(QueryBuilders.termQuery("source.ip", sessionRequest.getSourceIp()));
         }
         if (!ObjectUtils.isEmpty(sessionRequest.getTargetIp())) {
-            boolQueryBuilder.must(QueryBuilders.termQuery("dstIp", sessionRequest.getTargetIp()));
+            boolQueryBuilder.must(QueryBuilders.termQuery("destination.ip", sessionRequest.getTargetIp()));
         }
         if (!ObjectUtils.isEmpty(sessionRequest.getProtocol())) {
             boolQueryBuilder.must(QueryBuilders.wildcardQuery("protocol","*" +sessionRequest.getProtocol() + "*"));
         }
         if (!ObjectUtils.isEmpty(sessionRequest.getMacIds())) {
-            boolQueryBuilder.filter(QueryBuilders.termsQuery("srcMac", sessionRequest.getMacIds()));
+            boolQueryBuilder.filter(QueryBuilders.termsQuery("source.mac", sessionRequest.getMacIds()));
         }
         if (!ObjectUtils.isEmpty(sessionRequest.getSeverityEnum())){
             List<Integer> allSeverityList = Arrays.stream(SeverityEnum.values()).map(Enum::ordinal).collect(Collectors.toList());
