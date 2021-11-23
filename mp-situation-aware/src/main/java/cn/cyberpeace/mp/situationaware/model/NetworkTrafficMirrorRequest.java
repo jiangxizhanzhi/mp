@@ -12,6 +12,7 @@ import lombok.*;
 @Data
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 public class NetworkTrafficMirrorRequest {
     /**
      * 虚拟机id列表
