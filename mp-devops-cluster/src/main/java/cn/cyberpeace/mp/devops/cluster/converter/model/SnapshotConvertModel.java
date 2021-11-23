@@ -26,6 +26,11 @@ public class SnapshotConvertModel extends BasePageConvertModel{
     private String name;
 
     /**
+     * 设备ID
+     */
+    private String deviceUuid;
+
+    /**
      * 描述
      */
     @ApiModelProperty("描述")

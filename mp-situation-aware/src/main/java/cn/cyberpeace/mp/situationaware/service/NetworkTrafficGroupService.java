@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
 import cn.cyberpeace.mp.situationaware.model.GroupModel;
+import cn.cyberpeace.mp.situationaware.model.NetworkTrafficMirrorRequest;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -37,6 +38,9 @@ public class NetworkTrafficGroupService {
 
     @Value("${mp.situationaware.arkime.cpcloud-container-create-url}")
     private String cpCloudUrl;
+
+    @Value("${mp.situationaware.arkime.cpcloud-network-mirror-url}")
+    private String mirrorUrl;
 
     @Value("${mp.situationaware.arkime.es-host}")
     private String esHost;
@@ -192,6 +196,25 @@ public class NetworkTrafficGroupService {
             log.error("create arkime Image instance error");
             log.error(SituationalAwareErrorCode.ARKIME_ADD_ERROR.getMessage(), ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(SituationalAwareErrorCode.ARKIME_ADD_ERROR, ExceptionUtils.getStackTrace(e));
+        }
+    }
+
+    /**
+     * 场景绑定流量镜像
+     * @param networkTrafficMirrorRequest
+     */
+    public void doBindingNetworkTrafficMirror(NetworkTrafficMirrorRequest networkTrafficMirrorRequest) {
+        String url = mirrorUrl + "/openflow/mirror";
+        var paramObject = new JSONObject();
+
+        paramObject.put("src_vm", networkTrafficMirrorRequest.getVmInstanceIds());
+        paramObject.put("src_container", networkTrafficMirrorRequest.getVmInstanceIds());
+        paramObject.put("dst_node", networkTrafficMirrorRequest.getArkimeInstanceNames());
+        try {
+            HttpUtils.sendPost(url, paramObject.toJSONString());
+        } catch (IOException e) {
+            log.error("binding mirror error param:{}", networkTrafficMirrorRequest);
+            throw new MpRuntimeException(SituationalAwareErrorCode.BINDING_MIRROR_ERROR, ExceptionUtils.getStackTrace(e));
         }
     }
 }
