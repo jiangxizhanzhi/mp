@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+
 /**
  * 流量分析Controller
  * @author wanggang
@@ -29,10 +31,17 @@ public class FlowAnalysisController {
         this.flowAnalysisService = flowAnalysisService;
     }
 
-    @ApiOperation("修改比例")
-    @GetMapping("/update-date")
+    @ApiOperation("初始化攻击分类")
+    @GetMapping("/init-classification")
+    public void initClassification() throws IOException {
+        //初始化分类数据
+        flowAnalysisService.initClassification();
+    }
+
+    @ApiOperation("测试")
+    @GetMapping("/test")
     public ServiceResult updateDate(FlowAnalysisRequest request){
-        flowAnalysisService.topBySeverity(request);
+        flowAnalysisService.flowLog(request);
         return new ServiceResult().asResult();
     }
 }
