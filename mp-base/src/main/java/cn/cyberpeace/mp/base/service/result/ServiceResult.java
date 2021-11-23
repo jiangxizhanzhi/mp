@@ -30,6 +30,7 @@ public class ServiceResult<T> extends BaseServiceResult<T, T> {
     @ApiModelProperty(value = "错误详细说明")
     private String detail;
     @ApiModelProperty(value = "服务器时间UTC毫秒")
+    @Builder.Default
     private Long timestamp = System.currentTimeMillis();
     @JsonIgnore
     @Builder.Default

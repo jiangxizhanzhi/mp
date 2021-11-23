@@ -7,6 +7,8 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineCre
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineDeleteData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachinePauseData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineRestartData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineResumeData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineSuspendData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineUnPauseData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
@@ -38,6 +40,14 @@ public class VirtualMachine extends CloudClient {
 
     public boolean restart(String instanceId) {
         return doAction(instanceId, new VirtualMachineRestartData());
+    }
+
+    public boolean resume(String instanceId) {
+        return doAction(instanceId, new VirtualMachineResumeData());
+    }
+
+    public boolean suspend(String instanceId) {
+        return doAction(instanceId, new VirtualMachineSuspendData());
     }
 
     private boolean doAction(String instanceId, CloudHttpData httpData) {

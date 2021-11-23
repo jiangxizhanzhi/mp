@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.flow.service.impl;
 
 import cn.cyberpeace.mp.base.constant.BaseSingleton;
 import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
@@ -413,7 +414,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                 log.warn("delete flow file not exit");
             }
 
-            return delete(id);
+            return delete(id).asResult();
         } else {
             log.error("flow task not exist: {}", id);
             return ServiceResult.fail(FlowErrorCode.TASK_NOT_EXIST);
@@ -546,9 +547,10 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
      *
      * @param flowTaskId
      * @param taskAction 1 start， 2 stop, 3 reset
+     * @param call 回调方法
      * @return
      */
-    public ServiceResult<Boolean> actuator(String flowTaskId, int taskAction) {
+    public ServiceResult<Boolean> actuator(String flowTaskId, int taskAction, Runnable call) {
         // 流量任务存在校验
         ObjResult<FlowTaskModel> flowTaskResult = get(flowTaskId).getSource();
         if (Objects.isNull(flowTaskResult)) {
@@ -559,7 +561,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
 
         // 判断调用哪个流量执行器
         if (FlowPlatformEnum.TREX.toValue() == flowTaskModel.getFlowPlatform()) {
-            return this.actuatorTrex(flowTaskModel, taskAction);
+            return this.actuatorTrex(flowTaskModel, taskAction, call);
         } else {
             return ServiceResult.fail(FlowErrorCode.NO_ACTUATOR_TO_USE);
         }
@@ -567,12 +569,12 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
 
     /**
      * 调用Trex流量执行器
-     *
      * @param flowTaskModel
      * @param taskAction    1 start， 2 stop, 3 reset
+     * @param call
      * @return
      */
-    private ServiceResult<Boolean> actuatorTrex(FlowTaskModel flowTaskModel, int taskAction) {
+    private ServiceResult<Boolean> actuatorTrex(FlowTaskModel flowTaskModel, int taskAction, Runnable call) {
         // 流量信息存在校验
         ObjResult<FlowInfoModel> flowInfoResult = flowInfoService.get(flowTaskModel.getFlowId()).getSource();
         if (Objects.isNull(flowInfoResult)) {
@@ -695,6 +697,12 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
         flowTaskModel.setThirdTaskId(thirdTaskId);
         flowTaskModel.setTaskStatus(taskStatus);
         update(flowTaskModel);
+
+        try {
+            asyncPlatFlowTaskService.refreshTaskStatus(flowTaskModel.getId(), flowActuatorModel, call);
+        } catch (InterruptedException e) {
+            throw new MpRuntimeException(FlowErrorCode.GET_TASK_STATUS_ERROR);
+        }
 
         return ServiceResult.success(true);
     }

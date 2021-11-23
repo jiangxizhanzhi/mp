@@ -95,4 +95,8 @@ public class TimeUtils {
     public static LocalDateTime dateToLocalDateTime(Date date) {
         return LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
     }
+
+    public static LocalDateTime timestampToLocalDateTime(Long timestamp) {
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault());
+    }
 }
