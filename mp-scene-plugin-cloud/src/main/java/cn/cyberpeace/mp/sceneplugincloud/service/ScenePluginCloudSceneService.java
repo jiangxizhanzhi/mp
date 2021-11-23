@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.FloatUtils;
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
@@ -191,8 +192,7 @@ public class ScenePluginCloudSceneService {
             }
             var timeStr = rawRecording.getRecordate();
             if (!StringUtils.isEmpty(timeStr)) {
-                // TODO 统一转换调用
-                recording.setTime(LocalDateTime.parse(timeStr, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssz")));
+                recording.setTime(TimeUtils.utcStringToLocalDateTime(timeStr));
             }
 
             return recording;

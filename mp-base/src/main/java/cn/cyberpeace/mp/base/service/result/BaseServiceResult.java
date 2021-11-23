@@ -1,9 +1,9 @@
 package cn.cyberpeace.mp.base.service.result;
 
+import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.code.MessageServiceCode;
 import cn.cyberpeace.mp.base.service.code.ServiceCode;
-import cn.cyberpeace.mp.base.common.MessageCommon;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -55,12 +55,32 @@ public class BaseServiceResult<T, R> {
         setDetail(detail);
     }
 
+    public boolean isSuccess() {
+        return BaseErrorCode.SUCCESS.getCode().equals(getServiceCode().getCode());
+    }
+
     public R sourceToData(T source) {
         if (source == null) {
             return null;
         }
 
         return (R) source;
+    }
+
+    /**
+     * service code获取最终message
+     * @return this
+     */
+    public String calcMessage() {
+        ServiceCode actualServiceCode = getServiceCode();
+        if (actualServiceCode != null) {
+            if (actualServiceCode instanceof MessageServiceCode) {
+                return ((MessageServiceCode) actualServiceCode).generateMessage();
+            } else {
+                return MessageCommon.get(actualServiceCode.getMessage());
+            }
+        }
+        return null;
     }
 
     /**
@@ -73,11 +93,7 @@ public class BaseServiceResult<T, R> {
         ServiceCode actualServiceCode = getServiceCode();
         if (actualServiceCode != null) {
             setCode(actualServiceCode.getCode());
-            if (actualServiceCode instanceof MessageServiceCode) {
-                setMessage(((MessageServiceCode) actualServiceCode).generateMessage());
-            } else {
-                setMessage(MessageCommon.get(actualServiceCode.getMessage()));
-            }
+            setMessage(MessageServiceCode.calcMessage(actualServiceCode));
         }
 
         return this;

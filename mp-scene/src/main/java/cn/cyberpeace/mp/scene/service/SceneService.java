@@ -85,6 +85,7 @@ public class SceneService {
         SceneHandler sceneHandler;
         try {
             sceneHandler = new SceneHandler(id, null, false, context);
+            sceneHandler.setRealTimeUpdate(true);
             if (logic) {
                 SceneTaskPool.getInstance().executeTask(() -> sceneHandler.logicDelete());
             } else {
@@ -127,6 +128,20 @@ public class SceneService {
         return new ServiceResult<>(true);
     }
 
+    public ServiceResult<Boolean> suspend(String id, SceneContextBO context) {
+        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
+        sceneHandler.setRealTimeUpdate(true);
+        SceneTaskPool.getInstance().executeTask(() -> sceneHandler.suspend());
+        return new ServiceResult<>(true);
+    }
+
+    public ServiceResult<Boolean> resume(String id, SceneContextBO context) {
+        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
+        sceneHandler.setRealTimeUpdate(true);
+        SceneTaskPool.getInstance().executeTask(() -> sceneHandler.resume());
+        return new ServiceResult<>(true);
+    }
+
     public ServiceResult<Boolean> pauseElement(String id, String nodeId, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
         sceneHandler.setRealTimeUpdate(true);
@@ -154,4 +169,19 @@ public class SceneService {
         ElementTaskPool.getInstance().executeTask(() -> sceneHandler.recreateElement(nodeId));
         return new ServiceResult<>(true);
     }
+
+    public ServiceResult<Boolean> suspendElement(String id, String nodeId, SceneContextBO context) {
+        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
+        sceneHandler.setRealTimeUpdate(true);
+        ElementTaskPool.getInstance().executeTask(() -> sceneHandler.suspendElement(nodeId));
+        return new ServiceResult<>(true);
+    }
+
+    public ServiceResult<Boolean> resumeElement(String id, String nodeId, SceneContextBO context) {
+        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
+        sceneHandler.setRealTimeUpdate(true);
+        ElementTaskPool.getInstance().executeTask(() -> sceneHandler.resumeElement(nodeId));
+        return new ServiceResult<>(true);
+    }
+
 }

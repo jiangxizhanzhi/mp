@@ -38,7 +38,7 @@ public class NetworkTrafficGroupController {
     @DeleteMapping("/{groupId}")
     @ApiOperation(value = "根据groupId删除分组信息", notes = "")
     public ServiceResult deleteModelById(@PathVariable("groupId") String groupId) {
-        networkTrafficGroupService.deleteByGroupId(groupId);
+        networkTrafficGroupService.deleteArkimeInstance(groupId);
         return ServiceResult.successful();
     }
 
@@ -48,7 +48,7 @@ public class NetworkTrafficGroupController {
     public ServiceResult addGroup(@RequestBody @Valid GroupRequest groupRequest) {
         var groupModel = new GroupModel();
         BeanUtils.copyProperties(groupRequest, groupModel);
-        String res = networkTrafficGroupService.addGroup(groupModel);
+        String res = networkTrafficGroupService.addArkimeImageInstance(groupModel);
         return ServiceResult.builder().detail(res).serviceCode(BaseErrorCode.SUCCESS).build().asResult();
     }
 }

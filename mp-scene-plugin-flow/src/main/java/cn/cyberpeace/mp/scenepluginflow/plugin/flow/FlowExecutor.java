@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.scenepluginflow.plugin.flow;
 
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.flow.enums.TaskActionEnum;
 import cn.cyberpeace.mp.flow.model.FlowTaskModel;
@@ -54,20 +55,32 @@ public class FlowExecutor {
         addFlowTaskRequest.setDelay(delay == null ? DEFAULT_INSTANCE.getDelay() : delay);
         addFlowTaskRequest.setCount(count == null ? DEFAULT_INSTANCE.getCount() : delay);
         addFlowTaskRequest.setIntervalTime(interval == null ? DEFAULT_INSTANCE.getIntervalTime() : interval);
-        var task = flowService3.addFlowTask(addFlowTaskRequest).getData();
-        return task == null ? null : task.getId();
+        var result = flowService3.addFlowTask(addFlowTaskRequest);
+        if (!result.isSuccess()) {
+            throw new MpRuntimeException(result.getServiceCode());
+        }
+        return result.getData().getId();
     }
 
     public void startFlow(String taskId) {
-        flowService3.actuator(taskId, TaskActionEnum.START.toValue(), null);
+        var result = flowService3.actuator(taskId, TaskActionEnum.START.toValue());
+        if (!result.isSuccess()) {
+            throw new MpRuntimeException(result.getServiceCode());
+        }
     }
 
     public void stopFlow(String taskId) {
-        flowService3.actuator(taskId, TaskActionEnum.STOP.toValue(), null);
+        var result = flowService3.actuator(taskId, TaskActionEnum.STOP.toValue());
+        if (!result.isSuccess()) {
+            throw new MpRuntimeException(result.getServiceCode());
+        }
     }
 
     public void deleteFlow(String taskId) {
-        flowService3.deleteFlowTask(taskId);
+        var result = flowService3.deleteFlowTask(taskId);
+        if (!result.isSuccess()) {
+            throw new MpRuntimeException(result.getServiceCode());
+        }
     }
 
     private synchronized void initDefaultInstance() {

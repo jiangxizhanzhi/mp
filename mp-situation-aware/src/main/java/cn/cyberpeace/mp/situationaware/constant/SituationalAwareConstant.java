@@ -15,4 +15,9 @@ public class SituationalAwareConstant {
      * 分组id
      */
     public static LoadingCache<String, String> wazuhToken;
+
+    /**
+     * openstack network查询
+     */
+    public static String ArkimeNetworkId;
 }

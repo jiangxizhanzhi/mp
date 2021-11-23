@@ -201,7 +201,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                     asyncPlatFlowTaskService.savePlatFlowTask(request, false);
                     return ServiceResult.success(flowTaskModel);
                 } else {
-                    return ServiceResult.fail(FlowErrorCode.ADD_TASK_ERROR);
+                    return new ServiceResult<>(null, FlowErrorCode.ADD_TASK_ERROR);
                 }
             } else {
                 // 暂无其他流量发生器，直接保存
@@ -210,7 +210,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
             }
         } else {
             log.error("flow file be chosen not existed");
-            return ServiceResult.fail(FlowErrorCode.FLOW_NOT_EXIST);
+            return new ServiceResult<>(null, FlowErrorCode.ADD_TASK_ERROR);
         }
     }
 

@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.util.ObjectUtils;
 
 @Configuration
-public class MolochElasticsearchConfig {
+public class ArkimeElasticsearchConfig {
 
     @Value("${mp.situationaware.es-nodes}")
     private String elasticsearchNodes;

@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -34,10 +35,10 @@ public class CollectionFlowBO {
     private String targetIp;
 
     @ApiModelProperty("源Mac")
-    private String sourceMac;
+    private List<String> sourceMac;
 
     @ApiModelProperty("目的Mac")
-    private String targetMac;
+    private List<String> targetMac;
 
     @ApiModelProperty("源端口")
     private String sourcePort;
@@ -46,7 +47,7 @@ public class CollectionFlowBO {
     private String targetPort;
 
     @ApiModelProperty("协议类型")
-    private String protocol;
+    private List<String> protocol;
 
     @ApiModelProperty("流量大小")
     private Integer size;

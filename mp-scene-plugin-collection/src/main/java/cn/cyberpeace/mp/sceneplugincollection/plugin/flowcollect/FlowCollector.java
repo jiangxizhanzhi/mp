@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+// TODO 对接
 @Data
 @Component
 public class FlowCollector {
@@ -25,17 +26,22 @@ public class FlowCollector {
         setNetworkTrafficService(networkTrafficService);
     }
 
-    public String createCollector(List<String> macAddrs) {
+    public String createCollector() {
+        return TextUtils.uuid();
+    }
+
+    public void bindNetworkPorts(String collectorId, List<String> macAddrs) {
         var groupData = new GroupModel();
-        String collectorId = TextUtils.uuid();
         groupData.setGroupId(collectorId);
         groupData.setMacIds(macAddrs);
-        networkTrafficGroupService.addGroup(groupData);
-        return collectorId;
+        networkTrafficGroupService.addArkimeImageInstance(groupData);
+    }
+
+    public void unbindNetworkPorts(String collectorId, List<String> macAddrs) {
     }
 
     public void deleteCollector(String collectorId) {
-        networkTrafficGroupService.deleteByGroupId(collectorId);
+        networkTrafficGroupService.deleteArkimeInstance(collectorId);
     }
 
 }

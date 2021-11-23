@@ -36,11 +36,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 场景实例的处理
@@ -97,7 +98,7 @@ public class SceneHandler extends BaseSceneHandler<
         SceneHandler> {
 
     // mock的进度
-    private int progressPercentage = 0;
+    private static Map<String, Integer> progressPercentageMap = new ConcurrentHashMap<>();
 
     @Setter
     private boolean realTimeUpdate;
@@ -299,6 +300,36 @@ public class SceneHandler extends BaseSceneHandler<
         reporters.forEach(reporter -> reportTaskPool.executeTask(() -> reporter.reportElement(collectedSceneElement)));
     }
 
+    public void ackSceneChanged(boolean forceSave) {
+        ackSceneChanged(forceSave, true);
+    }
+
+    public void ackElementChanged(String nodeId, boolean forceSave) {
+        ackElementChanged(nodeId, forceSave, true);
+    }
+
+    public void ackSceneChanged(boolean forceSave, boolean withPlugins) {
+        if (forceSave || realTimeUpdate) {
+            if (withPlugins) {
+                updateSceneWithPlugins();
+            } else {
+                updateScene();
+            }
+        }
+        reportSceneUpdated();
+    }
+
+    public void ackElementChanged(String nodeId, boolean forceSave, boolean withPlugins) {
+        if (forceSave || realTimeUpdate) {
+            if (withPlugins) {
+                updateSceneElementWithPlugins(nodeId);
+            } else {
+                updateSceneElement(nodeId);
+            }
+        }
+        reportElementUpdated(nodeId);
+    }
+
     public void prepareSceneProcess(int event, List<EventProcess> eventProcesses) {
         getSceneEventHandler(event).addProcess(eventProcesses);
     }
@@ -310,10 +341,7 @@ public class SceneHandler extends BaseSceneHandler<
     public int progressSceneProcess(int event, String process) {
         var flag = getSceneEventHandler(event).progressProcess(process);
         if (isTriggerEventSuccess(flag)) {
-            if (realTimeUpdate) {
-                updateScene();
-            }
-            reportSceneUpdated();
+            ackSceneChanged(false, false);
         }
         return flag;
     }
@@ -321,10 +349,7 @@ public class SceneHandler extends BaseSceneHandler<
     public int progressElementProcess(String nodeId, int event, String process) {
         var flag = getElementEventHandler(nodeId, event).progressProcess(process);
         if (isTriggerEventSuccess(flag)) {
-            if (realTimeUpdate) {
-                updateSceneElement(nodeId);
-            }
-            reportElementUpdated(nodeId);
+            ackElementChanged(nodeId, false, false);
         }
         return flag;
     }
@@ -332,10 +357,7 @@ public class SceneHandler extends BaseSceneHandler<
     public int overSceneProcess(int event) {
         var flag = getSceneEventHandler(event).overProcess();
         if (isTriggerEventSuccess(flag)) {
-            if (realTimeUpdate) {
-                updateSceneWithPlugins();
-            }
-            reportSceneUpdated();
+            ackSceneChanged(true, true);
         }
         return flag;
     }
@@ -344,10 +366,7 @@ public class SceneHandler extends BaseSceneHandler<
         var flag = getElementEventHandler(nodeId, event).overProcess();
         this.getScene().setProgressPercentage(this.calculateProgressPercentage());
         if (isTriggerEventSuccess(flag)) {
-            if (realTimeUpdate) {
-                updateSceneElementWithPlugins(nodeId);
-            }
-            reportElementUpdated(nodeId);
+            ackElementChanged(nodeId, true, true);
         }
         return flag;
     }
@@ -426,6 +445,36 @@ public class SceneHandler extends BaseSceneHandler<
             return false;
         }
         overAllEvent(SceneModel.Event.UNPAUSE, SceneElementModel.Event.UNPAUSE);
+        return true;
+    }
+
+    public boolean suspend() {
+        prepareAllEvent(SceneModel.Event.SUSPEND, SceneElementModel.Event.SUSPEND);
+        startAllEvent(SceneModel.Event.SUSPEND, SceneElementModel.Event.SUSPEND);
+        try {
+            for (var plugin : getPlugins()) {
+                plugin.suspend();
+            }
+        } catch (Exception e) {
+            errorScene(SceneModel.Event.SUSPEND, e.getMessage());
+            return false;
+        }
+        overAllEvent(SceneModel.Event.SUSPEND, SceneElementModel.Event.SUSPEND);
+        return true;
+    }
+
+    public boolean resume() {
+        prepareAllEvent(SceneModel.Event.RESUME, SceneElementModel.Event.RESUME);
+        startAllEvent(SceneModel.Event.RESUME, SceneElementModel.Event.RESUME);
+        try {
+            for (var plugin : getPlugins()) {
+                plugin.resume();
+            }
+        } catch (Exception e) {
+            errorScene(SceneModel.Event.RESUME, e.getMessage());
+            return false;
+        }
+        overAllEvent(SceneModel.Event.RESUME, SceneElementModel.Event.RESUME);
         return true;
     }
 
@@ -547,6 +596,36 @@ public class SceneHandler extends BaseSceneHandler<
         overElementEvent(nodeId, SceneElementModel.Event.RECREATE);
     }
 
+    public void suspendElement(String nodeId) {
+        SceneElementBO element = getElement(nodeId);
+        prepareElementEvent(element, SceneElementModel.Event.SUSPEND);
+        startElementEvent(nodeId, SceneElementModel.Event.SUSPEND);
+        try {
+            for (ScenePluginHandler plugin : getPlugins()) {
+                plugin.suspendElement(nodeId);
+            }
+        } catch (Exception e) {
+            errorElement(nodeId, SceneElementModel.Event.SUSPEND, e.getMessage());
+            return;
+        }
+        overElementEvent(nodeId, SceneElementModel.Event.SUSPEND);
+    }
+
+    public void resumeElement(String nodeId) {
+        SceneElementBO element = getElement(nodeId);
+        prepareElementEvent(element, SceneElementModel.Event.RESUME);
+        startElementEvent(nodeId, SceneElementModel.Event.RESUME);
+        try {
+            for (ScenePluginHandler plugin : getPlugins()) {
+                plugin.resumeElement(nodeId);
+            }
+        } catch (Exception e) {
+            errorElement(nodeId, SceneElementModel.Event.RESUME, e.getMessage());
+            return;
+        }
+        overElementEvent(nodeId, SceneElementModel.Event.RESUME);
+    }
+
     @Override
     public SceneDataBO toData() {
         SceneDataBO sceneDataBO = super.toData();
@@ -557,23 +636,43 @@ public class SceneHandler extends BaseSceneHandler<
     // TODO
     private Integer calculateProgressPercentage() {
         if (CollectionUtils.isEmpty(this.getElementMap().values())) {
+            progressPercentageMap.remove(getSceneId());
             return 100;
         } else {
-            if (getScene().getEvent() == SceneModel.Event.CREATE && getScene().getEventStatus() == EventStatus.OVER) {
+            if (this.isTerminateEvent(getScene().getEvent()) && getScene().getEventStatus() == EventStatus.OVER) {
+                progressPercentageMap.remove(getSceneId());
                 return 100;
             }
             // mock 一个进度
             int newProcess = Math.abs(new Random().nextInt(10));
-            this.addProgressPercentage(newProcess);
-            return this.progressPercentage;
+            return this.addProgressPercentage(newProcess);
         }
     }
 
-    private synchronized void addProgressPercentage(int newProcess) {
-        if (this.progressPercentage + newProcess >= 100) {
-            this.progressPercentage = 99;
+    private boolean isTerminateEvent(int state) {
+        Set<Integer> terminateStates = new HashSet<>() {{
+            this.add(SceneModel.Event.CREATE);
+            this.add(SceneModel.Event.START);
+            this.add(SceneModel.Event.STOP);
+            this.add(SceneModel.Event.RESTART);
+            this.add(SceneModel.Event.PAUSE);
+            this.add(SceneModel.Event.UNPAUSE);
+            this.add(SceneModel.Event.SNAPSHOT);
+            this.add(SceneModel.Event.DELETE);
+            this.add(SceneModel.Event.MODIFY);
+        }};
+        return terminateStates.contains(state);
+    }
+
+    private synchronized int addProgressPercentage(int newProcess) {
+        Integer progressPercentage = progressPercentageMap.getOrDefault(getSceneId(), 0);
+        int result = progressPercentage + newProcess;
+        if (result >= 100) {
+            progressPercentageMap.put(getSceneId(), 99);
+            return 99;
         } else {
-            this.progressPercentage += newProcess;
+            progressPercentageMap.put(getSceneId(), result);
+            return result;
         }
     }
 }

@@ -150,6 +150,8 @@ public class DeleteHandler extends HandlerCommon {
             return true;
         }
 
+        closeAccessModes(cloudElement);
+
         var deleteData = new VirtualMachineDeleteData();
         deleteData.setVms(List.of(resourceId));
         var extraInfo = collectElementExtraCloudInfo(cloudElement);
@@ -166,6 +168,8 @@ public class DeleteHandler extends HandlerCommon {
             return true;
         }
 
+        closeAccessModes(cloudElement);
+
         var deleteData = new ContainerDeleteData();
         deleteData.setContainers(List.of(resourceId));
         var extraInfo = collectElementExtraCloudInfo(cloudElement);
@@ -177,6 +181,8 @@ public class DeleteHandler extends HandlerCommon {
     }
 
     protected boolean deleteEntityNode(CloudPluginSceneElementBO cloudElement) {
+        closeAccessModes(cloudElement);
+
         var deleteData = new EntityNodeDeleteData();
         List<String> interfaceNames = cloudElement.getSrcElement().getPorts().stream()
                 .map(BaseSceneElementPortBO::getName).collect(Collectors.toList());

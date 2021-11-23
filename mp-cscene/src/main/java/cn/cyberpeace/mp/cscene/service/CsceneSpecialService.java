@@ -148,6 +148,7 @@ public class CsceneSpecialService {
                 .currentLink(CsceneInstanceModel.class)
                 .groupBy(CsceneInstanceModel::getId)
                 .selectAs(CsceneInstanceModel::getId, CsceneInstanceStat::getId)
+                .selectAs(CsceneInstanceModel::getType, CsceneInstanceStat::getType)
                 .selectAs(CsceneInstanceModel::getReferenceType, CsceneInstanceStat::getReferenceType)
                 .selectAs(CsceneInstanceModel::getReferenceMetaData, CsceneInstanceStat::getReferenceMetaData)
                 .selectAs(CsceneInstanceModel::getCreateUsername, CsceneInstanceStat::getCreateUsername)
@@ -180,6 +181,10 @@ public class CsceneSpecialService {
         var ids = queryParams.getIds();
         if (ids != null && ids.length > 0) {
             humanCondition.filterIn(CsceneInstanceModel::getId, ids);
+        }
+        var type = queryParams.getType();
+        if (type != null) {
+            humanCondition.filterEqual(CsceneInstanceModel::getType, type);
         }
         var referenceTypes = queryParams.getReferenceTypes();
         if (referenceTypes != null && referenceTypes.length > 0) {

@@ -12,4 +12,6 @@ public interface BaseObjMappingService<M extends BaseObjMappingModel> {
 
     ServiceResult<List<M>> syncMappings(String group, List<M> mappings);
 
+    ServiceResult<Integer> deleteMappings(String group);
+
 }

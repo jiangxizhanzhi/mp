@@ -34,7 +34,7 @@ public interface BaseModelUpdateController<M extends BaseModel, S extends BaseMo
     })
     @PatchMapping("/{id}")
     default ObjServiceResult<M> update(@PathVariable String id, @RequestBody M obj,
-                                      @RequestParam(required = false) String[] fields) {
+                                       @RequestParam(required = false) String[] fields) {
         obj.setId(id);
         return getModelService().update(obj, fields).asResult();
     }
@@ -51,7 +51,7 @@ public interface BaseModelUpdateController<M extends BaseModel, S extends BaseMo
     })
     @PatchMapping
     default ObjServiceResult<M> update(@RequestBody M obj,
-                                      @RequestParam(required = false) String[] fields) {
+                                       @RequestParam(required = false) String[] fields) {
         return getModelService().update(obj, fields).asResult();
     }
 
@@ -69,7 +69,7 @@ public interface BaseModelUpdateController<M extends BaseModel, S extends BaseMo
     })
     @PatchMapping(params = "id")
     default ObjServiceResult<M> updateByParam(@RequestParam String id, @RequestBody M obj,
-                                      @RequestParam(required = false) String[] fields) {
+                                              @RequestParam(required = false) String[] fields) {
         obj.setId(id);
         return getModelService().update(obj, fields).asResult();
     }

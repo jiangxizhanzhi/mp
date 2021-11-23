@@ -2,8 +2,8 @@ package cn.cyberpeace.mp.cscene.core;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
-import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstaneRoleBO;
@@ -15,11 +15,8 @@ import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
 import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
 import cn.cyberpeace.mp.scene.service.SceneService;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginContext;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 /**
@@ -47,12 +44,7 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
             return null;
         }
 
-        var sceneContext = new SceneContextBO();
-        Map<String, Object> plugins = new HashMap<>();
-        plugins.put(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY,
-                new CloudScenePluginContext(context.getAccessUserId()));
-        sceneContext.setPlugins(plugins);
-        return sceneContext;
+        return context.toSceneContext();
     }
 
     public CsceneInstanceHandler(CsceneInstanceBO csceneBO, CsceneContextBO context) {
@@ -135,6 +127,22 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         return this.sceneService.unpause(sceneId, generateSceneContext()).getSource();
     }
 
+    public boolean suspend() {
+        String sceneId = this.getSceneId();
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return this.sceneService.suspend(sceneId, generateSceneContext()).getSource();
+    }
+
+    public boolean resume() {
+        String sceneId = this.getSceneId();
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return this.sceneService.resume(sceneId, generateSceneContext()).getSource();
+    }
+
     public boolean pauseElement(String nodeId) {
         String sceneId = this.getSceneId();
         if (sceneId == null) {
@@ -165,6 +173,22 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
         }
         return this.sceneService.recreateElement(sceneId, nodeId, generateSceneContext()).getSource();
+    }
+
+    public boolean suspendElement(String nodeId) {
+        String sceneId = this.getSceneId();
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return this.sceneService.suspendElement(sceneId, nodeId, generateSceneContext()).getSource();
+    }
+
+    public boolean resumeElement(String nodeId) {
+        String sceneId = this.getSceneId();
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return this.sceneService.resumeElement(sceneId, nodeId, generateSceneContext()).getSource();
     }
 
     private String getSceneId() {

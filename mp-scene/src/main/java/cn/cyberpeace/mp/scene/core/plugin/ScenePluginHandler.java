@@ -61,6 +61,14 @@ public abstract class ScenePluginHandler<S extends BasePluginSceneBO<?, S, Scene
         return getSceneHandler().errorElement(nodeId, event, errorMessage);
     }
 
+    public void ackSceneChanged(boolean forceSave) {
+        getSceneHandler().ackSceneChanged(forceSave);
+    }
+
+    public void ackElementChanged(String nodeId, boolean forceSave) {
+        getSceneHandler().ackElementChanged(nodeId, forceSave);
+    }
+
     public void initiate() throws Exception {
     }
 
@@ -88,6 +96,14 @@ public abstract class ScenePluginHandler<S extends BasePluginSceneBO<?, S, Scene
 
     }
 
+    public void suspend() {
+
+    }
+
+    public void resume() {
+
+    }
+
     public void snapshot() {
 
     }
@@ -104,6 +120,14 @@ public abstract class ScenePluginHandler<S extends BasePluginSceneBO<?, S, Scene
     }
 
     public void recreateElement(String nodeId) {
+
+    }
+
+    public void suspendElement(String nodeId) {
+
+    }
+
+    public void resumeElement(String nodeId) {
 
     }
 

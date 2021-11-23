@@ -17,8 +17,12 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionFlowBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -103,13 +107,13 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @DeleteMapping(value = "/clear", params = "id")
     public ServiceResult<Boolean> clear(@RequestParam String id,
                                         @RequestBody(required = false) CsceneContextBO context) {
-        return modelService.deleteById(id, false, context).asResult();
+        return modelService.clearById(id, context).asResult();
     }
 
     @ApiOperation("批量清理场景实例")
     @DeleteMapping("/bulk_clear")
     public ServiceResult<Integer> bulkClear(@RequestBody CsceneInstanceDeleteRequest deleteRequest) {
-        return modelService.bulkDeleteByIds(deleteRequest.getIds(), false, deleteRequest.getContext()).asResult();
+        return modelService.bulkClearByIds(deleteRequest.getIds(), deleteRequest.getContext()).asResult();
     }
 
     @ApiOperation("场景实例启动节点流量")
@@ -198,6 +202,28 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return modelService.listFlows(id, queryParams).asResult();
     }
 
+    @ApiOperation("场景实例获取分页主机采集数据列表")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
+    })
+    @GetMapping(value = "/list_host_states", params = "id")
+    public ListObjServiceResult<CollectionHostStateBO> listHostStates(@RequestParam String id,
+                                                                      HostStateQueryParams queryParams) {
+        handleQueryParams("listHostStates", queryParams);
+        return modelService.listHostStates(id, queryParams).asResult();
+    }
+
+    @ApiOperation("场景实例获取分页主机采集事件列表")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
+    })
+    @GetMapping(value = "/list_host_events", params = "id")
+    public ListObjServiceResult<CollectionHostEventBO> listHostEvents(@RequestParam String id,
+                                                                      HostEventQueryParams queryParams) {
+        handleQueryParams("listHostEvents", queryParams);
+        return modelService.listHostEvents(id, queryParams).asResult();
+    }
+
     @ApiOperation("统计靶标对应引用该靶标的场景实例")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "images", value = "靶标名称", dataTypeClass = String.class, allowMultiple = true),
@@ -217,13 +243,31 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return modelService.pause(id, context).asResult();
     }
 
-    @ApiOperation("恢复场景实例")
+    @ApiOperation("(从暂停)恢复场景实例")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class)
     })
     @PostMapping("/unpause")
-    public ServiceResult<Boolean> unparseScene(@RequestParam String id, @RequestBody(required = false) CsceneContextBO context) {
+    public ServiceResult<Boolean> unpauseScene(@RequestParam String id, @RequestBody(required = false) CsceneContextBO context) {
         return modelService.unpause(id, context).asResult();
+    }
+
+    @ApiOperation("挂起场景实例")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class)
+    })
+    @PostMapping("/suspend")
+    public ServiceResult<Boolean> suspendScene(@RequestParam String id, @RequestBody(required = false) CsceneContextBO context) {
+        return modelService.suspend(id, context).asResult();
+    }
+
+    @ApiOperation("(从挂起)恢复场景实例")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class)
+    })
+    @PostMapping("/resume")
+    public ServiceResult<Boolean> resumeScene(@RequestParam String id, @RequestBody(required = false) CsceneContextBO context) {
+        return modelService.resume(id, context).asResult();
     }
 
     @ApiOperation("重启节点")
@@ -246,7 +290,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return modelService.pauseElement(id, nodeId, context).asResult();
     }
 
-    @ApiOperation("恢复节点")
+    @ApiOperation("从暂停状态恢复节点")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
             @ApiImplicitParam(name = "node_id", value = "节点id", dataTypeClass = String.class)
@@ -264,5 +308,26 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @PostMapping("/recreate_element")
     public ServiceResult<Boolean> recreateElement(@RequestParam String id, @RequestParam("node_id") String nodeId, @RequestBody(required = false) CsceneContextBO context) {
         return modelService.recreateElement(id, nodeId, context).asResult();
+    }
+
+    @ApiOperation("挂起节点")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "node_id", value = "节点id", dataTypeClass = String.class)
+    })
+    @PostMapping("/suspend_element")
+    public ServiceResult<Boolean> suspendElement(@RequestParam String id, @RequestParam("node_id") String nodeId, @RequestBody(required = false) CsceneContextBO context) {
+        return modelService.suspendElement(id, nodeId, context).asResult();
+    }
+
+
+    @ApiOperation("从挂起状态恢复节点")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "node_id", value = "节点id", dataTypeClass = String.class)
+    })
+    @PostMapping("/resume_element")
+    public ServiceResult<Boolean> resumeElement(@RequestParam String id, @RequestParam("node_id") String nodeId, @RequestBody(required = false) CsceneContextBO context) {
+        return modelService.resumeElement(id, nodeId, context).asResult();
     }
 }

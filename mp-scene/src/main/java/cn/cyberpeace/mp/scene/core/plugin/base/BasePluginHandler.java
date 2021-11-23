@@ -59,7 +59,8 @@ public abstract class BasePluginHandler<S, E, P, C> {
             if (contextClass.equals(context.getClass())) {
                 this.context = (C) context;
             } else if (context instanceof Map) {
-                this.context = JsonCommon.mapToBean((Map<String, Object>) context, contextClass);
+                // TODO: 去除snake依赖
+                this.context = JsonCommon.snakeMapToBean((Map<String, Object>) context, contextClass);
             } else {
                 this.context = (C) context;
             }
@@ -69,26 +70,26 @@ public abstract class BasePluginHandler<S, E, P, C> {
     }
 
     /**
-     * 从场景插件业务数据载入
+     * 从场景插件业务数据载入 TODO: 去除snake依赖
      * @param pluginData 场景插件业务数据
      */
     public void fromData(ScenePluginDataBO pluginData) {
         var sceneSrc = pluginData.getScene();
         if (sceneSrc != null) {
-            scene = JsonCommon.mapToBean(sceneSrc, sceneBOClass);
+            scene = JsonCommon.snakeMapToBean(sceneSrc, sceneBOClass);
         }
 
         var elementMapSrc = pluginData.getElements();
         if (elementMapSrc != null) {
             elementMapSrc.forEach((nodeId, elementData) -> {
-                elementMap.put(nodeId, JsonCommon.mapToBean(elementData, elementBOClass));
+                elementMap.put(nodeId, JsonCommon.snakeMapToBean(elementData, elementBOClass));
             });
         }
 
         var elementPortMapSrc = pluginData.getElementPorts();
         if (elementPortMapSrc != null) {
             elementPortMapSrc.forEach((portId, elementPortData) -> {
-                elementPortMap.put(portId, JsonCommon.mapToBean(elementPortData, elementPortBOClass));
+                elementPortMap.put(portId, JsonCommon.snakeMapToBean(elementPortData, elementPortBOClass));
             });
         }
     }
@@ -99,7 +100,7 @@ public abstract class BasePluginHandler<S, E, P, C> {
     public void correctData() {}
 
     /**
-     * 转出场景插件业务数据
+     * 转出场景插件业务数据 TODO: 去除snake依赖
      * @return 场景插件业务数据
      */
     public ScenePluginDataBO toData() {

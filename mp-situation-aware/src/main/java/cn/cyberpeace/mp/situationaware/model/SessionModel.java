@@ -1,9 +1,10 @@
 package cn.cyberpeace.mp.situationaware.model;
 
-import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 /**
  * es真是的bean
@@ -20,19 +21,19 @@ public class SessionModel {
 
     private String srcIp;
 
-    private String srcMac;
+    private List<String> srcMac;
 
     private String dstIp;
 
-    private String dstMac;
+    private List<String> dstMac;
 
-    private String protocol;
+    private List<String> protocol;
 
-    private String srcPort;
+    private Integer srcPort;
 
-    private String dstPort;
+    private Integer dstPort;
 
-    private Integer totBytes;
+    private Long totBytes;
 
-    private LocalDateTime timestamp;
+    private Long timestamp;
 }

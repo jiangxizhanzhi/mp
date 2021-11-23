@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.cscene.core.CsceneInstanceHandler;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceCountByReferenceTypeModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceRoleModel;
+import cn.cyberpeace.mp.cscene.model.base.BaseCsceneModel;
 import cn.cyberpeace.mp.cscene.report.rabbitmq.RabbitmqCsceneReporter;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
@@ -25,9 +26,13 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionFlowBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
 import cn.cyberpeace.mp.scenepluginflow.service.ScenePluginFlowSceneService;
 import com.google.common.collect.Lists;
 import lombok.Data;
@@ -83,6 +88,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     private List<CsceneInstanceModel> getCsceneInstanceObjs(List<String> csceneIds) {
+        if (csceneIds.isEmpty()) {
+            return new ArrayList<>();
+        }
         var queryParams = new QueryParams();
         queryParams.setIds(csceneIds.toArray(new String[0]));
         var csceneInstancesResult = list(queryParams).getSource();
@@ -148,6 +156,21 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
     }
 
+    public ServiceResult<Boolean> clearById(String id, CsceneContextBO context) {
+        var csceneInstanceObjs = getCsceneInstanceObjs(List.of(id)).stream()
+                .filter(BaseCsceneModel::getDeleted).collect(Collectors.toList());
+        if (csceneInstanceObjs.isEmpty()) {
+            return new ServiceResult<>(false);
+        }
+        return deleteById(csceneInstanceObjs.get(0).getId(), false, context);
+    }
+
+    public ServiceResult<Integer> bulkClearByIds(String[] ids, CsceneContextBO context) {
+        var csceneInstanceObjs = getCsceneInstanceObjs(Arrays.asList(ids)).stream()
+                .filter(BaseCsceneModel::getDeleted).collect(Collectors.toList());
+        return bulkDeleteByIds(csceneInstanceObjs.stream().map(BaseModel::getId).toArray(String[]::new), false, context);
+    }
+
     public ServiceResult<List<NodeSessionBO>> getNodeSessions(List<String> ids, List<String> nodeIds) {
         var csceneInstances = getCsceneInstanceObjs(ids);
         if (csceneInstances.isEmpty()) {
@@ -200,13 +223,32 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return scenePluginCollectionSceneService.listFlows(sceneId, queryParams);
     }
 
+    public ListObjServiceResult<CollectionHostStateBO> listHostStates(String id, HostStateQueryParams queryParams) {
+        var sceneId = getSceneId(id);
+        if (StringUtils.isEmpty(sceneId)) {
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
+        }
+
+        return scenePluginCollectionSceneService.listHostStates(sceneId, queryParams);
+    }
+
+    public ListObjServiceResult<CollectionHostEventBO> listHostEvents(String id, HostEventQueryParams queryParams) {
+        var sceneId = getSceneId(id);
+        if (StringUtils.isEmpty(sceneId)) {
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
+        }
+
+        return scenePluginCollectionSceneService.listHostEvents(sceneId, queryParams);
+    }
+
     public ServiceResult<Boolean> startFlow(String id, String toNodeId, String flowId, CsceneContextBO context) {
         var sceneId = getSceneId(id);
         if (StringUtils.isEmpty(sceneId)) {
             return new ServiceResult<>(false);
         }
 
-        return scenePluginFlowSceneService.startFlow(sceneId, toNodeId, flowId);
+        return scenePluginFlowSceneService.startFlow(sceneId, toNodeId, flowId,
+                context == null ? null : context.toSceneContext());
     }
 
     public ServiceResult<Boolean> stopFlow(String id, String toNodeId, String flowId, CsceneContextBO context) {
@@ -215,7 +257,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             return new ServiceResult<>(false);
         }
 
-        return scenePluginFlowSceneService.stopFlow(sceneId, toNodeId, flowId);
+        return scenePluginFlowSceneService.stopFlow(sceneId, toNodeId, flowId,
+                context == null ? null : context.toSceneContext());
     }
 
     public ServiceResult<Probe> startProbe(String id, String toNodeId, String probeId, CsceneContextBO context) {
@@ -252,6 +295,18 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return new ServiceResult<>(result);
     }
 
+    public ServiceResult<Boolean> suspend(String id, CsceneContextBO context) {
+        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
+        boolean result = instanceHandler.suspend();
+        return new ServiceResult<>(result);
+    }
+
+    public ServiceResult<Boolean> resume(String id, CsceneContextBO context) {
+        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
+        boolean result = instanceHandler.resume();
+        return new ServiceResult<>(result);
+    }
+
     public ServiceResult<Boolean> pauseElement(String id, String nodeId, CsceneContextBO context) {
         CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
         boolean result = instanceHandler.pauseElement(nodeId);
@@ -273,6 +328,18 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     public ServiceResult<Boolean> recreateElement(String id, String nodeId, CsceneContextBO context) {
         CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
         boolean result = instanceHandler.recreateElement(nodeId);
+        return new ServiceResult<>(result);
+    }
+
+    public ServiceResult<Boolean> suspendElement(String id, String nodeId, CsceneContextBO context) {
+        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
+        boolean result = instanceHandler.suspendElement(nodeId);
+        return new ServiceResult<>(result);
+    }
+
+    public ServiceResult<Boolean> resumeElement(String id, String nodeId, CsceneContextBO context) {
+        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
+        boolean result = instanceHandler.resumeElement(nodeId);
         return new ServiceResult<>(result);
     }
 }
