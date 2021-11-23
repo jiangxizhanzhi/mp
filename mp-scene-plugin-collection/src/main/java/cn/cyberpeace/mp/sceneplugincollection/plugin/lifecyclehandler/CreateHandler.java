@@ -2,6 +2,9 @@ package cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.taskpool.CreateTaskPool;
 import lombok.extern.slf4j.Slf4j;
@@ -23,15 +26,31 @@ public class CreateHandler extends HandlerCommon {
     }
 
     public static class ElementProcess {
+        public static final EventProcess BIND_PROBE_COLLECT_AGENT = new EventProcess("bind_probe_collect_agent", "sceneplugincollection.event.bind_probe_collect_agent");
     }
 
     public CreateHandler(CollectionScenePluginHandler pluginHandler) {
         super(pluginHandler, CreateTaskPool.getInstance(), SceneModel.Event.CREATE);
     }
 
+    protected void bindProbeCollectAgent(CollectionPluginSceneElementBO collectionElement, String probeCollectorId) {
+        var srcElement = collectionElement.getSrcElement();
+        CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
+                .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+        CloudPluginSceneElementBO cloudElement = cloudPluginHandler.getElement(srcElement.getId());
+        if (cloudElement == null) {
+            return;
+        }
+
+        var cloudResourceId = cloudElement.getResourceId();
+        if (cloudResourceId == null) {
+            return;
+        }
+        getProbeCollector().bindAgent(probeCollectorId, cloudResourceId);
+    }
+
     public void create() {
         prepareEventProcess(SceneModel.Event.CREATE, SceneProcess.class, ElementProcess.class);
-
 
         List<String> flowCollectMacAddrs = new ArrayList<>();
         getPluginHandler().getElementPortMap().forEach((portId, collectionPort) -> {
@@ -64,12 +83,19 @@ public class CreateHandler extends HandlerCommon {
                     .stream()
                     .filter(collectionElement -> !CollectionUtils.isEmpty(collectionElement.getProbes()))
                     .collect(Collectors.toList());
-            if (!probeCollectionElements.isEmpty()) {
-                runSceneProgress(SceneProcess.BIND_PROBE_COLLECT_AGENTS, () -> {
-                    getProbeCollector().bindAgents(probeCollectorId);
-                });
+            var bindProbeCollectAgentTasks = probeCollectionElements.stream()
+                    .map(collectionElement -> (Runnable)() -> bindProbeCollectAgentProcess(collectionElement,
+                            probeCollectorId))
+                    .collect(Collectors.toList());
+            if (!bindProbeCollectAgentTasks.isEmpty()) {
+                runSceneProgress(SceneProcess.BIND_PROBE_COLLECT_AGENTS, () -> runTasks(bindProbeCollectAgentTasks));
             }
         }
+    }
+
+    public void bindProbeCollectAgentProcess(CollectionPluginSceneElementBO collectionElement, String probeCollectorId) {
+        runElementProgress(collectionElement.getSrcElement().getId(), ElementProcess.BIND_PROBE_COLLECT_AGENT,
+                () -> bindProbeCollectAgent(collectionElement, probeCollectorId));
     }
 
 }

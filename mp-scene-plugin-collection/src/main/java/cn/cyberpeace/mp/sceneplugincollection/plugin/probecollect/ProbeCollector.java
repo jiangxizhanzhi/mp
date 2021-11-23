@@ -1,32 +1,45 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect;
 
+import cn.cyberpeace.mp.base.common.TaskCommon;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
+import cn.cyberpeace.mp.situationaware.service.DataCollectionFlowTableService;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 // TODO 对接
 @Data
 @Component
 public class ProbeCollector {
 
+    private DataCollectionFlowTableService dataCollectionFlowTableService;
+
     private String getWazuhHost(String collectorId) {
         return CollectionSingleton.collectionAppConfig.getWazuhServerHost();
     }
 
     @Autowired
-    public ProbeCollector() {
+    public ProbeCollector(DataCollectionFlowTableService dataCollectionFlowTableService) {
+        this.dataCollectionFlowTableService = dataCollectionFlowTableService;
     }
 
+    /**
+     * 目前方案固定一个wazuh server
+     */
     public String createCollector() {
         return TextUtils.uuid();
     }
 
-    public void bindAgents(String collectorId) {
+    public void bindAgent(String collectorId, String agentInstanceId) {
+        dataCollectionFlowTableService.createDataCollectionFlow(agentInstanceId);
     }
 
-    public void unbindAgents(String collectorId) {
+    public void unbindAgent(String collectorId, String agentInstanceId) {
+        dataCollectionFlowTableService.deleteDataCollectionFlow(agentInstanceId);
     }
 
     public void deleteCollector(String collectorId) {
