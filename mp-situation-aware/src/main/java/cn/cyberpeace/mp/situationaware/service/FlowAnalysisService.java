@@ -1,8 +1,9 @@
 package cn.cyberpeace.mp.situationaware.service;
 
 import cn.cyberpeace.mp.situationaware.bo.AttackDestinationIpAggregationBO;
-import cn.cyberpeace.mp.situationaware.bo.AttackLogBO;
 import cn.cyberpeace.mp.situationaware.bo.AttackWayAggregationBO;
+import cn.cyberpeace.mp.situationaware.bo.FlowLogBO;
+import cn.cyberpeace.mp.situationaware.bo.FlowSeverityBO;
 import cn.cyberpeace.mp.situationaware.request.FlowAnalysisRequest;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
@@ -47,6 +48,42 @@ public class FlowAnalysisService extends AbstractBaseService {
     @Autowired
     public FlowAnalysisService(RestHighLevelClient datasandtableRestHighLevelClient) {
         this.restHighLevelClient = datasandtableRestHighLevelClient;
+    }
+
+    /**
+     * 攻击等级TOP N(默认TOP 10)
+     * @param request
+     * @return
+     */
+    public List<FlowSeverityBO> topBySeverity(FlowAnalysisRequest request){
+        var boolQueryBuilder = this.buildBoolQueryBuilder(request);
+
+        TermsAggregationBuilder aggregationBuilder = AggregationBuilders.terms("suricata_severity")
+                .field("suricata.severity").size(request.getTopSize());
+
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        searchSourceBuilder.aggregation(aggregationBuilder);
+        searchSourceBuilder.size(0);
+
+        var searchRequest = new SearchRequest(this.indices(request.getGroupList(),request.getStartDate(),request.getEndDate()));
+        searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
+        searchRequest.source(searchSourceBuilder.query(boolQueryBuilder));
+
+        try {
+            SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            Aggregations aggregations = response.getAggregations();
+            ParsedTerms parsedTerms = aggregations.get("suricata_severity");
+            return parsedTerms.getBuckets().stream().map(bucket -> {
+                FlowSeverityBO bo = FlowSeverityBO.builder()
+                        .severityId(bucket.getKey().toString()).build();
+                bo.setAttackNumber(bucket.getDocCount());
+
+                return bo;
+            }).collect(Collectors.toList());
+        } catch (IOException e) {
+            log.error("search attack way error",e);
+        }
+        return Lists.newArrayList();
     }
 
     /**
@@ -162,7 +199,7 @@ public class FlowAnalysisService extends AbstractBaseService {
      * @param request
      * @return
      */
-    public List<AttackLogBO> attackLog(FlowAnalysisRequest request){
+    public List<FlowLogBO> flowLog(FlowAnalysisRequest request){
 
         var boolQueryBuilder = this.buildBoolQueryBuilder(request);
 
@@ -174,21 +211,21 @@ public class FlowAnalysisService extends AbstractBaseService {
         var searchRequest = new SearchRequest(this.indices(request.getGroupList(),request.getStartDate(),request.getEndDate()));
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
         searchRequest.source(searchSourceBuilder);
-        List<AttackLogBO> attackLogBOList = new ArrayList<>();
+        List<FlowLogBO> flowLogBOList = new ArrayList<>();
         try {
             SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             SearchHits hits = searchResponse.getHits();
             SearchHit[] searchHits = hits.getHits();
-            attackLogBOList = Arrays.stream(searchHits).map(hit -> {
+            flowLogBOList = Arrays.stream(searchHits).map(hit -> {
                 Map<String, Object> sourceAsMap = hit.getSourceAsMap();
-                AttackLogBO attackLogBO = JSONObject.parseObject(hit.getSourceAsString(), AttackLogBO.class);
-                attackLogBO.setTimestamp(Long.valueOf(sourceAsMap.get("@timestamp").toString()));
-                return attackLogBO;
+                FlowLogBO flowLogBO = JSONObject.parseObject(hit.getSourceAsString(), FlowLogBO.class);
+                flowLogBO.setTimestamp(Long.valueOf(sourceAsMap.get("@timestamp").toString()));
+                return flowLogBO;
             } ).collect(Collectors.toList());
         } catch (Exception e) {
             log.error("search attack way error",e);
         }
-        return attackLogBOList;
+        return flowLogBOList;
     }
 
     /**

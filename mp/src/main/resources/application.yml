@@ -7,7 +7,7 @@ ip:
   es: 127.0.0.1                 # MP新中台ES地址
   trex: 10.100.7.158            # trex资源服务器地址
   rabbitmq: 10.100.0.101        # rabbitmq地址
-  container-create: 10.100.7.1        # 云平台编辑dockerImage地址
+  flow-table: 10.100.7.50        # 云平台编辑dockerImage地址
 
 server:
   servlet:
@@ -81,7 +81,7 @@ mp:
   situationaware:
     group-url: http://${ip.moloch}:5079/v1/scenes
     arkime:
-      cpcloud-container-create-url: http://${ip.container-create}:11111/v1
+      cpcloud-container-create-url: http://${ip.cp}:11111/v1
       es-host: 10.100.0.111
       image-name: centos-arkime_arkime:v2
       username: api
@@ -99,6 +99,7 @@ mp:
       es-port: 9200
       es-username: admin
       es-password: admin
+      flow-table-url: http://${ip.flow-table}:9999/knapsack/probe/v1
     wazuh-probe-manager:
       url: http://10.100.0.111:8002
       agent-script-linux-path: /var/ossec/etc/shared/scripts/
