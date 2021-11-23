@@ -1,13 +1,18 @@
 package cn.cyberpeace.mp.situationaware.service;
 
-import cn.cyberpeace.mp.situationaware.bo.AttackDestinationIpAggregationBO;
-import cn.cyberpeace.mp.situationaware.bo.AttackWayAggregationBO;
-import cn.cyberpeace.mp.situationaware.bo.FlowLogBO;
-import cn.cyberpeace.mp.situationaware.bo.FlowSeverityBO;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.situationaware.bo.*;
+import cn.cyberpeace.mp.situationaware.model.FlowClassificationModel;
+import cn.cyberpeace.mp.situationaware.model.enums.AggregationTypeEnum;
+import cn.cyberpeace.mp.situationaware.model.enums.SeverityEnum;
 import cn.cyberpeace.mp.situationaware.request.FlowAnalysisRequest;
+import cn.cyberpeace.mp.situationaware.utils.FileUtils;
+import cn.cyberpeace.mp.situationaware.utils.LocalDateUtils;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.MapUtils;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.IndicesOptions;
@@ -15,10 +20,15 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
+import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
+import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
+import org.elasticsearch.search.aggregations.bucket.histogram.ParsedDateHistogram;
 import org.elasticsearch.search.aggregations.bucket.terms.ParsedTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.aggregations.metrics.ParsedSum;
@@ -26,13 +36,14 @@ import org.elasticsearch.search.aggregations.metrics.SumAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ResourceUtils;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -43,17 +54,79 @@ import java.util.stream.Collectors;
 @Service
 public class FlowAnalysisService extends AbstractBaseService {
 
+    @javax.annotation.Resource(name = "datasandtableRestHighLevelClient")
     private RestHighLevelClient restHighLevelClient;
 
+
     @Autowired
-    public FlowAnalysisService(RestHighLevelClient datasandtableRestHighLevelClient) {
-        this.restHighLevelClient = datasandtableRestHighLevelClient;
+    private FlowClassificationsService flowClassificationsService;
+
+    /**
+     * 初始化攻击方式
+     * @return
+     * @throws IOException
+     */
+    public void initClassification() throws IOException {
+        Resource[] resources = new PathMatchingResourcePatternResolver()
+                .getResources(ResourceUtils.CLASSPATH_URL_PREFIX + "suricata/classification.json");
+        String json = FileUtils.readLine(resources);
+        var attackClassificationBOS = JSONObject.parseObject(json, AttackClassificationBO.class);
+        log.info("attackClassificationBOS：{}",attackClassificationBOS);
+        flowClassificationsService.deleteAll();
+        flowClassificationsService.batchSave(attackClassificationBOS);
+    }
+
+    /**
+     * 统计时间窗口里的流量大小
+     * @param request   属性secondsInterval不可为空且必须大于0
+     * @return
+     */
+    public List<AttackDateHistogramNetworkBytesBO> sumNetworkBytesByDateHistogramTimestamp(FlowAnalysisRequest request){
+        Integer secondsInterval = request.getSecondsInterval();
+        if (Objects.isNull(secondsInterval) || secondsInterval <= 0){
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+        AggregationBuilder aggregationBuilder = AggregationBuilders.dateHistogram("lastHourAttack").field("@timestamp")
+                .fixedInterval(DateHistogramInterval.seconds(secondsInterval))
+                .subAggregation(AggregationBuilders.sum("network_bytes").field("network.bytes"));
+
+        var boolQueryBuilder = buildBoolQueryBuilder(request);
+
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        searchSourceBuilder.aggregation(aggregationBuilder);
+        searchSourceBuilder.query(boolQueryBuilder);
+
+        var searchRequest = new SearchRequest(this.indices(request.getGroupList(),request.getStartDate(),request.getEndDate()));
+        searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
+        searchRequest.source(searchSourceBuilder);
+        List<AttackDateHistogramNetworkBytesBO> attackTimestampBOS = new ArrayList();
+        try {
+            SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            long totalHits = searchResponse.getHits().getTotalHits().value;
+            if (totalHits == 0){
+                return Lists.newArrayList();
+            }
+            Aggregations aggregations = searchResponse.getAggregations();
+            ParsedDateHistogram parsedTerms = aggregations.get("lastHourAttack");
+            List<? extends Histogram.Bucket>  buckets = parsedTerms.getBuckets();
+            attackTimestampBOS = buckets.stream().map(bucket -> {
+                AttackDateHistogramNetworkBytesBO bo = new AttackDateHistogramNetworkBytesBO();
+                bo.setTime(bucket.getKeyAsString());
+                Aggregations bucketAggregations = bucket.getAggregations();
+                ParsedSum parsedSum = bucketAggregations.get("network_bytes");
+                bo.setNetworkBytes(parsedSum.getValue());
+                return bo;
+            }).collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("search attack way error",e);
+        }
+        return attackTimestampBOS;
     }
 
     /**
      * 攻击等级TOP N(默认TOP 10)
      * @param request
-     * @return
+     * @return 1：高，2：中，3：中低，4：低
      */
     public List<FlowSeverityBO> topBySeverity(FlowAnalysisRequest request){
         var boolQueryBuilder = this.buildBoolQueryBuilder(request);
@@ -75,117 +148,8 @@ public class FlowAnalysisService extends AbstractBaseService {
             ParsedTerms parsedTerms = aggregations.get("suricata_severity");
             return parsedTerms.getBuckets().stream().map(bucket -> {
                 FlowSeverityBO bo = FlowSeverityBO.builder()
-                        .severityId(bucket.getKey().toString()).build();
+                        .severityId(bucket.getKeyAsString()).build();
                 bo.setAttackNumber(bucket.getDocCount());
-
-                return bo;
-            }).collect(Collectors.toList());
-        } catch (IOException e) {
-            log.error("search attack way error",e);
-        }
-        return Lists.newArrayList();
-    }
-
-    /**
-     * 攻击方式TOP N(默认TOP 10)
-     * @param request
-     * @return
-     */
-    public List<AttackWayAggregationBO> topBySuricataCategory(FlowAnalysisRequest request){
-        var boolQueryBuilder = this.buildBoolQueryBuilder(request);
-
-        TermsAggregationBuilder aggregationBuilder = AggregationBuilders.terms("suricata_category")
-                .field("suricata.category").size(request.getTopSize());
-
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        searchSourceBuilder.aggregation(aggregationBuilder);
-        searchSourceBuilder.size(0);
-
-        var searchRequest = new SearchRequest(this.indices(request.getGroupList(),request.getStartDate(),request.getEndDate()));
-        searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
-        searchRequest.source(searchSourceBuilder.query(boolQueryBuilder));
-
-        try {
-            SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
-            Aggregations aggregations = response.getAggregations();
-            ParsedTerms parsedTerms = aggregations.get("suricata_category");
-            return parsedTerms.getBuckets().stream().map(bucket -> {
-                AttackWayAggregationBO bo = AttackWayAggregationBO.builder()
-                        .attackWay(bucket.getKey().toString()).build();
-                bo.setAttackNumber(bucket.getDocCount());
-
-                return bo;
-            }).collect(Collectors.toList());
-        } catch (IOException e) {
-            log.error("search attack way error",e);
-        }
-        return Lists.newArrayList();
-    }
-
-    /**
-     * 攻击节点TOP N (默认TOP 10)
-     * @param request
-     * @return
-     */
-    public List<AttackDestinationIpAggregationBO> topBySourceIp(FlowAnalysisRequest request){
-
-        TermsAggregationBuilder aggregationBuilder = AggregationBuilders.terms("source_ip")
-                .field("source.ip").size(request.getTopSize());
-
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        searchSourceBuilder.aggregation(aggregationBuilder);
-        searchSourceBuilder.size(0);
-
-        var searchRequest = new SearchRequest(this.indices(request.getGroupList(),request.getStartDate(),request.getEndDate()));
-        searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
-
-        var boolQueryBuilder = this.buildBoolQueryBuilder(request);
-
-        searchRequest.source(searchSourceBuilder.query(boolQueryBuilder));
-
-        try {
-            SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
-            Aggregations aggregations = response.getAggregations();
-            ParsedTerms parsedTerms = aggregations.get("source_ip");
-            return parsedTerms.getBuckets().stream().map(bucket -> {
-                AttackDestinationIpAggregationBO bo = AttackDestinationIpAggregationBO.builder()
-                        .attackDestinationIp(bucket.getKey().toString()).num(bucket.getDocCount()).build();
-                return bo;
-            }).collect(Collectors.toList());
-        } catch (IOException e) {
-            log.error("search attack way error",e);
-        }
-        return Lists.newArrayList();
-    }
-
-    /**
-     * 被攻击节点TOP N (默认TOP 10)
-     * @param request
-     * @return
-     */
-    public List<AttackDestinationIpAggregationBO> topByDestinationIp(FlowAnalysisRequest request){
-
-        TermsAggregationBuilder aggregationBuilder = AggregationBuilders.terms("destination_ip")
-                .field("destination.ip").size(request.getTopSize());
-
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        searchSourceBuilder.aggregation(aggregationBuilder);
-        searchSourceBuilder.size(0);
-
-        var searchRequest = new SearchRequest(this.indices(request.getGroupList(),request.getStartDate(),request.getEndDate()));
-        searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
-
-        var boolQueryBuilder = this.buildBoolQueryBuilder(request);
-
-        searchRequest.source(searchSourceBuilder.query(boolQueryBuilder));
-
-        try {
-            SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
-            Aggregations aggregations = response.getAggregations();
-            ParsedTerms parsedTerms = aggregations.get("destination_ip");
-            return parsedTerms.getBuckets().stream().map(bucket -> {
-                AttackDestinationIpAggregationBO bo = AttackDestinationIpAggregationBO.builder()
-                        .attackDestinationIp(bucket.getKey().toString()).num(bucket.getDocCount()).build();
                 return bo;
             }).collect(Collectors.toList());
         } catch (IOException e) {
@@ -229,6 +193,85 @@ public class FlowAnalysisService extends AbstractBaseService {
     }
 
     /**
+     * 流量日志，包含分类的中英文名称
+     * @param request
+     * @return
+     */
+    public List<FlowLogBO> flowLogWithCategoryZh(FlowAnalysisRequest request){
+
+        List<FlowLogBO> flowLogBOS = this.flowLog(request);
+        if (CollectionUtils.isEmpty(flowLogBOS)){
+            return Lists.newArrayList();
+        }
+        Map<String, FlowClassificationModel> allCategoryDicMap = flowClassificationsService.findAllCategoryDicMap();
+        flowLogBOS.stream().filter(v -> Objects.nonNull(v.getSuricata())).forEach(flowLogBO -> {
+            if (MapUtils.isNotEmpty(allCategoryDicMap)){
+                List<String> categoryZh = flowLogBO.getSuricata().getCategory().stream()
+                        .map(c -> Objects.nonNull(allCategoryDicMap.get(c)) ?
+                        allCategoryDicMap.get(c).getCategoryEn() : c).collect(Collectors.toList());
+                flowLogBO.getSuricata().setCategoryZh(categoryZh);
+            }
+        });
+
+        return flowLogBOS;
+    }
+
+    /**
+     * 根据聚合类型聚合不同的TOP N数据，目标支持攻击分类、源IP、目标IP,默认TOP 10
+     * @param request
+     * @return
+     */
+    public List<AttackWayAggregationBO> topByAggregationTypeEnum(FlowAnalysisRequest request){
+        AggregationTypeEnum aggregationTypeEnum = request.getAggregationTypeEnum();
+        if (Objects.isNull(aggregationTypeEnum)){
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+
+        var boolQueryBuilder = this.buildBoolQueryBuilder(request);
+
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        TermsAggregationBuilder aggregationBuilder;
+        if (aggregationTypeEnum == AggregationTypeEnum.SURICATA_CATEGORY) {
+            aggregationBuilder = AggregationBuilders.terms("aggregationType")
+                    .field("suricata.category").size(request.getTopSize());
+            searchSourceBuilder.aggregation(aggregationBuilder);
+
+        }else if (aggregationTypeEnum == AggregationTypeEnum.SOURCE_IP){
+            aggregationBuilder = AggregationBuilders.terms("aggregationType")
+                    .field("source.ip").size(request.getTopSize());
+            searchSourceBuilder.aggregation(aggregationBuilder);
+
+        }else if(aggregationTypeEnum == AggregationTypeEnum.DESTINATION_IP){
+            aggregationBuilder = AggregationBuilders.terms("aggregationType")
+                    .field("destination.ip").size(request.getTopSize());
+            searchSourceBuilder.aggregation(aggregationBuilder);
+        }
+
+        searchSourceBuilder.size(0);
+
+        var searchRequest = new SearchRequest(this.indices(request.getGroupList(),request.getStartDate(),request.getEndDate()));
+        searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
+        searchRequest.source(searchSourceBuilder.query(boolQueryBuilder));
+
+        try {
+            SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            Aggregations aggregations = response.getAggregations();
+            ParsedTerms parsedTerms = aggregations.get("aggregationType");
+            return parsedTerms.getBuckets().stream().map(bucket -> {
+                AttackWayAggregationBO bo = new AttackWayAggregationBO();
+                bo.setAggregationType(bucket.getKeyAsString());
+                bo.setAttackNumber(bucket.getDocCount());
+                return bo;
+            }).collect(Collectors.toList());
+        } catch (IOException e) {
+            log.error("search attack way error",e);
+        }
+        return Lists.newArrayList();
+    }
+
+
+
+    /**
      * 计算流量大小
      * @param request
      * @return
@@ -259,6 +302,8 @@ public class FlowAnalysisService extends AbstractBaseService {
         return Double.valueOf("0");
     }
 
+
+
     /**
      * 构建BoolQueryBuilder对象
      * @param request
@@ -266,6 +311,20 @@ public class FlowAnalysisService extends AbstractBaseService {
      */
     protected BoolQueryBuilder buildBoolQueryBuilder(FlowAnalysisRequest request){
         var boolQueryBuilder = QueryBuilders.boolQuery();
+        if (Objects.nonNull(request.getSeverityEnum())){
+            List<Integer> allSeverityList = Arrays.stream(SeverityEnum.values()).map(Enum::ordinal).collect(Collectors.toList());
+            List<Integer> severityList = request.getSeverityEnum() == SeverityEnum.ALL ? allSeverityList :
+                    allSeverityList.stream().filter(v -> v <= request.getSeverityEnum().ordinal()).collect(Collectors.toList());
+            boolQueryBuilder.filter(QueryBuilders.termsQuery("suricata.severity", severityList));
+        }
+
+        if (Objects.nonNull(request.getStartDate()) && Objects.nonNull(request.getEndDate())){
+            RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery("@timestamp");
+            rangeQueryBuilder.gte(LocalDateUtils.toEpochMilli(request.getStartDate()));
+            rangeQueryBuilder.lte(LocalDateUtils.toEpochMilli(request.getEndDate()));
+            boolQueryBuilder.must(rangeQueryBuilder);
+        }
         return boolQueryBuilder;
     }
+
 }

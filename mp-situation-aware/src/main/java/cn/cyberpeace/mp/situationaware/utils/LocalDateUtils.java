@@ -5,6 +5,7 @@ import org.springframework.util.Assert;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -49,5 +50,14 @@ public class LocalDateUtils {
         Assert.notNull(time, "time is null");
         DateTimeFormatter ftf = DateTimeFormatter.ofPattern(pattern);
         return ftf.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(time), ZoneId.systemDefault()));
+    }
+
+    /**
+     * LocalDateTime转换成毫秒
+     * @param dateTime
+     * @return
+     */
+    public static Long toEpochMilli(LocalDateTime dateTime){
+        return dateTime.toInstant(ZoneOffset.of("+8")).toEpochMilli();
     }
 }

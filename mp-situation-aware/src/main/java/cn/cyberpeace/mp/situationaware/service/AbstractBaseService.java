@@ -58,7 +58,7 @@ public abstract class AbstractBaseService {
      */
     protected String sessionIndexFormatter(String groupId,String dateString) {
         StringBuilder sessionIndexBuilder = new StringBuilder();
-        sessionIndexBuilder.append(groupId).append(SESSION3).append("-")
+        sessionIndexBuilder.append(groupId).append("_").append(SESSION3).append("-")
                 .append(dateString);
         return sessionIndexBuilder.toString();
     }
