@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.base.exception;
 
-import cn.cyberpeace.mp.base.service.code.MessageServiceCode;
 import cn.cyberpeace.mp.base.service.code.ServiceCode;
 import lombok.Data;
 
@@ -19,7 +18,7 @@ public class MpRuntimeException extends RuntimeException {
     }
 
     public MpRuntimeException(ServiceCode serviceCode) {
-        super(MessageServiceCode.calcMessage(serviceCode));
+        super(serviceCode.transMessage());
         this.serviceCode = serviceCode;
     }
 

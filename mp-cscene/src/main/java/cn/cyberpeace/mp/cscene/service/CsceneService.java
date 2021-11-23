@@ -12,6 +12,8 @@ import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCreateContextBO;
+import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
+import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.core.CsceneHandler;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.model.CsceneRoleModel;
@@ -37,6 +39,8 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
 
     private CsceneRoleMapper csceneRoleMapper;
 
+    private CsceneAppConfig csceneAppConfig;
+
     private List<CsceneRoleModel> readCsceneRoles(String[] csceneIds) {
         if (csceneIds == null || csceneIds.length == 0) {
             return new ArrayList<>();
@@ -46,9 +50,10 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     }
 
     @Autowired
-    public CsceneService(CsceneMapper modelMapper, CsceneRoleMapper csceneRoleMapper) {
+    public CsceneService(CsceneMapper modelMapper, CsceneRoleMapper csceneRoleMapper, CsceneAppConfig csceneAppConfig) {
         setModelMapper(modelMapper);
         setCsceneRoleMapper(csceneRoleMapper);
+        setCsceneAppConfig(csceneAppConfig);
     }
 
     public void loadListFilterCondition(HumanCondition humanCondition, CsceneQueryParams queryParams) {
@@ -99,6 +104,19 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
 
     @Transactional
     public ServiceResult<CsceneBO> sync(CsceneBO csceneBO, CsceneContextBO context) {
+        var elementCount = 0;
+        try {
+            elementCount = csceneBO.getSceneConfig().getTopology().getElements().size();
+        } catch (Exception e) {
+            log.error("Get element count error: ", e);
+        }
+        var sceneEditNodeLimit = csceneAppConfig.getSceneEditNodeLimit();
+        if (elementCount > sceneEditNodeLimit) {
+            return new ServiceResult<>(null,
+                    CsceneErrorCode.SCENE_EDIT_NODE_LIMIT.format(String.valueOf(sceneEditNodeLimit),
+                            String.valueOf(elementCount)));
+        }
+
         var csceneHandler = new CsceneHandler(csceneBO, context);
         csceneHandler.save();
         return new ServiceResult<>(csceneHandler.toData());
