@@ -62,8 +62,8 @@ public class FlowExecutor {
         return result.getData().getId();
     }
 
-    public void startFlow(String taskId) {
-        var result = flowService3.actuator(taskId, TaskActionEnum.START.toValue(), null);
+    public void startFlow(String taskId, Runnable stopCallback) {
+        var result = flowService3.actuator(taskId, TaskActionEnum.START.toValue(), stopCallback);
         if (!result.isSuccess()) {
             throw new MpRuntimeException(result.getServiceCode());
         }
