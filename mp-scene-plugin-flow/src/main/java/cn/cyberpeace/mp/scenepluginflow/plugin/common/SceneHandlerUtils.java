@@ -36,8 +36,8 @@ public class SceneHandlerUtils {
         flowExecutor = BeanCommon.getBean(FlowExecutor.class);
     }
 
-    public String createExecutor() {
-        return flowExecutor.createExecutor();
+    public String createExecutor(String sceneEid) {
+        return flowExecutor.createExecutor(sceneEid);
     }
 
     public void deleteExecutor(String executorId) {
