@@ -78,12 +78,20 @@ public class FlowAnalysisService extends AbstractBaseService {
 
     /**
      * 统计时间窗口里的流量大小
-     * @param request   属性secondsInterval不可为空且必须大于0
+     * @param request
+     *        属性secondsInterval不可为空且必须大于0;
+     *        属性groupList不可为空;
+     *        属性startDateTime不可为空;
+     *        属性endDateTime不可为空；
      * @return
      */
     public List<AttackDateHistogramNetworkBytesBO> sumNetworkBytesByDateHistogramTimestamp(FlowAnalysisRequest request){
         Integer secondsInterval = request.getSecondsInterval();
-        if (Objects.isNull(secondsInterval) || secondsInterval <= 0){
+        if (Objects.isNull(secondsInterval) || secondsInterval <= 0
+                || CollectionUtils.isEmpty(request.getGroupList())
+                || Objects.isNull(request.getStartDateTime())
+                || Objects.isNull(request.getEndDateTime())
+                || request.getStartDateTime().isAfter(request.getEndDateTime()) ){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         AggregationBuilder aggregationBuilder = AggregationBuilders.dateHistogram("lastHourAttack").field("@timestamp")
@@ -96,7 +104,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         searchSourceBuilder.aggregation(aggregationBuilder);
         searchSourceBuilder.query(boolQueryBuilder);
 
-        var searchRequest = new SearchRequest(this.indices(request.getGroupList(),request.getStartDate(),request.getEndDate()));
+        var searchRequest = new SearchRequest(this.indices(request.getGroupList(),request.getStartDateTime(),request.getEndDateTime()));
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
         searchRequest.source(searchSourceBuilder);
         List<AttackDateHistogramNetworkBytesBO> attackTimestampBOS = new ArrayList();
@@ -124,41 +132,6 @@ public class FlowAnalysisService extends AbstractBaseService {
     }
 
     /**
-     * 攻击等级TOP N(默认TOP 10)
-     * @param request
-     * @return 1：高，2：中，3：中低，4：低
-     */
-    public List<FlowSeverityBO> topBySeverity(FlowAnalysisRequest request){
-        var boolQueryBuilder = this.buildBoolQueryBuilder(request);
-
-        TermsAggregationBuilder aggregationBuilder = AggregationBuilders.terms("suricata_severity")
-                .field("suricata.severity").size(request.getTopSize());
-
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        searchSourceBuilder.aggregation(aggregationBuilder);
-        searchSourceBuilder.size(0);
-
-        var searchRequest = new SearchRequest(this.indices(request.getGroupList(),request.getStartDate(),request.getEndDate()));
-        searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
-        searchRequest.source(searchSourceBuilder.query(boolQueryBuilder));
-
-        try {
-            SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
-            Aggregations aggregations = response.getAggregations();
-            ParsedTerms parsedTerms = aggregations.get("suricata_severity");
-            return parsedTerms.getBuckets().stream().map(bucket -> {
-                FlowSeverityBO bo = FlowSeverityBO.builder()
-                        .severityId(bucket.getKeyAsString()).build();
-                bo.setAttackNumber(bucket.getDocCount());
-                return bo;
-            }).collect(Collectors.toList());
-        } catch (IOException e) {
-            log.error("search attack way error",e);
-        }
-        return Lists.newArrayList();
-    }
-
-    /**
      * 攻击日志
      * @param request
      * @return
@@ -172,7 +145,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         searchSourceBuilder.sort("@timestamp", SortOrder.DESC);
         searchSourceBuilder.from(0).size(request.getTopSize());
 
-        var searchRequest = new SearchRequest(this.indices(request.getGroupList(),request.getStartDate(),request.getEndDate()));
+        var searchRequest = new SearchRequest(this.indices(request.getGroupList(),request.getStartDateTime(),request.getEndDateTime()));
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
         searchRequest.source(searchSourceBuilder);
         List<FlowLogBO> flowLogBOList = new ArrayList<>();
@@ -217,7 +190,7 @@ public class FlowAnalysisService extends AbstractBaseService {
     }
 
     /**
-     * 根据聚合类型聚合不同的TOP N数据，目标支持攻击分类、源IP、目标IP,默认TOP 10
+     * 根据聚合类型聚合不同的TOP N数据，目标支持攻击分类、源IP、目标IP、攻击严重性,默认TOP 10
      * @param request
      * @return
      */
@@ -245,11 +218,14 @@ public class FlowAnalysisService extends AbstractBaseService {
             aggregationBuilder = AggregationBuilders.terms("aggregationType")
                     .field("destination.ip").size(request.getTopSize());
             searchSourceBuilder.aggregation(aggregationBuilder);
+        }else if (aggregationTypeEnum == AggregationTypeEnum.SURICATA_SEVERITY){
+            aggregationBuilder = AggregationBuilders.terms("aggregationType")
+                    .field("suricata.severity").size(request.getTopSize());
         }
 
         searchSourceBuilder.size(0);
 
-        var searchRequest = new SearchRequest(this.indices(request.getGroupList(),request.getStartDate(),request.getEndDate()));
+        var searchRequest = new SearchRequest(this.indices(request.getGroupList(),request.getStartDateTime(),request.getEndDateTime()));
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
         searchRequest.source(searchSourceBuilder.query(boolQueryBuilder));
 
@@ -283,7 +259,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         searchSourceBuilder.aggregation(aggregationBuilder);
         searchSourceBuilder.size(0);
 
-        var searchRequest = new SearchRequest(this.indices(request.getGroupList(),request.getStartDate(),request.getEndDate()));
+        var searchRequest = new SearchRequest(this.indices(request.getGroupList(),request.getStartDateTime(),request.getEndDateTime()));
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
 
         var boolQueryBuilder = this.buildBoolQueryBuilder(request);
@@ -318,10 +294,11 @@ public class FlowAnalysisService extends AbstractBaseService {
             boolQueryBuilder.filter(QueryBuilders.termsQuery("suricata.severity", severityList));
         }
 
-        if (Objects.nonNull(request.getStartDate()) && Objects.nonNull(request.getEndDate())){
+        if (Objects.nonNull(request.getStartDateTime()) && Objects.nonNull(request.getEndDateTime())
+                && request.getStartDateTime().isBefore(request.getEndDateTime())){
             RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery("@timestamp");
-            rangeQueryBuilder.gte(LocalDateUtils.toEpochMilli(request.getStartDate()));
-            rangeQueryBuilder.lte(LocalDateUtils.toEpochMilli(request.getEndDate()));
+            rangeQueryBuilder.gte(LocalDateUtils.toEpochMilli(request.getStartDateTime()));
+            rangeQueryBuilder.lte(LocalDateUtils.toEpochMilli(request.getEndDateTime()));
             boolQueryBuilder.must(rangeQueryBuilder);
         }
         return boolQueryBuilder;
