@@ -2,7 +2,9 @@ package cn.cyberpeace.mp.flow.service.impl;
 
 import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.util.CheckUtils;
 import cn.cyberpeace.mp.base.util.HttpUtils;
+import cn.cyberpeace.mp.base.util.NetworkUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
@@ -32,7 +34,6 @@ import com.alibaba.fastjson.JSONObject;
 import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.net.telnet.TelnetClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
@@ -148,9 +149,11 @@ public class AsyncPlatFlowTaskService {
         flowTaskModel.setFlowPortId(flowPortModel.getId());
 
         try {
-            // 校验任务接口网络是否正常，正常才继续;异常时也正常往下走
-            this.checkTaskJobStatus(flowActuatorModel);
-        } catch (InterruptedException e) {
+            // 校验任务接口网络是否正常，正常才继续;异常时直到超时才继续走
+            CheckUtils.loopCheck(() -> getTaskJobStatus(flowActuatorModel), 2000, 1000 * 60 * 5,
+                    null, 0, null, () -> log.error("task job status check failed：[{}]",
+                            flowActuatorModel.getIp()), "CheckTaskJobStatus");
+        } catch (Exception e) {
             log.error("checkTaskJobStatus error", e);
         }
 
@@ -359,24 +362,9 @@ public class AsyncPlatFlowTaskService {
                 flowActuatorModel.setIp(ip);
                 flowActuatorMapper.create(flowActuatorModel);
 
-                // 轮询流量发生器端口，直到端口可访问才返回
-                long startTime = System.currentTimeMillis();
-                boolean isConnectable = isHostConnectable(fixedIp);
-                while (!isConnectable) {
-                    isConnectable = isHostConnectable(fixedIp);
-                    if (isConnectable) {
-                        log.info("trex host[{}] connect success", fixedIp);
-                    } else {
-                        long endTime = System.currentTimeMillis();
-                        if ((endTime - startTime) > (1000 * 60 * 10)) {
-                            // 十分钟服务没起来，结束轮询
-                            log.error("trex vm start error:{}", addVmRequest.getName());
-                            isConnectable = true;
-                        } else {
-                            Thread.sleep(1000);
-                        }
-                    }
-                }
+                // 轮询流量发生器端口，直到端口可访问才返回（轮询10分钟）
+                NetworkUtils.probePort(fixedIp, 5001, 1000, 1000, 1000 * 60 * 10,
+                        null, 0, null, () -> log.error("Trex vm start error:{}", addVmRequest.getName()));
             } else {
                 log.error("add trex vm error");
                 throw new MpRuntimeException(FlowErrorCode.ADD_FLOW_EXECUTOR_ERROR);
@@ -387,58 +375,6 @@ public class AsyncPlatFlowTaskService {
         }
 
         log.info("================ Add vm instance end ==================");
-    }
-
-    /**
-     * 判断端口是否能连接
-     * @param host
-     * @return
-     */
-    private boolean isHostConnectable(String host) {
-        TelnetClient client = new TelnetClient();
-        // 超时时间设为2s
-        client.setConnectTimeout(1000);
-        try {
-            client.connect(host, 5001);
-        } catch (IOException e) {
-            log.warn("trex host[{}] connect failed", host);
-            return false;
-        } finally {
-            try {
-                client.disconnect();
-            } catch (IOException e) {
-                log.error("client disconnect error", e);
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * 校验任务接口状态
-     * @param flowActuatorModel
-     * @return
-     */
-    private void checkTaskJobStatus(FlowActuatorModel flowActuatorModel) throws InterruptedException {
-        // 根据任务接口状态
-        long startTime = System.currentTimeMillis();
-        boolean isActive = getTaskJobStatus(flowActuatorModel);
-        while (!isActive) {
-            isActive = getTaskJobStatus(flowActuatorModel);
-            if (isActive) {
-                log.info("task job status is active：[{}]", flowActuatorModel.getIp());
-            } else {
-                log.warn("task job status is not ready：[{}]", flowActuatorModel.getIp());
-                long endTime = System.currentTimeMillis();
-                if ((endTime - startTime) > (1000 * 60 * 5)) {
-                    // 5分钟服务没起来，结束轮询
-                    log.error("task job status check failed：[{}]", flowActuatorModel.getIp());
-                    isActive = true;
-                } else {
-                    Thread.sleep(1000);
-                }
-            }
-        }
     }
 
     /**
@@ -632,9 +568,6 @@ public class AsyncPlatFlowTaskService {
      */
     @Async
     public void refreshTaskStatus(String taskId, FlowActuatorModel flowActuatorModel, Runnable call) throws InterruptedException {
-        // 根据任务接口状态
-        long startTime = System.currentTimeMillis();
-        boolean isStopped = false;
         String host = flowActuatorModel.getIp();
         FlowTaskModel flowTaskModel = flowTaskMapper.get(taskId);
         if (Objects.isNull(flowTaskModel)) {
@@ -643,56 +576,44 @@ public class AsyncPlatFlowTaskService {
         }
 
         String thirdTaskId = flowTaskModel.getThirdTaskId();
-        while (!isStopped) {
-            JSONArray rows = this.getTaskJobStatusResult(thirdTaskId, host);
-            if (Objects.nonNull(rows)) {
-                int taskStatus = rows.getJSONObject(0).getInteger("status");
-                if (TaskStatusEnum.STOPED.toValue() == taskStatus) {
-                    isStopped = true;
-                    // 执行回调通知方法
-                    if (Objects.nonNull(call)) {
-                        log.info("start to run callback function");
-                        call.run();
-                    }
+        // 轮询校验任务是否跑完，完成时调用回调方法，最多轮询20分钟
+        CheckUtils.loopCheck(() -> checkTaskJobStopped(thirdTaskId, host), 2000, 1000 * 60 * 20,
+                null, 0, () -> taskJobStoppedCallback(flowTaskModel, call), () -> log.error("task job running status get failed：[{}]", taskId), "CheckTaskJobStopped");
+    }
 
-                    flowTaskModel.setTaskStatus(taskStatus);
-                    // 更新本地任务状态
-                    flowTaskMapper.update(flowTaskModel);
-                }
-            }
+    /**
+     * 流量任务停止时回调方法
+     * @param flowTaskModel
+     * @param call
+     */
+    private void taskJobStoppedCallback(FlowTaskModel flowTaskModel, Runnable call) {
+        flowTaskModel.setTaskStatus(TaskStatusEnum.STOPED.toValue());
+        // 更新本地任务状态
+        flowTaskMapper.update(flowTaskModel);
 
-            if (isStopped) {
-                log.info("task job running status is stopped：[{}]", taskId);
-            } else {
-                log.warn("task job is still running：[{}]", taskId);
-                long endTime = System.currentTimeMillis();
-                if ((endTime - startTime) > (1000 * 60 * 20)) {
-                    // 20分钟服务没跑完，结束轮询
-                    log.error("task job running status get failed：[{}]", taskId);
-                    isStopped = true;
-                } else {
-                    Thread.sleep(5000);
-                }
-            }
+        // 执行回调通知方法
+        if (Objects.nonNull(call)) {
+            log.info("start to run callback function");
+            call.run();
         }
     }
 
     /**
-     * 获取任务接口状态结果
+     * 校验任务状态是否已停止
      * @param thirdTaskId
      * @param hostUrl
      * @return
      */
-    private JSONArray getTaskJobStatusResult(String thirdTaskId, String hostUrl) {
-        JSONArray rows = null;
+    private Boolean checkTaskJobStopped(String thirdTaskId, String hostUrl) {
+        Boolean result = false;
         if (StringUtils.isBlank(thirdTaskId)) {
             log.warn("no thirdTaskIds to query");
-            return rows;
+            return result;
         }
 
         if (StringUtils.isBlank(hostUrl)) {
             log.error("hostUrl is empty");
-            return rows;
+            return result;
         }
 
         try {
@@ -706,7 +627,13 @@ public class AsyncPlatFlowTaskService {
             JSONObject statusRspObj = JSONObject.parseObject(statusRsp);
             log.info("query task status response:{}", statusRspObj.toJSONString());
             if (ResponseUtils.checkResponse(statusRspObj)) {
-                rows = statusRspObj.getJSONObject(BaseConstants.STR_DATA).getJSONArray("rows");
+                JSONArray rows = statusRspObj.getJSONObject(BaseConstants.STR_DATA).getJSONArray("rows");
+                if (Objects.nonNull(rows)) {
+                    int taskStatus = rows.getJSONObject(0).getInteger("status");
+                    if (TaskStatusEnum.STOPED.toValue() == taskStatus) {
+                        result = true;
+                    }
+                }
             } else {
                 log.error("query task status failed");
             }
@@ -714,7 +641,7 @@ public class AsyncPlatFlowTaskService {
             log.error("query task status error", e);
         }
 
-        return rows;
+        return result;
     }
 
 
