@@ -1,8 +1,7 @@
-package cn.cyberpeace.mp.front.scene.dto.event;
+package cn.cyberpeace.mp.cscene.dto.event;
 
-import cn.cyberpeace.mp.front.scene.dto.common.PageRequest;
+import cn.cyberpeace.mp.cscene.dto.common.PageRequest;
 import io.swagger.annotations.ApiModelProperty;
-import io.swagger.annotations.ApiOperation;
 import lombok.Data;
 
 import java.time.LocalDateTime;

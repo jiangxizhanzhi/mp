@@ -1,8 +1,9 @@
-package cn.cyberpeace.mp.front.scene.controller;
+package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.front.scene.dto.element.ElementResourceUsage;
-import cn.cyberpeace.mp.front.scene.dto.event.ElementMonitorInfo;
+import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
+import cn.cyberpeace.mp.cscene.dto.element.ElementResourceUsage;
+import cn.cyberpeace.mp.cscene.dto.event.ElementMonitorInfo;
 import cn.hutool.core.collection.CollectionUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -20,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(value = "场景节点监控", tags = "场景节点监控")
 @Slf4j
 @RestController
-@RequestMapping("/monitor/scene/element")
+@RequestMapping(ControllerConstant.BASE_API_PATH + "/monitor/scene/element")
 public class SceneElementMonitorController {
 
     @ApiOperation(value = "查询节点监控信息")

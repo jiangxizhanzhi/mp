@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.front.scene.dto.element;
+package cn.cyberpeace.mp.cscene.dto.element;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;

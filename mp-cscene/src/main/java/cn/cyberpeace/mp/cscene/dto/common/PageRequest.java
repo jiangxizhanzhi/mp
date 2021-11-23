@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.front.scene.dto.common;
+package cn.cyberpeace.mp.cscene.dto.common;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;

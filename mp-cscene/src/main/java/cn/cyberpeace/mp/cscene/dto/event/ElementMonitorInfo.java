@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.front.scene.dto.event;
+package cn.cyberpeace.mp.cscene.dto.event;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

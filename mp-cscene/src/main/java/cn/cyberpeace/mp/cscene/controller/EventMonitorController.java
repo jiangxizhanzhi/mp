@@ -1,7 +1,8 @@
-package cn.cyberpeace.mp.front.scene.controller;
+package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.front.scene.dto.event.EventPageRequest;
+import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
+import cn.cyberpeace.mp.cscene.dto.event.EventPageRequest;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +21,7 @@ import java.util.Map;
 @Api(value = "事件监控", tags = "事件监控")
 @Slf4j
 @RestController
-@RequestMapping("/monitor/event")
+@RequestMapping(ControllerConstant.BASE_API_PATH + "/monitor/event")
 public class EventMonitorController {
 
     @ApiOperation(value = "采集事件分类")

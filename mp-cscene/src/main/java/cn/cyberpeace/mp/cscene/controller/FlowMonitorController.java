@@ -1,9 +1,10 @@
-package cn.cyberpeace.mp.front.scene.controller;
+package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.front.scene.dto.flow.FlowDataStatistic;
-import cn.cyberpeace.mp.front.scene.dto.flow.FlowPageRequest;
-import cn.cyberpeace.mp.front.scene.dto.flow.FlowRiskAggrResponse;
+import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowDataStatistic;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowPageRequest;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowRiskAggrResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(value = "流量监控", tags = "流量监控")
 @Slf4j
 @RestController
-@RequestMapping("/monitor/flow")
+@RequestMapping(ControllerConstant.BASE_API_PATH + "/monitor/flow")
 public class FlowMonitorController {
 
     @ApiOperation(value = "流量统计")

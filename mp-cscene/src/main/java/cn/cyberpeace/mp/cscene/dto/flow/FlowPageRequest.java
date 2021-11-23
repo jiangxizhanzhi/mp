@@ -1,6 +1,6 @@
-package cn.cyberpeace.mp.front.scene.dto.flow;
+package cn.cyberpeace.mp.cscene.dto.flow;
 
-import cn.cyberpeace.mp.front.scene.dto.common.PageRequest;
+import cn.cyberpeace.mp.cscene.dto.common.PageRequest;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
