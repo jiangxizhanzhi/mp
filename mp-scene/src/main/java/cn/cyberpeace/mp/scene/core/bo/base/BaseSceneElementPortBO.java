@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.scene.core.bo.base;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementPortModel;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -14,7 +15,7 @@ import java.util.List;
 
 @Data
 public abstract class BaseSceneElementPortBO<M extends BaseSceneElementPortModel,
-        T extends BaseSceneElementPortBO<M, T>> extends EidBO<M, T> {
+        T extends BaseSceneElementPortBO<M, T, E>, E extends BaseSceneElementBO<?, T, E>> extends EidBO<M, T> {
     @ApiModelProperty(value = "端口id")
     private String id;
     @ApiModelProperty(value = "名称")
@@ -43,6 +44,9 @@ public abstract class BaseSceneElementPortBO<M extends BaseSceneElementPortModel
     private Integer loss;
     @ApiModelProperty(value = "【即将废弃】接入方式")
     private List<AccessMode> accessModes;
+
+    @JsonIgnore
+    private E element;
 
     @Override
     public void fromModel(M obj, String... ignoreFields) {

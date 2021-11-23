@@ -17,7 +17,7 @@ public abstract class BaseSceneTopologyBO<
         C0 extends BaseSceneElementPortConnectionModel,
         S extends BaseSceneBO<S0, S>,
         A extends BaseSceneAreaBO<A0, A>,
-        P extends BaseSceneElementPortBO<P0, P>,
+        P extends BaseSceneElementPortBO<P0, P, E>,
         E extends BaseSceneElementBO<E0, P, E>,
         C extends BaseSceneElementPortConnectionBO<C0, C>,
         T extends BaseSceneTopologyBO<S0, A0, E0, P0, C0, S, A, P, E, C, T>> {
@@ -50,7 +50,7 @@ public abstract class BaseSceneTopologyBO<
 
     public <S9 extends BaseSceneBO<?, S9>,
             A9 extends BaseSceneAreaBO<?, A9>,
-            P9 extends BaseSceneElementPortBO<?, P9>,
+            P9 extends BaseSceneElementPortBO<?, P9, E9>,
             E9 extends BaseSceneElementBO<?, P9, E9>,
             C9 extends BaseSceneElementPortConnectionBO<?, C9>,
             P8 extends BaseSceneTopologyBO<?, ?, ?, ?, ?, S9, A9, P9, E9, C9, P8>> P8 export(

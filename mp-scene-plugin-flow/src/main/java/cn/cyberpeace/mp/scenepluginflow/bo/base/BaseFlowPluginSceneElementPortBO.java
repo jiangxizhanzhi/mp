@@ -7,6 +7,6 @@ import lombok.Data;
 
 @Data
 public abstract class BaseFlowPluginSceneElementPortBO<M extends BaseFlowPluginSceneElementPortModel,
-        T extends BaseFlowPluginSceneElementPortBO<M, T, S>, S extends BaseSceneElementPortBO<?, S>>
+        T extends BaseFlowPluginSceneElementPortBO<M, T, S>, S extends BaseSceneElementPortBO<?, S, ?>>
         extends BasePluginSceneElementPortBO<M, T, S> {
 }
