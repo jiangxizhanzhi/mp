@@ -1,11 +1,13 @@
 package cn.cyberpeace.mp.flow.service.impl;
 
 import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.flow.constant.BaseConstants;
+import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
 import cn.cyberpeace.mp.flow.enums.FlowPlatformEnum;
 import cn.cyberpeace.mp.flow.enums.ResourceTypeEnum;
 import cn.cyberpeace.mp.flow.enums.TaskStatusEnum;
@@ -316,7 +318,7 @@ public class AsyncPlatFlowTaskService {
             }
         } catch (IOException e) {
             log.error("get network error", e);
-            return;
+            throw new MpRuntimeException(FlowErrorCode.GET_OUTER_NETWORK_ERROR);
         }
 
         FlowActuatorModel flowActuatorModel = new FlowActuatorModel();
@@ -377,9 +379,11 @@ public class AsyncPlatFlowTaskService {
                 }
             } else {
                 log.error("add trex vm error");
+                throw new MpRuntimeException(FlowErrorCode.ADD_FLOW_EXECUTOR_ERROR);
             }
         } catch (Exception e) {
             log.error("add vm instance error", e);
+            throw new MpRuntimeException(FlowErrorCode.ADD_FLOW_EXECUTOR_ERROR);
         }
 
         log.info("================ Add vm instance end ==================");
