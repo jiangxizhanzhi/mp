@@ -448,6 +448,36 @@ public class SceneHandler extends BaseSceneHandler<
         return true;
     }
 
+    public boolean suspend() {
+        prepareAllEvent(SceneModel.Event.SUSPEND, SceneElementModel.Event.SUSPEND);
+        startAllEvent(SceneModel.Event.SUSPEND, SceneElementModel.Event.SUSPEND);
+        try {
+            for (var plugin : getPlugins()) {
+                plugin.suspend();
+            }
+        } catch (Exception e) {
+            errorScene(SceneModel.Event.SUSPEND, e.getMessage());
+            return false;
+        }
+        overAllEvent(SceneModel.Event.SUSPEND, SceneElementModel.Event.SUSPEND);
+        return true;
+    }
+
+    public boolean resume() {
+        prepareAllEvent(SceneModel.Event.RESUME, SceneElementModel.Event.RESUME);
+        startAllEvent(SceneModel.Event.RESUME, SceneElementModel.Event.RESUME);
+        try {
+            for (var plugin : getPlugins()) {
+                plugin.resume();
+            }
+        } catch (Exception e) {
+            errorScene(SceneModel.Event.RESUME, e.getMessage());
+            return false;
+        }
+        overAllEvent(SceneModel.Event.RESUME, SceneElementModel.Event.RESUME);
+        return true;
+    }
+
     public void snapshot() {
     }
 
@@ -564,6 +594,36 @@ public class SceneHandler extends BaseSceneHandler<
             return;
         }
         overElementEvent(nodeId, SceneElementModel.Event.RECREATE);
+    }
+
+    public void suspendElement(String nodeId) {
+        SceneElementBO element = getElement(nodeId);
+        prepareElementEvent(element, SceneElementModel.Event.SUSPEND);
+        startElementEvent(nodeId, SceneElementModel.Event.SUSPEND);
+        try {
+            for (ScenePluginHandler plugin : getPlugins()) {
+                plugin.suspendElement(nodeId);
+            }
+        } catch (Exception e) {
+            errorElement(nodeId, SceneElementModel.Event.SUSPEND, e.getMessage());
+            return;
+        }
+        overElementEvent(nodeId, SceneElementModel.Event.SUSPEND);
+    }
+
+    public void resumeElement(String nodeId) {
+        SceneElementBO element = getElement(nodeId);
+        prepareElementEvent(element, SceneElementModel.Event.RESUME);
+        startElementEvent(nodeId, SceneElementModel.Event.RESUME);
+        try {
+            for (ScenePluginHandler plugin : getPlugins()) {
+                plugin.resumeElement(nodeId);
+            }
+        } catch (Exception e) {
+            errorElement(nodeId, SceneElementModel.Event.RESUME, e.getMessage());
+            return;
+        }
+        overElementEvent(nodeId, SceneElementModel.Event.RESUME);
     }
 
     @Override

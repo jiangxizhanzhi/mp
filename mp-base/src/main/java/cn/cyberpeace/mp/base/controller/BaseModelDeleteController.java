@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.base.controller;
 
+import cn.cyberpeace.mp.base.controller.request.BaseDeleteData;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -8,6 +9,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -45,6 +47,17 @@ public interface BaseModelDeleteController<M extends BaseModel, S extends BaseMo
     @DeleteMapping(params = "id")
     default ServiceResult<Boolean> deleteByParam(@RequestParam String id) {
         return getModelService().delete(id).asResult();
+    }
+
+    /**
+     * 通用删除
+     * @param deleteData 删除数据
+     * @return 是否删除成功
+     */
+    @ApiOperation("删除指定id数据")
+    @DeleteMapping
+    default ServiceResult<Boolean> deleteByData(@RequestBody BaseDeleteData deleteData) {
+        return getModelService().delete(deleteData.getId()).asResult();
     }
 
 }

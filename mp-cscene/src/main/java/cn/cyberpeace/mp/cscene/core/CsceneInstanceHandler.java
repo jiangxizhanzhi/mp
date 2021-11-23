@@ -127,6 +127,22 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         return this.sceneService.unpause(sceneId, generateSceneContext()).getSource();
     }
 
+    public boolean suspend() {
+        String sceneId = this.getSceneId();
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return this.sceneService.suspend(sceneId, generateSceneContext()).getSource();
+    }
+
+    public boolean resume() {
+        String sceneId = this.getSceneId();
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return this.sceneService.resume(sceneId, generateSceneContext()).getSource();
+    }
+
     public boolean pauseElement(String nodeId) {
         String sceneId = this.getSceneId();
         if (sceneId == null) {
@@ -157,6 +173,22 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
         }
         return this.sceneService.recreateElement(sceneId, nodeId, generateSceneContext()).getSource();
+    }
+
+    public boolean suspendElement(String nodeId) {
+        String sceneId = this.getSceneId();
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return this.sceneService.suspendElement(sceneId, nodeId, generateSceneContext()).getSource();
+    }
+
+    public boolean resumeElement(String nodeId) {
+        String sceneId = this.getSceneId();
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return this.sceneService.resumeElement(sceneId, nodeId, generateSceneContext()).getSource();
     }
 
     private String getSceneId() {
