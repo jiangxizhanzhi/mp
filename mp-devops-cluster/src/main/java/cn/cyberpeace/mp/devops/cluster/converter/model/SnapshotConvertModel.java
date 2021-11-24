@@ -17,7 +17,8 @@ public class SnapshotConvertModel extends BasePageConvertModel{
     /**
      * UUID
      */
-    private String snapshotUuid;
+    @ApiModelProperty("UUID")
+    private String uuid;
 
     /**
      * 名称
@@ -28,6 +29,7 @@ public class SnapshotConvertModel extends BasePageConvertModel{
     /**
      * 设备ID
      */
+    @ApiModelProperty("镜像UUID")
     private String deviceUuid;
 
     /**
