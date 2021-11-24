@@ -11,6 +11,8 @@ public class MpRuntimeException extends RuntimeException {
 
     private ServiceCode serviceCode;
 
+    private Exception rawException;
+
     private String detail;
 
     public MpRuntimeException(String message) {
@@ -27,5 +29,18 @@ public class MpRuntimeException extends RuntimeException {
         this.detail = detail;
     }
 
+    public MpRuntimeException(ServiceCode serviceCode, Exception rawException) {
+        this(serviceCode, rawException.getMessage());
+    }
+
+    public MpRuntimeException e(Exception rawException) {
+        this.rawException = rawException;
+        return this;
+    }
+
+    public MpRuntimeException de(Exception rawException) {
+        this.detail = rawException.getMessage();
+        return e(rawException);
+    }
 
 }

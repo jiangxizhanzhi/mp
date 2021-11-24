@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
@@ -23,6 +24,10 @@ import cn.cyberpeace.mp.cscene.model.CsceneRoleModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneRoleMapper;
 import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneConfigService;
+import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -44,12 +50,53 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
 
     private CsceneAppConfig csceneAppConfig;
 
+    private ScenePluginCloudSceneService scenePluginCloudSceneService;
+
+    private ScenePluginCloudSceneConfigService scenePluginCloudSceneConfigService;
+
     private List<CsceneRoleModel> readCsceneRoles(String[] csceneIds) {
         if (csceneIds == null || csceneIds.length == 0) {
             return new ArrayList<>();
         }
         return csceneRoleMapper.list(new HumanCondition()
                 .filterIn(CsceneRoleModel::getCscene, csceneIds));
+    }
+
+    private String getSceneConfigId(String csceneId) {
+        var csceneResult = get(csceneId).getSource();
+        if (csceneResult == null) {
+            return null;
+        }
+        var cscene = csceneResult.getObj();
+        return cscene.getSceneConfig();
+    }
+
+    private int getActiveVirtualDeviceCount() {
+        Map<Integer, Integer> elementCountMap = scenePluginCloudSceneService
+                .<Integer>groupCountElement(null, null,
+                        BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getVirtualType))
+                .getSource();
+        int activeVirtualDeviceCount = elementCountMap.getOrDefault(
+                BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE, 0) +
+                elementCountMap.getOrDefault(
+                        BaseCloudPluginSceneElementModel.VirtualType.CONTAINER, 0) +
+                elementCountMap.getOrDefault(
+                        BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE, 0);
+        return activeVirtualDeviceCount;
+    }
+
+    private int getSceneConfigVirtualDeviceCount(String sceneConfigId) {
+        Map<Integer, Integer> elementCountMap = scenePluginCloudSceneConfigService
+                .<Integer>groupCountElement(List.of(sceneConfigId), null,
+                        BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getVirtualType))
+                .getSource();
+        int virtualDeviceCount = elementCountMap.getOrDefault(
+                BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE, 0) +
+                elementCountMap.getOrDefault(
+                        BaseCloudPluginSceneElementModel.VirtualType.CONTAINER, 0) +
+                elementCountMap.getOrDefault(
+                        BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE, 0);
+        return virtualDeviceCount;
     }
 
     private void checkSceneEditNodeLimit(int count) {
@@ -71,34 +118,42 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     }
 
     private void checkSceneUsingNodeLimit(int count) {
+        var activeVirtualDeviceCount = getActiveVirtualDeviceCount();
         var sceneUsingNodeLimit = csceneAppConfig.getSceneUsingNodeLimit();
-        if (count > sceneUsingNodeLimit) {
+        if (activeVirtualDeviceCount + count > sceneUsingNodeLimit) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_USING_NODE_LIMIT.format(String.valueOf(sceneUsingNodeLimit),
-                    String.valueOf(count)));
+                    String.valueOf(activeVirtualDeviceCount), String.valueOf(count)));
         }
     }
 
     private void checkSceneUsingNodeLimit(String csceneId, CsceneBO cscene) {
-        if (cscene == null) {
-            var csceneHandler = new CsceneHandler(csceneId, null);
-            cscene = csceneHandler.toData();
-        }
-
         var elementCount = 0;
-        try {
-            elementCount = cscene.getSceneConfig().getTopology().getElements().size();
-        } catch (Exception e) {
-            log.error("Get element count error: ", e);
+        if (cscene == null) {
+            var sceneConfigId = getSceneConfigId(csceneId);
+            elementCount = getSceneConfigVirtualDeviceCount(sceneConfigId);
+        } else {
+            // TODO 获取需要虚拟化的节点数量
+            try {
+                elementCount = cscene.getSceneConfig().getTopology().getElements().size();
+            } catch (Exception e) {
+                log.error("Get element count error: ", e);
+            }
         }
 
         checkSceneUsingNodeLimit(elementCount);
     }
 
     @Autowired
-    public CsceneService(CsceneMapper modelMapper, CsceneRoleMapper csceneRoleMapper, CsceneAppConfig csceneAppConfig) {
+    public CsceneService(CsceneMapper modelMapper,
+                         CsceneRoleMapper csceneRoleMapper,
+                         CsceneAppConfig csceneAppConfig,
+                         ScenePluginCloudSceneService scenePluginCloudSceneService,
+                         ScenePluginCloudSceneConfigService scenePluginCloudSceneConfigService) {
         setModelMapper(modelMapper);
         setCsceneRoleMapper(csceneRoleMapper);
         setCsceneAppConfig(csceneAppConfig);
+        setScenePluginCloudSceneService(scenePluginCloudSceneService);
+        setScenePluginCloudSceneConfigService(scenePluginCloudSceneConfigService);
     }
 
     public void loadListFilterCondition(HumanCondition humanCondition, CsceneQueryParams queryParams) {
