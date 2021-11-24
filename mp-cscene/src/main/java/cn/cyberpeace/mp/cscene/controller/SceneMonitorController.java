@@ -1,16 +1,13 @@
 package cn.cyberpeace.mp.cscene.controller;
 
-import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
+import cn.cyberpeace.mp.cscene.dto.common.ResourceUsage;
+import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
+import cn.cyberpeace.mp.cscene.dto.request.ResourceUsageRequest;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneMonitorInfo;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.SceneMonitorService;
-import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
-import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
-import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
-import cn.hutool.core.collection.CollectionUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -20,8 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDateTime;
-import java.util.Objects;
+import java.util.List;
 
 /**
  * @Description:
@@ -43,12 +39,24 @@ public class SceneMonitorController {
     @ApiOperation(value = "查询场景监控信息")
     @GetMapping("/info/{sceneId}")
     public ServiceResult<SceneMonitorInfo> getSceneMonitorInfo(@PathVariable String sceneId) {
-        log.info("sceneId:{}", sceneId);
-
-        var result = csceneInstanceService.getById(sceneId, null);
-        SceneMonitorInfo sceneMonitorInfo = sceneMonitorService.sceneInstanceBO2SceneMonitorInfo(result.getSource());
-
+        SceneMonitorInfo sceneMonitorInfo = sceneMonitorService.getSceneMonitorInfo(sceneId);
         return ServiceResult.success(sceneMonitorInfo);
+    }
+
+
+    @ApiOperation(value = "查询场景资源使用统计")
+    @GetMapping("/resource_usage/{sceneId}")
+    public ServiceResult<ResourceUsage> getSceneResourceUsage(@PathVariable String sceneId, ResourceUsageRequest usageRequest) {
+        log.info("sceneId:{}, usageRequest:{}", sceneId, usageRequest);
+
+        return null;
+    }
+
+    @ApiOperation(value = "查询场景所有节点列表")
+    @GetMapping("/all_elements/{sceneId}")
+    public ServiceResult<List<ElementMonitorBasicInfo>> getSceneAllElements(@PathVariable String sceneId) {
+        List<ElementMonitorBasicInfo> basicInfoList = sceneMonitorService.getAllSceneElements(sceneId);
+        return ServiceResult.success(basicInfoList);
     }
 
 
