@@ -36,6 +36,14 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     private Integer opticalPortNumber;
     @DefaultStr(OpticalPortType.SFP)
     private String opticalPortType;
+    @DefaultInt
+    private Integer wanPortNumber;
+    @DefaultStr(WanPortType.E)
+    private String wanPortType;
+    @DefaultInt
+    private Integer lanPortNumber;
+    @DefaultStr(LanPortType.E)
+    private String lanPortType;
 
     // 虚拟交换机属性
     @DefaultStr
@@ -106,6 +114,20 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
         public static final String SFP_PLUS = "sfp+";
 
         private OpticalPortType() {}
+    }
+
+    public static class WanPortType {
+        public static final String E = "E";
+
+        private WanPortType() {
+        }
+    }
+
+    public static class LanPortType {
+        public static final String E = "E";
+
+        private LanPortType() {
+        }
     }
 
     public static class Role {
