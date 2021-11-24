@@ -23,8 +23,14 @@ public class SnapshotConvertModel extends BasePageConvertModel{
     /**
      * 名称
      */
-    @ApiModelProperty("名称")
+    @ApiModelProperty("真实快照名称")
     private String name;
+
+    /**
+     * 名称
+     */
+    @ApiModelProperty("用户设置的快照名称")
+    private String userSnapshotName;
 
     /**
      * 设备ID

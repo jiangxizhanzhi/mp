@@ -38,7 +38,7 @@ public class SnapshotConverterImpl implements SnapshotConverter {
             return null;
         }
         List<SnapshotConvertModel> list = model.getItems().stream().map(item ->
-                new SnapshotConvertModel(item.getUuid(), item.getName(),item.getDeviceUuid(),
+                new SnapshotConvertModel(item.getUuid(), item.getName(), item.getUserSnapshotName(), item.getDeviceUuid(),
                         item.getDescription(), TimeUtils.utcStringToLocalDateTime(item.getCreatedAt())))
                 .collect(Collectors.toList());
         SnapshotListConvertModel convertModel = new SnapshotListConvertModel();
@@ -60,7 +60,7 @@ public class SnapshotConverterImpl implements SnapshotConverter {
             return convertModel;
         }
         List<SnapshotConvertModel> list = model.getSnapshots().stream().map(item ->
-                new SnapshotConvertModel(item.getUuid(), item.getName(),item.getDeviceUuid(),
+                new SnapshotConvertModel(item.getUuid(), item.getName(), item.getUserSnapshotName(), item.getDeviceUuid(),
                         item.getDescription(), Objects.isNull(item.getCreatedAt()) ? null :
                         TimeUtils.utcStringToLocalDateTime(item.getCreatedAt())))
                 .collect(Collectors.toList());
