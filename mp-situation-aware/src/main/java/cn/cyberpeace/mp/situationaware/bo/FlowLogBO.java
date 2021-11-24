@@ -52,6 +52,11 @@ public class FlowLogBO {
          */
         private String ip;
 
+        /**
+         * mac地址
+         */
+        private List<String> mac;
+
     }
 
     @Data
@@ -63,6 +68,11 @@ public class FlowLogBO {
          * 目标IP
          */
         private String ip;
+
+        /**
+         * mac地址
+         */
+        private List<String> mac;
 
     }
 
