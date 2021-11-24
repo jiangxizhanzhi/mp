@@ -16,9 +16,14 @@ public class Snapshot extends BaseCloudPlatformModel {
     private String uuid;
 
     /**
-     * 名称
+     * 真实快照名称
      */
     private String name;
+
+    /**
+     * 用户快照名称
+     */
+    private String userSnapshotName;
 
     /**
      * 设备ID
