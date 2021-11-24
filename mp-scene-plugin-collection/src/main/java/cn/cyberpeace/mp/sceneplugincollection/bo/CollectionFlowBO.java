@@ -50,9 +50,14 @@ public class CollectionFlowBO {
     private List<String> protocol;
 
     @ApiModelProperty("流量大小")
-    private Integer size;
+    private Long size;
 
     @ApiModelProperty("时间")
     private LocalDateTime time;
 
+    @ApiModelProperty("告警等级(1:高,2:中,3:中低,4:低)")
+    private Integer severity;
+
+    @ApiModelProperty("攻击类型")
+    private String AttackType;
 }
