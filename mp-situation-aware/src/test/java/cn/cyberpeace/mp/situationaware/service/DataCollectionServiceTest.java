@@ -108,6 +108,17 @@ public class DataCollectionServiceTest {
         System.out.println(date);
     }
 
+
+    @Test
+    public void  testQueryMonitorEventsWithTimeRange() {
+        WazuhMonitorEventsRequest wazuhEventRequest = new WazuhMonitorEventsRequest();
+        wazuhEventRequest.setAgentNames(Lists.newArrayList("ubuntu1", "windows_agent1"));
+        wazuhEventRequest.setStartTime(LocalDateTime.now().minusDays(1));
+        wazuhEventRequest.setEndTime(LocalDateTime.now());
+        List<WazuhModel> wazuhModelList = dataCollectionService.queryMonitorEventsWithTimeRange(wazuhEventRequest);
+        System.out.println(wazuhModelList);
+    }
+
     @Test
     public void testGetJSon() {
         String address = "{\"addresses\":{\n" +

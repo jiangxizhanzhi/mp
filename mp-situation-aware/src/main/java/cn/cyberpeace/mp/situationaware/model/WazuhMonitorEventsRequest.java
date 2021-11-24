@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.situationaware.model;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Data;
 
@@ -28,4 +29,14 @@ public class WazuhMonitorEventsRequest {
 
     @ApiModelProperty(value = "agentName列表", required = false)
     private List<String> agentNames;
+
+    /**
+     * 开始时间
+     */
+    private LocalDateTime startTime;
+
+    /**
+     * 结束时间
+     */
+    private LocalDateTime endTime;
 }
