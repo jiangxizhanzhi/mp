@@ -49,6 +49,35 @@ public class FlowAnalysisRequest {
      */
     private List<String> groupList;
 
+    /**
+     * 源IP
+     */
+    private String sourceIp;
+
+    /**
+     * 源端口
+     */
+    private String sourcePort;
+
+    /**
+     * 源Mac地址
+     */
+    private String sourceMac;
+
+    /**
+     * 目标IP
+     */
+    private String destinationIp;
+
+    /**
+     * 支持多协议
+     */
+    private List<String> protocols;
+
+    /**
+     * 目标端口
+     */
+    private String destinationPort;
 
     /**
      * 时间窗口间隔周期,单位：秒

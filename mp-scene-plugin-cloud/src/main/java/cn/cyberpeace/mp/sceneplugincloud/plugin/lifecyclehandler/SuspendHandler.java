@@ -58,14 +58,14 @@ public class SuspendHandler extends HandlerCommon {
         if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
             getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.SUSPEND, Arrays.asList(ElementProcess.SUSPEND_VIRTUAL_MACHINE));
             runElementProgress(nodeId, SceneElementModel.Event.SUSPEND, ElementProcess.SUSPEND_VIRTUAL_MACHINE, () -> {
+                closeAccessModes(element);
                 virtualMachine.suspend(instanceId);
-                checkAccessModes(element);
             });
         } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
             getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.SUSPEND, Arrays.asList(ElementProcess.SUSPEND_CONTAINER));
             runElementProgress(nodeId, SceneElementModel.Event.SUSPEND, ElementProcess.SUSPEND_CONTAINER, () -> {
+                closeAccessModes(element);
                 container.suspend(instanceId);
-                checkAccessModes(element);
             });
         }
     }

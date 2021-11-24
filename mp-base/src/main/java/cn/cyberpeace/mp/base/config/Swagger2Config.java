@@ -255,6 +255,19 @@ public class Swagger2Config implements ModelPropertyBuilderPlugin {
 
 
     @Bean
+    public Docket apiFrontScene() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .apiInfo(apiInfo())
+                .enableUrlTemplating(true)
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.front.scene"))
+                .paths(PathSelectors.any())
+                .build()
+                .globalRequestParameters(CollectionUtil.toList(parameter)).groupName("front-scene");
+    }
+
+
+    @Bean
     public Docket apiOther() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(apiInfo())
