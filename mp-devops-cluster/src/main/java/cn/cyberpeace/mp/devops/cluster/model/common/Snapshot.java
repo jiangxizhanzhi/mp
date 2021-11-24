@@ -13,7 +13,7 @@ public class Snapshot extends BaseCloudPlatformModel {
     /**
      * UUID
      */
-    private String snapshotUuid;
+    private String uuid;
 
     /**
      * 名称
