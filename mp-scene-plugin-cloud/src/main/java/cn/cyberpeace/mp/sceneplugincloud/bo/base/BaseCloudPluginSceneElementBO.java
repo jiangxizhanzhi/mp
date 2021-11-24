@@ -132,6 +132,9 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     @JsonIgnore
     private String mgmtMacAddr;
 
+    @ApiModelProperty(value = "宿主机名称")
+    private String host;
+
     @Override
     public void fromModel(M obj, String... ignoreFields) {
         super.fromModel(obj, ArrayUtils.addAll(ignoreFields,
