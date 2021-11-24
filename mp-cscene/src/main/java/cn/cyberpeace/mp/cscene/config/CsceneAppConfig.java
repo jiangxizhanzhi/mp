@@ -18,10 +18,10 @@ public class CsceneAppConfig {
     @Autowired
     private SysConfigService sysConfigService;
 
-    @Value("${mp.cscene.scene-edit-node-limit-key:MP_SCENE_EDIT_NODE_LIMIT}")
+    @Value("${mp.cscene.scene-edit-node-limit-key:LCS-RES-CR-EDITNODES}")
     private String sceneEditNodeLimitKey;
 
-    @Value("${mp.cscene.scene-using-node-limit-key:MP_SCENE_USING_NODE_LIMIT}")
+    @Value("${mp.cscene.scene-using-node-limit-key:LCS-RES-CR-ACTIVENODES}")
     private String sceneUsingNodeLimitKey;
 
     @Value("${mp.cscene.scene-edit-node-limit:1000}")

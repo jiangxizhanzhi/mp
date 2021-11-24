@@ -1,8 +1,11 @@
 package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.service.code.ErrorCode;
+import cn.cyberpeace.mp.base.service.code.ServiceCode;
 import cn.cyberpeace.mp.base.service.fields.BaseModelFields;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
@@ -47,6 +50,48 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         }
         return csceneRoleMapper.list(new HumanCondition()
                 .filterIn(CsceneRoleModel::getCscene, csceneIds));
+    }
+
+    private void checkSceneEditNodeLimit(int count) {
+        var sceneEditNodeLimit = csceneAppConfig.getSceneEditNodeLimit();
+        if (count > sceneEditNodeLimit) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_EDIT_NODE_LIMIT.format(String.valueOf(sceneEditNodeLimit),
+                    String.valueOf(count)));
+        }
+    }
+
+    private void checkSceneEditNodeLimit(CsceneBO csceneBO) {
+        var elementCount = 0;
+        try {
+            elementCount = csceneBO.getSceneConfig().getTopology().getElements().size();
+        } catch (Exception e) {
+            log.error("Get element count error: ", e);
+        }
+        checkSceneEditNodeLimit(elementCount);
+    }
+
+    private void checkSceneUsingNodeLimit(int count) {
+        var sceneUsingNodeLimit = csceneAppConfig.getSceneUsingNodeLimit();
+        if (count > sceneUsingNodeLimit) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_USING_NODE_LIMIT.format(String.valueOf(sceneUsingNodeLimit),
+                    String.valueOf(count)));
+        }
+    }
+
+    private void checkSceneUsingNodeLimit(String csceneId, CsceneBO cscene) {
+        if (cscene == null) {
+            var csceneHandler = new CsceneHandler(csceneId, null);
+            cscene = csceneHandler.toData();
+        }
+
+        var elementCount = 0;
+        try {
+            elementCount = cscene.getSceneConfig().getTopology().getElements().size();
+        } catch (Exception e) {
+            log.error("Get element count error: ", e);
+        }
+
+        checkSceneUsingNodeLimit(elementCount);
     }
 
     @Autowired
@@ -104,18 +149,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
 
     @Transactional
     public ServiceResult<CsceneBO> sync(CsceneBO csceneBO, CsceneContextBO context) {
-        var elementCount = 0;
-        try {
-            elementCount = csceneBO.getSceneConfig().getTopology().getElements().size();
-        } catch (Exception e) {
-            log.error("Get element count error: ", e);
-        }
-        var sceneEditNodeLimit = csceneAppConfig.getSceneEditNodeLimit();
-        if (elementCount > sceneEditNodeLimit) {
-            return new ServiceResult<>(null,
-                    CsceneErrorCode.SCENE_EDIT_NODE_LIMIT.format(String.valueOf(sceneEditNodeLimit),
-                            String.valueOf(elementCount)));
-        }
+        checkSceneEditNodeLimit(csceneBO);
 
         var csceneHandler = new CsceneHandler(csceneBO, context);
         csceneHandler.save();
@@ -147,12 +181,16 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
 
     public ServiceResult<CsceneInstanceBO> createTestInstance(String csceneId, boolean unique,
                                                               CsceneContextBO context) {
+        checkSceneUsingNodeLimit(csceneId, null);
+
         var csceneHandler = new CsceneHandler(csceneId, context);
         return new ServiceResult<>(csceneHandler.createTestInstance(unique));
     }
 
     public ServiceResult<CsceneInstanceBO> createTestInstance(String csceneId, boolean unique, CsceneBO cscene,
                                                               CsceneContextBO context) {
+        checkSceneUsingNodeLimit(csceneId, cscene);
+
         var csceneHandler = new CsceneHandler(csceneId, context);
         return new ServiceResult<>(csceneHandler.createTestInstance(unique, cscene));
     }
@@ -162,6 +200,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         if (createContext == null) {
             return createTestInstance(csceneId, unique, new CsceneContextBO());
         }
+        checkSceneUsingNodeLimit(csceneId, createContext.getCscene());
 
         var csceneHandler = new CsceneHandler(csceneId, createContext.toCsceneContext());
         var cscene = createContext.getCscene();
@@ -184,12 +223,16 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     }
 
     public ServiceResult<CsceneInstanceBO> createAppInstance(String csceneId, boolean unique, CsceneContextBO context) {
+        checkSceneUsingNodeLimit(csceneId, null);
+
         var csceneHandler = new CsceneHandler(csceneId, context);
         return new ServiceResult<>(csceneHandler.createTestInstance(unique));
     }
 
     public ServiceResult<CsceneInstanceBO> createAppInstance(String csceneId, boolean unique, CsceneBO cscene,
                                                              CsceneContextBO context) {
+        checkSceneUsingNodeLimit(csceneId, cscene);
+
         var csceneHandler = new CsceneHandler(csceneId, context);
         return new ServiceResult<>(csceneHandler.createTestInstance(unique, cscene));
     }
@@ -199,6 +242,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         if (createContext == null) {
             return createAppInstance(csceneId, unique, new CsceneContextBO());
         }
+        checkSceneUsingNodeLimit(csceneId, createContext.getCscene());
 
         var csceneHandler = new CsceneHandler(csceneId, createContext.toCsceneContext());
         var cscene = createContext.getCscene();
