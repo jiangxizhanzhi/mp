@@ -2,7 +2,10 @@ package cn.cyberpeace.mp.situationaware.service;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.situationaware.bo.*;
+import cn.cyberpeace.mp.situationaware.bo.AttackClassificationBO;
+import cn.cyberpeace.mp.situationaware.bo.AttackDateHistogramNetworkBytesBO;
+import cn.cyberpeace.mp.situationaware.bo.AttackWayAggregationBO;
+import cn.cyberpeace.mp.situationaware.bo.FlowLogBO;
 import cn.cyberpeace.mp.situationaware.model.FlowClassificationModel;
 import cn.cyberpeace.mp.situationaware.model.enums.AggregationTypeEnum;
 import cn.cyberpeace.mp.situationaware.model.enums.SeverityEnum;
@@ -12,7 +15,9 @@ import cn.cyberpeace.mp.situationaware.utils.LocalDateUtils;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.IndicesOptions;
@@ -39,7 +44,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.ResourceUtils;
 
 import java.io.IOException;
@@ -287,11 +291,36 @@ public class FlowAnalysisService extends AbstractBaseService {
      */
     protected BoolQueryBuilder buildBoolQueryBuilder(FlowAnalysisRequest request){
         var boolQueryBuilder = QueryBuilders.boolQuery();
+
         if (Objects.nonNull(request.getSeverityEnum())){
             List<Integer> allSeverityList = Arrays.stream(SeverityEnum.values()).map(Enum::ordinal).collect(Collectors.toList());
             List<Integer> severityList = request.getSeverityEnum() == SeverityEnum.ALL ? allSeverityList :
                     allSeverityList.stream().filter(v -> v <= request.getSeverityEnum().ordinal()).collect(Collectors.toList());
             boolQueryBuilder.filter(QueryBuilders.termsQuery("suricata.severity", severityList));
+        }
+
+        if (StringUtils.isNotBlank(request.getSourceIp())) {
+            boolQueryBuilder.must(QueryBuilders.termQuery("source.ip.keyword", request.getSourceIp()));
+        }
+
+        if (StringUtils.isNotBlank(request.getSourcePort())) {
+            boolQueryBuilder.must(QueryBuilders.termQuery("source.port", request.getSourcePort()));
+        }
+
+        if (StringUtils.isNotBlank(request.getSourceMac())) {
+            boolQueryBuilder.must(QueryBuilders.termQuery("source.mac.keyword", request.getSourceMac()));
+        }
+
+        if (StringUtils.isNotBlank(request.getDestinationIp())) {
+            boolQueryBuilder.must(QueryBuilders.termQuery("destination.ip.keyword", request.getDestinationIp()));
+        }
+
+        if (StringUtils.isNotBlank(request.getDestinationPort())) {
+            boolQueryBuilder.must(QueryBuilders.termQuery("destination.port", request.getDestinationPort()));
+        }
+
+        if (CollectionUtils.isNotEmpty(request.getProtocols())) {
+            boolQueryBuilder.must(QueryBuilders.termQuery("protocol.keyword",request.getProtocols()));
         }
 
         if (Objects.nonNull(request.getStartDateTime()) && Objects.nonNull(request.getEndDateTime())
