@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.cscene.service;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneMonitorInfo;
-import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.hutool.core.collection.CollectionUtil;
@@ -24,51 +23,54 @@ public class SceneMonitorService {
     private static final String CPCLOUD_PLUGIN = "cpcloud";
 
     /**
-     * SceneInstanceBO转为SceneMonitorInfo
+     * CsceneInstanceBO转为SceneMonitorInfo
+     *
      * @param csceneInstanceBO
      * @return
      */
     public SceneMonitorInfo sceneInstanceBO2SceneMonitorInfo(CsceneInstanceBO csceneInstanceBO) {
-        SceneMonitorInfo sceneMonitorInfo = new SceneMonitorInfo();
+        log.info("sceneId:{}", csceneInstanceBO.getId());
+
         if (Objects.isNull(csceneInstanceBO)
                 || Objects.isNull(csceneInstanceBO.getScene())
                 || Objects.isNull(csceneInstanceBO.getScene().getPlugins())
                 || Objects.isNull(csceneInstanceBO.getScene().getPlugins().get(CPCLOUD_PLUGIN))) {
-            return sceneMonitorInfo;
+            return null;
         }
 
-        ScenePluginDataBO scenePluginDataBO = csceneInstanceBO.getScene().getPlugins().get(CPCLOUD_PLUGIN);
+        SceneMonitorInfo sceneMonitorInfo = new SceneMonitorInfo();
+        var scenePluginDataBO = csceneInstanceBO.getScene().getPlugins().get(CPCLOUD_PLUGIN);
 
-        var emap = scenePluginDataBO.getElements();
-        if (CollectionUtil.isNotEmpty(emap)) {
-            emap.forEach((k1, m1) -> {
-                CloudPluginSceneElementBO e = JsonCommon.snakeMapToBean(m1, CloudPluginSceneElementBO.class);
+        var pluginElements = scenePluginDataBO.getElements();
+        if (CollectionUtil.isNotEmpty(pluginElements)) {
+            pluginElements.forEach((k, v) -> {
+                CloudPluginSceneElementBO elementBO = JsonCommon.snakeMapToBean(v, CloudPluginSceneElementBO.class);
                 // 虚拟机
-                if (Objects.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE, e.getVirtualType())) {
-                    sceneMonitorInfo.setVmCount(sceneMonitorInfo.getVmCount() + 1);
+                if (Objects.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE, elementBO.getVirtualType())) {
+                    sceneMonitorInfo.setVirtualMachineCount(sceneMonitorInfo.getVirtualMachineCount() + 1);
                 }
                 // 容器
-                if (Objects.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER, e.getVirtualType())) {
+                if (Objects.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER, elementBO.getVirtualType())) {
                     sceneMonitorInfo.setContainerCount(sceneMonitorInfo.getContainerCount() + 1);
                 }
                 // 实体设备
-                if (Objects.equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE, e.getVirtualType())) {
+                if (Objects.equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE, elementBO.getVirtualType())) {
                     sceneMonitorInfo.setEntityCount(sceneMonitorInfo.getEntityCount() + 1);
                 }
                 // 网络
-                if (Objects.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH, e.getVirtualType())) {
-                    sceneMonitorInfo.setNetworkCount(sceneMonitorInfo.getNetworkCount() + 1);
+                if (Objects.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH, elementBO.getVirtualType())) {
+                    sceneMonitorInfo.setSwitchCount(sceneMonitorInfo.getSwitchCount() + 1);
                 }
 
                 // todo 弹性IP 暂时没有
 
                 // 路由
-                if (Objects.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER, e.getVirtualType())) {
+                if (Objects.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER, elementBO.getVirtualType())) {
                     sceneMonitorInfo.setRouterCount(sceneMonitorInfo.getRouterCount() + 1);
                 }
 
                 // 防火墙规则
-                if (Objects.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_FIREWALL, e.getVirtualType())) {
+                if (Objects.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_FIREWALL, elementBO.getVirtualType())) {
                     sceneMonitorInfo.setFirewallCount(sceneMonitorInfo.getFirewallCount() + 1);
                 }
 
@@ -79,5 +81,6 @@ public class SceneMonitorService {
 
         return sceneMonitorInfo;
     }
+
 
 }
