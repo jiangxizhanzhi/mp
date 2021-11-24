@@ -1,7 +1,5 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect;
 
-import cn.cyberpeace.mp.base.common.TaskCommon;
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionFlowTableService;
@@ -11,7 +9,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-// TODO 对接
 @Data
 @Component
 public class ProbeCollector {
@@ -35,11 +32,11 @@ public class ProbeCollector {
     }
 
     public void bindAgent(String collectorId, String agentInstanceId) {
-        dataCollectionFlowTableService.createDataCollectionFlow(agentInstanceId);
+        dataCollectionFlowTableService.createDataCollectionFlow(List.of(agentInstanceId));
     }
 
     public void unbindAgent(String collectorId, String agentInstanceId) {
-        dataCollectionFlowTableService.deleteDataCollectionFlow(agentInstanceId);
+        dataCollectionFlowTableService.deleteDataCollectionFlow(List.of(agentInstanceId));
     }
 
     public void deleteCollector(String collectorId) {

@@ -1,7 +1,5 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin.flowcollect;
 
-import cn.cyberpeace.mp.base.util.basic.TextUtils;
-import cn.cyberpeace.mp.situationaware.model.GroupModel;
 import cn.cyberpeace.mp.situationaware.model.NetworkTrafficMirrorRequest;
 import cn.cyberpeace.mp.situationaware.service.NetworkTrafficGroupService;
 import cn.cyberpeace.mp.situationaware.service.NetworkTrafficService;
@@ -11,7 +9,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-// TODO 对接
 @Data
 @Component
 public class FlowCollector {
