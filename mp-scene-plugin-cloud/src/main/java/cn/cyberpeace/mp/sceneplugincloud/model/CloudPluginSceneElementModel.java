@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.sceneplugincloud.model;
 
-import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import lombok.AllArgsConstructor;
