@@ -2,8 +2,8 @@ package cn.cyberpeace.mp.cscene.dto.event;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -13,7 +13,8 @@ import java.util.List;
  * @Date：2021/11/22 14:03
  */
 @Data
-@Builder
+//@Builder
+@NoArgsConstructor
 @ApiModel(value = "节点监控信息")
 public class ElementMonitorInfo {
 
@@ -24,7 +25,7 @@ public class ElementMonitorInfo {
     private List<String> ips;
 
     @ApiModelProperty(value = "节点基本信息-操作系统")
-    private String os;
+    private String systemType;
 
     @ApiModelProperty(value = "节点基本信息-镜像名称")
     private String imageName;
@@ -33,17 +34,18 @@ public class ElementMonitorInfo {
     private String physicalNode;
 
     @ApiModelProperty(value = "节点基本信息-实例类型")
-    private String instanceType;
+    // 对应 BaseCloudPluginSceneElementModel.VirtualType 中的枚举？
+    private Integer instanceType;
 
 
     @ApiModelProperty(value = "节点资源-CPU")
     private int nodeCPUs;
 
-    @ApiModelProperty(value = "节点资源-内存")
-    private String memSize;
+    @ApiModelProperty(value = "节点资源-内存 (单位GB)")
+    private double memSize;
 
-    @ApiModelProperty(value = "节点资源-硬盘")
-    private String diskSize;
+    @ApiModelProperty(value = "节点资源-硬盘 (单位GB)")
+    private double diskSize;
 
 
     @ApiModelProperty(value = "实时状态-进程")
