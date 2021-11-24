@@ -50,18 +50,20 @@ public class SnapshotConverterImpl implements SnapshotConverter {
     @Override
     public DeviceAndSnapshotConvertModel deviceAndSnapshotByName(String name) {
         DeviceAndSnapshotCloudPlatformModel model = snapshotService.deviceAndSnapshotByName(name);
-        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getSnapshots())){
+        if (Objects.isNull(model)){
             return null;
+        }
+        DeviceAndSnapshotConvertModel convertModel = new DeviceAndSnapshotConvertModel();
+        convertModel.setDeviceName(model.getDeviceName());
+        convertModel.setDeviceUuid(model.getDeviceUuid());
+        if (CollectionUtils.isEmpty(model.getSnapshots())){
+            return convertModel;
         }
         List<SnapshotConvertModel> list = model.getSnapshots().stream().map(item ->
                 new SnapshotConvertModel(item.getSnapshotUuid(), item.getName(),item.getDeviceUuid(),
                         item.getDescription(), Objects.isNull(item.getCreatedAt()) ? null :
                         TimeUtils.utcStringToLocalDateTime(item.getCreatedAt())))
                 .collect(Collectors.toList());
-
-        DeviceAndSnapshotConvertModel convertModel = new DeviceAndSnapshotConvertModel();
-        convertModel.setDeviceName(model.getDeviceName());
-        convertModel.setDeviceUuid(model.getDeviceUuid());
         convertModel.setItems(list);
         return convertModel;
     }
