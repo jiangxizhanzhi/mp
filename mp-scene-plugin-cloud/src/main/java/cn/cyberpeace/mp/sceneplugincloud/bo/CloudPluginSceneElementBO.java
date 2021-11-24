@@ -10,9 +10,6 @@ import lombok.Data;
 public class CloudPluginSceneElementBO extends BaseCloudPluginSceneElementBO<CloudPluginSceneElementModel,
         CloudPluginSceneElementBO, SceneElementBO> {
 
-    @ApiModelProperty(value = "宿主机名称")
-    private String host;
-
     @Override
     public CloudPluginSceneElementModel createModel() {
         return new CloudPluginSceneElementModel();
