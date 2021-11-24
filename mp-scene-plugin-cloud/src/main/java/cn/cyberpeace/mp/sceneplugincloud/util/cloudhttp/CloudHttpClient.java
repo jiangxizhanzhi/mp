@@ -130,6 +130,10 @@ public class CloudHttpClient {
         return resultBean(httpClient.post(url, data, param, null, null), valueType, "post", url, data, param);
     }
 
+    public <T> T put(String url, HttpData data, HttpParam param, Class<T> valueType) {
+        return resultBean(httpClient.put(url, data, param, null, null), valueType, "put", url, data, param);
+    }
+
     public <T> T patch(String url, HttpData data, HttpParam param, Class<T> valueType) {
         return resultBean(httpClient.patch(url, data, param, null, null), valueType, "patch", url, data, param);
     }

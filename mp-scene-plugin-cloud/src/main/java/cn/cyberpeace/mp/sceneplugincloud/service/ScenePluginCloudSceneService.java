@@ -8,11 +8,9 @@ import cn.cyberpeace.mp.base.util.basic.IntUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
-import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
-import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
-import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
-import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.*;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
+import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
@@ -26,8 +24,6 @@ import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -200,4 +196,31 @@ public class ScenePluginCloudSceneService {
 
         return new ListObjServiceResult<>(new ListObjResult<>(recordings, rawRecordings.getTotal()));
     }
+
+    public ServiceResult<NodeActionRecordingBO> enableRemoteRecording(String sceneId, String nodeId, String connectionId) {
+        var connectionLinkInfoMap = collectConnectionLinkInfo(sceneId, List.of(nodeId));
+        if (!connectionLinkInfoMap.containsKey(connectionId)) {
+            return new ServiceResult<>(null, CloudErrorCode.CONNECTION_NOT_EXIST);
+        }
+
+        var remoteClient = new Remote();
+        var result = remoteClient.enableRecording(connectionId);
+        var actionRecordingBO = new NodeActionRecordingBO();
+        actionRecordingBO.setRecordingName(result);
+        return new ServiceResult<>(actionRecordingBO);
+    }
+
+    public ServiceResult<NodeActionRecordingBO> disableRemoteRecording(String sceneId, String nodeId, String connectionId) {
+        var connectionLinkInfoMap = collectConnectionLinkInfo(sceneId, List.of(nodeId));
+        if (!connectionLinkInfoMap.containsKey(connectionId)) {
+            return new ServiceResult<>(null, CloudErrorCode.CONNECTION_NOT_EXIST);
+        }
+
+        var remoteClient = new Remote();
+        var result = remoteClient.disableRecording(connectionId);
+        var actionRecordingBO = new NodeActionRecordingBO();
+        actionRecordingBO.setRecordingName(result);
+        return new ServiceResult<>(actionRecordingBO);
+    }
+
 }

@@ -5,6 +5,8 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneCreateInstanceRequest;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
@@ -14,6 +16,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,6 +33,24 @@ public class CsceneController implements BaseModelListControllerBase {
     private CsceneService modelService;
 
     private CsceneSpecialService csceneSpecialService;
+
+    private CsceneActionRequest formatActionRequest(CsceneActionRequest request, String paramId) {
+        if (request == null) {
+            request = new CsceneActionRequest();
+        }
+        if (!StringUtils.isEmpty(paramId)) {
+            request.setId(paramId);
+        }
+        return request;
+    }
+
+    private CsceneCreateInstanceRequest formatCreateInstanceRequest(CsceneCreateInstanceRequest request, String paramId) {
+        if (request == null) {
+            request = new CsceneCreateInstanceRequest();
+        }
+        request = (CsceneCreateInstanceRequest) formatActionRequest(request, paramId);
+        return request;
+    }
 
     @Autowired
     public CsceneController(CsceneService csceneService, CsceneSpecialService csceneSpecialService) {
@@ -72,18 +93,22 @@ public class CsceneController implements BaseModelListControllerBase {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),
     })
-    @PostMapping(value = "/clone", params = "id")
-    public ServiceResult<CsceneBO> clone(@RequestParam String id) {
-        return modelService.clone(id, null).asResult();
+    @PostMapping(value = "/clone")
+    public ServiceResult<CsceneBO> clone(@RequestParam(required = false) String id,
+                                         @RequestBody(required = false) CsceneActionRequest request) {
+        request = formatActionRequest(request, id);
+        return modelService.clone(request.getId(), null).asResult();
     }
 
     @ApiOperation("删除场景模板")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),
     })
-    @DeleteMapping(params = "id")
-    public ServiceResult<Boolean> delete(@RequestParam String id) {
-        return modelService.deleteById(id, true, false, null).asResult();
+    @DeleteMapping
+    public ServiceResult<Boolean> delete(@RequestParam(required = false) String id,
+                                         @RequestBody(required = false) CsceneActionRequest request) {
+        request = formatActionRequest(request, id);
+        return modelService.deleteById(request.getId(), true, false, null).asResult();
     }
 
     @ApiOperation("批量删除场景模板")
@@ -96,20 +121,22 @@ public class CsceneController implements BaseModelListControllerBase {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),
     })
-    @PostMapping(value = "/test_instance", params = "id")
+    @PostMapping(value = "/test_instance")
     public ServiceResult<CsceneInstanceBO> createTestInstance(
-            @RequestParam String id, @RequestBody(required = false) CsceneInstanceCreateContextBO createContext) {
-        return modelService.createTestInstance(id, false, createContext).asResult();
+            @RequestParam(required = false) String id, @RequestBody(required = false) CsceneCreateInstanceRequest request) {
+        request = formatCreateInstanceRequest(request, id);
+        return modelService.createTestInstance(request.getId(), false, request.getContext()).asResult();
     }
 
     @ApiOperation("创建场景模板应用实例")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),
     })
-    @PostMapping(value = "/app_instance", params = "id")
+    @PostMapping(value = "/app_instance")
     public ServiceResult<CsceneInstanceBO> createAppInstance(
-            @RequestParam String id, @RequestBody(required = false) CsceneInstanceCreateContextBO createContext) {
-        return modelService.createAppInstance(id, false, createContext).asResult();
+            @RequestParam(required = false) String id, @RequestBody(required = false) CsceneCreateInstanceRequest request) {
+        request = formatCreateInstanceRequest(request, id);
+        return modelService.createAppInstance(request.getId(), false, request.getContext()).asResult();
     }
 
     @ApiOperation("获取场景模板统计数据")
