@@ -20,4 +20,6 @@ public class SituationalAwareConstant {
      * openstack network查询
      */
     public static String ArkimeNetworkId;
+
+    public static Integer ES_DOC_MAXCOUNT = 10000;
 }

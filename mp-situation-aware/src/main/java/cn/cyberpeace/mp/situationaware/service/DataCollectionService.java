@@ -5,15 +5,33 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.base.util.es.EsConstants;
-import cn.cyberpeace.mp.situationaware.repository.WazuhRepository;
-import cn.cyberpeace.mp.situationaware.model.*;
+import cn.cyberpeace.mp.situationaware.model.FileEventModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
+import cn.cyberpeace.mp.situationaware.model.WazuhFileRoot;
+import cn.cyberpeace.mp.situationaware.model.WazuhModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
+import cn.cyberpeace.mp.situationaware.model.WazuhMonitorRoot;
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
-import cn.cyberpeace.mp.situationaware.utils.LocalDateUtils;
+import cn.cyberpeace.mp.situationaware.repository.WazuhRepository;
 import cn.hutool.core.util.NumberUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import javax.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.elasticsearch.action.search.SearchRequest;
@@ -25,7 +43,6 @@ import org.elasticsearch.client.core.CountRequest;
 import org.elasticsearch.client.core.CountResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,14 +51,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import javax.annotation.Resource;
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import static cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant.ES_DOC_MAXCOUNT;
 
 /**
  * wazuh对接
@@ -172,6 +182,7 @@ public class DataCollectionService {
         buildMonitorEventsBuilderTimeRange(wazuhMonitorEventsRequest, boolQueryBuilder, multiValueMap);
         // 按时间降序
         sourceBuilder.sort("timestamp", SortOrder.DESC);
+        sourceBuilder.size(ES_DOC_MAXCOUNT);
         // 监控数据每个agent一条，所以这里分页大小设为agent数量的2倍
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
         //配置索引为空
@@ -182,14 +193,6 @@ public class DataCollectionService {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
 
             List<WazuhMonitorRoot> wazuhFileRootList = Arrays.stream(response.getHits().getHits()).map(hit -> JSONObject.parseObject(hit.getSourceAsString(), WazuhMonitorRoot.class)).collect(Collectors.toList());
-            Map<String, Optional<WazuhMonitorRoot>> wazuhMonitorMap =
-                wazuhFileRootList.stream()
-                    .filter(wazuhMonitorRoot -> wazuhMonitorRoot.getFullLog().contains("MonitorMessage:"))
-                    .sorted(Comparator.comparing(WazuhMonitorRoot::getTimestamp))
-                    .collect(Collectors.groupingBy(root -> root.getAgent().getId(),
-                        Collectors.maxBy(Comparator.comparing(WazuhMonitorRoot::getTimestamp))));
-
-            wazuhFileRootList = wazuhMonitorMap.values().stream().filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
             var wazuhModelList = wazuhFileRootList.stream()
                 .filter(model -> model.getFullLog().contains("MonitorMessage:")).map(model -> {
                     var monitorMessage = model.getFullLog().substring("MonitorMessage:".length());
@@ -274,7 +277,6 @@ public class DataCollectionService {
 
         if (!CollectionUtils.isEmpty(wazuhEventRequest.getAgentNames())) {
             buildAgentNameQuery(wazuhEventRequest.getAgentNames(), boolQueryBuilder);
-            wazuhEventRequest.getAgentNames().size();
         }
 
         //构造事件条件
@@ -463,7 +465,7 @@ public class DataCollectionService {
             return IntStream.range(0, days + 2).boxed().map(startTime::plusDays).map((time) -> time.format(DateTimeFormatter.ofPattern("yyyy.MM.*")))
                 .distinct().collect(Collectors.toList());
         }
-        return IntStream.range(0, days + 2).boxed().map(startTime::plusDays).map((time) -> time.format(DateTimeFormatter.ofPattern("yyyy.MM.dd")))
+        return IntStream.range(0, days + 1).boxed().map(startTime::plusDays).map((time) -> time.format(DateTimeFormatter.ofPattern("yyyy.MM.dd")))
             .distinct().collect(Collectors.toList());
     }
 }
