@@ -1,15 +1,11 @@
 package cn.cyberpeace.mp.devops.cluster.service.impl;
 
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.CloudPlatformPageResult;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.HypervisorPageResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.HypervisorStatisticsResult;
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.InstanceOsServicePageResult;
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.NetworkAgentPageResult;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.common.Hypervisor;
-import cn.cyberpeace.mp.devops.cluster.model.common.InstanceOsServiceModel;
-import cn.cyberpeace.mp.devops.cluster.model.common.NetworkAgentModel;
 import cn.cyberpeace.mp.devops.cluster.service.HypervisorService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;

@@ -32,6 +32,6 @@ public class PortConfig {
     @ApiModelProperty("端口网段")
     private String portIps;
 
-
+    @ApiModelProperty("接入协议")
     private List<AccessProtocol> accessProtocols;
 }

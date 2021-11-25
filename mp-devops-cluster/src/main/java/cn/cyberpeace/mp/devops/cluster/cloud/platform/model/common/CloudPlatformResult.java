@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.devops.cluster.cloud.platform;
+package cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common;
 
 import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import lombok.AllArgsConstructor;
