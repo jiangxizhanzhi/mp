@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CsceneInstanceCreateContextBO extends CsceneContextBO {
+public class CsceneInstanceCreateContextBO {
 
     @ApiModelProperty(value = "场景存活时间")
     @JsonIgnore
@@ -24,7 +24,7 @@ public class CsceneInstanceCreateContextBO extends CsceneContextBO {
     @ApiModelProperty(value = "场景模板数据")
     private CsceneBO cscene;
 
-    public CsceneContextBO toCsceneContext() {
-        return new CsceneContextBO(getAccessUserId(), getContext());
-    }
+    @ApiModelProperty(value = "场景上下文数据")
+    private CsceneContextBO context;
+
 }

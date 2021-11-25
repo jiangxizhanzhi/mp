@@ -20,11 +20,11 @@ public class CsceneContextBO {
     private String accessUserId;
 
     @ApiModelProperty(value = "透明上下文")
-    private Map<String, Object> context;
+    private Map<String, Object> passThrough;
 
     public void loadTransparentContext() {
-        if (context != null) {
-            SysContextHolder.setPassThroughMap(context);
+        if (passThrough != null) {
+            SysContextHolder.setPassThroughMap(passThrough);
         }
     }
 

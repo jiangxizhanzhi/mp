@@ -125,7 +125,7 @@ public class CsceneController implements BaseModelListControllerBase {
     public ServiceResult<CsceneInstanceBO> createTestInstance(
             @RequestParam(required = false) String id, @RequestBody(required = false) CsceneCreateInstanceRequest request) {
         request = formatCreateInstanceRequest(request, id);
-        return modelService.createTestInstance(request.getId(), false, request.getContext()).asResult();
+        return modelService.createTestInstance(request.getId(), false, request.toCsceneInstanceCreateContextBO()).asResult();
     }
 
     @ApiOperation("创建场景模板应用实例")
@@ -136,7 +136,7 @@ public class CsceneController implements BaseModelListControllerBase {
     public ServiceResult<CsceneInstanceBO> createAppInstance(
             @RequestParam(required = false) String id, @RequestBody(required = false) CsceneCreateInstanceRequest request) {
         request = formatCreateInstanceRequest(request, id);
-        return modelService.createAppInstance(request.getId(), false, request.getContext()).asResult();
+        return modelService.createAppInstance(request.getId(), false, request.toCsceneInstanceCreateContextBO()).asResult();
     }
 
     @ApiOperation("获取场景模板统计数据")
