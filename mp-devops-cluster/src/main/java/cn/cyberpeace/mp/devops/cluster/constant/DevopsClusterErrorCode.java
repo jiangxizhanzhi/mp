@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.devops.cluster.constant;
 
-import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.base.service.code.ErrorCode;
 
 
