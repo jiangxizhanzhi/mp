@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class SceneConfigElementPortBO
-        extends BaseSceneElementPortBO<SceneConfigElementPortModel, SceneConfigElementPortBO> {
+        extends BaseSceneElementPortBO<SceneConfigElementPortModel, SceneConfigElementPortBO, SceneConfigElementBO> {
 
     @Override
     public SceneConfigElementPortModel createModel() {

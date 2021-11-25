@@ -5,4 +5,5 @@ dependencies {
     implementation project(':mp-scene-plugin-collection')
     implementation project(':mp-scene-plugin-flow')
     implementation project(':mp-auth')
+    implementation project(':mp-front-admin')
 }

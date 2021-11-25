@@ -13,7 +13,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.AnnotationUtils;
-import springfox.documentation.builders.*;
+import springfox.documentation.builders.ApiInfoBuilder;
+import springfox.documentation.builders.ModelPropertyBuilder;
+import springfox.documentation.builders.PathSelectors;
+import springfox.documentation.builders.RequestHandlerSelectors;
+import springfox.documentation.builders.RequestParameterBuilder;
 import springfox.documentation.schema.Annotations;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.ParameterType;
@@ -251,19 +255,6 @@ public class Swagger2Config implements ModelPropertyBuilderPlugin {
                 .paths(PathSelectors.any())
                 .build()
                 .globalRequestParameters(CollectionUtil.toList(parameter)).groupName("front-business");
-    }
-
-
-    @Bean
-    public Docket apiFrontScene() {
-        return new Docket(DocumentationType.SWAGGER_2)
-                .apiInfo(apiInfo())
-                .enableUrlTemplating(true)
-                .select()
-                .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.front.scene"))
-                .paths(PathSelectors.any())
-                .build()
-                .globalRequestParameters(CollectionUtil.toList(parameter)).groupName("front-scene");
     }
 
 

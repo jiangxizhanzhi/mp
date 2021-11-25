@@ -1,15 +1,20 @@
 package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
-import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
+import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneMonitorInfo;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @Description: 场景监控Service
@@ -22,23 +27,30 @@ public class SceneMonitorService {
 
     private static final String CPCLOUD_PLUGIN = "cpcloud";
 
+    @Autowired
+    private CsceneInstanceService csceneInstanceService;
+
+    @Autowired
+    private SceneElementMonitorService elementMonitorService;
+
     /**
      * CsceneInstanceBO转为SceneMonitorInfo
      *
-     * @param csceneInstanceBO
      * @return
      */
-    public SceneMonitorInfo sceneInstanceBO2SceneMonitorInfo(CsceneInstanceBO csceneInstanceBO) {
-        log.info("sceneId:{}", csceneInstanceBO.getId());
+    public SceneMonitorInfo getSceneMonitorInfo(String sceneId) {
+        log.info("sceneId:{}", sceneId);
+        var result = csceneInstanceService.getById(sceneId, null);
+        var csceneInstanceBO = result.getSource();
 
+        SceneMonitorInfo sceneMonitorInfo = new SceneMonitorInfo();
         if (Objects.isNull(csceneInstanceBO)
                 || Objects.isNull(csceneInstanceBO.getScene())
                 || Objects.isNull(csceneInstanceBO.getScene().getPlugins())
                 || Objects.isNull(csceneInstanceBO.getScene().getPlugins().get(CPCLOUD_PLUGIN))) {
-            return null;
+            return sceneMonitorInfo;
         }
 
-        SceneMonitorInfo sceneMonitorInfo = new SceneMonitorInfo();
         var scenePluginDataBO = csceneInstanceBO.getScene().getPlugins().get(CPCLOUD_PLUGIN);
 
         var pluginElements = scenePluginDataBO.getElements();
@@ -82,5 +94,37 @@ public class SceneMonitorService {
         return sceneMonitorInfo;
     }
 
+
+    /**
+     * 查询场景中所有的节点列表
+     *
+     * @param sceneId
+     * @return
+     */
+    public List<ElementMonitorBasicInfo> getAllSceneElements(String sceneId) {
+        log.info("sceneId:{}", sceneId);
+        var result = csceneInstanceService.getById(sceneId, null);
+        var csceneInstanceBO = result.getSource();
+
+        if (Objects.isNull(csceneInstanceBO)
+                || Objects.isNull(csceneInstanceBO.getScene())
+                || Objects.isNull(csceneInstanceBO.getScene().getTopology())) {
+        }
+
+        var topology = csceneInstanceBO.getScene().getTopology();
+        var topologyElements = topology.getElements();
+
+        List<String> eids = topologyElements.stream().map(SceneElementBO::getId).collect(Collectors.toList());
+
+        List<ElementMonitorBasicInfo> basicInfos = new ArrayList<>();
+        for (String eid : eids) {
+            ElementMonitorBasicInfo basicInfo = new ElementMonitorBasicInfo();
+            elementMonitorService.processTopologyElement(basicInfo, csceneInstanceBO, eid);
+            elementMonitorService.processPluginElement(basicInfo, csceneInstanceBO, eid);
+            basicInfos.add(basicInfo);
+        }
+
+        return basicInfos;
+    }
 
 }

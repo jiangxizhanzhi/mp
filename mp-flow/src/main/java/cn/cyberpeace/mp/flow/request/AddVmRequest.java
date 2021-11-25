@@ -18,8 +18,8 @@ public class AddVmRequest {
 
     private String name;
     private String image;
-    private int cpu = 4;
-    private int ram = 6144;
+    private int cpu = 2;
+    private int ram = 2048;
     private int disk = 40;
     private String requestUser;
     private String host;

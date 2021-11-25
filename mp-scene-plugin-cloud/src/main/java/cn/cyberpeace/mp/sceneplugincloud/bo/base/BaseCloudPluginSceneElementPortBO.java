@@ -16,7 +16,7 @@ import java.util.List;
 
 @Data
 public abstract class BaseCloudPluginSceneElementPortBO<M extends BaseCloudPluginSceneElementPortModel,
-        T extends BaseCloudPluginSceneElementPortBO<M, T, S>, S extends BaseSceneElementPortBO<?, S>>
+        T extends BaseCloudPluginSceneElementPortBO<M, T, S>, S extends BaseSceneElementPortBO<?, S, ?>>
         extends BasePluginSceneElementPortBO<M, T, S> {
     @ApiModelProperty(value = "云平台虚拟化资源id")
     private String resourceId;

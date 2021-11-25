@@ -3,7 +3,9 @@ package cn.cyberpeace.mp.sceneplugincollection.bo;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -55,9 +57,21 @@ public class CollectionFlowBO {
     @ApiModelProperty("时间")
     private LocalDateTime time;
 
-    @ApiModelProperty("告警等级(1:高,2:中,3:中低,4:低)")
-    private Integer severity;
+    @ApiModelProperty("本条流量包含的攻击信息")
+    private List<AttackInfo> attackInfos;
 
-    @ApiModelProperty("攻击类型")
-    private String AttackType;
+    @Setter
+    @Getter
+    public static class AttackInfo {
+        @ApiModelProperty("告警等级(1:高,2:中,3:中低,4:低)")
+        private Integer severity;
+
+        @ApiModelProperty("攻击类型")
+        private String attackType;
+
+        public AttackInfo(Integer severity, String attackType) {
+            this.severity = severity;
+            this.attackType = attackType;
+        }
+    }
 }

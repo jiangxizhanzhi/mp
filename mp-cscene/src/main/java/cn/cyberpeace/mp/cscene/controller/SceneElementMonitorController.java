@@ -2,8 +2,9 @@ package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
-import cn.cyberpeace.mp.cscene.dto.element.ElementResourceUsage;
-import cn.cyberpeace.mp.cscene.dto.event.ElementMonitorInfo;
+import cn.cyberpeace.mp.cscene.dto.common.ResourceUsage;
+import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
+import cn.cyberpeace.mp.cscene.dto.request.ResourceUsageRequest;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.SceneElementMonitorService;
 import io.swagger.annotations.Api;
@@ -35,20 +36,17 @@ public class SceneElementMonitorController {
 
     @ApiOperation(value = "查询节点监控信息")
     @GetMapping("/info")
-    public ServiceResult<ElementMonitorInfo> getSceneElementMonitorInfo(@RequestParam String sceneId, @RequestParam String elementId) {
-        log.info("sceneId:{}, elementId:{}", sceneId, elementId);
+    public ServiceResult<ElementMonitorBasicInfo> getSceneElementMonitorInfo(@RequestParam String sceneId, @RequestParam String elementId) {
+        ElementMonitorBasicInfo elementMonitorBasicInfo = sceneElementMonitorService.getElementMonitorInfo(sceneId, elementId);
 
-        var result = csceneInstanceService.getById(sceneId, null);
-        ElementMonitorInfo elementMonitorInfo = sceneElementMonitorService.sceneInstanceBO2ElementMonitorInfo(result.getSource(), elementId);
-
-        return ServiceResult.success(elementMonitorInfo);
+        return ServiceResult.success(elementMonitorBasicInfo);
     }
 
 
     @ApiOperation(value = "查询节点资源使用统计")
     @GetMapping("/resource_usage/{elementId}")
-    public ServiceResult<ElementResourceUsage> getElementResourceUsage(@PathVariable String elementId) {
-        log.info("elementId:{}", elementId);
+    public ServiceResult<ResourceUsage> getElementResourceUsage(@PathVariable String elementId, ResourceUsageRequest usageRequest) {
+        log.info("elementId:{}, usageRequest:{}", elementId, usageRequest);
 
         return null;
     }

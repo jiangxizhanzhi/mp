@@ -13,7 +13,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @ApiModel
-public class QueryParams {
+public class QueryParams implements IdsQueryParams, SearchQueryParams, OrderQueryParams, PageQueryParams,
+        FieldsQueryParams, CompatiblePageQueryParams, CompatibleOrderQueryParams {
     /** id列表 */
     @ApiModelProperty(value = "id列表")
     private String[] ids;
@@ -44,12 +45,8 @@ public class QueryParams {
     private String[] sort;
 
     public void ensure() {
-        if (perPage != null) {
-            pageSize = perPage;
-        }
-        if (sort != null && sort.length > 0) {
-            orders = sort;
-        }
+        CompatiblePageQueryParams.ensureCompatible(this);
+        CompatibleOrderQueryParams.ensureCompatible(this);
     }
 
 }
