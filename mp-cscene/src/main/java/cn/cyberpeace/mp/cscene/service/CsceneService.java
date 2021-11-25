@@ -257,7 +257,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         }
         checkSceneUsingNodeLimit(csceneId, createContext.getCscene());
 
-        var csceneHandler = new CsceneHandler(csceneId, createContext.toCsceneContext());
+        var csceneHandler = new CsceneHandler(csceneId, createContext.getContext());
         var cscene = createContext.getCscene();
         CsceneInstanceBO csceneInstance;
         if (cscene == null) {
@@ -299,7 +299,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         }
         checkSceneUsingNodeLimit(csceneId, createContext.getCscene());
 
-        var csceneHandler = new CsceneHandler(csceneId, createContext.toCsceneContext());
+        var csceneHandler = new CsceneHandler(csceneId, createContext.getContext());
         var cscene = createContext.getCscene();
         CsceneInstanceBO csceneInstance;
         if (cscene == null) {
