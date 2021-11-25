@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Data
-public abstract class BaseSceneElementBO<M extends BaseSceneElementModel, P extends BaseSceneElementPortBO<?, P>,
+public abstract class BaseSceneElementBO<M extends BaseSceneElementModel, P extends BaseSceneElementPortBO<?, P, T>,
         T extends BaseSceneElementBO<M, P, T>> extends BaseSceneNodeBO<M, T> {
     @ApiModelProperty(value = "网元类型")
     private Integer type;
@@ -73,7 +73,7 @@ public abstract class BaseSceneElementBO<M extends BaseSceneElementModel, P exte
         return super.export(pClass, ArrayUtils.addAll(ignoreFields, "ports"));
     }
 
-    public <P2 extends BaseSceneElementPortBO<?, P2>, P1 extends BaseSceneElementBO<?, P2, ?>> P1 export(
+    public <P2 extends BaseSceneElementPortBO<?, P2, P1>, P1 extends BaseSceneElementBO<?, P2, P1>> P1 export(
             Class<P1> pClass, Class<P2> portClass, SerializableFunction<T>... ignoreFieldGetters) {
         var pObj = super.exportIgnore(pClass, ignoreFieldGetters);
         if (ports != null) {

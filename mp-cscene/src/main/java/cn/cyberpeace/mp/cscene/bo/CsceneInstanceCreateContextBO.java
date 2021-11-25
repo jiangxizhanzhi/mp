@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.bo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,6 +12,7 @@ import lombok.NoArgsConstructor;
 public class CsceneInstanceCreateContextBO extends CsceneContextBO {
 
     @ApiModelProperty(value = "场景存活时间")
+    @JsonIgnore
     private Integer sceneTtl;
 
     @ApiModelProperty(value = "场景属性")

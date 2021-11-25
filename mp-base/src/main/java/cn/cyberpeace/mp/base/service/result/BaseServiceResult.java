@@ -75,7 +75,7 @@ public class BaseServiceResult<T, R> {
         ServiceCode actualServiceCode = getServiceCode();
         if (actualServiceCode != null) {
             if (actualServiceCode instanceof MessageServiceCode) {
-                return ((MessageServiceCode) actualServiceCode).generateMessage();
+                return ((MessageServiceCode) actualServiceCode).transMessage();
             } else {
                 return MessageCommon.get(actualServiceCode.getMessage());
             }
@@ -93,7 +93,7 @@ public class BaseServiceResult<T, R> {
         ServiceCode actualServiceCode = getServiceCode();
         if (actualServiceCode != null) {
             setCode(actualServiceCode.getCode());
-            setMessage(MessageServiceCode.calcMessage(actualServiceCode));
+            setMessage(actualServiceCode.transMessage());
         }
 
         return this;
