@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -68,11 +67,11 @@ public class CollectionFlowBO {
         private Integer severity;
 
         @ApiModelProperty("攻击类型")
-        private String AttackType;
+        private String attackType;
 
         public AttackInfo(Integer severity, String attackType) {
             this.severity = severity;
-            AttackType = attackType;
+            this.attackType = attackType;
         }
     }
 }
