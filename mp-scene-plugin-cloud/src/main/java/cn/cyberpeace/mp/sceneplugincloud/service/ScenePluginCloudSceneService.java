@@ -256,6 +256,15 @@ public class ScenePluginCloudSceneService {
         return new ServiceResult<>(actionRecordingBO);
     }
 
+    /**
+     * 分组查询指定字段的聚合统计数量
+     * @param sceneIds 场景id列表，不传默认为全部
+     * @param nodeIds 节点id列表，不传默认为全部
+     * @param filterIn in过滤条件 Map<字段, 字段值范围>
+     * @param groupFieldName 分组聚合字段
+     * @param <T> 分组聚合字段的值类型
+     * @return 字段的聚合统计数量 Map<字段值, 该字段值统计数量>
+     */
     public <T> ServiceResult<Map<T, Integer>> groupCountElement(List<String> sceneIds, List<String> nodeIds,
                                                                 Map<String, List<?>> filterIn, String groupFieldName) {
         if (!AVAILABLE_CLOUD_ELEMENT_GROUP_COUNT_FIELDS.contains(groupFieldName)) {
