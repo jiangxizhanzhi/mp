@@ -3,11 +3,10 @@ ip:
   fdfs: 10.100.14.252           # FastDFS地址
   cp: 10.100.7.1               # 云平台适配层接口地址
   moloch: 10.100.0.111         # moloch的IP地址
-  wazuh: 10.100.0.102          # wazuh的IP地址
+  wazuh: 10.100.7.193        # wazuh的IP地址
   es: 127.0.0.1                 # MP新中台ES地址
   trex: 10.100.7.158            # trex资源服务器地址
   rabbitmq: 10.100.0.101        # rabbitmq地址
-  flow-table: 10.100.7.50        # 云平台编辑dockerImage地址
 
 server:
   servlet:
@@ -100,7 +99,7 @@ mp:
       es-port: 9200
       es-username: admin
       es-password: admin
-      flow-table-url: http://${ip.flow-table}:9999/knapsack/probe/v1
+      flow-table-url: http://${ip.cp}:9999/knapsack/probe/v1
     wazuh-probe-manager:
       url: http://10.100.0.111:8002
       agent-script-linux-path: /var/ossec/etc/shared/scripts/

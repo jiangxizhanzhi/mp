@@ -89,6 +89,10 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     @DefaultStr
     private String quickCreateParams;
 
+    // 宿主机信息
+    @DefaultStr
+    private String host;
+
 
     public static class VirtualType {
         public static final int VIRTUAL_SWITCH = 1;

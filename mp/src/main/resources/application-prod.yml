@@ -3,7 +3,7 @@ ip:
   fdfs: ${FDFS_IP:10.100.14.252}           # FastDFS地址
   cp: ${CP_IP:10.100.7.1}                # 云平台适配层接口地址
   moloch: ${MOLOCH_IP:10.100.7.101}        # moloch的IP地址
-  wazuh: ${WAZUH_IP:10.100.0.111}          # wazuh的IP地址
+  wazuh: ${WAZUH_IP:10.100.7.193}          # wazuh的IP地址
   trex: ${TREX_IP:10.100.7.158}         # trex资源服务器地址
   rabbitmq: ${RABBITMQ_IP:10.100.0.101}           # rabbitmq地址
   log-es: ${LOG_ES_IP:10.100.0.103}        # 日志es
@@ -78,9 +78,13 @@ mp:
     hostname: controller  #主机名称
   situationaware:
     group-url: http://${SITUATION_AWARE_IP:10.100.7.112}:${SITUATION_AWARE_PORT:5079}/v1/scenes
-    moloch:
-      username: ${MOLOCH_USERNAME:api}
-      password: ${MOLOCH_PASSWORD:api}
+    arkime:
+      cpcloud-container-create-url: http://${ip.cp}:11111/v1
+      cpcloud-network-mirror-url: http://${ip.cp}:11111/knapsack/sdn_app/v1
+      es-host: 10.100.0.111
+      image-name: centos-arkime_arkime:v2
+      username: api
+      password: api
     #moloch es节点地址
     es-nodes: ${ip.moloch}:${MOLOCH_PORT:9200}
     wazuh:
