@@ -1,10 +1,9 @@
 package cn.cyberpeace.mp.sceneplugincloud.service;
 
-import cn.cyberpeace.mp.base.bo.GroupCountBO;
+import cn.cyberpeace.mp.base.common.StatCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
-import cn.cyberpeace.mp.base.repository.condition.aggregation.Count;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -12,7 +11,6 @@ import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.FloatUtils;
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
-import cn.cyberpeace.mp.base.util.define.SerializableFunction;
 import cn.cyberpeace.mp.scene.core.bo.SceneBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.SceneModel;
@@ -44,6 +42,13 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class ScenePluginCloudSceneService {
+
+    public static final List<String> AVAILABLE_CLOUD_ELEMENT_FILTER_IN_FIELDS = Arrays.asList(
+            BeanUtils.getBeanGetterFieldNames(
+                    BaseCloudPluginSceneElementModel::getHost,
+                    BaseCloudPluginSceneElementModel::getVirtualType
+            )
+    );
 
     public static final List<String> AVAILABLE_CLOUD_ELEMENT_GROUP_COUNT_FIELDS = Arrays.asList(
             BeanUtils.getBeanGetterFieldNames(
@@ -252,7 +257,7 @@ public class ScenePluginCloudSceneService {
     }
 
     public <T> ServiceResult<Map<T, Integer>> groupCountElement(List<String> sceneIds, List<String> nodeIds,
-                                                                String groupFieldName) {
+                                                                Map<String, List<?>> filterIn, String groupFieldName) {
         if (!AVAILABLE_CLOUD_ELEMENT_GROUP_COUNT_FIELDS.contains(groupFieldName)) {
             throw new MpRuntimeException(CloudErrorCode.INVALID_GROUP_COUNT_FIELD);
         }
@@ -263,28 +268,29 @@ public class ScenePluginCloudSceneService {
                         CloudPluginSceneElementModel.class, CloudPluginSceneElementModel::getScene)
                 .currentLink(SceneModel.class)
                 .filterEqual(SceneModel::getDeleted, false)
-                .currentLink(CloudPluginSceneElementModel.class)
-                .selectAs(groupFieldName, GroupCountBO<T>::getTarget)
-                .selectAs(Count.f(groupFieldName), GroupCountBO<T>::getCount)
-                .groupBy(groupFieldName);
+                .currentLink(CloudPluginSceneElementModel.class);
         if (!CollectionUtils.isEmpty(sceneIds)) {
-            condition.filterIn(BaseCloudPluginSceneElementModel::getScene, sceneIds.toArray(new String[0]));
+            condition.filterIn(CloudPluginSceneElementModel::getScene, sceneIds.toArray(new String[0]));
         }
         if (!CollectionUtils.isEmpty(nodeIds)) {
-            condition.filterIn(BaseCloudPluginSceneElementModel::getSceneElement, nodeIds.toArray(new String[0]));
+            condition.filterIn(CloudPluginSceneElementModel::getSceneElement, nodeIds.toArray(new String[0]));
+        }
+        if (filterIn != null) {
+            filterIn.forEach((fieldName, value) -> {
+                if (AVAILABLE_CLOUD_ELEMENT_FILTER_IN_FIELDS.contains(fieldName)) {
+                    condition.filterIn(fieldName, value.toArray());
+                }
+            });
         }
 
-        List<? extends GroupCountBO> groupCountBOs;
+        Map<T, Integer> result;
         try {
-            groupCountBOs = cloudPluginSceneElementMapper.list(condition, new GroupCountBO<T>().getClass());
+            result = StatCommon.groupCount(cloudPluginSceneElementMapper, condition, groupFieldName);
         } catch (Exception e) {
             log.error("Group count cloud element on field {} error: {}", groupFieldName, e);
             throw new MpRuntimeException(BaseErrorCode.ERROR, e);
         }
 
-        Map<T, Integer> result = groupCountBOs.stream()
-                .collect(Collectors.toMap(groupCountBO -> (T) groupCountBO.getTarget(),
-                        groupCountBO -> groupCountBO.getCount()));
         return new ServiceResult<>(result);
     }
 

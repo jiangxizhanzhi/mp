@@ -73,7 +73,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
 
     private int getActiveVirtualDeviceCount() {
         Map<Integer, Integer> elementCountMap = scenePluginCloudSceneService
-                .<Integer>groupCountElement(null, null,
+                .<Integer>groupCountElement(null, null, null,
                         BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getVirtualType))
                 .getSource();
         int activeVirtualDeviceCount = elementCountMap.getOrDefault(
@@ -87,7 +87,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
 
     private int getSceneConfigVirtualDeviceCount(String sceneConfigId) {
         Map<Integer, Integer> elementCountMap = scenePluginCloudSceneConfigService
-                .<Integer>groupCountElement(List.of(sceneConfigId), null,
+                .<Integer>groupCountElement(List.of(sceneConfigId), null, null,
                         BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getVirtualType))
                 .getSource();
         int virtualDeviceCount = elementCountMap.getOrDefault(
