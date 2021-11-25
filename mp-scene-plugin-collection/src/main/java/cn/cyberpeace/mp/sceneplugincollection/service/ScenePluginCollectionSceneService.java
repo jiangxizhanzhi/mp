@@ -14,8 +14,6 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
 import cn.cyberpeace.mp.situationaware.bo.FlowLogBO;
-import cn.cyberpeace.mp.situationaware.model.SessionRequest;
-import cn.cyberpeace.mp.situationaware.model.SessionResult;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
 import cn.cyberpeace.mp.situationaware.request.FlowAnalysisRequest;
@@ -27,7 +25,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -58,32 +60,13 @@ public class ScenePluginCollectionSceneService {
         return srcElements;
     }
 
-    // todo
     public ListObjServiceResult<CollectionFlowBO> listFlows(String sceneId, FlowQueryParams queryParams) {
         var sceneHandler = new SceneHandler(sceneId, null, false, null);
         List<SceneElementBO> srcElements = getSrcElements(sceneHandler, queryParams.getNodeIds());
         CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
-        Map<String, SceneElementBO> ipElementMap = new HashMap<>();
-        List<String> flowCollectIps = new ArrayList<>();
-        srcElements.forEach(srcElement -> {
-            var srcPorts = srcElement.getPorts();
-            if (srcPorts == null) {
-                return;
-            }
-            srcPorts.forEach(srcPort -> {
-                var ip = srcPort.getIp();
-                if (StringUtils.isEmpty(ip)) {
-                    return;
-                }
-                ipElementMap.put(ip, srcElement);
-                var collectionPort = pluginHandler.getPort(srcPort.getId());
-                if (collectionPort == null || !Boolean.TRUE.equals(collectionPort.getEnableFlowCollect())) {
-                    return;
-                }
-                flowCollectIps.add(ip);
-            });
-        });
-        if (flowCollectIps.isEmpty()) {
+        Map<String, SceneElementBO> macElementMap = new HashMap<>();
+        List<String> flowCollectMacs = this.loadMac2ElementBOMapAndGetEnableMac(macElementMap, srcElements, pluginHandler);
+        if (flowCollectMacs.isEmpty()) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
         FlowAnalysisRequest request = new FlowAnalysisRequest();
@@ -209,12 +192,43 @@ public class ScenePluginCollectionSceneService {
             flowBO.setTargetIp(flowLogBO.getDestination().getIp());
         }
         if (flowLogBO.getSuricata() != null) {
-            flowBO.setSeverity(flowLogBO.getSuricata().getSeverity().get(0));
-            flowBO.setAttackType(flowLogBO.getSuricata().getCategory().get(0));
+            List<String> category = flowLogBO.getSuricata().getCategory();
+            List<Integer> severity = flowLogBO.getSuricata().getSeverity();
+            if (CollectionUtils.isNotEmpty(category) && CollectionUtils.isNotEmpty(severity)) {
+                int attackInfoNum = category.size() < severity.size() ? category.size() : severity.size();
+                List<CollectionFlowBO.AttackInfo> attackInfos = new ArrayList<>();
+                flowBO.setAttackInfos(attackInfos);
+                for (int i = 0; i < attackInfoNum; i++) {
+                    attackInfos.add(new CollectionFlowBO.AttackInfo(severity.get(i), category.get(i)));
+                }
+            }
         }
         if (flowLogBO.getNetwork() != null) {
             flowBO.setSize(flowLogBO.getNetwork().getBytes());
         }
         return flowBO;
+    }
+
+    private List<String> loadMac2ElementBOMapAndGetEnableMac(Map<String, SceneElementBO> mac2ElementMap, List<SceneElementBO> srcElements, CollectionScenePluginHandler pluginHandler) {
+        List<String> enableMac = new ArrayList<>();
+        srcElements.forEach(srcElement -> {
+            var srcPorts = srcElement.getPorts();
+            if (srcPorts == null) {
+                return;
+            }
+            srcPorts.forEach(srcPort -> {
+                var macAddr = srcPort.getMacAddr();
+                if (StringUtils.isEmpty(macAddr)) {
+                    return;
+                }
+                mac2ElementMap.put(macAddr, srcElement);
+                var collectionPort = pluginHandler.getPort(srcPort.getId());
+                if (collectionPort == null || !Boolean.TRUE.equals(collectionPort.getEnableFlowCollect())) {
+                    return;
+                }
+                enableMac.add(macAddr);
+            });
+        });
+        return enableMac;
     }
 }
