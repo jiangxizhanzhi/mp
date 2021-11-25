@@ -80,7 +80,7 @@ mp:
     group-url: http://${SITUATION_AWARE_IP:10.100.7.112}:${SITUATION_AWARE_PORT:5079}/v1/scenes
     arkime:
       cpcloud-container-create-url: http://${ip.cp}:11111/v1
-      cpcloud-network-mirror-url: http://${ip.cp}:11111/knapsack/sdn_app/v1
+      cpcloud-network-mirror-url: http://${ip.cp}:11111/cpcloud/sdn_app/v1
       es-host: 10.100.0.111
       image-name: centos-arkime_arkime:v2
       username: api
