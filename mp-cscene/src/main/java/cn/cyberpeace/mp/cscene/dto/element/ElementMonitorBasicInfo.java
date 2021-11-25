@@ -34,11 +34,11 @@ public class ElementMonitorBasicInfo {
     private String imageName;
 
     @ApiModelProperty(value = "节点基本信息-物理节点")
-    private String physicalNode;
+    private String host;
 
     @ApiModelProperty(value = "节点基本信息-实例类型")
     // 对应 BaseCloudPluginSceneElementModel.VirtualType 中的枚举？
-    private Integer instanceType;
+    private Integer virtualType;
 
 
     @ApiModelProperty(value = "节点资源-CPU")

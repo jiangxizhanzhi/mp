@@ -113,10 +113,11 @@ public class SceneElementMonitorService {
         // 镜像名称
         basicInfo.setImageName(cpSceneElementBO.getImage());
 
-        // todo 物理节点 待确认
+        // 物理节点
+        basicInfo.setHost(cpSceneElementBO.getHost());
 
-        // todo 实例类型 待确认
-        basicInfo.setInstanceType(cpSceneElementBO.getVirtualType());
+        // 实例类型
+        basicInfo.setVirtualType(cpSceneElementBO.getVirtualType());
     }
 
 
