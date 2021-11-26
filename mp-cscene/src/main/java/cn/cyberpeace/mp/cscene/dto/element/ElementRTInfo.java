@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(value = "节点实时状态信息")
-public class ElementMonitorRTInfo {
+public class ElementRTInfo {
 
     @ApiModelProperty(value = "实时状态-进程")
     private int processCount;
@@ -39,6 +39,5 @@ public class ElementMonitorRTInfo {
 
     @ApiModelProperty(value = "实时状态-环境变量操作")
     private int envOpCount;
-
 
 }
