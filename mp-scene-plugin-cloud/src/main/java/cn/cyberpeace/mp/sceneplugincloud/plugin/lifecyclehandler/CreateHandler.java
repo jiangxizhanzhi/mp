@@ -149,65 +149,61 @@ public class CreateHandler extends HandlerCommon {
             return virtualNics;
         }
 
-        // TODO: 多个端口复用
         Map<String, List<CloudPluginSceneElementPortBO>> networkIdCloudPortsMap = new HashMap<>();
-        for (var port : ports) {
-            var cloudPort = getPluginHandler().getPort(port.getId());
-            var connectedSrcElement = getPluginHandler().getPortConnectedSrcElement(port.getId());
-            var connectedCloudElement = connectedSrcElement == null ? null
-                    : getPluginHandler().getElement(connectedSrcElement.getId());
-            var auxiliaryNetworkCloudElement = getHandlerUtils().confirmAuxiliaryNetworkCloudElement(
-                    cloudElement, connectedCloudElement);
+        var groupPortsMap = getCloudElementGroupPorts(cloudElement);
+        for (var groupPorts : groupPortsMap.values()) {
+            var samplePort = groupPorts.get(0);
+            var auxiliaryNetworkCloudElement = getPortAuxiliaryNetworkCloudElement(samplePort.getId());
             if (auxiliaryNetworkCloudElement == null) {
                 continue;
             }
 
-            // 没有定义的端口补全
-            if (cloudPort == null) {
-                cloudPort = new CloudPluginSceneElementPortBO();
-                addCloudPort(port.getId(), cloudPort);
-            }
             var auxiliaryNetworkId = auxiliaryNetworkCloudElement.getAuxiliaryNetworkId();
-            cloudPort.setAuxiliaryNetworkId(auxiliaryNetworkId);
-            var networkIdCloudPorts = networkIdCloudPortsMap.getOrDefault(
-                    auxiliaryNetworkId, new ArrayList<>());
-            networkIdCloudPorts.add(cloudPort);
-            networkIdCloudPortsMap.put(auxiliaryNetworkId, networkIdCloudPorts);
-            // TODO: 多个端口连到同一个网络上的时候暂时当做一个端口处理
-            if (networkIdCloudPorts.size() > 1) {
-                continue;
+            for (var srcPort : groupPorts) {
+                // 没有定义的端口补全
+                var cloudPort = getPluginHandler().getPort(srcPort.getId());
+                if (cloudPort == null) {
+                    cloudPort = new CloudPluginSceneElementPortBO();
+                    addCloudPort(srcPort.getId(), cloudPort);
+                }
+                cloudPort.setAuxiliaryNetworkId(auxiliaryNetworkId);
+                var networkIdCloudPorts = networkIdCloudPortsMap.getOrDefault(
+                        auxiliaryNetworkId, new ArrayList<>());
+                networkIdCloudPorts.add(cloudPort);
+                networkIdCloudPortsMap.put(auxiliaryNetworkId, networkIdCloudPorts);
             }
+            var sampleCloudPort = getPluginHandler().getPort(samplePort.getId());
 
             var virtualNic = new VirtualNic();
             virtualNic.setNetworkId(auxiliaryNetworkId);
-            virtualNic.setFixedIp(TextUtils.emptyNull(port.getIp()));
-            virtualNic.setMacAddress(TextUtils.emptyNull(port.getMacAddr()));
+            virtualNic.setFixedIp(TextUtils.emptyNull(samplePort.getIp()));
+            virtualNic.setMacAddress(TextUtils.emptyNull(samplePort.getMacAddr()));
 
             List<VirtualNic.QosRule> qosRules = new ArrayList<>();
-            if (port.getIngress() > 0 || port.getDelay() > 0 || port.getLoss() > 0) {
+            if (samplePort.getIngress() > 0 || samplePort.getDelay() > 0 || samplePort.getLoss() > 0) {
                 var qosRule = new VirtualNic.QosRule();
-                qosRule.setMaxKbps(port.getIngress());
+                qosRule.setMaxKbps(samplePort.getIngress());
                 qosRule.setDirection(QosRuleDirection.INGRESS);
-                qosRule.setDelayMs(port.getDelay());
-                qosRule.setLossPercent(port.getLoss());
+                qosRule.setDelayMs(samplePort.getDelay());
+                qosRule.setLossPercent(samplePort.getLoss());
                 qosRules.add(qosRule);
             }
-            if (port.getEgress() > 0 || port.getDelay() > 0 || port.getLoss() > 0) {
+            if (samplePort.getEgress() > 0 || samplePort.getDelay() > 0 || samplePort.getLoss() > 0) {
                 var qosRule = new VirtualNic.QosRule();
-                qosRule.setMaxKbps(port.getEgress());
+                qosRule.setMaxKbps(samplePort.getEgress());
                 qosRule.setDirection(QosRuleDirection.EGRESS);
-                qosRule.setDelayMs(port.getDelay());
-                qosRule.setLossPercent(port.getLoss());
+                qosRule.setDelayMs(samplePort.getDelay());
+                qosRule.setLossPercent(samplePort.getLoss());
                 qosRules.add(qosRule);
             }
             virtualNic.setQosRules(CollectionUtils.emptyNull(qosRules));
             if (!getHandlerUtils().isExternalNetwork(auxiliaryNetworkId)) {
-                virtualNic.setEnableExternal(cloudPort.getNat());
+                virtualNic.setEnableExternal(sampleCloudPort.getNat());
             }
 
             virtualNic.setFirewallId(null);
 
-            var accessModes = cloudPort.getAccessModes();
+            var accessModes = sampleCloudPort.getAccessModes();
             if (accessModes != null && !accessModes.isEmpty()) {
                 virtualNic.setAccessModes(accessModes.stream().map(accessMode -> {
                     var accessModeParam = new VirtualNic.AccessMode();
@@ -338,7 +334,7 @@ public class CreateHandler extends HandlerCommon {
                 return;
             }
 
-            // TODO: 多个端口连到同一个网络上的时候暂时当做一个端口处理
+            // 多个端口连到同一个网络上的时候暂时当做一个端口处理
             cloudPorts.forEach(cloudPort -> {
                 var srcPort = cloudPort.getSrcPort();
                 srcPort.setIp(virtualNic.getFixedIp());
