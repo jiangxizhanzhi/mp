@@ -17,6 +17,8 @@ public abstract class BaseSceneElementPortConnectionBO<M extends BaseSceneElemen
     private String name;
     @ApiModelProperty(value = "是否单向连接")
     private Boolean unidirectional;
+    @ApiModelProperty(value = "显示参数")
+    private String displayContext;
 
     @Override
     public void fromModel(M obj, String... ignoreFields) {
