@@ -214,10 +214,6 @@ public class InitiateHandler extends HandlerCommon {
         List<SceneElementPortBO> selfPorts = new ArrayList<>();
         String selfPortIp = null;
         for (var auxiliaryNetworkSrcPort : auxiliaryNetworkSrcPorts) {
-            var connectedOpaqueSrcPort = getHandlerUtils().getPortConnectedOpaqueSrcPort(auxiliaryNetworkSrcPort.getId());
-            if (connectedOpaqueSrcPort == null) {
-                continue;
-            }
             var portAuxiliaryNetworkCloudElement = getPortAuxiliaryNetworkCloudElement(auxiliaryNetworkSrcPort.getId());
             if (!auxiliaryNetworkCloudElement.equals(portAuxiliaryNetworkCloudElement)) {
                 continue;
@@ -231,23 +227,27 @@ public class InitiateHandler extends HandlerCommon {
                     selfPortIp = selfIp;
                 }
             }
-            var connectedIp = connectedOpaqueSrcPort.getIp();
-            if (!StringUtils.isEmpty(connectedIp)) {
-                existIps.add(connectedIp);
-            }
 
-            var connectedOpaqueSrcElement = connectedOpaqueSrcPort.getElement();
-            var connectedOpaqueCloudElement = getPluginHandler().getElement(connectedOpaqueSrcElement.getId());
-            Integer connectedVirtualType = connectedOpaqueCloudElement.getVirtualType();
-            // 判断连接的端口是否需要ip
-            if (StringUtils.isEmpty(connectedIp)) {
-                if (connectedVirtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
-                    // 连接到默认路由
-                    defaultRouterRequireCount++;
-                } else if (connectedVirtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)
-                        || connectedVirtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
-                    // 连接到虚拟机、容器
-                    requireCount++;
+            var connectedOpaqueSrcPort = getHandlerUtils().getPortConnectedOpaqueSrcPort(auxiliaryNetworkSrcPort.getId());
+            if (connectedOpaqueSrcPort != null) {
+                var connectedIp = connectedOpaqueSrcPort.getIp();
+                if (!StringUtils.isEmpty(connectedIp)) {
+                    existIps.add(connectedIp);
+                }
+
+                var connectedOpaqueSrcElement = connectedOpaqueSrcPort.getElement();
+                var connectedOpaqueCloudElement = getPluginHandler().getElement(connectedOpaqueSrcElement.getId());
+                Integer connectedVirtualType = connectedOpaqueCloudElement.getVirtualType();
+                // 判断连接的端口是否需要ip
+                if (StringUtils.isEmpty(connectedIp)) {
+                    if (connectedVirtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
+                        // 连接到默认路由
+                        defaultRouterRequireCount++;
+                    } else if (connectedVirtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)
+                            || connectedVirtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
+                        // 连接到虚拟机、容器
+                        requireCount++;
+                    }
                 }
             }
         }
