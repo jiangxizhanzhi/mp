@@ -190,9 +190,8 @@ public class NetworkTrafficGroupService {
         paramObject.put("privileged", true);
 
         try {
-            log.info("create arkime Image instance param {}", paramObject.toJSONString());
+            log.info("create arkime Image instance param {}",paramObject.toJSONString());
             var result = HttpUtils.sendPost(url, paramObject.toJSONString());
-            log.info("create arkime instance result:{}", result);
         } catch (IOException e) {
             log.error("create arkime Image instance error");
             log.error(SituationalAwareErrorCode.ARKIME_ADD_ERROR.getMessage(), ExceptionUtils.getStackTrace(e));
@@ -212,8 +211,29 @@ public class NetworkTrafficGroupService {
         paramObject.put("src_container", networkTrafficMirrorRequest.getVmInstanceIds());
         paramObject.put("dst_node", networkTrafficMirrorRequest.getArkimeInstanceNames());
         try {
-            String result = HttpUtils.sendPost(url, paramObject.toJSONString());
-            log.info("binding network traffic mirror result:{}", result);
+            String res = HttpUtils.sendPost(url, paramObject.toJSONString());
+            log.info("dobind Network traffic mirror message {}", res);
+        } catch (IOException e) {
+            log.error("binding mirror error param:{}", networkTrafficMirrorRequest);
+            throw new MpRuntimeException(SituationalAwareErrorCode.BINDING_MIRROR_ERROR, ExceptionUtils.getStackTrace(e));
+        }
+    }
+
+
+    /**
+     * 接触场景绑定流量镜像
+     * @param networkTrafficMirrorRequest
+     */
+    public void deleteNetworkTrafficMirror(NetworkTrafficMirrorRequest networkTrafficMirrorRequest) {
+        String url = mirrorUrl + "/openflow/mirror";
+        var paramObject = new JSONObject();
+
+        paramObject.put("src_vm", networkTrafficMirrorRequest.getVmInstanceIds());
+        paramObject.put("src_container", networkTrafficMirrorRequest.getVmInstanceIds());
+        paramObject.put("dst_node", networkTrafficMirrorRequest.getArkimeInstanceNames());
+        try {
+            String res  = HttpUtils.sendDelete(url, paramObject.toJSONString());
+            log.info("delete Network traffic mirror message {}", res);
         } catch (IOException e) {
             log.error("binding mirror error param:{}", networkTrafficMirrorRequest);
             throw new MpRuntimeException(SituationalAwareErrorCode.BINDING_MIRROR_ERROR, ExceptionUtils.getStackTrace(e));
