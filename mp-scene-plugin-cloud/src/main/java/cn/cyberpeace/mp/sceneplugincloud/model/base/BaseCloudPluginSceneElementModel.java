@@ -82,6 +82,10 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     private String imageType;
     @DefaultInt
     private Integer category;
+    @DefaultInt
+    private Integer category2;
+    @DefaultInt
+    private Integer category3;
     @DefaultBool
     private Boolean initSupport;
     @DefaultBool

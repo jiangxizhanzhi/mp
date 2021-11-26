@@ -190,8 +190,9 @@ public class NetworkTrafficGroupService {
         paramObject.put("privileged", true);
 
         try {
-            log.info("create arkime Image instance param {}",paramObject.toJSONString());
+            log.info("create arkime Image instance param {}", paramObject.toJSONString());
             var result = HttpUtils.sendPost(url, paramObject.toJSONString());
+            log.info("create arkime instance result:{}", result);
         } catch (IOException e) {
             log.error("create arkime Image instance error");
             log.error(SituationalAwareErrorCode.ARKIME_ADD_ERROR.getMessage(), ExceptionUtils.getStackTrace(e));
@@ -211,7 +212,8 @@ public class NetworkTrafficGroupService {
         paramObject.put("src_container", networkTrafficMirrorRequest.getVmInstanceIds());
         paramObject.put("dst_node", networkTrafficMirrorRequest.getArkimeInstanceNames());
         try {
-            HttpUtils.sendPost(url, paramObject.toJSONString());
+            String result = HttpUtils.sendPost(url, paramObject.toJSONString());
+            log.info("binding network traffic mirror result:{}", result);
         } catch (IOException e) {
             log.error("binding mirror error param:{}", networkTrafficMirrorRequest);
             throw new MpRuntimeException(SituationalAwareErrorCode.BINDING_MIRROR_ERROR, ExceptionUtils.getStackTrace(e));

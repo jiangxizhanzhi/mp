@@ -84,6 +84,10 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     private String imageType;
     @ApiModelProperty(value = "靶标分类")
     private Integer category;
+    @ApiModelProperty(value = "靶标二级分类")
+    private Integer category2;
+    @ApiModelProperty(value = "靶标三级分类")
+    private Integer category3;
     @ApiModelProperty(value = "是否支持初始化")
     private Boolean initSupport;
     @ApiModelProperty(value = "是否支持快速创建")
