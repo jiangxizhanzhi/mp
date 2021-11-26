@@ -49,10 +49,12 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
         var srcElement = getPluginHandler().getSrcPort(portId).getElement();
         var cloudElement = getPluginHandler().getElement(srcElement.getId());
         var connectedOpaqueSrcElement = getHandlerUtils().getPortConnectedOpaqueSrcElement(portId);
-        var connectedCloudElement = getPluginHandler().getElement(connectedOpaqueSrcElement.getId());
+        var connectedCloudElement = connectedOpaqueSrcElement != null ? getPluginHandler().getElement(connectedOpaqueSrcElement.getId()) : null;
         var auxiliaryNetworkCloudElement = getHandlerUtils().confirmAuxiliaryNetworkCloudElement(cloudElement, connectedCloudElement);
         portIdAuxiliaryNetworkCloudElementMap.put(portId, auxiliaryNetworkCloudElement);
-        portIdAuxiliaryNetworkCloudElementMap.put(connectedOpaqueSrcElement.getId(), auxiliaryNetworkCloudElement);
+        if (connectedOpaqueSrcElement != null) {
+            portIdAuxiliaryNetworkCloudElementMap.put(connectedOpaqueSrcElement.getId(), auxiliaryNetworkCloudElement);
+        }
         return auxiliaryNetworkCloudElement;
     }
 
