@@ -48,7 +48,9 @@ public class SceneHandlerUtils {
         var taskId = flow.getTaskId();
         if (!StringUtils.isEmpty(taskId)) {
             try {
-                flowExecutor.startFlow(taskId);
+                flowExecutor.startFlow(taskId, () -> {
+                    successOffFLow(flow);
+                });
             } catch (Exception e) {
                 errorFLow(flow, e.getMessage());
                 return false;
@@ -111,8 +113,7 @@ public class SceneHandlerUtils {
         }
 
         flow.setTaskId(taskId);
-        successOnFLow(flow);
-        return true;
+        return startFlow(flowElement, flow);
     }
 
     public boolean stopFlow(Flow flow) {

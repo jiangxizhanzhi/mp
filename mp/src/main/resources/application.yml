@@ -120,6 +120,8 @@ mp:
     trex-image: tgn-1102
   sceneplugincloud:
     cpcloud-server: http://${ip.cp}:11111
+  sceneplugincollection:
+    wazuh-server-host: ${ip.wazuh}
 
 management:
   endpoints:

@@ -511,6 +511,7 @@ public class CreateHandler extends HandlerCommon {
         createData.setNetworks(CollectionUtils.emptyNull(genVirutalNics(cloudElement)));
         var virtualMachine = vmClient.create(createData);
         cloudElement.setResourceId(virtualMachine.getId());
+        cloudElement.setHost(virtualMachine.getHost());
 
         receiveVirtualPortInfo(cloudElement, virtualMachine.getNetworks());
 
@@ -532,6 +533,7 @@ public class CreateHandler extends HandlerCommon {
         createData.setNetworks(CollectionUtils.emptyNull(genVirutalNics(cloudElement)));
         var container = containerClient.create(createData);
         cloudElement.setResourceId(container.getId());
+        cloudElement.setHost(container.getHost());
 
         receiveVirtualPortInfo(cloudElement, container.getNetworks());
 

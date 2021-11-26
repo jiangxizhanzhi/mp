@@ -38,6 +38,14 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     private Integer opticalPortNumber;
     @ApiModelProperty(value = "光口类型")
     private String opticalPortType;
+    @ApiModelProperty(value = "wan口数量")
+    private Integer wanPortNumber;
+    @ApiModelProperty(value = "wan口类型")
+    private String wanPortType;
+    @ApiModelProperty(value = "lan口数量")
+    private Integer lanPortNumber;
+    @ApiModelProperty(value = "lan口类型")
+    private String lanPortType;
 
     // 虚拟交换机属性
     @ApiModelProperty(value = "虚拟交换机cidr地址段")
@@ -123,6 +131,9 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     @ApiModelProperty(value = "管理网卡mac地址", hidden = true)
     @JsonIgnore
     private String mgmtMacAddr;
+
+    @ApiModelProperty(value = "宿主机名称")
+    private String host;
 
     @Override
     public void fromModel(M obj, String... ignoreFields) {

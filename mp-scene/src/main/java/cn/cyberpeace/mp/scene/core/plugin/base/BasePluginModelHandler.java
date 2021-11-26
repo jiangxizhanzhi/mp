@@ -52,7 +52,7 @@ import java.util.List;
 public class BasePluginModelHandler<
         S9 extends BaseSceneBO<?, S9>,
         E9 extends BaseSceneElementBO<?, P9, E9>,
-        P9 extends BaseSceneElementPortBO<?, P9>,
+        P9 extends BaseSceneElementPortBO<?, P9, E9>,
         S0 extends BasePluginSceneModel,
         E0 extends BasePluginSceneElementModel,
         P0 extends BasePluginSceneElementPortModel,

@@ -9,7 +9,7 @@ import org.apache.commons.lang3.ArrayUtils;
 
 @Data
 public abstract class BasePluginSceneElementPortBO<M extends BasePluginSceneElementPortModel,
-        T extends BasePluginSceneElementPortBO<M, T, S>, S extends BaseSceneElementPortBO<?, S>> extends ModelBO<M, T> {
+        T extends BasePluginSceneElementPortBO<M, T, S>, S extends BaseSceneElementPortBO<?, S, ?>> extends ModelBO<M, T> {
     @JsonIgnore
     private S srcPort;
 
