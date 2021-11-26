@@ -300,7 +300,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         }
 
         if (StringUtils.isNotBlank(request.getSourceIp())) {
-            boolQueryBuilder.must(QueryBuilders.termQuery("source.ip.keyword", request.getSourceIp()));
+            boolQueryBuilder.must(QueryBuilders.termQuery("source.ip", request.getSourceIp()));
         }
 
         if (StringUtils.isNotBlank(request.getSourcePort())) {
@@ -308,11 +308,11 @@ public class FlowAnalysisService extends AbstractBaseService {
         }
 
         if (StringUtils.isNotBlank(request.getSourceMac())) {
-            boolQueryBuilder.must(QueryBuilders.termQuery("source.mac.keyword", request.getSourceMac()));
+            boolQueryBuilder.must(QueryBuilders.termQuery("source.mac", request.getSourceMac()));
         }
 
         if (StringUtils.isNotBlank(request.getDestinationIp())) {
-            boolQueryBuilder.must(QueryBuilders.termQuery("destination.ip.keyword", request.getDestinationIp()));
+            boolQueryBuilder.must(QueryBuilders.termQuery("destination.ip", request.getDestinationIp()));
         }
 
         if (StringUtils.isNotBlank(request.getDestinationPort())) {
