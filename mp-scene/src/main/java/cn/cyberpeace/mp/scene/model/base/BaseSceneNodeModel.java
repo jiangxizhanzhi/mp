@@ -25,4 +25,6 @@ public class BaseSceneNodeModel extends BaseModel {
     private String name;
     @DefaultStr
     private String description;
+    @DefaultStr
+    private String displayContext;
 }

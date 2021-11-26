@@ -23,6 +23,8 @@ public abstract class BaseSceneNodeBO<M extends BaseSceneNodeModel, T extends Ba
     private String name;
     @ApiModelProperty(value = "描述")
     private String description;
+    @ApiModelProperty(value = "显示参数")
+    private String displayContext;
 
     @Override
     public void fromModel(M obj, String... ignoreFields) {
