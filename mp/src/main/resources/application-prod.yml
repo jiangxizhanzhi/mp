@@ -1,6 +1,6 @@
 ip:
   mariadb: ${MP_DB_IP:10.100.0.101}         # MP新中台mariadb数据库地址
-  fdfs: ${FDFS_IP:10.100.14.252}           # FastDFS地址
+  fdfs: ${FDFS_IP:10.100.1.26}           # FastDFS地址
   cp: ${CP_IP:10.100.7.1}                # 云平台适配层接口地址
   moloch: ${MOLOCH_IP:10.100.7.101}        # moloch的IP地址
   wazuh: ${WAZUH_IP:10.100.7.193}          # wazuh的IP地址
@@ -80,7 +80,7 @@ mp:
     group-url: http://${SITUATION_AWARE_IP:10.100.7.112}:${SITUATION_AWARE_PORT:5079}/v1/scenes
     arkime:
       cpcloud-container-create-url: http://${ip.cp}:11111/v1
-      cpcloud-network-mirror-url: http://${ip.cp}:11111/knapsack/sdn_app/v1
+      cpcloud-network-mirror-url: http://${ip.cp}:11111/cpcloud/sdn_app/v1
       es-host: 10.100.0.111
       image-name: centos-arkime_arkime:v2
       username: api
@@ -117,6 +117,8 @@ mp:
     trex-image: ${TREX_IMAGE:tgn-1102}
   sceneplugincloud:
     cpcloud-server: http://${ip.cp}:${CP_PORT:11111}
+  sceneplugincollection:
+    wazuh-server-host: ${ip.wazuh}
 
 management:
   endpoints:

@@ -22,7 +22,7 @@ import cn.cyberpeace.mp.scene.model.base.BaseSceneElementPortConnectionModel;
 public abstract class BasePluginCommonHandler<
         S9 extends BaseSceneBO<?, S9>,
         E9 extends BaseSceneElementBO<?, P9, E9>,
-        P9 extends BaseSceneElementPortBO<?, P9>,
+        P9 extends BaseSceneElementPortBO<?, P9, E9>,
         S extends BasePluginSceneBO<?, S, S9>,
         E extends BasePluginSceneElementBO<?, E, E9>,
         P extends BasePluginSceneElementPortBO<?, P, P9>,

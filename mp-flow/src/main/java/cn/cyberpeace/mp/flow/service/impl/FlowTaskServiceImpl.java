@@ -551,6 +551,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
      * @return
      */
     public ServiceResult<Boolean> actuator(String flowTaskId, int taskAction, Runnable call) {
+        log.info("=========== Start actuator flow:[{}] ===============", flowTaskId);
         // 流量任务存在校验
         ObjResult<FlowTaskModel> flowTaskResult = get(flowTaskId).getSource();
         if (Objects.isNull(flowTaskResult)) {
@@ -561,8 +562,10 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
 
         // 判断调用哪个流量执行器
         if (FlowPlatformEnum.TREX.toValue() == flowTaskModel.getFlowPlatform()) {
+            log.info("=========== Actuator trex flow end ===============");
             return this.actuatorTrex(flowTaskModel, taskAction, call);
         } else {
+            log.info("=========== Actuator other flow end ===============");
             return ServiceResult.fail(FlowErrorCode.NO_ACTUATOR_TO_USE);
         }
     }

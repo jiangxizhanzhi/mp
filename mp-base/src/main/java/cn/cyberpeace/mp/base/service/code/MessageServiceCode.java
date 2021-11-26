@@ -21,19 +21,12 @@ public class MessageServiceCode implements ServiceCode {
         return serviceCode.getInnerCode();
     }
 
-    public String generateMessage() {
+    @Override
+    public String transMessage() {
         if (params == null || params.length == 0) {
             return MessageCommon.get(getMessage());
         } else {
             return MessageCommon.get(getMessage(), params);
-        }
-    }
-
-    public static String calcMessage(ServiceCode serviceCode) {
-        if (serviceCode instanceof MessageServiceCode) {
-            return ((MessageServiceCode) serviceCode).generateMessage();
-        } else {
-            return MessageCommon.get(serviceCode.getMessage());
         }
     }
 

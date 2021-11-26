@@ -5,7 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 @Data
-public class CsceneInstanceDeleteRequest {
+public class CsceneInstancesActionRequest {
     @ApiModelProperty(value = "id列表")
     private String[] ids;
     @ApiModelProperty(value = "场景上下文")
