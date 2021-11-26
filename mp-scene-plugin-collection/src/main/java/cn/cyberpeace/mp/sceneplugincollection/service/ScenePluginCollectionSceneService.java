@@ -204,7 +204,6 @@ public class ScenePluginCollectionSceneService {
                     }
                 }
             }
-            mac2ElementMap.get(flowBO.getSourceMac());
         }
         if (flowLogBO.getDestination() != null) {
             flowBO.setTargetIp(flowLogBO.getDestination().getIp());
