@@ -96,4 +96,12 @@ public class NetworkTrafficGroupServiceTest {
         networkTrafficMirrorRequest.setArkimeInstanceNames(Lists.newArrayList("mp_1637131359990"));
         networkTrafficGroupService.doBindingNetworkTrafficMirror(networkTrafficMirrorRequest);
     }
+
+    @Test
+    public void testDeleteNetworkTrafficMirror() {
+        NetworkTrafficMirrorRequest networkTrafficMirrorRequest = new NetworkTrafficMirrorRequest();
+        networkTrafficMirrorRequest.setVmInstanceIds(Lists.newArrayList("a42454fb-e1cf-4375-847c-84ca8d027c69"));
+        networkTrafficMirrorRequest.setArkimeInstanceNames(Lists.newArrayList("mp_1637131359990"));
+        networkTrafficGroupService.deleteNetworkTrafficMirror(networkTrafficMirrorRequest);
+    }
 }
