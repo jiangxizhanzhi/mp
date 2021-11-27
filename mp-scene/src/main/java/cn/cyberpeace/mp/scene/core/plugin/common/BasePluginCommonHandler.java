@@ -10,6 +10,10 @@ import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneBO;
 import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementBO;
 import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementPortBO;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementPortConnectionModel;
+import org.apache.commons.collections4.CollectionUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 基础的场景插件处理类, 基于通用bo处理
@@ -46,6 +50,25 @@ public abstract class BasePluginCommonHandler<
             var srcPort = getSrcPort(portId);
             port.setSrcPort(srcPort);
         });
+    }
+
+    public List<P> getPorts(E pluginElement) {
+        return getPorts(pluginElement.getSrcElement());
+    }
+
+    public List<P> getPorts(E9 srcElement) {
+        var srcPorts = srcElement.getPorts();
+        List<P> pluginPorts = new ArrayList<>();
+        if (srcPorts == null) {
+            return pluginPorts;
+        }
+        srcPorts.forEach(srcPort -> {
+            var pluginPort = getPort(srcPort.getId());
+            if (pluginPort != null) {
+                pluginPorts.add(pluginPort);
+            }
+        });
+        return pluginPorts;
     }
 
     @Override

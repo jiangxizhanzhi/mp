@@ -14,6 +14,8 @@ public class BaseCloudPluginSceneElementPortModel extends BasePluginSceneElement
 
     @DefaultBool
     private Boolean nat;
+    @DefaultStr
+    private String firewallRules;
 
     // 靶标属性
     @DefaultStr
