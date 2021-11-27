@@ -33,7 +33,9 @@ public class DataCollectionFlowTableService{
         var param = new JSONObject();
         param.put("instance_ids", agentInstanceIds);
         try {
-            HttpUtils.sendPost(createUrl, param.toJSONString());
+            log.info("create data collection flow request params:{}", param.toJSONString());
+            String result = HttpUtils.sendPost(createUrl, param.toJSONString());
+            log.info("create data collection flow result:{}", result);
         } catch (IOException e) {
             log.info("create flow table error ,instance id {}", agentInstanceIds);
             throw new MpRuntimeException(SituationalAwareErrorCode.ADD_FLOWTABLE_ERROR, ExceptionUtils.getStackTrace(e));
