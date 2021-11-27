@@ -234,17 +234,6 @@ public class ImagesConverterImpl implements ImagesConverter {
             imageMapper.delete(dto);
             imageAuthMapper.deleteByTargets(request.getImageIds());
         }
-
-        //同时释放镜像机器
-        List<TargetModel> targetModelList = imageMapper.findByUuids(request.getImageIds());
-        if (CollectionUtils.isNotEmpty(targetModelList)) {
-            for (TargetModel targetModel : targetModelList) {
-                ImagesDeleteInstanceRequest imagesDeleteInstanceRequest = new ImagesDeleteInstanceRequest();
-                imagesDeleteInstanceRequest.setUuid(targetModel.getUuid());
-                imagesDeleteInstanceRequest.setImageType(targetModel.getImageType());
-                this.delete(imagesDeleteInstanceRequest);
-            }
-        }
         return result;
     }
 
