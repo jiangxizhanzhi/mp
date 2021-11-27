@@ -95,15 +95,10 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
      * 检查接入方式可用性
      */
     public void checkAccessModes(CloudPluginSceneElementBO cloudElement) {
-        var srcPorts = cloudElement.getSrcElement().getPorts();
-        if (srcPorts == null) {
-            return;
-        }
-
+        var cloudPorts = getPluginHandler().getPorts(cloudElement);
         // 同样ip、端口可能对应多个接入方式
         Map<String, List<CloudAccessMode>> ipAccessModesMap = new HashMap<>();
-        srcPorts.forEach(srcPort -> {
-            var cloudPort = getPluginHandler().getPort(srcPort.getId());
+        cloudPorts.forEach(cloudPort -> {
             var accessModes = cloudPort.getAccessModes();
             if (accessModes == null) {
                 return;
@@ -156,14 +151,9 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
      * 关闭接入方式可用性
      */
     public void closeAccessModes(CloudPluginSceneElementBO cloudElement) {
-        var srcPorts = cloudElement.getSrcElement().getPorts();
-        if (srcPorts == null) {
-            return;
-        }
-
+        var cloudPorts = getPluginHandler().getPorts(cloudElement);
         var closeFlag = false;
-        for (var srcPort : srcPorts) {
-            var cloudPort = getPluginHandler().getPort(srcPort.getId());
+        for (var cloudPort : cloudPorts) {
             var accessModes = cloudPort.getAccessModes();
             if (accessModes == null) {
                 return;

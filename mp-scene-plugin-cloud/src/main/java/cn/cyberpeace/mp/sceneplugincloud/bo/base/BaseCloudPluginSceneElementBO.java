@@ -28,6 +28,8 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
 
     @ApiModelProperty(value = "云平台虚拟化资源id")
     private String resourceId;
+    @ApiModelProperty(value = "云平台三层防火墙资源id")
+    private String firewallResourceId;
 
     // 虚拟交换机/路由/防火墙属性
     @ApiModelProperty(value = "电口数量")

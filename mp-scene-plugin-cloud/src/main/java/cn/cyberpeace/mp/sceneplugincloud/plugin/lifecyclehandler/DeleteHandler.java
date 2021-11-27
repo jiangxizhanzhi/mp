@@ -74,13 +74,8 @@ public class DeleteHandler extends HandlerCommon {
         Set<String> connectionIds = new HashSet<>();
         Set<String> proxyIds = new HashSet<>();
         Set<String> floatingIpIds = new HashSet<>();
-        var srcPorts = cloudElement.getSrcElement().getPorts();
-        srcPorts.forEach(srcPort -> {
-            var cloudPort = getPluginHandler().getPort(srcPort.getId());
-            if (cloudPort == null) {
-                return;
-            }
-
+        var cloudPorts = getPluginHandler().getPorts(cloudElement);
+        cloudPorts.forEach(cloudPort -> {
             var qosId = cloudPort.getQosId();
             if (!StringUtils.isEmpty(qosId)) {
                 qosIds.add(qosId);
@@ -122,15 +117,27 @@ public class DeleteHandler extends HandlerCommon {
         return vsClient.delete(deleteData);
     }
 
-    protected boolean deleteVirtualRouter(CloudPluginSceneElementBO cloudElement) {
-        var resourceId = cloudElement.getResourceId();
-        if (StringUtils.isEmpty(resourceId)) {
+    private boolean deleteVirtualRouterFirewall(CloudPluginSceneElementBO cloudElement) {
+        var firewallResourceId = cloudElement.getFirewallResourceId();
+        if (StringUtils.isEmpty(firewallResourceId)) {
             return true;
         }
 
-        var deleteData = new VirtualRouterDeleteData();
-        deleteData.setIds(List.of(resourceId));
-        return vrClient.delete(deleteData);
+        var deleteData = new VirtualFirewallDeleteData();
+        deleteData.setIds(List.of(firewallResourceId));
+        return vfClient.delete(deleteData);
+    }
+
+    protected boolean deleteVirtualRouter(CloudPluginSceneElementBO cloudElement) {
+        var flag = true;
+        var resourceId = cloudElement.getResourceId();
+        if (!StringUtils.isEmpty(resourceId)) {
+            var deleteData = new VirtualRouterDeleteData();
+            deleteData.setIds(List.of(resourceId));
+            flag = vrClient.delete(deleteData);
+        }
+        flag = flag && deleteVirtualRouterFirewall(cloudElement);
+        return flag;
     }
 
     protected boolean deleteVirtualFirewall(CloudPluginSceneElementBO cloudElement) {
