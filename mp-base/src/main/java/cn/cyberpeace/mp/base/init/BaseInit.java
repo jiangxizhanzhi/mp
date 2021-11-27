@@ -2,11 +2,13 @@ package cn.cyberpeace.mp.base.init;
 
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.hutool.core.io.FileUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 public class BaseInit implements ApplicationRunner {
 
@@ -15,8 +17,12 @@ public class BaseInit implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        FileUtil.mkdir(baseAppConfig.getHomeDir());
-        FileUtil.mkdir(baseAppConfig.getResourcesDir());
+        var homeDir = baseAppConfig.getHomeDir();
+        var resourcesDir = baseAppConfig.getResourcesDir();
+        FileUtil.mkdir(homeDir);
+        FileUtil.mkdir(resourcesDir);
+        log.info("Home dir: {}", homeDir);
+        log.info("Resource dir: {}", resourcesDir);
     }
 
 }
