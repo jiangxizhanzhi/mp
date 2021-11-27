@@ -106,15 +106,27 @@ public class DeleteHandler extends HandlerCommon {
     }
 
     private boolean deleteAuxiliaryNetwork(CloudPluginSceneElementBO cloudElement) {
+        var flag = true;
         var resourceId = cloudElement.getAuxiliaryNetworkId();
+        if (!StringUtils.isEmpty(resourceId)) {
+            var deleteData = new VirtualSwitchDeleteData();
+            deleteData.setEntityNetwork(cloudElement.getAuxiliaryNetworkVlan());
+            deleteData.setIds(List.of(resourceId));
+            flag = vsClient.delete(deleteData);
+        }
+
+        flag = flag && deleteAuxiliaryNetworkRouter(cloudElement);
+        return flag;
+    }
+
+    private boolean deleteAuxiliaryNetworkRouter(CloudPluginSceneElementBO cloudElement) {
+        var resourceId = cloudElement.getAuxiliaryNetworkRouterResourceId();
         if (StringUtils.isEmpty(resourceId)) {
             return true;
         }
-
-        var deleteData = new VirtualSwitchDeleteData();
-        deleteData.setEntityNetwork(cloudElement.getAuxiliaryNetworkVlan());
+        var deleteData = new VirtualRouterDeleteData();
         deleteData.setIds(List.of(resourceId));
-        return vsClient.delete(deleteData);
+        return vrClient.delete(deleteData);
     }
 
     private boolean deleteVirtualRouterFirewall(CloudPluginSceneElementBO cloudElement) {

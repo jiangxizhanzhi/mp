@@ -130,6 +130,29 @@ public class CreateHandler extends HandlerCommon {
         createData.setSubnet(subnet);
         var virtualSwitch = vsClient.create(createData);
         cloudElement.setAuxiliaryNetworkId(virtualSwitch.getId());
+
+        createAuxiliaryNetworkRouter(cloudElement);
+    }
+
+    private void createAuxiliaryNetworkRouter(CloudPluginSceneElementBO cloudElement) {
+        if (!Boolean.TRUE.equals(cloudElement.getAuxiliaryNetworkRouterOn())) {
+            return;
+        }
+
+        // 创建辅助路由
+        var createData = new VirtualRouterCreateData();
+        createData.setName(genResourceName(cloudElement.getSrcElement().getEid()));
+        var virtualNic = new VirtualNic();
+        virtualNic.setNetworkId(cloudElement.getAuxiliaryNetworkId());
+        createData.setNetworks(List.of(virtualNic));
+        var virtualRouter = vrClient.create(createData);
+        cloudElement.setAuxiliaryNetworkRouterResourceId(virtualRouter.getId());
+        var routerVirtualNics = virtualRouter.getNetworks();
+        if (routerVirtualNics != null) {
+            routerVirtualNics.forEach(routerVirtualNic -> {
+                cloudElement.setAuxiliaryNetworkRouterIp(routerVirtualNic.getFixedIp());
+            });
+        }
     }
 
     private List<VirtualNic> genVirutalNics(CloudPluginSceneElementBO cloudElement) {

@@ -167,6 +167,9 @@ public class InitiateHandler extends HandlerCommon {
             cloudElement.setAuxiliaryNetworkCidr(allocateCidrs(1).get(0));
         }
 
+
+        var connectedOpaqueSrcElements = getHandlerUtils().getEleConnectedOpaqueSrcElements(cloudElement.getSrcElement().getId());
+
         // 是否vlan模式(是否连接了实体节点)
         var vlan = false;
         Integer virtualType = cloudElement.getVirtualType();
@@ -175,8 +178,7 @@ public class InitiateHandler extends HandlerCommon {
             vlan = true;
         } else {
             // 连接节点有实体节点
-            var connectedSrcElements = getPluginHandler().getElementConnectedSrcElements(cloudElement.getSrcElement().getId());
-            for (var connectedSrcElement : connectedSrcElements) {
+            for (var connectedSrcElement : connectedOpaqueSrcElements) {
                 var connectedCloudElement = getPluginHandler().getElement(connectedSrcElement.getId());
                 Integer connectedVirtualType = connectedCloudElement == null ? null : connectedCloudElement.getVirtualType();
                 if (connectedVirtualType != null
@@ -187,6 +189,24 @@ public class InitiateHandler extends HandlerCommon {
             }
         }
         cloudElement.setAuxiliaryNetworkVlan(vlan);
+
+        // 是否开启辅助路由(是否未连接默认路由)
+        var routerOn = true;
+        if (virtualType != null && virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
+            // 本节点是默认路由
+            routerOn = false;
+        } else {
+            for (var connectedSrcElement : connectedOpaqueSrcElements) {
+                var connectedCloudElement = getPluginHandler().getElement(connectedSrcElement.getId());
+                Integer connectedVirtualType = connectedCloudElement == null ? null : connectedCloudElement.getVirtualType();
+                if (connectedVirtualType != null
+                        && connectedVirtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
+                    routerOn = false;
+                    break;
+                }
+            }
+        }
+        cloudElement.setAuxiliaryNetworkRouterOn(routerOn);
     }
 
     /**
@@ -269,6 +289,11 @@ public class InitiateHandler extends HandlerCommon {
             }
         }
 
+        // 辅助网络对辅助路由分配一个ip
+        if (Boolean.TRUE.equals(auxiliaryNetworkCloudElement.getAuxiliaryNetworkRouterOn())) {
+            defaultRouterRequireCount++;
+        }
+
         // 分配默认路由地址
         List<String> defaultRouterIpPool = IpUtils.allocateDefaultRouterIps(cidr, defaultRouterRequireCount,
                 new ArrayList<>(existIps),
@@ -276,6 +301,10 @@ public class InitiateHandler extends HandlerCommon {
         // 选择最后一个地址设置为初始默认网关
         if (!defaultRouterIpPool.isEmpty() && StringUtils.isEmpty(auxiliaryNetworkCloudElement.getAuxiliaryNetworkGateway())) {
             auxiliaryNetworkCloudElement.setAuxiliaryNetworkGateway(defaultRouterIpPool.get(defaultRouterIpPool.size() - 1));
+        }
+        // 辅助网络辅助路由选择第一个作为默认地址
+        if (Boolean.TRUE.equals(auxiliaryNetworkCloudElement.getAuxiliaryNetworkRouterOn())) {
+            auxiliaryNetworkCloudElement.setAuxiliaryNetworkRouterIp(defaultRouterIpPool.remove(0));
         }
 
         // 分配普通地址

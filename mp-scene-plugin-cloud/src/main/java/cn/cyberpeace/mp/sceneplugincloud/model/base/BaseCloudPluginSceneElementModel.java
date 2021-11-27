@@ -27,7 +27,7 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     @DefaultStr
     private String resourceId;
     /**
-     * 云平台三层防火墙对应防火墙资源id
+     * 三层防火墙对应防火墙资源id
      */
     @DefaultStr
     private String firewallResourceId;
@@ -188,6 +188,15 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     private Boolean auxiliaryNetworkVlan;
     @DefaultInt
     private Integer auxiliaryNetworkVlanId;
+    /**
+     * 辅助网络辅助路由，ovs流表需要网络必须有默认路由
+     */
+    @DefaultBool
+    private Boolean auxiliaryNetworkRouterOn;
+    @DefaultStr
+    private String auxiliaryNetworkRouterResourceId;
+    @DefaultStr
+    private String auxiliaryNetworkRouterIp;
 
     // 用于管理网卡
     @DefaultBool

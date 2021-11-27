@@ -124,6 +124,15 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     @ApiModelProperty(value = "辅助网络vlanId", hidden = true)
     @JsonIgnore
     private Integer auxiliaryNetworkVlanId;
+    @ApiModelProperty(value = "是否开启辅助网络辅助路由", hidden = true)
+    @JsonIgnore
+    private Boolean auxiliaryNetworkRouterOn;
+    @ApiModelProperty(value = "辅助网络辅助路由id", hidden = true)
+    @JsonIgnore
+    private String auxiliaryNetworkRouterResourceId;
+    @ApiModelProperty(value = "辅助网络辅助路由ip", hidden = true)
+    @JsonIgnore
+    private String auxiliaryNetworkRouterIp;
 
     @ApiModelProperty(value = "是否开启管理网卡", hidden = true)
     @JsonIgnore

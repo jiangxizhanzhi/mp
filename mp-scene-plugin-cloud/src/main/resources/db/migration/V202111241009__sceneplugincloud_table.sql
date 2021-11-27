@@ -5,6 +5,9 @@ ALTER TABLE mp_sceneplugincloud_scene_config_element ADD COLUMN `lan_port_type` 
 ALTER TABLE mp_sceneplugincloud_scene_config_element ADD COLUMN `host`  varchar(64) NOT NULL default '' COMMENT '宿主机名称';
 ALTER TABLE mp_sceneplugincloud_scene_config_element ADD COLUMN `category2` int(10) NOT NULL COMMENT '二级分类';
 ALTER TABLE mp_sceneplugincloud_scene_config_element ADD COLUMN `category3` int(10) NOT NULL COMMENT '三级分类';
+ALTER TABLE mp_sceneplugincloud_scene_config_element ADD COLUMN `auxiliary_network_router_on` tinyint(1) NOT NULL COMMENT '是否开启辅助网络辅助路由';
+ALTER TABLE mp_sceneplugincloud_scene_config_element ADD COLUMN `auxiliary_network_router_resource_id` varchar(64) NOT NULL COMMENT '辅助网络辅助路由id';
+ALTER TABLE mp_sceneplugincloud_scene_config_element ADD COLUMN `auxiliary_network_router_ip` varchar(32) NOT NULL COMMENT '辅助网络辅助路由ip';
 ALTER TABLE mp_sceneplugincloud_scene_config_element ADD COLUMN `firewall_resource_id` varchar(64) NOT NULL COMMENT '虚拟防火墙资源id';
 ALTER TABLE mp_sceneplugincloud_scene_config_element MODIFY COLUMN `firewall_rules` varchar(2048) NOT NULL COMMENT '虚拟防火墙规则';
 ALTER TABLE mp_sceneplugincloud_scene_config_element_port ADD COLUMN `firewall_rules` varchar(2048) NOT NULL COMMENT '虚拟防火墙规则';
@@ -16,6 +19,9 @@ ALTER TABLE mp_sceneplugincloud_scene_element ADD COLUMN `lan_port_type`   varch
 ALTER TABLE mp_sceneplugincloud_scene_element ADD COLUMN `host`  varchar(64) NOT NULL default '' COMMENT '宿主机名称';
 ALTER TABLE mp_sceneplugincloud_scene_element ADD COLUMN `category2` int(10) NOT NULL COMMENT '二级分类';
 ALTER TABLE mp_sceneplugincloud_scene_element ADD COLUMN `category3` int(10) NOT NULL COMMENT '三级分类';
+ALTER TABLE mp_sceneplugincloud_scene_element ADD COLUMN `auxiliary_network_router_on` tinyint(1) NOT NULL COMMENT '是否开启辅助网络辅助路由';
+ALTER TABLE mp_sceneplugincloud_scene_element ADD COLUMN `auxiliary_network_router_resource_id` varchar(64) NOT NULL COMMENT '辅助网络辅助路由id';
+ALTER TABLE mp_sceneplugincloud_scene_element ADD COLUMN `auxiliary_network_router_ip` varchar(32) NOT NULL COMMENT '辅助网络辅助路由ip';
 ALTER TABLE mp_sceneplugincloud_scene_element ADD COLUMN `firewall_resource_id` varchar(64) NOT NULL COMMENT '虚拟防火墙资源id';
 ALTER TABLE mp_sceneplugincloud_scene_element MODIFY COLUMN `firewall_rules` varchar(2048) NOT NULL COMMENT '虚拟防火墙规则';
 ALTER TABLE mp_sceneplugincloud_scene_element_port ADD COLUMN `firewall_rules` varchar(2048) NOT NULL COMMENT '虚拟防火墙规则';
