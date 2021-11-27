@@ -363,6 +363,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     public boolean resetSelfPwd(String oldPwd, String newPwd) {
+        log.info("resetSelfPwd...");
         var currentUser = UserUtils.getLoginUser();
         Assert.notNull(currentUser, AuthConstant.ERROR_CODE_PREFIX + "account_not_login");
 
@@ -376,14 +377,14 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         // 检查新密码强度是否合法
         Assert.isFalse(PasswordUtils.isPasswordStrengthLowLevel(newPwd), AuthConstant.ERROR_CODE_PREFIX + "password_strength_invalid");
 
-        UserModel userUpdate = UserModel.builder().password(newPwd).build();
-        userUpdate.setId(currentUser.getId());
+        UserModel userUpdate = UserModel.builder().id(currentUser.getId()).password(newPwd).initCheck(UserModel.INT_CHECK_NO).build();
         update(userUpdate);
         return true;
     }
 
     @Override
     public boolean resetPwd(String userId, String newPwd) {
+        log.info("resetPwd userId:{}", userId);
         // 密码是否合法
         Assert.isFalse(PasswordUtils.isPasswordStrengthLowLevel(newPwd), AuthConstant.ERROR_CODE_PREFIX + "password_strength_invalid");
 
@@ -391,7 +392,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         UserModel user = Objects.isNull(source) ? null : source.getObj();
         Assert.notNull(user, AuthConstant.ERROR_CODE_PREFIX + "account_not_existed");
 
-        UserModel userUpdate = UserModel.builder().id(user.getId()).password(newPwd).build();
+        UserModel userUpdate = UserModel.builder().id(user.getId()).password(newPwd).initCheck(UserModel.INT_CHECK_NO).build();
         update(userUpdate);
         return true;
     }
