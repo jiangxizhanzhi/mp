@@ -1,14 +1,17 @@
 package cn.cyberpeace.mp.flow.response;
 
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
+import cn.cyberpeace.mp.flow.model.FlowScriptParamModel;
 import cn.hutool.core.date.DateUtil;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -46,7 +49,13 @@ public class AttackFlowResponse extends FlowInfoResponse {
     @ApiModelProperty(value = "攻击脚本运行参数")
     private String runCmd;
 
-    public AttackFlowResponse(FlowInfoModel flowInfoModel, String prefixUrl) {
+    /**
+     * 攻击脚本参数列表
+     */
+    @ApiModelProperty(value = "攻击脚本运行参数")
+    private List<FlowScriptParamModel> scriptParamModels;
+
+    public AttackFlowResponse(FlowInfoModel flowInfoModel, String prefixUrl, List<FlowScriptParamModel> scriptParamModels) {
         setResourceId(flowInfoModel.getId());
         setTitle(flowInfoModel.getTitle());
         setIntroduction(flowInfoModel.getFlowDesc());
@@ -62,6 +71,10 @@ public class AttackFlowResponse extends FlowInfoResponse {
             setSuffix(filePath.endsWith(".py") ? 0 : 1);
         }
         setRunCmd(flowInfoModel.getRunCmd());
+
+        if (CollectionUtils.isNotEmpty(scriptParamModels)) {
+            setScriptParamModels(scriptParamModels);
+        }
     }
 
 }

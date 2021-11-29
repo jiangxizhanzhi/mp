@@ -2,6 +2,8 @@ package cn.cyberpeace.mp.devops.cluster.converter.impl;
 
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.DeviceService;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.RealEquipmentService;
 import cn.cyberpeace.mp.devops.cluster.converter.RealEquipmentConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.RealEquipment;
 import cn.cyberpeace.mp.devops.cluster.converter.model.RealEquipmentConvertModel;
@@ -18,9 +20,7 @@ import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentRequest;
-import cn.cyberpeace.mp.devops.cluster.service.DeviceService;
 import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
-import cn.cyberpeace.mp.devops.cluster.service.RealEquipmentService;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
