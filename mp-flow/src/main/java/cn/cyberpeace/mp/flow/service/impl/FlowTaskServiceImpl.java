@@ -18,15 +18,13 @@ import cn.cyberpeace.mp.flow.enums.FlowPlatformEnum;
 import cn.cyberpeace.mp.flow.enums.ResourceTypeEnum;
 import cn.cyberpeace.mp.flow.enums.TaskActionEnum;
 import cn.cyberpeace.mp.flow.enums.TaskStatusEnum;
-import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
-import cn.cyberpeace.mp.flow.model.FlowInfoModel;
-import cn.cyberpeace.mp.flow.model.FlowPortModel;
-import cn.cyberpeace.mp.flow.model.FlowTaskModel;
+import cn.cyberpeace.mp.flow.model.*;
 import cn.cyberpeace.mp.flow.repository.FlowTaskMapper;
 import cn.cyberpeace.mp.flow.request.*;
 import cn.cyberpeace.mp.flow.request.queryparam.FlowInfoQueryParams;
 import cn.cyberpeace.mp.flow.service.FlowInfoService;
 import cn.cyberpeace.mp.flow.service.FlowPortService;
+import cn.cyberpeace.mp.flow.service.FlowScriptParamService;
 import cn.cyberpeace.mp.flow.service.FlowTaskService;
 import cn.cyberpeace.mp.flow.service.field.FlowTaskFields;
 import cn.cyberpeace.mp.flow.util.CommonUtil;
@@ -43,6 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -79,6 +78,9 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
 
     @Autowired
     private FlowPortService flowPortService;
+
+    @Autowired
+    private FlowScriptParamService flowScriptParamService;
 
     public FlowTaskServiceImpl(FlowTaskMapper stuMapper, FlowTaskFields stuFields) {
         setModelFields(stuFields);
@@ -194,7 +196,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
             FlowInfoModel flowInfoModel = flowInfoObjResult.asResult();
 
             if (FlowPlatformEnum.TREX.toValue() == flowTaskModel.getFlowPlatform()) {
-                if (this.uploadFlowInfo(flowInfoModel, flowTaskModel)) {
+                if (this.uploadFlowInfo(flowInfoModel, flowTaskModel, request)) {
                     create(flowTaskModel);
 
                     // 异步新增流量发生平台流量任务
@@ -219,9 +221,10 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
      *
      * @param flowInfoModel
      * @param flowTaskModel
+     * @param addFlowTaskRequest
      * @return
      */
-    private boolean uploadFlowInfo(FlowInfoModel flowInfoModel, FlowTaskModel flowTaskModel) {
+    private boolean uploadFlowInfo(FlowInfoModel flowInfoModel, FlowTaskModel flowTaskModel, AddFlowTaskRequest addFlowTaskRequest) {
         if (Objects.isNull(flowInfoModel) || Objects.isNull(flowTaskModel)) {
             return false;
         }
@@ -268,6 +271,8 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
             } else {
                 // 获取script流量脚本
                 byte[] fileByte = fastDFSClient.download(flowInfoModel.getScriptFile(), FdfsGroupEnum.DEFAULT.name());
+                // 获取替换脚本参数后的脚本内容
+                String code = replaceCode(fileByte, flowInfoModel.getId(), addFlowTaskRequest);
 
                 AddScriptsRequest scriptsRequest = new AddScriptsRequest();
                 // 流量执行平台名称不能重复，名称后加上时间戳
@@ -291,7 +296,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                 object.put("fileName", flowName);
 
                 // 先向流量发生平台新增资源文件
-                String scriptRsp = HttpUtils.postFile(actuatorResourceUrl + "/scripts", fileByte, "run_image_script",
+                String scriptRsp = HttpUtils.postFile(actuatorResourceUrl + "/scripts", code.getBytes(StandardCharsets.UTF_8), "run_image_script",
                         object);
                 JSONObject scriptObj = JSONObject.parseObject(scriptRsp);
                 log.info("add script file response:{}", scriptObj.toJSONString());
@@ -311,6 +316,34 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
         }
 
         return isSuccess;
+    }
+
+    /**
+     * 脚本内容替换
+     * @param fileByte
+     * @param flowId
+     * @param addFlowTaskRequest
+     * @return
+     */
+    private String replaceCode(byte[] fileByte, String flowId, AddFlowTaskRequest addFlowTaskRequest) {
+        String code = new String(fileByte, StandardCharsets.UTF_8);
+        List<FlowScriptParamModel> replaceScriptParamModels;
+        if (Objects.nonNull(addFlowTaskRequest) && CollectionUtils.isNotEmpty(addFlowTaskRequest.getScriptParamModels())) {
+            // 有传脚本参数过来，直接用传过来的去替换脚本内容
+            replaceScriptParamModels = addFlowTaskRequest.getScriptParamModels();
+        } else {
+            // 没有传脚本参数，直接查询默认脚本参数
+            replaceScriptParamModels = flowScriptParamService.selectByFlowId(flowId);
+        }
+
+        if (CollectionUtils.isNotEmpty(replaceScriptParamModels)) {
+            // 根据脚本key替换脚本参数值
+            for (FlowScriptParamModel replaceScriptParamModel : replaceScriptParamModels) {
+                code = code.replace("$" + replaceScriptParamModel.getParamKey(), replaceScriptParamModel.getParamValue());
+            }
+        }
+
+        return code;
     }
 
     /**
@@ -350,7 +383,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                             flowInfoService.get(flowTaskModel.getFlowId()).getSource();
                     if (Objects.nonNull(newFlowInfoResult)) {
                         FlowInfoModel newFlowInfoModel = newFlowInfoResult.asResult();
-                        if (!this.uploadFlowInfo(newFlowInfoModel, flowTaskModel)) {
+                        if (!this.uploadFlowInfo(newFlowInfoModel, flowTaskModel, request)) {
                             return ServiceResult.fail(FlowErrorCode.UPDATE_TASK_ERROR);
                         }
                     } else {
@@ -366,7 +399,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                 ObjResult<FlowInfoModel> newFlowInfoResult = flowInfoService.get(flowTaskModel.getFlowId()).getSource();
                 if (Objects.nonNull(newFlowInfoResult)) {
                     FlowInfoModel newFlowInfoModel = newFlowInfoResult.asResult();
-                    if (!this.uploadFlowInfo(newFlowInfoModel, flowTaskModel)) {
+                    if (!this.uploadFlowInfo(newFlowInfoModel, flowTaskModel, request)) {
                         return ServiceResult.fail(FlowErrorCode.UPDATE_TASK_ERROR);
                     }
                 } else {

@@ -1,13 +1,16 @@
 package cn.cyberpeace.mp.flow.response;
 
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
+import cn.cyberpeace.mp.flow.model.FlowScriptParamModel;
 import cn.hutool.core.date.DateUtil;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -59,7 +62,13 @@ public class FlowInfoResponse {
     @ApiModelProperty(value = "交互类型：0 背景流量，1 攻击流量，2 全流量")
     private Integer interactiveType;
 
-    public FlowInfoResponse(FlowInfoModel flowInfoModel) {
+    /**
+     * 攻击脚本参数列表
+     */
+    @ApiModelProperty(value = "攻击脚本运行参数")
+    private List<FlowScriptParamModel> scriptParamModels;
+
+    public FlowInfoResponse(FlowInfoModel flowInfoModel, List<FlowScriptParamModel> scriptParamModels) {
         setResourceId(flowInfoModel.getId());
         setTitle(flowInfoModel.getTitle());
         setIntroduction(flowInfoModel.getFlowDesc());
@@ -68,6 +77,10 @@ public class FlowInfoResponse {
             setCreateTime(DateUtil.format(flowInfoModel.getCreateTime(), "yyyy-MM-dd HH:mm:ss"));
         }
         setInteractiveType(flowInfoModel.getInteractiveType());
+
+        if (CollectionUtils.isNotEmpty(scriptParamModels)) {
+            setScriptParamModels(scriptParamModels);
+        }
     }
 
 }
