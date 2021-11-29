@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.request.ResourceUsageRequest;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.SceneElementMonitorService;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +17,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * @Description:
@@ -49,6 +52,16 @@ public class SceneElementMonitorController {
         log.info("elementId:{}, usageRequest:{}", elementId, usageRequest);
 
         return null;
+    }
+
+
+    @ApiOperation(value = "查询节点资源使用统计")
+    @GetMapping("/host_states")
+    public ServiceResult getElementHostStates(ResourceUsageRequest usageRequest) {
+        log.info("usageRequest:{}", usageRequest);
+        List<CollectionHostStateBO> hostStateBOS = sceneElementMonitorService.getHostStates(usageRequest.getSceneId(), usageRequest.getElementIds());
+
+        return ServiceResult.success(hostStateBOS);
     }
 
 }

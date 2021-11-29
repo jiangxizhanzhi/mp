@@ -2,7 +2,8 @@ package cn.cyberpeace.mp.cscene.dto.request;
 
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * @Description: 资源使用请求体
@@ -12,10 +13,9 @@ import java.time.LocalDateTime;
 @Data
 public class ResourceUsageRequest {
 
-    private LocalDateTime startTime;
+    @NotNull
+    private String sceneId;
 
-    private LocalDateTime endTime;
-
-    private Integer segmentCount;
+    private List<String> elementIds;
 
 }
