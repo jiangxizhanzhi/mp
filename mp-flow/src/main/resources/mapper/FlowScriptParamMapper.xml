@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.cyberpeace.mp.flow.repository.FlowScriptParamMapper">
+    <select id="selectByFlowId" resultType="cn.cyberpeace.mp.flow.model.FlowScriptParamModel">
+        select p.* from mp_flow_script_param p
+        <where>
+            p.flow_id = #{flowId}
+        </where>
+    </select>
+
+    <select id="selectByFlowIds" resultType="cn.cyberpeace.mp.flow.model.FlowScriptParamModel">
+        select p.* from mp_flow_script_param p
+        <where>
+            1 = 1
+            <if test="flowIds != null and flowIds.size() > 0">
+                AND p.flow_id in
+                <foreach item="id" index="index" collection="flowIds" open="(" separator="," close=")">
+                    #{id}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <select id="deleteByFlowId">
+        delete from mp_flow_script_param where flow_id = #{flowId}
+    </select>
+
+    <select id="deleteByFlowIds">
+        delete from mp_flow_script_param
+        where flow_id in
+        <foreach item="id" index="index" collection="flowIds" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+</mapper>
