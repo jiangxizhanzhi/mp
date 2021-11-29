@@ -10,7 +10,7 @@ import java.util.function.Function;
  * 约定：子类通过静态方法f载入聚合字段
  */
 @Data
-public abstract class Aggregation {
+public abstract class Aggregation<T extends Aggregation<T>> {
 
     private String fieldName;
 
@@ -20,9 +20,28 @@ public abstract class Aggregation {
         return column -> String.format("case when %s = %s then 1 else null end", column, value.toString());
     }
 
-    public Aggregation calcEqual(Object value) {
-        this.calc = genCalcEqual(value);
-        return this;
+    public static Function<String, String> genCalcEmptyNull() {
+        return column -> String.format("case when %s <> '' then %s else null end", column, column);
+    }
+
+    public T addCalc(Function<String, String> calc) {
+        var rawCalc = this.calc;
+        if (rawCalc == null) {
+            this.calc = calc;
+        } else {
+            this.calc = column -> calc.apply(rawCalc.apply(column));
+        }
+        return (T) this;
+    }
+
+    public T calcEqual(Object value) {
+        this.addCalc(genCalcEqual(value));
+        return (T) this;
+    }
+
+    public T calcEmptyNull() {
+        this.addCalc(genCalcEmptyNull());
+        return (T) this;
     }
 
     /** 聚合函数sql名称 */

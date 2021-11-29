@@ -5,14 +5,14 @@ import cn.cyberpeace.mp.base.util.define.SerializableFunction;
 
 import java.util.function.Function;
 
-public class Count extends Aggregation {
+public class Count extends Aggregation<Count> {
 
     public static Function<String, String> genDistinct() {
-        return column -> String.format("distinct %s", column);
+        return column -> String.format("distinct (%s)", column);
     }
 
-    public Aggregation distinct() {
-        setCalc(genDistinct());
+    public Count distinct() {
+        addCalc(genDistinct());
         return this;
     }
 

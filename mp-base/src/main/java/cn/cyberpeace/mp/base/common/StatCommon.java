@@ -80,9 +80,9 @@ public class StatCommon {
      * @return 字段的聚合count数量 Map<字段名, 该字段值统计数量>
      */
     public static Map<String, Long> count(BaseModelMapper<?> mapper, HumanCondition condition,
-                                             List<String> fieldNames) {
+                                          List<String> fieldNames) {
         for (var fieldName : fieldNames) {
-            condition.selectAs(Count.f(fieldName).distinct(), fieldName);
+            condition.selectAs(Count.f(fieldName).calcEmptyNull().distinct(), fieldName);
         }
         var countResultList = mapper.originList(condition);
         if (countResultList.isEmpty()) {
@@ -104,7 +104,7 @@ public class StatCommon {
      * @return 字段的聚合sum数量 Map<字段名, 该字段值统计数量>
      */
     public static Map<String, Long> sum(BaseModelMapper<?> mapper, HumanCondition condition,
-                                           List<String> fieldNames) {
+                                        List<String> fieldNames) {
         for (var fieldName : fieldNames) {
             condition.selectAs(Sum.f(fieldName), fieldName);
         }
