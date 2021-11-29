@@ -30,7 +30,6 @@ import oshi.util.ExecutingCommand;
 import java.io.File;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -99,7 +98,7 @@ public class SysActivationService {
      */
     public ActivationResponse status() {
 
-        /*if (Objects.isNull(ACTIVATION_CONTENT)) {
+        if (Objects.isNull(ACTIVATION_CONTENT)) {
             ActivationResponse activationResponse = parseContentFromDecrpytedFile();
             log.info("{}", activationResponse);
             ACTIVATION_CONTENT = activationResponse;
@@ -112,20 +111,8 @@ public class SysActivationService {
             } else {
                 ACTIVATION_CONTENT.setIsActived(0);
             }
-        }*/
+        }
 
-
-        ActivationResponse response = new ActivationResponse();
-        response.setIsActived(1);
-        response.setExpiredDate("2021-10-28");
-        ActivationItem item = new ActivationItem();
-        item.setKey("LCS-RES-CR-ACTIVENODES");
-        item.setName("最大并发启动场景节点数");
-        item.setValue("100");
-        List<ActivationItem> items = new ArrayList<>();
-        items.add(item);
-        response.setItems(items);
-        ACTIVATION_CONTENT = response;
         log.info("{}", ACTIVATION_CONTENT);
         return ACTIVATION_CONTENT;
     }
