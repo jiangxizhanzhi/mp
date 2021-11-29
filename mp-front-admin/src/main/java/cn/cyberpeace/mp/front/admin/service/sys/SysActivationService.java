@@ -117,8 +117,8 @@ public class SysActivationService {
 
     public String getValueByKey(String key) {
         ActivationResponse activationResponse = status();
-        if (!Objects.equals("1,", activationResponse.getIsActived())) {
-            throw new MpRuntimeException("未激活！");
+        if (!Objects.equals("1", activationResponse.getIsActived())) {
+            throw new MpRuntimeException("系统未激活！");
         }
 
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
