@@ -40,7 +40,7 @@ public class ElementMonitorBasicInfo {
     private Integer virtualType;
 
     @ApiModelProperty(value = "节点资源配置信息")
-    private ElementResource elementResource;
+    private HostState hostState;
 
 
 }
