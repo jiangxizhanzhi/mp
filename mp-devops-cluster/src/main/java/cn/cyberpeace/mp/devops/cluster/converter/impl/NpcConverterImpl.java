@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.converter.impl;
 
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.NpcService;
 import cn.cyberpeace.mp.devops.cluster.converter.NpcConverter;
-import cn.cyberpeace.mp.devops.cluster.service.NpcService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
