@@ -76,10 +76,13 @@ public class CreateHandler extends HandlerCommon {
             if (srcRules != null) {
                 srcRules.forEach(srcRule -> {
                     var direction = srcRule.getDirection();
-                    var rule = new VirtualFirewallCreateData.Rule(srcRule.getSourceIpAddress(),
-                            srcRule.getDestinationIpAddress(), srcRule.getSourcePort(),
-                            srcRule.getDestinationPort(), null, srcRule.getProtocol(),
-                            srcRule.getAction());
+                    var rule = new VirtualFirewallCreateData.Rule();
+                    rule.setSourceIpAddress(srcRule.getSourceIpAddress());
+                    rule.setDestinationIpAddress(srcRule.getDestinationIpAddress());
+                    rule.setSourcePort(srcRule.getSourcePort());
+                    rule.setDestinationPort(srcRule.getDestinationPort());
+                    rule.setProtocol(srcRule.getProtocol());
+                    rule.setAction(srcRule.getAction());
                     if (FirewallRuleDirection.INGRESS.equals(direction)) {
                         ingressRules.add(rule);
                     } else if (FirewallRuleDirection.EGRESS.equals(direction)) {

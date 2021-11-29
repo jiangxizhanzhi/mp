@@ -29,5 +29,7 @@ public class VirtualFirewallCreateData implements CloudHttpData {
         private Integer ipVersion;
         private String protocol;
         private String action;
+
+        private String name;
     }
 }
