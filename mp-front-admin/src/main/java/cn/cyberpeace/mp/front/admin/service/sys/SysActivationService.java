@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.front.admin.service.sys;
 
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.front.admin.config.ActivationConfig;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationItem;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationModuleItem;
@@ -8,7 +10,6 @@ import cn.cyberpeace.mp.front.admin.dto.activation.ActivationResourceItem;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationResponse;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationVerifyInfo;
 import cn.cyberpeace.mp.front.admin.util.EncryptUtils;
-import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Assert;
@@ -26,10 +27,13 @@ import org.springframework.stereotype.Service;
 import oshi.util.ExecutingCommand;
 
 import java.io.File;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * @Description: 系统激活相关service
@@ -111,9 +115,32 @@ public class SysActivationService {
         return ACTIVATION_CONTENT;
     }
 
+    public String getValueByKey(String key) {
+        ActivationResponse activationResponse = status();
+        if (!Objects.equals("1", activationResponse.getIsActived())) {
+            throw new MpRuntimeException("系统未激活！");
+        }
+
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDateTime expiredDate = LocalDateTime.parse(activationResponse.getExpiredDate(), dtf);
+        LocalDateTime now = LocalDateTime.now();
+        if (now.isAfter(expiredDate)) {
+            throw new MpRuntimeException("激活文件已经过期！");
+        }
+
+        List<ActivationItem> items = activationResponse.getItems();
+        Optional<ActivationItem> itemOptional = items.stream().filter(i -> i.getKey().equals(key)).findFirst();
+        if (!itemOptional.isPresent()) {
+            throw new MpRuntimeException("不存在该项配置！" + key);
+        }
+
+        return itemOptional.get().getValue();
+    }
+
 
     /**
      * 查询系统UUID
+     *
      * @return
      */
     public String querySysUUID() {

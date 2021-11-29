@@ -79,16 +79,8 @@ public class ScenePluginCloudSceneService {
                 return;
             }
 
-            var srcElement = cloudElement.getSrcElement();
-            var srcPorts = srcElement.getPorts();
-            if (srcPorts == null) {
-                return;
-            }
-            srcPorts.forEach(srcPort -> {
-                var cloudPort = pluginHandler.getPort(srcPort.getId());
-                if (cloudPort == null) {
-                    return;
-                }
+            var cloudPorts = pluginHandler.getPorts(cloudElement);
+            cloudPorts.forEach(cloudPort -> {
                 var accessModes = cloudPort.getAccessModes();
                 if (accessModes == null) {
                     return;

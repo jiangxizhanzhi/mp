@@ -91,8 +91,6 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
 
     int totalUserCnt();
 
-    void initDefaultAvatar(UserModel userModel);
-
     boolean isAdmin(String userId);
 
 }
