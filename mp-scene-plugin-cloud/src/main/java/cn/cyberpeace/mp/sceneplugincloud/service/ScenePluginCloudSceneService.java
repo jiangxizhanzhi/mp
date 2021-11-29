@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
 public class ScenePluginCloudSceneService {
 
     public static final List<String> COUNT_PORT_FIELDS = Arrays.asList(
-            BeanUtils.getBeanGetterFieldNames(CloudPluginSceneElementPortModel::getFloatingIp)
+            BeanUtils.getBeanGetterFieldNames(CloudPluginSceneElementPortModel::getFloatingIp, CloudPluginSceneElementPortModel::getAuxiliaryNetworkId)
     );
 
     private CloudPluginSceneElementMapper cloudPluginSceneElementMapper;
@@ -337,6 +337,8 @@ public class ScenePluginCloudSceneService {
                         SceneElementModel.class, SceneElementModel::getScene)
                 .filterLink(SceneModel.class, SceneModel::getId,
                         SceneElementPortModel.class, SceneElementPortModel::getScene)
+                .filterLink(SceneModel.class, SceneModel::getId,
+                        CloudPluginSceneElementPortModel.class, CloudPluginSceneElementPortModel::getScene)
                 .filterLink(SceneElementModel.class, SceneElementModel::getId,
                         SceneElementPortModel.class, SceneElementPortModel::getSceneElement)
                 .filterLink(SceneElementPortModel.class, SceneElementPortModel::getPortId,
@@ -353,12 +355,6 @@ public class ScenePluginCloudSceneService {
         }
 
         condition.currentLink(CloudPluginSceneElementPortModel.class);
-        fieldNames.forEach(fieldName -> {
-            if (fieldName.equals(BeanUtils.getBeanGetterFieldName(CloudPluginSceneElementPortModel::getFloatingIp))) {
-                condition.filterNotEqual(fieldName, StringUtils.EMPTY);
-            }
-        });
-
         Map<String, Long> result;
         try {
             result = StatCommon.count(cloudPluginSceneElementPortMapper, condition, fieldNames);
