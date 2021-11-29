@@ -130,13 +130,22 @@ public class DeleteHandler extends HandlerCommon {
     }
 
     private boolean deleteVirtualRouterFirewall(CloudPluginSceneElementBO cloudElement) {
-        var firewallResourceId = cloudElement.getFirewallResourceId();
-        if (StringUtils.isEmpty(firewallResourceId)) {
+        Set<String> firewallResourceIds = new HashSet<>();
+        if (!StringUtils.isEmpty(cloudElement.getFirewallResourceId())) {
+            firewallResourceIds.add(cloudElement.getFirewallResourceId());
+        }
+        getPluginHandler().getPorts(cloudElement).forEach(cloudPort -> {
+            if (!StringUtils.isEmpty(cloudPort.getFirewallResourceId())) {
+                firewallResourceIds.add(cloudPort.getFirewallResourceId());
+            }
+        });
+
+        if (firewallResourceIds.isEmpty()) {
             return true;
         }
 
         var deleteData = new VirtualFirewallDeleteData();
-        deleteData.setIds(List.of(firewallResourceId));
+        deleteData.setIds(new ArrayList<>(firewallResourceIds));
         return vfClient.delete(deleteData);
     }
 
