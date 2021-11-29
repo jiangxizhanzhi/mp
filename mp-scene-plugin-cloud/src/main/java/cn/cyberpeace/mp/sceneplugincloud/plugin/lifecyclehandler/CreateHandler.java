@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.scene.util.CommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.FirewallRule;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.FirewallRuleDirection;
 import cn.cyberpeace.mp.sceneplugincloud.constant.QosRuleDirection;
@@ -33,10 +34,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.Create
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -132,6 +130,29 @@ public class CreateHandler extends HandlerCommon {
         createData.setSubnet(subnet);
         var virtualSwitch = vsClient.create(createData);
         cloudElement.setAuxiliaryNetworkId(virtualSwitch.getId());
+
+        createAuxiliaryNetworkRouter(cloudElement);
+    }
+
+    private void createAuxiliaryNetworkRouter(CloudPluginSceneElementBO cloudElement) {
+        if (!Boolean.TRUE.equals(cloudElement.getAuxiliaryNetworkRouterOn())) {
+            return;
+        }
+
+        // 创建辅助路由
+        var createData = new VirtualRouterCreateData();
+        createData.setName(genResourceName(cloudElement.getSrcElement().getEid()));
+        var virtualNic = new VirtualNic();
+        virtualNic.setNetworkId(cloudElement.getAuxiliaryNetworkId());
+        createData.setNetworks(List.of(virtualNic));
+        var virtualRouter = vrClient.create(createData);
+        cloudElement.setAuxiliaryNetworkRouterResourceId(virtualRouter.getId());
+        var routerVirtualNics = virtualRouter.getNetworks();
+        if (routerVirtualNics != null) {
+            routerVirtualNics.forEach(routerVirtualNic -> {
+                cloudElement.setAuxiliaryNetworkRouterIp(routerVirtualNic.getFixedIp());
+            });
+        }
     }
 
     private List<VirtualNic> genVirutalNics(CloudPluginSceneElementBO cloudElement) {
@@ -149,65 +170,61 @@ public class CreateHandler extends HandlerCommon {
             return virtualNics;
         }
 
-        // TODO: 多个端口复用
         Map<String, List<CloudPluginSceneElementPortBO>> networkIdCloudPortsMap = new HashMap<>();
-        for (var port : ports) {
-            var cloudPort = getPluginHandler().getPort(port.getId());
-            var connectedSrcElement = getPluginHandler().getPortConnectedSrcElement(port.getId());
-            var connectedCloudElement = connectedSrcElement == null ? null
-                    : getPluginHandler().getElement(connectedSrcElement.getId());
-            var auxiliaryNetworkCloudElement = getHandlerUtils().confirmAuxiliaryNetworkCloudElement(
-                    cloudElement, connectedCloudElement);
+        var groupPortsMap = getCloudElementGroupPorts(cloudElement);
+        for (var groupPorts : groupPortsMap.values()) {
+            var samplePort = groupPorts.get(0);
+            var auxiliaryNetworkCloudElement = getPortAuxiliaryNetworkCloudElement(samplePort.getId());
             if (auxiliaryNetworkCloudElement == null) {
                 continue;
             }
 
-            // 没有定义的端口补全
-            if (cloudPort == null) {
-                cloudPort = new CloudPluginSceneElementPortBO();
-                addCloudPort(port.getId(), cloudPort);
-            }
             var auxiliaryNetworkId = auxiliaryNetworkCloudElement.getAuxiliaryNetworkId();
-            cloudPort.setAuxiliaryNetworkId(auxiliaryNetworkId);
-            var networkIdCloudPorts = networkIdCloudPortsMap.getOrDefault(
-                    auxiliaryNetworkId, new ArrayList<>());
-            networkIdCloudPorts.add(cloudPort);
-            networkIdCloudPortsMap.put(auxiliaryNetworkId, networkIdCloudPorts);
-            // TODO: 多个端口连到同一个网络上的时候暂时当做一个端口处理
-            if (networkIdCloudPorts.size() > 1) {
-                continue;
+            for (var srcPort : groupPorts) {
+                // 没有定义的端口补全
+                var cloudPort = getPluginHandler().getPort(srcPort.getId());
+                if (cloudPort == null) {
+                    cloudPort = new CloudPluginSceneElementPortBO();
+                    addCloudPort(srcPort.getId(), cloudPort);
+                }
+                cloudPort.setAuxiliaryNetworkId(auxiliaryNetworkId);
+                var networkIdCloudPorts = networkIdCloudPortsMap.getOrDefault(
+                        auxiliaryNetworkId, new ArrayList<>());
+                networkIdCloudPorts.add(cloudPort);
+                networkIdCloudPortsMap.put(auxiliaryNetworkId, networkIdCloudPorts);
             }
+            var sampleCloudPort = getPluginHandler().getPort(samplePort.getId());
 
             var virtualNic = new VirtualNic();
             virtualNic.setNetworkId(auxiliaryNetworkId);
-            virtualNic.setFixedIp(TextUtils.emptyNull(port.getIp()));
-            virtualNic.setMacAddress(TextUtils.emptyNull(port.getMacAddr()));
+            virtualNic.setFixedIp(TextUtils.emptyNull(samplePort.getIp()));
+            virtualNic.setMacAddress(TextUtils.emptyNull(samplePort.getMacAddr()));
 
             List<VirtualNic.QosRule> qosRules = new ArrayList<>();
-            if (port.getIngress() > 0 || port.getDelay() > 0 || port.getLoss() > 0) {
+            if (samplePort.getIngress() > 0 || samplePort.getDelay() > 0 || samplePort.getLoss() > 0) {
                 var qosRule = new VirtualNic.QosRule();
-                qosRule.setMaxKbps(port.getIngress());
+                qosRule.setMaxKbps(samplePort.getIngress());
                 qosRule.setDirection(QosRuleDirection.INGRESS);
-                qosRule.setDelayMs(port.getDelay());
-                qosRule.setLossPercent(port.getLoss());
+                qosRule.setDelayMs(samplePort.getDelay());
+                qosRule.setLossPercent(samplePort.getLoss());
                 qosRules.add(qosRule);
             }
-            if (port.getEgress() > 0 || port.getDelay() > 0 || port.getLoss() > 0) {
+            if (samplePort.getEgress() > 0 || samplePort.getDelay() > 0 || samplePort.getLoss() > 0) {
                 var qosRule = new VirtualNic.QosRule();
-                qosRule.setMaxKbps(port.getEgress());
+                qosRule.setMaxKbps(samplePort.getEgress());
                 qosRule.setDirection(QosRuleDirection.EGRESS);
-                qosRule.setDelayMs(port.getDelay());
-                qosRule.setLossPercent(port.getLoss());
+                qosRule.setDelayMs(samplePort.getDelay());
+                qosRule.setLossPercent(samplePort.getLoss());
                 qosRules.add(qosRule);
             }
             virtualNic.setQosRules(CollectionUtils.emptyNull(qosRules));
             if (!getHandlerUtils().isExternalNetwork(auxiliaryNetworkId)) {
-                virtualNic.setEnableExternal(cloudPort.getNat());
+                virtualNic.setEnableExternal(sampleCloudPort.getNat());
             }
 
             virtualNic.setFirewallId(null);
 
-            var accessModes = cloudPort.getAccessModes();
+            var accessModes = sampleCloudPort.getAccessModes();
             if (accessModes != null && !accessModes.isEmpty()) {
                 virtualNic.setAccessModes(accessModes.stream().map(accessMode -> {
                     var accessModeParam = new VirtualNic.AccessMode();
@@ -309,18 +326,19 @@ public class CreateHandler extends HandlerCommon {
             return;
         }
 
-        var srcPorts = cloudElement.getSrcElement().getPorts();
-        Map<String, List<CloudPluginSceneElementPortBO>> networkIdCloudPortsMap = new HashMap<>();
-        if (srcPorts != null) {
-            srcPorts.forEach(srcPort -> {
-                var cloudPort = getPluginHandler().getPort(srcPort.getId());
-                var auxiliaryNetworkId = cloudPort.getAuxiliaryNetworkId();
-                var networkIdCloudPorts = networkIdCloudPortsMap.getOrDefault(
-                        auxiliaryNetworkId, new ArrayList<>());
-                networkIdCloudPorts.add(cloudPort);
-                networkIdCloudPortsMap.put(auxiliaryNetworkId, networkIdCloudPorts);
-            });
+        var cloudPorts = getPluginHandler().getPorts(cloudElement);
+        if (cloudPorts.isEmpty()) {
+            return;
         }
+
+        Map<String, List<CloudPluginSceneElementPortBO>> networkIdCloudPortsMap = new HashMap<>();
+        cloudPorts.forEach(cloudPort -> {
+            var auxiliaryNetworkId = cloudPort.getAuxiliaryNetworkId();
+            var networkIdCloudPorts = networkIdCloudPortsMap.getOrDefault(
+                    auxiliaryNetworkId, new ArrayList<>());
+            networkIdCloudPorts.add(cloudPort);
+            networkIdCloudPortsMap.put(auxiliaryNetworkId, networkIdCloudPorts);
+        });
 
         virtualNics.forEach(virtualNic -> {
             var networkId = virtualNic.getNetworkId();
@@ -333,13 +351,13 @@ public class CreateHandler extends HandlerCommon {
                 return;
             }
 
-            var cloudPorts = networkIdCloudPortsMap.getOrDefault(networkId, null);
-            if (cloudPorts == null) {
+            var networkCloudPorts = networkIdCloudPortsMap.getOrDefault(networkId, null);
+            if (networkCloudPorts == null) {
                 return;
             }
 
-            // TODO: 多个端口连到同一个网络上的时候暂时当做一个端口处理
-            cloudPorts.forEach(cloudPort -> {
+            // 多个端口连到同一个网络上的时候暂时当做一个端口处理
+            networkCloudPorts.forEach(cloudPort -> {
                 var srcPort = cloudPort.getSrcPort();
                 srcPort.setIp(virtualNic.getFixedIp());
                 srcPort.setMacAddr(virtualNic.getMacAddress());
@@ -387,14 +405,13 @@ public class CreateHandler extends HandlerCommon {
             return;
         }
 
-        var srcPorts = cloudElement.getSrcElement().getPorts();
-        if (srcPorts == null) {
+        var cloudPorts = getPluginHandler().getPorts(cloudElement);
+        if (cloudPorts.isEmpty()) {
             return;
         }
 
         Map<String, CloudPluginSceneElementPortBO> networkIdCloudPortMap = new HashMap<>();
-        srcPorts.forEach(srcPort -> {
-            var cloudPort = getPluginHandler().getPort(srcPort.getId());
+        cloudPorts.forEach(cloudPort -> {
             networkIdCloudPortMap.put(cloudPort.getAuxiliaryNetworkId(), cloudPort);
         });
 
@@ -444,6 +461,8 @@ public class CreateHandler extends HandlerCommon {
         cloudElement.setResourceId(virtualRouter.getId());
 
         receiveVirtualPortInfo(cloudElement, virtualRouter.getNetworks());
+
+        createVirtualRouterFirewall(cloudElement);
     }
 
     protected void createVirtualFirewall(CloudPluginSceneElementBO cloudElement) {
@@ -475,7 +494,7 @@ public class CreateHandler extends HandlerCommon {
         }
 
         // 防火墙连接的虚拟路由端口
-        List<String> targetPorts = new ArrayList<>();
+        Set<String> targetPorts = new HashSet<>();
         var connectedSrcPorts = getPluginHandler().getElementConnectedSrcPorts(srcElement.getId());
         for (var connectedSrcPort : connectedSrcPorts) {
             var connectedCloudPort = getPluginHandler().getPort(connectedSrcPort.getId());
@@ -490,7 +509,7 @@ public class CreateHandler extends HandlerCommon {
             }
             targetPorts.add(connectedCloudPort.getResourceId());
         }
-        createData.setPorts(CollectionUtils.emptyNull(targetPorts));
+        createData.setPorts(CollectionUtils.emptyNull(new ArrayList<>(targetPorts)));
 
         var virtualFirewall = vfClient.create(createData);
         cloudElement.setResourceId(virtualFirewall.getId());
@@ -511,6 +530,7 @@ public class CreateHandler extends HandlerCommon {
         createData.setNetworks(CollectionUtils.emptyNull(genVirutalNics(cloudElement)));
         var virtualMachine = vmClient.create(createData);
         cloudElement.setResourceId(virtualMachine.getId());
+        cloudElement.setHost(virtualMachine.getHost());
 
         receiveVirtualPortInfo(cloudElement, virtualMachine.getNetworks());
 
@@ -532,6 +552,7 @@ public class CreateHandler extends HandlerCommon {
         createData.setNetworks(CollectionUtils.emptyNull(genVirutalNics(cloudElement)));
         var container = containerClient.create(createData);
         cloudElement.setResourceId(container.getId());
+        cloudElement.setHost(container.getHost());
 
         receiveVirtualPortInfo(cloudElement, container.getNetworks());
 
@@ -548,6 +569,61 @@ public class CreateHandler extends HandlerCommon {
         receiveEntityInterfaceInfo(cloudElement, entityNode.getInterfaces());
 
         checkAccessModes(cloudElement);
+    }
+
+    /**
+     * 创建默认路由模拟的三层防火墙
+     */
+    private void createVirtualRouterFirewall(CloudPluginSceneElementBO cloudElement) {
+        var srcElement = cloudElement.getSrcElement();
+        var createData = new VirtualFirewallCreateData();
+        createData.setName(genResourceName(srcElement.getEid()));
+        List<FirewallRule> srcRules = cloudElement.getFirewallRules();
+        srcRules = srcRules == null ? new ArrayList<>() : srcRules;
+        var cloudPorts = getPluginHandler().getPorts(cloudElement);
+        for (var cloudPort : cloudPorts) {
+            var portSrcRules = cloudPort.getFirewallRules();
+            if (portSrcRules != null) {
+                srcRules.addAll(portSrcRules);
+            }
+        }
+        if (srcRules.isEmpty()) {
+            return;
+        }
+
+        List<VirtualFirewallCreateData.Rule> ingressRules = new ArrayList<>();
+        List<VirtualFirewallCreateData.Rule> egressRules = new ArrayList<>();
+        srcRules.forEach(srcRule -> {
+            var direction = srcRule.getDirection();
+            var rule = new VirtualFirewallCreateData.Rule(srcRule.getSourceIpAddress(),
+                    srcRule.getDestinationIpAddress(), srcRule.getSourcePort(),
+                    srcRule.getDestinationPort(), null, srcRule.getProtocol(),
+                    srcRule.getAction());
+            if (FirewallRuleDirection.INGRESS.equals(direction)) {
+                ingressRules.add(rule);
+            } else if (FirewallRuleDirection.EGRESS.equals(direction)) {
+                egressRules.add(rule);
+            } else if (FirewallRuleDirection.BOTH.equals(direction)) {
+                ingressRules.add(rule);
+                egressRules.add(rule);
+            }
+
+        });
+        createData.setIngressRules(ingressRules);
+        createData.setEgressRules(egressRules);
+
+        // 防火墙的虚拟路由端口
+        Set<String> targetPorts = new HashSet<>();
+        for (var cloudPort : cloudPorts) {
+            if (StringUtils.isEmpty(cloudPort.getResourceId())) {
+                continue;
+            }
+            targetPorts.add(cloudPort.getResourceId());
+        }
+        createData.setPorts(CollectionUtils.emptyNull(new ArrayList<>(targetPorts)));
+
+        var virtualFirewall = vfClient.create(createData);
+        cloudElement.setFirewallResourceId(virtualFirewall.getId());
     }
 
     public CreateHandler(CloudScenePluginHandler pluginHandler) {

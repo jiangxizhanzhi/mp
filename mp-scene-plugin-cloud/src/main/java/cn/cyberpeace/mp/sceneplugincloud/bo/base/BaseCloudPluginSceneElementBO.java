@@ -28,6 +28,8 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
 
     @ApiModelProperty(value = "云平台虚拟化资源id")
     private String resourceId;
+    @ApiModelProperty(value = "云平台三层防火墙资源id")
+    private String firewallResourceId;
 
     // 虚拟交换机/路由/防火墙属性
     @ApiModelProperty(value = "电口数量")
@@ -38,6 +40,14 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     private Integer opticalPortNumber;
     @ApiModelProperty(value = "光口类型")
     private String opticalPortType;
+    @ApiModelProperty(value = "wan口数量")
+    private Integer wanPortNumber;
+    @ApiModelProperty(value = "wan口类型")
+    private String wanPortType;
+    @ApiModelProperty(value = "lan口数量")
+    private Integer lanPortNumber;
+    @ApiModelProperty(value = "lan口类型")
+    private String lanPortType;
 
     // 虚拟交换机属性
     @ApiModelProperty(value = "虚拟交换机cidr地址段")
@@ -76,6 +86,10 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     private String imageType;
     @ApiModelProperty(value = "靶标分类")
     private Integer category;
+    @ApiModelProperty(value = "靶标二级分类")
+    private Integer category2;
+    @ApiModelProperty(value = "靶标三级分类")
+    private Integer category3;
     @ApiModelProperty(value = "是否支持初始化")
     private Boolean initSupport;
     @ApiModelProperty(value = "是否支持快速创建")
@@ -110,6 +124,15 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     @ApiModelProperty(value = "辅助网络vlanId", hidden = true)
     @JsonIgnore
     private Integer auxiliaryNetworkVlanId;
+    @ApiModelProperty(value = "是否开启辅助网络辅助路由", hidden = true)
+    @JsonIgnore
+    private Boolean auxiliaryNetworkRouterOn;
+    @ApiModelProperty(value = "辅助网络辅助路由id", hidden = true)
+    @JsonIgnore
+    private String auxiliaryNetworkRouterResourceId;
+    @ApiModelProperty(value = "辅助网络辅助路由ip", hidden = true)
+    @JsonIgnore
+    private String auxiliaryNetworkRouterIp;
 
     @ApiModelProperty(value = "是否开启管理网卡", hidden = true)
     @JsonIgnore
@@ -123,6 +146,9 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     @ApiModelProperty(value = "管理网卡mac地址", hidden = true)
     @JsonIgnore
     private String mgmtMacAddr;
+
+    @ApiModelProperty(value = "宿主机名称")
+    private String host;
 
     @Override
     public void fromModel(M obj, String... ignoreFields) {

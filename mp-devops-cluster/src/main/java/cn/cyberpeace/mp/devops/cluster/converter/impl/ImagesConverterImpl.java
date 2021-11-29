@@ -34,7 +34,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -224,6 +227,7 @@ public class ImagesConverterImpl implements ImagesConverter {
     @Transactional
     public Boolean delete(ImagesDeleteRequest request) {
         Boolean result = deviceService.deleteByIds(request.getImageIds());
+
         if (CollectionUtils.isNotEmpty(request.getImageIds())){
             ImageDeleteDTO dto = new ImageDeleteDTO();
             dto.setIds(request.getImageIds());

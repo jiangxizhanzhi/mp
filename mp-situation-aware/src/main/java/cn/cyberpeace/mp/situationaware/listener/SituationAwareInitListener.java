@@ -88,9 +88,8 @@ public class SituationAwareInitListener implements ApplicationListener<Applicati
             networkList.stream().filter(json -> json instanceof JSONObject).map(JSONObject.class::cast).filter(json -> ARKIMENETWORKNAME.equals(json.get("name"))).findFirst().ifPresent(network ->{
                 SituationalAwareConstant.ArkimeNetworkId = (String) network.get("id");
             });
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.info("init arkime network error {}", ExceptionUtils.getMessage(e));
-            e.printStackTrace();
         }
     }
 }

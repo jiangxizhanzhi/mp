@@ -288,9 +288,9 @@ public class AsyncPlatFlowTaskService {
      * 同步新增流量执行器
      * @return
      */
-    public String addExecutor() {
+    public String addExecutorSync(String trexName) {
         String uuid = TextUtils.uuid();
-        this.addFlowExecutor(uuid);
+        this.addFlowExecutor(uuid, trexName);
         return uuid;
     }
 
@@ -300,14 +300,14 @@ public class AsyncPlatFlowTaskService {
      */
     @Async
     public void addExecutor(String uuid) {
-        this.addFlowExecutor(uuid);
+        this.addFlowExecutor(uuid, String.valueOf(System.currentTimeMillis()));
     }
 
     /**
      * 新增流量执行器
      * @param uuid
      */
-    private void addFlowExecutor(String uuid) {
+    private void addFlowExecutor(String uuid,String trexName) {
         log.info("================ Add vm instance start ==================");
         // 获取外部networkId，用于管理端口
         String externalNetId = "";
@@ -326,7 +326,7 @@ public class AsyncPlatFlowTaskService {
 
         FlowActuatorModel flowActuatorModel = new FlowActuatorModel();
         AddVmRequest addVmRequest = new AddVmRequest();
-        addVmRequest.setName(FlowPlatformEnum.TREX.toString() + System.currentTimeMillis());
+        addVmRequest.setName(FlowPlatformEnum.TREX.toString() + "_" + trexName);
         addVmRequest.setImage(trexImage);
         AddVmRequest.Networks networks = new AddVmRequest.Networks();
         networks.setNetworkId(externalNetId);

@@ -36,27 +36,25 @@ public class CreateHandler extends HandlerCommon {
         // 创建 trex 虚拟机
         runSceneProgress(SceneProcess.CREATE_EXECUTOR, () -> {
             FlowPluginSceneBO scene = getPluginHandler().getScene();
-            var executorId = getHandlerUtils().createExecutor();
+            var executorId = getHandlerUtils().createExecutor(getPluginHandler().getSourceSceneId());
             scene.setExecutor(executorId);
             getPluginHandler().saveScene();
         });
 
-        // 启动流量插件
-        List<Runnable> startFlowTasks = new ArrayList<>();
-        getPluginHandler().getElementMap().forEach((nodeId, flowElement) -> {
-            List<Flow> flows = flowElement.getFlows();
-            if (flows == null) {
-                return;
-            }
-            flows.forEach(flow -> startFlowTasks.add(() -> this.createOneStartFlowTask(nodeId, flowElement, flow)));
-        });
-        if (!startFlowTasks.isEmpty()) {
-            runSceneProgress(SceneProcess.START_FLOW, () -> runTasks(startFlowTasks));
-        }
-    }
-
-    private void createOneStartFlowTask(String nodeId, FlowPluginSceneElementBO flowElement, Flow flow) {
-        runElementProgress(nodeId, ElementProcess.START_FLOW, () -> getHandlerUtils().startFlow(flowElement, flow));
+        // 启动流量任务 创建暂不启动
+//        List<Runnable> startFlowTasks = new ArrayList<>();
+//        getPluginHandler().getElementMap().forEach((nodeId, flowElement) -> {
+//            List<Flow> flows = flowElement.getFlows();
+//            if (flows == null) {
+//                return;
+//            }
+//            flows.forEach(flow -> startFlowTasks.add(() -> {
+//                runElementProgress(nodeId, ElementProcess.START_FLOW, () -> getHandlerUtils().startFlow(flowElement, flow));
+//            }));
+//        });
+//        if (!startFlowTasks.isEmpty()) {
+//            runSceneProgress(SceneProcess.START_FLOW, () -> runTasks(startFlowTasks));
+//        }
     }
 
 }

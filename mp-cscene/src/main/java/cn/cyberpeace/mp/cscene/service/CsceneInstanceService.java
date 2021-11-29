@@ -21,6 +21,7 @@ import cn.cyberpeace.mp.cscene.report.rabbitmq.RabbitmqCsceneReporter;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
 import cn.cyberpeace.mp.cscene.service.taskpool.CsceneReportTaskPool;
+import cn.cyberpeace.mp.sceneplugincloud.bo.NodeActionRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
@@ -267,6 +268,22 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     public ServiceResult<Probe> stopProbe(String id, String toNodeId, String probeId, CsceneContextBO context) {
         return new ServiceResult<>(null);
+    }
+
+    public ServiceResult<NodeActionRecordingBO> enableRecording(String id, String nodeId, String connectionId, CsceneContextBO context) {
+        var sceneId = getSceneId(id);
+        if (StringUtils.isEmpty(sceneId)) {
+            return new ServiceResult<>(null);
+        }
+        return scenePluginCloudSceneService.enableRemoteRecording(sceneId, nodeId, connectionId);
+    }
+
+    public ServiceResult<NodeActionRecordingBO> disableRecording(String id, String nodeId, String connectionId, CsceneContextBO context) {
+        var sceneId = getSceneId(id);
+        if (StringUtils.isEmpty(sceneId)) {
+            return new ServiceResult<>(null);
+        }
+        return scenePluginCloudSceneService.disableRemoteRecording(sceneId, nodeId, connectionId);
     }
 
     /**

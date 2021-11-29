@@ -87,7 +87,7 @@ public abstract class BaseSceneHandler<
         P1 extends BaseSceneElementPluginModel,
         S extends BaseSceneBO<S0, S>,
         A extends BaseSceneAreaBO<A0, A>,
-        P extends BaseSceneElementPortBO<P0, P>,
+        P extends BaseSceneElementPortBO<P0, P, E>,
         E extends BaseSceneElementBO<E0, P, E>,
         C extends BaseSceneElementPortConnectionBO<C0, C>,
         T extends BaseSceneTopologyBO<S0, A0, E0, P0, C0, S, A, P, E, C, T>,
@@ -399,6 +399,7 @@ public abstract class BaseSceneHandler<
                 return;
             }
             elementPorts.forEach(elementPort -> {
+                elementPort.setElement(element);
                 elementPortMap.put(elementPort.getId(), elementPort);
                 portIdElementMap.put(elementPort.getId(), element);
             });
@@ -509,6 +510,7 @@ public abstract class BaseSceneHandler<
 
             var elementPortBO = ClassUtils.createInstance(sceneElementPortBOClass);
             elementPortBO.fromModel(elementPort);
+            elementPortBO.setElement(elementBO);
             elementPortMap.put(elementPortBO.getId(), elementPortBO);
             portIdElementMap.put(elementPortBO.getId(), elementBO);
 

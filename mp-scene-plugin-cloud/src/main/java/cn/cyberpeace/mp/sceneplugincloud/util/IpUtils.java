@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.util;
 
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.RandomUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.AllocationPool;
 import cn.hutool.core.net.Ipv4Util;
@@ -36,35 +37,82 @@ public class IpUtils {
      * @param count 随机数量
      * @param excludeIps 排除的ip
      * @param allocationPools 地址池
+     * @param abandonDhcp 是否去除dhcp地址
      * @return 随机ip列表
      */
     public static List<String> randomIps(String cidr, int count, List<String> excludeIps,
-                                         List<AllocationPool> allocationPools) {
-        List<String> ips = getCidrIps(cidr);
-        if (!ips.isEmpty()) {
-            ips.remove(0);
+                                         List<AllocationPool> allocationPools, boolean abandonDhcp) {
+        List<String> ips = getAvailableCidrIps(cidr);
+
+        // dhcp情况，默认地址池
+        if (abandonDhcp && (allocationPools == null || allocationPools.isEmpty())) {
+            allocationPools = List.of(new AllocationPool(ips.get(0), ips.get(ips.size() - 1)));
         }
-        if (!ips.isEmpty()) {
-            ips.remove(0);
-        }
-        if (!ips.isEmpty()) {
-            ips.remove(ips.size() - 1);
+        // 和地址池求交集
+        if (allocationPools != null && !allocationPools.isEmpty()) {
+            List<String> allocationPoolsIps = getAllocationPoolsIps(allocationPools, abandonDhcp);
+            ips.retainAll(allocationPoolsIps);
         }
 
+        // 移除指定过滤的ip
         if (excludeIps != null && !excludeIps.isEmpty()) {
             ips.removeAll(excludeIps);
-        }
-
-        if (allocationPools != null && !allocationPools.isEmpty()) {
-            List<String> allocationPoolsIps = getAllocationPoolsIps(allocationPools, true);
-            ips.retainAll(allocationPoolsIps);
         }
 
         return RandomUtils.sample(ips, count);
     }
 
     /**
+     * 分配默认路由ip，默认路由ip有特殊限制，必须在地址池外
+     * @param cidr 网段
+     * @param count 随机数量
+     * @param excludeIps 排除的ip
+     * @param allocationPools 地址池
+     * @return 随机ip列表
+     */
+    public static List<String> allocateDefaultRouterIps(String cidr, int count, List<String> excludeIps,
+                                                        List<AllocationPool> allocationPools) {
+        List<String> ips = getAvailableCidrIps(cidr);
+
+        if (allocationPools != null && !allocationPools.isEmpty()) {
+            // 包含dhcp地址以去除
+            List<String> allocationPoolsIps = getAllocationPoolsIps(allocationPools, false);
+            // 和地址池求差集
+            ips.removeAll(allocationPoolsIps);
+        }
+
+        // 移除指定过滤的ip
+        if (excludeIps != null && !excludeIps.isEmpty()) {
+            ips.removeAll(excludeIps);
+        }
+
+        if (ips.size() < count) {
+            throw new MpRuntimeException("No enough resource for default router address pick");
+        }
+
+        return ips.subList(ips.size() - count, ips.size());
+    }
+
+    /**
      * 获取cidr段可用ip列表
+     * @param cidr cidr
+     * @return ip列表
+     */
+    public static List<String> getAvailableCidrIps(String cidr) {
+        List<String> ips = getCidrIps(cidr);
+        // 移除第一个网络自身地址
+        if (!ips.isEmpty()) {
+            ips.remove(0);
+        }
+        // 移除最后一个地址
+        if (!ips.isEmpty()) {
+            ips.remove(ips.size() - 1);
+        }
+        return ips;
+    }
+
+    /**
+     * 获取cidr段ip列表
      * @param cidr cidr
      * @return ip列表
      */
@@ -96,6 +144,7 @@ public class IpUtils {
         for (var allocationPool : allocationPools) {
             List<String> allocationPoolIps = getRangeIps(allocationPool.getStart(), allocationPool.getEnd());
             if (abandonDhcp && !allocationPoolIps.isEmpty()) {
+                // 移除第一个默认的dhcp地址
                 allocationPoolIps.remove(0);
             }
             ips.addAll(allocationPoolIps);

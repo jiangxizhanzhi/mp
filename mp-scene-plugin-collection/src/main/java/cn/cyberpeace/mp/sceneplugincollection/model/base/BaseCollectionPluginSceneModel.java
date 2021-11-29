@@ -6,6 +6,6 @@ import lombok.Data;
 
 @Data
 public class BaseCollectionPluginSceneModel extends BasePluginSceneModel {
-    @DefaultBool
+    @DefaultBool(true)
     private Boolean enableFlowCollect;
 }

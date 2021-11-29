@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.service.impl;
 
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.CloudPlatformPageResult;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.InstanceOsServicePageResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.InstancePageResult;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;

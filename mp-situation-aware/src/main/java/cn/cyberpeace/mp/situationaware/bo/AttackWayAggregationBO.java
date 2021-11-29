@@ -14,12 +14,7 @@ import lombok.*;
 public class AttackWayAggregationBO extends BaseBO {
 
     /**
-     * 攻击方式
+     * 聚合类型
      */
-    private String attackWay;
-
-    /**
-     *
-     */
-    private String description;
+    private String aggregationType;
 }

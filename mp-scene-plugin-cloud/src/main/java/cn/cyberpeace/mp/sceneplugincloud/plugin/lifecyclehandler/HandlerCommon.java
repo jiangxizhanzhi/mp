@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.util.NetworkUtils;
 import cn.cyberpeace.mp.base.util.thread.taskpool.TaskPool;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.plugin.common.PluginSceneEventHandlerCommon;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
@@ -28,9 +29,53 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
     @Getter
     private HandlerUtils<CloudScenePluginHandler> handlerUtils;
 
+    private final Map<String, CloudPluginSceneElementBO> portIdAuxiliaryNetworkCloudElementMap = new HashMap<>();
+
     public HandlerCommon(CloudScenePluginHandler pluginHandler, TaskPool taskPool, int event) {
         super(pluginHandler, taskPool, event);
         handlerUtils = pluginHandler.getHandlerUtils();
+    }
+
+
+    /**
+     * 获取端口所在辅助网络网元
+     * @param portId 网元端口id
+     * @return 端口所在辅助网络网元
+     */
+    public CloudPluginSceneElementBO getPortAuxiliaryNetworkCloudElement(String portId) {
+        if (portIdAuxiliaryNetworkCloudElementMap.containsKey(portId)) {
+            return portIdAuxiliaryNetworkCloudElementMap.get(portId);
+        }
+        var srcElement = getPluginHandler().getSrcPort(portId).getElement();
+        var cloudElement = getPluginHandler().getElement(srcElement.getId());
+        var connectedOpaqueSrcElement = getHandlerUtils().getPortConnectedOpaqueSrcElement(portId);
+        var connectedCloudElement = connectedOpaqueSrcElement != null ? getPluginHandler().getElement(connectedOpaqueSrcElement.getId()) : null;
+        var auxiliaryNetworkCloudElement = getHandlerUtils().confirmAuxiliaryNetworkCloudElement(cloudElement, connectedCloudElement);
+        portIdAuxiliaryNetworkCloudElementMap.put(portId, auxiliaryNetworkCloudElement);
+        if (connectedOpaqueSrcElement != null) {
+            portIdAuxiliaryNetworkCloudElementMap.put(connectedOpaqueSrcElement.getId(), auxiliaryNetworkCloudElement);
+        }
+        return auxiliaryNetworkCloudElement;
+    }
+
+    /**
+     * 同性质端口分组 <辅助网络，同性质端口列表>
+     */
+    public Map<String, List<SceneElementPortBO>> getCloudElementGroupPorts(CloudPluginSceneElementBO cloudElement) {
+        Map<String, List<SceneElementPortBO>> groupPortsMap = new HashMap<>();
+        var srcElement = cloudElement.getSrcElement();
+        var srcPorts = srcElement.getPorts();
+        for (var srcPort : srcPorts) {
+            var portAuxiliaryNetworkCloudElement = getPortAuxiliaryNetworkCloudElement(srcPort.getId());
+            if (portAuxiliaryNetworkCloudElement == null) {
+                continue;
+            }
+            var portAuxiliaryNetworkCloudElementNodeId = portAuxiliaryNetworkCloudElement.getSrcElement().getId();
+            var groupPorts = groupPortsMap.getOrDefault(portAuxiliaryNetworkCloudElementNodeId, new ArrayList<>());
+            groupPorts.add(srcPort);
+            groupPortsMap.put(portAuxiliaryNetworkCloudElementNodeId, groupPorts);
+        }
+        return groupPortsMap;
     }
 
     public String genResourceName(String name) {
@@ -50,15 +95,10 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
      * 检查接入方式可用性
      */
     public void checkAccessModes(CloudPluginSceneElementBO cloudElement) {
-        var srcPorts = cloudElement.getSrcElement().getPorts();
-        if (srcPorts == null) {
-            return;
-        }
-
+        var cloudPorts = getPluginHandler().getPorts(cloudElement);
         // 同样ip、端口可能对应多个接入方式
         Map<String, List<CloudAccessMode>> ipAccessModesMap = new HashMap<>();
-        srcPorts.forEach(srcPort -> {
-            var cloudPort = getPluginHandler().getPort(srcPort.getId());
+        cloudPorts.forEach(cloudPort -> {
             var accessModes = cloudPort.getAccessModes();
             if (accessModes == null) {
                 return;
@@ -111,14 +151,9 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
      * 关闭接入方式可用性
      */
     public void closeAccessModes(CloudPluginSceneElementBO cloudElement) {
-        var srcPorts = cloudElement.getSrcElement().getPorts();
-        if (srcPorts == null) {
-            return;
-        }
-
+        var cloudPorts = getPluginHandler().getPorts(cloudElement);
         var closeFlag = false;
-        for (var srcPort : srcPorts) {
-            var cloudPort = getPluginHandler().getPort(srcPort.getId());
+        for (var cloudPort : cloudPorts) {
             var accessModes = cloudPort.getAccessModes();
             if (accessModes == null) {
                 return;

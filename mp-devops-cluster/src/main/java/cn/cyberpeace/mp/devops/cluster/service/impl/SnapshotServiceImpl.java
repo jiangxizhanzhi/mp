@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.devops.cluster.service.impl;
 
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.DeviceAndSnapshotCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.SnapshotCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.SnapshotCreate;
 import cn.cyberpeace.mp.devops.cluster.model.common.Snapshot;
@@ -23,6 +24,11 @@ public class SnapshotServiceImpl extends BaseOpenStackServiceImpl implements Sna
     @Override
     public SnapshotCloudPlatformModel list(String deviceUuid) {
         return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + SNAPSHOT + "?device_uuid=" + deviceUuid, SnapshotCloudPlatformModel.class);
+    }
+
+    @Override
+    public DeviceAndSnapshotCloudPlatformModel deviceAndSnapshotByName(String name){
+        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + SNAPSHOT + "/device_snapshots?name=" + name,DeviceAndSnapshotCloudPlatformModel.class);
     }
 
     @Override

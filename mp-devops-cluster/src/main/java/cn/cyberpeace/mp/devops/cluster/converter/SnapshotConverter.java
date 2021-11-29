@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.converter;
 
+import cn.cyberpeace.mp.devops.cluster.converter.model.DeviceAndSnapshotConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.SnapshotListConvertModel;
 import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.request.SnapshotMergeRequest;
@@ -12,6 +13,13 @@ public interface SnapshotConverter {
      * @param deviceUuid
      */
     SnapshotListConvertModel list(String deviceUuid);
+
+    /**
+     * 根据名称查询设备名称和快照列表
+     * @param name
+     * @return
+     */
+    DeviceAndSnapshotConvertModel deviceAndSnapshotByName(String name);
 
     /**
      * 创建

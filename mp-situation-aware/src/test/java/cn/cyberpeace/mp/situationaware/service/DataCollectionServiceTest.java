@@ -40,6 +40,9 @@ public class DataCollectionServiceTest {
     @Resource(name = "wazuhRestHighLevelClient")
     private RestHighLevelClient restHighLevelClient;
 
+    @Autowired
+    private DataCollectionFlowTableService dataCollectionFlowTableService;
+
     @Test
     public void testQueryFileEvents() {
         WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
@@ -106,6 +109,22 @@ public class DataCollectionServiceTest {
     public void testDateFormate() {
         String date = TimeUtils.localDateTimeToString(LocalDateTime.now(), EsConstants.esDateTimeFormatter);
         System.out.println(date);
+    }
+
+
+    @Test
+    public void  testQueryMonitorEventsWithTimeRange() {
+        WazuhMonitorEventsRequest wazuhEventRequest = new WazuhMonitorEventsRequest();
+        wazuhEventRequest.setAgentNames(Lists.newArrayList("ubuntu1", "windows_agent1"));
+        wazuhEventRequest.setStartTime(LocalDateTime.now().minusDays(1));
+        wazuhEventRequest.setEndTime(LocalDateTime.now());
+        List<WazuhModel> wazuhModelList = dataCollectionService.queryMonitorEventsWithTimeRange(wazuhEventRequest);
+        System.out.println(wazuhModelList);
+    }
+
+    @Test
+    public void testCreateDataCollectionFlow() {
+        dataCollectionFlowTableService.createDataCollectionFlow(Lists.newArrayList("84702684-9e92-4e44-a84d-990191cf2442"));
     }
 
     @Test

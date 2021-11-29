@@ -71,13 +71,27 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
             }
             cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_FIREWALL);
             cloudElement.setTransparent(true);
-        } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_IMAGE_GATEWAY)) {
+        } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_GATEWAY)) {
+            if (isForceCorrectElementType) {
+                // TODO 暂定 - 虚拟网关就是仿真路由
+                srcElement.setType(BaseSceneElementModel.Type.ROUTER);
+            }
+            cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER);
+        }  else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_IMAGE_GATEWAY)) {
             if (isForceCorrectElementType) {
                 // TODO 暂定 - 三层镜像网关就是仿真路由
                 srcElement.setType(BaseSceneElementModel.Type.ROUTER);
             }
         } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER)) {
             srcElement.setType(BaseSceneElementModel.Type.ROUTER);
+            cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER);
+        } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH)) {
+            srcElement.setType(BaseSceneElementModel.Type.SWITCH);
+            // 简单三层虚拟交换机用虚拟默认路由实现
+            cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER);
+        } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_FIREWALL)) {
+            srcElement.setType(BaseSceneElementModel.Type.FIREWALL);
+            // 简单三层虚拟防火墙用虚拟默认路由 + 防火墙实现
             cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER);
         } else if (role.equals(BaseCloudPluginSceneElementModel.Role.ENTITY_GATEWAY)) {
             if (isForceCorrectElementType) {
