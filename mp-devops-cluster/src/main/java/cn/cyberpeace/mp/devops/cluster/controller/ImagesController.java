@@ -325,7 +325,7 @@ public class ImagesController {
     /**
      * 查询快照历史
      */
-    @ApiOperation("根据镜像名称/快照名称查询镜像名称和快照历史信息")
+    @ApiOperation("根据镜像名称或快照名称查询镜像名称和快照历史信息")
     @GetMapping("/snapshot/by-name")
     public Result<DeviceAndSnapshotConvertModel> deviceAndSnapshotByName(@RequestParam String name){
         DeviceAndSnapshotConvertModel convertModel = snapshotConverter.deviceAndSnapshotByName(name);
