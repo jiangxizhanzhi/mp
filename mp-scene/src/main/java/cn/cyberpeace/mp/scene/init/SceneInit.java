@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.scene.init;
 
 import cn.cyberpeace.mp.base.common.LocalFileMappingCommon;
+import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.scene.config.SceneAppConfig;
 import cn.cyberpeace.mp.scene.util.InstallerUtils;
 import cn.hutool.core.io.FileUtil;
@@ -18,8 +19,10 @@ public class SceneInit implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         FileUtil.mkdir(sceneAppConfig.getWindowsHelpInstallerDir());
-        LocalFileMappingCommon.syncDir(InstallerUtils.WINDOWS_HELP_INSTALLER_GROUP,
-                sceneAppConfig.getWindowsHelpInstallerDir());
+        TaskCommon.executeTask(() -> {
+            LocalFileMappingCommon.syncDir(InstallerUtils.WINDOWS_HELP_INSTALLER_GROUP,
+                    sceneAppConfig.getWindowsHelpInstallerDir());
+        });
     }
 
 }

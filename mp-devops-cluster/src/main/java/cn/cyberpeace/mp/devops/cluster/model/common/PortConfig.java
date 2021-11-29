@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -29,4 +31,7 @@ public class PortConfig {
      */
     @ApiModelProperty("端口网段")
     private String portIps;
+
+    @ApiModelProperty("接入协议")
+    private List<AccessProtocol> accessProtocols;
 }

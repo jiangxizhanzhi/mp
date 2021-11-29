@@ -14,7 +14,7 @@ gradle.ext {
         'mp-devops-log',
         'mp-flow',
         'mp-front-admin',
-        'mp-front-business',
+        'mp-front-business'
     ]
 
     flyway = [

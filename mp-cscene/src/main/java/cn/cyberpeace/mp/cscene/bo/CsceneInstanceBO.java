@@ -10,6 +10,8 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.apache.commons.lang3.ArrayUtils;
 
+import java.time.LocalDateTime;
+
 @ApiModel(description = "场景实例数据")
 @Data
 public class CsceneInstanceBO extends BaseCsceneBO<CsceneInstanceModel, CsceneInstanceRoleModel, CsceneInstaneRoleBO,
@@ -28,6 +30,8 @@ public class CsceneInstanceBO extends BaseCsceneBO<CsceneInstanceModel, CsceneIn
     private Integer sceneTtl;
     @ApiModelProperty(value = "场景实例属性")
     private Integer sceneAttr;
+    @ApiModelProperty(value = "场景实例创建时间")
+    private LocalDateTime createTime;
 
     @Override
     public CsceneInstanceModel createModel() {

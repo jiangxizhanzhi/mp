@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.cloud.platform.model;
 
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.CloudPlatformResult;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.CloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.model.common.HypervisorStatistics;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

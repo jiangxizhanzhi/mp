@@ -28,4 +28,7 @@ public class FlowQueryParams extends QueryParams {
 
     @ApiModelProperty(value = "节点id列表")
     private List<String> nodeIds;
+
+    @ApiModelProperty(value = "相邻数据间的时间间隔,单位：秒")
+    private Integer interval;
 }

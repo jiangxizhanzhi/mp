@@ -22,4 +22,6 @@ public class BaseSceneElementPortConnectionModel extends BaseModel {
     private String name;
     @DefaultBool
     private Boolean unidirectional;
+    @DefaultStr
+    private String displayContext;
 }

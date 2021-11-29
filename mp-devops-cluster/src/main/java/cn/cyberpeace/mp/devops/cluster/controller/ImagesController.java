@@ -44,6 +44,7 @@ import javax.validation.Valid;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -322,6 +323,16 @@ public class ImagesController {
     }
 
     /**
+     * 查询快照历史
+     */
+    @ApiOperation("根据镜像名称/快照名称查询镜像名称和快照历史信息")
+    @GetMapping("/snapshot/by-name")
+    public Result<DeviceAndSnapshotConvertModel> deviceAndSnapshotByName(@RequestParam String name){
+        DeviceAndSnapshotConvertModel convertModel = snapshotConverter.deviceAndSnapshotByName(name);
+        return new Result(convertModel);
+    }
+
+    /**
      * 合并快照历史
      */
     @ApiOperation("合并快照历史")
@@ -401,7 +412,10 @@ public class ImagesController {
         if (Objects.isNull(page) ||  Objects.isNull(page.getData())){
             return new Result();
         }
-        return new Result<>(page.getData().getList());
+        List<Flavor> flavorList = page.getData().getList().stream().sorted(Comparator.comparing(Flavor::getDisk))
+                .sorted(Comparator.comparing(Flavor::getRam))
+                .sorted(Comparator.comparing(Flavor::getCpu)).collect(Collectors.toList());
+        return new Result<>(flavorList);
     }
 
     @ApiOperation("根据设备ID获取登录链接信息")

@@ -16,12 +16,14 @@ import java.util.List;
 
 @Data
 public abstract class BaseCloudPluginSceneElementPortBO<M extends BaseCloudPluginSceneElementPortModel,
-        T extends BaseCloudPluginSceneElementPortBO<M, T, S>, S extends BaseSceneElementPortBO<?, S>>
+        T extends BaseCloudPluginSceneElementPortBO<M, T, S>, S extends BaseSceneElementPortBO<?, S, ?>>
         extends BasePluginSceneElementPortBO<M, T, S> {
     @ApiModelProperty(value = "云平台虚拟化资源id")
     private String resourceId;
     @ApiModelProperty(value = "是否nat外网")
     private Boolean nat;
+    @ApiModelProperty(value = "虚拟防火墙规则")
+    private List<FirewallRule> firewallRules;
 
     // 靶标属性
     @ApiModelProperty(value = "实体设备端口接入类型")
@@ -50,7 +52,10 @@ public abstract class BaseCloudPluginSceneElementPortBO<M extends BaseCloudPlugi
     @Override
     public void fromModel(M obj, String... ignoreFields) {
         super.fromModel(obj, ArrayUtils.addAll(ignoreFields,
+                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementPortModel::getFirewallRules),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementPortModel::getAccessModes)));
+        firewallRules = StringUtils.isEmpty(obj.getFirewallRules()) ? new ArrayList<>()
+                : JsonCommon.parse(obj.getFirewallRules(), new TypeReference<List<FirewallRule>>(){});
         accessModes = StringUtils.isEmpty(obj.getAccessModes()) ? new ArrayList<>()
                 : JsonCommon.parse(obj.getAccessModes(), new TypeReference<List<CloudAccessMode>>(){});
     }
@@ -58,7 +63,11 @@ public abstract class BaseCloudPluginSceneElementPortBO<M extends BaseCloudPlugi
     @Override
     public M toModel(String... ignoreFields) {
         var obj = super.toModel(ArrayUtils.addAll(ignoreFields,
+                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementPortModel::getFirewallRules),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementPortModel::getAccessModes)));
+        if (firewallRules != null) {
+            obj.setFirewallRules(JsonCommon.stringify(firewallRules));
+        }
         if (accessModes != null) {
             obj.setAccessModes(JsonCommon.stringify(accessModes));
         }

@@ -15,7 +15,7 @@ import java.util.List;
  * @param <H>
  */
 public interface PluginSceneHandlerCommon<S extends BaseSceneBO<?, S>, E extends BaseSceneElementBO<?, P, E>,
-        P extends BaseSceneElementPortBO<?, P>,
+        P extends BaseSceneElementPortBO<?, P, E>,
         H extends BaseSceneHandler<?, ?, ?, ?,
                 ? extends BaseSceneElementPortConnectionModel, ?, S, ?, P, E, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, H>> {
 

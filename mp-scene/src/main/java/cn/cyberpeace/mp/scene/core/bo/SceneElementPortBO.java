@@ -5,7 +5,7 @@ import cn.cyberpeace.mp.scene.model.SceneElementPortModel;
 import lombok.Data;
 
 @Data
-public class SceneElementPortBO extends BaseSceneElementPortBO<SceneElementPortModel, SceneElementPortBO> {
+public class SceneElementPortBO extends BaseSceneElementPortBO<SceneElementPortModel, SceneElementPortBO, SceneElementBO> {
 
     @Override
     public SceneElementPortModel createModel() {

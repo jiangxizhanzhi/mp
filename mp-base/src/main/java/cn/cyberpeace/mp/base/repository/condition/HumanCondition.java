@@ -204,6 +204,16 @@ public class HumanCondition {
 
     /**
      * select字段并设置别名
+     * @param fieldName 字段名称
+     * @param outputFieldGetter 返回字段get方法引用
+     * @return this
+     */
+    public <O> HumanCondition selectAs(String fieldName, SerializableFunction<O> outputFieldGetter) {
+        return selectAs(fieldName, BeanUtils.getBeanGetterFieldName(outputFieldGetter));
+    }
+
+    /**
+     * select字段并设置别名
      * @param fieldGetter 字段get方法引用
      * @param outputFieldName 返回别名
      * @return this

@@ -54,6 +54,7 @@ try {
    | SceneErrorCode       | MP-1104** |            |
    | SituationalAwareErrorCode       | MP-1105** |            |
    | DevopsClusterErrorCode       | MP-1106** |            |
+   | CloudErrorCode       | MP-1107** |            |
 4. 建议错误码的定义可以尽量连续。如果部分模块错误码不足，可以再分配一个区间。
    
 
