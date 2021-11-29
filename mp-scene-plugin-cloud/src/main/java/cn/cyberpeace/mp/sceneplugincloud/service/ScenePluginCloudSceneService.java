@@ -50,12 +50,6 @@ public class ScenePluginCloudSceneService {
             )
     );
 
-    public static final List<String> AVAILABLE_CLOUD_ELEMENT_GROUP_COUNT_FIELDS = Arrays.asList(
-            BeanUtils.getBeanGetterFieldNames(
-                    BaseCloudPluginSceneElementModel::getVirtualType
-            )
-    );
-
     private CloudPluginSceneElementMapper cloudPluginSceneElementMapper;
 
     @Data
@@ -106,6 +100,49 @@ public class ScenePluginCloudSceneService {
             connectionLinkInfoMap.putAll(collectConnectionLinkInfo(sceneId, nodeIds));
         }
         return connectionLinkInfoMap;
+    }
+
+    /**
+     * 分组查询指定字段的聚合统计数量
+     * @param sceneIds 场景id列表，不传默认为全部
+     * @param nodeIds 节点id列表，不传默认为全部
+     * @param filterIn in过滤条件 Map<字段, 字段值范围>
+     * @param groupFieldName 分组聚合字段
+     * @param <T> 分组聚合字段的值类型
+     * @return 字段的聚合统计数量 Map<字段值, 该字段值统计数量>
+     */
+    private <T> ServiceResult<Map<T, Integer>> groupCountElement(List<String> sceneIds, List<String> nodeIds,
+                                                                 Map<String, List<?>> filterIn, String groupFieldName) {
+        var condition = new HumanCondition()
+                .link(SceneModel.class, CloudPluginSceneElementModel.class)
+                .filterLink(SceneModel.class, SceneModel::getId,
+                        CloudPluginSceneElementModel.class, CloudPluginSceneElementModel::getScene)
+                .currentLink(SceneModel.class)
+                .filterEqual(SceneModel::getDeleted, false)
+                .currentLink(CloudPluginSceneElementModel.class);
+        if (!CollectionUtils.isEmpty(sceneIds)) {
+            condition.filterIn(CloudPluginSceneElementModel::getScene, sceneIds.toArray(new String[0]));
+        }
+        if (!CollectionUtils.isEmpty(nodeIds)) {
+            condition.filterIn(CloudPluginSceneElementModel::getSceneElement, nodeIds.toArray(new String[0]));
+        }
+        if (filterIn != null) {
+            filterIn.forEach((fieldName, value) -> {
+                if (AVAILABLE_CLOUD_ELEMENT_FILTER_IN_FIELDS.contains(fieldName)) {
+                    condition.filterIn(fieldName, value.toArray());
+                }
+            });
+        }
+
+        Map<T, Integer> result;
+        try {
+            result = StatCommon.groupCount(cloudPluginSceneElementMapper, condition, groupFieldName);
+        } catch (Exception e) {
+            log.error("Group count cloud element on field {} error: {}", groupFieldName, e);
+            throw new MpRuntimeException(BaseErrorCode.ERROR, e);
+        }
+
+        return new ServiceResult<>(result);
     }
 
     @Autowired
@@ -249,50 +286,29 @@ public class ScenePluginCloudSceneService {
     }
 
     /**
-     * 分组查询指定字段的聚合统计数量
+     * 分组查询host的聚合统计数量
      * @param sceneIds 场景id列表，不传默认为全部
      * @param nodeIds 节点id列表，不传默认为全部
      * @param filterIn in过滤条件 Map<字段, 字段值范围>
-     * @param groupFieldName 分组聚合字段
-     * @param <T> 分组聚合字段的值类型
-     * @return 字段的聚合统计数量 Map<字段值, 该字段值统计数量>
+     * @return 字段的聚合统计数量 Map<host, 该字段值统计数量>
      */
-    public <T> ServiceResult<Map<T, Integer>> groupCountElement(List<String> sceneIds, List<String> nodeIds,
-                                                                Map<String, List<?>> filterIn, String groupFieldName) {
-        if (!AVAILABLE_CLOUD_ELEMENT_GROUP_COUNT_FIELDS.contains(groupFieldName)) {
-            throw new MpRuntimeException(CloudErrorCode.INVALID_GROUP_COUNT_FIELD);
-        }
+    public ServiceResult<Map<String, Integer>> groupCountElementByHost(
+            List<String> sceneIds, List<String> nodeIds, Map<String, List<?>> filterIn) {
+        return groupCountElement(sceneIds, nodeIds, filterIn,
+                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getHost));
+    }
 
-        var condition = new HumanCondition()
-                .link(SceneModel.class, CloudPluginSceneElementModel.class)
-                .filterLink(SceneModel.class, SceneModel::getId,
-                        CloudPluginSceneElementModel.class, CloudPluginSceneElementModel::getScene)
-                .currentLink(SceneModel.class)
-                .filterEqual(SceneModel::getDeleted, false)
-                .currentLink(CloudPluginSceneElementModel.class);
-        if (!CollectionUtils.isEmpty(sceneIds)) {
-            condition.filterIn(CloudPluginSceneElementModel::getScene, sceneIds.toArray(new String[0]));
-        }
-        if (!CollectionUtils.isEmpty(nodeIds)) {
-            condition.filterIn(CloudPluginSceneElementModel::getSceneElement, nodeIds.toArray(new String[0]));
-        }
-        if (filterIn != null) {
-            filterIn.forEach((fieldName, value) -> {
-                if (AVAILABLE_CLOUD_ELEMENT_FILTER_IN_FIELDS.contains(fieldName)) {
-                    condition.filterIn(fieldName, value.toArray());
-                }
-            });
-        }
-
-        Map<T, Integer> result;
-        try {
-            result = StatCommon.groupCount(cloudPluginSceneElementMapper, condition, groupFieldName);
-        } catch (Exception e) {
-            log.error("Group count cloud element on field {} error: {}", groupFieldName, e);
-            throw new MpRuntimeException(BaseErrorCode.ERROR, e);
-        }
-
-        return new ServiceResult<>(result);
+    /**
+     * 分组查询虚拟类型的聚合统计数量
+     * @param sceneIds 场景id列表，不传默认为全部
+     * @param nodeIds 节点id列表，不传默认为全部
+     * @param filterIn in过滤条件 Map<字段, 字段值范围>
+     * @return 字段的聚合统计数量 Map<virtualType, 该字段值统计数量>
+     */
+    public ServiceResult<Map<Integer, Integer>> groupCountElementByVirtualType(
+            List<String> sceneIds, List<String> nodeIds, Map<String, List<?>> filterIn) {
+        return groupCountElement(sceneIds, nodeIds, filterIn,
+                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getVirtualType));
     }
 
 }

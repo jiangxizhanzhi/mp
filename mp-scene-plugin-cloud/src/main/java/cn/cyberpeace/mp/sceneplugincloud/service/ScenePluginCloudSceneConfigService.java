@@ -31,18 +31,7 @@ public class ScenePluginCloudSceneConfigService {
             )
     );
 
-    public static final List<String> AVAILABLE_CLOUD_ELEMENT_GROUP_COUNT_FIELDS = Arrays.asList(
-            BeanUtils.getBeanGetterFieldNames(
-                    BaseCloudPluginSceneElementModel::getVirtualType
-            )
-    );
-
     private CloudPluginSceneConfigElementMapper cloudPluginSceneConfigElementMapper;
-
-    @Autowired
-    public ScenePluginCloudSceneConfigService(CloudPluginSceneConfigElementMapper cloudPluginSceneConfigElementMapper) {
-        this.cloudPluginSceneConfigElementMapper = cloudPluginSceneConfigElementMapper;
-    }
 
     /**
      * 分组查询指定字段的聚合统计数量
@@ -53,16 +42,12 @@ public class ScenePluginCloudSceneConfigService {
      * @param <T> 分组聚合字段的值类型
      * @return 字段的聚合统计数量 Map<字段值, 该字段值统计数量>
      */
-    public <T> ServiceResult<Map<T, Integer>> groupCountElement(List<String> sceneIds, List<String> nodeIds,
-                                                                Map<String, List<?>> filterIn, String groupFieldName) {
-        if (!AVAILABLE_CLOUD_ELEMENT_GROUP_COUNT_FIELDS.contains(groupFieldName)) {
-            throw new MpRuntimeException(CloudErrorCode.INVALID_GROUP_COUNT_FIELD);
-        }
-
+    private <T> ServiceResult<Map<T, Integer>> groupCountElement(List<String> sceneIds, List<String> nodeIds,
+                                                                 Map<String, List<?>> filterIn, String groupFieldName) {
         var condition = new HumanCondition()
                 .link(SceneConfigModel.class, CloudPluginSceneConfigElementModel.class)
                 .filterLink(SceneConfigModel.class, SceneConfigModel::getId,
-                            CloudPluginSceneConfigElementModel.class, CloudPluginSceneConfigElementModel::getScene)
+                        CloudPluginSceneConfigElementModel.class, CloudPluginSceneConfigElementModel::getScene)
                 .currentLink(SceneConfigModel.class)
                 .filterEqual(SceneConfigModel::getDeleted, false)
                 .currentLink(CloudPluginSceneConfigElementModel.class);
@@ -89,6 +74,37 @@ public class ScenePluginCloudSceneConfigService {
         }
 
         return new ServiceResult<>(result);
+    }
+
+    @Autowired
+    public ScenePluginCloudSceneConfigService(CloudPluginSceneConfigElementMapper cloudPluginSceneConfigElementMapper) {
+        this.cloudPluginSceneConfigElementMapper = cloudPluginSceneConfigElementMapper;
+    }
+
+    /**
+     * 分组查询host的聚合统计数量
+     * @param sceneIds 场景id列表，不传默认为全部
+     * @param nodeIds 节点id列表，不传默认为全部
+     * @param filterIn in过滤条件 Map<字段, 字段值范围>
+     * @return 字段的聚合统计数量 Map<host, 该字段值统计数量>
+     */
+    public ServiceResult<Map<String, Integer>> groupCountElementByHost(
+            List<String> sceneIds, List<String> nodeIds, Map<String, List<?>> filterIn) {
+        return groupCountElement(sceneIds, nodeIds, filterIn,
+                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getHost));
+    }
+
+    /**
+     * 分组查询虚拟类型的聚合统计数量
+     * @param sceneIds 场景id列表，不传默认为全部
+     * @param nodeIds 节点id列表，不传默认为全部
+     * @param filterIn in过滤条件 Map<字段, 字段值范围>
+     * @return 字段的聚合统计数量 Map<virtualType, 该字段值统计数量>
+     */
+    public ServiceResult<Map<Integer, Integer>> groupCountElementByVirtualType(
+            List<String> sceneIds, List<String> nodeIds, Map<String, List<?>> filterIn) {
+        return groupCountElement(sceneIds, nodeIds, filterIn,
+                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getVirtualType));
     }
 
 }
