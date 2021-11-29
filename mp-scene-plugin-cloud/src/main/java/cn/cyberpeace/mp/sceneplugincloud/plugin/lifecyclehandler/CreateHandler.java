@@ -31,6 +31,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterCrea
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -62,6 +63,38 @@ public class CreateHandler extends HandlerCommon {
         public static final EventProcess CREATE_VIRTUAL_MACHINE = new EventProcess("create_virtual_machine", "sceneplugincloud.event.create_virtual_machine");
         public static final EventProcess CREATE_CONTAINER = new EventProcess("create_container", "sceneplugincloud.event.create_container");
         public static final EventProcess CREATE_ENTITY_NODE = new EventProcess("create_entity_node", "sceneplugincloud.event.create_entity_node");
+    }
+
+    @Data
+    public static class CloudFirewallRules {
+        private List<VirtualFirewallCreateData.Rule> ingressRules;
+        private List<VirtualFirewallCreateData.Rule> egressRules;
+
+        public static CloudFirewallRules fromSrcRules(List<FirewallRule> srcRules) {
+            List<VirtualFirewallCreateData.Rule> ingressRules = new ArrayList<>();
+            List<VirtualFirewallCreateData.Rule> egressRules = new ArrayList<>();
+            if (srcRules != null) {
+                srcRules.forEach(srcRule -> {
+                    var direction = srcRule.getDirection();
+                    var rule = new VirtualFirewallCreateData.Rule(srcRule.getSourceIpAddress(),
+                            srcRule.getDestinationIpAddress(), srcRule.getSourcePort(),
+                            srcRule.getDestinationPort(), null, srcRule.getProtocol(),
+                            srcRule.getAction());
+                    if (FirewallRuleDirection.INGRESS.equals(direction)) {
+                        ingressRules.add(rule);
+                    } else if (FirewallRuleDirection.EGRESS.equals(direction)) {
+                        egressRules.add(rule);
+                    } else if (FirewallRuleDirection.BOTH.equals(direction)) {
+                        ingressRules.add(rule);
+                        egressRules.add(rule);
+                    }
+                });
+            }
+            var cloudFirewallRules = new CloudFirewallRules();
+            cloudFirewallRules.setIngressRules(ingressRules);
+            cloudFirewallRules.setEgressRules(egressRules);
+            return cloudFirewallRules;
+        }
     }
 
     private void addCloudPort(String portId, CloudPluginSceneElementPortBO cloudPort) {
@@ -151,6 +184,81 @@ public class CreateHandler extends HandlerCommon {
         if (routerVirtualNics != null) {
             routerVirtualNics.forEach(routerVirtualNic -> {
                 cloudElement.setAuxiliaryNetworkRouterIp(routerVirtualNic.getFixedIp());
+            });
+        }
+    }
+
+    /**
+     * 创建默认路由模拟的三层防火墙
+     */
+    private void createVirtualRouterFirewall(CloudPluginSceneElementBO cloudElement) {
+        var srcElement = cloudElement.getSrcElement();
+        List<FirewallRule> srcRules = cloudElement.getFirewallRules();
+        // 创建节点全局防火墙，对节点上所有端口生效，增加端口注意同步此数据
+        if (srcRules != null && !srcRules.isEmpty()) {
+            // 防火墙的虚拟路由端口
+            Set<String> targetPorts = new HashSet<>();
+            var cloudPorts = getPluginHandler().getPorts(cloudElement);
+            for (var cloudPort : cloudPorts) {
+                if (StringUtils.isEmpty(cloudPort.getResourceId())) {
+                    continue;
+                }
+                targetPorts.add(cloudPort.getResourceId());
+            }
+
+            if (!targetPorts.isEmpty()) {
+                var createData = new VirtualFirewallCreateData();
+                createData.setName(genResourceName(srcElement.getEid()));
+                var cloudFirewallRules = CloudFirewallRules.fromSrcRules(srcRules);
+                createData.setIngressRules(cloudFirewallRules.getIngressRules());
+                createData.setEgressRules(cloudFirewallRules.getEgressRules());
+                createData.setPorts(CollectionUtils.emptyNull(new ArrayList<>(targetPorts)));
+
+                var virtualFirewall = vfClient.create(createData);
+                cloudElement.setFirewallResourceId(virtualFirewall.getId());
+            }
+        }
+
+        createVirtualRouterGroupPortFirewall(cloudElement);
+    }
+
+    private void createVirtualRouterGroupPortFirewall(CloudPluginSceneElementBO cloudElement) {
+        // 单独创建端口防火墙
+        var groupPortsMap = getCloudElementGroupPorts(cloudElement);
+        for (var groupPorts : groupPortsMap.values()) {
+            // 防火墙的虚拟路由端口
+            Set<String> targetPorts = new HashSet<>();
+            List<FirewallRule> srcRules = new ArrayList<>();
+            List<CloudPluginSceneElementPortBO> cloudPorts = new ArrayList<>();
+            groupPorts.forEach(srcPort -> {
+                var cloudPort = getPluginHandler().getPort(srcPort.getId());
+                if (cloudPort == null) {
+                    return;
+                }
+                cloudPorts.add(cloudPort);
+                if (!StringUtils.isEmpty(cloudPort.getResourceId())) {
+                    targetPorts.add(cloudPort.getResourceId());
+                }
+                var portSrcRules = cloudPort.getFirewallRules();
+                if (portSrcRules != null) {
+                    srcRules.addAll(portSrcRules);
+                }
+            });
+            if (targetPorts.isEmpty() || srcRules == null || srcRules.isEmpty()) {
+                continue;
+            }
+
+            var srcElement = cloudElement.getSrcElement();
+            var createData = new VirtualFirewallCreateData();
+            createData.setName(genResourceName(srcElement.getEid()));
+            var cloudFirewallRules = CloudFirewallRules.fromSrcRules(srcRules);
+            createData.setIngressRules(cloudFirewallRules.getIngressRules());
+            createData.setEgressRules(cloudFirewallRules.getEgressRules());
+            createData.setPorts(CollectionUtils.emptyNull(new ArrayList<>(targetPorts)));
+
+            var virtualFirewall = vfClient.create(createData);
+            cloudPorts.forEach(cloudPort -> {
+                cloudPort.setFirewallResourceId(virtualFirewall.getId());
             });
         }
     }
@@ -471,26 +579,9 @@ public class CreateHandler extends HandlerCommon {
         createData.setName(genResourceName(srcElement.getEid()));
         var srcRules = cloudElement.getFirewallRules();
         if (srcRules != null && !srcRules.isEmpty()) {
-            List<VirtualFirewallCreateData.Rule> ingressRules = new ArrayList<>();
-            List<VirtualFirewallCreateData.Rule> egressRules = new ArrayList<>();
-            srcRules.forEach(srcRule -> {
-                var direction = srcRule.getDirection();
-                var rule = new VirtualFirewallCreateData.Rule(srcRule.getSourceIpAddress(),
-                        srcRule.getDestinationIpAddress(), srcRule.getSourcePort(),
-                        srcRule.getDestinationPort(), null, srcRule.getProtocol(),
-                        srcRule.getAction());
-                if (FirewallRuleDirection.INGRESS.equals(direction)) {
-                    ingressRules.add(rule);
-                } else if (FirewallRuleDirection.EGRESS.equals(direction)) {
-                    egressRules.add(rule);
-                } else if (FirewallRuleDirection.BOTH.equals(direction)) {
-                    ingressRules.add(rule);
-                    egressRules.add(rule);
-                }
-
-            });
-            createData.setIngressRules(ingressRules);
-            createData.setEgressRules(egressRules);
+            var cloudFirewallRules = CloudFirewallRules.fromSrcRules(srcRules);
+            createData.setIngressRules(cloudFirewallRules.getIngressRules());
+            createData.setEgressRules(cloudFirewallRules.getEgressRules());
         }
 
         // 防火墙连接的虚拟路由端口
@@ -569,61 +660,6 @@ public class CreateHandler extends HandlerCommon {
         receiveEntityInterfaceInfo(cloudElement, entityNode.getInterfaces());
 
         checkAccessModes(cloudElement);
-    }
-
-    /**
-     * 创建默认路由模拟的三层防火墙
-     */
-    private void createVirtualRouterFirewall(CloudPluginSceneElementBO cloudElement) {
-        var srcElement = cloudElement.getSrcElement();
-        var createData = new VirtualFirewallCreateData();
-        createData.setName(genResourceName(srcElement.getEid()));
-        List<FirewallRule> srcRules = cloudElement.getFirewallRules();
-        srcRules = srcRules == null ? new ArrayList<>() : srcRules;
-        var cloudPorts = getPluginHandler().getPorts(cloudElement);
-        for (var cloudPort : cloudPorts) {
-            var portSrcRules = cloudPort.getFirewallRules();
-            if (portSrcRules != null) {
-                srcRules.addAll(portSrcRules);
-            }
-        }
-        if (srcRules.isEmpty()) {
-            return;
-        }
-
-        List<VirtualFirewallCreateData.Rule> ingressRules = new ArrayList<>();
-        List<VirtualFirewallCreateData.Rule> egressRules = new ArrayList<>();
-        srcRules.forEach(srcRule -> {
-            var direction = srcRule.getDirection();
-            var rule = new VirtualFirewallCreateData.Rule(srcRule.getSourceIpAddress(),
-                    srcRule.getDestinationIpAddress(), srcRule.getSourcePort(),
-                    srcRule.getDestinationPort(), null, srcRule.getProtocol(),
-                    srcRule.getAction());
-            if (FirewallRuleDirection.INGRESS.equals(direction)) {
-                ingressRules.add(rule);
-            } else if (FirewallRuleDirection.EGRESS.equals(direction)) {
-                egressRules.add(rule);
-            } else if (FirewallRuleDirection.BOTH.equals(direction)) {
-                ingressRules.add(rule);
-                egressRules.add(rule);
-            }
-
-        });
-        createData.setIngressRules(ingressRules);
-        createData.setEgressRules(egressRules);
-
-        // 防火墙的虚拟路由端口
-        Set<String> targetPorts = new HashSet<>();
-        for (var cloudPort : cloudPorts) {
-            if (StringUtils.isEmpty(cloudPort.getResourceId())) {
-                continue;
-            }
-            targetPorts.add(cloudPort.getResourceId());
-        }
-        createData.setPorts(CollectionUtils.emptyNull(new ArrayList<>(targetPorts)));
-
-        var virtualFirewall = vfClient.create(createData);
-        cloudElement.setFirewallResourceId(virtualFirewall.getId());
     }
 
     public CreateHandler(CloudScenePluginHandler pluginHandler) {
