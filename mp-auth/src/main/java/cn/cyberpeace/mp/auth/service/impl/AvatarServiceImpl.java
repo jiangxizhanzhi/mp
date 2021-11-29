@@ -55,10 +55,11 @@ public class AvatarServiceImpl extends BaseModelServiceImpl<AvatarModel, AvatarM
     @Autowired
     private UserService userService;
 
+    /*
     @Override
     public List<AvatarModel> listAll() {
         return getModelMapper().listAll();
-    }
+    }*/
 
     @Override
     public boolean deleteAll() {

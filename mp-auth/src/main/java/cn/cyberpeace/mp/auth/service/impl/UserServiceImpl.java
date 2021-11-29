@@ -5,7 +5,6 @@ import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.dto.user.UserRequest;
-import cn.cyberpeace.mp.auth.model.AvatarModel;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.OrgUserModel;
 import cn.cyberpeace.mp.auth.model.RoleModel;
@@ -226,7 +225,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
         createCheckService.check(userModel);
 
-        initDefaultAvatar(userModel);
+        userModel.setAvatar(AuthConstant.USER_DEFAULT_IMG);
         // create中会对密码加密，外层不需要再次加密
         ObjServiceResult<UserModel> result = create(userModel);
         ResultUtils.throwExceptionIfError(result, "创建用户失败！");
@@ -557,12 +556,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Transactional(rollbackFor = Exception.class)
     public void importExcel(List<ImportUser> list) {
         // 初始化默认头像信息
-        List<AvatarModel> avatarModels = avatarService.listAll();
-        String defaultAvatarUrl = null;
-        if (CollectionUtil.isNotEmpty(avatarModels)) {
-            defaultAvatarUrl = avatarModels.get(0).getUrl();
-        }
-
         for (ImportUser importUser : list) {
             // 1.保存用户信息
             UserModel userModel = importUser2UserModel(importUser);
@@ -570,7 +563,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                 continue;
             }
 
-            userModel.setAvatar(defaultAvatarUrl);
+            userModel.setAvatar(AuthConstant.USER_DEFAULT_IMG);
             var result = create(userModel);
             ResultUtils.throwExceptionIfError(result, "创建用户失败！");
             UserModel userCreated = result.getSource().getObj();
@@ -758,17 +751,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     public void setModelMapper(UserMapper modelMapper) {
         super.setModelMapper(modelMapper);
-    }
-
-    @Override
-    public void initDefaultAvatar(UserModel userModel) {
-        if (Objects.isNull(userModel) || StringUtils.isNotBlank(userModel.getAvatar())) {
-            return;
-        }
-        List<AvatarModel> avatarModels = avatarService.listAll();
-        if (CollectionUtil.isNotEmpty(avatarModels)) {
-            userModel.setAvatar(avatarModels.get(0).getUrl());
-        }
     }
 
     @Override

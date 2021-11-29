@@ -17,7 +17,7 @@ import java.util.Map;
  */
 public interface AvatarService extends BaseModelService<AvatarModel, QueryParams> {
 
-    List<AvatarModel> listAll();
+//    List<AvatarModel> listAll();
 
     boolean deleteAll();
 

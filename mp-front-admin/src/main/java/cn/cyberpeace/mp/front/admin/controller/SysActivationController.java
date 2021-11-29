@@ -1,11 +1,11 @@
 package cn.cyberpeace.mp.front.admin.controller;
 
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationRequest;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationResponse;
 import cn.cyberpeace.mp.front.admin.dto.activation.VerifyInfoRequest;
 import cn.cyberpeace.mp.front.admin.dto.activation.VerifyInfoResponse;
 import cn.cyberpeace.mp.front.admin.service.sys.SysActivationService;
-import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -74,6 +75,15 @@ public class SysActivationController {
             return ServiceResult.fail("未查询到激活状态信息！");
         }
         return ServiceResult.success(content);
+    }
+
+
+    @ApiOperation("查询激活配置项")
+    @GetMapping("/config_value")
+    public ServiceResult<String> getConfigValue(@RequestParam String key) {
+        String value = activationService.getValueByKey(key);
+
+        return ServiceResult.success(value);
     }
 
 

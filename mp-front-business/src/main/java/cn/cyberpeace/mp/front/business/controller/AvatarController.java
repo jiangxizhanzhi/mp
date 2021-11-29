@@ -1,24 +1,18 @@
 package cn.cyberpeace.mp.front.business.controller;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
-import cn.cyberpeace.mp.auth.model.AvatarModel;
 import cn.cyberpeace.mp.auth.service.AvatarService;
-import cn.cyberpeace.mp.base.controller.BaseModelController;
-import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 /**
  * @Description: 头像管理接口
@@ -34,12 +28,14 @@ public class AvatarController {
     @Autowired
     private AvatarService avatarService;
 
+    /*
     @ApiOperation(value = "查询所有头像", notes = "")
     @GetMapping("/all")
     public ServiceResult<List<AvatarModel>> getAll() {
         List<AvatarModel> avatars = avatarService.listAll();
         return ServiceResult.success(avatars);
     }
+    */
 
 
     @ApiOperation(value = "上传头像，返回url", notes = "")
