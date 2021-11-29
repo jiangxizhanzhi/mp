@@ -3,7 +3,18 @@ package cn.cyberpeace.mp.base.repository.condition.aggregation;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.define.SerializableFunction;
 
+import java.util.function.Function;
+
 public class Count extends Aggregation {
+
+    public static Function<String, String> genDistinct() {
+        return column -> String.format("distinct %s", column);
+    }
+
+    public Aggregation distinct() {
+        setCalc(genDistinct());
+        return this;
+    }
 
     public static Count f(String fieldName) {
         var aggregation = new Count();
