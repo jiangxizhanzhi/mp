@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.base.common;
 
-import cn.cyberpeace.mp.base.bo.GroupCountBO;
+import cn.cyberpeace.mp.base.bo.GroupSizeBO;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.repository.condition.aggregation.Count;
@@ -27,8 +27,8 @@ public class StatCommon {
      * @param <T> 分组聚合字段的值类型
      * @return 字段的聚合count数量 Map<字段值, 该字段值统计数量>
      */
-    public static <T> Map<T, Integer> groupCount(BaseModelMapper<?> mapper, HumanCondition condition,
-                                                 String groupFieldName) {
+    public static <T> Map<T, Long> groupCount(BaseModelMapper<?> mapper, HumanCondition condition,
+                                              String groupFieldName) {
         return groupCount(mapper, condition, groupFieldName, groupFieldName, false);
     }
 
@@ -41,17 +41,17 @@ public class StatCommon {
      * @param <T> 分组聚合字段的值类型
      * @return 字段的聚合count数量 Map<字段值, 该字段值统计数量>
      */
-    public static <T> Map<T, Integer> groupCount(BaseModelMapper<?> mapper, HumanCondition condition,
-                                                 String groupFieldName, String countFieldName, boolean distinct) {
-        condition.selectAs(groupFieldName, GroupCountBO<T>::getTarget).groupBy(groupFieldName);
+    public static <T> Map<T, Long> groupCount(BaseModelMapper<?> mapper, HumanCondition condition,
+                                              String groupFieldName, String countFieldName, boolean distinct) {
+        condition.selectAs(groupFieldName, GroupSizeBO<T>::getTarget).groupBy(groupFieldName);
         if (distinct) {
-            condition.selectAs(Count.f(countFieldName).distinct(), GroupCountBO<T>::getCount);
+            condition.selectAs(Count.f(countFieldName).distinct(), GroupSizeBO<T>::getSize);
         } else {
-            condition.selectAs(Count.f(countFieldName), GroupCountBO<T>::getCount);
+            condition.selectAs(Count.f(countFieldName), GroupSizeBO<T>::getSize);
         }
-        var groupCountBOs = mapper.list(condition, new GroupCountBO<T>().getClass());
+        var groupCountBOs = mapper.list(condition, new GroupSizeBO<T>().getClass());
         return groupCountBOs.stream()
-                .collect(Collectors.toMap(groupCountBO -> (T) groupCountBO.getTarget(), GroupCountBO::getCount));
+                .collect(Collectors.toMap(groupCountBO -> (T) groupCountBO.getTarget(), GroupSizeBO::getSize));
     }
 
     /**
@@ -63,13 +63,13 @@ public class StatCommon {
      * @param <T> 分组聚合字段的值类型
      * @return 字段的聚合count数量 Map<字段值, 该字段值统计数量>
      */
-    public static <T> Map<T, Integer> groupSum(BaseModelMapper<?> mapper, HumanCondition condition,
-                                               String groupFieldName, String sumFieldName) {
-        condition.selectAs(groupFieldName, GroupCountBO<T>::getTarget).groupBy(groupFieldName);
-        condition.selectAs(Sum.f(sumFieldName), GroupCountBO<T>::getCount);
-        var groupCountBOs = mapper.list(condition, new GroupCountBO<T>().getClass());
+    public static <T> Map<T, Long> groupSum(BaseModelMapper<?> mapper, HumanCondition condition,
+                                            String groupFieldName, String sumFieldName) {
+        condition.selectAs(groupFieldName, GroupSizeBO<T>::getTarget).groupBy(groupFieldName);
+        condition.selectAs(Sum.f(sumFieldName), GroupSizeBO<T>::getSize);
+        var groupCountBOs = mapper.list(condition, new GroupSizeBO<T>().getClass());
         return groupCountBOs.stream()
-                .collect(Collectors.toMap(groupCountBO -> (T) groupCountBO.getTarget(), GroupCountBO::getCount));
+                .collect(Collectors.toMap(groupCountBO -> (T) groupCountBO.getTarget(), GroupSizeBO::getSize));
     }
 
     /**

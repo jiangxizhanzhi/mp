@@ -68,29 +68,29 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     }
 
     private int getActiveVirtualDeviceCount() {
-        Map<Integer, Integer> elementCountMap = scenePluginCloudSceneService
+        Map<Integer, Long> elementCountMap = scenePluginCloudSceneService
                 .groupCountElementByVirtualType(null, null, null)
                 .getSource();
-        int activeVirtualDeviceCount = elementCountMap.getOrDefault(
-                BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE, 0) +
+        long activeVirtualDeviceCount = elementCountMap.getOrDefault(
+                BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE, 0L) +
                 elementCountMap.getOrDefault(
-                        BaseCloudPluginSceneElementModel.VirtualType.CONTAINER, 0) +
+                        BaseCloudPluginSceneElementModel.VirtualType.CONTAINER, 0L) +
                 elementCountMap.getOrDefault(
-                        BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE, 0);
-        return activeVirtualDeviceCount;
+                        BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE, 0L);
+        return (int) activeVirtualDeviceCount;
     }
 
     private int getSceneConfigVirtualDeviceCount(String sceneConfigId) {
-        Map<Integer, Integer> elementCountMap = scenePluginCloudSceneConfigService
+        Map<Integer, Long> elementCountMap = scenePluginCloudSceneConfigService
                 .groupCountElementByVirtualType(List.of(sceneConfigId), null, null)
                 .getSource();
-        int virtualDeviceCount = elementCountMap.getOrDefault(
-                BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE, 0) +
+        long virtualDeviceCount = elementCountMap.getOrDefault(
+                BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE, 0L) +
                 elementCountMap.getOrDefault(
-                        BaseCloudPluginSceneElementModel.VirtualType.CONTAINER, 0) +
+                        BaseCloudPluginSceneElementModel.VirtualType.CONTAINER, 0L) +
                 elementCountMap.getOrDefault(
-                        BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE, 0);
-        return virtualDeviceCount;
+                        BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE, 0L);
+        return (int) virtualDeviceCount;
     }
 
     private void checkSceneEditNodeLimit(int count) {

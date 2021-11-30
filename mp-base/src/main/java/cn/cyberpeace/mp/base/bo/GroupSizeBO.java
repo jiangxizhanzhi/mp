@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.base.bo;
 import lombok.Data;
 
 @Data
-public class GroupCountBO<T> {
+public class GroupSizeBO<T> {
     private T target;
-    private Integer count;
+    private Long size;
 }
