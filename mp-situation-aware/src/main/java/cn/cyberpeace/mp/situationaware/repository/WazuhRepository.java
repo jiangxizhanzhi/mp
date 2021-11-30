@@ -2,7 +2,8 @@ package cn.cyberpeace.mp.situationaware.repository;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
-import cn.cyberpeace.mp.situationaware.model.DataCollectAgent;
+import cn.cyberpeace.mp.situationaware.model.WazuhAgentModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhAgentPortsModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhFileRoot;
 import cn.cyberpeace.mp.situationaware.model.WazuhNetifaceRoot;
 import cn.cyberpeace.mp.situationaware.model.WazuhRamRoot;
@@ -104,31 +105,34 @@ public class WazuhRepository {
     /**
      * 查询agentPort
      * @param agents agents
-     * @return  结果
+     * @return  端口号
      */
-    public String queryAgentsPorts(List<String> agents) {
+    public List<WazuhAgentPortsModel> queryAgentsPorts(List<String> agents) {
+        List<WazuhAgentPortsModel> agentPortsModels = Lists.newArrayList();
         if (CollectionUtils.isEmpty(agents)) {
-            return "";
+            return agentPortsModels;
         }
         List<String> agentIds = queryAgentIdByAgentName(agents);
         var requestUri = "/experimental/syscollector/ports";
         var requestUrl = wazuhUrl + requestUri + "?agents_list=" + String.join(",", agentIds);
 
-        String res = null;
         try {
-            res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
-        } catch (IOException e) {
-            e.printStackTrace();
+            var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
+            JSONArray agentArray = (JSONArray) JSONPath.eval(JSON.parse(res), "$.data.affected_items");
+            agentPortsModels = agentArray.toJavaList(WazuhAgentPortsModel.class);
+        } catch (Exception e) {
+            log.error(SituationalAwareErrorCode.WAZUH_AGENTS_QUERY_PORT_ERROR.getMessage());
+            throw new MpRuntimeException(SituationalAwareErrorCode.WAZUH_AGENTS_QUERY_PORT_ERROR, ExceptionUtils.getStackTrace(e));
         }
-        return res;
+        return agentPortsModels;
     }
 
     /**
      * 查询所有agent信息
      * @return
      */
-    public List<DataCollectAgent> queryAllAgents() {
-        List<DataCollectAgent> collectAgents = Lists.newArrayList();
+    public List<WazuhAgentModel> queryAllAgents() {
+        List<WazuhAgentModel> collectAgents = Lists.newArrayList();
 
         var requestUri = "/agents";
         var requestUrl = wazuhUrl + requestUri;
@@ -136,7 +140,7 @@ public class WazuhRepository {
         try {
             res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
             JSONArray agentArray = (JSONArray) JSONPath.eval(JSON.parse(res), "$.data.affected_items");
-            collectAgents = agentArray.toJavaList(DataCollectAgent.class);
+            collectAgents = agentArray.toJavaList(WazuhAgentModel.class);
         } catch (Exception e) {
             log.error(SituationalAwareErrorCode.WAZUH_AGENTS_QUERY_ERROR.getMessage() + "{}",ExceptionUtils.getMessage(e));
             throw new MpRuntimeException(SituationalAwareErrorCode.WAZUH_AGENTS_QUERY_ERROR, ExceptionUtils.getStackTrace(e));
@@ -147,7 +151,7 @@ public class WazuhRepository {
 
 
     public List<String> queryAgentIdByAgentName(List<String> agentNames) {
-        List<DataCollectAgent> collectAgents = queryAllAgents();
-        return collectAgents.stream().filter(agent -> agentNames.contains(agent.getName())).map(DataCollectAgent::getId).collect(Collectors.toList());
+        List<WazuhAgentModel> collectAgents = queryAllAgents();
+        return collectAgents.stream().filter(agent -> agentNames.contains(agent.getName())).map(WazuhAgentModel::getId).collect(Collectors.toList());
     }
 }

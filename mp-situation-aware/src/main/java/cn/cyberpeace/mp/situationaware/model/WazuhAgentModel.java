@@ -8,7 +8,7 @@ import java.util.Date;
   *@Author zhangjin
   *@Date 11/30/21 2:16 下午
 **/
-public class DataCollectAgent {
+public class WazuhAgentModel {
     private String ip;
     @JSONField(name = "node_name")
     private String nodeName;

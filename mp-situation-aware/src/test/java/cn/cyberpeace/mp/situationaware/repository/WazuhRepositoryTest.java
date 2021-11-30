@@ -2,6 +2,8 @@ package cn.cyberpeace.mp.situationaware.repository;
 
 import cn.cyberpeace.mp.situationaware.TestSituationAwareApplciation;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
+import cn.cyberpeace.mp.situationaware.model.WazuhAgentModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhAgentPortsModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhNetifaceRoot;
 import cn.cyberpeace.mp.situationaware.model.WazuhRamRoot;
 import java.io.IOException;
@@ -57,13 +59,15 @@ public class WazuhRepositoryTest {
     @Test
     public void testQueryAgentsPorts() {
         List<String> agentIds = Lists.newArrayList("windows_agent1");
-        wazuhRepository.queryAgentsPorts(agentIds);
+        List<WazuhAgentPortsModel> wazuhAgentModels =wazuhRepository.queryAgentsPorts(agentIds);
+        Assert.isTrue(wazuhAgentModels.size() > 0, "");
     }
 
 
     @Test
     public void testQueryAllAgents() {
-        wazuhRepository.queryAllAgents();
+         wazuhRepository.queryAllAgents();
+
     }
 
     @Test
