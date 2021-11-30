@@ -534,10 +534,12 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         // 更新流量信息
         ObjServiceResult<FlowInfoModel> serviceResult = update(flowInfoModel);
 
-        // 批量更新流量脚本参数
+        // 更新脚本参数时，先删除旧参数，再重新保存新参数
         List<FlowScriptParamModel> scriptParamModels = modifyRequest.getScriptParamModels();
         if (CollectionUtils.isNotEmpty(scriptParamModels)) {
-            flowScriptParamService.bulkUpdate(scriptParamModels);
+            flowScriptParamService.deleteByFlowId(modifyRequest.getId());
+            scriptParamModels.forEach(model -> model.setFlowId(modifyRequest.getId()));
+            flowScriptParamService.bulkCreate(scriptParamModels);
         }
 
         FastDfsConfig.Group group = fastDfsConfig.getGroupByName(FdfsGroupEnum.DEFAULT);
