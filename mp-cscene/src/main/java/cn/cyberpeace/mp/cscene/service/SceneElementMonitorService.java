@@ -3,10 +3,10 @@ package cn.cyberpeace.mp.cscene.service;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
+import cn.cyberpeace.mp.cscene.dto.element.ElementPort;
 import cn.cyberpeace.mp.cscene.dto.element.ElementRTInfo;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
-import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import lombok.extern.slf4j.Slf4j;
@@ -120,8 +120,8 @@ public class SceneElementMonitorService {
         basicInfo.setHostState(resource);
 
         // ip地址
-        List<String> ipList = sceneElementBO.getPorts().stream().map(BaseSceneElementPortBO::getIp).collect(Collectors.toList());
-        basicInfo.setIps(ipList);
+//        List<String> ipList = sceneElementBO.getPorts().stream().map(BaseSceneElementPortBO::getIp).collect(Collectors.toList());
+//        basicInfo.setIps(ipList);
 
         // ID
         basicInfo.setId(sceneElementBO.getId());
@@ -133,14 +133,16 @@ public class SceneElementMonitorService {
         basicInfo.setSystemType(sceneElementBO.getSystemType());
 
 
-        // 用户
-        /*var ports = sceneElementBO.getPorts();
-        for (SceneElementPortBO port : ports) {
-
-        }*/
-        // 登录方式
-
-        basicInfo.setPorts(sceneElementBO.getPorts());
+        // ip, 用户名，登录方式
+        var ports = sceneElementBO.getPorts();
+        List<ElementPort> ePorts = ports.stream().map(p -> {
+            ElementPort port = new ElementPort();
+            port.setIp(p.getIp());
+            port.setName(p.getName());
+            port.setAccessModes(p.getAccessModes());
+            return port;
+        }).collect(Collectors.toList());
+        basicInfo.setPorts(ePorts);
 
     }
 

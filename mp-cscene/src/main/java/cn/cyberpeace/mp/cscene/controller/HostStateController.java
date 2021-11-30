@@ -53,6 +53,7 @@ public class HostStateController {
     public ServiceResult<List<HostState>> getElementHostStateTrend(HostStateTrendSceneElementRequest hostStateTrendRequest) {
         log.info("hostStateTrendRequest:{}", hostStateTrendRequest);
 
+
         return null;
     }
 
