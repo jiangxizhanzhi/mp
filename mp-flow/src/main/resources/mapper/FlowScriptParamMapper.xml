@@ -21,16 +21,16 @@
         </where>
     </select>
 
-    <select id="deleteByFlowId">
+    <delete id="deleteByFlowId">
         delete from mp_flow_script_param where flow_id = #{flowId}
-    </select>
+    </delete>
 
-    <select id="deleteByFlowIds">
+    <delete id="deleteByFlowIds">
         delete from mp_flow_script_param
         where flow_id in
         <foreach item="id" index="index" collection="flowIds" open="(" separator="," close=")">
             #{id}
         </foreach>
-    </select>
+    </delete>
 
 </mapper>

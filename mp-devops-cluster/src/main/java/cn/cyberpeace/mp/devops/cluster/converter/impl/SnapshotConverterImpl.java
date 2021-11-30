@@ -55,12 +55,13 @@ public class SnapshotConverterImpl implements SnapshotConverter {
             return null;
         }
         List<SnapshotConvertModel> resultList = new ArrayList<>();
-        resultList.add(new SnapshotConvertModel(model.getDeviceUuid(), model.getDeviceName(), model.getDeviceName(), model.getDeviceUuid(),
-                "", null));
+        SnapshotConvertModel snapshotConvertModel = new SnapshotConvertModel(model.getDeviceUuid(), model.getDeviceName(), model.getDeviceName(), model.getDeviceUuid(),
+                "", null);
         DeviceAndSnapshotConvertModel convertModel = new DeviceAndSnapshotConvertModel();
         convertModel.setDeviceName(model.getDeviceName());
         convertModel.setDeviceUuid(model.getDeviceUuid());
         if (CollectionUtils.isEmpty(model.getSnapshots())){
+            resultList.add(snapshotConvertModel);
             convertModel.setItems(resultList);
             return convertModel;
         }
@@ -70,6 +71,7 @@ public class SnapshotConverterImpl implements SnapshotConverter {
                         TimeUtils.utcStringToLocalDateTime(item.getCreatedAt())))
                 .collect(Collectors.toList());
         resultList.addAll(list);
+        resultList.add(snapshotConvertModel);
         convertModel.setItems(resultList);
         return convertModel;
     }

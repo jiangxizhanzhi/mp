@@ -23,6 +23,8 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.IndicesOptions;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.core.CountRequest;
+import org.elasticsearch.client.core.CountResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
@@ -283,6 +285,27 @@ public class FlowAnalysisService extends AbstractBaseService {
         return Double.valueOf("0");
     }
 
+
+    /**
+     * 统计总数
+     * @param request
+     * @return
+     */
+    public long count(FlowAnalysisRequest request){
+        var boolQueryBuilder = this.buildBoolQueryBuilder(request);
+
+        CountRequest countRequest = new CountRequest();
+        countRequest.indices(this.indices(request.getGroupList(),request.getStartDateTime(),request.getEndDateTime()));
+        countRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
+        countRequest.query(boolQueryBuilder);
+        try {
+            CountResponse countResponse = restHighLevelClient.count(countRequest,RequestOptions.DEFAULT);
+            return countResponse.getCount();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
 
 
     /**
