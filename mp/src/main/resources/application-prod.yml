@@ -34,6 +34,9 @@ spring:
     port: ${RABBITMQ_PORT:5673}
     username: ${RABBITMQ_USERNAME:guest}
     password: ${RABBITMQ_PASSWORD:guest}
+  web:
+    resources:
+      static-locations: file:/home/default_img
 
 
 logging:
