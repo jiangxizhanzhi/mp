@@ -19,7 +19,8 @@ public enum SituationalAwareErrorCode implements ErrorCode {
     ARKIME_DELETE_ERROR("MP-110409", "delete instance add error"),
     ADD_FLOWTABLE_ERROR("MP-110410", "add flow table error"),
     DELETE_FLOWTABLE_ERROR("MP-110411", "delete flow table error"),
-    BINDING_MIRROR_ERROR("MP-110412", "binding flow mirror error");
+    BINDING_MIRROR_ERROR("MP-110412", "binding flow mirror error"),
+    WAZUH_AGENTS_QUERY_ERROR("MP-110413", "wazuh agents query error");
 
     SituationalAwareErrorCode(String code, String message) {
         setCode(code, message);
