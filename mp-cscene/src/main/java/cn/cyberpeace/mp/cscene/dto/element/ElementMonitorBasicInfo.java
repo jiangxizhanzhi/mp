@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.dto.element;
 
+import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -42,5 +43,7 @@ public class ElementMonitorBasicInfo {
     @ApiModelProperty(value = "节点资源配置信息")
     private HostState hostState;
 
+    @ApiModelProperty(value = "节点资源配置信息")
+    private List<SceneElementPortBO> ports;
 
 }

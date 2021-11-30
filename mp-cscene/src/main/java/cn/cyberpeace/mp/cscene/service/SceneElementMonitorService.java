@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.cscene.service;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
+import cn.cyberpeace.mp.cscene.dto.element.ElementRTInfo;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementPortBO;
@@ -54,6 +55,15 @@ public class SceneElementMonitorService {
 
         return elementMonitorBasicInfo;
     }
+
+
+    public ElementRTInfo getElementRTInfo(String sceneId, String elementId) {
+        log.info("sceneId:{}, elementId:{}", sceneId, elementId);
+
+
+        return null;
+    }
+
 
     public void processTopologyElement(ElementMonitorBasicInfo basicInfo, CsceneInstanceBO csceneInstanceBO, String elementId) {
         if (Objects.isNull(csceneInstanceBO)
@@ -119,6 +129,16 @@ public class SceneElementMonitorService {
         // 操作系统
         // 参考SystemTypeUtils
         basicInfo.setSystemType(sceneElementBO.getSystemType());
+
+
+        // 用户
+        /*var ports = sceneElementBO.getPorts();
+        for (SceneElementPortBO port : ports) {
+
+        }*/
+        // 登录方式
+
+        basicInfo.setPorts(sceneElementBO.getPorts());
 
     }
 
