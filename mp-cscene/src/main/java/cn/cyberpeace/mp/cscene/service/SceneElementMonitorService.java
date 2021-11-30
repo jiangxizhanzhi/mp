@@ -123,6 +123,8 @@ public class SceneElementMonitorService {
         List<String> ipList = sceneElementBO.getPorts().stream().map(BaseSceneElementPortBO::getIp).collect(Collectors.toList());
         basicInfo.setIps(ipList);
 
+        // ID
+        basicInfo.setId(sceneElementBO.getId());
         // 实例名称
         basicInfo.setName(sceneElementBO.getName());
 
