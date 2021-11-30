@@ -115,6 +115,13 @@ public class FlowTaskModel extends BaseModel {
     private Integer taskStatus;
 
     /**
+     * 实际运行次数
+     */
+    @ApiModelProperty(value = "实际运行次数")
+    @DefaultInt()
+    private Integer runningCount;
+
+    /**
      * 源ip范围
      */
     @ApiModelProperty(value = "源ip范围")
