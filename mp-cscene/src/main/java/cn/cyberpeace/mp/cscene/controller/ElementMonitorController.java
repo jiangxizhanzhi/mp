@@ -5,13 +5,13 @@ import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.element.ElementRTInfo;
+import cn.cyberpeace.mp.cscene.dto.element.ProcessState;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.SceneElementMonitorService;
 import cn.hutool.core.collection.CollectionUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.elasticsearch.monitor.process.ProcessInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -74,7 +74,7 @@ public class ElementMonitorController {
 
     @ApiOperation(value = "查询节点进程信息")
     @GetMapping("/process")
-    public ServiceResult<ProcessInfo> getSceneElementMonitorInfo(BaseSceneElementRequest baseRequest) {
+    public ServiceResult<ProcessState> getProcessState(BaseSceneElementRequest baseRequest) {
         log.info("{}", baseRequest);
 
         return null;
