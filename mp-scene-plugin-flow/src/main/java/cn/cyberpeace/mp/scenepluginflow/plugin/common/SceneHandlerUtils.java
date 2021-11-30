@@ -55,6 +55,7 @@ public class SceneHandlerUtils {
                     successOffFLow(flow);
                 });
             } catch (Exception e) {
+                log.error("start flow for taskId:[{}] error", taskId, e);
                 errorFLow(flow, e.getMessage());
                 return false;
             }
