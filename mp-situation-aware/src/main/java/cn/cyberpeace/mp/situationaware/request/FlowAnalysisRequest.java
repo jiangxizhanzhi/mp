@@ -60,9 +60,9 @@ public class FlowAnalysisRequest {
     private String sourcePort;
 
     /**
-     * 源Mac地址
+     * 源Mac地址集合
      */
-    private String sourceMac;
+    private List<String> sourceMacs;
 
     /**
      * 目标IP

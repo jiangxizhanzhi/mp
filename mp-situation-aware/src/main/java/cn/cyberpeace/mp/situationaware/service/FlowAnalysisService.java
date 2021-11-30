@@ -331,8 +331,8 @@ public class FlowAnalysisService extends AbstractBaseService {
             boolQueryBuilder.must(QueryBuilders.termQuery("source.port", request.getSourcePort()));
         }
 
-        if (StringUtils.isNotBlank(request.getSourceMac())) {
-            boolQueryBuilder.must(QueryBuilders.termQuery("source.mac", request.getSourceMac()));
+        if (CollectionUtils.isNotEmpty(request.getSourceMacs())) {
+            boolQueryBuilder.must(QueryBuilders.termQuery("source.mac", request.getSourceMacs()));
         }
 
         if (StringUtils.isNotBlank(request.getDestinationIp())) {
