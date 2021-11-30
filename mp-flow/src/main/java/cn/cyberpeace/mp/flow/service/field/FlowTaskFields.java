@@ -19,7 +19,7 @@ public class FlowTaskFields extends BaseModelFields {
     public static final DynamicFields searchFields = new DynamicFields(FlowTaskModel::getTitle, FlowTaskModel::getTaskDesc, FlowTaskModel::getTaskStatus,
             FlowTaskModel::getFlowId, FlowTaskModel::getFlowPlatform, FlowTaskModel::getThirdFlowId, FlowTaskModel::getThirdFlowName, FlowTaskModel::getCount,
             FlowTaskModel::getDelay, FlowTaskModel::getIntervalTime, FlowTaskModel::getOriginIps, FlowTaskModel::getTargetIps,
-            FlowTaskModel::getActuatorId, FlowTaskModel::getThirdTaskId, FlowTaskModel::getFlowPortId);
+            FlowTaskModel::getActuatorId, FlowTaskModel::getThirdTaskId, FlowTaskModel::getFlowPortId, FlowTaskModel::getRunningCount);
 
     public static final DynamicFields orderFields = new DynamicFields(new String[]{}).merge(BaseModelFields.readonlyFields);
 }

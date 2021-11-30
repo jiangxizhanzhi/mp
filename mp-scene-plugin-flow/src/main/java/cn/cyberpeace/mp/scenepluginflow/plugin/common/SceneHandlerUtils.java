@@ -7,9 +7,11 @@ import cn.cyberpeace.mp.scenepluginflow.bo.base.Flow;
 import cn.cyberpeace.mp.scenepluginflow.plugin.FlowScenePluginHandler;
 import cn.cyberpeace.mp.scenepluginflow.plugin.flow.FlowExecutor;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 @Data
+@Slf4j
 public class SceneHandlerUtils {
 
     private FlowScenePluginHandler pluginHandler;
@@ -48,6 +50,7 @@ public class SceneHandlerUtils {
         var taskId = flow.getTaskId();
         if (!StringUtils.isEmpty(taskId)) {
             try {
+                log.info("start flow for taskId:[{}]", taskId);
                 flowExecutor.startFlow(taskId, () -> {
                     successOffFLow(flow);
                 });
@@ -57,7 +60,10 @@ public class SceneHandlerUtils {
             }
             successOnFLow(flow);
             return true;
+        } else {
+            log.info("taskId is empty");
         }
+
         var flowId = flow.getId();
         if (StringUtils.isEmpty(flowId)) {
             errorFLow(flow, "Empty flow id");
@@ -107,6 +113,7 @@ public class SceneHandlerUtils {
 
         try {
             taskId = flowExecutor.createFlow(executorId, networkId, flowId, StringUtils.EMPTY, ip, null, null, null);
+            log.info("flowExecutor createFlow success:[{}]", taskId);
         } catch (Exception e) {
             errorFLow(flow, e.getMessage());
             return false;
