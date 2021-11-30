@@ -323,8 +323,8 @@ public class FlowAnalysisService extends AbstractBaseService {
             boolQueryBuilder.filter(QueryBuilders.termsQuery("suricata.severity", severityList));
         }
 
-        if (StringUtils.isNotBlank(request.getSourceIp())) {
-            boolQueryBuilder.must(QueryBuilders.termQuery("source.ip", request.getSourceIp()));
+        if (CollectionUtils.isNotEmpty(request.getSourceIps())) {
+            boolQueryBuilder.must(QueryBuilders.termQuery("source.ip", request.getSourceIps()));
         }
 
         if (StringUtils.isNotBlank(request.getSourcePort())) {
@@ -335,8 +335,8 @@ public class FlowAnalysisService extends AbstractBaseService {
             boolQueryBuilder.must(QueryBuilders.termQuery("source.mac", request.getSourceMacs()));
         }
 
-        if (StringUtils.isNotBlank(request.getDestinationIp())) {
-            boolQueryBuilder.must(QueryBuilders.termQuery("destination.ip", request.getDestinationIp()));
+        if (CollectionUtils.isNotEmpty(request.getDestinationIps())) {
+            boolQueryBuilder.must(QueryBuilders.termQuery("destination.ip", request.getDestinationIps()));
         }
 
         if (StringUtils.isNotBlank(request.getDestinationPort())) {

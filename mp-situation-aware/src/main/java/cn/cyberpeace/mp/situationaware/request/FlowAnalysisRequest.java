@@ -50,9 +50,9 @@ public class FlowAnalysisRequest {
     private List<String> groupList;
 
     /**
-     * 源IP
+     * 源IP集合
      */
-    private String sourceIp;
+    private List<String> sourceIps;
 
     /**
      * 源端口
@@ -65,9 +65,9 @@ public class FlowAnalysisRequest {
     private List<String> sourceMacs;
 
     /**
-     * 目标IP
+     * 目标IP集合
      */
-    private String destinationIp;
+    private List<String> destinationIps;
 
     /**
      * 支持多协议
