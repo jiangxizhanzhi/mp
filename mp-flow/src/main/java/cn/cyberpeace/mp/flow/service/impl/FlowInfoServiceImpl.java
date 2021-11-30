@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
 import cn.cyberpeace.mp.flow.enums.InteractiveTypeEnum;
+import cn.cyberpeace.mp.flow.enums.ParamTypeEnum;
 import cn.cyberpeace.mp.flow.enums.ResourceTypeEnum;
 import cn.cyberpeace.mp.flow.model.FlowCollectionRelModel;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
@@ -25,6 +26,8 @@ import cn.cyberpeace.mp.flow.response.BackgroundFlowResponse;
 import cn.cyberpeace.mp.flow.response.FlowInfoResponse;
 import cn.cyberpeace.mp.flow.service.FlowInfoService;
 import cn.cyberpeace.mp.flow.service.field.FlowInfoFields;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -324,6 +327,38 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             return ServiceResult.fail(FlowErrorCode.TITLE_UNIQUE);
         }
 
+        // 解析攻击流量脚本参数
+        if (StringUtils.isNotBlank(addRequest.getParameter())) {
+            List<FlowScriptParamModel> scriptParamModels = new ArrayList<>();
+            JSONObject paramObj = JSONObject.parseObject(addRequest.getParameter());
+            paramObj.keySet().forEach(paramKey -> {
+                FlowScriptParamModel paramModel = new FlowScriptParamModel();
+                paramModel.setParamKey(paramKey);
+
+                JSONArray paramArray = paramObj.getJSONArray(paramKey);
+                // 参数类型
+                Integer type;
+                if (ParamTypeEnum.STRING.toString().equals(paramArray.getString(0))) {
+                    type = ParamTypeEnum.STRING.toValue();
+                } else if (ParamTypeEnum.IP.toString().equals(paramArray.getString(0))) {
+                    type = ParamTypeEnum.IP.toValue();
+                } else if (ParamTypeEnum.NUMBER.toString().equals(paramArray.getString(0))) {
+                    type = ParamTypeEnum.NUMBER.toValue();
+                } else {
+                    type = ParamTypeEnum.BOOL.toValue();
+                }
+                paramModel.setParamType(type);
+
+                // 参数值
+                paramModel.setParamValue(paramArray.getString(1));
+                // 参数描述
+                paramModel.setParamDesc(paramArray.getString(2));
+                scriptParamModels.add(paramModel);
+            });
+
+            addRequest.setScriptParamModels(scriptParamModels);
+        }
+
         // 判断是否有文件名，没有则根据脚本语言默认生成一个
         String fileName;
         if (StringUtils.isBlank(addRequest.getFileName())) {
@@ -429,6 +464,38 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             if (InteractiveTypeEnum.ATTACK.toValue() != oldServiceResult.getSource().getObj().getInteractiveType()) {
                 return ServiceResult.fail(FlowErrorCode.NOT_ATTACK_FLOW);
             }
+        }
+
+        // 解析攻击流量脚本参数
+        if (StringUtils.isNotBlank(modifyRequest.getParameter())) {
+            List<FlowScriptParamModel> scriptParamModels = new ArrayList<>();
+            JSONObject paramObj = JSONObject.parseObject(modifyRequest.getParameter());
+            paramObj.keySet().forEach(paramKey -> {
+                FlowScriptParamModel paramModel = new FlowScriptParamModel();
+                paramModel.setParamKey(paramKey);
+
+                JSONArray paramArray = paramObj.getJSONArray(paramKey);
+                // 参数类型
+                Integer type;
+                if (ParamTypeEnum.STRING.toString().equals(paramArray.getString(0))) {
+                    type = ParamTypeEnum.STRING.toValue();
+                } else if (ParamTypeEnum.IP.toString().equals(paramArray.getString(0))) {
+                    type = ParamTypeEnum.IP.toValue();
+                } else if (ParamTypeEnum.NUMBER.toString().equals(paramArray.getString(0))) {
+                    type = ParamTypeEnum.NUMBER.toValue();
+                } else {
+                    type = ParamTypeEnum.BOOL.toValue();
+                }
+                paramModel.setParamType(type);
+
+                // 参数值
+                paramModel.setParamValue(paramArray.getString(1));
+                // 参数描述
+                paramModel.setParamDesc(paramArray.getString(2));
+                scriptParamModels.add(paramModel);
+            });
+
+            modifyRequest.setScriptParamModels(scriptParamModels);
         }
 
         if (StringUtils.isNotBlank(modifyRequest.getCode())) {

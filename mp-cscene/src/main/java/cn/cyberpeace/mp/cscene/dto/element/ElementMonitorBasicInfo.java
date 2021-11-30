@@ -20,11 +20,11 @@ import java.util.List;
 @ApiModel(value = "节点基本信息")
 public class ElementMonitorBasicInfo {
 
+    @ApiModelProperty(value = "节点ID")
+    private String id;
+
     @ApiModelProperty(value = "节点基本信息-实例名称")
     private String name;
-
-    @ApiModelProperty(value = "节点基本信息-IP地址")
-    private List<String> ips;
 
     @ApiModelProperty(value = "节点基本信息-操作系统")
     private String systemType;
@@ -40,7 +40,9 @@ public class ElementMonitorBasicInfo {
     private Integer virtualType;
 
     @ApiModelProperty(value = "节点资源配置信息")
-    private ElementResource elementResource;
+    private HostState hostState;
 
+    @ApiModelProperty(value = "端口")
+    private List<ElementPort> ports;
 
 }

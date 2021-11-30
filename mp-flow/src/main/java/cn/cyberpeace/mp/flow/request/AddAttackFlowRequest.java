@@ -83,4 +83,10 @@ public class AddAttackFlowRequest {
     @ApiModelProperty(value = "攻击脚本运行参数")
     private List<FlowScriptParamModel> scriptParamModels;
 
+    /**
+     * 攻击脚本运行参数(JSON)
+     */
+    @ApiModelProperty(value = "攻击脚本运行参数")
+    private String parameter;
+
 }

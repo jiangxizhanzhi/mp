@@ -1,20 +1,15 @@
 package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
-import cn.cyberpeace.mp.cscene.dto.element.ElementResource;
+import cn.cyberpeace.mp.cscene.dto.element.ElementPort;
+import cn.cyberpeace.mp.cscene.dto.element.ElementRTInfo;
+import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
-import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
-import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
-import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
-import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -61,6 +56,15 @@ public class SceneElementMonitorService {
         return elementMonitorBasicInfo;
     }
 
+
+    public ElementRTInfo getElementRTInfo(String sceneId, String elementId) {
+        log.info("sceneId:{}, elementId:{}", sceneId, elementId);
+
+
+        return null;
+    }
+
+
     public void processTopologyElement(ElementMonitorBasicInfo basicInfo, CsceneInstanceBO csceneInstanceBO, String elementId) {
         if (Objects.isNull(csceneInstanceBO)
                 || Objects.isNull(csceneInstanceBO.getScene())
@@ -98,9 +102,9 @@ public class SceneElementMonitorService {
 
 
     public void sceneElementBO2ElementMonitorBasicInfo(ElementMonitorBasicInfo basicInfo, SceneElementBO sceneElementBO) {
-        ElementResource resource = basicInfo.getElementResource();
+        HostState resource = basicInfo.getHostState();
         if (Objects.isNull(resource)) {
-            resource = new ElementResource();
+            resource = new HostState();
         }
 
         resource.setCpuCount(Optional.ofNullable(sceneElementBO.getCpu()).orElse(0));
@@ -113,18 +117,32 @@ public class SceneElementMonitorService {
         // 磁盘大小
         Integer diskSize = Optional.ofNullable(sceneElementBO.getDisk()).orElse(0);
         resource.setDiskSpace(diskSize);
-        basicInfo.setElementResource(resource);
+        basicInfo.setHostState(resource);
 
         // ip地址
-        List<String> ipList = sceneElementBO.getPorts().stream().map(BaseSceneElementPortBO::getIp).collect(Collectors.toList());
-        basicInfo.setIps(ipList);
+//        List<String> ipList = sceneElementBO.getPorts().stream().map(BaseSceneElementPortBO::getIp).collect(Collectors.toList());
+//        basicInfo.setIps(ipList);
 
+        // ID
+        basicInfo.setId(sceneElementBO.getId());
         // 实例名称
         basicInfo.setName(sceneElementBO.getName());
 
         // 操作系统
         // 参考SystemTypeUtils
         basicInfo.setSystemType(sceneElementBO.getSystemType());
+
+
+        // ip, 用户名，登录方式
+        var ports = sceneElementBO.getPorts();
+        List<ElementPort> ePorts = ports.stream().map(p -> {
+            ElementPort port = new ElementPort();
+            port.setIp(p.getIp());
+            port.setName(p.getName());
+            port.setAccessModes(p.getAccessModes());
+            return port;
+        }).collect(Collectors.toList());
+        basicInfo.setPorts(ePorts);
 
     }
 
@@ -138,25 +156,5 @@ public class SceneElementMonitorService {
         // 实例类型
         basicInfo.setVirtualType(cpSceneElementBO.getVirtualType());
     }
-
-
-    public List<CollectionHostStateBO> getHostStates(String sceneId, List<String> elementIds) {
-        if (StringUtils.isEmpty(sceneId)) {
-            throw new MpRuntimeException("场景id不能为空！");
-        }
-
-        if (CollectionUtil.isEmpty(elementIds)) {
-            throw new MpRuntimeException("节点id不能为空！");
-        }
-
-        HostStateQueryParams queryParams = new HostStateQueryParams();
-        queryParams.setNodeIds(elementIds);
-
-        ListObjServiceResult<CollectionHostStateBO> hostStateBOs = csceneInstanceService.listHostStates(sceneId, queryParams);
-
-        return hostStateBOs.getSource().getList();
-
-    }
-
 
 }
