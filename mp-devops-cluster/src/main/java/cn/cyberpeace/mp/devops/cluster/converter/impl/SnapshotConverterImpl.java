@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.devops.cluster.converter.impl;
 
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ScenariosSnapshotService;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.SnapshotService;
 import cn.cyberpeace.mp.devops.cluster.converter.SnapshotConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.DeviceAndSnapshotConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.SnapshotConvertModel;
@@ -8,12 +10,11 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.SnapshotListConvertModel;
 import cn.cyberpeace.mp.devops.cluster.model.*;
 import cn.cyberpeace.mp.devops.cluster.request.SnapshotMergeRequest;
 import cn.cyberpeace.mp.devops.cluster.request.SnapshotRequest;
-import cn.cyberpeace.mp.devops.cluster.service.ScenariosSnapshotService;
-import cn.cyberpeace.mp.devops.cluster.service.SnapshotService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -53,10 +54,14 @@ public class SnapshotConverterImpl implements SnapshotConverter {
         if (Objects.isNull(model)){
             return null;
         }
+        List<SnapshotConvertModel> resultList = new ArrayList<>();
+        resultList.add(new SnapshotConvertModel(model.getDeviceUuid(), model.getDeviceName(), model.getDeviceName(), model.getDeviceUuid(),
+                "", null));
         DeviceAndSnapshotConvertModel convertModel = new DeviceAndSnapshotConvertModel();
         convertModel.setDeviceName(model.getDeviceName());
         convertModel.setDeviceUuid(model.getDeviceUuid());
         if (CollectionUtils.isEmpty(model.getSnapshots())){
+            convertModel.setItems(resultList);
             return convertModel;
         }
         List<SnapshotConvertModel> list = model.getSnapshots().stream().map(item ->
@@ -64,7 +69,8 @@ public class SnapshotConverterImpl implements SnapshotConverter {
                         item.getDescription(), Objects.isNull(item.getCreatedAt()) ? null :
                         TimeUtils.utcStringToLocalDateTime(item.getCreatedAt())))
                 .collect(Collectors.toList());
-        convertModel.setItems(list);
+        resultList.addAll(list);
+        convertModel.setItems(resultList);
         return convertModel;
     }
 

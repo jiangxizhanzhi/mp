@@ -5,7 +5,7 @@ import cn.cyberpeace.mp.base.util.define.SerializableFunction;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
-public class Sum extends Aggregation {
+public class Sum extends Aggregation<Sum> {
 
     public static Sum f(String fieldName) {
         var aggregation = new Sum();

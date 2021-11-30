@@ -48,6 +48,8 @@ public abstract class BaseCloudPluginSceneElementPortBO<M extends BaseCloudPlugi
     private String floatingIp;
     @ApiModelProperty(value = "弹性ip的id")
     private String floatingIpId;
+    @ApiModelProperty(value = "云平台三层防火墙资源id")
+    private String firewallResourceId;
 
     @Override
     public void fromModel(M obj, String... ignoreFields) {

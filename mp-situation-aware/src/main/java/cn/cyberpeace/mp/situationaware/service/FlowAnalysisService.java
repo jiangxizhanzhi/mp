@@ -225,6 +225,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         }else if (aggregationTypeEnum == AggregationTypeEnum.SURICATA_SEVERITY){
             aggregationBuilder = AggregationBuilders.terms("aggregationType")
                     .field("suricata.severity").size(request.getTopSize());
+            searchSourceBuilder.aggregation(aggregationBuilder);
         }
 
         searchSourceBuilder.size(0);

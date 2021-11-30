@@ -5,7 +5,7 @@ import cn.cyberpeace.mp.base.util.define.SerializableFunction;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
-public class Min extends Aggregation {
+public class Min extends Aggregation<Min> {
 
     public static Min f(String fieldName) {
         var aggregation = new Min();

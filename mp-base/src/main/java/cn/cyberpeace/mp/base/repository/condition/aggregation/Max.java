@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.base.repository.condition.aggregation;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.define.SerializableFunction;
 
-public class Max extends Aggregation {
+public class Max extends Aggregation<Max> {
 
     public static Max f(String fieldName) {
         var aggregation = new Max();

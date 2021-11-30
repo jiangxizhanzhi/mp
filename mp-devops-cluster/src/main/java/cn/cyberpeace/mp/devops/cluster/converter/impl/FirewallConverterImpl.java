@@ -2,11 +2,11 @@ package cn.cyberpeace.mp.devops.cluster.converter.impl;
 
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.FirewallService;
 import cn.cyberpeace.mp.devops.cluster.converter.FirewallConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.FirewallPageConverterModel;
 import cn.cyberpeace.mp.devops.cluster.model.FirewallCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.request.FirewallPageRequest;
-import cn.cyberpeace.mp.devops.cluster.service.FirewallService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
