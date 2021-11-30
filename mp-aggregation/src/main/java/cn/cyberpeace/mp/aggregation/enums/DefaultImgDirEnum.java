@@ -16,7 +16,9 @@ public enum DefaultImgDirEnum  {
 
     SAFETY_EQUIPMENT("/safety-equipment"),
 
-    TARGET("/target");
+    STATUS("/status"),
+
+    TARGET("");
 
     private final String endPathName;
 

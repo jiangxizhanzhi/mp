@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.aggregation.request.DefaultImgRequest;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.situationaware.model.enums.DefaultImgDirEnum;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -33,15 +35,46 @@ public class DefaultImgController {
     @Value("${spring.web.resources.static-locations:}")
     private List<String> staticLocations;
 
+    /**
+     * 获取默认图片
+     * @param request
+     * @return
+     */
     @ApiOperation("获取默认图片")
     @GetMapping("/get-default-img")
     public ServiceResult<List<String>> getDefaultImg(DefaultImgRequest request){
         if (CollectionUtils.isEmpty(staticLocations)){
             throw new MpRuntimeException(BaseErrorCode.DATA_NOT_EXIST);
         }
+        DefaultImgDirEnum defaultImgDirEnum = request.getDefaultImgDirEnum();
+        List<String> fileNameList;
+        if (defaultImgDirEnum == DefaultImgDirEnum.TARGET){
+            List<DefaultImgDirEnum> defaultImgDirEnums = Arrays.asList(DefaultImgDirEnum.APPLICATION_SYSTEM,
+                    DefaultImgDirEnum.NETWORK_EQUIPMENT,DefaultImgDirEnum.OPERATION_SYSTEM,
+                    DefaultImgDirEnum.SAFETY_EQUIPMENT,DefaultImgDirEnum.STATUS);
+            fileNameList = getFileByDefaultImgDirEnums(defaultImgDirEnums);
+        }else{
+            fileNameList = getFileByDefaultImgDirEnum(defaultImgDirEnum);
+        }
+        return new ServiceResult<>(fileNameList).asResult();
+    }
 
-        String endPathName = request.getDefaultImgDirEnum().getEndPathName();
+    /**
+     * 获取多个指定目录下的默认图片
+     * @param defaultImgDirEnums
+     * @return
+     */
+    private List<String> getFileByDefaultImgDirEnums(List<DefaultImgDirEnum> defaultImgDirEnums){
+        return defaultImgDirEnums.stream().map(this::getFileByDefaultImgDirEnum).flatMap(List::stream).collect(Collectors.toList());
+    }
 
+    /**
+     * 获取单个指定目录下的默认图片
+     * @param defaultImgDirEnum
+     * @return
+     */
+    private List<String> getFileByDefaultImgDirEnum(DefaultImgDirEnum defaultImgDirEnum){
+        String endPathName = defaultImgDirEnum.getEndPathName();
         String startWithFile = "file:";
         List<String> pathNameList = staticLocations.stream().map(s -> {
             if (s.startsWith(startWithFile)){
@@ -51,11 +84,21 @@ public class DefaultImgController {
         }).filter(StringUtils::isNotBlank).collect(Collectors.toList());
 
         if (CollectionUtils.isEmpty(pathNameList)){
+            log.error("==========default img config error==================");
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+
+        String pathName = pathNameList.get(0).concat(endPathName);
+
+        var logFile = new File(pathName);
+
+        File[] listFiles = logFile.listFiles();
+
+        if (Objects.isNull(listFiles)){
+            log.error("==========file dir not exist:{}==================",pathName);
             throw new MpRuntimeException(BaseErrorCode.DATA_NOT_EXIST);
         }
-        var logFile = new File(pathNameList.get(0).concat(endPathName));
-        List<File> fileList = Arrays.stream(Objects.requireNonNull(logFile.listFiles())).filter(File::isFile).collect(Collectors.toList());
-        List<String> fileNameList = fileList.stream().map(f -> endPathName.concat("/").concat(f.getName())).collect(Collectors.toList());
-        return new ServiceResult<>(fileNameList).asResult();
+        List<File> fileList = Arrays.stream(listFiles).filter(File::isFile).sorted(Comparator.comparing(File::getName)).collect(Collectors.toList());
+        return fileList.stream().map(f -> endPathName.concat("/").concat(f.getName())).collect(Collectors.toList());
     }
 }
