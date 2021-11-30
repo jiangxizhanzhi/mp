@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -62,10 +64,7 @@ public class HostStateService {
 
         List<String> nodeIds = CollectionUtil.toList(trendRequest.getElementIds().get(0));
 
-        ServiceResult<List<IntervalSizeBO<LocalDateTime>>> result = scenePluginCollectionSceneService.timeIntervalAvgHostCpuPercent(sceneIds, nodeIds, trendRequest.getStartTime(), trendRequest.getEndTime(), trendRequest.getSegmentCount());
-
-
-        return null;
+        return processHostStateTrend(sceneIds, nodeIds, trendRequest.getStartTime(), trendRequest.getEndTime(), trendRequest.getSegmentCount());
     }
 
 
@@ -82,9 +81,30 @@ public class HostStateService {
         }
         List<String> sceneIds = CollectionUtil.toList(trendRequest.getSceneId());
 
-        ServiceResult<List<IntervalSizeBO<LocalDateTime>>> result = scenePluginCollectionSceneService.timeIntervalAvgHostCpuPercent(sceneIds, null, trendRequest.getStartTime(), trendRequest.getEndTime(), trendRequest.getSegmentCount());
+        return processHostStateTrend(sceneIds, null, trendRequest.getStartTime(), trendRequest.getEndTime(), trendRequest.getSegmentCount());
+    }
 
-        return null;
+    private List<HostState> processHostStateTrend(List<String> sceneIds, List<String> elementIds, LocalDateTime startTime, LocalDateTime endTime, int segmentCount) {
+        ServiceResult<List<IntervalSizeBO<LocalDateTime>>> cpuResult = scenePluginCollectionSceneService.timeIntervalAvgHostCpuPercent(sceneIds, null, startTime, endTime, segmentCount);
+        ServiceResult<List<IntervalSizeBO<LocalDateTime>>> memResult = scenePluginCollectionSceneService.timeIntervalAvgHostMemoryPercent(sceneIds, null, startTime, endTime, segmentCount);
+
+        List<IntervalSizeBO<LocalDateTime>> intervalCpuSizeBOs = cpuResult.getSource();
+        List<IntervalSizeBO<LocalDateTime>> intervalMemSizeBOs = memResult.getSource();
+
+        intervalCpuSizeBOs.sort(Comparator.comparing(IntervalSizeBO::getEnd));
+        intervalMemSizeBOs.sort(Comparator.comparing(IntervalSizeBO::getEnd));
+
+        List<HostState> hostStates = new ArrayList<>();
+
+        for (int i = 0; i < intervalCpuSizeBOs.size(); i++) {
+            HostState hs = new HostState();
+            hs.setTime(intervalCpuSizeBOs.get(i).getEnd());
+            hs.setCpuPercent(intervalCpuSizeBOs.get(i).getSize() / 100.00);
+            hs.setMemoryPercent(intervalMemSizeBOs.get(i).getSize() / 100.00);
+            hostStates.add(hs);
+        }
+
+        return hostStates;
     }
 
 }
