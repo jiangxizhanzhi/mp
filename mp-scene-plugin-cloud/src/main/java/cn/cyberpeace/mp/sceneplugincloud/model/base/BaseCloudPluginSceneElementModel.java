@@ -26,6 +26,11 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
      */
     @DefaultStr
     private String resourceId;
+    /**
+     * 三层防火墙对应防火墙资源id
+     */
+    @DefaultStr
+    private String firewallResourceId;
 
     // 虚拟交换机/路由/防火墙属性
     @DefaultInt
@@ -144,8 +149,11 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
         public static final int VIRTUAL_EXTERNAL_NETWORK = 3;
         public static final int VIRTUAL_TERMINAL = 4;
         public static final int VIRTUAL_TRANSPARENT_GATEWAY = 5;
+        public static final int VIRTUAL_GATEWAY = 6;
         public static final int VIRTUAL_LAYER_3_IMAGE_GATEWAY = 20;
         public static final int VIRTUAL_LAYER_3_SIMPLE_ROUTER = 21;
+        public static final int VIRTUAL_LAYER_3_SIMPLE_SWITCH = 22;
+        public static final int VIRTUAL_LAYER_3_SIMPLE_FIREWALL = 23;
         public static final int ENTITY_GATEWAY = 50;
         public static final int ENTITY_TERMINAL = 51;
 
@@ -180,6 +188,15 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     private Boolean auxiliaryNetworkVlan;
     @DefaultInt
     private Integer auxiliaryNetworkVlanId;
+    /**
+     * 辅助网络辅助路由，ovs流表需要网络必须有默认路由
+     */
+    @DefaultBool
+    private Boolean auxiliaryNetworkRouterOn;
+    @DefaultStr
+    private String auxiliaryNetworkRouterResourceId;
+    @DefaultStr
+    private String auxiliaryNetworkRouterIp;
 
     // 用于管理网卡
     @DefaultBool

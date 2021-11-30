@@ -1,15 +1,14 @@
 package cn.cyberpeace.mp.devops.cluster.converter.impl;
 
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.InjectFileService;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ScenariosSnapshotService;
 import cn.cyberpeace.mp.devops.cluster.converter.InjectFileConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InjectFileConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InjectFileListConvertModel;
 import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceInjectFileDelete;
 import cn.cyberpeace.mp.devops.cluster.model.InjectFileCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.SnapshotCreate;
 import cn.cyberpeace.mp.devops.cluster.request.ImageInjectFileDeleteRequest;
-import cn.cyberpeace.mp.devops.cluster.service.InjectFileService;
-import cn.cyberpeace.mp.devops.cluster.service.ScenariosSnapshotService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

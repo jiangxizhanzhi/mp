@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.auth.listener;
 
 import cn.cyberpeace.mp.auth.service.AvatarService;
-import cn.cyberpeace.mp.auth.thread.AvatarInitThread;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -23,8 +22,8 @@ public class AvatarInitListener implements ApplicationListener<ApplicationReadyE
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
         // todo 将默认头像图片转到前端
-        new Thread(new AvatarInitThread(avatarService)).start();
-        log.info("success!");
+//        new Thread(new AvatarInitThread(avatarService)).start();
+//        log.info("success!");
     }
 
 }

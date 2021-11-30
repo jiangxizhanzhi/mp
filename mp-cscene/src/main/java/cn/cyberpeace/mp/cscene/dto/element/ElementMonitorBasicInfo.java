@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.cscene.dto.element;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -15,7 +14,7 @@ import java.util.List;
  * @Date：2021/11/22 14:03
  */
 @Data
-@Builder
+//@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(value = "节点基本信息")
@@ -40,14 +39,8 @@ public class ElementMonitorBasicInfo {
     // 对应 BaseCloudPluginSceneElementModel.VirtualType 中的枚举？
     private Integer virtualType;
 
+    @ApiModelProperty(value = "节点资源配置信息")
+    private ElementResource elementResource;
 
-    @ApiModelProperty(value = "节点资源-CPU")
-    private int nodeCPUs;
-
-    @ApiModelProperty(value = "节点资源-内存 (单位GB)")
-    private double memSize;
-
-    @ApiModelProperty(value = "节点资源-硬盘 (单位GB)")
-    private double diskSize;
 
 }

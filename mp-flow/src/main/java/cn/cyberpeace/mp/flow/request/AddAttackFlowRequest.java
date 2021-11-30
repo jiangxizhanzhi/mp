@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.flow.request;
 
+import cn.cyberpeace.mp.flow.model.FlowScriptParamModel;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -8,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * @Description: 新增攻击流量请求
@@ -74,5 +76,11 @@ public class AddAttackFlowRequest {
      */
     @ApiModelProperty("文件路径")
     private String filePath;
+
+    /**
+     * 攻击脚本参数列表
+     */
+    @ApiModelProperty(value = "攻击脚本运行参数")
+    private List<FlowScriptParamModel> scriptParamModels;
 
 }

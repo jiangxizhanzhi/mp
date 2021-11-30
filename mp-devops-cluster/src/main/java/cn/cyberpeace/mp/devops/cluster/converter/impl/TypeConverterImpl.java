@@ -1,12 +1,12 @@
 package cn.cyberpeace.mp.devops.cluster.converter.impl;
 
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.TypeService;
 import cn.cyberpeace.mp.devops.cluster.converter.TypeConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.TypeCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.TypeIdIntegerCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.TypeIdStringCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.TypeL2CloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.service.TypeService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

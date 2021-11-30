@@ -1,6 +1,9 @@
 package cn.cyberpeace.mp.front.admin.service.sys;
 
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.front.admin.config.ActivationConfig;
+import cn.cyberpeace.mp.front.admin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationItem;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationModuleItem;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationRequest;
@@ -8,7 +11,6 @@ import cn.cyberpeace.mp.front.admin.dto.activation.ActivationResourceItem;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationResponse;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationVerifyInfo;
 import cn.cyberpeace.mp.front.admin.util.EncryptUtils;
-import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Assert;
@@ -26,10 +28,13 @@ import org.springframework.stereotype.Service;
 import oshi.util.ExecutingCommand;
 
 import java.io.File;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * @Description: 系统激活相关service
@@ -108,12 +113,38 @@ public class SysActivationService {
             }
         }
 
+        log.info("{}", ACTIVATION_CONTENT);
         return ACTIVATION_CONTENT;
+    }
+
+    public String getValueByKey(String key) {
+        log.info(key);
+        ActivationResponse activationResponse = status();
+        if (!Objects.equals(1, activationResponse.getIsActived())) {
+            throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_ERROR, "系统未激活");
+        }
+
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate expiredDate = LocalDate.parse(activationResponse.getExpiredDate(), dtf);
+        LocalDate now = LocalDate.now();
+
+        if (expiredDate.isBefore(now)) {
+            throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_ERROR, "激活文件已经过期！");
+        }
+
+        List<ActivationItem> items = activationResponse.getItems();
+        Optional<ActivationItem> itemOptional = items.stream().filter(i -> i.getKey().equals(key)).findFirst();
+        if (!itemOptional.isPresent()) {
+            throw new MpRuntimeException(AdminErrorCode.SYS_CONFIG_NOT_EXIST, "不存在该项配置！" + key);
+        }
+
+        return itemOptional.get().getValue();
     }
 
 
     /**
      * 查询系统UUID
+     *
      * @return
      */
     public String querySysUUID() {

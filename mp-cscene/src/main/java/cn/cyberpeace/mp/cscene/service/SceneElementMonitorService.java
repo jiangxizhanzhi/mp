@@ -1,13 +1,20 @@
 package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
+import cn.cyberpeace.mp.cscene.dto.element.ElementResource;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
-import cn.hutool.core.util.NumberUtil;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
+import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
+import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +37,12 @@ public class SceneElementMonitorService {
 
     @Autowired
     private CsceneInstanceService csceneInstanceService;
+
+    @Autowired
+    private ScenePluginCollectionSceneService scenePluginCollectionSceneService;
+
+//    @Autowired
+//    private CsceneInstanceService c
 
     /**
      * CsceneInstanceBO转为ElementMonitorInfo
@@ -85,16 +98,22 @@ public class SceneElementMonitorService {
 
 
     public void sceneElementBO2ElementMonitorBasicInfo(ElementMonitorBasicInfo basicInfo, SceneElementBO sceneElementBO) {
-        basicInfo.setNodeCPUs(Optional.ofNullable(sceneElementBO.getCpu()).orElse(0));
+        ElementResource resource = basicInfo.getElementResource();
+        if (Objects.isNull(resource)) {
+            resource = new ElementResource();
+        }
 
-        // 内存大小，原单位MB 转化为 GB
-        int memSizeInMb = Optional.ofNullable(sceneElementBO.getRam()).orElse(0);
-        double memSizeInGb = NumberUtil.round(memSizeInMb / 1024.0, 2).doubleValue();
-        basicInfo.setMemSize(memSizeInGb);
+        resource.setCpuCount(Optional.ofNullable(sceneElementBO.getCpu()).orElse(0));
 
-        // 磁盘大小，原单位GB
-        int diskInGb = Optional.ofNullable(sceneElementBO.getDisk()).orElse(0);
-        basicInfo.setDiskSize(diskInGb);
+        // 内存大小
+        Integer memSize = Optional.ofNullable(sceneElementBO.getRam()).orElse(0);
+//        double memSizeInGb = NumberUtil.round(memSizeInMb / 1024.0, 2).doubleValue();
+        resource.setMemoryTotal(memSize);
+
+        // 磁盘大小
+        Integer diskSize = Optional.ofNullable(sceneElementBO.getDisk()).orElse(0);
+        resource.setDiskSpace(diskSize);
+        basicInfo.setElementResource(resource);
 
         // ip地址
         List<String> ipList = sceneElementBO.getPorts().stream().map(BaseSceneElementPortBO::getIp).collect(Collectors.toList());
@@ -118,6 +137,25 @@ public class SceneElementMonitorService {
 
         // 实例类型
         basicInfo.setVirtualType(cpSceneElementBO.getVirtualType());
+    }
+
+
+    public List<CollectionHostStateBO> getHostStates(String sceneId, List<String> elementIds) {
+        if (StringUtils.isEmpty(sceneId)) {
+            throw new MpRuntimeException("场景id不能为空！");
+        }
+
+        if (CollectionUtil.isEmpty(elementIds)) {
+            throw new MpRuntimeException("节点id不能为空！");
+        }
+
+        HostStateQueryParams queryParams = new HostStateQueryParams();
+        queryParams.setNodeIds(elementIds);
+
+        ListObjServiceResult<CollectionHostStateBO> hostStateBOs = csceneInstanceService.listHostStates(sceneId, queryParams);
+
+        return hostStateBOs.getSource().getList();
+
     }
 
 
