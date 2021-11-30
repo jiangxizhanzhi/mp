@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincollection.service;
 
+import cn.cyberpeace.mp.base.bo.IntervalSizeBO;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
@@ -337,6 +338,64 @@ public class ScenePluginCollectionSceneService {
     public ServiceResult<Map<String, Integer>> groupCountHostEventByNodeName(
             List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime) {
         return groupCountHostEvent(sceneIds, nodeIds, GroupCountHostEventField.NODE_NAME, startTime, endTime);
+    }
+
+    /**
+     * 时间区间统计流量次数
+     * @param sceneIds 场景id列表，不传默认为全部
+     * @param nodeIds 节点id列表，不传默认为全部
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @return 聚合统计结果
+     */
+    public ServiceResult<List<IntervalSizeBO<LocalDateTime>>> timeIntervalCountFlow(
+            List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime) {
+        return new ServiceResult<>(new ArrayList<>());
+    }
+
+    /**
+     * 时间区间统计流量大小
+     * @param sceneIds 场景id列表，不传默认为全部
+     * @param nodeIds 节点id列表，不传默认为全部
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @param intervalNumber 间隔数量
+     * @return 聚合统计结果
+     */
+    public ServiceResult<List<IntervalSizeBO<LocalDateTime>>> timeIntervalSumFlowSize(
+            List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime,
+            int intervalNumber) {
+        return new ServiceResult<>(new ArrayList<>());
+    }
+
+    /**
+     * 时间区间统计主机cpu占用平均值
+     * @param sceneIds 场景id列表，不传默认为全部
+     * @param nodeIds 节点id列表，不传默认为全部
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @param intervalNumber 间隔数量
+     * @return 聚合统计结果
+     */
+    public ServiceResult<List<IntervalSizeBO<LocalDateTime>>> timeIntervalAvgHostCpuPercent(
+            List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime,
+            int intervalNumber) {
+        return new ServiceResult<>(new ArrayList<>());
+    }
+
+    /**
+     * 时间区间统计主机内存占用平均值
+     * @param sceneIds 场景id列表，不传默认为全部
+     * @param nodeIds 节点id列表，不传默认为全部
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @param intervalNumber 间隔数量
+     * @return 聚合统计结果
+     */
+    public ServiceResult<List<IntervalSizeBO<LocalDateTime>>> timeIntervalAvgHostMemoryPercent(
+            List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime,
+            int intervalNumber) {
+        return new ServiceResult<>(new ArrayList<>());
     }
 
 }

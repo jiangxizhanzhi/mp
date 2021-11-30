@@ -112,8 +112,8 @@ public class ScenePluginCloudSceneService {
      * @param <T> 分组聚合字段的值类型
      * @return 字段的聚合统计数量 Map<字段值, 该字段值统计数量>
      */
-    private <T> ServiceResult<Map<T, Integer>> groupCountElement(List<String> sceneIds, List<String> nodeIds,
-                                                                 GroupCountFilter filter, String groupFieldName) {
+    private <T> ServiceResult<Map<T, Long>> groupCountElement(List<String> sceneIds, List<String> nodeIds,
+                                                              GroupCountFilter filter, String groupFieldName) {
         var condition = new HumanCondition()
                 .link(SceneModel.class, CloudPluginSceneElementModel.class)
                 .filterLink(SceneModel.class, SceneModel::getId,
@@ -137,7 +137,7 @@ public class ScenePluginCloudSceneService {
             }
         }
 
-        Map<T, Integer> result;
+        Map<T, Long> result;
         try {
             result = StatCommon.groupCount(cloudPluginSceneElementMapper, condition, groupFieldName);
         } catch (Exception e) {
@@ -297,7 +297,7 @@ public class ScenePluginCloudSceneService {
      * @param filter 过滤条件
      * @return 字段的聚合统计数量 Map<host, 该字段值统计数量>
      */
-    public ServiceResult<Map<String, Integer>> groupCountElementByHost(
+    public ServiceResult<Map<String, Long>> groupCountElementByHost(
             List<String> sceneIds, List<String> nodeIds, GroupCountFilter filter) {
         return groupCountElement(sceneIds, nodeIds, filter,
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getHost));
@@ -310,7 +310,7 @@ public class ScenePluginCloudSceneService {
      * @param filter 过滤条件
      * @return 字段的聚合统计数量 Map<virtualType, 该字段值统计数量>
      */
-    public ServiceResult<Map<Integer, Integer>> groupCountElementByVirtualType(
+    public ServiceResult<Map<Integer, Long>> groupCountElementByVirtualType(
             List<String> sceneIds, List<String> nodeIds, GroupCountFilter filter) {
         return groupCountElement(sceneIds, nodeIds, filter,
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getVirtualType));
