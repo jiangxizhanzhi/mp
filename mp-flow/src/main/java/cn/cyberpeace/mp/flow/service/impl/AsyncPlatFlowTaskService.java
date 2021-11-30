@@ -83,12 +83,12 @@ public class AsyncPlatFlowTaskService {
     private FastDFSClient fastDFSClient;
 
     /**
-     * 异步保存流量发生平台任务
+     * 保存流量发生平台任务
      *
      * @param request
      * @param isUpdate
      */
-    @Async
+//    @Async
     public void savePlatFlowTask(AddFlowTaskRequest request, boolean isUpdate) {
         log.info("start to " + (isUpdate ? "update" : "add") + "platform flow task");
 
