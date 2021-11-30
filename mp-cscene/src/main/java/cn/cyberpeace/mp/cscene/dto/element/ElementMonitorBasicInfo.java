@@ -35,7 +35,7 @@ public class ElementMonitorBasicInfo {
     @ApiModelProperty(value = "节点基本信息-物理节点")
     private String host;
 
-    @ApiModelProperty(value = "节点基本信息-实例类型")
+    @ApiModelProperty(value = "节点基本信息-实例类型  1: 交换机, 2: 路由器, 3: 防火墙, 4: 虚拟机, 5: 容器, 6: 实体设备")
     // 对应 BaseCloudPluginSceneElementModel.VirtualType 中的枚举？
     private Integer virtualType;
 
