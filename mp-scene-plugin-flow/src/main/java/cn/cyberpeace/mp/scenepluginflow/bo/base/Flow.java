@@ -2,6 +2,10 @@ package cn.cyberpeace.mp.scenepluginflow.bo.base;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.List;
 
 @Data
 public class Flow {
@@ -19,12 +23,29 @@ public class Flow {
     private String statusText;
     @ApiModelProperty(value = "流量任务id")
     private String taskId;
+    @ApiModelProperty(value = "流量脚本参数列表")
+    private List<FlowScriptParam> scriptParams;
 
     public static class Status {
         public static final int OFF = 0;
         public static final int ON = 1;
         public static final int ERROR = 2;
+        public static final int PREPARING = 3;
 
-        private Status() {}
+        private Status() {
+        }
+    }
+
+    @Setter
+    @Getter
+    public static class FlowScriptParam {
+        @ApiModelProperty(value = "参数key")
+        private String key;
+        @ApiModelProperty(value = "参数值")
+        private String value;
+        @ApiModelProperty(value = "参数类型：0 string,1 IP,2 number,3 bool")
+        private Integer type;
+        @ApiModelProperty(value = "参数描述")
+        private String desc;
     }
 }

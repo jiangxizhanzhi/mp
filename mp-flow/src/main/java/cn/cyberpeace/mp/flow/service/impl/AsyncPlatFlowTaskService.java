@@ -333,7 +333,7 @@ public class AsyncPlatFlowTaskService {
         networks.setNetworkId(externalNetId);
         AddVmRequest.AccessModes accessModes = new AddVmRequest.AccessModes();
         accessModes.setPort(80);
-        accessModes.setEnablePortMapping(true);
+        accessModes.setEnablePortMapping(false);
         networks.setAccessModes(Collections.singletonList(accessModes));
         addVmRequest.setNetworks(Collections.singletonList(networks));
 
@@ -350,11 +350,7 @@ public class AsyncPlatFlowTaskService {
                 String instanceId = vmObj.getString("id");
                 JSONObject netWorkObj = vmObj.getJSONArray("networks").getJSONObject(0);
                 fixedIp = netWorkObj.getString("fixed_ip");
-                JSONObject portMappingObj = netWorkObj.getJSONArray("access_modes").getJSONObject(0).getJSONObject(
-                        "port_mapping");
-                String host = portMappingObj.getString("host");
-                String port = portMappingObj.getString("host_port");
-                String ip = host + BaseConstants.COLON + port;
+                String ip = fixedIp + BaseConstants.COLON + "80";
 
                 // 新增流量执行器信息
                 flowActuatorModel.setId(uuid);

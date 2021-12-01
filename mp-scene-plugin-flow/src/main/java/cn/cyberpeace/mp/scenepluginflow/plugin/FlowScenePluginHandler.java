@@ -115,7 +115,7 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
         deleteHandler.delete();
     }
 
-    public boolean startFlow(String nodeId, String flowId) {
+    public boolean startFlow(String nodeId, String flowId, boolean async) {
         var flowElement = getElement(nodeId);
         if (flowElement == null) {
             return false;
@@ -132,7 +132,9 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
             return false;
         }
 
-        var flag = handlerUtils.startFlow(flowElement, flow);
+        var flag = handlerUtils.startFlow(flowElement, flow, async, () -> {
+            ackElementChanged(nodeId, true);
+        });
         ackElementChanged(nodeId, true);
         return flag;
     }
