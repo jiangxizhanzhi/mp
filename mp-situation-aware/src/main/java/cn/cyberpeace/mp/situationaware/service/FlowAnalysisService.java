@@ -324,7 +324,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         }
 
         if (CollectionUtils.isNotEmpty(request.getSourceIps())) {
-            boolQueryBuilder.must(QueryBuilders.termQuery("source.ip", request.getSourceIps()));
+            boolQueryBuilder.must(QueryBuilders.termsQuery("source.ip", request.getSourceIps()));
         }
 
         if (StringUtils.isNotBlank(request.getSourcePort())) {
@@ -332,11 +332,11 @@ public class FlowAnalysisService extends AbstractBaseService {
         }
 
         if (CollectionUtils.isNotEmpty(request.getSourceMacs())) {
-            boolQueryBuilder.must(QueryBuilders.termQuery("source.mac", request.getSourceMacs()));
+            boolQueryBuilder.must(QueryBuilders.termsQuery("source.mac", request.getSourceMacs()));
         }
 
         if (CollectionUtils.isNotEmpty(request.getDestinationIps())) {
-            boolQueryBuilder.must(QueryBuilders.termQuery("destination.ip", request.getDestinationIps()));
+            boolQueryBuilder.must(QueryBuilders.termsQuery("destination.ip", request.getDestinationIps()));
         }
 
         if (StringUtils.isNotBlank(request.getDestinationPort())) {
@@ -344,7 +344,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         }
 
         if (CollectionUtils.isNotEmpty(request.getProtocols())) {
-            boolQueryBuilder.must(QueryBuilders.termQuery("protocol.keyword",request.getProtocols()));
+            boolQueryBuilder.must(QueryBuilders.termsQuery("protocol",request.getProtocols()));
         }
 
         if (Objects.nonNull(request.getStartDateTime()) && Objects.nonNull(request.getEndDateTime())
