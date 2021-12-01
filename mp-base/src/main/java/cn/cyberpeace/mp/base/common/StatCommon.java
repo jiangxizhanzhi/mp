@@ -27,19 +27,6 @@ public class StatCommon {
      * @param mapper 数据mapper对象
      * @param condition 已完成设置的HumanCondition查询条件（如关联查询需要已指向字段对应的表）
      * @param groupFieldName 分组聚合字段
-     * @param <T> 分组聚合字段的值类型
-     * @return 字段的聚合count数量 Map<字段值, 该字段值统计数量>
-     */
-    public static <T> Map<T, Long> groupCount(BaseModelMapper<?> mapper, HumanCondition condition,
-                                              String groupFieldName) {
-        return groupCount(mapper, condition, groupFieldName, groupFieldName, false);
-    }
-
-    /**
-     * 分组查询指定字段的聚合count数量
-     * @param mapper 数据mapper对象
-     * @param condition 已完成设置的HumanCondition查询条件（如关联查询需要已指向字段对应的表）
-     * @param groupFieldName 分组聚合字段
      * @param countFieldName 统计字段
      * @param <T> 分组聚合字段的值类型
      * @return 字段的聚合count数量 Map<字段值, 该字段值统计数量>
@@ -81,29 +68,41 @@ public class StatCommon {
      * @param mapper 数据mapper对象
      * @param condition 已完成设置的HumanCondition查询条件（如关联查询需要已指向字段对应的表）
      * @param groupFieldName 分组聚合字段
-     * @param calcFieldName 统计字段
-     * @param <T1> 分组聚合分组字段的值类型
-     * @param <T2> 分组聚合统计字段的值类型
-     * @param <R> 分组聚合统计结果类型
-     * @return 字段的聚合count数量 Map<字段值, 该字段值聚合结果>
+     * @param fieldCalcMap 统计字段对应的计算方法
+     * @param <T> 分组聚合分组字段的值类型
+     * @return 字段的聚合count数量 Map<字段, Map<分组字段值, 该字段值聚合结果>>
      */
-    public static <T1, T2, R> Map<T1, R> groupCalc(BaseModelMapper<?> mapper, HumanCondition condition,
-                                                   String groupFieldName, String calcFieldName,
-                                                   Function<List<T2>, R> calc) {
-        condition.selectAs(groupFieldName, GroupCalcItemBO<T1, T2>::getTarget).groupBy(groupFieldName);
-        condition.selectAs(calcFieldName, GroupCalcItemBO<T1, T2>::getCalcSource);
-        var groupCalcItemBOs = mapper.list(condition, new GroupCalcItemBO<T1, T2>().getClass());
-        Map<T1, List<T2>> groupValues = new HashMap<>();
-        groupCalcItemBOs.forEach(groupCalcItem -> {
-            List<T2> values = groupValues.getOrDefault((T1) groupCalcItem.getTarget(), new ArrayList<>());
-            values.add((T2) groupCalcItem.getCalcSource());
-            groupValues.put((T1) groupCalcItem.getTarget(), values);
+    public static <T> Map<String, Map<T, Object>> groupCalc(
+            BaseModelMapper<?> mapper, HumanCondition condition, String groupFieldName,
+            Map<String, Function<List<Object>, Object>> fieldCalcMap) {
+        condition.selectAs(groupFieldName, groupFieldName).groupBy(groupFieldName);
+        var fieldNames = fieldCalcMap.keySet();
+        fieldNames.forEach(fieldName -> condition.selectAs(fieldName, fieldName));
+
+        var result = mapper.originList(condition);
+        Map<String, Map<T, List<Object>>> fieldGroupValuesMap = new HashMap<>();
+        result.forEach(resultItem -> {
+            fieldNames.forEach(fieldName -> {
+                var fieldGroupValues = fieldGroupValuesMap.getOrDefault(fieldName, new HashMap<>());
+                var groupValue = (T) resultItem.get(groupFieldName);
+                var groupValues = fieldGroupValues.getOrDefault(groupValue, new ArrayList<>());
+                var fieldValue = resultItem.get(fieldName);
+                groupValues.add(fieldValue);
+                fieldGroupValues.put(groupValue, groupValues);
+                fieldGroupValuesMap.put(fieldName, fieldGroupValues);
+            });
         });
-        Map<T1, R> groupCalcResult = new HashMap<>();
-        groupValues.forEach((group, values) -> {
-            groupCalcResult.put(group, calc.apply(values));
+
+        Map<String, Map<T, Object>> fieldGroupCalcValueMap = new HashMap<>();
+        fieldGroupValuesMap.forEach((fieldName, fieldGroupValues) -> {
+            Map<T, Object> fieldGroupCalcValue = new HashMap<>();
+            fieldGroupCalcValueMap.put(fieldName, fieldGroupCalcValue);
+            var calc = fieldCalcMap.get(fieldName);
+            fieldGroupValues.forEach((groupValue, groupValues) -> {
+                fieldGroupCalcValue.put(groupValue, calc.apply(groupValues));
+            });
         });
-        return groupCalcResult;
+        return fieldGroupCalcValueMap;
     }
 
     /**
