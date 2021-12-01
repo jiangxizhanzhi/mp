@@ -113,7 +113,7 @@ public class SceneHandlerUtils {
         }
 
         try {
-            taskId = flowExecutor.createFlow(executorId, networkId, flowId, StringUtils.EMPTY, ip, null, null, null);
+            taskId = flowExecutor.createFlow(executorId, networkId, flowId, StringUtils.EMPTY, ip, null, null, null, flow);
             log.info("flowExecutor createFlow success:[{}]", taskId);
         } catch (Exception e) {
             errorFLow(flow, e.getMessage());
