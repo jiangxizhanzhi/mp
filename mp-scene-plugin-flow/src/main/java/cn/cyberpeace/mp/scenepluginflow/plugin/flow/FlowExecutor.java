@@ -3,14 +3,19 @@ package cn.cyberpeace.mp.scenepluginflow.plugin.flow;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.flow.enums.TaskActionEnum;
+import cn.cyberpeace.mp.flow.model.FlowScriptParamModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskModel;
 import cn.cyberpeace.mp.flow.request.AddFlowTaskRequest;
 import cn.cyberpeace.mp.flow.service.FlowActuatorService;
 import cn.cyberpeace.mp.flow.service.impl.AsyncPlatFlowTaskService;
 import cn.cyberpeace.mp.flow.service.impl.FlowTaskServiceImpl;
+import cn.cyberpeace.mp.scenepluginflow.bo.base.Flow;
 import lombok.Data;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.stream.Collectors;
 
 @Data
 @Component
@@ -31,8 +36,8 @@ public class FlowExecutor {
         setFlowService3(flowService3);
     }
 
-    public String createExecutor(String sceneEid) {
-        return flowService1.addExecutorSync(sceneEid);
+    public String createExecutor(String name) {
+        return flowService1.addExecutorSync(name);
     }
 
     public void deleteExecutor(String executorId) {
@@ -40,7 +45,7 @@ public class FlowExecutor {
     }
 
     public String createFlow(String executorId, String targetNetId, String flowId, String fromIps, String toIps,
-                            Integer delay, Integer count, Integer interval) {
+                             Integer delay, Integer count, Integer interval, Flow flow) {
         var addFlowTaskRequest = new AddFlowTaskRequest();
         addFlowTaskRequest.setActuatorId(executorId);
         addFlowTaskRequest.setNetworkId(targetNetId);
@@ -48,6 +53,19 @@ public class FlowExecutor {
         addFlowTaskRequest.setOriginIps(fromIps);
         addFlowTaskRequest.setTargetIps(toIps);
         addFlowTaskRequest.setTitle(TextUtils.uuid());
+        if (CollectionUtils.isNotEmpty(flow.getScriptParams())) {
+            addFlowTaskRequest.setScriptParamModels(flow.getScriptParams().stream()
+                    .map(param -> {
+                        FlowScriptParamModel model = new FlowScriptParamModel();
+                        model.setFlowId(flowId);
+                        model.setParamDesc(param.getDesc());
+                        model.setParamKey(param.getKey());
+                        model.setParamValue(param.getValue());
+                        model.setParamType(param.getType());
+                        return model;
+                    }).collect(Collectors.toList())
+            );
+        }
         if (DEFAULT_INSTANCE == null) {
             this.initDefaultInstance();
         }
