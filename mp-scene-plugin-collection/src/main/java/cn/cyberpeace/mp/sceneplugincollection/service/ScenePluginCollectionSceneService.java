@@ -105,9 +105,6 @@ public class ScenePluginCollectionSceneService {
     }
 
     public ListObjServiceResult<CollectionFlowBO> listFlows(String sceneId, FlowQueryParams queryParams) {
-        if (StringUtils.isBlank(queryParams.getStartTime()) || StringUtils.isBlank(queryParams.getEndTime())) {
-            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
-        }
         var sceneHandler = new SceneHandler(sceneId, null, false, null);
         List<SceneElementBO> srcElements = getSrcElements(sceneHandler, queryParams.getNodeIds());
         CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
@@ -122,8 +119,19 @@ public class ScenePluginCollectionSceneService {
         FlowAnalysisRequest request = new FlowAnalysisRequest();
         request.setGroupList(Arrays.asList(pluginHandler.getScene().getFlowCollector()));
         request.setSecondsInterval(queryParams.getInterval());
-        request.setStartDateTime(TimeUtils.stringToLocalDateTime(queryParams.getStartTime()));
-        request.setEndDateTime(TimeUtils.stringToLocalDateTime(queryParams.getEndTime()));
+
+        // 查询时间段 默认使用场景创建到当前时间
+        if (StringUtils.isBlank(queryParams.getStartTime())) {
+            request.setStartDateTime(sceneHandler.getScene().getCreateTime());
+        } else {
+            request.setStartDateTime(TimeUtils.stringToLocalDateTime(queryParams.getStartTime()));
+        }
+        if (StringUtils.isBlank(queryParams.getEndTime())) {
+            request.setEndDateTime(LocalDateTime.now());
+        } else {
+            request.setEndDateTime(TimeUtils.stringToLocalDateTime(queryParams.getEndTime()));
+        }
+
         List<FlowLogBO> flowLogBOS = flowAnalysisService.flowLog(request);
         if (CollectionUtils.isEmpty(flowLogBOS)) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
@@ -200,14 +208,19 @@ public class ScenePluginCollectionSceneService {
         request.setPageNum(queryParams.getPage());
         request.setPageSize(queryParams.getPageSize());
         request.setAgentNames(new ArrayList<>(agentNameElementMap.keySet()));
-        var startTimeStr = queryParams.getStartTime();
-        if (!StringUtils.isEmpty(startTimeStr)) {
-            request.setStartTime(TimeUtils.stringToLocalDateTime(startTimeStr));
+
+        // 查询时间段 默认使用场景创建到当前时间
+        if (StringUtils.isBlank(queryParams.getStartTime())) {
+            request.setStartTime(sceneHandler.getScene().getCreateTime());
+        } else {
+            request.setStartTime(TimeUtils.stringToLocalDateTime(queryParams.getStartTime()));
         }
-        var endTimeStr = queryParams.getEndTime();
-        if (!StringUtils.isEmpty(endTimeStr)) {
-            request.setEndTime(TimeUtils.stringToLocalDateTime(endTimeStr));
+        if (StringUtils.isBlank(queryParams.getEndTime())) {
+            request.setEndTime(LocalDateTime.now());
+        } else {
+            request.setEndTime(TimeUtils.stringToLocalDateTime(queryParams.getEndTime()));
         }
+
         var result = dataCollectionService.queryFileEvents(request);
 
         List<CollectionHostEventBO> hostEvents = new ArrayList<>();
