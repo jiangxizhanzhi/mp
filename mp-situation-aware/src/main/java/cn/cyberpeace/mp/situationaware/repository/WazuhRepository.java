@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
 import cn.cyberpeace.mp.situationaware.model.WazuhAgentModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhAgentPortsModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhAgentProcessModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhFileRoot;
 import cn.cyberpeace.mp.situationaware.model.WazuhNetifaceRoot;
 import cn.cyberpeace.mp.situationaware.model.WazuhRamRoot;
@@ -125,6 +126,27 @@ public class WazuhRepository {
             throw new MpRuntimeException(SituationalAwareErrorCode.WAZUH_AGENTS_QUERY_PORT_ERROR, ExceptionUtils.getStackTrace(e));
         }
         return agentPortsModels;
+    }
+
+    public List<WazuhAgentProcessModel> queryAgentsProcesses(List<String> agents) {
+        List<WazuhAgentProcessModel> wazuhAgentProcessModels = Lists.newArrayList();
+        if (CollectionUtils.isEmpty(agents)) {
+            return wazuhAgentProcessModels;
+        }
+        var res = "";
+        List<String> agentIds = queryAgentIdByAgentName(agents);
+        var requestUri = "/experimental/syscollector/processes";
+        var requestUrl = wazuhUrl + requestUri + "?agents_list=" + String.join(",", agentIds);
+        try {
+            res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
+            JSONArray agentArray = (JSONArray) JSONPath.eval(JSON.parse(res), "$.data.affected_items");
+            wazuhAgentProcessModels = agentArray.toJavaList(WazuhAgentProcessModel.class);
+        } catch (Exception e) {
+            log.error(SituationalAwareErrorCode.WAZUH_AGENTS_QUERY_PORT_ERROR.getMessage());
+            throw new MpRuntimeException(SituationalAwareErrorCode.WAZUH_AGENTS_QUERY_PORT_ERROR, ExceptionUtils.getStackTrace(e));
+        }
+
+        return wazuhAgentProcessModels;
     }
 
     /**

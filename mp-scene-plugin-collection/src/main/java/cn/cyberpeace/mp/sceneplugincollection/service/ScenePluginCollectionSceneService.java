@@ -113,6 +113,7 @@ public class ScenePluginCollectionSceneService {
         FlowAnalysisRequest request = new FlowAnalysisRequest();
         request.setGroupList(Arrays.asList(pluginHandler.getScene().getFlowCollector()));
         request.setSecondsInterval(queryParams.getInterval());
+        request.setSourceMacs(flowCollectMacs);
 
         // 查询时间段 默认使用场景创建到当前时间
         if (StringUtils.isBlank(queryParams.getStartTime())) {
