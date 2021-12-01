@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.cscene.dto.flow;
 
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Builder;
 import lombok.Data;
 
 /**
@@ -10,7 +9,6 @@ import lombok.Data;
  * @Date：2021/11/22 17:58
  */
 @Data
-@Builder
 public class FlowRiskCount {
 
     @ApiModelProperty(notes = "高风险")

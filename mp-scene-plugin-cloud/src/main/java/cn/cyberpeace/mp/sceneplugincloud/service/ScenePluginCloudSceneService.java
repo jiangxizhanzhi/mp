@@ -1,54 +1,54 @@
 package cn.cyberpeace.mp.sceneplugincloud.service;
 
-import cn.cyberpeace.mp.base.common.JsonCommon;
-import cn.cyberpeace.mp.base.common.StatCommon;
-import cn.cyberpeace.mp.base.constant.BaseErrorCode;
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
-import cn.cyberpeace.mp.base.repository.condition.aggregation.Count;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.base.util.basic.*;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
+import cn.cyberpeace.mp.base.util.basic.FloatUtils;
+import cn.cyberpeace.mp.base.util.basic.IntUtils;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
-import cn.cyberpeace.mp.scene.model.SceneElementModel;
-import cn.cyberpeace.mp.scene.model.SceneElementPortModel;
-import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.*;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
-import cn.cyberpeace.mp.sceneplugincloud.bo.base.FirewallRule;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementPortModel;
-import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GetGuacamoleRecordingData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleRecordingData;
-import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementMapper;
-import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementPortMapper;
-import cn.cyberpeace.mp.sceneplugincloud.service.param.GroupCountFilter;
+import cn.cyberpeace.mp.sceneplugincloud.service.common.CloudSceneStatCommon;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
-import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class ScenePluginCloudSceneService {
+
+    public static final List<String> COUNT_ELEMENT_FIELDS = Arrays.asList(
+            BeanUtils.getBeanGetterFieldNames(
+                    CloudPluginSceneElementModel::getHost,
+                    CloudPluginSceneElementModel::getVirtualType
+            )
+    );
+
+    public static final List<String> CALC_COUNT_ELEMENT_FIELDS = Arrays.asList(
+            BeanUtils.getBeanGetterFieldNames(
+                    CloudPluginSceneElementModel::getFirewallRules
+            )
+    );
 
     public static final List<String> COUNT_PORT_FIELDS = Arrays.asList(
             BeanUtils.getBeanGetterFieldNames(
@@ -63,28 +63,7 @@ public class ScenePluginCloudSceneService {
             )
     );
 
-    /**
-     * count方法
-     */
-    public static final Map<String, Function<List<Object>, Object>> CALC_COUNT_PORT_FIELD_CALC_MAP = Map.of(
-            BeanUtils.getBeanGetterFieldName(CloudPluginSceneElementPortModel::getFirewallRules),
-            fieldValues -> {
-                var count = 0;
-                for (var rawFieldValue : fieldValues) {
-                    var fieldValue = (String) rawFieldValue;
-                    if (StringUtils.isEmpty(fieldValue)) {
-                        continue;
-                    }
-                    List<FirewallRule> firewallRules = JsonCommon.parse(fieldValue, new TypeReference<List<FirewallRule>>() {});
-                    count += firewallRules.size();
-                }
-                return count;
-            }
-    );
-
-    private CloudPluginSceneElementMapper cloudPluginSceneElementMapper;
-
-    private CloudPluginSceneElementPortMapper cloudPluginSceneElementPortMapper;
+    private CloudSceneStatCommon cloudSceneStatCommon;
 
     @Data
     @AllArgsConstructor
@@ -136,88 +115,9 @@ public class ScenePluginCloudSceneService {
         return connectionLinkInfoMap;
     }
 
-    private HumanCondition genNodeCondition(List<String> sceneIds, List<String> nodeIds) {
-        var condition = new HumanCondition()
-                .link(SceneModel.class, CloudPluginSceneElementModel.class)
-                .filterLink(SceneModel.class, SceneModel::getId,
-                        CloudPluginSceneElementModel.class, CloudPluginSceneElementModel::getScene)
-                .currentLink(SceneModel.class)
-                .filterEqual(SceneModel::getDeleted, false);
-        if (!CollectionUtils.isEmpty(sceneIds)) {
-            condition.filterIn(SceneModel::getId, sceneIds.toArray(new String[0]));
-        }
-
-        condition.currentLink(CloudPluginSceneElementModel.class);
-        if (!CollectionUtils.isEmpty(nodeIds)) {
-            condition.filterIn(CloudPluginSceneElementModel::getSceneElement, nodeIds.toArray(new String[0]));
-        }
-        return condition;
-    }
-
-    private HumanCondition genNodePortCondition(List<String> sceneIds, List<String> nodeIds) {
-        var condition = new HumanCondition()
-                .link(SceneModel.class, SceneElementModel.class, SceneElementPortModel.class, CloudPluginSceneElementPortModel.class)
-                .filterLink(SceneModel.class, SceneModel::getId,
-                        SceneElementModel.class, SceneElementModel::getScene)
-                .filterLink(SceneModel.class, SceneModel::getId,
-                        SceneElementPortModel.class, SceneElementPortModel::getScene)
-                .filterLink(SceneModel.class, SceneModel::getId,
-                        CloudPluginSceneElementPortModel.class, CloudPluginSceneElementPortModel::getScene)
-                .filterLink(SceneElementModel.class, SceneElementModel::getId,
-                        SceneElementPortModel.class, SceneElementPortModel::getSceneElement)
-                .filterLink(SceneElementPortModel.class, SceneElementPortModel::getPortId,
-                        CloudPluginSceneElementPortModel.class, CloudPluginSceneElementPortModel::getSceneElementPort)
-                .currentLink(SceneModel.class)
-                .filterEqual(SceneModel::getDeleted, false);
-        if (!CollectionUtils.isEmpty(sceneIds)) {
-            condition.filterIn(SceneModel::getId, sceneIds.toArray(new String[0]));
-        }
-
-        condition.currentLink(SceneElementModel.class);
-        if (!CollectionUtils.isEmpty(nodeIds)) {
-            condition.filterIn(SceneElementModel::getNodeId, nodeIds.toArray(new String[0]));
-        }
-        return condition;
-    }
-
-    /**
-     * 分组查询指定字段的聚合统计数量
-     * @param sceneIds 场景id列表，不传默认为全部
-     * @param nodeIds 节点id列表，不传默认为全部
-     * @param filter 过滤条件
-     * @param groupFieldName 分组聚合字段
-     * @param <T> 分组聚合字段的值类型
-     * @return 字段的聚合统计数量 Map<字段值, 该字段值统计数量>
-     */
-    private <T> ServiceResult<Map<T, Long>> groupCountElement(List<String> sceneIds, List<String> nodeIds,
-                                                              GroupCountFilter filter, String groupFieldName) {
-        var condition = genNodeCondition(sceneIds, nodeIds);
-        condition.currentLink(CloudPluginSceneElementModel.class);
-        if (filter != null) {
-            if (!CollectionUtils.isEmpty(filter.getHosts())) {
-                condition.filterIn(CloudPluginSceneElementModel::getHost, filter.getHosts().toArray());
-            }
-            if (!CollectionUtils.isEmpty(filter.getVirtualTypes())) {
-                condition.filterIn(CloudPluginSceneElementModel::getVirtualType, filter.getVirtualTypes().toArray());
-            }
-        }
-
-        Map<T, Long> result;
-        try {
-            result = StatCommon.groupCount(cloudPluginSceneElementMapper, condition, groupFieldName);
-        } catch (Exception e) {
-            log.error("Group count cloud element on field {} error: {}", groupFieldName, e);
-            throw new MpRuntimeException(BaseErrorCode.ERROR, e);
-        }
-
-        return new ServiceResult<>(result);
-    }
-
     @Autowired
-    public ScenePluginCloudSceneService(CloudPluginSceneElementMapper cloudPluginSceneElementMapper,
-                                        CloudPluginSceneElementPortMapper cloudPluginSceneElementPortMapper) {
-        this.cloudPluginSceneElementMapper = cloudPluginSceneElementMapper;
-        this.cloudPluginSceneElementPortMapper = cloudPluginSceneElementPortMapper;
+    public ScenePluginCloudSceneService(CloudSceneStatCommon cloudSceneStatCommon) {
+        this.cloudSceneStatCommon = cloudSceneStatCommon;
     }
 
     public ServiceResult<List<NodeSessionBO>> getSceneRemoteSessions(List<String> sceneIds, List<String> nodeIds,
@@ -356,93 +256,89 @@ public class ScenePluginCloudSceneService {
     }
 
     /**
-     * 分组查询host的聚合统计数量
+     * 查询网元指定字段的聚合统计数量
      * @param sceneIds 场景id列表，不传默认为全部
      * @param nodeIds 节点id列表，不传默认为全部
-     * @param filter 过滤条件
-     * @return 字段的聚合统计数量 Map<host, 该字段值统计数量>
+     * @param fieldNames 聚合统计字段  有效字段 COUNT_ELEMENT_FIELDS
+     * @return 字段的聚合统计数量 Map<字段名称, Map<字段值, 该字段统计数量>>
      */
-    public ServiceResult<Map<String, Long>> groupCountElementByHost(
-            List<String> sceneIds, List<String> nodeIds, GroupCountFilter filter) {
-        return groupCountElement(sceneIds, nodeIds, filter,
-                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getHost));
-    }
-
-    /**
-     * 分组查询virtualType的聚合统计数量
-     * @param sceneIds 场景id列表，不传默认为全部
-     * @param nodeIds 节点id列表，不传默认为全部
-     * @param filter 过滤条件
-     * @return 字段的聚合统计数量 Map<virtualType, 该字段值统计数量>
-     */
-    public ServiceResult<Map<Integer, Long>> groupCountElementByVirtualType(
-            List<String> sceneIds, List<String> nodeIds, GroupCountFilter filter) {
-        return groupCountElement(sceneIds, nodeIds, filter,
-                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getVirtualType));
-    }
-
-    /**
-     * 查询端口指定字段的聚合统计数量
-     * @param sceneIds 场景id列表，不传默认为全部
-     * @param nodeIds 节点id列表，不传默认为全部
-     * @param fieldNames 聚合统计字段
-     * @return 字段的聚合统计数量 Map<字段名称, 该字段统计数量>
-     */
-    public ServiceResult<Map<String, Long>> countPort(
+    public ServiceResult<Map<String, Map<Object, Long>>> groupCountElement(
             List<String> sceneIds, List<String> nodeIds, List<String> fieldNames) {
-        fieldNames = fieldNames.stream().filter(fieldName -> COUNT_PORT_FIELDS.contains(fieldName))
-                .collect(Collectors.toList());
-        if (fieldNames.isEmpty()) {
-            return new ServiceResult<>(new HashMap<>());
-        }
+        List<String> countFieldNames = new ArrayList<>();
+        fieldNames.forEach(fieldName -> {
+            if (COUNT_ELEMENT_FIELDS.contains(fieldName)) {
+                countFieldNames.add(fieldName);
+            }
+        });
 
-        var condition = genNodePortCondition(sceneIds, nodeIds);
-        condition.currentLink(CloudPluginSceneElementPortModel.class);
-        Map<String, Long> result;
-        try {
-            result = StatCommon.count(cloudPluginSceneElementPortMapper, condition, fieldNames);
-        } catch (Exception e) {
-            log.error("Count cloud element port on fields {} error: {}", fieldNames, e);
-            throw new MpRuntimeException(BaseErrorCode.ERROR, e);
+        Map<String, Map<Object, Long>> result = new HashMap<>();
+        if (!countFieldNames.isEmpty()) {
+            countFieldNames.forEach(fieldName -> {
+                result.put(fieldName, cloudSceneStatCommon.groupCountElement(sceneIds, nodeIds, fieldName, fieldName, false));
+            });
         }
 
         return new ServiceResult<>(result);
     }
 
     /**
-     * 查询端口指定字段的聚合统计数量, 需要自定义计算结果
+     * 查询网元指定字段的聚合统计数量
      * @param sceneIds 场景id列表，不传默认为全部
      * @param nodeIds 节点id列表，不传默认为全部
-     * @param fieldNames 聚合统计字段
+     * @param fieldNames 聚合统计字段  有效字段 COUNT_ELEMENT_FIELDS + CALC_COUNT_ELEMENT_FIELDS
      * @return 字段的聚合统计数量 Map<字段名称, 该字段统计数量>
      */
-    public ServiceResult<Map<String, Long>> calcCountPort(
+    public ServiceResult<Map<String, Long>> countElement(
             List<String> sceneIds, List<String> nodeIds, List<String> fieldNames) {
-        fieldNames = fieldNames.stream().filter(fieldName -> CALC_COUNT_PORT_FIELDS.contains(fieldName))
-                .collect(Collectors.toList());
-        if (fieldNames.isEmpty()) {
-            return new ServiceResult<>(new HashMap<>());
-        }
-
-        var fieldCalcMap = fieldNames.stream()
-                .collect(Collectors.toMap(fieldName -> fieldName,
-                        fieldName -> CALC_COUNT_PORT_FIELD_CALC_MAP.get(fieldName)));
-
-        var condition = genNodePortCondition(sceneIds, nodeIds);
-        condition.currentLink(CloudPluginSceneElementPortModel.class);
-        Map<String, Object> result;
-        try {
-            result = StatCommon.calc(cloudPluginSceneElementPortMapper, condition, fieldCalcMap);
-        } catch (Exception e) {
-            log.error("Calc count cloud element port on fields {} error: {}", fieldNames, e);
-            throw new MpRuntimeException(BaseErrorCode.ERROR, e);
-        }
-
-        Map<String, Long> formatResult = new HashMap<>();
-        result.forEach((fieldName, fieldValue) -> {
-            formatResult.put(fieldName, Long.valueOf(fieldValue.toString()));
+        List<String> countFieldNames = new ArrayList<>();
+        List<String> calcCountFieldNames = new ArrayList<>();
+        fieldNames.forEach(fieldName -> {
+            if (COUNT_ELEMENT_FIELDS.contains(fieldName)) {
+                countFieldNames.add(fieldName);
+            } else if (CALC_COUNT_ELEMENT_FIELDS.contains(fieldName)) {
+                calcCountFieldNames.add(fieldName);
+            }
         });
-        return new ServiceResult<>(formatResult);
+
+        Map<String, Long> result = new HashMap<>();
+        if (!countFieldNames.isEmpty()) {
+            result.putAll(cloudSceneStatCommon.countElement(sceneIds, nodeIds, countFieldNames));
+        }
+        if (!calcCountFieldNames.isEmpty()) {
+            result.putAll(cloudSceneStatCommon.calcCountElement(sceneIds, nodeIds, calcCountFieldNames));
+        }
+
+        return new ServiceResult<>(result);
+    }
+
+    /**
+     * 查询端口指定字段的聚合统计数量
+     * @param sceneIds 场景id列表，不传默认为全部
+     * @param nodeIds 节点id列表，不传默认为全部
+     * @param fieldNames 聚合统计字段  有效字段 COUNT_PORT_FIELDS + CALC_COUNT_PORT_FIELDS
+     * @return 字段的聚合统计数量 Map<字段名称, 该字段统计数量>
+     */
+    public ServiceResult<Map<String, Long>> countPort(
+            List<String> sceneIds, List<String> nodeIds, List<String> fieldNames) {
+        List<String> countFieldNames = new ArrayList<>();
+        List<String> calcCountFieldNames = new ArrayList<>();
+        fieldNames.forEach(fieldName -> {
+            if (COUNT_PORT_FIELDS.contains(fieldName)) {
+                countFieldNames.add(fieldName);
+            } else if (CALC_COUNT_PORT_FIELDS.contains(fieldName)) {
+                calcCountFieldNames.add(fieldName);
+            }
+        });
+
+        Map<String, Long> result = new HashMap<>();
+        if (!countFieldNames.isEmpty()) {
+            result.putAll(cloudSceneStatCommon.countPort(sceneIds, nodeIds, countFieldNames));
+        }
+        if (!calcCountFieldNames.isEmpty()) {
+            result.putAll(cloudSceneStatCommon.calcCountPort(sceneIds, nodeIds, calcCountFieldNames));
+        }
+
+        return new ServiceResult<>(result);
     }
 
 }

@@ -95,29 +95,6 @@ public interface BaseModelMapper<M extends BaseModel> {
         return getMapperInterface((Proxy) this);
     }
 
-    @SuppressWarnings("unchecked")
-    private Class<M> getModelClass() {
-        Class<?> actualModelClassSource;
-        Class<?> mapperInterface = getMapperInterface();
-        var modelClassAnnotation = mapperInterface.getAnnotation(ModelClass.class);
-        if (modelClassAnnotation != null) {
-            actualModelClassSource = modelClassAnnotation.value();
-        } else {
-            actualModelClassSource = ClassUtils.getStaticFieldValue(mapperInterface, "modelClass",
-                    Class.class);
-        }
-
-        Class<M> actualModelClass;
-        try {
-            actualModelClass = (Class<M>) actualModelClassSource;
-        } catch (Exception e) {
-            log.error("Invalid model class[{}] for {}", actualModelClassSource, getClass());
-            return null;
-        }
-
-        return actualModelClass;
-    }
-
     private String getTableName() {
         Class<M> actualModelClass = getModelClass();
         return actualModelClass != null ? ModelUtils.getTableName(actualModelClass) : null;
@@ -250,6 +227,29 @@ public interface BaseModelMapper<M extends BaseModel> {
             validFieldsObjs.put(key, keyObjs);
         });
         return validFieldsObjs;
+    }
+
+    @SuppressWarnings("unchecked")
+    default Class<M> getModelClass() {
+        Class<?> actualModelClassSource;
+        Class<?> mapperInterface = getMapperInterface();
+        var modelClassAnnotation = mapperInterface.getAnnotation(ModelClass.class);
+        if (modelClassAnnotation != null) {
+            actualModelClassSource = modelClassAnnotation.value();
+        } else {
+            actualModelClassSource = ClassUtils.getStaticFieldValue(mapperInterface, "modelClass",
+                    Class.class);
+        }
+
+        Class<M> actualModelClass;
+        try {
+            actualModelClass = (Class<M>) actualModelClassSource;
+        } catch (Exception e) {
+            log.error("Invalid model class[{}] for {}", actualModelClassSource, getClass());
+            return null;
+        }
+
+        return actualModelClass;
     }
 
     @Recommendation

@@ -1,16 +1,24 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
-import cn.cyberpeace.mp.cscene.dto.element.HostState;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackDto;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowRiskCount;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowTrend;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowTrendSceneElementRequest;
+import cn.cyberpeace.mp.cscene.service.FlowMonitorService;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -26,6 +34,9 @@ import java.util.List;
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/monitor/flow")
 public class FlowMonitorController {
 
+    @Autowired
+    private FlowMonitorService flowMonitorService;
+
     /**
      * 默认查询场景所有节点
      * 忽略elementIds的值
@@ -34,10 +45,11 @@ public class FlowMonitorController {
      */
     @ApiOperation(value = "场景流量趋势图")
     @GetMapping("/scene_trend")
-    public ServiceResult<List<HostState>> getSceneFlowTrend(FlowTrendSceneElementRequest flowTrendRequest) {
+    public ServiceResult<List<FlowTrend>> getSceneFlowTrend(FlowTrendSceneElementRequest flowTrendRequest) {
         log.info("flowTrendRequest:{}", flowTrendRequest);
 
-        return null;
+
+        return ServiceResult.success(null);
     }
 
 
@@ -48,10 +60,10 @@ public class FlowMonitorController {
      */
     @ApiOperation(value = "节点流量趋势图")
     @GetMapping("/element_trend")
-    public ServiceResult<List<HostState>> getElementHostStateTrend(FlowTrendSceneElementRequest flowTrendRequest) {
+    public ServiceResult<List<FlowTrend>> getElementHostStateTrend(FlowTrendSceneElementRequest flowTrendRequest) {
         log.info("flowTrendRequest:{}", flowTrendRequest);
 
-        return null;
+        return ServiceResult.success(null);
     }
 
 
@@ -61,7 +73,20 @@ public class FlowMonitorController {
         log.info("{}", baseRequest);
 
 
-        return null;
+        return ServiceResult.success(null);
+    }
+
+
+    @ApiOperation(value = "流量分页接口")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
+    })
+    @GetMapping("/page")
+    public ListObjServiceResult<FlowAttackDto> pageFlow(@RequestParam String id, FlowQueryParams queryParams) {
+        log.info("id:{}, queryParams:{}", id, queryParams);
+
+        ListObjServiceResult<FlowAttackDto> result = flowMonitorService.pageFlow(id, queryParams);
+        return result;
     }
 
 
