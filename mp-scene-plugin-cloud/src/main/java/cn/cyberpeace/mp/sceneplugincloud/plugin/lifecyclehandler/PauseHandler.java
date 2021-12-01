@@ -65,7 +65,7 @@ public class PauseHandler extends HandlerCommon {
             getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.PAUSE, Arrays.asList(ElementProcess.PAUSE_CONTAINER));
             runElementProgress(nodeId, SceneElementModel.Event.PAUSE, ElementProcess.PAUSE_CONTAINER, () -> {
                 closeAccessModes(element);
-                container.lifeControl(instanceId, "pause");
+                container.pause(instanceId);
             });
         }
     }
