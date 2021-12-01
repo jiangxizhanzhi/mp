@@ -21,7 +21,8 @@ public enum SituationalAwareErrorCode implements ErrorCode {
     DELETE_FLOWTABLE_ERROR("MP-110411", "delete flow table error"),
     BINDING_MIRROR_ERROR("MP-110412", "binding flow mirror error"),
     WAZUH_AGENTS_QUERY_ERROR("MP-110413", "wazuh agents query error"),
-    WAZUH_AGENTS_QUERY_PORT_ERROR("MP-110414", "wazuh ports query error");
+    WAZUH_AGENTS_QUERY_PORT_ERROR("MP-110414", "wazuh ports query error"),
+    WAZUH_AGENTS_QUERY_PROCESS_ERROR("MP-110415", "wazuh agent process query error");
 
     SituationalAwareErrorCode(String code, String message) {
         setCode(code, message);
