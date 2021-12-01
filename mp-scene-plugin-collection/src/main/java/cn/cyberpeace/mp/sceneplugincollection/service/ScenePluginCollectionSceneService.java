@@ -1,12 +1,16 @@
 package cn.cyberpeace.mp.sceneplugincollection.service;
 
+import cn.cyberpeace.mp.base.bo.IntervalSizeBO;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionFlowBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
@@ -27,6 +31,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -36,6 +41,15 @@ import java.util.stream.Collectors;
 
 @Service
 public class ScenePluginCollectionSceneService {
+
+    public static class GroupCountFlowField {
+        public static final String LEVEL = "level";
+    }
+
+    public static class GroupCountHostEventField {
+        public static final String EVENT_TYPE = "eventType";
+        public static final String NODE_NAME = "nodeName";
+    }
 
     @Autowired
     private NetworkTrafficService networkTrafficService;
@@ -60,6 +74,34 @@ public class ScenePluginCollectionSceneService {
             });
         }
         return srcElements;
+    }
+
+    /**
+     * TODO 分组查询主机事件的聚合统计数量
+     * @param sceneIds 场景id列表，不传默认为全部
+     * @param nodeIds 节点id列表，不传默认为全部
+     * @param groupField 分组聚合字段类型
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @param <T> 分组聚合字段的值类型
+     * @return 字段的聚合统计数量 Map<字段值, 该字段值统计数量>
+     */
+    private <T> ServiceResult<Map<T, Integer>> groupCountHostEvent(
+            List<String> sceneIds, List<String> nodeIds, String groupField, LocalDateTime startTime, LocalDateTime endTime) {
+        return new ServiceResult<>(new HashMap<>());
+    }
+
+    /**
+     * TODO 分组查询采集流量的聚合统计数量
+     * @param sceneIds 场景id列表，不传默认为全部
+     * @param nodeIds 节点id列表，不传默认为全部
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @return 字段的聚合统计数量 Map<字段值, 该字段值统计数量>
+     */
+    private <T> ServiceResult<Map<T, Integer>> groupCountFlow(
+            List<String> sceneIds, List<String> nodeIds, String groupField, LocalDateTime startTime, LocalDateTime endTime) {
+        return new ServiceResult<>(new HashMap<>());
     }
 
     public ListObjServiceResult<CollectionFlowBO> listFlows(String sceneId, FlowQueryParams queryParams) {
@@ -258,4 +300,102 @@ public class ScenePluginCollectionSceneService {
         });
         return enableMac;
     }
+
+    /**
+     * 安全等级分组查询采集流量的聚合统计数量
+     * @param sceneIds 场景id列表，不传默认为全部
+     * @param nodeIds 节点id列表，不传默认为全部
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @return 字段的聚合统计数量 Map<安全等级, 该字段值统计数量>
+     */
+    public ServiceResult<Map<String, Integer>> groupCountFlowByLevel(
+            List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime) {
+        return groupCountFlow(sceneIds, nodeIds, GroupCountFlowField.LEVEL, startTime, endTime);
+    }
+
+    /**
+     * 事件类型分组查询主机事件的聚合统计数量
+     * @param sceneIds 场景id列表，不传默认为全部
+     * @param nodeIds 节点id列表，不传默认为全部
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @return 字段的聚合统计数量 Map<事件类型, 该字段值统计数量>
+     */
+    public ServiceResult<Map<String, Integer>> groupCountHostEventByEventType(
+            List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime) {
+        return groupCountHostEvent(sceneIds, nodeIds, GroupCountHostEventField.EVENT_TYPE, startTime, endTime);
+    }
+
+    /**
+     * 节点名称分组查询主机事件的聚合统计数量
+     * @param sceneIds 场景id列表，不传默认为全部
+     * @param nodeIds 节点id列表，不传默认为全部
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @return 字段的聚合统计数量 Map<节点名称, 该字段值统计数量>
+     */
+    public ServiceResult<Map<String, Integer>> groupCountHostEventByNodeName(
+            List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime) {
+        return groupCountHostEvent(sceneIds, nodeIds, GroupCountHostEventField.NODE_NAME, startTime, endTime);
+    }
+
+    /**
+     * 时间区间统计流量次数
+     * @param sceneIds 场景id列表，不传默认为全部
+     * @param nodeIds 节点id列表，不传默认为全部
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @return 聚合统计结果
+     */
+    public ServiceResult<List<IntervalSizeBO<LocalDateTime>>> timeIntervalCountFlow(
+            List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime) {
+        return new ServiceResult<>(new ArrayList<>());
+    }
+
+    /**
+     * 时间区间统计流量大小
+     * @param sceneIds 场景id列表，不传默认为全部
+     * @param nodeIds 节点id列表，不传默认为全部
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @param intervalNumber 间隔数量
+     * @return 聚合统计结果
+     */
+    public ServiceResult<List<IntervalSizeBO<LocalDateTime>>> timeIntervalSumFlowSize(
+            List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime,
+            int intervalNumber) {
+        return new ServiceResult<>(new ArrayList<>());
+    }
+
+    /**
+     * 时间区间统计主机cpu占用平均值
+     * @param sceneIds 场景id列表，不传默认为全部
+     * @param nodeIds 节点id列表，不传默认为全部
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @param intervalNumber 间隔数量
+     * @return 聚合统计结果
+     */
+    public ServiceResult<List<IntervalSizeBO<LocalDateTime>>> timeIntervalAvgHostCpuPercent(
+            List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime,
+            int intervalNumber) {
+        return new ServiceResult<>(new ArrayList<>());
+    }
+
+    /**
+     * 时间区间统计主机内存占用平均值
+     * @param sceneIds 场景id列表，不传默认为全部
+     * @param nodeIds 节点id列表，不传默认为全部
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @param intervalNumber 间隔数量
+     * @return 聚合统计结果
+     */
+    public ServiceResult<List<IntervalSizeBO<LocalDateTime>>> timeIntervalAvgHostMemoryPercent(
+            List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime,
+            int intervalNumber) {
+        return new ServiceResult<>(new ArrayList<>());
+    }
+
 }

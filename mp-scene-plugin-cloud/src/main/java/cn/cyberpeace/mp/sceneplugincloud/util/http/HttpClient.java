@@ -108,9 +108,9 @@ public class HttpClient {
         result.setResponse(response);
 
         if (!result.isSuccess()) {
-            log.error("Http {} status error - url: {}, header: {}, body: {}, error: {}", request.getMethod(),
+            log.error("Http {} status error - url: {}, header: {}, body: {}, http code: {}, error: {}", request.getMethod(),
                     request.getURI(), request.getAllHeaders(),
-                    data == null ? StringUtils.EMPTY : data.toContent(), response.getStatusLine().getReasonPhrase());
+                    data == null ? StringUtils.EMPTY : data.toContent(), response.getStatusLine().getStatusCode(), response.getStatusLine().getReasonPhrase());
         }
 
         try {

@@ -40,6 +40,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -82,12 +83,12 @@ public class AsyncPlatFlowTaskService {
     private FastDFSClient fastDFSClient;
 
     /**
-     * 异步保存流量发生平台任务
+     * 保存流量发生平台任务
      *
      * @param request
      * @param isUpdate
      */
-    @Async
+//    @Async
     public void savePlatFlowTask(AddFlowTaskRequest request, boolean isUpdate) {
         log.info("start to " + (isUpdate ? "update" : "add") + "platform flow task");
 
@@ -578,18 +579,22 @@ public class AsyncPlatFlowTaskService {
         String thirdTaskId = flowTaskModel.getThirdTaskId();
         // 轮询校验任务是否跑完，完成时调用回调方法，最多轮询20分钟
         CheckUtils.loopCheck(() -> checkTaskJobStopped(thirdTaskId, host), 2000, 1000 * 60 * 20,
-                null, 0, () -> taskJobStoppedCallback(flowTaskModel, call), () -> log.error("task job running status get failed：[{}]", taskId), "CheckTaskJobStopped");
+                null, 0, () -> taskJobStoppedCallback(flowTaskModel.getId(), call), () -> log.error("task job running status get failed：[{}]", taskId), "CheckTaskJobStopped");
     }
 
     /**
      * 流量任务停止时回调方法
-     * @param flowTaskModel
+     * @param taskId
      * @param call
      */
-    private void taskJobStoppedCallback(FlowTaskModel flowTaskModel, Runnable call) {
+    private void taskJobStoppedCallback(String taskId, Runnable call) {
+        FlowTaskModel flowTaskModel = new FlowTaskModel();
+        flowTaskModel.setId(taskId);
         flowTaskModel.setTaskStatus(TaskStatusEnum.STOPED.toValue());
+        flowTaskModel.setUpdateTime(LocalDateTime.now());
+
         // 更新本地任务状态
-        flowTaskMapper.update(flowTaskModel);
+        flowTaskMapper.updateTaskInfo(flowTaskModel);
 
         // 执行回调通知方法
         if (Objects.nonNull(call)) {

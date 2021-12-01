@@ -2,15 +2,18 @@ package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowDataStatistic;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowPageRequest;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowRiskAggrResponse;
+import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
+import cn.cyberpeace.mp.cscene.dto.element.HostState;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowRiskCount;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowTrendSceneElementRequest;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * @Description:
@@ -23,26 +26,42 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/monitor/flow")
 public class FlowMonitorController {
 
-    @ApiOperation(value = "流量统计")
-    @GetMapping("/statistic")
-    public ServiceResult<FlowDataStatistic> getFlowStatistic() {
+    /**
+     * 默认查询场景所有节点
+     * 忽略elementIds的值
+     *
+     * @return
+     */
+    @ApiOperation(value = "场景流量趋势图")
+    @GetMapping("/scene_trend")
+    public ServiceResult<List<HostState>> getSceneFlowTrend(FlowTrendSceneElementRequest flowTrendRequest) {
+        log.info("flowTrendRequest:{}", flowTrendRequest);
 
         return null;
     }
 
-    @ApiOperation(value = "流量风险统计")
-    @GetMapping("/risk_aggr")
-    public ServiceResult<FlowRiskAggrResponse> getFlowRiskAggr() {
+
+    /**
+     * elementIds若为多值，则只取第一个值
+     *
+     * @return
+     */
+    @ApiOperation(value = "节点流量趋势图")
+    @GetMapping("/element_trend")
+    public ServiceResult<List<HostState>> getElementHostStateTrend(FlowTrendSceneElementRequest flowTrendRequest) {
+        log.info("flowTrendRequest:{}", flowTrendRequest);
 
         return null;
     }
 
-    @ApiOperation(value = "分页查询流量")
-    @GetMapping("/page")
-    public ServiceResult getEventPage(FlowPageRequest flowPageRequest) {
-        log.info("flowPageRequest:{}", flowPageRequest);
+
+    @ApiOperation(value = "流量风险各级别统计")
+    @GetMapping("/risk_count")
+    public ServiceResult<FlowRiskCount> getFlowRiskCount(BaseSceneElementRequest baseRequest) {
+        log.info("{}", baseRequest);
 
         return null;
     }
+
 
 }

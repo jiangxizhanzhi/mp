@@ -22,6 +22,11 @@ public class FlowExecuteRequest extends FlowBaseModel {
     /**
      * 任务id
      */
+    private String taskId;
+
+    /**
+     * 第三方任务id
+     */
     private String uuid;
 
     /**

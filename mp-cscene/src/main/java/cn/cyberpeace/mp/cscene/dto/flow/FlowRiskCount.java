@@ -11,7 +11,7 @@ import lombok.Data;
  */
 @Data
 @Builder
-public class FlowRiskAggrResponse {
+public class FlowRiskCount {
 
     @ApiModelProperty(notes = "高风险")
     private int highCount;

@@ -11,6 +11,7 @@ ALTER TABLE mp_sceneplugincloud_scene_config_element ADD COLUMN `auxiliary_netwo
 ALTER TABLE mp_sceneplugincloud_scene_config_element ADD COLUMN `firewall_resource_id` varchar(64) NOT NULL COMMENT '虚拟防火墙资源id';
 ALTER TABLE mp_sceneplugincloud_scene_config_element MODIFY COLUMN `firewall_rules` varchar(2048) NOT NULL COMMENT '虚拟防火墙规则';
 ALTER TABLE mp_sceneplugincloud_scene_config_element_port ADD COLUMN `firewall_rules` varchar(2048) NOT NULL COMMENT '虚拟防火墙规则';
+ALTER TABLE mp_sceneplugincloud_scene_config_element_port ADD COLUMN `firewall_resource_id` varchar(64) NOT NULL COMMENT '虚拟防火墙资源id';
 
 ALTER TABLE mp_sceneplugincloud_scene_element ADD COLUMN `wan_port_number` int(10) NOT NULL COMMENT 'wan口数量';
 ALTER TABLE mp_sceneplugincloud_scene_element ADD COLUMN `wan_port_type`   varchar(8) NOT NULL COMMENT 'wan口类型';
@@ -25,3 +26,4 @@ ALTER TABLE mp_sceneplugincloud_scene_element ADD COLUMN `auxiliary_network_rout
 ALTER TABLE mp_sceneplugincloud_scene_element ADD COLUMN `firewall_resource_id` varchar(64) NOT NULL COMMENT '虚拟防火墙资源id';
 ALTER TABLE mp_sceneplugincloud_scene_element MODIFY COLUMN `firewall_rules` varchar(2048) NOT NULL COMMENT '虚拟防火墙规则';
 ALTER TABLE mp_sceneplugincloud_scene_element_port ADD COLUMN `firewall_rules` varchar(2048) NOT NULL COMMENT '虚拟防火墙规则';
+ALTER TABLE mp_sceneplugincloud_scene_element_port ADD COLUMN `firewall_resource_id` varchar(64) NOT NULL COMMENT '虚拟防火墙资源id';

@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * @Description:
@@ -13,6 +14,12 @@ import java.time.LocalDateTime;
  */
 @Data
 public class EventPageRequest extends PageRequest {
+
+    @ApiModelProperty(value = "场景id")
+    private String sceneId;
+
+    @ApiModelProperty(value = "节点id")
+    private List<String> elementIds;
 
     @ApiModelProperty(value = "事件类型")
     private String eventType;

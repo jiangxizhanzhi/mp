@@ -36,6 +36,9 @@ spring:
     port: 5673
     username: guest
     password: guest
+  web:
+    resources:
+      static-locations: file:${user.home}/img
 
 
 logging:
