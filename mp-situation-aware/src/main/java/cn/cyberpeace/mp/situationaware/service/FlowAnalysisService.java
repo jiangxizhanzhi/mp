@@ -149,7 +149,14 @@ public class FlowAnalysisService extends AbstractBaseService {
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.query(boolQueryBuilder);
         searchSourceBuilder.sort("@timestamp", SortOrder.DESC);
-        searchSourceBuilder.from(0).size(request.getTopSize());
+
+        if(Objects.nonNull(request.getPageSize()) && Objects.nonNull(request.getPageNum())){
+            int  offset = (request.getPageNum() -1) * (request.getPageSize());
+            searchSourceBuilder.from(offset);
+            searchSourceBuilder.size(request.getPageSize());
+        }else {
+            searchSourceBuilder.from(0).size(request.getTopSize());
+        }
 
         var searchRequest = new SearchRequest(this.indices(request.getGroupList(),request.getStartDateTime(),request.getEndDateTime()));
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
