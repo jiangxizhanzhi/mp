@@ -45,6 +45,9 @@ public class NetworkTrafficGroupService {
     @Value("${mp.situationaware.arkime.es-host}")
     private String esHost;
 
+    @Value("${mp.situationaware.arkime.es-port}")
+    private String esPort;
+
     @Value("${mp.situationaware.arkime.image-name}")
     private String imageName;
 
@@ -182,6 +185,7 @@ public class NetworkTrafficGroupService {
         //设置环境变量
         JSONObject environment = new JSONObject();
         environment.put("ES_HOST", esHost);
+        environment.put("ES_PORT", esPort);
         environment.put("ES_PREFIX", instanceId);
         paramObject.put("environment", environment);
 
