@@ -30,6 +30,7 @@ public class Flow {
         public static final int OFF = 0;
         public static final int ON = 1;
         public static final int ERROR = 2;
+        public static final int PREPARING = 3;
 
         private Status() {
         }
