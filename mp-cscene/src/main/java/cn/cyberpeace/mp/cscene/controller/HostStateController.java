@@ -5,9 +5,11 @@ import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.dto.request.HostStateTrendSceneElementRequest;
+import cn.cyberpeace.mp.cscene.service.HostStateService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,6 +27,8 @@ import java.util.List;
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/monitor/hoststate")
 public class HostStateController {
 
+    @Autowired
+    private HostStateService hostStateService;
 
     /**
      * 默认查询场景所有节点
@@ -38,7 +42,9 @@ public class HostStateController {
     public ServiceResult<List<HostState>> getSceneHostStateTrend(HostStateTrendSceneElementRequest hostStateTrendRequest) {
         log.info("hostStateTrendRequest:{}", hostStateTrendRequest);
 
-        return null;
+        List<HostState> hostStates = hostStateService.getSceneHostStateTrend(hostStateTrendRequest);
+
+        return ServiceResult.success(hostStates);
     }
 
 
@@ -53,8 +59,9 @@ public class HostStateController {
     public ServiceResult<List<HostState>> getElementHostStateTrend(HostStateTrendSceneElementRequest hostStateTrendRequest) {
         log.info("hostStateTrendRequest:{}", hostStateTrendRequest);
 
+        List<HostState> hostStates = hostStateService.getElementHostStateTrend(hostStateTrendRequest);
 
-        return null;
+        return ServiceResult.success(hostStates);
     }
 
 

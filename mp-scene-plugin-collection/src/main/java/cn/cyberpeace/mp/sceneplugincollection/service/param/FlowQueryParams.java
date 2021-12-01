@@ -7,7 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Data
@@ -19,11 +18,9 @@ public class FlowQueryParams extends QueryParams {
     private String protocol;
 
     @ApiModelProperty(value = "开始时间")
-    @NotNull(message = "开始时间不能为空")
     private String startTime;
 
     @ApiModelProperty(value = "结束时间")
-    @NotNull(message = "结束时间不能为空")
     private String endTime;
 
     @ApiModelProperty(value = "节点id列表")
