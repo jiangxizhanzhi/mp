@@ -20,6 +20,10 @@ import java.io.File;
 public class MpEnvironmentPostProcessor implements EnvironmentPostProcessor {
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
+        String env = environment.getProperty("spring.profiles.active");
+        if (StringUtils.isBlank(env) || !"prod".equals(env)) {
+            return;
+        }
         String envPath = environment.getProperty("MP_ENV_PATH");
         try {
             if (StringUtils.isBlank(envPath) || !new File(envPath).exists()) {
