@@ -37,7 +37,8 @@ public class FlowMonitorController {
     public ServiceResult<List<FlowTrend>> getSceneFlowTrend(FlowTrendSceneElementRequest flowTrendRequest) {
         log.info("flowTrendRequest:{}", flowTrendRequest);
 
-        return null;
+
+        return ServiceResult.success(null);
     }
 
 
@@ -51,7 +52,7 @@ public class FlowMonitorController {
     public ServiceResult<List<FlowTrend>> getElementHostStateTrend(FlowTrendSceneElementRequest flowTrendRequest) {
         log.info("flowTrendRequest:{}", flowTrendRequest);
 
-        return null;
+        return ServiceResult.success(null);
     }
 
 
@@ -61,7 +62,7 @@ public class FlowMonitorController {
         log.info("{}", baseRequest);
 
 
-        return null;
+        return ServiceResult.success(null);
     }
 
 
