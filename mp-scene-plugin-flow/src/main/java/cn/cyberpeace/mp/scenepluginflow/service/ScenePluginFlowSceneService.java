@@ -13,7 +13,7 @@ public class ScenePluginFlowSceneService {
     public ServiceResult<Boolean> startFlow(String sceneId, String nodeId, String flowId, SceneContextBO context) {
         var sceneHandler = new SceneHandler(sceneId, null, false, context);
         FlowScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
-        var result = pluginHandler.startFlow(nodeId, flowId);
+        var result = pluginHandler.startFlow(nodeId, flowId, true);
         return new ServiceResult<>(result);
     }
 
