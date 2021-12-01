@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 /**
  * @Description: 节点监控统计信息
  * @Author zhouxinghuai
@@ -16,8 +18,17 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ApiModel(value = "节点资源配置信息(cpu，内存，磁盘等")
-public class ElementResource {
+@ApiModel(value = "节点状态信息(cpu，内存，磁盘等")
+public class HostState {
+
+    @ApiModelProperty("场景id")
+    private String sceneId;
+
+    @ApiModelProperty("节点id")
+    private String elementId;
+
+    @ApiModelProperty("时间")
+    private LocalDateTime time;
 
 //    @ApiModelProperty(value = "节点资源-CPU")
 //    private int nodeCPUs;

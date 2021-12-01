@@ -42,6 +42,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -176,7 +177,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
             }
         }
 
-        return listObjResult;
+        return listObjResult.asResult();
     }
 
     /**
@@ -714,6 +715,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
         int taskStatus = TaskStatusEnum.RUNNING.toValue();
         // 构建执行任务请求
         FlowExecuteRequest executeRequest = new FlowExecuteRequest(flowTaskModel);
+        executeRequest.setTaskId(flowTaskModel.getId());
         executeRequest.setAction(taskAction);
         executeRequest.setUuid(thirdTaskId);
         executeRequest.setUrlPath(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + urlPath);
@@ -730,9 +732,12 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
         util.schedule();
 
         // 更新第三方任务id和任务状态
-        flowTaskModel.setThirdTaskId(thirdTaskId);
-        flowTaskModel.setTaskStatus(taskStatus);
-        update(flowTaskModel);
+        FlowTaskModel updateTaskModel = new FlowTaskModel();
+        updateTaskModel.setId(flowTaskModel.getId());
+        updateTaskModel.setThirdTaskId(thirdTaskId);
+        updateTaskModel.setTaskStatus(taskStatus);
+        updateTaskModel.setUpdateTime(LocalDateTime.now());
+        this.updateFlowTaskInfo(updateTaskModel);
 
         try {
             asyncPlatFlowTaskService.refreshTaskStatus(flowTaskModel.getId(), flowActuatorModel, call);
@@ -782,6 +787,24 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
         }
 
         return rows;
+    }
+
+    /**
+     * 增加实际运行次数
+     * @param taskId
+     * @return
+     */
+    public int increaseRunningCount(String taskId) {
+        return getModelMapper().increaseRunningCount(taskId);
+    }
+
+    /**
+     * 更新流量任务
+     * @param flowTaskModel
+     * @return
+     */
+    public int updateFlowTaskInfo(FlowTaskModel flowTaskModel) {
+        return getModelMapper().updateTaskInfo(flowTaskModel);
     }
 
 }

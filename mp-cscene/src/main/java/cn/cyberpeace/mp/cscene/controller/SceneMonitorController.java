@@ -2,9 +2,7 @@ package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
-import cn.cyberpeace.mp.cscene.dto.common.ResourceUsage;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
-import cn.cyberpeace.mp.cscene.dto.request.ResourceUsageRequest;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneMonitorInfo;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.SceneMonitorService;
@@ -44,20 +42,11 @@ public class SceneMonitorController {
     }
 
 
-    @ApiOperation(value = "查询场景资源使用统计")
-    @GetMapping("/resource_usage/{sceneId}")
-    public ServiceResult<ResourceUsage> getSceneResourceUsage(@PathVariable String sceneId, ResourceUsageRequest usageRequest) {
-        log.info("sceneId:{}, usageRequest:{}", sceneId, usageRequest);
-
-        return null;
-    }
-
     @ApiOperation(value = "查询场景所有节点列表")
     @GetMapping("/all_elements/{sceneId}")
     public ServiceResult<List<ElementMonitorBasicInfo>> getSceneAllElements(@PathVariable String sceneId) {
         List<ElementMonitorBasicInfo> basicInfoList = sceneMonitorService.getAllSceneElements(sceneId);
         return ServiceResult.success(basicInfoList);
     }
-
 
 }

@@ -15,4 +15,68 @@
         </where>
     </select>
 
+    <update id="increaseRunningCount">
+        update mp_flow_task
+        set running_count = running_count + 1
+        where id = #{taskId,jdbcType=VARCHAR}
+    </update>
+
+    <update id="updateTaskInfo" parameterType="cn.cyberpeace.mp.flow.model.FlowTaskModel">
+        update mp_flow_task
+        <set>
+            <if test="title != null">
+                title = #{title},
+            </if>
+            <if test="taskDesc != null">
+                task_desc = #{taskDesc},
+            </if>
+            <if test="actuatorId != null">
+                actuator_id = #{actuatorId},
+            </if>
+            <if test="flowId != null">
+                flow_id = #{flowId},
+            </if>
+            <if test="flowPortId != null">
+                flow_port_id = #{flowPortId},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime},
+            </if>
+            <if test="flowPlatform != null">
+                flow_platform = #{flowPlatform},
+            </if>
+            <if test="thirdFlowId != null">
+                third_flow_id = #{thirdFlowId},
+            </if>
+            <if test="thirdFlowName != null">
+                third_flow_name = #{thirdFlowName},
+            </if>
+            <if test="thirdTaskId != null">
+                third_task_id = #{thirdTaskId},
+            </if>
+            <if test="count != null">
+                count = #{count},
+            </if>
+            <if test="delay != null">
+                delay = #{delay},
+            </if>
+            <if test="intervalTime != null">
+                interval_time = #{intervalTime},
+            </if>
+            <if test="taskStatus != null">
+                task_status = #{taskStatus},
+            </if>
+            <if test="runningCount != null">
+                running_count = #{runningCount},
+            </if>
+            <if test="originIps != null">
+                origin_ips = #{originIps},
+            </if>
+            <if test="targetIps != null">
+                target_ips = #{targetIps},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
 </mapper>

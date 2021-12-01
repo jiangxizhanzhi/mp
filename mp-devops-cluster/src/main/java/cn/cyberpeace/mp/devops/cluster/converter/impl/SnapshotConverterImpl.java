@@ -14,6 +14,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -53,10 +54,15 @@ public class SnapshotConverterImpl implements SnapshotConverter {
         if (Objects.isNull(model)){
             return null;
         }
+        List<SnapshotConvertModel> resultList = new ArrayList<>();
+        SnapshotConvertModel snapshotConvertModel = new SnapshotConvertModel(model.getDeviceUuid(), model.getDeviceName(), model.getDeviceName(), model.getDeviceUuid(),
+                "", null);
         DeviceAndSnapshotConvertModel convertModel = new DeviceAndSnapshotConvertModel();
         convertModel.setDeviceName(model.getDeviceName());
         convertModel.setDeviceUuid(model.getDeviceUuid());
         if (CollectionUtils.isEmpty(model.getSnapshots())){
+            resultList.add(snapshotConvertModel);
+            convertModel.setItems(resultList);
             return convertModel;
         }
         List<SnapshotConvertModel> list = model.getSnapshots().stream().map(item ->
@@ -64,7 +70,9 @@ public class SnapshotConverterImpl implements SnapshotConverter {
                         item.getDescription(), Objects.isNull(item.getCreatedAt()) ? null :
                         TimeUtils.utcStringToLocalDateTime(item.getCreatedAt())))
                 .collect(Collectors.toList());
-        convertModel.setItems(list);
+        resultList.addAll(list);
+        resultList.add(snapshotConvertModel);
+        convertModel.setItems(resultList);
         return convertModel;
     }
 
