@@ -86,6 +86,7 @@ mp:
       cpcloud-container-create-url: http://${ip.cp}:11111/v1
       cpcloud-network-mirror-url: http://${ip.cp}:11111/cpcloud/sdn_app/v1
       es-host: ${ip.moloch}
+      es-port: ${ARKIME_PORT:9200}
       image-name: centos-arkime_arkime:v2
       username: api
       password: api
