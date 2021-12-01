@@ -6,14 +6,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @Setter
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
 public class ContainerSuspendData implements CloudHttpData {
     // 容器无法挂起,挂起时暂停容器
-    private Map pause = new HashMap();
+    private String action = "pause";
+    private boolean waitForStatus = true ;
 }
