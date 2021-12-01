@@ -1,14 +1,13 @@
 package cn.cyberpeace.mp.sceneplugincollection.service;
 
 import cn.cyberpeace.mp.base.bo.IntervalSizeBO;
-import cn.cyberpeace.mp.base.constant.BaseErrorCode;
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.sceneplugincollection.bo.AttackInfo;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionFlowBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
@@ -30,7 +29,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -273,10 +276,10 @@ public class ScenePluginCollectionSceneService {
             List<Integer> severity = flowLogBO.getSuricata().getSeverity();
             if (CollectionUtils.isNotEmpty(category) && CollectionUtils.isNotEmpty(severity)) {
                 int attackInfoNum = category.size() < severity.size() ? category.size() : severity.size();
-                List<CollectionFlowBO.AttackInfo> attackInfos = new ArrayList<>();
+                List<AttackInfo> attackInfos = new ArrayList<>();
                 flowBO.setAttackInfos(attackInfos);
                 for (int i = 0; i < attackInfoNum; i++) {
-                    attackInfos.add(new CollectionFlowBO.AttackInfo(severity.get(i), category.get(i)));
+                    attackInfos.add(new AttackInfo(severity.get(i), category.get(i)));
                 }
             }
         }
