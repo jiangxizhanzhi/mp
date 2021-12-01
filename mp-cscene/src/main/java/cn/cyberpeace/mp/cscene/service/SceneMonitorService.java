@@ -2,8 +2,6 @@ package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
-import cn.cyberpeace.mp.cscene.dto.element.HostState;
-import cn.cyberpeace.mp.cscene.dto.request.HostStateTrendSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneMonitorInfo;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
@@ -127,19 +125,6 @@ public class SceneMonitorService {
         }
 
         return basicInfos;
-    }
-
-    /**
-     * 查询场景所有节点的hoststate平均值
-     *
-     * @param trendRequest
-     * @return
-     */
-    public List<HostState> getSceneHostStatesTrend(HostStateTrendSceneElementRequest trendRequest) {
-        log.info("{}", trendRequest);
-
-
-        return null;
     }
 
 }

@@ -2,10 +2,12 @@ package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
+import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.element.ElementPort;
 import cn.cyberpeace.mp.cscene.dto.element.ElementRTInfo;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
+import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
@@ -36,16 +38,17 @@ public class SceneElementMonitorService {
     @Autowired
     private ScenePluginCollectionSceneService scenePluginCollectionSceneService;
 
-//    @Autowired
-//    private CsceneInstanceService c
-
     /**
      * CsceneInstanceBO转为ElementMonitorInfo
      *
      * @return
      */
-    public ElementMonitorBasicInfo getElementMonitorInfo(String sceneId, String elementId) {
-        log.info("sceneId:{}, elementId:{}", sceneId, elementId);
+    public ElementMonitorBasicInfo getElementMonitorInfo(BaseSceneElementRequest baseRequest) {
+        log.info("baseRequest:{}", baseRequest);
+        BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(baseRequest);
+        String sceneId = baseRequest.getSceneId();
+        String elementId = baseRequest.getElementIds().get(0);
+
         var result = csceneInstanceService.getById(sceneId, null);
         var csceneInstanceBO = result.getSource();
 
@@ -57,9 +60,11 @@ public class SceneElementMonitorService {
     }
 
 
-    public ElementRTInfo getElementRTInfo(String sceneId, String elementId) {
-        log.info("sceneId:{}, elementId:{}", sceneId, elementId);
+    public ElementRTInfo getElementRTInfo(BaseSceneElementRequest baseRequest) {
+        log.info("baseRequest:{}", baseRequest);
+        BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(baseRequest);
 
+        // todo 1201 实时状态
 
         return null;
     }
