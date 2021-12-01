@@ -6,11 +6,9 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
-import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionFlowBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
@@ -32,11 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -361,7 +355,7 @@ public class ScenePluginCollectionSceneService {
      * @param endTime 结束时间
      * @return 聚合统计结果
      */
-    public ServiceResult<List<IntervalSizeBO<LocalDateTime>>> timeIntervalCountFlow(
+    public ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> timeIntervalCountFlow(
             List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime) {
         return new ServiceResult<>(new ArrayList<>());
     }
@@ -375,7 +369,7 @@ public class ScenePluginCollectionSceneService {
      * @param intervalNumber 间隔数量
      * @return 聚合统计结果
      */
-    public ServiceResult<List<IntervalSizeBO<LocalDateTime>>> timeIntervalSumFlowSize(
+    public ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> timeIntervalSumFlowSize(
             List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime,
             int intervalNumber) {
         return new ServiceResult<>(new ArrayList<>());
@@ -390,7 +384,7 @@ public class ScenePluginCollectionSceneService {
      * @param intervalNumber 间隔数量
      * @return 聚合统计结果
      */
-    public ServiceResult<List<IntervalSizeBO<LocalDateTime>>> timeIntervalAvgHostCpuPercent(
+    public ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> timeIntervalAvgHostCpuPercent(
             List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime,
             int intervalNumber) {
         return new ServiceResult<>(new ArrayList<>());
@@ -405,7 +399,7 @@ public class ScenePluginCollectionSceneService {
      * @param intervalNumber 间隔数量
      * @return 聚合统计结果
      */
-    public ServiceResult<List<IntervalSizeBO<LocalDateTime>>> timeIntervalAvgHostMemoryPercent(
+    public ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> timeIntervalAvgHostMemoryPercent(
             List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime,
             int intervalNumber) {
         return new ServiceResult<>(new ArrayList<>());
