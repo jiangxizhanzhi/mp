@@ -75,4 +75,9 @@ public class WazuhRepositoryTest {
         List<String> agentIds= wazuhRepository.queryAgentIdByAgentName(Lists.newArrayList("windows_agent1"));
         Assert.isTrue(agentIds.size() > 0, "");
     }
+
+    @Test
+    public void testQueryAgentsProcesses() {
+        wazuhRepository.queryAgentsProcesses(Lists.newArrayList("windows_agent1", "ubuntu2"));
+    }
 }
