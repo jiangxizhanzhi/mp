@@ -36,8 +36,8 @@ public class FlowExecutor {
         setFlowService3(flowService3);
     }
 
-    public String createExecutor(String sceneEid) {
-        return flowService1.addExecutorSync(sceneEid);
+    public String createExecutor(String name) {
+        return flowService1.addExecutorSync(name);
     }
 
     public void deleteExecutor(String executorId) {
