@@ -84,11 +84,11 @@ public class HostStateService {
     }
 
     private List<HostState> processHostStateTrend(List<String> sceneIds, List<String> elementIds, LocalDateTime startTime, LocalDateTime endTime, int segmentCount) {
-        ServiceResult<List<IntervalSizeBO<LocalDateTime>>> cpuResult = scenePluginCollectionSceneService.timeIntervalAvgHostCpuPercent(sceneIds, null, startTime, endTime, segmentCount);
-        ServiceResult<List<IntervalSizeBO<LocalDateTime>>> memResult = scenePluginCollectionSceneService.timeIntervalAvgHostMemoryPercent(sceneIds, null, startTime, endTime, segmentCount);
+        ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> cpuResult = scenePluginCollectionSceneService.timeIntervalAvgHostCpuPercent(sceneIds, null, startTime, endTime, segmentCount);
+        ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> memResult = scenePluginCollectionSceneService.timeIntervalAvgHostMemoryPercent(sceneIds, null, startTime, endTime, segmentCount);
 
-        List<IntervalSizeBO<LocalDateTime>> intervalCpuSizeBOs = cpuResult.getSource();
-        List<IntervalSizeBO<LocalDateTime>> intervalMemSizeBOs = memResult.getSource();
+        List<IntervalSizeBO<LocalDateTime, Long>> intervalCpuSizeBOs = cpuResult.getSource();
+        List<IntervalSizeBO<LocalDateTime, Long>> intervalMemSizeBOs = memResult.getSource();
 
         intervalCpuSizeBOs.sort(Comparator.comparing(IntervalSizeBO::getEnd));
         intervalMemSizeBOs.sort(Comparator.comparing(IntervalSizeBO::getEnd));
@@ -100,6 +100,7 @@ public class HostStateService {
             hs.setTime(intervalCpuSizeBOs.get(i).getEnd());
             hs.setCpuPercent(intervalCpuSizeBOs.get(i).getSize() / 100.00);
             hs.setMemoryPercent(intervalMemSizeBOs.get(i).getSize() / 100.00);
+
             hostStates.add(hs);
         }
 
