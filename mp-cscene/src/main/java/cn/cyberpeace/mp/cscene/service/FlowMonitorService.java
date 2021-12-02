@@ -42,6 +42,9 @@ public class FlowMonitorService {
     @Autowired
     private CsceneInstanceService csceneInstanceService;
 
+    @Autowired
+    private SceneIdTranslationService sceneIdTranslationService;
+
 
     /**
      * 查询单个节点机器流量趋势
@@ -91,8 +94,9 @@ public class FlowMonitorService {
         LocalDateTime startTime = now.minusMinutes(10);
 
         // todo 转好
+        List<String> sceneIdList = sceneIdTranslationService.translateSceneIds(sceneIds);
 
-        ServiceResult<Map<String, Integer>> mapResult = scenePluginCollectionSceneService.groupCountFlowByLevel(sceneIds, nodeIds, startTime, endTime);
+        ServiceResult<Map<String, Integer>> mapResult = scenePluginCollectionSceneService.groupCountFlowByLevel(sceneIdList, nodeIds, startTime, endTime);
         Map<String, Integer> map = mapResult.getSource();
 
         // 风险等级 1,2,3,4 数字越低，级别越高
@@ -149,8 +153,10 @@ public class FlowMonitorService {
             segmentCount = 10;
         }
 
-        // too 转好
-        ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> flowResult = scenePluginCollectionSceneService.timeIntervalSumFlowSize(sceneIds, elementIds, startTime, endTime, segmentCount);
+        // todo 转好
+        List<String> sceneIdList = sceneIdTranslationService.translateSceneIds(sceneIds);
+
+        ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> flowResult = scenePluginCollectionSceneService.timeIntervalSumFlowSize(sceneIdList, elementIds, startTime, endTime, segmentCount);
 
         List<IntervalSizeBO<LocalDateTime, Long>> intervalFlowSizeBOs = flowResult.getSource();
 

@@ -31,10 +31,10 @@ public class HostState {
     private LocalDateTime time;
 
     @ApiModelProperty("总内存(MB)")
-    private Integer memoryTotal;
+    private Long memoryTotal;
 
     @ApiModelProperty("空闲内存(MB)")
-    private Integer memoryFree;
+    private Long memoryFree;
 
     @ApiModelProperty("内存使用率")
     private Double memoryPercent;
@@ -46,6 +46,6 @@ public class HostState {
     private Integer cpuCount;
 
     @ApiModelProperty("磁盘空间(GB)")
-    private Integer diskSpace;
+    private Long diskSpace;
 
 }

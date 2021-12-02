@@ -37,6 +37,9 @@ public class HostStateService {
     @Autowired
     private CsceneInstanceService csceneInstanceService;
 
+    @Autowired
+    private SceneIdTranslationService sceneIdTranslationService;
+
     /**
      * 查询单个节点机器当前状态
      *
@@ -60,10 +63,9 @@ public class HostStateService {
             HostState hs = new HostState();
             hs.setCpuCount(hostStateBO.getCpuCount());
             hs.setCpuPercent(hostStateBO.getCpuPercent());
-            // todo 1201 内存MB，磁盘GB转换
-//            hs.setMemoryFree(Integer.valueOf(hostStateBO.getMemoryFree()));
-//            hs.setMemoryTotal(Integer.valueOf(hostStateBO.getMemoryTotal()));
-//            hs.setDiskSpace(hostStateBO.getDiskSpace());
+            hs.setMemoryFree(hostStateBO.getMemoryFree());
+            hs.setMemoryTotal(hostStateBO.getMemoryTotal());
+            hs.setDiskSpace(hostStateBO.getDiskSpace());
             hs.setSceneId(hostStateBO.getSceneId());
             hs.setElementId(hostStateBO.getNodeId());
             hs.setTime(hostStateBO.getTime());
@@ -118,8 +120,10 @@ public class HostStateService {
             segmentCount = 10;
         }
 
-        ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> cpuResult = scenePluginCollectionSceneService.timeIntervalAvgHostCpuPercent(sceneIds, elementIds, startTime, endTime, segmentCount);
-        ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> memResult = scenePluginCollectionSceneService.timeIntervalAvgHostMemoryPercent(sceneIds, elementIds, startTime, endTime, segmentCount);
+        List<String> sceneIdList = sceneIdTranslationService.translateSceneIds(sceneIds);
+
+        ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> cpuResult = scenePluginCollectionSceneService.timeIntervalAvgHostCpuPercent(sceneIdList, elementIds, startTime, endTime, segmentCount);
+        ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> memResult = scenePluginCollectionSceneService.timeIntervalAvgHostMemoryPercent(sceneIdList, elementIds, startTime, endTime, segmentCount);
 
         List<IntervalSizeBO<LocalDateTime, Double>> intervalCpuSizeBOs = cpuResult.getSource();
         List<IntervalSizeBO<LocalDateTime, Double>> intervalMemSizeBOs = memResult.getSource();

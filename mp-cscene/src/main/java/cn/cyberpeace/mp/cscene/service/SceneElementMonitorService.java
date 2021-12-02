@@ -117,11 +117,11 @@ public class SceneElementMonitorService {
         // 内存大小
         Integer memSize = Optional.ofNullable(sceneElementBO.getRam()).orElse(0);
 //        double memSizeInGb = NumberUtil.round(memSizeInMb / 1024.0, 2).doubleValue();
-        resource.setMemoryTotal(memSize);
+        resource.setMemoryTotal(Long.valueOf(memSize));
 
         // 磁盘大小
         Integer diskSize = Optional.ofNullable(sceneElementBO.getDisk()).orElse(0);
-        resource.setDiskSpace(diskSize);
+        resource.setDiskSpace(Long.valueOf(diskSize));
         basicInfo.setHostState(resource);
 
         // ip地址
