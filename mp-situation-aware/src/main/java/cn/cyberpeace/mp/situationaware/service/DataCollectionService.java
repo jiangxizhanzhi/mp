@@ -6,6 +6,8 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.base.util.es.EsConstants;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
+import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
+import cn.cyberpeace.mp.situationaware.model.DataCollectionEventModel;
 import cn.cyberpeace.mp.situationaware.model.FileEventModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.model.WazuhFileRoot;
@@ -176,7 +178,7 @@ public class DataCollectionService {
      * 查询聚合分析监控事件
      * @param wazuhMonitorEventsRequest wazuhMonitorEventsRequest
      */
-    public void queryMonitorEventsAgg(WazuhMonitorEventsRequest wazuhMonitorEventsRequest){
+    public List<DataCollectionEventModel> queryMonitorEventsAgg(WazuhMonitorEventsRequest wazuhMonitorEventsRequest){
         //根据日期构造索引
         String[] indexArray = buildRequestIndex(LocalDateTime.now(), LocalDateTime.now());
         var searchRequest = new SearchRequest(indexArray);
@@ -194,15 +196,22 @@ public class DataCollectionService {
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
         //配置索引为空
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
-        log.info("monitor JSON query: {}", searchRequest.source().toString());
+        log.info("queryMonitorEventsAgg JSON query: {}", searchRequest.source().toString());
 
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
-
-            System.out.println(response);
-        } catch (IOException e) {
-            log.error("es 查询监控事件分页失败 {}", e);
-            throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
+            List<WazuhMonitorRoot> wazuhMonitorRootList = Arrays.stream(response.getHits().getHits()).map(hit -> JSONObject.parseObject(hit.getSourceAsString(), WazuhMonitorRoot.class)).collect(Collectors.toList());
+            return wazuhMonitorRootList.stream().map(root -> {
+                DataCollectionEventModel dataCollectionEventModel = new DataCollectionEventModel();
+                dataCollectionEventModel.setDataCollectionType(DataCollectionType.getTypeById(root.getRule().getId()));
+                dataCollectionEventModel.setEventDes(dataCollectionEventModel.getDataCollectionType().getEventDes());
+                dataCollectionEventModel.setAgentName(root.getAgent().getName());
+                dataCollectionEventModel.setTime(root.getTimestamp());
+                return dataCollectionEventModel;
+            }).collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error(SituationalAwareErrorCode.WAZUH_AGENTS_QUERY_EVENT_ERROR.getMessage() + "{}", ExceptionUtils.getMessage(e));
+            throw new MpRuntimeException(SituationalAwareErrorCode.WAZUH_AGENTS_QUERY_EVENT_ERROR, ExceptionUtils.getStackTrace(e));
         }
     }
 

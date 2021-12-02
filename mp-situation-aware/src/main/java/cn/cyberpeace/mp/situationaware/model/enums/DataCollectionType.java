@@ -1,5 +1,10 @@
 package cn.cyberpeace.mp.situationaware.model.enums;
 
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
   *@Desciption 数据采集
   *@Author zhangjin
@@ -24,5 +29,10 @@ public enum DataCollectionType {
 
     public String getEventDes() {
         return eventDes;
+    }
+
+    public static DataCollectionType getTypeById(String ruleId) {
+        return EnumSet.allOf(DataCollectionType.class).stream().filter(type -> type.getRuleId().equals(ruleId)).findFirst()
+            .orElseThrow(() -> new MpRuntimeException("rule not found"));
     }
 }
