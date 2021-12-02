@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.scenepluginflow.bo.base;
 
+import cn.cyberpeace.mp.flow.enums.InteractiveTypeEnum;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.Getter;
@@ -36,6 +37,14 @@ public class Flow {
             status = Status.INIT;
         }
         return status;
+    }
+
+    public Integer getInteractiveType() {
+        // 针对没有interactiveType的老数据，暂时给个默认值
+        if (Objects.isNull(interactiveType)) {
+            interactiveType = InteractiveTypeEnum.BACKGROUND.toValue();
+        }
+        return interactiveType;
     }
 
     public static class Status {
