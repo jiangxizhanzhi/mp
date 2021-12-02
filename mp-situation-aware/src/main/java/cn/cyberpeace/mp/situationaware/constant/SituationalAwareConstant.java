@@ -25,5 +25,5 @@ public class SituationalAwareConstant {
 
     public static Integer ES_DOC_MAXCOUNT = 10000;
 
-    public static List<String> monitorRuleIds = Lists.newArrayList();
+    public static List<String> monitorRuleIds = Lists.newArrayList("5715", "5502");
 }
