@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -103,9 +104,22 @@ public class HostStateService {
         return processHostStateTrend(sceneIds, null, trendRequest.getStartTime(), trendRequest.getEndTime(), trendRequest.getSegmentCount());
     }
 
-    private List<HostState> processHostStateTrend(List<String> sceneIds, List<String> elementIds, LocalDateTime startTime, LocalDateTime endTime, int segmentCount) {
-        ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> cpuResult = scenePluginCollectionSceneService.timeIntervalAvgHostCpuPercent(sceneIds, null, startTime, endTime, segmentCount);
-        ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> memResult = scenePluginCollectionSceneService.timeIntervalAvgHostMemoryPercent(sceneIds, null, startTime, endTime, segmentCount);
+    private List<HostState> processHostStateTrend(List<String> sceneIds, List<String> elementIds, LocalDateTime startTime, LocalDateTime endTime, Integer segmentCount) {
+        // 默认值
+        if (Objects.isNull(endTime)) {
+            endTime = LocalDateTime.now();
+        }
+
+        if (Objects.isNull(startTime)) {
+            startTime = endTime.minusHours(1);
+        }
+
+        if (Objects.isNull(segmentCount)) {
+            segmentCount = 10;
+        }
+
+        ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> cpuResult = scenePluginCollectionSceneService.timeIntervalAvgHostCpuPercent(sceneIds, elementIds, startTime, endTime, segmentCount);
+        ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> memResult = scenePluginCollectionSceneService.timeIntervalAvgHostMemoryPercent(sceneIds, elementIds, startTime, endTime, segmentCount);
 
         List<IntervalSizeBO<LocalDateTime, Long>> intervalCpuSizeBOs = cpuResult.getSource();
         List<IntervalSizeBO<LocalDateTime, Long>> intervalMemSizeBOs = memResult.getSource();

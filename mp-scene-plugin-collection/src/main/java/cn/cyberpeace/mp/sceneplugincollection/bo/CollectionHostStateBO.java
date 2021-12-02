@@ -24,10 +24,10 @@ public class CollectionHostStateBO {
     @ApiModelProperty("时间")
     private LocalDateTime time;
 
-    @ApiModelProperty("总内存")
+    @ApiModelProperty("总内存,单位M")
     private Long memoryTotal;
 
-    @ApiModelProperty("空闲内存")
+    @ApiModelProperty("空闲内存,单位M")
     private Long memoryFree;
 
     @ApiModelProperty("内存使用率")
@@ -39,7 +39,7 @@ public class CollectionHostStateBO {
     @ApiModelProperty("CPU核数")
     private Integer cpuCount;
 
-    @ApiModelProperty("磁盘空间")
+    @ApiModelProperty("磁盘空间,单位G")
     private Long diskSpace;
 
 }
