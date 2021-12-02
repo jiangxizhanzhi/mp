@@ -11,18 +11,18 @@ public enum DataCollectionType {
 
     private String ruleId;
 
-    private String eventType;
+    private String eventDes;
 
-    DataCollectionType(String ruleId, String eventType) {
+    DataCollectionType(String ruleId, String eventDes) {
         this.ruleId = ruleId;
-        this.eventType = eventType;
+        this.eventDes = eventDes;
     }
 
     public String getRuleId() {
         return ruleId;
     }
 
-    public String getEventType() {
-        return eventType;
+    public String getEventDes() {
+        return eventDes;
     }
 }
