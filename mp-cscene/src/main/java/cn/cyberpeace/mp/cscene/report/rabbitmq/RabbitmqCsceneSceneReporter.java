@@ -1,5 +1,8 @@
 package cn.cyberpeace.mp.cscene.report.rabbitmq;
 
+import cn.cyberpeace.mp.cscene.context.CsceneContextHolder;
+import cn.cyberpeace.mp.cscene.report.bo.CollectedCsceneBO;
+import cn.cyberpeace.mp.cscene.report.bo.CollectedCsceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.CollectedSceneBO;
 import cn.cyberpeace.mp.scene.core.bo.CollectedSceneElementBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneReporter;
@@ -20,11 +23,15 @@ public class RabbitmqCsceneSceneReporter implements SceneReporter {
 
     @Override
     public void reportScene(CollectedSceneBO scene) {
-        messageSender.send(scene, MESSAGE_TYPE_SCENE);
+        var cscene = CollectedCsceneBO.fromCollectedSceneBO(scene);
+        cscene.setCallAction(CsceneContextHolder.getCallAction());
+        messageSender.send(cscene, MESSAGE_TYPE_SCENE);
     }
 
     @Override
     public void reportElement(CollectedSceneElementBO sceneElement) {
-        messageSender.send(sceneElement, MESSAGE_TYPE_SCENE_ELEMENT);
+        var csceneElement = CollectedCsceneElementBO.fromCollectedSceneElementBO(sceneElement);
+        csceneElement.setCallAction(CsceneContextHolder.getCallAction());
+        messageSender.send(csceneElement, MESSAGE_TYPE_SCENE_ELEMENT);
     }
 }

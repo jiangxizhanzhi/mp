@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCountByReferenceTypeBO;
+import cn.cyberpeace.mp.cscene.context.CsceneContextHolder;
 import cn.cyberpeace.mp.cscene.core.CsceneInstanceHandler;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceCountByReferenceTypeModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
@@ -20,6 +21,7 @@ import cn.cyberpeace.mp.cscene.model.base.BaseCsceneModel;
 import cn.cyberpeace.mp.cscene.report.rabbitmq.RabbitmqCsceneReporter;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
+import cn.cyberpeace.mp.cscene.service.action.CsceneCallAction;
 import cn.cyberpeace.mp.cscene.service.taskpool.CsceneReportTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeActionRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
@@ -243,6 +245,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     public ServiceResult<Boolean> startFlow(String id, String toNodeId, String flowId, CsceneContextBO context) {
+        CsceneContextHolder.setCallAction(CsceneCallAction.NODE_START_FLOW);
+
         var sceneId = getSceneId(id);
         if (StringUtils.isEmpty(sceneId)) {
             return new ServiceResult<>(false);
@@ -253,6 +257,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     public ServiceResult<Boolean> stopFlow(String id, String toNodeId, String flowId, CsceneContextBO context) {
+        CsceneContextHolder.setCallAction(CsceneCallAction.NODE_STOP_FLOW);
+
         var sceneId = getSceneId(id);
         if (StringUtils.isEmpty(sceneId)) {
             return new ServiceResult<>(false);
@@ -263,10 +269,12 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     public ServiceResult<Probe> startProbe(String id, String toNodeId, String probeId, CsceneContextBO context) {
+        CsceneContextHolder.setCallAction(CsceneCallAction.NODE_START_PROBE);
         return new ServiceResult<>(null);
     }
 
     public ServiceResult<Probe> stopProbe(String id, String toNodeId, String probeId, CsceneContextBO context) {
+        CsceneContextHolder.setCallAction(CsceneCallAction.NODE_STOP_PROBE);
         return new ServiceResult<>(null);
     }
 
