@@ -170,10 +170,12 @@ public class ScenePluginCollectionSceneService {
             hostState.setSceneId(sceneId);
             hostState.setCpuCount(srcHostState.getCpuCount());
             hostState.setCpuPercent(srcHostState.getCpuTotalPercent());
-            hostState.setMemoryTotal(srcHostState.getMemoryTotal());
-            hostState.setMemoryFree(srcHostState.getMemoryFree());
+            // 内存统一使用单位M
+            hostState.setMemoryTotal(srcHostState.getMemoryTotal() / 1000000);
+            hostState.setMemoryFree(srcHostState.getMemoryFree() / 1000000);
+            // 磁盘统一使用单位G
+            hostState.setDiskSpace(srcHostState.getDiskSpace() / 1000000000);
             hostState.setMemoryPercent(srcHostState.getMemoryPercent());
-            hostState.setDiskSpace(srcHostState.getDiskSpace());
             hostState.setTime(srcHostState.getTime());
 
             var srcElement = agentNameElementMap.getOrDefault(srcHostState.getAgentName(), null);
