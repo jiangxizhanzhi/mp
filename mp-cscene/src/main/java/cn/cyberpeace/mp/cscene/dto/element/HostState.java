@@ -30,15 +30,6 @@ public class HostState {
     @ApiModelProperty("时间")
     private LocalDateTime time;
 
-//    @ApiModelProperty(value = "节点资源-CPU")
-//    private int nodeCPUs;
-//
-//    @ApiModelProperty(value = "节点资源-内存 (单位GB)")
-//    private double memSize;
-//
-//    @ApiModelProperty(value = "节点资源-硬盘 (单位GB)")
-//    private double diskSize;
-
     @ApiModelProperty("总内存(MB)")
     private Integer memoryTotal;
 

@@ -150,7 +150,7 @@ public class ScenePluginCollectionSceneService {
             if (collectionElement == null || CollectionUtils.isEmpty(collectionElement.getProbes())) {
                 return;
             }
-            agentNameElementMap.put(srcElement.getId(), srcElement);
+            agentNameElementMap.put(srcElement.getEid(), srcElement);
         });
 
         if (agentNameElementMap.isEmpty()) {
@@ -166,6 +166,7 @@ public class ScenePluginCollectionSceneService {
         List<CollectionHostStateBO> hostStates = new ArrayList<>();
         result.getObjs().forEach(srcHostState -> {
             var hostState = new CollectionHostStateBO();
+            hostStates.add(hostState);
             hostState.setSceneId(sceneId);
             hostState.setCpuCount(srcHostState.getCpuCount());
             hostState.setCpuPercent(srcHostState.getCpuTotalPercent());

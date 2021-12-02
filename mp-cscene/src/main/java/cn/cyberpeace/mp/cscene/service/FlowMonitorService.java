@@ -1,18 +1,18 @@
 package cn.cyberpeace.mp.cscene.service;
 
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackDto;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowRiskCount;
+import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.sceneplugincollection.bo.AttackInfo;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionFlowBO;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
 import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,24 +37,24 @@ public class FlowMonitorService {
     @Autowired
     private CsceneInstanceService csceneInstanceService;
 
-    public FlowRiskCount getFlowRiskCount(String sceneId, String elementId) {
-        if (StringUtils.isBlank(sceneId)) {
-            throw new MpRuntimeException("sceneId为空");
-        }
-        List<String> sceneIds = CollectionUtil.toList(sceneId);
+    public FlowRiskCount getFlowRiskCount(BaseSceneElementRequest baseRequest) {
+
+        BaseRequestUtil.checkBaseRequestWithSceneId(baseRequest);
+
+        List<String> sceneIds = CollectionUtil.toList(baseRequest.getSceneId());
 
         List<String> nodeIds = null;
-        if (StringUtils.isNotBlank(elementId)) {
-            nodeIds = CollectionUtil.toList(elementId);
+        if (!CollectionUtil.isEmpty(baseRequest.getElementIds())) {
+            nodeIds = CollectionUtil.toList(baseRequest.getElementIds().get(0));
         }
 
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime endTime = now;
-        LocalDateTime startTime = now.minusMinutes(1);
+        LocalDateTime startTime = now.minusMinutes(10);
 
         ServiceResult<Map<String, Integer>> mapResult = scenePluginCollectionSceneService.groupCountFlowByLevel(sceneIds, nodeIds, startTime, endTime);
         Map<String, Integer> map = mapResult.getSource();
-        // todo
+        // todo 1201
         return null;
     }
 

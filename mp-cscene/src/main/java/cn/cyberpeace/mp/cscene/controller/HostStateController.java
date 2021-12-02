@@ -40,8 +40,6 @@ public class HostStateController {
     @ApiOperation(value = "场景主机状态趋势图")
     @GetMapping("/scene_trend")
     public ServiceResult<List<HostState>> getSceneHostStateTrend(HostStateTrendSceneElementRequest hostStateTrendRequest) {
-        log.info("hostStateTrendRequest:{}", hostStateTrendRequest);
-
         List<HostState> hostStates = hostStateService.getSceneHostStateTrend(hostStateTrendRequest);
 
         return ServiceResult.success(hostStates);
@@ -57,8 +55,6 @@ public class HostStateController {
     @ApiOperation(value = "节点主机状态趋势图")
     @GetMapping("/element_trend")
     public ServiceResult<List<HostState>> getElementHostStateTrend(HostStateTrendSceneElementRequest hostStateTrendRequest) {
-        log.info("hostStateTrendRequest:{}", hostStateTrendRequest);
-
         List<HostState> hostStates = hostStateService.getElementHostStateTrend(hostStateTrendRequest);
 
         return ServiceResult.success(hostStates);
@@ -73,9 +69,8 @@ public class HostStateController {
     @ApiOperation(value = "节点主机状态")
     @GetMapping()
     public ServiceResult<List<HostState>> getElementHostState(BaseSceneElementRequest baseRequest) {
-        log.info("baseRequest:{}", baseRequest);
-
-        return null;
+        List<HostState> hostStates = hostStateService.getHostStates(baseRequest);
+        return ServiceResult.success(hostStates);
     }
 
 }

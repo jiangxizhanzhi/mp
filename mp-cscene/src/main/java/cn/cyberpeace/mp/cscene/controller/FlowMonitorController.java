@@ -48,6 +48,7 @@ public class FlowMonitorController {
     public ServiceResult<List<FlowTrend>> getSceneFlowTrend(FlowTrendSceneElementRequest flowTrendRequest) {
         log.info("flowTrendRequest:{}", flowTrendRequest);
 
+        // todo 1201
 
         return ServiceResult.success(null);
     }
@@ -60,8 +61,10 @@ public class FlowMonitorController {
      */
     @ApiOperation(value = "节点流量趋势图")
     @GetMapping("/element_trend")
-    public ServiceResult<List<FlowTrend>> getElementHostStateTrend(FlowTrendSceneElementRequest flowTrendRequest) {
+    public ServiceResult<List<FlowTrend>> getElementFlowTrend(FlowTrendSceneElementRequest flowTrendRequest) {
         log.info("flowTrendRequest:{}", flowTrendRequest);
+
+        // todo 1201
 
         return ServiceResult.success(null);
     }
@@ -72,8 +75,8 @@ public class FlowMonitorController {
     public ServiceResult<FlowRiskCount> getFlowRiskCount(BaseSceneElementRequest baseRequest) {
         log.info("{}", baseRequest);
 
-
-        return ServiceResult.success(null);
+        FlowRiskCount riskCount = flowMonitorService.getFlowRiskCount(baseRequest);
+        return ServiceResult.success(riskCount);
     }
 
 
