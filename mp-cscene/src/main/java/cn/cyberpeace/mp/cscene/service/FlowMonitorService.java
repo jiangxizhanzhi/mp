@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * @Description:
@@ -132,8 +133,21 @@ public class FlowMonitorService {
     }
 
 
-    private List<FlowTrend> processFlowTrend(List<String> sceneIds, List<String> elementIds, LocalDateTime startTime, LocalDateTime endTime, int segmentCount) {
-        ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> flowResult = scenePluginCollectionSceneService.timeIntervalSumFlowSize(sceneIds, null, startTime, endTime, segmentCount);
+    private List<FlowTrend> processFlowTrend(List<String> sceneIds, List<String> elementIds, LocalDateTime startTime, LocalDateTime endTime, Integer segmentCount) {
+        // 默认值
+        if (Objects.isNull(endTime)) {
+            endTime = LocalDateTime.now();
+        }
+
+        if (Objects.isNull(startTime)) {
+            startTime = endTime.minusHours(1);
+        }
+
+        if (Objects.isNull(segmentCount)) {
+            segmentCount = 10;
+        }
+
+        ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> flowResult = scenePluginCollectionSceneService.timeIntervalSumFlowSize(sceneIds, elementIds, startTime, endTime, segmentCount);
 
         List<IntervalSizeBO<LocalDateTime, Long>> intervalFlowSizeBOs = flowResult.getSource();
 
