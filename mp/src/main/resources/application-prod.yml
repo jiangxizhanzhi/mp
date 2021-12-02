@@ -23,6 +23,7 @@ spring:
     time-zone: GMT+8
   flyway:
     clean-disabled: true
+    enabled: ${MP_FLYWAY_ENABLED_VALUE:true}
   application:
     name: mp
   servlet:
