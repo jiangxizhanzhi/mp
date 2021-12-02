@@ -118,11 +118,11 @@ public class HostStateService {
             segmentCount = 10;
         }
 
-        ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> cpuResult = scenePluginCollectionSceneService.timeIntervalAvgHostCpuPercent(sceneIds, elementIds, startTime, endTime, segmentCount);
-        ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> memResult = scenePluginCollectionSceneService.timeIntervalAvgHostMemoryPercent(sceneIds, elementIds, startTime, endTime, segmentCount);
+        ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> cpuResult = scenePluginCollectionSceneService.timeIntervalAvgHostCpuPercent(sceneIds, elementIds, startTime, endTime, segmentCount);
+        ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> memResult = scenePluginCollectionSceneService.timeIntervalAvgHostMemoryPercent(sceneIds, elementIds, startTime, endTime, segmentCount);
 
-        List<IntervalSizeBO<LocalDateTime, Long>> intervalCpuSizeBOs = cpuResult.getSource();
-        List<IntervalSizeBO<LocalDateTime, Long>> intervalMemSizeBOs = memResult.getSource();
+        List<IntervalSizeBO<LocalDateTime, Double>> intervalCpuSizeBOs = cpuResult.getSource();
+        List<IntervalSizeBO<LocalDateTime, Double>> intervalMemSizeBOs = memResult.getSource();
 
         intervalCpuSizeBOs.sort(Comparator.comparing(IntervalSizeBO::getEnd));
         intervalMemSizeBOs.sort(Comparator.comparing(IntervalSizeBO::getEnd));
@@ -132,9 +132,8 @@ public class HostStateService {
         for (int i = 0; i < intervalCpuSizeBOs.size(); i++) {
             HostState hs = new HostState();
             hs.setTime(intervalCpuSizeBOs.get(i).getEnd());
-            hs.setCpuPercent(Double.valueOf(intervalCpuSizeBOs.get(i).getSize()));
-            hs.setMemoryPercent(Double.valueOf(intervalMemSizeBOs.get(i).getSize()));
-            // todo 1201 内存MB，磁盘GB转换
+            hs.setCpuPercent(intervalCpuSizeBOs.get(i).getSize());
+            hs.setMemoryPercent(intervalMemSizeBOs.get(i).getSize());
             hostStates.add(hs);
         }
 

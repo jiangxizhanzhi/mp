@@ -90,6 +90,8 @@ public class FlowMonitorService {
         LocalDateTime endTime = now;
         LocalDateTime startTime = now.minusMinutes(10);
 
+        // todo 转好
+
         ServiceResult<Map<String, Integer>> mapResult = scenePluginCollectionSceneService.groupCountFlowByLevel(sceneIds, nodeIds, startTime, endTime);
         Map<String, Integer> map = mapResult.getSource();
 
@@ -147,6 +149,7 @@ public class FlowMonitorService {
             segmentCount = 10;
         }
 
+        // too 转好
         ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> flowResult = scenePluginCollectionSceneService.timeIntervalSumFlowSize(sceneIds, elementIds, startTime, endTime, segmentCount);
 
         List<IntervalSizeBO<LocalDateTime, Long>> intervalFlowSizeBOs = flowResult.getSource();

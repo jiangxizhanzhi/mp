@@ -78,7 +78,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 .filterIn(CsceneInstanceRoleModel::getCscene, csceneInstanceIds));
     }
 
-    private String getSceneId(String csceneId) {
+    public String getSceneId(String csceneId) {
         var csceneInstanceResult = get(csceneId).getSource();
         if (csceneInstanceResult == null) {
             return null;
