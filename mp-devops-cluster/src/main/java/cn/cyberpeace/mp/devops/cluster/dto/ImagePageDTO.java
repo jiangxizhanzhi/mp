@@ -1,11 +1,12 @@
 package cn.cyberpeace.mp.devops.cluster.dto;
 
 import cn.cyberpeace.mp.devops.cluster.enums.PublicEnum;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+
+import java.util.Objects;
 
 @Data
 @AllArgsConstructor
@@ -108,4 +109,12 @@ public class ImagePageDTO extends BasePageDTO{
      */
     private Integer targetCategory;
 
+    /**
+     * 是否模糊匹配镜像名称
+     */
+    private Boolean likeName = Boolean.TRUE;
+
+    public Boolean getLikeName() {
+        return Objects.isNull(likeName) ? Boolean.TRUE : likeName;
+    }
 }

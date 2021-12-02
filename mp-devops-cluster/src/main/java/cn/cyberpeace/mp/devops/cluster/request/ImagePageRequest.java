@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.util.Objects;
+
 /**
  * 镜像分页请求信息
  */
@@ -51,6 +53,9 @@ public class ImagePageRequest extends BasePageRequest {
     @ApiModelProperty(value = "镜像名称")
     private String name;
 
+    @ApiModelProperty("是否模糊匹配镜像名称,默认：true")
+    private Boolean likeName = Boolean.TRUE;
+
     /**
      * 快速创建
      */
@@ -87,4 +92,7 @@ public class ImagePageRequest extends BasePageRequest {
     @ApiModelProperty(value = "是否支持基础镜像")
     private Boolean baseImageSupport;
 
+    public Boolean getLikeName() {
+        return Objects.isNull(likeName) ? Boolean.TRUE : likeName;
+    }
 }
