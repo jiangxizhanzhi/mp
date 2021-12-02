@@ -42,4 +42,16 @@ public class CollectionHostStateBO {
     @ApiModelProperty("磁盘空间,单位G")
     private Long diskSpace;
 
+    @ApiModelProperty(value = "进程数")
+    private Integer processCount;
+
+    @ApiModelProperty(value = "用户数")
+    private Integer userCount;
+
+    @ApiModelProperty(value = "端口数")
+    private Integer portsCount;
+
+    @ApiModelProperty(value = "网络连接数")
+    private Integer connectionCount;
+
 }
