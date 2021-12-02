@@ -12,7 +12,9 @@ import java.util.stream.Collectors;
 **/
 public enum DataCollectionType {
     LOGINSUCCESS("5715", "登录成功"),
-    LOGOUT("5502", "登录失败");
+    LOGOUT("5502", "退出登录"),
+    WINDOWSLOGINSUCCESS("60118", "windows 登录成功"),
+    WINDOWSLOGINOFF("60137", "windows 退出登录");
 
     private String ruleId;
 
