@@ -55,15 +55,15 @@ public class FlowExecutor {
         addFlowTaskRequest.setOriginIps(fromIps);
         addFlowTaskRequest.setTargetIps(toIps);
         addFlowTaskRequest.setTitle(TextUtils.uuid());
-        if (CollectionUtils.isNotEmpty(flow.getScriptParams())) {
-            addFlowTaskRequest.setScriptParamModels(flow.getScriptParams().stream()
+        if (CollectionUtils.isNotEmpty(flow.getScriptParamModels())) {
+            addFlowTaskRequest.setScriptParamModels(flow.getScriptParamModels().stream()
                     .map(param -> {
                         FlowScriptParamModel model = new FlowScriptParamModel();
                         model.setFlowId(flowId);
-                        model.setParamDesc(param.getDesc());
-                        model.setParamKey(param.getKey());
-                        model.setParamValue(param.getValue());
-                        model.setParamType(param.getType());
+                        model.setParamDesc(param.getParamDesc());
+                        model.setParamKey(param.getParamKey());
+                        model.setParamValue(param.getParamValue());
+                        model.setParamType(param.getParamType());
                         return model;
                     }).collect(Collectors.toList())
             );

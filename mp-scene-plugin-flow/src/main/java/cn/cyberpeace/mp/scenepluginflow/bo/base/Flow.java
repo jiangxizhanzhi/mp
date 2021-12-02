@@ -28,7 +28,7 @@ public class Flow {
     @ApiModelProperty(value = "流量任务id")
     private String taskId;
     @ApiModelProperty(value = "流量脚本参数列表")
-    private List<FlowScriptParam> scriptParams;
+    private List<FlowScriptParam> scriptParamModels;
 
     public static class Status {
         public static final int OFF = 0;
@@ -44,12 +44,12 @@ public class Flow {
     @Getter
     public static class FlowScriptParam {
         @ApiModelProperty(value = "参数key")
-        private String key;
+        private String paramKey;
         @ApiModelProperty(value = "参数值")
-        private String value;
+        private String paramValue;
         @ApiModelProperty(value = "参数类型：0 string,1 IP,2 number,3 bool")
-        private Integer type;
+        private Integer paramType;
         @ApiModelProperty(value = "参数描述")
-        private String desc;
+        private String paramDesc;
     }
 }

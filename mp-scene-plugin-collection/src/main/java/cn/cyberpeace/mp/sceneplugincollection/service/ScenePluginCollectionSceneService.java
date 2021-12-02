@@ -425,6 +425,13 @@ public class ScenePluginCollectionSceneService {
         // todo 暂时先实现一个
         var sceneHandler = new SceneHandler(sceneIds.get(0), null, false, null);
         CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+
+        if (CollectionUtils.isNotEmpty(nodeIds)) {
+            List<SceneElementBO> elements = nodeIds.stream().map(nodeId -> sceneHandler.getElement(nodeId)).collect(Collectors.toList());
+            List<String> macAddrs = this.loadMac2ElementBOMapAndGetEnableMac(new HashMap<>(), elements, pluginHandler);
+            request.setSourceMacs(macAddrs);
+        }
+
         request.setGroupList(Arrays.asList(pluginHandler.getScene().getFlowCollector()));
 
         if (startTime == null) {
