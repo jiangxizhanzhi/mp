@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.Objects;
 
 @Data
 public class Flow {
@@ -22,13 +23,20 @@ public class Flow {
     @ApiModelProperty(value = "执行次数")
     private Integer count;
     @ApiModelProperty(value = "状态")
-    private Integer status = Status.INIT;
+    private Integer status;
     @ApiModelProperty(value = "状态描述")
     private String statusText;
     @ApiModelProperty(value = "流量任务id")
     private String taskId;
     @ApiModelProperty(value = "流量脚本参数列表")
     private List<FlowScriptParam> scriptParams;
+
+    public Integer getStatus() {
+        if (Objects.isNull(status)) {
+            status = Status.INIT;
+        }
+        return status;
+    }
 
     public static class Status {
         public static final int INIT = -1;
