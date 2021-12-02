@@ -19,6 +19,8 @@ public class Flow {
     private String type;
     @ApiModelProperty(value = "交互类型：0 背景流量，1 攻击流量，2 全流量")
     private Integer interactiveType;
+    @ApiModelProperty(value = "执行次数")
+    private Integer count;
     @ApiModelProperty(value = "状态")
     private Integer status;
     @ApiModelProperty(value = "状态描述")
