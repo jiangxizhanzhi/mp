@@ -10,6 +10,8 @@ import java.util.TimeZone;
 @Slf4j
 public class TimeUtils {
 
+    private static final DateTimeFormatter yyyyMMddHHmm_Formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
     public static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -78,6 +80,14 @@ public class TimeUtils {
 
     public static String localTimeToString(LocalTime localTime, DateTimeFormatter dateTimeFormatter) {
         return localTime.format(dateTimeFormatter);
+    }
+
+    public static String localTime2yyyyMMddHHmm(LocalDateTime localTime) {
+        return localTime.format(yyyyMMddHHmm_Formatter);
+    }
+
+    public static LocalDateTime yyyyMMddHHmm2LocalDate(String localDateStr) {
+        return LocalDateTime.parse(localDateStr, yyyyMMddHHmm_Formatter);
     }
 
     public static LocalDateTime stringToLocalDateTime(String localDateTimeStr, DateTimeFormatter dateTimeFormatter) {
