@@ -456,7 +456,7 @@ public class ScenePluginCollectionSceneService {
         }
         List<IntervalSizeBO<LocalDateTime, Long>> totalResult = bos.stream()
                 .map(bo -> {
-                    LocalDateTime time = TimeUtils.stringToLocalDateTime(bo.getTime(), TimeUtils.tzDateTimeFormatter);
+                    LocalDateTime time = TimeUtils.stringToLocalDateTime(bo.getTime(), TimeUtils.tzMillsDateTimeFormatter);
                     return new IntervalSizeBO<LocalDateTime, Long>(time, time, bo.getNetworkBytes().longValue());
                 }).collect(Collectors.toList());
         Collections.sort(totalResult, Comparator.comparing(IntervalSizeBO::getStart));
