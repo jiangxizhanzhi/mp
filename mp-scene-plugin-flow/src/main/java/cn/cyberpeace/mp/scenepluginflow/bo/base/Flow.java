@@ -22,7 +22,7 @@ public class Flow {
     @ApiModelProperty(value = "执行次数")
     private Integer count;
     @ApiModelProperty(value = "状态")
-    private Integer status;
+    private Integer status = Status.INIT;
     @ApiModelProperty(value = "状态描述")
     private String statusText;
     @ApiModelProperty(value = "流量任务id")
@@ -31,6 +31,7 @@ public class Flow {
     private List<FlowScriptParam> scriptParams;
 
     public static class Status {
+        public static final int INIT = -1;
         public static final int OFF = 0;
         public static final int ON = 1;
         public static final int ERROR = 2;
