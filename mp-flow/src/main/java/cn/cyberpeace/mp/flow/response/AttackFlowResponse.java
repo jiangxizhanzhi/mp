@@ -1,14 +1,20 @@
 package cn.cyberpeace.mp.flow.response;
 
+import cn.cyberpeace.mp.flow.enums.ParamTypeEnum;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
+import cn.cyberpeace.mp.flow.model.FlowScriptParamModel;
 import cn.hutool.core.date.DateUtil;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -46,7 +52,13 @@ public class AttackFlowResponse extends FlowInfoResponse {
     @ApiModelProperty(value = "攻击脚本运行参数")
     private String runCmd;
 
-    public AttackFlowResponse(FlowInfoModel flowInfoModel, String prefixUrl) {
+    /**
+     * 攻击脚本运行参数(JSON)
+     */
+    @ApiModelProperty(value = "攻击脚本运行参数")
+    private String parameter;
+
+    public AttackFlowResponse(FlowInfoModel flowInfoModel, String prefixUrl, List<FlowScriptParamModel> scriptParamModels) {
         setResourceId(flowInfoModel.getId());
         setTitle(flowInfoModel.getTitle());
         setIntroduction(flowInfoModel.getFlowDesc());
@@ -62,6 +74,31 @@ public class AttackFlowResponse extends FlowInfoResponse {
             setSuffix(filePath.endsWith(".py") ? 0 : 1);
         }
         setRunCmd(flowInfoModel.getRunCmd());
+
+        if (CollectionUtils.isNotEmpty(scriptParamModels)) {
+            JSONObject paramObj = new JSONObject();
+            scriptParamModels.forEach(param -> {
+                JSONArray paramArray = new JSONArray();
+                String type;
+                if (param.getParamType() == ParamTypeEnum.STRING.toValue()) {
+                    type = "String";
+                } else if (param.getParamType() == ParamTypeEnum.IP.toValue()) {
+                    type = "IP";
+                } else if (param.getParamType() == ParamTypeEnum.NUMBER.toValue()) {
+                    type = "Number";
+                } else {
+                    type = "Bool";
+                }
+                // 类型
+                paramArray.add(type);
+                // 默认值
+                paramArray.add(param.getParamValue());
+                // 参数说明
+                paramArray.add(param.getParamDesc());
+                paramObj.put(param.getParamKey(), paramArray);
+            });
+            setParameter(paramObj.toJSONString());
+        }
     }
 
 }

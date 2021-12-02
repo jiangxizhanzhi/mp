@@ -1,0 +1,28 @@
+package cn.cyberpeace.mp.flow.service.field;
+
+import cn.cyberpeace.mp.base.repository.fields.DynamicFields;
+import cn.cyberpeace.mp.base.service.fields.BaseModelFields;
+import cn.cyberpeace.mp.base.util.basic.ClassUtils;
+import cn.cyberpeace.mp.flow.model.FlowScriptParamModel;
+import org.springframework.stereotype.Component;
+
+/**
+ * @Description 流量脚本参数Fields
+ * @Author qiaokang
+ * @Date 2021-11-25 15:00:45
+ */
+@Component
+public class FlowScriptParamFields extends BaseModelFields {
+    public static final DynamicFields allFields = new DynamicFields(ClassUtils.getBeanClassFields(FlowScriptParamModel.class));
+
+    public static final DynamicFields availableFields = new DynamicFields(ClassUtils.getBeanClassFields(FlowScriptParamModel.class)).merge(BaseModelFields.availableFields);
+
+    public static final DynamicFields hiddenFields = allFields.subtract(availableFields);
+
+    public static final DynamicFields readonlyFields = new DynamicFields().merge(BaseModelFields.readonlyFields);
+
+    public static final DynamicFields searchFields = new DynamicFields(ClassUtils.getBeanClassFields(FlowScriptParamModel.class));
+
+    public static final DynamicFields orderFields = new DynamicFields(new String[]{}).merge(BaseModelFields.readonlyFields);
+}
+

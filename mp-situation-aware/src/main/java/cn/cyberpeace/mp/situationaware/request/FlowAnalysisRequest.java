@@ -24,6 +24,12 @@ import java.util.Objects;
 @Builder
 public class FlowAnalysisRequest {
 
+    @ApiModelProperty("页码，从1开始")
+    private Integer pageNum;
+
+    @ApiModelProperty("分页大小")
+    private Integer pageSize;
+
     /**
      * Top数量
      */
@@ -47,55 +53,64 @@ public class FlowAnalysisRequest {
     /**
      * 查询条件需要的分组,场景分组
      */
+    @ApiModelProperty("查询条件需要的分组,场景分组")
     private List<String> groupList;
 
     /**
-     * 源IP
+     * 源IP集合
      */
-    private String sourceIp;
+    @ApiModelProperty("源IP集合")
+    private List<String> sourceIps;
 
     /**
      * 源端口
      */
+    @ApiModelProperty("源端口")
     private String sourcePort;
 
     /**
-     * 源Mac地址
+     * 源Mac地址集合
      */
-    private String sourceMac;
+    @ApiModelProperty("源Mac地址集合")
+    private List<String> sourceMacs;
 
     /**
-     * 目标IP
+     * 目标IP集合
      */
-    private String destinationIp;
+    @ApiModelProperty("目标IP集合")
+    private List<String> destinationIps;
 
     /**
      * 支持多协议
      */
+    @ApiModelProperty("多协议")
     private List<String> protocols;
 
     /**
      * 目标端口
      */
+    @ApiModelProperty("目标端口")
     private String destinationPort;
 
     /**
      * 时间窗口间隔周期,单位：秒
      */
+    @ApiModelProperty("时间窗口间隔周期,单位：秒")
     private Integer secondsInterval;
 
     /**
      * 严重性，1：高，2：中，3：中低，4：低
      */
+    @ApiModelProperty("严重性，1：高，2：中，3：中低，4：低")
     private SeverityEnum severityEnum;
 
     /**
      * 聚合类型
      */
+    @ApiModelProperty("聚合类型")
     private AggregationTypeEnum aggregationTypeEnum;
 
     public Integer getTopSize() {
         return Objects.isNull(topSize) ? 10 : topSize;
     }
-
 }

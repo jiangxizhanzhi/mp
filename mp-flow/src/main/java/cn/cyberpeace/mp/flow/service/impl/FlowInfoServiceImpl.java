@@ -10,9 +10,11 @@ import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
 import cn.cyberpeace.mp.flow.enums.InteractiveTypeEnum;
+import cn.cyberpeace.mp.flow.enums.ParamTypeEnum;
 import cn.cyberpeace.mp.flow.enums.ResourceTypeEnum;
 import cn.cyberpeace.mp.flow.model.FlowCollectionRelModel;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
+import cn.cyberpeace.mp.flow.model.FlowScriptParamModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskModel;
 import cn.cyberpeace.mp.flow.repository.FlowCollectionRelMapper;
 import cn.cyberpeace.mp.flow.repository.FlowInfoMapper;
@@ -24,12 +26,15 @@ import cn.cyberpeace.mp.flow.response.BackgroundFlowResponse;
 import cn.cyberpeace.mp.flow.response.FlowInfoResponse;
 import cn.cyberpeace.mp.flow.service.FlowInfoService;
 import cn.cyberpeace.mp.flow.service.field.FlowInfoFields;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -70,6 +75,9 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
     @Autowired
     private FlowCollectionServiceImpl flowCollectionService;
 
+    @Autowired
+    private FlowScriptParamServiceImpl flowScriptParamService;
+
     /**
      * 补充list查询条件
      * @param humanCondition
@@ -92,6 +100,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
      * @param id
      * @return
      */
+    @Transactional
     public ServiceResult<Boolean> deleteFlowInfo(String id) {
         // 判断流量任务是否关联该流量信息
         List<FlowTaskModel> flowTaskList = flowTaskMapper.listByFlowIds(Collections.singletonList(id));
@@ -113,9 +122,18 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         }
 
         ObjServiceResult<FlowInfoModel> serviceResult = get(id);
-        if (Objects.nonNull(serviceResult.getSource())) {
+        ObjResult<FlowInfoModel> flowInfoModelObjResult = serviceResult.getSource();
+        if (Objects.nonNull(flowInfoModelObjResult)) {
+            FlowInfoModel flowInfoModel = flowInfoModelObjResult.getObj();
             // 异步删除流量文件
-            asyncPlatFlowTaskService.deleteFlowFile(Collections.singletonList(serviceResult.getSource().getObj()));
+            asyncPlatFlowTaskService.deleteFlowFile(Collections.singletonList(flowInfoModel));
+
+            // 攻击流量，根据流量id删除对应的脚本参数信息
+            if (InteractiveTypeEnum.ATTACK.toValue() == flowInfoModel.getInteractiveType()) {
+                flowScriptParamService.deleteByFlowId(id);
+            }
+
+            // 删除流量信息
             return delete(id);
         } else {
             log.error("flow file to delete not exist");
@@ -130,6 +148,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
      * @param ids
      * @return
      */
+    @Transactional
     public ServiceResult<Integer> batchDeleteFlowInfo(String[] ids) {
         List<String> idList = Arrays.asList(ids);
         // 判断流量任务是否关联该流量信息
@@ -160,6 +179,17 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         if (CollectionUtils.isNotEmpty(flowInfoModels)) {
             // 异步删除流量文件
             asyncPlatFlowTaskService.deleteFlowFile(flowInfoModels);
+
+            // 过滤攻击流量
+            List<FlowInfoModel> attackFlows =
+                    flowInfoModels.stream().filter(flow -> InteractiveTypeEnum.ATTACK.toValue() == flow.getInteractiveType()).collect(Collectors.toList());
+            if (CollectionUtils.isNotEmpty(attackFlows)) {
+                List<String> attackFlowIds = attackFlows.stream().map(FlowInfoModel::getId).collect(Collectors.toList());
+                // 根据流量id批量删除对应的脚本参数信息
+                flowScriptParamService.deleteByFlowIds(attackFlowIds);
+            }
+
+            // 批量删除流量信息
             return bulkDelete(ids);
         } else {
             log.error("flow files to delete not exist");
@@ -179,9 +209,20 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
 
         // 结果转换
         List<FlowInfoResponse> responseList = new ArrayList<>();
-        if (CollectionUtils.isNotEmpty(listObjServiceResult.getSource().getObjs())) {
+        List<FlowInfoModel> flowInfoModels = listObjServiceResult.getSource().getObjs();
+        if (CollectionUtils.isNotEmpty(flowInfoModels)) {
+            List<String> flowIds = flowInfoModels.stream().map(FlowInfoModel::getId).collect(Collectors.toList());
+            List<FlowScriptParamModel> flowScriptParamModels = flowScriptParamService.selectByFlowIds(flowIds);
             responseList = listObjServiceResult.getSource().getObjs().stream()
-                    .map(FlowInfoResponse::new)
+                    .map(model -> {
+                        List<FlowScriptParamModel> currentFlowParamModels = new ArrayList<>();
+                        if (CollectionUtils.isNotEmpty(flowScriptParamModels)) {
+                            currentFlowParamModels =
+                                    flowScriptParamModels.stream().filter(param -> model.getId().equals(param.getFlowId())).collect(Collectors.toList());
+                        }
+                        FlowInfoResponse response = new FlowInfoResponse(model, currentFlowParamModels);
+                        return response;
+                    })
                     .collect(Collectors.toList());
         }
 
@@ -228,7 +269,11 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             if (InteractiveTypeEnum.ATTACK.toValue() != flowInfoModel.getInteractiveType()) {
                 return ServiceResult.fail(FlowErrorCode.NOT_ATTACK_FLOW);
             }
-            response = new AttackFlowResponse(flowInfoModel, prefixUrl);
+
+            // 根据流量id查询脚本参数
+            List<FlowScriptParamModel> flowScriptParamModels =
+                    flowScriptParamService.selectByFlowId(flowInfoModel.getId());
+            response = new AttackFlowResponse(flowInfoModel, prefixUrl, flowScriptParamModels);
 
             // 下载攻击脚本
             byte[] fileByte = fastDFSClient.download(flowInfoModel.getScriptFile(), FdfsGroupEnum.DEFAULT.toString());
@@ -276,9 +321,42 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
      * @param addRequest
      * @return
      */
+    @Transactional
     public ServiceResult<AttackFlowResponse> addAttackFlow(AddAttackFlowRequest addRequest) {
         if (!checkNameUnique(addRequest.getTitle(), org.apache.commons.lang3.StringUtils.EMPTY)) {
             return ServiceResult.fail(FlowErrorCode.TITLE_UNIQUE);
+        }
+
+        // 解析攻击流量脚本参数
+        if (StringUtils.isNotBlank(addRequest.getParameter())) {
+            List<FlowScriptParamModel> scriptParamModels = new ArrayList<>();
+            JSONObject paramObj = JSONObject.parseObject(addRequest.getParameter());
+            paramObj.keySet().forEach(paramKey -> {
+                FlowScriptParamModel paramModel = new FlowScriptParamModel();
+                paramModel.setParamKey(paramKey);
+
+                JSONArray paramArray = paramObj.getJSONArray(paramKey);
+                // 参数类型
+                Integer type;
+                if (ParamTypeEnum.STRING.toString().equals(paramArray.getString(0))) {
+                    type = ParamTypeEnum.STRING.toValue();
+                } else if (ParamTypeEnum.IP.toString().equals(paramArray.getString(0))) {
+                    type = ParamTypeEnum.IP.toValue();
+                } else if (ParamTypeEnum.NUMBER.toString().equals(paramArray.getString(0))) {
+                    type = ParamTypeEnum.NUMBER.toValue();
+                } else {
+                    type = ParamTypeEnum.BOOL.toValue();
+                }
+                paramModel.setParamType(type);
+
+                // 参数值
+                paramModel.setParamValue(paramArray.getString(1));
+                // 参数描述
+                paramModel.setParamDesc(paramArray.getString(2));
+                scriptParamModels.add(paramModel);
+            });
+
+            addRequest.setScriptParamModels(scriptParamModels);
         }
 
         // 判断是否有文件名，没有则根据脚本语言默认生成一个
@@ -306,11 +384,19 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         FlowInfoModel flowInfoModel = this.getFlowInfoModel(addRequest);
         // 保存流量信息
         ObjServiceResult<FlowInfoModel> serviceResult = create(flowInfoModel);
+        FlowInfoModel resultModel = serviceResult.getSource().getObj();
+
+        // 批量保存流量脚本参数信息
+        List<FlowScriptParamModel> scriptParamModels = addRequest.getScriptParamModels();
+        if (CollectionUtils.isNotEmpty(scriptParamModels)) {
+            scriptParamModels.forEach(model -> model.setFlowId(resultModel.getId()));
+            flowScriptParamService.bulkCreate(scriptParamModels);
+        }
 
         FastDfsConfig.Group group = fastDfsConfig.getGroupByName(FdfsGroupEnum.DEFAULT);
         String prefixUrl = group.getInnerFileServerAddr() + File.separator;
         // 转换返回对象
-        AttackFlowResponse response = new AttackFlowResponse(serviceResult.getSource().getObj(), prefixUrl);
+        AttackFlowResponse response = new AttackFlowResponse(resultModel, prefixUrl, scriptParamModels);
         response.setCode(addRequest.getCode());
         return ServiceResult.success(response);
     }
@@ -363,6 +449,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
      * @param modifyRequest
      * @return
      */
+    @Transactional
     public ServiceResult<AttackFlowResponse> modifyAttackFlow(ModifyAttackFlowRequest modifyRequest) {
         if (!checkNameUnique(modifyRequest.getTitle(), modifyRequest.getId())) {
             return ServiceResult.fail(FlowErrorCode.TITLE_UNIQUE);
@@ -377,6 +464,38 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             if (InteractiveTypeEnum.ATTACK.toValue() != oldServiceResult.getSource().getObj().getInteractiveType()) {
                 return ServiceResult.fail(FlowErrorCode.NOT_ATTACK_FLOW);
             }
+        }
+
+        // 解析攻击流量脚本参数
+        if (StringUtils.isNotBlank(modifyRequest.getParameter())) {
+            List<FlowScriptParamModel> scriptParamModels = new ArrayList<>();
+            JSONObject paramObj = JSONObject.parseObject(modifyRequest.getParameter());
+            paramObj.keySet().forEach(paramKey -> {
+                FlowScriptParamModel paramModel = new FlowScriptParamModel();
+                paramModel.setParamKey(paramKey);
+
+                JSONArray paramArray = paramObj.getJSONArray(paramKey);
+                // 参数类型
+                Integer type;
+                if (ParamTypeEnum.STRING.toString().equals(paramArray.getString(0))) {
+                    type = ParamTypeEnum.STRING.toValue();
+                } else if (ParamTypeEnum.IP.toString().equals(paramArray.getString(0))) {
+                    type = ParamTypeEnum.IP.toValue();
+                } else if (ParamTypeEnum.NUMBER.toString().equals(paramArray.getString(0))) {
+                    type = ParamTypeEnum.NUMBER.toValue();
+                } else {
+                    type = ParamTypeEnum.BOOL.toValue();
+                }
+                paramModel.setParamType(type);
+
+                // 参数值
+                paramModel.setParamValue(paramArray.getString(1));
+                // 参数描述
+                paramModel.setParamDesc(paramArray.getString(2));
+                scriptParamModels.add(paramModel);
+            });
+
+            modifyRequest.setScriptParamModels(scriptParamModels);
         }
 
         if (StringUtils.isNotBlank(modifyRequest.getCode())) {
@@ -415,10 +534,18 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         // 更新流量信息
         ObjServiceResult<FlowInfoModel> serviceResult = update(flowInfoModel);
 
+        // 更新脚本参数时，先删除旧参数，再重新保存新参数
+        List<FlowScriptParamModel> scriptParamModels = modifyRequest.getScriptParamModels();
+        if (CollectionUtils.isNotEmpty(scriptParamModels)) {
+            flowScriptParamService.deleteByFlowId(modifyRequest.getId());
+            scriptParamModels.forEach(model -> model.setFlowId(modifyRequest.getId()));
+            flowScriptParamService.bulkCreate(scriptParamModels);
+        }
+
         FastDfsConfig.Group group = fastDfsConfig.getGroupByName(FdfsGroupEnum.DEFAULT);
         String prefixUrl = group.getInnerFileServerAddr() + File.separator;
         // 转换返回对象
-        AttackFlowResponse response = new AttackFlowResponse(serviceResult.getSource().getObj(), prefixUrl);
+        AttackFlowResponse response = new AttackFlowResponse(serviceResult.getSource().getObj(), prefixUrl, scriptParamModels);
         response.setCode(modifyRequest.getCode());
         return ServiceResult.success(response);
     }

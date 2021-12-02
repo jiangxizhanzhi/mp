@@ -39,8 +39,15 @@ public class FlowCollector {
     public void unbindNetworkPorts(String collectorId, List<String> macAddrs) {
     }
 
-    public void deleteCollector(String collectorId) {
+    public void deleteCollector(String collectorId, List<String> vmInstanceIds, List<String> containerInstanceIds) {
+        // 删除实例
         networkTrafficGroupService.deleteArkimeInstance(collectorId);
+        // 删除镜像
+        var request = new NetworkTrafficMirrorRequest();
+        request.setArkimeInstanceNames(List.of(collectorId));
+        request.setVmInstanceIds(vmInstanceIds);
+        request.setContainerInstanceIds(containerInstanceIds);
+        networkTrafficGroupService.deleteNetworkTrafficMirror(request);
     }
 
 }

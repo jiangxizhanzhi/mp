@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.cscene.config;
 
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
-import cn.cyberpeace.mp.front.admin.service.sys.SysConfigService;
+import cn.cyberpeace.mp.front.admin.service.sys.SysActivationService;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +16,7 @@ import org.springframework.context.annotation.Configuration;
 public class CsceneAppConfig {
 
     @Autowired
-    private SysConfigService sysConfigService;
+    private SysActivationService sysActivationService;
 
     @Value("${mp.cscene.scene-edit-node-limit-key:LCS-RES-CR-EDITNODES}")
     private String sceneEditNodeLimitKey;
@@ -31,12 +31,16 @@ public class CsceneAppConfig {
     private Integer sceneUsingNodeLimit;
 
     public int getSceneEditNodeLimit() {
-        var config = sysConfigService.getByKeyName(sceneEditNodeLimitKey);
-        if (config == null) {
+        String value = null;
+        try {
+            value = sysActivationService.getValueByKey(sceneEditNodeLimitKey);
+        } catch (Exception e) {
+            log.error("Get config {} error: {}", sceneEditNodeLimitKey, e);
+        }
+        if (value == null) {
             return sceneEditNodeLimit;
         }
 
-        var value = config.getValue();
         var limit = IntUtils.fromStr(value);
         if (limit.equals(0)) {
             log.warn("SceneEditNodeLimit({}) parse as 0", value);
@@ -45,12 +49,16 @@ public class CsceneAppConfig {
     }
 
     public int getSceneCreateNodeLimit() {
-        var config = sysConfigService.getByKeyName(sceneUsingNodeLimitKey);
-        if (config == null) {
+        String value = null;
+        try {
+            value = sysActivationService.getValueByKey(sceneUsingNodeLimitKey);
+        } catch (Exception e) {
+            log.error("Get config {} error: {}", sceneUsingNodeLimitKey, e);
+        }
+        if (value == null) {
             return sceneUsingNodeLimit;
         }
 
-        var value = config.getValue();
         var limit = IntUtils.fromStr(value);
         if (limit.equals(0)) {
             log.warn("SceneUsingNodeLimit({}) parse as 0", value);

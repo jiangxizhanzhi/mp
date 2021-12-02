@@ -36,6 +36,9 @@ spring:
     port: 5673
     username: guest
     password: guest
+  web:
+    resources:
+      static-locations: file:${user.home}/img
 
 
 logging:
@@ -82,7 +85,8 @@ mp:
     arkime:
       cpcloud-container-create-url: http://${ip.cp}:11111/v1
       cpcloud-network-mirror-url: http://${ip.cp}:11111/cpcloud/sdn_app/v1
-      es-host: 10.100.0.111
+      es-host: ${ip.moloch}
+      es-port: ${ARKIME_PORT:9200}
       image-name: centos-arkime_arkime:v2
       username: api
       password: api
@@ -92,8 +96,8 @@ mp:
       #wazuh 开放接口地址
       base-url: https://${ip.wazuh}:55000
       #wazuh 开放接口用户名密码
-      username: acme-user
-      password: MyS3cr37P450r.*-
+      username: wazuh-api
+      password: Wazuh123#
       #wazuh es地址用户名密码
       es-url: ${ip.wazuh}
       es-port: 9200
@@ -117,7 +121,7 @@ mp:
   flow:
     # 流量发生器资源地址
     actuator-resource-url: http://${ip.trex}:80/api/v1/resource
-    trex-image: tgn-1125
+    trex-image: tgn-1201
   sceneplugincloud:
     cpcloud-server: http://${ip.cp}:11111
   sceneplugincollection:

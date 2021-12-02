@@ -31,5 +31,8 @@ public class AuthConstant {
 
     public static final String ORG_PATH_SEPARATOR = "/";
 
-    private AuthConstant() {}
+    public static final String USER_DEFAULT_IMG = "/dev/mg/admin/43119f4d3c86e7b22045df3d72f3c116.png";
+
+    private AuthConstant() {
+    }
 }

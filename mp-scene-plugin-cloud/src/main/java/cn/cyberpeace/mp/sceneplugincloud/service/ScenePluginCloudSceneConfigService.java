@@ -1,91 +1,54 @@
 package cn.cyberpeace.mp.sceneplugincloud.service;
 
-import cn.cyberpeace.mp.base.common.StatCommon;
-import cn.cyberpeace.mp.base.constant.BaseErrorCode;
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
-import cn.cyberpeace.mp.scene.model.SceneConfigModel;
-import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
-import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
-import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConfigElementMapper;
+import cn.cyberpeace.mp.sceneplugincloud.service.common.CloudSceneConfigStatCommon;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Service
 public class ScenePluginCloudSceneConfigService {
 
-    public static final List<String> AVAILABLE_CLOUD_ELEMENT_FILTER_IN_FIELDS = Arrays.asList(
+    public static final List<String> COUNT_ELEMENT_FIELDS = Arrays.asList(
             BeanUtils.getBeanGetterFieldNames(
                     BaseCloudPluginSceneElementModel::getHost,
                     BaseCloudPluginSceneElementModel::getVirtualType
             )
     );
 
-    public static final List<String> AVAILABLE_CLOUD_ELEMENT_GROUP_COUNT_FIELDS = Arrays.asList(
-            BeanUtils.getBeanGetterFieldNames(
-                    BaseCloudPluginSceneElementModel::getVirtualType
-            )
-    );
-
-    private CloudPluginSceneConfigElementMapper cloudPluginSceneConfigElementMapper;
+    private CloudSceneConfigStatCommon cloudSceneConfigStatCommon;
 
     @Autowired
-    public ScenePluginCloudSceneConfigService(CloudPluginSceneConfigElementMapper cloudPluginSceneConfigElementMapper) {
-        this.cloudPluginSceneConfigElementMapper = cloudPluginSceneConfigElementMapper;
+    public ScenePluginCloudSceneConfigService(CloudSceneConfigStatCommon cloudSceneConfigStatCommon) {
+        this.cloudSceneConfigStatCommon = cloudSceneConfigStatCommon;
     }
 
     /**
-     * 分组查询指定字段的聚合统计数量
+     * 查询网元指定字段的聚合统计数量
      * @param sceneIds 场景id列表，不传默认为全部
      * @param nodeIds 节点id列表，不传默认为全部
-     * @param filterIn in过滤条件 Map<字段, 字段值范围>
-     * @param groupFieldName 分组聚合字段
-     * @param <T> 分组聚合字段的值类型
-     * @return 字段的聚合统计数量 Map<字段值, 该字段值统计数量>
+     * @param fieldNames 聚合统计字段  有效字段 COUNT_ELEMENT_FIELDS
+     * @return 字段的聚合统计数量 Map<字段名称, Map<字段值, 该字段统计数量>>
      */
-    public <T> ServiceResult<Map<T, Integer>> groupCountElement(List<String> sceneIds, List<String> nodeIds,
-                                                                Map<String, List<?>> filterIn, String groupFieldName) {
-        if (!AVAILABLE_CLOUD_ELEMENT_GROUP_COUNT_FIELDS.contains(groupFieldName)) {
-            throw new MpRuntimeException(CloudErrorCode.INVALID_GROUP_COUNT_FIELD);
-        }
+    public ServiceResult<Map<String, Map<Object, Long>>> groupCountElement(
+            List<String> sceneIds, List<String> nodeIds, List<String> fieldNames) {
+        List<String> countFieldNames = new ArrayList<>();
+        fieldNames.forEach(fieldName -> {
+            if (COUNT_ELEMENT_FIELDS.contains(fieldName)) {
+                countFieldNames.add(fieldName);
+            }
+        });
 
-        var condition = new HumanCondition()
-                .link(SceneConfigModel.class, CloudPluginSceneConfigElementModel.class)
-                .filterLink(SceneConfigModel.class, SceneConfigModel::getId,
-                            CloudPluginSceneConfigElementModel.class, CloudPluginSceneConfigElementModel::getScene)
-                .currentLink(SceneConfigModel.class)
-                .filterEqual(SceneConfigModel::getDeleted, false)
-                .currentLink(CloudPluginSceneConfigElementModel.class);
-        if (!CollectionUtils.isEmpty(sceneIds)) {
-            condition.filterIn(BaseCloudPluginSceneElementModel::getScene, sceneIds.toArray(new String[0]));
-        }
-        if (!CollectionUtils.isEmpty(nodeIds)) {
-            condition.filterIn(BaseCloudPluginSceneElementModel::getSceneElement, nodeIds.toArray(new String[0]));
-        }
-        if (filterIn != null) {
-            filterIn.forEach((fieldName, value) -> {
-                if (AVAILABLE_CLOUD_ELEMENT_FILTER_IN_FIELDS.contains(fieldName)) {
-                    condition.filterIn(fieldName, value.toArray());
-                }
+        Map<String, Map<Object, Long>> result = new HashMap<>();
+        if (!countFieldNames.isEmpty()) {
+            countFieldNames.forEach(fieldName -> {
+                result.put(fieldName, cloudSceneConfigStatCommon.groupCountElement(sceneIds, nodeIds, fieldName, fieldName, false));
             });
-        }
-
-        Map<T, Integer> result;
-        try {
-            result = StatCommon.groupCount(cloudPluginSceneConfigElementMapper, condition, groupFieldName);
-        } catch (Exception e) {
-            log.error("Group count cloud element on field {} error: {}", groupFieldName, e);
-            throw new MpRuntimeException(BaseErrorCode.ERROR, e);
         }
 
         return new ServiceResult<>(result);

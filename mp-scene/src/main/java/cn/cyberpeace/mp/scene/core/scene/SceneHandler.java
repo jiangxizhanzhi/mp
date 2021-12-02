@@ -486,8 +486,8 @@ public class SceneHandler extends BaseSceneHandler<
         prepareAllEvent(SceneModel.Event.DELETE, SceneElementModel.Event.DELETE);
         startAllEvent(SceneModel.Event.DELETE, SceneElementModel.Event.DELETE);
         try {
-            for (var plugin : getPlugins()) {
-                plugin.delete();
+            for (int i = getPlugins().size() - 1; i >= 0; i--) {
+                getPlugins().get(i).delete();
             }
         } catch (Exception e) {
             errorScene(SceneModel.Event.DELETE, e.getMessage());
@@ -503,8 +503,8 @@ public class SceneHandler extends BaseSceneHandler<
         prepareAllEvent(SceneModel.Event.DELETE, SceneElementModel.Event.DELETE);
         startAllEvent(SceneModel.Event.DELETE, SceneElementModel.Event.DELETE);
         try {
-            for (var plugin : getPlugins()) {
-                plugin.delete();
+            for (int i = getPlugins().size() - 1; i >= 0; i--) {
+                getPlugins().get(i).delete();
             }
         } catch (Exception e) {
             errorScene(SceneModel.Event.DELETE, e.getMessage());

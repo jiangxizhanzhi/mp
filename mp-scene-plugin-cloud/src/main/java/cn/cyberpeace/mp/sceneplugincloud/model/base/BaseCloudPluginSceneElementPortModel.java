@@ -43,4 +43,10 @@ public class BaseCloudPluginSceneElementPortModel extends BasePluginSceneElement
     @DefaultStr
     private String floatingIpId;
 
+    /**
+     * 三层防火墙对应防火墙资源id
+     */
+    @DefaultStr
+    private String firewallResourceId;
+
 }

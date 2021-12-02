@@ -1,0 +1,90 @@
+package cn.cyberpeace.mp.cscene.service;
+
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackDto;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowRiskCount;
+import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
+import cn.cyberpeace.mp.sceneplugincollection.bo.AttackInfo;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionFlowBO;
+import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
+import cn.hutool.core.collection.CollectionUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2021/11/30 13:41
+ */
+@Slf4j
+@Service
+public class FlowMonitorService {
+
+    @Autowired
+    private ScenePluginCollectionSceneService scenePluginCollectionSceneService;
+
+    @Autowired
+    private CsceneInstanceService csceneInstanceService;
+
+    public FlowRiskCount getFlowRiskCount(BaseSceneElementRequest baseRequest) {
+
+        BaseRequestUtil.checkBaseRequestWithSceneId(baseRequest);
+
+        List<String> sceneIds = CollectionUtil.toList(baseRequest.getSceneId());
+
+        List<String> nodeIds = null;
+        if (!CollectionUtil.isEmpty(baseRequest.getElementIds())) {
+            nodeIds = CollectionUtil.toList(baseRequest.getElementIds().get(0));
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime endTime = now;
+        LocalDateTime startTime = now.minusMinutes(10);
+
+        ServiceResult<Map<String, Integer>> mapResult = scenePluginCollectionSceneService.groupCountFlowByLevel(sceneIds, nodeIds, startTime, endTime);
+        Map<String, Integer> map = mapResult.getSource();
+        // todo 1201
+        return null;
+    }
+
+
+    /**
+     * 流量分页接口包装
+     * 根据攻击类型拆分
+     *
+     * @param id
+     * @param queryParams
+     * @return
+     */
+    public ListObjServiceResult<FlowAttackDto> pageFlow(String id, FlowQueryParams queryParams) {
+        ListObjServiceResult<CollectionFlowBO> flowBOResult = csceneInstanceService.listFlows(id, queryParams);
+        List<CollectionFlowBO> flowBOS = flowBOResult.getSource().getList();
+
+        List<FlowAttackDto> flowAttackDtos = new ArrayList<>();
+
+        for (CollectionFlowBO flowBO : flowBOS) {
+            for (AttackInfo attackInfo : flowBO.getAttackInfos()) {
+                FlowAttackDto flowAttackDto = new FlowAttackDto();
+                BeanUtils.copyProperties(flowBO, flowAttackDto);
+                flowAttackDto.setAttackInfo(attackInfo);
+                flowAttackDtos.add(flowAttackDto);
+            }
+        }
+
+        List<FlowAttackDto> finalList = flowAttackDtos.subList(0, 1000);
+
+        return new ListObjServiceResult(new ListObjResult(finalList, finalList.size()));
+    }
+
+}

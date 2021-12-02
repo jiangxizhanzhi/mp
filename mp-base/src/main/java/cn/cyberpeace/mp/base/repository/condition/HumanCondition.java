@@ -259,7 +259,7 @@ public class HumanCondition {
      * @param aggregation 聚合字段
      * @return this
      */
-    public HumanCondition selectAs(Aggregation aggregation, String outputFieldName) {
+    public HumanCondition selectAs(Aggregation<?> aggregation, String outputFieldName) {
         selectFields.put(aggregation.toSqlField(currentFieldName(aggregation.getFieldName())), outputFieldName);
         return this;
     }
@@ -270,7 +270,7 @@ public class HumanCondition {
      * @param outputFieldGetter 返回字段get方法引用
      * @return this
      */
-    public <O> HumanCondition selectAs(Aggregation aggregation, SerializableFunction<O> outputFieldGetter) {
+    public <O> HumanCondition selectAs(Aggregation<?> aggregation, SerializableFunction<O> outputFieldGetter) {
         return selectAs(aggregation, BeanUtils.getBeanGetterFieldName(outputFieldGetter));
     }
 
@@ -279,8 +279,8 @@ public class HumanCondition {
      * @param aggregations 聚合字段...
      * @return this
      */
-    public HumanCondition select(Aggregation... aggregations) {
-        for (Aggregation aggregation: aggregations) {
+    public HumanCondition select(Aggregation<?>... aggregations) {
+        for (Aggregation<?> aggregation: aggregations) {
             String fieldName = aggregation.getFieldName();
             String funcName = aggregation.getFuncName();
             String outputFieldNameSuffix = funcName.substring(0, 1).toUpperCase() + funcName.substring(1);

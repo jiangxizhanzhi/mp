@@ -2,13 +2,13 @@ package cn.cyberpeace.mp.devops.cluster.controller;
 
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.impl.ScreenrecordServiceImpl;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.request.ScreenrecordBatchDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.ScreenrecordDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.queryparam.ScreenrecordQueryParams;
 import cn.cyberpeace.mp.devops.cluster.response.ScreenRecordUsedSpaceResponse;
 import cn.cyberpeace.mp.devops.cluster.response.ScreenrecordResponse;
-import cn.cyberpeace.mp.devops.cluster.service.impl.ScreenrecordServiceImpl;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;

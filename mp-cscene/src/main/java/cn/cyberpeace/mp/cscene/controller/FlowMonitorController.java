@@ -1,16 +1,27 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowDataStatistic;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowPageRequest;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowRiskAggrResponse;
+import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackDto;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowRiskCount;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowTrend;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowTrendSceneElementRequest;
+import cn.cyberpeace.mp.cscene.service.FlowMonitorService;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * @Description:
@@ -23,26 +34,63 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/monitor/flow")
 public class FlowMonitorController {
 
-    @ApiOperation(value = "流量统计")
-    @GetMapping("/statistic")
-    public ServiceResult<FlowDataStatistic> getFlowStatistic() {
+    @Autowired
+    private FlowMonitorService flowMonitorService;
 
-        return null;
+    /**
+     * 默认查询场景所有节点
+     * 忽略elementIds的值
+     *
+     * @return
+     */
+    @ApiOperation(value = "场景流量趋势图")
+    @GetMapping("/scene_trend")
+    public ServiceResult<List<FlowTrend>> getSceneFlowTrend(FlowTrendSceneElementRequest flowTrendRequest) {
+        log.info("flowTrendRequest:{}", flowTrendRequest);
+
+        // todo 1201
+
+        return ServiceResult.success(null);
     }
 
-    @ApiOperation(value = "流量风险统计")
-    @GetMapping("/risk_aggr")
-    public ServiceResult<FlowRiskAggrResponse> getFlowRiskAggr() {
 
-        return null;
+    /**
+     * elementIds若为多值，则只取第一个值
+     *
+     * @return
+     */
+    @ApiOperation(value = "节点流量趋势图")
+    @GetMapping("/element_trend")
+    public ServiceResult<List<FlowTrend>> getElementFlowTrend(FlowTrendSceneElementRequest flowTrendRequest) {
+        log.info("flowTrendRequest:{}", flowTrendRequest);
+
+        // todo 1201
+
+        return ServiceResult.success(null);
     }
 
-    @ApiOperation(value = "分页查询流量")
+
+    @ApiOperation(value = "流量风险各级别统计")
+    @GetMapping("/risk_count")
+    public ServiceResult<FlowRiskCount> getFlowRiskCount(BaseSceneElementRequest baseRequest) {
+        log.info("{}", baseRequest);
+
+        FlowRiskCount riskCount = flowMonitorService.getFlowRiskCount(baseRequest);
+        return ServiceResult.success(riskCount);
+    }
+
+
+    @ApiOperation(value = "流量分页接口")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
+    })
     @GetMapping("/page")
-    public ServiceResult getEventPage(FlowPageRequest flowPageRequest) {
-        log.info("flowPageRequest:{}", flowPageRequest);
+    public ListObjServiceResult<FlowAttackDto> pageFlow(@RequestParam String id, FlowQueryParams queryParams) {
+        log.info("id:{}, queryParams:{}", id, queryParams);
 
-        return null;
+        ListObjServiceResult<FlowAttackDto> result = flowMonitorService.pageFlow(id, queryParams);
+        return result;
     }
+
 
 }

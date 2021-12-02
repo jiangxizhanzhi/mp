@@ -39,7 +39,7 @@
                 and i.image_type = #{imageType}
             </if>
             <if test=" searchType != null and searchType == 1 ">
-                and i.image_type in ('vm','container','simple')
+                and i.image_type != 'entity'
             </if>
             <if test=" searchType != null and searchType == 2 ">
                 and i.image_type = 'entity'

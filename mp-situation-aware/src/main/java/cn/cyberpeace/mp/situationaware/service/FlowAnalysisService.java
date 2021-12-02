@@ -23,6 +23,8 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.IndicesOptions;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.core.CountRequest;
+import org.elasticsearch.client.core.CountResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
@@ -147,7 +149,14 @@ public class FlowAnalysisService extends AbstractBaseService {
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.query(boolQueryBuilder);
         searchSourceBuilder.sort("@timestamp", SortOrder.DESC);
-        searchSourceBuilder.from(0).size(request.getTopSize());
+
+        if(Objects.nonNull(request.getPageSize()) && Objects.nonNull(request.getPageNum())){
+            int  offset = (request.getPageNum() -1) * (request.getPageSize());
+            searchSourceBuilder.from(offset);
+            searchSourceBuilder.size(request.getPageSize());
+        }else {
+            searchSourceBuilder.from(0).size(request.getTopSize());
+        }
 
         var searchRequest = new SearchRequest(this.indices(request.getGroupList(),request.getStartDateTime(),request.getEndDateTime()));
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
@@ -225,6 +234,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         }else if (aggregationTypeEnum == AggregationTypeEnum.SURICATA_SEVERITY){
             aggregationBuilder = AggregationBuilders.terms("aggregationType")
                     .field("suricata.severity").size(request.getTopSize());
+            searchSourceBuilder.aggregation(aggregationBuilder);
         }
 
         searchSourceBuilder.size(0);
@@ -283,6 +293,27 @@ public class FlowAnalysisService extends AbstractBaseService {
     }
 
 
+    /**
+     * 统计总数
+     * @param request
+     * @return
+     */
+    public long count(FlowAnalysisRequest request){
+        var boolQueryBuilder = this.buildBoolQueryBuilder(request);
+
+        CountRequest countRequest = new CountRequest();
+        countRequest.indices(this.indices(request.getGroupList(),request.getStartDateTime(),request.getEndDateTime()));
+        countRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
+        countRequest.query(boolQueryBuilder);
+        try {
+            CountResponse countResponse = restHighLevelClient.count(countRequest,RequestOptions.DEFAULT);
+            return countResponse.getCount();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
 
     /**
      * 构建BoolQueryBuilder对象
@@ -299,20 +330,20 @@ public class FlowAnalysisService extends AbstractBaseService {
             boolQueryBuilder.filter(QueryBuilders.termsQuery("suricata.severity", severityList));
         }
 
-        if (StringUtils.isNotBlank(request.getSourceIp())) {
-            boolQueryBuilder.must(QueryBuilders.termQuery("source.ip", request.getSourceIp()));
+        if (CollectionUtils.isNotEmpty(request.getSourceIps())) {
+            boolQueryBuilder.must(QueryBuilders.termsQuery("source.ip", request.getSourceIps()));
         }
 
         if (StringUtils.isNotBlank(request.getSourcePort())) {
             boolQueryBuilder.must(QueryBuilders.termQuery("source.port", request.getSourcePort()));
         }
 
-        if (StringUtils.isNotBlank(request.getSourceMac())) {
-            boolQueryBuilder.must(QueryBuilders.termQuery("source.mac", request.getSourceMac()));
+        if (CollectionUtils.isNotEmpty(request.getSourceMacs())) {
+            boolQueryBuilder.must(QueryBuilders.termsQuery("source.mac", request.getSourceMacs()));
         }
 
-        if (StringUtils.isNotBlank(request.getDestinationIp())) {
-            boolQueryBuilder.must(QueryBuilders.termQuery("destination.ip", request.getDestinationIp()));
+        if (CollectionUtils.isNotEmpty(request.getDestinationIps())) {
+            boolQueryBuilder.must(QueryBuilders.termsQuery("destination.ip", request.getDestinationIps()));
         }
 
         if (StringUtils.isNotBlank(request.getDestinationPort())) {
@@ -320,7 +351,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         }
 
         if (CollectionUtils.isNotEmpty(request.getProtocols())) {
-            boolQueryBuilder.must(QueryBuilders.termQuery("protocol.keyword",request.getProtocols()));
+            boolQueryBuilder.must(QueryBuilders.termsQuery("protocol",request.getProtocols()));
         }
 
         if (Objects.nonNull(request.getStartDateTime()) && Objects.nonNull(request.getEndDateTime())

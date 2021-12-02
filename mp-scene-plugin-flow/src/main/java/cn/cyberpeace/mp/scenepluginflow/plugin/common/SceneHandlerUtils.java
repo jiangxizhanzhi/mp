@@ -1,15 +1,22 @@
 package cn.cyberpeace.mp.scenepluginflow.plugin.common;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneElementBO;
 import cn.cyberpeace.mp.scenepluginflow.bo.base.Flow;
 import cn.cyberpeace.mp.scenepluginflow.plugin.FlowScenePluginHandler;
 import cn.cyberpeace.mp.scenepluginflow.plugin.flow.FlowExecutor;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.concurrent.Callable;
+import java.util.function.Consumer;
+import java.util.function.Function;
+
 @Data
+@Slf4j
 public class SceneHandlerUtils {
 
     private FlowScenePluginHandler pluginHandler;
@@ -31,6 +38,27 @@ public class SceneHandlerUtils {
         flow.setStatusText(error);
     }
 
+    private void preparingFLow(Flow flow) {
+        flow.setStatus(Flow.Status.PREPARING);
+        flow.setStatusText(null);
+    }
+
+    private boolean startFlow(Flow flow) {
+        var taskId = flow.getTaskId();
+        try {
+            log.info("start flow for taskId:[{}]", taskId);
+            flowExecutor.startFlow(taskId, () -> {
+                successOffFLow(flow);
+            });
+        } catch (Exception e) {
+            log.error("start flow for taskId:[{}] error", taskId, e);
+            errorFLow(flow, e.getMessage());
+            return false;
+        }
+        successOnFLow(flow);
+        return true;
+    }
+
     public SceneHandlerUtils(FlowScenePluginHandler pluginHandler) {
         this.pluginHandler = pluginHandler;
         flowExecutor = BeanCommon.getBean(FlowExecutor.class);
@@ -44,20 +72,14 @@ public class SceneHandlerUtils {
         flowExecutor.deleteExecutor(executorId);
     }
 
-    public boolean startFlow(FlowPluginSceneElementBO flowElement, Flow flow) {
+    public boolean startFlow(FlowPluginSceneElementBO flowElement, Flow flow, boolean async, Runnable asyncCallback) {
         var taskId = flow.getTaskId();
         if (!StringUtils.isEmpty(taskId)) {
-            try {
-                flowExecutor.startFlow(taskId, () -> {
-                    successOffFLow(flow);
-                });
-            } catch (Exception e) {
-                errorFLow(flow, e.getMessage());
-                return false;
-            }
-            successOnFLow(flow);
-            return true;
+            return startFlow(flow);
+        } else {
+            log.info("taskId is empty");
         }
+
         var flowId = flow.getId();
         if (StringUtils.isEmpty(flowId)) {
             errorFLow(flow, "Empty flow id");
@@ -105,15 +127,42 @@ public class SceneHandlerUtils {
             return false;
         }
 
-        try {
-            taskId = flowExecutor.createFlow(executorId, networkId, flowId, StringUtils.EMPTY, ip, null, null, null);
-        } catch (Exception e) {
-            errorFLow(flow, e.getMessage());
-            return false;
-        }
+        preparingFLow(flow);
+        final String flowNetworkId = networkId;
+        final String flowIp = ip;
+        Callable<Boolean> start = () -> {
+            String flowTaskId;
+            try {
+                flowTaskId = flowExecutor.createFlow(executorId, flowNetworkId, flowId, StringUtils.EMPTY, flowIp, null, null, null, flow);
+                log.info("flowExecutor createFlow success:[{}]", flowTaskId);
+            } catch (Exception e) {
+                errorFLow(flow, e.getMessage());
+                return false;
+            }
 
-        flow.setTaskId(taskId);
-        return startFlow(flowElement, flow);
+            flow.setTaskId(flowTaskId);
+            return startFlow(flow);
+        };
+        if (async) {
+            TaskCommon.executeTask(() -> {
+                try {
+                    start.call();
+                } catch (Exception e) {
+                    log.info("Start flow error: ", e);
+                }
+                if (asyncCallback != null) {
+                    asyncCallback.run();
+                }
+            });
+            return true;
+        } else {
+            try {
+                return start.call();
+            } catch (Exception e) {
+                log.info("Start flow error: ", e);
+                return false;
+            }
+        }
     }
 
     public boolean stopFlow(Flow flow) {

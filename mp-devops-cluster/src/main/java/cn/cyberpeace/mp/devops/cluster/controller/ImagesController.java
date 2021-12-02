@@ -5,6 +5,9 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.FlavorService;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ImagesService;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ScenariosSnapshotService;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.constant.DevopsClusterErrorCode;
 import cn.cyberpeace.mp.devops.cluster.converter.ImagesConverter;
@@ -19,9 +22,6 @@ import cn.cyberpeace.mp.devops.cluster.response.ImagesByUuidsResponse;
 import cn.cyberpeace.mp.devops.cluster.response.ImagesPageResponse;
 import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
 import cn.cyberpeace.mp.devops.cluster.response.base.Result;
-import cn.cyberpeace.mp.devops.cluster.service.FlavorService;
-import cn.cyberpeace.mp.devops.cluster.service.ImagesService;
-import cn.cyberpeace.mp.devops.cluster.service.ScenariosSnapshotService;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -325,7 +325,7 @@ public class ImagesController {
     /**
      * 查询快照历史
      */
-    @ApiOperation("根据镜像名称/快照名称查询镜像名称和快照历史信息")
+    @ApiOperation("根据镜像名称或快照名称查询镜像名称和快照历史信息")
     @GetMapping("/snapshot/by-name")
     public Result<DeviceAndSnapshotConvertModel> deviceAndSnapshotByName(@RequestParam String name){
         DeviceAndSnapshotConvertModel convertModel = snapshotConverter.deviceAndSnapshotByName(name);

@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.devops.cluster.converter;
 
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.BaseCloudPlatformService;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeAllConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeL2AllConvertModel;
-import cn.cyberpeace.mp.devops.cluster.service.BaseCloudPlatformService;
 
 public interface TypeConverter extends BaseCloudPlatformService {
 

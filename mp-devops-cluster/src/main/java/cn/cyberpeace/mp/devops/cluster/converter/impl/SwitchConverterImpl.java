@@ -1,11 +1,11 @@
 package cn.cyberpeace.mp.devops.cluster.converter.impl;
 
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.SwitchService;
 import cn.cyberpeace.mp.devops.cluster.converter.SwitchConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.SwitchConvertModel;
 import cn.cyberpeace.mp.devops.cluster.model.InterfaceDetail;
 import cn.cyberpeace.mp.devops.cluster.model.Switches;
 import cn.cyberpeace.mp.devops.cluster.model.SwitchesCloudPlatform;
-import cn.cyberpeace.mp.devops.cluster.service.SwitchService;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
