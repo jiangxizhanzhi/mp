@@ -220,6 +220,8 @@ public class ScenePluginCollectionSceneService {
             hostState.setMemoryPercent(srcHostState.getMemoryPercent());
             hostState.setTime(srcHostState.getTime());
 
+            // todo 进程，端口，网络连接
+
             var srcElement = agentNameElementMap.getOrDefault(srcHostState.getAgentName(), null);
             if (srcElement != null) {
                 hostState.setNodeId(srcElement.getId());
