@@ -1,11 +1,14 @@
 package cn.cyberpeace.mp.cscene.service;
 
+import cn.cyberpeace.mp.base.bo.IntervalSizeBO;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackDto;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowRiskCount;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowTrend;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowTrendSceneElementRequest;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.sceneplugincollection.bo.AttackInfo;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionFlowBO;
@@ -19,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -37,7 +41,40 @@ public class FlowMonitorService {
     @Autowired
     private CsceneInstanceService csceneInstanceService;
 
+
+    /**
+     * 查询单个节点机器流量趋势
+     *
+     * @param trendRequest
+     * @return
+     */
+    public List<FlowTrend> getElementFlowTrend(FlowTrendSceneElementRequest trendRequest) {
+        log.info("{}", trendRequest);
+        BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(trendRequest);
+        List<String> sceneIds = CollectionUtil.toList(trendRequest.getSceneId());
+        List<String> nodeIds = CollectionUtil.toList(trendRequest.getElementIds().get(0));
+
+        return processFlowTrend(sceneIds, nodeIds, trendRequest.getStartTime(), trendRequest.getEndTime(), trendRequest.getSegmentCount());
+    }
+
+
+    /**
+     * 查询场景机器流量趋势
+     *
+     * @param trendRequest
+     * @return
+     */
+    public List<FlowTrend> getSceneFlowTrend(FlowTrendSceneElementRequest trendRequest) {
+        log.info("{}", trendRequest);
+        BaseRequestUtil.checkBaseRequestWithSceneId(trendRequest);
+        List<String> sceneIds = CollectionUtil.toList(trendRequest.getSceneId());
+
+        return processFlowTrend(sceneIds, null, trendRequest.getStartTime(), trendRequest.getEndTime(), trendRequest.getSegmentCount());
+    }
+
+
     public FlowRiskCount getFlowRiskCount(BaseSceneElementRequest baseRequest) {
+        log.info("baseRequest:{}", baseRequest);
 
         BaseRequestUtil.checkBaseRequestWithSceneId(baseRequest);
 
@@ -54,8 +91,15 @@ public class FlowMonitorService {
 
         ServiceResult<Map<String, Integer>> mapResult = scenePluginCollectionSceneService.groupCountFlowByLevel(sceneIds, nodeIds, startTime, endTime);
         Map<String, Integer> map = mapResult.getSource();
-        // todo 1201
-        return null;
+
+        // 风险等级 1,2,3,4 数字越低，级别越高
+        FlowRiskCount riskCount = new FlowRiskCount();
+        riskCount.setHighCount(map.get("1") == null ? 0 : map.get("1"));
+        riskCount.setMediumCount(map.get("2") == null ? 0 : map.get("2"));
+        Integer low1 = map.get("3") == null ? 0 : map.get("3");
+        Integer low2 = map.get("4") == null ? 0 : map.get("4");
+        riskCount.setLowCount(low1 + low2);
+        return riskCount;
     }
 
 
@@ -85,6 +129,26 @@ public class FlowMonitorService {
         List<FlowAttackDto> finalList = flowAttackDtos.subList(0, 1000);
 
         return new ListObjServiceResult(new ListObjResult(finalList, finalList.size()));
+    }
+
+
+    private List<FlowTrend> processFlowTrend(List<String> sceneIds, List<String> elementIds, LocalDateTime startTime, LocalDateTime endTime, int segmentCount) {
+        ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> flowResult = scenePluginCollectionSceneService.timeIntervalSumFlowSize(sceneIds, null, startTime, endTime, segmentCount);
+
+        List<IntervalSizeBO<LocalDateTime, Long>> intervalFlowSizeBOs = flowResult.getSource();
+
+        intervalFlowSizeBOs.sort(Comparator.comparing(IntervalSizeBO::getEnd));
+
+        List<FlowTrend> flowTrends = new ArrayList<>();
+
+        for (int i = 0; i < intervalFlowSizeBOs.size(); i++) {
+            FlowTrend ft = new FlowTrend();
+            ft.setTime(intervalFlowSizeBOs.get(i).getEnd());
+            ft.setDataSize(intervalFlowSizeBOs.get(i).getSize());
+            flowTrends.add(ft);
+        }
+
+        return flowTrends;
     }
 
 }

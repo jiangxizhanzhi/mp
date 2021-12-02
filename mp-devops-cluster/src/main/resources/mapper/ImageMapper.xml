@@ -20,8 +20,11 @@
 
     <sql id="commonTargetWhere">
         <where>
-            <if test=" name != null and name != ''">
+            <if test=" name != null and name != '' and likeName != false">
                 and i.name like CONCAT('%',#{name},'%')
+            </if>
+            <if test=" name != null and name != '' and likeName == false">
+                and i.name = #{name}
             </if>
             <if test=" mainCategory != null">
                 and i.main_category = #{mainCategory}
@@ -86,8 +89,11 @@
     <sql id="commonTargetAuthWhere">
 
         <where>
-            <if test=" name != null and name != ''">
+            <if test=" name != null and name != '' and likeName != false">
                 and i.name like CONCAT('%',#{name},'%')
+            </if>
+            <if test=" name != null and name != '' and likeName == false">
+                and i.name = #{name}
             </if>
             <if test=" mainCategory != null">
                 and i.main_category = #{mainCategory}

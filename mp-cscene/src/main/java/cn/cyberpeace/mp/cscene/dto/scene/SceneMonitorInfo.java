@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 /**
  * @Description:
  * @Author zhouxinghuai
@@ -19,17 +21,17 @@ import lombok.NoArgsConstructor;
 @ApiModel(value = "场景监控信息")
 public class SceneMonitorInfo {
 
-//    @ApiModelProperty(value = "创建者")
-//    private String creator;
-//
-//    @ApiModelProperty(value = "创建时间")
-//    private LocalDateTime createTime;
-//
-//    @ApiModelProperty(value = "运行时间（分钟）")
-//    private Integer runMinutes;
-//
-//    @ApiModelProperty(value = "场景属性")
-//    private String property;
+    @ApiModelProperty(value = "创建者")
+    private String createUsername;
+    //
+    @ApiModelProperty(value = "创建时间")
+    private LocalDateTime createTime;
+    //
+    @ApiModelProperty(value = "运行时间（分钟）")
+    private Long runMinutes;
+    //
+    @ApiModelProperty(value = "场景属性 0:个人隔离 1:非隔离")
+    private Integer sceneAttr;
 
     @ApiModelProperty(value = "运行节点统计-虚拟机总数")
     @Builder.Default
