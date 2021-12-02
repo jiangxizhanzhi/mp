@@ -119,6 +119,16 @@ public class FlowMonitorService {
      * @return
      */
     public ListObjServiceResult<FlowAttackDto> pageFlow(String id, FlowQueryParams queryParams) {
+        // todo
+        if (Objects.isNull(queryParams.getPage())) {
+            queryParams.setPage(1);
+        }
+        if (Objects.isNull(queryParams.getPerPage())) {
+            queryParams.setPerPage(1000);
+        }
+        queryParams.ensure();
+        // todo
+
         ListObjServiceResult<CollectionFlowBO> flowBOResult = csceneInstanceService.listFlows(id, queryParams);
         List<CollectionFlowBO> flowBOS = flowBOResult.getSource().getList();
 
@@ -133,9 +143,12 @@ public class FlowMonitorService {
             }
         }
 
-        List<FlowAttackDto> finalList = flowAttackDtos.subList(0, 1000);
+        List<FlowAttackDto> finalList = flowAttackDtos;
+        if (flowAttackDtos.size() > queryParams.getPageSize()) {
+            finalList = flowAttackDtos.subList(0, queryParams.getPageSize());
+        }
 
-        return new ListObjServiceResult(new ListObjResult(finalList, finalList.size()));
+        return new ListObjServiceResult(new ListObjResult(finalList, finalList.size()).asResult()).asResult();
     }
 
 
