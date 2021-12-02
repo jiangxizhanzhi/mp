@@ -298,7 +298,7 @@ public class DataCollectionService {
         }
         wazuhNetifaceRoot.getData().getAffectedItems().forEach(item -> {
             // 所有的macId都以小写保存
-            responseMultiMap.add(item.getAgentId(), item.getMac().toLowerCase());
+            responseMultiMap.add(item.getAgentId(), Objects.isNull(item.getMac()) ? "" : item.getMac().toLowerCase());
         });
 
         return responseMultiMap;

@@ -8,7 +8,6 @@ import cn.cyberpeace.mp.cscene.dto.element.ElementRTInfo;
 import cn.cyberpeace.mp.cscene.dto.element.ProcessState;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.SceneElementMonitorService;
-import cn.hutool.core.collection.CollectionUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * @Description:
@@ -43,11 +44,7 @@ public class ElementMonitorController {
     @ApiOperation(value = "查询节点基本信息")
     @GetMapping("/info")
     public ServiceResult<ElementMonitorBasicInfo> getElementMonitorInfo(BaseSceneElementRequest baseRequest) {
-        log.info("{}", baseRequest);
-        if (CollectionUtil.isEmpty(baseRequest.getElementIds())) {
-            return ServiceResult.fail("节点id不能为空");
-        }
-        ElementMonitorBasicInfo elementMonitorBasicInfo = sceneElementMonitorService.getElementMonitorInfo(baseRequest.getSceneId(), baseRequest.getElementIds().get(0));
+        ElementMonitorBasicInfo elementMonitorBasicInfo = sceneElementMonitorService.getElementMonitorInfo(baseRequest);
 
         return ServiceResult.success(elementMonitorBasicInfo);
     }
@@ -62,11 +59,7 @@ public class ElementMonitorController {
     @ApiOperation(value = "查询节点实时状态")
     @GetMapping("/rtinfo")
     public ServiceResult<ElementRTInfo> getElementRTInfo(BaseSceneElementRequest baseRequest) {
-        log.info("{}", baseRequest);
-        if (CollectionUtil.isEmpty(baseRequest.getElementIds())) {
-            return ServiceResult.fail("节点id不能为空");
-        }
-        ElementRTInfo rtInfo = sceneElementMonitorService.getElementRTInfo(baseRequest.getSceneId(), baseRequest.getElementIds().get(0));
+        ElementRTInfo rtInfo = sceneElementMonitorService.getElementRTInfo(baseRequest);
 
         return ServiceResult.success(rtInfo);
     }
@@ -74,9 +67,25 @@ public class ElementMonitorController {
 
     @ApiOperation(value = "查询节点进程信息")
     @GetMapping("/process")
-    public ServiceResult<ProcessState> getProcessState(BaseSceneElementRequest baseRequest) {
+    public ServiceResult<List<ProcessState>> getProcessesStates(BaseSceneElementRequest baseRequest) {
         log.info("{}", baseRequest);
+        // todo 1201
+        return null;
+    }
 
+    @ApiOperation(value = "查询节点端口信息")
+    @GetMapping("/ports")
+    public ServiceResult getPortsStates(BaseSceneElementRequest baseRequest) {
+        log.info("{}", baseRequest);
+        // todo 1201
+        return null;
+    }
+
+    @ApiOperation(value = "查询节点网络连接信息")
+    @GetMapping("/connections")
+    public ServiceResult getConnectionsStates(BaseSceneElementRequest baseRequest) {
+        log.info("{}", baseRequest);
+        // todo 1201
         return null;
     }
 

@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.scenepluginflow.plugin.common;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
+import cn.cyberpeace.mp.flow.model.FlowTaskModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneElementBO;
 import cn.cyberpeace.mp.scenepluginflow.bo.base.Flow;
@@ -12,8 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.concurrent.Callable;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 @Data
 @Slf4j
@@ -75,6 +74,9 @@ public class SceneHandlerUtils {
     public boolean startFlow(FlowPluginSceneElementBO flowElement, Flow flow, boolean async, Runnable asyncCallback) {
         var taskId = flow.getTaskId();
         if (!StringUtils.isEmpty(taskId)) {
+            FlowTaskModel flowTask = flowExecutor.getFlowTask(taskId);
+            // 流量执行次数
+            flow.setCount(flowTask.getCount());
             return startFlow(flow);
         } else {
             log.info("taskId is empty");

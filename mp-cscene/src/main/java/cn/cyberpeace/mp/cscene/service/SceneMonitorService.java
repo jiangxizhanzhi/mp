@@ -2,8 +2,6 @@ package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
-import cn.cyberpeace.mp.cscene.dto.element.HostState;
-import cn.cyberpeace.mp.cscene.dto.request.HostStateTrendSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneMonitorInfo;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
@@ -13,6 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -46,12 +46,25 @@ public class SceneMonitorService {
         var csceneInstanceBO = result.getSource();
 
         SceneMonitorInfo sceneMonitorInfo = new SceneMonitorInfo();
+        sceneMonitorInfo.setSceneAttr(csceneInstanceBO.getSceneAttr());
+        sceneMonitorInfo.setCreateUsername(csceneInstanceBO.getCreateUsername());
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime createTime = csceneInstanceBO.getCreateTime();
+        if (Objects.nonNull(createTime)) {
+            sceneMonitorInfo.setCreateTime(createTime);
+            Duration duration = Duration.between(createTime, now);
+            Long minutes = duration.toMinutes();
+            sceneMonitorInfo.setRunMinutes(minutes);
+        }
+
         if (Objects.isNull(csceneInstanceBO)
                 || Objects.isNull(csceneInstanceBO.getScene())
                 || Objects.isNull(csceneInstanceBO.getScene().getPlugins())
                 || Objects.isNull(csceneInstanceBO.getScene().getPlugins().get(CPCLOUD_PLUGIN))) {
             return sceneMonitorInfo;
         }
+        var scene = csceneInstanceBO.getScene();
 
         var scenePluginDataBO = csceneInstanceBO.getScene().getPlugins().get(CPCLOUD_PLUGIN);
 
@@ -127,19 +140,6 @@ public class SceneMonitorService {
         }
 
         return basicInfos;
-    }
-
-    /**
-     * 查询场景所有节点的hoststate平均值
-     *
-     * @param trendRequest
-     * @return
-     */
-    public List<HostState> getSceneHostStatesTrend(HostStateTrendSceneElementRequest trendRequest) {
-        log.info("{}", trendRequest);
-
-
-        return null;
     }
 
 }

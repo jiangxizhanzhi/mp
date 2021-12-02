@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.scenepluginflow.plugin.flow;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.flow.enums.TaskActionEnum;
 import cn.cyberpeace.mp.flow.model.FlowScriptParamModel;
@@ -15,6 +16,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Data
@@ -99,6 +101,21 @@ public class FlowExecutor {
         if (!result.isSuccess()) {
             throw new MpRuntimeException(result.getServiceCode());
         }
+    }
+
+    /**
+     * 获取流量任务
+     * @param taskId
+     * @return
+     */
+    public FlowTaskModel getFlowTask(String taskId) {
+        FlowTaskModel flowTaskModel = new FlowTaskModel();
+        ObjResult<FlowTaskModel> serviceResult = flowService3.get(taskId).getSource();
+        if (Objects.nonNull(serviceResult)) {
+            flowTaskModel = serviceResult.getObj();
+        }
+
+        return flowTaskModel;
     }
 
     private synchronized void initDefaultInstance() {

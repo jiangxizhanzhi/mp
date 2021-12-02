@@ -1,11 +1,13 @@
 package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.bo.IntervalSizeBO;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.dto.request.HostStateTrendSceneElementRequest;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
 import cn.hutool.core.collection.CollectionUtil;
@@ -17,6 +19,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @Description:
@@ -44,12 +47,29 @@ public class HostStateService {
         String sceneId = baseRequest.getSceneId();
         List<String> elementIds = baseRequest.getElementIds();
         HostStateQueryParams queryParams = new HostStateQueryParams();
-//        queryParams.setNodeIds();
+        queryParams.setNodeIds(elementIds);
+        queryParams.setPage(1);
+        queryParams.setPageSize(1);
 //
-//        csceneInstanceService.listHostStates()
+        ListObjServiceResult<CollectionHostStateBO> listObjServiceResult = csceneInstanceService.listHostStates(sceneId, queryParams);
 
-        return null;
+        List<CollectionHostStateBO> hostStateBOS = listObjServiceResult.getSource().getList();
 
+        List<HostState> hostStates = hostStateBOS.stream().map(hostStateBO -> {
+            HostState hs = new HostState();
+            hs.setCpuCount(hostStateBO.getCpuCount());
+            hs.setCpuPercent(hostStateBO.getCpuPercent());
+            // todo 1201 内存MB，磁盘GB转换
+//            hs.setMemoryFree(Integer.valueOf(hostStateBO.getMemoryFree()));
+//            hs.setMemoryTotal(Integer.valueOf(hostStateBO.getMemoryTotal()));
+//            hs.setDiskSpace(hostStateBO.getDiskSpace());
+            hs.setSceneId(hostStateBO.getSceneId());
+            hs.setElementId(hostStateBO.getNodeId());
+            hs.setTime(hostStateBO.getTime());
+            return hs;
+        }).collect(Collectors.toList());
+
+        return hostStates;
     }
 
 
@@ -98,9 +118,9 @@ public class HostStateService {
         for (int i = 0; i < intervalCpuSizeBOs.size(); i++) {
             HostState hs = new HostState();
             hs.setTime(intervalCpuSizeBOs.get(i).getEnd());
-            hs.setCpuPercent(intervalCpuSizeBOs.get(i).getSize() / 100.00);
-            hs.setMemoryPercent(intervalMemSizeBOs.get(i).getSize() / 100.00);
-
+            hs.setCpuPercent(Double.valueOf(intervalCpuSizeBOs.get(i).getSize()));
+            hs.setMemoryPercent(Double.valueOf(intervalMemSizeBOs.get(i).getSize()));
+            // todo 1201 内存MB，磁盘GB转换
             hostStates.add(hs);
         }
 

@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
@@ -68,9 +69,10 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     }
 
     private int getActiveVirtualDeviceCount() {
-        Map<Integer, Long> elementCountMap = scenePluginCloudSceneService
-                .groupCountElementByVirtualType(null, null, null)
-                .getSource();
+        var groupFieldName = BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getVirtualType);
+        Map<Object, Long> elementCountMap = scenePluginCloudSceneService
+                .groupCountElement(null, null, List.of(groupFieldName))
+                .getSource().get(groupFieldName);
         long activeVirtualDeviceCount = elementCountMap.getOrDefault(
                 BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE, 0L) +
                 elementCountMap.getOrDefault(
@@ -81,9 +83,10 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     }
 
     private int getSceneConfigVirtualDeviceCount(String sceneConfigId) {
-        Map<Integer, Long> elementCountMap = scenePluginCloudSceneConfigService
-                .groupCountElementByVirtualType(List.of(sceneConfigId), null, null)
-                .getSource();
+        var groupFieldName = BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getVirtualType);
+        Map<Object, Long> elementCountMap = scenePluginCloudSceneConfigService
+                .groupCountElement(List.of(sceneConfigId), null, List.of(groupFieldName))
+                .getSource().get(groupFieldName);
         long virtualDeviceCount = elementCountMap.getOrDefault(
                 BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE, 0L) +
                 elementCountMap.getOrDefault(
