@@ -18,6 +18,4 @@ public class FlowTrend {
 
     @ApiModelProperty("流量大小")
     private Long dataSize;
-
-
 }
