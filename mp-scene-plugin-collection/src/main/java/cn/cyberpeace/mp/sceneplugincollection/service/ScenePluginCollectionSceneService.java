@@ -16,13 +16,17 @@ import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandle
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
+import cn.cyberpeace.mp.situationaware.bo.AttackDateHistogramNetworkBytesBO;
+import cn.cyberpeace.mp.situationaware.bo.AttackWayAggregationBO;
 import cn.cyberpeace.mp.situationaware.bo.FlowLogBO;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
+import cn.cyberpeace.mp.situationaware.model.enums.AggregationTypeEnum;
 import cn.cyberpeace.mp.situationaware.request.FlowAnalysisRequest;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import cn.cyberpeace.mp.situationaware.service.FlowAnalysisService;
 import cn.cyberpeace.mp.situationaware.service.NetworkTrafficService;
+import cn.cyberpeace.mp.situationaware.utils.LocalDateUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,7 +105,32 @@ public class ScenePluginCollectionSceneService {
      */
     private <T> ServiceResult<Map<T, Integer>> groupCountFlow(
             List<String> sceneIds, List<String> nodeIds, String groupField, LocalDateTime startTime, LocalDateTime endTime) {
-        return new ServiceResult<>(new HashMap<>());
+        FlowAnalysisRequest request = new FlowAnalysisRequest();
+        if (GroupCountFlowField.LEVEL.equals(groupField)) {
+            request.setAggregationTypeEnum(AggregationTypeEnum.SURICATA_SEVERITY);
+        }
+        // todo 暂时先实现一个
+        var sceneHandler = new SceneHandler(sceneIds.get(0), null, false, null);
+        CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        request.setGroupList(Arrays.asList(pluginHandler.getScene().getFlowCollector()));
+
+        if (startTime == null) {
+            request.setStartDateTime(sceneHandler.getScene().getCreateTime());
+        } else {
+            request.setStartDateTime(startTime);
+        }
+        if (endTime == null) {
+            request.setEndDateTime(LocalDateTime.now());
+        } else {
+            request.setEndDateTime(endTime);
+        }
+        List<AttackWayAggregationBO> result = flowAnalysisService.topByAggregationTypeEnum(request);
+        if (CollectionUtils.isEmpty(result)) {
+            return new ServiceResult<>(new HashMap<>());
+        }
+        Map<T, Integer> finalResult = new HashMap<>();
+        result.forEach(bo -> finalResult.put((T) bo.getAggregationType(), bo.getAttackNumber().intValue()));
+        return new ServiceResult<>(finalResult);
     }
 
     public ListObjServiceResult<CollectionFlowBO> listFlows(String sceneId, FlowQueryParams queryParams) {
@@ -392,7 +421,50 @@ public class ScenePluginCollectionSceneService {
     public ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> timeIntervalSumFlowSize(
             List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime,
             int intervalNumber) {
-        return new ServiceResult<>(new ArrayList<>());
+        FlowAnalysisRequest request = new FlowAnalysisRequest();
+        // todo 暂时先实现一个
+        var sceneHandler = new SceneHandler(sceneIds.get(0), null, false, null);
+        CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+
+        if (CollectionUtils.isNotEmpty(nodeIds)) {
+            List<SceneElementBO> elements = nodeIds.stream().map(nodeId -> sceneHandler.getElement(nodeId)).collect(Collectors.toList());
+            List<String> macAddrs = this.loadMac2ElementBOMapAndGetEnableMac(new HashMap<>(), elements, pluginHandler);
+            request.setSourceMacs(macAddrs);
+        }
+
+        request.setGroupList(Arrays.asList(pluginHandler.getScene().getFlowCollector()));
+
+        if (startTime == null) {
+            request.setStartDateTime(sceneHandler.getScene().getCreateTime());
+        } else {
+            request.setStartDateTime(startTime);
+        }
+        if (endTime == null) {
+            request.setEndDateTime(LocalDateTime.now());
+        } else {
+            request.setEndDateTime(endTime);
+        }
+
+        long totalSeconds = LocalDateUtils.toEpochSecond(request.getStartDateTime()) - LocalDateUtils.toEpochSecond(request.getEndDateTime());
+        request.setSecondsInterval((int) Math.max(1, totalSeconds / intervalNumber));
+        List<AttackDateHistogramNetworkBytesBO> bos = flowAnalysisService.sumNetworkBytesByDateHistogramTimestamp(request);
+
+        if (CollectionUtils.isEmpty(bos)) {
+            return new ServiceResult<>(new ArrayList<>());
+        }
+        List<IntervalSizeBO<LocalDateTime, Long>> totalResult = bos.stream()
+                .map(bo -> {
+                    LocalDateTime time = TimeUtils.stringToLocalDateTime(bo.getTime(), TimeUtils.tzDateTimeFormatter);
+                    return new IntervalSizeBO<LocalDateTime, Long>(time, time, bo.getNetworkBytes().longValue());
+                }).collect(Collectors.toList());
+        Collections.sort(totalResult, Comparator.comparing(IntervalSizeBO::getStart));
+
+        int interval = totalResult.size() / intervalNumber;
+        List<IntervalSizeBO<LocalDateTime, Long>> finalResult = new ArrayList<>();
+        for (int i = 0; i < totalResult.size(); i += interval) {
+            finalResult.add(totalResult.get(i));
+        }
+        return new ServiceResult<>(finalResult);
     }
 
     /**
