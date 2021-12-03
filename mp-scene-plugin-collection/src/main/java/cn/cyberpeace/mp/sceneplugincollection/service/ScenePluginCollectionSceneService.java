@@ -176,6 +176,9 @@ public class ScenePluginCollectionSceneService {
         List<SceneElementBO> srcElements = getSrcElements(sceneHandler, queryParams.getNodeIds());
 
         CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        if (pluginHandler == null) {
+            return new ListObjServiceResult<>();
+        }
         Map<String, SceneElementBO> agentNameElementMap = new HashMap<>();
         srcElements.forEach(srcElement -> {
             var collectionElement = pluginHandler.getElement(srcElement.getId());
@@ -236,6 +239,9 @@ public class ScenePluginCollectionSceneService {
         var sceneHandler = new SceneHandler(sceneId, null, false, null);
         List<SceneElementBO> srcElements = getSrcElements(sceneHandler, queryParams.getNodeIds());
         CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        if (pluginHandler == null) {
+            return new ListObjServiceResult<>();
+        }
         Map<String, SceneElementBO> agentNameElementMap = new HashMap<>();
         srcElements.forEach(srcElement -> {
             var collectionElement = pluginHandler.getElement(srcElement.getId());
@@ -427,6 +433,9 @@ public class ScenePluginCollectionSceneService {
         // todo 暂时先实现一个
         var sceneHandler = new SceneHandler(sceneIds.get(0), null, false, null);
         CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        if (pluginHandler == null) {
+            return new ServiceResult<>();
+        }
 
         if (CollectionUtils.isNotEmpty(nodeIds)) {
             List<SceneElementBO> elements = nodeIds.stream().map(nodeId -> sceneHandler.getElement(nodeId)).collect(Collectors.toList());
