@@ -516,7 +516,7 @@ public class ScenePluginCollectionSceneService {
         });
         // 按时间升序排列
         Collections.sort(totalResult, Comparator.comparing(IntervalSizeBO::getStart));
-        int interval = totalResult.size() / intervalNumber;
+        int interval = Math.max(1, totalResult.size() / intervalNumber);
         List<IntervalSizeBO<LocalDateTime, Double>> finalResult = new ArrayList<>();
         for (int i = 0; i < totalResult.size(); i += interval) {
             finalResult.add(totalResult.get(i));
