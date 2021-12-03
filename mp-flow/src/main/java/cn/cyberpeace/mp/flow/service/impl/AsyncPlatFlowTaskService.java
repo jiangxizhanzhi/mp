@@ -563,8 +563,7 @@ public class AsyncPlatFlowTaskService {
      * @param call
      * @throws InterruptedException
      */
-    @Async
-    public void refreshTaskStatus(String taskId, FlowActuatorModel flowActuatorModel, Runnable call) throws InterruptedException {
+    public void refreshTaskStatus(String taskId, FlowActuatorModel flowActuatorModel, Runnable call) {
         String host = flowActuatorModel.getIp();
         FlowTaskModel flowTaskModel = flowTaskMapper.get(taskId);
         if (Objects.isNull(flowTaskModel)) {
