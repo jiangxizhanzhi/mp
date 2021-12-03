@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.aggregation.request;
 
-import cn.cyberpeace.mp.situationaware.model.enums.DefaultImgDirEnum;
+import cn.cyberpeace.mp.auth.constant.DefaultImgDirEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
