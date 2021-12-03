@@ -165,6 +165,10 @@ public class FlowAnalysisService extends AbstractBaseService {
         try {
             SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             SearchHits hits = searchResponse.getHits();
+            long totalHits = hits.getTotalHits().value;
+            if (totalHits == 0){
+                return Lists.newArrayList();
+            }
             SearchHit[] searchHits = hits.getHits();
             flowLogBOList = Arrays.stream(searchHits).map(hit -> {
                 Map<String, Object> sourceAsMap = hit.getSourceAsMap();
@@ -245,6 +249,10 @@ public class FlowAnalysisService extends AbstractBaseService {
 
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            long totalHits = response.getHits().getTotalHits().value;
+            if (totalHits == 0){
+                return Lists.newArrayList();
+            }
             Aggregations aggregations = response.getAggregations();
             ParsedTerms parsedTerms = aggregations.get("aggregationType");
             return parsedTerms.getBuckets().stream().map(bucket -> {
@@ -282,6 +290,10 @@ public class FlowAnalysisService extends AbstractBaseService {
 
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            long totalHits = response.getHits().getTotalHits().value;
+            if (totalHits == 0){
+                return Double.valueOf("0");
+            }
             Aggregations aggregations = response.getAggregations();
             ParsedSum parsedSum = aggregations.get("network_bytes");
             return parsedSum.getValue();
