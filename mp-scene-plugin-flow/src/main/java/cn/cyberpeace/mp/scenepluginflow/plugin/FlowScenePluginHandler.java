@@ -132,7 +132,9 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
             return false;
         }
 
-        var flag = handlerUtils.startFlow(flowElement, flow, async, () -> {
+        var flag = handlerUtils.startFlow(flowElement, flow, () -> {
+            ackElementChanged(nodeId, true);
+        }, async, () -> {
             ackElementChanged(nodeId, true);
         });
         ackElementChanged(nodeId, true);
