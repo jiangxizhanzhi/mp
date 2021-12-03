@@ -158,8 +158,8 @@ public class FlowMonitorService {
         }
 
         if (Objects.isNull(startTime)) {
-            // todo 默认时间间隔12小时
-            startTime = endTime.minusHours(12);
+            // todo 默认时间间隔48小时
+            startTime = endTime.minusHours(48);
         }
 
         if (Objects.isNull(segmentCount)) {
