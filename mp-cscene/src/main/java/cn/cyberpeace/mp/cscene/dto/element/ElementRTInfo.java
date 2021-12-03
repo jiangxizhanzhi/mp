@@ -20,24 +20,24 @@ import lombok.NoArgsConstructor;
 public class ElementRTInfo {
 
     @ApiModelProperty(value = "实时状态-进程")
-    private int processCount;
+    private Integer processCount;
 
     @ApiModelProperty(value = "实时状态-用户")
-    private int userCount;
+    private Integer userCount;
 
     @ApiModelProperty(value = "实时状态-端口")
-    private int portsCount;
+    private Integer portsCount;
 
     @ApiModelProperty(value = "实时状态-网络连接")
-    private int connectionCount;
+    private Integer connectionCount;
 
     @ApiModelProperty(value = "实时状态-文件操作")
-    private int fileOpCount;
+    private Integer fileOpCount;
 
     @ApiModelProperty(value = "实时状态-注册表操作")
-    private int registryOpCount;
+    private Integer registryOpCount;
 
     @ApiModelProperty(value = "实时状态-环境变量操作")
-    private int envOpCount;
+    private Integer envOpCount;
 
 }

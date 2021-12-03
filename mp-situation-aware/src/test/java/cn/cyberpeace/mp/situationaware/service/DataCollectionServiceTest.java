@@ -98,7 +98,7 @@ public class DataCollectionServiceTest {
     @Test
     public void testQueryMonitorEvents() {
         WazuhMonitorEventsRequest wazuhEventRequest = new WazuhMonitorEventsRequest();
-        wazuhEventRequest.setMacIds(Lists.newArrayList("30:D0:42:E0:84:CC", "00:0c:29:22:d3:95"));
+        wazuhEventRequest.setAgentNames(Lists.newArrayList("000e100b-ecce-41a4-a09c-0643e68d3eb6"));
         wazuhEventRequest.setPageNum(1);
         wazuhEventRequest.setPageSize(10);
         ListObjResult<WazuhModel> listObjResult= dataCollectionService.queryMonitorEvents(wazuhEventRequest);
@@ -125,6 +125,16 @@ public class DataCollectionServiceTest {
     @Test
     public void testCreateDataCollectionFlow() {
         dataCollectionFlowTableService.createDataCollectionFlow(Lists.newArrayList("84702684-9e92-4e44-a84d-990191cf2442"));
+    }
+
+
+    @Test
+    public void testQueryMonitorEventsAgg() {
+        WazuhMonitorEventsRequest wazuhEventRequest = new WazuhMonitorEventsRequest();
+        wazuhEventRequest.setAgentNames(Lists.newArrayList("ubuntu2", "windows_agent1"));
+        wazuhEventRequest.setStartTime(LocalDateTime.now().minusDays(1));
+        wazuhEventRequest.setEndTime(LocalDateTime.now());
+        dataCollectionService.queryMonitorEventsAgg(wazuhEventRequest);
     }
 
     @Test

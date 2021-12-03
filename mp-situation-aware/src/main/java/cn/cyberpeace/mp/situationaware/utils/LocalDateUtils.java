@@ -18,11 +18,11 @@ import java.util.stream.IntStream;
  */
 public class LocalDateUtils {
 
-    private LocalDateUtils() {}
+    private LocalDateUtils() {
+    }
 
     /**
      * 获取比如2021-05-01 到2021-05-20.所有的日期，方便构建所有的时间字符串210501,210502,....
-     *
      * @param startTime startTime
      * @param endTime endTime
      * @return List<String>
@@ -46,7 +46,7 @@ public class LocalDateUtils {
      * @param pattern
      * @return
      */
-    public static String timeToString(Long time,String pattern){
+    public static String timeToString(Long time, String pattern) {
         Assert.notNull(time, "time is null");
         DateTimeFormatter ftf = DateTimeFormatter.ofPattern(pattern);
         return ftf.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(time), ZoneId.systemDefault()));
@@ -57,7 +57,16 @@ public class LocalDateUtils {
      * @param dateTime
      * @return
      */
-    public static Long toEpochMilli(LocalDateTime dateTime){
+    public static Long toEpochMilli(LocalDateTime dateTime) {
         return dateTime.toInstant(ZoneOffset.of("+8")).toEpochMilli();
+    }
+
+    /**
+     * LocalDateTime转换成秒
+     * @param dateTime
+     * @return
+     */
+    public static Long toEpochSecond(LocalDateTime dateTime) {
+        return toEpochMilli(dateTime) / 1000;
     }
 }

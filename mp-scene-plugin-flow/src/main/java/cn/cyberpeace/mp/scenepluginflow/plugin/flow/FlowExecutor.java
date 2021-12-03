@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.scenepluginflow.plugin.flow;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.flow.enums.TaskActionEnum;
 import cn.cyberpeace.mp.flow.model.FlowScriptParamModel;
@@ -15,6 +16,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Data
@@ -53,15 +55,15 @@ public class FlowExecutor {
         addFlowTaskRequest.setOriginIps(fromIps);
         addFlowTaskRequest.setTargetIps(toIps);
         addFlowTaskRequest.setTitle(TextUtils.uuid());
-        if (CollectionUtils.isNotEmpty(flow.getScriptParams())) {
-            addFlowTaskRequest.setScriptParamModels(flow.getScriptParams().stream()
+        if (CollectionUtils.isNotEmpty(flow.getScriptParamModels())) {
+            addFlowTaskRequest.setScriptParamModels(flow.getScriptParamModels().stream()
                     .map(param -> {
                         FlowScriptParamModel model = new FlowScriptParamModel();
                         model.setFlowId(flowId);
-                        model.setParamDesc(param.getDesc());
-                        model.setParamKey(param.getKey());
-                        model.setParamValue(param.getValue());
-                        model.setParamType(param.getType());
+                        model.setParamDesc(param.getParamDesc());
+                        model.setParamKey(param.getParamKey());
+                        model.setParamValue(param.getParamValue());
+                        model.setParamType(param.getParamType());
                         return model;
                     }).collect(Collectors.toList())
             );
@@ -99,6 +101,21 @@ public class FlowExecutor {
         if (!result.isSuccess()) {
             throw new MpRuntimeException(result.getServiceCode());
         }
+    }
+
+    /**
+     * 获取流量任务
+     * @param taskId
+     * @return
+     */
+    public FlowTaskModel getFlowTask(String taskId) {
+        FlowTaskModel flowTaskModel = new FlowTaskModel();
+        ObjResult<FlowTaskModel> serviceResult = flowService3.get(taskId).getSource();
+        if (Objects.nonNull(serviceResult)) {
+            flowTaskModel = serviceResult.getObj();
+        }
+
+        return flowTaskModel;
     }
 
     private synchronized void initDefaultInstance() {

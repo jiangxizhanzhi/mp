@@ -5,12 +5,16 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.base.util.es.EsConstants;
+import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
+import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
+import cn.cyberpeace.mp.situationaware.model.DataCollectionEventModel;
 import cn.cyberpeace.mp.situationaware.model.FileEventModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.model.WazuhFileRoot;
 import cn.cyberpeace.mp.situationaware.model.WazuhModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
 import cn.cyberpeace.mp.situationaware.model.WazuhMonitorRoot;
+import cn.cyberpeace.mp.situationaware.model.enums.DataCollectionType;
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
 import cn.cyberpeace.mp.situationaware.repository.WazuhRepository;
 import cn.hutool.core.util.NumberUtil;
@@ -24,6 +28,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -43,6 +48,10 @@ import org.elasticsearch.client.core.CountRequest;
 import org.elasticsearch.client.core.CountResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.histogram.ParsedDateHistogram;
+import org.elasticsearch.search.aggregations.bucket.terms.ParsedStringTerms;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -165,6 +174,47 @@ public class DataCollectionService {
         }
     }
 
+    /**
+     * 查询聚合分析监控事件
+     * @param wazuhMonitorEventsRequest wazuhMonitorEventsRequest
+     */
+    public List<DataCollectionEventModel> queryMonitorEventsAgg(WazuhMonitorEventsRequest wazuhMonitorEventsRequest){
+        //根据日期构造索引
+        String[] indexArray = buildRequestIndex(LocalDateTime.now(), LocalDateTime.now());
+        var searchRequest = new SearchRequest(indexArray);
+        var boolQueryBuilder = QueryBuilders.boolQuery();
+        var sourceBuilder = new SearchSourceBuilder();
+
+        MultiValueMap<String, String> multiValueMap = this.queryAllAgentMacAddr();
+        buildMonitorEventsAggBuilder(wazuhMonitorEventsRequest, boolQueryBuilder, multiValueMap);
+        // 按时间降序
+        sourceBuilder.sort("timestamp", SortOrder.DESC);
+        // 监控数据每个agent一条，所以这里分页大小设为agent数量的2倍
+        sourceBuilder.from(0);
+        sourceBuilder.size(ES_DOC_MAXCOUNT);
+
+        searchRequest.source(sourceBuilder.query(boolQueryBuilder));
+        //配置索引为空
+        searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
+        log.info("queryMonitorEventsAgg JSON query: {}", searchRequest.source().toString());
+
+        try {
+            SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            List<WazuhMonitorRoot> wazuhMonitorRootList = Arrays.stream(response.getHits().getHits()).map(hit -> JSONObject.parseObject(hit.getSourceAsString(), WazuhMonitorRoot.class)).collect(Collectors.toList());
+            return wazuhMonitorRootList.stream().map(root -> {
+                DataCollectionEventModel dataCollectionEventModel = new DataCollectionEventModel();
+                dataCollectionEventModel.setDataCollectionType(DataCollectionType.getTypeById(root.getRule().getId()));
+                dataCollectionEventModel.setEventDes(dataCollectionEventModel.getDataCollectionType().getEventDes());
+                dataCollectionEventModel.setAgentName(root.getAgent().getName());
+                dataCollectionEventModel.setTime(root.getTimestamp());
+                return dataCollectionEventModel;
+            }).collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error(SituationalAwareErrorCode.WAZUH_AGENTS_QUERY_EVENT_ERROR.getMessage() + "{}", ExceptionUtils.getMessage(e));
+            throw new MpRuntimeException(SituationalAwareErrorCode.WAZUH_AGENTS_QUERY_EVENT_ERROR, ExceptionUtils.getStackTrace(e));
+        }
+    }
+
 
     /**
      * 查询监控数据 查询最近五分钟数据，监控指标频率为 1min, 对五分钟数据按照agentId进行分组，再去最近的时间的数据
@@ -250,14 +300,8 @@ public class DataCollectionService {
 
         // 返回agent数量
         return agentSize;
-
-        //构造事件条件
-//        var end = LocalDateTime.now();
-//        var start = end.minusMinutes(5L);
-//        boolQueryBuilder.must(QueryBuilders.rangeQuery("timestamp")
-//            .from(LocalDateTimeUtils.localDateTimeToString(start, LocalDateTimeUtils.esdateTimeFormatter))
-//            .to(LocalDateTimeUtils.localDateTimeToString(end, LocalDateTimeUtils.esdateTimeFormatter)));
     }
+
 
 
     /**
@@ -283,6 +327,26 @@ public class DataCollectionService {
         boolQueryBuilder.must(QueryBuilders.rangeQuery("@timestamp")
             .from(TimeUtils.localDateTimeToString(wazuhEventRequest.getStartTime(), EsConstants.esDateTimeFormatter))
             .to(TimeUtils.localDateTimeToString(wazuhEventRequest.getEndTime(), EsConstants.esDateTimeFormatter)));
+    }
+
+
+    /**
+     * 文件监控时间过滤
+     *
+     * @param wazuhEventRequest wazuhEventRequest
+     * @param boolQueryBuilder boolQueryBuilder
+     */
+    private void buildMonitorEventsAggBuilder(WazuhMonitorEventsRequest wazuhEventRequest,
+        BoolQueryBuilder boolQueryBuilder, MultiValueMap<String, String> allAgentMacAddr) {
+        //构造查询条件
+        List<String> ruleIds = EnumSet.allOf(DataCollectionType.class).stream().map(DataCollectionType::getRuleId).collect(Collectors.toList());
+        if (!CollectionUtils.isEmpty(ruleIds)) {
+            boolQueryBuilder.filter(QueryBuilders.termsQuery("rule.id", ruleIds));
+        }
+
+        if (!CollectionUtils.isEmpty(wazuhEventRequest.getAgentNames())) {
+            buildAgentNameQuery(wazuhEventRequest.getAgentNames(), boolQueryBuilder);
+        }
     }
 
     /**

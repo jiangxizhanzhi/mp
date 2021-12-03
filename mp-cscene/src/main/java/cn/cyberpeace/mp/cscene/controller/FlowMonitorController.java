@@ -47,10 +47,9 @@ public class FlowMonitorController {
     @GetMapping("/scene_trend")
     public ServiceResult<List<FlowTrend>> getSceneFlowTrend(FlowTrendSceneElementRequest flowTrendRequest) {
         log.info("flowTrendRequest:{}", flowTrendRequest);
+        List<FlowTrend> flowTrends = flowMonitorService.getSceneFlowTrend(flowTrendRequest);
 
-        // todo 1201
-
-        return ServiceResult.success(null);
+        return ServiceResult.success(flowTrends);
     }
 
 
@@ -63,10 +62,9 @@ public class FlowMonitorController {
     @GetMapping("/element_trend")
     public ServiceResult<List<FlowTrend>> getElementFlowTrend(FlowTrendSceneElementRequest flowTrendRequest) {
         log.info("flowTrendRequest:{}", flowTrendRequest);
+        List<FlowTrend> flowTrends = flowMonitorService.getElementFlowTrend(flowTrendRequest);
 
-        // todo 1201
-
-        return ServiceResult.success(null);
+        return ServiceResult.success(flowTrends);
     }
 
 

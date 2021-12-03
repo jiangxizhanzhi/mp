@@ -3,8 +3,10 @@ package cn.cyberpeace.mp.cscene.controller;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
+import cn.cyberpeace.mp.cscene.dto.element.ConnectionState;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.element.ElementRTInfo;
+import cn.cyberpeace.mp.cscene.dto.element.PortState;
 import cn.cyberpeace.mp.cscene.dto.element.ProcessState;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.SceneElementMonitorService;
@@ -59,34 +61,48 @@ public class ElementMonitorController {
     @ApiOperation(value = "查询节点实时状态")
     @GetMapping("/rtinfo")
     public ServiceResult<ElementRTInfo> getElementRTInfo(BaseSceneElementRequest baseRequest) {
-        ElementRTInfo rtInfo = sceneElementMonitorService.getElementRTInfo(baseRequest);
-
-        return ServiceResult.success(rtInfo);
+//        ElementRTInfo rtInfo = sceneElementMonitorService.getElementRTInfo(baseRequest);
+        // todo 实时状态
+        return ServiceResult.success(mockElementRTInfo());
     }
 
 
-    @ApiOperation(value = "查询节点进程信息")
-    @GetMapping("/process")
+    @ApiOperation(value = "查询节点进程状态")
+    @GetMapping("/process_state")
     public ServiceResult<List<ProcessState>> getProcessesStates(BaseSceneElementRequest baseRequest) {
         log.info("{}", baseRequest);
         // todo 1201
-        return null;
+        return ServiceResult.success(null);
     }
 
-    @ApiOperation(value = "查询节点端口信息")
-    @GetMapping("/ports")
-    public ServiceResult getPortsStates(BaseSceneElementRequest baseRequest) {
+    @ApiOperation(value = "查询节点端口状态")
+    @GetMapping("/port_state")
+    public ServiceResult<List<PortState>> getPortStates(BaseSceneElementRequest baseRequest) {
         log.info("{}", baseRequest);
         // todo 1201
-        return null;
+        return ServiceResult.success(null);
     }
 
-    @ApiOperation(value = "查询节点网络连接信息")
-    @GetMapping("/connections")
-    public ServiceResult getConnectionsStates(BaseSceneElementRequest baseRequest) {
+    @ApiOperation(value = "查询节点网络连接状态")
+    @GetMapping("/connection_state")
+    public ServiceResult<List<ConnectionState>> getConnectionStates(BaseSceneElementRequest baseRequest) {
         log.info("{}", baseRequest);
         // todo 1201
-        return null;
+        return ServiceResult.success(null);
     }
+
+
+    private ElementRTInfo mockElementRTInfo() {
+        ElementRTInfo rtInfo = new ElementRTInfo();
+        rtInfo.setProcessCount(5);
+        rtInfo.setUserCount(1);
+        rtInfo.setPortsCount(10);
+        rtInfo.setConnectionCount(11);
+        rtInfo.setFileOpCount(5);
+        rtInfo.setRegistryOpCount(5);
+        rtInfo.setEnvOpCount(5);
+        return rtInfo;
+    }
+
 
 }
