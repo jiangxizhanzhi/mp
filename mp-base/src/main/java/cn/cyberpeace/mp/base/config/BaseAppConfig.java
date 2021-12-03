@@ -64,6 +64,9 @@ public class BaseAppConfig {
     @Value("${mp.base.resources_dir:}")
     private String resourcesDir;
 
+    @Value("${mp.base.run_init:false}")
+    private boolean runInit;
+
     public String getHomeDir() {
         if (!StringUtils.isEmpty(homeDir)) {
             return homeDir;
