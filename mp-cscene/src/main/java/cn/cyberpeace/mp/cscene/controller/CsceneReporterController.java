@@ -2,8 +2,8 @@ package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.base.message.FormatMessage;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
-import cn.cyberpeace.mp.scene.core.bo.CollectedSceneBO;
-import cn.cyberpeace.mp.scene.core.bo.CollectedSceneElementBO;
+import cn.cyberpeace.mp.cscene.report.bo.CollectedCsceneBO;
+import cn.cyberpeace.mp.cscene.report.bo.CollectedCsceneElementBO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiOperation;
@@ -22,13 +22,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class CsceneReporterController {
 
     @Data
-    public static class SceneFormatMessage extends FormatMessage<CollectedSceneBO> {
+    public static class SceneFormatMessage extends FormatMessage<CollectedCsceneBO> {
         @ApiModelProperty(value = "数据类型: scene")
         private String type;
     }
 
     @Data
-    public static class SceneElementFormatMessage extends FormatMessage<CollectedSceneElementBO> {
+    public static class SceneElementFormatMessage extends FormatMessage<CollectedCsceneElementBO> {
         @ApiModelProperty(value = "数据类型: scene_element")
         private String type;
     }
