@@ -149,6 +149,7 @@ public class DashboardService {
         }
         var condition = new HumanCondition()
                 .filterEqual(CsceneInstanceModel::getDeleted, false)
+                .filterEqual(CsceneInstanceModel::getType, CsceneInstanceModel.Type.APP)
                 .filterEqual(CsceneInstanceModel::getCreateUser, user.getId());
         List<CsceneInstanceModel> csceneInstances;
         try {
@@ -157,15 +158,15 @@ public class DashboardService {
             throw new MpRuntimeException(BaseErrorCode.ERROR);
         }
 
+        userResource.setSceneCount(csceneInstances.size());
         List<String> sceneIds = csceneInstances.stream()
                 .filter(csceneInstance -> !StringUtils.isEmpty(csceneInstance.getScene()))
                 .map(csceneInstance -> csceneInstance.getScene())
                 .collect(Collectors.toList());
 
+        var fieldName = BeanUtils.getBeanGetterFieldName(CloudPluginSceneElementModel::getVirtualType);
         var result = scenePluginCloudSceneService
-                .countElement(sceneIds, null, List.of(BeanUtils.getBeanGetterFieldName(
-                        CloudPluginSceneElementModel::getVirtualType
-                ))).getSource();
+                .groupCountElement(sceneIds, null, List.of(fieldName)).getSource().get(fieldName);
         userResource.setVmCount(result.getOrDefault(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE, 0L).intValue());
         userResource.setContainerCount(result.getOrDefault(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER, 0L).intValue());
         userResource.setEntityCount(result.getOrDefault(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE, 0L).intValue());
