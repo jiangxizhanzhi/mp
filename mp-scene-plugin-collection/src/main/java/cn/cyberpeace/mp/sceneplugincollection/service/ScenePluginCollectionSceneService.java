@@ -220,7 +220,7 @@ public class ScenePluginCollectionSceneService {
             hostState.setMemoryPercent(srcHostState.getMemoryPercent());
             hostState.setTime(srcHostState.getTime());
 
-            // todo 进程，端口，网络连接
+            // todo 进程，端口，网络连接，磁盘使用率
 
             var srcElement = agentNameElementMap.getOrDefault(srcHostState.getAgentName(), null);
             if (srcElement != null) {
@@ -538,6 +538,23 @@ public class ScenePluginCollectionSceneService {
             int intervalNumber) {
         List<IntervalSizeBO<LocalDateTime, Double>> result = this.timeIntervalAvgBy(sceneIds, nodeIds, startTime, endTime, intervalNumber, (state) -> state.getMemoryPercent().doubleValue());
         return new ServiceResult<>(result);
+    }
+
+    /**
+     * 时间区间统计主机磁盘占用平均值
+     *
+     * @param sceneIds       场景id列表，不传默认为全部
+     * @param nodeIds        节点id列表，不传默认为全部
+     * @param startTime      开始时间
+     * @param endTime        结束时间
+     * @param intervalNumber 间隔数量
+     * @return 聚合统计结果
+     */
+    public ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> timeIntervalAvgHostDiskPercent(
+            List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime,
+            int intervalNumber) {
+        // todo 主机磁盘使用率
+        return new ServiceResult<>(null);
     }
 
 }

@@ -48,4 +48,7 @@ public class HostState {
     @ApiModelProperty("磁盘空间(GB)")
     private Long diskSpace;
 
+    @ApiModelProperty("磁盘使用率")
+    private Double diskPercent;
+
 }

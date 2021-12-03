@@ -124,6 +124,7 @@ public class HostStateService {
 
         ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> cpuResult = scenePluginCollectionSceneService.timeIntervalAvgHostCpuPercent(sceneIdList, elementIds, startTime, endTime, segmentCount);
         ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> memResult = scenePluginCollectionSceneService.timeIntervalAvgHostMemoryPercent(sceneIdList, elementIds, startTime, endTime, segmentCount);
+        ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> diskResult = scenePluginCollectionSceneService.timeIntervalAvgHostDiskPercent(sceneIdList, elementIds, startTime, endTime, segmentCount);
 
         List<IntervalSizeBO<LocalDateTime, Double>> intervalCpuSizeBOs = cpuResult.getSource();
         List<IntervalSizeBO<LocalDateTime, Double>> intervalMemSizeBOs = memResult.getSource();
@@ -138,6 +139,8 @@ public class HostStateService {
             hs.setTime(intervalCpuSizeBOs.get(i).getEnd());
             hs.setCpuPercent(intervalCpuSizeBOs.get(i).getSize());
             hs.setMemoryPercent(intervalMemSizeBOs.get(i).getSize());
+            // todo 磁盘利用率
+            hs.setDiskPercent(40.0);
             hostStates.add(hs);
         }
 

@@ -42,6 +42,9 @@ public class CollectionHostStateBO {
     @ApiModelProperty("磁盘空间,单位G")
     private Long diskSpace;
 
+    @ApiModelProperty("磁盘空间使用率")
+    private Long diskPercent;
+
     @ApiModelProperty(value = "进程数")
     private Integer processCount;
 

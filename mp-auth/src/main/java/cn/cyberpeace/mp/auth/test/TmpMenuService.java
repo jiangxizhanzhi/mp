@@ -30,7 +30,7 @@ public class TmpMenuService {
     private TargetService targetService;
 
     public void process() {
-//        String path = "/Users/sternberg/work/saining/all_permissions_json_0908.json";
+//        String path = "/Users/sternberg/work/saining/all_permissions_json_1203.json";
         String path = "";
         String s = readJsonFile(path);
         List<TmpMenuDTO> menus = JSON.parseArray(s, TmpMenuDTO.class);
