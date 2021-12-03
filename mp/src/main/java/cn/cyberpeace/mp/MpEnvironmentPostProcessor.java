@@ -26,13 +26,7 @@ public class MpEnvironmentPostProcessor implements EnvironmentPostProcessor {
         }
         String envPath = environment.getProperty("MP_ENV_PATH");
         try {
-            if (StringUtils.isBlank(envPath) || !new File(envPath).exists()) {
-                // 使用clathpath下默认的env变量
-                var list = new PropertiesPropertySourceLoader().load("mp_env", new ClassPathResource("default_env.properties"));
-                if (list != null && list.size() != 0) {
-                    environment.getPropertySources().addFirst(list.get(0));
-                }
-            } else {
+            if (StringUtils.isNotBlank(envPath) && new File(envPath).exists()) {
                 // 使用指定文件的env变量
                 var list = new PropertiesPropertySourceLoader().load("mp_env", new FileUrlResource(envPath));
                 if (list != null && list.size() != 0) {
