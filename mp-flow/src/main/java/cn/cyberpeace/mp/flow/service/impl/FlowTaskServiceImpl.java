@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.flow.service.impl;
 
+import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseSingleton;
 import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
@@ -739,11 +739,14 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
         updateTaskModel.setUpdateTime(LocalDateTime.now());
         this.updateFlowTaskInfo(updateTaskModel);
 
-        try {
-            asyncPlatFlowTaskService.refreshTaskStatus(flowTaskModel.getId(), flowActuatorModel, call);
-        } catch (InterruptedException e) {
-            throw new MpRuntimeException(FlowErrorCode.GET_TASK_STATUS_ERROR);
-        }
+        TaskCommon.executeTask(() -> {
+            try {
+                asyncPlatFlowTaskService.refreshTaskStatus(flowTaskModel.getId(), flowActuatorModel, call);
+            } catch (Exception e) {
+                log.info("refresh task status error: ", e);
+            }
+        });
+
 
         return ServiceResult.success(true);
     }
