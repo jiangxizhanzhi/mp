@@ -33,4 +33,6 @@ public class NodeRecordingBO {
     private Float duration;
     @ApiModelProperty(value = "录屏时间")
     private LocalDateTime time;
+    @ApiModelProperty(value = "组织名称")
+    private String orgName;
 }

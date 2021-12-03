@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.situationaware.model.enums;
+package cn.cyberpeace.mp.auth.constant;
 
 /**
  * 默认图片文件夹

@@ -127,6 +127,16 @@ public class DataCollectionServiceTest {
         dataCollectionFlowTableService.createDataCollectionFlow(Lists.newArrayList("84702684-9e92-4e44-a84d-990191cf2442"));
     }
 
+
+    @Test
+    public void testQueryMonitorEventsAgg() {
+        WazuhMonitorEventsRequest wazuhEventRequest = new WazuhMonitorEventsRequest();
+        wazuhEventRequest.setAgentNames(Lists.newArrayList("ubuntu2", "windows_agent1"));
+        wazuhEventRequest.setStartTime(LocalDateTime.now().minusDays(1));
+        wazuhEventRequest.setEndTime(LocalDateTime.now());
+        dataCollectionService.queryMonitorEventsAgg(wazuhEventRequest);
+    }
+
     @Test
     public void testGetJSon() {
         String address = "{\"addresses\":{\n" +

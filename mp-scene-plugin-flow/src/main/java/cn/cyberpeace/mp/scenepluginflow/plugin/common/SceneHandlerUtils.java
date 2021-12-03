@@ -42,12 +42,15 @@ public class SceneHandlerUtils {
         flow.setStatusText(null);
     }
 
-    private boolean startFlow(Flow flow) {
+    private boolean startFlow(Flow flow, Runnable stopCallback) {
         var taskId = flow.getTaskId();
         try {
             log.info("start flow for taskId:[{}]", taskId);
             flowExecutor.startFlow(taskId, () -> {
                 successOffFLow(flow);
+                if (stopCallback != null) {
+                    stopCallback.run();
+                }
             });
         } catch (Exception e) {
             log.error("start flow for taskId:[{}] error", taskId, e);
@@ -71,13 +74,14 @@ public class SceneHandlerUtils {
         flowExecutor.deleteExecutor(executorId);
     }
 
-    public boolean startFlow(FlowPluginSceneElementBO flowElement, Flow flow, boolean async, Runnable asyncCallback) {
+    public boolean startFlow(FlowPluginSceneElementBO flowElement, Flow flow, Runnable stopCallback,
+                             boolean async, Runnable asyncCallback) {
         var taskId = flow.getTaskId();
         if (!StringUtils.isEmpty(taskId)) {
             FlowTaskModel flowTask = flowExecutor.getFlowTask(taskId);
             // 流量执行次数
             flow.setCount(flowTask.getCount());
-            return startFlow(flow);
+            return startFlow(flow, stopCallback);
         } else {
             log.info("taskId is empty");
         }
@@ -143,7 +147,7 @@ public class SceneHandlerUtils {
             }
 
             flow.setTaskId(flowTaskId);
-            return startFlow(flow);
+            return startFlow(flow, stopCallback);
         };
         if (async) {
             TaskCommon.executeTask(() -> {

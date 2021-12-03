@@ -20,6 +20,10 @@ public class ScenePluginCollectionInit implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
+        // 本地开发环境不运行资源的更新和删除
+        if (!collectionAppConfig.getBaseAppConfig().isRunInit()) {
+            return;
+        }
         FileUtil.mkdir(collectionAppConfig.getWazuhAgentInstallerDir());
         TaskCommon.executeTask(() -> {
             log.info("syncDir do ScenePluginCollectionInit start");

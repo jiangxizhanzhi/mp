@@ -1,11 +1,16 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
+import cn.cyberpeace.mp.cscene.dto.element.ConnectionState;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.element.ElementRTInfo;
+import cn.cyberpeace.mp.cscene.dto.element.PortState;
 import cn.cyberpeace.mp.cscene.dto.element.ProcessState;
+import cn.cyberpeace.mp.cscene.dto.element.StatePageRequest;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.SceneElementMonitorService;
 import io.swagger.annotations.Api;
@@ -16,6 +21,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -59,34 +66,94 @@ public class ElementMonitorController {
     @ApiOperation(value = "查询节点实时状态")
     @GetMapping("/rtinfo")
     public ServiceResult<ElementRTInfo> getElementRTInfo(BaseSceneElementRequest baseRequest) {
-        ElementRTInfo rtInfo = sceneElementMonitorService.getElementRTInfo(baseRequest);
-
-        return ServiceResult.success(rtInfo);
+//        ElementRTInfo rtInfo = sceneElementMonitorService.getElementRTInfo(baseRequest);
+        // todo 实时状态
+        return ServiceResult.success(mockElementRTInfo());
     }
 
 
-    @ApiOperation(value = "查询节点进程信息")
-    @GetMapping("/process")
-    public ServiceResult<List<ProcessState>> getProcessesStates(BaseSceneElementRequest baseRequest) {
-        log.info("{}", baseRequest);
+    @ApiOperation(value = "查询节点进程状态")
+    @GetMapping("/process_state")
+    public ListObjServiceResult<ProcessState> pageProcessesStates(StatePageRequest pageRequest) {
+        log.info("{}", pageRequest);
+        pageRequest.ensure();
         // todo 1201
-        return null;
+        List<ProcessState> processStates = mockProcessStates();
+        return new ListObjServiceResult(new ListObjResult(processStates, processStates.size()).asResult()).asResult();
     }
 
-    @ApiOperation(value = "查询节点端口信息")
-    @GetMapping("/ports")
-    public ServiceResult getPortsStates(BaseSceneElementRequest baseRequest) {
-        log.info("{}", baseRequest);
+    @ApiOperation(value = "查询节点端口状态")
+    @GetMapping("/port_state")
+    public ListObjServiceResult<PortState> pagePortStates(StatePageRequest pageRequest) {
+        log.info("{}", pageRequest);
+        pageRequest.ensure();
         // todo 1201
-        return null;
+        List<PortState> portStates = mockPortStates();
+        return new ListObjServiceResult(new ListObjResult(portStates, portStates.size()).asResult()).asResult();
     }
 
-    @ApiOperation(value = "查询节点网络连接信息")
-    @GetMapping("/connections")
-    public ServiceResult getConnectionsStates(BaseSceneElementRequest baseRequest) {
-        log.info("{}", baseRequest);
+    @ApiOperation(value = "查询节点网络连接状态")
+    @GetMapping("/connection_state")
+    public ListObjServiceResult<ConnectionState> pageConnectionStates(StatePageRequest pageRequest) {
+        log.info("{}", pageRequest);
+        pageRequest.ensure();
         // todo 1201
-        return null;
+        List<ConnectionState> connectionStates = mockConnectionStates();
+        return new ListObjServiceResult(new ListObjResult(connectionStates, connectionStates.size()).asResult()).asResult();
     }
+
+
+    private ElementRTInfo mockElementRTInfo() {
+        ElementRTInfo rtInfo = new ElementRTInfo();
+        rtInfo.setProcessCount(5);
+        rtInfo.setUserCount(1);
+        rtInfo.setPortsCount(10);
+        rtInfo.setConnectionCount(11);
+        rtInfo.setFileOpCount(5);
+        rtInfo.setRegistryOpCount(5);
+        rtInfo.setEnvOpCount(5);
+        return rtInfo;
+    }
+
+    private List<ProcessState> mockProcessStates() {
+        List<ProcessState> processStates = new ArrayList<>();
+        LocalDateTime now = LocalDateTime.now();
+        for (int i = 0; i < 10; i++) {
+            ProcessState ps = new ProcessState();
+            ps.setPid(String.valueOf(123 + i));
+            ps.setCmd("cmd");
+            ps.setState("Listen");
+            ps.setMemory(1024L);
+            ps.setCreateTime("2020-05-14 10:10:10");
+            processStates.add(ps);
+        }
+        return processStates;
+    }
+
+    private List<PortState> mockPortStates() {
+        List<PortState> portStates = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            PortState ps = new PortState();
+            ps.setPid(String.valueOf(123 + i));
+            ps.setPort("80");
+            ps.setProtocol("tcp");
+            portStates.add(ps);
+        }
+        return portStates;
+    }
+
+    private List<ConnectionState> mockConnectionStates() {
+        List<ConnectionState> connectionStates = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            ConnectionState cs = new ConnectionState();
+            cs.setState("LISTEN");
+            cs.setLocalAddress("0.0.0.0:22");
+            cs.setForeignAddress("0.0.0.0:*");
+            cs.setProtocol("tcp");
+            connectionStates.add(cs);
+        }
+        return connectionStates;
+    }
+
 
 }

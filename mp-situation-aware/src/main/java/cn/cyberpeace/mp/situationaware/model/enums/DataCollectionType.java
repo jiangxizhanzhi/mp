@@ -1,5 +1,10 @@
 package cn.cyberpeace.mp.situationaware.model.enums;
 
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
   *@Desciption 数据采集
   *@Author zhangjin
@@ -7,22 +12,29 @@ package cn.cyberpeace.mp.situationaware.model.enums;
 **/
 public enum DataCollectionType {
     LOGINSUCCESS("5715", "登录成功"),
-    LOGOUT("5502", "登录失败");
+    LOGOUT("5502", "退出登录"),
+    WINDOWSLOGINSUCCESS("60118", "windows 登录成功"),
+    WINDOWSLOGINOFF("60137", "windows 退出登录");
 
     private String ruleId;
 
-    private String eventType;
+    private String eventDes;
 
-    DataCollectionType(String ruleId, String eventType) {
+    DataCollectionType(String ruleId, String eventDes) {
         this.ruleId = ruleId;
-        this.eventType = eventType;
+        this.eventDes = eventDes;
     }
 
     public String getRuleId() {
         return ruleId;
     }
 
-    public String getEventType() {
-        return eventType;
+    public String getEventDes() {
+        return eventDes;
+    }
+
+    public static DataCollectionType getTypeById(String ruleId) {
+        return EnumSet.allOf(DataCollectionType.class).stream().filter(type -> type.getRuleId().equals(ruleId)).findFirst()
+            .orElseThrow(() -> new MpRuntimeException("rule not found"));
     }
 }

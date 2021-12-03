@@ -23,6 +23,7 @@ spring:
     time-zone: GMT+8
   flyway:
     clean-disabled: true
+    enabled: ${MP_FLYWAY_ENABLED_VALUE:false}
   application:
     name: mp
   servlet:
@@ -75,6 +76,7 @@ mp:
       - ${ip.fdfs}:${FDFS_TRACKER_SERVERS_PORT:22122}
     fdfs-inner-http-server: http://${ip.fdfs}:${FDFS_INNER_FILE_SERVER_PORT:8888}
     fdfs-outer-http-server: ${FDFS_FILE-SERVER-ADDR:/fdfs}
+    run-init: true
   devops:
     cp-url: http://${ip.cp}:${CP_PORT:11111} #云平台地址
     #    cr-url: http://${ip.cr} #

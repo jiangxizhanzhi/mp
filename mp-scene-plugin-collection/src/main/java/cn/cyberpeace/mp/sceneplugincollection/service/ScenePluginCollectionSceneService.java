@@ -16,13 +16,17 @@ import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandle
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
+import cn.cyberpeace.mp.situationaware.bo.AttackDateHistogramNetworkBytesBO;
+import cn.cyberpeace.mp.situationaware.bo.AttackWayAggregationBO;
 import cn.cyberpeace.mp.situationaware.bo.FlowLogBO;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
+import cn.cyberpeace.mp.situationaware.model.enums.AggregationTypeEnum;
 import cn.cyberpeace.mp.situationaware.request.FlowAnalysisRequest;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import cn.cyberpeace.mp.situationaware.service.FlowAnalysisService;
 import cn.cyberpeace.mp.situationaware.service.NetworkTrafficService;
+import cn.cyberpeace.mp.situationaware.utils.LocalDateUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,9 +35,12 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -98,7 +105,35 @@ public class ScenePluginCollectionSceneService {
      */
     private <T> ServiceResult<Map<T, Integer>> groupCountFlow(
             List<String> sceneIds, List<String> nodeIds, String groupField, LocalDateTime startTime, LocalDateTime endTime) {
-        return new ServiceResult<>(new HashMap<>());
+        FlowAnalysisRequest request = new FlowAnalysisRequest();
+        if (GroupCountFlowField.LEVEL.equals(groupField)) {
+            request.setAggregationTypeEnum(AggregationTypeEnum.SURICATA_SEVERITY);
+        }
+        // todo 暂时先实现一个
+        var sceneHandler = new SceneHandler(sceneIds.get(0), null, false, null);
+        CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        if (pluginHandler == null) {
+            return new ServiceResult<>();
+        }
+        request.setGroupList(Arrays.asList(pluginHandler.getScene().getFlowCollector()));
+
+        if (startTime == null) {
+            request.setStartDateTime(sceneHandler.getScene().getCreateTime());
+        } else {
+            request.setStartDateTime(startTime);
+        }
+        if (endTime == null) {
+            request.setEndDateTime(LocalDateTime.now());
+        } else {
+            request.setEndDateTime(endTime);
+        }
+        List<AttackWayAggregationBO> result = flowAnalysisService.topByAggregationTypeEnum(request);
+        if (CollectionUtils.isEmpty(result)) {
+            return new ServiceResult<>(new HashMap<>());
+        }
+        Map<T, Integer> finalResult = new HashMap<>();
+        result.forEach(bo -> finalResult.put((T) bo.getAggregationType(), bo.getAttackNumber().intValue()));
+        return new ServiceResult<>(finalResult);
     }
 
     public ListObjServiceResult<CollectionFlowBO> listFlows(String sceneId, FlowQueryParams queryParams) {
@@ -144,6 +179,9 @@ public class ScenePluginCollectionSceneService {
         List<SceneElementBO> srcElements = getSrcElements(sceneHandler, queryParams.getNodeIds());
 
         CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        if (pluginHandler == null) {
+            return new ListObjServiceResult<>();
+        }
         Map<String, SceneElementBO> agentNameElementMap = new HashMap<>();
         srcElements.forEach(srcElement -> {
             var collectionElement = pluginHandler.getElement(srcElement.getId());
@@ -161,20 +199,34 @@ public class ScenePluginCollectionSceneService {
         request.setPageNum(queryParams.getPage());
         request.setPageSize(queryParams.getPageSize());
         request.setAgentNames(new ArrayList<>(agentNameElementMap.keySet()));
-        var result = dataCollectionService.queryMonitorEvents(request);
+        if (queryParams.getStartTime() == null) {
+            request.setStartTime(sceneHandler.getScene().getCreateTime());
+        } else {
+            request.setStartTime(queryParams.getStartTime());
+        }
+        if (queryParams.getEndTime() == null) {
+            request.setEndTime(LocalDateTime.now());
+        } else {
+            request.setEndTime(queryParams.getEndTime());
+        }
+        var result = dataCollectionService.queryMonitorEventsWithTimeRange(request);
 
         List<CollectionHostStateBO> hostStates = new ArrayList<>();
-        result.getObjs().forEach(srcHostState -> {
+        result.forEach(srcHostState -> {
             var hostState = new CollectionHostStateBO();
             hostStates.add(hostState);
             hostState.setSceneId(sceneId);
             hostState.setCpuCount(srcHostState.getCpuCount());
             hostState.setCpuPercent(srcHostState.getCpuTotalPercent());
-            hostState.setMemoryTotal(srcHostState.getMemoryTotal());
-            hostState.setMemoryFree(srcHostState.getMemoryFree());
+            // 内存统一使用单位M
+            hostState.setMemoryTotal(srcHostState.getMemoryTotal() / 1000000);
+            hostState.setMemoryFree(srcHostState.getMemoryFree() / 1000000);
+            // 磁盘统一使用单位G
+            hostState.setDiskSpace(srcHostState.getDiskSpace() / 1000000000);
             hostState.setMemoryPercent(srcHostState.getMemoryPercent());
-            hostState.setDiskSpace(srcHostState.getDiskSpace());
             hostState.setTime(srcHostState.getTime());
+
+            // todo 进程，端口，网络连接，磁盘使用率
 
             var srcElement = agentNameElementMap.getOrDefault(srcHostState.getAgentName(), null);
             if (srcElement != null) {
@@ -183,13 +235,16 @@ public class ScenePluginCollectionSceneService {
             }
         });
 
-        return new ListObjServiceResult<>(new ListObjResult<>(hostStates, result.getTotal()));
+        return new ListObjServiceResult<>(new ListObjResult<>(hostStates, result.size()));
     }
 
     public ListObjServiceResult<CollectionHostEventBO> listHostEvents(String sceneId, HostEventQueryParams queryParams) {
         var sceneHandler = new SceneHandler(sceneId, null, false, null);
         List<SceneElementBO> srcElements = getSrcElements(sceneHandler, queryParams.getNodeIds());
         CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        if (pluginHandler == null) {
+            return new ListObjServiceResult<>();
+        }
         Map<String, SceneElementBO> agentNameElementMap = new HashMap<>();
         srcElements.forEach(srcElement -> {
             var collectionElement = pluginHandler.getElement(srcElement.getId());
@@ -377,7 +432,53 @@ public class ScenePluginCollectionSceneService {
     public ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> timeIntervalSumFlowSize(
             List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime,
             int intervalNumber) {
-        return new ServiceResult<>(new ArrayList<>());
+        FlowAnalysisRequest request = new FlowAnalysisRequest();
+        // todo 暂时先实现一个
+        var sceneHandler = new SceneHandler(sceneIds.get(0), null, false, null);
+        CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        if (pluginHandler == null) {
+            return new ServiceResult<>();
+        }
+
+        if (CollectionUtils.isNotEmpty(nodeIds)) {
+            List<SceneElementBO> elements = nodeIds.stream().map(nodeId -> sceneHandler.getElement(nodeId)).collect(Collectors.toList());
+            List<String> macAddrs = this.loadMac2ElementBOMapAndGetEnableMac(new HashMap<>(), elements, pluginHandler);
+            request.setSourceMacs(macAddrs);
+        }
+
+        request.setGroupList(Arrays.asList(pluginHandler.getScene().getFlowCollector()));
+
+        if (startTime == null) {
+            request.setStartDateTime(sceneHandler.getScene().getCreateTime());
+        } else {
+            request.setStartDateTime(startTime);
+        }
+        if (endTime == null) {
+            request.setEndDateTime(LocalDateTime.now());
+        } else {
+            request.setEndDateTime(endTime);
+        }
+
+        long totalSeconds = LocalDateUtils.toEpochSecond(request.getStartDateTime()) - LocalDateUtils.toEpochSecond(request.getEndDateTime());
+        request.setSecondsInterval((int) Math.max(1, totalSeconds / intervalNumber));
+        List<AttackDateHistogramNetworkBytesBO> bos = flowAnalysisService.sumNetworkBytesByDateHistogramTimestamp(request);
+
+        if (CollectionUtils.isEmpty(bos)) {
+            return new ServiceResult<>(new ArrayList<>());
+        }
+        List<IntervalSizeBO<LocalDateTime, Long>> totalResult = bos.stream()
+                .map(bo -> {
+                    LocalDateTime time = TimeUtils.stringToLocalDateTime(bo.getTime(), TimeUtils.tzMillsDateTimeFormatter);
+                    return new IntervalSizeBO<LocalDateTime, Long>(time, time, bo.getNetworkBytes().longValue());
+                }).collect(Collectors.toList());
+        Collections.sort(totalResult, Comparator.comparing(IntervalSizeBO::getStart));
+
+        int interval = totalResult.size() / intervalNumber;
+        List<IntervalSizeBO<LocalDateTime, Long>> finalResult = new ArrayList<>();
+        for (int i = 0; i < totalResult.size(); i += interval) {
+            finalResult.add(totalResult.get(i));
+        }
+        return new ServiceResult<>(finalResult);
     }
 
     /**
@@ -389,10 +490,50 @@ public class ScenePluginCollectionSceneService {
      * @param intervalNumber 间隔数量
      * @return 聚合统计结果
      */
-    public ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> timeIntervalAvgHostCpuPercent(
+    public ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> timeIntervalAvgHostCpuPercent(
             List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime,
             int intervalNumber) {
-        return new ServiceResult<>(new ArrayList<>());
+        List<IntervalSizeBO<LocalDateTime, Double>> result = this.timeIntervalAvgBy(sceneIds, nodeIds, startTime, endTime, intervalNumber, (state) -> state.getCpuPercent());
+        return new ServiceResult<>(result);
+    }
+
+    private List<IntervalSizeBO<LocalDateTime, Double>> timeIntervalAvgBy(
+            List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime,
+            int intervalNumber, Function<CollectionHostStateBO, Double> execCal) {
+        //todo 暂时先支持一个场景的查询
+        HostStateQueryParams params = new HostStateQueryParams();
+        params.setNodeIds(nodeIds);
+        params.setStartTime(startTime);
+        params.setEndTime(endTime);
+        var queryResult = this.listHostStates(sceneIds.get(0), params).getSource();
+        List<CollectionHostStateBO> list = queryResult.getObjs();
+        if (CollectionUtils.isEmpty(list)) {
+            return new ArrayList<>();
+        }
+        Map<String, List<CollectionHostStateBO>> time2State = new HashMap<>();
+        list.forEach(state -> {
+            String timeKey = TimeUtils.localTime2yyyyMMddHHmm(state.getTime());
+            List<CollectionHostStateBO> bos = time2State.getOrDefault(timeKey, new ArrayList<>());
+            bos.add(state);
+            time2State.put(timeKey, bos);
+        });
+        List<IntervalSizeBO<LocalDateTime, Double>> totalResult = new ArrayList<>();
+        time2State.forEach((timeStr, listState) -> {
+            double totalPercent = 0;
+            for (CollectionHostStateBO state : listState) {
+                totalPercent += execCal.apply(state);
+            }
+            LocalDateTime time = TimeUtils.yyyyMMddHHmm2LocalDate(timeStr);
+            totalResult.add(new IntervalSizeBO<LocalDateTime, Double>(time, time, totalPercent / listState.size()));
+        });
+        // 按时间升序排列
+        Collections.sort(totalResult, Comparator.comparing(IntervalSizeBO::getStart));
+        int interval = Math.max(1, totalResult.size() / intervalNumber);
+        List<IntervalSizeBO<LocalDateTime, Double>> finalResult = new ArrayList<>();
+        for (int i = 0; i < totalResult.size(); i += interval) {
+            finalResult.add(totalResult.get(i));
+        }
+        return finalResult;
     }
 
     /**
@@ -404,10 +545,28 @@ public class ScenePluginCollectionSceneService {
      * @param intervalNumber 间隔数量
      * @return 聚合统计结果
      */
-    public ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> timeIntervalAvgHostMemoryPercent(
+    public ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> timeIntervalAvgHostMemoryPercent(
             List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime,
             int intervalNumber) {
-        return new ServiceResult<>(new ArrayList<>());
+        List<IntervalSizeBO<LocalDateTime, Double>> result = this.timeIntervalAvgBy(sceneIds, nodeIds, startTime, endTime, intervalNumber, (state) -> state.getMemoryPercent().doubleValue());
+        return new ServiceResult<>(result);
+    }
+
+    /**
+     * 时间区间统计主机磁盘占用平均值
+     *
+     * @param sceneIds       场景id列表，不传默认为全部
+     * @param nodeIds        节点id列表，不传默认为全部
+     * @param startTime      开始时间
+     * @param endTime        结束时间
+     * @param intervalNumber 间隔数量
+     * @return 聚合统计结果
+     */
+    public ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> timeIntervalAvgHostDiskPercent(
+            List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime,
+            int intervalNumber) {
+        // todo 主机磁盘使用率
+        return new ServiceResult<>(null);
     }
 
 }

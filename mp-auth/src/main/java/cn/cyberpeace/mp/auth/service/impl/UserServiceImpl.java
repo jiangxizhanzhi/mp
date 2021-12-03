@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.constant.DefaultImgDirEnum;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
@@ -12,6 +13,7 @@ import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.service.AvatarService;
+import cn.cyberpeace.mp.auth.service.DefaultImgService;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.service.RoleService;
@@ -107,6 +109,10 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Autowired
     private AvatarService avatarService;
+
+    @Autowired
+    private DefaultImgService defaultImgService;
+
 
     @Autowired
     public UserServiceImpl(UserMapper modelMapper, UserFields modelFields) {
@@ -225,7 +231,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
         createCheckService.check(userModel);
 
-        userModel.setAvatar(AuthConstant.USER_DEFAULT_IMG);
+        if (StringUtils.isEmpty(userModel.getAvatar())) {
+            userModel.setAvatar(getDefaultUserAvatar());
+        }
         // create中会对密码加密，外层不需要再次加密
         ObjServiceResult<UserModel> result = create(userModel);
         ResultUtils.throwExceptionIfError(result, "创建用户失败！");
@@ -563,7 +571,10 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                 continue;
             }
 
-            userModel.setAvatar(AuthConstant.USER_DEFAULT_IMG);
+            if (StringUtils.isEmpty(userModel.getAvatar())) {
+                userModel.setAvatar(getDefaultUserAvatar());
+            }
+
             var result = create(userModel);
             ResultUtils.throwExceptionIfError(result, "创建用户失败！");
             UserModel userCreated = result.getSource().getObj();
@@ -760,6 +771,13 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return isAdmin;
     }
 
+
+    @Override
+    public String getDefaultUserAvatar() {
+        List<String> avatarList = defaultImgService.getFileByDefaultImgDirEnum(DefaultImgDirEnum.AVATAR);
+        return avatarList.get(0);
+    }
+
     private UserModel importUser2UserModel(ImportUser importUser) {
         if (Objects.isNull(importUser)) {
             return null;
@@ -829,5 +847,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             throw new MpRuntimeException("删除失败！");
         }
     }
+
 
 }

@@ -18,6 +18,10 @@ public class SceneInit implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
+        // 本地开发环境不运行资源的更新和删除
+        if (!sceneAppConfig.getBaseAppConfig().isRunInit()) {
+            return;
+        }
         FileUtil.mkdir(sceneAppConfig.getWindowsHelpInstallerDir());
         TaskCommon.executeTask(() -> {
             LocalFileMappingCommon.syncDir(InstallerUtils.WINDOWS_HELP_INSTALLER_GROUP,

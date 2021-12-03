@@ -15,7 +15,7 @@ public class ProcessState {
     private String pid;
 
     @ApiModelProperty("内存占用")
-    private Integer memory;
+    private Long memory;
 
     @ApiModelProperty("命令")
     private String cmd;
