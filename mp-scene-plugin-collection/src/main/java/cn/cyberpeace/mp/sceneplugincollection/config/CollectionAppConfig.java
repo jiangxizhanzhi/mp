@@ -40,6 +40,9 @@ public class CollectionAppConfig {
     @Value("${mp.sceneplugincollection.wazuh_agent_installer_dir:}")
     private String wazuhAgentInstallerDir;
 
+    @Value("${mp.sceneplugincollection.run_init:false}")
+    private boolean runInit;
+
     @Autowired
     private BaseAppConfig baseAppConfig;
 

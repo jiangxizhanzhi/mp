@@ -124,6 +124,7 @@ mp:
     cpcloud-server: http://${ip.cp}:${CP_PORT:11111}
   sceneplugincollection:
     wazuh-server-host: ${ip.wazuh}
+    run-init: true
 
 management:
   endpoints:
