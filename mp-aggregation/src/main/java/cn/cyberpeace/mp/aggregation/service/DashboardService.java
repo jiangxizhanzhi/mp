@@ -1,18 +1,32 @@
 package cn.cyberpeace.mp.aggregation.service;
 
 import cn.cyberpeace.mp.aggregation.dto.DailyUserActivityResponse;
+import cn.cyberpeace.mp.aggregation.dto.UserResourceResponse;
 import cn.cyberpeace.mp.aggregation.dto.UserSummarySceneResponse;
 import cn.cyberpeace.mp.aggregation.dto.resource.ResourceStatisticsResponse;
 import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
+import cn.cyberpeace.mp.auth.util.UserUtils;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCountActivitySceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCountByReferenceTypeBO;
+import cn.cyberpeace.mp.cscene.core.common.UserCommon;
+import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
+import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.DeviceService;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceStaticsCloudPlatformModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,6 +36,7 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author wanggang
@@ -36,14 +51,24 @@ public class DashboardService {
 
     private CsceneSpecialService csceneSpecialService;
 
+    private ScenePluginCloudSceneService scenePluginCloudSceneService;
+
+    private CsceneInstanceMapper csceneInstanceMapper;
+
     @Autowired
     private UserOnlineRecordService userOnlineRecordService;
 
     @Autowired
-    public DashboardService(DeviceService deviceService, CsceneInstanceService csceneInstanceService, CsceneSpecialService csceneSpecialService) {
+    public DashboardService(DeviceService deviceService,
+                            CsceneInstanceService csceneInstanceService,
+                            CsceneSpecialService csceneSpecialService,
+                            CsceneInstanceMapper csceneInstanceMapper,
+                            ScenePluginCloudSceneService scenePluginCloudSceneService) {
         this.deviceService = deviceService;
         this.csceneInstanceService = csceneInstanceService;
         this.csceneSpecialService = csceneSpecialService;
+        this.csceneInstanceMapper = csceneInstanceMapper;
+        this.scenePluginCloudSceneService = scenePluginCloudSceneService;
     }
 
     /**
@@ -109,4 +134,43 @@ public class DashboardService {
         response.setRunningScenePercent(runningScenePercent);
         return response;
     }
+
+    public ServiceResult<UserResourceResponse> countUserResourceResponse() {
+        var userResource = UserResourceResponse
+                .builder()
+                .containerCount(0)
+                .vmCount(0)
+                .entityCount(0)
+                .sceneCount(0)
+                .build();
+        var user = UserCommon.getCurrentUser();
+        if (user == null) {
+            return new ServiceResult<>(userResource);
+        }
+        var condition = new HumanCondition()
+                .filterEqual(CsceneInstanceModel::getDeleted, false)
+                .filterEqual(CsceneInstanceModel::getType, CsceneInstanceModel.Type.APP)
+                .filterEqual(CsceneInstanceModel::getCreateUser, user.getId());
+        List<CsceneInstanceModel> csceneInstances;
+        try {
+            csceneInstances = csceneInstanceMapper.list(condition);
+        } catch (Exception e) {
+            throw new MpRuntimeException(BaseErrorCode.ERROR);
+        }
+
+        userResource.setSceneCount(csceneInstances.size());
+        List<String> sceneIds = csceneInstances.stream()
+                .filter(csceneInstance -> !StringUtils.isEmpty(csceneInstance.getScene()))
+                .map(csceneInstance -> csceneInstance.getScene())
+                .collect(Collectors.toList());
+
+        var fieldName = BeanUtils.getBeanGetterFieldName(CloudPluginSceneElementModel::getVirtualType);
+        var result = scenePluginCloudSceneService
+                .groupCountElement(sceneIds, null, List.of(fieldName)).getSource().get(fieldName);
+        userResource.setVmCount(result.getOrDefault(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE, 0L).intValue());
+        userResource.setContainerCount(result.getOrDefault(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER, 0L).intValue());
+        userResource.setEntityCount(result.getOrDefault(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE, 0L).intValue());
+        return new ServiceResult<>(userResource);
+    }
+
 }
