@@ -68,8 +68,7 @@ public class DashboardController {
 
     @GetMapping("/user_resource")
     public ServiceResult<UserResourceResponse> userResource() {
-        UserResourceResponse response = mockService.mockUserResourceResponse();
-        return ServiceResult.success(response);
+        return dashboardService.countUserResourceResponse().asResult();
     }
 
 }
