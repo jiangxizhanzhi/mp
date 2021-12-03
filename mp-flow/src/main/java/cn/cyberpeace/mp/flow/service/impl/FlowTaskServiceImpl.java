@@ -743,7 +743,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
             try {
                 asyncPlatFlowTaskService.refreshTaskStatus(flowTaskModel.getId(), flowActuatorModel, call);
             } catch (Exception e) {
-                log.info("Start flow error: ", e);
+                log.info("refresh task status error: ", e);
             }
         });
 
