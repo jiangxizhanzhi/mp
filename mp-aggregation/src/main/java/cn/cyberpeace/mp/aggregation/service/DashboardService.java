@@ -5,7 +5,6 @@ import cn.cyberpeace.mp.aggregation.dto.UserResourceResponse;
 import cn.cyberpeace.mp.aggregation.dto.UserSummarySceneResponse;
 import cn.cyberpeace.mp.aggregation.dto.resource.ResourceStatisticsResponse;
 import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
-import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
