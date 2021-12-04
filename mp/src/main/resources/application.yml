@@ -121,7 +121,7 @@ mp:
   flow:
     # 流量发生器资源地址
     actuator-resource-url: http://${ip.trex}:80/api/v1/resource
-    trex-image: tgn-1204
+    trex-image: tgn-1205
   sceneplugincloud:
     cpcloud-server: http://${ip.cp}:11111
   sceneplugincollection:
