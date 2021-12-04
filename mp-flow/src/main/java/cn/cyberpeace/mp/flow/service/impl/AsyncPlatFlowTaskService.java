@@ -630,7 +630,7 @@ public class AsyncPlatFlowTaskService {
                 JSONArray rows = statusRspObj.getJSONObject(BaseConstants.STR_DATA).getJSONArray("rows");
                 if (Objects.nonNull(rows)) {
                     int taskStatus = rows.getJSONObject(0).getInteger("status");
-                    if (TaskStatusEnum.STOPED.toValue() == taskStatus) {
+                    if (TaskStatusEnum.STOPED.toValue() == taskStatus || TaskStatusEnum.STOPING.toValue() == taskStatus) {
                         result = true;
                     }
                 }
