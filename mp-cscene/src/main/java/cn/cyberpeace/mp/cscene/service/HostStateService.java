@@ -1,13 +1,13 @@
 package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.bo.IntervalSizeBO;
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.dto.request.HostStateTrendRequest;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
+import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
@@ -16,7 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -124,10 +123,12 @@ public class HostStateService {
         }
 
         List<String> sceneIdList = sceneIdTranslationService.translateSceneIds(sceneIds);
+        Long intervalSeconds = SegmentCount2IntervalSecondsUtil.calculateIntervalSeconds(startTime, endTime, segmentCount);
+        String intervalSecondStr = intervalSeconds + "";
 
-        ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> cpuResult = scenePluginCollectionSceneService.timeIntervalAvgHostCpuPercent(sceneIdList, elementIds, startTime, endTime, segmentCount);
-        ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> memResult = scenePluginCollectionSceneService.timeIntervalAvgHostMemoryPercent(sceneIdList, elementIds, startTime, endTime, segmentCount);
-        ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> diskResult = scenePluginCollectionSceneService.timeIntervalAvgHostDiskPercent(sceneIdList, elementIds, startTime, endTime, segmentCount);
+        ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> cpuResult = scenePluginCollectionSceneService.timeIntervalAvgHostCpuPercent(sceneIdList, elementIds, startTime, endTime, Integer.valueOf(intervalSecondStr));
+        ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> memResult = scenePluginCollectionSceneService.timeIntervalAvgHostMemoryPercent(sceneIdList, elementIds, startTime, endTime, Integer.valueOf(intervalSecondStr));
+        ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> diskResult = scenePluginCollectionSceneService.timeIntervalAvgHostDiskPercent(sceneIdList, elementIds, startTime, endTime, Integer.valueOf(intervalSecondStr));
 
         List<IntervalSizeBO<LocalDateTime, Double>> intervalCpuPercentBOs = cpuResult.getSource();
         List<IntervalSizeBO<LocalDateTime, Double>> intervalMemPercentBOs = memResult.getSource();
@@ -173,34 +174,6 @@ public class HostStateService {
         }
 
         return hostStates;
-    }
-
-
-    public void testTimeSeg(LocalDateTime start, LocalDateTime end, int segmentCount) {
-        if (segmentCount < 1) {
-            throw new MpRuntimeException("分段数不能小于1");
-        }
-
-        if (end.isBefore(start)) {
-            throw new MpRuntimeException("结束时间不可早于开始时间");
-        }
-
-        Duration duration = Duration.between(start, end);
-        Long seconds = duration.toSeconds();
-        // todo 时间间隔问题
-        Long intervalSeconds = seconds / (segmentCount - 1);
-
-        List<LocalDateTime> timeSegs = new ArrayList<>();
-        for (int i = 0; i < segmentCount - 1; i++) {
-            timeSegs.add(start);
-            start = start.plusSeconds(intervalSeconds);
-        }
-
-        timeSegs.add(end);
-
-        for (int i = 0; i < timeSegs.size(); i++) {
-            log.info(" i:{}, intervalSeconds:{}, timeSegs:{}", i, intervalSeconds, timeSegs.get(i));
-        }
     }
 
 }
