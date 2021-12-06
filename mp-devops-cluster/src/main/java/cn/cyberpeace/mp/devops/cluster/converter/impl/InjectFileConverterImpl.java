@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.converter.impl;
 
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.InjectFileService;
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ScenariosSnapshotService;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ScenariosService;
 import cn.cyberpeace.mp.devops.cluster.converter.InjectFileConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InjectFileConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InjectFileListConvertModel;
@@ -21,12 +21,12 @@ public class InjectFileConverterImpl implements InjectFileConverter {
 
     private InjectFileService injectFileService;
 
-    private ScenariosSnapshotService scenariosSnapshotService;
+    private ScenariosService scenariosService;
 
     @Autowired
-    public InjectFileConverterImpl(InjectFileService injectFileService,ScenariosSnapshotService scenariosSnapshotService) {
+    public InjectFileConverterImpl(InjectFileService injectFileService, ScenariosService scenariosService) {
         this.injectFileService = injectFileService;
-        this.scenariosSnapshotService = scenariosSnapshotService;
+        this.scenariosService = scenariosService;
     }
 
     @Override
@@ -46,6 +46,6 @@ public class InjectFileConverterImpl implements InjectFileConverter {
 
     @Override
     public BaseCloudPlatformModel delete(ImageInjectFileDeleteRequest request) {
-        return scenariosSnapshotService.deleteInjectFile(new DeviceInjectFileDelete(request.getDeviceUuid(),request.getInjectUuid()));
+        return scenariosService.deleteInjectFile(new DeviceInjectFileDelete(request.getDeviceUuid(),request.getInjectUuid()));
     }
 }

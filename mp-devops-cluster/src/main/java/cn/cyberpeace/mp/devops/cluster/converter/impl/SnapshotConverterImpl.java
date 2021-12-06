@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.converter.impl;
 
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ScenariosSnapshotService;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ScenariosService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.SnapshotService;
 import cn.cyberpeace.mp.devops.cluster.converter.SnapshotConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.DeviceAndSnapshotConvertModel;
@@ -24,12 +24,12 @@ public class SnapshotConverterImpl implements SnapshotConverter {
 
     private SnapshotService snapshotService;
 
-    private ScenariosSnapshotService scenariosSnapshotService;
+    private ScenariosService scenariosService;
 
     @Autowired
-    public SnapshotConverterImpl(SnapshotService snapshotService,ScenariosSnapshotService scenariosSnapshotService) {
+    public SnapshotConverterImpl(SnapshotService snapshotService, ScenariosService scenariosService) {
         this.snapshotService = snapshotService;
-        this.scenariosSnapshotService = scenariosSnapshotService;
+        this.scenariosService = scenariosService;
     }
 
     @Override
@@ -83,7 +83,7 @@ public class SnapshotConverterImpl implements SnapshotConverter {
         snapshotCreate.setImageType(request.getImageType());
         snapshotCreate.setName(request.getName());
         snapshotCreate.setDescription(request.getDescription());
-        return scenariosSnapshotService.create(snapshotCreate);
+        return scenariosService.create(snapshotCreate);
     }
 
     @Override
@@ -93,6 +93,6 @@ public class SnapshotConverterImpl implements SnapshotConverter {
         mergeCloudPlatform.setNewName(request.getNewName());
         mergeCloudPlatform.setDeviceUuid(request.getUuid());
         mergeCloudPlatform.setImageType(request.getImageType());
-        return scenariosSnapshotService.mergeSnapshot(mergeCloudPlatform);
+        return scenariosService.mergeSnapshot(mergeCloudPlatform);
     }
 }

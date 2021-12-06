@@ -1,27 +1,46 @@
 package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.impl.BaseOpenStackServiceImpl;
+import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.*;
+import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import static cn.cyberpeace.mp.devops.cluster.cloud.platform.service.BaseCloudPlatformService.*;
 
 /**
  * 实装管理接口
+ * @author wanggang
  */
-public interface RealEquipmentService extends BaseCloudPlatformService {
+@Service
+@Slf4j
+public class RealEquipmentService extends BaseOpenStackServiceImpl {
 
-    String ENTITY = "/entity";
+    private static final String ENTITY = "/entity";
+
+    public RealEquipmentService(DevopsConfig devopsConfig, ObjectMapper objectMapper) {
+        super(devopsConfig, objectMapper);
+    }
 
     /**
      * 分页查询
      * @param getParams
      * @return
      */
-    DeviceCloudPlatformModel page(String getParams);
+    public DeviceCloudPlatformModel page(String getParams){
+        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + ENTITY + "/lists" + getParams, DeviceCloudPlatformModel.class);
+    }
 
     /**
      * 新增
      * @param device
      * @return
      */
-    Device add(Device device);
+    public Device add(Device device){
+        return super.sendPost(CPCLOUD_DEVICE + URL_VERSION + ENTITY + "/lists", JsonUtils.toUnderlineJSONString(device),Device.class);
+    }
 
     /**
      * 更新
@@ -29,54 +48,75 @@ public interface RealEquipmentService extends BaseCloudPlatformService {
      * @param device
      * @return
      */
-    Device update(String uuid,Device device);
+    public Device update(String uuid,Device device){
+        return super.sendPut(CPCLOUD_DEVICE + URL_VERSION + ENTITY + "/" + uuid,JsonUtils.toUnderlineJSONString(device),Device.class);
+    }
 
     /**
      * 接口
      * @param snmp
      * @return
      */
-    SnmpInterfaceResourceCloudPlatform interfacesResource(SnmpParams snmp);
+    public SnmpInterfaceResourceCloudPlatform interfacesResource(SnmpParams snmp){
+        snmp.setDataType("interfaces");
+        return super.sendPost(CPCLOUD_INFO_URL + URL_VERSION + "/snmp", JsonUtils.toUnderlineJSONString(snmp), SnmpInterfaceResourceCloudPlatform.class);
+    }
+
 
     /**
      * CPU
      * @param snmp
      * @return
      */
-    SnmpCloudPlatform snmpForCpu(SnmpParams snmp);
+    public SnmpCloudPlatform snmpForCpu(SnmpParams snmp){
+        snmp.setDataType("cpu");
+        return super.sendPost(CPCLOUD_INFO_URL + URL_VERSION + "/snmp", JsonUtils.toUnderlineJSONString(snmp), SnmpCloudPlatform.class);
+    }
 
     /**
      * 内存
      * @param snmp
      * @return
      */
-    SnmpCloudPlatform snmpForMem(SnmpParams snmp);
+    public SnmpCloudPlatform snmpForMem(SnmpParams snmp){
+        snmp.setDataType("mem");
+        return super.sendPost(CPCLOUD_INFO_URL + URL_VERSION + "/snmp", JsonUtils.toUnderlineJSONString(snmp), SnmpCloudPlatform.class);
+    }
 
     /**
      * 磁盘
      * @param snmp
      * @return
      */
-    SnmpCloudPlatform snmpForDisk(SnmpParams snmp);
+    public SnmpCloudPlatform snmpForDisk(SnmpParams snmp){
+        snmp.setDataType("disk");
+        return super.sendPost(CPCLOUD_INFO_URL + URL_VERSION + "/snmp", JsonUtils.toUnderlineJSONString(snmp), SnmpCloudPlatform.class);
+    }
 
     /**
      * 根据交换机名称查询
      * @param switchName
      * @return
      */
-    RealEquipmentBySwitchNameCloudPlatform findBySwitchName(String switchName);
+    public RealEquipmentBySwitchNameCloudPlatform findBySwitchName(String switchName){
+        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + ENTITY + "/switch_map?switch_name=" + switchName,RealEquipmentBySwitchNameCloudPlatform.class);
+    }
 
     /**
      * 根据串口查询
      * @param serialPort
      * @return
      */
-    RealEquipmentBySerialPortCloudPlatform findBySerialPort(String serialPort);
+    public RealEquipmentBySerialPortCloudPlatform findBySerialPort(String serialPort){
+        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + ENTITY + "/ccm_map?ccm_server_name=" + serialPort,RealEquipmentBySerialPortCloudPlatform.class);
+    }
 
     /**
      * 获取登录链接
      * @param deviceUuid
      * @return
      */
-    RealEquipmentConnectionCloudPlatform connection(String deviceUuid);
+    public RealEquipmentConnectionCloudPlatform connection(String deviceUuid){
+        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + ENTITY + "/connection?device_uuid=" + deviceUuid,RealEquipmentConnectionCloudPlatform.class);
+    }
 }

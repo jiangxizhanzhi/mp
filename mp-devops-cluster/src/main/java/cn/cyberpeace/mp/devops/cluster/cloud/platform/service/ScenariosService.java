@@ -1,0 +1,78 @@
+package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
+
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.impl.BaseOpenStackServiceImpl;
+import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
+import cn.cyberpeace.mp.devops.cluster.model.*;
+import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import static cn.cyberpeace.mp.devops.cluster.cloud.platform.service.BaseCloudPlatformService.URL_VERSION;
+
+/**
+ * 靶标-场景接口
+ * @author wanggang
+ */
+@Service
+@Slf4j
+public class ScenariosService extends BaseOpenStackServiceImpl {
+
+    private static final String SCENARIOS = "/scenarios";
+
+    public ScenariosService(DevopsConfig devopsConfig, ObjectMapper objectMapper) {
+        super(devopsConfig, objectMapper);
+    }
+
+    /**
+     * 创建快照
+     */
+    public BaseCloudPlatformModel create(ScenariosSnapshot snapshotCreate){
+        return super.sendPost(  URL_VERSION + SCENARIOS + "/device_snapshot", JsonUtils.toUnderlineJSONString(snapshotCreate), BaseCloudPlatformModel.class);
+    }
+
+    /**
+     * 注入文件
+     * @param injectFileCreate
+     * @return
+     */
+    public BaseCloudPlatformModel injectFile(DeviceInjectFileCreate injectFileCreate){
+        return super.sendPost(  URL_VERSION + SCENARIOS + "/device_inject_file", JsonUtils.toUnderlineJSONString(injectFileCreate), BaseCloudPlatformModel.class);
+    }
+
+    /**
+     * 删除注入文件
+     * @param delete
+     * @return
+     */
+    public BaseCloudPlatformModel deleteInjectFile(DeviceInjectFileDelete delete){
+        return super.sendDelete(  URL_VERSION + SCENARIOS + "/device_inject_file", JsonUtils.toUnderlineJSONString(delete), BaseCloudPlatformModel.class);
+    }
+
+    /**
+     * 创建虚拟靶标实例
+     * @param snapshotCreate
+     * @return
+     */
+    public BaseCloudPlatformModel create(ImagesCreateInstanceCloudPlatform snapshotCreate){
+        return super.sendPost(  URL_VERSION + SCENARIOS + "/device_scenario", JsonUtils.toUnderlineJSONString(snapshotCreate), BaseCloudPlatformModel.class);
+    }
+
+    /**
+     * 合并快照
+     * @param mergeCloudPlatform
+     * @return
+     */
+    public BaseCloudPlatformModel mergeSnapshot(DeviceSnapshotMergeCloudPlatform mergeCloudPlatform){
+        return super.sendPost(  URL_VERSION + SCENARIOS + "/device_snapshot_merge", JsonUtils.toUnderlineJSONString(mergeCloudPlatform), BaseCloudPlatformModel.class);
+    }
+
+    /**
+     * 删除虚拟靶标实例
+     * @param cloudPlatform
+     * @return
+     */
+    public BaseCloudPlatformModel delete(ImagesDeleteInstanceCloudPlatform cloudPlatform){
+        return super.sendDelete(  URL_VERSION + SCENARIOS + "/device_scenario", JsonUtils.toUnderlineJSONString(cloudPlatform), BaseCloudPlatformModel.class);
+    }
+}

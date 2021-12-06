@@ -7,7 +7,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.FlavorService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ImagesService;
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ScenariosSnapshotService;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ScenariosService;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.constant.DevopsClusterErrorCode;
 import cn.cyberpeace.mp.devops.cluster.converter.ImagesConverter;
@@ -64,20 +64,20 @@ public class ImagesController {
 
     private FlavorService flavorService;
 
-    private ScenariosSnapshotService scenariosSnapshotService;
+    private ScenariosService scenariosService;
 
     private InjectFileConverter injectFileConverter;
 
     private ImagesService imagesService;
 
     @Autowired
-    public ImagesController(ImagesConverter imagesConverter,SnapshotConverter snapshotConverter,
-                            FlavorService flavorService,ImagesService imagesService,
-                            ScenariosSnapshotService scenariosSnapshotService,InjectFileConverter injectFileConverter) {
+    public ImagesController(ImagesConverter imagesConverter, SnapshotConverter snapshotConverter,
+                            FlavorService flavorService, ImagesService imagesService,
+                            ScenariosService scenariosService, InjectFileConverter injectFileConverter) {
         this.imagesConverter = imagesConverter;
         this.snapshotConverter = snapshotConverter;
         this.flavorService = flavorService;
-        this.scenariosSnapshotService = scenariosSnapshotService;
+        this.scenariosService = scenariosService;
         this.injectFileConverter = injectFileConverter;
         this.imagesService = imagesService;
     }
@@ -364,7 +364,7 @@ public class ImagesController {
     @ApiOperation("文件注入")
     @PostMapping("/inject-file")
     public ServiceResult injectFile(@Valid @RequestBody ImageInjectFileRequest request){
-        BaseCloudPlatformModel model = scenariosSnapshotService.injectFile(new DeviceInjectFileCreate(request.getDeviceUuid(),
+        BaseCloudPlatformModel model = scenariosService.injectFile(new DeviceInjectFileCreate(request.getDeviceUuid(),
                 request.getFileUrl(),request.getFileName(),request.getFileSize()));
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
