@@ -42,6 +42,7 @@ public class CsceneContextBO {
                 var orgs = user.getOrgs();
                 if (!CollectionUtils.isEmpty(orgs)) {
                     var orgName = orgs.get(0).getName();
+                    orgName = StringUtils.joinWith("|", user.getName(), orgName);
                     cloudScenePluginContext.setRequestUserOrg(orgName);
                 }
             }
