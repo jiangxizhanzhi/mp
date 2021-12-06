@@ -581,10 +581,11 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
      *
      * @param flowTaskId
      * @param taskAction 1 start， 2 stop, 3 reset
-     * @param call 回调方法
+     * @param callback 回调方法
+     * @param errorCallback 执行错误时回调方法
      * @return
      */
-    public ServiceResult<Boolean> actuator(String flowTaskId, int taskAction, Runnable call) {
+    public ServiceResult<Boolean> actuator(String flowTaskId, int taskAction, Runnable callback, Runnable errorCallback) {
         log.info("=========== Start actuator flow:[{}] ===============", flowTaskId);
         // 流量任务存在校验
         ObjResult<FlowTaskModel> flowTaskResult = get(flowTaskId).getSource();
@@ -597,7 +598,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
         // 判断调用哪个流量执行器
         if (FlowPlatformEnum.TREX.toValue() == flowTaskModel.getFlowPlatform()) {
             log.info("=========== Actuator trex flow end ===============");
-            return this.actuatorTrex(flowTaskModel, taskAction, call);
+            return this.actuatorTrex(flowTaskModel, taskAction, callback, errorCallback);
         } else {
             log.info("=========== Actuator other flow end ===============");
             return ServiceResult.fail(FlowErrorCode.NO_ACTUATOR_TO_USE);
@@ -608,10 +609,11 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
      * 调用Trex流量执行器
      * @param flowTaskModel
      * @param taskAction    1 start， 2 stop, 3 reset
-     * @param call
+     * @param callback  流量停止回调方法
+     * @param errorCallback 流量执行异常回调方法
      * @return
      */
-    private ServiceResult<Boolean> actuatorTrex(FlowTaskModel flowTaskModel, int taskAction, Runnable call) {
+    private ServiceResult<Boolean> actuatorTrex(FlowTaskModel flowTaskModel, int taskAction, Runnable callback, Runnable errorCallback) {
         // 流量信息存在校验
         ObjResult<FlowInfoModel> flowInfoResult = flowInfoService.get(flowTaskModel.getFlowId()).getSource();
         if (Objects.isNull(flowInfoResult)) {
@@ -741,7 +743,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
 
         TaskCommon.executeTask(() -> {
             try {
-                asyncPlatFlowTaskService.refreshTaskStatus(flowTaskModel.getId(), flowActuatorModel, call);
+                asyncPlatFlowTaskService.refreshTaskStatus(flowTaskModel.getId(), flowActuatorModel, callback, errorCallback);
             } catch (Exception e) {
                 log.info("refresh task status error: ", e);
             }

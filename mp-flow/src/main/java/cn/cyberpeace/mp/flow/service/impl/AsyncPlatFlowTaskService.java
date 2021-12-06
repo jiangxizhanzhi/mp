@@ -557,13 +557,14 @@ public class AsyncPlatFlowTaskService {
     }
 
     /**
-     * 5秒一次轮询任务状态，当任务结束时执行回调方法
+     * 2秒一次轮询任务状态，当任务结束时执行回调方法
      * @param taskId
      * @param flowActuatorModel
-     * @param call
+     * @param callback
+     * @param errorCallback
      * @throws InterruptedException
      */
-    public void refreshTaskStatus(String taskId, FlowActuatorModel flowActuatorModel, Runnable call) {
+    public void refreshTaskStatus(String taskId, FlowActuatorModel flowActuatorModel, Runnable callback, Runnable errorCallback) {
         String host = flowActuatorModel.getIp();
         FlowTaskModel flowTaskModel = flowTaskMapper.get(taskId);
         if (Objects.isNull(flowTaskModel)) {
@@ -571,10 +572,24 @@ public class AsyncPlatFlowTaskService {
             return;
         }
 
-        String thirdTaskId = flowTaskModel.getThirdTaskId();
         // 轮询校验任务是否跑完，完成时调用回调方法，最多轮询20分钟
-        CheckUtils.loopCheck(() -> checkTaskJobStopped(thirdTaskId, host), 2000, 1000 * 60 * 20,
-                null, 0, () -> taskJobStoppedCallback(flowTaskModel.getId(), call), () -> log.error("task job running status get failed：[{}]", taskId), "CheckTaskJobStopped");
+        CheckUtils.loopCheck(() -> checkTaskJobStopped(flowTaskModel, host, errorCallback), 2000, 1000 * 60 * 20,
+                () -> refreshTaskStatusStopCheck(flowTaskModel.getId()), 1, () -> taskJobStoppedCallback(flowTaskModel.getId(), callback), () -> log.error("task job running status get failed：[{}]", taskId), "CheckTaskJobStopped");
+    }
+
+    /**
+     * 刷新任务状态停止校验方法
+     * @param taskId
+     * @return
+     */
+    private Boolean refreshTaskStatusStopCheck(String taskId) {
+        FlowTaskModel flowTaskModel = flowTaskMapper.get(taskId);
+        if (Objects.isNull(flowTaskModel)) {
+            log.error("flowTaskModel is empty for [{}]", taskId);
+            return false;
+        }
+
+        return TaskStatusEnum.STOPED.toValue() == flowTaskModel.getTaskStatus();
     }
 
     /**
@@ -600,13 +615,14 @@ public class AsyncPlatFlowTaskService {
 
     /**
      * 校验任务状态是否已停止
-     * @param thirdTaskId
+     * @param flowTaskModel
      * @param hostUrl
+     * @param errorCallback
      * @return
      */
-    private Boolean checkTaskJobStopped(String thirdTaskId, String hostUrl) {
+    private Boolean checkTaskJobStopped(FlowTaskModel flowTaskModel, String hostUrl, Runnable errorCallback) {
         Boolean result = false;
-        if (StringUtils.isBlank(thirdTaskId)) {
+        if (StringUtils.isBlank(flowTaskModel.getThirdTaskId())) {
             log.warn("no thirdTaskIds to query");
             return result;
         }
@@ -619,7 +635,7 @@ public class AsyncPlatFlowTaskService {
         try {
             JSONObject statusObj = new JSONObject();
             JSONArray statusArray = new JSONArray();
-            statusArray.addAll(Collections.singletonList(thirdTaskId));
+            statusArray.addAll(Collections.singletonList(flowTaskModel.getThirdTaskId()));
             statusObj.put("uuids", statusArray);
 
             String statusRsp = HttpUtils.sendPost(CommonUtil.getHostUrl(hostUrl) + "/tasks/standards/many",
@@ -629,9 +645,20 @@ public class AsyncPlatFlowTaskService {
             if (ResponseUtils.checkResponse(statusRspObj)) {
                 JSONArray rows = statusRspObj.getJSONObject(BaseConstants.STR_DATA).getJSONArray("rows");
                 if (Objects.nonNull(rows)) {
-                    int taskStatus = rows.getJSONObject(0).getInteger("status");
+                    Integer taskStatus = rows.getJSONObject(0).getInteger("status");
+                    // 任务状态为已停止或者停止中，表示任务运行结束
                     if (TaskStatusEnum.STOPED.toValue() == taskStatus || TaskStatusEnum.STOPING.toValue() == taskStatus) {
-                        result = true;
+                        // 判断任务是否运行成功
+                        Integer isSuccess = rows.getJSONObject(0).getInteger("result");
+                        if (1 == isSuccess) {
+                            log.info("flow execute success:[{}]", flowTaskModel.getId());
+                            result = true;
+                        } else {
+                            // 运行失败，更新任务状态为已停止，调用失败回调方法
+                            log.info("flow execute error:[{}]", flowTaskModel.getId());
+                            taskJobStoppedCallback(flowTaskModel.getId(), errorCallback);
+                        }
+
                     }
                 }
             } else {
