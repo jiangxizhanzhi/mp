@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -101,11 +102,13 @@ public class FlowMonitorService {
 
         // 风险等级 1,2,3,4 数字越低，级别越高
         FlowRiskCount riskCount = new FlowRiskCount();
-        riskCount.setHighCount(map.get("1") == null ? 0 : map.get("1"));
-        riskCount.setMediumCount(map.get("2") == null ? 0 : map.get("2"));
-        Integer low1 = map.get("3") == null ? 0 : map.get("3");
-        Integer low2 = map.get("4") == null ? 0 : map.get("4");
-        riskCount.setLowCount(low1 + low2);
+        if (Objects.nonNull(map)) {
+            riskCount.setHighCount(map.get("1") == null ? 0 : map.get("1"));
+            riskCount.setMediumCount(map.get("2") == null ? 0 : map.get("2"));
+            Integer low1 = map.get("3") == null ? 0 : map.get("3");
+            Integer low2 = map.get("4") == null ? 0 : map.get("4");
+            riskCount.setLowCount(low1 + low2);
+        }
         return riskCount;
     }
 
@@ -178,13 +181,31 @@ public class FlowMonitorService {
         if (Objects.isNull(intervalFlowSizeBOs)) {
             return flowTrends;
         }
-        intervalFlowSizeBOs.sort(Comparator.comparing(IntervalSizeBO::getEnd));
-        for (int i = 0; i < intervalFlowSizeBOs.size(); i++) {
-            FlowTrend ft = new FlowTrend();
-            ft.setTime(intervalFlowSizeBOs.get(i).getEnd());
-            ft.setDataSize(intervalFlowSizeBOs.get(i).getSize());
-            flowTrends.add(ft);
+
+        List<LocalDateTime> timeList = SegmentCount2IntervalSecondsUtil.generateTimeList(startTime, endTime, intervalSeconds);
+        Map<LocalDateTime, FlowTrend> flowTrendMap = new HashMap<>();
+        for (LocalDateTime time : timeList) {
+            FlowTrend flowTrend = new FlowTrend();
+            // 初始化
+            flowTrend.setTime(time);
+            flowTrend.setDataSize(0L);
+            flowTrendMap.put(time, flowTrend);
         }
+
+        // flow
+        if (Objects.nonNull(intervalFlowSizeBOs)) {
+            for (IntervalSizeBO<LocalDateTime, Long> bo : intervalFlowSizeBOs) {
+                if (Objects.nonNull(flowTrendMap.get(bo.getStart()))) {
+                    flowTrendMap.get(bo.getStart()).setDataSize(bo.getSize());
+                }
+            }
+        }
+
+        flowTrendMap.entrySet().forEach(entry -> {
+            flowTrends.add(entry.getValue());
+        });
+        flowTrends.sort(Comparator.comparing(FlowTrend::getTime));
+
 
         return flowTrends;
     }

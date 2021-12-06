@@ -19,7 +19,9 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -134,44 +136,51 @@ public class HostStateService {
         List<IntervalSizeBO<LocalDateTime, Double>> intervalMemPercentBOs = memResult.getSource();
         List<IntervalSizeBO<LocalDateTime, Double>> intervalDiskPercentBOs = diskResult.getSource();
 
-        List<HostState> hostStates = new ArrayList<>();
-        int count = 0;
+        List<LocalDateTime> timeList = SegmentCount2IntervalSecondsUtil.generateTimeList(startTime, endTime, intervalSeconds);
+        Map<LocalDateTime, HostState> hostStateMap = new HashMap<>();
+        for (LocalDateTime localDateTime : timeList) {
+            HostState hostState = new HostState();
+            // 初始化
+            hostState.setTime(localDateTime);
+            hostState.setCpuPercent(0.0);
+            hostState.setMemoryPercent(0.0);
+            // todo diskPercent
+            hostState.setDiskPercent(40.0);
+            hostStateMap.put(localDateTime, hostState);
+        }
+
+        // cpu
         if (Objects.nonNull(intervalCpuPercentBOs)) {
-            intervalCpuPercentBOs.sort(Comparator.comparing(IntervalSizeBO::getEnd));
-            for (int i = 0; i < intervalCpuPercentBOs.size(); i++) {
-                HostState hs = new HostState();
-                hs.setTime(intervalCpuPercentBOs.get(i).getEnd());
-                hs.setCpuPercent(intervalCpuPercentBOs.get(i).getSize());
-                hostStates.add(hs);
+            for (IntervalSizeBO<LocalDateTime, Double> bo : intervalCpuPercentBOs) {
+                if (Objects.nonNull(hostStateMap.get(bo.getStart()))) {
+                    hostStateMap.get(bo.getStart()).setCpuPercent(bo.getSize());
+                }
             }
-
         }
 
+        // 内存
         if (Objects.nonNull(intervalMemPercentBOs)) {
-            intervalMemPercentBOs.sort(Comparator.comparing(IntervalSizeBO::getEnd));
-            count = intervalMemPercentBOs.size();
+            for (IntervalSizeBO<LocalDateTime, Double> bo : intervalMemPercentBOs) {
+                if (Objects.nonNull(hostStateMap.get(bo.getStart()))) {
+                    hostStateMap.get(bo.getStart()).setMemoryPercent(bo.getSize());
+                }
+            }
         }
 
-        // todo diskPercent
-       /* if (Objects.nonNull(intervalDiskPercentBOs)) {
-            intervalDiskPercentBOs.sort(Comparator.comparing(IntervalSizeBO::getEnd));
-            count = intervalDiskPercentBOs.size();
+        // 磁盘
+        /*if (Objects.nonNull(intervalDiskPercentBOs)) {
+            for (IntervalSizeBO<LocalDateTime, Double> bo : intervalDiskPercentBOs) {
+                if (Objects.nonNull(hostStateMap.get(bo.getStart()))) {
+                    hostStateMap.get(bo.getStart()).setDiskPercent(bo.getSize());
+                }
+            }
         }*/
 
-        for (int i = 0; i < count; i++) {
-            HostState hs = new HostState();
-
-            if (Objects.nonNull(intervalCpuPercentBOs)) {
-                hs.setTime(intervalCpuPercentBOs.get(i).getEnd());
-                hs.setCpuPercent(intervalCpuPercentBOs.get(i).getSize());
-            }
-            if (Objects.nonNull(intervalMemPercentBOs)) {
-                hs.setTime(intervalMemPercentBOs.get(i).getEnd());
-                hs.setMemoryPercent(intervalMemPercentBOs.get(i).getSize());
-            }
-            hs.setDiskPercent(40.0);
-            hostStates.add(hs);
-        }
+        List<HostState> hostStates = new ArrayList<>();
+        hostStateMap.entrySet().forEach(entry -> {
+            hostStates.add(entry.getValue());
+        });
+        hostStates.sort(Comparator.comparing(HostState::getTime));
 
         return hostStates;
     }
