@@ -59,6 +59,9 @@ public class ExtDocker{
     @ApiModelProperty("支持快速创建")
     private Boolean quickCreateSupport;
 
+    @ApiModelProperty("快照数量")
+    private Integer snapshotCount;
+
 
     /**
      * 接入方式
