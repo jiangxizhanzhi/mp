@@ -8,7 +8,7 @@ import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackDto;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowRiskCount;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowTrend;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowTrendSceneElementRequest;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowTrendRequest;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.sceneplugincollection.bo.AttackInfo;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionFlowBO;
@@ -52,7 +52,7 @@ public class FlowMonitorService {
      * @param trendRequest
      * @return
      */
-    public List<FlowTrend> getElementFlowTrend(FlowTrendSceneElementRequest trendRequest) {
+    public List<FlowTrend> getElementFlowTrend(FlowTrendRequest trendRequest) {
         log.info("{}", trendRequest);
         BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(trendRequest);
         List<String> sceneIds = CollectionUtil.toList(trendRequest.getSceneId());
@@ -68,7 +68,7 @@ public class FlowMonitorService {
      * @param trendRequest
      * @return
      */
-    public List<FlowTrend> getSceneFlowTrend(FlowTrendSceneElementRequest trendRequest) {
+    public List<FlowTrend> getSceneFlowTrend(FlowTrendRequest trendRequest) {
         log.info("{}", trendRequest);
         BaseRequestUtil.checkBaseRequestWithSceneId(trendRequest);
         List<String> sceneIds = CollectionUtil.toList(trendRequest.getSceneId());
@@ -89,9 +89,8 @@ public class FlowMonitorService {
             nodeIds = CollectionUtil.toList(baseRequest.getElementIds().get(0));
         }
 
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime endTime = now;
-        LocalDateTime startTime = now.minusMinutes(10);
+        LocalDateTime endTime = LocalDateTime.now();
+        LocalDateTime startTime = endTime.minusMinutes(10);
 
         // todo 转好
         List<String> sceneIdList = sceneIdTranslationService.translateSceneIds(sceneIds);
@@ -172,11 +171,11 @@ public class FlowMonitorService {
         ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> flowResult = scenePluginCollectionSceneService.timeIntervalSumFlowSize(sceneIdList, elementIds, startTime, endTime, segmentCount);
 
         List<IntervalSizeBO<LocalDateTime, Long>> intervalFlowSizeBOs = flowResult.getSource();
-
-        intervalFlowSizeBOs.sort(Comparator.comparing(IntervalSizeBO::getEnd));
-
         List<FlowTrend> flowTrends = new ArrayList<>();
-
+        if (Objects.isNull(intervalFlowSizeBOs)) {
+            return flowTrends;
+        }
+        intervalFlowSizeBOs.sort(Comparator.comparing(IntervalSizeBO::getEnd));
         for (int i = 0; i < intervalFlowSizeBOs.size(); i++) {
             FlowTrend ft = new FlowTrend();
             ft.setTime(intervalFlowSizeBOs.get(i).getEnd());
