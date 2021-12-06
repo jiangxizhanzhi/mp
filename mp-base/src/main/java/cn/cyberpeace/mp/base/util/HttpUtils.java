@@ -335,7 +335,8 @@ public class HttpUtils {
         // 向流量发生平台导入pcap包
         Response response = null;
         try {
-            OkHttpClient client = new OkHttpClient().newBuilder().connectTimeout(60, TimeUnit.SECONDS).build();
+            OkHttpClient client = new OkHttpClient().newBuilder().connectTimeout(60, TimeUnit.SECONDS).readTimeout(60
+                    , TimeUnit.SECONDS).writeTimeout(60, TimeUnit.SECONDS).build();
             MultipartBody.Builder builder = new MultipartBody.Builder();
             String fileName = "";
 
