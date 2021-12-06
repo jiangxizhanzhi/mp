@@ -11,7 +11,6 @@ import cn.cyberpeace.mp.cscene.dto.element.ElementRTInfo;
 import cn.cyberpeace.mp.cscene.dto.element.PortState;
 import cn.cyberpeace.mp.cscene.dto.element.ProcessState;
 import cn.cyberpeace.mp.cscene.dto.element.StatePageRequest;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowTrendRequest;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.HostStateService;
 import cn.cyberpeace.mp.cscene.service.SceneElementMonitorService;
@@ -105,14 +104,6 @@ public class ElementMonitorController {
         // todo 1201 mock data
         List<ConnectionState> connectionStates = mockConnectionStates();
         return new ListObjServiceResult(new ListObjResult(connectionStates, connectionStates.size()).asResult()).asResult();
-    }
-
-
-    @GetMapping("/test")
-    public ServiceResult test(FlowTrendRequest trendRequest) {
-        log.info("{}", trendRequest);
-        hostStateService.testTimeSeg(trendRequest.getStartTime(), trendRequest.getEndTime(), 10);
-        return ServiceResult.success(null);
     }
 
 
