@@ -91,6 +91,15 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
         return context.getRequestUser();
     }
 
+    public String getRequestUserOrg() {
+        var context = getPluginHandler().getContext();
+        if (context == null) {
+            return null;
+        }
+
+        return context.getRequestUserOrg();
+    }
+
     /**
      * 检查接入方式可用性
      */

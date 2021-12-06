@@ -9,4 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CloudScenePluginContext {
     private String requestUser;
+
+    private String requestUserOrg;
 }
