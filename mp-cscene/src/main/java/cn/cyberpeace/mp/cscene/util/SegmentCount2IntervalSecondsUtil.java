@@ -4,6 +4,8 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @Description:
@@ -40,6 +42,16 @@ public class SegmentCount2IntervalSecondsUtil {
         }*/
 
         return intervalSeconds;
+    }
+
+    public static List<LocalDateTime> generateTimeList(LocalDateTime start, LocalDateTime end, long intervalSeconds) {
+        List<LocalDateTime> timeList = new ArrayList<>();
+        while (start.isBefore(end)) {
+            timeList.add(start);
+            start = start.plusSeconds(intervalSeconds);
+        }
+        timeList.add(end);
+        return timeList;
     }
 
 }
