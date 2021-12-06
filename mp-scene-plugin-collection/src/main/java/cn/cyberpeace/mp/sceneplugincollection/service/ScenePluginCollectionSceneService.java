@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincollection.service;
 
 import cn.cyberpeace.mp.base.bo.IntervalSizeBO;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -20,31 +21,39 @@ import cn.cyberpeace.mp.situationaware.bo.AttackDateHistogramNetworkBytesBO;
 import cn.cyberpeace.mp.situationaware.bo.AttackWayAggregationBO;
 import cn.cyberpeace.mp.situationaware.bo.FlowLogBO;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
+import cn.cyberpeace.mp.situationaware.model.WazuhModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
 import cn.cyberpeace.mp.situationaware.model.enums.AggregationTypeEnum;
 import cn.cyberpeace.mp.situationaware.request.FlowAnalysisRequest;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import cn.cyberpeace.mp.situationaware.service.FlowAnalysisService;
-import cn.cyberpeace.mp.situationaware.service.NetworkTrafficService;
-import cn.cyberpeace.mp.situationaware.utils.LocalDateUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class ScenePluginCollectionSceneService {
+    private static String LOG_PREFIX = "collection service -> ";
 
     public static class GroupCountFlowField {
         public static final String LEVEL = "level";
@@ -56,85 +65,10 @@ public class ScenePluginCollectionSceneService {
     }
 
     @Autowired
-    private NetworkTrafficService networkTrafficService;
-
-    @Autowired
     private DataCollectionService dataCollectionService;
 
     @Autowired
     private FlowAnalysisService flowAnalysisService;
-
-    private List<SceneElementBO> getSrcElements(SceneHandler sceneHandler, List<String> nodeIds) {
-        List<SceneElementBO> srcElements;
-        if (nodeIds == null || nodeIds.isEmpty()) {
-            srcElements = new ArrayList<>(sceneHandler.getElementMap().values());
-        } else {
-            srcElements = new ArrayList<>();
-            nodeIds.forEach(nodeId -> {
-                var srcElement = sceneHandler.getElement(nodeId);
-                if (srcElement != null) {
-                    srcElements.add(srcElement);
-                }
-            });
-        }
-        return srcElements;
-    }
-
-    /**
-     * TODO 分组查询主机事件的聚合统计数量
-     * @param sceneIds 场景id列表，不传默认为全部
-     * @param nodeIds 节点id列表，不传默认为全部
-     * @param groupField 分组聚合字段类型
-     * @param startTime 开始时间
-     * @param endTime 结束时间
-     * @param <T> 分组聚合字段的值类型
-     * @return 字段的聚合统计数量 Map<字段值, 该字段值统计数量>
-     */
-    private <T> ServiceResult<Map<T, Integer>> groupCountHostEvent(
-            List<String> sceneIds, List<String> nodeIds, String groupField, LocalDateTime startTime, LocalDateTime endTime) {
-        return new ServiceResult<>(new HashMap<>());
-    }
-
-    /**
-     * TODO 分组查询采集流量的聚合统计数量
-     * @param sceneIds 场景id列表，不传默认为全部
-     * @param nodeIds 节点id列表，不传默认为全部
-     * @param startTime 开始时间
-     * @param endTime 结束时间
-     * @return 字段的聚合统计数量 Map<字段值, 该字段值统计数量>
-     */
-    private <T> ServiceResult<Map<T, Integer>> groupCountFlow(
-            List<String> sceneIds, List<String> nodeIds, String groupField, LocalDateTime startTime, LocalDateTime endTime) {
-        FlowAnalysisRequest request = new FlowAnalysisRequest();
-        if (GroupCountFlowField.LEVEL.equals(groupField)) {
-            request.setAggregationTypeEnum(AggregationTypeEnum.SURICATA_SEVERITY);
-        }
-        // todo 暂时先实现一个
-        var sceneHandler = new SceneHandler(sceneIds.get(0), null, false, null);
-        CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
-        if (pluginHandler == null) {
-            return new ServiceResult<>();
-        }
-        request.setGroupList(Arrays.asList(pluginHandler.getScene().getFlowCollector()));
-
-        if (startTime == null) {
-            request.setStartDateTime(sceneHandler.getScene().getCreateTime());
-        } else {
-            request.setStartDateTime(startTime);
-        }
-        if (endTime == null) {
-            request.setEndDateTime(LocalDateTime.now());
-        } else {
-            request.setEndDateTime(endTime);
-        }
-        List<AttackWayAggregationBO> result = flowAnalysisService.topByAggregationTypeEnum(request);
-        if (CollectionUtils.isEmpty(result)) {
-            return new ServiceResult<>(new HashMap<>());
-        }
-        Map<T, Integer> finalResult = new HashMap<>();
-        result.forEach(bo -> finalResult.put((T) bo.getAggregationType(), bo.getAttackNumber().intValue()));
-        return new ServiceResult<>(finalResult);
-    }
 
     public ListObjServiceResult<CollectionFlowBO> listFlows(String sceneId, FlowQueryParams queryParams) {
         var sceneHandler = new SceneHandler(sceneId, null, false, null);
@@ -176,65 +110,61 @@ public class ScenePluginCollectionSceneService {
 
     public ListObjServiceResult<CollectionHostStateBO> listHostStates(String sceneId, HostStateQueryParams queryParams) {
         var sceneHandler = new SceneHandler(sceneId, null, false, null);
-        List<SceneElementBO> srcElements = getSrcElements(sceneHandler, queryParams.getNodeIds());
-
+        // 没有采集插件
         CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         if (pluginHandler == null) {
-            return new ListObjServiceResult<>();
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
-        Map<String, SceneElementBO> agentNameElementMap = new HashMap<>();
+        // 构建探针名和节点的映射
+        List<SceneElementBO> srcElements = getSrcElements(sceneHandler, queryParams.getNodeIds());
+        Map<String, SceneElementBO> agentName2Element = new HashMap<>();
         srcElements.forEach(srcElement -> {
             var collectionElement = pluginHandler.getElement(srcElement.getId());
             if (collectionElement == null || CollectionUtils.isEmpty(collectionElement.getProbes())) {
                 return;
             }
-            agentNameElementMap.put(srcElement.getEid(), srcElement);
+            agentName2Element.put(srcElement.getEid(), srcElement);
         });
-
-        if (agentNameElementMap.isEmpty()) {
+        // 没有探针
+        if (agentName2Element.isEmpty()) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
-
+        // 构建查询参数
         var request = new WazuhMonitorEventsRequest();
         request.setPageNum(queryParams.getPage());
-        request.setPageSize(queryParams.getPageSize());
-        request.setAgentNames(new ArrayList<>(agentNameElementMap.keySet()));
-        if (queryParams.getStartTime() == null) {
-            request.setStartTime(sceneHandler.getScene().getCreateTime());
-        } else {
-            request.setStartTime(queryParams.getStartTime());
-        }
-        if (queryParams.getEndTime() == null) {
-            request.setEndTime(LocalDateTime.now());
-        } else {
-            request.setEndTime(queryParams.getEndTime());
-        }
-        var result = dataCollectionService.queryMonitorEventsWithTimeRange(request);
-
-        List<CollectionHostStateBO> hostStates = new ArrayList<>();
-        result.forEach(srcHostState -> {
-            var hostState = new CollectionHostStateBO();
-            hostStates.add(hostState);
+        // todo 暂时最多取 10000 条
+        request.setPageSize(Optional.ofNullable(queryParams.getPageSize()).orElse(10000));
+        request.setAgentNames(new ArrayList<>(agentName2Element.keySet()));
+        // 开始时间,默认为场景创建时间
+        request.setStartTime(Optional.ofNullable(queryParams.getStartTime())
+                .orElse(sceneHandler.getScene().getCreateTime())
+        );
+        // 结束时间,默认为当前时间
+        request.setEndTime(Optional.ofNullable(queryParams.getEndTime())
+                .orElse(LocalDateTime.now())
+        );
+        // 执行查询
+        List<WazuhModel> result = dataCollectionService.queryMonitorEventsWithTimeRange(request);
+        List<CollectionHostStateBO> hostStates = result.stream().map(srcHostState -> {
+            CollectionHostStateBO hostState = new CollectionHostStateBO();
             hostState.setSceneId(sceneId);
             hostState.setCpuCount(srcHostState.getCpuCount());
             hostState.setCpuPercent(srcHostState.getCpuTotalPercent());
             // 内存统一使用单位M
-            hostState.setMemoryTotal(srcHostState.getMemoryTotal() / 1000000);
-            hostState.setMemoryFree(srcHostState.getMemoryFree() / 1000000);
+            hostState.setMemoryTotal(this.byte2MB(srcHostState.getMemoryTotal()));
+            hostState.setMemoryFree(this.byte2MB(srcHostState.getMemoryFree()));
             // 磁盘统一使用单位G
-            hostState.setDiskSpace(srcHostState.getDiskSpace() / 1000000000);
+            hostState.setDiskSpace(this.byte2GB(srcHostState.getDiskSpace()));
             hostState.setMemoryPercent(srcHostState.getMemoryPercent());
             hostState.setTime(srcHostState.getTime());
-
             // todo 进程，端口，网络连接，磁盘使用率
-
-            var srcElement = agentNameElementMap.getOrDefault(srcHostState.getAgentName(), null);
+            var srcElement = agentName2Element.getOrDefault(srcHostState.getAgentName(), null);
             if (srcElement != null) {
                 hostState.setNodeId(srcElement.getId());
                 hostState.setNodeName(srcElement.getName());
             }
-        });
-
+            return hostState;
+        }).collect(Collectors.toList());
         return new ListObjServiceResult<>(new ListObjResult<>(hostStates, result.size()));
     }
 
@@ -293,6 +223,255 @@ public class ScenePluginCollectionSceneService {
         });
 
         return new ListObjServiceResult<>(new ListObjResult<>(hostEvents, result.getTotal()));
+    }
+
+    /**
+     * 安全等级分组查询采集流量的聚合统计数量
+     * @param sceneIds 场景id列表，不传默认为全部
+     * @param nodeIds 节点id列表，不传默认为全部
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @return 字段的聚合统计数量 Map<安全等级, 该字段值统计数量>
+     */
+    public ServiceResult<Map<String, Integer>> groupCountFlowByLevel(
+            List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime) {
+        return groupCountFlow(sceneIds, nodeIds, GroupCountFlowField.LEVEL, startTime, endTime);
+    }
+
+    /**
+     * 事件类型分组查询主机事件的聚合统计数量
+     * @param sceneIds 场景id列表，不传默认为全部
+     * @param nodeIds 节点id列表，不传默认为全部
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @return 字段的聚合统计数量 Map<事件类型, 该字段值统计数量>
+     */
+    public ServiceResult<Map<String, Integer>> groupCountHostEventByEventType(
+            List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime) {
+        return groupCountHostEvent(sceneIds, nodeIds, GroupCountHostEventField.EVENT_TYPE, startTime, endTime);
+    }
+
+    /**
+     * 节点名称分组查询主机事件的聚合统计数量
+     * @param sceneIds 场景id列表，不传默认为全部
+     * @param nodeIds 节点id列表，不传默认为全部
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @return 字段的聚合统计数量 Map<节点名称, 该字段值统计数量>
+     */
+    public ServiceResult<Map<String, Integer>> groupCountHostEventByNodeName(
+            List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime) {
+        return groupCountHostEvent(sceneIds, nodeIds, GroupCountHostEventField.NODE_NAME, startTime, endTime);
+    }
+
+    /**
+     * 时间区间统计流量次数
+     * @param sceneIds 场景id列表，不传默认为全部
+     * @param nodeIds 节点id列表，不传默认为全部
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @return 聚合统计结果
+     */
+    public ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> timeIntervalCountFlow(
+            List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime) {
+        return new ServiceResult<>(new ArrayList<>());
+    }
+
+    /**
+     * 时间区间统计流量大小
+     * @param sceneIds 场景id列表，不传默认为全部
+     * @param nodeIds 节点id列表，不传默认为全部
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @param intervalSeconds 每{intervalSeconds}秒统计一条数据
+     * @return 聚合统计结果
+     */
+    public ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> timeIntervalSumFlowSize(
+            List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime,
+            int intervalSeconds) {
+        // todo 暂时先实现一个
+        var sceneHandler = new SceneHandler(sceneIds.get(0), null, false, null);
+        CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        if (pluginHandler == null || pluginHandler.getScene() == null || pluginHandler.getScene().getFlowCollector() == null) {
+            log.info("{} query time interval sum flow size,sceneId:{},no collection plugin or no flowCollector", LOG_PREFIX, JsonCommon.stringify(sceneIds));
+            return new ServiceResult<>(new ArrayList<>());
+        }
+        List<SceneElementBO> elements = new ArrayList<>(sceneHandler.getElementMap().values());
+        // 根据参数筛选一下节点
+        if (CollectionUtils.isNotEmpty(nodeIds)) {
+            Set<String> effectNodeIds = new HashSet<>(nodeIds);
+            elements = elements.stream().filter(e -> effectNodeIds.contains(e.getId())).collect(Collectors.toList());
+        }
+        // 获取mac地址
+        List<String> macAddrs = this.loadMac2ElementBOMapAndGetEnableMac(new HashMap<>(), elements, pluginHandler);
+        if (CollectionUtils.isEmpty(macAddrs)) {
+            log.info("{} query time interval sum flow size,sceneIds:{},nodeIds:{},no enabled macAddr", LOG_PREFIX, JsonCommon.stringify(sceneIds), JsonCommon.stringify(nodeIds));
+            return new ServiceResult<>(new ArrayList<>());
+        }
+        // 构造参数
+        FlowAnalysisRequest request = new FlowAnalysisRequest();
+        request.setSourceMacs(macAddrs);
+        request.setGroupList(Arrays.asList(pluginHandler.getScene().getFlowCollector()));
+        request.setStartDateTime(Optional.ofNullable(startTime)
+                .orElse(sceneHandler.getScene().getCreateTime())
+        );
+        request.setEndDateTime(Optional.ofNullable(endTime)
+                .orElse(LocalDateTime.now())
+        );
+        request.setSecondsInterval(intervalSeconds);
+        // 执行查询
+        List<AttackDateHistogramNetworkBytesBO> bos = flowAnalysisService.sumNetworkBytesByDateHistogramTimestamp(request);
+        if (CollectionUtils.isEmpty(bos)) {
+            return new ServiceResult<>(new ArrayList<>());
+        }
+        List<IntervalSizeBO<LocalDateTime, Long>> result = bos.stream()
+                .map(bo -> {
+                    LocalDateTime time = TimeUtils.stringToLocalDateTime(bo.getTime(), TimeUtils.tzMillsDateTimeFormatter);
+                    return new IntervalSizeBO<LocalDateTime, Long>(time, time, bo.getNetworkBytes().longValue());
+                }).collect(Collectors.toList());
+        Collections.sort(result, Comparator.comparing(IntervalSizeBO::getStart));
+        return new ServiceResult<>(result);
+    }
+
+    /**
+     * 时间区间统计主机cpu占用平均值
+     * @param sceneIds 场景id列表，不传默认为全部
+     * @param nodeIds 节点id列表，不传默认为全部
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @param intervalSeconds 每{intervalSeconds}秒统计一条数据
+     * @return 聚合统计结果
+     */
+    public ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> timeIntervalAvgHostCpuPercent(
+            List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime,
+            int intervalSeconds) {
+        List<IntervalSizeBO<LocalDateTime, Double>> result = this.timeIntervalAvgBy(sceneIds, nodeIds, startTime, endTime, intervalSeconds, (state) -> state.getCpuPercent());
+        return new ServiceResult<>(result);
+    }
+
+    /**
+     * 时间区间统计主机内存占用平均值
+     * @param sceneIds 场景id列表，不传默认为全部
+     * @param nodeIds 节点id列表，不传默认为全部
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @param intervalNumber 间隔数量
+     * @return 聚合统计结果
+     */
+    public ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> timeIntervalAvgHostMemoryPercent(
+            List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime,
+            int intervalNumber) {
+        List<IntervalSizeBO<LocalDateTime, Double>> result = this.timeIntervalAvgBy(sceneIds, nodeIds, startTime, endTime, intervalNumber, (state) -> state.getMemoryPercent().doubleValue());
+        return new ServiceResult<>(result);
+    }
+
+    /**
+     * 时间区间统计主机磁盘占用平均值
+     * @param sceneIds 场景id列表，不传默认为全部
+     * @param nodeIds 节点id列表，不传默认为全部
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @param intervalNumber 间隔数量
+     * @return 聚合统计结果
+     */
+    public ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> timeIntervalAvgHostDiskPercent(
+            List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime,
+            int intervalNumber) {
+        // todo 主机磁盘使用率
+        return new ServiceResult<>(null);
+    }
+
+    /**
+     * @param sceneIds 场景id列表，不传默认为全部
+     * @param nodeIds 节点id列表，不传默认为全部
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @param intervalSeconds 间隔数量
+     * @param execCal 查询使用的数据
+     * @return
+     */
+    private List<IntervalSizeBO<LocalDateTime, Double>> timeIntervalAvgBy(
+            List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime,
+            int intervalSeconds, Function<CollectionHostStateBO, Double> execCal) {
+        //todo 暂时先支持一个场景的查询
+        HostStateQueryParams params = new HostStateQueryParams();
+        params.setNodeIds(nodeIds);
+        // 为计算平均值,往前多取一个周期的数据
+        params.setStartTime(startTime.minus(intervalSeconds, ChronoUnit.SECONDS));
+        params.setEndTime(endTime);
+        var queryResult = this.listHostStates(sceneIds.get(0), params).getSource();
+        if (queryResult == null || CollectionUtils.isEmpty(queryResult.getObjs())) {
+            return new ArrayList<>();
+        }
+        List<CollectionHostStateBO> list = queryResult.getObjs();
+        // 按时间升序排列
+        Collections.sort(list, Comparator.comparing(CollectionHostStateBO::getTime));
+        LocalDateTime tmpMaxTime = startTime;
+        BigDecimal tmpValue = null;
+        BigDecimal tmpSize = null;
+        List<IntervalSizeBO<LocalDateTime, Double>> result = new ArrayList<>();
+        int index = 0;
+        while (index < list.size()) {
+            CollectionHostStateBO state = list.get(index);
+            if (state.getTime().isBefore(tmpMaxTime)) {
+                // 数据属于当前周期,计算结果并指向下一个数据
+                index++;
+                double value = execCal.apply(state);
+                tmpValue = Optional.ofNullable(tmpValue)
+                        .orElse(BigDecimal.ZERO)
+                        .add(BigDecimal.valueOf(value));
+                tmpSize = Optional.ofNullable(tmpSize)
+                        .orElse(BigDecimal.ZERO)
+                        .add(BigDecimal.ONE);
+            } else {
+                // 数据不属于当前周期,记录当前周期结果,并指向下一个周期
+                // 当前周期有数据则记录
+                if (tmpValue != null) {
+                    result.add(new IntervalSizeBO<LocalDateTime, Double>(tmpMaxTime, tmpMaxTime, tmpValue.divide(tmpSize).doubleValue()));
+                }
+                // 进入下一个周期
+                tmpMaxTime = tmpMaxTime.plus(intervalSeconds, ChronoUnit.SECONDS);
+                tmpSize = null;
+                tmpValue = null;
+            }
+        }
+        for (CollectionHostStateBO state : list) {
+            if (state.getTime().isBefore(tmpMaxTime)) {
+                double value = execCal.apply(state);
+                tmpValue = Optional.ofNullable(tmpValue)
+                        .orElse(BigDecimal.ZERO)
+                        .add(BigDecimal.valueOf(value));
+                tmpSize = Optional.ofNullable(tmpSize)
+                        .orElse(BigDecimal.ZERO)
+                        .add(BigDecimal.ONE);
+            } else {
+                // 当前时间段有数据则构造
+                if (tmpValue != null) {
+                    result.add(new IntervalSizeBO<LocalDateTime, Double>(tmpMaxTime, tmpMaxTime, tmpValue.divide(tmpSize, 10, RoundingMode.HALF_UP).doubleValue()));
+                }
+                // 不论有无数据都进入下一个周期
+                tmpMaxTime = tmpMaxTime.plus(intervalSeconds, ChronoUnit.SECONDS);
+                tmpSize = null;
+                tmpValue = null;
+            }
+        }
+        return result;
+    }
+
+    private List<SceneElementBO> getSrcElements(SceneHandler sceneHandler, List<String> nodeIds) {
+        List<SceneElementBO> srcElements;
+        if (nodeIds == null || nodeIds.isEmpty()) {
+            srcElements = new ArrayList<>(sceneHandler.getElementMap().values());
+        } else {
+            srcElements = new ArrayList<>();
+            nodeIds.forEach(nodeId -> {
+                var srcElement = sceneHandler.getElement(nodeId);
+                if (srcElement != null) {
+                    srcElements.add(srcElement);
+                }
+            });
+        }
+        return srcElements;
     }
 
     private CollectionFlowBO buildCollectionFlowBOFrom(String sceneId, FlowLogBO flowLogBO, Map<String, SceneElementBO> mac2ElementMap) {
@@ -369,83 +548,40 @@ public class ScenePluginCollectionSceneService {
     }
 
     /**
-     * 安全等级分组查询采集流量的聚合统计数量
+     * TODO 分组查询主机事件的聚合统计数量
      * @param sceneIds 场景id列表，不传默认为全部
      * @param nodeIds 节点id列表，不传默认为全部
+     * @param groupField 分组聚合字段类型
      * @param startTime 开始时间
      * @param endTime 结束时间
-     * @return 字段的聚合统计数量 Map<安全等级, 该字段值统计数量>
+     * @param <T> 分组聚合字段的值类型
+     * @return 字段的聚合统计数量 Map<字段值, 该字段值统计数量>
      */
-    public ServiceResult<Map<String, Integer>> groupCountFlowByLevel(
-            List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime) {
-        return groupCountFlow(sceneIds, nodeIds, GroupCountFlowField.LEVEL, startTime, endTime);
+    private <T> ServiceResult<Map<T, Integer>> groupCountHostEvent(
+            List<String> sceneIds, List<String> nodeIds, String groupField, LocalDateTime startTime, LocalDateTime endTime) {
+        return new ServiceResult<>(new HashMap<>());
     }
 
     /**
-     * 事件类型分组查询主机事件的聚合统计数量
+     * TODO 分组查询采集流量的聚合统计数量
      * @param sceneIds 场景id列表，不传默认为全部
      * @param nodeIds 节点id列表，不传默认为全部
      * @param startTime 开始时间
      * @param endTime 结束时间
-     * @return 字段的聚合统计数量 Map<事件类型, 该字段值统计数量>
+     * @return 字段的聚合统计数量 Map<字段值, 该字段值统计数量>
      */
-    public ServiceResult<Map<String, Integer>> groupCountHostEventByEventType(
-            List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime) {
-        return groupCountHostEvent(sceneIds, nodeIds, GroupCountHostEventField.EVENT_TYPE, startTime, endTime);
-    }
-
-    /**
-     * 节点名称分组查询主机事件的聚合统计数量
-     * @param sceneIds 场景id列表，不传默认为全部
-     * @param nodeIds 节点id列表，不传默认为全部
-     * @param startTime 开始时间
-     * @param endTime 结束时间
-     * @return 字段的聚合统计数量 Map<节点名称, 该字段值统计数量>
-     */
-    public ServiceResult<Map<String, Integer>> groupCountHostEventByNodeName(
-            List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime) {
-        return groupCountHostEvent(sceneIds, nodeIds, GroupCountHostEventField.NODE_NAME, startTime, endTime);
-    }
-
-    /**
-     * 时间区间统计流量次数
-     * @param sceneIds 场景id列表，不传默认为全部
-     * @param nodeIds 节点id列表，不传默认为全部
-     * @param startTime 开始时间
-     * @param endTime 结束时间
-     * @return 聚合统计结果
-     */
-    public ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> timeIntervalCountFlow(
-            List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime) {
-        return new ServiceResult<>(new ArrayList<>());
-    }
-
-    /**
-     * 时间区间统计流量大小
-     * @param sceneIds 场景id列表，不传默认为全部
-     * @param nodeIds 节点id列表，不传默认为全部
-     * @param startTime 开始时间
-     * @param endTime 结束时间
-     * @param intervalNumber 间隔数量
-     * @return 聚合统计结果
-     */
-    public ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> timeIntervalSumFlowSize(
-            List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime,
-            int intervalNumber) {
+    private <T> ServiceResult<Map<T, Integer>> groupCountFlow(
+            List<String> sceneIds, List<String> nodeIds, String groupField, LocalDateTime startTime, LocalDateTime endTime) {
         FlowAnalysisRequest request = new FlowAnalysisRequest();
+        if (GroupCountFlowField.LEVEL.equals(groupField)) {
+            request.setAggregationTypeEnum(AggregationTypeEnum.SURICATA_SEVERITY);
+        }
         // todo 暂时先实现一个
         var sceneHandler = new SceneHandler(sceneIds.get(0), null, false, null);
         CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         if (pluginHandler == null) {
             return new ServiceResult<>();
         }
-
-        if (CollectionUtils.isNotEmpty(nodeIds)) {
-            List<SceneElementBO> elements = nodeIds.stream().map(nodeId -> sceneHandler.getElement(nodeId)).collect(Collectors.toList());
-            List<String> macAddrs = this.loadMac2ElementBOMapAndGetEnableMac(new HashMap<>(), elements, pluginHandler);
-            request.setSourceMacs(macAddrs);
-        }
-
         request.setGroupList(Arrays.asList(pluginHandler.getScene().getFlowCollector()));
 
         if (startTime == null) {
@@ -458,115 +594,20 @@ public class ScenePluginCollectionSceneService {
         } else {
             request.setEndDateTime(endTime);
         }
-
-        long totalSeconds = LocalDateUtils.toEpochSecond(request.getStartDateTime()) - LocalDateUtils.toEpochSecond(request.getEndDateTime());
-        request.setSecondsInterval((int) Math.max(1, totalSeconds / intervalNumber));
-        List<AttackDateHistogramNetworkBytesBO> bos = flowAnalysisService.sumNetworkBytesByDateHistogramTimestamp(request);
-
-        if (CollectionUtils.isEmpty(bos)) {
-            return new ServiceResult<>(new ArrayList<>());
+        List<AttackWayAggregationBO> result = flowAnalysisService.topByAggregationTypeEnum(request);
+        if (CollectionUtils.isEmpty(result)) {
+            return new ServiceResult<>(new HashMap<>());
         }
-        List<IntervalSizeBO<LocalDateTime, Long>> totalResult = bos.stream()
-                .map(bo -> {
-                    LocalDateTime time = TimeUtils.stringToLocalDateTime(bo.getTime(), TimeUtils.tzMillsDateTimeFormatter);
-                    return new IntervalSizeBO<LocalDateTime, Long>(time, time, bo.getNetworkBytes().longValue());
-                }).collect(Collectors.toList());
-        Collections.sort(totalResult, Comparator.comparing(IntervalSizeBO::getStart));
-
-        int interval = totalResult.size() / intervalNumber;
-        List<IntervalSizeBO<LocalDateTime, Long>> finalResult = new ArrayList<>();
-        for (int i = 0; i < totalResult.size(); i += interval) {
-            finalResult.add(totalResult.get(i));
-        }
+        Map<T, Integer> finalResult = new HashMap<>();
+        result.forEach(bo -> finalResult.put((T) bo.getAggregationType(), bo.getAttackNumber().intValue()));
         return new ServiceResult<>(finalResult);
     }
 
-    /**
-     * 时间区间统计主机cpu占用平均值
-     * @param sceneIds 场景id列表，不传默认为全部
-     * @param nodeIds 节点id列表，不传默认为全部
-     * @param startTime 开始时间
-     * @param endTime 结束时间
-     * @param intervalNumber 间隔数量
-     * @return 聚合统计结果
-     */
-    public ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> timeIntervalAvgHostCpuPercent(
-            List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime,
-            int intervalNumber) {
-        List<IntervalSizeBO<LocalDateTime, Double>> result = this.timeIntervalAvgBy(sceneIds, nodeIds, startTime, endTime, intervalNumber, (state) -> state.getCpuPercent());
-        return new ServiceResult<>(result);
+    private long byte2MB(long num) {
+        return num >> 20;
     }
 
-    private List<IntervalSizeBO<LocalDateTime, Double>> timeIntervalAvgBy(
-            List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime,
-            int intervalNumber, Function<CollectionHostStateBO, Double> execCal) {
-        //todo 暂时先支持一个场景的查询
-        HostStateQueryParams params = new HostStateQueryParams();
-        params.setNodeIds(nodeIds);
-        params.setStartTime(startTime);
-        params.setEndTime(endTime);
-        var queryResult = this.listHostStates(sceneIds.get(0), params).getSource();
-        List<CollectionHostStateBO> list = queryResult.getObjs();
-        if (CollectionUtils.isEmpty(list)) {
-            return new ArrayList<>();
-        }
-        Map<String, List<CollectionHostStateBO>> time2State = new HashMap<>();
-        list.forEach(state -> {
-            String timeKey = TimeUtils.localTime2yyyyMMddHHmm(state.getTime());
-            List<CollectionHostStateBO> bos = time2State.getOrDefault(timeKey, new ArrayList<>());
-            bos.add(state);
-            time2State.put(timeKey, bos);
-        });
-        List<IntervalSizeBO<LocalDateTime, Double>> totalResult = new ArrayList<>();
-        time2State.forEach((timeStr, listState) -> {
-            double totalPercent = 0;
-            for (CollectionHostStateBO state : listState) {
-                totalPercent += execCal.apply(state);
-            }
-            LocalDateTime time = TimeUtils.yyyyMMddHHmm2LocalDate(timeStr);
-            totalResult.add(new IntervalSizeBO<LocalDateTime, Double>(time, time, totalPercent / listState.size()));
-        });
-        // 按时间升序排列
-        Collections.sort(totalResult, Comparator.comparing(IntervalSizeBO::getStart));
-        int interval = Math.max(1, totalResult.size() / intervalNumber);
-        List<IntervalSizeBO<LocalDateTime, Double>> finalResult = new ArrayList<>();
-        for (int i = 0; i < totalResult.size(); i += interval) {
-            finalResult.add(totalResult.get(i));
-        }
-        return finalResult;
+    private long byte2GB(long num) {
+        return num >> 30;
     }
-
-    /**
-     * 时间区间统计主机内存占用平均值
-     * @param sceneIds 场景id列表，不传默认为全部
-     * @param nodeIds 节点id列表，不传默认为全部
-     * @param startTime 开始时间
-     * @param endTime 结束时间
-     * @param intervalNumber 间隔数量
-     * @return 聚合统计结果
-     */
-    public ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> timeIntervalAvgHostMemoryPercent(
-            List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime,
-            int intervalNumber) {
-        List<IntervalSizeBO<LocalDateTime, Double>> result = this.timeIntervalAvgBy(sceneIds, nodeIds, startTime, endTime, intervalNumber, (state) -> state.getMemoryPercent().doubleValue());
-        return new ServiceResult<>(result);
-    }
-
-    /**
-     * 时间区间统计主机磁盘占用平均值
-     *
-     * @param sceneIds       场景id列表，不传默认为全部
-     * @param nodeIds        节点id列表，不传默认为全部
-     * @param startTime      开始时间
-     * @param endTime        结束时间
-     * @param intervalNumber 间隔数量
-     * @return 聚合统计结果
-     */
-    public ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> timeIntervalAvgHostDiskPercent(
-            List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime,
-            int intervalNumber) {
-        // todo 主机磁盘使用率
-        return new ServiceResult<>(null);
-    }
-
 }

@@ -212,7 +212,7 @@ public class NetworkTrafficGroupService {
         var paramObject = new JSONObject();
 
         paramObject.put("src_vm", networkTrafficMirrorRequest.getVmInstanceIds());
-        paramObject.put("src_container", networkTrafficMirrorRequest.getVmInstanceIds());
+        paramObject.put("src_container", networkTrafficMirrorRequest.getContainerInstanceIds());
         paramObject.put("dst_node", networkTrafficMirrorRequest.getArkimeInstanceNames());
         try {
             String res = HttpUtils.sendPost(url, paramObject.toJSONString());
@@ -233,7 +233,7 @@ public class NetworkTrafficGroupService {
         var paramObject = new JSONObject();
 
         paramObject.put("src_vm", networkTrafficMirrorRequest.getVmInstanceIds());
-        paramObject.put("src_container", networkTrafficMirrorRequest.getVmInstanceIds());
+        paramObject.put("src_container", networkTrafficMirrorRequest.getContainerInstanceIds());
         paramObject.put("dst_node", networkTrafficMirrorRequest.getArkimeInstanceNames());
         try {
             String res  = HttpUtils.sendDelete(url, paramObject.toJSONString());
