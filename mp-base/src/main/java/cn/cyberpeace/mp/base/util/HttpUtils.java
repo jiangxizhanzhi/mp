@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.base.util;
 
 import com.alibaba.fastjson.JSONObject;
-import java.net.URI;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.apache.commons.collections4.MapUtils;
@@ -27,11 +26,13 @@ import org.apache.http.util.EntityUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /**
  * http工具类
@@ -334,7 +335,7 @@ public class HttpUtils {
         // 向流量发生平台导入pcap包
         Response response = null;
         try {
-            OkHttpClient client = new OkHttpClient().newBuilder().build();
+            OkHttpClient client = new OkHttpClient().newBuilder().connectTimeout(60, TimeUnit.SECONDS).build();
             MultipartBody.Builder builder = new MultipartBody.Builder();
             String fileName = "";
 
