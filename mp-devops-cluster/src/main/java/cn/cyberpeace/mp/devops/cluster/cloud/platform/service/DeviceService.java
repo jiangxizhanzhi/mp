@@ -1,43 +1,71 @@
 package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.impl.BaseOpenStackServiceImpl;
+import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
+import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.Device;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceStaticsCloudPlatformModel;
+import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Joiner;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static cn.cyberpeace.mp.devops.cluster.cloud.platform.service.BaseCloudPlatformService.CPCLOUD_DEVICE;
+import static cn.cyberpeace.mp.devops.cluster.cloud.platform.service.BaseCloudPlatformService.URL_VERSION;
+
 /**
- * 设备
+ * 靶标
  * @author wanggang
  */
-public interface DeviceService extends BaseCloudPlatformService {
+@Service
+@Slf4j
+public class DeviceService extends BaseOpenStackServiceImpl {
 
-    String DEVICE = "/device";
+    private static final String DEVICE = "/device";
+
+    public DeviceService(DevopsConfig devopsConfig, ObjectMapper objectMapper) {
+        super(devopsConfig, objectMapper);
+    }
 
     /**
      * 根据ID查询
      * @param id
      * @return
      */
-    Device findById(String id);
+    public Device findById(String id){
+        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + DEVICE + "/" + id, Device.class);
+    }
 
     /**
      * 根据ID集合查询
      * @param ids
      * @return
      */
-    DeviceCloudPlatformModel findByIds(List<Integer> ids);
+    public DeviceCloudPlatformModel findByIds(List<Integer> ids){
+        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION +  DEVICE + "/byid?ids=" + Joiner.on(",").join(ids), DeviceCloudPlatformModel.class);
+    }
 
 
     /**
      * 批量删除
-     * @param ids
+     * @param uuids
      */
-    Boolean deleteByIds(List<String> ids);
+    public Boolean deleteByIds(List<String> uuids) {
+        var jsonObject = new JSONObject();
+        jsonObject.put("uuids", uuids);
+        BaseCloudPlatformModel model = super.sendDelete(CPCLOUD_DEVICE + URL_VERSION + "/device/batch_delete",JSONObject.toJSONString(jsonObject), BaseCloudPlatformModel.class);
+        return model.isSuccess();
+    }
 
     /**
      * 靶标统计
      * @return
      */
-    DeviceStaticsCloudPlatformModel statics();
+    public DeviceStaticsCloudPlatformModel statics() {
+        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + "/statics", DeviceStaticsCloudPlatformModel.class);
+    }
 }

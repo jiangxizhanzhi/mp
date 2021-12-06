@@ -61,13 +61,13 @@ public class ImagesConverterImpl implements ImagesConverter {
 
     private UserService userService;
 
-    private ScenariosSnapshotService scenariosSnapshotService;
+    private ScenariosService scenariosService;
 
     @Autowired
     public ImagesConverterImpl(ImagesService imagesService, ImageMapper imageMapper,DeviceService deviceService,
                                ImageAuthMapper imageAuthMapper,VmService vmService,ContainerService containerService,
                                DevopsTargetService devopsTargetService,UserService userService,
-                               ScenariosSnapshotService scenariosSnapshotService) {
+                               ScenariosService scenariosService) {
         this.imagesService = imagesService;
         this.imageMapper = imageMapper;
         this.deviceService = deviceService;
@@ -76,7 +76,7 @@ public class ImagesConverterImpl implements ImagesConverter {
         this.containerService = containerService;
         this.devopsTargetService = devopsTargetService;
         this.userService = userService;
-        this.scenariosSnapshotService = scenariosSnapshotService;
+        this.scenariosService = scenariosService;
     }
 
     @Override
@@ -311,13 +311,13 @@ public class ImagesConverterImpl implements ImagesConverter {
 
     @Override
     public BaseCloudPlatformModel create(String uuid) {
-        return scenariosSnapshotService.create(new ImagesCreateInstanceCloudPlatform(uuid,
+        return scenariosService.create(new ImagesCreateInstanceCloudPlatform(uuid,
                 Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getUsername() : ""));
     }
 
     @Override
     public BaseCloudPlatformModel delete(ImagesDeleteInstanceRequest request) {
-        return scenariosSnapshotService.delete(new ImagesDeleteInstanceCloudPlatform(request.getUuid(),request.getImageType()));
+        return scenariosService.delete(new ImagesDeleteInstanceCloudPlatform(request.getUuid(),request.getImageType()));
     }
 
     /**
