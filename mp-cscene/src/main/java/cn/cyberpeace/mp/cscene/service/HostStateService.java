@@ -1,11 +1,12 @@
 package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.bo.IntervalSizeBO;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
-import cn.cyberpeace.mp.cscene.dto.request.HostStateTrendSceneElementRequest;
+import cn.cyberpeace.mp.cscene.dto.request.HostStateTrendRequest;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
@@ -15,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -82,7 +84,7 @@ public class HostStateService {
      * @param trendRequest
      * @return
      */
-    public List<HostState> getElementHostStateTrend(HostStateTrendSceneElementRequest trendRequest) {
+    public List<HostState> getElementHostStateTrend(HostStateTrendRequest trendRequest) {
         log.info("{}", trendRequest);
         BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(trendRequest);
         List<String> sceneIds = CollectionUtil.toList(trendRequest.getSceneId());
@@ -98,7 +100,7 @@ public class HostStateService {
      * @param trendRequest
      * @return
      */
-    public List<HostState> getSceneHostStateTrend(HostStateTrendSceneElementRequest trendRequest) {
+    public List<HostState> getSceneHostStateTrend(HostStateTrendRequest trendRequest) {
         log.info("{}", trendRequest);
         BaseRequestUtil.checkBaseRequestWithSceneId(trendRequest);
         List<String> sceneIds = CollectionUtil.toList(trendRequest.getSceneId());
@@ -127,25 +129,78 @@ public class HostStateService {
         ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> memResult = scenePluginCollectionSceneService.timeIntervalAvgHostMemoryPercent(sceneIdList, elementIds, startTime, endTime, segmentCount);
         ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> diskResult = scenePluginCollectionSceneService.timeIntervalAvgHostDiskPercent(sceneIdList, elementIds, startTime, endTime, segmentCount);
 
-        List<IntervalSizeBO<LocalDateTime, Double>> intervalCpuSizeBOs = cpuResult.getSource();
-        List<IntervalSizeBO<LocalDateTime, Double>> intervalMemSizeBOs = memResult.getSource();
-
-        intervalCpuSizeBOs.sort(Comparator.comparing(IntervalSizeBO::getEnd));
-        intervalMemSizeBOs.sort(Comparator.comparing(IntervalSizeBO::getEnd));
+        List<IntervalSizeBO<LocalDateTime, Double>> intervalCpuPercentBOs = cpuResult.getSource();
+        List<IntervalSizeBO<LocalDateTime, Double>> intervalMemPercentBOs = memResult.getSource();
+        List<IntervalSizeBO<LocalDateTime, Double>> intervalDiskPercentBOs = diskResult.getSource();
 
         List<HostState> hostStates = new ArrayList<>();
+        int count = 0;
+        if (Objects.nonNull(intervalCpuPercentBOs)) {
+            intervalCpuPercentBOs.sort(Comparator.comparing(IntervalSizeBO::getEnd));
+            for (int i = 0; i < intervalCpuPercentBOs.size(); i++) {
+                HostState hs = new HostState();
+                hs.setTime(intervalCpuPercentBOs.get(i).getEnd());
+                hs.setCpuPercent(intervalCpuPercentBOs.get(i).getSize());
+                hostStates.add(hs);
+            }
 
-        for (int i = 0; i < intervalCpuSizeBOs.size(); i++) {
+        }
+
+        if (Objects.nonNull(intervalMemPercentBOs)) {
+            intervalMemPercentBOs.sort(Comparator.comparing(IntervalSizeBO::getEnd));
+            count = intervalMemPercentBOs.size();
+        }
+
+        // todo diskPercent
+       /* if (Objects.nonNull(intervalDiskPercentBOs)) {
+            intervalDiskPercentBOs.sort(Comparator.comparing(IntervalSizeBO::getEnd));
+            count = intervalDiskPercentBOs.size();
+        }*/
+
+        for (int i = 0; i < count; i++) {
             HostState hs = new HostState();
-            hs.setTime(intervalCpuSizeBOs.get(i).getEnd());
-            hs.setCpuPercent(intervalCpuSizeBOs.get(i).getSize());
-            hs.setMemoryPercent(intervalMemSizeBOs.get(i).getSize());
-            // todo 磁盘利用率
+
+            if (Objects.nonNull(intervalCpuPercentBOs)) {
+                hs.setTime(intervalCpuPercentBOs.get(i).getEnd());
+                hs.setCpuPercent(intervalCpuPercentBOs.get(i).getSize());
+            }
+            if (Objects.nonNull(intervalMemPercentBOs)) {
+                hs.setTime(intervalMemPercentBOs.get(i).getEnd());
+                hs.setMemoryPercent(intervalMemPercentBOs.get(i).getSize());
+            }
             hs.setDiskPercent(40.0);
             hostStates.add(hs);
         }
 
         return hostStates;
+    }
+
+
+    public void testTimeSeg(LocalDateTime start, LocalDateTime end, int segmentCount) {
+        if (segmentCount < 1) {
+            throw new MpRuntimeException("分段数不能小于1");
+        }
+
+        if (end.isBefore(start)) {
+            throw new MpRuntimeException("结束时间不可早于开始时间");
+        }
+
+        Duration duration = Duration.between(start, end);
+        Long seconds = duration.toSeconds();
+        // todo 时间间隔问题
+        Long intervalSeconds = seconds / (segmentCount - 1);
+
+        List<LocalDateTime> timeSegs = new ArrayList<>();
+        for (int i = 0; i < segmentCount - 1; i++) {
+            timeSegs.add(start);
+            start = start.plusSeconds(intervalSeconds);
+        }
+
+        timeSegs.add(end);
+
+        for (int i = 0; i < timeSegs.size(); i++) {
+            log.info(" i:{}, intervalSeconds:{}, timeSegs:{}", i, intervalSeconds, timeSegs.get(i));
+        }
     }
 
 }

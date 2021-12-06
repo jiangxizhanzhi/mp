@@ -7,7 +7,7 @@ import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackDto;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowRiskCount;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowTrend;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowTrendSceneElementRequest;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowTrendRequest;
 import cn.cyberpeace.mp.cscene.service.FlowMonitorService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
 import io.swagger.annotations.Api;
@@ -45,7 +45,7 @@ public class FlowMonitorController {
      */
     @ApiOperation(value = "场景流量趋势图")
     @GetMapping("/scene_trend")
-    public ServiceResult<List<FlowTrend>> getSceneFlowTrend(FlowTrendSceneElementRequest flowTrendRequest) {
+    public ServiceResult<List<FlowTrend>> getSceneFlowTrend(FlowTrendRequest flowTrendRequest) {
         log.info("flowTrendRequest:{}", flowTrendRequest);
         List<FlowTrend> flowTrends = flowMonitorService.getSceneFlowTrend(flowTrendRequest);
 
@@ -60,7 +60,7 @@ public class FlowMonitorController {
      */
     @ApiOperation(value = "节点流量趋势图")
     @GetMapping("/element_trend")
-    public ServiceResult<List<FlowTrend>> getElementFlowTrend(FlowTrendSceneElementRequest flowTrendRequest) {
+    public ServiceResult<List<FlowTrend>> getElementFlowTrend(FlowTrendRequest flowTrendRequest) {
         log.info("flowTrendRequest:{}", flowTrendRequest);
         List<FlowTrend> flowTrends = flowMonitorService.getElementFlowTrend(flowTrendRequest);
 

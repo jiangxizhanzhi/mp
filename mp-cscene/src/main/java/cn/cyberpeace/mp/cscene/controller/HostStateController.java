@@ -4,7 +4,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
-import cn.cyberpeace.mp.cscene.dto.request.HostStateTrendSceneElementRequest;
+import cn.cyberpeace.mp.cscene.dto.request.HostStateTrendRequest;
 import cn.cyberpeace.mp.cscene.service.HostStateService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -39,7 +39,7 @@ public class HostStateController {
      */
     @ApiOperation(value = "场景主机状态趋势图")
     @GetMapping("/scene_trend")
-    public ServiceResult<List<HostState>> getSceneHostStateTrend(HostStateTrendSceneElementRequest hostStateTrendRequest) {
+    public ServiceResult<List<HostState>> getSceneHostStateTrend(HostStateTrendRequest hostStateTrendRequest) {
         List<HostState> hostStates = hostStateService.getSceneHostStateTrend(hostStateTrendRequest);
 
         return ServiceResult.success(hostStates);
@@ -54,7 +54,7 @@ public class HostStateController {
      */
     @ApiOperation(value = "节点主机状态趋势图")
     @GetMapping("/element_trend")
-    public ServiceResult<List<HostState>> getElementHostStateTrend(HostStateTrendSceneElementRequest hostStateTrendRequest) {
+    public ServiceResult<List<HostState>> getElementHostStateTrend(HostStateTrendRequest hostStateTrendRequest) {
         List<HostState> hostStates = hostStateService.getElementHostStateTrend(hostStateTrendRequest);
 
         return ServiceResult.success(hostStates);

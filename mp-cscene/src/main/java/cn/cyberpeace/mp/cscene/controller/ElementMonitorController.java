@@ -11,7 +11,9 @@ import cn.cyberpeace.mp.cscene.dto.element.ElementRTInfo;
 import cn.cyberpeace.mp.cscene.dto.element.PortState;
 import cn.cyberpeace.mp.cscene.dto.element.ProcessState;
 import cn.cyberpeace.mp.cscene.dto.element.StatePageRequest;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowTrendRequest;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
+import cn.cyberpeace.mp.cscene.service.HostStateService;
 import cn.cyberpeace.mp.cscene.service.SceneElementMonitorService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -42,6 +44,9 @@ public class ElementMonitorController {
     @Autowired
     private SceneElementMonitorService sceneElementMonitorService;
 
+    @Autowired
+    private HostStateService hostStateService;
+
     /**
      * elementIds不能为空，如果为多个值，默认只取第一个
      *
@@ -67,7 +72,7 @@ public class ElementMonitorController {
     @GetMapping("/rtinfo")
     public ServiceResult<ElementRTInfo> getElementRTInfo(BaseSceneElementRequest baseRequest) {
 //        ElementRTInfo rtInfo = sceneElementMonitorService.getElementRTInfo(baseRequest);
-        // todo 实时状态
+        // todo 1201 mock data
         return ServiceResult.success(mockElementRTInfo());
     }
 
@@ -77,7 +82,7 @@ public class ElementMonitorController {
     public ListObjServiceResult<ProcessState> pageProcessesStates(StatePageRequest pageRequest) {
         log.info("{}", pageRequest);
         pageRequest.ensure();
-        // todo 1201
+        // todo 1201 mock data
         List<ProcessState> processStates = mockProcessStates();
         return new ListObjServiceResult(new ListObjResult(processStates, processStates.size()).asResult()).asResult();
     }
@@ -87,7 +92,7 @@ public class ElementMonitorController {
     public ListObjServiceResult<PortState> pagePortStates(StatePageRequest pageRequest) {
         log.info("{}", pageRequest);
         pageRequest.ensure();
-        // todo 1201
+        // todo 1201 mock data
         List<PortState> portStates = mockPortStates();
         return new ListObjServiceResult(new ListObjResult(portStates, portStates.size()).asResult()).asResult();
     }
@@ -97,9 +102,17 @@ public class ElementMonitorController {
     public ListObjServiceResult<ConnectionState> pageConnectionStates(StatePageRequest pageRequest) {
         log.info("{}", pageRequest);
         pageRequest.ensure();
-        // todo 1201
+        // todo 1201 mock data
         List<ConnectionState> connectionStates = mockConnectionStates();
         return new ListObjServiceResult(new ListObjResult(connectionStates, connectionStates.size()).asResult()).asResult();
+    }
+
+
+    @GetMapping("/test")
+    public ServiceResult test(FlowTrendRequest trendRequest) {
+        log.info("{}", trendRequest);
+        hostStateService.testTimeSeg(trendRequest.getStartTime(), trendRequest.getEndTime(), 10);
+        return ServiceResult.success(null);
     }
 
 
