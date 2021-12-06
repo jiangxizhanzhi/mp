@@ -51,6 +51,11 @@ public class SceneHandlerUtils {
                 if (stopCallback != null) {
                     stopCallback.run();
                 }
+            }, () -> {
+                errorFLow(flow, "Flow execute error");
+                if (Objects.nonNull(stopCallback)) {
+                    stopCallback.run();
+                }
             });
         } catch (Exception e) {
             log.error("start flow for taskId:[{}] error", taskId, e);
