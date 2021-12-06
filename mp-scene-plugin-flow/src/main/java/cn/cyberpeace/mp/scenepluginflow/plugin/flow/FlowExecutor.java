@@ -80,15 +80,15 @@ public class FlowExecutor {
         return result.getData().getId();
     }
 
-    public void startFlow(String taskId, Runnable stopCallback) {
-        var result = flowService3.actuator(taskId, TaskActionEnum.START.toValue(), stopCallback);
+    public void startFlow(String taskId, Runnable stopCallback, Runnable errorCallback) {
+        var result = flowService3.actuator(taskId, TaskActionEnum.START.toValue(), stopCallback, errorCallback);
         if (!result.isSuccess()) {
             throw new MpRuntimeException(result.getServiceCode());
         }
     }
 
     public void stopFlow(String taskId) {
-        var result = flowService3.actuator(taskId, TaskActionEnum.STOP.toValue(), null);
+        var result = flowService3.actuator(taskId, TaskActionEnum.STOP.toValue(), null, null);
         if (!result.isSuccess()) {
             throw new MpRuntimeException(result.getServiceCode());
         }

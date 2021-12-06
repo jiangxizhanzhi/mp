@@ -127,7 +127,7 @@ public class FlowTaskController extends BaseModelController<FlowTaskModel, Query
     @ApiOperation("执行流量任务")
     @PostMapping("/actuator/{id}/{taskAction}")
     public ServiceResult<Boolean> actuator(@PathVariable String id, @PathVariable int taskAction) {
-        return flowTaskService.actuator(id, taskAction, null);
+        return flowTaskService.actuator(id, taskAction, null, null);
     }
 
 }

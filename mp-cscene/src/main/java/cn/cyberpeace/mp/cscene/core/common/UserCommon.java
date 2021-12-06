@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.cscene.core.common;
 
+import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import lombok.extern.slf4j.Slf4j;
@@ -8,6 +10,8 @@ import org.apache.commons.lang3.StringUtils;
 
 @Slf4j
 public class UserCommon {
+
+    private static UserService userService;
 
     public static UserModel getCurrentUser() {
         UserModel user = null;
@@ -37,5 +41,18 @@ public class UserCommon {
         return getUser(context.getAccessUserId());
     }
 
-    private UserCommon() {}
+    public static UserDto getUserDetail(String userId) {
+        UserDto user = null;
+        try {
+            user = userService.getUserDto(userId);
+        } catch (Exception e) {
+            log.error("Get user[{}] failed: ", userId, e);
+        }
+        return user;
+    }
+
+    @SuppressWarnings({"java:S3010"})
+    private UserCommon(UserService userService) {
+        UserCommon.userService = userService;
+    }
 }

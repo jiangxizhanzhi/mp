@@ -428,30 +428,27 @@ public class InitiateHandler extends HandlerCommon {
         cloudElement.setResourceId(StringUtils.EMPTY);
         // 是否需要辅助网络
         cloudElement.setAuxiliaryNetworkOn(requireAuxiliaryNetwork(cloudElement));
-        if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH)) {
-            // 统一使用辅助网络
-            cloudElement.setAuxiliaryNetworkCidr(cloudElement.getCidr());
-            cloudElement.setAuxiliaryNetworkGateway(cloudElement.getGateway());
-            cloudElement.setAuxiliaryNetworkDnsNameservers(cloudElement.getDnsNameservers());
-            cloudElement.setAuxiliaryNetworkDhcp(cloudElement.getDhcp());
-            cloudElement.setAuxiliaryNetworkAllocationPools(cloudElement.getAllocationPools());
-            cloudElement.setAuxiliaryNetworkVlan(cloudElement.getVlan());
-            cloudElement.setAuxiliaryNetworkVlanId(cloudElement.getVlanId());
-        }
+
+        // 辅助网络参数设置
+        cloudElement.setAuxiliaryNetworkCidr(cloudElement.getCidr());
+        cloudElement.setAuxiliaryNetworkGateway(cloudElement.getGateway());
+        cloudElement.setAuxiliaryNetworkDnsNameservers(cloudElement.getDnsNameservers());
+        cloudElement.setAuxiliaryNetworkDhcp(cloudElement.getDhcp());
+        cloudElement.setAuxiliaryNetworkAllocationPools(cloudElement.getAllocationPools());
+        cloudElement.setAuxiliaryNetworkVlan(cloudElement.getVlan());
+        cloudElement.setAuxiliaryNetworkVlanId(cloudElement.getVlanId());
 
         // 初始化辅助网络
         initiateAuxiliaryNetwork(cloudElement);
 
-        if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH)) {
-            // 同步设置辅助网络信息
-            cloudElement.setCidr(cloudElement.getAuxiliaryNetworkCidr());
-            cloudElement.setGateway(cloudElement.getAuxiliaryNetworkGateway());
-            cloudElement.setDnsNameservers(cloudElement.getAuxiliaryNetworkDnsNameservers());
-            cloudElement.setDhcp(cloudElement.getAuxiliaryNetworkDhcp());
-            cloudElement.setAllocationPools(cloudElement.getAuxiliaryNetworkAllocationPools());
-            cloudElement.setVlan(cloudElement.getAuxiliaryNetworkVlan());
-            cloudElement.setVlanId(cloudElement.getAuxiliaryNetworkVlanId());
-        }
+        // 同步设置辅助网络信息
+        cloudElement.setCidr(cloudElement.getAuxiliaryNetworkCidr());
+        cloudElement.setGateway(cloudElement.getAuxiliaryNetworkGateway());
+        cloudElement.setDnsNameservers(cloudElement.getAuxiliaryNetworkDnsNameservers());
+        cloudElement.setDhcp(cloudElement.getAuxiliaryNetworkDhcp());
+        cloudElement.setAllocationPools(cloudElement.getAuxiliaryNetworkAllocationPools());
+        cloudElement.setVlan(cloudElement.getAuxiliaryNetworkVlan());
+        cloudElement.setVlanId(cloudElement.getAuxiliaryNetworkVlanId());
 
         // 虚拟机/容器 默认开启管理网络
 //        if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)
