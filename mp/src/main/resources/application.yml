@@ -135,6 +135,9 @@ management:
   info:
     git:
       mode: full
+  health:
+    elasticsearch:
+      enabled: false
 
 ---
 spring:
