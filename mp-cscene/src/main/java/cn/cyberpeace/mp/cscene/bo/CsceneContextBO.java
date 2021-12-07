@@ -35,7 +35,7 @@ public class CsceneContextBO {
         var sceneContext = new SceneContextBO();
         Map<String, Object> plugins = new HashMap<>();
         var cloudScenePluginContext = new CloudScenePluginContext();
-        if (StringUtils.isEmpty(accessUserId)) {
+        if (StringUtils.isNotEmpty(accessUserId)) {
             cloudScenePluginContext.setRequestUser(accessUserId);
             var user = UserCommon.getUserDetail(accessUserId);
             if (user != null) {
