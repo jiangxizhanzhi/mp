@@ -36,6 +36,8 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -326,7 +328,10 @@ public class ScenePluginCollectionSceneService {
         }
         List<IntervalSizeBO<LocalDateTime, Long>> result = bos.stream()
                 .map(bo -> {
-                    LocalDateTime time = TimeUtils.stringToLocalDateTime(bo.getTime(), TimeUtils.tzMillsDateTimeFormatter);
+                    LocalDateTime time = TimeUtils.stringToLocalDateTime(bo.getTime(), TimeUtils.tzMillsDateTimeFormatter)
+                            .atZone(ZoneOffset.UTC)
+                            .withZoneSameInstant(ZoneId.systemDefault())
+                            .toLocalDateTime();
                     return new IntervalSizeBO<LocalDateTime, Long>(time, time, bo.getNetworkBytes().longValue());
                 }).collect(Collectors.toList());
         Collections.sort(result, Comparator.comparing(IntervalSizeBO::getStart));
