@@ -12,10 +12,11 @@ import cn.cyberpeace.mp.flow.service.impl.FlowTaskServiceImpl;
 import cn.cyberpeace.mp.scenepluginflow.bo.base.Flow;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.stream.Collectors;
+import java.util.ArrayList;
 
 @Data
 @Component
@@ -45,7 +46,7 @@ public class FlowExecutor {
     }
 
     public String createFlow(String executorId, String targetNetId, String flowId, String fromIps, String toIps,
-                             Integer delay, Integer count, Integer interval, Flow flow) {
+                             Integer delay, Integer count, Integer interval, Flow flow, String instanceIp) {
         var addFlowTaskRequest = new AddFlowTaskRequest();
         addFlowTaskRequest.setActuatorId(executorId);
         addFlowTaskRequest.setNetworkId(targetNetId);
@@ -53,18 +54,30 @@ public class FlowExecutor {
         addFlowTaskRequest.setOriginIps(fromIps);
         addFlowTaskRequest.setTargetIps(toIps);
         addFlowTaskRequest.setTitle(TextUtils.uuid());
+        addFlowTaskRequest.setScriptParamModels(new ArrayList<>());
+        boolean ipParamLoaded = false;
         if (CollectionUtils.isNotEmpty(flow.getScriptParamModels())) {
-            addFlowTaskRequest.setScriptParamModels(flow.getScriptParamModels().stream()
-                    .map(param -> {
-                        FlowScriptParamModel model = new FlowScriptParamModel();
-                        model.setFlowId(flowId);
-                        model.setParamDesc(param.getParamDesc());
-                        model.setParamKey(param.getParamKey());
-                        model.setParamValue(param.getParamValue());
-                        model.setParamType(param.getParamType());
-                        return model;
-                    }).collect(Collectors.toList())
-            );
+            for (Flow.FlowScriptParam param : flow.getScriptParamModels()) {
+                FlowScriptParamModel model = new FlowScriptParamModel();
+                model.setFlowId(flowId);
+                model.setParamDesc(param.getParamDesc());
+                model.setParamKey(param.getParamKey());
+                model.setParamType(param.getParamType());
+                if (StringUtils.equalsIgnoreCase("ip", param.getParamKey())) {
+                    ipParamLoaded = true;
+                    model.setParamValue(instanceIp);
+                } else {
+                    model.setParamValue(param.getParamValue());
+                }
+                addFlowTaskRequest.getScriptParamModels().add(model);
+            }
+        }
+        if (!ipParamLoaded) {
+            FlowScriptParamModel model = new FlowScriptParamModel();
+            model.setFlowId(flowId);
+            model.setParamKey("ip");
+            model.setParamValue(instanceIp);
+            addFlowTaskRequest.getScriptParamModels().add(model);
         }
         if (DEFAULT_INSTANCE == null) {
             this.initDefaultInstance();
