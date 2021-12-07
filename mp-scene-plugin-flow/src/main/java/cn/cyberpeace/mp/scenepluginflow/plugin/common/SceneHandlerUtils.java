@@ -140,10 +140,11 @@ public class SceneHandlerUtils {
         preparingFLow(flow);
         final String flowNetworkId = networkId;
         final String flowIp = ip;
+        String finalIp = ip;
         Callable<Boolean> start = () -> {
             String flowTaskId;
             try {
-                flowTaskId = flowExecutor.createFlow(executorId, flowNetworkId, flowId, StringUtils.EMPTY, flowIp, null, null, null, flow);
+                flowTaskId = flowExecutor.createFlow(executorId, flowNetworkId, flowId, StringUtils.EMPTY, flowIp, null, null, null, flow, finalIp);
                 log.info("flowExecutor createFlow success:[{}]", flowTaskId);
             } catch (Exception e) {
                 errorFLow(flow, e.getMessage());
