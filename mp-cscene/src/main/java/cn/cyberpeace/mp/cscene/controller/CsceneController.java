@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -135,6 +136,7 @@ public class CsceneController implements BaseModelListControllerBase {
     @PostMapping(value = "/app_instance")
     public ServiceResult<CsceneInstanceBO> createAppInstance(
             @RequestParam(required = false) String id, @RequestBody(required = false) CsceneCreateInstanceRequest request) {
+        log.info("app_instance params,id:{},request:{}", id, JsonCommon.stringify(request));
         request = formatCreateInstanceRequest(request, id);
         return modelService.createAppInstance(request.getId(), false, request.toCsceneInstanceCreateContextBO()).asResult();
     }
