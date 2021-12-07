@@ -21,6 +21,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -193,10 +194,11 @@ public class FlowMonitorService {
         }
 
         // flow
-        if (Objects.nonNull(intervalFlowSizeBOs)) {
-            for (IntervalSizeBO<LocalDateTime, Long> bo : intervalFlowSizeBOs) {
-                if (Objects.nonNull(flowTrendMap.get(bo.getStart()))) {
-                    flowTrendMap.get(bo.getStart()).setDataSize(bo.getSize());
+        for (IntervalSizeBO<LocalDateTime, Long> bo : intervalFlowSizeBOs) {
+            if (Objects.nonNull(bo.getStart())) {
+                FlowTrend flowTrend = getClosest(bo.getStart(), flowTrendMap);
+                if (Objects.nonNull(flowTrend)) {
+                    flowTrend.setDataSize(bo.getSize());
                 }
             }
         }
@@ -206,8 +208,23 @@ public class FlowMonitorService {
         });
         flowTrends.sort(Comparator.comparing(FlowTrend::getTime));
 
-
         return flowTrends;
+    }
+
+
+    private FlowTrend getClosest(LocalDateTime time, Map<LocalDateTime, FlowTrend> flowTrendMap) {
+        LocalDateTime closestTime = null;
+        long durationSeconds = Long.MAX_VALUE;
+        for (Map.Entry<LocalDateTime, FlowTrend> entry : flowTrendMap.entrySet()) {
+            Duration duration = Duration.between(entry.getKey(), time);
+            long duraSecs = Math.abs(duration.toSeconds());
+            if (durationSeconds > duraSecs) {
+                durationSeconds = duraSecs;
+                closestTime = entry.getKey();
+            }
+        }
+        log.info("time:{}, closestTime:{}", time, closestTime);
+        return flowTrendMap.get(closestTime);
     }
 
 }
