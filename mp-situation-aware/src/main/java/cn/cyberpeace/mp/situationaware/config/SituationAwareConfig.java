@@ -8,9 +8,6 @@ import org.springframework.context.annotation.Configuration;
 @Data
 public class SituationAwareConfig {
 
-    @Value("${mp.situationaware.group-url}")
-    private String groupUrl;
-
     @Value("${mp.situationaware.arkime.username}")
     private String userName;
 

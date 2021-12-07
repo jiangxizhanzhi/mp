@@ -81,7 +81,6 @@ mp:
     cp-url: http://${ip.cp}:11111 #云平台地址
     hostname: controller  #主机名称
   situationaware:
-    group-url: http://${ip.moloch}:5079/v1/scenes
     arkime:
       cpcloud-container-create-url: http://${ip.cp}:11111/v1
       cpcloud-network-mirror-url: http://${ip.cp}:11111/cpcloud/sdn_app/v1
