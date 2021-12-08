@@ -12,7 +12,6 @@ import cn.cyberpeace.mp.devops.cluster.request.queryparam.ScreenrecordQueryParam
 import cn.cyberpeace.mp.devops.cluster.response.*;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -39,8 +38,8 @@ import java.util.Objects;
 @Slf4j
 public class ScreenrecordServiceImpl extends BaseOpenStackServiceImpl {
 
-    public ScreenrecordServiceImpl(DevopsConfig devopsConfig, ObjectMapper objectMapper) {
-        super(devopsConfig, objectMapper);
+    public ScreenrecordServiceImpl(DevopsConfig devopsConfig) {
+        super(devopsConfig);
     }
 
     @Value("${mp.devops.cp-url}")

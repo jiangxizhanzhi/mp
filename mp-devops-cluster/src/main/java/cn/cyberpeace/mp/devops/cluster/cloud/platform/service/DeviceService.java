@@ -7,7 +7,6 @@ import cn.cyberpeace.mp.devops.cluster.model.Device;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceStaticsCloudPlatformModel;
 import com.alibaba.fastjson.JSONObject;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Joiner;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,8 +26,8 @@ public class DeviceService extends BaseOpenStackServiceImpl {
 
     private static final String DEVICE = "/device";
 
-    public DeviceService(DevopsConfig devopsConfig, ObjectMapper objectMapper) {
-        super(devopsConfig, objectMapper);
+    public DeviceService(DevopsConfig devopsConfig) {
+        super(devopsConfig);
     }
 
     /**

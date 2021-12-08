@@ -9,7 +9,6 @@ import cn.cyberpeace.mp.devops.cluster.model.ContainerActionCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.ContainerCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.ContainerModel;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -33,8 +32,8 @@ public class ContainerService extends BaseOpenStackServiceImpl {
      */
     private static final String CONTAINERS = "/containers";
 
-    public ContainerService(DevopsConfig devopsConfig, ObjectMapper objectMapper) {
-        super(devopsConfig,objectMapper);
+    public ContainerService(DevopsConfig devopsConfig) {
+        super(devopsConfig);
     }
 
     /**

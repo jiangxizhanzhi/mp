@@ -9,7 +9,6 @@ import cn.cyberpeace.mp.devops.cluster.model.HypervisorCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.HypervisorStatisticsCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.HypervisorWeightAndMaxInstanceCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.Hypervisor;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -31,8 +30,8 @@ public class HypervisorService extends BaseOpenStackServiceImpl {
 
     public static final String HYPERVISORS = "/hypervisors";
 
-    public HypervisorService(DevopsConfig devopsConfig, ObjectMapper objectMapper) {
-        super(devopsConfig, objectMapper);
+    public HypervisorService(DevopsConfig devopsConfig) {
+        super(devopsConfig);
     }
 
     /**

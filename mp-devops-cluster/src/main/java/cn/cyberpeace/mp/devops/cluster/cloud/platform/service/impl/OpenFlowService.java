@@ -7,7 +7,6 @@ import cn.cyberpeace.mp.devops.cluster.request.OpenflowActionRequest;
 import cn.cyberpeace.mp.devops.cluster.response.OpenflowActionResponse;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -26,8 +25,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class OpenFlowService extends BaseOpenStackServiceImpl {
 
-    public OpenFlowService(DevopsConfig devopsConfig, ObjectMapper objectMapper) {
-        super(devopsConfig, objectMapper);
+    public OpenFlowService(DevopsConfig devopsConfig) {
+        super(devopsConfig);
     }
 
     /**

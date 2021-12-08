@@ -4,7 +4,6 @@ import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.impl.BaseOpenStack
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.*;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -20,8 +19,8 @@ public class ScenariosService extends BaseOpenStackServiceImpl {
 
     private static final String SCENARIOS = "/scenarios";
 
-    public ScenariosService(DevopsConfig devopsConfig, ObjectMapper objectMapper) {
-        super(devopsConfig, objectMapper);
+    public ScenariosService(DevopsConfig devopsConfig) {
+        super(devopsConfig);
     }
 
     /**

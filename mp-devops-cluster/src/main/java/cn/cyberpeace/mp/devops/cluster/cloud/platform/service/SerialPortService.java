@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.impl.BaseOpenStackServiceImpl;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.SerialPortCloudPlatform;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -18,8 +17,8 @@ import static cn.cyberpeace.mp.devops.cluster.cloud.platform.service.BaseCloudPl
 @Slf4j
 public class SerialPortService extends BaseOpenStackServiceImpl {
 
-    public SerialPortService(DevopsConfig devopsConfig, ObjectMapper objectMapper) {
-        super(devopsConfig, objectMapper);
+    public SerialPortService(DevopsConfig devopsConfig) {
+        super(devopsConfig);
     }
 
     /**
