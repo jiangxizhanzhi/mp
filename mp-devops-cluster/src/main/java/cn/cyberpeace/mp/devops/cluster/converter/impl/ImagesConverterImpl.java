@@ -363,7 +363,6 @@ public class ImagesConverterImpl implements ImagesConverter {
         if (Objects.nonNull(extVm) && CollectionUtils.isNotEmpty(request.getAccessProtocolList())) {
             extVm.setAccessProtocols(request.getAccessProtocolList());
         }
-        device.setExtVm(extVm);
         device.setExtSystemInfo(request.getExtSystemInfo());
         ExtImageInfo extImageInfo = request.getExtImageInfo();
         if (Objects.nonNull(extImageInfo) && StringUtils.isNotBlank(extImageInfo.getUploadType())
@@ -377,6 +376,12 @@ public class ImagesConverterImpl implements ImagesConverter {
                 && CollectionUtils.isNotEmpty(request.getAccessProtocolList())){
            extDocker.setAccessProtocols(request.getAccessProtocolList());
         }
+
+        if (CollectionUtils.isEmpty(request.getAccessProtocolList())){
+            extVm.setAccessProtocols(Lists.newArrayList());
+            extDocker.setAccessProtocols(Lists.newArrayList());
+        }
+        device.setExtVm(extVm);
         device.setExtDocker(extDocker);
         return device;
     }
