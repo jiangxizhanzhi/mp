@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.NetworkUtils;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.FlavorService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ImagesService;
@@ -433,5 +434,12 @@ public class ImagesController {
     public ServiceResult async(@RequestBody ImageAsyncRequest request){
         Integer result = imagesConverter.async(request);
         return result > 0 ? ServiceResult.successful() : ServiceResult.fail("");
+    }
+
+    @ApiOperation("检验IP+端口是否可连接")
+    @GetMapping("/check-port-connectable")
+    public Result checkPortConnectable(ImageCheckPortRequest request){
+        boolean pass = NetworkUtils.checkPortConnectable(request.getHost(),request.getPort(),1000);
+        return new Result(pass);
     }
 }
