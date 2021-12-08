@@ -613,6 +613,8 @@ public class CreateHandler extends HandlerCommon {
         var srcElement = cloudElement.getSrcElement();
         var createData = new VirtualMachineCreateData();
         createData.setRequestUser(TextUtils.emptyNull(getRequestUser()));
+        createData.setDepartment(Optional.ofNullable(getRequestUserOrg()).orElse(StringUtils.EMPTY));
+        createData.setScene(Optional.ofNullable(getPluginHandler().getSrcScene().getName()).orElse(StringUtils.EMPTY));
         createData.setName(genResourceName(srcElement.getEid()));
         createData.setImage(cloudElement.getImage());
         createData.setCpu(IntUtils.zeroNull(srcElement.getCpu()));
@@ -635,6 +637,8 @@ public class CreateHandler extends HandlerCommon {
         var srcElement = cloudElement.getSrcElement();
         var createData = new ContainerCreateData();
         createData.setRequestUser(TextUtils.emptyNull(getRequestUser()));
+        createData.setDepartment(Optional.ofNullable(getRequestUserOrg()).orElse(StringUtils.EMPTY));
+        createData.setScene(Optional.ofNullable(getPluginHandler().getSrcScene().getName()).orElse(StringUtils.EMPTY));
         createData.setName(genResourceName(srcElement.getEid()));
         createData.setImage(cloudElement.getImage());
         createData.setCpu(IntUtils.zeroNull(srcElement.getCpu()));
@@ -656,6 +660,8 @@ public class CreateHandler extends HandlerCommon {
     protected void createEntityNode(CloudPluginSceneElementBO cloudElement) {
         var createData = new EntityNodeCreateData();
         createData.setRequestUser(TextUtils.emptyNull(getRequestUser()));
+        createData.setDepartment(Optional.ofNullable(getRequestUserOrg()).orElse(StringUtils.EMPTY));
+        createData.setScene(Optional.ofNullable(getPluginHandler().getSrcScene().getName()).orElse(StringUtils.EMPTY));
         createData.setName(cloudElement.getImage());
         createData.setInterfaces(CollectionUtils.emptyNull(genEntityInterfaces(cloudElement)));
         var entityNode = enClient.create(createData);

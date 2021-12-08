@@ -36,6 +36,8 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -326,7 +328,10 @@ public class ScenePluginCollectionSceneService {
         }
         List<IntervalSizeBO<LocalDateTime, Long>> result = bos.stream()
                 .map(bo -> {
-                    LocalDateTime time = TimeUtils.stringToLocalDateTime(bo.getTime(), TimeUtils.tzMillsDateTimeFormatter);
+                    LocalDateTime time = TimeUtils.stringToLocalDateTime(bo.getTime(), TimeUtils.tzMillsDateTimeFormatter)
+                            .atZone(ZoneOffset.UTC)
+                            .withZoneSameInstant(ZoneId.systemDefault())
+                            .toLocalDateTime();
                     return new IntervalSizeBO<LocalDateTime, Long>(time, time, bo.getNetworkBytes().longValue());
                 }).collect(Collectors.toList());
         Collections.sort(result, Comparator.comparing(IntervalSizeBO::getStart));
@@ -427,7 +432,7 @@ public class ScenePluginCollectionSceneService {
                 // 数据不属于当前周期,记录当前周期结果,并指向下一个周期
                 // 当前周期有数据则记录
                 if (tmpValue != null) {
-                    result.add(new IntervalSizeBO<LocalDateTime, Double>(tmpMaxTime, tmpMaxTime, tmpValue.divide(tmpSize).doubleValue()));
+                    result.add(new IntervalSizeBO<LocalDateTime, Double>(tmpMaxTime, tmpMaxTime, tmpValue.divide(tmpSize, 10, RoundingMode.HALF_DOWN).doubleValue()));
                 }
                 // 进入下一个周期
                 tmpMaxTime = tmpMaxTime.plus(intervalSeconds, ChronoUnit.SECONDS);
@@ -435,25 +440,9 @@ public class ScenePluginCollectionSceneService {
                 tmpValue = null;
             }
         }
-        for (CollectionHostStateBO state : list) {
-            if (state.getTime().isBefore(tmpMaxTime)) {
-                double value = execCal.apply(state);
-                tmpValue = Optional.ofNullable(tmpValue)
-                        .orElse(BigDecimal.ZERO)
-                        .add(BigDecimal.valueOf(value));
-                tmpSize = Optional.ofNullable(tmpSize)
-                        .orElse(BigDecimal.ZERO)
-                        .add(BigDecimal.ONE);
-            } else {
-                // 当前时间段有数据则构造
-                if (tmpValue != null) {
-                    result.add(new IntervalSizeBO<LocalDateTime, Double>(tmpMaxTime, tmpMaxTime, tmpValue.divide(tmpSize, 10, RoundingMode.HALF_UP).doubleValue()));
-                }
-                // 不论有无数据都进入下一个周期
-                tmpMaxTime = tmpMaxTime.plus(intervalSeconds, ChronoUnit.SECONDS);
-                tmpSize = null;
-                tmpValue = null;
-            }
+        // 记录最后一个数据
+        if (tmpValue != null) {
+            result.add(new IntervalSizeBO<LocalDateTime, Double>(tmpMaxTime, tmpMaxTime, tmpValue.divide(tmpSize, 10, RoundingMode.HALF_DOWN).doubleValue()));
         }
         return result;
     }
