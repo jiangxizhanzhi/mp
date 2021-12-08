@@ -17,6 +17,8 @@ public class VirtualMachineCreateData implements CloudHttpData {
     private Integer ram;
     private Integer disk;
     private String requestUser;
+    private String scene;
+    private String department;
     private String host;
     private String hostname;
     private String userData;

@@ -13,6 +13,8 @@ import java.util.List;
 public class EntityNodeCreateData implements CloudHttpData {
     private String name;
     private String requestUser;
+    private String scene;
+    private String department;
     private List<Interface> interfaces;
 
     @Data
