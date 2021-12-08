@@ -12,6 +12,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
+import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,23 +63,7 @@ public class NetworkTrafficGroupService {
      * @return List<GroupModel>
      */
     public List<GroupModel> queryAllGroups() {
-        if (ObjectUtils.isEmpty(situationAwareConfig.getGroupUrl())) {
-            throw new MpRuntimeException("底层分组服务url不存在，请配置");
-        }
-        String sceneListString;
-        try {
-            sceneListString = HttpUtils.sendGet(situationAwareConfig.getGroupUrl());
-        } catch (IOException e) {
-            log.error("查询所有分组错误:" + e);
-            throw new MpRuntimeException("查询分组错误:" + e);
-        }
-        var jsonObject = JSONObject.parseObject(sceneListString);
-        var groupList = jsonObject.getJSONArray("scenes");
-        if (CollectionUtils.isEmpty(groupList)) {
-            return new ArrayList<>();
-        }
-        List<String> groupIds = groupList.stream().map(String.class::cast).collect(Collectors.toList());
-        return groupIds.stream().map(this::queryGroupById).collect(Collectors.toList());
+        return Lists.newArrayList();
     }
 
     /**
