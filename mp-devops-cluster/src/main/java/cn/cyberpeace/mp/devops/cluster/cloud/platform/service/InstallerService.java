@@ -39,8 +39,8 @@ public class InstallerService extends BaseOpenStackServiceImpl {
 
     private static final String INSTALLER = "/installer";
 
-    public InstallerService(DevopsConfig devopsConfig, ObjectMapper objectMapper) {
-        super(devopsConfig, objectMapper);
+    public InstallerService(DevopsConfig devopsConfig) {
+        super(devopsConfig);
     }
 
     /**

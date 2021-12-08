@@ -1,11 +1,9 @@
 package cn.cyberpeace.mp.devops.cluster.cloud.platform.service.impl;
 
 import cn.cyberpeace.mp.base.util.HttpUtils;
-import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.config.HttpDeleteWithBody;
 import cn.cyberpeace.mp.devops.cluster.model.BaseModel;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -14,7 +12,6 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -27,16 +24,6 @@ import java.util.Map;
 @Slf4j
 @Service
 public class BaseServiceImpl {
-
-    protected DevopsConfig devopsConfig;
-
-    protected ObjectMapper objectMapper;
-
-    @Autowired
-    public BaseServiceImpl(DevopsConfig devopsConfig, ObjectMapper objectMapper) {
-        this.devopsConfig = devopsConfig;
-        this.objectMapper = objectMapper;
-    }
 
     /**
      * 通过Get方式查询信息

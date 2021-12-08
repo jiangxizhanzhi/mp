@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.impl.BaseOpenStackServiceImpl;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.NpcCloudPlatformModel;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
@@ -21,8 +20,8 @@ import static cn.cyberpeace.mp.devops.cluster.cloud.platform.service.BaseCloudPl
 @Service
 public class NpcService extends BaseOpenStackServiceImpl {
 
-    public NpcService(DevopsConfig devopsConfig, ObjectMapper objectMapper) {
-        super(devopsConfig,objectMapper);
+    public NpcService(DevopsConfig devopsConfig) {
+        super(devopsConfig);
     }
 
     /**

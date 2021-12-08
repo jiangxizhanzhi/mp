@@ -4,7 +4,6 @@ import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.impl.BaseOpenStack
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.*;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.http.HttpResponse;
@@ -28,8 +27,8 @@ public class ImagesService extends BaseOpenStackServiceImpl {
 
     private static final String NORMAL = "/normal";
 
-    public ImagesService(DevopsConfig devopsConfig, ObjectMapper objectMapper) {
-        super(devopsConfig, objectMapper);
+    public ImagesService(DevopsConfig devopsConfig) {
+        super(devopsConfig);
     }
 
     /**

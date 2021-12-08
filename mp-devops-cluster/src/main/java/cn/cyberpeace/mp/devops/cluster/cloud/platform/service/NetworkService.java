@@ -12,7 +12,6 @@ import cn.cyberpeace.mp.devops.cluster.model.NetworkCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.ElasticIpModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.NetworkAgentModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.NetworkModel;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -33,8 +32,8 @@ public class NetworkService extends BaseOpenStackServiceImpl {
 
     private static final String NETWORKS = "/networks";
 
-    public NetworkService(DevopsConfig devopsConfig, ObjectMapper objectMapper) {
-        super(devopsConfig, objectMapper);
+    public NetworkService(DevopsConfig devopsConfig) {
+        super(devopsConfig);
     }
 
     /**

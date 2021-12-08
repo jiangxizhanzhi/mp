@@ -6,7 +6,6 @@ import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.impl.BaseOpenStack
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.RouterCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.RouterModel;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -25,8 +24,8 @@ import static cn.cyberpeace.mp.devops.cluster.cloud.platform.service.BaseCloudPl
 @Slf4j
 public class RouterService extends BaseOpenStackServiceImpl {
 
-    public RouterService(DevopsConfig devopsConfig, ObjectMapper objectMapper) {
-        super(devopsConfig, objectMapper);
+    public RouterService(DevopsConfig devopsConfig) {
+        super(devopsConfig);
     }
 
     /**

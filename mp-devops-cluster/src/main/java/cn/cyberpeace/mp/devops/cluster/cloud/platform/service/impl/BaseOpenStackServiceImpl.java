@@ -2,10 +2,10 @@ package cn.cyberpeace.mp.devops.cluster.cloud.platform.service.impl;
 
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.BaseModel;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -19,8 +19,11 @@ import java.util.Map;
 @Service
 public class BaseOpenStackServiceImpl extends BaseServiceImpl {
 
-    public BaseOpenStackServiceImpl(DevopsConfig devopsConfig, ObjectMapper objectMapper) {
-        super(devopsConfig, objectMapper);
+    private DevopsConfig devopsConfig;
+
+    @Autowired
+    public BaseOpenStackServiceImpl(DevopsConfig devopsConfig) {
+       this.devopsConfig = devopsConfig;
     }
 
     /**

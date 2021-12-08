@@ -9,7 +9,6 @@ import cn.cyberpeace.mp.devops.cluster.model.SnapshotCreate;
 import cn.cyberpeace.mp.devops.cluster.model.common.Snapshot;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import com.alibaba.fastjson.JSONObject;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -28,8 +27,8 @@ public class SnapshotService extends BaseOpenStackServiceImpl {
 
     private static final String SNAPSHOT = "/snapshot";
 
-    public SnapshotService(DevopsConfig devopsConfig, ObjectMapper objectMapper) {
-        super(devopsConfig, objectMapper);
+    public SnapshotService(DevopsConfig devopsConfig) {
+        super(devopsConfig);
     }
 
 
