@@ -1,9 +1,10 @@
-package cn.cyberpeace.mp.front.admin.controller;
+package cn.cyberpeace.mp.front.admin.business.controller;
 
-import cn.cyberpeace.mp.front.admin.model.SysConfigModel;
-import cn.cyberpeace.mp.front.admin.service.sys.SysConfigService;
 import cn.cyberpeace.mp.base.controller.stereotype.UnlimitPagination;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.front.admin.business.service.SysConfigCheckService;
+import cn.cyberpeace.mp.front.admin.model.SysConfigModel;
+import cn.cyberpeace.mp.front.admin.service.sys.SysConfigService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -31,6 +33,9 @@ public class SysConfigController {
     @Autowired
     private SysConfigService sysConfigService;
 
+    @Autowired
+    private SysConfigCheckService checkService;
+
 
     @ApiOperation(value = "查询所有系统设置", notes = "")
     @GetMapping("/all")
@@ -42,6 +47,8 @@ public class SysConfigController {
     @ApiOperation(value = "根据keyname更新单条sysconfig", notes = "")
     @PostMapping("/update/bykeyname")
     public ServiceResult updateByKeyName(@RequestBody SysConfigModel updateConfig) {
+
+        checkService.updateCheck(Arrays.asList(updateConfig));
 
         boolean success = sysConfigService.updateByKeyName(updateConfig);
         if (success) {
@@ -55,6 +62,8 @@ public class SysConfigController {
     @PostMapping("/updateall")
     public ServiceResult updateAll(@RequestBody List<SysConfigModel> configs) {
         // 更新规则，如果key存在，就修改value值，如果key不存在，就忽略不改
+        checkService.updateCheck(configs);
+
         boolean success = sysConfigService.batchUpdateByKeyname(configs);
         if (success) {
             return ServiceResult.successful();
