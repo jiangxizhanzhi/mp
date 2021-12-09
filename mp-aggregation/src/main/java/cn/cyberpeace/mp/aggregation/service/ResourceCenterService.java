@@ -35,6 +35,6 @@ public class ResourceCenterService {
         // 转换bo
         CsceneBO csceneBO = cSceneBoConverter.convert(ymlParseResult, imageInfos);
         // 保存
-        return csceneService.sync(csceneBO, new CsceneContextBO());
+        return csceneService.syncWithoutCheckLimit(csceneBO, new CsceneContextBO());
     }
 }
