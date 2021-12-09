@@ -775,7 +775,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     public String getDefaultUserAvatar() {
         List<String> avatarList = defaultImgService.getFileByDefaultImgDirEnum(DefaultImgDirEnum.AVATAR);
-        return avatarList.get(0);
+        String avatar = "/api/mp" + avatarList.get(0);
+        return avatar;
     }
 
     private UserModel importUser2UserModel(ImportUser importUser) {
