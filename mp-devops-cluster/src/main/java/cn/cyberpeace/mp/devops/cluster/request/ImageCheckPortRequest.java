@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -15,19 +16,35 @@ import javax.validation.constraints.NotNull;
 @EqualsAndHashCode(callSuper = true)
 public class ImageCheckPortRequest extends BaseRequest{
 
-    /**
-     * IP地址
-     */
-    @ApiModelProperty("IP地址")
-    @NotBlank
-    private String host;
-
-    /**
-     * 端口
-     */
-    @ApiModelProperty("端口")
     @NotNull
-    private Integer port;
+    private List<ImageCheckPort> list;
 
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ImageCheckPort{
+
+        /**
+         * 连接ID
+         */
+        @ApiModelProperty("连接ID")
+        private Integer connectionId;
+
+
+        /**
+         * IP地址
+         */
+        @ApiModelProperty("IP地址")
+        @NotBlank
+        private String host;
+
+        /**
+         * 端口
+         */
+        @ApiModelProperty("端口")
+        @NotNull
+        private Integer port;
+
+    }
 
 }

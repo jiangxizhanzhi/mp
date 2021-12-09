@@ -18,6 +18,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.common.*;
 import cn.cyberpeace.mp.devops.cluster.request.*;
+import cn.cyberpeace.mp.devops.cluster.response.ImageCheckPortResponse;
 import cn.cyberpeace.mp.devops.cluster.response.ImagesByIdResponse;
 import cn.cyberpeace.mp.devops.cluster.response.ImagesByUuidsResponse;
 import cn.cyberpeace.mp.devops.cluster.response.ImagesPageResponse;
@@ -437,9 +438,19 @@ public class ImagesController {
     }
 
     @ApiOperation("检验IP+端口是否可连接")
-    @GetMapping("/check-port-connectable")
-    public Result checkPortConnectable(ImageCheckPortRequest request){
-        boolean pass = NetworkUtils.checkPortConnectable(request.getHost(),request.getPort(),1000);
-        return new Result(pass);
+    @GetMapping("/check-access-protocols-connectable")
+    public Result<ImageCheckPortResponse> checkAccessProtocolsConnectable(ImageCheckPortRequest request){
+        List<ImageCheckPortRequest.ImageCheckPort> list = request.getList();
+        List<ImageCheckPortResponse.ImageCheckPort> imageCheckPorts = Lists.newArrayList();
+        for (ImageCheckPortRequest.ImageCheckPort imageCheckPort : list) {
+            ImageCheckPortResponse.ImageCheckPort checkPort = new ImageCheckPortResponse.ImageCheckPort();
+            boolean pass = NetworkUtils.checkPortConnectable(imageCheckPort.getHost(), imageCheckPort.getPort(), 1000);
+            checkPort.setPort(imageCheckPort.getPort());
+            checkPort.setConnectionId(imageCheckPort.getConnectionId());
+            checkPort.setHost(imageCheckPort.getHost());
+            checkPort.setPass(pass);
+            imageCheckPorts.add(checkPort);
+        }
+        return new Result(new ImageCheckPortResponse(imageCheckPorts));
     }
 }
