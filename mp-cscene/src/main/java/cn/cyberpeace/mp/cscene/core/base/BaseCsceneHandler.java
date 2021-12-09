@@ -2,10 +2,10 @@ package cn.cyberpeace.mp.cscene.core.base;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.stereotype.BeanFieldNames;
-import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldNames;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
+import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldNames;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.base.BaseCsceneBO;
 import cn.cyberpeace.mp.cscene.bo.base.BaseCsceneRoleBO;
@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.cscene.model.base.BaseCsceneModel;
 import cn.cyberpeace.mp.cscene.model.base.BaseCsceneRoleModel;
 import cn.cyberpeace.mp.cscene.repository.base.BaseCsceneMapper;
 import cn.cyberpeace.mp.cscene.repository.base.BaseCsceneRoleMapper;
+import cn.cyberpeace.mp.scene.core.exception.SceneNotExistException;
 import cn.cyberpeace.mp.scene.core.exception.SceneUpdateException;
 import lombok.Getter;
 import org.apache.commons.collections4.ListUtils;
@@ -285,6 +286,9 @@ public abstract class BaseCsceneHandler<
         initContext(context);
         this.csceneId = csceneId;
         reload();
+        if (this.csceneId != null && this.cscene == null) {
+            throw new SceneNotExistException("csceneId:" + csceneId);
+        }
     }
 
     /**
