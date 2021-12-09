@@ -7,8 +7,10 @@ import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
 
 @Slf4j
+@Component
 public class UserCommon {
 
     private static UserService userService;
