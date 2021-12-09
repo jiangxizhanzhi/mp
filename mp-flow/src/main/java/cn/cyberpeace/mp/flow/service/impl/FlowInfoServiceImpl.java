@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.result.*;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
+import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
 import cn.cyberpeace.mp.flow.enums.InteractiveTypeEnum;
 import cn.cyberpeace.mp.flow.enums.ParamTypeEnum;
@@ -77,6 +78,11 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
 
     @Autowired
     private FlowScriptParamServiceImpl flowScriptParamService;
+
+    /**
+     * 预制流量文件目录
+     */
+    private static final String PRE_PATH = "/root/.mp/resources/flows";
 
     /**
      * 补充list查询条件
@@ -641,5 +647,97 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
     public List<FlowInfoModel> selectByFlowIds(List<String> flowIds) {
         return getModelMapper().selectByFlowIds(flowIds);
     }
+
+    /**
+     * 根据标题查询
+     * @param title
+     * @return
+     */
+    public FlowInfoModel selectByTitle(String title) {
+        return getModelMapper().selectByTitle(title);
+    }
+
+    /**
+     *
+     * 批量导入预制流量文件
+     * @return
+     */
+    public ServiceResult<Boolean> batchImportFlowInfo() {
+        String pcapPath = PRE_PATH + "/pcap";
+        log.info("导入pcap文件开始,pcapPath:{}", pcapPath);
+        File pcapFile = new File(pcapPath);
+        if (!this.doImport(pcapFile)) {
+            return new ServiceResult<>(false);
+        }
+        log.info("导入pcap文件结束");
+
+        String scriptPath = PRE_PATH + "/scripts";
+        log.info("导入script文件开始,scriptPath:{}", scriptPath);
+        File scriptFile = new File(scriptPath);
+        if (!this.doImport(scriptFile)) {
+            return new ServiceResult<>(false);
+        }
+        log.info("导入script文件结束");
+
+        return new ServiceResult<>(true);
+    }
+
+    /**
+     * 导入流量文件
+     * @param file
+     * @return
+     */
+    private boolean doImport(File file) {
+        LinkedList<File> list = new LinkedList<>();
+        if (file.exists()) {
+            if (null == file.listFiles()) {
+                log.error("文件目录为空");
+                return false;
+            }
+
+            list.addAll(Arrays.asList(file.listFiles()));
+            if (CollectionUtils.isNotEmpty(list)) {
+                String firstTitle = list.get(0).getName().split(BaseConstants.SPOT)[0];
+                FlowInfoModel existModel = this.getModelMapper().selectByTitle(firstTitle);
+                if (Objects.nonNull(existModel)) {
+                    log.info("流量文件已导入:{}", existModel.getTitle());
+                    return true;
+                }
+                List<FlowInfoModel> flowInfoModelList = new ArrayList<>();
+
+                list.forEach(flowFile -> {
+                    String fileName = flowFile.getName().split(BaseConstants.SPOT)[0];
+                    FlowInfoModel flowInfoModel = new FlowInfoModel();
+                    flowInfoModel.setTitle(fileName);
+                    flowInfoModel.setFileName(flowFile.getName());
+                    String fdfsPath = fastDFSClient.uploadFileWithFilepath(flowFile.getAbsolutePath(), FdfsGroupEnum.DEFAULT.toString());
+                    if (flowFile.getName().endsWith(".pcap")) {
+                        // 背景流量
+                        flowInfoModel.setResourceType(ResourceTypeEnum.PACP.toValue());
+                        flowInfoModel.setInteractiveType(InteractiveTypeEnum.BACKGROUND.toValue());
+                        flowInfoModel.setPcapFile(fdfsPath);
+                    } else {
+                        // 攻击流量
+                        flowInfoModel.setResourceType(ResourceTypeEnum.SCRIPT.toValue());
+                        flowInfoModel.setInteractiveType(InteractiveTypeEnum.ATTACK.toValue());
+                        flowInfoModel.setScriptFile(fdfsPath);
+                    }
+                    flowInfoModel.setFlowDesc(fileName);
+                    flowInfoModel.setCategory(2);
+                    flowInfoModelList.add(flowInfoModel);
+                });
+
+                if (CollectionUtils.isNotEmpty(flowInfoModelList)) {
+                    bulkCreate(flowInfoModelList);
+                }
+            }
+        } else {
+            log.error("文件目录不存在!");
+            return false;
+        }
+
+        return true;
+    }
+
 
 }
