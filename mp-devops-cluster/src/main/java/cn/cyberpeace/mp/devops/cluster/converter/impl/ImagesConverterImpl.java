@@ -363,20 +363,28 @@ public class ImagesConverterImpl implements ImagesConverter {
         if (Objects.nonNull(extVm) && CollectionUtils.isNotEmpty(request.getAccessProtocolList())) {
             extVm.setAccessProtocols(request.getAccessProtocolList());
         }
-        device.setExtVm(extVm);
         device.setExtSystemInfo(request.getExtSystemInfo());
         ExtImageInfo extImageInfo = request.getExtImageInfo();
         if (Objects.nonNull(extImageInfo) && StringUtils.isNotBlank(extImageInfo.getUploadType())
                 && extImageInfo.getUploadType().equals(UploadTypeEnum.FTP.getDesc())){
             extImageInfo.setUserFilename(extImageInfo.getFtpFilename());
         }
-        device.setExtImageInfo(extImageInfo);
+        //解决外部网络靶标-镜像状态问题
+        if (StringUtils.isNotBlank(request.getImageType())) {
+            device.setExtImageInfo(extImageInfo);
+        }
         device.setExtGateway(request.getExtGateway());
         ExtDocker extDocker = request.getExtDocker();
         if (request.getImageType().equals("container") && Objects.nonNull(extDocker)
                 && CollectionUtils.isNotEmpty(request.getAccessProtocolList())){
            extDocker.setAccessProtocols(request.getAccessProtocolList());
         }
+
+        if (CollectionUtils.isEmpty(request.getAccessProtocolList())){
+            extVm.setAccessProtocols(Lists.newArrayList());
+            extDocker.setAccessProtocols(Lists.newArrayList());
+        }
+        device.setExtVm(extVm);
         device.setExtDocker(extDocker);
         return device;
     }
