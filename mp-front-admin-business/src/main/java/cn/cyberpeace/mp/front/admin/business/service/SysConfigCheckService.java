@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.front.admin.business.service;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.front.admin.constant.AdminErrorCode;
+import cn.cyberpeace.mp.front.admin.business.constant.AdminBusinessErrorCode;
 import cn.cyberpeace.mp.front.admin.constant.SysConfigKey;
 import cn.cyberpeace.mp.front.admin.model.SysConfigModel;
 import cn.hutool.core.collection.CollectionUtil;
@@ -30,7 +30,7 @@ public class SysConfigCheckService {
                 String value = sysConfig.getValue();
                 Integer intVal = Integer.valueOf(value);
                 if (intVal < 0) {
-                    throw new MpRuntimeException(AdminErrorCode.SYS_CONFIG_ERROR, "场景数据自动清除天数不能小于0！");
+                    throw new MpRuntimeException(AdminBusinessErrorCode.SYS_CONFIG_ERROR);
                 }
             }
         }
