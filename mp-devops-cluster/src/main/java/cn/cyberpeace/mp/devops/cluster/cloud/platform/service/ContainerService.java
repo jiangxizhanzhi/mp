@@ -62,6 +62,6 @@ public class ContainerService extends BaseOpenStackServiceImpl {
      * @return
      */
     public BaseCloudPlatformModel action(ContainerActionCloudPlatformModel model,String uuid) {
-        return super.sendPost(URL_VERSION + CONTAINERS + uuid +"/action", JsonUtils.toUnderlineJSONString(model), BaseCloudPlatformModel.class);
+        return super.sendPost(URL_VERSION + CONTAINERS + "/" + uuid +"/action", JsonUtils.toUnderlineJSONString(model), BaseCloudPlatformModel.class);
     }
 }
