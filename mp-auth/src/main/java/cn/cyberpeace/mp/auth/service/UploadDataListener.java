@@ -93,6 +93,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
 
 
     private void checkImportUsers(List<ImportUser> users) {
+        log.info("checkImportUsers... list size:{}", users.size());
         if (CollectionUtil.isEmpty(users)) {
             throw new MpRuntimeException("列表为空！");
         }

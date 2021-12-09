@@ -563,8 +563,10 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void importExcel(List<ImportUser> list) {
+        log.info("Now import users from excel...");
         // 初始化默认头像信息
         for (ImportUser importUser : list) {
+            log.info("importUser:{}", importUser);
             // 1.保存用户信息
             UserModel userModel = importUser2UserModel(importUser);
             if (Objects.isNull(userModel)) {
@@ -605,6 +607,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                     }
                 });
             }
+            log.info("import success...");
         }
     }
 
@@ -802,7 +805,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         // org path
         List<OrgModel> orgList = orgUserService.listOrgsByUserId(user.getId());
         // 调整为跟前端逻辑一样，如果存在多个组织，则选择主键最大的一个
-//        String paths = orgList.stream().map(o -> orgService.calculatePathByOrgId(o.getId())).collect(Collectors.joining(","));
         Optional<OrgModel> optional = orgList.stream().max(Comparator.comparing(OrgModel::getPk));
         optional.ifPresent(o -> exportUser.setOrg(o.getPath()));
 
