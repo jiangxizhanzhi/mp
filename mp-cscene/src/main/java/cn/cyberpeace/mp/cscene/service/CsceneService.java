@@ -208,6 +208,13 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         return new ServiceResult<>(csceneHandler.toData());
     }
 
+    @Transactional
+    public ServiceResult<CsceneBO> syncWithoutCheckLimit(CsceneBO csceneBO, CsceneContextBO context) {
+        var csceneHandler = new CsceneHandler(csceneBO, context);
+        csceneHandler.save();
+        return new ServiceResult<>(csceneHandler.toData());
+    }
+
     public ServiceResult<Boolean> deleteById(String id, boolean logic, boolean withInstance, CsceneContextBO context) {
         var csceneHandler = new CsceneHandler(id, context);
         var flag = csceneHandler.delete(logic, withInstance);
