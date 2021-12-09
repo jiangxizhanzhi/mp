@@ -14,10 +14,7 @@ import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
-import cn.cyberpeace.mp.flow.enums.FlowPlatformEnum;
-import cn.cyberpeace.mp.flow.enums.ResourceTypeEnum;
-import cn.cyberpeace.mp.flow.enums.TaskActionEnum;
-import cn.cyberpeace.mp.flow.enums.TaskStatusEnum;
+import cn.cyberpeace.mp.flow.enums.*;
 import cn.cyberpeace.mp.flow.model.*;
 import cn.cyberpeace.mp.flow.repository.FlowTaskMapper;
 import cn.cyberpeace.mp.flow.request.*;
@@ -187,6 +184,8 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
      * @return
      */
     public ServiceResult<FlowTaskModel> addFlowTask(AddFlowTaskRequest request) {
+        log.info("add flow task request:{}", request.toString());
+
         if (StringUtils.isBlank(request.getOriginIps())) {
             // 设置默认来源ip
             request.setOriginIps("127.0.0.1-127.0.0.1");
@@ -340,7 +339,13 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
         if (CollectionUtils.isNotEmpty(replaceScriptParamModels)) {
             // 根据脚本key替换脚本参数值
             for (FlowScriptParamModel replaceScriptParamModel : replaceScriptParamModels) {
-                code = code.replace("$" + replaceScriptParamModel.getParamKey(), replaceScriptParamModel.getParamValue());
+                if (ParamTypeEnum.IP.toString().equalsIgnoreCase(replaceScriptParamModel.getParamKey())) {
+                    // ip替换兼容大小写
+                    code = code.replace("$" + ParamTypeEnum.IP.name().toUpperCase(), replaceScriptParamModel.getParamValue());
+                    code = code.replace("$" + ParamTypeEnum.IP.name().toLowerCase(), replaceScriptParamModel.getParamValue());
+                } else {
+                    code = code.replace("$" + replaceScriptParamModel.getParamKey(), replaceScriptParamModel.getParamValue());
+                }
             }
         }
 
