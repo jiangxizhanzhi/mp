@@ -381,8 +381,12 @@ public class ImagesConverterImpl implements ImagesConverter {
         }
 
         if (CollectionUtils.isEmpty(request.getAccessProtocolList())){
-            extVm.setAccessProtocols(Lists.newArrayList());
-            extDocker.setAccessProtocols(Lists.newArrayList());
+            if (Objects.nonNull(extVm)) {
+                extVm.setAccessProtocols(Lists.newArrayList());
+            }
+            if (Objects.nonNull(extDocker)) {
+                extDocker.setAccessProtocols(Lists.newArrayList());
+            }
         }
         device.setExtVm(extVm);
         device.setExtDocker(extDocker);
