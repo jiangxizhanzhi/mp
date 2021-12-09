@@ -28,16 +28,6 @@ public class AvatarController {
     @Autowired
     private AvatarService avatarService;
 
-    /*
-    @ApiOperation(value = "查询所有头像", notes = "")
-    @GetMapping("/all")
-    public ServiceResult<List<AvatarModel>> getAll() {
-        List<AvatarModel> avatars = avatarService.listAll();
-        return ServiceResult.success(avatars);
-    }
-    */
-
-
     @ApiOperation(value = "上传头像，返回url", notes = "")
     @PostMapping("/upload")
     @ResponseBody
