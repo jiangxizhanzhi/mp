@@ -368,11 +368,15 @@ public class InitiateHandler extends HandlerCommon {
         if (StringUtils.isEmpty(ip)) {
             if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
                 // 默认路由从后取ip
-                ip = ipPool.remove(ipPool.size() - 1);
+                synchronized (ipPool) {
+                    ip = ipPool.remove(ipPool.size() - 1);
+                }
             } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)
                     || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
                 // 虚拟机、容器
-                ip = ipPool.remove(0);
+                synchronized (ipPool) {
+                    ip = ipPool.remove(0);
+                }
             }
         }
 
