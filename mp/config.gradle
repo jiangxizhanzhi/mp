@@ -14,6 +14,7 @@ gradle.ext {
         'mp-devops-log',
         'mp-flow',
         'mp-front-admin',
+        'mp-front-admin-business',
         'mp-front-business'
     ]
 

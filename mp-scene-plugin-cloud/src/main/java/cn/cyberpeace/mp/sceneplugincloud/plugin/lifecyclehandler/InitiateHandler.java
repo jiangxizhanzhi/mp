@@ -378,7 +378,10 @@ public class InitiateHandler extends HandlerCommon {
 
         // 如果辅助网络属于该网元，且没有手动指定网关，强制该地址设置为默认网关
         if (isSelfAuxiliaryNetwork && StringUtils.isEmpty(auxiliaryNetworkCloudElement.getGateway())) {
-            auxiliaryNetworkCloudElement.setAuxiliaryNetworkGateway(ip);
+            // TODO: 暂时只有默认路由支持，其它设备地址会冲突待解决方案
+            if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
+                auxiliaryNetworkCloudElement.setAuxiliaryNetworkGateway(ip);
+            }
         }
 
         srcPort.setIp(ip);
