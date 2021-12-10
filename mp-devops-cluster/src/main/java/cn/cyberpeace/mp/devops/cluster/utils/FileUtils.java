@@ -35,6 +35,37 @@ public class FileUtils {
         return fileList;
     }
 
+    /**
+     * 转换 MultipartFile to File,生成临时文件，原文件名称修改为uuid
+     * @param multipartFiles
+     * @return
+     * @throws IOException
+     */
+    public static Map<String,File> transferToFileMap(List<MultipartFile> multipartFiles,String type) throws IOException {
+        if (CollectionUtils.isEmpty(multipartFiles)){
+            return new HashMap<>();
+        }
+        Map<String,File> fileList = new HashMap<>();
+        String fileName;
+        String prefix;
+        for (MultipartFile multipartFile : multipartFiles) {
+            // 获取文件名
+            fileName = multipartFile.getOriginalFilename();
+            int index = fileName.lastIndexOf(".");
+            // 获取文件后缀
+            if (index < 0 ){
+                prefix = ".img";
+            }else{
+                prefix = fileName.substring(index);
+            }
+            // 用uuid作为文件名，防止生成的临时文件重复
+            final File file = File.createTempFile(UUID.randomUUID().toString(), prefix);
+            // MultipartFile to File
+            multipartFile.transferTo(file);
+            fileList.put(fileName,file);
+        }
+        return fileList;
+    }
 
     /**
      * 转换 MultipartFile to File,生成临时文件，原文件名称修改为uuid
