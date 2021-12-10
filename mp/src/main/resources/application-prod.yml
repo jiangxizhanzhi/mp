@@ -118,7 +118,7 @@ mp:
       licenseDir: /home/mp/config/license
   flow:
     # 流量发生器资源地址
-    actuator-resource-url: http://${MP_TREX_IP}:${MP_TREX_PORT:80}/api/v1/resource
+    actuator-resource-url: http://${MP_TREX_IP:10.100.7.197}:${MP_TREX_PORT:80}/api/v1/resource
     trex-image: ${MP_TREX_IMAGE:tgn-1209}
   sceneplugincloud:
     cpcloud-server: http://${ip.cp}:${CP_PORT:11111}
