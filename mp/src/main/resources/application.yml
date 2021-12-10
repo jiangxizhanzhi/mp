@@ -5,7 +5,7 @@ ip:
   moloch: 10.100.0.111          # moloch的IP地址
   wazuh: 10.100.7.146           # wazuh的IP地址
   es: 127.0.0.1                 # MP新中台ES地址
-  trex: 10.100.7.197            # trex资源服务器地址
+  trex: 10.100.7.172            # trex资源服务器地址
   rabbitmq: 10.100.0.101        # rabbitmq地址
 
 server:

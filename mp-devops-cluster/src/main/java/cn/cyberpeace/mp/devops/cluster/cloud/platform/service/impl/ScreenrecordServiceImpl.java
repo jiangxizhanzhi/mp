@@ -92,7 +92,7 @@ public class ScreenrecordServiceImpl extends BaseOpenStackServiceImpl {
         JSONObject delObj = new JSONObject();
         delObj.put("recordtime", request.getRecordTime());
         ScreenrecordDelResponse delResponse = super.sendDelete(BaseCloudPlatformService.SCREENRECORD_METHOD +
-                "/removerecordfile", delObj.toJSONString(), ScreenrecordDelResponse.class);
+                "/remove_file", delObj.toJSONString(), ScreenrecordDelResponse.class);
 
         log.info("remove record file response: {}", delResponse);
         if (Objects.nonNull(delResponse)) {

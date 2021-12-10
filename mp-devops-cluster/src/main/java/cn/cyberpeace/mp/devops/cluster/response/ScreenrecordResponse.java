@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.devops.cluster.response;
 
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.devops.cluster.model.ScreenshotModel;
+import io.micrometer.core.instrument.util.StringUtils;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -29,8 +30,19 @@ public class ScreenrecordResponse extends ScreenshotModel {
         this.setFileName(record.getRecordingFile());
         this.setFileSize(record.getFileSize());
         this.setSceneName(record.getScene());
-        this.setUserName(record.getUsername());
-        this.setUserOrgName(record.getDepartment());
+        // 组织： 管理员|分公司01
+        String org = record.getDepartment();
+        if (StringUtils.isNotBlank(org) && org.contains("|")) {
+            // 将组织拆分成姓名和组织
+            int start = org.indexOf("|");
+            String userName = org.substring(0, start);
+            String orgName = org.substring(start + 1, org.length() - 1);
+            this.setUserName(userName);
+            this.setUserOrgName(orgName);
+        } else {
+            this.setUserName(record.getUsername());
+            this.setUserOrgName(org);
+        }
         this.setRecortime(record.getRecortime());
         this.setCreateTime(TimeUtils.utcStringToLocalDateTime(record.getRecordate()));
     }
