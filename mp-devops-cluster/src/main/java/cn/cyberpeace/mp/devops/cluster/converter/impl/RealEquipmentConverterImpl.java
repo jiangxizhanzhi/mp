@@ -161,12 +161,14 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
     @Override
     @Transactional
     public Boolean delete(RealEquipmentDeleteRequest request) {
-        deviceService.deleteByIds(request.getUuids());
-        ImageDeleteDTO dto = new ImageDeleteDTO();
-        dto.setIds(request.getUuids());
-        imageMapper.delete(dto);
-        request.getUuids().forEach(id -> imageAuthMapper.deleteByTarget(id));
-        return Boolean.TRUE;
+        Boolean result = deviceService.deleteByIds(request.getUuids());
+        if (result) {
+            ImageDeleteDTO dto = new ImageDeleteDTO();
+            dto.setIds(request.getUuids());
+            imageMapper.delete(dto);
+            request.getUuids().forEach(id -> imageAuthMapper.deleteByTarget(id));
+        }
+        return result;
     }
 
     /**
