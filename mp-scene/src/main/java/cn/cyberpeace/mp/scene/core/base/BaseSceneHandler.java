@@ -1040,10 +1040,8 @@ public abstract class BaseSceneHandler<
         }
         initPlugins(scenePluginData);
 
-        // 新的场景数据需要纠正
-        if (StringUtils.isEmpty(sceneId)) {
-            correctData();
-        }
+        // 场景业务数据需要纠正
+        correctData();
     }
 
     /**
