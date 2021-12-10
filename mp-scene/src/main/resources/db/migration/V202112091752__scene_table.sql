@@ -1,2 +1,5 @@
 alter table mp_scene_scene_config_area modify column `position2` varchar(128) NOT NULL COMMENT '2d坐标' ;
 alter table mp_scene_scene_config_area modify column `position3` varchar(128) NOT NULL COMMENT '3d坐标' ;
+
+alter table mp_scene_scene_area modify column `position2` varchar(128) NOT NULL COMMENT '2d坐标' ;
+alter table mp_scene_scene_area modify column `position3` varchar(128) NOT NULL COMMENT '3d坐标' ;
