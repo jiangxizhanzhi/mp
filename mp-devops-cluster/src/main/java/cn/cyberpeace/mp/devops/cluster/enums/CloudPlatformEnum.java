@@ -16,6 +16,8 @@ public enum CloudPlatformEnum{
 
     DOWN("down","异常"),
 
+    STOPPED("Stopped","已停止"),
+
     UPPER_DOWN("DOWN","异常"),
 
     ACTIVE("ACTIVE","运行"),
