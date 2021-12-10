@@ -82,7 +82,8 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
     /**
      * 预制流量文件目录
      */
-    private static final String PRE_PATH = "/root/.mp/resources/flows";
+//    private static final String PRE_PATH = "/root/.mp/resources/flows";
+    private static final String PRE_PATH = "/Users/qkjoe/Downloads/流量业务/flows";
 
     /**
      * 补充list查询条件
@@ -663,13 +664,13 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
      * @return
      */
     public ServiceResult<Boolean> batchImportFlowInfo() {
-        String pcapPath = PRE_PATH + "/pcap";
-        log.info("导入pcap文件开始,pcapPath:{}", pcapPath);
-        File pcapFile = new File(pcapPath);
-        if (!this.doImport(pcapFile)) {
-            return new ServiceResult<>(false);
-        }
-        log.info("导入pcap文件结束");
+//        String pcapPath = PRE_PATH + "/pcap";
+//        log.info("导入pcap文件开始,pcapPath:{}", pcapPath);
+//        File pcapFile = new File(pcapPath);
+//        if (!this.doImport(pcapFile)) {
+//            return new ServiceResult<>(false);
+//        }
+//        log.info("导入pcap文件结束");
 
         String scriptPath = PRE_PATH + "/scripts";
         log.info("导入script文件开始,scriptPath:{}", scriptPath);
@@ -706,25 +707,29 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                 List<FlowInfoModel> flowInfoModelList = new ArrayList<>();
 
                 list.forEach(flowFile -> {
-                    String fileName = flowFile.getName().split(BaseConstants.SPOT)[0];
-                    FlowInfoModel flowInfoModel = new FlowInfoModel();
-                    flowInfoModel.setTitle(fileName);
-                    flowInfoModel.setFileName(flowFile.getName());
-                    String fdfsPath = fastDFSClient.uploadFileWithFilepath(flowFile.getAbsolutePath(), FdfsGroupEnum.DEFAULT.toString());
-                    if (flowFile.getName().endsWith(".pcap")) {
-                        // 背景流量
-                        flowInfoModel.setResourceType(ResourceTypeEnum.PACP.toValue());
-                        flowInfoModel.setInteractiveType(InteractiveTypeEnum.BACKGROUND.toValue());
-                        flowInfoModel.setPcapFile(fdfsPath);
+                    if (flowFile.getName().endsWith(".pcap") || flowFile.getName().endsWith(".sh") || flowFile.getName().endsWith(".py")) {
+                        String fileName = flowFile.getName().split(BaseConstants.SPOT)[0];
+                        FlowInfoModel flowInfoModel = new FlowInfoModel();
+                        flowInfoModel.setTitle(fileName);
+                        flowInfoModel.setFileName(flowFile.getName());
+                        String fdfsPath = fastDFSClient.uploadFileWithFilepath(flowFile.getAbsolutePath(), FdfsGroupEnum.DEFAULT.toString());
+                        if (flowFile.getName().endsWith(".pcap")) {
+                            // 背景流量
+                            flowInfoModel.setResourceType(ResourceTypeEnum.PACP.toValue());
+                            flowInfoModel.setInteractiveType(InteractiveTypeEnum.BACKGROUND.toValue());
+                            flowInfoModel.setPcapFile(fdfsPath);
+                        } else {
+                            // 攻击流量
+                            flowInfoModel.setResourceType(ResourceTypeEnum.SCRIPT.toValue());
+                            flowInfoModel.setInteractiveType(InteractiveTypeEnum.ATTACK.toValue());
+                            flowInfoModel.setScriptFile(fdfsPath);
+                        }
+                        flowInfoModel.setFlowDesc(fileName);
+                        flowInfoModel.setCategory(2);
+                        flowInfoModelList.add(flowInfoModel);
                     } else {
-                        // 攻击流量
-                        flowInfoModel.setResourceType(ResourceTypeEnum.SCRIPT.toValue());
-                        flowInfoModel.setInteractiveType(InteractiveTypeEnum.ATTACK.toValue());
-                        flowInfoModel.setScriptFile(fdfsPath);
+                        log.info("过滤非脚本文件:{}", flowFile.getName());
                     }
-                    flowInfoModel.setFlowDesc(fileName);
-                    flowInfoModel.setCategory(2);
-                    flowInfoModelList.add(flowInfoModel);
                 });
 
                 if (CollectionUtils.isNotEmpty(flowInfoModelList)) {
