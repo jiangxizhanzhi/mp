@@ -36,7 +36,7 @@ public class LocalDateUtils {
             return IntStream.range(0, days + 2).boxed().map(startTime::plusDays).map((time) -> time.format(DateTimeFormatter.ofPattern("yyMM*")))
                     .distinct().collect(Collectors.toList());
         }
-        return IntStream.range(0, days + 1).boxed().map(startTime::plusDays).map((time) -> time.format(formatter))
+        return IntStream.range(0, days + 2).boxed().map(startTime::plusDays).map((time) -> time.format(formatter))
                 .collect(Collectors.toList());
     }
 
