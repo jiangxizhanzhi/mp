@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class FrontAdminExceptionHandler {
 
     @ExceptionHandler({MpRuntimeException.class})
-//    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public ServiceResult<String> mpRuntimeExceptionHandle(MpRuntimeException ex) {
         String errorMsg = ex.getMessage();
