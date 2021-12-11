@@ -7,6 +7,8 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import com.alibaba.excel.exception.ExcelCommonException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AccountStatusException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * @Date：2021/8/31 11:13
  */
 @ControllerAdvice(basePackages = "cn.cyberpeace.mp.auth")
+@Order(Ordered.HIGHEST_PRECEDENCE)
 @Slf4j
 public class AuthExceptionHandler {
 
