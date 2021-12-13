@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.dto.target.TargetDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.RoleModel;
@@ -149,7 +150,7 @@ public class UserPermissionServiceImpl
         Assert.notNull(userId, "userId不能为空");
 
         var result = userService.get(userId);
-        ResultUtils.throwExceptionIfError(result, AuthConstant.ERROR_CODE_PREFIX + "account_not_existed");
+        ResultUtils.throwExceptionIfError(result, AuthErrorCode.ACCOUNT_NOT_EXISTED);
 
         if (cleanOldTargets) {
             // 清除用户原来的权限

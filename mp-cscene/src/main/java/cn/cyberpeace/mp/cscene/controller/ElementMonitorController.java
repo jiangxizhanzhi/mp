@@ -31,7 +31,7 @@ import java.util.List;
  * @Author zhouxinghuai
  * @Date：2021/11/22 10:16
  */
-@Api(value = "场景节点监控", tags = "场景节点监控")
+@Api(value = "节点监控", tags = "节点监控")
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/monitor/scene/element")

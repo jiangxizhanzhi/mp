@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.model.RolePermissionModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.repository.RolePermissionMapper;
@@ -56,7 +57,7 @@ public class RolePermissionModelServiceImpl extends BaseModelServiceImpl<RolePer
         Assert.notNull(roleId, "roleId不能为空");
 
         var result = roleService.get(roleId);
-        ResultUtils.throwExceptionIfError(result, AuthConstant.ERROR_CODE_PREFIX + "role_not_existed");
+        ResultUtils.throwExceptionIfError(result, AuthErrorCode.ROLE_NOT_EXISTED);
 
         if (cleanOldTargets) {
             // 清除角色绑定的权限

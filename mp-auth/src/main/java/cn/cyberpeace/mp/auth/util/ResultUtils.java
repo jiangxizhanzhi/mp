@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.auth.util;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.service.code.ErrorCode;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjResult;
@@ -32,7 +33,6 @@ public class ResultUtils {
     }
 
 
-
     public static void throwExceptionIfError(ObjServiceResult result, String errorMsg) {
         if (StringUtils.isBlank(errorMsg)) {
             errorMsg = "execute error!";
@@ -42,6 +42,12 @@ public class ResultUtils {
         }
     }
 
+
+    public static void throwExceptionIfError(ObjServiceResult result, ErrorCode errorCode) {
+        if (Objects.isNull(result.getSource())) {
+            throw new MpRuntimeException(errorCode);
+        }
+    }
 
 
 }

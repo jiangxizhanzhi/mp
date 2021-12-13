@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
-import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserCheckService;
 import cn.cyberpeace.mp.auth.service.UserService;
@@ -31,29 +31,36 @@ public class UserUpdateCheckService implements UserCheckService {
         Assert.notBlank(user.getId(), "用户id不能为空!");
         ObjServiceResult<UserModel> result = userService.get(user.getId());
         if (Objects.isNull(result.getSource()) || Objects.isNull(result.getSource().getObj())) {
-            throw new MpRuntimeException("用户不存在！ id:" + user.getId());
+            throw new MpRuntimeException(AuthErrorCode.ACCOUNT_NOT_EXISTED);
         }
         UserModel oldUser = result.getSource().getObj();
 
         // 修改操作允许直接修改密码
         // 密码是否合法
         if (StringUtils.isNotBlank(user.getPassword())) {
-            Assert.isFalse(PasswordUtils.isPasswordStrengthLowLevel(user.getPassword()), AuthConstant.ERROR_CODE_PREFIX + "password_strength_invalid");
+            if (PasswordUtils.isPasswordStrengthLowLevel(user.getPassword())) {
+                throw new MpRuntimeException(AuthErrorCode.PASSWORD_STRENGTH_INVALID);
+            }
         }
 
         // 邮箱是否合法
         if (StringUtils.isNotBlank(user.getEmail())) {
-            Assert.isTrue(Validator.isEmail(user.getEmail()), AuthConstant.ERROR_CODE_PREFIX + "email_invalid");
+            if (!Validator.isEmail(user.getEmail())) {
+                throw new MpRuntimeException(AuthErrorCode.EMAIL_INVALID);
+            }
         }
 
         // 手机号是否合法
         if (StringUtils.isNotBlank(user.getMobile())) {
-            Assert.isTrue(PhoneUtil.isMobile(user.getMobile()), AuthConstant.ERROR_CODE_PREFIX + "mobile_invalid");
+            if (!PhoneUtil.isMobile(user.getMobile())) {
+                throw new MpRuntimeException(AuthErrorCode.MOBILE_INVALID);
+            }
+
             // 如果手机号已存在，查看手机号是否是oldUser
             UserModel userByMobile = userService.getByMobile(user.getMobile());
 
             if (userByMobile != null && !Objects.equals(userByMobile.getId(), oldUser.getId())) {
-                throw new MpRuntimeException("该手机号码已存在！" + user.getMobile() + "，请确认用户手机号码是否正确");
+                throw new MpRuntimeException(AuthErrorCode.ACCOUNT_MOBILE_EXISTED);
             }
         }
 
@@ -62,7 +69,7 @@ public class UserUpdateCheckService implements UserCheckService {
             UserModel userByUserName = userService.getByUserName(user.getUsername());
 
             if (userByUserName != null && !Objects.equals(userByUserName.getId(), oldUser.getId())) {
-                throw new MpRuntimeException("用户名已存在！" + user.getUsername() + "，请确认用户名是否正确");
+                throw new MpRuntimeException(AuthErrorCode.ACCOUNT_USERNAME_EXISTED);
             }
         }
 
@@ -71,7 +78,7 @@ public class UserUpdateCheckService implements UserCheckService {
             UserModel userByIdent = userService.getByIdent(user.getIdentifier());
 
             if (userByIdent != null && !Objects.equals(userByIdent.getId(), oldUser.getId())) {
-                throw new MpRuntimeException("用户编号已存在！" + user.getIdentifier() + "，请确认用户编号是否正确");
+                throw new MpRuntimeException(AuthErrorCode.ACCOUNT_IDENTIFIER_EXISTED);
             }
         }
 

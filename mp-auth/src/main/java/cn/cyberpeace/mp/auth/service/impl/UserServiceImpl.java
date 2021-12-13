@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.DefaultImgDirEnum;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
@@ -393,7 +394,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
         var source = get(userId).getSource();
         UserModel user = Objects.isNull(source) ? null : source.getObj();
-        Assert.notNull(user, AuthConstant.ERROR_CODE_PREFIX + "account_not_existed");
+        if (Objects.isNull(user)) {
+            throw new MpRuntimeException(AuthErrorCode.ACCOUNT_NOT_EXISTED);
+        }
 
         UserModel userUpdate = UserModel.builder().id(userId).password(newPwd).initCheck(UserModel.INT_CHECK_NO).build();
         update(userUpdate);
