@@ -17,9 +17,7 @@ public enum AuthErrorCode implements ErrorCode {
     ACCOUNT_DISABLED("MP-110010", "account_disabled"),
     ACCOUNT_NOT_AUDITED("MP-110011", "account_not_audited"),
     ACCOUNT_EXPIRED("MP-110012", "account_expired"),
-    ACCOUNT_TYPE_ERROR("MP-110013", "account_type_error"),
-
-    SYS_CONFIG_CANNOT_CLOSE_AUDIT("MP-110021", "sysconfig_cannot_close_audit");
+    ACCOUNT_TYPE_ERROR("MP-110013", "account_type_error");
 
     AuthErrorCode(String code, String message) {
         setCode(code, AuthConstant.ERROR_CODE_PREFIX + message);
