@@ -4,8 +4,7 @@ INSERT INTO mp_auth_user (id, tenant, identifier, username, password, token_secr
                           expired_time, last_login)
 VALUES ('3f655d87112f4ae094bbaf70830e20aa', 'default', 'admin', 'admin',
         '1f670a02678a6cbcc9d38ce57f97f4a3724574dfa3a69b73f2930586110b4619265c87c9874df4cc',
-        '351672ff8854438eaaa48c46efdfa947', '管理员', '管理员', '/api/mp/avatar/1.png', '2021-06-23', 'example@123.com',
-        '13988888888', '',
+        '351672ff8854438eaaa48c46efdfa947', '管理员', '管理员', '', '2021-06-23', 'example@123.com', '13988888888', '',
         '北京路101号', 1, 1, 1, '', CURRENT_TIMESTAMP, '2121-07-29 00:00:00', null);
 
 -- 默认管理员角色
