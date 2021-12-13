@@ -18,6 +18,8 @@ import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneRoleMapper;
+import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
+import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.service.SceneConfigService;
 import cn.cyberpeace.mp.scene.service.SceneService;
 import org.apache.commons.collections4.ListUtils;
@@ -121,6 +123,10 @@ public class CsceneHandler extends BaseCsceneHandler<
         }
         csceneInstance.setCscene(getCsceneId());
         csceneInstance.setType(type);
+        if (type == CsceneInstanceModel.Type.TEST && csceneInstance.getScene() != null) {
+            // 测试模式下,需要默认可以有console登录协议
+            CsceneDataModifier.supplyProtocol(csceneInstance, AccessMode.Protocol.CONSOLE);
+        }
         var instanceHandler = new CsceneInstanceHandler(csceneInstance, getContext());
         instanceHandler.create();
         return instanceHandler.toData();
