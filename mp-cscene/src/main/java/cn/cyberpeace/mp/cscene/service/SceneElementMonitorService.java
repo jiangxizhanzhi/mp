@@ -56,6 +56,15 @@ public class SceneElementMonitorService {
         processTopologyElement(elementMonitorBasicInfo, csceneInstanceBO, elementId);
         processPluginElement(elementMonitorBasicInfo, csceneInstanceBO, elementId);
 
+        // todo 节点实时信息
+        ElementRTInfo rtInfo = new ElementRTInfo();
+        rtInfo.setUserCount(0);
+        rtInfo.setProcessCount(0);
+        rtInfo.setPortsCount(0);
+        rtInfo.setConnectionCount(0);
+
+        elementMonitorBasicInfo.setRtInfo(rtInfo);
+
         return elementMonitorBasicInfo;
     }
 
