@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.auth.extensions.security.check;
 
-import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsChecker;
 
@@ -18,7 +18,7 @@ public class CustomPostAuthenticationChecker implements UserDetailsChecker {
     public void check(UserDetails user) {
         if (!user.isCredentialsNonExpired()) {
             log.info("Failed to authenticate since user account credentials have expired");
-            throw new CredentialsExpiredException(AuthConstant.ERROR_CODE_PREFIX + "account_credentials_expired");
+            throw new MpRuntimeException(AuthErrorCode.ACCOUNT_CREDENTIALS_EXPIRED);
         }
     }
 }

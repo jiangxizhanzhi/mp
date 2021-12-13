@@ -370,17 +370,21 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     public boolean resetSelfPwd(String oldPwd, String newPwd) {
         var currentUser = UserUtils.getLoginUser();
-        Assert.notNull(currentUser, AuthConstant.ERROR_CODE_PREFIX + "account_not_login");
+        if (Objects.isNull(currentUser)) {
+            throw new MpRuntimeException(AuthErrorCode.ACCOUNT_NOT_LOGIN);
+        }
 
         // 旧密码是否正确
         boolean isOldPwdMatch = PasswordUtils.getPasswordEncoder().matches(oldPwd, currentUser.getPassword());
         if (!isOldPwdMatch) {
-            log.warn("旧密码不正确！");
+            log.error("旧密码不正确！");
+            throw new MpRuntimeException(AuthErrorCode.INCORRECT_OLD_CREDENTIALS);
         }
-        Assert.isTrue(isOldPwdMatch, AuthConstant.ERROR_CODE_PREFIX + "incorrect_old_credentials");
 
         // 检查新密码强度是否合法
-        Assert.isFalse(PasswordUtils.isPasswordStrengthLowLevel(newPwd), AuthConstant.ERROR_CODE_PREFIX + "password_strength_invalid");
+        if (PasswordUtils.isPasswordStrengthLowLevel(newPwd)) {
+            throw new MpRuntimeException(AuthErrorCode.PASSWORD_STRENGTH_INVALID);
+        }
 
         UserModel userUpdate = UserModel.builder().id(currentUser.getId()).password(newPwd).initCheck(UserModel.INT_CHECK_NO).build();
         update(userUpdate);
@@ -390,7 +394,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     public boolean resetPwd(String userId, String newPwd) {
         // 密码是否合法
-        Assert.isFalse(PasswordUtils.isPasswordStrengthLowLevel(newPwd), AuthConstant.ERROR_CODE_PREFIX + "password_strength_invalid");
+        if (PasswordUtils.isPasswordStrengthLowLevel(newPwd)) {
+            throw new MpRuntimeException(AuthErrorCode.PASSWORD_STRENGTH_INVALID);
+        }
 
         var source = get(userId).getSource();
         UserModel user = Objects.isNull(source) ? null : source.getObj();

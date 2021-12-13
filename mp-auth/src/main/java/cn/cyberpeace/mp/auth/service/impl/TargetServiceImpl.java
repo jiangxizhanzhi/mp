@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.dto.target.TargetDto;
 import cn.cyberpeace.mp.auth.dto.target.TargetType;
 import cn.cyberpeace.mp.auth.model.TargetModel;
@@ -146,7 +147,7 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
         TargetModel parentTarget = getModelMapper().get(parentId);
         if (parentTarget == null) {
             log.info("target:{}不存在!", parentId);
-            throw new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "target_not_existed");
+            throw new MpRuntimeException(AuthErrorCode.TARGET_NOT_EXISTED);
         }
 
         TargetDto targetDto = new TargetDto();
@@ -170,19 +171,17 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
         boolean supportedType = false;
         if (target.getType() != null) {
             for (TargetType ty : TargetType.values()) {
-                if(target.getType() == ty.getType()) {
+                if (target.getType() == ty.getType()) {
                     supportedType = true;
                     break;
                 }
             }
         }
 
-        Assert.isTrue(supportedType, AuthConstant.ERROR_CODE_PREFIX + "target_type_not_support");
+        if (!supportedType) {
+            throw new MpRuntimeException(AuthErrorCode.TARGET_TYPE_NOT_SUPPORT);
+        }
 
-//        TargetModel targetModel = getByIdentifier(target.getIdentifier());
-//        if (targetModel != null) {
-//            throw new MpRuntimeException("Identifier为" + target.getIdentifier() + "的记录已经存在!");
-//        }
     }
 
 
