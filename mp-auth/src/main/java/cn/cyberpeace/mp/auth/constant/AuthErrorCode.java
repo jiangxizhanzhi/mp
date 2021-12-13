@@ -51,7 +51,8 @@ public enum AuthErrorCode implements ErrorCode {
 
 
     // validation-api params
-    PARAMS_USERNAME_EMPTY("MP-110100", "params.username_empty");
+    PARAMS_USERNAME_EMPTY("MP-110100", "params.username_empty"),
+    PARAMS_PASSWORD_EMPTY("MP-110101", "params.password_empty");
 
 
     AuthErrorCode(String code, String message) {
