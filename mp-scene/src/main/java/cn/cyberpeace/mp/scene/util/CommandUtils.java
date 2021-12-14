@@ -98,7 +98,7 @@ public class CommandUtils {
     }
 
     public static String windowsDownloadFile(String fileUrl, String toPath) {
-        return String.format(WINDOWS_DOWNLOAD_FILE, fileUrl, toPath);
+        return String.format(WINDOWS_DOWNLOAD_FILE, toPath, fileUrl);
     }
 
     public static String windowsUnzipFile(String filePath, String toDir) {
@@ -122,7 +122,7 @@ public class CommandUtils {
     }
 
     public static String linuxDownloadFile(String fileUrl, String toPath) {
-        return String.format(LINUX_DOWNLOAD_FILE, fileUrl, toPath);
+        return String.format(LINUX_DOWNLOAD_FILE, toPath, fileUrl);
     }
 
     public static String linuxUnzipFile(String filePath, String toDir) {
