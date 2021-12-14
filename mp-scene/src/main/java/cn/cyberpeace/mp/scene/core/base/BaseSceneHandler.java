@@ -171,7 +171,7 @@ public abstract class BaseSceneHandler<
     private M4 sceneElementPortMapper;
     private M5 sceneElementPortConnectionMapper;
     private M6 sceneElementPluginMapper;
-    private M2 scenePieceMapper;
+    private M7 scenePieceMapper;
 
     /** 插件数据处理对象集合 */
     private final List<P2> plugins = new ArrayList<>();
@@ -307,25 +307,25 @@ public abstract class BaseSceneHandler<
 
     /**
      * 判断节点是否是区域内
-     * @param element 节点
+     * @param node 节点
      * @return boolean 节点是否是区域内
      */
-    private boolean isValidAreaElement(E element) {
+    private <N extends BaseSceneNodeBO<?, N>> boolean isValidAreaNode(N node) {
         if (!isAreaMode) {
             return true;
         }
 
-        String elementArea = element.getArea();
-        if (StringUtils.isEmpty(areaId) && StringUtils.isEmpty(elementArea)) {
+        String nodeArea = node.getArea();
+        if (StringUtils.isEmpty(areaId) && StringUtils.isEmpty(nodeArea)) {
             return true;
         }
 
-        if (StringUtils.equals(areaId, elementArea)) {
+        if (StringUtils.equals(areaId, nodeArea)) {
             return true;
         }
 
         // 节点所属区域也在区域内并且是展开的
-        var parentArea = areaMap.getOrDefault(elementArea, null);
+        var parentArea = areaMap.getOrDefault(nodeArea, null);
         return parentArea != null && parentArea.getOpen();
     }
 
@@ -396,6 +396,24 @@ public abstract class BaseSceneHandler<
     }
 
     /**
+     * 载入碎片节点数据
+     * @param pieces 业务模型-碎片节点
+     */
+    private void loadPieceBOs(List<P4> pieces) {
+        if (pieces == null) {
+            return;
+        }
+
+        pieces.forEach(piece -> {
+            if (!isValidAreaNode(piece)) {
+                return;
+            }
+
+            pieceMap.put(piece.getId(), piece);
+        });
+    }
+
+    /**
      * 载入网元节点数据
      * @param elements 业务模型-网元节点
      */
@@ -405,7 +423,7 @@ public abstract class BaseSceneHandler<
         }
 
         elements.forEach(element -> {
-            if (!isValidAreaElement(element)) {
+            if (!isValidAreaNode(element)) {
                 return;
             }
 
@@ -491,6 +509,22 @@ public abstract class BaseSceneHandler<
             var areaBO = ClassUtils.createInstance(sceneAreaBOClass);
             areaBO.fromModel(area);
             areaMap.put(areaBO.getId(), areaBO);
+        });
+    }
+
+    /**
+     * 载入碎片节点数据
+     * @param pieces 表模型-碎片节点
+     */
+    private void loadPieces(List<P3> pieces) {
+        if (pieces == null) {
+            return;
+        }
+
+        pieces.forEach(piece -> {
+            var pieceBO = ClassUtils.createInstance(scenePieceBOClass);
+            pieceBO.fromModel(piece);
+            pieceMap.put(pieceBO.getId(), pieceBO);
         });
     }
 
@@ -621,6 +655,29 @@ public abstract class BaseSceneHandler<
         }
 
         return areas;
+    }
+
+    /**
+     * 从数据库读取碎片节点
+     * @param areaIds 父区域节点
+     * @return 表模型-碎片节点
+     */
+    private List<P3> readPieces(String... areaIds) {
+        List<P3> pieces;
+        var condition = new HumanCondition()
+                .filterEqual(BaseScenePieceModel::getScene, sceneId);
+
+        String[] filterAreaIds = areaIds;
+        if (filterAreaIds.length == 0 && isAreaMode) {
+            String currentAreaId = areaId == null ? StringUtils.EMPTY : areaId;
+            filterAreaIds = new String[]{currentAreaId};
+        }
+        if (filterAreaIds.length > 0) {
+            condition.filterIn(BaseSceneElementModel::getArea, filterAreaIds);
+        }
+
+        pieces = scenePieceMapper.list(condition);
+        return pieces;
     }
 
     /**
@@ -830,6 +887,25 @@ public abstract class BaseSceneHandler<
     }
 
     /**
+     * 保存碎片节点
+     * @param existPieceMap 已存在的碎片节点
+     * @return 更新的碎片节点，包含添加的、更新属性的、删除的
+     */
+    private DiffTargets<P3> savePieces(Map<String, P3> existPieceMap) {
+        Map<String, P3> savingPieceMap = pieceMap.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> {
+                    P3 piece = entry.getValue().toModel();
+                    piece.setScene(sceneId);
+                    return piece;
+                }));
+        DiffTargets<P3> diff = diffTargets(savingPieceMap, existPieceMap);
+        saveDiff(scenePieceMapper, diff);
+        ListUtils.union(diff.getAddingTargets(), diff.getUpdatingTargets())
+                .forEach(piece -> pieceMap.get(piece.getNodeId()).fromModel(piece));
+        return diff;
+    }
+
+    /**
      * 保存网元节点
      * @param existElementMap 已存在的网元节点
      * @return 更新的网元节点，包含添加的、更新属性的、删除的
@@ -1027,6 +1103,7 @@ public abstract class BaseSceneHandler<
             loadSceneBO(topology.getScene());
             areaId = topology.getAreaId();
             loadAreaBOs(topology.getAreas());
+            loadPieceBOs(topology.getPieces());
             loadElementBOs(topology.getElements());
             loadConnectionBOs(topology.getConnections());
         }
@@ -1104,6 +1181,7 @@ public abstract class BaseSceneHandler<
         topologyBO.setScene(scene);
         topologyBO.setAreaId(areaId);
         topologyBO.setAreas(new ArrayList<>(areaMap.values()));
+        topologyBO.setPieces(new ArrayList<>(pieceMap.values()));
         topologyBO.setElements(new ArrayList<>(elementMap.values()));
         topologyBO.setConnections(new ArrayList<>(elementPortConnectionMap.values()));
 
@@ -1119,6 +1197,7 @@ public abstract class BaseSceneHandler<
     public void reload() {
         scene = null;
         areaMap.clear();
+        pieceMap.clear();
         elementMap.clear();
         elementPortMap.clear();
         portIdElementMap.clear();
@@ -1141,6 +1220,7 @@ public abstract class BaseSceneHandler<
             filterAreaIds = ArrayUtils.addAll(areaMap.values().stream().filter(BaseSceneAreaBO::getOpen)
                     .map(BaseSceneAreaBO::getId).toArray(String[]::new), currentAreaId);
         }
+        loadPieces(readPieces(filterAreaIds));
         loadElements(readElements(filterAreaIds));
         loadElementPorts(readElementPorts(filterAreaIds));
         loadConnections(readElementPortConnections(filterAreaIds));
@@ -1193,6 +1273,8 @@ public abstract class BaseSceneHandler<
             filterAreaIds = ArrayUtils.addAll(existAreaMap.values().stream().filter(BaseSceneAreaModel::getOpen)
                     .map(BaseSceneAreaModel::getNodeId).toArray(String[]::new), currentAreaId);
         }
+        Map<String, P3> existPieceMap = isCreate ? new HashMap<>() : readPieces(filterAreaIds).stream()
+                .collect(Collectors.toMap(BaseScenePieceModel::getNodeId, x -> x));
         Map<String, E0> existElementMap = isCreate ? new HashMap<>() : readElements(filterAreaIds).stream()
                 .collect(Collectors.toMap(BaseSceneElementModel::getNodeId, x -> x));
         Map<String, P0> existElementPortMap = isCreate ? new HashMap<>() : readElementPorts(filterAreaIds).stream()
@@ -1204,6 +1286,7 @@ public abstract class BaseSceneHandler<
 
         // 保存区域，可能会跨区域连接
         DiffTargets<A0> diffAreas = saveAreas(existAreaMap);
+        DiffTargets<P3> diffPieces = savePieces(existPieceMap);
         DiffTargets<E0> diffElements = saveElements(existElementMap);
         DiffTargets<P0> diffElementPorts = saveElementPorts(existElementPortMap);
         // 此时可能存在已被删除的跨区域连接，可优化
@@ -1267,11 +1350,15 @@ public abstract class BaseSceneHandler<
             filterAreaIds = ArrayUtils.addAll(areas.stream().filter(BaseSceneAreaModel::getOpen)
                     .map(BaseSceneNodeModel::getNodeId).toArray(String[]::new), currentAreaId);
         }
+        List<P3> pieces = readPieces(filterAreaIds);
         List<E0> elements = readElements(filterAreaIds);
         List<P0> elementPorts = readElementPorts(filterAreaIds);
         List<P1> elementPlugins = readElementPlugins(filterAreaIds);
         if (!areas.isEmpty()) {
             sceneAreaMapper.bulkDelete(areas.stream().map(BaseModel::getId).toArray(String[]::new));
+        }
+        if (!pieces.isEmpty()) {
+            scenePieceMapper.bulkDelete(pieces.stream().map(BaseModel::getId).toArray(String[]::new));
         }
         if (!elements.isEmpty()) {
             sceneElementMapper.bulkDelete(elements.stream().map(BaseModel::getId).toArray(String[]::new));
