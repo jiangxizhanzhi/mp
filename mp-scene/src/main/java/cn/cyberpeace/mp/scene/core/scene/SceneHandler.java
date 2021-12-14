@@ -3,44 +3,20 @@ package cn.cyberpeace.mp.scene.core.scene;
 import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.scene.core.base.BaseSceneHandler;
-import cn.cyberpeace.mp.scene.core.bo.CollectedSceneBO;
-import cn.cyberpeace.mp.scene.core.bo.CollectedSceneElementBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneAreaBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneElementPortConnectionBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneTopologyBO;
+import cn.cyberpeace.mp.scene.core.bo.*;
 import cn.cyberpeace.mp.scene.core.event.SceneElementEventHandler;
 import cn.cyberpeace.mp.scene.core.event.SceneEventHandler;
 import cn.cyberpeace.mp.scene.core.event.base.EventFlag;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
-import cn.cyberpeace.mp.scene.model.SceneAreaModel;
-import cn.cyberpeace.mp.scene.model.SceneElementModel;
-import cn.cyberpeace.mp.scene.model.SceneElementPluginModel;
-import cn.cyberpeace.mp.scene.model.SceneElementPortConnectionModel;
-import cn.cyberpeace.mp.scene.model.SceneElementPortModel;
-import cn.cyberpeace.mp.scene.model.SceneModel;
-import cn.cyberpeace.mp.scene.repository.SceneAreaMapper;
-import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
-import cn.cyberpeace.mp.scene.repository.SceneElementPluginMapper;
-import cn.cyberpeace.mp.scene.repository.SceneElementPortConnectionMapper;
-import cn.cyberpeace.mp.scene.repository.SceneElementPortMapper;
-import cn.cyberpeace.mp.scene.repository.SceneMapper;
+import cn.cyberpeace.mp.scene.model.*;
+import cn.cyberpeace.mp.scene.repository.*;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -56,12 +32,14 @@ import java.util.concurrent.ConcurrentHashMap;
         SceneElementBO.class,
         SceneElementPortBO.class,
         SceneElementPortConnectionBO.class,
+        ScenePieceBO.class,
         SceneModel.class,
         SceneAreaModel.class,
         SceneElementModel.class,
         SceneElementPortModel.class,
         SceneElementPortConnectionModel.class,
         SceneElementPluginModel.class,
+        ScenePieceModel.class,
         ScenePluginHandler.class,
         SceneHandler.class,
 })
@@ -72,6 +50,7 @@ import java.util.concurrent.ConcurrentHashMap;
         SceneElementPortMapper.class,
         SceneElementPortConnectionMapper.class,
         SceneElementPluginMapper.class,
+        ScenePieceMapper.class,
 })
 public class SceneHandler extends BaseSceneHandler<
         SceneModel,
@@ -80,11 +59,13 @@ public class SceneHandler extends BaseSceneHandler<
         SceneElementPortModel,
         SceneElementPortConnectionModel,
         SceneElementPluginModel,
+        ScenePieceModel,
         SceneBO,
         SceneAreaBO,
         SceneElementPortBO,
         SceneElementBO,
         SceneElementPortConnectionBO,
+        ScenePieceBO,
         SceneTopologyBO,
         SceneDataBO,
         SceneMapper,
@@ -93,6 +74,7 @@ public class SceneHandler extends BaseSceneHandler<
         SceneElementPortMapper,
         SceneElementPortConnectionMapper,
         SceneElementPluginMapper,
+        ScenePieceMapper,
         SceneContextBO,
         ScenePluginHandler<?, ?, ?, ?>,
         SceneHandler> {

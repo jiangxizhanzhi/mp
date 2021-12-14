@@ -36,11 +36,13 @@ import java.util.stream.Collectors;
  * @param <P0> 表模型类   网元端口
  * @param <C0> 表模型类   网元端口连接（也代表节点之间连接）
  * @param <P1> 表模型类   网元节点插件关系
+ * @param <P3> 表模型类   碎片节点
  * @param <S>  业务模型类  场景模板/场景实例
  * @param <A>  业务模型类  区域节点
  * @param <P>  业务模型类  网元端口
  * @param <E>  业务模型类  网元节点
  * @param <C>  业务模型类  网元端口连接（也代表节点之间连接）
+ * @param <P4> 业务模型类  碎片节点
  * @param <T>  业务模型类  场景拓扑数据
  * @param <D>  业务模型类  场景数据（包含拓扑数据、插件数据）
  * @param <M1> mapper类  场景模板/场景实例
@@ -49,6 +51,8 @@ import java.util.stream.Collectors;
  * @param <M4> mapper类  网元端口
  * @param <M5> mapper类  网元端口连接（也代表节点之间连接）
  * @param <M6> mapper类  网元节点插件关系
+ * @param <M7> mapper类  碎片节点
+ * @param <C2> 场景上下文
  * @param <P2> 场景插件处理接口类
  * @param <H> 场景处理实现类
  */
@@ -60,12 +64,14 @@ import java.util.stream.Collectors;
         "sceneElementBOClass",
         "sceneElementPortBOClass",
         "sceneElementPortConnectionBOClass",
+        "scenePieceBOClass",
         "sceneModelClass",
         "sceneAreaModelClass",
         "sceneElementModelClass",
         "sceneElementPortModelClass",
         "sceneElementPortConnectionModelClass",
         "sceneElementPluginModelClass",
+        "scenePieceModelClass",
         "scenePluginHandlerInterface",
         "sceneHandlerClass",
 })
@@ -76,6 +82,7 @@ import java.util.stream.Collectors;
         "sceneElementPortMapper",
         "sceneElementPortConnectionMapper",
         "sceneElementPluginMapper",
+        "scenePieceMapper",
 })
 @Getter
 public abstract class BaseSceneHandler<
@@ -85,22 +92,27 @@ public abstract class BaseSceneHandler<
         P0 extends BaseSceneElementPortModel,
         C0 extends BaseSceneElementPortConnectionModel,
         P1 extends BaseSceneElementPluginModel,
+        P3 extends BaseScenePieceModel,
         S extends BaseSceneBO<S0, S>,
         A extends BaseSceneAreaBO<A0, A>,
         P extends BaseSceneElementPortBO<P0, P, E>,
         E extends BaseSceneElementBO<E0, P, E>,
         C extends BaseSceneElementPortConnectionBO<C0, C>,
-        T extends BaseSceneTopologyBO<S0, A0, E0, P0, C0, S, A, P, E, C, T>,
-        D extends BaseSceneDataBO<S0, A0, E0, P0, C0, S, A, P, E, C, T, D>,
+        P4 extends BaseScenePieceBO<P3, P4>,
+        T extends BaseSceneTopologyBO<S0, A0, E0, P0, C0, P3, S, A, P, E, C, P4, T>,
+        D extends BaseSceneDataBO<S0, A0, E0, P0, C0, P3, S, A, P, E, C, P4, T, D>,
         M1 extends BaseSceneMapper<S0>,
         M2 extends BaseSceneAreaMapper<A0>,
         M3 extends BaseSceneElementMapper<E0>,
         M4 extends BaseSceneElementPortMapper<P0>,
         M5 extends BaseSceneElementPortConnectionMapper<C0>,
         M6 extends BaseSceneElementPluginMapper<P1>,
+        M7 extends BaseScenePieceMapper<P3>,
         C2 extends BaseSceneContextBO,
         P2 extends BasePluginHandler<?, ?, ?, ?>,
-        H extends BaseSceneHandler<S0, A0, E0, P0, C0, P1, S, A, P, E, C, T, D, M1, M2, M3, M4, M5, M6, C2, P2, H>> {
+        H extends BaseSceneHandler<S0, A0, E0, P0, C0, P1, P3,
+                S, A, P, E, C, P4, T, D,
+                M1, M2, M3, M4, M5, M6, M7, C2, P2, H>> {
 
     /** 上下文 */
     private C2 context;
@@ -112,6 +124,8 @@ public abstract class BaseSceneHandler<
     private String areaId;
     /** 场景模板/场景实例 */
     private S scene;
+    /** 碎片节点集合 */
+    private final Map<String, P4> pieceMap = new HashMap<>();
     /** 区域节点集合 */
     private final Map<String, A> areaMap = new HashMap<>();
     /** 网元节点集合 */
@@ -139,12 +153,14 @@ public abstract class BaseSceneHandler<
     private Class<E> sceneElementBOClass;
     private Class<P> sceneElementPortBOClass;
     private Class<C> sceneElementPortConnectionBOClass;
+    private Class<P4> scenePieceBOClass;
     private Class<S0> sceneModelClass;
     private Class<A0> sceneAreaModelClass;
     private Class<E0> sceneElementModelClass;
     private Class<P0> sceneElementPortModelClass;
     private Class<C0> sceneElementPortConnectionModelClass;
     private Class<P1> sceneElementPluginModelClass;
+    private Class<P3> scenePieceModelClass;
     private Class<P2> scenePluginHandlerInterface;
     private Class<H> sceneHandlerClass;
 
@@ -155,6 +171,7 @@ public abstract class BaseSceneHandler<
     private M4 sceneElementPortMapper;
     private M5 sceneElementPortConnectionMapper;
     private M6 sceneElementPluginMapper;
+    private M2 scenePieceMapper;
 
     /** 插件数据处理对象集合 */
     private final List<P2> plugins = new ArrayList<>();
