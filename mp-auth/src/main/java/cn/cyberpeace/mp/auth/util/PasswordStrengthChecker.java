@@ -5,6 +5,8 @@
 package cn.cyberpeace.mp.auth.util;
 
 
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Objects;
@@ -80,7 +82,7 @@ public class PasswordStrengthChecker {
      */
     public static int checkPasswordStrength(String passwd) {
         if (StringUtils.isBlank(passwd)) {
-            throw new IllegalArgumentException("password is empty");
+            throw new MpRuntimeException(AuthErrorCode.PARAMS_PASSWORD_EMPTY);
         }
 
 //        StringUtils.isWhitespace()

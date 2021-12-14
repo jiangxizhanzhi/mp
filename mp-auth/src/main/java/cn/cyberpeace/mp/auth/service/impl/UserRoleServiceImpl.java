@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.dto.role.UserRolePageRequest;
 import cn.cyberpeace.mp.auth.dto.role.UserRoleStatistic;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
@@ -95,7 +96,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
 
         var objResult = userService.get(userId).getSource();
         if (objResult == null || objResult.getObj() == null) {
-            throw new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "account_not_existed");
+            throw new MpRuntimeException(AuthErrorCode.ACCOUNT_NOT_EXISTED);
         }
 
         if (cleanOldRoles) {
@@ -131,7 +132,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
 
         var objResult = roleService.get(roleId).getSource();
         if (objResult == null || objResult.getObj() == null) {
-            throw new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "role_not_existed");
+            throw new MpRuntimeException(AuthErrorCode.ROLE_NOT_EXISTED);
         }
 
         if (CollectionUtil.isEmpty(userIds)) {
@@ -193,7 +194,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
 
         var objResult = roleService.get(roleId).getSource();
         if (objResult == null || objResult.getObj() == null) {
-            throw new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "role_not_existed");
+            throw new MpRuntimeException(AuthErrorCode.ROLE_NOT_EXISTED);
         }
 
         if (CollectionUtil.isEmpty(userIds)) {

@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.dto.OrgDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -212,7 +213,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         OrgModel parentOrg = getModelMapper().get(parentOrgId);
         if (parentOrg == null) {
             log.info("org:{}不存在!", parentOrgId);
-            throw new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "org_not_existed");
+            throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED);
         }
 
         OrgDto orgDto = new OrgDto();
@@ -231,7 +232,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         OrgModel orgModel = getModelMapper().get(orgId);
         if (orgModel == null) {
             log.info("org:{}不存在!", orgId);
-            throw new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "org_not_existed");
+            throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED);
         }
 
         OrgDto orgDto = new OrgDto();

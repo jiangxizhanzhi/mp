@@ -48,6 +48,9 @@ public class SceneMonitorService {
         SceneMonitorInfo sceneMonitorInfo = new SceneMonitorInfo();
         sceneMonitorInfo.setSceneAttr(csceneInstanceBO.getSceneAttr());
         sceneMonitorInfo.setCreateUsername(csceneInstanceBO.getCreateUsername());
+        sceneMonitorInfo.setType(csceneInstanceBO.getType());
+        sceneMonitorInfo.setReferenceType(csceneInstanceBO.getReferenceType());
+        sceneMonitorInfo.setReferenceMetaData(csceneInstanceBO.getReferenceMetaData());
 
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime createTime = csceneInstanceBO.getCreateTime();
@@ -65,6 +68,7 @@ public class SceneMonitorService {
             return sceneMonitorInfo;
         }
         var scene = csceneInstanceBO.getScene();
+
 
         var scenePluginDataBO = csceneInstanceBO.getScene().getPlugins().get(CPCLOUD_PLUGIN);
 

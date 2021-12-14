@@ -45,4 +45,7 @@ public class ElementMonitorBasicInfo {
     @ApiModelProperty(value = "端口")
     private List<ElementPort> ports;
 
+    @ApiModelProperty(value = "节点实时信息")
+    private ElementRTInfo rtInfo;
+
 }

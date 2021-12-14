@@ -160,6 +160,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
         // 密码是否合法
         if (PasswordUtils.isPasswordStrengthLowLevel(password)) {
             throw new MpRuntimeException(errMsgPrefix + "密码【" + password + "】强度不够!");
+//            throw new MpRuntimeException(AuthErrorCode.PASSWORD_STRENGTH_INVALID);
         }
     }
 

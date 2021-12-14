@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.dto.OrgDto;
 import cn.cyberpeace.mp.auth.model.OrgPermissionModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
@@ -76,7 +77,7 @@ public class OrgPermissionServiceImpl
         Assert.notNull(orgId, "orgId不能为空");
 
         var result = orgService.get(orgId);
-        ResultUtils.throwExceptionIfError(result, AuthConstant.ERROR_CODE_PREFIX + "org_not_existed");
+        ResultUtils.throwExceptionIfError(result, AuthErrorCode.ORG_NOT_EXISTED);
 
         if (cleanOldTargets) {
             // 清除组织权限

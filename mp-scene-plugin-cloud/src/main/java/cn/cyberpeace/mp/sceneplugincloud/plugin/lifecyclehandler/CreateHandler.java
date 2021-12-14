@@ -661,9 +661,10 @@ public class CreateHandler extends HandlerCommon {
         createData.setScene(Optional.ofNullable(getPluginHandler().getSrcScene().getName()).orElse(StringUtils.EMPTY));
         createData.setName(genResourceName(srcElement.getEid()));
         createData.setImage(cloudElement.getImage());
-        createData.setCpu(IntUtils.zeroNull(srcElement.getCpu()));
-        createData.setRam(IntUtils.zeroNull(srcElement.getRam()));
-        createData.setDisk(IntUtils.zeroNull(srcElement.getDisk()));
+        // todo 暂时不传
+//        createData.setCpu(IntUtils.zeroNull(srcElement.getCpu()));
+//        createData.setRam(IntUtils.zeroNull(srcElement.getRam()));
+//        createData.setDisk(IntUtils.zeroNull(srcElement.getDisk()));
         if (Boolean.TRUE.equals(cloudElement.getInitSupport())) {
             createData.setPostCommand(TextUtils.emptyNull(combineInitCommand(cloudElement)));
         }
