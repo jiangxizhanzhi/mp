@@ -261,6 +261,7 @@ public class SceneHandler extends BaseSceneHandler<
 
     public CollectedSceneElementBO getCollectedSceneElementBO(String nodeId) {
         var collectedSceneElementBO = new CollectedSceneElementBO();
+        collectedSceneElementBO.setSceneId(getScene().getEid());
         var sceneElement = getElement(nodeId);
         collectedSceneElementBO.setSceneElement(sceneElement);
         var sceneElementPorts = sceneElement.getPorts();

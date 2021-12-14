@@ -8,6 +8,8 @@ public class SceneCommandUtils {
 
     public static final String NODE_COMMAND_PREFIX = "n:";
 
+    public static final String WINDOWS_CALL_TEMPLATE = "call %s";
+
     /**
      * 解析场景命令
      * @param command
@@ -18,19 +20,31 @@ public class SceneCommandUtils {
      * @return parsed command
      */
     public static String parseCommand(String command, String sceneId, String elementId, String systemType) {
+        String parsedCommand;
+        boolean isWindows = SystemTypeCommandUtils.isWindows(systemType);
         if (command.startsWith(ORIGIN_COMMAND_PREFIX)) {
-            return command.substring(ORIGIN_COMMAND_PREFIX.length());
+            parsedCommand = command.substring(ORIGIN_COMMAND_PREFIX.length());
         } else if (command.startsWith(SCENE_COMMAND_PREFIX)) {
             var relativeCommand = command.substring(SCENE_COMMAND_PREFIX.length());
-            return SystemTypeCommandUtils.joinPath(systemType, SceneFileUtils.getSceneFileUnzipDir(systemType, sceneId),
-                    relativeCommand);
+            parsedCommand = SystemTypeCommandUtils.joinPath(systemType,
+                    SceneFileUtils.getSceneFileUnzipDir(systemType, sceneId), relativeCommand);
+            // 确保call执行不退出
+            if (isWindows) {
+                parsedCommand = String.format(WINDOWS_CALL_TEMPLATE, parsedCommand);
+            }
         } else if (command.startsWith(NODE_COMMAND_PREFIX)) {
             var relativeCommand = command.substring(NODE_COMMAND_PREFIX.length());
-            return SystemTypeCommandUtils.joinPath(systemType, SceneFileUtils.getElementFileUnzipDir(systemType, sceneId, elementId),
-                    relativeCommand);
+            parsedCommand = SystemTypeCommandUtils.joinPath(systemType,
+                    SceneFileUtils.getElementFileUnzipDir(systemType, sceneId, elementId), relativeCommand);
+            // 确保call执行不退出
+            if (isWindows) {
+                parsedCommand = String.format(WINDOWS_CALL_TEMPLATE, parsedCommand);
+            }
         } else {
-            return command;
+            parsedCommand = command;
         }
+
+        return parsedCommand;
     }
 
 }

@@ -30,4 +30,12 @@ public class CsceneContextHolder {
         getContext().setCallAction(action);
     }
 
+    public static String getCsceneInstanceId() {
+        return getContext().getCsceneInstanceId();
+    }
+
+    public static void setCsceneInstanceId(String csceneInstanceId) {
+        getContext().setCsceneInstanceId(csceneInstanceId);
+    }
+
 }

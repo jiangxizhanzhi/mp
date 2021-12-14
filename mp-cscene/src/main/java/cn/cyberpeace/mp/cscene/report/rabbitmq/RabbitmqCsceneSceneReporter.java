@@ -24,6 +24,7 @@ public class RabbitmqCsceneSceneReporter implements SceneReporter {
     @Override
     public void reportScene(CollectedSceneBO scene) {
         var cscene = CollectedCsceneBO.fromCollectedSceneBO(scene);
+        cscene.setCsceneId(CsceneContextHolder.getCsceneInstanceId());
         cscene.setCallAction(CsceneContextHolder.getCallAction());
         messageSender.send(cscene, MESSAGE_TYPE_SCENE);
     }
@@ -31,6 +32,7 @@ public class RabbitmqCsceneSceneReporter implements SceneReporter {
     @Override
     public void reportElement(CollectedSceneElementBO sceneElement) {
         var csceneElement = CollectedCsceneElementBO.fromCollectedSceneElementBO(sceneElement);
+        csceneElement.setCsceneId(CsceneContextHolder.getCsceneInstanceId());
         csceneElement.setCallAction(CsceneContextHolder.getCallAction());
         messageSender.send(csceneElement, MESSAGE_TYPE_SCENE_ELEMENT);
     }
