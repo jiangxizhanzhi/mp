@@ -76,6 +76,12 @@
             ) a
     </select>
 
-
+    <select id="countActivitySceneByTime" resultType="java.lang.Integer">
+        select count(*)
+        from mp_cscene_cscene_instance i
+                 LEFT JOIN mp_scene_scene s ON i.scene = s.id
+        where (i.create_time &lt; #{startTime} and s.event != 9 and s.event_status != 4)
+           or (i.create_time &gt;= #{startTime} and i.create_time &lt; #{endTime})
+    </select>
 
 </mapper>
