@@ -55,4 +55,18 @@ public class BasePageConvertModel {
     @ApiModelProperty(hidden = true)
     @JsonIgnore
     private String errorMessage;
+
+    /**
+     * 消息体
+     */
+    @ApiModelProperty(hidden = true)
+    @JsonIgnore
+    private String msg;
+
+    /**
+     * 消息体
+     */
+    @ApiModelProperty(hidden = true)
+    @JsonIgnore
+    private String msgZh;
 }
