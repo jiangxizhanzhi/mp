@@ -30,10 +30,13 @@ import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -153,6 +156,7 @@ public class CsceneSpecialService {
                 .selectAs(CsceneInstanceModel::getReferenceMetaData, CsceneInstanceStat::getReferenceMetaData)
                 .selectAs(CsceneInstanceModel::getCreateUsername, CsceneInstanceStat::getCreateUsername)
                 .selectAs(CsceneInstanceModel::getCreateTime, CsceneInstanceStat::getCreateTime)
+                .selectAs(CsceneInstanceModel::getUpdateTime, CsceneInstanceStat::getUpdateTime)
                 .selectAs(CsceneInstanceModel::getSceneTtl, CsceneInstanceStat::getSceneTtl)
                 .selectAs(CsceneInstanceModel::getSceneAttr, CsceneInstanceStat::getSceneAttr)
                 .selectAs(CsceneInstanceModel::getSceneTtl, CsceneInstanceStat::getSceneTtl)
@@ -279,10 +283,29 @@ public class CsceneSpecialService {
         List<CsceneInstanceStat> data;
         int total;
         try {
+            if (queryParams.getOrders() == null || queryParams.getOrders().length == 0) {
+                // 排序,默认使用时间倒序排列
+                humanCondition.orderBy("-createTime");
+            } else {
+                // todo 可根据需要去实现按cpu数量等排列 暂时只支持createTime、updateTime
+                humanCondition.orderBy(queryParams.getOrders());
+            }
             data = csceneInstanceMapper.list(humanCondition, CsceneInstanceStat.class);
+            // 场景运行时长
+            if (CollectionUtils.isNotEmpty(data)) {
+                data.forEach(s -> {
+                    if (SceneModel.Event.DELETE == s.getEvent() && EventStatus.OVER == s.getEventStatus()) {
+                        // 已删除场景的运行时间=删除时刻 - 创建时刻
+                        s.setSceneRunTime(s.getUpdateTime().toEpochSecond(ZoneOffset.UTC) - s.getCreateTime().toEpochSecond(ZoneOffset.UTC));
+                    } else {
+                        // 未删除场景的运行时间=当前时刻 - 创建时刻
+                        s.setSceneRunTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC) - s.getCreateTime().toEpochSecond(ZoneOffset.UTC));
+                    }
+                });
+            }
             total = csceneInstanceMapper.total(humanCondition);
         } catch (Exception e) {
-            log.error("Service list error: {}", e.getMessage());
+            log.error("Service list error: {}", e.getMessage(), e);
             return new ListObjServiceResult<>(null, BaseErrorCode.ERROR, e.getMessage());
         }
 
