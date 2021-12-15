@@ -91,11 +91,8 @@ public class DashboardService {
         CollectionUtil.reverse(daylist);
 
         String[] xAxis = daylist.stream().map(day -> df.format(day)).toArray(String[]::new);
-        CountDownLatch countDownLatch = new CountDownLatch(7);
         Integer[] userCount = daylist.stream().map(day -> {
             Integer cnt = userOnlineRecordService.getOnlinedUserCntByPeriod(day.atStartOfDay(), day.plusDays(1).atStartOfDay());
-            countDownLatch.countDown();
-            System.out.println(countDownLatch.getCount());
             return cnt;
         }).toArray(Integer[]::new);
 
