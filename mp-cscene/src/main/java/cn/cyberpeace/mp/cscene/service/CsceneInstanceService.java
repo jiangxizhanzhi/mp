@@ -246,6 +246,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     public ServiceResult<Boolean> startFlow(String id, String toNodeId, String flowId, CsceneContextBO context) {
         CsceneContextHolder.setCallAction(CsceneCallAction.NODE_START_FLOW);
+        CsceneContextHolder.setCsceneInstanceId(id);
         if (context != null) {
             context.loadTransparentContext();
         }
@@ -261,6 +262,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     public ServiceResult<Boolean> stopFlow(String id, String toNodeId, String flowId, CsceneContextBO context) {
         CsceneContextHolder.setCallAction(CsceneCallAction.NODE_STOP_FLOW);
+        CsceneContextHolder.setCsceneInstanceId(id);
         if (context != null) {
             context.loadTransparentContext();
         }
@@ -276,6 +278,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     public ServiceResult<Probe> startProbe(String id, String toNodeId, String probeId, CsceneContextBO context) {
         CsceneContextHolder.setCallAction(CsceneCallAction.NODE_START_PROBE);
+        CsceneContextHolder.setCsceneInstanceId(id);
         if (context != null) {
             context.loadTransparentContext();
         }
@@ -285,6 +288,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     public ServiceResult<Probe> stopProbe(String id, String toNodeId, String probeId, CsceneContextBO context) {
         CsceneContextHolder.setCallAction(CsceneCallAction.NODE_STOP_PROBE);
+        CsceneContextHolder.setCsceneInstanceId(id);
         if (context != null) {
             context.loadTransparentContext();
         }
@@ -293,6 +297,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     public ServiceResult<NodeActionRecordingBO> enableRecording(String id, String nodeId, String connectionId, CsceneContextBO context) {
+        CsceneContextHolder.setCsceneInstanceId(id);
         if (context != null) {
             context.loadTransparentContext();
         }
@@ -305,6 +310,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     public ServiceResult<NodeActionRecordingBO> disableRecording(String id, String nodeId, String connectionId, CsceneContextBO context) {
+        CsceneContextHolder.setCsceneInstanceId(id);
         if (context != null) {
             context.loadTransparentContext();
         }

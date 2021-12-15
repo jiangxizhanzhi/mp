@@ -11,10 +11,12 @@ public class SceneConfigTopologyBO extends BaseSceneTopologyBO<
         SceneConfigElementModel,
         SceneConfigElementPortModel,
         SceneConfigElementPortConnectionModel,
+        SceneConfigPieceModel,
         SceneConfigBO,
         SceneConfigAreaBO,
         SceneConfigElementPortBO,
         SceneConfigElementBO,
         SceneConfigElementPortConnectionBO,
+        SceneConfigPieceBO,
         SceneConfigTopologyBO> {
 }

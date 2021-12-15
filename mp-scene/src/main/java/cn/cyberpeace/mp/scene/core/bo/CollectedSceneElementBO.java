@@ -11,6 +11,8 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CollectedSceneElementBO {
+    @ApiModelProperty(value = "场景id")
+    private String sceneId;
     @ApiModelProperty(value = "网元基础数据")
     private SceneElementBO sceneElement;
     @ApiModelProperty(value = "场景插件对应网元数据(字典: key-插件代号, value-插件数据[不同插件代号对应的数据模型不一样]), "

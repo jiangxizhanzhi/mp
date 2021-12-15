@@ -15,12 +15,14 @@ public abstract class BaseSceneTopologyBO<
         E0 extends BaseSceneElementModel,
         P0 extends BaseSceneElementPortModel,
         C0 extends BaseSceneElementPortConnectionModel,
+        P1 extends BaseScenePieceModel,
         S extends BaseSceneBO<S0, S>,
         A extends BaseSceneAreaBO<A0, A>,
         P extends BaseSceneElementPortBO<P0, P, E>,
         E extends BaseSceneElementBO<E0, P, E>,
         C extends BaseSceneElementPortConnectionBO<C0, C>,
-        T extends BaseSceneTopologyBO<S0, A0, E0, P0, C0, S, A, P, E, C, T>> {
+        P2 extends BaseScenePieceBO<P1, P2>,
+        T extends BaseSceneTopologyBO<S0, A0, E0, P0, C0, P1, S, A, P, E, C, P2, T>> {
     @ApiModelProperty(value = "场景基础数据")
     private S scene;
     @ApiModelProperty(value = "当前区域id")
@@ -31,6 +33,8 @@ public abstract class BaseSceneTopologyBO<
     private List<E> elements;
     @ApiModelProperty(value = "连接数据")
     private List<C> connections;
+    @ApiModelProperty(value = "碎片数据")
+    private List<P2> pieces;
 
     public T export() {
         if (scene != null) {
@@ -45,6 +49,9 @@ public abstract class BaseSceneTopologyBO<
         if (connections != null) {
             setConnections(connections.stream().map(EidBO::export).collect(Collectors.toList()));
         }
+        if (pieces != null) {
+            setPieces(pieces.stream().map(EidBO::export).collect(Collectors.toList()));
+        }
         return (T) this;
     }
 
@@ -53,9 +60,10 @@ public abstract class BaseSceneTopologyBO<
             P9 extends BaseSceneElementPortBO<?, P9, E9>,
             E9 extends BaseSceneElementBO<?, P9, E9>,
             C9 extends BaseSceneElementPortConnectionBO<?, C9>,
-            P8 extends BaseSceneTopologyBO<?, ?, ?, ?, ?, S9, A9, P9, E9, C9, P8>> P8 export(
+            P7 extends BaseScenePieceBO<?, P7>,
+            P8 extends BaseSceneTopologyBO<?, ?, ?, ?, ?, ?, S9, A9, P9, E9, C9, P7, P8>> P8 export(
             Class<P8> pClass, Class<S9> sceneClass, Class<A9> areaClass, Class<E9> elementClass, Class<P9> portClass,
-            Class<C9> connectionClass) {
+            Class<C9> connectionClass, Class<P7> pieceClass) {
         var pObj = ClassUtils.createInstance(pClass);
         pObj.setAreaId(areaId);
         if (scene != null) {
@@ -70,6 +78,10 @@ public abstract class BaseSceneTopologyBO<
         }
         if (connections != null) {
             pObj.setConnections(connections.stream().map(connection -> connection.export(connectionClass))
+                    .collect(Collectors.toList()));
+        }
+        if (pieces != null) {
+            pObj.setPieces(pieces.stream().map(piece -> piece.export(pieceClass))
                     .collect(Collectors.toList()));
         }
         return pObj;

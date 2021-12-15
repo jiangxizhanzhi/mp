@@ -7,6 +7,9 @@ import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.util.CommandUtils;
+import cn.cyberpeace.mp.scene.util.SceneCommandUtils;
+import cn.cyberpeace.mp.scene.util.SceneFileUtils;
+import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
@@ -407,9 +410,27 @@ public class CreateHandler extends HandlerCommon {
     private String combineInitCommand(CloudPluginSceneElementBO cloudElement) {
         var srcElement = cloudElement.getSrcElement();
         List<String> commands = new ArrayList<>();
+
+        var standardSystemType = SystemTypeUtils.getStandardSystemType(srcElement.getSystemType());
+        var srcScene = getPluginHandler().getSrcScene();
+        var sceneId = srcScene.getEid();
+        var sceneFileUrl = srcScene.getFile();
+        if (!StringUtils.isEmpty(sceneFileUrl)) {
+            commands.add(SceneFileUtils.genSceneFileInitCommand(standardSystemType, sceneFileUrl, sceneId));
+        }
+
+        var elementFileUrl = srcElement.getFile();
+        if (!StringUtils.isEmpty(elementFileUrl)) {
+            commands.add(SceneFileUtils.genElementFileInitCommand(standardSystemType, elementFileUrl, sceneId,
+                    srcElement.getEid()));
+        }
+
         List<String> initCommands = srcElement.getInitCommands();
         if (initCommands != null) {
-            commands.addAll(initCommands);
+            initCommands.forEach(initCommand -> {
+                commands.add(SceneCommandUtils.parseCommand(initCommand, sceneId, srcElement.getEid(),
+                        standardSystemType));
+            });
         }
 
         // TODO: 应用安装
@@ -419,13 +440,12 @@ public class CreateHandler extends HandlerCommon {
 //
 //        }
 
-        var standardSystemType = SystemTypeUtils.getStandardSystemType(srcElement.getSystemType());
-        var command = CommandUtils.joinCommands(commands.toArray(new String[0]), standardSystemType);
+        var command = SystemTypeCommandUtils.joinCommands(standardSystemType, commands.toArray(new String[0]));
         if (!StringUtils.isEmpty(command)) {
-            if (CommandUtils.isWindows(standardSystemType)) {
-                command = CommandUtils.appendBeforeCommand(command, "rem cmd", standardSystemType);
+            if (SystemTypeCommandUtils.isWindows(standardSystemType)) {
+                command = SystemTypeCommandUtils.appendBeforeCommand(command, "rem cmd", standardSystemType);
             } else {
-                command = CommandUtils.appendBeforeCommand(command, "#!/bin/sh", standardSystemType);
+                command = SystemTypeCommandUtils.appendBeforeCommand(command, "#!/bin/sh", standardSystemType);
             }
         }
 

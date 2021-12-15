@@ -16,8 +16,9 @@ import java.util.List;
  */
 public interface PluginSceneHandlerCommon<S extends BaseSceneBO<?, S>, E extends BaseSceneElementBO<?, P, E>,
         P extends BaseSceneElementPortBO<?, P, E>,
-        H extends BaseSceneHandler<?, ?, ?, ?,
-                ? extends BaseSceneElementPortConnectionModel, ?, S, ?, P, E, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, H>> {
+        H extends BaseSceneHandler<?, ?, ?, ?, ? extends BaseSceneElementPortConnectionModel, ?, ?,
+                S, ?, P, E, ?, ?, ?, ?, ?,
+                ?, ?, ?, ?, ?, ?, ?, ?, H>> {
 
     H getSceneHandler();
 
