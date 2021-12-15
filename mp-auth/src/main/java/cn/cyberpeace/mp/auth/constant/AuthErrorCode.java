@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.base.service.code.ErrorCode;
  * @Date：2021/8/31 11:13
  */
 public enum AuthErrorCode implements ErrorCode {
+    OP_ERROR("MP-110000", "op_error"),
     NOT_CERTIFIED("MP-110001", "not_certified"),
     AUTHENTICATION_FAILED("MP-110002", "authentication_failed"),
     BAD_CREDENTIALS("MP-110003", "bad_credentials"),
@@ -36,10 +37,15 @@ public enum AuthErrorCode implements ErrorCode {
 
     // org
     ORG_NOT_EXISTED("MP-110070", "org_not_existed"),
+    ORG_CHILD_ALREADY_EXISTED("MP-110071", "org_child_already_existed"),
+    ORG_CANNOT_DELETE_WITH_CHILD_EXISTED("MP-110072", "org_cannot_delete_with_child_existed"),
+    ORG_CANNOT_DELETE_WITH_USER_EXISTED("MP-110073", "org_cannot_delete_with_user_existed"),
 
 
     // role
     ROLE_NOT_EXISTED("MP-110080", "role_not_existed"),
+    ROLE_IDENT_CANNOT_BE_ADMIN("MP-110081", "role_ident_cannot_be_admin"),
+    ROLE_CANNOT_DELETE_WITH_USER_EXISTED("MP-110082", "role_cannot_delete_with_user_existed"),
 
 
     // target
@@ -52,7 +58,12 @@ public enum AuthErrorCode implements ErrorCode {
 
     // validation-api params
     PARAMS_USERNAME_EMPTY("MP-110100", "params.username_empty"),
-    PARAMS_PASSWORD_EMPTY("MP-110101", "params.password_empty");
+    PARAMS_PASSWORD_EMPTY("MP-110101", "params.password_empty"),
+
+
+    // EXCEL
+    EXCEL_USER_LIST_EMPTY("MP-110121", "excel_list_empty"),
+    EXCEL_LIST_SIZE_OVER_100("MP-110122", "excel_list_size_over_100");
 
 
     AuthErrorCode(String code, String message) {

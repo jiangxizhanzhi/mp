@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.service;
 
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -62,7 +63,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
         list.add(data);
 
         if (list.size() > MAX_COUNT) {
-            throw new MpRuntimeException("导入数据超过100条！");
+            throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_SIZE_OVER_100);
         }
     }
 
@@ -95,7 +96,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
     private void checkImportUsers(List<ImportUser> users) {
         log.info("checkImportUsers... list size:{}", users.size());
         if (CollectionUtil.isEmpty(users)) {
-            throw new MpRuntimeException("列表为空！");
+            throw new MpRuntimeException(AuthErrorCode.EXCEL_USER_LIST_EMPTY);
         }
 
         for (int i = 0; i < users.size(); i++) {
@@ -159,8 +160,8 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
     private void checkPwd(String password, String errMsgPrefix) {
         // 密码是否合法
         if (PasswordUtils.isPasswordStrengthLowLevel(password)) {
-            throw new MpRuntimeException(errMsgPrefix + "密码【" + password + "】强度不够!");
-//            throw new MpRuntimeException(AuthErrorCode.PASSWORD_STRENGTH_INVALID);
+//            throw new MpRuntimeException(errMsgPrefix + "密码【" + password + "】强度不够!");
+            throw new MpRuntimeException(AuthErrorCode.PASSWORD_STRENGTH_INVALID);
         }
     }
 
