@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstaneRoleBO;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
+import cn.cyberpeace.mp.cscene.context.CsceneContextHolder;
 import cn.cyberpeace.mp.cscene.core.base.BaseCsceneHandler;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceRoleModel;
@@ -15,6 +16,7 @@ import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
 import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
 import cn.cyberpeace.mp.scene.service.SceneService;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 
@@ -47,6 +49,12 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         return context.toSceneContext();
     }
 
+    @Override
+    protected void setCsceneId(String csceneId) {
+        super.setCsceneId(csceneId);
+        CsceneContextHolder.setCsceneInstanceId(csceneId);
+    }
+
     public CsceneInstanceHandler(CsceneInstanceBO csceneBO, CsceneContextBO context) {
         init(csceneBO, context);
     }
@@ -76,8 +84,13 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
 
     public void create() {
         var cscene = getCscene();
-        cscene.setScene(sceneService.create(cscene.getScene(), generateSceneContext()).getSource());
+        // 先保存设置id
         save();
+        cscene.setScene(sceneService.create(cscene.getScene(), generateSceneContext()).getSource());
+
+        var csceneObj = cscene.toModel();
+        getCsceneMapper().save(csceneObj);
+        cscene.fromModel(csceneObj);
     }
 
     @Override

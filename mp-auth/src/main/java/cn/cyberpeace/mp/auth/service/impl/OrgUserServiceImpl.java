@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.dto.OrgDto;
 import cn.cyberpeace.mp.auth.dto.org.OrgUserPageRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
@@ -14,6 +15,7 @@ import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.OrgUserFields;
 import cn.cyberpeace.mp.auth.util.SQLUtils;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.hutool.core.collection.CollectionUtil;
@@ -125,7 +127,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
         Assert.notBlank(orgId, "orgId不能为空！");
         var objResult = orgService.get(orgId).getSource();
         if (objResult == null || objResult.getObj() == null) {
-            throw new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "org_not_existed");
+            throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED);
         }
 
         // 不清楚组织-用户关系，而是增量添加

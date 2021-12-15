@@ -213,7 +213,7 @@ public abstract class BaseCsceneHandler<
 
         C0 csceneObj = cscene.toModel();
         var result = csceneMapper.save(csceneObj);
-        csceneId = csceneObj.getId();
+        setCsceneId(csceneObj.getId());
         cscene.fromModel(csceneObj);
         return result;
     }
@@ -258,6 +258,10 @@ public abstract class BaseCsceneHandler<
         cscene.setRoles(convertToRoleBOs(ListUtils.union(addingTargets, updatingTargets), csceneRoleBOClass));
     }
 
+    protected void setCsceneId(String csceneId) {
+        this.csceneId = csceneId;
+    }
+
     public void initBase() {
         ClassUtils.loadClassFields(this);
         BeanCommon.loadBeanFields(this);
@@ -273,7 +277,7 @@ public abstract class BaseCsceneHandler<
     public void initLazy(String csceneId, CsceneContextBO context) {
         initBase();
         initContext(context);
-        this.csceneId = csceneId;
+        setCsceneId(csceneId);
         this.initLazy = true;
     }
 
@@ -284,7 +288,7 @@ public abstract class BaseCsceneHandler<
     public void init(String csceneId, CsceneContextBO context) {
         initBase();
         initContext(context);
-        this.csceneId = csceneId;
+        setCsceneId(csceneId);
         reload();
         if (this.csceneId != null && this.cscene == null) {
             throw new SceneNotExistException("csceneId:" + csceneId);
@@ -319,7 +323,7 @@ public abstract class BaseCsceneHandler<
      * @param csceneBO 完整的综合场景业务数据
      */
     public void fromData(C csceneBO) {
-        csceneId = csceneBO.getId();
+        setCsceneId(csceneBO.getId());
         cscene = csceneBO;
     }
 

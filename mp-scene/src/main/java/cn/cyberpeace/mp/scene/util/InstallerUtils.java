@@ -3,8 +3,6 @@ package cn.cyberpeace.mp.scene.util;
 import cn.cyberpeace.mp.base.common.FdfsCommon;
 import cn.cyberpeace.mp.base.common.LocalFileMappingCommon;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
-import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
-import cn.cyberpeace.mp.base.util.fdfsclient.FdfsClient;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.hutool.core.io.FileUtil;
@@ -12,15 +10,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
+// TODO: 调用CommandUtils优化操作命令
 @Slf4j
 @Component
 public class InstallerUtils {
@@ -130,14 +128,6 @@ public class InstallerUtils {
     @SuppressWarnings({"java:S1144", "java:S3010"})
     private InstallerUtils() {}
 
-    public static boolean isWindows(String systemType) {
-        return CommandUtils.OS_TYPE_WINDOWS.equals(CommandUtils.getOsType(systemType));
-    }
-
-    public static boolean isLinux(String systemType) {
-        return CommandUtils.OS_TYPE_LINUX.equals(CommandUtils.getOsType(systemType));
-    }
-
     public static boolean isNewerWindows(String systemType) {
         systemType = systemType.toLowerCase();
         return BaseSceneElementModel.SystemType.WINDOWS.equals(systemType)
@@ -160,7 +150,7 @@ public class InstallerUtils {
     }
 
     public static String getDefaultInstallDir(String systemType) {
-        if (isWindows(systemType)) {
+        if (SystemTypeCommandUtils.isWindows(systemType)) {
             return SceneSingleton.sceneAppConfig.getWindowsInstallerDir();
         } else {
             return SceneSingleton.sceneAppConfig.getLinuxInstallerDir();
@@ -178,11 +168,11 @@ public class InstallerUtils {
      */
     public static String generateBaseDirCreateCommand(String systemType) {
         var installerDir = getDefaultInstallDir(systemType);
-        if (isWindows(systemType)) {
-            return String.format(CommandUtils.joinCommands(WINDOWS_BASE_DIR_CREATE, systemType), installerDir,
+        if (SystemTypeCommandUtils.isWindows(systemType)) {
+            return String.format(SystemTypeCommandUtils.joinCommands(systemType, WINDOWS_BASE_DIR_CREATE), installerDir,
                     installerDir);
         } else {
-            return String.format(CommandUtils.joinCommands(LINUX_BASE_DIR_CREATE, systemType), installerDir,
+            return String.format(SystemTypeCommandUtils.joinCommands(systemType, LINUX_BASE_DIR_CREATE), installerDir,
                     installerDir);
         }
     }
@@ -201,7 +191,7 @@ public class InstallerUtils {
         var installerDir = getDefaultInstallDir(systemType);
         String filePath;
         String downloadCommand;
-        if (isWindows(systemType)) {
+        if (SystemTypeCommandUtils.isWindows(systemType)) {
             filePath = String.format("%s\\%s", installerDir, fileName);
             downloadCommand = String.format(WINDOWS_FILE_DOWNLOAD, filePath, fileUrl);
         } else {
@@ -246,16 +236,16 @@ public class InstallerUtils {
                                                              String installCommand) {
         String filePathLower = filePath.toLowerCase();
         var installerDir = getDefaultInstallDir(systemType);
-        if (isWindows(systemType)) {
+        if (SystemTypeCommandUtils.isWindows(systemType)) {
             if (installCommand.contains(INSTALLER_REPLACEMENT)) {
                 var fileName = FileUtil.getName(filePath);
                 installCommand = installCommand.replace(INSTALLER_REPLACEMENT, fileName);
-                return String.format(CommandUtils.joinCommands(WINDOWS_CUSTOM_NORMAL_INSTALL, systemType), installerDir,
+                return String.format(SystemTypeCommandUtils.joinCommands(systemType, WINDOWS_CUSTOM_NORMAL_INSTALL), installerDir,
                         installCommand);
 
             } else if (filePathLower.endsWith(".zip") || filePathLower.endsWith(".rar")) {
                 var installFolder = TextUtils.uuid();
-                return String.format(CommandUtils.joinCommands(WINDOWS_CUSTOM_UNZIP_INSTALL, systemType), installerDir,
+                return String.format(SystemTypeCommandUtils.joinCommands(systemType, WINDOWS_CUSTOM_UNZIP_INSTALL), installerDir,
                         installFolder, filePath, installerDir, installFolder, installerDir, installFolder,
                         installCommand);
             }
@@ -263,11 +253,11 @@ public class InstallerUtils {
             if (installCommand.contains(INSTALLER_REPLACEMENT)) {
                 var fileName = FileUtil.getName(filePath);
                 installCommand = installCommand.replace(INSTALLER_REPLACEMENT, fileName);
-                return String.format(CommandUtils.joinCommands(LINUX_CUSTOM_NORMAL_INSTALL, systemType), installerDir,
+                return String.format(SystemTypeCommandUtils.joinCommands(systemType, LINUX_CUSTOM_NORMAL_INSTALL), installerDir,
                         installCommand);
             } else if (filePathLower.endsWith(".zip")) {
                 var installFolder = TextUtils.uuid();
-                return String.format(CommandUtils.joinCommands(LINUX_CUSTOM_UNZIP_INSTALL, systemType), installerDir,
+                return String.format(SystemTypeCommandUtils.joinCommands(systemType, LINUX_CUSTOM_UNZIP_INSTALL), installerDir,
                         installFolder, filePath, installerDir, installFolder, installerDir, installFolder, installerDir,
                         installFolder, installerDir, installFolder, installCommand);
             }
@@ -319,7 +309,7 @@ public class InstallerUtils {
             }
         }
 
-        boolean isWindowsOS = isWindows(systemType);
+        boolean isWindowsOS = SystemTypeCommandUtils.isWindows(systemType);
         for (var installer : installers) {
             String installerFile = installer.getFile();
             String installCommand = installer.getInstallCommand();
@@ -366,7 +356,7 @@ public class InstallerUtils {
                     innerCommands.add(installCommand);
                 }
 
-                installCommand = CommandUtils.joinCommands(innerCommands.toArray(new String[0]), systemType);
+                installCommand = SystemTypeCommandUtils.joinCommands(systemType, innerCommands.toArray(new String[0]));
 
                 if (isWinFileContainZh) {
                     installCommand = CommandUtils.fixWinZhCommand(installCommand);
@@ -383,8 +373,8 @@ public class InstallerUtils {
 
         if (isWindowsOS) {
             // windows做成脚本文件安装
-            var subInstallCommand = CommandUtils.joinCommands(subInstallCommands.toArray(new String[0]),
-                    systemType);
+            var subInstallCommand = SystemTypeCommandUtils.joinCommands(systemType,
+                    subInstallCommands.toArray(new String[0]));
             String tmpFile = null;
             try {
                 tmpFile = FdfsCommon.uploadContent(subInstallCommand);
@@ -394,14 +384,14 @@ public class InstallerUtils {
             }
 
             if (tmpFile != null) {
-                installCommands.add(String.format(CommandUtils.joinCommands(WINDOWS_MAKE_SCRIPT_INSTALL, systemType),
+                installCommands.add(String.format(SystemTypeCommandUtils.joinCommands(systemType, WINDOWS_MAKE_SCRIPT_INSTALL),
                         installerDir, StringUtils.joinWith(FILE_URL_SEPARATOR, metadataFileServer, tmpFile), installerDir));
             }
         } else {
             installCommands.addAll(subInstallCommands);
         }
 
-        return CommandUtils.joinCommands(installCommands.toArray(new String[0]), systemType);
+        return SystemTypeCommandUtils.joinCommands(systemType, installCommands.toArray(new String[0]));
     }
 
     @Data

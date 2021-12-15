@@ -84,9 +84,10 @@ public class CsceneController implements BaseModelListControllerBase {
         return modelService.export(id, null).asResult();
     }
 
-    @ApiOperation(value = "保存（创建/更新）场景模板", notes="请忽略test_scenes和app_scenes字段")
+    @ApiOperation(value = "保存（创建/更新）场景模板", notes = "请忽略test_scenes和app_scenes字段")
     @PostMapping("/sync")
     public ServiceResult<CsceneBO> sync(@RequestBody CsceneBO csceneBO) {
+        log.info("scene sync,params is {}", JsonCommon.stringify(csceneBO));
         return modelService.sync(csceneBO, null).asResult();
     }
 

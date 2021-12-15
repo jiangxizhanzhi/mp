@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.dto.role.RoleDto;
 import cn.cyberpeace.mp.auth.dto.role.RolePageRequest;
 import cn.cyberpeace.mp.auth.dto.role.RolePermDto;
@@ -229,7 +230,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         log.info("roleid:{}", roleId);
 
         var result = get(roleId);
-        ResultUtils.throwExceptionIfError(result, AuthConstant.ERROR_CODE_PREFIX + "role_not_existed");
+        ResultUtils.throwExceptionIfError(result, AuthErrorCode.ROLE_NOT_EXISTED);
 
         RoleModel roleModel = result.getSource().getObj();
         if (Objects.equals(AuthConstant.ROLE_ADMIN, roleModel.getIdentifier())) {

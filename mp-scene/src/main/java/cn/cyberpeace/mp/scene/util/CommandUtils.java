@@ -1,67 +1,76 @@
 package cn.cyberpeace.mp.scene.util;
 
-import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import org.apache.commons.lang3.StringUtils;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class CommandUtils {
 
     public static final String WINDOWS_LINE_BREAK = "\r\n";
     public static final String LINUX_LINE_BREAK = "\n";
 
-    public static final String OS_TYPE_WINDOWS = "windows";
-    public static final String OS_TYPE_LINUX = "linux";
+    public static final String WINDOWS_PATH_DELIMITER = "\\";
+    public static final String LINUX_PATH_DELIMITER = "/";
 
-    public static final Map<String, String> SYSTEM_TYPE_OS_TYPE = new HashMap<>() {
-        {
-            put(BaseSceneElementModel.SystemType.WINDOWS_10, OS_TYPE_WINDOWS);
-            put(BaseSceneElementModel.SystemType.WINDOWS_8, OS_TYPE_WINDOWS);
-            put(BaseSceneElementModel.SystemType.WINDOWS_7, OS_TYPE_WINDOWS);
-            put(BaseSceneElementModel.SystemType.WINDOWS_XP, OS_TYPE_WINDOWS);
-            put(BaseSceneElementModel.SystemType.WINDOWS_VISTA, OS_TYPE_WINDOWS);
-            put(BaseSceneElementModel.SystemType.WINDOWS_SERVER_2019, OS_TYPE_WINDOWS);
-            put(BaseSceneElementModel.SystemType.WINDOWS_SERVER_2016, OS_TYPE_WINDOWS);
-            put(BaseSceneElementModel.SystemType.WINDOWS_SERVER_2012, OS_TYPE_WINDOWS);
-            put(BaseSceneElementModel.SystemType.WINDOWS_SERVER_2010, OS_TYPE_WINDOWS);
-            put(BaseSceneElementModel.SystemType.WINDOWS_SERVER_2008, OS_TYPE_WINDOWS);
-            put(BaseSceneElementModel.SystemType.WINDOWS_SERVER_2003, OS_TYPE_WINDOWS);
-            put(BaseSceneElementModel.SystemType.WINDOWS_SERVER_2000, OS_TYPE_WINDOWS);
-            put(BaseSceneElementModel.SystemType.CENTOS, OS_TYPE_LINUX);
-            put(BaseSceneElementModel.SystemType.UBUNTU, OS_TYPE_LINUX);
-            put(BaseSceneElementModel.SystemType.KALI, OS_TYPE_LINUX);
-            put(BaseSceneElementModel.SystemType.OTHER, OS_TYPE_LINUX);
+    /**
+     * windows创建目录
+     */
+    public static final String WINDOWS_MK_DIR = "md %s";
 
-            put(BaseSceneElementModel.SystemType.WINDOWS, OS_TYPE_WINDOWS);
-            put(BaseSceneElementModel.SystemType.LINUX, OS_TYPE_LINUX);
-        }
-    };
+    /**
+     * windows进入目录
+     */
+    public static final String WINDOWS_CD_DIR = "cd %s";
+
+    /**
+     * windows call执行
+     */
+    public static final String WINDOWS_CALL_TARGET = "call \"%s\"";
+
+    /**
+     * windows start执行
+     */
+    public static final String WINDOWS_START_TARGET = "start /b %s";
+
+    /**
+     * windows下载文件
+     */
+    public static final String WINDOWS_DOWNLOAD_FILE = "curl -o \"%s\" %s";
+
+    /**
+     * windows解压zip
+     */
+    public static final String WINDOWS_UNZIP_FILE = "unzip -o \"%s\" -d \"%s\"";
+
+    /**
+     * linux创建目录
+     */
+    public static final String LINUX_MK_DIR = "mkdir -p %s";
+
+    /**
+     * linux进入目录
+     */
+    public static final String LINUX_CD_DIR = "cd %s";
+
+    /**
+     * linux 添加执行权限
+     */
+    public static final String LINUX_CHMOD_X = "chmod +x %s";
+
+    /**
+     * linux sh执行
+     */
+    public static final String LINUX_CALL_SH = "/bin/sh %s";
+
+    /**
+     * linux下载文件
+     */
+    public static final String LINUX_DOWNLOAD_FILE = "curl -o \"%s\" %s";
+
+    /**
+     * linux解压zip
+     */
+    public static final String LINUX_UNZIP_FILE = "unzip -o %s -d %s";
 
     private CommandUtils() {}
-
-    public static String getOsType(String systemType) {
-        return SYSTEM_TYPE_OS_TYPE.getOrDefault(systemType.toLowerCase(), OS_TYPE_LINUX);
-    }
-
-    public static boolean isWindows(String systemType) {
-        return OS_TYPE_WINDOWS.equals(getOsType(systemType));
-    }
-
-    public static boolean isLinux(String systemType) {
-        return OS_TYPE_LINUX.equals(getOsType(systemType));
-    }
-
-    public static String getLineBreak(String systemType) {
-        var osType = getOsType(systemType);
-        if (OS_TYPE_WINDOWS.equals(osType)) {
-            return WINDOWS_LINE_BREAK;
-        } else if (OS_TYPE_LINUX.equals(osType)) {
-            return LINUX_LINE_BREAK;
-        } else {
-            return LINUX_LINE_BREAK;
-        }
-    }
 
     /**
      * 修复带中文的windows命令
@@ -72,16 +81,52 @@ public class CommandUtils {
         return StringUtils.joinWith(WINDOWS_LINE_BREAK, "chcp 65001", command, "chcp 936");
     }
 
-    public static String joinCommands(String[] commands, String systemType) {
-        return StringUtils.joinWith(getLineBreak(systemType), commands);
+    public static String windowsMkDir(String dir) {
+        return String.format(WINDOWS_MK_DIR, dir);
     }
 
-    public static String appendBeforeCommand(String command, String beforeCommand, String systemType) {
-        return StringUtils.joinWith(getLineBreak(systemType), beforeCommand, command);
+    public static String windowsCdDir(String dir) {
+        return String.format(WINDOWS_CD_DIR, dir);
     }
 
-    public static String appendAfterCommand(String command, String afterCommand, String systemType) {
-        return StringUtils.joinWith(getLineBreak(systemType), command, afterCommand);
+    public static String windowsCallTarget(String target) {
+        return String.format(WINDOWS_CALL_TARGET, target);
+    }
+
+    public static String windowsStartTarget(String target) {
+        return String.format(WINDOWS_START_TARGET, target);
+    }
+
+    public static String windowsDownloadFile(String fileUrl, String toPath) {
+        return String.format(WINDOWS_DOWNLOAD_FILE, toPath, fileUrl);
+    }
+
+    public static String windowsUnzipFile(String filePath, String toDir) {
+        return String.format(WINDOWS_UNZIP_FILE, filePath, toDir);
+    }
+
+    public static String linuxMkDir(String dir) {
+        return String.format(LINUX_MK_DIR, dir);
+    }
+
+    public static String linuxCdDir(String dir) {
+        return String.format(LINUX_CD_DIR, dir);
+    }
+
+    public static String linuxChmodX(String filePath) {
+        return String.format(LINUX_CHMOD_X, filePath);
+    }
+
+    public static String linuxCallSh(String shPath) {
+        return String.format(LINUX_CALL_SH, shPath);
+    }
+
+    public static String linuxDownloadFile(String fileUrl, String toPath) {
+        return String.format(LINUX_DOWNLOAD_FILE, toPath, fileUrl);
+    }
+
+    public static String linuxUnzipFile(String filePath, String toDir) {
+        return String.format(LINUX_UNZIP_FILE, filePath, toDir);
     }
 
 }
