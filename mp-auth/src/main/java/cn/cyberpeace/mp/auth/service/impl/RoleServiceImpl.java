@@ -338,7 +338,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
         List<UserModel> users = userRoleService.listUsersByRoleId(roleId);
         if (CollectionUtil.isNotEmpty(users)) {
-            throw new MpRuntimeException("当前角色下有用户，不允许删除！");
+            throw new MpRuntimeException(AuthErrorCode.ROLE_CANNOT_DELETE_WITH_USER_EXISTED);
         }
 
 
@@ -347,7 +347,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
         if (!deleteRolePermissionSuccess || !deleteUserRoleSuccess) {
             log.info("deleteRolePermissionSuccess:{}, deleteUserRoleSuccess:{}", deleteRolePermissionSuccess, deleteUserRoleSuccess);
-            throw new MpRuntimeException("删除失败！");
+            throw new MpRuntimeException(AuthErrorCode.OP_ERROR);
         }
     }
 
@@ -359,7 +359,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         }
 
         if (Objects.equals(AuthConstant.ROLE_ADMIN, roleModel.getIdentifier())) {
-            throw new MpRuntimeException("角色编号不能是ADMIN");
+            throw new MpRuntimeException(AuthErrorCode.ROLE_IDENT_CANNOT_BE_ADMIN);
         }
     }
 
