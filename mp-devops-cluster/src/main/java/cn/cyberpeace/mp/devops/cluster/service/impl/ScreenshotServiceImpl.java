@@ -71,6 +71,7 @@ public class ScreenshotServiceImpl extends BaseModelServiceImpl<ScreenshotModel,
         // 上传截屏文件
         String filePath = fastDFSClient.upload(request.getFile(), null, FdfsGroupEnum.DEFAULT.toString());
         ScreenshotModel model = new ScreenshotModel();
+        model.setFile(filePath);
         model.setSceneName(request.getSceneName());
         model.setFileName(request.getFile().getOriginalFilename());
         model.setFileSize(request.getFile().getSize());
@@ -94,9 +95,9 @@ public class ScreenshotServiceImpl extends BaseModelServiceImpl<ScreenshotModel,
 
         // 新增截屏文件
         this.create(model);
-
         // 返回前端地址加上 /fdfs 前缀
         model.setFile("/fdfs/" + filePath);
+
         return ServiceResult.success(model);
     }
 
