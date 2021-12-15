@@ -34,7 +34,12 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
 /**
@@ -91,8 +96,8 @@ public class DashboardService {
             return cnt;
         }).toArray(Integer[]::new);
 
-        // todo 每日启动场景数量
-        Integer[] sceneCount = {45, 5, 0, 24, 2, 1, 8, 16, 12, 0, 7};
+        // 每日活跃场景数量 todo,性能可优化
+        Integer[] sceneCount = daylist.stream().map(day -> csceneSpecialService.countActivitySceneByTime(day.atStartOfDay(), day.plusDays(1).atStartOfDay())).toArray(Integer[]::new);
 
         DailyUserActivityResponse response = DailyUserActivityResponse.builder().xAxis(xAxis).userCount(userCount).sceneCount(sceneCount).build();
         return response;
@@ -100,7 +105,6 @@ public class DashboardService {
 
     /**
      * 仪表盘-资源统计
-     *
      * @return
      */
     public ResourceStatisticsResponse resourceStatistics() {

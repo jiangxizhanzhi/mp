@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -172,13 +173,13 @@ public class CsceneSpecialService {
                 .selectAs(Sum.f(SceneElementModel::getDisk), CsceneInstanceStat::getDisk)
                 .currentLink(CloudPluginSceneElementModel.class)
                 .selectAs(Count.f(CloudPluginSceneElementModel::getVirtualType)
-                        .calcEqual(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE),
+                                .calcEqual(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE),
                         CsceneInstanceStat::getVmCount)
                 .selectAs(Count.f(CloudPluginSceneElementModel::getVirtualType)
-                        .calcEqual(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER),
+                                .calcEqual(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER),
                         CsceneInstanceStat::getContainerCount)
                 .selectAs(Count.f(CloudPluginSceneElementModel::getVirtualType)
-                        .calcEqual(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE),
+                                .calcEqual(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE),
                         CsceneInstanceStat::getEntityCount);
 
         humanCondition.currentLink(CsceneInstanceModel.class);
@@ -234,7 +235,7 @@ public class CsceneSpecialService {
                         .orAndEnd()
                         .orAndStart()
                         .andEqual(SceneModel::getEvent, SceneModel.Event.CREATE)
-                        .andIn(SceneModel::getEventStatus, new Integer[] {
+                        .andIn(SceneModel::getEventStatus, new Integer[]{
                                 EventStatus.START, EventStatus.IN_PROGRESS
                         })
                         .orAndEnd()
@@ -252,7 +253,7 @@ public class CsceneSpecialService {
                         .andEqual(SceneModel::getEventStatus, EventStatus.OVER)
                         .orAndEnd()
                         .orAndStart()
-                        .andIn(SceneModel::getEvent, new Integer[] {
+                        .andIn(SceneModel::getEvent, new Integer[]{
                                 SceneModel.Event.START, SceneModel.Event.STOP, SceneModel.Event.RESTART,
                                 SceneModel.Event.SNAPSHOT, SceneModel.Event.MODIFY
                         })
@@ -267,7 +268,7 @@ public class CsceneSpecialService {
                         .orAndEnd()
                         .orAndStart()
                         .andEqual(SceneModel::getEvent, SceneModel.Event.UNPAUSE)
-                        .andIn(SceneModel::getEventStatus, new Integer[] {
+                        .andIn(SceneModel::getEventStatus, new Integer[]{
                                 EventStatus.START, EventStatus.IN_PROGRESS
                         })
                         .orAndEnd()
@@ -400,5 +401,16 @@ public class CsceneSpecialService {
     public CsceneInstanceCountActivitySceneBO countActivityScene() {
         CsceneInstanceCountActivitySceneModel model = csceneInstanceMapper.countActivityScene();
         return CsceneInstanceCountActivitySceneBO.builder().activitySceneTotal(model.getActivitySceneTotal()).total(model.getTotal()).build();
+    }
+
+    /**
+     * 统计一段时间区间内活跃过的场景数(活跃数 = 区间内启动过的(不管有没有关闭) + 之前启动的而且未关闭的)
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    public int countActivitySceneByTime(LocalDateTime startTime, LocalDateTime endTime) {
+        Integer cnt = csceneInstanceMapper.countActivitySceneByTime(startTime, endTime);
+        return Optional.ofNullable(cnt).orElse(0);
     }
 }
