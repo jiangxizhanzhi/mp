@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.constraints.NotEmpty;
 import java.util.Arrays;
 import java.util.List;
 
@@ -60,7 +61,7 @@ public class SysConfigController {
 
     @ApiOperation(value = "根据keyname批量更新sysconfig", notes = "")
     @PostMapping("/updateall")
-    public ServiceResult updateAll(@RequestBody List<SysConfigModel> configs) {
+    public ServiceResult updateAll(@RequestBody @NotEmpty List<SysConfigModel> configs) {
         // 更新规则，如果key存在，就修改value值，如果key不存在，就忽略不改
         checkService.updateCheck(configs);
 

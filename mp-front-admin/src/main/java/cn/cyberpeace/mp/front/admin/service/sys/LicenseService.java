@@ -1,7 +1,8 @@
 package cn.cyberpeace.mp.front.admin.service.sys;
 
-import cn.cyberpeace.mp.front.admin.config.ActivationConfig;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.front.admin.config.ActivationConfig;
+import cn.cyberpeace.mp.front.admin.constant.AdminErrorCode;
 import com.sun.jna.Library;
 import com.sun.jna.Native;
 import com.sun.jna.Structure;
@@ -87,11 +88,11 @@ public class LicenseService {
         //  1	此授权码错误
         if (ret == -1) {
             log.error("json格式错误！");
-            throw new MpRuntimeException("json格式错误！");
+            throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_FAILED);
         }
         if (ret == 1) {
             log.error("授权码错误！");
-            throw new MpRuntimeException("授权码错误！");
+            throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_FAILED);
         }
         if (ret == 0) {
             // 授权码正确

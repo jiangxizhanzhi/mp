@@ -63,7 +63,7 @@ public class RolePermissionModelServiceImpl extends BaseModelServiceImpl<RolePer
             // 清除角色绑定的权限
             boolean success = deleteByRoleId(roleId);
             if (!success) {
-                throw new MpRuntimeException("清除角色权限失败！");
+                throw new MpRuntimeException(AuthErrorCode.ROLE_TARGET_DELETE_ERROR);
             }
         }
 
@@ -80,7 +80,7 @@ public class RolePermissionModelServiceImpl extends BaseModelServiceImpl<RolePer
             rolePerm.setTarget(tid);
             rolePerm.setTenant(AuthConstant.DEFAULT_TENANT);
             var re = create(rolePerm);
-            ResultUtils.throwExceptionIfError(re, "创建角色-权限关系失败！");
+            ResultUtils.throwExceptionIfError(re, AuthErrorCode.ROLE_TARGET_ADD_ERROR);
         });
 
         return true;

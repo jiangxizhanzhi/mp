@@ -295,7 +295,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         ObjServiceResult<UserModel> result = update(userModel);
 
         if (Objects.isNull(result.getSource()) || Objects.isNull(result.getSource().getObj())) {
-            throw new MpRuntimeException("修改用户失败！");
+            log.error("删除用户失败！");
+            throw new MpRuntimeException(AuthErrorCode.OP_ERROR);
         }
 
         UserModel userModified = result.getSource().getObj();

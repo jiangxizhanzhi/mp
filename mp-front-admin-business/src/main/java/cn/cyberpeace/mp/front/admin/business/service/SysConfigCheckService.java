@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.front.admin.business.service;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.front.admin.business.constant.AdminBusinessErrorCode;
+import cn.cyberpeace.mp.front.admin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.front.admin.constant.SysConfigKey;
 import cn.cyberpeace.mp.front.admin.model.SysConfigModel;
 import cn.hutool.core.collection.CollectionUtil;
@@ -22,7 +23,7 @@ public class SysConfigCheckService {
 
     public void updateCheck(List<SysConfigModel> sysConfigs) {
         if (CollectionUtil.isEmpty(sysConfigs)) {
-            throw new MpRuntimeException("更新的系统配置不能为空！");
+            throw new MpRuntimeException(AdminErrorCode.PARAMS_ERROR);
         }
 
         for (SysConfigModel sysConfig : sysConfigs) {

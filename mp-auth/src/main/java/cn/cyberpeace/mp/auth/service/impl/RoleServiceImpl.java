@@ -247,7 +247,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         // todo 清除原来角色绑定的权限？
         boolean cleanSuccess = rolePermissionService.deleteByRoleId(roleId);
         if (!cleanSuccess) {
-            throw new MpRuntimeException("清除原来角色绑定的权限关系失败！");
+            throw new MpRuntimeException(AuthErrorCode.ROLE_TARGET_DELETE_ERROR);
         }
 
         // 保存角色-权限关系
@@ -333,7 +333,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         RoleModel roleModel = getModelMapper().get(roleId);
         if (Objects.equals(AuthConstant.ROLE_ADMIN, roleModel.getIdentifier())) {
             log.info("管理员角色不能删除！");
-            throw new MpRuntimeException("管理员角色不能删除！");
+            throw new MpRuntimeException(AuthErrorCode.ROLE_CANNOT_DELETE_ADMIN);
         }
 
         List<UserModel> users = userRoleService.listUsersByRoleId(roleId);
