@@ -139,6 +139,8 @@ public class InstallerConverterImpl implements InstallerConverter {
         model.setSuccess(installer.isSuccess());
         model.setMessage(installer.getMessage());
         model.setMessageZh(installer.getMessageZh());
+        model.setMsg(installer.getMsg());
+        model.setMsgZh(installer.getMsgZh());
         return model;
     }
 
