@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Length;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -38,6 +39,7 @@ public class ImageRequest extends BaseRequest {
      * 名称
      */
     @ApiModelProperty(value = "名称")
+    @Length(max = 126, message = "名称长度不可超过{max}")
     private String name;
 
     /**
