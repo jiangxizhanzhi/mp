@@ -46,6 +46,7 @@ import cn.hutool.core.lang.Assert;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -61,6 +62,7 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -547,8 +549,16 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public void downloadExcelTemplate() {
         try {
             HttpServletResponse response = ServletUtils.getResponse();
+
+            Locale locale = LocaleContextHolder.getLocale();
+
             InputStream is = this.getClass().getClassLoader().getResourceAsStream("excel/import_template.xls");
             String fileName = "用户列表.xls";
+
+            if (Objects.equals(locale, Locale.US)) {
+                is = this.getClass().getClassLoader().getResourceAsStream("excel/import_template_en.xls");
+                fileName = "UserList.xls";
+            }
 
             InputStream fis = new BufferedInputStream(is);
             byte[] buffer = new byte[fis.available()];
@@ -557,7 +567,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             // 清空response
             response.reset();
             // 设置response的Header
-            response.addHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes("UTF-8"),"ISO8859-1"));
+            response.addHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes("UTF-8"), "ISO8859-1"));
             OutputStream toClient = new BufferedOutputStream(response.getOutputStream());
             response.setContentType("application/octet-stream");
             toClient.write(buffer);
