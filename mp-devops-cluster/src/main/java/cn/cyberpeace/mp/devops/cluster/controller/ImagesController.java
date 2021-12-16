@@ -119,7 +119,7 @@ public class ImagesController {
     @ApiOperation("新增")
     @PostMapping("/add")
     public ServiceResult add(@Valid @RequestBody ImageRequest request){
-        if (StringUtils.isNotBlank(request.getName()) && request.getName().length() > 4){
+        if (StringUtils.isNotBlank(request.getName()) && request.getName().length() > 126){
             throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_NAME_EXCEED_MAX_LENGTH);
         }
         Device device = imagesConverter.add(request);
