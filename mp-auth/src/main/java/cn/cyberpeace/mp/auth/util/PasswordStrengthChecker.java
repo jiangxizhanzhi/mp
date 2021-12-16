@@ -82,7 +82,7 @@ public class PasswordStrengthChecker {
      */
     public static int checkPasswordStrength(String passwd) {
         if (StringUtils.isBlank(passwd)) {
-            throw new MpRuntimeException(AuthErrorCode.PARAMS_PASSWORD_EMPTY);
+            throw new MpRuntimeException(AuthErrorCode.PARAMS_SHOULD_NOT_EMPTY.format("password"));
         }
 
 //        StringUtils.isWhitespace()

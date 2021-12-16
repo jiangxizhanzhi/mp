@@ -134,7 +134,4 @@ public class SysNoticeController {
         return noticeService.bulkDelete(ids);
     }
 
-
-
-
 }

@@ -1,11 +1,5 @@
 package cn.cyberpeace.mp.front.admin.service.sys.impl;
 
-import cn.cyberpeace.mp.front.admin.constant.AdminErrorCode;
-import cn.cyberpeace.mp.front.admin.constant.SysConfigConstant;
-import cn.cyberpeace.mp.front.admin.model.SysConfigModel;
-import cn.cyberpeace.mp.front.admin.repository.SysConfigMapper;
-import cn.cyberpeace.mp.front.admin.service.fields.SysConfigFields;
-import cn.cyberpeace.mp.front.admin.service.sys.SysConfigService;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -13,6 +7,12 @@ import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.front.admin.constant.AdminErrorCode;
+import cn.cyberpeace.mp.front.admin.constant.SysConfigConstant;
+import cn.cyberpeace.mp.front.admin.model.SysConfigModel;
+import cn.cyberpeace.mp.front.admin.repository.SysConfigMapper;
+import cn.cyberpeace.mp.front.admin.service.fields.SysConfigFields;
+import cn.cyberpeace.mp.front.admin.service.sys.SysConfigService;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.lang.Assert;
@@ -49,7 +49,8 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
     public ObjServiceResult<SysConfigModel> create(SysConfigModel obj, String[] fields) {
         SysConfigModel config = getByKeyName(obj.getKeyName());
         if (Objects.nonNull(config)) {
-            throw new MpRuntimeException("该项配置已经存在，不能允许新增！" + obj.getKeyName());
+            log.error("config {} already existed! can not add again!");
+            throw new MpRuntimeException(AdminErrorCode.SYS_CONFIG_EXISTED.format(obj.getKeyName()));
         }
         return create(obj);
     }
@@ -114,14 +115,16 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
         SysConfigModel oldConfigModel = getModelMapper().get(obj.getId());
 
         if (Objects.isNull(oldConfigModel)) {
-            throw new MpRuntimeException("id为:" + obj.getId() + "的系统配置不存在！");
+            log.error("Config id:{} not existed!", obj.getId());
+            throw new MpRuntimeException(AdminErrorCode.SYS_CONFIG_NOT_EXISTED.format(obj.getId()));
         }
 
         // 查看keyname是否是oldConfigModel的
         if (StringUtils.isNotBlank(obj.getKeyName())) {
             SysConfigModel configByKeyName = getByKeyName(obj.getKeyName());
             if (configByKeyName != null && !Objects.equals(configByKeyName.getId(), oldConfigModel.getId())) {
-                throw new MpRuntimeException("keyname已存在！" + obj.getKeyName());
+                log.error("Config {} already existed!", obj.getKeyName());
+                throw new MpRuntimeException(AdminErrorCode.SYS_CONFIG_EXISTED.format(obj.getKeyName()));
             }
         }
 
@@ -131,7 +134,7 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
     @Override
     public boolean isNewUserNeedAudit() {
         SysConfigModel config = getByKeyName(SysConfigConstant.KEY_USER_AUDIT);
-        if (Objects.nonNull(config) && Objects.equals("1", config.getValue())) {
+        if (Objects.nonNull(config) && Objects.equals(SysConfigConstant.KEY_USER_NEED_AUDIT, config.getValue())) {
             // 新用户需要审核
             return true;
         }

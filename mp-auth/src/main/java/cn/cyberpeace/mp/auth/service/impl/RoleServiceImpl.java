@@ -194,7 +194,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         }
 
         ObjServiceResult<RoleModel> result = create(roleModel);
-        ResultUtils.throwExceptionIfError(result, "创建角色失败!");
+        ResultUtils.throwExceptionIfError(result, AuthErrorCode.OP_ERROR);
 
         RoleModel roleCreated = result.getSource().getObj();
         String roleId = roleCreated.getId();
@@ -213,7 +213,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
                 rolePermissionModel.setTarget(id);
                 // 如果保存错误，抛出异常
                 ObjServiceResult re = rolePermissionService.create(rolePermissionModel);
-                ResultUtils.throwExceptionIfError(re, "保存角色权限关系失败!");
+                ResultUtils.throwExceptionIfError(re, AuthErrorCode.ROLE_TARGET_ADD_ERROR);
             });
         }
 
@@ -241,7 +241,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         RoleModel roleUpdate = new RoleModel();
         BeanUtils.copyProperties(modifyRequest, roleUpdate);
         ObjServiceResult<RoleModel> updateResult = update(roleUpdate);
-        ResultUtils.throwExceptionIfError(updateResult, "修改角色失败！");
+        ResultUtils.throwExceptionIfError(updateResult, AuthErrorCode.OP_ERROR);
 
 
         // todo 清除原来角色绑定的权限？
@@ -263,7 +263,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
                 rolePermissionModel.setTarget(id);
                 // 如果保存错误，抛出异常
                 ObjServiceResult re = rolePermissionService.create(rolePermissionModel);
-                ResultUtils.throwExceptionIfError(re, "保存角色权限关系失败!");
+                ResultUtils.throwExceptionIfError(re, AuthErrorCode.ROLE_TARGET_ADD_ERROR);
             });
         }
 
@@ -354,6 +354,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     private void createCheck(RoleModel roleModel) {
         if (StringUtils.isNotBlank(roleModel.getName())) {
             if (getByName(roleModel.getName()) != null) {
+                log.error("role name {} already existed!", roleModel.getName());
                 throw new MpRuntimeException("角色名已存在！[" + roleModel.getName() + "]");
             }
         }

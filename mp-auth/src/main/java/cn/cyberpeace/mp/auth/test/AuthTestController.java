@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.auth.test;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
-import cn.cyberpeace.mp.auth.constant.CustomAuthErrorCode;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserOnlineRecordModel;
 import cn.cyberpeace.mp.auth.repository.OrgMapper;
@@ -17,7 +16,6 @@ import cn.cyberpeace.mp.auth.service.UserPermissionService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.PasswordStrengthChecker;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
-import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -31,10 +29,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -138,12 +138,11 @@ public class AuthTestController {
     }
 
 
-    @GetMapping("testErrorcode")
+    @GetMapping("test_exception_handler")
     public ServiceResult testErrorCode() {
-        String errorMsg = "auth.error_code.account_not_existed";
-        CustomAuthErrorCode customAuthErrorCode = new CustomAuthErrorCode();
-        customAuthErrorCode.setCode(BaseErrorCode.PARAMS_INVALID.getCode(), errorMsg);
-        return ServiceResult.<String>builder().serviceCode(customAuthErrorCode).build().asResult();
+
+        resolveMessage("abc", new String[]{"a"}, Locale.CHINA);
+        throw new IllegalArgumentException("illegal from mp.auth");
     }
 
     @GetMapping("/tmpmenu")
@@ -193,6 +192,15 @@ public class AuthTestController {
     @GetMapping("/olrecord/heartmap")
     public ConcurrentHashMap<UserModel, CopyOnWriteArrayList<LocalDateTime>> heartmap() {
         return userHeartbeatService.getHeartbeatMap();
+    }
+
+
+    private String resolveMessage(String code, Object[] args, Locale locale) {
+        String pattern = "{0} not empty"; // TODO Load message from database...
+        MessageFormat messageFormat = new MessageFormat(pattern, locale);
+        StringBuffer formattedMessage = new StringBuffer();
+        messageFormat.format(args, formattedMessage, null);
+        return formattedMessage.toString();
     }
 
 }

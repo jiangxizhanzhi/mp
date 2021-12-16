@@ -135,7 +135,8 @@ public class SysActivationService {
         List<ActivationItem> items = activationResponse.getItems();
         Optional<ActivationItem> itemOptional = items.stream().filter(i -> i.getKey().equals(key)).findFirst();
         if (!itemOptional.isPresent()) {
-            throw new MpRuntimeException(AdminErrorCode.SYS_CONFIG_NOT_EXIST, "不存在该项配置！" + key);
+            log.error("config key {} not existed!", key);
+            throw new MpRuntimeException(AdminErrorCode.SYS_CONFIG_NOT_EXISTED.format(key));
         }
 
         return itemOptional.get().getValue();

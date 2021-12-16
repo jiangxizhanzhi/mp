@@ -7,7 +7,6 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import com.github.pagehelper.PageInfo;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.Objects;
@@ -32,20 +31,15 @@ public class ResultUtils {
         return new ObjServiceResult(new ObjResult(obj)).asResult();
     }
 
-
-    public static void throwExceptionIfError(ObjServiceResult result, String errorMsg) {
-        if (StringUtils.isBlank(errorMsg)) {
-            errorMsg = "execute error!";
-        }
-        if (Objects.isNull(result.getSource())) {
-            throw new MpRuntimeException(errorMsg);
-        }
-    }
-
-
     public static void throwExceptionIfError(ObjServiceResult result, ErrorCode errorCode) {
         if (Objects.isNull(result.getSource())) {
             throw new MpRuntimeException(errorCode);
+        }
+    }
+
+    public static void throwExceptionIfError(ObjServiceResult result, ErrorCode errorCode, String... params) {
+        if (Objects.isNull(result.getSource())) {
+            throw new MpRuntimeException(errorCode.format(params));
         }
     }
 

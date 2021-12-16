@@ -9,4 +9,6 @@ public class SysConfigConstant {
 
     public static final String KEY_USER_AUDIT = "user_audit";
 
+    public static final String KEY_USER_NEED_AUDIT = "1";
+
 }
