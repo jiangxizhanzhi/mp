@@ -5,14 +5,18 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.*;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -77,17 +81,36 @@ public class HttpClient {
             ).toArray(Header[]::new));
         }
         if (data != null && request instanceof HttpEntityEnclosingRequestBase) {
-            var entity = new StringEntity(data.toContent(), charset);
-            entity.setContentEncoding(charset.toString());
-            entity.setContentType(contentType);
+            HttpEntity entity;
+            if (data.multipart()) {
+                var multipart = data.toMultipart();
+                var multipartEntity = MultipartEntityBuilder.create();
+                multipart.forEach((fieldName, fieldValue) -> {
+                    if (fieldValue instanceof String) {
+                        multipartEntity.addTextBody(fieldName, (String) fieldValue);
+                    } else if (fieldValue instanceof File) {
+                        multipartEntity.addBinaryBody(fieldName, (File) fieldValue);
+                    } else if (fieldValue instanceof InputStream) {
+                        multipartEntity.addBinaryBody(fieldName, (InputStream) fieldValue);
+                    } else if (fieldValue instanceof byte[]) {
+                        multipartEntity.addBinaryBody(fieldName, (byte[]) fieldValue);
+                    }
+                });
+                entity = multipartEntity.build();
+            } else {
+                var stringEntity = new StringEntity(data.toContent(), charset);
+                stringEntity.setContentEncoding(charset.toString());
+                stringEntity.setContentType(contentType);
+                entity = stringEntity;
+            }
             ((HttpEntityEnclosingRequestBase) request).setEntity(entity);
         }
         return request;
     }
 
     private <T extends HttpRequestBase> HttpResult request(Class<T> requestClass, String url, HttpData data,
-                                                                  HttpParam param, Map<String, String> headers,
-                                                                  Integer timeout) {
+                                                           HttpParam param, Map<String, String> headers,
+                                                           Integer timeout) {
         var request = genRequest(requestClass, url, param, data, headers, timeout);
         var result = new HttpResult();
         result.setRequest(request);

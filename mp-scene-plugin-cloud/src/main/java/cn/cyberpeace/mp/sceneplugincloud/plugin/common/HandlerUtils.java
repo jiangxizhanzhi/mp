@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.common;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.BaseCloudPluginSceneBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.BaseCloudPluginSceneElementBO;
@@ -68,32 +69,67 @@ public class HandlerUtils<H extends ScenePluginHandler<? extends BaseCloudPlugin
             return null;
         }
 
+        var srcElement = cloudElement.getSrcElement();
+        var connectedElement = connectedCloudElement.getSrcElement();
+        Integer type = srcElement.getType();
+        Integer connectedType = connectedElement.getType();
         Integer virtualType = cloudElement.getVirtualType();
+        Integer connectedVirtualType = connectedCloudElement.getVirtualType();
+
+        // 判断是否是默认类型的虚拟交换机(默认包含辅助网络)
         if (virtualType != null && virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH)) {
             return cloudElement;
         }
-
-        Integer connectedVirtualType = connectedCloudElement.getVirtualType();
         if (connectedVirtualType != null
                 && connectedVirtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH)) {
             return connectedCloudElement;
         }
 
+        // 判断是否是交换机 且开启辅助网络
+        if (type != null && type.equals(BaseSceneElementModel.Type.SWITCH)
+                && Boolean.TRUE.equals(cloudElement.getAuxiliaryNetworkOn())) {
+            return cloudElement;
+        }
+        if (connectedType != null && connectedType.equals(BaseSceneElementModel.Type.SWITCH)
+                && Boolean.TRUE.equals(connectedCloudElement.getAuxiliaryNetworkOn())) {
+            return connectedCloudElement;
+        }
+
+        // 判断是否是默认类型的虚拟路由 且开启辅助网络
         if (virtualType != null && virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)
                 && Boolean.TRUE.equals(cloudElement.getAuxiliaryNetworkOn())) {
             return cloudElement;
         }
-
         if (connectedVirtualType != null
                 && connectedVirtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)
                 && Boolean.TRUE.equals(connectedCloudElement.getAuxiliaryNetworkOn())) {
             return connectedCloudElement;
         }
 
+        // 判断是否是路由 且开启辅助网络
+        if (type != null && type.equals(BaseSceneElementModel.Type.ROUTER)
+                && Boolean.TRUE.equals(cloudElement.getAuxiliaryNetworkOn())) {
+            return cloudElement;
+        }
+        if (connectedType != null && connectedType.equals(BaseSceneElementModel.Type.ROUTER)
+                && Boolean.TRUE.equals(connectedCloudElement.getAuxiliaryNetworkOn())) {
+            return connectedCloudElement;
+        }
+
+        // 判断是否是防火墙 且开启辅助网络
+        if (type != null && type.equals(BaseSceneElementModel.Type.FIREWALL)
+                && Boolean.TRUE.equals(cloudElement.getAuxiliaryNetworkOn())) {
+            return cloudElement;
+        }
+        if (connectedType != null && connectedType.equals(BaseSceneElementModel.Type.FIREWALL)
+                && Boolean.TRUE.equals(connectedCloudElement.getAuxiliaryNetworkOn())) {
+            return connectedCloudElement;
+        }
+
+        // 判断是否开启辅助网络
         if (Boolean.TRUE.equals(cloudElement.getAuxiliaryNetworkOn())) {
             return cloudElement;
         }
-
         if (Boolean.TRUE.equals(connectedCloudElement.getAuxiliaryNetworkOn())) {
             return connectedCloudElement;
         }
