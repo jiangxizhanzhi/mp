@@ -251,7 +251,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                 boolean isOrgExist = orgService.exists(id);
                 if (!isOrgExist) {
                     log.error("org id:{} not existed!", id);
-                    throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED.format("id: " + id));
+                    throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED.format(id));
                 }
                 OrgUserModel orgUserModel = OrgUserModel.builder().user(userId).org(id).build();
                 var re = orgUserService.create(orgUserModel);
@@ -265,7 +265,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                 boolean isRoleExist = roleService.exists(id);
                 if (!isRoleExist) {
                     log.error("role id:{} not existed!", id);
-                    throw new MpRuntimeException(AuthErrorCode.ROLE_NOT_EXISTED.format("id: " + id));
+                    throw new MpRuntimeException(AuthErrorCode.ROLE_NOT_EXISTED.format(id));
                 }
                 UserRoleModel userRoleModel = UserRoleModel.builder().user(userId).role(id).build();
                 var re = userRoleService.create(userRoleModel);
@@ -319,7 +319,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                 boolean isOrgExist = orgService.exists(id);
                 if (!isOrgExist) {
                     log.error("org id:{} not existed!", id);
-                    throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED.format("id:" + id));
+                    throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED.format(id));
                 }
                 OrgUserModel orgUserModel = OrgUserModel.builder().user(userId).org(id).build();
                 var re = orgUserService.create(orgUserModel);
@@ -337,7 +337,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                 boolean isRoleExist = roleService.exists(id);
                 if (!isRoleExist) {
                     log.error("role id:{} not existed!", id);
-                    throw new MpRuntimeException(AuthErrorCode.ROLE_NOT_EXISTED.format("id:" + id));
+                    throw new MpRuntimeException(AuthErrorCode.ROLE_NOT_EXISTED.format(id));
                 }
                 UserRoleModel userRoleModel = UserRoleModel.builder().user(userId).role(id).build();
                 var re = userRoleService.create(userRoleModel);

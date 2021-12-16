@@ -65,13 +65,15 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     public ObjServiceResult<OrgModel> create(OrgModel obj, String[] fields) {
         if (StringUtils.isNotBlank(obj.getParent())) {
             OrgModel parentOrg = getModelMapper().get(obj.getParent());
-            if (parentOrg == null) {
-                throw new IllegalArgumentException("id为"+ obj.getParent() + "的组织不存在");
+            if (Objects.isNull(parentOrg)) {
+                log.error("org {} not existed!", obj.getParent());
+                throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED.format(obj.getParent()));
             }
             String path = calculatePathByOrgId(parentOrg.getId());
             path = path + AuthConstant.ORG_PATH_SEPARATOR + obj.getName();
 
             if (Objects.nonNull(getByPath(path))) {
+                log.info("org child already exited! {}", path);
                 throw new MpRuntimeException(AuthErrorCode.ORG_CHILD_ALREADY_EXISTED);
             }
 
@@ -85,7 +87,10 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     public ObjServiceResult<OrgModel> update(OrgModel obj, String[] fields) {
 
         OrgModel oldOrg = getModelMapper().get(obj.getId());
-        Assert.notNull(oldOrg, "组织不存在! id:" + obj.getId());
+        if (Objects.isNull(oldOrg)) {
+            log.error("org {} not existed!", obj.getId());
+            throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED.format(obj.getId()));
+        }
         // 不允许直接更新path
         obj.setPath(null);
 
@@ -96,8 +101,9 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         // 如果更新parent，则重新计算path
         if (StringUtils.isNotBlank(obj.getParent())) {
             OrgModel parentOrg = getModelMapper().get(obj.getParent());
-            if (parentOrg == null) {
-                throw new IllegalArgumentException("id为"+ obj.getParent() + "的组织不存在");
+            if (Objects.isNull(parentOrg)) {
+                log.error("parent org {} not existed!", obj.getParent());
+                throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED.format(obj.getParent()));
             }
             String path = calculatePathByOrgId(parentOrg.getId());
             path = path + AuthConstant.ORG_PATH_SEPARATOR + obj.getName();
@@ -247,7 +253,11 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     @Override
     public String calculatePathByOrgId(String orgId) {
         OrgDto orgDto = getHierarchicalOrgsByOrgId(orgId);
-        Assert.notNull(orgDto, "未查询到id为" + orgId + "的组织");
+
+        if (Objects.isNull(orgDto)) {
+            log.error("org {} not existed!", orgId);
+            throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED.format(orgId));
+        }
 
         StringBuilder path = new StringBuilder(orgDto.getName());
         while (true) {

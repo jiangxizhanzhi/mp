@@ -206,7 +206,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
                 boolean isTargetExist = targetService.exists(id);
                 if (!isTargetExist) {
                     log.error("权限id:{}不存在", id);
-                    throw new MpRuntimeException("权限id：" + id + "不存在！");
+                    throw new MpRuntimeException(AuthErrorCode.TARGET_NOT_EXISTED.format(id));
                 }
                 RolePermissionModel rolePermissionModel = new RolePermissionModel();
                 rolePermissionModel.setOwner(roleId);
@@ -256,7 +256,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
                 boolean isTargetExist = targetService.exists(id);
                 if (!isTargetExist) {
                     log.error("权限id:{}不存在", id);
-                    throw new MpRuntimeException("权限id：" + id + "不存在！");
+                    throw new MpRuntimeException(AuthErrorCode.TARGET_NOT_EXISTED.format(id));
                 }
                 RolePermissionModel rolePermissionModel = new RolePermissionModel();
                 rolePermissionModel.setOwner(roleId);
@@ -355,7 +355,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         if (StringUtils.isNotBlank(roleModel.getName())) {
             if (getByName(roleModel.getName()) != null) {
                 log.error("role name {} already existed!", roleModel.getName());
-                throw new MpRuntimeException("角色名已存在！[" + roleModel.getName() + "]");
+                throw new MpRuntimeException(AuthErrorCode.ROLE_NAME_EXISTED);
             }
         }
 

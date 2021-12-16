@@ -147,7 +147,7 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
         TargetModel parentTarget = getModelMapper().get(parentId);
         if (parentTarget == null) {
             log.info("target:{}不存在!", parentId);
-            throw new MpRuntimeException(AuthErrorCode.TARGET_NOT_EXISTED);
+            throw new MpRuntimeException(AuthErrorCode.TARGET_NOT_EXISTED.format(parentId));
         }
 
         TargetDto targetDto = new TargetDto();
