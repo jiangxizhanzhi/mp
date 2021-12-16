@@ -8,6 +8,8 @@ import java.util.List;
 
 public interface BaseObjMappingService<M extends BaseObjMappingModel> {
 
+    ServiceResult<M> getMapping(String group, String name);
+
     ServiceResult<List<M>> getMappings(String group);
 
     ServiceResult<List<M>> syncMappings(String group, List<M> mappings);

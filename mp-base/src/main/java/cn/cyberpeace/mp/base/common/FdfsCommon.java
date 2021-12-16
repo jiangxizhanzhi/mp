@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.base.common;
 
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.util.fdfsclient.FdfsClient;
+import cn.hutool.core.io.FileUtil;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
@@ -27,16 +28,24 @@ public class FdfsCommon {
         return fdfsClient.upload(is);
     }
 
-    public static void download(String fdfsFilePath, String localFilepath) {
-        fdfsClient.download(fdfsFilePath, localFilepath);
+    public static void download(String fdfsFilepath, String localFilepath) {
+        fdfsClient.download(fdfsFilepath, localFilepath);
     }
 
-    public static String downloadContent(String fdfsFilePath) {
-        return fdfsClient.downloadContent(fdfsFilePath);
+    public static String downloadTmp(String fdfsFilepath) {
+        return fdfsClient.downloadTmp(fdfsFilepath);
     }
 
-    public static void delete(String fdfsFilePath) {
-        fdfsClient.delete(fdfsFilePath);
+    public static String downloadTmp(String fdfsFilepath, String filename) {
+        return fdfsClient.downloadTmp(fdfsFilepath, filename);
+    }
+
+    public static String downloadContent(String fdfsFilepath) {
+        return fdfsClient.downloadContent(fdfsFilepath);
+    }
+
+    public static void delete(String fdfsFilepath) {
+        fdfsClient.delete(fdfsFilepath);
     }
 
 }

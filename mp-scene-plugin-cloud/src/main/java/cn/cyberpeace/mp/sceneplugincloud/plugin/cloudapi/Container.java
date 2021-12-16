@@ -29,20 +29,20 @@ public class Container extends CloudClient {
         return true;
     }
 
-    public boolean copyFile(String containerId, File file, String dstPath) {
+    public boolean copyFile(String containerId, String filepath, String dstPath) {
         var data = new ContainerArchiveData();
-        data.setFile(file);
+        data.setFile(new File(filepath));
         data.setDstPath(dstPath);
         var requestUrl = String.format(CloudUrlConstant.CONTAINER_COPY_FILE_URL, containerId);
-        CloudResponse<Map<String, Object>> result = cloudPost(requestUrl, data, null,
-                new TypeReference<CloudResponse<Map<String, Object>>>() {
+        CloudResponse<Object> result = cloudPost(requestUrl, data, null,
+                new TypeReference<CloudResponse<Object>>() {
                 }, true);
         return true;
     }
 
     public ContainerExecuteResult executeCommand(String containerId, String command) {
         var data = new ContainerExecuteData();
-        data.setCommand(command);
+        data.setCommand(String.format("sh -c '%s'", command));
         data.setInteractive(false);
         data.setRun(true);
         var requestUrl = String.format(CloudUrlConstant.CONTAINER_EXECUTE_COMMAND_URL, containerId);
