@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.base.common.stereotype.BeanFieldNames;
+import cn.cyberpeace.mp.base.util.basic.MapUtils;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldNames;
 import cn.cyberpeace.mp.base.util.define.ListTreeNode;
 import cn.cyberpeace.mp.scene.core.bo.base.*;
@@ -450,6 +451,8 @@ public abstract class BaseSceneHandler<
             return;
         }
 
+        Map<String, List<String>> outerConnectionPortIdConnectionsMap = new HashMap<>();
+        Map<String, C> validConnectionMap = new HashMap<>();
         connections.forEach(connection -> {
             String sourcePortId = connection.getSource();
             String targetPortId = connection.getTarget();
@@ -458,14 +461,39 @@ public abstract class BaseSceneHandler<
                 return;
             }
 
+            var connectionKey = elementPortConnectionKey(connection);
             if (!elementPortMap.containsKey(sourcePortId)) {
-                outerConnectionPortIds.add(sourcePortId);
+                MapUtils.setDefault(outerConnectionPortIdConnectionsMap, sourcePortId, new ArrayList<>())
+                        .add(connectionKey);
             }
             if (!elementPortMap.containsKey(targetPortId)) {
-                outerConnectionPortIds.add(targetPortId);
+                MapUtils.setDefault(outerConnectionPortIdConnectionsMap, targetPortId, new ArrayList<>())
+                        .add(connectionKey);
             }
+            validConnectionMap.put(connectionKey, connection);
+        });
 
-            elementPortConnectionMap.put(elementPortConnectionKey(connection), connection);
+        // 外部连接端口（其它区域端口）
+        if (!outerConnectionPortIdConnectionsMap.isEmpty()) {
+            Set<String> currentOuterConnectionPortIds = outerConnectionPortIdConnectionsMap.keySet();
+            if (!StringUtils.isEmpty(sceneId)) {
+                Set<String> existOuterConnectionPortIds = new HashSet<>();
+                sceneElementPortMapper.list(new HumanCondition()
+                        .select(BaseSceneElementPortModel::getPortId)
+                        .filterEqual(BaseSceneElementPortModel::getScene, sceneId)
+                        .filterIn(BaseSceneElementPortModel::getPortId,
+                                outerConnectionPortIdConnectionsMap.keySet().toArray(new String[0])))
+                        .forEach(elementPort -> existOuterConnectionPortIds.add(elementPort.getPortId()));
+                currentOuterConnectionPortIds.removeAll(existOuterConnectionPortIds);
+            }
+            currentOuterConnectionPortIds.forEach(notExistOuterConnectionPortId -> {
+                outerConnectionPortIdConnectionsMap.get(notExistOuterConnectionPortId)
+                        .forEach(validConnectionMap::remove);
+            });
+        }
+
+        validConnectionMap.forEach((key, connection) -> {
+            elementPortConnectionMap.put(key, connection);
             portIdConnectedPortIdMap.put(connection.getSource(), connection.getTarget());
             portIdConnectedPortIdMap.put(connection.getTarget(), connection.getSource());
         });
@@ -964,6 +992,7 @@ public abstract class BaseSceneHandler<
             sceneElementPortMapper.list(new HumanCondition()
                     .select(BaseSceneElementPortModel::getId, BaseSceneElementPortModel::getSceneElement,
                             BaseSceneElementPortModel::getPortId)
+                    .filterEqual(BaseSceneElementPortModel::getScene, sceneId)
                     .filterIn(BaseSceneElementPortModel::getPortId, outerConnectionPortIds.toArray(new String[0])))
                     .forEach(elementPort -> outerElementPortMap.put(elementPort.getPortId(), elementPort));
         }
