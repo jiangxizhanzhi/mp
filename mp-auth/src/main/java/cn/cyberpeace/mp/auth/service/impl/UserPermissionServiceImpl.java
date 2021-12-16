@@ -156,7 +156,7 @@ public class UserPermissionServiceImpl
             // 清除用户原来的权限
             boolean success = deleteByUserId(userId);
             if (!success) {
-                throw new MpRuntimeException("清除用户权限失败！");
+                throw new MpRuntimeException(AuthErrorCode.USER_TARGET_DELETE_ERROR);
             }
         }
 
@@ -173,7 +173,7 @@ public class UserPermissionServiceImpl
             userPerm.setTarget(tid);
             userPerm.setTenant(AuthConstant.DEFAULT_TENANT);
             var re = create(userPerm);
-            ResultUtils.throwExceptionIfError(re, "创建用户-权限关系失败！");
+            ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_TARGET_ADD_ERROR);
         });
 
         return true;

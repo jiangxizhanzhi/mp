@@ -83,7 +83,7 @@ public class OrgPermissionServiceImpl
             // 清除组织权限
             boolean success = deleteByOrgId(orgId);
             if (!success) {
-                throw new MpRuntimeException("清除组织权限失败！");
+                throw new MpRuntimeException(AuthErrorCode.ORG_TARGET_DELETE_ERROR);
             }
         }
 
@@ -100,7 +100,7 @@ public class OrgPermissionServiceImpl
             orgPerm.setTarget(tid);
             orgPerm.setTenant(AuthConstant.DEFAULT_TENANT);
             var re = orgPermissionService.create(orgPerm);
-            ResultUtils.throwExceptionIfError(re, "创建组织权限关系失败！");
+            ResultUtils.throwExceptionIfError(re, AuthErrorCode.ORG_TARGET_ADD_ERROR);
         });
 
         return true;

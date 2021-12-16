@@ -23,6 +23,10 @@ public enum AuthErrorCode implements ErrorCode {
     ACCOUNT_TYPE_ERROR("MP-110013", "account_type_error"),
     ACCOUNT_NOT_EXISTED("MP-110014", "account_not_existed"),
     ACCOUNT_LOCKED("MP-110014", "account_locked"),
+    USER_TARGET_DELETE_ERROR("MP-110015", "user_target_delete_error"),
+    USER_TARGET_ADD_ERROR("MP-110016", "user_target_add_error"),
+    USER_ROLE_DELETE_ERROR("MP-110016", "user_role_delete_error"),
+    USER_ROLE_ADD_ERROR("MP-110016", "user_role_add_error"),
 
 
     ACCOUNT_MOBILE_EXISTED("MP-110041", "mobile_existed"),
@@ -40,12 +44,17 @@ public enum AuthErrorCode implements ErrorCode {
     ORG_CHILD_ALREADY_EXISTED("MP-110071", "org_child_already_existed"),
     ORG_CANNOT_DELETE_WITH_CHILD_EXISTED("MP-110072", "org_cannot_delete_with_child_existed"),
     ORG_CANNOT_DELETE_WITH_USER_EXISTED("MP-110073", "org_cannot_delete_with_user_existed"),
+    ORG_TARGET_DELETE_ERROR("MP-110074", "org_target_delete_error"),
+    ORG_TARGET_ADD_ERROR("MP-110075", "org_target_add_error"),
 
 
     // role
     ROLE_NOT_EXISTED("MP-110080", "role_not_existed"),
     ROLE_IDENT_CANNOT_BE_ADMIN("MP-110081", "role_ident_cannot_be_admin"),
     ROLE_CANNOT_DELETE_WITH_USER_EXISTED("MP-110082", "role_cannot_delete_with_user_existed"),
+    ROLE_CANNOT_DELETE_ADMIN("MP-110083", "role_cannot_delete_admin"),
+    ROLE_TARGET_DELETE_ERROR("MP-110084", "role_target_delete_error"),
+    ROLE_TARGET_ADD_ERROR("MP-110085", "role_target_add_error"),
 
 
     // target

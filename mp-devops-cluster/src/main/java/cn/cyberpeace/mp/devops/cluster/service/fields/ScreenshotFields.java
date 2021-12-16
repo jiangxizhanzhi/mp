@@ -23,6 +23,6 @@ public class ScreenshotFields extends BaseModelFields {
 
     public static final DynamicFields searchFields = new DynamicFields(ClassUtils.getBeanClassFields(ScreenshotModel.class));
 
-    public static final DynamicFields orderFields = new DynamicFields(new String[]{}).merge(BaseModelFields.readonlyFields);
+    public static final DynamicFields orderFields = new DynamicFields(new String[]{}).merge(availableFields);
 }
 

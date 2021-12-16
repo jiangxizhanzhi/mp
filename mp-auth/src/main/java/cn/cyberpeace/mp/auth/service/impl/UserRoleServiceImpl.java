@@ -103,7 +103,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
             // 清除用户角色
             boolean success = deleteByUserId(userId);
             if (!success) {
-                throw new MpRuntimeException("清除用户角色失败！");
+                throw new MpRuntimeException(AuthErrorCode.USER_ROLE_DELETE_ERROR);
             }
         }
 
