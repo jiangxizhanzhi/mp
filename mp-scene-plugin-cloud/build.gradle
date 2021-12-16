@@ -1,4 +1,6 @@
 dependencies {
     implementation project(':mp-base')
     implementation project(':mp-scene')
+
+    implementation 'org.apache.httpcomponents:httpmime:4.4.1'
 }

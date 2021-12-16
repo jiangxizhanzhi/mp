@@ -3,19 +3,15 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerCreateData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerDeleteData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerPauseData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerResumeData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerSuspendData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerUnPauseData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineLifeControllData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.util.Collections;
+import java.util.Map;
 
 public class Container extends CloudClient {
 
@@ -31,6 +27,29 @@ public class Container extends CloudClient {
                 new TypeReference<CloudResponse<Object>>() {
                 }, true);
         return true;
+    }
+
+    public boolean copyFile(String containerId, File file, String dstPath) {
+        var data = new ContainerArchiveData();
+        data.setFile(file);
+        data.setDstPath(dstPath);
+        var requestUrl = String.format(CloudUrlConstant.CONTAINER_COPY_FILE_URL, containerId);
+        CloudResponse<Map<String, Object>> result = cloudPost(requestUrl, data, null,
+                new TypeReference<CloudResponse<Map<String, Object>>>() {
+                }, true);
+        return true;
+    }
+
+    public ContainerExecuteResult executeCommand(String containerId, String command) {
+        var data = new ContainerExecuteData();
+        data.setCommand(command);
+        data.setInteractive(false);
+        data.setRun(true);
+        var requestUrl = String.format(CloudUrlConstant.CONTAINER_EXECUTE_COMMAND_URL, containerId);
+        CloudResponse<ContainerExecuteResult> result = cloudPost(requestUrl, data, null,
+                new TypeReference<CloudResponse<ContainerExecuteResult>>() {
+                }, true);
+        return result.getData();
     }
 
     public boolean lifeControl(String instanceId, String action) {

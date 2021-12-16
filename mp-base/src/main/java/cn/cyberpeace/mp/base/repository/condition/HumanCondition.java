@@ -367,7 +367,7 @@ public class HumanCondition {
         for (String order: orders) {
             String linkedOrder;
             if (order.startsWith("-")) {
-                linkedOrder = "-" + currentFieldName(order.substring(1));
+                linkedOrder = currentFieldName(order.substring(1)) + " desc";
             } else {
                 linkedOrder = currentFieldName(order);
             }
