@@ -25,7 +25,7 @@ public class UserCreateCheckService implements UserCheckService {
 
     public void check(UserModel user) {
         if (StringUtils.isBlank(user.getUsername())) {
-            throw new MpRuntimeException(AuthErrorCode.PARAMS_SHOULD_NOT_EMPTY);
+            throw new MpRuntimeException(AuthErrorCode.PARAMS_SHOULD_NOT_EMPTY.format("username"));
         }
 
         // 密码是否合法

@@ -118,7 +118,10 @@ public class ImagesController {
      */
     @ApiOperation("新增")
     @PostMapping("/add")
-    public ServiceResult add(@RequestBody ImageRequest request){
+    public ServiceResult add(@Valid @RequestBody ImageRequest request){
+        if (StringUtils.isNotBlank(request.getName()) && request.getName().length() > 126){
+            throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_NAME_EXCEED_MAX_LENGTH);
+        }
         Device device = imagesConverter.add(request);
         if (Objects.isNull(device)){
             return new Result();
@@ -135,7 +138,7 @@ public class ImagesController {
      */
     @ApiOperation("更新")
     @PostMapping("/update")
-    public ServiceResult update(@RequestBody ImageRequest request){
+    public ServiceResult update(@Valid @RequestBody ImageRequest request){
         if (StringUtils.isBlank(request.getUuid())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }

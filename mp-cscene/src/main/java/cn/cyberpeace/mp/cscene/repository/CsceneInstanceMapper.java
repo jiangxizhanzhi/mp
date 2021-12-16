@@ -9,6 +9,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Mapper
@@ -29,5 +30,12 @@ public interface CsceneInstanceMapper extends BaseCsceneMapper<CsceneInstanceMod
      */
     CsceneInstanceCountActivitySceneModel countActivityScene();
 
+    /**
+     * 统计一段时间区间内活跃过的场景数(活跃数 = 区间内启动过的(不管有没有关闭) + 之前启动的而且未关闭的)
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    Integer countActivitySceneByTime(LocalDateTime startTime, LocalDateTime endTime);
 
 }

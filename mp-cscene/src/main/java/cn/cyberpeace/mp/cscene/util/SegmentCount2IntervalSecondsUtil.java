@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.cscene.util;
 
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -12,16 +14,19 @@ import java.util.List;
  * @Author zhouxinghuai
  * @Date：2021/12/6 13:51
  */
+@Slf4j
 public class SegmentCount2IntervalSecondsUtil {
 
 
     public static Long calculateIntervalSeconds(LocalDateTime start, LocalDateTime end, int segmentCount) {
         if (segmentCount < 1) {
-            throw new MpRuntimeException("分段数不能小于1");
+            log.error("segmentCount should not less than 1! {}", segmentCount);
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID, "分段数不能小于1");
         }
 
         if (end.isBefore(start)) {
-            throw new MpRuntimeException("结束时间不可早于开始时间");
+            log.error("end time {} should not before than start time {}!", end, start);
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID, "结束时间不可早于开始时间");
         }
 
         Duration duration = Duration.between(start, end);

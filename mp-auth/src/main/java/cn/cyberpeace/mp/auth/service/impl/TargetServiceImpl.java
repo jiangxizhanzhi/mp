@@ -238,8 +238,9 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
         boolean deleteOrgPermissionSuccess = orgPermissionService.deleteByTargetId(targetId);
         boolean deleteRolePermissionSuccess = rolePermissionService.deleteByTargetId(targetId);
 
-        if(!deleteUserPermissionSuccess || !deleteOrgPermissionSuccess || !deleteRolePermissionSuccess) {
-            throw new MpRuntimeException("删除失败！");
+        if (!deleteUserPermissionSuccess || !deleteOrgPermissionSuccess || !deleteRolePermissionSuccess) {
+            log.error("删除关联关系失败！");
+            throw new MpRuntimeException(AuthErrorCode.OP_ERROR);
         }
     }
 

@@ -35,6 +35,8 @@ public class CsceneInstanceStat {
     private String createUsername;
     @ApiModelProperty(value = "创建时间")
     private LocalDateTime createTime;
+    @ApiModelProperty(value = "更新时间")
+    private LocalDateTime updateTime;
     @ApiModelProperty(value = "场景实例存活时间")
     private Integer sceneTtl;
     @ApiModelProperty(value = "场景实例属性")
@@ -47,4 +49,6 @@ public class CsceneInstanceStat {
     private String eventMessage;
     @ApiModelProperty(value = "启动时长(秒)")
     private Integer createConsumeSeconds;
+    @ApiModelProperty(value = "场景运行时长(秒)")
+    private Long sceneRunTime;
 }

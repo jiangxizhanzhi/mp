@@ -72,7 +72,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
             path = path + AuthConstant.ORG_PATH_SEPARATOR + obj.getName();
 
             if (Objects.nonNull(getByPath(path))) {
-                throw new MpRuntimeException("同一父级组织下，已有同名的子组织存在！");
+                throw new MpRuntimeException(AuthErrorCode.ORG_CHILD_ALREADY_EXISTED);
             }
 
             obj.setPath(path);
@@ -122,7 +122,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         if (StringUtils.isNotBlank(obj.getPath())) {
             String path = obj.getPath();
             if (Objects.nonNull(getByPath(path))) {
-                throw new MpRuntimeException("同一父级组织下，已有同名的子组织存在！");
+                throw new MpRuntimeException(AuthErrorCode.ORG_CHILD_ALREADY_EXISTED);
             }
         }
 
@@ -144,7 +144,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     @Override
     public ServiceResult<Integer> bulkUpdate(List<OrgModel> objs) {
 //        return super.bulkUpdate(objs);
-        throw new MpRuntimeException("暂不支持此操作！");
+        throw new MpRuntimeException(AuthErrorCode.OP_ERROR);
     }
 
     @Override
@@ -153,7 +153,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         Assert.notBlank(orgId, "orgId不能为空！");
         List<OrgModel> children = listByParent(orgId);
         if (CollectionUtil.isNotEmpty(children)) {
-            throw new MpRuntimeException("该组织下有子组织，不能删除！");
+            throw new MpRuntimeException(AuthErrorCode.ORG_CANNOT_DELETE_WITH_CHILD_EXISTED);
         }
 
         deleteReleated(orgId);
@@ -167,7 +167,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         for (String id : ids) {
             List<OrgModel> children = listByParent(id);
             if (CollectionUtil.isNotEmpty(children)) {
-                throw new MpRuntimeException("该组织下有子组织，不能删除！");
+                throw new MpRuntimeException(AuthErrorCode.ORG_CANNOT_DELETE_WITH_CHILD_EXISTED);
             }
 
             deleteReleated(id);
@@ -379,7 +379,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         // 如果组织下有人员，不允许删除
         List<UserModel> users = orgUserService.listUsersByOrgId(orgId);
         if (CollectionUtil.isNotEmpty(users)) {
-            throw new MpRuntimeException("该组织下有用户，不允许删除！");
+            throw new MpRuntimeException(AuthErrorCode.ORG_CANNOT_DELETE_WITH_USER_EXISTED);
         }
 
         boolean deleteOrgPermissionSuccess = orgPermissionService.deleteByOrgId(orgId);
@@ -387,7 +387,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
 
         if(!deleteOrgPermissionSuccess || !deleteOrgUserSuccess) {
             log.info("deleteOrgPermissionSuccess:{}, deleteOrgUserSuccess:{}", deleteOrgPermissionSuccess, deleteOrgUserSuccess);
-            throw new MpRuntimeException("删除失败！");
+            throw new MpRuntimeException(AuthErrorCode.OP_ERROR);
         }
     }
 

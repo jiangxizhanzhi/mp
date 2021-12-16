@@ -11,12 +11,18 @@ import cn.cyberpeace.mp.cscene.controller.request.CsceneCreateInstanceRequest;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortConnectionBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigPieceBO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -53,6 +59,40 @@ public class CsceneController implements BaseModelListControllerBase {
         return request;
     }
 
+    private void correctRequestCsceneParams(CsceneBO csceneBO) {
+        removeEidWhenCreate(csceneBO);
+    }
+
+    private void removeEidWhenCreate(CsceneBO csceneBO) {
+        if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getTopology() != null) {
+            SceneConfigBO sceneConfigBO = csceneBO.getSceneConfig().getTopology().getScene();
+            if (sceneConfigBO != null && sceneConfigBO.getEid() == null) {
+                // 属于新增 需要去除多余的eid
+                List<SceneConfigElementBO> elementBOS = csceneBO.getSceneConfig().getTopology().getElements();
+                List<SceneConfigElementPortConnectionBO> connectionBOS = csceneBO.getSceneConfig().getTopology().getConnections();
+                List<SceneConfigAreaBO> areaBOS = csceneBO.getSceneConfig().getTopology().getAreas();
+                List<SceneConfigPieceBO> pieceBOS = csceneBO.getSceneConfig().getTopology().getPieces();
+                if (CollectionUtils.isNotEmpty(elementBOS)) {
+                    elementBOS.forEach(bo -> {
+                        bo.setEid(null);
+                        if (CollectionUtils.isNotEmpty(bo.getPorts())) {
+                            bo.getPorts().forEach(port -> port.setEid(null));
+                        }
+                    });
+                }
+                if (CollectionUtils.isNotEmpty(connectionBOS)) {
+                    connectionBOS.forEach(conn -> conn.setEid(null));
+                }
+                if (CollectionUtils.isNotEmpty(areaBOS)) {
+                    areaBOS.forEach(area -> area.setEid(null));
+                }
+                if (CollectionUtils.isNotEmpty(pieceBOS)) {
+                    pieceBOS.forEach(piece -> piece.setEid(null));
+                }
+            }
+        }
+    }
+
     @Autowired
     public CsceneController(CsceneService csceneService, CsceneSpecialService csceneSpecialService) {
         setModelService(csceneService);
@@ -84,9 +124,11 @@ public class CsceneController implements BaseModelListControllerBase {
         return modelService.export(id, null).asResult();
     }
 
-    @ApiOperation(value = "保存（创建/更新）场景模板", notes="请忽略test_scenes和app_scenes字段")
+    @ApiOperation(value = "保存（创建/更新）场景模板", notes = "请忽略test_scenes和app_scenes字段")
     @PostMapping("/sync")
     public ServiceResult<CsceneBO> sync(@RequestBody CsceneBO csceneBO) {
+        log.info("scene sync,params is {}", JsonCommon.stringify(csceneBO));
+        correctRequestCsceneParams(csceneBO);
         return modelService.sync(csceneBO, null).asResult();
     }
 

@@ -1,9 +1,9 @@
 package cn.cyberpeace.mp.front.admin.filter;
 
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.front.admin.config.ActivationConfig;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationResponse;
 import cn.cyberpeace.mp.front.admin.service.sys.SysActivationService;
-import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -66,6 +66,7 @@ public class LicenseFilter extends OncePerRequestFilter {
                 if(activationFailed) {
                     log.error("激活状态异常！");
                     response.setStatus(HttpServletResponse.SC_OK);
+                    // todo message format
                     ServiceResult serviceResult = ServiceResult.fail("激活状态异常！");
                     mapper = converter.getObjectMapper();
 

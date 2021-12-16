@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.front.admin.controller;
 
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.front.admin.dto.notice.SysNoticeDto;
 import cn.cyberpeace.mp.front.admin.dto.notice.SysNoticePageRequest;
@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collections;
+import java.util.Objects;
 
 /**
  * @Description: 系统公告管理接口
@@ -47,15 +48,14 @@ public class SysNoticeController {
     @ApiOperation("查询单个公告")
     @GetMapping("/{id}")
     public ServiceResult<SysNoticeDto> get(@PathVariable String id) {
-//        ObjServiceResult<SysNoticeModel> result = noticeService.get(id);
-//        if (Objects.nonNull(result.getSource())) {
-//            SysNoticeModel noticeModel = result.getSource().getObj();
-//            SysNoticeDto noticeDto = noticeService.noticeModel2NoticeDto(noticeModel, false);
-//            return ServiceResult.success(noticeDto);
-//        } else {
-//            return ServiceResult.fail("没有查询到ID为:" + id + "的公告！");
-//        }
-        throw new MpRuntimeException("公告异常");
+        ObjServiceResult<SysNoticeModel> result = noticeService.get(id);
+        if (Objects.nonNull(result.getSource())) {
+            SysNoticeModel noticeModel = result.getSource().getObj();
+            SysNoticeDto noticeDto = noticeService.noticeModel2NoticeDto(noticeModel, false);
+            return ServiceResult.success(noticeDto);
+        } else {
+            return ServiceResult.fail("没有查询到ID为:" + id + "的公告！");
+        }
     }
 
 
@@ -133,8 +133,5 @@ public class SysNoticeController {
         String[] ids = Collections.singletonList(id).toArray(new String[0]);
         return noticeService.bulkDelete(ids);
     }
-
-
-
 
 }

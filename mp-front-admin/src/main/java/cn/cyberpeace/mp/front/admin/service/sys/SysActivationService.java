@@ -121,7 +121,7 @@ public class SysActivationService {
         log.info(key);
         ActivationResponse activationResponse = status();
         if (!Objects.equals(1, activationResponse.getIsActived())) {
-            throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_ERROR, "系统未激活");
+            throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_ERROR);
         }
 
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -129,13 +129,14 @@ public class SysActivationService {
         LocalDate now = LocalDate.now();
 
         if (expiredDate.isBefore(now)) {
-            throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_ERROR, "激活文件已经过期！");
+            throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_EXPIRED);
         }
 
         List<ActivationItem> items = activationResponse.getItems();
         Optional<ActivationItem> itemOptional = items.stream().filter(i -> i.getKey().equals(key)).findFirst();
         if (!itemOptional.isPresent()) {
-            throw new MpRuntimeException(AdminErrorCode.SYS_CONFIG_NOT_EXIST, "不存在该项配置！" + key);
+            log.error("config key {} not existed!", key);
+            throw new MpRuntimeException(AdminErrorCode.SYS_CONFIG_NOT_EXISTED.format(key));
         }
 
         return itemOptional.get().getValue();

@@ -194,7 +194,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         }
 
         ObjServiceResult<RoleModel> result = create(roleModel);
-        ResultUtils.throwExceptionIfError(result, "创建角色失败!");
+        ResultUtils.throwExceptionIfError(result, AuthErrorCode.OP_ERROR);
 
         RoleModel roleCreated = result.getSource().getObj();
         String roleId = roleCreated.getId();
@@ -213,7 +213,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
                 rolePermissionModel.setTarget(id);
                 // 如果保存错误，抛出异常
                 ObjServiceResult re = rolePermissionService.create(rolePermissionModel);
-                ResultUtils.throwExceptionIfError(re, "保存角色权限关系失败!");
+                ResultUtils.throwExceptionIfError(re, AuthErrorCode.ROLE_TARGET_ADD_ERROR);
             });
         }
 
@@ -241,13 +241,13 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         RoleModel roleUpdate = new RoleModel();
         BeanUtils.copyProperties(modifyRequest, roleUpdate);
         ObjServiceResult<RoleModel> updateResult = update(roleUpdate);
-        ResultUtils.throwExceptionIfError(updateResult, "修改角色失败！");
+        ResultUtils.throwExceptionIfError(updateResult, AuthErrorCode.OP_ERROR);
 
 
         // todo 清除原来角色绑定的权限？
         boolean cleanSuccess = rolePermissionService.deleteByRoleId(roleId);
         if (!cleanSuccess) {
-            throw new MpRuntimeException("清除原来角色绑定的权限关系失败！");
+            throw new MpRuntimeException(AuthErrorCode.ROLE_TARGET_DELETE_ERROR);
         }
 
         // 保存角色-权限关系
@@ -263,7 +263,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
                 rolePermissionModel.setTarget(id);
                 // 如果保存错误，抛出异常
                 ObjServiceResult re = rolePermissionService.create(rolePermissionModel);
-                ResultUtils.throwExceptionIfError(re, "保存角色权限关系失败!");
+                ResultUtils.throwExceptionIfError(re, AuthErrorCode.ROLE_TARGET_ADD_ERROR);
             });
         }
 
@@ -333,12 +333,12 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         RoleModel roleModel = getModelMapper().get(roleId);
         if (Objects.equals(AuthConstant.ROLE_ADMIN, roleModel.getIdentifier())) {
             log.info("管理员角色不能删除！");
-            throw new MpRuntimeException("管理员角色不能删除！");
+            throw new MpRuntimeException(AuthErrorCode.ROLE_CANNOT_DELETE_ADMIN);
         }
 
         List<UserModel> users = userRoleService.listUsersByRoleId(roleId);
         if (CollectionUtil.isNotEmpty(users)) {
-            throw new MpRuntimeException("当前角色下有用户，不允许删除！");
+            throw new MpRuntimeException(AuthErrorCode.ROLE_CANNOT_DELETE_WITH_USER_EXISTED);
         }
 
 
@@ -347,19 +347,20 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
         if (!deleteRolePermissionSuccess || !deleteUserRoleSuccess) {
             log.info("deleteRolePermissionSuccess:{}, deleteUserRoleSuccess:{}", deleteRolePermissionSuccess, deleteUserRoleSuccess);
-            throw new MpRuntimeException("删除失败！");
+            throw new MpRuntimeException(AuthErrorCode.OP_ERROR);
         }
     }
 
     private void createCheck(RoleModel roleModel) {
         if (StringUtils.isNotBlank(roleModel.getName())) {
             if (getByName(roleModel.getName()) != null) {
+                log.error("role name {} already existed!", roleModel.getName());
                 throw new MpRuntimeException("角色名已存在！[" + roleModel.getName() + "]");
             }
         }
 
         if (Objects.equals(AuthConstant.ROLE_ADMIN, roleModel.getIdentifier())) {
-            throw new MpRuntimeException("角色编号不能是ADMIN");
+            throw new MpRuntimeException(AuthErrorCode.ROLE_IDENT_CANNOT_BE_ADMIN);
         }
     }
 

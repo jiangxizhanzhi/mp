@@ -30,14 +30,18 @@ import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -153,6 +157,7 @@ public class CsceneSpecialService {
                 .selectAs(CsceneInstanceModel::getReferenceMetaData, CsceneInstanceStat::getReferenceMetaData)
                 .selectAs(CsceneInstanceModel::getCreateUsername, CsceneInstanceStat::getCreateUsername)
                 .selectAs(CsceneInstanceModel::getCreateTime, CsceneInstanceStat::getCreateTime)
+                .selectAs(CsceneInstanceModel::getUpdateTime, CsceneInstanceStat::getUpdateTime)
                 .selectAs(CsceneInstanceModel::getSceneTtl, CsceneInstanceStat::getSceneTtl)
                 .selectAs(CsceneInstanceModel::getSceneAttr, CsceneInstanceStat::getSceneAttr)
                 .selectAs(CsceneInstanceModel::getSceneTtl, CsceneInstanceStat::getSceneTtl)
@@ -168,13 +173,13 @@ public class CsceneSpecialService {
                 .selectAs(Sum.f(SceneElementModel::getDisk), CsceneInstanceStat::getDisk)
                 .currentLink(CloudPluginSceneElementModel.class)
                 .selectAs(Count.f(CloudPluginSceneElementModel::getVirtualType)
-                        .calcEqual(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE),
+                                .calcEqual(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE),
                         CsceneInstanceStat::getVmCount)
                 .selectAs(Count.f(CloudPluginSceneElementModel::getVirtualType)
-                        .calcEqual(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER),
+                                .calcEqual(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER),
                         CsceneInstanceStat::getContainerCount)
                 .selectAs(Count.f(CloudPluginSceneElementModel::getVirtualType)
-                        .calcEqual(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE),
+                                .calcEqual(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE),
                         CsceneInstanceStat::getEntityCount);
 
         humanCondition.currentLink(CsceneInstanceModel.class);
@@ -230,7 +235,7 @@ public class CsceneSpecialService {
                         .orAndEnd()
                         .orAndStart()
                         .andEqual(SceneModel::getEvent, SceneModel.Event.CREATE)
-                        .andIn(SceneModel::getEventStatus, new Integer[] {
+                        .andIn(SceneModel::getEventStatus, new Integer[]{
                                 EventStatus.START, EventStatus.IN_PROGRESS
                         })
                         .orAndEnd()
@@ -248,7 +253,7 @@ public class CsceneSpecialService {
                         .andEqual(SceneModel::getEventStatus, EventStatus.OVER)
                         .orAndEnd()
                         .orAndStart()
-                        .andIn(SceneModel::getEvent, new Integer[] {
+                        .andIn(SceneModel::getEvent, new Integer[]{
                                 SceneModel.Event.START, SceneModel.Event.STOP, SceneModel.Event.RESTART,
                                 SceneModel.Event.SNAPSHOT, SceneModel.Event.MODIFY
                         })
@@ -263,7 +268,7 @@ public class CsceneSpecialService {
                         .orAndEnd()
                         .orAndStart()
                         .andEqual(SceneModel::getEvent, SceneModel.Event.UNPAUSE)
-                        .andIn(SceneModel::getEventStatus, new Integer[] {
+                        .andIn(SceneModel::getEventStatus, new Integer[]{
                                 EventStatus.START, EventStatus.IN_PROGRESS
                         })
                         .orAndEnd()
@@ -279,10 +284,29 @@ public class CsceneSpecialService {
         List<CsceneInstanceStat> data;
         int total;
         try {
+            if (queryParams.getOrders() == null || queryParams.getOrders().length == 0) {
+                // 排序,默认使用时间倒序排列
+                humanCondition.orderBy("-createTime");
+            } else {
+                // todo 可根据需要去实现按cpu数量等排列 暂时只支持createTime、updateTime
+                humanCondition.orderBy(queryParams.getOrders());
+            }
             data = csceneInstanceMapper.list(humanCondition, CsceneInstanceStat.class);
+            // 场景运行时长
+            if (CollectionUtils.isNotEmpty(data)) {
+                data.forEach(s -> {
+                    if (SceneModel.Event.DELETE == s.getEvent() && EventStatus.OVER == s.getEventStatus()) {
+                        // 已删除场景的运行时间=删除时刻 - 创建时刻
+                        s.setSceneRunTime(s.getUpdateTime().toEpochSecond(ZoneOffset.UTC) - s.getCreateTime().toEpochSecond(ZoneOffset.UTC));
+                    } else {
+                        // 未删除场景的运行时间=当前时刻 - 创建时刻
+                        s.setSceneRunTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC) - s.getCreateTime().toEpochSecond(ZoneOffset.UTC));
+                    }
+                });
+            }
             total = csceneInstanceMapper.total(humanCondition);
         } catch (Exception e) {
-            log.error("Service list error: {}", e.getMessage());
+            log.error("Service list error: {}", e.getMessage(), e);
             return new ListObjServiceResult<>(null, BaseErrorCode.ERROR, e.getMessage());
         }
 
@@ -377,5 +401,16 @@ public class CsceneSpecialService {
     public CsceneInstanceCountActivitySceneBO countActivityScene() {
         CsceneInstanceCountActivitySceneModel model = csceneInstanceMapper.countActivityScene();
         return CsceneInstanceCountActivitySceneBO.builder().activitySceneTotal(model.getActivitySceneTotal()).total(model.getTotal()).build();
+    }
+
+    /**
+     * 统计一段时间区间内活跃过的场景数(活跃数 = 区间内启动过的(不管有没有关闭) + 之前启动的而且未关闭的)
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    public int countActivitySceneByTime(LocalDateTime startTime, LocalDateTime endTime) {
+        Integer cnt = csceneInstanceMapper.countActivitySceneByTime(startTime, endTime);
+        return Optional.ofNullable(cnt).orElse(0);
     }
 }
