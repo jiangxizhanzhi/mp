@@ -552,13 +552,15 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
             Locale locale = LocaleContextHolder.getLocale();
 
-            InputStream is = this.getClass().getClassLoader().getResourceAsStream("excel/import_template.xls");
+            String res = "excel/import_template.xls";
             String fileName = "用户列表.xls";
 
             if (Objects.equals(locale, Locale.US)) {
-                is = this.getClass().getClassLoader().getResourceAsStream("excel/import_template_en.xls");
+                res = "excel/import_template_en.xls";
                 fileName = "UserList.xls";
             }
+
+            InputStream is = this.getClass().getClassLoader().getResourceAsStream(res);
 
             InputStream fis = new BufferedInputStream(is);
             byte[] buffer = new byte[fis.available()];
