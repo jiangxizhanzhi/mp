@@ -154,7 +154,9 @@ public class CreateHandler extends HandlerCommon {
         var createData = new VirtualSwitchCreateData();
         createData.setName(genResourceName(srcElement.getEid()));
         createData.setEntityNetwork(cloudElement.getAuxiliaryNetworkVlan());
-        createData.setSegmentationId(IntUtils.zeroNull(cloudElement.getAuxiliaryNetworkVlanId()));
+        if (Boolean.TRUE.equals(cloudElement.getAuxiliaryNetworkVlan())) {
+            createData.setSegmentationId(IntUtils.zeroNull(cloudElement.getAuxiliaryNetworkVlanId()));
+        }
         var subnet = new VirtualSwitchCreateData.Subnet();
         subnet.setCidr(cloudElement.getAuxiliaryNetworkCidr());
         subnet.setGatewayIp(TextUtils.emptyNull(cloudElement.getAuxiliaryNetworkGateway()));
