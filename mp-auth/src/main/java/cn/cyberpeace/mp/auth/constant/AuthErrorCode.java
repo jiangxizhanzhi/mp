@@ -82,13 +82,13 @@ public enum AuthErrorCode implements ErrorCode {
     // EXCEL
     EXCEL_USER_LIST_EMPTY("MP-110121", "excel_list_empty"),
     EXCEL_LIST_SIZE_OVER("MP-110122", "excel_list_size_over"),
-    EXCEL_LIST_USERNAME_EMPTY("MP-110123", " excel_list_username_empty"),
-    EXCEL_LIST_USERNAME_ILLEGAL_LENGTH("MP-110124", " excel_list_username_illegal_length"),
-    EXCEL_LIST_USERNAME_EXISTED("MP-110125", " excel_list_username_existed"),
-    EXCEL_LIST_NAME_EMPTY("MP-110126", " excel_list_name_empty"),
-    EXCEL_LIST_NAME_ILLEGAL_LENGTH("MP-110127", " excel_list_name_illegal_length"),
-    EXCEL_LIST_PWD_INVALID("MP-110128", " excel_list_pwd_invalid"),
-    EXCEL_TEMPLATE_DOWNLOAD_ERROR("MP-110129", " excel_template_download_error");
+    EXCEL_LIST_USERNAME_EMPTY("MP-110123", "excel_list_username_empty"),
+    EXCEL_LIST_USERNAME_ILLEGAL_LENGTH("MP-110124", "excel_list_username_illegal_length"),
+    EXCEL_LIST_USERNAME_EXISTED("MP-110125", "excel_list_username_existed"),
+    EXCEL_LIST_NAME_EMPTY("MP-110126", "excel_list_name_empty"),
+    EXCEL_LIST_NAME_ILLEGAL_LENGTH("MP-110127", "excel_list_name_illegal_length"),
+    EXCEL_LIST_PWD_INVALID("MP-110128", "excel_list_pwd_invalid"),
+    EXCEL_TEMPLATE_DOWNLOAD_ERROR("MP-110129", "excel_template_download_error");
 
 
     AuthErrorCode(String code, String message) {
