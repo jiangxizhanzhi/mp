@@ -120,7 +120,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
     private void checkUserName(String username, int index) {
         if (StringUtils.isBlank(username)) {
             log.error("No {} row error!，username {} should not be empty!", index, username);
-            throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_USERNAME_EMPTY.format(String.valueOf(index), username));
+            throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_USERNAME_EMPTY.format(String.valueOf(index)));
         }
 
         if (StringUtils.length(username) < 2 || StringUtils.length(username) > 20) {
@@ -144,7 +144,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
     private void checkName(String name, int index) {
         if (StringUtils.isBlank(name)) {
             log.error("No {} row error!，name {} should not be empty!", index, name);
-            throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_NAME_EMPTY.format(String.valueOf(index), name));
+            throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_NAME_EMPTY.format(String.valueOf(index)));
         }
 
         if (StringUtils.length(name) < 2 || StringUtils.length(name) > 40) {

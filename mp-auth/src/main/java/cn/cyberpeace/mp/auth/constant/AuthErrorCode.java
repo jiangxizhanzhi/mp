@@ -67,6 +67,7 @@ public enum AuthErrorCode implements ErrorCode {
     ROLE_ADD_ERROR("MP-110086", "role_add_error"),
     ROLE_DELETE_ERROR("MP-110087", "role_delete_error"),
     ROLE_MODIFY_ERROR("MP-110088", "role_modify_error"),
+    ROLE_NAME_EXISTED("MP-110089", "role_name_existed"),
 
 
     // target

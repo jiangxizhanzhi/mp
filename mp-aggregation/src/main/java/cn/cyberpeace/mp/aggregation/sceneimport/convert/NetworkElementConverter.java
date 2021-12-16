@@ -77,7 +77,7 @@ class NetworkElementConverter implements IConverter {
         sceneConfigElementBO.setName(network.getName());
         sceneConfigElementBO.setId(network.getId());
         sceneConfigElementBO.setType(BaseSceneElementModel.Type.SWITCH);
-        sceneConfigElementBO.setIcon2("switcher");
+        sceneConfigElementBO.setIcon2("/network-equipment/switcher.png");
         List<SceneConfigElementPortBO> ports = new ArrayList<>();
         sceneConfigElementBO.setPorts(ports);
 
