@@ -1,10 +1,14 @@
 package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.cscene.bo.*;
+import cn.cyberpeace.mp.cscene.bo.CsceneBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneStat;
+import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneActionRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneCreateInstanceRequest;
@@ -25,7 +29,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
@@ -40,6 +50,8 @@ public class CsceneController implements BaseModelListControllerBase {
     private CsceneService modelService;
 
     private CsceneSpecialService csceneSpecialService;
+
+    private BaseAppConfig baseAppConfig;
 
     private CsceneActionRequest formatActionRequest(CsceneActionRequest request, String paramId) {
         if (request == null) {
@@ -61,6 +73,7 @@ public class CsceneController implements BaseModelListControllerBase {
 
     private void correctRequestCsceneParams(CsceneBO csceneBO) {
         removeEidWhenCreate(csceneBO);
+        correctFilePath(csceneBO);
     }
 
     private void removeEidWhenCreate(CsceneBO csceneBO) {
@@ -93,13 +106,37 @@ public class CsceneController implements BaseModelListControllerBase {
         }
     }
 
-    @Autowired
-    public CsceneController(CsceneService csceneService, CsceneSpecialService csceneSpecialService) {
-        setModelService(csceneService);
-        setCsceneSpecialService(csceneSpecialService);
+    private void correctFilePath(CsceneBO csceneBO) {
+        // 纠正fdfs的地址
+        if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getTopology() != null) {
+            SceneConfigBO sceneConfig = csceneBO.getSceneConfig().getTopology().getScene();
+            if (sceneConfig != null && StringUtils.isNotEmpty(sceneConfig.getFile()) && sceneConfig.getFile().startsWith(baseAppConfig.getFdfsOuterHttpServer())) {
+                sceneConfig.setFile(StringUtils.replaceOnce(sceneConfig.getFile(), baseAppConfig.getFdfsOuterHttpServer(), StringUtils.EMPTY));
+                if (sceneConfig.getFile().startsWith("/")) {
+                    sceneConfig.setFile(StringUtils.replaceOnce(sceneConfig.getFile(), "/", StringUtils.EMPTY));
+                }
+            }
+            List<SceneConfigElementBO> elements = csceneBO.getSceneConfig().getTopology().getElements();
+            if (CollectionUtils.isNotEmpty(elements)) {
+                elements.stream().forEach(e -> {
+                    if (StringUtils.isNotEmpty(e.getFile()) && e.getFile().startsWith(baseAppConfig.getFdfsOuterHttpServer())) {
+                        e.setFile(StringUtils.replaceOnce(sceneConfig.getFile(), baseAppConfig.getFdfsOuterHttpServer(), StringUtils.EMPTY));
+                        if (e.getFile().startsWith("/")) {
+                            e.setFile(StringUtils.replaceOnce(e.getFile(), "/", StringUtils.EMPTY));
+                        }
+                    }
+                });
+            }
+        }
     }
 
-    @ApiOperation("获取分页数据")
+    @Autowired
+    public CsceneController(CsceneService csceneService, CsceneSpecialService csceneSpecialService, BaseAppConfig baseAppConfig) {
+        setModelService(csceneService);
+        setCsceneSpecialService(csceneSpecialService);
+        this.baseAppConfig = baseAppConfig;
+    }
+
     @GetMapping
     public ListObjServiceResult<CsceneBO> list(CsceneQueryParams queryParams) {
         handleQueryParams("list", queryParams);
@@ -150,6 +187,7 @@ public class CsceneController implements BaseModelListControllerBase {
     @DeleteMapping
     public ServiceResult<Boolean> delete(@RequestParam(required = false) String id,
                                          @RequestBody(required = false) CsceneActionRequest request) {
+        log.info("delete cscene config , cscene id is {}", id);
         request = formatActionRequest(request, id);
         return modelService.deleteById(request.getId(), true, false, null).asResult();
     }
@@ -157,6 +195,7 @@ public class CsceneController implements BaseModelListControllerBase {
     @ApiOperation("批量删除场景模板")
     @DeleteMapping("/bulk_delete")
     public ServiceResult<Integer> bulkDelete(@RequestBody String[] ids) {
+        log.info("delete cscene configs , cscene ids is {}", JsonCommon.stringify(ids));
         return modelService.bulkDeleteByIds(ids, true, false, null).asResult();
     }
 
