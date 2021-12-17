@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image;
 
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import lombok.Setter;
 
 import java.util.Arrays;
@@ -43,5 +44,13 @@ public class ImageInfoParseResult {
 
     public List<String> getInitCommands() {
         return Arrays.asList(this.自定义命令);
+    }
+
+    public Integer getVirtualType() {
+        if (this.虚拟机文件.endsWith(".tar")) {
+            return BaseCloudPluginSceneElementModel.VirtualType.CONTAINER;
+        } else {
+            return BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE;
+        }
     }
 }
