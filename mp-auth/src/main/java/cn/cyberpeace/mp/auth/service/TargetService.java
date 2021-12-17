@@ -27,4 +27,6 @@ public interface TargetService extends BaseModelService<TargetModel, QueryParams
     List<TargetModel> listByMultiTypes(String tenant, Integer[] types);
 
     List<TargetDto> getTree(String parentId, Integer type);
+
+    boolean deleteAll();
 }
