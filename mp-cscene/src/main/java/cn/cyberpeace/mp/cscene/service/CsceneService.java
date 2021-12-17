@@ -22,11 +22,13 @@ import cn.cyberpeace.mp.cscene.model.CsceneRoleModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneRoleMapper;
 import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
+import cn.cyberpeace.mp.scene.model.SceneConfigModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneConfigService;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -164,7 +166,13 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
 
     public ListObjServiceResult<CsceneBO> listBO(CsceneQueryParams queryParams, boolean withInstance,
                                                  CsceneContextBO context) {
-        var listResult = super.list(queryParams);
+        ListObjServiceResult<CsceneModel> listResult = null;
+        if (StringUtils.isNotEmpty(queryParams.getSearch())) {
+            // 暂时支持name的模糊搜搜
+            listResult = this.listBOBySearchName(queryParams);
+        } else {
+            listResult = super.list(queryParams);
+        }
         if (listResult.getSource() == null) {
             new ListObjServiceResult<>(null, listResult.getServiceCode(), listResult.getDetail());
         }
@@ -181,6 +189,27 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         });
         return new ListObjServiceResult<>(new ListObjResult<>(csceneBOs, listResult.getSource().getTotal(),
                 listResult.getSource().getFields()));
+    }
+
+    /**
+     * 需要联合scene表进行的搜索
+     * @return
+     */
+    private ListObjServiceResult<CsceneModel> listBOBySearchName(CsceneQueryParams queryParams) {
+        HumanCondition humanCondition = new HumanCondition()
+                .link(CsceneModel.class, SceneConfigModel.class)
+                .filterLink(CsceneModel.class, CsceneModel::getSceneConfig, SceneConfigModel.class, SceneConfigModel::getId)
+                .currentLink(CsceneModel.class);
+        if (queryParams.getType() != null) {
+            humanCondition.filterEqual(CsceneModel::getType, queryParams.getType());
+        }
+        humanCondition.filterEqual(CsceneModel::getDeleted, false)
+                .currentLink(SceneConfigModel.class)
+                .filterContains(SceneConfigModel::getName, queryParams.getSearch())
+                .pagination(queryParams.getPage(), queryParams.getPageSize());
+        var data = getModelMapper().list(humanCondition);
+        var total = getModelMapper().total(humanCondition);
+        return new ListObjServiceResult<>(new ListObjResult<>(data, total));
     }
 
     public ServiceResult<CsceneBO> getById(String id, boolean withInstance, CsceneContextBO context) {
@@ -224,7 +253,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     public ServiceResult<Integer> bulkDeleteByIds(String[] ids, boolean logic, boolean withInstance,
                                                   CsceneContextBO context) {
         var result = 0;
-        for (String id: ids) {
+        for (String id : ids) {
             if (Boolean.TRUE.equals(deleteById(id, logic, withInstance, context).getSource())) {
                 result += 1;
             }
