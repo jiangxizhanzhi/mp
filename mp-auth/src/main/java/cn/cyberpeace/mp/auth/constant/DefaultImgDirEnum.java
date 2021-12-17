@@ -18,6 +18,8 @@ public enum DefaultImgDirEnum  {
 
     STATUS("/status"),
 
+    SCENES_EDITOR("/scenes-editor"),
+
     TARGET("");
 
     private final String endPathName;
