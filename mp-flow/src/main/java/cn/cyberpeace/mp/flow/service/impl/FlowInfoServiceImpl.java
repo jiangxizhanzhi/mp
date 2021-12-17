@@ -733,6 +733,30 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
 
                 if (CollectionUtils.isNotEmpty(flowInfoModelList)) {
                     bulkCreate(flowInfoModelList);
+
+                    if (!flowInfoModelList.get(0).getFileName().endsWith(".pcap")) {
+                        // 攻击流量，要添加默认脚本参数信息
+                        List<FlowScriptParamModel> scriptParamModelList = new ArrayList<>();
+                        flowInfoModelList.forEach(flowInfo -> {
+                            FlowInfoModel flowInfoModel = this.selectByTitle(flowInfo.getTitle());
+                            FlowScriptParamModel scriptParamIp = new FlowScriptParamModel();
+                            scriptParamIp.setFlowId(flowInfoModel.getId());
+                            scriptParamIp.setParamKey("ip");
+                            scriptParamIp.setParamType(1);
+                            scriptParamIp.setParamDesc("流量发生目标地址");
+                            scriptParamModelList.add(scriptParamIp);
+
+                            FlowScriptParamModel scriptParamPort = new FlowScriptParamModel();
+                            scriptParamPort.setFlowId(flowInfoModel.getId());
+                            scriptParamPort.setParamKey("port");
+                            scriptParamPort.setParamValue("80");
+                            scriptParamPort.setParamType(2);
+                            scriptParamPort.setParamDesc("流量发生目标端口");
+                            scriptParamModelList.add(scriptParamPort);
+                        });
+
+                        flowScriptParamService.bulkCreate(scriptParamModelList);
+                    }
                 }
             }
         } else {

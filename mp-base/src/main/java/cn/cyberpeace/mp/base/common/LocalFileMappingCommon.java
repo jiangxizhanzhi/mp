@@ -24,6 +24,10 @@ public class LocalFileMappingCommon {
         LocalFileMappingCommon.localFileMappingService = localFileMappingService;
     }
 
+    public static LocalFileMappingModel getMapping(String group, String name) {
+        return localFileMappingService.getMapping(group, name).getSource();
+    }
+
     public static List<LocalFileMappingModel> getMappings(String group) {
         return localFileMappingService.getMappings(group).getSource();
     }

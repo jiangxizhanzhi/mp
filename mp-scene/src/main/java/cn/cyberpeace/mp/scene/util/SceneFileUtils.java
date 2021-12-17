@@ -73,7 +73,8 @@ public class SceneFileUtils {
     public static String genZipFileInitCommand(String systemType, String fileUrl, String toPath, String unzipDir) {
         var metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer();
         var absoluteFileUrl = StringUtils.joinWith(FILE_URL_SEPARATOR, metadataFileServer, fileUrl);
-        var toPathDir = FileUtil.getParent(toPath, 1);
+        var filename = FileUtil.getName(toPath);
+        var toPathDir = toPath.substring(0, toPath.length() - filename.length());
         List<String> commands;
         if (SystemTypeCommandUtils.isWindows(systemType)) {
             commands = List.of(

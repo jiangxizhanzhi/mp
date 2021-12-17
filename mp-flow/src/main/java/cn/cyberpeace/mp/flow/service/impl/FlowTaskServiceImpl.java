@@ -331,9 +331,11 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
         if (Objects.nonNull(addFlowTaskRequest) && CollectionUtils.isNotEmpty(addFlowTaskRequest.getScriptParamModels())) {
             // 有传脚本参数过来，直接用传过来的去替换脚本内容
             replaceScriptParamModels = addFlowTaskRequest.getScriptParamModels();
+            log.info("replace script params:{}", replaceScriptParamModels.toString());
         } else {
             // 没有传脚本参数，直接查询默认脚本参数
             replaceScriptParamModels = flowScriptParamService.selectByFlowId(flowId);
+            log.info("default script params:{}", replaceScriptParamModels.toString());
         }
 
         if (CollectionUtils.isNotEmpty(replaceScriptParamModels)) {

@@ -1,8 +1,10 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.base.common.FdfsCommon;
 import cn.cyberpeace.mp.base.util.basic.CollectionUtils;
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
@@ -32,12 +34,15 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineCre
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.ContainerFileUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
+import cn.hutool.core.io.FileUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -149,7 +154,9 @@ public class CreateHandler extends HandlerCommon {
         var createData = new VirtualSwitchCreateData();
         createData.setName(genResourceName(srcElement.getEid()));
         createData.setEntityNetwork(cloudElement.getAuxiliaryNetworkVlan());
-        createData.setSegmentationId(IntUtils.zeroNull(cloudElement.getAuxiliaryNetworkVlanId()));
+        if (Boolean.TRUE.equals(cloudElement.getAuxiliaryNetworkVlan())) {
+            createData.setSegmentationId(IntUtils.zeroNull(cloudElement.getAuxiliaryNetworkVlanId()));
+        }
         var subnet = new VirtualSwitchCreateData.Subnet();
         subnet.setCidr(cloudElement.getAuxiliaryNetworkCidr());
         subnet.setGatewayIp(TextUtils.emptyNull(cloudElement.getAuxiliaryNetworkGateway()));
@@ -452,6 +459,45 @@ public class CreateHandler extends HandlerCommon {
         return command;
     }
 
+    /**
+     * 容器不保证有 curl/unzip 无法正常通过系统命令方式初始化
+     * 容器默认linux
+     */
+    private void execContainerInitCommand(CloudPluginSceneElementBO cloudElement) {
+        var containerId = cloudElement.getResourceId();
+        var srcElement = cloudElement.getSrcElement();
+        var standardSystemType = SystemTypeUtils.getStandardSystemType(srcElement.getSystemType());
+        var srcScene = getPluginHandler().getSrcScene();
+        var sceneId = srcScene.getEid();
+
+        ContainerFileUtils.prepareUnzip(containerClient, containerId);
+
+        var sceneFileUrl = srcScene.getFile();
+        if (!StringUtils.isEmpty(sceneFileUrl)) {
+            var unzipDir = SceneFileUtils.getSceneFileUnzipDir(standardSystemType, sceneId);
+            ContainerFileUtils.prepareZipFile(containerClient, containerId, sceneFileUrl, unzipDir);
+        }
+
+        var elementFileUrl = srcElement.getFile();
+        if (!StringUtils.isEmpty(elementFileUrl)) {
+            var unzipDir = SceneFileUtils.getElementFileUnzipDir(standardSystemType, sceneId, srcElement.getEid());
+            ContainerFileUtils.prepareZipFile(containerClient, containerId, elementFileUrl, unzipDir);
+        }
+
+        List<String> commands = new ArrayList<>();
+        List<String> initCommands = srcElement.getInitCommands();
+        if (initCommands != null) {
+            initCommands.forEach(initCommand -> {
+                commands.add(SceneCommandUtils.parseCommand(initCommand, sceneId, srcElement.getEid(),
+                        standardSystemType));
+            });
+        }
+
+        for (var command : commands) {
+            containerClient.executeCommand(containerId, command);
+        }
+    }
+
     private void receiveVirtualPortInfo(CloudPluginSceneElementBO cloudElement, List<VirtualNic> virtualNics) {
         if (virtualNics == null) {
             return;
@@ -665,15 +711,18 @@ public class CreateHandler extends HandlerCommon {
 //        createData.setCpu(IntUtils.zeroNull(srcElement.getCpu()));
 //        createData.setRam(IntUtils.zeroNull(srcElement.getRam()));
 //        createData.setDisk(IntUtils.zeroNull(srcElement.getDisk()));
-        if (Boolean.TRUE.equals(cloudElement.getInitSupport())) {
-            createData.setPostCommand(TextUtils.emptyNull(combineInitCommand(cloudElement)));
-        }
+        // 容器初始化命令通过execContainerInitCommand执行
+//        if (Boolean.TRUE.equals(cloudElement.getInitSupport())) {
+//            createData.setPostCommand(TextUtils.emptyNull(combineInitCommand(cloudElement)));
+//        }
         createData.setNetworks(CollectionUtils.emptyNull(genVirutalNics(cloudElement)));
         var container = containerClient.create(createData);
         cloudElement.setResourceId(container.getId());
         cloudElement.setHost(container.getHost());
 
         receiveVirtualPortInfo(cloudElement, container.getNetworks());
+
+        execContainerInitCommand(cloudElement);
 
         checkAccessModes(cloudElement);
     }

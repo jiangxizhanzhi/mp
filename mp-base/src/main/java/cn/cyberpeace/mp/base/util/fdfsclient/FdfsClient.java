@@ -1,7 +1,9 @@
 package cn.cyberpeace.mp.base.util.fdfsclient;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.csource.common.MyException;
 import org.csource.fastdfs.StorageClient1;
 import org.csource.fastdfs.TrackerClient;
@@ -17,6 +19,8 @@ import java.util.List;
 
 @Slf4j
 public class FdfsClient {
+
+    public static final String TMP_DIR_NAME = "fdfs";
 
     private final TrackerClient trackerClient;
 
@@ -74,34 +78,52 @@ public class FdfsClient {
         return fdfsFilePath;
     }
 
-    public void download(String fdfsFilePath, String localFilepath) {
+    public void download(String fdfsFilepath, String localFilepath) {
         try {
-            getStorageClient().download_file1(fdfsFilePath, localFilepath);
+            getStorageClient().download_file1(fdfsFilepath, localFilepath);
         } catch (IOException | MyException e) {
-            var msg = String.format("Fdfs download %s to %s error: %s", fdfsFilePath, localFilepath,
+            var msg = String.format("Fdfs download %s to %s error: %s", fdfsFilepath, localFilepath,
                     e.getMessage());
             log.error(msg);
             throw new MpRuntimeException(msg);
         }
     }
 
-    public String downloadContent(String fdfsFilePath) {
+    public String downloadTmp(String fdfsFilepath) {
+        return downloadTmp(fdfsFilepath, null);
+    }
+
+    public String downloadTmp(String fdfsFilepath, String filename) {
+        var tmpDir = FileUtil.getTmpDirPath();
+        var tmpFdfsDir = StringUtils.joinWith(FileUtil.FILE_SEPARATOR, tmpDir, TMP_DIR_NAME);
+        if (!FileUtil.exist(tmpFdfsDir)) {
+            FileUtil.mkdir(tmpFdfsDir);
+        }
+        if (StringUtils.isEmpty(filename)) {
+            filename = FileUtil.getName(fdfsFilepath);
+        }
+        var tmpFilepath = StringUtils.joinWith(FileUtil.FILE_SEPARATOR, tmpFdfsDir, filename);
+        download(fdfsFilepath, tmpFilepath);
+        return tmpFilepath;
+    }
+
+    public String downloadContent(String fdfsFilepath) {
         byte[] byteContent;
         try {
-            byteContent = getStorageClient().download_file1(fdfsFilePath);
+            byteContent = getStorageClient().download_file1(fdfsFilepath);
         } catch (IOException | MyException e) {
-            var msg = String.format("Fdfs download %s content error: %s", fdfsFilePath, e.getMessage());
+            var msg = String.format("Fdfs download %s content error: %s", fdfsFilepath, e.getMessage());
             log.error(msg);
             throw new MpRuntimeException(msg);
         }
         return new String(byteContent, StandardCharsets.UTF_8);
     }
 
-    public void delete(String fdfsFilePath) {
+    public void delete(String fdfsFilepath) {
         try {
-            getStorageClient().delete_file1(fdfsFilePath);
+            getStorageClient().delete_file1(fdfsFilepath);
         } catch (IOException | MyException e) {
-            var msg = String.format("Fdfs delete %s error: %s", fdfsFilePath, e.getMessage());
+            var msg = String.format("Fdfs delete %s error: %s", fdfsFilepath, e.getMessage());
             log.error(msg);
             throw new MpRuntimeException(msg);
         }

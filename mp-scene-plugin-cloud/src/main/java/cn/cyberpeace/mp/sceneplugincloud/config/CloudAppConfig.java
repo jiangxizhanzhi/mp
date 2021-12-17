@@ -1,12 +1,15 @@
 package cn.cyberpeace.mp.sceneplugincloud.config;
 
+import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Network;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualInternet;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NetworkData;
+import cn.hutool.core.io.FileUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -96,6 +99,12 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.mgmt_net_id:}")
     private String mgmtNetId;
 
+    @Value("${mp.scene.container_help_installer_dir:}")
+    private String containerHelpInstallerDir;
+
+    @Autowired
+    private BaseAppConfig baseAppConfig;
+
     public List<String> getCidrPool() {
         List<String> cidrPool = new ArrayList<>();
         IntStream.range(172, 173).forEach(cidrA -> IntStream.range(0, 255)
@@ -142,4 +151,15 @@ public class CloudAppConfig {
 
         return mgmtNetId;
     }
+
+    public String getContainerHelpInstallerDir() {
+        if (!StringUtils.isEmpty(containerHelpInstallerDir)) {
+            return containerHelpInstallerDir;
+        }
+
+        containerHelpInstallerDir = StringUtils.joinWith(FileUtil.FILE_SEPARATOR, baseAppConfig.getResourcesDir(),
+                "scene_plugin_cloud/container_installer");
+        return containerHelpInstallerDir;
+    }
+
 }
