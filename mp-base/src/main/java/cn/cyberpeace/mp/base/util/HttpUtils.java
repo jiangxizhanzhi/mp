@@ -396,7 +396,7 @@ public class HttpUtils {
         HttpClient client = HttpClientBuilder.create().build();
         HttpPost httpPost = new HttpPost(url);
         httpPost.setEntity(entity);
-        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(10000).setConnectTimeout(10000).build();
+        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(60000).setConnectTimeout(60000).build();
         httpPost.setConfig(requestConfig);
         HttpResponse response = client.execute(httpPost);
         return EntityUtils.toString(response.getEntity(), "UTF-8");
@@ -406,7 +406,7 @@ public class HttpUtils {
         HttpClient client = HttpClientBuilder.create().build();
         HttpPut httpPost = new HttpPut(url);
         httpPost.setEntity(entity);
-        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(10000).setConnectTimeout(10000).build();
+        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(60000).setConnectTimeout(60000).build();
         httpPost.setConfig(requestConfig);
         HttpResponse response = client.execute(httpPost);
         return EntityUtils.toString(response.getEntity(), "UTF-8");
