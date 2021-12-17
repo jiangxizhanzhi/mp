@@ -46,6 +46,7 @@ import cn.hutool.core.lang.Assert;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -61,6 +62,7 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -237,23 +239,23 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         }
         // create中会对密码加密，外层不需要再次加密
         ObjServiceResult<UserModel> result = create(userModel);
-        ResultUtils.throwExceptionIfError(result, "创建用户失败！");
+        ResultUtils.throwExceptionIfError(result, AuthErrorCode.USER_ADD_ERROR);
 
         UserModel userCreated = result.getSource().getObj();
         String userId = userCreated.getId();
-        log.info("user created id:{}", userId);
+        log.info("user create success id:{}", userId);
 
         // 保存组织-用户关系
         if (CollectionUtil.isNotEmpty(createRequest.getOrgIds())) {
             createRequest.getOrgIds().forEach(id -> {
                 boolean isOrgExist = orgService.exists(id);
                 if (!isOrgExist) {
-                    log.error("组织id:{}不存在", id);
-                    throw new MpRuntimeException("组织id：" + id + "不存在！");
+                    log.error("org id:{} not existed!", id);
+                    throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED.format(id));
                 }
                 OrgUserModel orgUserModel = OrgUserModel.builder().user(userId).org(id).build();
                 var re = orgUserService.create(orgUserModel);
-                ResultUtils.throwExceptionIfError(re, "创建组织-用户关系失败！");
+                ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ORG_ADD_ERROR);
             });
         }
 
@@ -262,12 +264,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             createRequest.getRoleIds().forEach(id -> {
                 boolean isRoleExist = roleService.exists(id);
                 if (!isRoleExist) {
-                    log.error("角色id:{}不存在", id);
-                    throw new MpRuntimeException("角色id：" + id + "不存在！");
+                    log.error("role id:{} not existed!", id);
+                    throw new MpRuntimeException(AuthErrorCode.ROLE_NOT_EXISTED.format(id));
                 }
                 UserRoleModel userRoleModel = UserRoleModel.builder().user(userId).role(id).build();
                 var re = userRoleService.create(userRoleModel);
-                ResultUtils.throwExceptionIfError(re, "创建用户-角色关系失败！");
+                ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ROLE_ADD_ERROR);
             });
         }
 
@@ -316,12 +318,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             modifyRequest.getOrgIds().forEach(id -> {
                 boolean isOrgExist = orgService.exists(id);
                 if (!isOrgExist) {
-                    log.error("组织id:{}不存在", id);
-                    throw new MpRuntimeException("组织id：" + id + "不存在！");
+                    log.error("org id:{} not existed!", id);
+                    throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED.format(id));
                 }
                 OrgUserModel orgUserModel = OrgUserModel.builder().user(userId).org(id).build();
                 var re = orgUserService.create(orgUserModel);
-                ResultUtils.throwExceptionIfError(re, "重新创建组织-用户关系失败！");
+                ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ORG_ADD_ERROR);
             });
         }
 
@@ -334,12 +336,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             modifyRequest.getRoleIds().forEach(id -> {
                 boolean isRoleExist = roleService.exists(id);
                 if (!isRoleExist) {
-                    log.error("角色id:{}不存在", id);
-                    throw new MpRuntimeException("角色id：" + id + "不存在！");
+                    log.error("role id:{} not existed!", id);
+                    throw new MpRuntimeException(AuthErrorCode.ROLE_NOT_EXISTED.format(id));
                 }
                 UserRoleModel userRoleModel = UserRoleModel.builder().user(userId).role(id).build();
                 var re = userRoleService.create(userRoleModel);
-                ResultUtils.throwExceptionIfError(re, "重新创建用户-角色关系失败！");
+                ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ROLE_ADD_ERROR);
             });
         }
 
@@ -421,7 +423,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                 return getModelMapper().update(updateUser);
             }
             log.error("id为{}的用户状态不是正常状态！", userId);
-            throw new MpRuntimeException("id为:" + userId + "的用户状态不是正常状态！");
+            throw new MpRuntimeException(AuthErrorCode.ACCOUNT_STATUS_ERROR);
         } else {
             log.error("id为:" + userId + "的用户不存在！");
         }
@@ -457,7 +459,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                 return getModelMapper().update(updateUser);
             }
             log.error("id为{}的用户状态不是禁用状态！", userId);
-            throw new MpRuntimeException("id为:" + userId + "的用户状态不是禁用状态！");
+            throw new MpRuntimeException(AuthErrorCode.ACCOUNT_STATUS_ERROR);
         } else {
             log.error("id为{}的用户不存在！", userId);
         }
@@ -494,7 +496,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                 return getModelMapper().update(updateUser);
             }
             log.error("id为{}的用户状态不是挂起状态！", userId);
-            throw new MpRuntimeException("id为:" + userId + "的用户状态不是挂起状态！");
+            throw new MpRuntimeException(AuthErrorCode.ACCOUNT_STATUS_ERROR);
         } else {
             log.error("id为{}的用户不存在！", userId);
         }
@@ -547,8 +549,18 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public void downloadExcelTemplate() {
         try {
             HttpServletResponse response = ServletUtils.getResponse();
-            InputStream is = this.getClass().getClassLoader().getResourceAsStream("excel/import_template.xls");
+
+            Locale locale = LocaleContextHolder.getLocale();
+
+            String res = "excel/import_template.xls";
             String fileName = "用户列表.xls";
+
+            if (Objects.equals(locale, Locale.US)) {
+                res = "excel/import_template_en.xls";
+                fileName = "UserList.xls";
+            }
+
+            InputStream is = this.getClass().getClassLoader().getResourceAsStream(res);
 
             InputStream fis = new BufferedInputStream(is);
             byte[] buffer = new byte[fis.available()];
@@ -557,7 +569,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             // 清空response
             response.reset();
             // 设置response的Header
-            response.addHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes("UTF-8"),"ISO8859-1"));
+            response.addHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes("UTF-8"), "ISO8859-1"));
             OutputStream toClient = new BufferedOutputStream(response.getOutputStream());
             response.setContentType("application/octet-stream");
             toClient.write(buffer);
@@ -566,7 +578,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
         } catch (IOException e) {
             log.error("{}", ExceptionUtil.stacktraceToString(e));
-            throw new MpRuntimeException("下载模板错误！");
+            throw new MpRuntimeException(AuthErrorCode.EXCEL_TEMPLATE_DOWNLOAD_ERROR);
         }
     }
 
@@ -588,7 +600,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             }
 
             var result = create(userModel);
-            ResultUtils.throwExceptionIfError(result, "创建用户失败！");
+            ResultUtils.throwExceptionIfError(result, AuthErrorCode.USER_ADD_ERROR);
             UserModel userCreated = result.getSource().getObj();
             String userId = userCreated.getId();
 
@@ -600,7 +612,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                     if (Objects.nonNull(roleModel)) {
                         UserRoleModel userRoleModel = UserRoleModel.builder().user(userId).role(roleModel.getId()).build();
                         var re = userRoleService.create(userRoleModel);
-                        ResultUtils.throwExceptionIfError(re, "创建用户-角色关系失败！");
+                        ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ROLE_ADD_ERROR);
                     }
                 });
             }
@@ -613,7 +625,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                     if (Objects.nonNull(orgModel)) {
                         OrgUserModel orgUserModel = OrgUserModel.builder().user(userId).org(orgModel.getId()).build();
                         var re = orgUserService.create(orgUserModel);
-                        ResultUtils.throwExceptionIfError(re, "创建组织-用户关系失败！");
+                        ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ORG_ADD_ERROR);
                     }
                 });
             }
@@ -652,12 +664,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                 return getModelMapper().update(updateUser);
             } else {
                 log.error("upload failed! userId:{}", userId);
-                throw new MpRuntimeException("头像上传失败！");
+                throw new MpRuntimeException(AuthErrorCode.OP_ERROR);
             }
 
         } else {
             log.error("id为{}的用户不存在！", userId);
-            throw new MpRuntimeException("id为" + userId + "的用户不存在！");
+            throw new MpRuntimeException(AuthErrorCode.ACCOUNT_NOT_EXISTED);
         }
 
     }
@@ -857,7 +869,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
         if(!cleanUserRolesSuccess || !cleanUserOrgsSuccess || !cleanUserTargetsSuccess || !cleanUserTenantsSuccess) {
             log.info("cleanUserRolesSuccess:{}, cleanUserOrgsSuccess:{}, cleanUserTargetsSuccess:{}, cleanUserTenantsSuccess:{}", cleanUserRolesSuccess, cleanUserOrgsSuccess, cleanUserTargetsSuccess, cleanUserTenantsSuccess);
-            throw new MpRuntimeException("删除失败！");
+            throw new MpRuntimeException(AuthErrorCode.OP_ERROR);
         }
     }
 

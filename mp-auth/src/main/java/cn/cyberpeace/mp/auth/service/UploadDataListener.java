@@ -63,7 +63,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
         list.add(data);
 
         if (list.size() > MAX_COUNT) {
-            throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_SIZE_OVER_100);
+            throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_SIZE_OVER.format("100"));
         }
     }
 
@@ -103,10 +103,9 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
             ImportUser user = users.get(i);
             int index = i + 1;
             if (Objects.nonNull(user)) {
-                String errMsgPrefix = "第" + index + "条数据错误！";
-                checkUserName(user.getUsername(), errMsgPrefix);
-                checkName(user.getName(), errMsgPrefix);
-                checkPwd(user.getPassword(), errMsgPrefix);
+                checkUserName(user.getUsername(), index);
+                checkName(user.getName(), index);
+                checkPwd(user.getPassword(), index);
             }
         }
     }
@@ -116,19 +115,22 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
      * 校验用户名
      *
      * @param username
-     * @param errMsgPrefix
+     * @param index
      */
-    private void checkUserName(String username, String errMsgPrefix) {
+    private void checkUserName(String username, int index) {
         if (StringUtils.isBlank(username)) {
-            throw new MpRuntimeException(errMsgPrefix + "用户名【" + username + "】不能为空!");
+            log.error("No {} row error!，username {} should not be empty!", index, username);
+            throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_USERNAME_EMPTY.format(String.valueOf(index)));
         }
 
         if (StringUtils.length(username) < 2 || StringUtils.length(username) > 20) {
-            throw new MpRuntimeException(errMsgPrefix + "用户名【" + username + "】长度不合法！");
+            log.error("No {} row error!，username {} has illegal length!", index, username);
+            throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_USERNAME_ILLEGAL_LENGTH.format(String.valueOf(index), username));
         }
 
-        if (userService.getByUserName(username) != null) {
-            throw new MpRuntimeException(errMsgPrefix + "用户名【" + username + "】已存在！");
+        if (Objects.nonNull(userService.getByUserName(username))) {
+            log.error("No {} row error!，username {} already existed!", index, username);
+            throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_USERNAME_EXISTED.format(String.valueOf(index), username));
         }
 
     }
@@ -137,15 +139,17 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
      * 校验名称
      *
      * @param name
-     * @param errMsgPrefix
+     * @param index
      */
-    private void checkName(String name, String errMsgPrefix) {
+    private void checkName(String name, int index) {
         if (StringUtils.isBlank(name)) {
-            throw new MpRuntimeException(errMsgPrefix + "名称【" + name + "】不能为空!");
+            log.error("No {} row error!，name {} should not be empty!", index, name);
+            throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_NAME_EMPTY.format(String.valueOf(index)));
         }
 
         if (StringUtils.length(name) < 2 || StringUtils.length(name) > 40) {
-            throw new MpRuntimeException(errMsgPrefix + "名称【" + name + "】长度不合法！");
+            log.error("No {} row error!，name {} has illegal length!", index, name);
+            throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_NAME_ILLEGAL_LENGTH.format(String.valueOf(index), name));
         }
 
     }
@@ -155,13 +159,13 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
      * 校验密码
      *
      * @param password
-     * @param errMsgPrefix
+     * @param index
      */
-    private void checkPwd(String password, String errMsgPrefix) {
+    private void checkPwd(String password, int index) {
         // 密码是否合法
         if (PasswordUtils.isPasswordStrengthLowLevel(password)) {
-//            throw new MpRuntimeException(errMsgPrefix + "密码【" + password + "】强度不够!");
-            throw new MpRuntimeException(AuthErrorCode.PASSWORD_STRENGTH_INVALID);
+            log.error("No {} row error!，password {} has illegal strength!", index, password);
+            throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_PWD_INVALID.format(String.valueOf(index), password));
         }
     }
 

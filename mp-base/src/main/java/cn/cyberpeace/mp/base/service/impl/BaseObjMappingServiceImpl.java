@@ -74,6 +74,12 @@ public abstract class BaseObjMappingServiceImpl<M extends BaseObjMappingModel, P
         return resultObjMappings;
     }
 
+    protected M getObjMapping(String group, String name) {
+        return modelMapper.first(new HumanCondition()
+                .filterEqual(BaseObjMappingModel::getGroup, group)
+                .filterEqual(BaseObjMappingModel::getName, name));
+    }
+
     protected List<M> getObjMappings(String group) {
         return modelMapper.list(new HumanCondition()
                 .filterEqual(BaseObjMappingModel::getGroup, group)
@@ -89,6 +95,10 @@ public abstract class BaseObjMappingServiceImpl<M extends BaseObjMappingModel, P
     protected int deleteObjMappings(String group) {
         return modelMapper.filterDelete(new HumanCondition()
                 .filterEqual(BaseObjMappingModel::getGroup, group));
+    }
+
+    public ServiceResult<M> getMapping(String group, String name) {
+        return new ServiceResult<>(getObjMapping(group, name));
     }
 
     public ServiceResult<List<M>> getMappings(String group) {
