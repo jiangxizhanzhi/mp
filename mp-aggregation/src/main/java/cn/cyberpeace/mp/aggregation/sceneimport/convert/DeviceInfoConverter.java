@@ -67,8 +67,7 @@ class DeviceInfoConverter implements IConverter {
         pluginElement.setCategory(device.getCategory());
         pluginElement.setImageType(device.getImageType());
         pluginElement.setImage(device.getName());
-        // TODO 20211030 目前资管导入的靶标无正确的角色信息
-//        pluginElement.setRole(device.getRole());
+        pluginElement.setRole(device.getRole());
 
         if (device.getExtSystemInfo() != null) {
             this.loadExtSystemInfo(params.element, device.getExtSystemInfo());

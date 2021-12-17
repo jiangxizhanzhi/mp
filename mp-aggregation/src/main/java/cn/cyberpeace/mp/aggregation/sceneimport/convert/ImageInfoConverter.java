@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
@@ -45,22 +46,68 @@ class ImageInfoConverter implements IConverter {
             }
             ImageInfoParseResult imageInfo = imageInfos.get(cloudPluginElement.getImage());
             if (imageInfo == null) {
-                continue;
+                // 无镜像信息 增加role init_support proxy的默认值
+                if (cloudPluginElement.getRole() == null) {
+                    cloudPluginElement.setRole(BaseCloudPluginSceneElementModel.Role.VIRTUAL_TERMINAL);
+                }
+                if (cloudPluginElement.getVirtualType() == null) {
+                    cloudPluginElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE);
+                }
+                if (cloudPluginElement.getInitSupport() == null) {
+                    cloudPluginElement.setInitSupport(true);
+                }
+                if (CollectionUtils.isNotEmpty(element.getPorts())) {
+                    element.getPorts().forEach(port -> {
+                        if (CollectionUtils.isNotEmpty(port.getAccessModes())) {
+                            port.getAccessModes().forEach(mode -> {
+                                if (mode.getProxy() == null) {
+                                    mode.setProxy(true);
+                                }
+                            });
+                        }
+                        CloudPluginSceneConfigElementPortBO pluginPort = pluginPorts.get(port.getId());
+                        if (pluginPort != null && CollectionUtils.isNotEmpty(pluginPort.getAccessModes())) {
+                            pluginPort.getAccessModes().forEach(mode -> {
+                                if (mode.getProxy() == null) {
+                                    mode.setProxy(true);
+                                }
+                            });
+                        }
+                    });
+                }
+            } else {
+                // 有镜像信息 增加role init_support proxy的默认值,还要读取其他值
+                element.setInitCommands(imageInfo.getInitCommands());
+                if (cloudPluginElement.getVirtualType() == null) {
+                    cloudPluginElement.setVirtualType(imageInfo.getVirtualType());
+                }
+                if (cloudPluginElement.getRole() == null) {
+                    cloudPluginElement.setRole(BaseCloudPluginSceneElementModel.Role.VIRTUAL_TERMINAL);
+                }
+                if (CollectionUtils.isEmpty(element.getPorts())) {
+                    SceneConfigElementPortBO portBO = new SceneConfigElementPortBO();
+                    portBO.setId(TextUtils.uuid());
+                    element.setPorts(new ArrayList<>());
+                    element.getPorts().add(portBO);
+                    CloudPluginSceneConfigElementPortBO pluginPort = new CloudPluginSceneConfigElementPortBO();
+                    container.putPluginElementPort(portBO.getId(), pluginPort);
+                }
+                SceneConfigElementPortBO portBO = element.getPorts().get(0);
+                portBO.setAccessModes(this.getAccessModes(imageInfo.getAccessModes()));
+                portBO.getAccessModes().forEach(mode -> {
+                    if (mode.getProxy() == null) {
+                        mode.setProxy(true);
+                    }
+                });
+                CloudPluginSceneConfigElementPortBO pluginPort = pluginPorts.get(portBO.getId());
+                pluginPort.setNat(imageInfo.getNat());
+                pluginPort.setAccessModes(this.getCloudAccessModes(imageInfo.getAccessModes()));
+                pluginPort.getAccessModes().forEach(mode -> {
+                    if (mode.getProxy() == null) {
+                        mode.setProxy(true);
+                    }
+                });
             }
-            element.setInitCommands(imageInfo.getInitCommands());
-            if (CollectionUtils.isEmpty(element.getPorts())) {
-                SceneConfigElementPortBO portBO = new SceneConfigElementPortBO();
-                portBO.setId(TextUtils.uuid());
-                element.setPorts(new ArrayList<>());
-                element.getPorts().add(portBO);
-                CloudPluginSceneConfigElementPortBO pluginPort = new CloudPluginSceneConfigElementPortBO();
-                container.putPluginElementPort(portBO.getId(), pluginPort);
-            }
-            SceneConfigElementPortBO portBO = element.getPorts().get(0);
-            portBO.setAccessModes(this.getAccessModes(imageInfo.getAccessModes()));
-            CloudPluginSceneConfigElementPortBO pluginPort = pluginPorts.get(portBO.getId());
-            pluginPort.setNat(imageInfo.getNat());
-            pluginPort.setAccessModes(this.getCloudAccessModes(imageInfo.getAccessModes()));
         }
     }
 
