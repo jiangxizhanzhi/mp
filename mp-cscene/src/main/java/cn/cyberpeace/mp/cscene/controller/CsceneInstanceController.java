@@ -286,7 +286,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
             @ApiImplicitParam(name = "nodeId", value = "节点id", dataTypeClass = String.class),
-            @ApiImplicitParam(name = "connectionId", value = "连接id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "accessModeId", value = "接入方式id", dataTypeClass = String.class),
     })
     @PostMapping(value = "/get_connection")
     public ServiceResult<NodeConnectionBO> getRemoteConnection(@RequestParam(required = false) String id,
