@@ -54,7 +54,7 @@ public class DefaultImgController {
         if (defaultImgDirEnum == DefaultImgDirEnum.TARGET){
             List<DefaultImgDirEnum> defaultImgDirEnums = Arrays.asList(DefaultImgDirEnum.APPLICATION_SYSTEM,
                     DefaultImgDirEnum.NETWORK_EQUIPMENT,DefaultImgDirEnum.OPERATION_SYSTEM,
-                    DefaultImgDirEnum.SAFETY_EQUIPMENT,DefaultImgDirEnum.STATUS);
+                    DefaultImgDirEnum.SAFETY_EQUIPMENT);
             fileNameList = getFileByDefaultImgDirEnums(defaultImgDirEnums);
         }else{
             fileNameList = defaultImgService.getFileByDefaultImgDirEnum(defaultImgDirEnum);

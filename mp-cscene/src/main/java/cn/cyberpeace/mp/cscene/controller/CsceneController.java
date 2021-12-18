@@ -1,31 +1,36 @@
 package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.cscene.bo.*;
+import cn.cyberpeace.mp.cscene.bo.CsceneBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneStat;
+import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneActionRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneCreateInstanceRequest;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
-import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneConfigBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortConnectionBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneConfigPieceBO;
+import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
@@ -40,6 +45,8 @@ public class CsceneController implements BaseModelListControllerBase {
     private CsceneService modelService;
 
     private CsceneSpecialService csceneSpecialService;
+
+    private BaseAppConfig baseAppConfig;
 
     private CsceneActionRequest formatActionRequest(CsceneActionRequest request, String paramId) {
         if (request == null) {
@@ -60,46 +67,17 @@ public class CsceneController implements BaseModelListControllerBase {
     }
 
     private void correctRequestCsceneParams(CsceneBO csceneBO) {
-        removeEidWhenCreate(csceneBO);
-    }
-
-    private void removeEidWhenCreate(CsceneBO csceneBO) {
-        if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getTopology() != null) {
-            SceneConfigBO sceneConfigBO = csceneBO.getSceneConfig().getTopology().getScene();
-            if (sceneConfigBO != null && sceneConfigBO.getEid() == null) {
-                // 属于新增 需要去除多余的eid
-                List<SceneConfigElementBO> elementBOS = csceneBO.getSceneConfig().getTopology().getElements();
-                List<SceneConfigElementPortConnectionBO> connectionBOS = csceneBO.getSceneConfig().getTopology().getConnections();
-                List<SceneConfigAreaBO> areaBOS = csceneBO.getSceneConfig().getTopology().getAreas();
-                List<SceneConfigPieceBO> pieceBOS = csceneBO.getSceneConfig().getTopology().getPieces();
-                if (CollectionUtils.isNotEmpty(elementBOS)) {
-                    elementBOS.forEach(bo -> {
-                        bo.setEid(null);
-                        if (CollectionUtils.isNotEmpty(bo.getPorts())) {
-                            bo.getPorts().forEach(port -> port.setEid(null));
-                        }
-                    });
-                }
-                if (CollectionUtils.isNotEmpty(connectionBOS)) {
-                    connectionBOS.forEach(conn -> conn.setEid(null));
-                }
-                if (CollectionUtils.isNotEmpty(areaBOS)) {
-                    areaBOS.forEach(area -> area.setEid(null));
-                }
-                if (CollectionUtils.isNotEmpty(pieceBOS)) {
-                    pieceBOS.forEach(piece -> piece.setEid(null));
-                }
-            }
-        }
+        CsceneDataModifier.removeEidWhenCreate(csceneBO);
+        CsceneDataModifier.correctFilePath(csceneBO);
     }
 
     @Autowired
-    public CsceneController(CsceneService csceneService, CsceneSpecialService csceneSpecialService) {
+    public CsceneController(CsceneService csceneService, CsceneSpecialService csceneSpecialService, BaseAppConfig baseAppConfig) {
         setModelService(csceneService);
         setCsceneSpecialService(csceneSpecialService);
+        this.baseAppConfig = baseAppConfig;
     }
 
-    @ApiOperation("获取分页数据")
     @GetMapping
     public ListObjServiceResult<CsceneBO> list(CsceneQueryParams queryParams) {
         handleQueryParams("list", queryParams);
@@ -150,6 +128,7 @@ public class CsceneController implements BaseModelListControllerBase {
     @DeleteMapping
     public ServiceResult<Boolean> delete(@RequestParam(required = false) String id,
                                          @RequestBody(required = false) CsceneActionRequest request) {
+        log.info("delete cscene config , cscene id is {}", id);
         request = formatActionRequest(request, id);
         return modelService.deleteById(request.getId(), true, false, null).asResult();
     }
@@ -157,6 +136,7 @@ public class CsceneController implements BaseModelListControllerBase {
     @ApiOperation("批量删除场景模板")
     @DeleteMapping("/bulk_delete")
     public ServiceResult<Integer> bulkDelete(@RequestBody String[] ids) {
+        log.info("delete cscene configs , cscene ids is {}", JsonCommon.stringify(ids));
         return modelService.bulkDeleteByIds(ids, true, false, null).asResult();
     }
 
