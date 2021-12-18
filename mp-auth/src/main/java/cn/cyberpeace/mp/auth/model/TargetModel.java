@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.auth.model;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.dto.validate.AddGroup;
 import cn.cyberpeace.mp.base.model.BaseModel;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 import io.swagger.annotations.ApiModelProperty;
@@ -16,6 +17,8 @@ import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
 /**
+ * 这个target以后就当做menu
+ *
  * @Description:
  * @Author zhouxinghuai
  * @Date：2021/8/31 11:13
@@ -30,6 +33,9 @@ public class TargetModel extends BaseModel {
     public static Integer TYPE_MENU = 1;
     public static Integer TYPE_API = 2;
     public static Integer TYPE_DATA = 3;
+
+    public static Integer VISIBILITY_NO = 0;
+    public static Integer VISIBILITY_YES = 1;
 
     @ApiModelProperty(value = "上级权限")
     private String parent;
@@ -53,6 +59,10 @@ public class TargetModel extends BaseModel {
     @NotNull(groups = AddGroup.class)
     private Integer type;
 
+    @ApiModelProperty(value = "可见性 1：可见 0：不可见")
+    @DefaultInt(1)
+    private Integer visible;
+
 
     @Override
     public boolean equals(Object o) {
@@ -60,11 +70,11 @@ public class TargetModel extends BaseModel {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         TargetModel that = (TargetModel) o;
-        return Objects.equals(parent, that.parent) && Objects.equals(identifier, that.identifier) && Objects.equals(tenant, that.tenant) && Objects.equals(name, that.name) && Objects.equals(type, that.type);
+        return Objects.equals(parent, that.parent) && Objects.equals(identifier, that.identifier) && Objects.equals(tenant, that.tenant) && Objects.equals(name, that.name) && Objects.equals(path, that.path) && Objects.equals(type, that.type) && Objects.equals(visible, that.visible);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), parent, identifier, tenant, name, type);
+        return Objects.hash(super.hashCode(), parent, identifier, tenant, name, path, type, visible);
     }
 }

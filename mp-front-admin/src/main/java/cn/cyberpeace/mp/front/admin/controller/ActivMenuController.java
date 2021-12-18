@@ -14,19 +14,18 @@ import org.springframework.web.multipart.MultipartFile;
  * @Author zhouxinghuai
  * @Date：2021/12/16 19:02
  */
-@Api(value = "ADMIN-TEST", tags = "ADMIN-TEST")
+@Api(value = "SYS-ADMIN-TEST", tags = "ADMIN-TEST")
 @Slf4j
 @RestController
-@RequestMapping("/admin/test")
-public class AdminTestController {
+@RequestMapping("/sys/admin")
+public class ActivMenuController {
 
     @Autowired
     private ActivMenuService activMenuService;
 
-
-    @PostMapping("/activ/menu")
+    @PostMapping("/menu/reimport")
     public void activMenu(MultipartFile file) {
-        activMenuService.process(file);
+        activMenuService.reImportMenus(file);
     }
 
 }

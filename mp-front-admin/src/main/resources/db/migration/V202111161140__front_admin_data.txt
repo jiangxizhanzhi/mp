@@ -1,7 +1,4 @@
 
-DROP table `mp_auth_target`;
-
-
 # 资源目标表(有哪些资源)
 CREATE TABLE mp_auth_target
 (

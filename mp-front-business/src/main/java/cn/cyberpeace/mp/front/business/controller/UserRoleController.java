@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.front.business.controller;
 
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.role.RoleUsersRequest;
 import cn.cyberpeace.mp.auth.dto.role.UserRolePageRequest;
@@ -7,6 +8,7 @@ import cn.cyberpeace.mp.auth.dto.role.UserRoleStatistic;
 import cn.cyberpeace.mp.auth.dto.role.UserRolesRequest;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import com.github.pagehelper.PageInfo;
@@ -66,7 +68,8 @@ public class UserRoleController {
         if (success) {
             return ServiceResult.successful();
         } else {
-            return ServiceResult.fail("绑定用户角色失败!");
+            log.error("绑定用户角色失败!");
+            throw new MpRuntimeException(AuthErrorCode.USER_ROLE_ADD_ERROR);
         }
     }
 
@@ -78,7 +81,8 @@ public class UserRoleController {
         if (success) {
             return ServiceResult.successful();
         } else {
-            return ServiceResult.fail("绑定用户角色失败!");
+            log.error("绑定用户角色失败!");
+            throw new MpRuntimeException(AuthErrorCode.USER_ROLE_ADD_ERROR);
         }
     }
 
@@ -90,7 +94,8 @@ public class UserRoleController {
         if (success) {
             return ServiceResult.successful();
         } else {
-            return ServiceResult.fail("删除用户角色关系失败!");
+            log.error("删除用户角色失败!");
+            throw new MpRuntimeException(AuthErrorCode.USER_ROLE_DELETE_ERROR);
         }
     }
 

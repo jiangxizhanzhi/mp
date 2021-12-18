@@ -176,6 +176,7 @@ CREATE TABLE mp_auth_target
     `name`        varchar(64)  NOT NULL COMMENT '名称',
     `path`        varchar(255) NULL COMMENT '路径',
     `type`        int          NOT NULL COMMENT '资源类型 1:菜单, 2:API, 3:数据',
+    `visible`     int                   DEFAULT 1 NOT NULL COMMENT '是否可见 1:可见，0:不可见（受控于激活选项） 默认为可见',
     `create_time` datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time` datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`pk`),

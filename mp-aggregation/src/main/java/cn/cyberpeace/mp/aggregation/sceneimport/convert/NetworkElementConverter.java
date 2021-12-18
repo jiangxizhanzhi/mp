@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.aggregation.sceneimport.convert;
 
+import cn.cyberpeace.mp.aggregation.constant.CommonConstant;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.NetworkElementParseResult;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
@@ -77,7 +78,7 @@ class NetworkElementConverter implements IConverter {
         sceneConfigElementBO.setName(network.getName());
         sceneConfigElementBO.setId(network.getId());
         sceneConfigElementBO.setType(BaseSceneElementModel.Type.SWITCH);
-        sceneConfigElementBO.setIcon2("/network-equipment/switcher.png");
+        sceneConfigElementBO.setIcon2(CommonConstant.DefaultImageUrl.SWITCHER);
         List<SceneConfigElementPortBO> ports = new ArrayList<>();
         sceneConfigElementBO.setPorts(ports);
 
