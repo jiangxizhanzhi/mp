@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincloud.service.common;
 
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
@@ -82,7 +83,9 @@ public class CloudSceneConnectionCommon {
             guacamoleCreateConnectionData.setDepartment(param.getDepartment());
             guacamoleCreateConnectionData.setFlag(true);
             var connectionParams = new GuacamoleCreateConnectionData.ConnectionParams();
-            connectionParams.setProtocol(sceneConnection.getProtocol());
+            var protocol = sceneConnection.getProtocol().equals(AccessMode.Protocol.CONSOLE) ?
+                    AccessMode.Protocol.VNC : sceneConnection.getProtocol();
+            connectionParams.setProtocol(protocol);
             connectionParams.setPort(sceneConnection.getAccessPort().toString());
             connectionParams.setUsername(sceneConnection.getUsername());
             connectionParams.setPassword(sceneConnection.getPassword());
