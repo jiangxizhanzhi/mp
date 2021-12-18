@@ -13,6 +13,9 @@ import java.util.List;
 @Data
 public class TargetActivDto extends TargetModel {
 
+    // 表示这个菜单不受系统激活项的限制，如帮助中心等，无论系统激活项如何选择，都应该显示
+    public static final String NO_AUTH = "no_auth";
+
     private List<String> active;
 
     private List<String> edition;

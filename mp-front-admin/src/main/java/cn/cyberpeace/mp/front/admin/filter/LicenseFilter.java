@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.front.admin.filter;
 
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.front.admin.config.ActivationConfig;
+import cn.cyberpeace.mp.front.admin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationResponse;
 import cn.cyberpeace.mp.front.admin.service.sys.SysActivationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -67,7 +68,7 @@ public class LicenseFilter extends OncePerRequestFilter {
                     log.error("激活状态异常！");
                     response.setStatus(HttpServletResponse.SC_OK);
                     // todo message format
-                    ServiceResult serviceResult = ServiceResult.fail("激活状态异常！");
+                    ServiceResult serviceResult = ServiceResult.fail(AdminErrorCode.SYS_ACTIVATION_ERROR);
                     mapper = converter.getObjectMapper();
 
                     PrintWriter writer = response.getWriter();

@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.front.business.controller.register;
 
 
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.AuthLogConstant;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.register.RegisterRequest;
@@ -9,6 +10,7 @@ import cn.cyberpeace.mp.auth.service.RegisterService;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
@@ -65,7 +67,7 @@ public class RegisterController {
             return ServiceResult.success(userModel);
         }
 
-        return ServiceResult.fail("注册失败！");
+        throw new MpRuntimeException(AuthErrorCode.OP_ERROR);
     }
 
 }
