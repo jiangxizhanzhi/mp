@@ -470,7 +470,12 @@ public class CreateHandler extends HandlerCommon {
         var srcScene = getPluginHandler().getSrcScene();
         var sceneId = srcScene.getEid();
 
-        ContainerFileUtils.prepareUnzip(containerClient, containerId);
+        // 准备容器的unzip工具，容器本身可能自带，所以忽略失败
+        try {
+            ContainerFileUtils.prepareUnzip(containerClient, containerId);
+        } catch (Exception e) {
+            log.warn("Scene({}) cloud container({}) element prepare unzip failed: ", sceneId, containerId, e);
+        }
 
         var sceneFileUrl = srcScene.getFile();
         if (!StringUtils.isEmpty(sceneFileUrl)) {

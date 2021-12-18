@@ -33,7 +33,6 @@ public class ContainerFileUtils {
         var unzipLocalFilepath = getUnzipLocalFilepath();
         if (StringUtils.isEmpty(unzipLocalFilepath)) {
             return false;
-
         }
         var flag = containerClient.copyFile(containerId, unzipLocalFilepath, UNZIP_DST_PATH);
         containerClient.executeCommand(containerId, String.format("chmod +x %s", UNZIP_DST_PATH + UNZIP_EXECUTOR_NAME));
