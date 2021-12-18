@@ -8,6 +8,9 @@ import lombok.Data;
 @Data
 public class CloudAccessMode extends AccessMode {
 
+    @ApiModelProperty(value = "接入模式id")
+    private String id;
+
     @ApiModelProperty(value = "基础协议tcp/udp")
     private String baseProtocol;
 

@@ -9,11 +9,13 @@ import cn.cyberpeace.mp.cscene.bo.CsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.controller.request.*;
+import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceQueryParams;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeActionRecordingBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
@@ -62,6 +64,17 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         if (!StringUtils.isEmpty(paramId)) {
             request.setId(paramId);
         }
+
+        var context = request.getContext();
+        if (context == null) {
+            var user = UserCommon.getCurrentUser();
+            if (user != null) {
+                context = new CsceneContextBO();
+                context.setAccessUserId(user.getId());
+                request.setContext(context);
+            }
+        }
+
         return request;
     }
 
@@ -119,9 +132,22 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         if (request == null) {
             request = new CsceneInstanceNodeConnectionActionRequest();
         }
-        request = (CsceneInstanceNodeConnectionActionRequest) formatNodeActionRequest(request, paramId, paramConnectionId);
+        request = (CsceneInstanceNodeConnectionActionRequest) formatNodeActionRequest(request, paramId, paramNodeId);
         if (!StringUtils.isEmpty(paramConnectionId)) {
             request.setConnectionId(paramConnectionId);
+        }
+        return request;
+    }
+
+    private CsceneInstanceNodeAccessModeActionRequest formatNodeAccessModeActionRequest(
+            CsceneInstanceNodeAccessModeActionRequest request, String paramId, String paramNodeId,
+            String paramAccessModeId) {
+        if (request == null) {
+            request = new CsceneInstanceNodeAccessModeActionRequest();
+        }
+        request = (CsceneInstanceNodeAccessModeActionRequest) formatNodeActionRequest(request, paramId, paramNodeId);
+        if (!StringUtils.isEmpty(paramAccessModeId)) {
+            request.setAccessModeId(paramAccessModeId);
         }
         return request;
     }
@@ -253,6 +279,22 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                           @RequestBody(required = false) CsceneInstanceNodeProbeActionRequest request) {
         request = formatNodeProbeActionRequest(request, id, nodeId, probeId);
         return modelService.stopProbe(request.getId(), request.getNodeId(), request.getProbeId(),
+                request.getContext()).asResult();
+    }
+
+    @ApiOperation("场景实例获取远程连接")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "nodeId", value = "节点id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "accessModeId", value = "接入方式id", dataTypeClass = String.class),
+    })
+    @PostMapping(value = "/get_connection")
+    public ServiceResult<NodeConnectionBO> getRemoteConnection(@RequestParam(required = false) String id,
+                                                               @RequestParam(required = false) String nodeId,
+                                                               @RequestParam(required = false) String accessModeId,
+                                                               @RequestBody(required = false) CsceneInstanceNodeAccessModeActionRequest request) {
+        request = formatNodeAccessModeActionRequest(request, id, nodeId, accessModeId);
+        return modelService.getRemoteConnection(request.getId(), request.getNodeId(), request.getAccessModeId(),
                 request.getContext()).asResult();
     }
 

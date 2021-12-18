@@ -24,6 +24,7 @@ import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
 import cn.cyberpeace.mp.cscene.service.action.CsceneCallAction;
 import cn.cyberpeace.mp.cscene.service.taskpool.CsceneReportTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeActionRecordingBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
@@ -294,6 +295,22 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
 
         return new ServiceResult<>(null);
+    }
+
+    public ServiceResult<NodeConnectionBO> getRemoteConnection(String id, String nodeId, String accessModeId, CsceneContextBO context) {
+        CsceneContextHolder.setCsceneInstanceId(id);
+        if (context == null || StringUtils.isEmpty(context.getAccessUserId())) {
+            return new ServiceResult<>(null);
+        }
+        context.loadTransparentContext();
+
+        var sceneId = getSceneId(id);
+        if (StringUtils.isEmpty(sceneId)) {
+            return new ServiceResult<>(null);
+        }
+        var cloudScenePluginContext = context.toCloudScenePluginContext();
+        return scenePluginCloudSceneService.getSceneRemoteConnection(sceneId, nodeId, accessModeId,
+                context.getAccessUserId(), cloudScenePluginContext);
     }
 
     public ServiceResult<NodeActionRecordingBO> enableRecording(String id, String nodeId, String connectionId, CsceneContextBO context) {
