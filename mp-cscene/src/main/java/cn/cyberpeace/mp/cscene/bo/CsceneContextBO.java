@@ -34,6 +34,13 @@ public class CsceneContextBO {
     public SceneContextBO toSceneContext() {
         var sceneContext = new SceneContextBO();
         Map<String, Object> plugins = new HashMap<>();
+        var cloudScenePluginContext = toCloudScenePluginContext();
+        plugins.put(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY, cloudScenePluginContext);
+        sceneContext.setPlugins(plugins);
+        return sceneContext;
+    }
+
+    public CloudScenePluginContext toCloudScenePluginContext() {
         var cloudScenePluginContext = new CloudScenePluginContext();
         if (StringUtils.isNotEmpty(accessUserId)) {
             cloudScenePluginContext.setRequestUser(accessUserId);
@@ -47,8 +54,6 @@ public class CsceneContextBO {
                 }
             }
         }
-        plugins.put(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY, cloudScenePluginContext);
-        sceneContext.setPlugins(plugins);
-        return sceneContext;
+        return cloudScenePluginContext;
     }
 }
