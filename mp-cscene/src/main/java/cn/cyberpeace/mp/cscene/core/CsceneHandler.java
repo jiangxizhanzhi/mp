@@ -157,7 +157,8 @@ public class CsceneHandler extends BaseCsceneHandler<
         if (withInstance) {
             reloadCsceneInstances();
         }
-        return getCscene();
+        CsceneBO csceneBO = getCscene();
+        return csceneBO;
     }
 
     public CsceneInstanceBO createTestInstance(boolean unique) {

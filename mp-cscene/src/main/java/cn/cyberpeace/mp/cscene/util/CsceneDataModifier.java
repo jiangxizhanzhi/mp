@@ -13,6 +13,9 @@ import cn.cyberpeace.mp.scene.core.bo.SceneConfigPieceBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
+import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneBO;
+import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneDataBO;
+import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -106,10 +109,10 @@ public class CsceneDataModifier {
     }
 
     /**
-     * 纠正创建和更新场景模板时fdfs的地址
+     * 纠正创建和更新场景模板时fdfs的地址,移除前缀
      * @param csceneBO
      */
-    public static void correctFilePath(CsceneBO csceneBO) {
+    public static void removeFilePathPrefix(CsceneBO csceneBO) {
         BaseAppConfig baseAppConfig = BeanCommon.getBean(BaseAppConfig.class);
         // 纠正fdfs的地址
         if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getTopology() != null) {
@@ -128,6 +131,35 @@ public class CsceneDataModifier {
                         if (e.getFile().startsWith("/")) {
                             e.setFile(StringUtils.replaceOnce(e.getFile(), "/", StringUtils.EMPTY));
                         }
+                    }
+                });
+            }
+        }
+    }
+
+    /**
+     * 纠正返回场景模板时fdfs的地址,增加前缀
+     * @param BaseSceneDataBO
+     */
+    private static void addFilePathPrefix(BaseSceneDataBO baseSceneDataBO) {
+        BaseAppConfig baseAppConfig = BeanCommon.getBean(BaseAppConfig.class);
+        // 纠正fdfs的地址
+        if (baseSceneDataBO.getTopology() != null) {
+            BaseSceneBO scene = baseSceneDataBO.getTopology().getScene();
+            if (scene != null && StringUtils.isNotEmpty(scene.getFile()) && !StringUtils.startsWith(scene.getFile(), baseAppConfig.getFdfsOuterHttpServer())) {
+                if (!StringUtils.startsWith(scene.getFile(), "/")) {
+                    scene.setFile("/" + scene.getFile());
+                }
+                scene.setFile(baseAppConfig.getFdfsOuterHttpServer() + scene.getFile());
+            }
+            if (CollectionUtils.isNotEmpty(baseSceneDataBO.getTopology().getElements())) {
+                baseSceneDataBO.getTopology().getElements().forEach(e -> {
+                    BaseSceneElementBO sceneElement = (BaseSceneElementBO) e;
+                    if (StringUtils.isNotEmpty(sceneElement.getFile()) && !StringUtils.startsWith(sceneElement.getFile(), baseAppConfig.getFdfsOuterHttpServer())) {
+                        if (!StringUtils.startsWith(sceneElement.getFile(), "/")) {
+                            sceneElement.setFile("/" + sceneElement.getFile());
+                        }
+                        sceneElement.setFile(baseAppConfig.getFdfsOuterHttpServer() + sceneElement.getFile());
                     }
                 });
             }
