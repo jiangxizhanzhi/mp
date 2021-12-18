@@ -15,18 +15,13 @@ import cn.cyberpeace.mp.cscene.controller.request.CsceneCreateInstanceRequest;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
-import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneConfigBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortConnectionBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneConfigPieceBO;
+import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -72,62 +67,8 @@ public class CsceneController implements BaseModelListControllerBase {
     }
 
     private void correctRequestCsceneParams(CsceneBO csceneBO) {
-        removeEidWhenCreate(csceneBO);
-        correctFilePath(csceneBO);
-    }
-
-    private void removeEidWhenCreate(CsceneBO csceneBO) {
-        if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getTopology() != null) {
-            SceneConfigBO sceneConfigBO = csceneBO.getSceneConfig().getTopology().getScene();
-            if (sceneConfigBO != null && sceneConfigBO.getEid() == null) {
-                // 属于新增 需要去除多余的eid
-                List<SceneConfigElementBO> elementBOS = csceneBO.getSceneConfig().getTopology().getElements();
-                List<SceneConfigElementPortConnectionBO> connectionBOS = csceneBO.getSceneConfig().getTopology().getConnections();
-                List<SceneConfigAreaBO> areaBOS = csceneBO.getSceneConfig().getTopology().getAreas();
-                List<SceneConfigPieceBO> pieceBOS = csceneBO.getSceneConfig().getTopology().getPieces();
-                if (CollectionUtils.isNotEmpty(elementBOS)) {
-                    elementBOS.forEach(bo -> {
-                        bo.setEid(null);
-                        if (CollectionUtils.isNotEmpty(bo.getPorts())) {
-                            bo.getPorts().forEach(port -> port.setEid(null));
-                        }
-                    });
-                }
-                if (CollectionUtils.isNotEmpty(connectionBOS)) {
-                    connectionBOS.forEach(conn -> conn.setEid(null));
-                }
-                if (CollectionUtils.isNotEmpty(areaBOS)) {
-                    areaBOS.forEach(area -> area.setEid(null));
-                }
-                if (CollectionUtils.isNotEmpty(pieceBOS)) {
-                    pieceBOS.forEach(piece -> piece.setEid(null));
-                }
-            }
-        }
-    }
-
-    private void correctFilePath(CsceneBO csceneBO) {
-        // 纠正fdfs的地址
-        if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getTopology() != null) {
-            SceneConfigBO sceneConfig = csceneBO.getSceneConfig().getTopology().getScene();
-            if (sceneConfig != null && StringUtils.isNotEmpty(sceneConfig.getFile()) && sceneConfig.getFile().startsWith(baseAppConfig.getFdfsOuterHttpServer())) {
-                sceneConfig.setFile(StringUtils.replaceOnce(sceneConfig.getFile(), baseAppConfig.getFdfsOuterHttpServer(), StringUtils.EMPTY));
-                if (sceneConfig.getFile().startsWith("/")) {
-                    sceneConfig.setFile(StringUtils.replaceOnce(sceneConfig.getFile(), "/", StringUtils.EMPTY));
-                }
-            }
-            List<SceneConfigElementBO> elements = csceneBO.getSceneConfig().getTopology().getElements();
-            if (CollectionUtils.isNotEmpty(elements)) {
-                elements.stream().forEach(e -> {
-                    if (StringUtils.isNotEmpty(e.getFile()) && e.getFile().startsWith(baseAppConfig.getFdfsOuterHttpServer())) {
-                        e.setFile(StringUtils.replaceOnce(sceneConfig.getFile(), baseAppConfig.getFdfsOuterHttpServer(), StringUtils.EMPTY));
-                        if (e.getFile().startsWith("/")) {
-                            e.setFile(StringUtils.replaceOnce(e.getFile(), "/", StringUtils.EMPTY));
-                        }
-                    }
-                });
-            }
-        }
+        CsceneDataModifier.removeEidWhenCreate(csceneBO);
+        CsceneDataModifier.correctFilePath(csceneBO);
     }
 
     @Autowired
