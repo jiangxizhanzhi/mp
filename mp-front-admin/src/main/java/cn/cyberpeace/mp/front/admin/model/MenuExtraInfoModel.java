@@ -32,4 +32,5 @@ public class MenuExtraInfoModel extends BaseModel {
 
     @ApiModelProperty(value = "系统激活版本，多个值用逗号隔开 0:标准版 1:专业版")
     private String editions;
+
 }
