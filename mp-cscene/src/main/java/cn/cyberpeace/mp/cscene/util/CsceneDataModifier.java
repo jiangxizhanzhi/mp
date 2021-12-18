@@ -124,7 +124,7 @@ public class CsceneDataModifier {
             if (CollectionUtils.isNotEmpty(elements)) {
                 elements.stream().forEach(e -> {
                     if (StringUtils.isNotEmpty(e.getFile()) && e.getFile().startsWith(baseAppConfig.getFdfsOuterHttpServer())) {
-                        e.setFile(StringUtils.replaceOnce(sceneConfig.getFile(), baseAppConfig.getFdfsOuterHttpServer(), StringUtils.EMPTY));
+                        e.setFile(StringUtils.replaceOnce(e.getFile(), baseAppConfig.getFdfsOuterHttpServer(), StringUtils.EMPTY));
                         if (e.getFile().startsWith("/")) {
                             e.setFile(StringUtils.replaceOnce(e.getFile(), "/", StringUtils.EMPTY));
                         }
