@@ -4,10 +4,7 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.base.util.basic.BeanUtils;
-import cn.cyberpeace.mp.base.util.basic.FloatUtils;
-import cn.cyberpeace.mp.base.util.basic.IntUtils;
-import cn.cyberpeace.mp.base.util.basic.TimeUtils;
+import cn.cyberpeace.mp.base.util.basic.*;
 import cn.cyberpeace.mp.scene.core.bo.SceneBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincloud.bo.*;
@@ -30,8 +27,8 @@ import cn.cyberpeace.mp.sceneplugincloud.service.common.CloudSceneStatCommon;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -134,20 +131,23 @@ public class ScenePluginCloudSceneService {
         private AccessModeLinkInfo accessModeLinkInfo;
     }
 
-    private Map<String, ConnectionLinkInfo> collectConnectionLinkInfo(String sceneId, List<String> nodeIds) {
+    private Map<String, ConnectionLinkInfo> collectConnectionLinkInfo(String sceneId, List<String> nodeIds,
+                                                                      List<String> userIds) {
         Map<String, AccessModeLinkInfo> accessModeLinkInfoMap = collectAccessModeLinkInfo(sceneId, nodeIds);
         Map<String, ConnectionLinkInfo> connectionLinkInfoMap = new HashMap<>();
         if (accessModeLinkInfoMap.isEmpty()) {
             return connectionLinkInfoMap;
         }
 
-        var sceneConnections = cloudPluginSceneConnectionMapper.list(
-                new HumanCondition()
-                        .filterEqual(CloudPluginSceneConnectionModel::getScene, sceneId)
-                        .filterNotEqual(CloudPluginSceneConnectionModel::getConnectionId, StringUtils.EMPTY)
-                        .filterIn(CloudPluginSceneConnectionModel::getAccessModeId,
-                                accessModeLinkInfoMap.keySet().toArray(new String[0]))
-        );
+        var condition = new HumanCondition()
+                .filterEqual(CloudPluginSceneConnectionModel::getScene, sceneId)
+                .filterNotEqual(CloudPluginSceneConnectionModel::getConnectionId, StringUtils.EMPTY)
+                .filterIn(CloudPluginSceneConnectionModel::getAccessModeId,
+                        accessModeLinkInfoMap.keySet().toArray(new String[0]));
+        if (!CollectionUtils.isEmpty(userIds)) {
+            condition.filterIn(CloudPluginSceneConnectionModel::getAccessUser, userIds.toArray());
+        }
+        var sceneConnections = cloudPluginSceneConnectionMapper.list(condition);
         sceneConnections.forEach(sceneConnection -> {
             var connectionId = sceneConnection.getConnectionId();
             var accessModeLinkInfo = accessModeLinkInfoMap.get(sceneConnection.getAccessModeId());
@@ -158,10 +158,11 @@ public class ScenePluginCloudSceneService {
         return connectionLinkInfoMap;
     }
 
-    private Map<String, ConnectionLinkInfo> collectConnectionLinkInfo(List<String> sceneIds, List<String> nodeIds) {
+    private Map<String, ConnectionLinkInfo> collectConnectionLinkInfo(List<String> sceneIds, List<String> nodeIds,
+                                                                      List<String> userIds) {
         Map<String, ConnectionLinkInfo> connectionLinkInfoMap = new HashMap<>();
         for (var sceneId : sceneIds) {
-            connectionLinkInfoMap.putAll(collectConnectionLinkInfo(sceneId, nodeIds));
+            connectionLinkInfoMap.putAll(collectConnectionLinkInfo(sceneId, nodeIds, userIds));
         }
         return connectionLinkInfoMap;
     }
@@ -174,12 +175,12 @@ public class ScenePluginCloudSceneService {
     }
 
     public ServiceResult<List<NodeSessionBO>> getSceneRemoteSessions(List<String> sceneIds, List<String> nodeIds,
-                                                                     boolean monitor, boolean assistance) {
+                                                                     List<String> userIds, boolean monitor, boolean assistance) {
         if (!monitor && !assistance) {
             return new ServiceResult<>(new ArrayList<>());
         }
 
-        var connectionLinkInfoMap = collectConnectionLinkInfo(sceneIds, nodeIds);
+        var connectionLinkInfoMap = collectConnectionLinkInfo(sceneIds, nodeIds, userIds);
         String[] connectionIds = connectionLinkInfoMap.keySet().toArray(new String[0]);
         if (connectionIds.length == 0) {
             return new ServiceResult<>(new ArrayList<>());
@@ -230,8 +231,9 @@ public class ScenePluginCloudSceneService {
     }
 
     public ListObjServiceResult<NodeRecordingBO> getSceneRemoteRecordings(List<String> sceneIds, List<String> nodeIds,
+                                                                          List<String> userIds,
                                                                           RecordingQueryParams queryParams) {
-        var connectionLinkInfoMap = collectConnectionLinkInfo(sceneIds, nodeIds);
+        var connectionLinkInfoMap = collectConnectionLinkInfo(sceneIds, nodeIds, userIds);
         String[] connectionIds = connectionLinkInfoMap.keySet().toArray(new String[0]);
         if (connectionIds.length == 0) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
@@ -286,7 +288,7 @@ public class ScenePluginCloudSceneService {
     }
 
     public ServiceResult<NodeActionRecordingBO> enableRemoteRecording(String sceneId, String nodeId, String connectionId) {
-        var connectionLinkInfoMap = collectConnectionLinkInfo(sceneId, List.of(nodeId));
+        var connectionLinkInfoMap = collectConnectionLinkInfo(sceneId, List.of(nodeId), null);
         if (!connectionLinkInfoMap.containsKey(connectionId)) {
             return new ServiceResult<>(null, CloudErrorCode.CONNECTION_NOT_EXIST);
         }
@@ -299,7 +301,7 @@ public class ScenePluginCloudSceneService {
     }
 
     public ServiceResult<NodeActionRecordingBO> disableRemoteRecording(String sceneId, String nodeId, String connectionId) {
-        var connectionLinkInfoMap = collectConnectionLinkInfo(sceneId, List.of(nodeId));
+        var connectionLinkInfoMap = collectConnectionLinkInfo(sceneId, List.of(nodeId), null);
         if (!connectionLinkInfoMap.containsKey(connectionId)) {
             return new ServiceResult<>(null, CloudErrorCode.CONNECTION_NOT_EXIST);
         }

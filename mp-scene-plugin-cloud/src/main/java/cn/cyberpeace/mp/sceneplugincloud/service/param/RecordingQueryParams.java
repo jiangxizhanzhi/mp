@@ -7,8 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -18,6 +16,4 @@ public class RecordingQueryParams extends QueryParams {
     private String startTime;
     @ApiModelProperty(value = "结束时间")
     private String endTime;
-    @ApiModelProperty(value = "登录用户")
-    private List<String> loginUsers;
 }

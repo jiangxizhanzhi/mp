@@ -175,7 +175,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return bulkDeleteByIds(csceneInstanceObjs.stream().map(BaseModel::getId).toArray(String[]::new), false, context);
     }
 
-    public ServiceResult<List<NodeSessionBO>> getNodeSessions(List<String> ids, List<String> nodeIds) {
+    public ServiceResult<List<NodeSessionBO>> getNodeSessions(List<String> ids, List<String> nodeIds, List<String> userIds) {
         var csceneInstances = getCsceneInstanceObjs(ids);
         if (csceneInstances.isEmpty()) {
             return new ServiceResult<>(new ArrayList<>());
@@ -184,7 +184,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 .collect(Collectors.toMap(csceneInstance -> csceneInstance.getScene(), csceneInstance -> csceneInstance));
         List<String> sceneIds = new ArrayList<>(sceneIdCsceneInstanceMap.keySet());
         var nodeSessionResult = scenePluginCloudSceneService.getSceneRemoteSessions(
-                sceneIds, nodeIds, true, false);
+                sceneIds, nodeIds, userIds, true, false);
         nodeSessionResult.getSource().forEach(nodeSession -> {
             var sceneId = nodeSession.getSceneId();
             var csceneInstance = sceneIdCsceneInstanceMap.getOrDefault(sceneId, null);
@@ -196,7 +196,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return nodeSessionResult;
     }
 
-    public ListObjServiceResult<NodeRecordingBO> listRecordings(List<String> ids, List<String> nodeIds,
+    public ListObjServiceResult<NodeRecordingBO> listRecordings(List<String> ids, List<String> nodeIds, List<String> userIds,
                                                                 RecordingQueryParams queryParams) {
         var csceneInstances = getCsceneInstanceObjs(ids);
         if (csceneInstances.isEmpty()) {
@@ -206,7 +206,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 .collect(Collectors.toMap(csceneInstance -> csceneInstance.getScene(), csceneInstance -> csceneInstance));
         List<String> sceneIds = new ArrayList<>(sceneIdCsceneInstanceMap.keySet());
         var nodeRecordingResult = scenePluginCloudSceneService.getSceneRemoteRecordings(
-                sceneIds, nodeIds, queryParams);
+                sceneIds, nodeIds, userIds, queryParams);
         nodeRecordingResult.getSource().getObjs().forEach(nodeRecording -> {
             var sceneId = nodeRecording.getSceneId();
             var csceneInstance = sceneIdCsceneInstanceMap.getOrDefault(sceneId, null);
