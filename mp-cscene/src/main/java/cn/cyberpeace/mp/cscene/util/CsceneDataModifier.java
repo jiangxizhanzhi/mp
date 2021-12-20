@@ -139,9 +139,9 @@ public class CsceneDataModifier {
 
     /**
      * 纠正返回场景模板时fdfs的地址,增加前缀
-     * @param BaseSceneDataBO
+     * @param baseSceneDataBO
      */
-    private static void addFilePathPrefix(BaseSceneDataBO baseSceneDataBO) {
+    public static void addFilePathPrefix(BaseSceneDataBO baseSceneDataBO) {
         BaseAppConfig baseAppConfig = BeanCommon.getBean(BaseAppConfig.class);
         // 纠正fdfs的地址
         if (baseSceneDataBO.getTopology() != null) {
@@ -160,6 +160,27 @@ public class CsceneDataModifier {
                             sceneElement.setFile("/" + sceneElement.getFile());
                         }
                         sceneElement.setFile(baseAppConfig.getFdfsOuterHttpServer() + sceneElement.getFile());
+                    }
+                });
+            }
+        }
+    }
+
+    /**
+     * 处理节点的初始化命令
+     * @param csceneBO
+     */
+    public static void handlerElementInitCommand(CsceneBO csceneBO) {
+        if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getTopology() != null) {
+            if (CollectionUtils.isNotEmpty(csceneBO.getSceneConfig().getTopology().getElements())) {
+                csceneBO.getSceneConfig().getTopology().getElements().forEach(e -> {
+                    if (StringUtils.isNotEmpty(e.getFile()) && CollectionUtils.isNotEmpty(e.getInitCommands())) {
+                        // 存在节点的附件时 额外的执行一下节点命令
+                        List<String> externalCommands = e.getInitCommands().stream()
+                                .filter(StringUtils::isNotBlank)
+                                .map(command -> "n:" + command)
+                                .collect(Collectors.toList());
+                        e.getInitCommands().addAll(externalCommands);
                     }
                 });
             }

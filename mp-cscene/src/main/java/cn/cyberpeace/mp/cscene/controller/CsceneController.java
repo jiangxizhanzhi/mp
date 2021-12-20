@@ -69,6 +69,7 @@ public class CsceneController implements BaseModelListControllerBase {
     private void correctRequestCsceneParams(CsceneBO csceneBO) {
         CsceneDataModifier.removeEidWhenCreate(csceneBO);
         CsceneDataModifier.removeFilePathPrefix(csceneBO);
+        CsceneDataModifier.handlerElementInitCommand(csceneBO);
     }
 
     @Autowired
