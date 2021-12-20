@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.situationaware.model.enums.OsType;
 import cn.cyberpeace.mp.situationaware.model.enums.ScriptType;
 import com.alibaba.fastjson.JSONObject;
 import java.io.IOException;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,7 @@ public class WazuhProbeManagerRepository {
      * @param probeRequest probeRequest
      * @return String
      */
-    public String addScript(ProbeRequest probeRequest) {
+    public void addProbeTemplate(ProbeRequest probeRequest) {
         var sentUrl = situationAwareConfig.getWazuhManagerUrl() + "/probe";
         var jsonObject = new JSONObject();
         jsonObject.put("ScriptId", probeRequest.getProbeId());
@@ -38,10 +39,10 @@ public class WazuhProbeManagerRepository {
         jsonObject.put("Interval", probeRequest.getCommandInterval() + "m");
         jsonObject.put("Commandline", buildExecCommandline(probeRequest));
         try {
-            return HttpUtils.sendPost(sentUrl, jsonObject.toJSONString());
-        } catch (IOException e) {
+            var res = HttpUtils.sendPost(sentUrl, jsonObject.toJSONString());
+            log.info("probe manager add script {}", res);
+        } catch (Exception e) {
             log.error(SituationalAwareErrorCode.PROBE_MANAGER_ADD_ERROR.getMessage(), ExceptionUtils.getStackTrace(e));
-            throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_MANAGER_ADD_ERROR);
         }
     }
 
@@ -51,15 +52,51 @@ public class WazuhProbeManagerRepository {
      * @param probeId
      * @return
      */
-    public String deleteProbeByProbeId(String probeId) {
+    public void deleteProbeTemplateByProbeId(String probeId) {
         var sentUrl = situationAwareConfig.getWazuhManagerUrl() + "/probe/" + probeId;
         try {
             String deleteResult = HttpUtils.sendDelete(sentUrl);
             log.info("delete probe id: {} {}:", probeId, deleteResult);
-            return deleteResult;
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error(SituationalAwareErrorCode.PROBE_MANAGER_ADD_ERROR.getMessage(), ExceptionUtils.getStackTrace(e));
-            throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_MANAGER_ADD_ERROR);
+        }
+    }
+
+    /**
+     * 绑定场景内的实例到探针模板
+     * @param agentNames agentNames
+     * @param probeId probeId
+     * @return
+     */
+    public void bindAgentsWithProbeTemplate(List<String> agentNames, String probeId) {
+        var sentUrl = situationAwareConfig.getWazuhManagerUrl() + "/probe/probes/bind_agent";
+        var jsonObject = new JSONObject();
+        jsonObject.put("ScriptId", probeId);
+        jsonObject.put("AgentNames", agentNames);
+        try {
+            String res =  HttpUtils.sendPost(sentUrl, jsonObject.toJSONString());
+            log.info("bind probe res{}:", res);
+        } catch (Exception e) {
+            log.error(SituationalAwareErrorCode.PROBE_MANAGER_BIND_ERROR.getMessage(), ExceptionUtils.getStackTrace(e));
+        }
+    }
+
+    /**
+     * 解绑定场景内的实例到探针模板
+     * @param agentNames agentNames
+     * @param probeId probeId
+     * @return
+     */
+    public void unbindAgentsWithProbeTemplate(List<String> agentNames, String probeId) {
+        var sentUrl = situationAwareConfig.getWazuhManagerUrl() + "/probe/probes/bind_agent";
+        var jsonObject = new JSONObject();
+        jsonObject.put("ScriptId", probeId);
+        jsonObject.put("AgentNames", agentNames);
+        try {
+            String res =  HttpUtils.sendDelete(sentUrl, jsonObject.toJSONString());
+            log.info("unbind probe res {}:", res);
+        } catch (Exception e) {
+            log.error(SituationalAwareErrorCode.PROBE_MANAGER_BIND_ERROR.getMessage(), ExceptionUtils.getStackTrace(e));
         }
     }
 

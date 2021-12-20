@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -72,6 +73,11 @@ public class ProbeService {
         probeModelMapper.insert(probeModel);
         insertProbeParams(probeRequest, probeModel.getId());
         probeRequest.setProbeId(probeModel.getId());
+        try {
+            wazuhProbeManagerRepository.addProbeTemplate(probeRequest);
+        }catch (Exception ex){
+            log.error(SituationalAwareErrorCode.PROBE_MANAGER_ADD_ERROR.getMessage(), ExceptionUtils.getStackTrace(ex));
+        }
     }
 
     /**
