@@ -73,11 +73,6 @@ public class ProbeService {
         probeModelMapper.insert(probeModel);
         insertProbeParams(probeRequest, probeModel.getId());
         probeRequest.setProbeId(probeModel.getId());
-        try {
-            wazuhProbeManagerRepository.addProbeTemplate(probeRequest);
-        }catch (Exception ex){
-            log.error(SituationalAwareErrorCode.PROBE_MANAGER_ADD_ERROR.getMessage(), ExceptionUtils.getStackTrace(ex));
-        }
     }
 
     /**
