@@ -5,7 +5,9 @@
 package cn.cyberpeace.mp.auth.util;
 
 
+import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
+import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import org.apache.commons.lang3.StringUtils;
 
@@ -82,10 +84,8 @@ public class PasswordStrengthChecker {
      */
     public static int checkPasswordStrength(String passwd) {
         if (StringUtils.isBlank(passwd)) {
-            throw new MpRuntimeException(AuthErrorCode.PARAMS_SHOULD_NOT_EMPTY.format("password"));
+            throw new MpRuntimeException(AuthErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(MessageCommon.get(AuthBasei18nCode.USER_PASSWORD)));
         }
-
-//        StringUtils.isWhitespace()
 
         int len = passwd.length();
         int level = 0;

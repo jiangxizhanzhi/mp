@@ -282,7 +282,7 @@ public class ActivMenuService {
                 }
             }
 
-            log.info("editionMatch:{}, itemMatch:{}", editionMatch, itemMatch);
+            log.info("final result... editionMatch:{}, itemMatch:{}, menuId:{}", editionMatch, itemMatch, mi.getMenu());
             TargetModel targetModel = targetModelOptional.get();
 
             // 版本匹配，激活项匹配，则最终的visible=1
@@ -299,7 +299,7 @@ public class ActivMenuService {
     private ActivationResponse mockActivationContent() {
         ActivationResponse content = new ActivationResponse();
         content.setIsActived(1);
-        content.setEdition(1);
+        content.setEdition(0);
 
 
         List<ActivationItem> list = new ArrayList<>();
@@ -311,7 +311,7 @@ public class ActivMenuService {
 
         ActivationItem item2 = new ActivationItem();
         item2.setKey("LCS-FUNC-CR-JINGSAI");
-        item2.setValue("0");
+        item2.setValue("1");
         item2.setType(1);
         list.add(item2);
 
