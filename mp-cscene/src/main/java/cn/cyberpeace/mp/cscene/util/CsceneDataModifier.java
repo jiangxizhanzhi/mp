@@ -138,10 +138,41 @@ public class CsceneDataModifier {
     }
 
     /**
+     * 处理节点的初始化命令
+     * @param csceneBO
+     */
+    public static void handlerElementInitCommand(CsceneBO csceneBO) {
+        if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getTopology() != null) {
+            if (CollectionUtils.isNotEmpty(csceneBO.getSceneConfig().getTopology().getElements())) {
+                csceneBO.getSceneConfig().getTopology().getElements().forEach(e -> {
+                    if (StringUtils.isNotEmpty(e.getFile()) && CollectionUtils.isNotEmpty(e.getInitCommands())) {
+                        // 存在节点的附件时 额外的执行一下节点命令
+                        List<String> externalCommands = e.getInitCommands().stream()
+                                .filter(StringUtils::isNotBlank)
+                                .map(command -> "n:" + command)
+                                .collect(Collectors.toList());
+                        e.getInitCommands().addAll(externalCommands);
+                    }
+                });
+            }
+        }
+    }
+
+    public static void correctReturnCsceneData(CsceneBO csceneBO) {
+        addFilePathPrefix(csceneBO.getSceneConfig());
+        handlerElementInitCommand(csceneBO.getSceneConfig());
+    }
+
+    public static void correctReturnCsceneData(CsceneInstanceBO csceneInstanceBO) {
+        addFilePathPrefix(csceneInstanceBO.getScene());
+        handlerElementInitCommand(csceneInstanceBO.getScene());
+    }
+
+    /**
      * 纠正返回场景模板时fdfs的地址,增加前缀
      * @param baseSceneDataBO
      */
-    public static void addFilePathPrefix(BaseSceneDataBO baseSceneDataBO) {
+    private static void addFilePathPrefix(BaseSceneDataBO baseSceneDataBO) {
         BaseAppConfig baseAppConfig = BeanCommon.getBean(BaseAppConfig.class);
         // 纠正fdfs的地址
         if (baseSceneDataBO.getTopology() != null) {
@@ -167,20 +198,20 @@ public class CsceneDataModifier {
     }
 
     /**
-     * 处理节点的初始化命令
-     * @param csceneBO
+     * 纠正返回场景模板时的初始化命令
+     * @param baseSceneDataBO
      */
-    public static void handlerElementInitCommand(CsceneBO csceneBO) {
-        if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getTopology() != null) {
-            if (CollectionUtils.isNotEmpty(csceneBO.getSceneConfig().getTopology().getElements())) {
-                csceneBO.getSceneConfig().getTopology().getElements().forEach(e -> {
-                    if (StringUtils.isNotEmpty(e.getFile()) && CollectionUtils.isNotEmpty(e.getInitCommands())) {
-                        // 存在节点的附件时 额外的执行一下节点命令
-                        List<String> externalCommands = e.getInitCommands().stream()
-                                .filter(StringUtils::isNotBlank)
-                                .map(command -> "n:" + command)
+    private static void handlerElementInitCommand(BaseSceneDataBO baseSceneDataBO) {
+        if (baseSceneDataBO != null && baseSceneDataBO.getTopology() != null) {
+            if (CollectionUtils.isNotEmpty(baseSceneDataBO.getTopology().getElements())) {
+                baseSceneDataBO.getTopology().getElements().forEach(e -> {
+                    SceneElementBO eBO = (SceneElementBO) e;
+                    if (StringUtils.isNotEmpty(eBO.getFile()) && CollectionUtils.isNotEmpty(eBO.getInitCommands())) {
+                        // 过滤掉n:开头而且重复的
+                        List<String> realInputCommands = eBO.getInitCommands().stream()
+                                .filter(s -> !StringUtils.startsWith(s, "n:"))
                                 .collect(Collectors.toList());
-                        e.getInitCommands().addAll(externalCommands);
+                        eBO.setInitCommands(realInputCommands);
                     }
                 });
             }

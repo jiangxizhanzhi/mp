@@ -217,7 +217,7 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
     @Override
     public CsceneInstanceBO toData() {
         CsceneInstanceBO csceneInstanceBO = super.toData();
-        CsceneDataModifier.addFilePathPrefix(csceneInstanceBO.getScene());
+        CsceneDataModifier.correctReturnCsceneData(csceneInstanceBO);
         return csceneInstanceBO;
     }
 }
