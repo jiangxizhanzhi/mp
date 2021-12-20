@@ -18,7 +18,7 @@ import java.util.List;
 @ModelClass(MenuExtraInfoModel.class)
 public interface MenuExtraInfoMapper extends BaseModelMapper<MenuExtraInfoModel> {
 
-    List<MenuExtraInfoModel> selectAll();
+    List<MenuExtraInfoModel> listAll();
 
     int deleteAll();
 }

@@ -170,7 +170,7 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
     @Override
     public boolean deleteAll() {
         int result = getModelMapper().deleteAll();
-        log.info("delete {} rows", result);
+        log.info("deleted {} rows", result);
         return true;
     }
 

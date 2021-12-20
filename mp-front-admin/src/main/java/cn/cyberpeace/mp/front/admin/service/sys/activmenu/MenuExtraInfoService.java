@@ -27,19 +27,18 @@ public class MenuExtraInfoService {
 
     public boolean bulkCreate(List<MenuExtraInfoModel> menuExtraInfoModels) {
         int result = menuExtraInfoMapper.bulkCreate(menuExtraInfoModels);
-        log.info("inserted {} rows", result);
+        log.info("inserted {} menu extra info rows", result);
         return true;
     }
 
-    public List<MenuExtraInfoModel> selectAll() {
-        return menuExtraInfoMapper.selectAll();
+    public List<MenuExtraInfoModel> listAll() {
+        return menuExtraInfoMapper.listAll();
     }
 
     public boolean deleteAll() {
         int result = menuExtraInfoMapper.deleteAll();
-        log.info("delete {} rows", result);
+        log.info("deleted {} rows", result);
         return true;
     }
-
 
 }

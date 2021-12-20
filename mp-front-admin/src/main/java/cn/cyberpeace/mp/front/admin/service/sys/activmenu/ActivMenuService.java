@@ -1,7 +1,9 @@
 package cn.cyberpeace.mp.front.admin.service.sys.activmenu;
 
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.dto.target.TargetActivDto;
 import cn.cyberpeace.mp.auth.model.TargetModel;
+import cn.cyberpeace.mp.auth.service.TargetService;
 import cn.cyberpeace.mp.front.admin.dto.ActivMenuDTO;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationItem;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationResponse;
@@ -44,7 +46,14 @@ public class ActivMenuService {
     @Autowired
     private SysActivationService activationService;
 
+    @Autowired
+    private TargetService targetService;
+
+    @Autowired
+    private MenuExtraInfoService menuExtraInfoService;
+
     /**
+     * 适用场景：重新导入menu.json
      * 1. 清空原有menu, keymenu, editionmenu表。
      * 2. 如果导入menu的时候，系统已经激活，则需要根据查询的激活项目，激活版本，再结合menu自身的active[],edition[]属性，决定visible，再重新导入所有menu。
      * 3. 如果导入menu的时候，系统还未激活，则所有visible默认为1
@@ -53,6 +62,7 @@ public class ActivMenuService {
      * @return
      */
     public boolean reImportMenus(MultipartFile jsonFile) {
+        log.info("reImportMenus...");
         String s = readJsonStrFromMultipartFile(jsonFile);
         List<ActivMenuDTO> menus = JSON.parseArray(s, ActivMenuDTO.class);
         List<TargetModel> targetModels = new ArrayList<>();
@@ -65,21 +75,38 @@ public class ActivMenuService {
             recursion(targetModels, menuExtraInfoModels, menu, "");
         }
 
-        // todo 根据系统激活与否，激活项目，版本，决定visible
+        // todo 根据系统激活与否，激活项目，版本，决定visible属性
         ActivationResponse content = activationService.status();
+//        ActivationResponse content = mockActivationContent();
         if (Objects.nonNull(content)) {
             // 系统已激活，暂时忽略激活状态过期的场景
             processMenuVisibility(targetModels, menuExtraInfoModels, content);
         }
 
-//        List<TargetModel> targets = targetActivDtos2TargetModels(targetActivDtos);
-//        log.info("targetActivDtos.size:{}, targets.size:{}", targetActivDtos.size(), targets.size());
         log.info("targetModels.size:{}", targetModels.size());
-//        List<ActivKeyMenuModel> keyMenus = targetActivDtos2KeyMenus(targetActivDtos);
-//        List<ActivEditionMenuModel> editionMenus = targetActivDtos2EditionMenus(targetActivDtos);
-//        log.info("keyMenus.size:{}, editionMenus.size:{}", keyMenus.size(), editionMenus.size());
 
-        boolean success = reImportSupportService.rebuildMenusAndExtraInfos(targetModels, menuExtraInfoModels);
+        boolean success = reImportSupportService.rebuildAllMenusAndExtraInfos(targetModels, menuExtraInfoModels);
+        return success;
+    }
+
+
+    /**
+     * 适用场景：系统中的总menu不变，需要根据重新激活的激活项，激活版本，重新设置所有菜单的visible属性，这一步需要用到menu_extra_info表
+     * 重新设置所有menu的visible属性
+     *
+     * @return
+     */
+    public boolean resetMenusVisibility(ActivationResponse content) {
+        log.info("resetMenusVisibility...");
+        if (Objects.isNull(content)) {
+            return false;
+        }
+        List<TargetModel> allTargets = targetService.listAll(AuthConstant.DEFAULT_TENANT, TargetModel.TYPE_MENU);
+        List<MenuExtraInfoModel> menuExtraInfos = menuExtraInfoService.listAll();
+
+        processMenuVisibility(allTargets, menuExtraInfos, content);
+
+        boolean success = reImportSupportService.rebuildAllMenus(allTargets);
         return success;
     }
 
@@ -184,45 +211,6 @@ public class ActivMenuService {
         return targetModels;
     }
 
-
-    /**
-     * 从menuDto中抽取activ_key和menu_id的对应关系
-     *
-     * @param targetActivDtos
-     */
-//    private List<ActivKeyMenuModel> targetActivDtos2KeyMenus(List<TargetActivDto> targetActivDtos) {
-//        List<ActivKeyMenuModel> keyMenus = new ArrayList<>();
-//        targetActivDtos.forEach(targetActivDto -> {
-//            targetActivDto.getActive().forEach(activKey -> {
-//                ActivKeyMenuModel keyMenu = new ActivKeyMenuModel();
-//                keyMenu.setActivKey(activKey);
-//                keyMenu.setMenu(targetActivDto.getId());
-//                keyMenus.add(keyMenu);
-//            });
-//        });
-//        return keyMenus;
-//    }
-
-
-    /**
-     * 从menuDto中抽取edition和menu_id的对应关系
-     *
-     * @param targetActivDtos
-     */
-//    private List<ActivEditionMenuModel> targetActivDtos2EditionMenus(List<TargetActivDto> targetActivDtos) {
-//        List<ActivEditionMenuModel> editionMenus = new ArrayList<>();
-//        targetActivDtos.forEach(targetActivDto -> {
-//            targetActivDto.getEdition().forEach(edition -> {
-//                ActivEditionMenuModel editionMenu = new ActivEditionMenuModel();
-//                editionMenu.setEdition(edition);
-//                editionMenu.setMenu(targetActivDto.getId());
-//                editionMenus.add(editionMenu);
-//            });
-//        });
-//        return editionMenus;
-//    }
-
-
     /**
      * 根据系统激活状态更改menu visible属性值
      * <p>
@@ -234,11 +222,16 @@ public class ActivMenuService {
 
         String edition = String.valueOf(activationResponse.getEdition());
         List<String> positiveKeys = new ArrayList<>();
-        items.forEach(item -> {
-            if (Objects.equals("1", item.getValue())) {
-                positiveKeys.add(item.getKey());
+        positiveKeys.add("no_auth");
+        items.stream().forEach(item -> {
+            if (Objects.nonNull(item.getType()) && Objects.equals(item.getType(), 1)) {
+                if (Objects.nonNull(item.getValue()) && Objects.equals("1", item.getValue())) {
+                    positiveKeys.add(item.getKey());
+                }
             }
         });
+
+        log.info("positiveKeys:{}", positiveKeys);
 
         menuExtraInfos.forEach(mi -> {
 
@@ -259,7 +252,7 @@ public class ActivMenuService {
                 editionMatch = editions.contains(edition);
 
                 if (editionMatch) {
-                    log.info("edition match!");
+                    log.info("edition matched!");
                 }
             }
 
@@ -285,7 +278,7 @@ public class ActivMenuService {
                 }
 
                 if (itemMatch) {
-                    log.info("item match!");
+                    log.info("item matched!");
                 }
             }
 
@@ -298,9 +291,87 @@ public class ActivMenuService {
             } else {
                 targetModel.setVisible(TargetModel.VISIBILITY_NO);
             }
-
-
         });
+
+    }
+
+
+    private ActivationResponse mockActivationContent() {
+        ActivationResponse content = new ActivationResponse();
+        content.setIsActived(1);
+        content.setEdition(1);
+
+
+        List<ActivationItem> list = new ArrayList<>();
+        ActivationItem item1 = new ActivationItem();
+        item1.setKey("LCS-FUNC-CR-SHIXUN");
+        item1.setValue("1");
+        item1.setType(1);
+        list.add(item1);
+
+        ActivationItem item2 = new ActivationItem();
+        item2.setKey("LCS-FUNC-CR-JINGSAI");
+        item2.setValue("0");
+        item2.setType(1);
+        list.add(item2);
+
+        ActivationItem item3 = new ActivationItem();
+        item3.setKey("LCS-FUNC-CR-HUOTILOUDONG");
+        item3.setValue("1");
+        item3.setType(1);
+        list.add(item3);
+
+        ActivationItem item4 = new ActivationItem();
+        item4.setKey("LCS-FUNC-CR-ZHISHIKU");
+        item4.setValue("1");
+        item4.setType(1);
+        list.add(item4);
+
+        ActivationItem item5 = new ActivationItem();
+        item5.setKey("LCS-FUNC-CR-ZONGHEXUNLIAN");
+        item5.setValue("1");
+        item5.setType(1);
+        list.add(item5);
+
+        ActivationItem item6 = new ActivationItem();
+        item6.setKey("LCS-FUNC-CR-HONGLANDUIKANG");
+        item6.setValue("1");
+        item6.setType(1);
+        list.add(item6);
+
+        ActivationItem item7 = new ActivationItem();
+        item7.setKey("LCS-FUNC-CR-SHENTOUSAI");
+        item7.setValue("1");
+        item7.setType(1);
+        list.add(item7);
+
+        ActivationItem item8 = new ActivationItem();
+        item8.setKey("LCS-FUNC-CR-YUNWEISAI");
+        item8.setValue("1");
+        item8.setType(1);
+        list.add(item8);
+
+        ActivationItem item9 = new ActivationItem();
+        item9.setKey("LCS-FUNC-CR-CEPING");
+        item9.setValue("1");
+        item9.setType(1);
+        list.add(item9);
+
+        ActivationItem item10 = new ActivationItem();
+        item10.setKey("LCS-RES-CR-ACTIVENODES");
+        item10.setValue("1000");
+        item10.setType(null);
+        list.add(item10);
+
+        ActivationItem item11 = new ActivationItem();
+        item11.setKey("LCS-RES-CR-EDITNODES");
+        item11.setValue("100");
+        item11.setType(null);
+        list.add(item11);
+
+        content.setItems(list);
+
+        return content;
 
     }
 
