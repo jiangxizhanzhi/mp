@@ -334,24 +334,28 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "ids", value = "场景实例id", allowMultiple = true, dataTypeClass = String.class),
             @ApiImplicitParam(name = "nodeIds", value = "节点id", allowMultiple = true, dataTypeClass = String.class),
+            @ApiImplicitParam(name = "userIds", value = "用户id", allowMultiple = true, dataTypeClass = String.class),
     })
     @GetMapping(value = "/node_sessions", params = "ids")
     public ServiceResult<List<NodeSessionBO>> getNodeSessions(@RequestParam List<String> ids,
-                                                              @RequestParam(required = false) List<String> nodeIds) {
-        return modelService.getNodeSessions(ids, nodeIds).asResult();
+                                                              @RequestParam(required = false) List<String> nodeIds,
+                                                              @RequestParam(required = false) List<String> userIds) {
+        return modelService.getNodeSessions(ids, nodeIds, userIds).asResult();
     }
 
     @ApiOperation("场景实例获取分页录屏列表")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "ids", value = "场景实例id", allowMultiple = true, dataTypeClass = String.class),
             @ApiImplicitParam(name = "nodeIds", value = "场景节点id", allowMultiple = true, dataTypeClass = String.class),
+            @ApiImplicitParam(name = "userIds", value = "用户id", allowMultiple = true, dataTypeClass = String.class),
     })
     @GetMapping(value = "/list_recordings", params = "ids")
     public ListObjServiceResult<NodeRecordingBO> listRecordings(@RequestParam List<String> ids,
                                                                 @RequestParam(required = false) List<String> nodeIds,
+                                                                @RequestParam(required = false) List<String> userIds,
                                                                 RecordingQueryParams queryParams) {
         handleQueryParams("listRecordings", queryParams);
-        return modelService.listRecordings(ids, nodeIds, queryParams).asResult();
+        return modelService.listRecordings(ids, nodeIds, userIds, queryParams).asResult();
     }
 
     @ApiOperation("场景实例获取分页流量列表")
