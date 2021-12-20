@@ -81,7 +81,7 @@ public class CloudSceneConnectionCommon {
             guacamoleCreateConnectionData.setScene(param.getSceneName());
             guacamoleCreateConnectionData.setUsername(userId);
             guacamoleCreateConnectionData.setDepartment(param.getDepartment());
-            guacamoleCreateConnectionData.setFlag(true);
+            guacamoleCreateConnectionData.setFlag(false);
             var connectionParams = new GuacamoleCreateConnectionData.ConnectionParams();
             var protocol = sceneConnection.getProtocol().equals(AccessMode.Protocol.CONSOLE) ?
                     AccessMode.Protocol.VNC : sceneConnection.getProtocol();

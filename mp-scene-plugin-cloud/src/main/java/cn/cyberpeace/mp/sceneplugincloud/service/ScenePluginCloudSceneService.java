@@ -261,9 +261,9 @@ public class ScenePluginCloudSceneService {
             recording.setSceneName(srcScene.getName());
             recording.setNodeId(srcElement.getId());
             recording.setNodeName(srcElement.getName());
-            recording.setUser(rawRecording.getUser());
+            recording.setUser(rawRecording.getUsername());
             recording.setProtocol(accessMode.getProtocol());
-            recording.setName(rawRecording.getRecordingName());
+            recording.setName(rawRecording.getRecordingFile());
             recording.setFilename(rawRecording.getRecordingFile());
             recording.setOrgName(rawRecording.getDepartment());
             recording.setFileUrl(StringUtils.join(CloudSingleton.cloudAppConfig.getCpcloudServer(),
