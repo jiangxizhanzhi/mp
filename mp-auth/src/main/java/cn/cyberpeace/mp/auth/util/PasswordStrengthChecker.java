@@ -6,9 +6,6 @@ package cn.cyberpeace.mp.auth.util;
 
 
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
-import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
-import cn.cyberpeace.mp.base.common.MessageCommon;
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Objects;
@@ -83,9 +80,10 @@ public class PasswordStrengthChecker {
      * @return strength level
      */
     public static int checkPasswordStrength(String passwd) {
-        if (StringUtils.isBlank(passwd)) {
-            throw new MpRuntimeException(AuthErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(MessageCommon.get(AuthBasei18nCode.USER_PASSWORD)));
-        }
+//        if (StringUtils.isBlank(passwd)) {
+//            throw new MpRuntimeException(AuthErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(MessageCommon.get(AuthBasei18nCode.USER_PASSWORD)));
+//        }
+        ParamCheck.notEmpty(passwd, AuthBasei18nCode.USER_PASSWORD);
 
         int len = passwd.length();
         int level = 0;

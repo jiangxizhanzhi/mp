@@ -299,7 +299,7 @@ public class ActivMenuService {
     private ActivationResponse mockActivationContent() {
         ActivationResponse content = new ActivationResponse();
         content.setIsActived(1);
-        content.setEdition(0);
+        content.setEdition(1);
 
 
         List<ActivationItem> list = new ArrayList<>();

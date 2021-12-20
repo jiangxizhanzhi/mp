@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
+import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.dto.target.TargetDto;
@@ -17,6 +18,7 @@ import cn.cyberpeace.mp.auth.service.UserPermissionService;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.UserPermissionFields;
+import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -76,7 +78,8 @@ public class UserPermissionServiceImpl
 
     @Override
     public List<TargetModel> listTargetsByUserId(String userId) {
-        Assert.notBlank(userId, "userId不能为空！");
+        ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
+
         Set<TargetModel> authorizedTargetsSet = new HashSet<>();
 
 
@@ -85,7 +88,7 @@ public class UserPermissionServiceImpl
 
         // 是否是管理员
         boolean isAdmin = hasAdminRole(roles);
-        if(isAdmin) {
+        if (isAdmin) {
             // 直接查询该租户下所有权限返回
             List<TargetModel> allTargets = targetService.listAll(AuthConstant.DEFAULT_TENANT, null);
             return allTargets;
@@ -117,7 +120,7 @@ public class UserPermissionServiceImpl
 
     @Override
     public List<UserModel> listUsersByTargetId(String targetId) {
-        Assert.notEmpty("target id should not be null");
+        ParamCheck.notBlank(targetId, AuthBasei18nCode.TARGET_ID);
 
         List<UserModel> users = getModelMapper().listUsersByTargetId(targetId);
 
@@ -126,7 +129,7 @@ public class UserPermissionServiceImpl
 
     @Override
     public List<TargetModel> listMenusByUserId(String userId) {
-        Assert.notBlank(userId, "userId不能为空！");
+        ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
         List<TargetModel> targets = listTargetsByUserId(userId);
         if (CollectionUtil.isNotEmpty(targets)) {
             return targets.stream().filter(t -> Objects.equals(t.getType(), TargetModel.TYPE_MENU)).collect(Collectors.toList());
@@ -147,7 +150,7 @@ public class UserPermissionServiceImpl
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean bindUserTargets(String userId, List<String> targetIds, boolean cleanOldTargets) {
-        Assert.notNull(userId, "userId不能为空");
+        ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
 
         var result = userService.get(userId);
         ResultUtils.throwExceptionIfError(result, AuthErrorCode.ACCOUNT_NOT_EXISTED);
@@ -232,7 +235,7 @@ public class UserPermissionServiceImpl
 
 
     public boolean  deleteByUserId(String userId) {
-        Assert.notNull(userId, "userid不能为空");
+        ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
 
 //        var objResult = userService.get(userId).getSource();
 //        if (objResult == null || objResult.getObj() == null) {
@@ -243,7 +246,7 @@ public class UserPermissionServiceImpl
     }
 
     public boolean deleteByTargetId(String targetId) {
-        Assert.notNull(targetId, "targetId不能为空");
+        ParamCheck.notBlank(targetId, AuthBasei18nCode.TARGET_ID);
         getModelMapper().deleteByTargetId(targetId);
         return true;
     }

@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
+import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.dto.role.UserRolePageRequest;
@@ -13,11 +14,11 @@ import cn.cyberpeace.mp.auth.service.RoleService;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.UserRoleFields;
+import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.lang.Assert;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,14 +51,14 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
 
     @Override
     public List<RoleModel> listByUserId(String userId) {
-        Assert.notBlank(userId, "userId不能为空！");
+        ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
         List<RoleModel> roles = getModelMapper().listRolesByUserId(userId);
         return roles;
     }
 
     @Override
     public List<UserModel> listUsersByRoleId(String roleId) {
-        Assert.notBlank(roleId, "roleId不能为空！");
+        ParamCheck.notBlank(roleId, AuthBasei18nCode.ROLE_ID);
         List<UserModel> users = getModelMapper().listUsersByRoleId(roleId);
         return users;
     }
@@ -65,7 +66,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     @Override
     public PageInfo pageByUserId(UserRolePageRequest pageRequest) {
         pageRequest.ensure();
-        Assert.notBlank(pageRequest.getUserId(), "userId不能为空！");
+        ParamCheck.notBlank(pageRequest.getUserId(), AuthBasei18nCode.USER_ID);
         PageHelper.startPage(pageRequest.getPage(), pageRequest.getPageSize());
         // 查询user直接绑定的角色
         List<RoleModel> roles = getModelMapper().listRolesByUserId(pageRequest.getUserId());
@@ -77,7 +78,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     @Override
     public PageInfo pageByRoleId(UserRolePageRequest pageRequest) {
         pageRequest.ensure();
-        Assert.notBlank(pageRequest.getRoleId(), "roleId不能为空！");
+        ParamCheck.notBlank(pageRequest.getRoleId(), AuthBasei18nCode.ROLE_ID);
         PageHelper.startPage(pageRequest.getPage(), pageRequest.getPageSize());
         List<UserModel> userModels = getModelMapper().listUsersByRoleId(pageRequest.getRoleId());
         PageInfo pageInfo = new PageInfo(userModels);
@@ -92,7 +93,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean bindUserRoles(String userId, List<String> roleIds, boolean cleanOldRoles) {
-        Assert.notNull(userId, "userId不能为空");
+        ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
 
         var objResult = userService.get(userId).getSource();
         if (objResult == null || objResult.getObj() == null) {
@@ -128,7 +129,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean bindRoleUsers(String roleId, List<String> userIds) {
-        Assert.notNull(roleId, "roleId不能为空");
+        ParamCheck.notBlank(roleId, AuthBasei18nCode.ROLE_ID);
 
         var objResult = roleService.get(roleId).getSource();
         if (objResult == null || objResult.getObj() == null) {
@@ -155,7 +156,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
 
     @Override
     public boolean deleteByUserId(String userId) {
-        Assert.notNull(userId, "userId不能为空");
+        ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
 
 //        var objResult = userService.get(userId).getSource();
 //        if (objResult == null || objResult.getObj() == null) {
@@ -169,8 +170,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
 
     @Override
     public boolean deleteByRoleId(String roleId) {
-
-        Assert.notNull(roleId, "roleId不能为空");
+        ParamCheck.notBlank(roleId, AuthBasei18nCode.ROLE_ID);
 
 //        var objResult = roleService.get(roleId).getSource();
 //        if (objResult == null || objResult.getObj() == null) {
@@ -190,7 +190,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
 
     @Override
     public boolean deleteByRoleIdAndUserIds(String roleId, List<String> userIds) {
-        Assert.notNull(roleId, "roleId不能为空");
+        ParamCheck.notBlank(roleId, AuthBasei18nCode.ROLE_ID);
 
         var objResult = roleService.get(roleId).getSource();
         if (objResult == null || objResult.getObj() == null) {

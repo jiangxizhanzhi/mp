@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
+import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.dto.OrgDto;
@@ -14,12 +15,12 @@ import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.OrgUserFields;
+import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.auth.util.SQLUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.lang.Assert;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -70,7 +71,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
 
     @Override
     public List<UserModel> listUsersByOrgId(String orgId) {
-        Assert.notBlank(orgId, "orgId不能为空！");
+        ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
         List<UserModel> users = getModelMapper().listUsersByOrgId(orgId);
 
         return users;
@@ -98,8 +99,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
 
     @Override
     public List<OrgModel> listOrgsByUserId(String userId) {
-        Assert.notBlank(userId, "userId不能为空！");
-
+        ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
         List<OrgModel> orgs = getModelMapper().listOrgsByUserId(userId);
 
         return orgs;
@@ -124,7 +124,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
 
     @Override
     public boolean additionalBindOrgUsers(String orgId, List<String> userIds) {
-        Assert.notBlank(orgId, "orgId不能为空！");
+        ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
         var objResult = orgService.get(orgId).getSource();
         if (objResult == null || objResult.getObj() == null) {
             throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED);
@@ -152,7 +152,8 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
 
     @Override
     public String getAllOrgPathByUserId(String userId) {
-        Assert.notBlank(userId, "userId不能为空！");
+        ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
+
         List<OrgModel> orgs = listOrgsByUserId(userId);
 //        String allorgpath = orgs.stream().map(o -> orgService.calculatePathByOrgId(o.getId())).collect(Collectors.joining(","));
         String allorgpath = orgs.stream().map(OrgModel::getPath).collect(Collectors.joining(","));
@@ -215,7 +216,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
 
     @Override
     public boolean deleteByUserId(String userId) {
-        Assert.notNull(userId, "userId不能为空");
+        ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
 
 //        var objResult = userService.get(userId).getSource();
 //        if (objResult == null || objResult.getObj() == null) {
@@ -229,7 +230,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
 
     @Override
     public boolean deleteByOrgId(String orgId) {
-        Assert.notNull(orgId, "orgId不能为空");
+        ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
 
 //        var objResult = orgService.get(orgId).getSource();
 //        if (objResult == null || objResult.getObj() == null) {

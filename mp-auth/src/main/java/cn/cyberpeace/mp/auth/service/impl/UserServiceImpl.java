@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
+import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.DefaultImgDirEnum;
@@ -25,6 +26,7 @@ import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.UserFields;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
+import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.auth.util.UserUtils;
@@ -414,7 +416,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     public boolean disable(String userId) {
-        Assert.notBlank(userId, "userId不能为空！");
+        ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
         Optional<UserModel> userOptional = Optional.ofNullable(getModelMapper().get(userId));
         if (userOptional.isPresent()) {
             UserModel userModel = userOptional.get();
@@ -450,7 +452,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     public boolean enable(String userId) {
-        Assert.notBlank(userId, "userId不能为空！");
+        ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
         Optional<UserModel> userOptional = Optional.ofNullable(getModelMapper().get(userId));
         if (userOptional.isPresent()) {
             UserModel userModel = userOptional.get();
@@ -487,7 +489,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     public boolean approve(String userId) {
-        Assert.notBlank(userId, "userId不能为空！");
+        ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
         Optional<UserModel> userOptional = Optional.ofNullable(getModelMapper().get(userId));
         if (userOptional.isPresent()) {
             UserModel userModel = userOptional.get();
@@ -642,7 +644,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     public boolean updateAvatar(String userId, MultipartFile multipartFile) throws MpRuntimeException {
-        Assert.notBlank(userId, "userId不能为空！");
+        ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
         Optional<UserModel> userOptional = Optional.ofNullable(getModelMapper().get(userId));
         if (userOptional.isPresent()) {
             // 上传服务器
@@ -712,7 +714,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     public UserDto doModel2Dto(UserModel userModel, boolean needOrg, boolean needRole) {
-        Assert.notEmpty(userModel.getId(), "用户ID不能为空！");
+        ParamCheck.notBlank(userModel.getId(), AuthBasei18nCode.USER_ID);
 
         UserDto userDto = new UserDto();
         BeanUtils.copyProperties(userModel, userDto);

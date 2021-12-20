@@ -1,13 +1,14 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
+import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserCheckService;
 import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
-import cn.hutool.core.lang.Assert;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.PhoneUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -28,7 +29,7 @@ public class UserUpdateCheckService implements UserCheckService {
     private UserService userService;
 
     public void check(UserModel user) {
-        Assert.notBlank(user.getId(), "用户id不能为空!");
+        ParamCheck.notBlank(user.getId(), AuthBasei18nCode.USER_ID);
         ObjServiceResult<UserModel> result = userService.get(user.getId());
         if (Objects.isNull(result.getSource()) || Objects.isNull(result.getSource().getObj())) {
             throw new MpRuntimeException(AuthErrorCode.ACCOUNT_NOT_EXISTED);

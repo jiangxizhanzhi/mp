@@ -7,6 +7,8 @@ package cn.cyberpeace.mp.auth.constant;
  */
 public class AuthBasei18nCode {
 
+    // USER
+    public static final String USER_ID = "auth.base.user.id";
     public static final String USER_PASSWORD = "auth.base.user.password";
     public static final String USER_NAME = "auth.base.user.name";
     public static final String USER_USERNAME = "auth.base.user.username";
@@ -16,6 +18,26 @@ public class AuthBasei18nCode {
     public static final String USER_STATUS = "auth.base.user.status";
     public static final String USER_BIRTHDAY = "auth.base.user.birthday";
     public static final String USER_ADDRESS = "auth.base.user.address";
+
+    // ROLE
+    public static final String ROLE_ID = "auth.base.role.id";
+    public static final String ROLE_IDENTIFIER = "auth.base.role.identifier";
+    public static final String ROLE_NAME = "auth.base.role.name";
+
+    // ORG
+    public static final String ORG_ID = "auth.base.org.id";
+    public static final String ORG_IDENTIFIER = "auth.base.org.identifier";
+    public static final String ORG_NAME = "auth.base.org.name";
+    public static final String ORG_PATH = "auth.base.org.path";
+    public static final String ORG_PARENT = "auth.base.org.parent";
+
+    // TARGET
+    public static final String TARGET_ID = "auth.base.target.id";
+    public static final String TARGET_IDENTIFIER = "auth.base.target.identifier";
+    public static final String TARGET_NAME = "auth.base.target.name";
+    public static final String TARGET_PATH = "auth.base.target.path";
+    public static final String TARGET_TYPE = "auth.base.target.type";
+    public static final String TARGET_PARENT = "auth.base.target.parent";
 
 
 }
