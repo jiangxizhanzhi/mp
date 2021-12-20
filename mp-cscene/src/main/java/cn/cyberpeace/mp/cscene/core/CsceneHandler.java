@@ -158,14 +158,14 @@ public class CsceneHandler extends BaseCsceneHandler<
             reloadCsceneInstances();
         }
         CsceneBO csceneBO = getCscene();
-        CsceneDataModifier.addFilePathPrefix(csceneBO.getSceneConfig());
+        CsceneDataModifier.correctReturnCsceneData(csceneBO);
         return csceneBO;
     }
 
     @Override
     public CsceneBO toData() {
         CsceneBO csceneBO = super.toData();
-        CsceneDataModifier.addFilePathPrefix(csceneBO.getSceneConfig());
+        CsceneDataModifier.correctReturnCsceneData(csceneBO);
         return csceneBO;
     }
 
