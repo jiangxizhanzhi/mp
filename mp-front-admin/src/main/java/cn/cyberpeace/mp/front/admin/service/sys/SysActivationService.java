@@ -66,28 +66,27 @@ public class SysActivationService {
         verifyInfo.setDeadline(activationRequest.getDeadline());
         verifyInfo.setMachinecode(activationRequest.getMachineCode());
 
-        // TODO setInfo
-//        Map<String, String> info = new HashMap<>();
-//        info.put("thj", "2");
-//        verifyInfo.setInfo(info);
-
         // 自定义信息
         Map<String, String> infoMap = convertActivationItems2CustomVerifyInfoMap(activationRequest.getItems());
+        log.info("info:{}", infoMap);
         verifyInfo.setInfo(infoMap);
 
         String verifyStr = JSON.toJSONString(verifyInfo);
         String verifyCode = activationRequest.getVerifyCode();
 
+        // 校验激活码和激活配置项，是否匹配
         boolean success = licenseService.verify(verifyStr, verifyCode);
 
         log.info("activationDir:{}", activationConfig.getLicenseDir());
-//        File activationFile = new File();
-        // 验证通过，加载内存激活配置项目，生成加密文件存储磁盘
         if (success) {
+            // 校验通过，生成加密文件存储磁盘
             generateEncryptedFile(activationRequest);
             ACTIVATION_CONTENT = null;
+            // todo 系统中menu不变，需要根据重新激活的激活项，激活版本，重新设置所有菜单的visible属性
+            // todo resetMenusVisibility();
         } else {
             log.error("license verify failed！");
+            throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_FAILED);
         }
 
     }

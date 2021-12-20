@@ -1,13 +1,12 @@
 package cn.cyberpeace.mp.front.business.controller;
 
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.target.BindUserTargetsRequest;
 import cn.cyberpeace.mp.auth.dto.target.TargetDto;
 import cn.cyberpeace.mp.auth.model.TargetModel;
-import cn.cyberpeace.mp.auth.model.UserPermissionModel;
 import cn.cyberpeace.mp.auth.service.UserPermissionService;
-import cn.cyberpeace.mp.base.controller.BaseModelController;
-import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -86,7 +85,8 @@ public class UserPermissionController {
         if (success) {
             return ServiceResult.successful();
         } else {
-            return ServiceResult.fail("绑定用户资源失败!");
+            log.error("绑定用户资源失败!");
+            throw new MpRuntimeException(AuthErrorCode.USER_TARGET_ADD_ERROR);
         }
     }
 

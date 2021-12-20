@@ -1,12 +1,11 @@
 package cn.cyberpeace.mp.front.business.controller;
 
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.target.BindOrgTargetsRequest;
-import cn.cyberpeace.mp.auth.model.OrgPermissionModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.service.OrgPermissionService;
-import cn.cyberpeace.mp.base.controller.BaseModelController;
-import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -44,8 +43,10 @@ public class OrgPermissionController {
         if (success) {
             return ServiceResult.successful();
         } else {
-            return ServiceResult.fail("绑定组织权限失败!");
+            log.error("绑定组织权限失败!");
+            throw new MpRuntimeException(AuthErrorCode.ORG_TARGET_ADD_ERROR);
         }
+
     }
 
 

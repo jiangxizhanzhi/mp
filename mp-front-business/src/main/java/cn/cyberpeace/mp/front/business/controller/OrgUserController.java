@@ -1,15 +1,14 @@
 package cn.cyberpeace.mp.front.business.controller;
 
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.OrgDto;
 import cn.cyberpeace.mp.auth.dto.org.BindOrgUsersRequest;
 import cn.cyberpeace.mp.auth.dto.org.OrgUserPageRequest;
-import cn.cyberpeace.mp.auth.model.OrgUserModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
-import cn.cyberpeace.mp.base.controller.BaseModelController;
-import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import com.github.pagehelper.PageInfo;
@@ -76,7 +75,8 @@ public class OrgUserController {
         if (success) {
             return ServiceResult.successful();
         } else {
-            return ServiceResult.fail("绑定组织用户失败!");
+            log.error("绑定组织用户失败!");
+            throw new MpRuntimeException(AuthErrorCode.USER_ORG_ADD_ERROR);
         }
     }
 

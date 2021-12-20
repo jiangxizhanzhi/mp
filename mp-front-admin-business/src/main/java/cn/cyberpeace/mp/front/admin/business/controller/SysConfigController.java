@@ -1,8 +1,10 @@
 package cn.cyberpeace.mp.front.admin.business.controller;
 
 import cn.cyberpeace.mp.base.controller.stereotype.UnlimitPagination;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.front.admin.business.service.SysConfigCheckService;
+import cn.cyberpeace.mp.front.admin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.front.admin.model.SysConfigModel;
 import cn.cyberpeace.mp.front.admin.service.sys.SysConfigService;
 import io.swagger.annotations.Api;
@@ -48,20 +50,22 @@ public class SysConfigController {
     @ApiOperation(value = "根据keyname更新单条sysconfig", notes = "")
     @PostMapping("/update/bykeyname")
     public ServiceResult updateByKeyName(@RequestBody SysConfigModel updateConfig) {
-
+        log.info("updateConfig:{}", updateConfig);
         checkService.updateCheck(Arrays.asList(updateConfig));
 
         boolean success = sysConfigService.updateByKeyName(updateConfig);
         if (success) {
             return ServiceResult.successful();
         } else {
-            return ServiceResult.fail("更新系统配置失败!");
+            log.error("配置修改失败{}", updateConfig);
+            throw new MpRuntimeException(AdminErrorCode.SYS_CONFIG_MODIFY_ERROR);
         }
     }
 
     @ApiOperation(value = "根据keyname批量更新sysconfig", notes = "")
     @PostMapping("/updateall")
     public ServiceResult updateAll(@RequestBody @NotEmpty List<SysConfigModel> configs) {
+        log.info("configs:{}", configs);
         // 更新规则，如果key存在，就修改value值，如果key不存在，就忽略不改
         checkService.updateCheck(configs);
 
@@ -69,7 +73,8 @@ public class SysConfigController {
         if (success) {
             return ServiceResult.successful();
         } else {
-            return ServiceResult.fail("更新系统配置失败!");
+            log.error("配置修改失败");
+            throw new MpRuntimeException(AdminErrorCode.SYS_CONFIG_MODIFY_ERROR);
         }
     }
 

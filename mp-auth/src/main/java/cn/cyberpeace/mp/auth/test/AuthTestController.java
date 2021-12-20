@@ -51,9 +51,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class AuthTestController {
 
     @Autowired
-    private TmpMenuService tmpMenuService;
-
-    @Autowired
     private UserLogService userLogService;
 
     @Autowired
@@ -143,11 +140,6 @@ public class AuthTestController {
 
         resolveMessage("abc", new String[]{"a"}, Locale.CHINA);
         throw new IllegalArgumentException("illegal from mp.auth");
-    }
-
-    @GetMapping("/tmpmenu")
-    public void testTmpMenu() {
-//        tmpMenuService.process();
     }
 
     @GetMapping("/olrecord/schedule")

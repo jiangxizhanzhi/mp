@@ -38,4 +38,7 @@ public class TargetConnection {
 
     @ApiModelProperty("内部IP:镜像")
     private String ipAddress;
+
+    @ApiModelProperty("连接状态")
+    private Integer connectionState;
 }

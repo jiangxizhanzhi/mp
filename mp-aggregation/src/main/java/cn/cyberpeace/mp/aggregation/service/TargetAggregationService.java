@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.devops.cluster.enums.StatusEnum;
 import cn.cyberpeace.mp.devops.cluster.model.TargetModel;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
 import cn.cyberpeace.mp.devops.cluster.request.TargetSceneRequest;
+import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,10 +58,6 @@ public class TargetAggregationService {
         ServiceResult<Map<String, List<DeviceReferCsceneInstanceStat>>>  useStateServiceResult = csceneSpecialService.statDeviceReferCsceneInstances(imageNames);
         Map<String, List<DeviceReferCsceneInstanceStat>> useStateMap = useStateServiceResult.getSource();
 
-        if (MapUtils.isEmpty(referStateMap) && MapUtils.isEmpty(useStateMap)){
-            return;
-        }
-
         String name;
         List<TargetModel> modelList = new ArrayList<>();
         List<DeviceReferCsceneStat> referStateList = new ArrayList<>();
@@ -69,12 +66,13 @@ public class TargetAggregationService {
             name = targetModel.getName();
             if (MapUtils.isNotEmpty(referStateMap)){
                 referStateList = referStateMap.get(name);
+            }else{
+                referStateList = Lists.newArrayList();
             }
             if (MapUtils.isNotEmpty(useStateMap)){
                 useStateList = useStateMap.get(name);
-            }
-            if (CollectionUtils.isEmpty(referStateList) && CollectionUtils.isEmpty(useStateList)){
-                continue;
+            }else{
+                useStateList = Lists.newArrayList();
             }
             TargetModel model = new TargetModel();
             model.setUuid(targetModel.getUuid());

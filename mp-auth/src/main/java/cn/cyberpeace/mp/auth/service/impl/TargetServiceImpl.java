@@ -167,6 +167,13 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
         return targets;
     }
 
+    @Override
+    public boolean deleteAll() {
+        int result = getModelMapper().deleteAll();
+        log.info("delete {} rows", result);
+        return true;
+    }
+
     private void check(TargetModel target) {
         boolean supportedType = false;
         if (target.getType() != null) {

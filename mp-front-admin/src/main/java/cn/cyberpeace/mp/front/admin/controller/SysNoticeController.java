@@ -1,7 +1,9 @@
 package cn.cyberpeace.mp.front.admin.controller;
 
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.front.admin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.front.admin.dto.notice.SysNoticeDto;
 import cn.cyberpeace.mp.front.admin.dto.notice.SysNoticePageRequest;
 import cn.cyberpeace.mp.front.admin.dto.notice.SysNoticeRequest;
@@ -54,7 +56,7 @@ public class SysNoticeController {
             SysNoticeDto noticeDto = noticeService.noticeModel2NoticeDto(noticeModel, false);
             return ServiceResult.success(noticeDto);
         } else {
-            return ServiceResult.fail("没有查询到ID为:" + id + "的公告！");
+            throw new MpRuntimeException(AdminErrorCode.SYS_NOTICE_NOT_EXISTED.format(id));
         }
     }
 

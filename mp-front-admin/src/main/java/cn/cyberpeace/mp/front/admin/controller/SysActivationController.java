@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.front.admin.controller;
 
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.front.admin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationRequest;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationResponse;
 import cn.cyberpeace.mp.front.admin.dto.activation.VerifyInfoRequest;
@@ -72,7 +73,7 @@ public class SysActivationController {
     public ServiceResult<ActivationResponse> status() {
         ActivationResponse content = activationService.status();
         if (Objects.isNull(content)) {
-            return ServiceResult.fail("未查询到激活状态信息！");
+            return ServiceResult.fail(AdminErrorCode.SYS_ACTIVATION_NONE);
         }
         return ServiceResult.success(content);
     }
