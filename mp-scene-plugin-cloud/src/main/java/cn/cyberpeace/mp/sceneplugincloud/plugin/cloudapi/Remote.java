@@ -14,6 +14,30 @@ import java.util.stream.Collectors;
 
 public class Remote extends CloudClient {
 
+    public GuacamoleCreateConnectionResult createConnection(GuacamoleCreateConnectionData createConnectionData) {
+        GuacamoleCreateConnectionResult result = getHttpClient().post(CloudUrlConstant.CREATE_CONNECTION_URL,
+                createConnectionData, null, GuacamoleCreateConnectionResult.class);
+        if (result == null) {
+            return null;
+        }
+
+        return result;
+    }
+
+    public GuacamoleGetConnectionUrlResult getConnectionUrl(String connectionId, String userId) {
+        GuacamoleGetConnectionUrlResult result = getHttpClient().get(CloudUrlConstant.GET_CONNECTION_URL,
+                new GuacamoleGetConnectionUrlParam(connectionId, userId), GuacamoleGetConnectionUrlResult.class);
+        if (result == null) {
+            return null;
+        }
+
+        return result;
+    }
+
+    public String removeConnection() {
+        return null;
+    }
+
     public Map<String, GuacamoleMonitorData.MonitorInfo> getMonitors(String[] connectionIds) {
         GuacamoleMonitorData result = getHttpClient().post(CloudUrlConstant.GET_MONITOR_URL,
                 new GetGuacamoleMonitorData(Arrays.asList(connectionIds)), null, GuacamoleMonitorData.class);

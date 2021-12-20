@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.base.util.basic.BoolUtils;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
@@ -392,17 +393,35 @@ public class InitiateHandler extends HandlerCommon {
     }
 
     /**
-     * 初始化虚拟网络端口
+     * 初始化网络端口
      * @param cloudElement 网元节点
      */
-    private void initiateVirtualPorts(CloudPluginSceneElementBO cloudElement) {
+    private void initiateElementPorts(CloudPluginSceneElementBO cloudElement) {
         var srcPorts = cloudElement.getSrcElement().getPorts();
         if (srcPorts == null) {
             return;
         }
 
+        Integer virtualType = cloudElement.getVirtualType();
+        var isVirtualElement = virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)
+                || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)
+                || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER);
+
         for (var srcPort : srcPorts) {
-            initiateVirtualPort(cloudElement, srcPort);
+            var cloudPort = getPluginHandler().getPort(srcPort.getId());
+            // 初始化accessModeId
+            var cloudAccessModes = cloudPort.getAccessModes();
+            if (cloudAccessModes != null) {
+                cloudAccessModes.forEach(cloudAccessMode -> {
+                    if (StringUtils.isEmpty(cloudAccessMode.getId())) {
+                        cloudAccessMode.setId(TextUtils.uuid());
+                    }
+                });
+            }
+
+            if (isVirtualElement) {
+                initiateVirtualPort(cloudElement, srcPort);
+            }
         }
     }
 
@@ -497,7 +516,8 @@ public class InitiateHandler extends HandlerCommon {
                     return virtualType != null
                             && (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)
                             || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)
-                            || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER));
+                            || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)
+                            || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE));
                 })
                 .map(cloudElement -> (Runnable) () -> initiateElementPortsProcess(cloudElement))
                 .collect(Collectors.toList());
@@ -518,7 +538,7 @@ public class InitiateHandler extends HandlerCommon {
 
     public void initiateElementPortsProcess(CloudPluginSceneElementBO cloudElement) {
         runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.INITIATE_PORTS,
-                () -> initiateVirtualPorts(cloudElement));
+                () -> initiateElementPorts(cloudElement));
     }
 
 }
