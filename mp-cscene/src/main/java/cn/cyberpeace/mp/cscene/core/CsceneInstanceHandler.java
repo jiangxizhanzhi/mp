@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceRoleModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
+import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
 import cn.cyberpeace.mp.scene.service.SceneService;
 import org.apache.commons.lang3.StringUtils;
@@ -211,5 +212,12 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         } else {
             return getCscene() == null ? null : getSceneId(getCscene().toModel());
         }
+    }
+
+    @Override
+    public CsceneInstanceBO toData() {
+        CsceneInstanceBO csceneInstanceBO = super.toData();
+        CsceneDataModifier.addFilePathPrefix(csceneInstanceBO.getScene());
+        return csceneInstanceBO;
     }
 }
