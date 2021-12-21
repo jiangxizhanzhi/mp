@@ -92,28 +92,7 @@ public class ImagesConverterImpl implements ImagesConverter {
 
     @Override
     public ImageConvertPageModel page(ImagePageRequest request) {
-        ImagePageDTO dto = new ImagePageDTO();
-        dto.setRole(request.getRole());
-        dto.setMainCategory(request.getMainCategory());
-        dto.setSubCategory(request.getSubCategory());
-        dto.setThirdCategory(request.getThirdCategory());
-        dto.setQuickCreateSupport(request.getQuickCreateSupport());
-        if (Objects.isNull(request.getImageType())){
-            dto.setSearchType(1);
-        }else {
-            dto.setImageType(request.getImageType());
-        }
-        dto.setName(request.getName());
-        dto.setOwner(Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : null);
-        dto.setSearchPublicEnum(1);
-        dto.setOffset((request.getPage() - 1) * request.getPerPage());
-        dto.setLimit(request.getPerPage());
-        dto.setSystemType(request.getSystemType());
-        dto.setSystemArchitecure(request.getSystemArchitecure());
-        dto.setLanguage(request.getLanguage());
-        dto.setImageStatus(request.getImageStatus());
-        dto.setBaseImageSupport(request.getBaseImageSupport());
-        dto.setLikeName(request.getLikeName());
+        ImagePageDTO dto = convertImagePageRequest(request);
         Integer total = imageMapper.totalCount(dto);
 
         ImageConvertPageModel convertModel = new ImageConvertPageModel();
@@ -420,6 +399,37 @@ public class ImagesConverterImpl implements ImagesConverter {
         imageModel.setExtGateway(device.getExtGateway());
         imageModel.setExtDocker(device.getExtDocker());
         return imageModel;
+    }
+
+    /**
+     * 转换ImagePageRequest
+     * @param request
+     * @return
+     */
+    protected ImagePageDTO convertImagePageRequest(ImagePageRequest request){
+        ImagePageDTO dto = new ImagePageDTO();
+        dto.setRole(request.getRole());
+        dto.setMainCategory(request.getMainCategory());
+        dto.setSubCategory(request.getSubCategory());
+        dto.setThirdCategory(request.getThirdCategory());
+        dto.setQuickCreateSupport(request.getQuickCreateSupport());
+        if (Objects.isNull(request.getImageType())){
+            dto.setSearchType(1);
+        }else {
+            dto.setImageType(request.getImageType());
+        }
+        dto.setName(request.getName());
+        dto.setOwner(Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : null);
+        dto.setSearchPublicEnum(1);
+        dto.setOffset((request.getPage() - 1) * request.getPerPage());
+        dto.setLimit(request.getPerPage());
+        dto.setSystemType(request.getSystemType());
+        dto.setSystemArchitecure(request.getSystemArchitecure());
+        dto.setLanguage(request.getLanguage());
+        dto.setImageStatus(request.getImageStatus());
+        dto.setBaseImageSupport(request.getBaseImageSupport());
+        dto.setLikeName(request.getLikeName());
+        return dto;
     }
 
 
