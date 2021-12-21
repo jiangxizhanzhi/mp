@@ -119,9 +119,7 @@ public class ImagesController {
     @ApiOperation("新增")
     @PostMapping("/add")
     public ServiceResult add(@Valid @RequestBody ImageRequest request){
-        if (StringUtils.isNotBlank(request.getName()) && request.getName().length() > 126){
-            throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_NAME_EXCEED_MAX_LENGTH);
-        }
+        validImageRequest(request);
         Device device = imagesConverter.add(request);
         if (Objects.isNull(device)){
             return new Result();
@@ -135,6 +133,7 @@ public class ImagesController {
     @ApiOperation("更新")
     @PostMapping("/update")
     public ServiceResult update(@Valid @RequestBody ImageRequest request){
+        validImageRequest(request);
         if (StringUtils.isBlank(request.getUuid())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
@@ -447,5 +446,18 @@ public class ImagesController {
             imageCheckPorts.add(checkPort);
         }
         return new Result(new ImageCheckPortResponse(imageCheckPorts));
+    }
+
+    /**
+     * 验证请求参数
+     * @param request
+     */
+    private void validImageRequest(ImageRequest request){
+        if (StringUtils.isNotBlank(request.getName()) && request.getName().length() > 126){
+            throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_NAME_EXCEED_MAX_LENGTH);
+        }
+        if (StringUtils.isNotBlank(request.getDescription()) && request.getDescription().length() > 1000){
+            throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_DESCRIPTION_EXCEED_MAX_LENGTH);
+        }
     }
 }
