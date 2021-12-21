@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
+import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.model.RolePermissionModel;
@@ -8,12 +9,12 @@ import cn.cyberpeace.mp.auth.repository.RolePermissionMapper;
 import cn.cyberpeace.mp.auth.service.RolePermissionModelService;
 import cn.cyberpeace.mp.auth.service.RoleService;
 import cn.cyberpeace.mp.auth.service.fields.RolePermissionFields;
+import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.lang.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,7 +44,8 @@ public class RolePermissionModelServiceImpl extends BaseModelServiceImpl<RolePer
 
     @Override
     public List<TargetModel> listTargetsByRoleId(String roleId) {
-        Assert.notBlank(roleId, "roleId不能为空！");
+        ParamCheck.notBlank(roleId, AuthBasei18nCode.ROLE_ID);
+
 
         List<TargetModel> targets = getModelMapper().listTargetsByRoleId(roleId);
         return targets;
@@ -54,7 +56,8 @@ public class RolePermissionModelServiceImpl extends BaseModelServiceImpl<RolePer
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean bindRoleTargets(String roleId, List<String> targetIds, boolean cleanOldTargets) {
-        Assert.notNull(roleId, "roleId不能为空");
+        ParamCheck.notBlank(roleId, AuthBasei18nCode.ROLE_ID);
+
 
         var result = roleService.get(roleId);
         ResultUtils.throwExceptionIfError(result, AuthErrorCode.ROLE_NOT_EXISTED);
@@ -89,7 +92,7 @@ public class RolePermissionModelServiceImpl extends BaseModelServiceImpl<RolePer
 
     @Override
     public boolean deleteByRoleId(String roleId) {
-        Assert.notNull(roleId, "roleId不能为空");
+        ParamCheck.notBlank(roleId, AuthBasei18nCode.ROLE_ID);
 
 //        var result = roleService.get(roleId);
 //        ResultUtils.throwExceptionIfError(result, AuthConstant.ERROR_CODE_PREFIX + "role_not_existed");
@@ -101,7 +104,7 @@ public class RolePermissionModelServiceImpl extends BaseModelServiceImpl<RolePer
 
     @Override
     public boolean deleteByTargetId(String targetId) {
-        Assert.notNull(targetId, "targetId不能为空");
+        ParamCheck.notBlank(targetId, AuthBasei18nCode.TARGET_ID);
         getModelMapper().deleteByTarget(targetId);
         return true;
     }

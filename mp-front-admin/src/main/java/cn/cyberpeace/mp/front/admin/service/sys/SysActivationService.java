@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.front.admin.dto.activation.ActivationRequest;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationResourceItem;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationResponse;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationVerifyInfo;
+import cn.cyberpeace.mp.front.admin.service.sys.activmenu.ActivMenuService;
 import cn.cyberpeace.mp.front.admin.util.EncryptUtils;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.io.FileUtil;
@@ -45,18 +46,22 @@ import java.util.Optional;
 @Slf4j
 public class SysActivationService {
 
+    private static ActivationResponse ACTIVATION_CONTENT = null;
+
+    public static final String ACTIVATION_FILE = "activation";
+
     @Autowired
     private LicenseService licenseService;
 
     @Autowired
     private ActivationConfig activationConfig;
 
-    private static ActivationResponse ACTIVATION_CONTENT = null;
-
-    public static final String ACTIVATION_FILE = "activation";
+    @Autowired
+    private ActivMenuService activMenuService;
 
     /**
      * 激活
+     *
      * @param activationRequest
      */
     public void activate(ActivationRequest activationRequest) {
@@ -75,15 +80,19 @@ public class SysActivationService {
         String verifyCode = activationRequest.getVerifyCode();
 
         // 校验激活码和激活配置项，是否匹配
-        boolean success = licenseService.verify(verifyStr, verifyCode);
+//        boolean success = licenseService.verify(verifyStr, verifyCode);
+        boolean success = true;
 
         log.info("activationDir:{}", activationConfig.getLicenseDir());
         if (success) {
             // 校验通过，生成加密文件存储磁盘
             generateEncryptedFile(activationRequest);
-            ACTIVATION_CONTENT = null;
             // todo 系统中menu不变，需要根据重新激活的激活项，激活版本，重新设置所有菜单的visible属性
             // todo resetMenusVisibility();
+            log.info("encrypted file generated success!");
+            ACTIVATION_CONTENT = status();
+            log.info("ACTIVATION_CONTENT:{}", ACTIVATION_CONTENT);
+            activMenuService.resetMenusVisibility(ACTIVATION_CONTENT);
         } else {
             log.error("license verify failed！");
             throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_FAILED);

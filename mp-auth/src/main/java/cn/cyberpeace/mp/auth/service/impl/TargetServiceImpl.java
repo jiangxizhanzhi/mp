@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
+import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.dto.target.TargetDto;
@@ -11,6 +12,7 @@ import cn.cyberpeace.mp.auth.service.RolePermissionModelService;
 import cn.cyberpeace.mp.auth.service.TargetService;
 import cn.cyberpeace.mp.auth.service.UserPermissionService;
 import cn.cyberpeace.mp.auth.service.fields.TargetFields;
+import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
@@ -91,7 +93,7 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
 
     @Override
     public TargetModel getByIdentifier(String identifier) {
-        Assert.notBlank(identifier);
+        ParamCheck.notBlank(identifier, AuthBasei18nCode.TARGET_IDENTIFIER);
         return getModelMapper().first(new HumanCondition().filterEqual("identifier", identifier));
     }
 
@@ -103,14 +105,14 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
 
     @Override
     public boolean exists(String id) {
-        Assert.notBlank(id, "id不能为空！");
+        ParamCheck.notBlank(id, AuthBasei18nCode.TARGET_ID);
         TargetModel targetModel = getModelMapper().get(id);
         return Objects.nonNull(targetModel);
     }
 
     @Override
     public List<TargetModel> listByParent(String parentId) {
-        Assert.notBlank(parentId, "parentId不能为空！");
+        ParamCheck.notBlank(parentId, AuthBasei18nCode.TARGET_PARENT);
         List<TargetModel> list = getModelMapper().listByParent(parentId);
         return list;
     }
@@ -170,7 +172,7 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
     @Override
     public boolean deleteAll() {
         int result = getModelMapper().deleteAll();
-        log.info("delete {} rows", result);
+        log.info("deleted {} rows", result);
         return true;
     }
 

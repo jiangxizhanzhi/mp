@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.cscene.core;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
@@ -14,9 +15,9 @@ import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceRoleModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
+import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
 import cn.cyberpeace.mp.scene.service.SceneService;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 
@@ -211,5 +212,13 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         } else {
             return getCscene() == null ? null : getSceneId(getCscene().toModel());
         }
+    }
+
+    @Override
+    public CsceneInstanceBO toData() {
+        // 深拷贝一下 (createHandler是多线程处理的,CsceneInstanceBO有可能是共用的)
+        CsceneInstanceBO csceneInstanceBO = JsonCommon.mapToBean(JsonCommon.beanToMap(super.toData()), CsceneInstanceBO.class);
+        CsceneDataModifier.correctReturnCsceneData(csceneInstanceBO);
+        return csceneInstanceBO;
     }
 }

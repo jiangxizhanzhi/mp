@@ -7,6 +7,7 @@
         from mp_auth_target
         where id in
               (select target from mp_auth_role_permission where owner = #{roleId})
+          and visible = 1
     </select>
 
     <delete id="deleteByOwner">

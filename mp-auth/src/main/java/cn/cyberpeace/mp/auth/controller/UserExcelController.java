@@ -59,6 +59,7 @@ public class UserExcelController {
         List<UserModel> users =  orgUserService.listUsersByOrgAndUname(exportRequest.getOrg(), exportRequest.getUsername(), userIds);
         List<ExportUser> exportUserList = userService.exportExcel(users);
 
+        // todo excel导出国际化处理
         response.setContentType("application/vnd.ms-excel");
         response.setCharacterEncoding("utf-8");
         String fileName = URLEncoder.encode("用户导出列表", "UTF-8").replaceAll("\\+", "%20");

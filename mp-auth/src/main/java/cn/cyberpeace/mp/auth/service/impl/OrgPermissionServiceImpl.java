@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
+import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.dto.OrgDto;
@@ -9,12 +10,12 @@ import cn.cyberpeace.mp.auth.repository.OrgPermissionMapper;
 import cn.cyberpeace.mp.auth.service.OrgPermissionService;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.fields.OrgPermissionFields;
+import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.lang.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,7 +50,7 @@ public class OrgPermissionServiceImpl
 
     @Override
     public Set<TargetModel> listTargetsByOrgId(String orgId) {
-        Assert.notNull(orgId, "orgId不能为空");
+        ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
 
 //        var objResult = orgService.get(orgId).getSource();
 //        if (objResult == null || objResult.getObj() == null) {
@@ -74,7 +75,7 @@ public class OrgPermissionServiceImpl
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean bindOrgTargets(String orgId, List<String> targetIds, boolean cleanOldTargets) {
-        Assert.notNull(orgId, "orgId不能为空");
+        ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
 
         var result = orgService.get(orgId);
         ResultUtils.throwExceptionIfError(result, AuthErrorCode.ORG_NOT_EXISTED);
@@ -111,14 +112,14 @@ public class OrgPermissionServiceImpl
 
     @Override
     public boolean deleteByOrgId(String orgId) {
-        Assert.notBlank(orgId, "orgId不能为空！");
+        ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
         getModelMapper().deleteByOrgId(orgId);
         return true;
     }
 
     @Override
     public boolean deleteByTargetId(String targetId) {
-        Assert.notBlank(targetId, "targetId不能为空！");
+        ParamCheck.notBlank(targetId, AuthBasei18nCode.TARGET_ID);
         getModelMapper().deleteByTargetId(targetId);
         return true;
     }

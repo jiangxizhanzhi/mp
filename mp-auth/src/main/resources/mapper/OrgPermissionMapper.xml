@@ -3,8 +3,11 @@
 <mapper namespace="cn.cyberpeace.mp.auth.repository.OrgPermissionMapper">
 
     <select id="listByOrgId" resultType="cn.cyberpeace.mp.auth.model.OrgPermissionModel">
-        select distinct * from mp_auth_target where id in
-            (select target from mp_auth_org_permission where owner = #{orgId})
+        select distinct *
+        from mp_auth_target
+        where id in
+              (select target from mp_auth_org_permission where owner = #{orgId})
+          and visible = 1
     </select>
 
     <select id="deleteByOrgId">

@@ -9,11 +9,13 @@ import cn.cyberpeace.mp.cscene.bo.CsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.controller.request.*;
+import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceQueryParams;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeActionRecordingBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
@@ -62,6 +64,17 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         if (!StringUtils.isEmpty(paramId)) {
             request.setId(paramId);
         }
+
+        var context = request.getContext();
+        if (context == null) {
+            var user = UserCommon.getCurrentUser();
+            if (user != null) {
+                context = new CsceneContextBO();
+                context.setAccessUserId(user.getId());
+                request.setContext(context);
+            }
+        }
+
         return request;
     }
 
@@ -119,9 +132,22 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         if (request == null) {
             request = new CsceneInstanceNodeConnectionActionRequest();
         }
-        request = (CsceneInstanceNodeConnectionActionRequest) formatNodeActionRequest(request, paramId, paramConnectionId);
+        request = (CsceneInstanceNodeConnectionActionRequest) formatNodeActionRequest(request, paramId, paramNodeId);
         if (!StringUtils.isEmpty(paramConnectionId)) {
             request.setConnectionId(paramConnectionId);
+        }
+        return request;
+    }
+
+    private CsceneInstanceNodeAccessModeActionRequest formatNodeAccessModeActionRequest(
+            CsceneInstanceNodeAccessModeActionRequest request, String paramId, String paramNodeId,
+            String paramAccessModeId) {
+        if (request == null) {
+            request = new CsceneInstanceNodeAccessModeActionRequest();
+        }
+        request = (CsceneInstanceNodeAccessModeActionRequest) formatNodeActionRequest(request, paramId, paramNodeId);
+        if (!StringUtils.isEmpty(paramAccessModeId)) {
+            request.setAccessModeId(paramAccessModeId);
         }
         return request;
     }
@@ -256,6 +282,22 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                 request.getContext()).asResult();
     }
 
+    @ApiOperation("场景实例获取远程连接")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "nodeId", value = "节点id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "accessModeId", value = "接入方式id", dataTypeClass = String.class),
+    })
+    @PostMapping(value = "/get_connection")
+    public ServiceResult<NodeConnectionBO> getRemoteConnection(@RequestParam(required = false) String id,
+                                                               @RequestParam(required = false) String nodeId,
+                                                               @RequestParam(required = false) String accessModeId,
+                                                               @RequestBody(required = false) CsceneInstanceNodeAccessModeActionRequest request) {
+        request = formatNodeAccessModeActionRequest(request, id, nodeId, accessModeId);
+        return modelService.getRemoteConnection(request.getId(), request.getNodeId(), request.getAccessModeId(),
+                request.getContext()).asResult();
+    }
+
     @ApiOperation("场景实例连接开启录屏")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
@@ -292,24 +334,28 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "ids", value = "场景实例id", allowMultiple = true, dataTypeClass = String.class),
             @ApiImplicitParam(name = "nodeIds", value = "节点id", allowMultiple = true, dataTypeClass = String.class),
+            @ApiImplicitParam(name = "userIds", value = "用户id", allowMultiple = true, dataTypeClass = String.class),
     })
     @GetMapping(value = "/node_sessions", params = "ids")
     public ServiceResult<List<NodeSessionBO>> getNodeSessions(@RequestParam List<String> ids,
-                                                              @RequestParam(required = false) List<String> nodeIds) {
-        return modelService.getNodeSessions(ids, nodeIds).asResult();
+                                                              @RequestParam(required = false) List<String> nodeIds,
+                                                              @RequestParam(required = false) List<String> userIds) {
+        return modelService.getNodeSessions(ids, nodeIds, userIds).asResult();
     }
 
     @ApiOperation("场景实例获取分页录屏列表")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "ids", value = "场景实例id", allowMultiple = true, dataTypeClass = String.class),
             @ApiImplicitParam(name = "nodeIds", value = "场景节点id", allowMultiple = true, dataTypeClass = String.class),
+            @ApiImplicitParam(name = "userIds", value = "用户id", allowMultiple = true, dataTypeClass = String.class),
     })
     @GetMapping(value = "/list_recordings", params = "ids")
     public ListObjServiceResult<NodeRecordingBO> listRecordings(@RequestParam List<String> ids,
                                                                 @RequestParam(required = false) List<String> nodeIds,
+                                                                @RequestParam(required = false) List<String> userIds,
                                                                 RecordingQueryParams queryParams) {
         handleQueryParams("listRecordings", queryParams);
-        return modelService.listRecordings(ids, nodeIds, queryParams).asResult();
+        return modelService.listRecordings(ids, nodeIds, userIds, queryParams).asResult();
     }
 
     @ApiOperation("场景实例获取分页流量列表")

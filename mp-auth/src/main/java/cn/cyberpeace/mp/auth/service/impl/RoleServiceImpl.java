@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
+import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.dto.role.RoleDto;
@@ -17,6 +18,7 @@ import cn.cyberpeace.mp.auth.service.RoleService;
 import cn.cyberpeace.mp.auth.service.TargetService;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.service.fields.RoleFields;
+import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.auth.util.SQLUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -69,7 +71,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     @Override
     @Transactional(rollbackFor = Exception.class)
     public ServiceResult<Boolean> delete(String roleId) {
-        Assert.notBlank(roleId, "id不能为空！");
+        ParamCheck.notBlank(roleId, AuthBasei18nCode.ROLE_ID);
         // todo 删除关联用户关系，权限关系
         deleteReleated(roleId);
         return super.delete(roleId);
@@ -111,28 +113,30 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
     @Override
     public List<RoleModel> listByOrgId(String orgId) {
-        Assert.notBlank(orgId, "orgId不能为空！");
+        ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
         List<RoleModel> roles = getModelMapper().listByOrgId(orgId);
         return roles;
     }
 
     @Override
     public RoleModel getByIdent(String ident) {
-        Assert.notBlank(ident, "identifier不能为空！");
+        ParamCheck.notBlank(ident, AuthBasei18nCode.ROLE_IDENTIFIER);
         RoleModel roleModel = getModelMapper().selectByIdent(ident);
         return roleModel;
     }
 
     @Override
     public RoleModel getByName(String name) {
-        Assert.notBlank(name, "name不能为空！");
+        ParamCheck.notBlank(name, AuthBasei18nCode.ROLE_NAME);
+
         RoleModel roleModel = getModelMapper().selectByName(name);
         return roleModel;
     }
 
     @Override
     public boolean exists(String id) {
-        Assert.notBlank(id, "id不能为空！");
+        ParamCheck.notBlank(id, AuthBasei18nCode.ROLE_ID);
+
         RoleModel roleModel = getModelMapper().get(id);
         return Objects.nonNull(roleModel);
     }
@@ -164,7 +168,8 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
     @Override
     public RoleDto getRoleDto(String id) {
-        Assert.notBlank(id, "id不能为空！");
+        ParamCheck.notBlank(id, AuthBasei18nCode.ROLE_ID);
+
         RoleModel roleModel = getModelMapper().get(id);
         RoleDto roleDto = roleModel2RoleDto(roleModel);
         return roleDto;
@@ -172,7 +177,8 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
     @Override
     public RolePermDto getRolePermDto(String id) {
-        Assert.notBlank(id, "id不能为空！");
+        ParamCheck.notBlank(id, AuthBasei18nCode.ROLE_ID);
+
         RoleModel roleModel = getModelMapper().get(id);
         RolePermDto rolePermDto = roleModel2RolePermDto(roleModel);
         return rolePermDto;
@@ -226,7 +232,8 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     public RoleModel modify(RoleRequest modifyRequest) {
         Assert.notNull(modifyRequest, "modifyRequest不能为空！");
         String roleId = modifyRequest.getId();
-        Assert.notBlank(roleId, "id不能为空！");
+        ParamCheck.notBlank(roleId, AuthBasei18nCode.ROLE_ID);
+
         log.info("roleid:{}", roleId);
 
         var result = get(roleId);

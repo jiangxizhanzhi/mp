@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
+import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.dto.OrgDto;
@@ -10,6 +11,7 @@ import cn.cyberpeace.mp.auth.service.OrgPermissionService;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.service.fields.OrgFields;
+import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
@@ -156,7 +158,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     @Override
     @Transactional(rollbackFor = Exception.class)
     public ServiceResult<Boolean> delete(String orgId) {
-        Assert.notBlank(orgId, "orgId不能为空！");
+        ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
         List<OrgModel> children = listByParent(orgId);
         if (CollectionUtil.isNotEmpty(children)) {
             throw new MpRuntimeException(AuthErrorCode.ORG_CANNOT_DELETE_WITH_CHILD_EXISTED);
@@ -189,7 +191,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
 
     @Override
     public List<OrgModel> listByParent(String parentId) {
-        Assert.notBlank(parentId, "parentId不能为空！");
+        ParamCheck.notBlank(parentId, AuthBasei18nCode.ORG_PARENT);
         List<OrgModel> orgs = getModelMapper().listByParentId(parentId);
         return orgs;
     }
@@ -233,7 +235,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
 
     @Override
     public OrgDto getHierarchicalOrgsByOrgId(String orgId) {
-        Assert.notBlank(orgId, "orgId不能为空！");
+        ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
 
         OrgModel orgModel = getModelMapper().get(orgId);
         if (orgModel == null) {
@@ -274,14 +276,16 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
 
     @Override
     public OrgModel getByPath(String path) {
-        Assert.notBlank(path, "path不能为空！");
+        ParamCheck.notBlank(path, AuthBasei18nCode.ORG_PATH);
+
         OrgModel orgModel = getModelMapper().getByPath(path);
         return orgModel;
     }
 
     @Override
     public boolean exists(String id) {
-        Assert.notBlank(id, "id不能为空！");
+        ParamCheck.notBlank(id, AuthBasei18nCode.ORG_ID);
+
         OrgModel orgModel = getModelMapper().get(id);
         return Objects.nonNull(orgModel);
     }

@@ -39,7 +39,7 @@ public class UserPermissionController {
 
     @ApiOperation(value = "根据userId查询所有权限", notes = "")
     @GetMapping("/byuser")
-    public ServiceResult getTargetsByUser(@RequestParam String userId) {
+    public ServiceResult getTargetsByUser(String userId) {
         List<TargetModel> targets = userPermissionService.listTargetsByUserId(userId);
         return ServiceResult.builder().source(targets).build().asResult();
     }

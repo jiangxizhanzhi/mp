@@ -157,7 +157,16 @@ public class CsceneHandler extends BaseCsceneHandler<
         if (withInstance) {
             reloadCsceneInstances();
         }
-        return getCscene();
+        CsceneBO csceneBO = getCscene();
+        CsceneDataModifier.correctReturnCsceneData(csceneBO);
+        return csceneBO;
+    }
+
+    @Override
+    public CsceneBO toData() {
+        CsceneBO csceneBO = super.toData();
+        CsceneDataModifier.correctReturnCsceneData(csceneBO);
+        return csceneBO;
     }
 
     public CsceneInstanceBO createTestInstance(boolean unique) {
