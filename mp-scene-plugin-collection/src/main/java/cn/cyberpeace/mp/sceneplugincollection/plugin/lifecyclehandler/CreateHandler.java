@@ -61,7 +61,6 @@ public class CreateHandler extends HandlerCommon {
                 .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
         getPluginHandler().getElementPortMap().forEach((portId, collectionPort) -> {
             if (!Boolean.TRUE.equals(collectionPort.getEnableFlowCollect())) {
-                //此处建议添加日志输出
                 return;
             }
             var srcPort = collectionPort.getSrcPort();
