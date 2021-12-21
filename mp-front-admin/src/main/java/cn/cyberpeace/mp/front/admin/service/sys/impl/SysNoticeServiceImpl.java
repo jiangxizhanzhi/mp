@@ -1,5 +1,25 @@
 package cn.cyberpeace.mp.front.admin.service.sys.impl;
 
+import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
+import cn.cyberpeace.mp.auth.dto.OrgDto;
+import cn.cyberpeace.mp.auth.model.OrgModel;
+import cn.cyberpeace.mp.auth.model.RoleModel;
+import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.service.OrgService;
+import cn.cyberpeace.mp.auth.service.OrgUserService;
+import cn.cyberpeace.mp.auth.service.UserRoleService;
+import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.auth.util.ParamCheck;
+import cn.cyberpeace.mp.auth.util.UserUtils;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
+import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.front.admin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.front.admin.dto.notice.SysNoticeDto;
 import cn.cyberpeace.mp.front.admin.dto.notice.SysNoticePageRequest;
 import cn.cyberpeace.mp.front.admin.dto.notice.SysNoticeRequest;
@@ -15,23 +35,7 @@ import cn.cyberpeace.mp.front.admin.service.fields.SysNoticeFields;
 import cn.cyberpeace.mp.front.admin.service.sys.SysNoticeService;
 import cn.cyberpeace.mp.front.admin.util.ResultUtils;
 import cn.cyberpeace.mp.front.admin.util.SQLUtils;
-import cn.cyberpeace.mp.auth.constant.AuthConstant;
-import cn.cyberpeace.mp.auth.dto.OrgDto;
-import cn.cyberpeace.mp.auth.model.OrgModel;
-import cn.cyberpeace.mp.auth.model.RoleModel;
-import cn.cyberpeace.mp.auth.model.UserModel;
-import cn.cyberpeace.mp.auth.service.OrgService;
-import cn.cyberpeace.mp.auth.service.OrgUserService;
-import cn.cyberpeace.mp.auth.service.UserRoleService;
-import cn.cyberpeace.mp.auth.service.UserService;
-import cn.cyberpeace.mp.auth.util.UserUtils;
-import cn.cyberpeace.mp.base.constant.BaseErrorCode;
-import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
-import cn.cyberpeace.mp.base.service.param.QueryParams;
-import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
-import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.lang.Assert;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -94,11 +98,11 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
     @Override
     public void unpush(List<String> noticeIds) {
         UserModel userModel = UserUtils.getLoginUser();
-        Assert.notNull(userModel, "未获取到当前登录用户信息");
+        if (Objects.isNull(userModel)) {
+            throw new MpRuntimeException(AuthErrorCode.ACCOUNT_NOT_LOGIN);
+        }
 
         for (String noticeId : noticeIds) {
-//            SysNoticeModel noticeModel = getModelMapper().get(noticeId);
-//            Assert.notNull(noticeModel, "公告不存在！ID:{}", noticeId);
 
             SysNoticeReadModel noticeReadModel = noticeReadMapper.selectByUserIdAndNoticeId(userModel.getId(), noticeId);
 
@@ -121,10 +125,14 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
     @Override
     public void read(String noticeId) {
         UserModel userModel = UserUtils.getLoginUser();
-        Assert.notNull(userModel, "未获取到当前登录用户信息");
+        if (Objects.isNull(userModel)) {
+            throw new MpRuntimeException(AuthErrorCode.ACCOUNT_NOT_LOGIN);
+        }
 
         SysNoticeModel noticeModel = getModelMapper().get(noticeId);
-        Assert.notNull(noticeModel, "公告不存在！ID:{}", noticeId);
+        if (Objects.isNull(noticeModel)) {
+            throw new MpRuntimeException(AdminErrorCode.SYS_NOTICE_NOT_EXISTED.format(noticeId));
+        }
 
         SysNoticeReadModel noticeReadModel = noticeReadMapper.selectByUserIdAndNoticeId(userModel.getId(), noticeId);
 
@@ -142,7 +150,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
     @Override
     @Transactional(rollbackFor = Exception.class)
     public SysNoticeModel add(SysNoticeRequest sysNoticeRequest) {
-        Assert.notNull(sysNoticeRequest, "公告新增请求不能为空！");
+        ParamCheck.notNull(sysNoticeRequest, AuthBasei18nCode.REQUEST_PARAMS);
         SysNoticeModel noticeModel = new SysNoticeModel();
         BeanUtils.copyProperties(sysNoticeRequest, noticeModel);
 
@@ -188,7 +196,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
     @Override
     @Transactional(rollbackFor = Exception.class)
     public SysNoticeModel modify(String id, SysNoticeRequest sysNoticeRequest) {
-        Assert.notNull(sysNoticeRequest, "公告更新请求不能为空！");
+        ParamCheck.notNull(sysNoticeRequest, AuthBasei18nCode.REQUEST_PARAMS);
 
         ObjServiceResult<SysNoticeModel> noticeModelResult = get(id);
         ResultUtils.throwExceptionIfError(noticeModelResult, "ID:" + id + "对应的公告信息不存在！");

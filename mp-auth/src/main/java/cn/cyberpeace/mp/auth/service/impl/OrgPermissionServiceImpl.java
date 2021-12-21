@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.hutool.core.collection.CollectionUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,6 +52,7 @@ public class OrgPermissionServiceImpl
     @Override
     public Set<TargetModel> listTargetsByOrgId(String orgId) {
         ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
+//        Assert.notNull(orgId, "orgId不能为空");
 
 //        var objResult = orgService.get(orgId).getSource();
 //        if (objResult == null || objResult.getObj() == null) {
@@ -127,14 +129,10 @@ public class OrgPermissionServiceImpl
 
     // 递归查询组织绑定的权限（如果有父级组织，则继续查找）
     private void recursionTargetsByOrgDto(Set<TargetModel> set, OrgDto orgDto) {
-        if (orgDto == null) {
+        if (orgDto == null || StringUtils.isBlank(orgDto.getParent())) {
             return;
         }
         Set<TargetModel> tset = listTargetsByOrgId(orgDto.getParent());
-//        Set<TargetModel> targetSet = new HashSet<>();
-//        for (TargetModel target : targets) {
-//            targetSet.add(target);
-//        }
         set.addAll(tset);
         recursionTargetsByOrgDto(set, orgDto.getParentOrg());
     }

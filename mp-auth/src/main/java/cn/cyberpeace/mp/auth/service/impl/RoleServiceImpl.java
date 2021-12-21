@@ -28,7 +28,6 @@ import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.IdUtils;
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.lang.Assert;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -99,7 +98,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
     @Override
     public List<RoleModel> listByTenantId(String tenantId) {
-        Assert.notBlank(tenantId, "tenantId不能为空！");
+        ParamCheck.notBlank(tenantId, AuthBasei18nCode.TENANT_ID);
         List<RoleModel> roles = getModelMapper().listByTenantId(tenantId);
         return roles;
     }
@@ -187,7 +186,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     @Override
     @Transactional(rollbackFor = Exception.class)
     public RoleModel add(RoleRequest createRequest) {
-        Assert.notNull(createRequest, "createRequest不能为空！");
+        ParamCheck.notNull(createRequest, AuthBasei18nCode.REQUEST_PARAMS);
 
         RoleModel roleModel = new RoleModel();
         BeanUtils.copyProperties(createRequest, roleModel);
@@ -230,7 +229,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     @Override
     @Transactional(rollbackFor = Exception.class)
     public RoleModel modify(RoleRequest modifyRequest) {
-        Assert.notNull(modifyRequest, "modifyRequest不能为空！");
+        ParamCheck.notNull(modifyRequest, AuthBasei18nCode.REQUEST_PARAMS);
         String roleId = modifyRequest.getId();
         ParamCheck.notBlank(roleId, AuthBasei18nCode.ROLE_ID);
 

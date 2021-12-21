@@ -21,7 +21,7 @@ public class FrontAdminConfiguration {
     @PostConstruct
     public void addBaseNames() {
         ReloadableResourceBundleMessageSource msgSrc = (ReloadableResourceBundleMessageSource) messageSource;
-        msgSrc.addBasenames("classpath:i18n/admin");
+        msgSrc.addBasenames("classpath:i18n/admin", "classpath:i18n/admin_base");
     }
 
 

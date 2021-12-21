@@ -25,7 +25,6 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.lang.Assert;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -184,7 +183,7 @@ public class UserPermissionServiceImpl
 
 
     public List<TargetDto> toTree(List<TargetModel> targets) {
-        Assert.notEmpty(targets, "menus should not be empty!");
+        ParamCheck.notEmpty(targets, AuthBasei18nCode.TARGET_LIST);
         Map<String, List<TargetModel>> map = new HashMap<>();
         Map<String, TargetDto> mapTmp = new HashMap<>();
 

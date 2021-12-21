@@ -44,7 +44,6 @@ import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
-import cn.hutool.core.lang.Assert;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -220,7 +219,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     @Transactional(rollbackFor = Exception.class)
     public UserModel add(UserRequest createRequest) {
-        Assert.notNull(createRequest, "userDto不能为空");
+        ParamCheck.notNull(createRequest, AuthBasei18nCode.REQUEST_PARAMS);
 
         // 保存用户
         UserModel userModel = new UserModel();
@@ -437,7 +436,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String batchDisable(List<String> userIds) {
-        Assert.notEmpty(userIds, "userIds不能为空！");
+        ParamCheck.notEmpty(userIds, AuthBasei18nCode.USER_LIST);
         StringBuilder errMsg = new StringBuilder();
         for (String userId : userIds) {
             try {
@@ -473,7 +472,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String batchEnable(List<String> userIds) {
-        Assert.notEmpty(userIds, "userIds不能为空！");
+        ParamCheck.notEmpty(userIds, AuthBasei18nCode.USER_LIST);
         StringBuilder errMsg = new StringBuilder();
         for (String userId : userIds) {
             try {
@@ -510,7 +509,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String batchApprove(List<String> userIds) {
-        Assert.notEmpty(userIds, "userIds不能为空！");
+        ParamCheck.notEmpty(userIds, AuthBasei18nCode.USER_LIST);
         StringBuilder errMsg = new StringBuilder();
         for (String userId : userIds) {
             try {
