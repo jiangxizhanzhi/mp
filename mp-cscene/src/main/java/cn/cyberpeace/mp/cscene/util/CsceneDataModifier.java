@@ -63,11 +63,14 @@ public class CsceneDataModifier {
                     continue;
                 }
                 // 当前节点所有端口上指定协议数量不为0则跳出此次
-                int proCNum = 0;
+                boolean hasPro = false;
                 for (SceneElementPortBO portBO : elementBO.getPorts()) {
-                    proCNum = proCNum + portBO.getAccessModes().stream().filter(m -> protocol.equals(m.getProtocol())).collect(Collectors.toList()).size();
+                    hasPro = portBO.getAccessModes().stream().filter(m -> protocol.equals(m.getProtocol())).collect(Collectors.toList()).size() > 0;
+                    if (hasPro) {
+                        break;
+                    }
                 }
-                if (proCNum > 0) {
+                if (hasPro) {
                     continue;
                 }
                 for (SceneElementPortBO portBO : elementBO.getPorts()) {
