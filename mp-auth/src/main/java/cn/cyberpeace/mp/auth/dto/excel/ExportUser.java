@@ -23,7 +23,7 @@ public class ExportUser {
     @ColumnWidth(12)
     private String name;
 
-    @ExcelProperty("组织")
+    @ExcelProperty("组织名称")
     @ColumnWidth(80)
     private String org;
 
