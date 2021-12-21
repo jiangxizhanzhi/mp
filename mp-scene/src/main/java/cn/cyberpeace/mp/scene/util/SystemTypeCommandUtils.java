@@ -87,4 +87,15 @@ public class SystemTypeCommandUtils {
     public static String joinPath(String systemType, String... paths) {
         return StringUtils.joinWith(getPathDelimiter(systemType), paths);
     }
+
+    public static String doCommandInDir(String systemType, String dir, String command) {
+        var osType = getOsType(systemType);
+        if (OS_TYPE_WINDOWS.equals(osType)) {
+            return CommandUtils.windowsDoCommandInDir(dir, command);
+        } else if (OS_TYPE_LINUX.equals(osType)) {
+            return CommandUtils.linuxDoCommandInDir(dir, command);
+        } else {
+            return command;
+        }
+    }
 }

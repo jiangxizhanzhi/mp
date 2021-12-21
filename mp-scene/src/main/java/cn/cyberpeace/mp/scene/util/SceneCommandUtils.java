@@ -26,16 +26,16 @@ public class SceneCommandUtils {
             parsedCommand = command.substring(ORIGIN_COMMAND_PREFIX.length());
         } else if (command.startsWith(SCENE_COMMAND_PREFIX)) {
             var relativeCommand = command.substring(SCENE_COMMAND_PREFIX.length());
-            parsedCommand = SystemTypeCommandUtils.joinPath(systemType,
-                    SceneFileUtils.getSceneFileUnzipDir(systemType, sceneId), relativeCommand);
+            var dir = SceneFileUtils.getSceneFileUnzipDir(systemType, sceneId);
+            parsedCommand = SystemTypeCommandUtils.doCommandInDir(systemType, dir, relativeCommand);
             // 确保call执行不退出
             if (isWindows) {
                 parsedCommand = String.format(WINDOWS_CALL_TEMPLATE, parsedCommand);
             }
         } else if (command.startsWith(NODE_COMMAND_PREFIX)) {
             var relativeCommand = command.substring(NODE_COMMAND_PREFIX.length());
-            parsedCommand = SystemTypeCommandUtils.joinPath(systemType,
-                    SceneFileUtils.getElementFileUnzipDir(systemType, sceneId, elementId), relativeCommand);
+            var dir = SceneFileUtils.getElementFileUnzipDir(systemType, sceneId, elementId);
+            parsedCommand = SystemTypeCommandUtils.doCommandInDir(systemType, dir, relativeCommand);
             // 确保call执行不退出
             if (isWindows) {
                 parsedCommand = String.format(WINDOWS_CALL_TEMPLATE, parsedCommand);
