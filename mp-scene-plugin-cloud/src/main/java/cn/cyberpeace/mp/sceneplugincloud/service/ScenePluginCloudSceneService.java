@@ -195,6 +195,7 @@ public class ScenePluginCloudSceneService {
                     var nodeSession = connectionIdSessionMap.getOrDefault(connectionId,
                             new NodeSessionBO());
                     nodeSession.setMonitorUrl(monitorData.getMonitorUrl());
+                    nodeSession.setUser(monitorData.getUsername());
                     connectionIdSessionMap.put(connectionId, nodeSession);
                 });
             }
@@ -224,7 +225,6 @@ public class ScenePluginCloudSceneService {
             nodeSession.setNodeName(srcElement.getName());
             var accessMode = accessModeLinkInfo.getAccessMode();
             nodeSession.setProtocol(accessMode.getProtocol());
-            nodeSession.setUser(accessMode.getConnectionUser());
         });
 
         return new ServiceResult<>(new ArrayList<>(connectionIdSessionMap.values()));

@@ -39,6 +39,8 @@ public abstract class BaseSceneElementBO<M extends BaseSceneElementModel, P exte
     private Integer maxPortNumber;
     @ApiModelProperty(value = "网元端口")
     private List<P> ports;
+    @ApiModelProperty(value = "节点文件命令")
+    private String nodeCommand;
 
     @Override
     public void fromModel(M obj, String... ignoreFields) {
