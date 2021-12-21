@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.auth.controller;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
+import cn.cyberpeace.mp.auth.dto.excel.ExportUserEn;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
 import cn.cyberpeace.mp.auth.dto.user.UserExportRequest;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -16,6 +17,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,6 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -56,15 +59,31 @@ public class UserExcelController {
             userIds = CollectionUtil.toList(ids);
         }
 
-        List<UserModel> users =  orgUserService.listUsersByOrgAndUname(exportRequest.getOrg(), exportRequest.getUsername(), userIds);
-        List<ExportUser> exportUserList = userService.exportExcel(users);
+        List<UserModel> users = orgUserService.listUsersByOrgAndUname(exportRequest.getOrg(), exportRequest.getUsername(), userIds);
 
-        // todo excel导出国际化处理
+        Locale locale = LocaleContextHolder.getLocale();
+        List dataLst = null;
+        String sheetName = "";
+        String fname = "";
+        Class exportClz = null;
+
+        if (Objects.equals(locale, Locale.US)) {
+            sheetName = "UserList";
+            fname = "UserList";
+            dataLst = userService.exportExcelEn(users);
+            exportClz = ExportUserEn.class;
+        } else {
+            sheetName = "用户导出列表";
+            fname = "用户导出列表";
+            dataLst = userService.exportExcel(users);
+            exportClz = ExportUser.class;
+        }
+
         response.setContentType("application/vnd.ms-excel");
         response.setCharacterEncoding("utf-8");
-        String fileName = URLEncoder.encode("用户导出列表", "UTF-8").replaceAll("\\+", "%20");
+        String fileName = URLEncoder.encode(fname, "UTF-8").replaceAll("\\+", "%20");
         response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
-        EasyExcel.write(response.getOutputStream(), ExportUser.class).sheet("用户导出列表").doWrite(exportUserList);
+        EasyExcel.write(response.getOutputStream(), exportClz).sheet(sheetName).doWrite(dataLst);
     }
 
 

@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.DefaultImgDirEnum;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
+import cn.cyberpeace.mp.auth.dto.excel.ExportUserEn;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.dto.user.UserRequest;
@@ -640,6 +641,11 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return exportUserList;
     }
 
+    @Override
+    public List<ExportUserEn> exportExcelEn(List<UserModel> users) {
+        List<ExportUserEn> exportUserList = users.stream().map(this::user2ExportUserEn).filter(Objects::nonNull).collect(Collectors.toList());
+        return exportUserList;
+    }
 
     @Override
     public boolean updateAvatar(String userId, MultipartFile multipartFile) throws MpRuntimeException {
@@ -855,6 +861,18 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         exportUser.setRoles(roles);
 
         return exportUser;
+    }
+
+
+    private ExportUserEn user2ExportUserEn(UserModel userModel) {
+        ExportUser exportUser = user2ExportUser(userModel);
+
+        if (Objects.nonNull(exportUser)) {
+            ExportUserEn exportUserEn = ExportUserEn.builder().build();
+            BeanUtils.copyProperties(exportUser, exportUserEn);
+            return exportUserEn;
+        }
+        return null;
     }
 
 
