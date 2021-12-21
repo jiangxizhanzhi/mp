@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.*;
 import cn.cyberpeace.mp.devops.cluster.converter.ImagesConverter;
+import cn.cyberpeace.mp.devops.cluster.converter.TargetConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageAuthConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertPageModel;
@@ -63,11 +64,13 @@ public class ImagesConverterImpl implements ImagesConverter {
 
     private ScenariosService scenariosService;
 
+    private TargetConverter targetConverter;
+
     @Autowired
     public ImagesConverterImpl(ImagesService imagesService, ImageMapper imageMapper,DeviceService deviceService,
                                ImageAuthMapper imageAuthMapper,VmService vmService,ContainerService containerService,
                                DevopsTargetService devopsTargetService,UserService userService,
-                               ScenariosService scenariosService) {
+                               ScenariosService scenariosService, TargetConverter targetConverter) {
         this.imagesService = imagesService;
         this.imageMapper = imageMapper;
         this.deviceService = deviceService;
@@ -77,6 +80,7 @@ public class ImagesConverterImpl implements ImagesConverter {
         this.devopsTargetService = devopsTargetService;
         this.userService = userService;
         this.scenariosService = scenariosService;
+        this.targetConverter = targetConverter;
     }
 
     @Override
@@ -206,6 +210,7 @@ public class ImagesConverterImpl implements ImagesConverter {
     @Override
     @Transactional
     public Boolean delete(ImagesDeleteRequest request) {
+        targetConverter.validTargetCanDelete(request.getImageIds());
         Boolean result = deviceService.deleteByIds(request.getImageIds());
 
         if (CollectionUtils.isNotEmpty(request.getImageIds())){

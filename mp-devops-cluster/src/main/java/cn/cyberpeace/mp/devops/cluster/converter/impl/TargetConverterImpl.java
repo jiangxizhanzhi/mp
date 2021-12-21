@@ -1,7 +1,13 @@
 package cn.cyberpeace.mp.devops.cluster.converter.impl;
 
 import cn.cyberpeace.mp.auth.util.UserUtils;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
+import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
+import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.DeviceService;
+import cn.cyberpeace.mp.devops.cluster.constant.DevopsClusterErrorCode;
 import cn.cyberpeace.mp.devops.cluster.converter.TargetConverter;
 import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devops.cluster.model.Device;
@@ -11,10 +17,12 @@ import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
 import cn.cyberpeace.mp.devops.cluster.request.TargetSceneRequest;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -25,10 +33,15 @@ public class TargetConverterImpl implements TargetConverter {
 
     private DeviceService deviceService;
 
+    private CsceneSpecialService csceneSpecialService;
+
+
     @Autowired
-    public TargetConverterImpl(ImageMapper imageMapper, DeviceService deviceService) {
+    public TargetConverterImpl(ImageMapper imageMapper, DeviceService deviceService,
+                               CsceneSpecialService csceneSpecialService) {
         this.imageMapper = imageMapper;
         this.deviceService = deviceService;
+        this.csceneSpecialService = csceneSpecialService;
     }
 
     @Override
@@ -78,5 +91,26 @@ public class TargetConverterImpl implements TargetConverter {
         }
 
         return model.getItems();
+    }
+
+    @Override
+    public void validTargetCanDelete(List<String> uuids){
+
+        List<TargetModel> targetModels = imageMapper.findByUuids(uuids);
+        String[] imageNames = targetModels.stream().map(TargetModel::getName).toArray(String[]::new);
+        //引用
+        ServiceResult<Map<String, List<DeviceReferCsceneStat>>> referStateServiceResult = csceneSpecialService.statDeviceReferCscenes(imageNames);
+        Map<String, List<DeviceReferCsceneStat>> referStateMap = referStateServiceResult.getSource();
+
+        if (MapUtils.isNotEmpty(referStateMap)){
+            throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_REFERENCED_SCENE);
+        }
+        //使用
+        ServiceResult<Map<String, List<DeviceReferCsceneInstanceStat>>>  useStateServiceResult = csceneSpecialService.statDeviceReferCsceneInstances(imageNames);
+        Map<String, List<DeviceReferCsceneInstanceStat>> useStateMap = useStateServiceResult.getSource();
+
+        if (MapUtils.isNotEmpty(useStateMap)){
+            throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_USED_SCENE);
+        }
     }
 }
