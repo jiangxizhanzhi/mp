@@ -12,6 +12,7 @@ public enum SituationalAwareErrorCode implements ErrorCode {
     PROBE_MODIFY_FAIL("MP-110402", "probe update fail"),
     PROBE_MODIFY_PARAM_ERROR("MP-110403", "probe update param error"),
     PROBE_MANAGER_ADD_ERROR("MP-110404", "probe manager add script error"),
+    PROBE_MANAGER_BIND_ERROR("MP-110417", "probe bind agents error"),
     PROBE_NAME_EXIST("MP-110405", "probe name already exit"),
     PROBE_MANAGER_ES_QUERY_ERROR("MP-110406", "probe es query error"),
     PROBE_MANAGER_DELETE_PARAM_ERROR("MP-110407", "probe delete param is empty"),
