@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.front.admin.service.sys;
 
+import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
+import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.front.admin.config.ActivationConfig;
@@ -14,7 +16,6 @@ import cn.cyberpeace.mp.front.admin.service.sys.activmenu.ActivMenuService;
 import cn.cyberpeace.mp.front.admin.util.EncryptUtils;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.crypto.digest.MD5;
 import com.alibaba.fastjson.JSON;
@@ -249,7 +250,7 @@ public class SysActivationService {
 
 
     private Map<String, String> convertActivationItems2CustomVerifyInfoMap(List<ActivationItem> items) {
-        Assert.notEmpty(items, "ActivationItem list should not be empty!");
+        ParamCheck.notEmpty(items, AuthBasei18nCode.REQUEST_PARAMS);
         Map<String, String> map = new HashMap<>();
         items.forEach(i -> {
             map.put(i.getKey(), i.getValue());

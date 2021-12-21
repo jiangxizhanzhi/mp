@@ -21,7 +21,6 @@ import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.lang.Assert;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -196,7 +195,7 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
 
 
     private List<TargetDto> toTree(List<TargetModel> targets) {
-        Assert.notEmpty(targets, "targets should not be empty!");
+        ParamCheck.notEmpty(targets, AuthBasei18nCode.TARGET_LIST);
         Map<String, List<TargetModel>> map = new HashMap<>();
         Map<String, TargetDto> mapTmp = new HashMap<>();
 

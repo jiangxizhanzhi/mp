@@ -2,11 +2,13 @@ package cn.cyberpeace.mp.front.admin.service.sys.impl;
 
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.front.admin.constant.AdminBasei18nCode;
 import cn.cyberpeace.mp.front.admin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.front.admin.constant.SysConfigConstant;
 import cn.cyberpeace.mp.front.admin.model.SysConfigModel;
@@ -15,7 +17,6 @@ import cn.cyberpeace.mp.front.admin.service.fields.SysConfigFields;
 import cn.cyberpeace.mp.front.admin.service.sys.SysConfigService;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
-import cn.hutool.core.lang.Assert;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,14 +72,15 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
 
     @Override
     public SysConfigModel getByKeyName(String keyName) {
-        Assert.notBlank(keyName, "keyName不能为空！");
+        ParamCheck.notEmpty(keyName, AdminBasei18nCode.SYS_CONFIG_KEY_NAME);
+
         return getModelMapper().selectByKey(keyName);
     }
 
     @Override
     public boolean updateByKeyName(SysConfigModel sysConfigModel) {
-        Assert.notBlank(sysConfigModel.getKeyName(), "key不能为空！");
-        Assert.notNull(sysConfigModel.getValue(), "value不能为null！");
+        ParamCheck.notEmpty(sysConfigModel.getKeyName(), AdminBasei18nCode.SYS_CONFIG_KEY_NAME);
+        ParamCheck.notEmpty(sysConfigModel.getValue(), AdminBasei18nCode.SYS_CONFIG_VALUE);
 
         if (sysConfigModel.getKeyName().equals(SysConfigConstant.KEY_USER_AUDIT) && sysConfigModel.getValue().equals("0")) {
             // 如果要关闭审核功能，需要检查用户中有没有处于待审核状态的
@@ -111,7 +113,7 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
 
     @Override
     public ObjServiceResult<SysConfigModel> update(SysConfigModel obj, String[] fields) {
-        Assert.notBlank(obj.getId(), "id不能为空！");
+        ParamCheck.notBlank(obj.getId(), AdminBasei18nCode.SYS_CONFIG_ID);
         SysConfigModel oldConfigModel = getModelMapper().get(obj.getId());
 
         if (Objects.isNull(oldConfigModel)) {

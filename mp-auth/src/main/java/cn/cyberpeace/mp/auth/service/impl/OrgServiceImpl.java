@@ -18,7 +18,6 @@ import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.lang.Assert;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -339,7 +338,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     }
 
     private List<OrgDto> toTree(List<OrgModel> orgs) {
-        Assert.notEmpty(orgs, "orgs should not be empty!");
+        ParamCheck.notEmpty(orgs, AuthBasei18nCode.ORG_LIST);
         Map<String, List<OrgModel>> map = new HashMap<>();
         Map<String, OrgDto> mapTmp = new HashMap<>();
 
