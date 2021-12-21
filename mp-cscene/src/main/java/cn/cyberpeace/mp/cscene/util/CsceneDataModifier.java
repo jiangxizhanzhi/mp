@@ -137,12 +137,58 @@ public class CsceneDataModifier {
         }
     }
 
+    public static void assembleInitCommands(CsceneBO csceneBO) {
+        if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getTopology() != null) {
+            csceneBO.getSceneConfig().getTopology().getElements().stream().forEach(e -> {
+                if (CollectionUtils.isNotEmpty(e.getInitCommands())) {
+                    List<String> s = e.getInitCommands().stream().map(c -> "s:" + c).collect(Collectors.toList());
+                    e.setInitCommands(s);
+                }
+                if (StringUtils.isNotBlank(e.getNodeCommand())) {
+                    e.getInitCommands().add("n:" + e.getNodeCommand());
+                }
+            });
+        }
+    }
+
     public static void correctReturnCsceneData(CsceneBO csceneBO) {
         addFilePathPrefix(csceneBO.getSceneConfig());
+        handlerNodeCommand(csceneBO.getSceneConfig());
     }
 
     public static void correctReturnCsceneData(CsceneInstanceBO csceneInstanceBO) {
         addFilePathPrefix(csceneInstanceBO.getScene());
+        handlerNodeCommand(csceneInstanceBO.getScene());
+    }
+
+    private static void handlerNodeCommand(BaseSceneDataBO baseSceneDataBO) {
+        if (baseSceneDataBO.getTopology() != null) {
+            if (CollectionUtils.isNotEmpty(baseSceneDataBO.getTopology().getElements())) {
+                baseSceneDataBO.getTopology().getElements().stream().forEach(e -> {
+                    BaseSceneElementBO sceneElement = (BaseSceneElementBO) e;
+                    if (CollectionUtils.isNotEmpty(sceneElement.getInitCommands())) {
+                        List<String> nodeCommands = new ArrayList<>();
+                        List<String> initCommands = new ArrayList<>();
+                        sceneElement.getInitCommands().forEach(c -> {
+                            if (c != null) {
+                                if (c.toString().startsWith("n:")) {
+                                    nodeCommands.add(StringUtils.replaceOnce(c.toString(), "n:", ""));
+                                } else if (c.toString().startsWith("s:")) {
+                                    initCommands.add(StringUtils.replaceOnce(c.toString(), "s:", ""));
+                                } else {
+                                    initCommands.add(c.toString());
+                                }
+                            }
+                        });
+                        sceneElement.setInitCommands(initCommands);
+                        if (CollectionUtils.isNotEmpty(nodeCommands)) {
+                            // 暂时只有一个命令
+                            sceneElement.setNodeCommand(nodeCommands.get(0));
+                        }
+                    }
+                });
+            }
+        }
     }
 
     /**
