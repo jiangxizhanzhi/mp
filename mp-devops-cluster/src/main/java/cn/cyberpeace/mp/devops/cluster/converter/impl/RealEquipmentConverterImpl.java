@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.DeviceService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.RealEquipmentService;
 import cn.cyberpeace.mp.devops.cluster.converter.RealEquipmentConverter;
+import cn.cyberpeace.mp.devops.cluster.converter.TargetConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.RealEquipment;
 import cn.cyberpeace.mp.devops.cluster.converter.model.RealEquipmentConvertModel;
 import cn.cyberpeace.mp.devops.cluster.dto.ImageDeleteDTO;
@@ -48,15 +49,18 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
 
     private ImageAuthMapper imageAuthMapper;
 
+    private TargetConverter targetConverter;
+
     @Autowired
     public RealEquipmentConverterImpl(RealEquipmentService realEquipmentService, DeviceService deviceService,
                                       DevopsTargetService devopsTargetService, ImageMapper imageMapper,
-                                      ImageAuthMapper imageAuthMapper) {
+                                      ImageAuthMapper imageAuthMapper,TargetConverter targetConverter) {
         this.realEquipmentService = realEquipmentService;
         this.deviceService = deviceService;
         this.devopsTargetService = devopsTargetService;
         this.imageMapper = imageMapper;
         this.imageAuthMapper = imageAuthMapper;
+        this.targetConverter = targetConverter;
     }
 
     @Override
@@ -161,6 +165,7 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
     @Override
     @Transactional
     public Boolean delete(RealEquipmentDeleteRequest request) {
+        targetConverter.validTargetCanDelete(request.getUuids());
         Boolean result = deviceService.deleteByIds(request.getUuids());
         if (result) {
             ImageDeleteDTO dto = new ImageDeleteDTO();

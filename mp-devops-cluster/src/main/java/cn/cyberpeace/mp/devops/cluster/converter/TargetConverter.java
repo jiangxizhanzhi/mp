@@ -17,4 +17,10 @@ public interface TargetConverter extends BaseConverter{
      */
     List<Device> allTarget(TargetSceneRequest request);
 
+    /**
+     * 验证靶标是否可删除
+     * @param uuids
+     */
+    void validTargetCanDelete(List<String> uuids);
+
 }
