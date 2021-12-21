@@ -37,6 +37,7 @@ public class DeleteHandler extends HandlerCommon {
         getPluginHandler().getElementMap().forEach((nodeId, flowElement) -> {
             List<Flow> flows = flowElement.getFlows();
             if (flows == null) {
+                //此处建议添加日志输出
                 return;
             }
             flows.forEach(flow -> deleteFlowTasks.add(this.createDeleteFlowTask(nodeId, flow)));
