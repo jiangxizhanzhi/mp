@@ -231,11 +231,11 @@ public class InitiateHandler extends HandlerCommon {
         var requireCount = 0;
         // 默认路由单独分配
         var defaultRouterRequireCount = 0;
-        Set<String> existIps = new HashSet<>();
+        Set<String> existIps = new HashSet<>(getHandlerUtils().getOuterExistIps(auxiliaryNetworkCloudElement));
         List<SceneElementPortBO> selfPorts = new ArrayList<>();
         String selfPortIp = null;
         for (var auxiliaryNetworkSrcPort : auxiliaryNetworkSrcPorts) {
-            var portAuxiliaryNetworkCloudElement = getPortAuxiliaryNetworkCloudElement(auxiliaryNetworkSrcPort.getId());
+            var portAuxiliaryNetworkCloudElement = getHandlerUtils().getPortAuxiliaryNetworkCloudElement(auxiliaryNetworkSrcPort.getId());
             if (!auxiliaryNetworkCloudElement.equals(portAuxiliaryNetworkCloudElement)) {
                 continue;
             }
@@ -335,7 +335,7 @@ public class InitiateHandler extends HandlerCommon {
             return;
         }
 
-        var auxiliaryNetworkCloudElement = getPortAuxiliaryNetworkCloudElement(srcPort.getId());
+        var auxiliaryNetworkCloudElement = getHandlerUtils().getPortAuxiliaryNetworkCloudElement(srcPort.getId());
         if (auxiliaryNetworkCloudElement == null) {
             return;
         }
@@ -352,7 +352,7 @@ public class InitiateHandler extends HandlerCommon {
         if (isSelfAuxiliaryNetwork) {
             var auxiliaryNetworkSrcPorts = auxiliaryNetworkCloudElement.getSrcElement().getPorts();
             for (var auxiliaryNetworkSrcPort : auxiliaryNetworkSrcPorts) {
-                var portAuxiliaryNetworkCloudElement = getPortAuxiliaryNetworkCloudElement(auxiliaryNetworkSrcPort.getId());
+                var portAuxiliaryNetworkCloudElement = getHandlerUtils().getPortAuxiliaryNetworkCloudElement(auxiliaryNetworkSrcPort.getId());
                 if (!auxiliaryNetworkCloudElement.equals(portAuxiliaryNetworkCloudElement)) {
                     continue;
                 }
@@ -409,14 +409,16 @@ public class InitiateHandler extends HandlerCommon {
 
         for (var srcPort : srcPorts) {
             var cloudPort = getPluginHandler().getPort(srcPort.getId());
-            // 初始化accessModeId
-            var cloudAccessModes = cloudPort.getAccessModes();
-            if (cloudAccessModes != null) {
-                cloudAccessModes.forEach(cloudAccessMode -> {
-                    if (StringUtils.isEmpty(cloudAccessMode.getId())) {
-                        cloudAccessMode.setId(TextUtils.uuid());
-                    }
-                });
+            if (cloudPort != null) {
+                // 初始化accessModeId
+                var cloudAccessModes = cloudPort.getAccessModes();
+                if (cloudAccessModes != null) {
+                    cloudAccessModes.forEach(cloudAccessMode -> {
+                        if (StringUtils.isEmpty(cloudAccessMode.getId())) {
+                            cloudAccessMode.setId(TextUtils.uuid());
+                        }
+                    });
+                }
             }
 
             if (isVirtualElement) {

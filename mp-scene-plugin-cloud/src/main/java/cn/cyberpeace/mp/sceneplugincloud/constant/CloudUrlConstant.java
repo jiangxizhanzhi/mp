@@ -26,6 +26,7 @@ public class CloudUrlConstant {
 
     public static final String VIRTUAL_INTERNET_CREATE_URL = "/v1/scenarios/virtual_internet";
     public static final String NETWORK_QUERY_URL = "/v1/networks";
+    public static final String NETWORK_GET_URL = "/v1/networks/%s";
 
     public static final String CREATE_CONNECTION_URL = "/cpcloud/guacamole/v1/connection";
     public static final String GET_CONNECTION_URL = "/cpcloud/guacamole/v1/connection";

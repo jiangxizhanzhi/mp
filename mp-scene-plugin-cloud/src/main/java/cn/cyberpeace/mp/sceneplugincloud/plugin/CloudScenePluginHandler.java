@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin;
 
+import cn.cyberpeace.mp.base.util.basic.BoolUtils;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
@@ -24,11 +25,12 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ResumeHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.SuspendHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.UnpauseHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.modelhandler.CloudScenePluginModelHandler;
+import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 
 @ClassFieldClasses({
@@ -49,7 +51,7 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
     private final Map<String, CloudPluginSceneElementBO> firewallElementMap = new HashMap<>();
     private final Map<String, CloudPluginSceneElementBO> terminalElementMap = new HashMap<>();
 
-    private HandlerUtils<CloudScenePluginHandler> handlerUtils;
+    private HandlerUtils handlerUtils;
     private InitiateHandler initiateHandler;
     private CreateHandler createHandler;
     private DeleteHandler deleteHandler;
@@ -90,7 +92,7 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
     @Override
     public void initBase() {
         super.initBase();
-        handlerUtils = new HandlerUtils<>(this);
+        handlerUtils = new HandlerUtils(this);
         pluginModelHandler = new CloudScenePluginModelHandler(this);
         initiateHandler = new InitiateHandler(this);
         createHandler = new CreateHandler(this);
@@ -244,4 +246,31 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         new ResumeHandler(this, getSceneHandler().getScene().getEvent()).resumeElement(element);
     }
 
+    public List<String> allocateOuterIps(String auxiliaryNetworkNodeId, int count) {
+        var auxiliaryNetworkCloudElement = getElement(auxiliaryNetworkNodeId);
+        var cidr = auxiliaryNetworkCloudElement.getAuxiliaryNetworkCidr();
+        if (StringUtils.isEmpty(cidr)) {
+            return new ArrayList<>();
+        }
+
+        var portIds = handlerUtils.getAuxiliaryNetworkCloudElementPortIds(auxiliaryNetworkCloudElement);
+        Set<String> existIps = new HashSet<>(handlerUtils.getOuterExistIps(auxiliaryNetworkCloudElement));
+        if (!StringUtils.isEmpty(auxiliaryNetworkCloudElement.getAuxiliaryNetworkRouterIp())) {
+            existIps.add(auxiliaryNetworkCloudElement.getAuxiliaryNetworkRouterIp());
+        }
+        if (portIds != null && !portIds.isEmpty()) {
+            portIds.forEach(portId -> {
+                var port = getSceneHandler().getPort(portId);
+                if (StringUtils.isEmpty(port.getIp())) {
+                    existIps.add(port.getIp());
+                }
+            });
+        }
+
+        var ips = IpUtils.randomIps(cidr, count, new ArrayList<>(existIps),
+                auxiliaryNetworkCloudElement.getAllocationPools(),
+                BoolUtils.bool(auxiliaryNetworkCloudElement.getAuxiliaryNetworkDhcp()));
+        handlerUtils.addOuterExistIps(auxiliaryNetworkCloudElement, ips);
+        return ips;
+    }
 }
