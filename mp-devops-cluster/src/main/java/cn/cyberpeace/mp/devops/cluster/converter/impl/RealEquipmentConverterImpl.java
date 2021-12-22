@@ -215,7 +215,7 @@ public class RealEquipmentConverterImpl implements RealEquipmentConverter {
         device.setRole(request.getRole());
         device.setCategory(request.getMainCategory());
         device.setSecondCategory(request.getSubCategory());
-        device.setL3Category(request.getThirdCategory());
+        device.setL3Category(Objects.nonNull(request.getThirdCategory()) ? request.getThirdCategory() : 0);
         device.setExtEntityAccess(request.getExtEntityAccess());
         device.setExtEntity(request.getExtEntity());
         device.setExtSystemInfo(request.getSystemInfo());
