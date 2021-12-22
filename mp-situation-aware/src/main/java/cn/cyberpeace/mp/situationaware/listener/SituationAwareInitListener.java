@@ -84,9 +84,11 @@ public class SituationAwareInitListener implements ApplicationListener<Applicati
         log.info("init arkime network");
         try {
             String result = HttpUtils.sendGet(cpCloudUrl + "/networks");
+            log.info("init arkime network result {}", result);
             JSONArray networkList = (JSONArray) JSONPath.eval(JSON.parse(result), "$.data.list");
             networkList.stream().filter(json -> json instanceof JSONObject).map(JSONObject.class::cast).filter(json -> ARKIMENETWORKNAME.equals(json.get("name"))).findFirst().ifPresent(network ->{
                 SituationalAwareConstant.ArkimeNetworkId = (String) network.get("id");
+                log.info("ArkimeNetworkId {}", SituationalAwareConstant.ArkimeNetworkId);
             });
         } catch (Exception e) {
             log.info("init arkime network error {}", ExceptionUtils.getMessage(e));

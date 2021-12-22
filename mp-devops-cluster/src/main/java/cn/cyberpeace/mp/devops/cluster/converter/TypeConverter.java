@@ -1,105 +1,242 @@
 package cn.cyberpeace.mp.devops.cluster.converter;
 
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.BaseCloudPlatformService;
-import cn.cyberpeace.mp.devops.cluster.converter.model.TypeAllConvertModel;
-import cn.cyberpeace.mp.devops.cluster.converter.model.TypeL2AllConvertModel;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.TypeService;
+import cn.cyberpeace.mp.devops.cluster.converter.model.*;
+import cn.cyberpeace.mp.devops.cluster.model.TypeCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.TypeIdIntegerCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.TypeIdStringCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.TypeL2CloudPlatformModel;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-public interface TypeConverter extends BaseCloudPlatformService {
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+@Service
+public class TypeConverter {
+
+    private TypeService typeService;
+
+    @Autowired
+    public TypeConverter(TypeService typeService) {
+        this.typeService = typeService;
+    }
 
     /**
      * 查询所有类型数据
      * @return
      */
-    TypeAllConvertModel findL1AndL2AndL3Type();
+    public TypeAllConvertModel findL1AndL2AndL3Type() {
+        TypeCloudPlatformModel l1AndL2AndL3Type = typeService.findL1AndL2AndL3Type();
+        if (Objects.isNull(l1AndL2AndL3Type) || CollectionUtils.isEmpty(l1AndL2AndL3Type.getItems())){
+            return null;
+        }
+        return convertModel(l1AndL2AndL3Type);
+    }
 
     /**
      * 查询类型数据，仅返回L1和L2级类型数据
      * @return
      */
-    TypeL2AllConvertModel findL1AndL2Type();
+    public TypeL2AllConvertModel findL1AndL2Type() {
+        TypeL2CloudPlatformModel l1AndL2Type = typeService.findL1AndL2Type();
+        if (Objects.isNull(l1AndL2Type) || CollectionUtils.isEmpty(l1AndL2Type.getItems())){
+            return null;
+        }
+
+        return new TypeL2AllConvertModel(l1AndL2Type.getItems());
+    }
 
     /**
-     * 查询所有role
-     * @return
-     */
-    TypeAllConvertModel findIdIntegerByType(String type);
-
-    /**
-     * 根据类型查询
+     * 查询ID为数字类型的枚举数据
      * @param type
      * @return
      */
-    TypeAllConvertModel findIdStringByType(String type);
+    public TypeAllConvertModel findIdIntegerByType(String type) {
+        TypeIdIntegerCloudPlatformModel list = typeService.findIdIntegerByType(type);
+        if (Objects.isNull(list) || CollectionUtils.isEmpty(list.getItems())){
+            return null;
+        }
+        return convertModel(list);
+    }
 
     /**
-     * 查询角色
+     * 查询ID为字符串类型的枚举数据
+     * @param type
      * @return
      */
-    TypeAllConvertModel  findRoles();
+    public TypeAllConvertModel findIdStringByType(String type) {
+        TypeIdStringCloudPlatformModel list = typeService.findIdStringByType(type);
+        if (Objects.isNull(list) || CollectionUtils.isEmpty(list.getItems())){
+            return null;
+        }
+        return convertModel(list);
+    }
 
     /**
-     * 查询实体角色
+     * 查询角色枚举值
      * @return
      */
-    TypeAllConvertModel  findEntityRoles();
+    public TypeAllConvertModel findRoles() {
+        return this.findIdIntegerByType("role");
+    }
 
     /**
-     * 查询部署类型
+     * 查询实体设备角色枚举值
      * @return
      */
-    TypeAllConvertModel findDeployType();
+    public TypeAllConvertModel findEntityRoles() {
+        return this.findIdIntegerByType("entity_role");
+    }
 
     /**
-     * 查询镜像类型
+     * 查询部署类型枚举值
      * @return
      */
-    TypeAllConvertModel findImageType();
+    public TypeAllConvertModel findDeployType() {
+        return this.findIdIntegerByType("deploy_type");
+    }
 
     /**
-     * 查询语言
+     * 查询镜像类型枚举值
      * @return
      */
-    TypeAllConvertModel findLanguage();
+    public TypeAllConvertModel findImageType() {
+        return this.findIdStringByType("image_type");
+    }
 
     /**
-     * 查询系统架构
+     * 查询语言枚举值
      * @return
      */
-    TypeAllConvertModel findSystemArchitecure();
+    public TypeAllConvertModel findLanguage() {
+        return this.findIdStringByType("language");
+    }
 
     /**
-     * 查询磁盘格式
+     * 查询系统架构枚举值
      * @return
      */
-    TypeAllConvertModel findDiskFormat();
+    public TypeAllConvertModel findSystemArchitecure() {
+        return this.findIdStringByType("system_architecure");
+    }
+
+    /**
+     * 查询磁盘格式枚举值
+     * @return
+     */
+    public TypeAllConvertModel findDiskFormat() {
+        return this.findIdStringByType("disk_format");
+    }
 
     /**
      * 查询访问类型
      * @return
      */
-    TypeAllConvertModel findAccessType();
+    public TypeAllConvertModel findAccessType() {
+        return this.findIdStringByType("access_type");
+    }
 
     /**
      * 查询服务分类
      * @return
      */
-    TypeAllConvertModel findServiceCategories();
+    public TypeAllConvertModel findServiceCategories() {
+        return this.findIdStringByType("categories");
+    }
 
     /**
      * 查询平台
      * @return
      */
-    TypeAllConvertModel findInstallerPlatforms();
+    public TypeAllConvertModel findInstallerPlatforms() {
+        return this.findIdStringByType("installer_platforms");
+    }
 
     /**
      * 查询服务管理-docker服务：启动参数类型
      * @return
      */
-    TypeAllConvertModel findServiceStartType();
+    public TypeAllConvertModel findServiceStartType() {
+        return this.findIdStringByType("type");
+    }
 
     /**
      * 查询SNMP版本
      * @return
      */
-    TypeAllConvertModel findSnmpVersion();
+    public TypeAllConvertModel findSnmpVersion() {
+        return this.findIdStringByType("snmp_version");
+    }
+
+    /**
+     * 转换TypeOfRoleCloudPlatformModel对象
+     * @param list
+     * @return
+     */
+    private TypeAllConvertModel convertModel(TypeIdStringCloudPlatformModel list){
+        List<TypeIdStringConvertModel> modelList = list.getItems().stream()
+                .map(item -> new TypeIdStringConvertModel(item.getId(),item.getName())).collect(Collectors.toList());
+        TypeAllConvertModel model =  new TypeAllConvertModel();
+        model.setIdStringModelList(modelList);
+        return model;
+    }
+
+    /**
+     * 转换TypeOfRoleCloudPlatformModel对象
+     * @param list
+     * @return
+     */
+    private TypeAllConvertModel convertModel(TypeIdIntegerCloudPlatformModel list){
+        List<TypeIdIntegerConvertModel> modelList = list.getItems().stream()
+                .map(item -> new TypeIdIntegerConvertModel(item.getId(),item.getName())).collect(Collectors.toList());
+        TypeAllConvertModel model =  new TypeAllConvertModel();
+        model.setIdIntegerModelList(modelList);
+        return model;
+    }
+
+    /**
+     * 转换Type
+     * @param l1AndL2AndL3Type
+     * @return
+     */
+    private TypeAllConvertModel convertModel(TypeCloudPlatformModel l1AndL2AndL3Type){
+        List<TypeConvertModel> firstTypeList = new ArrayList<>();
+        List<TypeConvertModel> secondTypeList = new ArrayList<>();
+        List<TypeConvertModel> thirdTypeList = new ArrayList<>();
+        for (TypeCloudPlatformModel.Item item : l1AndL2AndL3Type.getItems()){
+            TypeConvertModel typeConvertModel = new TypeConvertModel();
+            typeConvertModel.setId(item.getL1Id());
+            typeConvertModel.setName(item.getL1Name());
+            firstTypeList.add(typeConvertModel);
+
+            if (CollectionUtils.isEmpty(item.getL1Child())){
+                continue;
+            }
+            for (TypeCloudPlatformModel.Item.L1Child l1Child : item.getL1Child()){
+                TypeConvertModel second = new TypeConvertModel();
+                second.setId(l1Child.getL2Id());
+                second.setName(l1Child.getL2Name());
+                second.setL1ParentId(item.getL1Id());
+                secondTypeList.add(second);
+
+                if (CollectionUtils.isEmpty(l1Child.getL2Child())){
+                    continue;
+                }
+
+                for (TypeCloudPlatformModel.Item.L1Child.L2Child l2Child : l1Child.getL2Child()){
+                    TypeConvertModel third = new TypeConvertModel();
+                    third.setId(l2Child.getL3Id());
+                    third.setName(l2Child.getL3Name());
+                    third.setL1ParentId(item.getL1Id());
+                    third.setL2ParentId(l1Child.getL2Id());
+                    thirdTypeList.add(third);
+                }
+            }
+        }
+        return new TypeAllConvertModel(firstTypeList,secondTypeList,thirdTypeList);
+    }
 }
