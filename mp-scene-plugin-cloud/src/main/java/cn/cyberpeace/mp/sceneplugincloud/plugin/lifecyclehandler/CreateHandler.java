@@ -172,6 +172,15 @@ public class CreateHandler extends HandlerCommon {
             });
             subnet.setAllocationPools(allocationPools);
         }
+        var srcHostRoutes = cloudElement.getAuxiliaryNetworkHostRoutes();
+        if (srcHostRoutes != null && !srcHostRoutes.isEmpty()) {
+            List<VirtualSwitchCreateData.Subnet.HostRoute> hostRoutes = new ArrayList<>();
+            srcHostRoutes.forEach(srcHostRoute -> {
+                hostRoutes.add(new VirtualSwitchCreateData.Subnet.HostRoute(srcHostRoute.getDestination(),
+                        srcHostRoute.getNexthop()));
+            });
+            subnet.setHostRoutes(hostRoutes);
+        }
         subnet.setDnsNameservers(CollectionUtils.emptyNull(cloudElement.getAuxiliaryNetworkDnsNameservers()));
         createData.setSubnet(subnet);
         var virtualSwitch = vsClient.create(createData);

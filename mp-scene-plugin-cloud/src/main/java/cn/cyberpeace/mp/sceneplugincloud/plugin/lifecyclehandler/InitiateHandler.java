@@ -7,7 +7,6 @@ import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
-import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
@@ -462,6 +461,7 @@ public class InitiateHandler extends HandlerCommon {
         cloudElement.setAuxiliaryNetworkDnsNameservers(cloudElement.getDnsNameservers());
         cloudElement.setAuxiliaryNetworkDhcp(cloudElement.getDhcp());
         cloudElement.setAuxiliaryNetworkAllocationPools(cloudElement.getAllocationPools());
+        cloudElement.setAuxiliaryNetworkHostRoutes(cloudElement.getHostRoutes());
         cloudElement.setAuxiliaryNetworkVlan(cloudElement.getVlan());
         cloudElement.setAuxiliaryNetworkVlanId(cloudElement.getVlanId());
 
@@ -474,6 +474,7 @@ public class InitiateHandler extends HandlerCommon {
         cloudElement.setDnsNameservers(cloudElement.getAuxiliaryNetworkDnsNameservers());
         cloudElement.setDhcp(cloudElement.getAuxiliaryNetworkDhcp());
         cloudElement.setAllocationPools(cloudElement.getAuxiliaryNetworkAllocationPools());
+        cloudElement.setHostRoutes(cloudElement.getAuxiliaryNetworkHostRoutes());
         cloudElement.setVlan(cloudElement.getAuxiliaryNetworkVlan());
         cloudElement.setVlanId(cloudElement.getAuxiliaryNetworkVlanId());
 
