@@ -52,7 +52,6 @@ public class OrgPermissionServiceImpl
     @Override
     public Set<TargetModel> listTargetsByOrgId(String orgId) {
         ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
-//        Assert.notNull(orgId, "orgId不能为空");
 
 //        var objResult = orgService.get(orgId).getSource();
 //        if (objResult == null || objResult.getObj() == null) {
