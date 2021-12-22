@@ -81,6 +81,9 @@ public enum AuthErrorCode implements ErrorCode {
 
 
     // EXCEL
+    EXCEL_EXCEED_SIZE("MP-110118", "excel_exceed_size"),
+    EXCEL_FORMAT_ERROR("MP-110119", "excel_format_error"),
+    EXCEL_NOT_EXCEL("MP-110120", "excel_not_excel"),
     EXCEL_USER_LIST_EMPTY("MP-110121", "excel_list_empty"),
     EXCEL_LIST_SIZE_OVER("MP-110122", "excel_list_size_over"),
     EXCEL_LIST_USERNAME_EMPTY("MP-110123", "excel_list_username_empty"),

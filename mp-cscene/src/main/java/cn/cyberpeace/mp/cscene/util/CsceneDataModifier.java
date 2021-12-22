@@ -17,6 +17,8 @@ import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneDataBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.BaseCloudPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -40,9 +42,35 @@ public class CsceneDataModifier {
     public static void supplyProtocol(CsceneInstanceBO csceneInstance, String protocol) {
         ScenePluginDataBO cloudPlugin = Optional.ofNullable(csceneInstance.getScene().getPlugins()).orElse(new HashMap<>()).get("cpcloud");
         csceneInstance.getScene().getTopology().getElements().get(0).getPorts().get(0).getId();
-        if (cloudPlugin != null && cloudPlugin.getElements() != null) {
+        Map<String, Map<String, Object>> cloudElements = cloudPlugin.getElements();
+        if (cloudElements != null) {
             for (SceneElementBO elementBO : csceneInstance.getScene().getTopology().getElements()) {
                 if (CollectionUtils.isEmpty(elementBO.getPorts())) {
+                    continue;
+                }
+                Map<String, Object> cloudElement = cloudElements.get(elementBO.getId());
+                if (cloudElement == null) {
+                    continue;
+                }
+                Object virtualType = cloudElement.get("virtual_type");
+                if (virtualType == null) {
+                    continue;
+                }
+                int intVirtualType = Integer.parseInt(virtualType.toString());
+                if (BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE != intVirtualType &&
+                        BaseCloudPluginSceneElementModel.VirtualType.CONTAINER != intVirtualType &&
+                        BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE != intVirtualType) {
+                    continue;
+                }
+                // 当前节点所有端口上指定协议数量不为0则跳出此次
+                boolean hasPro = false;
+                for (SceneElementPortBO portBO : elementBO.getPorts()) {
+                    hasPro = portBO.getAccessModes().stream().filter(m -> protocol.equals(m.getProtocol())).collect(Collectors.toList()).size() > 0;
+                    if (hasPro) {
+                        break;
+                    }
+                }
+                if (hasPro) {
                     continue;
                 }
                 for (SceneElementPortBO portBO : elementBO.getPorts()) {
@@ -68,6 +96,7 @@ public class CsceneDataModifier {
                         originModeList.add(protocolMap);
                         portMap.put("access_modes", originModes);
                         portBO.getAccessModes().add(mode);
+                        break;
                     }
                 }
             }
@@ -76,6 +105,7 @@ public class CsceneDataModifier {
 
     /**
      * 创建时去除多余的eid
+     *
      * @param csceneBO
      */
     public static void removeEidWhenCreate(CsceneBO csceneBO) {
@@ -110,6 +140,7 @@ public class CsceneDataModifier {
 
     /**
      * 纠正创建和更新场景模板时fdfs的地址,移除前缀
+     *
      * @param csceneBO
      */
     public static void removeFilePathPrefix(CsceneBO csceneBO) {
@@ -193,6 +224,7 @@ public class CsceneDataModifier {
 
     /**
      * 纠正返回场景模板时fdfs的地址,增加前缀
+     *
      * @param baseSceneDataBO
      */
     private static void addFilePathPrefix(BaseSceneDataBO baseSceneDataBO) {
