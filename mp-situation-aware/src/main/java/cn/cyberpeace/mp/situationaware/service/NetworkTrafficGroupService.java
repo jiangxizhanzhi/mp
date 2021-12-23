@@ -181,9 +181,9 @@ public class NetworkTrafficGroupService {
         try {
             log.info("create arkime Image instance param {}",paramObject.toJSONString());
             var result = HttpUtils.sendPost(url, paramObject.toJSONString());
-        } catch (IOException e) {
-            log.error("create arkime Image instance error");
-            log.error(SituationalAwareErrorCode.ARKIME_ADD_ERROR.getMessage(), ExceptionUtils.getStackTrace(e));
+            log.info("create arkime Image instance res {}", result);
+        } catch (Exception e) {
+            log.error("create arkime Image instance error {}", ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(SituationalAwareErrorCode.ARKIME_ADD_ERROR, ExceptionUtils.getStackTrace(e));
         }
     }
