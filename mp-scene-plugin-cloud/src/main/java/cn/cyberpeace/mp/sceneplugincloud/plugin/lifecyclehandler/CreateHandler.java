@@ -403,7 +403,11 @@ public class CreateHandler extends HandlerCommon {
                     accessModeParam.setPort(accessMode.getPort());
                     accessModeParam.setUsername(accessMode.getUsername());
                     accessModeParam.setPassword(accessMode.getPassword());
-                    accessModeParam.setIpAddress(TextUtils.emptyNull(port.getIp()));
+                    if (StringUtils.isNotBlank(accessMode.getAccessIp())) {
+                        accessModeParam.setIpAddress(TextUtils.emptyNull(accessMode.getAccessIp()));
+                    } else {
+                        accessModeParam.setIpAddress(TextUtils.emptyNull(port.getIp()));
+                    }
                     accessModeParam.setMacAddress(TextUtils.emptyNull(port.getMacAddr()));
                     return accessModeParam;
                 }).collect(Collectors.toList()));
