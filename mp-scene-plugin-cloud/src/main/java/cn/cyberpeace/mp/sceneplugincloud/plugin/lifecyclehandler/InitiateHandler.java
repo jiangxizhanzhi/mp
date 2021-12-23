@@ -7,7 +7,6 @@ import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
-import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
@@ -232,11 +231,11 @@ public class InitiateHandler extends HandlerCommon {
         var requireCount = 0;
         // 默认路由单独分配
         var defaultRouterRequireCount = 0;
-        Set<String> existIps = new HashSet<>();
+        Set<String> existIps = new HashSet<>(getHandlerUtils().getOuterExistIps(auxiliaryNetworkCloudElement));
         List<SceneElementPortBO> selfPorts = new ArrayList<>();
         String selfPortIp = null;
         for (var auxiliaryNetworkSrcPort : auxiliaryNetworkSrcPorts) {
-            var portAuxiliaryNetworkCloudElement = getPortAuxiliaryNetworkCloudElement(auxiliaryNetworkSrcPort.getId());
+            var portAuxiliaryNetworkCloudElement = getHandlerUtils().getPortAuxiliaryNetworkCloudElement(auxiliaryNetworkSrcPort.getId());
             if (!auxiliaryNetworkCloudElement.equals(portAuxiliaryNetworkCloudElement)) {
                 continue;
             }
@@ -336,7 +335,7 @@ public class InitiateHandler extends HandlerCommon {
             return;
         }
 
-        var auxiliaryNetworkCloudElement = getPortAuxiliaryNetworkCloudElement(srcPort.getId());
+        var auxiliaryNetworkCloudElement = getHandlerUtils().getPortAuxiliaryNetworkCloudElement(srcPort.getId());
         if (auxiliaryNetworkCloudElement == null) {
             return;
         }
@@ -353,7 +352,7 @@ public class InitiateHandler extends HandlerCommon {
         if (isSelfAuxiliaryNetwork) {
             var auxiliaryNetworkSrcPorts = auxiliaryNetworkCloudElement.getSrcElement().getPorts();
             for (var auxiliaryNetworkSrcPort : auxiliaryNetworkSrcPorts) {
-                var portAuxiliaryNetworkCloudElement = getPortAuxiliaryNetworkCloudElement(auxiliaryNetworkSrcPort.getId());
+                var portAuxiliaryNetworkCloudElement = getHandlerUtils().getPortAuxiliaryNetworkCloudElement(auxiliaryNetworkSrcPort.getId());
                 if (!auxiliaryNetworkCloudElement.equals(portAuxiliaryNetworkCloudElement)) {
                     continue;
                 }
@@ -410,14 +409,16 @@ public class InitiateHandler extends HandlerCommon {
 
         for (var srcPort : srcPorts) {
             var cloudPort = getPluginHandler().getPort(srcPort.getId());
-            // 初始化accessModeId
-            var cloudAccessModes = cloudPort.getAccessModes();
-            if (cloudAccessModes != null) {
-                cloudAccessModes.forEach(cloudAccessMode -> {
-                    if (StringUtils.isEmpty(cloudAccessMode.getId())) {
-                        cloudAccessMode.setId(TextUtils.uuid());
-                    }
-                });
+            if (cloudPort != null) {
+                // 初始化accessModeId
+                var cloudAccessModes = cloudPort.getAccessModes();
+                if (cloudAccessModes != null) {
+                    cloudAccessModes.forEach(cloudAccessMode -> {
+                        if (StringUtils.isEmpty(cloudAccessMode.getId())) {
+                            cloudAccessMode.setId(TextUtils.uuid());
+                        }
+                    });
+                }
             }
 
             if (isVirtualElement) {
@@ -462,6 +463,7 @@ public class InitiateHandler extends HandlerCommon {
         cloudElement.setAuxiliaryNetworkDnsNameservers(cloudElement.getDnsNameservers());
         cloudElement.setAuxiliaryNetworkDhcp(cloudElement.getDhcp());
         cloudElement.setAuxiliaryNetworkAllocationPools(cloudElement.getAllocationPools());
+        cloudElement.setAuxiliaryNetworkHostRoutes(cloudElement.getHostRoutes());
         cloudElement.setAuxiliaryNetworkVlan(cloudElement.getVlan());
         cloudElement.setAuxiliaryNetworkVlanId(cloudElement.getVlanId());
 
@@ -474,6 +476,7 @@ public class InitiateHandler extends HandlerCommon {
         cloudElement.setDnsNameservers(cloudElement.getAuxiliaryNetworkDnsNameservers());
         cloudElement.setDhcp(cloudElement.getAuxiliaryNetworkDhcp());
         cloudElement.setAllocationPools(cloudElement.getAuxiliaryNetworkAllocationPools());
+        cloudElement.setHostRoutes(cloudElement.getAuxiliaryNetworkHostRoutes());
         cloudElement.setVlan(cloudElement.getAuxiliaryNetworkVlan());
         cloudElement.setVlanId(cloudElement.getAuxiliaryNetworkVlanId());
 

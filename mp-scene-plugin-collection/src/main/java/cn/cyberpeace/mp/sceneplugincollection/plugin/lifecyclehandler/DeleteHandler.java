@@ -5,6 +5,8 @@ import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualRouter;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterDeleteData;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.taskpool.DeleteTaskPool;
@@ -26,6 +28,7 @@ public class DeleteHandler extends HandlerCommon {
         public static final EventProcess UNBIND_PROBE_COLLECT_AGENTS = new EventProcess("unbind_probe_collect_agents", "sceneplugincollection.event.unbind_probe_collect_agents");
         public static final EventProcess DELETE_FLOW_COLLECTOR = new EventProcess("delete_flow_collector", "sceneplugincollection.event.delete_flow_collector");
         public static final EventProcess DELETE_PROBE_COLLECTOR = new EventProcess("delete_probe_collector", "sceneplugincollection.event.delete_probe_collector");
+        public static final EventProcess DELETE_PROBE_ROUTER = new EventProcess("delete_probe_router", "sceneplugincollection.event.delete_probe_router");
     }
 
     public static class ElementProcess {
@@ -50,6 +53,13 @@ public class DeleteHandler extends HandlerCommon {
             return;
         }
         getProbeCollector().unbindAgent(probeCollectorId, cloudResourceId);
+    }
+
+    protected boolean deleteProbeRouter(String probeRouterId) {
+        var vrClient = new VirtualRouter();
+        var deleteData = new VirtualRouterDeleteData();
+        deleteData.setIds(List.of(probeRouterId));
+        return vrClient.delete(deleteData);
     }
 
     public void delete() {
@@ -101,21 +111,29 @@ public class DeleteHandler extends HandlerCommon {
 
         var probeCollectorId = scene.getProbeCollector();
         if (!StringUtils.isEmpty(probeCollectorId)) {
-            var probeCollectionElements = getPluginHandler().getElementMap().values()
-                    .stream()
-                    .filter(collectionElement -> !CollectionUtils.isEmpty(collectionElement.getProbes()))
-                    .collect(Collectors.toList());
-            var unbindProbeCollectAgentTasks = probeCollectionElements.stream()
-                    .map(collectionElement -> (Runnable)() -> unbindProbeCollectAgentProcess(collectionElement,
-                            probeCollectorId))
-                    .collect(Collectors.toList());
-            if (!unbindProbeCollectAgentTasks.isEmpty()) {
-                runSceneProgress(SceneProcess.UNBIND_PROBE_COLLECT_AGENTS, () -> runTasks(unbindProbeCollectAgentTasks));
-            }
+//            var probeCollectionElements = getPluginHandler().getElementMap().values()
+//                    .stream()
+//                    .filter(collectionElement -> !CollectionUtils.isEmpty(collectionElement.getProbes()))
+//                    .collect(Collectors.toList());
+//            var unbindProbeCollectAgentTasks = probeCollectionElements.stream()
+//                    .map(collectionElement -> (Runnable)() -> unbindProbeCollectAgentProcess(collectionElement,
+//                            probeCollectorId))
+//                    .collect(Collectors.toList());
+//            if (!unbindProbeCollectAgentTasks.isEmpty()) {
+//                runSceneProgress(SceneProcess.UNBIND_PROBE_COLLECT_AGENTS, () -> runTasks(unbindProbeCollectAgentTasks));
+//            }
             runSceneProgress(SceneProcess.DELETE_PROBE_COLLECTOR, () -> {
                 getProbeCollector().deleteCollector(probeCollectorId);
             });
         }
+
+        var probeRouterId = scene.getProbeRouter();
+        if (!StringUtils.isEmpty(probeRouterId)) {
+            runSceneProgress(SceneProcess.DELETE_PROBE_ROUTER, () -> {
+                deleteProbeRouter(probeRouterId);
+            });
+        }
+
     }
 
     public void unbindProbeCollectAgentProcess(CollectionPluginSceneElementBO collectionElement, String probeCollectorId) {

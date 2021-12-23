@@ -62,11 +62,19 @@ public abstract class ScenePluginHandler<S extends BasePluginSceneBO<?, S, Scene
     }
 
     public void ackSceneChanged(boolean forceSave) {
-        getSceneHandler().ackSceneChanged(forceSave);
+        getSceneHandler().ackSceneChanged(forceSave, true);
     }
 
     public void ackElementChanged(String nodeId, boolean forceSave) {
-        getSceneHandler().ackElementChanged(nodeId, forceSave);
+        getSceneHandler().ackElementChanged(nodeId, forceSave, true);
+    }
+
+    public void asyncAckSceneChanged(boolean forceSave) {
+        getSceneHandler().asyncAckSceneChanged(forceSave, true);
+    }
+
+    public void asyncAckElementChanged(String nodeId, boolean forceSave) {
+        getSceneHandler().asyncAckElementChanged(nodeId, forceSave, true);
     }
 
     public void initiate() throws Exception {

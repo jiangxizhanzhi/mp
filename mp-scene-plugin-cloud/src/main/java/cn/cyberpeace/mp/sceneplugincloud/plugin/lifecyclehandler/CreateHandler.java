@@ -1,14 +1,11 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
-import cn.cyberpeace.mp.base.common.FdfsCommon;
 import cn.cyberpeace.mp.base.util.basic.CollectionUtils;
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
-import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
-import cn.cyberpeace.mp.scene.util.CommandUtils;
 import cn.cyberpeace.mp.scene.util.SceneCommandUtils;
 import cn.cyberpeace.mp.scene.util.SceneFileUtils;
 import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
@@ -21,28 +18,16 @@ import cn.cyberpeace.mp.sceneplugincloud.constant.FirewallRuleDirection;
 import cn.cyberpeace.mp.sceneplugincloud.constant.QosRuleDirection;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.EntityNode;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualFirewall;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualRouter;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualSwitch;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerCreateData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.EntityNodeCreateData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualFirewallCreateData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineCreateData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterCreateData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.*;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.ContainerFileUtils;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
-import cn.hutool.core.io.FileUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -152,7 +137,7 @@ public class CreateHandler extends HandlerCommon {
 
         var srcElement = cloudElement.getSrcElement();
         var createData = new VirtualSwitchCreateData();
-        createData.setName(genResourceName(srcElement.getEid()));
+        createData.setName(HandlerUtils.genResourceName(srcElement.getEid()));
         createData.setEntityNetwork(cloudElement.getAuxiliaryNetworkVlan());
         if (Boolean.TRUE.equals(cloudElement.getAuxiliaryNetworkVlan())) {
             createData.setSegmentationId(IntUtils.zeroNull(cloudElement.getAuxiliaryNetworkVlanId()));
@@ -172,6 +157,15 @@ public class CreateHandler extends HandlerCommon {
             });
             subnet.setAllocationPools(allocationPools);
         }
+        var srcHostRoutes = cloudElement.getAuxiliaryNetworkHostRoutes();
+        if (srcHostRoutes != null && !srcHostRoutes.isEmpty()) {
+            List<VirtualSwitchCreateData.Subnet.HostRoute> hostRoutes = new ArrayList<>();
+            srcHostRoutes.forEach(srcHostRoute -> {
+                hostRoutes.add(new VirtualSwitchCreateData.Subnet.HostRoute(srcHostRoute.getDestination(),
+                        srcHostRoute.getNexthop()));
+            });
+            subnet.setHostRoutes(hostRoutes);
+        }
         subnet.setDnsNameservers(CollectionUtils.emptyNull(cloudElement.getAuxiliaryNetworkDnsNameservers()));
         createData.setSubnet(subnet);
         var virtualSwitch = vsClient.create(createData);
@@ -187,7 +181,7 @@ public class CreateHandler extends HandlerCommon {
 
         // 创建辅助路由
         var createData = new VirtualRouterCreateData();
-        createData.setName(genResourceName(cloudElement.getSrcElement().getEid()));
+        createData.setName(HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid()));
         var virtualNic = new VirtualNic();
         virtualNic.setNetworkId(cloudElement.getAuxiliaryNetworkId());
         createData.setNetworks(List.of(virtualNic));
@@ -221,7 +215,7 @@ public class CreateHandler extends HandlerCommon {
 
             if (!targetPorts.isEmpty()) {
                 var createData = new VirtualFirewallCreateData();
-                createData.setName(genResourceName(srcElement.getEid()));
+                createData.setName(HandlerUtils.genResourceName(srcElement.getEid()));
                 var cloudFirewallRules = CloudFirewallRules.fromSrcRules(srcRules);
                 createData.setIngressRules(cloudFirewallRules.getIngressRules());
                 createData.setEgressRules(cloudFirewallRules.getEgressRules());
@@ -237,7 +231,7 @@ public class CreateHandler extends HandlerCommon {
 
     private void createVirtualRouterGroupPortFirewall(CloudPluginSceneElementBO cloudElement) {
         // 单独创建端口防火墙
-        var groupPortsMap = getCloudElementGroupPorts(cloudElement);
+        var groupPortsMap = getHandlerUtils().getCloudElementGroupPorts(cloudElement);
         for (var groupPorts : groupPortsMap.values()) {
             // 防火墙的虚拟路由端口
             Set<String> targetPorts = new HashSet<>();
@@ -263,7 +257,7 @@ public class CreateHandler extends HandlerCommon {
 
             var srcElement = cloudElement.getSrcElement();
             var createData = new VirtualFirewallCreateData();
-            createData.setName(genResourceName(srcElement.getEid()));
+            createData.setName(HandlerUtils.genResourceName(srcElement.getEid()));
             var cloudFirewallRules = CloudFirewallRules.fromSrcRules(srcRules);
             createData.setIngressRules(cloudFirewallRules.getIngressRules());
             createData.setEgressRules(cloudFirewallRules.getEgressRules());
@@ -292,10 +286,10 @@ public class CreateHandler extends HandlerCommon {
         }
 
         Map<String, List<CloudPluginSceneElementPortBO>> networkIdCloudPortsMap = new HashMap<>();
-        var groupPortsMap = getCloudElementGroupPorts(cloudElement);
+        var groupPortsMap = getHandlerUtils().getCloudElementGroupPorts(cloudElement);
         for (var groupPorts : groupPortsMap.values()) {
             var samplePort = groupPorts.get(0);
-            var auxiliaryNetworkCloudElement = getPortAuxiliaryNetworkCloudElement(samplePort.getId());
+            var auxiliaryNetworkCloudElement = getHandlerUtils().getPortAuxiliaryNetworkCloudElement(samplePort.getId());
             if (auxiliaryNetworkCloudElement == null) {
                 continue;
             }
@@ -339,7 +333,7 @@ public class CreateHandler extends HandlerCommon {
                 qosRules.add(qosRule);
             }
             virtualNic.setQosRules(CollectionUtils.emptyNull(qosRules));
-            if (!getHandlerUtils().isExternalNetwork(auxiliaryNetworkId)) {
+            if (!HandlerUtils.isExternalNetwork(auxiliaryNetworkId)) {
                 virtualNic.setEnableExternal(sampleCloudPort.getNat());
             }
 
@@ -378,7 +372,7 @@ public class CreateHandler extends HandlerCommon {
                 continue;
             }
             var connectedCloudElement = getPluginHandler().getElement(connectedSrcElement.getId());
-            var auxiliaryNetworkCloudElement = getHandlerUtils().confirmAuxiliaryNetworkCloudElement(cloudElement, connectedCloudElement);
+            var auxiliaryNetworkCloudElement = HandlerUtils.confirmAuxiliaryNetworkCloudElement(cloudElement, connectedCloudElement);
             if (auxiliaryNetworkCloudElement == null) {
                 continue;
             }
@@ -565,7 +559,7 @@ public class CreateHandler extends HandlerCommon {
 
                         var connection = accessModeData.getConnection();
                         if (connection != null) {
-                            accessMode.setConnectionUser(TextUtils.emptyNull(getRequestUser()));
+                            accessMode.setConnectionUser(TextUtils.emptyNull(getHandlerUtils().getRequestUser()));
                             accessMode.setConnectionId(connection.getConnectionId());
                             accessMode.setConnectionUrl(connection.getUrl());
                         }
@@ -619,7 +613,7 @@ public class CreateHandler extends HandlerCommon {
 
                     var connection = accessModeData.getConnection();
                     if (connection != null) {
-                        accessMode.setConnectionUser(TextUtils.emptyNull(getRequestUser()));
+                        accessMode.setConnectionUser(TextUtils.emptyNull(getHandlerUtils().getRequestUser()));
                         accessMode.setConnectionId(connection.getConnectionId());
                         accessMode.setConnectionUrl(connection.getUrl());
                     }
@@ -632,7 +626,7 @@ public class CreateHandler extends HandlerCommon {
 
     protected void createVirtualRouter(CloudPluginSceneElementBO cloudElement) {
         var createData = new VirtualRouterCreateData();
-        createData.setName(genResourceName(cloudElement.getSrcElement().getEid()));
+        createData.setName(HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid()));
         var srcStaticRoutes = cloudElement.getStaticRoutes();
         if (srcStaticRoutes != null && !srcStaticRoutes.isEmpty()) {
             List<VirtualRouterCreateData.StaticRoute> staticRoutes = new ArrayList<>();
@@ -654,7 +648,7 @@ public class CreateHandler extends HandlerCommon {
     protected void createVirtualFirewall(CloudPluginSceneElementBO cloudElement) {
         var srcElement = cloudElement.getSrcElement();
         var createData = new VirtualFirewallCreateData();
-        createData.setName(genResourceName(srcElement.getEid()));
+        createData.setName(HandlerUtils.genResourceName(srcElement.getEid()));
         var srcRules = cloudElement.getFirewallRules();
         if (srcRules != null && !srcRules.isEmpty()) {
             var cloudFirewallRules = CloudFirewallRules.fromSrcRules(srcRules);
@@ -687,10 +681,10 @@ public class CreateHandler extends HandlerCommon {
     protected void createVirtualMachine(CloudPluginSceneElementBO cloudElement) {
         var srcElement = cloudElement.getSrcElement();
         var createData = new VirtualMachineCreateData();
-        createData.setRequestUser(TextUtils.emptyNull(getRequestUser()));
-        createData.setDepartment(Optional.ofNullable(getRequestUserOrg()).orElse(StringUtils.EMPTY));
+        createData.setRequestUser(TextUtils.emptyNull(getHandlerUtils().getRequestUser()));
+        createData.setDepartment(Optional.ofNullable(getHandlerUtils().getRequestUserOrg()).orElse(StringUtils.EMPTY));
         createData.setScene(Optional.ofNullable(getPluginHandler().getSrcScene().getName()).orElse(StringUtils.EMPTY));
-        createData.setName(genResourceName(srcElement.getEid()));
+        createData.setName(HandlerUtils.genResourceName(srcElement.getEid()));
         createData.setImage(cloudElement.getImage());
         createData.setCpu(IntUtils.zeroNull(srcElement.getCpu()));
         createData.setRam(IntUtils.zeroNull(srcElement.getRam()));
@@ -711,10 +705,10 @@ public class CreateHandler extends HandlerCommon {
     protected void createContainer(CloudPluginSceneElementBO cloudElement) {
         var srcElement = cloudElement.getSrcElement();
         var createData = new ContainerCreateData();
-        createData.setRequestUser(TextUtils.emptyNull(getRequestUser()));
-        createData.setDepartment(Optional.ofNullable(getRequestUserOrg()).orElse(StringUtils.EMPTY));
+        createData.setRequestUser(TextUtils.emptyNull(getHandlerUtils().getRequestUser()));
+        createData.setDepartment(Optional.ofNullable(getHandlerUtils().getRequestUserOrg()).orElse(StringUtils.EMPTY));
         createData.setScene(Optional.ofNullable(getPluginHandler().getSrcScene().getName()).orElse(StringUtils.EMPTY));
-        createData.setName(genResourceName(srcElement.getEid()));
+        createData.setName(HandlerUtils.genResourceName(srcElement.getEid()));
         createData.setImage(cloudElement.getImage());
         // todo 暂时不传
 //        createData.setCpu(IntUtils.zeroNull(srcElement.getCpu()));
@@ -738,8 +732,8 @@ public class CreateHandler extends HandlerCommon {
 
     protected void createEntityNode(CloudPluginSceneElementBO cloudElement) {
         var createData = new EntityNodeCreateData();
-        createData.setRequestUser(TextUtils.emptyNull(getRequestUser()));
-        createData.setDepartment(Optional.ofNullable(getRequestUserOrg()).orElse(StringUtils.EMPTY));
+        createData.setRequestUser(TextUtils.emptyNull(getHandlerUtils().getRequestUser()));
+        createData.setDepartment(Optional.ofNullable(getHandlerUtils().getRequestUserOrg()).orElse(StringUtils.EMPTY));
         createData.setScene(Optional.ofNullable(getPluginHandler().getSrcScene().getName()).orElse(StringUtils.EMPTY));
         createData.setName(cloudElement.getImage());
         createData.setInterfaces(CollectionUtils.emptyNull(genEntityInterfaces(cloudElement)));
