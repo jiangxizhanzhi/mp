@@ -11,13 +11,13 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.util.Map;
 
 /**
@@ -40,6 +40,8 @@ public class BaseServiceImpl {
             if (log.isInfoEnabled()) {
                 log.info("=====GET调用url：{},对应返回结果信息：{}", url, result);
             }
+        }catch (ConnectException e){
+            throw new MpRuntimeException(BaseErrorCode.GATEWAY_TIME_OUT);
         } catch (IOException e) {
             log.error("=====GET调用url：{},对应返回结果信息：{},报错信息：{}",url,result,e.getMessage(),e);
         }
@@ -58,6 +60,8 @@ public class BaseServiceImpl {
             if (log.isInfoEnabled()) {
                 log.info("=====GET调用url：{},对应返回结果信息：{}", url, result);
             }
+        }catch (ConnectException e){
+            throw new MpRuntimeException(BaseErrorCode.GATEWAY_TIME_OUT);
         } catch (IOException e) {
             log.error("=====GET调用url：{},对应返回结果信息：{},报错信息：{}",url,result,e.getMessage(),e);
         }
@@ -76,6 +80,8 @@ public class BaseServiceImpl {
             if (log.isInfoEnabled()) {
                 log.info("=====GET调用url：{},对应返回结果信息：{}", url, result);
             }
+        }catch (ConnectException e){
+            throw new MpRuntimeException(BaseErrorCode.GATEWAY_TIME_OUT);
         } catch (IOException e) {
             log.error("=====GET调用url：{},对应返回结果信息：{},报错信息：{}",url,result,e.getMessage(),e);
         }
@@ -98,7 +104,7 @@ public class BaseServiceImpl {
                 log.info("=====GET调用url：{},对应返回结果信息：{}", url, result);
             }
             model = JsonUtils.toSnakeObject(result,valueType);
-        }catch (HttpHostConnectException e){
+        }catch (ConnectException e){
             throw new MpRuntimeException(BaseErrorCode.GATEWAY_TIME_OUT);
         }catch (IOException e) {
             log.error("=====GET调用url：{},对应返回结果信息：{},报错信息：{}",url,result,e.getMessage(),e);
@@ -123,6 +129,8 @@ public class BaseServiceImpl {
                 log.info("=====GET调用url：{},对应返回结果信息：{}", url, result);
             }
             model = JsonUtils.toSnakeObject(result,valueType);
+        } catch (ConnectException e){
+            throw new MpRuntimeException(BaseErrorCode.GATEWAY_TIME_OUT);
         } catch (IOException e) {
             log.error("=====GET调用url：{},对应返回结果信息：{},报错信息：{}",url,result,e.getMessage(),e);
         }
@@ -142,6 +150,8 @@ public class BaseServiceImpl {
             if (log.isInfoEnabled()) {
                 log.info("=====POST调用url：{},参数：{},对应返回结果信息：{}", url, body, result);
             }
+        }catch (ConnectException e){
+            throw new MpRuntimeException(BaseErrorCode.GATEWAY_TIME_OUT);
         } catch (IOException e) {
             log.error("=====POST调用url：{},参数：{},对应返回结果信息：{},报错信息：{}",url,body,result,e.getMessage(),e);
         }
@@ -165,6 +175,8 @@ public class BaseServiceImpl {
                 log.info("=====POST调用url：{},参数：{},对应返回结果信息：{}", url, body, result);
             }
             model = JsonUtils.toSnakeObject(result,valueType);
+        }catch (ConnectException e){
+            throw new MpRuntimeException(BaseErrorCode.GATEWAY_TIME_OUT);
         } catch (IOException e) {
             log.error("=====POST调用url：{},参数：{},对应返回结果信息：{},报错信息：{}",url,body,result,e.getMessage(),e);
         }
@@ -184,6 +196,8 @@ public class BaseServiceImpl {
             if (log.isInfoEnabled()) {
                 log.info("=====PUT调用url：{},参数：{},对应返回结果信息：{}", url, body, result);
             }
+        }catch (ConnectException e){
+            throw new MpRuntimeException(BaseErrorCode.GATEWAY_TIME_OUT);
         } catch (IOException e) {
             log.error("=====PUT调用url：{},参数：{},对应返回结果信息：{},报错信息：{}",url,body,result,e.getMessage(),e);
         }
@@ -207,6 +221,8 @@ public class BaseServiceImpl {
                 log.info("=====PUT调用url：{},参数：{},对应返回结果信息：{}", url, body, result);
             }
             model = JsonUtils.toSnakeObject(result,valueType);
+        }catch (ConnectException e){
+            throw new MpRuntimeException(BaseErrorCode.GATEWAY_TIME_OUT);
         } catch (IOException e) {
             log.error("=====PUT调用url：{},参数：{},对应返回结果信息：{},报错信息：{}",url,body,result,e.getMessage(),e);
         }
@@ -235,6 +251,8 @@ public class BaseServiceImpl {
             if (log.isInfoEnabled()) {
                 log.info("=====DELETE调用url：{},参数：{},对应返回结果信息：{}", url, body, result);
             }
+        }catch (ConnectException e){
+            throw new MpRuntimeException(BaseErrorCode.GATEWAY_TIME_OUT);
         } catch (IOException e) {
             log.error("=====DELETE调用url：{},参数：{},对应返回结果信息：{},报错信息：{}",url,body,result,e.getMessage(),e);
         }
