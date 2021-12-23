@@ -22,6 +22,7 @@ import cn.cyberpeace.mp.cscene.model.CsceneRoleModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneRoleMapper;
 import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.model.SceneConfigModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneConfigService;
@@ -231,10 +232,31 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     @Transactional
     public ServiceResult<CsceneBO> sync(CsceneBO csceneBO, CsceneContextBO context) {
         checkSceneEditNodeLimit(csceneBO);
+        if (csceneBO.getSceneConfig() == null && StringUtils.isNotEmpty(csceneBO.getId())) {
+            var serviceResult = update(csceneBO.toModel());
+            if (serviceResult != null && serviceResult.getSource() != null && serviceResult.getSource().getObj() != null) {
+                CsceneBO result = new CsceneBO();
+                result.fromModel(serviceResult.getSource().getObj());
+                return new ServiceResult<>(result);
+            } else {
+                return new ServiceResult<>(csceneBO);
+            }
+        } else {
+            var csceneHandler = new CsceneHandler(csceneBO, context);
+            if (StringUtils.isEmpty(csceneBO.getName())) {
+                // 兼容以前没有cscene name的调用
+                csceneBO.setName(getSceneName(csceneBO.getSceneConfig()));
+            }
+            csceneHandler.save();
+            return new ServiceResult<>(csceneHandler.toData());
+        }
+    }
 
-        var csceneHandler = new CsceneHandler(csceneBO, context);
-        csceneHandler.save();
-        return new ServiceResult<>(csceneHandler.toData());
+    private String getSceneName(SceneConfigDataBO sceneConfigDataBO) {
+        if (sceneConfigDataBO == null || sceneConfigDataBO.getTopology() == null || sceneConfigDataBO.getTopology().getScene() == null || sceneConfigDataBO.getTopology().getScene().getName() == null) {
+            return null;
+        }
+        return sceneConfigDataBO.getTopology().getScene().getName();
     }
 
     @Transactional
