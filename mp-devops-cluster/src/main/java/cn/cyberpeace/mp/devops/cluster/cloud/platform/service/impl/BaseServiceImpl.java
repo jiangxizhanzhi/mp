@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.cloud.platform.service.impl;
 
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.devops.cluster.config.HttpDeleteWithBody;
 import cn.cyberpeace.mp.devops.cluster.model.BaseModel;
@@ -9,6 +11,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
@@ -95,7 +98,9 @@ public class BaseServiceImpl {
                 log.info("=====GET调用url：{},对应返回结果信息：{}", url, result);
             }
             model = JsonUtils.toSnakeObject(result,valueType);
-        } catch (IOException e) {
+        }catch (HttpHostConnectException e){
+            throw new MpRuntimeException(BaseErrorCode.GATEWAY_TIME_OUT);
+        }catch (IOException e) {
             log.error("=====GET调用url：{},对应返回结果信息：{},报错信息：{}",url,result,e.getMessage(),e);
         }
         return model;
