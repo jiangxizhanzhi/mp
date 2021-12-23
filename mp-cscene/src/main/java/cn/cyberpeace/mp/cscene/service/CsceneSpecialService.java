@@ -151,6 +151,7 @@ public class CsceneSpecialService {
                 .pagination(queryParams.getPage(), queryParams.getPageSize())
                 .currentLink(CsceneInstanceModel.class)
                 .groupBy(CsceneInstanceModel::getId)
+                .selectAs("pk","pk")
                 .selectAs(CsceneInstanceModel::getId, CsceneInstanceStat::getId)
                 .selectAs(CsceneInstanceModel::getType, CsceneInstanceStat::getType)
                 .selectAs(CsceneInstanceModel::getReferenceType, CsceneInstanceStat::getReferenceType)
@@ -286,7 +287,8 @@ public class CsceneSpecialService {
         try {
             if (queryParams.getOrders() == null || queryParams.getOrders().length == 0) {
                 // 排序,默认使用时间倒序排列
-                humanCondition.orderBy("-createTime");
+                humanCondition.setCurrentLinkName(null);
+                humanCondition.orderBy("-pk");
             } else {
                 // todo 可根据需要去实现按cpu数量等排列 暂时只支持createTime、updateTime
                 humanCondition.orderBy(queryParams.getOrders());

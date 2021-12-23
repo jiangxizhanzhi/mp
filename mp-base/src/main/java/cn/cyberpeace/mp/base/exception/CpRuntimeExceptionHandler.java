@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.client.HttpServerErrorException;
 
 /**
  * 业务异常统一处理
@@ -48,6 +49,14 @@ public class CpRuntimeExceptionHandler {
             }
         }
         return new ServiceResult<>(null, BaseErrorCode.PARAMS_INVALID, detail).asResult();
+    }
+
+    @ExceptionHandler(HttpServerErrorException.GatewayTimeout.class)
+    @ResponseStatus(HttpStatus.GATEWAY_TIMEOUT)
+    @ResponseBody
+    public ServiceResult handException(Exception ex) {
+        log.error(ex.getMessage());
+        return new ServiceResult(null,BaseErrorCode.GATEWAY_TIME_OUT).asResult();
     }
 
     @ExceptionHandler(Exception.class)
