@@ -48,7 +48,7 @@ public class ContainerFileUtils {
         try {
             containerClient.copyFile(containerId, tmpZipFilepath, toDir);
         } finally {
-            FileUtil.del(tmpZipFilepath);
+//            FileUtil.del(tmpZipFilepath);
         }
         containerClient.executeCommand(containerId, CommandUtils.linuxUnzipFile(toPath, unzipDir));
         return true;
