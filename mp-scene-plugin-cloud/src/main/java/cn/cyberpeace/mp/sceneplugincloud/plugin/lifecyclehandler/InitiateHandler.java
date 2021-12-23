@@ -66,9 +66,14 @@ public class InitiateHandler extends HandlerCommon {
             return false;
         }
 
-        // 没有连接，需要辅助网络
+        // 没有连接
         if (connectedCloudElement == null) {
-            return true;
+            // 存在其它连接不需要辅助网络
+            if (getPluginHandler().getSceneHandler().elementHasConnectedPort(cloudElement.getSrcElement().getId())) {
+                return false;
+            } else {
+                return true;
+            }
         }
 
         // 自己和自己连接（异常），无需辅助网络
@@ -95,11 +100,57 @@ public class InitiateHandler extends HandlerCommon {
             return false;
         }
 
-        // 虚拟路由连接了虚拟路由并且对方未开启辅助网络，需要辅助网络
+        // 虚拟路由连接了虚拟路由
         if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)
-                && connectedVirtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)
-                && !Boolean.TRUE.equals(connectedCloudElement.getAuxiliaryNetworkOn())) {
-            return true;
+                && connectedVirtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
+            Integer type = cloudElement.getSrcElement().getType();
+            Integer connectedType = connectedCloudElement.getSrcElement().getType();
+            // 连接了未定义的网元类型，需要辅助网络
+            if (connectedType == null) {
+                return true;
+            }
+            // 自己是未定义的网元类型，不需要辅助网络
+            if (type == null) {
+                return false;
+            }
+
+            // 网元类型交换机，需要辅助网络
+            if (type.equals(BaseSceneElementModel.Type.SWITCH)) {
+                return true;
+            }
+
+            // 网元类型相同，连接节点未开启辅助网络，需要辅助网络
+            if (type.equals(connectedType) && !Boolean.TRUE.equals(connectedCloudElement.getAuxiliaryNetworkOn())) {
+                return true;
+            }
+
+            // 网元类型路由器
+            if (type.equals(BaseSceneElementModel.Type.ROUTER)) {
+                // 连接节点是交换机，不需要辅助网络
+                if (connectedType.equals(BaseSceneElementModel.Type.SWITCH)) {
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+
+            // 网元类型防火墙
+            if (type.equals(BaseSceneElementModel.Type.FIREWALL)) {
+                // 连接节点是交换机/路由，不需要辅助网络
+                if (connectedType.equals(BaseSceneElementModel.Type.SWITCH)
+                        || connectedType.equals(BaseSceneElementModel.Type.ROUTER)) {
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+
+            // 其它普通网元类型, 连接节点开启辅助网络时，不需要辅助网络
+            if (Boolean.TRUE.equals(connectedCloudElement.getAuxiliaryNetworkOn())) {
+                return false;
+            } else {
+                return true;
+            }
         }
 
         // 虚拟路由连接了虚拟机/容器/实体节点，需要辅助网络

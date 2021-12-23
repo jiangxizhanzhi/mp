@@ -211,6 +211,14 @@ public class HandlerUtils {
         var srcElement = getPluginHandler().getSrcPort(portId).getElement();
         var cloudElement = getPluginHandler().getElement(srcElement.getId());
         var connectedOpaqueSrcPort = getPortConnectedOpaqueSrcPort(portId);
+        if (connectedOpaqueSrcPort == null) {
+            // 未连接端口情况，如果节点存在其它连接，则忽略该端口
+            if (getPluginHandler().getSceneHandler().elementHasConnectedPort(srcElement.getId())) {
+                portIdAuxiliaryNetworkCloudElementMap.put(portId, null);
+                return null;
+            }
+        }
+
         var connectedOpaqueSrcElement = connectedOpaqueSrcPort != null ? getPluginHandler().getPortSrcElement(connectedOpaqueSrcPort.getId()) : null;
         var connectedCloudElement = connectedOpaqueSrcElement != null ? getPluginHandler().getElement(connectedOpaqueSrcElement.getId()) : null;
         var auxiliaryNetworkCloudElement = confirmAuxiliaryNetworkCloudElement(cloudElement, connectedCloudElement);
@@ -228,6 +236,10 @@ public class HandlerUtils {
         Map<String, List<SceneElementPortBO>> groupPortsMap = new HashMap<>();
         var srcElement = cloudElement.getSrcElement();
         var srcPorts = srcElement.getPorts();
+        if (srcPorts == null) {
+            return groupPortsMap;
+        }
+
         for (var srcPort : srcPorts) {
             var portAuxiliaryNetworkCloudElement = getPortAuxiliaryNetworkCloudElement(srcPort.getId());
             if (portAuxiliaryNetworkCloudElement == null) {

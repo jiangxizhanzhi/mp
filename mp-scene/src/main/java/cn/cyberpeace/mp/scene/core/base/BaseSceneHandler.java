@@ -1588,6 +1588,25 @@ public abstract class BaseSceneHandler<
     }
 
     /**
+     * 获取网元是否存在连接
+     * @param nodeId 网元节点id
+     */
+    public boolean elementHasConnectedPort(String nodeId) {
+        var ele = getElement(nodeId);
+        var ports = ele.getPorts();
+        if (ports == null) {
+            return false;
+        }
+        for (var port: ports) {
+            var connectedPortId = portIdConnectedPortIdMap.getOrDefault(port.getId(), null);
+            if (connectedPortId != null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * 获取端口数据
      * @param portId 端口id
      */
