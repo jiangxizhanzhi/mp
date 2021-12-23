@@ -1,0 +1,2 @@
+alter table mp_cscene_cscene add column `name` varchar(64) NOT NULL DEFAULT '' COMMENT '名称' after id ;
+alter table mp_cscene_cscene_instance add column `name` varchar(64) NOT NULL DEFAULT '' COMMENT '名称' after id ;
