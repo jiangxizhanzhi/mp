@@ -9,9 +9,8 @@ import org.apache.commons.lang3.StringUtils;
 public class HandlerUtils {
 
     public static String genResourceName(String name) {
-        return StringUtils.joinWith(
-                cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils.genResourceName(name),
-                "_", "collection");
+        return StringUtils.joinWith("_",
+                cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils.genResourceName(name), "collection");
     }
 
 }

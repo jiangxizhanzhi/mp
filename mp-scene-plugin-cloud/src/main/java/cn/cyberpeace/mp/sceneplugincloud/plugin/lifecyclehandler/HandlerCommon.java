@@ -74,7 +74,7 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
             var port = accessModes.get(0).getAccessPort();
             Runnable checkSuccessCallback = () -> {
                 accessModes.forEach(accessMode -> accessMode.setAvailable(true));
-                getPluginHandler().ackElementChanged(nodeId, true);
+                getPluginHandler().asyncAckElementChanged(nodeId, true);
             };
 
             if (port == null || port.compareTo(0) <= 0) {
@@ -106,7 +106,7 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
         if (closeFlag) {
             var nodeId = cloudElement.getSrcElement().getId();
             try {
-                getPluginHandler().ackElementChanged(nodeId, true);
+                getPluginHandler().asyncAckElementChanged(nodeId, true);
             } catch (Exception e) {
                 log.error("Close access mode ack element changed error: ", e);
             }
