@@ -23,6 +23,7 @@ import java.util.Map;
 
 /**
  * 单表通用服务实现类，包含通用的增删改查能力
+ *
  * @param <M> 数据model
  * @param <P> 数据mapper接口
  * @param <F> 业务处理字段
@@ -53,7 +54,7 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
 
         if (lastSearchFields != null) {
             var orCondition = humanCondition.filterOrStart();
-            for (var searchField: lastSearchFields) {
+            for (var searchField : lastSearchFields) {
                 orCondition.orIContains(searchField, search);
             }
             orCondition.filterOrEnd();
@@ -108,7 +109,8 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
         return customCondition.loadFromParams(params);
     }
 
-    public void loadListFilterCondition(HumanCondition humanCondition, Q queryParams) {}
+    public void loadListFilterCondition(HumanCondition humanCondition, Q queryParams) {
+    }
 
     @Override
     public ListObjServiceResult<M> list(Q queryParams) {
@@ -126,6 +128,9 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
         List<M> data;
         int total;
         try {
+            //排序，默认使用创建时间倒序排列
+            humanCondition.setCurrentLinkName(null);
+            humanCondition.orderBy("-createTime");
             data = getModelMapper().list(humanCondition);
             total = getModelMapper().total(humanCondition);
         } catch (Exception e) {

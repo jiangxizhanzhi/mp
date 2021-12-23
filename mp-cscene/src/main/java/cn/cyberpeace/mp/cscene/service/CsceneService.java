@@ -193,6 +193,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
 
     /**
      * 需要联合scene表进行的搜索
+     *
      * @return
      */
     private ListObjServiceResult<CsceneModel> listBOBySearchName(CsceneQueryParams queryParams) {
@@ -207,6 +208,9 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                 .currentLink(SceneConfigModel.class)
                 .filterContains(SceneConfigModel::getName, queryParams.getSearch())
                 .pagination(queryParams.getPage(), queryParams.getPageSize());
+        //排序，默认使用创建时间倒序排列
+        humanCondition.setCurrentLinkName(null);
+        humanCondition.orderBy("-createTime");
         var data = getModelMapper().list(humanCondition);
         var total = getModelMapper().total(humanCondition);
         return new ListObjServiceResult<>(new ListObjResult<>(data, total));
