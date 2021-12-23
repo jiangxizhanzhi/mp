@@ -15,7 +15,7 @@ import javax.validation.constraints.NotBlank;
 public class RegisterRequest {
 
     @ApiModelProperty(value = "用户名", example = "")
-    @NotBlank(message = "username不能为空!")
+    @NotBlank(message = "auth.validation.register.username")
 //    @NotBlank(message = "{auth.error_code.params.username_empty}")
     private String username;
 
