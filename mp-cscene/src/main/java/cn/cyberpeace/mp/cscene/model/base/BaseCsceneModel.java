@@ -18,6 +18,8 @@ public class BaseCsceneModel extends BaseModel {
     private String createUsername;
     @DefaultBool
     private Boolean deleted;
+    @DefaultStr
+    private String name;
 
     @Override
     public boolean hasDeleted() {

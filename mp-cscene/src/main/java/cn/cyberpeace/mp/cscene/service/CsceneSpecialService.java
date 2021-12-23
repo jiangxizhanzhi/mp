@@ -162,8 +162,8 @@ public class CsceneSpecialService {
                 .selectAs(CsceneInstanceModel::getSceneTtl, CsceneInstanceStat::getSceneTtl)
                 .selectAs(CsceneInstanceModel::getSceneAttr, CsceneInstanceStat::getSceneAttr)
                 .selectAs(CsceneInstanceModel::getSceneTtl, CsceneInstanceStat::getSceneTtl)
+                .selectAs(CsceneInstanceModel::getName, CsceneInstanceStat::getName)
                 .currentLink(SceneModel.class)
-                .selectAs(SceneModel::getName, CsceneInstanceStat::getName)
                 .selectAs(SceneModel::getEvent, CsceneInstanceStat::getEvent)
                 .selectAs(SceneModel::getEventStatus, CsceneInstanceStat::getEventStatus)
                 .selectAs(SceneModel::getProcessMessage, CsceneInstanceStat::getEventMessage)
@@ -207,12 +207,12 @@ public class CsceneSpecialService {
                 humanCondition.filterEqual(CsceneInstanceModel::getCreateUser, currentUser.getId());
             }
         }
-
-        humanCondition.currentLink(SceneModel.class);
         var search = queryParams.getSearch();
         if (!StringUtils.isEmpty(search)) {
-            humanCondition.filterIContains(SceneModel::getName, search);
+            humanCondition.filterIContains(CsceneInstanceModel::getName, search);
         }
+
+        humanCondition.currentLink(SceneModel.class);
         var error = queryParams.getError();
         if (Boolean.TRUE.equals(error)) {
             humanCondition.filterEqual(SceneModel::getEventStatus, EventStatus.ABNORMAL);
