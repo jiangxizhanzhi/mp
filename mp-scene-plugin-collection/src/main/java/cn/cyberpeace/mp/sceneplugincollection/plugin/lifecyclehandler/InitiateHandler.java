@@ -62,9 +62,11 @@ public class InitiateHandler extends HandlerCommon {
             });
         }
 
+
         var probeCollectionElements = getPluginHandler().getElementMap().values()
                 .stream()
-                .filter(collectionElement -> !CollectionUtils.isEmpty(collectionElement.getProbes()))
+                // TODO: 默认开启探针
+//                .filter(collectionElement -> !CollectionUtils.isEmpty(collectionElement.getProbes()))
                 .collect(Collectors.toList());
         if (!probeCollectionElements.isEmpty()) {
             // 准备采集路由
