@@ -151,7 +151,7 @@ public class CsceneSpecialService {
                 .pagination(queryParams.getPage(), queryParams.getPageSize())
                 .currentLink(CsceneInstanceModel.class)
                 .groupBy(CsceneInstanceModel::getId)
-                .selectAs("pk","pk")
+                .selectAs("pk", "pk")
                 .selectAs(CsceneInstanceModel::getId, CsceneInstanceStat::getId)
                 .selectAs(CsceneInstanceModel::getType, CsceneInstanceStat::getType)
                 .selectAs(CsceneInstanceModel::getReferenceType, CsceneInstanceStat::getReferenceType)
@@ -209,8 +209,10 @@ public class CsceneSpecialService {
         }
         var search = queryParams.getSearch();
         if (!StringUtils.isEmpty(search)) {
-            humanCondition.filterIContains(CsceneInstanceModel::getName, search);
-            humanCondition.filterIContains(CsceneInstanceModel::getReferenceMetaData, search);
+            humanCondition.filterOrStart()
+                    .orContains(CsceneInstanceModel::getName, search)
+                    .orContains(CsceneInstanceModel::getReferenceMetaData, search)
+                    .filterOrEnd();
         }
 
         humanCondition.currentLink(SceneModel.class);
