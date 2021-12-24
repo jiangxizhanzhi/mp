@@ -33,6 +33,7 @@ public enum AuthErrorCode implements ErrorCode {
     USER_ADD_ERROR("MP-110021", "user_add_error"),
     USER_DELETE_ERROR("MP-110022", "user_delete_error"),
     USER_MODIFY_ERROR("MP-110023", "user_modify_error"),
+    USER_CANNOT_DELETE_ADMIN("MP-110024", "user_cannot_delete_admin"),
 
 
     ACCOUNT_MOBILE_EXISTED("MP-110041", "mobile_existed"),
