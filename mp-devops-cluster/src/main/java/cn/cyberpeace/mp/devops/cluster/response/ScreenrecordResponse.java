@@ -36,7 +36,7 @@ public class ScreenrecordResponse extends ScreenshotModel {
             // 将组织拆分成姓名和组织
             int start = org.indexOf("|");
             String userName = org.substring(0, start);
-            String orgName = org.substring(start + 1, org.length() - 1);
+            String orgName = org.substring(start + 1);
             this.setUserName(userName);
             this.setUserOrgName(orgName);
         } else {
