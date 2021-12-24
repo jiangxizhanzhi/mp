@@ -210,6 +210,7 @@ public class CsceneSpecialService {
         var search = queryParams.getSearch();
         if (!StringUtils.isEmpty(search)) {
             humanCondition.filterIContains(CsceneInstanceModel::getName, search);
+            humanCondition.filterIContains(CsceneInstanceModel::getReferenceMetaData, search);
         }
 
         humanCondition.currentLink(SceneModel.class);
