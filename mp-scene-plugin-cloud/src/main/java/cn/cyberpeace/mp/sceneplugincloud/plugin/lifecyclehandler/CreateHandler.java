@@ -184,6 +184,7 @@ public class CreateHandler extends HandlerCommon {
         createData.setName(HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid()));
         var virtualNic = new VirtualNic();
         virtualNic.setNetworkId(cloudElement.getAuxiliaryNetworkId());
+        virtualNic.setFixedIp(TextUtils.emptyNull(cloudElement.getAuxiliaryNetworkRouterIp()));
         createData.setNetworks(List.of(virtualNic));
         var virtualRouter = vrClient.create(createData);
         cloudElement.setAuxiliaryNetworkRouterResourceId(virtualRouter.getId());

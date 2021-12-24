@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.base.util.basic.BoolUtils;
+import cn.cyberpeace.mp.base.util.basic.MapUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
@@ -12,6 +13,7 @@ import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementM
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.InitiateTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -25,6 +27,7 @@ public class InitiateHandler extends HandlerCommon {
         public static final EventProcess INITIATE_BASE_PROPERTIES = new EventProcess("initiate_base_properties", "sceneplugincloud.event.initiate_base_properties");
         public static final EventProcess INITIATE_IP_POOL = new EventProcess("initiate_ip_pool", "sceneplugincloud.event.initiate_ip_pool");
         public static final EventProcess INITIATE_PORTS = new EventProcess("initiate_ports", "sceneplugincloud.event.initiate_ports");
+        public static final EventProcess REALLOCATE_IPS = new EventProcess("reallocate_ips", "sceneplugincloud.event.reallocate_ips");
     }
 
     public static class ElementProcess {
@@ -33,8 +36,17 @@ public class InitiateHandler extends HandlerCommon {
         public static final EventProcess INITIATE_PORTS = new EventProcess("initiate_ports", "sceneplugincloud.event.initiate_ports");
     }
 
+    @Data
+    private static class ReallocateIpInfo {
+        private CloudPluginSceneElementBO auxiliaryNetworkCloudElement;
+        private String ip;
+    }
+
     private List<String> existCidrs;
     private final Map<String, List<String>> networkNodeIdIpPool = new HashMap<>();
+
+    // 辅助变量：需要重新分配的ip地址
+    private List<ReallocateIpInfo> reallocateIpInfos = new ArrayList<>();
 
     private void prepareExistCidrs() {
         if (existCidrs == null) {
@@ -354,6 +366,27 @@ public class InitiateHandler extends HandlerCommon {
         if (!defaultRouterIpPool.isEmpty() && StringUtils.isEmpty(auxiliaryNetworkCloudElement.getAuxiliaryNetworkGateway())) {
             auxiliaryNetworkCloudElement.setAuxiliaryNetworkGateway(defaultRouterIpPool.get(defaultRouterIpPool.size() - 1));
         }
+
+        // 网关地址之后的第一个地址可能是dhcp地址，需要排除掉
+        if (!StringUtils.isEmpty(auxiliaryNetworkCloudElement.getAuxiliaryNetworkGateway())) {
+            var possibleDhcpIp = IpUtils.nextIp(auxiliaryNetworkCloudElement.getAuxiliaryNetworkGateway());
+            if (!StringUtils.isEmpty(possibleDhcpIp)) {
+                // 固定ip地址也重新分配
+                var reallocateIpInfo = new ReallocateIpInfo();
+                reallocateIpInfo.setAuxiliaryNetworkCloudElement(auxiliaryNetworkCloudElement);
+                reallocateIpInfo.setIp(possibleDhcpIp);
+                reallocateIpInfos.add(reallocateIpInfo);
+
+                existIps.add(possibleDhcpIp);
+                // 如果分到了可能的dhcp地址，重新分配
+                if (defaultRouterIpPool.contains(possibleDhcpIp)) {
+                    defaultRouterIpPool.remove(possibleDhcpIp);
+                    defaultRouterIpPool.addAll(IpUtils.allocateDefaultRouterIps(cidr, 1, new ArrayList<>(existIps),
+                            auxiliaryNetworkCloudElement.getAllocationPools()));
+                }
+            }
+        }
+
         // 辅助网络辅助路由选择第一个作为默认地址
         if (Boolean.TRUE.equals(auxiliaryNetworkCloudElement.getAuxiliaryNetworkRouterOn())) {
             auxiliaryNetworkCloudElement.setAuxiliaryNetworkRouterIp(defaultRouterIpPool.remove(0));
@@ -437,10 +470,76 @@ public class InitiateHandler extends HandlerCommon {
             // TODO: 暂时只有默认路由支持，其它设备地址会冲突待解决方案
             if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
                 auxiliaryNetworkCloudElement.setAuxiliaryNetworkGateway(ip);
+
+                // 网关地址之后的第一个地址可能是dhcp地址，需要排除掉
+                var possibleDhcpIp = IpUtils.nextIp(auxiliaryNetworkCloudElement.getAuxiliaryNetworkGateway());
+                if (!StringUtils.isEmpty(possibleDhcpIp)) {
+                    var reallocateIpInfo = new ReallocateIpInfo();
+                    reallocateIpInfo.setAuxiliaryNetworkCloudElement(auxiliaryNetworkCloudElement);
+                    reallocateIpInfo.setIp(ip);
+                    reallocateIpInfos.add(reallocateIpInfo);
+                }
             }
         }
 
         srcPort.setIp(ip);
+    }
+
+    /**
+     * 获取需要重新分配的端口
+     */
+    private List<SceneElementPortBO> getReallocateIpPorts() {
+        List<SceneElementPortBO> reallocateIpPorts = new ArrayList<>();
+
+        reallocateIpInfos.forEach(reallocateIpInfo -> {
+            var auxiliaryNetworkCloudElement = reallocateIpInfo.getAuxiliaryNetworkCloudElement();
+            var srcPorts = auxiliaryNetworkCloudElement.getSrcElement().getPorts();
+            if (srcPorts == null || srcPorts.isEmpty()) {
+                return;
+            }
+
+            srcPorts.forEach(srcPort -> {
+                var srcPortAuxiliaryNetworkCloudElement = getHandlerUtils().getPortAuxiliaryNetworkCloudElement(srcPort.getId());
+                if (auxiliaryNetworkCloudElement.equals(srcPortAuxiliaryNetworkCloudElement)) {
+                    if (reallocateIpInfo.getIp().equals(srcPort.getIp())) {
+                        reallocateIpPorts.add(srcPort);
+                    }
+                    var connectedSrcPort = getHandlerUtils().getPortConnectedOpaqueSrcPort(srcPort.getId());
+                    if (connectedSrcPort != null && reallocateIpInfo.getIp().equals(connectedSrcPort.getIp())) {
+                        reallocateIpPorts.add(connectedSrcPort);
+                    }
+                }
+            });
+        });
+
+        return reallocateIpPorts;
+    }
+
+    private void reallocateIpPort(SceneElementPortBO srcPort) {
+        var srcPortAuxiliaryNetworkCloudElement = getHandlerUtils().getPortAuxiliaryNetworkCloudElement(srcPort.getId());
+        Set<String> existIps = new HashSet<>(getHandlerUtils().getOuterExistIps(srcPortAuxiliaryNetworkCloudElement));
+        var attachPorts = getHandlerUtils().getAuxiliaryNetworkCloudElementAttachPorts(srcPortAuxiliaryNetworkCloudElement);
+        attachPorts.forEach(attachPort -> {
+            if (!StringUtils.isEmpty(attachPort.getIp())) {
+                existIps.add(attachPort.getIp());
+            }
+        });
+        if (!StringUtils.isEmpty(srcPortAuxiliaryNetworkCloudElement.getAuxiliaryNetworkRouterIp())) {
+            existIps.add(srcPortAuxiliaryNetworkCloudElement.getAuxiliaryNetworkRouterIp());
+        }
+
+        var newIps = IpUtils.randomIps(srcPortAuxiliaryNetworkCloudElement.getAuxiliaryNetworkCidr(), 1,
+                new ArrayList<>(existIps),
+                srcPortAuxiliaryNetworkCloudElement.getAllocationPools(),
+                BoolUtils.bool(srcPortAuxiliaryNetworkCloudElement.getAuxiliaryNetworkDhcp()));
+        if (!newIps.isEmpty()) {
+            var newIp = newIps.get(0);
+            log.info("Port {} reallocate ip {} to {}", srcPort.getId(), srcPort.getIp(), newIp);
+            srcPort.setIp(newIp);
+        } else {
+            log.warn("Port {} reallocate ip failed, ip {} may conflict", srcPort.getId(), srcPort.getIp());
+        }
+
     }
 
     /**
@@ -590,6 +689,14 @@ public class InitiateHandler extends HandlerCommon {
         }
         if (!initiateOtherElementPortsTasks.isEmpty()) {
             runSceneProgress(SceneProcess.INITIATE_PORTS, () -> runTasks(initiateOtherElementPortsTasks));
+        }
+
+        // 存在需要重新分配的ip，重新分配ip
+        var requireReallocateIpPorts = getReallocateIpPorts();
+        if (!requireReallocateIpPorts.isEmpty()) {
+            runSceneProgress(SceneProcess.REALLOCATE_IPS, () -> {
+                requireReallocateIpPorts.forEach(this::reallocateIpPort);
+            });
         }
     }
 
