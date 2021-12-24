@@ -128,9 +128,6 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
         List<M> data;
         int total;
         try {
-            //排序，默认使用创建时间倒序排列
-            humanCondition.setCurrentLinkName(null);
-            humanCondition.orderBy("-createTime");
             data = getModelMapper().list(humanCondition);
             total = getModelMapper().total(humanCondition);
         } catch (Exception e) {
