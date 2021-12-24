@@ -108,6 +108,9 @@ public class CloudAppConfig {
     @Value("${mp.scene.container_help_installer_dir:}")
     private String containerHelpInstallerDir;
 
+    @Value("${mp.scene.remote_connection_token_expire_seconds:7200}")
+    private Integer remoteConnectionTokenExpireSeconds;
+
     @Autowired
     private BaseAppConfig baseAppConfig;
 
