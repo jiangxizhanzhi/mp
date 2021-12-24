@@ -148,12 +148,23 @@ public class HttpClient {
     }
 
     public HttpClient(String server) {
-        this.server = server;
-        innerHttpClient = HttpClients.custom().disableAutomaticRetries().build();
+        this(server, DEFAULT_TIMEOUT, null, null);
     }
 
-    public HttpClient(String server, int timeout) {
-        this(server);
+    public HttpClient(String server, Integer timeout) {
+        this(server, timeout, null, null);
+    }
+
+    public HttpClient(String server, Integer timeout, Integer maxConnPerRoute, Integer maxConnTotal) {
+        this.server = server;
+        var clientBuilder = HttpClients.custom().disableAutomaticRetries();
+        if (maxConnPerRoute != null) {
+            clientBuilder.setMaxConnPerRoute(maxConnPerRoute);
+        }
+        if (maxConnTotal != null) {
+            clientBuilder.setMaxConnTotal(maxConnTotal);
+        }
+        innerHttpClient = clientBuilder.build();
         this.timeout = timeout;
     }
 

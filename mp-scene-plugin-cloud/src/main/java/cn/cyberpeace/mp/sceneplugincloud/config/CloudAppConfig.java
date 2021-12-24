@@ -36,6 +36,9 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.cpcloud_resource_group:MP_SCENE}")
     private String cpcloudResourceGroup;
 
+    @Value("${mp.sceneplugincloud.cploud_http_pool_size:200}")
+    private Integer cpcloudHttpPoolSize;
+
     @Value("${mp.sceneplugincloud.initiate_pool_size:10}")
     private Integer initiatePoolSize;
 
@@ -93,6 +96,9 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.external_net_id:}")
     private String externalNetId;
 
+    @Value("${mp.sceneplugincloud.external_net_cidr:}")
+    private String externalNetCidr;
+
     @Value("${mp.sceneplugincloud.mgmt_name:mgmt}")
     private String mgmtName;
 
@@ -126,6 +132,26 @@ public class CloudAppConfig {
         }
 
         return externalNetId;
+    }
+
+    public String getExternalNetCidr() {
+        if (!StringUtils.isEmpty(externalNetCidr)) {
+            return externalNetCidr;
+        }
+
+        var netId = getExternalNetId();
+        if (StringUtils.isEmpty(netId)) {
+            return null;
+        }
+
+        try {
+            externalNetCidr = new Network().get(netId).getSubnet().getCidr();
+        } catch (Exception e) {
+            log.error("Try to get external net cidr failed: ", e);
+            throw e;
+        }
+
+        return externalNetCidr;
     }
 
     public String getMgmtNetId() {

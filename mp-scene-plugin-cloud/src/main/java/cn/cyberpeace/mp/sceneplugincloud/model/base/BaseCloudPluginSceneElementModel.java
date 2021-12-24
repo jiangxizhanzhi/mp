@@ -61,6 +61,8 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     private Boolean dhcp;
     @DefaultStr
     private String allocationPools;
+    @DefaultStr
+    private String hostRoutes;
     @DefaultBool
     private Boolean vlan;
     @DefaultInt
@@ -184,6 +186,8 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     private Boolean auxiliaryNetworkDhcp;
     @DefaultStr
     private String auxiliaryNetworkAllocationPools;
+    @DefaultStr
+    private String auxiliaryNetworkHostRoutes;
     @DefaultBool
     private Boolean auxiliaryNetworkVlan;
     @DefaultInt

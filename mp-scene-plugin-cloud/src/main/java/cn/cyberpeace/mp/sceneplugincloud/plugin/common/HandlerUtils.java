@@ -1,54 +1,45 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.common;
 
+import cn.cyberpeace.mp.base.util.basic.MapUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
-import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
-import cn.cyberpeace.mp.sceneplugincloud.bo.base.BaseCloudPluginSceneBO;
-import cn.cyberpeace.mp.sceneplugincloud.bo.base.BaseCloudPluginSceneElementBO;
-import cn.cyberpeace.mp.sceneplugincloud.bo.base.BaseCloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
-import lombok.Data;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-@Data
-public class HandlerUtils<H extends ScenePluginHandler<? extends BaseCloudPluginSceneBO<?, ?, ?>,
-        ? extends BaseCloudPluginSceneElementBO<?, ?, ?>, ? extends BaseCloudPluginSceneElementPortBO<?, ?, ?>, ?>> {
+@Slf4j
+@Getter
+public class HandlerUtils {
 
-    private H pluginHandler;
+    private CloudScenePluginHandler pluginHandler;
 
     private final List<String> cidrPool = CloudSingleton.cloudAppConfig.getCidrPool();
 
-    public HandlerUtils(H pluginHandler) {
+    private final Map<String, CloudPluginSceneElementBO> portIdAuxiliaryNetworkCloudElementMap = new HashMap<>();
+    private final Map<String, List<String>> networkNodeIdPortIdsMap = new HashMap<>();
+    private final Map<String, Set<String>> networkNodeIdOuterExistIpsMap = new HashMap<>();
+
+    public HandlerUtils(CloudScenePluginHandler pluginHandler) {
         this.pluginHandler = pluginHandler;
     }
 
-    public List<String> randomCidrs(int count, List<String> existCidrs) {
-        return IpUtils.randomCidrs(cidrPool, count, existCidrs);
+    public static boolean isExternalNetwork(String networkId) {
+        if (StringUtils.isEmpty(networkId)) {
+            return false;
+        }
+        return networkId.equals(CloudSingleton.cloudAppConfig.getExternalNetId());
     }
 
-    public List<String> statExistCidrs() {
-        List<String> existCidrs = new ArrayList<>();
-        getPluginHandler().getElementMap().forEach((nodeId, element) -> {
-            var cidr = element.getCidr();
-            if (!StringUtils.isEmpty(cidr)) {
-                existCidrs.add(cidr);
-            }
-
-            var auxiliaryNetworkCidr = element.getAuxiliaryNetworkCidr();
-            if (!StringUtils.isEmpty(auxiliaryNetworkCidr)) {
-                existCidrs.add(auxiliaryNetworkCidr);
-            }
-        });
-        return existCidrs;
+    public static String genResourceName(String name) {
+        return StringUtils.joinWith("_", CloudSingleton.cloudAppConfig.getCpcloudResourceGroup(), name);
     }
 
     /**
@@ -57,7 +48,7 @@ public class HandlerUtils<H extends ScenePluginHandler<? extends BaseCloudPlugin
      * @param connectedCloudElement 连接节点
      * @return 辅助网络所在节点
      */
-    public CloudPluginSceneElementBO confirmAuxiliaryNetworkCloudElement(
+    public static CloudPluginSceneElementBO confirmAuxiliaryNetworkCloudElement(
             CloudPluginSceneElementBO cloudElement, CloudPluginSceneElementBO connectedCloudElement) {
         if (cloudElement == null || connectedCloudElement == null) {
             if (cloudElement != null && Boolean.TRUE.equals(cloudElement.getAuxiliaryNetworkOn())) {
@@ -135,6 +126,131 @@ public class HandlerUtils<H extends ScenePluginHandler<? extends BaseCloudPlugin
         }
 
         return null;
+    }
+
+    public String getRequestUser() {
+        var context = getPluginHandler().getContext();
+        if (context == null) {
+            return null;
+        }
+
+        return context.getRequestUser();
+    }
+
+    public String getRequestUserOrg() {
+        var context = getPluginHandler().getContext();
+        if (context == null) {
+            return null;
+        }
+
+        return context.getRequestUserOrg();
+    }
+
+    public List<String> randomCidrs(int count, List<String> existCidrs) {
+        return IpUtils.randomCidrs(cidrPool, count, existCidrs);
+    }
+
+    public List<String> statExistCidrs() {
+        List<String> existCidrs = new ArrayList<>();
+        getPluginHandler().getElementMap().forEach((nodeId, element) -> {
+            var cidr = element.getCidr();
+            if (!StringUtils.isEmpty(cidr)) {
+                existCidrs.add(cidr);
+            }
+
+            var auxiliaryNetworkCidr = element.getAuxiliaryNetworkCidr();
+            if (!StringUtils.isEmpty(auxiliaryNetworkCidr)) {
+                existCidrs.add(auxiliaryNetworkCidr);
+            }
+        });
+        return existCidrs;
+    }
+
+    /**
+     * 预加载场景中端口关联的辅助网络节点
+     */
+    public void loadAuxiliaryNetworkCloudElementPortIdsMap() {
+        getPluginHandler().getSceneHandler().getElementPortMap().forEach((portId, srcPort) -> {
+            var auxiliaryNetworkCloudElement = getPortAuxiliaryNetworkCloudElement(portId);
+            if (auxiliaryNetworkCloudElement != null) {
+                var nodeId = auxiliaryNetworkCloudElement.getSrcElement().getId();
+                MapUtils.setDefault(networkNodeIdPortIdsMap, nodeId, new ArrayList<>()).add(portId);
+            }
+        });
+    }
+
+    /**
+     * 获取辅助网络连接的所有端口
+     */
+    public synchronized List<String> getAuxiliaryNetworkCloudElementPortIds(CloudPluginSceneElementBO auxiliaryNetworkCloudElement) {
+        if (networkNodeIdPortIdsMap.isEmpty()) {
+            loadAuxiliaryNetworkCloudElementPortIdsMap();
+        }
+        return networkNodeIdPortIdsMap.getOrDefault(auxiliaryNetworkCloudElement.getSrcElement().getId(), null);
+    }
+
+    public void addOuterExistIps(CloudPluginSceneElementBO auxiliaryNetworkCloudElement, List<String> outerExistIps) {
+        var nodeId = auxiliaryNetworkCloudElement.getSrcElement().getId();
+        MapUtils.setDefault(networkNodeIdOuterExistIpsMap, nodeId, new HashSet<>()).addAll(outerExistIps);
+    }
+
+    public Set<String> getOuterExistIps(CloudPluginSceneElementBO auxiliaryNetworkCloudElement) {
+        var nodeId = auxiliaryNetworkCloudElement.getSrcElement().getId();
+        return networkNodeIdOuterExistIpsMap.getOrDefault(nodeId, new HashSet<>());
+    }
+
+    /**
+     * 获取端口所在辅助网络网元
+     * @param portId 网元端口id
+     * @return 端口所在辅助网络网元
+     */
+    public CloudPluginSceneElementBO getPortAuxiliaryNetworkCloudElement(String portId) {
+        if (portIdAuxiliaryNetworkCloudElementMap.containsKey(portId)) {
+            return portIdAuxiliaryNetworkCloudElementMap.get(portId);
+        }
+        var srcElement = getPluginHandler().getSrcPort(portId).getElement();
+        var cloudElement = getPluginHandler().getElement(srcElement.getId());
+        var connectedOpaqueSrcPort = getPortConnectedOpaqueSrcPort(portId);
+        if (connectedOpaqueSrcPort == null) {
+            // 未连接端口情况，如果节点存在其它连接，则忽略该端口
+            if (getPluginHandler().getSceneHandler().elementHasConnectedPort(srcElement.getId())) {
+                portIdAuxiliaryNetworkCloudElementMap.put(portId, null);
+                return null;
+            }
+        }
+
+        var connectedOpaqueSrcElement = connectedOpaqueSrcPort != null ? getPluginHandler().getPortSrcElement(connectedOpaqueSrcPort.getId()) : null;
+        var connectedCloudElement = connectedOpaqueSrcElement != null ? getPluginHandler().getElement(connectedOpaqueSrcElement.getId()) : null;
+        var auxiliaryNetworkCloudElement = confirmAuxiliaryNetworkCloudElement(cloudElement, connectedCloudElement);
+        portIdAuxiliaryNetworkCloudElementMap.put(portId, auxiliaryNetworkCloudElement);
+        if (connectedOpaqueSrcPort != null) {
+            portIdAuxiliaryNetworkCloudElementMap.put(connectedOpaqueSrcPort.getId(), auxiliaryNetworkCloudElement);
+        }
+        return auxiliaryNetworkCloudElement;
+    }
+
+    /**
+     * 同性质端口分组 <辅助网络，同性质端口列表>
+     */
+    public Map<String, List<SceneElementPortBO>> getCloudElementGroupPorts(CloudPluginSceneElementBO cloudElement) {
+        Map<String, List<SceneElementPortBO>> groupPortsMap = new HashMap<>();
+        var srcElement = cloudElement.getSrcElement();
+        var srcPorts = srcElement.getPorts();
+        if (srcPorts == null) {
+            return groupPortsMap;
+        }
+
+        for (var srcPort : srcPorts) {
+            var portAuxiliaryNetworkCloudElement = getPortAuxiliaryNetworkCloudElement(srcPort.getId());
+            if (portAuxiliaryNetworkCloudElement == null) {
+                continue;
+            }
+            var portAuxiliaryNetworkCloudElementNodeId = portAuxiliaryNetworkCloudElement.getSrcElement().getId();
+            var groupPorts = groupPortsMap.getOrDefault(portAuxiliaryNetworkCloudElementNodeId, new ArrayList<>());
+            groupPorts.add(srcPort);
+            groupPortsMap.put(portAuxiliaryNetworkCloudElementNodeId, groupPorts);
+        }
+        return groupPortsMap;
     }
 
     /**
@@ -229,10 +345,4 @@ public class HandlerUtils<H extends ScenePluginHandler<? extends BaseCloudPlugin
         return getPluginHandler().getPortSrcElement(connectedSrcPort.getId());
     }
 
-    public boolean isExternalNetwork(String networkId) {
-        if (StringUtils.isEmpty(networkId)) {
-            return false;
-        }
-        return networkId.equals(CloudSingleton.cloudAppConfig.getExternalNetId());
-    }
 }

@@ -1,3 +1,8 @@
+ALTER TABLE mp_sceneplugincloud_scene_config_element ADD COLUMN `host_routes` varchar(2048) NOT NULL COMMENT '虚拟交换机静态路由';
+ALTER TABLE mp_sceneplugincloud_scene_config_element ADD COLUMN `auxiliary_network_host_routes` varchar(2048) NOT NULL COMMENT '辅助网络静态路由';
+ALTER TABLE mp_sceneplugincloud_scene_element ADD COLUMN `host_routes` varchar(2048) NOT NULL COMMENT '虚拟交换机静态路由';
+ALTER TABLE mp_sceneplugincloud_scene_element ADD COLUMN `auxiliary_network_host_routes` varchar(2048) NOT NULL COMMENT '辅助网络静态路由';
+
 CREATE TABLE mp_sceneplugincloud_scene_connection (
     `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
     `id` varchar(64)  NOT NULL COMMENT 'id',

@@ -151,7 +151,7 @@ public class CsceneSpecialService {
                 .pagination(queryParams.getPage(), queryParams.getPageSize())
                 .currentLink(CsceneInstanceModel.class)
                 .groupBy(CsceneInstanceModel::getId)
-                .selectAs("pk","pk")
+                .selectAs("pk", "pk")
                 .selectAs(CsceneInstanceModel::getId, CsceneInstanceStat::getId)
                 .selectAs(CsceneInstanceModel::getType, CsceneInstanceStat::getType)
                 .selectAs(CsceneInstanceModel::getReferenceType, CsceneInstanceStat::getReferenceType)
@@ -162,8 +162,8 @@ public class CsceneSpecialService {
                 .selectAs(CsceneInstanceModel::getSceneTtl, CsceneInstanceStat::getSceneTtl)
                 .selectAs(CsceneInstanceModel::getSceneAttr, CsceneInstanceStat::getSceneAttr)
                 .selectAs(CsceneInstanceModel::getSceneTtl, CsceneInstanceStat::getSceneTtl)
+                .selectAs(CsceneInstanceModel::getName, CsceneInstanceStat::getName)
                 .currentLink(SceneModel.class)
-                .selectAs(SceneModel::getName, CsceneInstanceStat::getName)
                 .selectAs(SceneModel::getEvent, CsceneInstanceStat::getEvent)
                 .selectAs(SceneModel::getEventStatus, CsceneInstanceStat::getEventStatus)
                 .selectAs(SceneModel::getProcessMessage, CsceneInstanceStat::getEventMessage)
@@ -207,12 +207,15 @@ public class CsceneSpecialService {
                 humanCondition.filterEqual(CsceneInstanceModel::getCreateUser, currentUser.getId());
             }
         }
-
-        humanCondition.currentLink(SceneModel.class);
         var search = queryParams.getSearch();
         if (!StringUtils.isEmpty(search)) {
-            humanCondition.filterIContains(SceneModel::getName, search);
+            humanCondition.filterOrStart()
+                    .orContains(CsceneInstanceModel::getName, search)
+                    .orContains(CsceneInstanceModel::getReferenceMetaData, search)
+                    .filterOrEnd();
         }
+
+        humanCondition.currentLink(SceneModel.class);
         var error = queryParams.getError();
         if (Boolean.TRUE.equals(error)) {
             humanCondition.filterEqual(SceneModel::getEventStatus, EventStatus.ABNORMAL);

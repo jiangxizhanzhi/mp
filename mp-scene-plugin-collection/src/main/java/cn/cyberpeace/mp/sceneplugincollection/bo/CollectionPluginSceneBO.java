@@ -16,6 +16,9 @@ public class CollectionPluginSceneBO extends BaseCollectionPluginSceneBO<Collect
     @ApiModelProperty(value = "数据采集id")
     private String probeCollector;
 
+    @ApiModelProperty(value = "采集路由id")
+    private String probeRouter;
+
     @Override
     public CollectionPluginSceneModel createModel() {
         return new CollectionPluginSceneModel();

@@ -881,6 +881,11 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             return;
         }
 
+        if (Objects.equals(AuthConstant.ROOT_USER_ID, userId)) {
+            log.warn("can not delete admin user!");
+            throw new MpRuntimeException(AuthErrorCode.USER_CANNOT_DELETE_ADMIN);
+        }
+
         boolean cleanUserRolesSuccess = userRoleService.deleteByUserId(userId);
         boolean cleanUserOrgsSuccess = orgUserService.deleteByUserId(userId);
         boolean cleanUserTargetsSuccess = userPermissionService.deleteByUserId(userId);

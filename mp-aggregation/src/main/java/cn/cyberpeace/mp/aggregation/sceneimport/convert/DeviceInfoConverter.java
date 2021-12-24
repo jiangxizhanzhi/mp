@@ -49,6 +49,8 @@ class DeviceInfoConverter implements IConverter {
             TargetSceneRequest request = new TargetSceneRequest();
             request.setName(elementBO.getImage());
             request.setIgnoreUser(true);
+            // 精确搜索
+            request.setLikeName(false);
             List<Device> devices = this.targetConverter.allTarget(request);
             if (CollectionUtils.isEmpty(devices)) {
                 continue;

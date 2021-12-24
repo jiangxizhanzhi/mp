@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.scene.util.CommandUtils;
 import cn.cyberpeace.mp.scene.util.SceneFileUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.URLUtil;
 import org.apache.commons.lang3.StringUtils;
 
 public class ContainerFileUtils {
@@ -43,7 +44,7 @@ public class ContainerFileUtils {
         var toPath = StringUtils.join(unzipDir, SceneFileUtils.ZIP_FILE_SUFFIX);
         containerClient.executeCommand(containerId, CommandUtils.linuxMkDir(unzipDir));
         var filename = FileUtil.getName(toPath);
-        var tmpZipFilepath = FdfsCommon.downloadTmp(fileUrl, filename);
+        var tmpZipFilepath = FdfsCommon.downloadTmp(URLUtil.getPath(fileUrl), filename);
         var toDir = toPath.substring(0, toPath.length() - filename.length());;
         try {
             containerClient.copyFile(containerId, tmpZipFilepath, toDir);

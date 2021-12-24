@@ -23,12 +23,6 @@ public class ExcelCheck {
 
     public static void check(MultipartFile file) {
         ParamCheck.notNull(file, AuthBasei18nCode.REQUEST_PARAMS);
-        long size = file.getSize();
-        log.info("size:{}", size);
-        if (size > MAX_SIZE) {
-            log.error("over size, size:{}", size);
-            throw new MpRuntimeException(AuthErrorCode.EXCEL_EXCEED_SIZE);
-        }
 
         String type = "";
         try {
@@ -54,6 +48,14 @@ public class ExcelCheck {
         if (!typeMatch) {
             log.error("not an excel file, type:{}", type);
             throw new MpRuntimeException(AuthErrorCode.EXCEL_NOT_EXCEL);
+        }
+
+
+        long size = file.getSize();
+        log.info("size:{}", size);
+        if (size > MAX_SIZE) {
+            log.error("over size, size:{}", size);
+            throw new MpRuntimeException(AuthErrorCode.EXCEL_EXCEED_SIZE);
         }
 
     }

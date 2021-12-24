@@ -62,6 +62,12 @@ public class ExtDocker{
     @ApiModelProperty("快照数量")
     private Integer snapshotCount;
 
+    /**
+     * 额外信息
+     */
+    @ApiModelProperty("扩展信息")
+    private Object extInfo;
+
 
     /**
      * 接入方式

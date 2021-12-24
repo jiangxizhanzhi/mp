@@ -60,6 +60,8 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     private Boolean dhcp;
     @ApiModelProperty(value = "虚拟交换机地址池")
     private List<AllocationPool> allocationPools;
+    @ApiModelProperty(value = "虚拟交换机静态路由")
+    private List<HostRoute> hostRoutes;
     @ApiModelProperty(value = "虚拟交换机vlan模式")
     private Boolean vlan;
     @ApiModelProperty(value = "虚拟交换机vlanId")
@@ -118,6 +120,9 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     @ApiModelProperty(value = "辅助网络地址池", hidden = true)
     @JsonIgnore
     private List<AllocationPool> auxiliaryNetworkAllocationPools;
+    @ApiModelProperty(value = "辅助网络静态路由", hidden = true)
+    @JsonIgnore
+    private List<HostRoute> auxiliaryNetworkHostRoutes;
     @ApiModelProperty(value = "辅助网络vlan模式", hidden = true)
     @JsonIgnore
     private Boolean auxiliaryNetworkVlan;
@@ -165,6 +170,8 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
                 : JsonCommon.parse(obj.getDnsNameservers(), new TypeReference<List<String>>(){});
         allocationPools = StringUtils.isEmpty(obj.getAllocationPools()) ? new ArrayList<>()
                 : JsonCommon.parse(obj.getAllocationPools(), new TypeReference<List<AllocationPool>>(){});
+        hostRoutes = StringUtils.isEmpty(obj.getHostRoutes()) ? new ArrayList<>()
+                : JsonCommon.parse(obj.getHostRoutes(), new TypeReference<List<HostRoute>>(){});
         staticRoutes = StringUtils.isEmpty(obj.getStaticRoutes()) ? new ArrayList<>()
                 : JsonCommon.parse(obj.getStaticRoutes(), new TypeReference<List<StaticRoute>>(){});
         firewallRules = StringUtils.isEmpty(obj.getFirewallRules()) ? new ArrayList<>()
@@ -177,6 +184,8 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
                 : JsonCommon.parse(obj.getAuxiliaryNetworkDnsNameservers(), new TypeReference<List<String>>(){});
         auxiliaryNetworkAllocationPools = StringUtils.isEmpty(obj.getAuxiliaryNetworkAllocationPools()) ? new ArrayList<>()
                 : JsonCommon.parse(obj.getAuxiliaryNetworkAllocationPools(), new TypeReference<List<AllocationPool>>(){});
+        auxiliaryNetworkHostRoutes = StringUtils.isEmpty(obj.getAuxiliaryNetworkHostRoutes()) ? new ArrayList<>()
+                : JsonCommon.parse(obj.getAuxiliaryNetworkHostRoutes(), new TypeReference<List<HostRoute>>(){});
     }
 
     @Override
@@ -192,6 +201,9 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAuxiliaryNetworkAllocationPools)));
         if (dnsNameservers != null) {
             obj.setDnsNameservers(JsonCommon.stringify(dnsNameservers));
+        }
+        if (hostRoutes != null) {
+            obj.setHostRoutes(JsonCommon.stringify(hostRoutes));
         }
         if (allocationPools != null) {
             obj.setAllocationPools(JsonCommon.stringify(allocationPools));
@@ -213,6 +225,9 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
         }
         if (auxiliaryNetworkAllocationPools != null) {
             obj.setAuxiliaryNetworkAllocationPools(JsonCommon.stringify(auxiliaryNetworkAllocationPools));
+        }
+        if (auxiliaryNetworkHostRoutes != null) {
+            obj.setAuxiliaryNetworkHostRoutes(JsonCommon.stringify(auxiliaryNetworkHostRoutes));
         }
         return obj;
     }

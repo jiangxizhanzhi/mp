@@ -2,14 +2,20 @@ package cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.HostRoute;
+import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementPortBO;
+import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneProbeRouterPortModel;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.taskpool.CreateTaskPool;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -19,6 +25,7 @@ public class InitiateHandler extends HandlerCommon {
     public static class SceneProcess {
         public static final EventProcess INITIATE_FLOW_COLLECTION = new EventProcess("initiate_flow_collection", "sceneplugincollection.event.initiate_flow_collection");
         public static final EventProcess CREATE_PROBE_COLLECTOR = new EventProcess("create_probe_collector", "sceneplugincollection.event.create_probe_collector");
+        public static final EventProcess INITIATE_PROBE_ROUTER = new EventProcess("initiate_probe_router", "sceneplugincollection.event.initiate_probe_router");
         public static final EventProcess INITIATE_PROBES = new EventProcess("initiate_probes", "sceneplugincollection.event.initiate_probes");
     }
 
@@ -55,11 +62,57 @@ public class InitiateHandler extends HandlerCommon {
             });
         }
 
+
         var probeCollectionElements = getPluginHandler().getElementMap().values()
                 .stream()
-                .filter(collectionElement -> !CollectionUtils.isEmpty(collectionElement.getProbes()))
+                // TODO: 默认开启探针
+//                .filter(collectionElement -> !CollectionUtils.isEmpty(collectionElement.getProbes()))
                 .collect(Collectors.toList());
         if (!probeCollectionElements.isEmpty()) {
+            // 准备采集路由
+            runSceneProgress(SceneProcess.INITIATE_PROBE_ROUTER, () -> {
+                final String externalNetCidr = CloudSingleton.cloudAppConfig.getExternalNetCidr();
+                if (StringUtils.isEmpty(externalNetCidr)) {
+                    return;
+                }
+
+                CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
+                        .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+                List<CollectionPluginSceneProbeRouterPortModel> routerPorts = new ArrayList<>();
+                cloudPluginHandler.getElementMap().forEach((nodeId, cloudElement) -> {
+                    if (!Boolean.TRUE.equals(cloudElement.getAuxiliaryNetworkOn())) {
+                        return;
+                    }
+                    if (Boolean.TRUE.equals(cloudElement.getExternal())) {
+                        return;
+                    }
+                    var ips = cloudPluginHandler.allocateOuterIps(nodeId, 1);
+                    if (ips.isEmpty()) {
+                        return;
+                    }
+                    var ip = ips.get(0);
+
+                    var hostRoutes = cloudElement.getAuxiliaryNetworkHostRoutes();
+                    if (hostRoutes == null) {
+                        hostRoutes = new ArrayList<>();
+                    }
+                    var hostRoute = new HostRoute();
+                    hostRoute.setDestination(externalNetCidr);
+                    hostRoute.setNexthop(ip);
+                    hostRoutes.add(hostRoute);
+                    cloudElement.setAuxiliaryNetworkHostRoutes(hostRoutes);
+
+                    var routerPort = new CollectionPluginSceneProbeRouterPortModel();
+                    routerPort.setScene(getPluginHandler().getSrcScene().getEid());
+                    routerPort.setSceneElement(nodeId);
+                    routerPort.setIp(ip);
+                    routerPorts.add(routerPort);
+                });
+                if (!routerPorts.isEmpty()) {
+                    getSceneProbeRouterPortMapper().bulkCreate(routerPorts);
+                }
+            });
+
             // 创建探针采集器
             runSceneProgress(SceneProcess.CREATE_PROBE_COLLECTOR, () -> {
                 var collectionId = getProbeCollector().createCollector();
