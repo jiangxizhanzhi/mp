@@ -35,10 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -189,11 +186,14 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         var csceneRoleObjMap = readCsceneRoles(csceneObjMap.keySet()
                 .toArray(new String[0])).stream().collect(Collectors.groupingBy(CsceneRoleModel::getCscene));
         List<CsceneBO> csceneBOs = new ArrayList<>();
+        Map<String,CsceneBO> csceneBOMap = new HashMap<>();
         csceneObjMap.forEach((csceneId, csceneObj) -> {
             var roleObjs = csceneRoleObjMap.getOrDefault(csceneId, new ArrayList<>());
             var csceneHandler = new CsceneHandler(csceneObj, roleObjs, context);
-            csceneBOs.add(csceneHandler.toData(withInstance));
+            csceneBOMap.put(csceneId,csceneHandler.toData(withInstance));
         });
+        //转为Map后顺序被打乱，此时再次排序
+        listResult.getSource().getObjs().stream().forEach(m -> csceneBOs.add(csceneBOMap.get(m.getId())));
         return new ListObjServiceResult<>(new ListObjResult<>(csceneBOs, listResult.getSource().getTotal(),
                 listResult.getSource().getFields()));
     }
