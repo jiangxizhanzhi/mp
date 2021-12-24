@@ -21,6 +21,7 @@ import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.model.CsceneRoleModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneRoleMapper;
+import cn.cyberpeace.mp.cscene.service.filed.CsceneModelFields;
 import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.model.SceneConfigModel;
@@ -148,7 +149,9 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                          CsceneRoleMapper csceneRoleMapper,
                          CsceneAppConfig csceneAppConfig,
                          ScenePluginCloudSceneService scenePluginCloudSceneService,
-                         ScenePluginCloudSceneConfigService scenePluginCloudSceneConfigService) {
+                         ScenePluginCloudSceneConfigService scenePluginCloudSceneConfigService,
+                         CsceneModelFields csceneModelFields) {
+        setModelFields(csceneModelFields);
         setModelMapper(modelMapper);
         setCsceneRoleMapper(csceneRoleMapper);
         setCsceneAppConfig(csceneAppConfig);
@@ -168,12 +171,15 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     public ListObjServiceResult<CsceneBO> listBO(CsceneQueryParams queryParams, boolean withInstance,
                                                  CsceneContextBO context) {
         ListObjServiceResult<CsceneModel> listResult = null;
-        if (StringUtils.isNotEmpty(queryParams.getSearch())) {
-            // 暂时支持name的模糊搜搜
-            listResult = this.listBOBySearchName(queryParams);
-        } else {
-            listResult = super.list(queryParams);
+        //未指定排序方式时默认按创建时间倒序排列
+        if (queryParams.getOrders() == null || queryParams.getOrders().length == 0) {
+            queryParams.setOrders(new String[]{"-createTime"});
         }
+        //指定模糊查询但是未指定查询字段时默认查询字段为name和referenceMetaData
+        if (queryParams.getSearch() != null && queryParams.getSearchFields() == null) {
+            queryParams.setSearchFields(new String[]{"name", "referenceMetaData"});
+        }
+        listResult = super.list(queryParams);
         if (listResult.getSource() == null) {
             new ListObjServiceResult<>(null, listResult.getServiceCode(), listResult.getDetail());
         }
@@ -190,27 +196,6 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         });
         return new ListObjServiceResult<>(new ListObjResult<>(csceneBOs, listResult.getSource().getTotal(),
                 listResult.getSource().getFields()));
-    }
-
-    /**
-     * 需要联合scene表进行的搜索
-     * @return
-     */
-    private ListObjServiceResult<CsceneModel> listBOBySearchName(CsceneQueryParams queryParams) {
-        HumanCondition humanCondition = new HumanCondition()
-                .link(CsceneModel.class, SceneConfigModel.class)
-                .filterLink(CsceneModel.class, CsceneModel::getSceneConfig, SceneConfigModel.class, SceneConfigModel::getId)
-                .currentLink(CsceneModel.class);
-        if (queryParams.getType() != null) {
-            humanCondition.filterEqual(CsceneModel::getType, queryParams.getType());
-        }
-        humanCondition.filterEqual(CsceneModel::getDeleted, false)
-                .currentLink(SceneConfigModel.class)
-                .filterContains(SceneConfigModel::getName, queryParams.getSearch())
-                .pagination(queryParams.getPage(), queryParams.getPageSize());
-        var data = getModelMapper().list(humanCondition);
-        var total = getModelMapper().total(humanCondition);
-        return new ListObjServiceResult<>(new ListObjResult<>(data, total));
     }
 
     public ServiceResult<CsceneBO> getById(String id, boolean withInstance, CsceneContextBO context) {
