@@ -254,6 +254,23 @@ public class HandlerUtils {
     }
 
     /**
+     * 获取网络连接的所有端口
+     */
+    public List<SceneElementPortBO> getAuxiliaryNetworkCloudElementAttachPorts(
+            CloudPluginSceneElementBO auxiliaryNetworkCloudElement) {
+        var groupPortsMap = getCloudElementGroupPorts(auxiliaryNetworkCloudElement);
+        var attachSrcPorts = groupPortsMap.get(auxiliaryNetworkCloudElement.getSrcElement().getId());
+        List<SceneElementPortBO> allAttachPorts = new ArrayList<>(attachSrcPorts);
+        attachSrcPorts.forEach(attachSrcPort -> {
+            var connectedOpaqueSrcPort = getPortConnectedOpaqueSrcPort(attachSrcPort.getId());
+            if (connectedOpaqueSrcPort != null) {
+                allAttachPorts.add(connectedOpaqueSrcPort);
+            }
+        });
+        return allAttachPorts;
+    }
+
+    /**
      * 获得节点连接的不透明元素，忽略透明模式节点
      * @param nodeId 节点id
      * @return 节点连接的不透明元素
