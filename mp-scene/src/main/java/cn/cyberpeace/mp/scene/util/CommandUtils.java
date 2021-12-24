@@ -41,11 +41,6 @@ public class CommandUtils {
     public static final String WINDOWS_UNZIP_FILE = "unzip -o \"%s\" -d \"%s\"";
 
     /**
-     * windows进入某个目录执行
-     */
-    public static final String WINDOWS_DO_COMMAND_IN_DIR = StringUtils.joinWith(WINDOWS_LINE_BREAK, "cd %s", "%s");
-
-    /**
      * linux创建目录
      */
     public static final String LINUX_MK_DIR = "mkdir -p %s";
@@ -74,11 +69,6 @@ public class CommandUtils {
      * linux解压zip
      */
     public static final String LINUX_UNZIP_FILE = "unzip -o %s -d %s";
-
-    /**
-     * linux进入某个目录执行
-     */
-    public static final String LINUX_DO_COMMAND_IN_DIR = StringUtils.joinWith(LINUX_LINE_BREAK, "cd %s", "%s");
 
     private CommandUtils() {}
 
@@ -137,14 +127,6 @@ public class CommandUtils {
 
     public static String linuxUnzipFile(String filePath, String toDir) {
         return String.format(LINUX_UNZIP_FILE, filePath, toDir);
-    }
-
-    public static String windowsDoCommandInDir(String dir, String command) {
-        return String.format(WINDOWS_DO_COMMAND_IN_DIR, dir, command);
-    }
-
-    public static String linuxDoCommandInDir(String dir, String command) {
-        return String.format(LINUX_DO_COMMAND_IN_DIR, dir, command);
     }
 
 }

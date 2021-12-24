@@ -421,19 +421,19 @@ public class CreateHandler extends HandlerCommon {
         var sceneId = srcScene.getEid();
         var sceneFileUrl = srcScene.getFile();
         if (!StringUtils.isEmpty(sceneFileUrl)) {
-            commands.add(SceneFileUtils.genSceneFileInitCommand(standardSystemType, sceneFileUrl, sceneId));
+            commands.addAll(SceneFileUtils.genSceneFileInitCommand(standardSystemType, sceneFileUrl, sceneId));
         }
 
         var elementFileUrl = srcElement.getFile();
         if (!StringUtils.isEmpty(elementFileUrl)) {
-            commands.add(SceneFileUtils.genElementFileInitCommand(standardSystemType, elementFileUrl, sceneId,
+            commands.addAll(SceneFileUtils.genElementFileInitCommand(standardSystemType, elementFileUrl, sceneId,
                     srcElement.getEid()));
         }
 
         List<String> initCommands = srcElement.getInitCommands();
         if (initCommands != null) {
             initCommands.forEach(initCommand -> {
-                commands.add(SceneCommandUtils.parseCommand(initCommand, sceneId, srcElement.getEid(),
+                commands.addAll(SceneCommandUtils.parseCommand(initCommand, sceneId, srcElement.getEid(),
                         standardSystemType));
             });
         }
@@ -491,8 +491,11 @@ public class CreateHandler extends HandlerCommon {
         List<String> initCommands = srcElement.getInitCommands();
         if (initCommands != null) {
             initCommands.forEach(initCommand -> {
-                commands.add(SceneCommandUtils.parseCommand(initCommand, sceneId, srcElement.getEid(),
-                        standardSystemType));
+                var parsedCommands = SceneCommandUtils.parseCommand(initCommand, sceneId, srcElement.getEid(),
+                        standardSystemType);
+                var inlineCommand = SystemTypeCommandUtils.inlineJoinCommands(standardSystemType,
+                        parsedCommands.toArray(new String[0]));
+                commands.add(inlineCommand);
             });
         }
 
