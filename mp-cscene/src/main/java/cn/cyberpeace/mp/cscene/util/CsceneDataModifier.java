@@ -172,7 +172,14 @@ public class CsceneDataModifier {
         if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getTopology() != null) {
             csceneBO.getSceneConfig().getTopology().getElements().stream().forEach(e -> {
                 if (CollectionUtils.isNotEmpty(e.getInitCommands())) {
-                    List<String> s = e.getInitCommands().stream().map(c -> "s:" + c).collect(Collectors.toList());
+                    List<String> s = e.getInitCommands().stream().map(c -> {
+                        // TODO: 临时兼容业务界面
+                        if (c.startsWith("o:") || c.startsWith("s:") || c.startsWith("n:")) {
+                            return c;
+                        } else {
+                            return "s:" + c;
+                        }
+                    }).collect(Collectors.toList());
                     e.setInitCommands(s);
                 }
                 if (StringUtils.isNotBlank(e.getNodeCommand())) {
