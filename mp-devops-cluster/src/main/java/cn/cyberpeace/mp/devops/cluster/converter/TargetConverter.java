@@ -72,6 +72,9 @@ public class TargetConverter implements BaseConverter{
         if (Objects.isNull(request.getImageType())){
             dto.setSearchType(0);
         }
+        if (request.getLikeName() != null) {
+            dto.setLikeName(request.getLikeName());
+        }
         Integer total = imageMapper.totalCount(dto);
         if (total == 0){
             return Lists.newArrayList();
