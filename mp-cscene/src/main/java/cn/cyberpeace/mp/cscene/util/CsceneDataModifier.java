@@ -41,7 +41,6 @@ public class CsceneDataModifier {
      */
     public static void supplyProtocol(CsceneInstanceBO csceneInstance, String protocol) {
         ScenePluginDataBO cloudPlugin = Optional.ofNullable(csceneInstance.getScene().getPlugins()).orElse(new HashMap<>()).get("cpcloud");
-        csceneInstance.getScene().getTopology().getElements().get(0).getPorts().get(0).getId();
         Map<String, Map<String, Object>> cloudElements = cloudPlugin.getElements();
         if (cloudElements != null) {
             for (SceneElementBO elementBO : csceneInstance.getScene().getTopology().getElements()) {
