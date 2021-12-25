@@ -424,7 +424,10 @@ public class CsceneSpecialService {
     }
 
     public void loadEvent(DeviceReferCsceneInstanceStat instanceStat, String csceneId) {
-        CsceneInstanceModel latestCsceneInstance = csceneInstanceMapper.first(new HumanCondition().filterEqual(CsceneInstanceModel::getCscene, csceneId).orderBy(CsceneInstanceModel::getPk, true));
+        CsceneInstanceModel latestCsceneInstance = csceneInstanceMapper.first(new HumanCondition()
+                .filterEqual(CsceneInstanceModel::getCscene, csceneId)
+                .filterEqual(CsceneInstanceModel::getDeleted, false)
+                .orderBy(CsceneInstanceModel::getPk, true));
         if (latestCsceneInstance == null) {
             instanceStat.setEvent(SceneModel.Event.UNUSE);
             instanceStat.setEventStatus(EventStatus.UNUSE);
