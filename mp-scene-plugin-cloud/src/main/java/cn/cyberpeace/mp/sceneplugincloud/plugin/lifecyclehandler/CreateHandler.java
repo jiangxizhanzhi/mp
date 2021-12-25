@@ -93,14 +93,6 @@ public class CreateHandler extends HandlerCommon {
         }
     }
 
-    private void addCloudPort(String portId, CloudPluginSceneElementPortBO cloudPort) {
-        getPluginHandler().getElementIds().add(portId);
-        getPluginHandler().getElementPortMap().put(portId, cloudPort);
-
-        var srcPort = getPluginHandler().getSrcPort(portId);
-        cloudPort.setSrcPort(srcPort);
-    }
-
     private String genAccessModeKey(String protocol, String port, String username, String password) {
         return String.format("%s:%s:%s:%s", protocol, AccessMode.Protocol.CONSOLE.equals(protocol) ? StringUtils.EMPTY : port, username, password);
     }
@@ -301,7 +293,7 @@ public class CreateHandler extends HandlerCommon {
                 var cloudPort = getPluginHandler().getPort(srcPort.getId());
                 if (cloudPort == null) {
                     cloudPort = new CloudPluginSceneElementPortBO();
-                    addCloudPort(srcPort.getId(), cloudPort);
+                    getPluginHandler().addPort(srcPort.getId(), cloudPort);
                 }
                 cloudPort.setAuxiliaryNetworkId(auxiliaryNetworkId);
                 var networkIdCloudPorts = networkIdCloudPortsMap.getOrDefault(
@@ -382,7 +374,7 @@ public class CreateHandler extends HandlerCommon {
             // 没有定义的端口补全
             if (cloudPort == null) {
                 cloudPort = new CloudPluginSceneElementPortBO();
-                addCloudPort(port.getId(), cloudPort);
+                getPluginHandler().addPort(port.getId(), cloudPort);
             }
             cloudPort.setAuxiliaryNetworkId(auxiliaryNetworkCloudElement.getAuxiliaryNetworkId());
 

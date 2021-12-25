@@ -40,6 +40,12 @@ public class CollectionAppConfig {
     @Value("${mp.sceneplugincollection.wazuh_agent_installer_dir:}")
     private String wazuhAgentInstallerDir;
 
+    @Value("${mp.sceneplugincollection.enable_flow_collect:true}")
+    private Boolean enableFlowCollect;
+
+    @Value("${mp.sceneplugincollection.enable_probe_collect:true}")
+    private Boolean enableProbeCollect;
+
     @Autowired
     private BaseAppConfig baseAppConfig;
 

@@ -19,6 +19,8 @@ public abstract class BaseCollectionPluginSceneElementBO<M extends BaseCollectio
         T extends BaseCollectionPluginSceneElementBO<M, T, S>, S extends BaseSceneElementBO<?, ?, S>>
         extends BasePluginSceneElementBO<M, T, S> {
 
+    @ApiModelProperty(value = "是否开启探针采集")
+    private Boolean enableProbeCollect;
     @ApiModelProperty(value = "探针列表")
     private List<Probe> probes;
 
