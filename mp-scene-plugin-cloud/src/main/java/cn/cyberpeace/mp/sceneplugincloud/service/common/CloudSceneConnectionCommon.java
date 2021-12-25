@@ -104,13 +104,11 @@ public class CloudSceneConnectionCommon {
             }
         }
 
-        if (StringUtils.isEmpty(sceneConnection.getConnectionUrl())
-                || sceneConnection.getAccessTokenExpireTime() == null
-                || LocalDateTime.now().compareTo(sceneConnection.getAccessTokenExpireTime()) >= 0) {
-            var result = remoteClient.getConnectionUrl(sceneConnection.getConnectionId(), userId);
-            if (result == null || StringUtils.isEmpty(result.getUrl())) {
-                log.error("Get scene connection[{}] url with empty result: {}", sceneConnection.getConnectionId(), result);
-            } else {
+        var result = remoteClient.getConnectionUrl(sceneConnection.getConnectionId(), userId);
+        if (result == null || StringUtils.isEmpty(result.getUrl())) {
+            log.error("Get scene connection[{}] url with empty result: {}", sceneConnection.getConnectionId(), result);
+        } else {
+            if (!result.getUrl().equals(sceneConnection.getConnectionUrl())) {
                 sceneConnection.setConnectionUrl(result.getUrl());
                 sceneConnection.setAccessTokenExpireTime(LocalDateTime.now()
                         .plusSeconds(CloudSingleton.cloudAppConfig.getRemoteConnectionTokenExpireSeconds()));
