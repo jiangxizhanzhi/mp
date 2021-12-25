@@ -136,7 +136,14 @@ public class CsceneDataModifier {
                     pieceBOS.forEach(piece -> piece.setEid(null));
                 }
                 if (CollectionUtils.isNotEmpty(roles)) {
-                    roles.forEach(r -> r.setId(null));
+                    roles.forEach(r -> {
+                        r.setId(null);
+                        if (CollectionUtils.isNotEmpty(r.getChildren())) {
+                            r.getChildren().forEach(ch -> {
+                                ch.setId(null);
+                            });
+                        }
+                    });
                 }
             }
         }
