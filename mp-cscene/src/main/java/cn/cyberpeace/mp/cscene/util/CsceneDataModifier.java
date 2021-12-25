@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneRoleBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
@@ -116,6 +117,7 @@ public class CsceneDataModifier {
                 List<SceneConfigElementPortConnectionBO> connectionBOS = csceneBO.getSceneConfig().getTopology().getConnections();
                 List<SceneConfigAreaBO> areaBOS = csceneBO.getSceneConfig().getTopology().getAreas();
                 List<SceneConfigPieceBO> pieceBOS = csceneBO.getSceneConfig().getTopology().getPieces();
+                List<CsceneRoleBO> roles = csceneBO.getRoles();
                 if (CollectionUtils.isNotEmpty(elementBOS)) {
                     elementBOS.forEach(bo -> {
                         bo.setEid(null);
@@ -132,6 +134,9 @@ public class CsceneDataModifier {
                 }
                 if (CollectionUtils.isNotEmpty(pieceBOS)) {
                     pieceBOS.forEach(piece -> piece.setEid(null));
+                }
+                if (CollectionUtils.isNotEmpty(roles)) {
+                    roles.forEach(r -> r.setId(null));
                 }
             }
         }
