@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.*;
 import cn.cyberpeace.mp.scene.core.bo.SceneBO;
+import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincloud.bo.*;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
@@ -16,6 +17,7 @@ import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementPortModel;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginContext;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
@@ -323,7 +325,24 @@ public class ScenePluginCloudSceneService {
         }
 
         var srcScene = accessModeInfo.getSrcScene();
+        var srcElement = accessModeInfo.getCloudElement().getSrcElement();
         var portId = accessModeInfo.getCloudPort().getSrcPort().getId();
+        var accessMode = accessModeInfo.getAccessMode();
+        var nodeConnection = new NodeConnectionBO();
+        nodeConnection.setSceneId(srcScene.getEid());
+        nodeConnection.setSceneName(srcScene.getName());
+        nodeConnection.setNodeId(srcElement.getId());
+        nodeConnection.setNodeName(srcElement.getName());
+        nodeConnection.setProtocol(accessMode.getProtocol());
+        nodeConnection.setUser(userId);
+
+        if (accessMode.getProtocol().equals(AccessMode.Protocol.CONSOLE)) {
+            var virtualType = accessModeInfo.getCloudElement().getVirtualType();
+            if (virtualType != null && virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
+                nodeConnection.setConnectionUrl(accessMode.getConnectionUrl());
+                return new ServiceResult<>(nodeConnection);
+            }
+        }
 
         var sceneConnectionParam = new CloudSceneConnectionCommon.SceneConnectionParam();
         sceneConnectionParam.setSceneId(sceneId);
@@ -338,15 +357,6 @@ public class ScenePluginCloudSceneService {
             return new ServiceResult<>(null);
         }
 
-        var srcElement = accessModeInfo.getCloudElement().getSrcElement();
-        var nodeConnection = new NodeConnectionBO();
-        nodeConnection.setSceneId(srcScene.getEid());
-        nodeConnection.setSceneName(srcScene.getName());
-        nodeConnection.setNodeId(srcElement.getId());
-        nodeConnection.setNodeName(srcElement.getName());
-        var accessMode = accessModeInfo.getAccessMode();
-        nodeConnection.setProtocol(accessMode.getProtocol());
-        nodeConnection.setUser(userId);
         nodeConnection.setConnectionId(sceneConnection.getConnectionId());
         nodeConnection.setConnectionUrl(sceneConnection.getConnectionUrl());
         return new ServiceResult<>(nodeConnection);
