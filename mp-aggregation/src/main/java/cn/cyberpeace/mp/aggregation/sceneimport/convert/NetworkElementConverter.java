@@ -96,7 +96,7 @@ class NetworkElementConverter implements IConverter {
             // id以internet开头,则是外部网络
             pluginElement.setRole(BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK);
         } else {
-            pluginElement.setRole(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_2_GATEWAY);
+            pluginElement.setRole(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH);
         }
         container.putPluginElement(sceneConfigElementBO.getId(), pluginElement);
 
