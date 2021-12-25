@@ -10,7 +10,6 @@ import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneBO;
 import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementBO;
 import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementPortBO;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementPortConnectionModel;
-import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,6 +69,22 @@ public abstract class BasePluginCommonHandler<
             }
         });
         return pluginPorts;
+    }
+
+    public void addElement(String nodeId, E pluginElement) {
+        getElementIds().add(nodeId);
+        getElementMap().put(nodeId, pluginElement);
+
+        var srcElement = getSrcElement(nodeId);
+        pluginElement.setSrcElement(srcElement);
+    }
+
+    public void addPort(String portId, P pluginPort) {
+        getElementPortIds().add(portId);
+        getElementPortMap().put(portId, pluginPort);
+
+        var srcPort = getSrcPort(portId);
+        pluginPort.setSrcPort(srcPort);
     }
 
     @Override
