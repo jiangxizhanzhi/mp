@@ -25,6 +25,7 @@ import cn.cyberpeace.mp.scene.model.SceneConfigModel;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
+import cn.cyberpeace.mp.scene.repository.SceneMapper;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
@@ -49,6 +50,9 @@ public class CsceneSpecialService {
 
     @Autowired
     private CsceneMapper csceneMapper;
+
+    @Autowired
+    private SceneMapper sceneMapper;
 
     @Autowired
     private CsceneInstanceMapper csceneInstanceMapper;
@@ -417,5 +421,19 @@ public class CsceneSpecialService {
     public int countActivitySceneByTime(LocalDateTime startTime, LocalDateTime endTime) {
         Integer cnt = csceneInstanceMapper.countActivitySceneByTime(startTime, endTime);
         return Optional.ofNullable(cnt).orElse(0);
+    }
+
+    public void loadEvent(DeviceReferCsceneInstanceStat instanceStat, String csceneId) {
+        CsceneInstanceModel latestCsceneInstance = csceneInstanceMapper.first(new HumanCondition().filterEqual(CsceneInstanceModel::getCscene, csceneId).orderBy(CsceneInstanceModel::getPk, true));
+        if (latestCsceneInstance == null) {
+            instanceStat.setEvent(SceneModel.Event.STOP);
+            instanceStat.setEventStatus(EventStatus.OVER);
+        } else {
+            SceneModel model = sceneMapper.get(latestCsceneInstance.getScene());
+            instanceStat.setEvent(model.getEvent());
+            instanceStat.setEventStatus(model.getEventStatus());
+            instanceStat.setCreateUser(latestCsceneInstance.getCreateUser());
+            instanceStat.setCreateUsername(latestCsceneInstance.getCreateUsername());
+        }
     }
 }
