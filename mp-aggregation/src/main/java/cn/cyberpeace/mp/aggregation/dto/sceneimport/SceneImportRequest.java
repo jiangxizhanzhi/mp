@@ -18,4 +18,7 @@ public class SceneImportRequest {
 
     @ApiModelProperty("镜像文件路径")
     private String imagePath;
+
+    @ApiModelProperty("场景文件路径")
+    private String sceneFilePath;
 }
