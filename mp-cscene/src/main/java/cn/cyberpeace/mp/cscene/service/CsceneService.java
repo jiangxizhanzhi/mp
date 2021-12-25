@@ -228,10 +228,9 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
             }
         } else {
             var csceneHandler = new CsceneHandler(csceneBO, context);
-            if (StringUtils.isEmpty(csceneBO.getName())) {
-                // 兼容以前没有cscene name的调用
-                csceneBO.setName(getSceneName(csceneBO.getSceneConfig()));
-            }
+            // 以前没有 cscene.name , 目前都和 scene.name 保持一致
+            String sceneName = getSceneName(csceneBO.getSceneConfig());
+            csceneBO.setName(sceneName == null ? StringUtils.EMPTY : sceneName);
             csceneHandler.save();
             return new ServiceResult<>(csceneHandler.toData());
         }
