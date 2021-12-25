@@ -21,7 +21,9 @@ import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.model.CsceneRoleModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneRoleMapper;
+import cn.cyberpeace.mp.cscene.service.filed.CsceneModelFields;
 import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.model.SceneConfigModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneConfigService;
@@ -33,10 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -147,7 +146,9 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                          CsceneRoleMapper csceneRoleMapper,
                          CsceneAppConfig csceneAppConfig,
                          ScenePluginCloudSceneService scenePluginCloudSceneService,
-                         ScenePluginCloudSceneConfigService scenePluginCloudSceneConfigService) {
+                         ScenePluginCloudSceneConfigService scenePluginCloudSceneConfigService,
+                         CsceneModelFields csceneModelFields) {
+        setModelFields(csceneModelFields);
         setModelMapper(modelMapper);
         setCsceneRoleMapper(csceneRoleMapper);
         setCsceneAppConfig(csceneAppConfig);
@@ -167,12 +168,15 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     public ListObjServiceResult<CsceneBO> listBO(CsceneQueryParams queryParams, boolean withInstance,
                                                  CsceneContextBO context) {
         ListObjServiceResult<CsceneModel> listResult = null;
-        if (StringUtils.isNotEmpty(queryParams.getSearch())) {
-            // 暂时支持name的模糊搜搜
-            listResult = this.listBOBySearchName(queryParams);
-        } else {
-            listResult = super.list(queryParams);
+        //未指定排序方式时默认按创建时间倒序排列
+        if (queryParams.getOrders() == null || queryParams.getOrders().length == 0) {
+            queryParams.setOrders(new String[]{"-createTime"});
         }
+        //指定模糊查询但是未指定查询字段时默认查询字段为name和referenceMetaData
+        if (queryParams.getSearch() != null && queryParams.getSearchFields() == null) {
+            queryParams.setSearchFields(new String[]{"name", "referenceMetaData"});
+        }
+        listResult = super.list(queryParams);
         if (listResult.getSource() == null) {
             new ListObjServiceResult<>(null, listResult.getServiceCode(), listResult.getDetail());
         }
@@ -182,34 +186,16 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         var csceneRoleObjMap = readCsceneRoles(csceneObjMap.keySet()
                 .toArray(new String[0])).stream().collect(Collectors.groupingBy(CsceneRoleModel::getCscene));
         List<CsceneBO> csceneBOs = new ArrayList<>();
+        Map<String,CsceneBO> csceneBOMap = new HashMap<>();
         csceneObjMap.forEach((csceneId, csceneObj) -> {
             var roleObjs = csceneRoleObjMap.getOrDefault(csceneId, new ArrayList<>());
             var csceneHandler = new CsceneHandler(csceneObj, roleObjs, context);
-            csceneBOs.add(csceneHandler.toData(withInstance));
+            csceneBOMap.put(csceneId,csceneHandler.toData(withInstance));
         });
+        //转为Map后顺序被打乱，此时再次排序
+        listResult.getSource().getObjs().stream().forEach(m -> csceneBOs.add(csceneBOMap.get(m.getId())));
         return new ListObjServiceResult<>(new ListObjResult<>(csceneBOs, listResult.getSource().getTotal(),
                 listResult.getSource().getFields()));
-    }
-
-    /**
-     * 需要联合scene表进行的搜索
-     * @return
-     */
-    private ListObjServiceResult<CsceneModel> listBOBySearchName(CsceneQueryParams queryParams) {
-        HumanCondition humanCondition = new HumanCondition()
-                .link(CsceneModel.class, SceneConfigModel.class)
-                .filterLink(CsceneModel.class, CsceneModel::getSceneConfig, SceneConfigModel.class, SceneConfigModel::getId)
-                .currentLink(CsceneModel.class);
-        if (queryParams.getType() != null) {
-            humanCondition.filterEqual(CsceneModel::getType, queryParams.getType());
-        }
-        humanCondition.filterEqual(CsceneModel::getDeleted, false)
-                .currentLink(SceneConfigModel.class)
-                .filterContains(SceneConfigModel::getName, queryParams.getSearch())
-                .pagination(queryParams.getPage(), queryParams.getPageSize());
-        var data = getModelMapper().list(humanCondition);
-        var total = getModelMapper().total(humanCondition);
-        return new ListObjServiceResult<>(new ListObjResult<>(data, total));
     }
 
     public ServiceResult<CsceneBO> getById(String id, boolean withInstance, CsceneContextBO context) {
@@ -231,10 +217,31 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     @Transactional
     public ServiceResult<CsceneBO> sync(CsceneBO csceneBO, CsceneContextBO context) {
         checkSceneEditNodeLimit(csceneBO);
+        if (csceneBO.getSceneConfig() == null && StringUtils.isNotEmpty(csceneBO.getId())) {
+            var serviceResult = update(csceneBO.toModel());
+            if (serviceResult != null && serviceResult.getSource() != null && serviceResult.getSource().getObj() != null) {
+                CsceneBO result = new CsceneBO();
+                result.fromModel(serviceResult.getSource().getObj());
+                return new ServiceResult<>(result);
+            } else {
+                return new ServiceResult<>(csceneBO);
+            }
+        } else {
+            var csceneHandler = new CsceneHandler(csceneBO, context);
+            if (StringUtils.isEmpty(csceneBO.getName())) {
+                // 兼容以前没有cscene name的调用
+                csceneBO.setName(getSceneName(csceneBO.getSceneConfig()));
+            }
+            csceneHandler.save();
+            return new ServiceResult<>(csceneHandler.toData());
+        }
+    }
 
-        var csceneHandler = new CsceneHandler(csceneBO, context);
-        csceneHandler.save();
-        return new ServiceResult<>(csceneHandler.toData());
+    private String getSceneName(SceneConfigDataBO sceneConfigDataBO) {
+        if (sceneConfigDataBO == null || sceneConfigDataBO.getTopology() == null || sceneConfigDataBO.getTopology().getScene() == null || sceneConfigDataBO.getTopology().getScene().getName() == null) {
+            return null;
+        }
+        return sceneConfigDataBO.getTopology().getScene().getName();
     }
 
     @Transactional

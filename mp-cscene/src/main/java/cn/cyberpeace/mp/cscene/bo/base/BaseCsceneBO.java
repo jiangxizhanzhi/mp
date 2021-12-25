@@ -25,6 +25,8 @@ public abstract class BaseCsceneBO<
     private String createUsername;
     @ApiModelProperty(value = "角色信息")
     private List<R> roles;
+    @ApiModelProperty(value = "场景名称")
+    private String name;
 
     @Override
     public T export() {

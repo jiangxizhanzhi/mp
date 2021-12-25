@@ -25,6 +25,7 @@ import cn.cyberpeace.mp.scene.model.SceneConfigModel;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
+import cn.cyberpeace.mp.scene.repository.SceneMapper;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
@@ -49,6 +50,9 @@ public class CsceneSpecialService {
 
     @Autowired
     private CsceneMapper csceneMapper;
+
+    @Autowired
+    private SceneMapper sceneMapper;
 
     @Autowired
     private CsceneInstanceMapper csceneInstanceMapper;
@@ -151,7 +155,7 @@ public class CsceneSpecialService {
                 .pagination(queryParams.getPage(), queryParams.getPageSize())
                 .currentLink(CsceneInstanceModel.class)
                 .groupBy(CsceneInstanceModel::getId)
-                .selectAs("pk","pk")
+                .selectAs("pk", "pk")
                 .selectAs(CsceneInstanceModel::getId, CsceneInstanceStat::getId)
                 .selectAs(CsceneInstanceModel::getType, CsceneInstanceStat::getType)
                 .selectAs(CsceneInstanceModel::getReferenceType, CsceneInstanceStat::getReferenceType)
@@ -162,8 +166,8 @@ public class CsceneSpecialService {
                 .selectAs(CsceneInstanceModel::getSceneTtl, CsceneInstanceStat::getSceneTtl)
                 .selectAs(CsceneInstanceModel::getSceneAttr, CsceneInstanceStat::getSceneAttr)
                 .selectAs(CsceneInstanceModel::getSceneTtl, CsceneInstanceStat::getSceneTtl)
+                .selectAs(CsceneInstanceModel::getName, CsceneInstanceStat::getName)
                 .currentLink(SceneModel.class)
-                .selectAs(SceneModel::getName, CsceneInstanceStat::getName)
                 .selectAs(SceneModel::getEvent, CsceneInstanceStat::getEvent)
                 .selectAs(SceneModel::getEventStatus, CsceneInstanceStat::getEventStatus)
                 .selectAs(SceneModel::getProcessMessage, CsceneInstanceStat::getEventMessage)
@@ -207,12 +211,15 @@ public class CsceneSpecialService {
                 humanCondition.filterEqual(CsceneInstanceModel::getCreateUser, currentUser.getId());
             }
         }
-
-        humanCondition.currentLink(SceneModel.class);
         var search = queryParams.getSearch();
         if (!StringUtils.isEmpty(search)) {
-            humanCondition.filterIContains(SceneModel::getName, search);
+            humanCondition.filterOrStart()
+                    .orContains(CsceneInstanceModel::getName, search)
+                    .orContains(CsceneInstanceModel::getReferenceMetaData, search)
+                    .filterOrEnd();
         }
+
+        humanCondition.currentLink(SceneModel.class);
         var error = queryParams.getError();
         if (Boolean.TRUE.equals(error)) {
             humanCondition.filterEqual(SceneModel::getEventStatus, EventStatus.ABNORMAL);
@@ -414,5 +421,19 @@ public class CsceneSpecialService {
     public int countActivitySceneByTime(LocalDateTime startTime, LocalDateTime endTime) {
         Integer cnt = csceneInstanceMapper.countActivitySceneByTime(startTime, endTime);
         return Optional.ofNullable(cnt).orElse(0);
+    }
+
+    public void loadEvent(DeviceReferCsceneInstanceStat instanceStat, String csceneId) {
+        CsceneInstanceModel latestCsceneInstance = csceneInstanceMapper.first(new HumanCondition().filterEqual(CsceneInstanceModel::getCscene, csceneId).orderBy(CsceneInstanceModel::getPk, true));
+        if (latestCsceneInstance == null) {
+            instanceStat.setEvent(SceneModel.Event.UNUSE);
+            instanceStat.setEventStatus(EventStatus.UNUSE);
+        } else {
+            SceneModel model = sceneMapper.get(latestCsceneInstance.getScene());
+            instanceStat.setEvent(model.getEvent());
+            instanceStat.setEventStatus(model.getEventStatus());
+            instanceStat.setCreateUser(latestCsceneInstance.getCreateUser());
+            instanceStat.setCreateUsername(latestCsceneInstance.getCreateUsername());
+        }
     }
 }

@@ -12,6 +12,12 @@ public class SystemTypeCommandUtils {
 
     public static final String OS_TYPE_LINUX = "linux";
 
+    public static final String COMMAND_AND_SEPARATOR = " && ";
+
+    public static final String WINDOWS_COMMAND_INLINE_SEPARATOR = " & ";
+
+    public static final String LINUX_COMMAND_INLINE_SEPARATOR = " ; ";
+
     private SystemTypeCommandUtils() {}
 
     public static final Map<String, String> SYSTEM_TYPE_OS_TYPE = new HashMap<>() {
@@ -72,8 +78,27 @@ public class SystemTypeCommandUtils {
         }
     }
 
+    public static String getCommandInlineSeparator(String systemType) {
+        var osType = getOsType(systemType);
+        if (OS_TYPE_WINDOWS.equals(osType)) {
+            return WINDOWS_COMMAND_INLINE_SEPARATOR;
+        } else if (OS_TYPE_LINUX.equals(osType)) {
+            return LINUX_COMMAND_INLINE_SEPARATOR;
+        } else {
+            return LINUX_COMMAND_INLINE_SEPARATOR;
+        }
+    }
+
     public static String joinCommands(String systemType, String... commands) {
         return StringUtils.joinWith(getLineBreak(systemType), commands);
+    }
+
+    public static String andJoinCommands(String systemType, String... commands) {
+        return StringUtils.joinWith(COMMAND_AND_SEPARATOR, commands);
+    }
+
+    public static String inlineJoinCommands(String systemType, String... commands) {
+        return StringUtils.joinWith(getCommandInlineSeparator(systemType), commands);
     }
 
     public static String appendBeforeCommand(String command, String beforeCommand, String systemType) {
@@ -88,14 +113,4 @@ public class SystemTypeCommandUtils {
         return StringUtils.joinWith(getPathDelimiter(systemType), paths);
     }
 
-    public static String doCommandInDir(String systemType, String dir, String command) {
-        var osType = getOsType(systemType);
-        if (OS_TYPE_WINDOWS.equals(osType)) {
-            return CommandUtils.windowsDoCommandInDir(dir, command);
-        } else if (OS_TYPE_LINUX.equals(osType)) {
-            return CommandUtils.linuxDoCommandInDir(dir, command);
-        } else {
-            return command;
-        }
-    }
 }

@@ -51,6 +51,7 @@ public class ScreenrecordServiceImpl extends BaseOpenStackServiceImpl {
      * @return
      */
     public ListObjServiceResult<ScreenrecordResponse> pageScreenrecord(ScreenrecordQueryParams queryParams) {
+        queryParams.ensure();
         StringBuffer getParams = new StringBuffer(BaseConstants.QUESTION_MARK);
         getParams.append("limit=").append(Objects.nonNull(queryParams.getPageSize()) ? queryParams.getPageSize() : queryParams.getPerPage())
                 .append("&page=").append(queryParams.getPage());
@@ -62,6 +63,22 @@ public class ScreenrecordServiceImpl extends BaseOpenStackServiceImpl {
         }
         if (StringUtils.isNotBlank(queryParams.getEndTime())) {
             getParams.append("&end_time=").append(queryParams.getEndTime());
+        }
+        if (Objects.nonNull(queryParams.getOrders())) {
+            String sortKey = queryParams.getOrders()[0];
+            if (sortKey.startsWith("-")) {
+                sortKey = sortKey.substring(1);
+                getParams.append("&sort_dir=").append("desc");
+            } else {
+                getParams.append("&sort_dir=").append("asc");
+            }
+            if ("scene_name".equals(sortKey) || "sceneName".equals(sortKey)) {
+                getParams.append("&sort_key=").append("scene");
+            } else if ("file_size".equals(sortKey) || ("fileSize".equals(sortKey))) {
+                getParams.append("&sort_key=").append("file_size");
+            } else if ("create_time".equals(sortKey) || ("createTime".equals(sortKey))) {
+                getParams.append("&sort_key=").append("recordate");
+            }
         }
 
         ScreenrecordPageResponse pageResponse = super.sendGet(BaseCloudPlatformService.SCREENRECORD_METHOD +

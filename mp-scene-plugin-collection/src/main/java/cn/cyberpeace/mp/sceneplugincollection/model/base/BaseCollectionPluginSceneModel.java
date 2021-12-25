@@ -8,4 +8,6 @@ import lombok.Data;
 public class BaseCollectionPluginSceneModel extends BasePluginSceneModel {
     @DefaultBool(true)
     private Boolean enableFlowCollect;
+    @DefaultBool(true)
+    private Boolean enableProbeCollect;
 }

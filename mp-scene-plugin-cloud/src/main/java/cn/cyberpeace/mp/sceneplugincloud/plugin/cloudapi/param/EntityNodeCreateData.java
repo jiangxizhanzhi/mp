@@ -26,12 +26,14 @@ public class EntityNodeCreateData implements CloudHttpData {
         private Integer allowPass;
         private String networkId;
         private List<AccessMode> accessModes;
+        private AccessMode.Connection connection;
 
         public static class LinkType {
             public static final String ACCESS = "access";
             public static final String TRUNK = "trunk";
 
-            private LinkType() {}
+            private LinkType() {
+            }
         }
 
         @Data
@@ -55,6 +57,8 @@ public class EntityNodeCreateData implements CloudHttpData {
                 private String url;
                 private String connectionId;
                 private String connectionName;
+                private Boolean success;
+                private String requestId;
             }
         }
     }

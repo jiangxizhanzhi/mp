@@ -41,7 +41,6 @@ public class CsceneDataModifier {
      */
     public static void supplyProtocol(CsceneInstanceBO csceneInstance, String protocol) {
         ScenePluginDataBO cloudPlugin = Optional.ofNullable(csceneInstance.getScene().getPlugins()).orElse(new HashMap<>()).get("cpcloud");
-        csceneInstance.getScene().getTopology().getElements().get(0).getPorts().get(0).getId();
         Map<String, Map<String, Object>> cloudElements = cloudPlugin.getElements();
         if (cloudElements != null) {
             for (SceneElementBO elementBO : csceneInstance.getScene().getTopology().getElements()) {
@@ -172,7 +171,14 @@ public class CsceneDataModifier {
         if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getTopology() != null) {
             csceneBO.getSceneConfig().getTopology().getElements().stream().forEach(e -> {
                 if (CollectionUtils.isNotEmpty(e.getInitCommands())) {
-                    List<String> s = e.getInitCommands().stream().map(c -> "s:" + c).collect(Collectors.toList());
+                    List<String> s = e.getInitCommands().stream().map(c -> {
+                        // TODO: 临时兼容业务界面
+                        if (c.startsWith("o:") || c.startsWith("s:") || c.startsWith("n:")) {
+                            return c;
+                        } else {
+                            return "s:" + c;
+                        }
+                    }).collect(Collectors.toList());
                     e.setInitCommands(s);
                 }
                 if (StringUtils.isNotBlank(e.getNodeCommand())) {
