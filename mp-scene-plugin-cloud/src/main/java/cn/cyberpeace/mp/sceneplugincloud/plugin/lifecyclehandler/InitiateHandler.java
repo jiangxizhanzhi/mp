@@ -40,13 +40,17 @@ public class InitiateHandler extends HandlerCommon {
     private static class ReallocateIpInfo {
         private CloudPluginSceneElementBO auxiliaryNetworkCloudElement;
         private String ip;
+
+        public String key() {
+            return StringUtils.joinWith(":", auxiliaryNetworkCloudElement.getSrcElement().getId(), ip);
+        }
     }
 
     private List<String> existCidrs;
     private final Map<String, List<String>> networkNodeIdIpPool = new HashMap<>();
 
     // 辅助变量：需要重新分配的ip地址
-    private List<ReallocateIpInfo> reallocateIpInfos = new ArrayList<>();
+    private Map<String, ReallocateIpInfo> reallocateIpInfos = new HashMap<>();
 
     private void prepareExistCidrs() {
         if (existCidrs == null) {
@@ -364,7 +368,9 @@ public class InitiateHandler extends HandlerCommon {
                 auxiliaryNetworkCloudElement.getAllocationPools());
         // 选择最后一个地址设置为初始默认网关
         if (!defaultRouterIpPool.isEmpty() && StringUtils.isEmpty(auxiliaryNetworkCloudElement.getAuxiliaryNetworkGateway())) {
-            auxiliaryNetworkCloudElement.setAuxiliaryNetworkGateway(defaultRouterIpPool.get(defaultRouterIpPool.size() - 1));
+            var lastIp = defaultRouterIpPool.get(defaultRouterIpPool.size() - 1);
+            auxiliaryNetworkCloudElement.setAuxiliaryNetworkGateway(lastIp);
+            auxiliaryNetworkCloudElement.setGateway(lastIp);
         }
 
         // 网关地址之后的第一个地址可能是dhcp地址，需要排除掉
@@ -375,7 +381,7 @@ public class InitiateHandler extends HandlerCommon {
                 var reallocateIpInfo = new ReallocateIpInfo();
                 reallocateIpInfo.setAuxiliaryNetworkCloudElement(auxiliaryNetworkCloudElement);
                 reallocateIpInfo.setIp(possibleDhcpIp);
-                reallocateIpInfos.add(reallocateIpInfo);
+                reallocateIpInfos.put(reallocateIpInfo.key(), reallocateIpInfo);
 
                 existIps.add(possibleDhcpIp);
                 // 如果分到了可能的dhcp地址，重新分配
@@ -470,6 +476,7 @@ public class InitiateHandler extends HandlerCommon {
             // TODO: 暂时只有默认路由支持，其它设备地址会冲突待解决方案
             if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
                 auxiliaryNetworkCloudElement.setAuxiliaryNetworkGateway(ip);
+                auxiliaryNetworkCloudElement.setGateway(ip);
 
                 // 网关地址之后的第一个地址可能是dhcp地址，需要排除掉
                 var possibleDhcpIp = IpUtils.nextIp(auxiliaryNetworkCloudElement.getAuxiliaryNetworkGateway());
@@ -477,7 +484,7 @@ public class InitiateHandler extends HandlerCommon {
                     var reallocateIpInfo = new ReallocateIpInfo();
                     reallocateIpInfo.setAuxiliaryNetworkCloudElement(auxiliaryNetworkCloudElement);
                     reallocateIpInfo.setIp(ip);
-                    reallocateIpInfos.add(reallocateIpInfo);
+                    reallocateIpInfos.put(reallocateIpInfo.key(), reallocateIpInfo);
                 }
             }
         }
@@ -488,58 +495,68 @@ public class InitiateHandler extends HandlerCommon {
     /**
      * 获取需要重新分配的端口
      */
-    private List<SceneElementPortBO> getReallocateIpPorts() {
-        List<SceneElementPortBO> reallocateIpPorts = new ArrayList<>();
+    private Map<String, List<SceneElementPortBO>> getReallocateIpPorts() {
+        Map<String, List<SceneElementPortBO>> groupSamePortsMap = new HashMap<>();
 
-        reallocateIpInfos.forEach(reallocateIpInfo -> {
+        reallocateIpInfos.forEach((key, reallocateIpInfo) -> {
             var auxiliaryNetworkCloudElement = reallocateIpInfo.getAuxiliaryNetworkCloudElement();
             var srcPorts = auxiliaryNetworkCloudElement.getSrcElement().getPorts();
             if (srcPorts == null || srcPorts.isEmpty()) {
                 return;
             }
 
+            var auxiliaryNetworkKey = auxiliaryNetworkCloudElement.getSrcElement().getEid();
             srcPorts.forEach(srcPort -> {
                 var srcPortAuxiliaryNetworkCloudElement = getHandlerUtils().getPortAuxiliaryNetworkCloudElement(srcPort.getId());
                 if (auxiliaryNetworkCloudElement.equals(srcPortAuxiliaryNetworkCloudElement)) {
                     if (reallocateIpInfo.getIp().equals(srcPort.getIp())) {
-                        reallocateIpPorts.add(srcPort);
+                        MapUtils.setDefault(groupSamePortsMap,
+                                StringUtils.joinWith(":", auxiliaryNetworkKey, srcPort.getIp()),
+                                new ArrayList<>()).add(srcPort);
                     }
                     var connectedSrcPort = getHandlerUtils().getPortConnectedOpaqueSrcPort(srcPort.getId());
                     if (connectedSrcPort != null && reallocateIpInfo.getIp().equals(connectedSrcPort.getIp())) {
-                        reallocateIpPorts.add(connectedSrcPort);
+                        MapUtils.setDefault(groupSamePortsMap,
+                                StringUtils.joinWith(":", auxiliaryNetworkKey, connectedSrcPort.getIp()),
+                                new ArrayList<>()).add(connectedSrcPort);
                     }
                 }
             });
         });
 
-        return reallocateIpPorts;
+        return groupSamePortsMap;
     }
 
-    private void reallocateIpPort(SceneElementPortBO srcPort) {
-        var srcPortAuxiliaryNetworkCloudElement = getHandlerUtils().getPortAuxiliaryNetworkCloudElement(srcPort.getId());
-        Set<String> existIps = new HashSet<>(getHandlerUtils().getOuterExistIps(srcPortAuxiliaryNetworkCloudElement));
-        var attachPorts = getHandlerUtils().getAuxiliaryNetworkCloudElementAttachPorts(srcPortAuxiliaryNetworkCloudElement);
-        attachPorts.forEach(attachPort -> {
-            if (!StringUtils.isEmpty(attachPort.getIp())) {
-                existIps.add(attachPort.getIp());
+    private void reallocateIpPorts(Map<String, List<SceneElementPortBO>> groupSamePortsMap) {
+        groupSamePortsMap.forEach((key, sameSrcPorts) -> {
+            var srcPort = sameSrcPorts.get(0);
+            var srcPortAuxiliaryNetworkCloudElement = getHandlerUtils().getPortAuxiliaryNetworkCloudElement(srcPort.getId());
+            Set<String> existIps = new HashSet<>(getHandlerUtils().getOuterExistIps(srcPortAuxiliaryNetworkCloudElement));
+            var attachPorts = getHandlerUtils().getAuxiliaryNetworkCloudElementAttachPorts(srcPortAuxiliaryNetworkCloudElement);
+            attachPorts.forEach(attachPort -> {
+                if (!StringUtils.isEmpty(attachPort.getIp())) {
+                    existIps.add(attachPort.getIp());
+                }
+            });
+            if (!StringUtils.isEmpty(srcPortAuxiliaryNetworkCloudElement.getAuxiliaryNetworkRouterIp())) {
+                existIps.add(srcPortAuxiliaryNetworkCloudElement.getAuxiliaryNetworkRouterIp());
             }
+
+            var newIps = IpUtils.randomIps(srcPortAuxiliaryNetworkCloudElement.getAuxiliaryNetworkCidr(), 1,
+                    new ArrayList<>(existIps),
+                    srcPortAuxiliaryNetworkCloudElement.getAllocationPools(),
+                    BoolUtils.bool(srcPortAuxiliaryNetworkCloudElement.getAuxiliaryNetworkDhcp()));
+            var newIp = !newIps.isEmpty() ? newIps.get(0) : null;
+
+            sameSrcPorts.forEach(sameSrcPort -> {
+                if (newIp != null) {
+                    log.info("Port {} reallocate ip {} to {}", sameSrcPort.getId(), sameSrcPort.getIp(), newIp);
+                    srcPort.setIp(newIp);
+                } else {
+                    log.warn("Port {} reallocate ip failed, ip {} may conflict", srcPort.getId(), srcPort.getIp());
+                }
+            });
         });
-        if (!StringUtils.isEmpty(srcPortAuxiliaryNetworkCloudElement.getAuxiliaryNetworkRouterIp())) {
-            existIps.add(srcPortAuxiliaryNetworkCloudElement.getAuxiliaryNetworkRouterIp());
-        }
-
-        var newIps = IpUtils.randomIps(srcPortAuxiliaryNetworkCloudElement.getAuxiliaryNetworkCidr(), 1,
-                new ArrayList<>(existIps),
-                srcPortAuxiliaryNetworkCloudElement.getAllocationPools(),
-                BoolUtils.bool(srcPortAuxiliaryNetworkCloudElement.getAuxiliaryNetworkDhcp()));
-        if (!newIps.isEmpty()) {
-            var newIp = newIps.get(0);
-            log.info("Port {} reallocate ip {} to {}", srcPort.getId(), srcPort.getIp(), newIp);
-            srcPort.setIp(newIp);
-        } else {
-            log.warn("Port {} reallocate ip failed, ip {} may conflict", srcPort.getId(), srcPort.getIp());
-        }
-
     }
 
     /**
@@ -695,7 +712,7 @@ public class InitiateHandler extends HandlerCommon {
         var requireReallocateIpPorts = getReallocateIpPorts();
         if (!requireReallocateIpPorts.isEmpty()) {
             runSceneProgress(SceneProcess.REALLOCATE_IPS, () -> {
-                requireReallocateIpPorts.forEach(this::reallocateIpPort);
+                reallocateIpPorts(requireReallocateIpPorts);
             });
         }
     }
