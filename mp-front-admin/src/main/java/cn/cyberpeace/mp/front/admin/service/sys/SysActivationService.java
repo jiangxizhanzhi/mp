@@ -86,6 +86,7 @@ public class SysActivationService {
         log.info("activationDir:{}", activationConfig.getLicenseDir());
         if (success) {
             // 校验通过，生成加密文件存储磁盘
+            ACTIVATION_CONTENT = null;
             generateEncryptedFile(activationRequest);
             log.info("encrypted file generated success!");
             ACTIVATION_CONTENT = status();
