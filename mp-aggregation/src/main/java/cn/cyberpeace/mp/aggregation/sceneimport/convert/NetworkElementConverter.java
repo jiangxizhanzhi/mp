@@ -97,6 +97,7 @@ class NetworkElementConverter implements IConverter {
             pluginElement.setRole(BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK);
         } else {
             pluginElement.setRole(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH);
+            pluginElement.setImageType(BaseCloudPluginSceneElementModel.ImageType.SIMPLE);
         }
         container.putPluginElement(sceneConfigElementBO.getId(), pluginElement);
 
