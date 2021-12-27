@@ -22,7 +22,21 @@ public interface TargetService extends BaseModelService<TargetModel, QueryParams
 
     List<TargetModel> listByParent(String parentId);
 
+    /**
+     * 查询所有资源，visible=1
+     * @param tenant
+     * @param type
+     * @return
+     */
     List<TargetModel> listAll(String tenant, Integer type);
+
+    /**
+     * 查询所有菜单，忽略visible=1的限制
+     * @param tenant
+     * @param type
+     * @return
+     */
+    List<TargetModel> listAllIgnoreVisible(String tenant, Integer type);
 
     List<TargetModel> listByMultiTypes(String tenant, Integer[] types);
 

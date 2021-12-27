@@ -101,7 +101,7 @@ public class ActivMenuService {
         if (Objects.isNull(content)) {
             return false;
         }
-        List<TargetModel> allTargets = targetService.listAll(AuthConstant.DEFAULT_TENANT, TargetModel.TYPE_MENU);
+        List<TargetModel> allTargets = targetService.listAllIgnoreVisible(AuthConstant.DEFAULT_TENANT, TargetModel.TYPE_MENU);
         List<MenuExtraInfoModel> menuExtraInfos = menuExtraInfoService.listAll();
 
         processMenuVisibility(allTargets, menuExtraInfos, content);
