@@ -14,5 +14,6 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 public class VirtualMachineUnPauseData implements CloudHttpData {
+    private Boolean waitForStatus = true;
     private Map unpause = new HashMap();
 }

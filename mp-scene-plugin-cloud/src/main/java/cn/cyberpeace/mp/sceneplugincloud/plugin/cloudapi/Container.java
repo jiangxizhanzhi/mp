@@ -52,18 +52,8 @@ public class Container extends CloudClient {
         return result.getData();
     }
 
-    public boolean lifeControl(String instanceId, String action) {
-        VirtualMachineLifeControllData lifeControllData = new VirtualMachineLifeControllData();
-        try {
-            Field field = lifeControllData.getClass().getDeclaredField(action);
-            field.setAccessible(true);
-            field.set(lifeControllData, Collections.EMPTY_MAP);
-            cloudPost(CloudUrlConstant.CONTAINER_LIFE_CONTROL_URL.replace("{instance_id}", instanceId), lifeControllData, null, new TypeReference<CloudResponse<Object>>() {
-            }, true);
-            return true;
-        } catch (Exception e) {
-            throw new MpRuntimeException(e.getMessage());
-        }
+    public boolean restart(String instanceId) {
+        return this.doAction(instanceId, new ContainerRestartData());
     }
 
     public boolean pause(String instanceId) {
