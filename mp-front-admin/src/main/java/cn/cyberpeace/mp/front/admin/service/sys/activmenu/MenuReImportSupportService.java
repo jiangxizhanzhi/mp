@@ -60,6 +60,7 @@ public class MenuReImportSupportService {
      */
     @Transactional(rollbackFor = Exception.class)
     public boolean rebuildAllMenus(List<TargetModel> targets) {
+        log.info("targets:{}", targets);
         // step1. clean menus, keymenus, editionmenus
         boolean cleanSuccess = cleanAllMenus();
         boolean reImportSuccess = false;
