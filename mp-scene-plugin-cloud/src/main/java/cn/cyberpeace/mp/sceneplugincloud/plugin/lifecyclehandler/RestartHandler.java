@@ -51,7 +51,7 @@ public class RestartHandler extends HandlerCommon {
             getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.RESTART, Arrays.asList(ElementProcess.RESTART_CONTAINER));
             runElementProgress(nodeId, SceneElementModel.Event.RESTART, ElementProcess.RESTART_CONTAINER, () -> {
                 closeAccessModes(element);
-                container.lifeControl(instanceId, "reboot");
+                container.restart(instanceId);
                 checkAccessModes(element);
             });
         }

@@ -14,5 +14,6 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 public class VirtualMachineResumeData implements CloudHttpData {
+    private Boolean waitForStatus = true;
     private Map resume = new HashMap() ;
 }

@@ -14,6 +14,7 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 public class VirtualMachineRestartData implements CloudHttpData {
+    private Boolean waitForStatus = true;
     private Map reboot = new HashMap() {{
         this.put("reboot_type", "HARD");
     }};
