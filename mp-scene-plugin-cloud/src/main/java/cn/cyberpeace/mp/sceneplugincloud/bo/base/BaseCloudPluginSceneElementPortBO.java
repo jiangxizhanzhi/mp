@@ -24,7 +24,8 @@ public abstract class BaseCloudPluginSceneElementPortBO<M extends BaseCloudPlugi
     private Boolean nat;
     @ApiModelProperty(value = "虚拟防火墙规则")
     private List<FirewallRule> firewallRules;
-
+    @ApiModelProperty(value = "是否是连接网络外网的端口")
+    private Boolean connToExtNet = false;
     // 靶标属性
     @ApiModelProperty(value = "实体设备端口接入类型")
     private String entityAccessType;

@@ -138,6 +138,7 @@ public class SceneMonitorService {
         List<ElementMonitorBasicInfo> basicInfos = new ArrayList<>();
         for (String eid : eids) {
             ElementMonitorBasicInfo basicInfo = new ElementMonitorBasicInfo();
+            basicInfo.setSceneId(sceneId);
             elementMonitorService.processTopologyElement(basicInfo, csceneInstanceBO, eid);
             elementMonitorService.processPluginElement(basicInfo, csceneInstanceBO, eid);
             basicInfos.add(basicInfo);
