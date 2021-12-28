@@ -159,7 +159,9 @@ public class CsceneController implements BaseModelListControllerBase {
     @PostMapping(value = "/test_instance")
     public ServiceResult<CsceneInstanceBO> createTestInstance(
             @RequestParam(required = false) String id, @RequestBody(required = false) CsceneCreateInstanceRequest request) {
+        log.info("test_instance params,id:{},request:{}", id, JsonCommon.stringify(request));
         request = formatCreateInstanceRequest(request, id);
+        correctRequestCsceneParamsForAppInstance(request.getCscene());
         return modelService.createTestInstance(request.getId(), false, request.toCsceneInstanceCreateContextBO()).asResult();
     }
 
