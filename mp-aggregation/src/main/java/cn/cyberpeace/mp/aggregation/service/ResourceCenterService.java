@@ -35,14 +35,15 @@ public class ResourceCenterService {
         YmlParseResult ymlParseResult = ResourceCenterYmlParser.parseTopoYml(ymlFilePath);
         // 解析 image/services.yml
         List<ImageParseResult> imageInfos = ResourceCenterYmlParser.parseImageServicesYml(ymlFilePath, imageFilePath);
-        // 转换bo
-        CsceneBO csceneBO = cSceneBoConverter.convert(ymlParseResult, imageInfos);
+        // 处理附件
+        String fdfsSceneFilePath = null ;
         if (StringUtils.isNotEmpty(sceneFilePath)) {
             if (FileUtil.exist(sceneFilePath)) {
-                String filepath = FdfsCommon.upload(sceneFilePath);
-                csceneBO.getSceneConfig().getTopology().getScene().setFile(filepath);
+                fdfsSceneFilePath = FdfsCommon.upload(sceneFilePath);
             }
         }
+        // 转换bo
+        CsceneBO csceneBO = cSceneBoConverter.convert(ymlParseResult, imageInfos, fdfsSceneFilePath);
         // 保存
         return csceneService.syncWithoutCheckLimit(csceneBO, new CsceneContextBO());
     }

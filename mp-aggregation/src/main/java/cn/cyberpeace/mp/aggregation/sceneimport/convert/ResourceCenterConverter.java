@@ -21,9 +21,10 @@ public class ResourceCenterConverter {
     @Resource
     private TargetConverter targetConverter;
 
-    public CsceneBO convert(YmlParseResult parseResult, List<ImageParseResult> imageInfos) {
+    public CsceneBO convert(YmlParseResult parseResult, List<ImageParseResult> imageInfos, String sceneFilePath) {
         // 构建用于存储数据的容器
         ConvertDataContainer container = new ConvertDataContainer();
+        container.setSceneFilePath(sceneFilePath);
         if (CollectionUtils.isNotEmpty(imageInfos)) {
             imageInfos.stream().forEach(imageInfo -> {
                 if (imageInfo.getServers() != null) {
@@ -42,6 +43,7 @@ public class ResourceCenterConverter {
         converters.add(new NetworkElementConverter(parseResult.getNetworks()));
         converters.add(new DeviceInfoConverter(this.targetConverter));
         converters.add(new ImageInfoConverter());
+        converters.add(new SceneFilePathConverter());
         // 依次执行链路
         converters.forEach(converter -> converter.convert2BO(container));
 
