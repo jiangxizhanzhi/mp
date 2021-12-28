@@ -145,6 +145,12 @@ public class FlowMonitorService {
                     flowAttackDto.setAttackInfo(attackInfo);
                     flowAttackDtos.add(flowAttackDto);
                 }
+            } else {
+                // 没有攻击类型标签，全部设置为默认的低风险
+                FlowAttackDto flowAttackDto = new FlowAttackDto();
+                BeanUtils.copyProperties(flowBO, flowAttackDto);
+                flowAttackDto.setAttackInfo(new AttackInfo(4, "异常链接"));
+                flowAttackDtos.add(flowAttackDto);
             }
         }
 
