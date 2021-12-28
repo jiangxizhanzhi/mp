@@ -365,7 +365,7 @@
             sum(case when t.main_category = 2 then 1 else 0 end ) as '2',
             sum(case when t.main_category = 3 then 1 else 0 end ) as '3',
             sum(case when t.main_category = 4 then 1 else 0 end ) as '4'
-        from mp_devops_target t where t.image_type = 'vm'
+        from mp_devops_target t where t.image_type in ('vm','simple')
     </select>
 
     <!-- 实体靶标统计 -->
