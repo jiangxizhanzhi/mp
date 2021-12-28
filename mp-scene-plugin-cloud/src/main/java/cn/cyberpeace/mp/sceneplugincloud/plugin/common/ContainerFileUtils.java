@@ -52,6 +52,7 @@ public class ContainerFileUtils {
             FileUtil.del(tmpZipFilepath);
         }
         containerClient.executeCommand(containerId, CommandUtils.linuxUnzipFile(toPath, unzipDir));
+        containerClient.executeCommand(containerId, String.format("chmod +x %s/*", unzipDir));
         return true;
     }
 
