@@ -20,11 +20,13 @@ public class SceneIdTranslationService {
     private CsceneInstanceService csceneInstanceService;
 
     public List<String> translateSceneIds(List<String> sceneIds) {
+        log.info("before translate: {}", sceneIds);
         List<String> translatedScendIds = new ArrayList<>();
         for (String sceneId : sceneIds) {
             String translatedSceneId = csceneInstanceService.getSceneId(sceneId);
             translatedScendIds.add(translatedSceneId);
         }
+        log.info("after translate: {}", translatedScendIds);
         return translatedScendIds;
     }
 

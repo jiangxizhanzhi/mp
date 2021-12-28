@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.cscene.util;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.cscene.constant.CsceneBasei18nCode;
+import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.hutool.core.collection.CollectionUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -21,12 +23,12 @@ public class BaseRequestUtil {
      */
     public static void checkBaseRequestWithSceneIdAndElementIds(BaseSceneElementRequest baseRequest) {
         if (StringUtils.isBlank(baseRequest.getSceneId())) {
-            throw new MpRuntimeException("sceneId为空");
+            throw new MpRuntimeException(CsceneErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(CsceneBasei18nCode.SCENE_ID));
         }
 
         List<String> elementIds = baseRequest.getElementIds();
         if (CollectionUtil.isEmpty(elementIds)) {
-            throw new MpRuntimeException("节点id不能为空");
+            throw new MpRuntimeException(CsceneErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(CsceneBasei18nCode.ELEMENT_LIST));
         }
     }
 
@@ -38,7 +40,7 @@ public class BaseRequestUtil {
      */
     public static void checkBaseRequestWithSceneId(BaseSceneElementRequest baseRequest) {
         if (StringUtils.isBlank(baseRequest.getSceneId())) {
-            throw new MpRuntimeException("sceneId为空");
+            throw new MpRuntimeException(CsceneErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(CsceneBasei18nCode.SCENE_ID));
         }
     }
 

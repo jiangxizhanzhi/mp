@@ -60,7 +60,7 @@ public class HostStateService {
 //
         ListObjServiceResult<CollectionHostStateBO> listObjServiceResult = csceneInstanceService.listHostStates(sceneId, queryParams);
 
-        List<CollectionHostStateBO> hostStateBOS = listObjServiceResult.getSource().getList();
+        List<CollectionHostStateBO> hostStateBOS = listObjServiceResult.getSource().getObjs();
 
         List<HostState> hostStates = hostStateBOS.stream().map(hostStateBO -> {
             HostState hs = new HostState();
@@ -117,7 +117,7 @@ public class HostStateService {
 
         if (Objects.isNull(startTime)) {
             // todo 默认时间间隔48小时
-            startTime = endTime.minusHours(48);
+            startTime = endTime.minusHours(24);
         }
 
         if (Objects.isNull(segmentCount)) {

@@ -11,10 +11,13 @@ import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
+import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.NumberUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -36,6 +39,9 @@ public class SceneElementMonitorService {
     private CsceneInstanceService csceneInstanceService;
 
     @Autowired
+    private HostStateService hostStateService;
+
+    @Autowired
     private ScenePluginCollectionSceneService scenePluginCollectionSceneService;
 
     /**
@@ -53,6 +59,7 @@ public class SceneElementMonitorService {
         var csceneInstanceBO = result.getSource();
 
         ElementMonitorBasicInfo elementMonitorBasicInfo = new ElementMonitorBasicInfo();
+        elementMonitorBasicInfo.setSceneId(sceneId);
         processTopologyElement(elementMonitorBasicInfo, csceneInstanceBO, elementId);
         processPluginElement(elementMonitorBasicInfo, csceneInstanceBO, elementId);
 
@@ -92,7 +99,7 @@ public class SceneElementMonitorService {
 
         if (tpoEleOptional.isPresent()) {
             SceneElementBO tpoEleBO = tpoEleOptional.get();
-            sceneElementBO2ElementMonitorBasicInfo(basicInfo, tpoEleBO);
+            sceneElementBO2ElementMonitorBasicInfo(basicInfo, tpoEleBO, true);
         }
     }
 
@@ -115,7 +122,7 @@ public class SceneElementMonitorService {
     }
 
 
-    public void sceneElementBO2ElementMonitorBasicInfo(ElementMonitorBasicInfo basicInfo, SceneElementBO sceneElementBO) {
+    public void sceneElementBO2ElementMonitorBasicInfo(ElementMonitorBasicInfo basicInfo, SceneElementBO sceneElementBO, boolean needHostStatePercent) {
         HostState resource = basicInfo.getHostState();
         if (Objects.isNull(resource)) {
             resource = new HostState();
@@ -131,6 +138,21 @@ public class SceneElementMonitorService {
         // 磁盘大小
         Integer diskSize = Optional.ofNullable(sceneElementBO.getDisk()).orElse(0);
         resource.setDiskSpace(Long.valueOf(diskSize));
+        log.info("needHostStatePercent:{}", needHostStatePercent);
+        if (needHostStatePercent) {
+            BaseSceneElementRequest request = new BaseSceneElementRequest();
+            request.setSceneId(sceneElementBO.getId());
+            request.setElementIds(Arrays.asList(sceneElementBO.getId()));
+
+            List<HostState> hostStates = hostStateService.getHostStates(request);
+            if (CollectionUtil.isNotEmpty(hostStates)) {
+                HostState hostState = hostStates.get(0);
+                resource.setCpuPercent(Objects.nonNull(hostState.getCpuPercent()) ? NumberUtil.round(hostState.getCpuPercent(), 2).doubleValue() : 0.0);
+                resource.setMemoryPercent(Objects.nonNull(hostState.getMemoryPercent()) ? NumberUtil.round(hostState.getMemoryPercent(), 2).doubleValue() : 0.0);
+                resource.setDiskPercent(Objects.nonNull(hostState.getDiskPercent()) ? NumberUtil.round(hostState.getDiskPercent(), 2).doubleValue() : 0.0);
+            }
+        }
+
         basicInfo.setHostState(resource);
 
         // ip地址
