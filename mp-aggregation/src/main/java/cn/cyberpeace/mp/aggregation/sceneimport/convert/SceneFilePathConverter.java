@@ -20,7 +20,7 @@ class SceneFilePathConverter implements IConverter {
         }
         var cloudElementMap = container.getCloudPluginElements();
         if (CollectionUtils.isNotEmpty(container.getNodeElements())) {
-            container.getNetworkElements().forEach(e -> {
+            container.getNodeElements().forEach(e -> {
                 CloudPluginSceneConfigElementBO cloudElement = cloudElementMap.get(e.getId());
                 if (cloudElement.getRole() != null && cloudElement.getRole() == BaseCloudPluginSceneElementModel.Role.VIRTUAL_TERMINAL) {
                     e.setFile(sceneFilePath);
