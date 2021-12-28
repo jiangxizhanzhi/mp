@@ -116,7 +116,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             new ListObjServiceResult<>(null, listResult.getServiceCode(), listResult.getDetail());
         }
 
-        var instanceObjMap = listResult.getSource().getList().stream()
+        var instanceObjMap = listResult.getSource().getObjs().stream()
                 .collect(Collectors.toMap(BaseModel::getId, x -> x));
         var instanceRoleObjMap = readCsceneInstanceRoles(instanceObjMap.keySet()
                 .toArray(new String[0])).stream().collect(Collectors.groupingBy(CsceneInstanceRoleModel::getCscene));
