@@ -153,6 +153,14 @@ public class CsceneHandler extends BaseCsceneHandler<
         csceneInstanceRoleMapper = BeanCommon.getBean(CsceneInstanceRoleMapper.class);
     }
 
+    public CsceneBO toDataWithoutCorrectCsceneData(boolean withInstance) {
+        if (withInstance) {
+            reloadCsceneInstances();
+        }
+        CsceneBO csceneBO = getCscene();
+        return csceneBO;
+    }
+
     public CsceneBO toData(boolean withInstance) {
         if (withInstance) {
             reloadCsceneInstances();

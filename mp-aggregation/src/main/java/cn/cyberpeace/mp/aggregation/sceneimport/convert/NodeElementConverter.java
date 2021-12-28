@@ -43,7 +43,7 @@ class NodeElementConverter implements IConverter {
         sceneConfigElementBO.setName(node.getName());
         if (CollectionUtils.isNotEmpty(node.getInitCommands())) {
             List<String> initCommands = node.getInitCommands().stream()
-                    .map(command -> command.getO())
+                    .map(command -> "n:" + command.getO())
                     .collect(Collectors.toList());
             sceneConfigElementBO.setInitCommands(initCommands);
         }
