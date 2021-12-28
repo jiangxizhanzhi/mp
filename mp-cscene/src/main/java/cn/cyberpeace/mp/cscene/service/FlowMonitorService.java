@@ -133,16 +133,18 @@ public class FlowMonitorService {
         queryParams.ensure();
 
         ListObjServiceResult<CollectionFlowBO> flowBOResult = csceneInstanceService.listFlows(id, queryParams);
-        List<CollectionFlowBO> flowBOS = flowBOResult.getSource().getList();
+        List<CollectionFlowBO> flowBOS = flowBOResult.getSource().getObjs();
 
         List<FlowAttackDto> flowAttackDtos = new ArrayList<>();
 
         for (CollectionFlowBO flowBO : flowBOS) {
-            for (AttackInfo attackInfo : flowBO.getAttackInfos()) {
-                FlowAttackDto flowAttackDto = new FlowAttackDto();
-                BeanUtils.copyProperties(flowBO, flowAttackDto);
-                flowAttackDto.setAttackInfo(attackInfo);
-                flowAttackDtos.add(flowAttackDto);
+            if (Objects.nonNull(flowBO.getAttackInfos())) {
+                for (AttackInfo attackInfo : flowBO.getAttackInfos()) {
+                    FlowAttackDto flowAttackDto = new FlowAttackDto();
+                    BeanUtils.copyProperties(flowBO, flowAttackDto);
+                    flowAttackDto.setAttackInfo(attackInfo);
+                    flowAttackDtos.add(flowAttackDto);
+                }
             }
         }
 
@@ -163,7 +165,7 @@ public class FlowMonitorService {
 
         if (Objects.isNull(startTime)) {
             // todo 默认时间间隔48小时
-            startTime = endTime.minusHours(48);
+            startTime = endTime.minusHours(24);
         }
 
         if (Objects.isNull(segmentCount)) {

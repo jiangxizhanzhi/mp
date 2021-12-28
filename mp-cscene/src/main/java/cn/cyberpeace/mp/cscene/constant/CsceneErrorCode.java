@@ -5,7 +5,14 @@ import cn.cyberpeace.mp.base.service.code.ErrorCode;
 public enum CsceneErrorCode implements ErrorCode {
     SCENE_NOT_EXIST("MP-110200", "scene_not_exist"),
     SCENE_EDIT_NODE_LIMIT("MP-110201", "scene_edit_node_limit"),
-    SCENE_USING_NODE_LIMIT("MP-110202", "scene_using_node_limit");
+    SCENE_USING_NODE_LIMIT("MP-110202", "scene_using_node_limit"),
+
+
+
+
+    // validation-api params
+    PARAMS_SHOULD_NOT_NULL("MP-110291", "params_should_not_null"),
+    PARAMS_SHOULD_NOT_EMPTY("MP-110292", "params_should_not_empty");
 
     CsceneErrorCode(String code, String message) {
         setCode(code, "cscene.error_code." + message);
