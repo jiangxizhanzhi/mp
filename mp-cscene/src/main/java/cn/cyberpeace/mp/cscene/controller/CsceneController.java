@@ -66,8 +66,19 @@ public class CsceneController implements BaseModelListControllerBase {
         return request;
     }
 
-    private void correctRequestCsceneParams(CsceneBO csceneBO) {
+    private void correctRequestCsceneParamsForSync(CsceneBO csceneBO) {
+        if (csceneBO == null) {
+            return;
+        }
         CsceneDataModifier.removeEidWhenCreate(csceneBO);
+        CsceneDataModifier.removeFilePathPrefix(csceneBO);
+        CsceneDataModifier.assembleInitCommands(csceneBO);
+    }
+
+    private void correctRequestCsceneParamsForAppInstance(CsceneBO csceneBO) {
+        if (csceneBO == null) {
+            return;
+        }
         CsceneDataModifier.removeFilePathPrefix(csceneBO);
         CsceneDataModifier.assembleInitCommands(csceneBO);
     }
@@ -107,7 +118,7 @@ public class CsceneController implements BaseModelListControllerBase {
     @PostMapping("/sync")
     public ServiceResult<CsceneBO> sync(@RequestBody CsceneBO csceneBO) {
         log.info("scene sync,params is {}", JsonCommon.stringify(csceneBO));
-        correctRequestCsceneParams(csceneBO);
+        correctRequestCsceneParamsForSync(csceneBO);
         return modelService.sync(csceneBO, null).asResult();
     }
 
@@ -148,7 +159,9 @@ public class CsceneController implements BaseModelListControllerBase {
     @PostMapping(value = "/test_instance")
     public ServiceResult<CsceneInstanceBO> createTestInstance(
             @RequestParam(required = false) String id, @RequestBody(required = false) CsceneCreateInstanceRequest request) {
+        log.info("test_instance params,id:{},request:{}", id, JsonCommon.stringify(request));
         request = formatCreateInstanceRequest(request, id);
+        correctRequestCsceneParamsForAppInstance(request.getCscene());
         return modelService.createTestInstance(request.getId(), false, request.toCsceneInstanceCreateContextBO()).asResult();
     }
 
@@ -161,6 +174,7 @@ public class CsceneController implements BaseModelListControllerBase {
             @RequestParam(required = false) String id, @RequestBody(required = false) CsceneCreateInstanceRequest request) {
         log.info("app_instance params,id:{},request:{}", id, JsonCommon.stringify(request));
         request = formatCreateInstanceRequest(request, id);
+        correctRequestCsceneParamsForAppInstance(request.getCscene());
         return modelService.createAppInstance(request.getId(), false, request.toCsceneInstanceCreateContextBO()).asResult();
     }
 

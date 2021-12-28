@@ -3,7 +3,7 @@ ip:
   fdfs: ${FDFS_IP:10.100.1.26}           # FastDFS地址
   cp: ${CP_IP:10.100.7.1}                # 云平台适配层接口地址
   moloch: ${MOLOCH_IP:10.100.0.111}        # moloch的IP地址
-  wazuh: ${WAZUH_IP:10.100.7.146}          # wazuh的IP地址
+  wazuh: ${WAZUH_IP:10.100.7.143}          # wazuh的IP地址
   trex: ${TREX_IP:10.100.7.129}            # trex资源服务器地址
   rabbitmq: ${RABBITMQ_IP:10.100.0.101}           # rabbitmq地址
   log-es: ${LOG_ES_IP:10.100.0.103}        # 日志es

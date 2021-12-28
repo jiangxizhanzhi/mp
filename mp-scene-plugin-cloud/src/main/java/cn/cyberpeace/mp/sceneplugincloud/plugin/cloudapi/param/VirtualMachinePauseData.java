@@ -14,5 +14,6 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 public class VirtualMachinePauseData implements CloudHttpData {
+    private Boolean waitForStatus = true;
     private Map pause = new HashMap();
 }

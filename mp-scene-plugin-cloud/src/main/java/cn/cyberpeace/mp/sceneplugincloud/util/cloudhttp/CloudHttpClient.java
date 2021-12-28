@@ -98,11 +98,13 @@ public class CloudHttpClient {
     }
 
     public CloudHttpClient() {
-        this(CloudSingleton.cloudAppConfig.getCpcloudServer(), CloudSingleton.cloudAppConfig.getCpcloudServerTimeout());
+        this(CloudSingleton.cloudAppConfig.getCpcloudServer(),
+                CloudSingleton.cloudAppConfig.getCpcloudServerTimeout(),
+                CloudSingleton.cloudAppConfig.getCpcloudHttpPoolSize());
     }
 
-    private CloudHttpClient(String server, int timeout) {
-        httpClient = new HttpClient(server, timeout);
+    private CloudHttpClient(String server, Integer timeout, Integer poolSize) {
+        httpClient = new HttpClient(server, timeout, poolSize, poolSize);
         httpClient.setLogRequest(true);
     }
 

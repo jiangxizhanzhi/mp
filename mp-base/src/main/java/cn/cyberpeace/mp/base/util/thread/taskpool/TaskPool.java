@@ -13,7 +13,7 @@ public class TaskPool {
 
     private final ExecutorService executor;
 
-    private <C, T, R> void invokeTask(BasePoolTask<C, T, R> poolTask) {
+    public static <C, T, R> void invokeTask(BasePoolTask<C, T, R> poolTask) {
         if (poolTask.getStatus() == null) {
             return;
         }
@@ -33,7 +33,7 @@ public class TaskPool {
         }
     }
 
-    private void interruptTask(BasePoolTask<?, ?, ?> poolTask, Exception e) {
+    public static void interruptTask(BasePoolTask<?, ?, ?> poolTask, Exception e) {
         if (TaskStatus.WAITING.equals(poolTask.getStatus())) {
             poolTask.setStatus(TaskStatus.INTERRUPTED);
             poolTask.setException(e);
@@ -76,8 +76,8 @@ public class TaskPool {
      * @param poolTaskClass 任务类型
      * @return 任务执行结果
      */
-    private  <C, T, R, T1 extends BasePoolTask<C, T, R>> List<T1> invokeTasks(List<T> tasks, boolean independent,
-                                                                              Class<T1> poolTaskClass) {
+    private <C, T, R, T1 extends BasePoolTask<C, T, R>> List<T1> invokeTasks(List<T> tasks, boolean independent,
+                                                                             Class<T1> poolTaskClass) {
         List<T1> poolTasks = tasks.stream()
                 .map(task -> {
                     var poolTask = ClassUtils.createInstance(poolTaskClass);
@@ -88,6 +88,9 @@ public class TaskPool {
         return invokePoolTasks(poolTasks, independent);
     }
 
+    public TaskPool(int poolSize) {
+        this(poolSize, Integer.MAX_VALUE);
+    }
 
     public TaskPool(int poolSize, int holdSize) {
         this(poolSize, holdSize, 0L);

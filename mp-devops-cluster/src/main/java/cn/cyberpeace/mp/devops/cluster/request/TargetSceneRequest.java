@@ -43,4 +43,7 @@ public class TargetSceneRequest implements Serializable {
 
     @ApiModelProperty("靶标分类，1：内置靶标，2：实体靶标，3：自定义靶标")
     private Integer targetCategory;
+
+    @ApiModelProperty("是否模糊查询")
+    private Boolean likeName = Boolean.TRUE;
 }

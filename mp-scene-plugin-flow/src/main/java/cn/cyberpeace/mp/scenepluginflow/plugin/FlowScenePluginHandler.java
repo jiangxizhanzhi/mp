@@ -133,11 +133,11 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
         }
 
         var flag = handlerUtils.startFlow(flowElement, flow, () -> {
-            ackElementChanged(nodeId, true);
+            asyncAckElementChanged(nodeId, true);
         }, async, () -> {
-            ackElementChanged(nodeId, true);
+            asyncAckElementChanged(nodeId, true);
         });
-        ackElementChanged(nodeId, true);
+        asyncAckElementChanged(nodeId, true);
         return flag;
     }
 
@@ -159,7 +159,7 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
         }
 
         var flag = handlerUtils.stopFlow(flow);
-        ackElementChanged(nodeId, true);
+        asyncAckElementChanged(nodeId, true);
         return flag;
     }
 }

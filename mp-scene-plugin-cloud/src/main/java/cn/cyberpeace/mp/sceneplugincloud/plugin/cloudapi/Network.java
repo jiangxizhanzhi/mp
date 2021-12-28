@@ -10,6 +10,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 public class Network extends CloudClient {
 
+    public NetworkData get(String id) {
+        var url = String.format(CloudUrlConstant.NETWORK_GET_URL, id);
+        CloudResponse<NetworkData> result = cloudGet(url, null, new TypeReference<>() {}, true);
+        return result.getData();
+    }
+
     public NetworkData getByName(String name) {
         var queryParam = new NetworkQueryParam();
         queryParam.setName(name);

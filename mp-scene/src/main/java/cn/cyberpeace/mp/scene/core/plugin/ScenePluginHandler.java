@@ -14,6 +14,7 @@ import lombok.Data;
 
 import java.util.List;
 
+
 /**
  * 场景实例插件基础类，场景实例的插件通过继承本类拓展插件功能
  * @param <S> 插件对应配置类
@@ -62,11 +63,19 @@ public abstract class ScenePluginHandler<S extends BasePluginSceneBO<?, S, Scene
     }
 
     public void ackSceneChanged(boolean forceSave) {
-        getSceneHandler().ackSceneChanged(forceSave);
+        getSceneHandler().ackSceneChanged(forceSave, true);
     }
 
     public void ackElementChanged(String nodeId, boolean forceSave) {
-        getSceneHandler().ackElementChanged(nodeId, forceSave);
+        getSceneHandler().ackElementChanged(nodeId, forceSave, true);
+    }
+
+    public void asyncAckSceneChanged(boolean forceSave) {
+        getSceneHandler().asyncAckSceneChanged(forceSave, true);
+    }
+
+    public void asyncAckElementChanged(String nodeId, boolean forceSave) {
+        getSceneHandler().asyncAckElementChanged(nodeId, forceSave, true);
     }
 
     public void initiate() throws Exception {

@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.sceneplugincloud.service.common;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
+import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleCreateConnectionData;
@@ -13,6 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
 
 @Slf4j
 @Component
@@ -100,12 +103,15 @@ public class CloudSceneConnectionCommon {
                 dataUpdateFlag = true;
             }
         }
-        if (StringUtils.isEmpty(sceneConnection.getConnectionUrl())) {
-            var result = remoteClient.getConnectionUrl(sceneConnection.getConnectionId(), userId);
-            if (result == null || StringUtils.isEmpty(result.getUrl())) {
-                log.error("Get scene connection[{}] url with empty result: {}", sceneConnection.getConnectionId(), result);
-            } else {
+
+        var result = remoteClient.getConnectionUrl(sceneConnection.getConnectionId(), userId);
+        if (result == null || StringUtils.isEmpty(result.getUrl())) {
+            log.error("Get scene connection[{}] url with empty result: {}", sceneConnection.getConnectionId(), result);
+        } else {
+            if (!result.getUrl().equals(sceneConnection.getConnectionUrl())) {
                 sceneConnection.setConnectionUrl(result.getUrl());
+                sceneConnection.setAccessTokenExpireTime(LocalDateTime.now()
+                        .plusSeconds(CloudSingleton.cloudAppConfig.getRemoteConnectionTokenExpireSeconds()));
                 dataUpdateFlag = true;
             }
         }

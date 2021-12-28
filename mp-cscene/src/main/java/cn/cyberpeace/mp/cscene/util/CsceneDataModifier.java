@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneRoleBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
@@ -41,7 +42,6 @@ public class CsceneDataModifier {
      */
     public static void supplyProtocol(CsceneInstanceBO csceneInstance, String protocol) {
         ScenePluginDataBO cloudPlugin = Optional.ofNullable(csceneInstance.getScene().getPlugins()).orElse(new HashMap<>()).get("cpcloud");
-        csceneInstance.getScene().getTopology().getElements().get(0).getPorts().get(0).getId();
         Map<String, Map<String, Object>> cloudElements = cloudPlugin.getElements();
         if (cloudElements != null) {
             for (SceneElementBO elementBO : csceneInstance.getScene().getTopology().getElements()) {
@@ -117,6 +117,7 @@ public class CsceneDataModifier {
                 List<SceneConfigElementPortConnectionBO> connectionBOS = csceneBO.getSceneConfig().getTopology().getConnections();
                 List<SceneConfigAreaBO> areaBOS = csceneBO.getSceneConfig().getTopology().getAreas();
                 List<SceneConfigPieceBO> pieceBOS = csceneBO.getSceneConfig().getTopology().getPieces();
+                List<CsceneRoleBO> roles = csceneBO.getRoles();
                 if (CollectionUtils.isNotEmpty(elementBOS)) {
                     elementBOS.forEach(bo -> {
                         bo.setEid(null);
@@ -133,6 +134,16 @@ public class CsceneDataModifier {
                 }
                 if (CollectionUtils.isNotEmpty(pieceBOS)) {
                     pieceBOS.forEach(piece -> piece.setEid(null));
+                }
+                if (CollectionUtils.isNotEmpty(roles)) {
+                    roles.forEach(r -> {
+                        r.setId(null);
+                        if (CollectionUtils.isNotEmpty(r.getChildren())) {
+                            r.getChildren().forEach(ch -> {
+                                ch.setId(null);
+                            });
+                        }
+                    });
                 }
             }
         }
@@ -172,7 +183,14 @@ public class CsceneDataModifier {
         if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getTopology() != null) {
             csceneBO.getSceneConfig().getTopology().getElements().stream().forEach(e -> {
                 if (CollectionUtils.isNotEmpty(e.getInitCommands())) {
-                    List<String> s = e.getInitCommands().stream().map(c -> "s:" + c).collect(Collectors.toList());
+                    List<String> s = e.getInitCommands().stream().map(c -> {
+                        // TODO: 临时兼容业务界面
+                        if (c.startsWith("o:") || c.startsWith("s:") || c.startsWith("n:")) {
+                            return c;
+                        } else {
+                            return "s:" + c;
+                        }
+                    }).collect(Collectors.toList());
                     e.setInitCommands(s);
                 }
                 if (StringUtils.isNotBlank(e.getNodeCommand())) {

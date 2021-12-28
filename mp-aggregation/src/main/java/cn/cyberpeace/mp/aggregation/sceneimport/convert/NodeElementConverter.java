@@ -61,11 +61,11 @@ class NodeElementConverter implements IConverter {
         // 初步加载role imageType (部分简单靶标不会导入), 这里不一定准确
         if (node.getId().startsWith("router")) {
             sceneConfigElementBO.setIcon2(CommonConstant.DefaultImageUrl.ROUTER);
-            pluginElement.setRole(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_GATEWAY);
+            pluginElement.setRole(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER);
             pluginElement.setImageType(BaseCloudPluginSceneElementModel.ImageType.SIMPLE);
         } else if (node.getId().startsWith("firewall")) {
             sceneConfigElementBO.setIcon2(CommonConstant.DefaultImageUrl.FIREWALL);
-            pluginElement.setRole(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_GATEWAY);
+            pluginElement.setRole(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_FIREWALL);
             pluginElement.setImageType(BaseCloudPluginSceneElementModel.ImageType.SIMPLE);
         } else if (node.getId().startsWith("server")) {
             sceneConfigElementBO.setIcon2(CommonConstant.DefaultImageUrl.SERVER);

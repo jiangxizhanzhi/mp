@@ -159,13 +159,15 @@ public class DashboardService {
         } catch (Exception e) {
             throw new MpRuntimeException(BaseErrorCode.ERROR);
         }
+        if (csceneInstances.isEmpty()) {
+            return new ServiceResult<>(userResource);
+        }
 
         userResource.setSceneCount(csceneInstances.size());
         List<String> sceneIds = csceneInstances.stream()
                 .filter(csceneInstance -> !StringUtils.isEmpty(csceneInstance.getScene()))
                 .map(csceneInstance -> csceneInstance.getScene())
                 .collect(Collectors.toList());
-
         var fieldName = BeanUtils.getBeanGetterFieldName(CloudPluginSceneElementModel::getVirtualType);
         var result = scenePluginCloudSceneService
                 .groupCountElement(sceneIds, null, List.of(fieldName)).getSource().get(fieldName);

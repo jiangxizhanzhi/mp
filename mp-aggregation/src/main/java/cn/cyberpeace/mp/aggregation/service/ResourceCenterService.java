@@ -4,10 +4,13 @@ import cn.cyberpeace.mp.aggregation.sceneimport.convert.ResourceCenterConverter;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.ResourceCenterYmlParser;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.YmlParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.ImageParseResult;
+import cn.cyberpeace.mp.base.common.FdfsCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
+import cn.hutool.core.io.FileUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -27,13 +30,19 @@ public class ResourceCenterService {
     @Resource
     private ResourceCenterConverter cSceneBoConverter;
 
-    public ServiceResult<CsceneBO> importByYmlConfig(String ymlFilePath, String imageFilePath) {
+    public ServiceResult<CsceneBO> importByYmlConfig(String ymlFilePath, String imageFilePath, String sceneFilePath) {
         // 解析 topo.yml
         YmlParseResult ymlParseResult = ResourceCenterYmlParser.parseTopoYml(ymlFilePath);
         // 解析 image/services.yml
         List<ImageParseResult> imageInfos = ResourceCenterYmlParser.parseImageServicesYml(ymlFilePath, imageFilePath);
         // 转换bo
         CsceneBO csceneBO = cSceneBoConverter.convert(ymlParseResult, imageInfos);
+        if (StringUtils.isNotEmpty(sceneFilePath)) {
+            if (FileUtil.exist(sceneFilePath)) {
+                String filepath = FdfsCommon.upload(sceneFilePath);
+                csceneBO.getSceneConfig().getTopology().getScene().setFile(filepath);
+            }
+        }
         // 保存
         return csceneService.syncWithoutCheckLimit(csceneBO, new CsceneContextBO());
     }

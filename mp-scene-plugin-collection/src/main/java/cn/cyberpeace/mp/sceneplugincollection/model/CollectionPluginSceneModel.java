@@ -17,4 +17,7 @@ public class CollectionPluginSceneModel extends BaseCollectionPluginSceneModel {
 
     @DefaultStr
     private String probeCollector;
+
+    @DefaultStr
+    private String probeRouter;
 }

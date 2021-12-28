@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.scene.core.scene;
 
 import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
+import cn.cyberpeace.mp.base.util.thread.taskpool.DelayTaskPool;
 import cn.cyberpeace.mp.scene.core.base.BaseSceneHandler;
 import cn.cyberpeace.mp.scene.core.bo.*;
 import cn.cyberpeace.mp.scene.core.event.SceneElementEventHandler;
@@ -15,6 +16,7 @@ import cn.cyberpeace.mp.scene.repository.*;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -78,6 +80,8 @@ public class SceneHandler extends BaseSceneHandler<
         SceneContextBO,
         ScenePluginHandler<?, ?, ?, ?>,
         SceneHandler> {
+
+    private static final DelayTaskPool delayTaskPool = new DelayTaskPool();
 
     // mock的进度
     private static Map<String, Integer> progressPercentageMap = new ConcurrentHashMap<>();
@@ -283,14 +287,6 @@ public class SceneHandler extends BaseSceneHandler<
         reporters.forEach(reporter -> reportTaskPool.executeTask(() -> reporter.reportElement(collectedSceneElement)));
     }
 
-    public void ackSceneChanged(boolean forceSave) {
-        ackSceneChanged(forceSave, true);
-    }
-
-    public void ackElementChanged(String nodeId, boolean forceSave) {
-        ackElementChanged(nodeId, forceSave, true);
-    }
-
     public void ackSceneChanged(boolean forceSave, boolean withPlugins) {
         if (forceSave || realTimeUpdate) {
             if (withPlugins) {
@@ -313,6 +309,18 @@ public class SceneHandler extends BaseSceneHandler<
         reportElementUpdated(nodeId);
     }
 
+    public void asyncAckSceneChanged(boolean forceSave, boolean withPlugins) {
+        delayTaskPool.execute(getSceneId(), () -> {
+            ackSceneChanged(forceSave, withPlugins);
+        });
+    }
+
+    public void asyncAckElementChanged(String nodeId, boolean forceSave, boolean withPlugins) {
+        delayTaskPool.execute(StringUtils.joinWith(":", getSceneId(), nodeId), () -> {
+            ackElementChanged(nodeId, forceSave, withPlugins);
+        });
+    }
+
     public void prepareSceneProcess(int event, List<EventProcess> eventProcesses) {
         getSceneEventHandler(event).addProcess(eventProcesses);
     }
@@ -324,7 +332,7 @@ public class SceneHandler extends BaseSceneHandler<
     public int progressSceneProcess(int event, String process) {
         var flag = getSceneEventHandler(event).progressProcess(process);
         if (isTriggerEventSuccess(flag)) {
-            ackSceneChanged(false, false);
+            asyncAckSceneChanged(false, false);
         }
         return flag;
     }
@@ -332,7 +340,7 @@ public class SceneHandler extends BaseSceneHandler<
     public int progressElementProcess(String nodeId, int event, String process) {
         var flag = getElementEventHandler(nodeId, event).progressProcess(process);
         if (isTriggerEventSuccess(flag)) {
-            ackElementChanged(nodeId, false, false);
+            asyncAckElementChanged(nodeId, false, false);
         }
         return flag;
     }
@@ -340,7 +348,7 @@ public class SceneHandler extends BaseSceneHandler<
     public int overSceneProcess(int event) {
         var flag = getSceneEventHandler(event).overProcess();
         if (isTriggerEventSuccess(flag)) {
-            ackSceneChanged(true, true);
+            asyncAckSceneChanged(true, true);
         }
         return flag;
     }
@@ -349,7 +357,7 @@ public class SceneHandler extends BaseSceneHandler<
         var flag = getElementEventHandler(nodeId, event).overProcess();
         this.getScene().setProgressPercentage(this.calculateProgressPercentage());
         if (isTriggerEventSuccess(flag)) {
-            ackElementChanged(nodeId, true, true);
+            asyncAckElementChanged(nodeId, true, true);
         }
         return flag;
     }

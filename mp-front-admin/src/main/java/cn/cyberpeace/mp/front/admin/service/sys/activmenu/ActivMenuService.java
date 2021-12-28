@@ -101,7 +101,7 @@ public class ActivMenuService {
         if (Objects.isNull(content)) {
             return false;
         }
-        List<TargetModel> allTargets = targetService.listAll(AuthConstant.DEFAULT_TENANT, TargetModel.TYPE_MENU);
+        List<TargetModel> allTargets = targetService.listAllIgnoreVisible(AuthConstant.DEFAULT_TENANT, TargetModel.TYPE_MENU);
         List<MenuExtraInfoModel> menuExtraInfos = menuExtraInfoService.listAll();
 
         processMenuVisibility(allTargets, menuExtraInfos, content);
@@ -218,6 +218,9 @@ public class ActivMenuService {
      * 如果一个menu edition[]跟激活状态的edition对应得上，并且active[]内有激活项中value为1的key，或者no_auth的，则最终的visible=1
      */
     private void processMenuVisibility(List<TargetModel> targetModels, List<MenuExtraInfoModel> menuExtraInfos, ActivationResponse activationResponse) {
+        log.info("targetModels:{}", targetModels);
+        log.info("menuExtraInfos:{}", menuExtraInfos);
+        log.info("activationResponse:{}", activationResponse);
         List<ActivationItem> items = activationResponse.getItems();
 
         String edition = String.valueOf(activationResponse.getEdition());
@@ -287,6 +290,7 @@ public class ActivMenuService {
 
             // 版本匹配，激活项匹配，则最终的visible=1
             if (editionMatch && itemMatch) {
+                log.info("edition and item matched! menuId:{}", targetModel.getId());
                 targetModel.setVisible(TargetModel.VISIBILITY_YES);
             } else {
                 targetModel.setVisible(TargetModel.VISIBILITY_NO);
@@ -360,13 +364,13 @@ public class ActivMenuService {
         ActivationItem item10 = new ActivationItem();
         item10.setKey("LCS-RES-CR-ACTIVENODES");
         item10.setValue("1000");
-        item10.setType(null);
+        item10.setType(2);
         list.add(item10);
 
         ActivationItem item11 = new ActivationItem();
         item11.setKey("LCS-RES-CR-EDITNODES");
         item11.setValue("100");
-        item11.setType(null);
+        item11.setType(2);
         list.add(item11);
 
         content.setItems(list);
