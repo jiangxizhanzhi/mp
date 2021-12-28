@@ -360,12 +360,16 @@
 
     <!-- 虚拟靶标统计 -->
     <select id="countVmTarget" resultType="java.util.Map">
-        select
-            sum(case when t.main_category = 1 then 1 else 0 end ) as '1',
-            sum(case when t.main_category = 2 then 1 else 0 end ) as '2',
-            sum(case when t.main_category = 3 then 1 else 0 end ) as '3',
-            sum(case when t.main_category = 4 then 1 else 0 end ) as '4'
-        from mp_devops_target t where t.image_type in ('vm','simple')
+        SELECT
+            sum( CASE WHEN t.main_category = 1 THEN 1 ELSE 0 END ) AS '1',
+            sum( CASE WHEN t.main_category = 2 THEN 1 ELSE 0 END ) AS '2',
+            sum( CASE WHEN t.main_category = 3 THEN 1 ELSE 0 END ) AS '3',
+            sum( CASE WHEN t.main_category = 4 THEN 1 ELSE 0 END ) AS '4'
+        FROM
+            mp_devops_target t
+        WHERE
+            t.image_type IN ( 'vm', 'simple' )
+           OR (t.sub_category = 53 AND t.image_type != 'entity')
     </select>
 
     <!-- 实体靶标统计 -->
