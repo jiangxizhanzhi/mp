@@ -88,7 +88,8 @@ public class SceneFileUtils {
                     CommandUtils.linuxMkDir(toPathDir),
                     CommandUtils.linuxMkDir(unzipDir),
                     CommandUtils.linuxDownloadFile(absoluteFileUrl, toPath),
-                    CommandUtils.linuxUnzipFile(toPath, unzipDir)
+                    CommandUtils.linuxUnzipFile(toPath, unzipDir),
+                    CommandUtils.linuxChmodX(SystemTypeCommandUtils.joinPath(systemType, unzipDir, "*"))
             );
         }
         return commands;
