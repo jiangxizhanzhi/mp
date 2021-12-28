@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.devops.cluster.controller;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.InstallerConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InstallerConvertModel;
@@ -27,7 +28,6 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -94,12 +94,12 @@ public class InstallerController {
      */
     @ApiOperation("新增")
     @PostMapping
-    public ServiceResult add(@RequestBody InstallerRequest request, HttpServletRequest httpServletRequest){
+    public ServiceResult add(@RequestBody InstallerRequest request){
         InstallerConvertModel model = installerConverter.add(request);
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
         }
-        String acceptLanguage = httpServletRequest.getHeader("Accept-Language");
+        String acceptLanguage = ServletUtils.getAcceptLanguage();
         return model.isSuccess() ? ServiceResult.successful() : StringUtils.isNotBlank(acceptLanguage) && acceptLanguage.equals("zh-CN") ?
                 ServiceResult.fail(model.getMsgZh()) : ServiceResult.fail(model.getMsg());
     }
@@ -109,7 +109,7 @@ public class InstallerController {
      */
     @ApiOperation("更新")
     @PatchMapping("/{uuid}")
-    public ServiceResult update(@RequestBody InstallerRequest request,@PathVariable("uuid") String uuid, HttpServletRequest httpServletRequest){
+    public ServiceResult update(@RequestBody InstallerRequest request,@PathVariable("uuid") String uuid){
         request.setUuid(uuid);
         if (StringUtils.isBlank(request.getUuid())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
@@ -118,7 +118,7 @@ public class InstallerController {
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
         }
-        String acceptLanguage = httpServletRequest.getHeader("Accept-Language");
+        String acceptLanguage = ServletUtils.getAcceptLanguage();
         return model.isSuccess() ? ServiceResult.successful() : StringUtils.isNotBlank(acceptLanguage) && acceptLanguage.equals("zh-CN") ?
                 ServiceResult.fail(model.getMsgZh()) : ServiceResult.fail(model.getMsg());
     }
