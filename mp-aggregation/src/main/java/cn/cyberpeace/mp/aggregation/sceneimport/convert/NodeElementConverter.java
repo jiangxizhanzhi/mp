@@ -37,6 +37,9 @@ class NodeElementConverter implements IConverter {
     private void createElementAndPort(NodeElementParseResult node, ConvertDataContainer container) {
         // 主表
         SceneConfigElementBO sceneConfigElementBO = new SceneConfigElementBO();
+        sceneConfigElementBO.setSystemType("306");
+        sceneConfigElementBO.setSystemArchitecture(BaseSceneElementModel.SystemArchitecture.BIT_64);
+        sceneConfigElementBO.setSystemLanguage(BaseSceneElementModel.SystemLanguage.EN);
         container.addNodeElement(sceneConfigElementBO);
 
         sceneConfigElementBO.setId(node.getId());
@@ -57,6 +60,7 @@ class NodeElementConverter implements IConverter {
 
         // 插件表
         CloudPluginSceneConfigElementBO pluginElement = new CloudPluginSceneConfigElementBO();
+        pluginElement.setImageType(BaseCloudPluginSceneElementModel.ImageType.SIMPLE);
         pluginElement.setImage(node.getImage());
         // 初步加载role imageType (部分简单靶标不会导入), 这里不一定准确
         if (node.getId().startsWith("router")) {
