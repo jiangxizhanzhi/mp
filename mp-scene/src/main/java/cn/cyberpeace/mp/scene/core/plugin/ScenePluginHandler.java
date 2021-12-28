@@ -14,6 +14,7 @@ import lombok.Data;
 
 import java.util.List;
 
+
 /**
  * 场景实例插件基础类，场景实例的插件通过继承本类拓展插件功能
  * @param <S> 插件对应配置类
