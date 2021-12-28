@@ -35,8 +35,6 @@ public abstract class BaseSimpleMessageSender {
 
     public <T> void send(T data, String type, Map<String, Object> context) {
         FormatMessage<T> formatMessage = new FormatMessage<>(data, type, context);
-        // todo 临时打印一下
-        log.info("mq message:" + messageConverter.toMessageString(formatMessage));
         amqpTemplate.convertAndSend(messageConfig.getExchangeName(), messageConfig.getRoutingKey(),
                 messageConverter.toMessageString(formatMessage));
     }
