@@ -70,23 +70,6 @@
         </encoder>
     </appender>
 
-    <!-- 时间滚动输出日志 -->
-    <!--<appender name="FILE-DEBUG" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOG_HOME}/debug/mp.log</file>
-        &lt;!&ndash; 日志记录器的滚动策略，按日期，按大小记录 &ndash;&gt;
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            &lt;!&ndash; 日志归档 &ndash;&gt;
-            <fileNamePattern>${LOG_HOME}/debug/%d{yyyy-MM-dd}.log</fileNamePattern>
-            &lt;!&ndash;日志文件保留天数&ndash;&gt;
-            <maxHistory>${LOG_FILE_MAX_HISTORY}</maxHistory>
-            <cleanHistoryOnStart>true</cleanHistoryOnStart>
-        </rollingPolicy>
-        <encoder>
-            <pattern>${FILE_LOG_PATTERN}</pattern>
-            <charset>UTF-8</charset>
-        </encoder>
-    </appender>-->
-
     <!--异步打印日志,任务放在阻塞队列中，如果队列达到80%，将会丢弃TRACE,DEBUG,INFO级别的日志任务，对性能要求不是太高的话不用启用-->
     <appender name="ASYNC" class="cn.cyberpeace.mp.base.config.log.LogAsyncAppender">
         <!--队列的深度，该值会影响性能，默认256-->
@@ -103,22 +86,6 @@
         <appender-ref ref="FILE"/>
     </appender>
 
-    <!--异步打印日志,任务放在阻塞队列中，如果队列达到80%，将会丢弃TRACE,DEBUG,INFO级别的日志任务，对性能要求不是太高的话不用启用-->
-    <!--<appender name="ASYNC-DEBUG" class="cn.cyberpeace.mp.base.config.log.LogAsyncAppender">
-        &lt;!&ndash;队列的深度，该值会影响性能，默认256&ndash;&gt;
-        <queueSize>512</queueSize>
-        &lt;!&ndash;设为0表示队列达到80%，也不丢弃任务&ndash;&gt;
-        <discardingThreshold>0</discardingThreshold>
-        &lt;!&ndash;日志上下文关闭后，AsyncAppender继续执行写任务的时间，单位毫秒&ndash;&gt;
-        <maxFlushTime>1000</maxFlushTime>
-        &lt;!&ndash;队列满了直接丢弃要写的消息&ndash;&gt;
-        <neverBlock>true</neverBlock>
-        &lt;!&ndash;是否包含调用方的信息，false则无法打印类名方法名行号等&ndash;&gt;
-        <includeCallerData>true</includeCallerData>
-        &lt;!&ndash;One and only one appender may be attached to AsyncAppender，添加多个的话后面的会被忽略&ndash;&gt;
-        <appender-ref ref="FILE"/>
-    </appender>-->
-
     <!--日志输出级别-->
     <root level="${LOG_LEVEL}">
         <!-- 控制台输出 -->
@@ -126,10 +93,5 @@
         <!-- 文件输出 需要注意选择同步或者异步输出的格式 -->
         <appender-ref ref="ASYNC"/>
     </root>
-
-    <!--<root level="DEBUG">
-        &lt;!&ndash; 文件输出 需要注意选择同步或者异步输出的格式 &ndash;&gt;
-        <appender-ref ref="ASYNC-DEBUG"/>
-    </root>-->
 
 </configuration>

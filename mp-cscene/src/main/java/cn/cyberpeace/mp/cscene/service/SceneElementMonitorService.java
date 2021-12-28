@@ -141,7 +141,7 @@ public class SceneElementMonitorService {
         log.info("needHostStatePercent:{}", needHostStatePercent);
         if (needHostStatePercent) {
             BaseSceneElementRequest request = new BaseSceneElementRequest();
-            request.setSceneId(sceneElementBO.getId());
+            request.setSceneId(basicInfo.getSceneId());
             request.setElementIds(Arrays.asList(sceneElementBO.getId()));
 
             List<HostState> hostStates = hostStateService.getHostStates(request);
