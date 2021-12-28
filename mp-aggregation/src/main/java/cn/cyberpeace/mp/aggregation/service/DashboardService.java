@@ -18,7 +18,7 @@ import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.DeviceService;
-import cn.cyberpeace.mp.devops.cluster.model.DeviceStaticsCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
@@ -34,12 +34,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.CountDownLatch;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -50,6 +45,8 @@ import java.util.stream.Collectors;
 public class DashboardService {
 
     private DeviceService deviceService;
+
+    private DevopsTargetService devopsTargetService;
 
     private CsceneInstanceService csceneInstanceService;
 
@@ -67,12 +64,14 @@ public class DashboardService {
                             CsceneInstanceService csceneInstanceService,
                             CsceneSpecialService csceneSpecialService,
                             CsceneInstanceMapper csceneInstanceMapper,
-                            ScenePluginCloudSceneService scenePluginCloudSceneService) {
+                            ScenePluginCloudSceneService scenePluginCloudSceneService,
+                            DevopsTargetService devopsTargetService) {
         this.deviceService = deviceService;
         this.csceneInstanceService = csceneInstanceService;
         this.csceneSpecialService = csceneSpecialService;
         this.csceneInstanceMapper = csceneInstanceMapper;
         this.scenePluginCloudSceneService = scenePluginCloudSceneService;
+        this.devopsTargetService = devopsTargetService;
     }
 
     /**
@@ -109,11 +108,11 @@ public class DashboardService {
      */
     public ResourceStatisticsResponse resourceStatistics() {
         ResourceStatisticsResponse response = new ResourceStatisticsResponse();
-        DeviceStaticsCloudPlatformModel model = deviceService.statics();
-        if (Objects.nonNull(model)) {
-            Map<String, Map<String, Integer>> targetStatics = model.getData();
-            response.setTargetStatics(targetStatics);
-        }
+        Map<String, Map<String, Object>> targetStatics = new HashMap<>();
+        targetStatics.put("all",devopsTargetService.countTarget());
+        targetStatics.put("entity",devopsTargetService.countEntityTarget());
+        targetStatics.put("virtual",devopsTargetService.countVmTarget());
+        response.setTargetStatics(targetStatics);
         List<CsceneInstanceCountByReferenceTypeBO> sceneStatics = csceneInstanceService.countGroupByReferenceType(Arrays.asList(SceneModel.Event.DELETE));
         response.setSceneStatics(sceneStatics);
         return response;

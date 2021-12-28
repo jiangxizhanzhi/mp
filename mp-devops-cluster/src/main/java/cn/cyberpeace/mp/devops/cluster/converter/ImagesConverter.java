@@ -96,7 +96,7 @@ public class ImagesConverter implements BaseConverter{
      */
     public ImageConvertPageModel page(ImagePageRequest request) {
         ImagePageDTO dto = convertImagePageRequest(request);
-        Integer total = imageMapper.totalCount(dto);
+        Integer total = devopsTargetService.totalCount(dto);
 
         ImageConvertPageModel convertModel = new ImageConvertPageModel();
         if (total == 0){

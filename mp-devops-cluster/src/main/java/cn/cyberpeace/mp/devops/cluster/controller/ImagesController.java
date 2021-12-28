@@ -24,6 +24,7 @@ import cn.cyberpeace.mp.devops.cluster.response.ImagesByUuidsResponse;
 import cn.cyberpeace.mp.devops.cluster.response.ImagesPageResponse;
 import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
 import cn.cyberpeace.mp.devops.cluster.response.base.Result;
+import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -48,6 +49,7 @@ import java.io.InputStream;
 import java.net.URLEncoder;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -446,6 +448,20 @@ public class ImagesController {
             imageCheckPorts.add(checkPort);
         }
         return new Result(new ImageCheckPortResponse(imageCheckPorts));
+    }
+
+    @Autowired
+    private DevopsTargetService devopsTargetService;
+
+    @GetMapping("/test")
+    public ServiceResult s(){
+        Map countTarget = devopsTargetService.countTarget();
+
+        Map countVmTarget = devopsTargetService.countVmTarget();
+
+        Map countEntityTarget = devopsTargetService.countEntityTarget();
+
+        return ServiceResult.successful();
     }
 
     /**

@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.situationaware.constant;
 
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
+
 import java.util.List;
 
 /**
@@ -24,6 +25,8 @@ public class SituationalAwareConstant {
     public static String ArkimeNetworkId;
 
     public static Integer ES_DOC_MAXCOUNT = 10000;
+
+    public static String ERROR_CODE_PREFIX = "situationaware.error_code.";
 
     public static List<String> monitorRuleIds = Lists.newArrayList("5715", "5502");
 }

@@ -29,4 +29,13 @@ public class ServletUtils {
         return servletRequestAttributes.getRequest();
     }
 
+    /**
+     * 获取请求语言
+     * @return
+     */
+    public static String getAcceptLanguage(){
+        HttpServletRequest httpServletRequest = getRequest();
+        return httpServletRequest.getHeader("Accept-Language");
+    }
+
 }
