@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/wazuh")
@@ -32,6 +33,9 @@ public class DataCollectionController {
     @PostMapping("/file_events")
     @ApiOperation(value = "查询文件注册表变更信息", notes = "")
     public ListObjServiceResult<FileEventModel> queryFileEvents(@RequestBody @Valid WazuhEventRequest wazuhEventRequest) {
+        if (Objects.isNull(wazuhEventRequest.getStartTime()) || Objects.isNull(wazuhEventRequest.getEndTime())){
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
         if (CollectionUtils.isEmpty(wazuhEventRequest.getMacIds()) && CollectionUtils.isEmpty(wazuhEventRequest.getAgentNames())) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
