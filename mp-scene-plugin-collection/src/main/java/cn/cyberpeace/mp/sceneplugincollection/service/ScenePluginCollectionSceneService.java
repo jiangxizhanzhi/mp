@@ -222,6 +222,7 @@ public class ScenePluginCollectionSceneService {
                 hostEvent.setNodeId(srcElement.getId());
                 hostEvent.setNodeName(srcElement.getName());
             }
+            hostEvents.add(hostEvent);
         });
 
         return new ListObjServiceResult<>(new ListObjResult<>(hostEvents, result.getTotal()));
