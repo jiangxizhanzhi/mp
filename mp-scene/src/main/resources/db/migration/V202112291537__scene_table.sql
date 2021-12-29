@@ -1,0 +1,2 @@
+alter table mp_scene_scene_element_port_connection modify `name` varchar(256) NOT NULL COMMENT '名称' ;
+alter table mp_scene_scene_config_element_port_connection modify `name` varchar(256) NOT NULL COMMENT '名称' ;
