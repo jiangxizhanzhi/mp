@@ -183,7 +183,7 @@ public class ScenePluginCollectionSceneService {
             if (collectionElement == null || CollectionUtils.isEmpty(collectionElement.getProbes())) {
                 return;
             }
-            agentNameElementMap.put(srcElement.getId(), srcElement);
+            agentNameElementMap.put(srcElement.getEid(), srcElement);
         });
 
         if (agentNameElementMap.isEmpty()) {
