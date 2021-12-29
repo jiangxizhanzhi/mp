@@ -77,7 +77,13 @@ class ImageInfoConverter implements IConverter {
                 }
             } else {
                 // 有镜像信息 增加role init_support proxy的默认值,还要读取其他值
-                element.setInitCommands(imageInfo.getInitCommands());
+                if (CollectionUtils.isNotEmpty(imageInfo.getInitCommands())) {
+                    if (element.getInitCommands() == null) {
+                        element.setInitCommands(imageInfo.getInitCommands());
+                    } else {
+                        element.getInitCommands().addAll(imageInfo.getInitCommands());
+                    }
+                }
                 if (cloudPluginElement.getVirtualType() == null) {
                     cloudPluginElement.setVirtualType(imageInfo.getVirtualType());
                 }

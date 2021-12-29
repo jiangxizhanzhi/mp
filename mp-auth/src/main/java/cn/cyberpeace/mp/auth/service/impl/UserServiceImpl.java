@@ -607,7 +607,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             String userId = userCreated.getId();
 
             // 2. 保存用户-角色关系
-            if (Objects.nonNull(importUser.getRoles())) {
+            if (StringUtils.isNotBlank(importUser.getRoles())) {
                 String roles = importUser.getRoles().trim();
                 Arrays.stream(StringUtils.split(roles, ",")).forEach(rname -> {
                     RoleModel roleModel = roleService.getByName(rname.trim());
@@ -619,8 +619,19 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                 });
             }
 
+            // todo http://10.10.10.10/biz/bug-view-4861.html
+            // 2. 保存用户-角色关系 之前的步骤已经处理过roleIdList了
+            /*if (CollectionUtil.isNotEmpty(importUser.getRoleIdList())) {
+                importUser.getRoleIdList().forEach(rid -> {
+                            UserRoleModel userRoleModel = UserRoleModel.builder().user(userId).role(rid).build();
+                            var re = userRoleService.create(userRoleModel);
+                            ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ROLE_ADD_ERROR);
+                        }
+                );
+            }*/
+
             // 3. 保存组织-用户关系
-            if (Objects.nonNull(importUser.getOrgpath())) {
+            if (StringUtils.isNotBlank(importUser.getOrgpath())) {
                 String orgPaths = importUser.getOrgpath().trim();
                 Arrays.stream(StringUtils.split(orgPaths, ",")).forEach(path -> {
                     OrgModel orgModel = orgService.getByPath(path);
@@ -631,6 +642,20 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                     }
                 });
             }
+            // todo http://10.10.10.10/biz/bug-view-4861.html
+            /*else {
+                // 组织为空则默认一级组织
+                log.info("org not specified! use default org!");
+                List<OrgModel> orgs = orgService.listParents();
+                OrgModel defaultTopOrg = orgs.get(0);
+                if (Objects.isNull(defaultTopOrg)) {
+                    log.error("默认一级组织不存在！");
+                    throw new MpRuntimeException(BaseErrorCode.ERROR, "default org not existed!");
+                }
+                OrgUserModel orgUserModel = OrgUserModel.builder().user(userId).org(defaultTopOrg.getId()).build();
+                var re = orgUserService.create(orgUserModel);
+                ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ORG_ADD_ERROR);
+            }*/
             log.info("import success...");
         }
     }

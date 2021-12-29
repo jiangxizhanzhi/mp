@@ -26,7 +26,6 @@ import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -307,7 +306,7 @@ public class ImagesConverter implements BaseConverter{
      * @param imageName
      * @return
      */
-    public HttpResponse export(String uuid, String imageName) {
+    public BaseCloudPlatformModel export(String uuid, String imageName) {
         return imagesService.export(uuid,imageName);
     }
 

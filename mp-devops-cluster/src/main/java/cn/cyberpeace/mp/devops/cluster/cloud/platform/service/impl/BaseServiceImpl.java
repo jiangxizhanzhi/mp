@@ -44,6 +44,7 @@ public class BaseServiceImpl {
             throw new MpRuntimeException(BaseErrorCode.GATEWAY_TIME_OUT);
         } catch (IOException e) {
             log.error("=====GET调用url：{},对应返回结果信息：{},报错信息：{}",url,result,e.getMessage(),e);
+            throw new MpRuntimeException(e.getMessage()).e(e);
         }
         return result;
     }
@@ -64,6 +65,7 @@ public class BaseServiceImpl {
             throw new MpRuntimeException(BaseErrorCode.GATEWAY_TIME_OUT);
         } catch (IOException e) {
             log.error("=====GET调用url：{},对应返回结果信息：{},报错信息：{}",url,result,e.getMessage(),e);
+            throw new MpRuntimeException(e.getMessage()).e(e);
         }
         return result;
     }
@@ -84,6 +86,7 @@ public class BaseServiceImpl {
             throw new MpRuntimeException(BaseErrorCode.GATEWAY_TIME_OUT);
         } catch (IOException e) {
             log.error("=====GET调用url：{},对应返回结果信息：{},报错信息：{}",url,result,e.getMessage(),e);
+            throw new MpRuntimeException(e.getMessage()).e(e);
         }
         return result;
     }
@@ -108,6 +111,7 @@ public class BaseServiceImpl {
             throw new MpRuntimeException(BaseErrorCode.GATEWAY_TIME_OUT);
         }catch (IOException e) {
             log.error("=====GET调用url：{},对应返回结果信息：{},报错信息：{}",url,result,e.getMessage(),e);
+            throw new MpRuntimeException(e.getMessage()).e(e);
         }
         return model;
     }
@@ -133,6 +137,7 @@ public class BaseServiceImpl {
             throw new MpRuntimeException(BaseErrorCode.GATEWAY_TIME_OUT);
         } catch (IOException e) {
             log.error("=====GET调用url：{},对应返回结果信息：{},报错信息：{}",url,result,e.getMessage(),e);
+            throw new MpRuntimeException(e.getMessage()).e(e);
         }
         return model;
     }
@@ -154,6 +159,7 @@ public class BaseServiceImpl {
             throw new MpRuntimeException(BaseErrorCode.GATEWAY_TIME_OUT);
         } catch (IOException e) {
             log.error("=====POST调用url：{},参数：{},对应返回结果信息：{},报错信息：{}",url,body,result,e.getMessage(),e);
+            throw new MpRuntimeException(e.getMessage()).e(e);
         }
         return result;
     }
@@ -179,6 +185,7 @@ public class BaseServiceImpl {
             throw new MpRuntimeException(BaseErrorCode.GATEWAY_TIME_OUT);
         } catch (IOException e) {
             log.error("=====POST调用url：{},参数：{},对应返回结果信息：{},报错信息：{}",url,body,result,e.getMessage(),e);
+            throw new MpRuntimeException(e.getMessage()).e(e);
         }
         return model;
     }
@@ -200,6 +207,7 @@ public class BaseServiceImpl {
             throw new MpRuntimeException(BaseErrorCode.GATEWAY_TIME_OUT);
         } catch (IOException e) {
             log.error("=====PUT调用url：{},参数：{},对应返回结果信息：{},报错信息：{}",url,body,result,e.getMessage(),e);
+            throw new MpRuntimeException(e.getMessage()).e(e);
         }
         return result;
     }
@@ -225,6 +233,7 @@ public class BaseServiceImpl {
             throw new MpRuntimeException(BaseErrorCode.GATEWAY_TIME_OUT);
         } catch (IOException e) {
             log.error("=====PUT调用url：{},参数：{},对应返回结果信息：{},报错信息：{}",url,body,result,e.getMessage(),e);
+            throw new MpRuntimeException(e.getMessage()).e(e);
         }
         return model;
     }
@@ -255,6 +264,7 @@ public class BaseServiceImpl {
             throw new MpRuntimeException(BaseErrorCode.GATEWAY_TIME_OUT);
         } catch (IOException e) {
             log.error("=====DELETE调用url：{},参数：{},对应返回结果信息：{},报错信息：{}",url,body,result,e.getMessage(),e);
+            throw new MpRuntimeException(e.getMessage()).e(e);
         }
         return result;
     }

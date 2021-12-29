@@ -151,7 +151,6 @@ public class DashboardService {
         }
         var condition = new HumanCondition()
                 .filterEqual(CsceneInstanceModel::getDeleted, false)
-                .filterEqual(CsceneInstanceModel::getType, CsceneInstanceModel.Type.APP)
                 .filterEqual(CsceneInstanceModel::getCreateUser, user.getId());
         List<CsceneInstanceModel> csceneInstances;
         try {

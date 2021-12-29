@@ -6,7 +6,6 @@ import cn.cyberpeace.mp.devops.cluster.model.*;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.http.HttpResponse;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.springframework.stereotype.Service;
 
@@ -55,8 +54,8 @@ public class ImagesService extends BaseOpenStackServiceImpl {
     /**
      * 导出
      */
-    public HttpResponse export(String uuid,String imageName){
-        return super.downLoad(CPCLOUD_DEVICE + URL_VERSION + "/image/export?device_uuid=" + uuid + "&&image_name=" + imageName);
+    public BaseCloudPlatformModel export(String uuid,String imageName){
+        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + "/image/export?device_uuid=" + uuid + "&&image_name=" + imageName,BaseCloudPlatformModel.class);
     }
 
     /**

@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
+import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.hutool.core.collection.CollectionUtil;
@@ -40,14 +41,17 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
      */
     private UserService userService;
 
+    private RoleService roleService;
+
     /**
      * 如果使用了spring,请使用这个构造方法。每次创建Listener的时候需要把spring管理的类传进来
      *
      * @param userService
      */
-    public UploadDataListener(UserService userService) {
+    public UploadDataListener(UserService userService, RoleService roleService) {
         log.info("New UploadDataListener Instance...");
         this.userService = userService;
+        this.roleService = roleService;
     }
 
     /**
@@ -81,6 +85,12 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
 
     /**
      * 加上存储数据库
+     * http://10.10.10.10/biz/bug-view-4861.html
+     *
+     * 当前导入模板里面说明的必填项是用户名、姓名、密码， 其他的组织、角色、电话号码没有在导入模板中说必填，
+     * 组织不填的话导入后要有默认值。
+     * 组织：可以不填， 不填的话默认根组织
+     * 角色：必填， 属于已有角色可以导入，不属于已有角色导入失败。
      */
     private void saveData() {
         log.info("{}条数据，开始存储数据库！", list.size());
@@ -91,6 +101,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
         userService.importExcel(list);
         log.info("存储数据库成功！");
     }
+
 
 
     private void checkImportUsers(List<ImportUser> users) {
@@ -106,6 +117,9 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
                 checkUserName(user.getUsername(), index);
                 checkName(user.getName(), index);
                 checkPwd(user.getPassword(), index);
+
+                // todo http://10.10.10.10/biz/bug-view-4861.html
+                // checkRole(user, index);
             }
         }
     }
@@ -119,17 +133,17 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
      */
     private void checkUserName(String username, int index) {
         if (StringUtils.isBlank(username)) {
-            log.error("No {} row error!，username {} should not be empty!", index, username);
+            log.error("No {} row error! username {} should not be empty!", index, username);
             throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_USERNAME_EMPTY.format(String.valueOf(index)));
         }
 
         if (StringUtils.length(username) < 2 || StringUtils.length(username) > 20) {
-            log.error("No {} row error!，username {} has illegal length!", index, username);
+            log.error("No {} row error! username {} has illegal length!", index, username);
             throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_USERNAME_ILLEGAL_LENGTH.format(String.valueOf(index), username));
         }
 
         if (Objects.nonNull(userService.getByUserName(username))) {
-            log.error("No {} row error!，username {} already existed!", index, username);
+            log.error("No {} row error! username {} already existed!", index, username);
             throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_USERNAME_EXISTED.format(String.valueOf(index), username));
         }
 
@@ -143,12 +157,12 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
      */
     private void checkName(String name, int index) {
         if (StringUtils.isBlank(name)) {
-            log.error("No {} row error!，name {} should not be empty!", index, name);
+            log.error("No {} row error! name {} should not be empty!", index, name);
             throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_NAME_EMPTY.format(String.valueOf(index)));
         }
 
         if (StringUtils.length(name) < 2 || StringUtils.length(name) > 40) {
-            log.error("No {} row error!，name {} has illegal length!", index, name);
+            log.error("No {} row error! name {} has illegal length!", index, name);
             throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_NAME_ILLEGAL_LENGTH.format(String.valueOf(index), name));
         }
 
@@ -164,8 +178,36 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
     private void checkPwd(String password, int index) {
         // 密码是否合法
         if (PasswordUtils.isPasswordStrengthLowLevel(password)) {
-            log.error("No {} row error!，password {} has illegal strength!", index, password);
+            log.error("No {} row error! password {} has illegal strength!", index, password);
             throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_PWD_INVALID.format(String.valueOf(index), password));
+        }
+    }
+
+
+    /**
+     * 校验角色是否存在，如果存在则查出id留待后面绑定的时候用
+     *
+     * @param
+     * @param index
+     */
+    private void checkRole(ImportUser user, int index) {
+        String roles = user.getRoles();
+        if (StringUtils.isBlank(roles)) {
+            log.error("No {} row error! roles:{} is empty! ", index, roles);
+            throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_ROLE_EMPTY.format(String.valueOf(index)));
+        }
+
+        // 清空roleIdList
+        user.setRoleIdList(new ArrayList<>());
+        String[] roleNameArr = StringUtils.split(roles, ",");
+
+        for (String roleName : roleNameArr) {
+            RoleModel roleModel = roleService.getByName(roleName.trim());
+            if (Objects.isNull(roleModel)) {
+                log.error("No {} row error! role {} not existed!", index, roleName.trim());
+                throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_ROLE_NOT_EXISTED.format(String.valueOf(index), roleName.trim()));
+            }
+            user.getRoleIdList().add(roleModel.getId());
         }
     }
 
