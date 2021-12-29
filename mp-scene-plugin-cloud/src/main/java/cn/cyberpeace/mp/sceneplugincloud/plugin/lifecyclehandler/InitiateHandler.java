@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -47,10 +48,10 @@ public class InitiateHandler extends HandlerCommon {
     }
 
     private List<String> existCidrs;
-    private final Map<String, List<String>> networkNodeIdIpPool = new HashMap<>();
+    private final Map<String, List<String>> networkNodeIdIpPool = new ConcurrentHashMap<>();
 
     // 辅助变量：需要重新分配的ip地址
-    private Map<String, ReallocateIpInfo> reallocateIpInfos = new HashMap<>();
+    private Map<String, ReallocateIpInfo> reallocateIpInfos = new ConcurrentHashMap<>();
 
     private void prepareExistCidrs() {
         if (existCidrs == null) {
