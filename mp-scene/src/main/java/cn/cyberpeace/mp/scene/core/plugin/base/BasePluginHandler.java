@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * 基础的场景插件处理类
@@ -37,12 +39,12 @@ public abstract class BasePluginHandler<S, E, P, C> {
 
     // 源场景索引数据
     private String sourceSceneId;
-    private final List<String> elementIds = new ArrayList<>();
-    private final List<String> elementPortIds = new ArrayList<>();
+    private final List<String> elementIds = new CopyOnWriteArrayList<>();
+    private final List<String> elementPortIds = new CopyOnWriteArrayList<>();
 
     private S scene;
-    private final Map<String, E> elementMap = new HashMap<>();
-    private final Map<String, P> elementPortMap = new HashMap<>();
+    private final Map<String, E> elementMap = new ConcurrentHashMap<>();
+    private final Map<String, P> elementPortMap = new ConcurrentHashMap<>();
 
     // 通过ClassFieldNames注解和实现类ClassFieldClasses注解，初始化调用ClassUtils.loadClassFields(this)设置
     private Class<S> sceneBOClass;
@@ -167,11 +169,11 @@ public abstract class BasePluginHandler<S, E, P, C> {
     }
 
     public E getElement(String nodeId) {
-        return elementMap.getOrDefault(nodeId, null);
+        return nodeId != null ? elementMap.getOrDefault(nodeId, null) : null;
     }
 
     public P getPort(String portId) {
-        return elementPortMap.getOrDefault(portId, null);
+        return portId != null ? elementPortMap.getOrDefault(portId, null) : null;
     }
 
     public abstract void reload();

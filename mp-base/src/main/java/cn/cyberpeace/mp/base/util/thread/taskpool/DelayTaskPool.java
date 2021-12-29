@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 延迟任务执行
@@ -23,7 +24,7 @@ public class DelayTaskPool {
     /**
      * 任务集合<任务key, 任务>，相同任务key会覆盖
      */
-    private final Map<String, Runnable> taskMap = new HashMap<>();
+    private final Map<String, Runnable> taskMap = new ConcurrentHashMap<>();
 
     private Integer runDelay;
 

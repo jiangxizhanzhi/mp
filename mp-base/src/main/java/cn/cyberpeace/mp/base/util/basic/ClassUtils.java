@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class ClassUtils {
 
-    private static final Map<Class<?>, String[]> beanClassFieldsCache = new HashMap<>();
+    private static final Map<Class<?>, String[]> beanClassFieldsCache = new ConcurrentHashMap<>();
 
     private static final Map<Class<?>, Map<String, Class<?>>> beanClassFieldTypesCache = new ConcurrentHashMap<>();
 

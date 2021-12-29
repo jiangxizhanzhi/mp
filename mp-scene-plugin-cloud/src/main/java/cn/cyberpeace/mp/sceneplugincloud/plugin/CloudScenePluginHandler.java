@@ -31,6 +31,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 @ClassFieldClasses({
@@ -47,9 +48,9 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
 
     private CloudScenePluginModelHandler pluginModelHandler;
 
-    private final Map<String, CloudPluginSceneElementBO> gatewayElementMap = new HashMap<>();
-    private final Map<String, CloudPluginSceneElementBO> firewallElementMap = new HashMap<>();
-    private final Map<String, CloudPluginSceneElementBO> terminalElementMap = new HashMap<>();
+    private final Map<String, CloudPluginSceneElementBO> gatewayElementMap = new ConcurrentHashMap<>();
+    private final Map<String, CloudPluginSceneElementBO> firewallElementMap = new ConcurrentHashMap<>();
+    private final Map<String, CloudPluginSceneElementBO> terminalElementMap = new ConcurrentHashMap<>();
 
     private HandlerUtils handlerUtils;
     private InitiateHandler initiateHandler;
