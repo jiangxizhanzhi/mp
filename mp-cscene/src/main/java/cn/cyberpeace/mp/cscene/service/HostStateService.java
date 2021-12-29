@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.NumberUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -65,9 +66,11 @@ public class HostStateService {
         List<HostState> hostStates = hostStateBOS.stream().map(hostStateBO -> {
             HostState hs = new HostState();
             hs.setCpuCount(hostStateBO.getCpuCount());
-            hs.setCpuPercent(hostStateBO.getCpuPercent());
+            hs.setCpuPercent(Objects.nonNull(hostStateBO.getCpuPercent()) ? NumberUtil.round(hostStateBO.getCpuPercent(), 2).doubleValue() : hostStateBO.getCpuPercent());
             hs.setMemoryFree(hostStateBO.getMemoryFree());
             hs.setMemoryTotal(hostStateBO.getMemoryTotal());
+            // todo 节点内存利用率 统一为Double？
+//            hs.setMemoryPercent(Objects.nonNull(hostStateBO.getMemoryPercent() ? NumberUtil.round(hostStateBO.getMemoryPercent(), 2).doubleValue() : hostStateBO.getMemoryPercent()));
             hs.setDiskSpace(hostStateBO.getDiskSpace());
             hs.setSceneId(hostStateBO.getSceneId());
             hs.setElementId(hostStateBO.getNodeId());
@@ -153,7 +156,7 @@ public class HostStateService {
         if (Objects.nonNull(intervalCpuPercentBOs)) {
             for (IntervalSizeBO<LocalDateTime, Double> bo : intervalCpuPercentBOs) {
                 if (Objects.nonNull(hostStateMap.get(bo.getStart()))) {
-                    hostStateMap.get(bo.getStart()).setCpuPercent(bo.getSize());
+                    hostStateMap.get(bo.getStart()).setCpuPercent(Objects.nonNull(bo.getSize()) ? NumberUtil.round(bo.getSize(), 2).doubleValue() : 0.0);
                 }
             }
         }
@@ -162,7 +165,7 @@ public class HostStateService {
         if (Objects.nonNull(intervalMemPercentBOs)) {
             for (IntervalSizeBO<LocalDateTime, Double> bo : intervalMemPercentBOs) {
                 if (Objects.nonNull(hostStateMap.get(bo.getStart()))) {
-                    hostStateMap.get(bo.getStart()).setMemoryPercent(bo.getSize());
+                    hostStateMap.get(bo.getStart()).setMemoryPercent(Objects.nonNull(bo.getSize()) ? NumberUtil.round(bo.getSize(), 2).doubleValue() : 0.0);
                 }
             }
         }
@@ -171,7 +174,7 @@ public class HostStateService {
         /*if (Objects.nonNull(intervalDiskPercentBOs)) {
             for (IntervalSizeBO<LocalDateTime, Double> bo : intervalDiskPercentBOs) {
                 if (Objects.nonNull(hostStateMap.get(bo.getStart()))) {
-                    hostStateMap.get(bo.getStart()).setDiskPercent(bo.getSize());
+                    hostStateMap.get(bo.getStart()).setDiskPercent(Objects.nonNull(bo.getSize()) ? NumberUtil.round(bo.getSize(), 2).doubleValue() : 0.0);
                 }
             }
         }*/
