@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.hutool.core.io.FileUtil;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -36,7 +37,7 @@ public class ResourceCenterService {
         // 解析 image/services.yml
         List<ImageParseResult> imageInfos = ResourceCenterYmlParser.parseImageServicesYml(ymlFilePath, imageFilePath);
         // 处理附件
-        String fdfsSceneFilePath = null ;
+        String fdfsSceneFilePath = null;
         if (StringUtils.isNotEmpty(sceneFilePath)) {
             if (FileUtil.exist(sceneFilePath)) {
                 fdfsSceneFilePath = FdfsCommon.upload(sceneFilePath);
@@ -44,6 +45,15 @@ public class ResourceCenterService {
         }
         // 转换bo
         CsceneBO csceneBO = cSceneBoConverter.convert(ymlParseResult, imageInfos, fdfsSceneFilePath);
+        if (CollectionUtils.isNotEmpty(csceneBO.getSceneConfig().getTopology().getElements())) {
+            csceneBO.getSceneConfig().getTopology().getElements().forEach(e -> {
+                if (CollectionUtils.isNotEmpty(e.getPorts())) {
+                    for (int i = 0; i < e.getPorts().size(); i++) {
+                        e.getPorts().get(i).setName("port" + i);
+                    }
+                }
+            });
+        }
         // 保存
         return csceneService.syncWithoutCheckLimit(csceneBO, new CsceneContextBO());
     }
