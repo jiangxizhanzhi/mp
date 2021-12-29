@@ -24,6 +24,7 @@ import java.util.List;
  */
 @Service
 public class ResourceCenterService {
+    private static String FDFS_SCENE_FILEPATH_FORMAT = "%s?filename=%s";
 
     @Resource
     private CsceneService csceneService;
@@ -40,7 +41,9 @@ public class ResourceCenterService {
         String fdfsSceneFilePath = null;
         if (StringUtils.isNotEmpty(sceneFilePath)) {
             if (FileUtil.exist(sceneFilePath)) {
-                fdfsSceneFilePath = FdfsCommon.upload(sceneFilePath);
+                String fdfsPath = FdfsCommon.upload(sceneFilePath);
+                String fileName = FileUtil.getName(sceneFilePath);
+                fdfsSceneFilePath = String.format(FDFS_SCENE_FILEPATH_FORMAT, fdfsPath, fileName);
             }
         }
         // 转换bo
