@@ -4,6 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
+
 /**
  * @Description:
  * @Author zhouxinghuai
@@ -29,5 +32,8 @@ public class ImportUser {
 
     // 角色 名称，多个用逗号隔开
     private String roles;
+
+    // 角色ID，Excel中不存在，留待后端绑定用
+    private List<String> roleIdList;
 
 }
