@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.service;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.repository.condition.aggregation.Count;
@@ -213,10 +214,7 @@ public class CsceneSpecialService {
         }
         var search = queryParams.getSearch();
         if (!StringUtils.isEmpty(search)) {
-            humanCondition.filterOrStart()
-                    .orContains(CsceneInstanceModel::getName, search)
-                    .orContains(CsceneInstanceModel::getReferenceMetaData, search)
-                    .filterOrEnd();
+            humanCondition.filterIContains(CsceneInstanceModel::getName, search);
         }
 
         humanCondition.currentLink(SceneModel.class);
@@ -304,6 +302,13 @@ public class CsceneSpecialService {
             // 场景运行时长
             if (CollectionUtils.isNotEmpty(data)) {
                 data.forEach(s -> {
+                    try {
+                        Map<String, Object> result = JsonCommon.parse(s.getReferenceMetaData(), Map.class);
+                        result.put("room_name", s.getName());
+                        s.setReferenceMetaData(JsonCommon.stringify(result));
+                    } catch (Exception e) {
+                        log.error("name parse error,csceneId is {},referenceMetaData is {}", s.getId(), s.getReferenceMetaData(), e);
+                    }
                     if (SceneModel.Event.DELETE == s.getEvent() && EventStatus.OVER == s.getEventStatus()) {
                         // 已删除场景的运行时间=删除时刻 - 创建时刻
                         s.setSceneRunTime(s.getUpdateTime().toEpochSecond(ZoneOffset.UTC) - s.getCreateTime().toEpochSecond(ZoneOffset.UTC));

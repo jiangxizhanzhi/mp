@@ -359,6 +359,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
 
     @Override
+    public List<UserModel> listByUserName(List<String> userNames) {
+        List<UserModel> userModels = getModelMapper().listByUserNames(userNames);
+        return userModels;
+    }
+
+    @Override
     public UserModel getByIdent(String ident) {
         log.info("ident:{}", ident);
         UserModel userModel = getModelMapper().first(new HumanCondition().filterEqual("identifier", ident));
@@ -712,6 +718,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
      *
      * @param user
      */
+    @Override
     public void processExpiredStatus(UserDto user) {
         if (Objects.isNull(user) || Objects.isNull(user.getExpiredTime())) {
             return;
@@ -743,6 +750,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return doModel2Dto(userModel, false, true);
     }
 
+    @Override
     public UserDto doModel2Dto(UserModel userModel, boolean needOrg, boolean needRole) {
         ParamCheck.notBlank(userModel.getId(), AuthBasei18nCode.USER_ID);
 
