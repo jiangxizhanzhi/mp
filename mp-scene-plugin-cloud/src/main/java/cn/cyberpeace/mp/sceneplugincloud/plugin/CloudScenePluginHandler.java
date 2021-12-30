@@ -274,4 +274,17 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         handlerUtils.addOuterExistIps(auxiliaryNetworkCloudElement, ips);
         return ips;
     }
+
+    @Override
+    public ScenePluginDataBO toData() {
+        getElementPortMap().forEach((portId, cloudPort) -> {
+            var auxiliaryNetworkCloudElement = handlerUtils.getPortAuxiliaryNetworkCloudElement(portId);
+            if (auxiliaryNetworkCloudElement != null && auxiliaryNetworkCloudElement.getRole() != null && auxiliaryNetworkCloudElement.getRole().equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK)) {
+                cloudPort.setConnToExtNet(true);
+            } else {
+                cloudPort.setConnToExtNet(false);
+            }
+        });
+        return super.toData();
+    }
 }
