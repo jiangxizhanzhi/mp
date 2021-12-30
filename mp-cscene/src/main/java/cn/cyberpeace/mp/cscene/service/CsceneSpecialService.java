@@ -305,15 +305,12 @@ public class CsceneSpecialService {
             // 场景运行时长
             if (CollectionUtils.isNotEmpty(data)) {
                 data.forEach(s -> {
-                    // 先兼容处理下 竞赛的 name todo
-                    if (String.valueOf(s.getReferenceType()).startsWith("3") && s.getName() != null) {
-                        try {
-                            Map<String, Object> result = JsonCommon.beanToSnakeMap(s.getReferenceMetaData());
-                            result.put("room_name", s.getName());
-                            s.setReferenceMetaData(JsonCommon.stringify(result));
-                        } catch (Exception e) {
-                            log.error("name parse error,csceneId is {},referenceMetaData is {}", s.getId(), s.getReferenceMetaData());
-                        }
+                    try {
+                        Map<String, Object> result = JsonCommon.beanToSnakeMap(s.getReferenceMetaData());
+                        result.put("room_name", s.getName());
+                        s.setReferenceMetaData(JsonCommon.stringify(result));
+                    } catch (Exception e) {
+                        log.error("name parse error,csceneId is {},referenceMetaData is {}", s.getId(), s.getReferenceMetaData());
                     }
                     if (SceneModel.Event.DELETE == s.getEvent() && EventStatus.OVER == s.getEventStatus()) {
                         // 已删除场景的运行时间=删除时刻 - 创建时刻
