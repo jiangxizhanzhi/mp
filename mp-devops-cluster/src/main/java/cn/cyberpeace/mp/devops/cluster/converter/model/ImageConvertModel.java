@@ -59,6 +59,16 @@ public class ImageConvertModel extends BasePageConvertModel{
     private Integer thirdCategory;
 
     /**
+     * 是否导入
+     */
+    private Boolean isImport;
+
+    /**
+     * 是否默认靶标
+     */
+    private Boolean isInternal;
+
+    /**
      * 系统信息
      */
     private ExtSystemInfo extSystemInfo;

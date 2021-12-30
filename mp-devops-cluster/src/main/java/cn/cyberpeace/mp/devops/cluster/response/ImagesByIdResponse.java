@@ -75,6 +75,18 @@ public class ImagesByIdResponse extends BaseCloudPlatformResponse  {
     private String imageType;
 
     /**
+     * 是否导入
+     */
+    @ApiModelProperty(value = "是否导入")
+    private Boolean isImport;
+
+    /**
+     * 是否默认靶标
+     */
+    @ApiModelProperty(value = "是否默认靶标")
+    private Boolean isInternal;
+
+    /**
      * 接入方式
      */
     @ApiModelProperty(value = "接入方式")
