@@ -94,6 +94,18 @@ public class ImagesPageResponse  extends BaseCloudPlatformResponse  {
     private Integer imageStatus;
 
     /**
+     * 是否导入
+     */
+    @ApiModelProperty("是否导入")
+    private Boolean isImport;
+
+    /**
+     * 是否默认靶标
+     */
+    @ApiModelProperty("是否默认靶标")
+    private Boolean isInternal;
+
+    /**
      * 系统信息
      */
     @ApiModelProperty("系统信息")

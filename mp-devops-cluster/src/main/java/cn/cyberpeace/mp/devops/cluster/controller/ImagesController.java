@@ -91,6 +91,8 @@ public class ImagesController {
                     .logo(v.getLogo())
                     .mainCategory(v.getMainCategory()).subCategory(v.getSubCategory()).thirdCategory(v.getThirdCategory())
                     .imageType(v.getImageType())
+                    .isImport(v.getIsImport())
+                    .isInternal(v.getIsInternal())
                     .systemType(Objects.nonNull(extSystemInfo) ? extSystemInfo.getSystemType() : null)
                     .flavor(Objects.nonNull(extVm) ? extVm.getFlavor() : "")
                     .description(v.getDescription()).imageStatus(Objects.nonNull(extImageInfo) ? extImageInfo.getImageStatus() : null)
@@ -148,6 +150,8 @@ public class ImagesController {
         imagesByIdResponse.setThirdCategory(model.getThirdCategory());
         imagesByIdResponse.setRole(model.getRole());
         imagesByIdResponse.setLogo(model.getLogo());
+        imagesByIdResponse.setIsInternal(model.getIsInternal());
+        imagesByIdResponse.setIsImport(model.getIsImport());
         ExtVm extVm = model.getExtVm();
         imagesByIdResponse.setAccessProtocolList(Objects.nonNull(extVm) ? extVm.getAccessProtocols() : null);
         ExtDocker extDocker = model.getExtDocker();

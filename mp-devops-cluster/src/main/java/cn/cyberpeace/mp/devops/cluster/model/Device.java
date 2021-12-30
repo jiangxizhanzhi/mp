@@ -98,6 +98,11 @@ public class Device extends BaseCloudPlatformModel{
     private Boolean isImport;
 
     /**
+     * 是否默认靶标
+     */
+    private Boolean isInternal;
+
+    /**
      * 实体信息
      */
     private ExtEntity extEntity;

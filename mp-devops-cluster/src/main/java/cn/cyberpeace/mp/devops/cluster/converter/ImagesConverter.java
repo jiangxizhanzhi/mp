@@ -421,6 +421,8 @@ public class ImagesConverter implements BaseConverter{
         imageModel.setRole(device.getRole());
         imageModel.setThirdCategory(device.getL3Category());
         imageModel.setImageType(device.getImageType());
+        imageModel.setIsImport(device.getIsImport());
+        imageModel.setIsInternal(device.getIsInternal());
         imageModel.setDescription(device.getDescription());
         imageModel.setExtSystemInfo(device.getExtSystemInfo());
         ExtImageInfo extImageInfo = device.getExtImageInfo();
