@@ -216,7 +216,6 @@ public class CsceneSpecialService {
         if (!StringUtils.isEmpty(search)) {
             humanCondition.filterOrStart()
                     .orContains(CsceneInstanceModel::getName, search)
-                    .orContains(CsceneInstanceModel::getReferenceMetaData, search)
                     .filterOrEnd();
         }
 
