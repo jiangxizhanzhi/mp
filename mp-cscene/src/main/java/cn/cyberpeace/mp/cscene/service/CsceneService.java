@@ -372,6 +372,8 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                         csceneInstance.setName(result.getRoomName());
                     } else if (result.getSceneName() != null) {
                         csceneInstance.setName(result.getSceneName());
+                    } else if (result.getBusinessName() != null) {
+                        csceneInstance.setName(result.getBusinessName());
                     }
                 }
             } catch (Exception e) {
@@ -384,6 +386,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     private static class NameParseResult {
         private String sceneName;
         private String roomName;
+        private String businessName;
 
         public String getSceneName() {
             return sceneName;
@@ -399,6 +402,14 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
 
         public void setRoomName(String roomName) {
             this.roomName = roomName;
+        }
+
+        public String getBusinessName() {
+            return businessName;
+        }
+
+        public void setBusinessName(String businessName) {
+            this.businessName = businessName;
         }
     }
 }
