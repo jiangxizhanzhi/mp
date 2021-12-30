@@ -48,6 +48,19 @@ public class HttpUtils {
      * @return
      * @throws IOException
      */
+    public static String sendPost(String url, String content,Map<String,String> headerMap) throws IOException {
+        HttpClient client = HttpClientBuilder.create().build();
+        return doPost(url, content,headerMap, client);
+    }
+
+    /**
+     * 发送一个Post请求
+     *
+     * @param url
+     * @param content
+     * @return
+     * @throws IOException
+     */
     public static String sendPost(String url, String content) throws IOException {
         HttpClient client = HttpClientBuilder.create().build();
         return doPost(url, content, client);
@@ -116,6 +129,7 @@ public class HttpUtils {
         log.info("请求地址================>{}", url);
         log.info("请求参数================>{}", content);
         HttpPost httpPost = new HttpPost(url);
+
         // 解决中文乱码问题
         StringEntity entity = new StringEntity(content, StandardCharsets.UTF_8);
         entity.setContentType(ContentType.APPLICATION_JSON.getMimeType());
@@ -127,6 +141,32 @@ public class HttpUtils {
         httpPost.setConfig(requestConfig);
         // 获得返回值
         return EntityUtils.toString(resp.getEntity(), StandardCharsets.UTF_8);
+    }
+
+    public static String doPost(String url, String content,Map<String,String> headerMap, HttpClient client) throws IOException {
+
+        HttpPost httpPost = new HttpPost(url);
+
+        // 解决中文乱码问题
+        StringEntity entity = new StringEntity(content, StandardCharsets.UTF_8);
+        entity.setContentType(ContentType.APPLICATION_JSON.getMimeType());
+        httpPost.setEntity(entity);
+
+        if (MapUtils.isNotEmpty(headerMap)) {
+            Header[] headers = headerMap.entrySet().stream().map(v ->
+                    new BasicHeader(v.getKey(), v.getValue())
+            ).toArray(Header[]::new);
+            httpPost.setHeaders(headers);
+        }
+
+        HttpResponse resp = client.execute(httpPost);
+        // 设置请求和传输超时时间
+        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
+        httpPost.setConfig(requestConfig);
+        // 获得返回值
+        return EntityUtils.toString(resp.getEntity(), StandardCharsets.UTF_8);
+
+
     }
 
     private static String doPost(String url, String content, HttpClient client, int timeOut) throws IOException {
@@ -291,6 +331,35 @@ public class HttpUtils {
     }
 
     /**
+     * 删除请求
+     *
+     * @param url
+     * @return
+     * @throws IOException
+     */
+    public static String sendDelete(String url, String content,Map<String,String> headerMap) throws IOException {
+        log.info("请求地址================>{}", url);
+        log.info("请求参数================>{}", content);
+        HttpClient client = HttpClientBuilder.create().build();
+        StringEntity entity = new StringEntity(content, StandardCharsets.UTF_8);
+        entity.setContentType(ContentType.APPLICATION_JSON.getMimeType());
+        HttpDeleteWithBody httpDelete = new HttpDeleteWithBody(url);
+        httpDelete.setEntity(entity);
+
+        if (MapUtils.isNotEmpty(headerMap)) {
+            Header[] headers = headerMap.entrySet().stream().map(v ->
+                    new BasicHeader(v.getKey(), v.getValue())
+            ).toArray(Header[]::new);
+            httpDelete.setHeaders(headers);
+        }
+
+        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
+        HttpResponse response = client.execute(httpDelete);
+        httpDelete.setConfig(requestConfig);
+        return EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+    }
+
+    /**
      * get请求下载文件
      *
      * @param url
@@ -379,9 +448,15 @@ public class HttpUtils {
         return result;
     }
 
-    public static String sendPut(String url,String content) throws IOException {
+    public static String sendPut(String url,String content,Map<String,String> headerMap) throws IOException {
         HttpClient client = HttpClientBuilder.create().build();
         HttpPut httpPut = new HttpPut(url);
+        if (MapUtils.isNotEmpty(headerMap)) {
+            Header[] headers = headerMap.entrySet().stream().map(v ->
+                    new BasicHeader(v.getKey(), v.getValue())
+            ).toArray(Header[]::new);
+            httpPut.setHeaders(headers);
+        }
         // 解决中文乱码问题
         StringEntity entity = new StringEntity(content, "utf-8");
         entity.setContentType("application/json");
@@ -392,9 +467,15 @@ public class HttpUtils {
         return EntityUtils.toString(response.getEntity(), "UTF-8");
     }
 
-    public static String doFormDataPost(String url, HttpEntity entity) throws IOException {
+    public static String doFormDataPost(String url, HttpEntity entity,Map<String,String> headerMap) throws IOException {
         HttpClient client = HttpClientBuilder.create().build();
         HttpPost httpPost = new HttpPost(url);
+        if (MapUtils.isNotEmpty(headerMap)) {
+            Header[] headers = headerMap.entrySet().stream().map(v ->
+                    new BasicHeader(v.getKey(), v.getValue())
+            ).toArray(Header[]::new);
+            httpPost.setHeaders(headers);
+        }
         httpPost.setEntity(entity);
         RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(60000).setConnectTimeout(60000).build();
         httpPost.setConfig(requestConfig);
@@ -402,9 +483,15 @@ public class HttpUtils {
         return EntityUtils.toString(response.getEntity(), "UTF-8");
     }
 
-    public static String doFormDataPut(String url, HttpEntity entity) throws IOException {
+    public static String doFormDataPut(String url, HttpEntity entity,Map<String,String> headerMap) throws IOException {
         HttpClient client = HttpClientBuilder.create().build();
         HttpPut httpPost = new HttpPut(url);
+        if (MapUtils.isNotEmpty(headerMap)) {
+            Header[] headers = headerMap.entrySet().stream().map(v ->
+                    new BasicHeader(v.getKey(), v.getValue())
+            ).toArray(Header[]::new);
+            httpPost.setHeaders(headers);
+        }
         httpPost.setEntity(entity);
         RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(60000).setConnectTimeout(60000).build();
         httpPost.setConfig(requestConfig);

@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.*;
 import cn.cyberpeace.mp.devops.cluster.converter.model.*;
+import cn.cyberpeace.mp.devops.cluster.enums.HypervisorActionEnum;
 import cn.cyberpeace.mp.devops.cluster.request.*;
 import cn.cyberpeace.mp.devops.cluster.response.HypervisorPageResponse;
 import cn.cyberpeace.mp.devops.cluster.response.HypervisorServiceStateResponse;
@@ -228,7 +229,8 @@ public class CloudPlatformMonitorController {
     @ApiOperation("节点管理-关机/重启")
     @GetMapping("/hypervisor/reboot-poweroff")
     public ServiceResult<?> rebootOrPowerOff(@Valid HypervisorRequest request){
-        if(request.getAction().equals("reboot") || request.getAction().equals("poweroff")) {
+        if(request.getAction().equals(HypervisorActionEnum.REBOOT.getAction())
+                || request.getAction().equals(HypervisorActionEnum.POWEROFF.getAction())) {
             hypervisorConverter.rebootOrPowerOff(request);
         }
         return ServiceResult.successful();
