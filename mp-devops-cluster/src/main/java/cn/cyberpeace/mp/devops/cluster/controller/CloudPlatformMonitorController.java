@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.*;
@@ -17,13 +19,13 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
@@ -228,7 +230,10 @@ public class CloudPlatformMonitorController {
      */
     @ApiOperation("节点管理-关机/重启")
     @GetMapping("/hypervisor/reboot-poweroff")
-    public ServiceResult<?> rebootOrPowerOff(@Valid HypervisorRequest request){
+    public ServiceResult<?> rebootOrPowerOff(HypervisorRequest request){
+        if (StringUtils.isBlank(request.getAction()) || StringUtils.isBlank(request.getHostname())){
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
         if(request.getAction().equals(HypervisorActionEnum.REBOOT.getAction())
                 || request.getAction().equals(HypervisorActionEnum.POWEROFF.getAction())) {
             hypervisorConverter.rebootOrPowerOff(request);

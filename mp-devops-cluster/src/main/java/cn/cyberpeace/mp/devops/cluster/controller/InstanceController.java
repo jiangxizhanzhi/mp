@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -47,7 +46,7 @@ public class InstanceController {
      */
     @ApiOperation("分页查询虚拟机信息")
     @GetMapping("/page")
-    public PageResult<InstancePageResponse> page(@Valid InstancePageRequest request){
+    public PageResult<InstancePageResponse> page(InstancePageRequest request){
         InstanceConvertModel model = instanceConverter.page(request);
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getModelList())){
             return new PageResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
