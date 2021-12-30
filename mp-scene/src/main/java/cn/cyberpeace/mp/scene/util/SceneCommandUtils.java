@@ -36,12 +36,12 @@ public class SceneCommandUtils {
                 // 确保call执行不退出
                 parsedCommands.add(String.format(WINDOWS_CALL_TEMPLATE, relativeCommand));
             } else {
-                parsedCommands.add(CommandUtils.linuxCdDir(sceneFileDir));
-                parsedCommands.add(relativeCommand);
-
-                // 对于linux节点文件内命令，相对路径无法执行，再执行一遍绝对路径
+                // 对于linux节点文件内命令，先执行一遍相对路径，再执行一遍绝对路径
                 var absoluteCommand = SystemTypeCommandUtils.joinPath(systemType, sceneFileDir, relativeCommand);
                 parsedCommands.add(absoluteCommand);
+
+                parsedCommands.add(CommandUtils.linuxCdDir(sceneFileDir));
+                parsedCommands.add(relativeCommand);
             }
         } else if (command.startsWith(NODE_COMMAND_PREFIX)) {
             var relativeCommand = command.substring(NODE_COMMAND_PREFIX.length());
