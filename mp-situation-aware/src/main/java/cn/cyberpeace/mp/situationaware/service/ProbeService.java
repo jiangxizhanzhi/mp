@@ -5,32 +5,27 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
-import cn.cyberpeace.mp.situationaware.model.ProbeModel;
-import cn.cyberpeace.mp.situationaware.model.ProbeParamModel;
-import cn.cyberpeace.mp.situationaware.model.ProbeParamsRequest;
-import cn.cyberpeace.mp.situationaware.model.ProbeParamsResult;
-import cn.cyberpeace.mp.situationaware.model.ProbeRequest;
-import cn.cyberpeace.mp.situationaware.model.ProbeResult;
-import cn.cyberpeace.mp.situationaware.model.ProbeSearchRequest;
+import cn.cyberpeace.mp.situationaware.model.*;
 import cn.cyberpeace.mp.situationaware.model.enums.OsType;
 import cn.cyberpeace.mp.situationaware.model.enums.ProbeStatus;
 import cn.cyberpeace.mp.situationaware.model.enums.ScriptType;
+import cn.cyberpeace.mp.situationaware.model.enums.SourceCategory;
 import cn.cyberpeace.mp.situationaware.repository.ProbeModelMapper;
 import cn.cyberpeace.mp.situationaware.repository.ProbeParamModelMapper;
 import cn.cyberpeace.mp.situationaware.repository.WazuhProbeManagerRepository;
-import java.nio.charset.StandardCharsets;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
   *@Desciption
@@ -59,6 +54,8 @@ public class ProbeService {
     public void addProbe(ProbeRequest probeRequest) {
         var probeModel = new ProbeModel();
         BeanUtils.copyProperties(probeRequest, probeModel);
+        //新增探针，默认为自定义探针
+        probeModel.setSourceCategory(SourceCategory.CUSTOM);
         probeModel.setCreateTime(new Date());
         probeModel.setUpdateTime(new Date());
         probeModel.setId(TextUtils.uuid());

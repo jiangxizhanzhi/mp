@@ -70,7 +70,7 @@ public class SceneFileUtils {
      * @param toPath 目的路径
      * @return 初始化命令
      */
-    public static String genZipFileInitCommand(String systemType, String fileUrl, String toPath, String unzipDir) {
+    public static List<String> genZipFileInitCommand(String systemType, String fileUrl, String toPath, String unzipDir) {
         var metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer();
         var absoluteFileUrl = StringUtils.joinWith(FILE_URL_SEPARATOR, metadataFileServer, fileUrl);
         var filename = FileUtil.getName(toPath);
@@ -88,19 +88,20 @@ public class SceneFileUtils {
                     CommandUtils.linuxMkDir(toPathDir),
                     CommandUtils.linuxMkDir(unzipDir),
                     CommandUtils.linuxDownloadFile(absoluteFileUrl, toPath),
-                    CommandUtils.linuxUnzipFile(toPath, unzipDir)
+                    CommandUtils.linuxUnzipFile(toPath, unzipDir),
+                    CommandUtils.linuxChmodX(SystemTypeCommandUtils.joinPath(systemType, unzipDir, "*"))
             );
         }
-        return SystemTypeCommandUtils.joinCommands(systemType, commands.toArray(new String[0]));
+        return commands;
     }
 
-    public static String genSceneFileInitCommand(String systemType, String fileUrl, String sceneId) {
+    public static List<String> genSceneFileInitCommand(String systemType, String fileUrl, String sceneId) {
         var unzipDir = getSceneFileUnzipDir(systemType, sceneId);
         var toPath = StringUtils.join(unzipDir, ZIP_FILE_SUFFIX);
         return genZipFileInitCommand(systemType, fileUrl, toPath, unzipDir);
     }
 
-    public static String genElementFileInitCommand(String systemType, String fileUrl, String sceneId, String elementId) {
+    public static List<String> genElementFileInitCommand(String systemType, String fileUrl, String sceneId, String elementId) {
         var unzipDir = getElementFileUnzipDir(systemType, sceneId, elementId);
         var toPath = StringUtils.join(unzipDir, ZIP_FILE_SUFFIX);
         return genZipFileInitCommand(systemType, fileUrl, toPath, unzipDir);

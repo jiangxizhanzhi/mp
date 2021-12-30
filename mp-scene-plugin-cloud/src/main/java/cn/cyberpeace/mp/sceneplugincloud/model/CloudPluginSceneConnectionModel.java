@@ -1,12 +1,16 @@
 package cn.cyberpeace.mp.sceneplugincloud.model;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
+import cn.cyberpeace.mp.base.model.generator.DateTimeGenerator;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultGen;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
@@ -40,7 +44,11 @@ public class CloudPluginSceneConnectionModel extends BaseModel {
     @DefaultStr
     private String accessUser;
     @DefaultStr
+    private String accessPass;
+    @DefaultStr
     private String accessToken;
+    @DefaultGen(DateTimeGenerator.class)
+    private LocalDateTime accessTokenExpireTime;
     @DefaultStr
     private String connectionId;
     @DefaultStr

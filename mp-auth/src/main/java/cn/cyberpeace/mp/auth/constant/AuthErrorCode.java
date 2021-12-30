@@ -33,6 +33,7 @@ public enum AuthErrorCode implements ErrorCode {
     USER_ADD_ERROR("MP-110021", "user_add_error"),
     USER_DELETE_ERROR("MP-110022", "user_delete_error"),
     USER_MODIFY_ERROR("MP-110023", "user_modify_error"),
+    USER_CANNOT_DELETE_ADMIN("MP-110024", "user_cannot_delete_admin"),
 
 
     ACCOUNT_MOBILE_EXISTED("MP-110041", "mobile_existed"),
@@ -92,7 +93,9 @@ public enum AuthErrorCode implements ErrorCode {
     EXCEL_LIST_NAME_EMPTY("MP-110126", "excel_list_name_empty"),
     EXCEL_LIST_NAME_ILLEGAL_LENGTH("MP-110127", "excel_list_name_illegal_length"),
     EXCEL_LIST_PWD_INVALID("MP-110128", "excel_list_pwd_invalid"),
-    EXCEL_TEMPLATE_DOWNLOAD_ERROR("MP-110129", "excel_template_download_error");
+    EXCEL_LIST_ROLE_EMPTY("MP-110129", "excel_list_role_empty"),
+    EXCEL_LIST_ROLE_NOT_EXISTED("MP-110130", "excel_list_role_not_existed"),
+    EXCEL_TEMPLATE_DOWNLOAD_ERROR("MP-110131", "excel_template_download_error");
 
 
     AuthErrorCode(String code, String message) {

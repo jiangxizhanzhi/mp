@@ -183,7 +183,7 @@ public class ScenePluginCollectionSceneService {
             if (collectionElement == null || CollectionUtils.isEmpty(collectionElement.getProbes())) {
                 return;
             }
-            agentNameElementMap.put(srcElement.getId(), srcElement);
+            agentNameElementMap.put(srcElement.getEid(), srcElement);
         });
 
         if (agentNameElementMap.isEmpty()) {
@@ -222,6 +222,7 @@ public class ScenePluginCollectionSceneService {
                 hostEvent.setNodeId(srcElement.getId());
                 hostEvent.setNodeName(srcElement.getName());
             }
+            hostEvents.add(hostEvent);
         });
 
         return new ListObjServiceResult<>(new ListObjResult<>(hostEvents, result.getTotal()));

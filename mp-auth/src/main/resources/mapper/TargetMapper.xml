@@ -29,6 +29,18 @@
         </where>
     </select>
 
+    <select id="listAllIgnoreVisible" resultType="cn.cyberpeace.mp.auth.model.TargetModel">
+        SELECT * FROM mp_auth_target
+        <where>
+            <if test="type != null">
+                AND type = #{type}
+            </if>
+            <if test="tenantId != null and tenantId != ''">
+                AND tenant = #{tenantId}
+            </if>
+        </where>
+    </select>
+
     <select id="listByMultiTypes" resultType="cn.cyberpeace.mp.auth.model.TargetModel">
         SELECT * FROM mp_auth_target
         <where>

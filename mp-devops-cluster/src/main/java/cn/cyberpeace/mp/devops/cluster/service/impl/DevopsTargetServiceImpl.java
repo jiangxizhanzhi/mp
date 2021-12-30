@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.service.impl;
 
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
+import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devops.cluster.enums.PublicEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.StatusEnum;
 import cn.cyberpeace.mp.devops.cluster.model.Device;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -34,6 +36,11 @@ public class DevopsTargetServiceImpl implements DevopsTargetService {
     @Autowired
     public DevopsTargetServiceImpl(ImageMapper imageMapper) {
         this.imageMapper = imageMapper;
+    }
+
+    @Override
+    public Integer totalCount(ImagePageDTO dto) {
+        return imageMapper.totalCount(dto);
     }
 
     @Transactional
@@ -59,6 +66,21 @@ public class DevopsTargetServiceImpl implements DevopsTargetService {
         List<TargetModel> targetModels = deviceList.stream().map(device -> convertToTargetModel(device))
                 .collect(Collectors.toList());
         return imageMapper.batchInsert(targetModels);
+    }
+
+    @Override
+    public Map<String,Object> countTarget() {
+        return imageMapper.countTarget();
+    }
+
+    @Override
+    public Map<String,Object> countVmTarget() {
+        return imageMapper.countVmTarget();
+    }
+
+    @Override
+    public Map<String,Object> countEntityTarget() {
+        return imageMapper.countEntityTarget();
     }
 
     protected TargetModel convertToTargetModel(Device device){

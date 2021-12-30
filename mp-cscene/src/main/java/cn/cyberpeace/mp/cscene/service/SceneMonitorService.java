@@ -138,12 +138,35 @@ public class SceneMonitorService {
         List<ElementMonitorBasicInfo> basicInfos = new ArrayList<>();
         for (String eid : eids) {
             ElementMonitorBasicInfo basicInfo = new ElementMonitorBasicInfo();
-            elementMonitorService.processTopologyElement(basicInfo, csceneInstanceBO, eid);
+            basicInfo.setSceneId(sceneId);
             elementMonitorService.processPluginElement(basicInfo, csceneInstanceBO, eid);
-            basicInfos.add(basicInfo);
+            if (isSupportedVirtualType(basicInfo.getVirtualType())) {
+                elementMonitorService.processTopologyElement(basicInfo, csceneInstanceBO, eid);
+                basicInfos.add(basicInfo);
+            }
         }
 
         return basicInfos;
     }
+
+    /**
+     * 是否是需要的节点
+     * @param type
+     * @return
+     */
+    private boolean isSupportedVirtualType(Integer type) {
+        if (Objects.isNull(type)) {
+            return false;
+        }
+        boolean supported = false;
+        if (BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE == type
+                || BaseCloudPluginSceneElementModel.VirtualType.CONTAINER == type
+                || BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE == type) {
+            supported = true;
+        }
+        return supported;
+    }
+
+
 
 }

@@ -20,6 +20,10 @@ import java.util.List;
 @ApiModel(value = "节点基本信息")
 public class ElementMonitorBasicInfo {
 
+
+    @ApiModelProperty(value = "场景ID")
+    private String sceneId;
+
     @ApiModelProperty(value = "节点ID")
     private String id;
 

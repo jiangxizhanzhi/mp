@@ -83,4 +83,10 @@ public class BaseCloudPlatformModel extends BaseModel {
      */
     @ApiModelProperty(hidden = true)
     private String msgZh;
+
+    /**
+     * 导出URL
+     */
+    @ApiModelProperty(hidden = true)
+    private String url;
 }

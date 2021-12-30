@@ -31,21 +31,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URLEncoder;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -241,29 +230,9 @@ public class ImagesController {
      */
     @ApiOperation("导出")
     @GetMapping("/export")
-    public ResponseEntity<Resource> export(@RequestParam("id") String uuid,@RequestParam("image_name") String imageName, HttpServletResponse httpServletResponse) {
-        HttpResponse httpResponse = imagesConverter.export(uuid,imageName);
-        InputStreamResource resource = null;
-        String filename = "";
-        try{
-            HttpEntity entity = httpResponse.getEntity();
-            String contentType = entity.getContentType().getValue();
-            if (contentType.equals(MediaType.APPLICATION_JSON_VALUE)){
-                throw new MpRuntimeException(DevopsClusterErrorCode.EXPORT_IMAGE_ERROR);
-            }
-            InputStream inputStream = entity.getContent();
-            resource = new InputStreamResource(inputStream);
-            filename = URLEncoder.encode(imageName + ".img","utf-8");
-        }catch (IOException e) {
-            log.error("export image error : {}",e.getMessage(),e);
-            throw new MpRuntimeException(DevopsClusterErrorCode.EXPORT_IMAGE_ERROR);
-        }
-
-        var httpHeaders = new HttpHeaders();
-        httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        httpServletResponse.setHeader("Content-Disposition", String.format("attachment; filename=%s",filename) );
-        return ResponseEntity.ok().headers(httpHeaders)
-                .contentType(MediaType.parseMediaType("application/octet-stream")).body(resource);
+    public ServiceResult<String> export(@RequestParam("id") String uuid,@RequestParam("image_name") String imageName) {
+        BaseCloudPlatformModel model = imagesConverter.export(uuid,imageName);
+        return model.isSuccess() ? new Result<>(model.getUrl()) : ServiceResult.fail(model.getMessage());
     }
 
     /**

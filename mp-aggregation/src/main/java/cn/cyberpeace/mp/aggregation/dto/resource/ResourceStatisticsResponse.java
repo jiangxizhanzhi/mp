@@ -35,7 +35,7 @@ public class ResourceStatisticsResponse {
      * 靶标类型统计/虚拟靶标/实体靶标统计
      */
     @ApiModelProperty("靶标类型统计/虚拟靶标/实体靶标统计")
-    private Map<String, Map<String,Integer>> targetStatics;
+    private Map<String, Map<String,Object>> targetStatics;
 
     /**
      * 场景统计

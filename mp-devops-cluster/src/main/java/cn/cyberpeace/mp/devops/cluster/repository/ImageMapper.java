@@ -10,6 +10,7 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 镜像管理
@@ -74,4 +75,22 @@ public interface ImageMapper extends BaseModelMapper<TargetModel> {
      * @return
      */
     Integer batchInsert(@Param("list") List<TargetModel> list);
+
+    /**
+     * 靶标类型统计
+     * @return
+     */
+    Map<String,Object> countTarget();
+
+    /**
+     * 虚拟靶标统计
+     * @return
+     */
+    Map<String,Object> countVmTarget();
+
+    /**
+     * 实体靶标统计
+     * @return
+     */
+    Map<String,Object> countEntityTarget();
 }

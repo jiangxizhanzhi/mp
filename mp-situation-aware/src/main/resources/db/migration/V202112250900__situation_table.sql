@@ -1,0 +1,1 @@
+INSERT INTO mp.mp_situation_probe (id, probe_name, des, command_interval, probe_category, source_category, script_content, create_time, update_time, del_flag, OS_type, probe_status, script_type) VALUES ('164a04a2fd9b46fcbc5d14e0d2987fe0', '通用探针', '通用探针', '30m', 0, 0, 0x6563686F20277465737427, '2021-12-25 14:49:22', '2021-12-25 14:49:22', 0, 0, 2, 0);

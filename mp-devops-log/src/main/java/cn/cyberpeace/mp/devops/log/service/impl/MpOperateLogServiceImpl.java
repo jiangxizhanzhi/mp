@@ -49,4 +49,6 @@ public class MpOperateLogServiceImpl extends BasEsLogService implements OperateL
     public SiteTypeEnums siteType(){
         return SiteTypeEnums.MP;
     }
+
+
 }

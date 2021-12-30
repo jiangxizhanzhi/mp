@@ -4,10 +4,12 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.RandomUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.AllocationPool;
 import cn.hutool.core.net.Ipv4Util;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 public class IpUtils {
 
     private IpUtils() {}
@@ -151,5 +153,22 @@ public class IpUtils {
         }
 
         return ips;
+    }
+
+    /**
+     * 获取ip地址的下一个地址
+     * @param ip ip地址
+     * @return 下一个ip地址
+     */
+    public static String nextIp(String ip) {
+        var ipLong = Ipv4Util.ipv4ToLong(ip);
+        var nextIpLong = ipLong + 1L;
+        String nextIp = null;
+        try {
+            nextIp = Ipv4Util.longToIpv4(nextIpLong);
+        } catch (Exception e) {
+            log.warn("Get ip({}) next ip error: ", ip, e);
+        }
+        return nextIp;
     }
 }

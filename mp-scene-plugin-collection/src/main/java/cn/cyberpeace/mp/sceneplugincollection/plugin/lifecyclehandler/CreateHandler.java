@@ -86,6 +86,7 @@ public class CreateHandler extends HandlerCommon {
             virtualNic.setFixedIp(routerPort.getIp());
             virtualNics.add(virtualNic);
         });
+        getSceneProbeRouterPortMapper().bulkUpdate(routerPorts);
         createData.setNetworks(virtualNics);
         var virtualRouter = vrClient.create(createData);
         getPluginHandler().getScene().setProbeRouter(virtualRouter.getId());

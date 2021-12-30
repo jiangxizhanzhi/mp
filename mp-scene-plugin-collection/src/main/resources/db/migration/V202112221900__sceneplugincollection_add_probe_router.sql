@@ -1,3 +1,8 @@
+ALTER TABLE mp_sceneplugincollection_scene_config ADD COLUMN `enable_probe_collect` tinyint(1) NOT NULL COMMENT '开启探针采集';
+ALTER TABLE mp_sceneplugincollection_scene_config_element ADD COLUMN `enable_probe_collect` tinyint(1) NOT NULL COMMENT '开启探针采集';
+ALTER TABLE mp_sceneplugincollection_scene ADD COLUMN `enable_probe_collect` tinyint(1) NOT NULL COMMENT '开启探针采集';
+ALTER TABLE mp_sceneplugincollection_scene_element ADD COLUMN `enable_probe_collect` tinyint(1) NOT NULL COMMENT '开启探针采集';
+
 ALTER TABLE mp_sceneplugincollection_scene ADD COLUMN `probe_router` varchar(64) NOT NULL COMMENT '采集路由id';
 
 CREATE TABLE mp_sceneplugincollection_scene_probe_router_port (

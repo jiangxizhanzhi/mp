@@ -25,6 +25,8 @@ public interface TargetMapper extends BaseModelMapper<TargetModel> {
 
     List<TargetModel> listAll(@Param("tenantId") String tenantId, @Param("type") Integer type);
 
+    List<TargetModel> listAllIgnoreVisible(@Param("tenantId") String tenantId, @Param("type") Integer type);
+
     List<TargetModel> listByMultiTypes(@Param("tenantId") String tenantId, @Param("types") Integer[] types);
 
     int deleteAll();

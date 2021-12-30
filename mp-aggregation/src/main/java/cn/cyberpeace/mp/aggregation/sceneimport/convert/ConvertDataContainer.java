@@ -49,6 +49,8 @@ class ConvertDataContainer {
 
     private Map<String, ImageInfoParseResult> imageInfos = new HashMap<>();
 
+    private String sceneFilePath;
+
     public void putImageInfo(String image, ImageInfoParseResult result) {
         this.imageInfos.put(image, result);
     }
@@ -147,4 +149,7 @@ class ConvertDataContainer {
         return topology;
     }
 
+    public void setSceneFilePath(String sceneFilePath) {
+        this.sceneFilePath = sceneFilePath;
+    }
 }

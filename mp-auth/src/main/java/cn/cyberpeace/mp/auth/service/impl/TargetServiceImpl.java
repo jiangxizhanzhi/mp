@@ -158,11 +158,19 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
         return CollectionUtil.toList(targetDto);
     }
 
+    @Override
     public List<TargetModel> listAll(String tenant, Integer type) {
         List<TargetModel> targets = getModelMapper().listAll(tenant, type);
         return targets;
     }
 
+    @Override
+    public List<TargetModel> listAllIgnoreVisible(String tenant, Integer type) {
+        List<TargetModel> targets = getModelMapper().listAllIgnoreVisible(tenant, type);
+        return targets;
+    }
+
+    @Override
     public List<TargetModel> listByMultiTypes(String tenant, Integer[] types) {
         List<TargetModel> targets = getModelMapper().listByMultiTypes(tenant, types);
         return targets;
