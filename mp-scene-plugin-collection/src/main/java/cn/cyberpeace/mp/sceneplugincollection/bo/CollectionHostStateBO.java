@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Data
 @AllArgsConstructor
@@ -21,8 +22,17 @@ public class CollectionHostStateBO {
     @ApiModelProperty("节点名称")
     private String nodeName;
 
+    @ApiModelProperty("探针id")
+    private String probeId;
+
+    @ApiModelProperty("探针名称")
+    private String probeName;
+
     @ApiModelProperty("时间")
     private LocalDateTime time;
+
+    @ApiModelProperty("采集数据")
+    private Map<String, String> probeData;
 
     @ApiModelProperty("总内存,单位M")
     private Long memoryTotal;
