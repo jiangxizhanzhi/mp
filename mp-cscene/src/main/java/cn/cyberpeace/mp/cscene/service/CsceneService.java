@@ -367,7 +367,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                     }
                 } else {
                     // 靶场和实训
-                    NameParseResult result = JsonCommon.parse(createContext.getReferenceMetaData(), NameParseResult.class);
+                    NameParseResult result = JsonCommon.snakeParse(createContext.getReferenceMetaData(), NameParseResult.class);
                     if (result.getRoomName() != null) {
                         csceneInstance.setName(result.getRoomName());
                     } else if (result.getSceneName() != null) {
