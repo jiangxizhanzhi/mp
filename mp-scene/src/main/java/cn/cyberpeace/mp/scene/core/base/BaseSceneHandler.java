@@ -1,11 +1,11 @@
 package cn.cyberpeace.mp.scene.core.base;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.stereotype.BeanFieldNames;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
-import cn.cyberpeace.mp.base.common.stereotype.BeanFieldNames;
 import cn.cyberpeace.mp.base.util.basic.MapUtils;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldNames;
 import cn.cyberpeace.mp.base.util.define.ListTreeNode;
@@ -23,6 +23,9 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Collectors;
 
 /**
@@ -128,25 +131,25 @@ public abstract class BaseSceneHandler<
     /** 场景模板/场景实例 */
     private S scene;
     /** 碎片节点集合 */
-    private final Map<String, P4> pieceMap = new HashMap<>();
+    private final Map<String, P4> pieceMap = new ConcurrentHashMap<>();
     /** 区域节点集合 */
-    private final Map<String, A> areaMap = new HashMap<>();
+    private final Map<String, A> areaMap = new ConcurrentHashMap<>();
     /** 网元节点集合 */
-    private final Map<String, E> elementMap = new HashMap<>();
+    private final Map<String, E> elementMap = new ConcurrentHashMap<>();
     /** 网元端口集合 */
-    private final Map<String, P> elementPortMap = new HashMap<>();
+    private final Map<String, P> elementPortMap = new ConcurrentHashMap<>();
     /** 网元端口连接集合 */
-    private final Map<String, C> elementPortConnectionMap = new HashMap<>();
+    private final Map<String, C> elementPortConnectionMap = new ConcurrentHashMap<>();
     /** 区域外连接端口id集合 */
-    private final Set<String> outerConnectionPortIds = new HashSet<>();
+    private final Set<String> outerConnectionPortIds = new CopyOnWriteArraySet<>();
     /** 场景插件数据，key为插件代号 */
-    private final Map<String, ScenePluginDataBO> scenePluginData = new HashMap<>();
+    private final Map<String, ScenePluginDataBO> scenePluginData = new ConcurrentHashMap<>();
 
     // 辅助变量
     /** 端口所属节点映射 */
-    private final Map<String, E> portIdElementMap = new HashMap<>();
+    private final Map<String, E> portIdElementMap = new ConcurrentHashMap<>();
     /** 端口连接端口映射 */
-    private final Map<String, String> portIdConnectedPortIdMap = new HashMap<>();
+    private final Map<String, String> portIdConnectedPortIdMap = new ConcurrentHashMap<>();
 
     // 通过ClassFieldNames注解和实现类ClassFieldClasses注解，初始化调用ClassUtils.loadClassFields(this)设置
     private Class<D> sceneDataBOClass;
@@ -177,10 +180,10 @@ public abstract class BaseSceneHandler<
     private M7 scenePieceMapper;
 
     /** 插件数据处理对象集合 */
-    private final List<P2> plugins = new ArrayList<>();
-    private final Map<String, P2> pluginMap = new HashMap<>();
+    private final List<P2> plugins = new CopyOnWriteArrayList<>();
+    private final Map<String, P2> pluginMap = new ConcurrentHashMap<>();
     /** 网元对应节点插件关系，一个网元节点对于多个插件 */
-    private final Map<String, List<P1>> elementIdPluginsMap = new HashMap<>();
+    private final Map<String, List<P1>> elementIdPluginsMap = new ConcurrentHashMap<>();
 
     private Object getPluginContext(String pluginKey) {
         if (context == null) {
@@ -328,7 +331,7 @@ public abstract class BaseSceneHandler<
         }
 
         // 节点所属区域也在区域内并且是展开的
-        var parentArea = areaMap.getOrDefault(nodeArea, null);
+        var parentArea = nodeArea != null ? areaMap.getOrDefault(nodeArea, null) : null;
         return parentArea != null && parentArea.getOpen();
     }
 
@@ -1480,7 +1483,7 @@ public abstract class BaseSceneHandler<
      * @param pluginKey 插件代号
      */
     public <H9> H9 getPluginHandler(String pluginKey) {
-        var plugin = pluginMap.getOrDefault(pluginKey, null);
+        var plugin = pluginKey != null ? pluginMap.getOrDefault(pluginKey, null) : null;
         return plugin == null ? null : (H9) plugin;
     }
 
@@ -1489,7 +1492,7 @@ public abstract class BaseSceneHandler<
      * @param pluginKey 插件代号
      */
     public <S9> S9 getPluginScene(String pluginKey) {
-        var plugin = pluginMap.getOrDefault(pluginKey, null);
+        var plugin = pluginKey != null ? pluginMap.getOrDefault(pluginKey, null) : null;
         if (plugin == null) {
             return null;
         }
@@ -1508,7 +1511,7 @@ public abstract class BaseSceneHandler<
      * @param nodeId 网元节点id
      */
     public <E9> E9 getPluginElement(String pluginKey, String nodeId) {
-        var plugin = pluginMap.getOrDefault(pluginKey, null);
+        var plugin = pluginKey != null ? pluginMap.getOrDefault(pluginKey, null) : null;
         if (plugin == null) {
             return null;
         }
@@ -1527,7 +1530,7 @@ public abstract class BaseSceneHandler<
      * @param portId 端口id
      */
     public <P9> P9 getPluginPort(String pluginKey, String portId) {
-        var plugin = pluginMap.getOrDefault(pluginKey, null);
+        var plugin = pluginKey != null ? pluginMap.getOrDefault(pluginKey, null) : null;
         if (plugin == null) {
             return null;
         }
@@ -1546,7 +1549,7 @@ public abstract class BaseSceneHandler<
      * @param nodeId 网元节点id
      */
     public E getElement(String nodeId) {
-        return elementMap.getOrDefault(nodeId, null);
+        return nodeId != null ? elementMap.getOrDefault(nodeId, null) : null;
     }
 
     /**
@@ -1611,7 +1614,7 @@ public abstract class BaseSceneHandler<
      * @param portId 端口id
      */
     public P getPort(String portId) {
-        return elementPortMap.getOrDefault(portId, null);
+        return portId != null ? elementPortMap.getOrDefault(portId, null) : null;
     }
 
     /**
@@ -1619,7 +1622,7 @@ public abstract class BaseSceneHandler<
      * @param portId 端口id
      */
     public E getPortElement(String portId) {
-        return portIdElementMap.getOrDefault(portId, null);
+        return portId != null ? portIdElementMap.getOrDefault(portId, null) : null;
     }
 
     /**
@@ -1627,7 +1630,7 @@ public abstract class BaseSceneHandler<
      * @param portId 端口id
      */
     public P getPortConnectedPort(String portId) {
-        var connectedPortId = portIdConnectedPortIdMap.getOrDefault(portId, null);
+        var connectedPortId = portId != null ? portIdConnectedPortIdMap.getOrDefault(portId, null) : null;
         return getPort(connectedPortId);
     }
 
@@ -1636,7 +1639,7 @@ public abstract class BaseSceneHandler<
      * @param portId 端口id
      */
     public E getPortConnectedElement(String portId) {
-        var connectedPortId = portIdConnectedPortIdMap.getOrDefault(portId, null);
+        var connectedPortId = portId != null ? portIdConnectedPortIdMap.getOrDefault(portId, null) : null;
         return getPortElement(connectedPortId);
     }
 
