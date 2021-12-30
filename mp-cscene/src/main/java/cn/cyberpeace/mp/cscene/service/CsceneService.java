@@ -314,6 +314,9 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         if (createContext.getSceneTtl() != null) {
             csceneInstance.setSceneTtl(createContext.getSceneTtl());
         }
+        if (createContext.getContext() != null && createContext.getContext().getPassThrough() != null) {
+            csceneInstance.setPassThrough(createContext.getContext().getPassThrough());
+        }
         if (createContext.getReferenceMetaData() != null) {
             csceneInstance.setReferenceMetaData(createContext.getReferenceMetaData());
 
@@ -347,7 +350,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         checkSceneUsingNodeLimit(csceneId, null);
 
         var csceneHandler = new CsceneHandler(csceneId, context);
-        return new ServiceResult<>(csceneHandler.createTestInstance(unique));
+        return new ServiceResult<>(csceneHandler.createAppInstance(unique));
     }
 
     public ServiceResult<CsceneInstanceBO> createAppInstance(String csceneId, boolean unique, CsceneBO cscene,
@@ -355,7 +358,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         checkSceneUsingNodeLimit(csceneId, cscene);
 
         var csceneHandler = new CsceneHandler(csceneId, context);
-        return new ServiceResult<>(csceneHandler.createTestInstance(unique, cscene));
+        return new ServiceResult<>(csceneHandler.createAppInstance(unique, cscene));
     }
 
     public ServiceResult<CsceneInstanceBO> createAppInstance(String csceneId, boolean unique,
@@ -378,6 +381,9 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         }
         if (createContext.getSceneTtl() != null) {
             csceneInstance.setSceneTtl(createContext.getSceneTtl());
+        }
+        if (createContext.getContext() != null && createContext.getContext().getPassThrough() != null) {
+            csceneInstance.setPassThrough(createContext.getContext().getPassThrough());
         }
         if (createContext.getReferenceMetaData() != null) {
             csceneInstance.setReferenceMetaData(createContext.getReferenceMetaData());
