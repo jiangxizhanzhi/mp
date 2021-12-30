@@ -214,9 +214,7 @@ public class CsceneSpecialService {
         }
         var search = queryParams.getSearch();
         if (!StringUtils.isEmpty(search)) {
-            humanCondition.filterOrStart()
-                    .orContains(CsceneInstanceModel::getName, search)
-                    .filterOrEnd();
+            humanCondition.filterIContains(CsceneInstanceModel::getName, search);
         }
 
         humanCondition.currentLink(SceneModel.class);
