@@ -3,21 +3,17 @@ package cn.cyberpeace.mp.devops.cluster.cloud.platform.service.impl;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.HttpUtils;
-import cn.cyberpeace.mp.devops.cluster.config.HttpDeleteWithBody;
+import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.devops.cluster.model.BaseModel;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.ConnectException;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -27,27 +23,6 @@ import java.util.Map;
 @Slf4j
 @Service
 public class BaseServiceImpl {
-
-    /**
-     * 通过Get方式查询信息
-     * @param url
-     * @return
-     */
-    protected String sendGet(String url){
-        String result = "";
-        try {
-            result = HttpUtils.sendGet(url);
-            if (log.isInfoEnabled()) {
-                log.info("=====GET调用url：{},对应返回结果信息：{}", url, result);
-            }
-        }catch (ConnectException e){
-            throw new MpRuntimeException(BaseErrorCode.GATEWAY_TIME_OUT);
-        } catch (IOException e) {
-            log.error("=====GET调用url：{},对应返回结果信息：{},报错信息：{}",url,result,e.getMessage(),e);
-            throw new MpRuntimeException(e.getMessage()).e(e);
-        }
-        return result;
-    }
 
     /**
      * 通过Get方式查询信息
@@ -102,7 +77,9 @@ public class BaseServiceImpl {
         T model = null;
         String result = "";
         try {
-            result =  HttpUtils.sendGet(url);
+            Map<String,String> headers = new HashMap<>();
+            headers.put("Accept-Language",ServletUtils.getAcceptLanguage());
+            result =  HttpUtils.sendGet(url,headers);
             if (log.isInfoEnabled()) {
                 log.info("=====GET调用url：{},对应返回结果信息：{}", url, result);
             }
@@ -110,32 +87,6 @@ public class BaseServiceImpl {
         }catch (ConnectException e){
             throw new MpRuntimeException(BaseErrorCode.GATEWAY_TIME_OUT);
         }catch (IOException e) {
-            log.error("=====GET调用url：{},对应返回结果信息：{},报错信息：{}",url,result,e.getMessage(),e);
-            throw new MpRuntimeException(e.getMessage()).e(e);
-        }
-        return model;
-    }
-
-    /**
-     * 通过Get方式查询信息
-     * @param url
-     * @param headers
-     * @param valueType
-     * @param <T>
-     * @return
-     */
-    protected <T extends BaseModel> T sendGet(String url, Map<String,String> headers, Class<T> valueType){
-        T model = null;
-        String result = "";
-        try {
-            result =  HttpUtils.sendGet(url,headers);
-            if (log.isInfoEnabled()) {
-                log.info("=====GET调用url：{},对应返回结果信息：{}", url, result);
-            }
-            model = JsonUtils.toSnakeObject(result,valueType);
-        } catch (ConnectException e){
-            throw new MpRuntimeException(BaseErrorCode.GATEWAY_TIME_OUT);
-        } catch (IOException e) {
             log.error("=====GET调用url：{},对应返回结果信息：{},报错信息：{}",url,result,e.getMessage(),e);
             throw new MpRuntimeException(e.getMessage()).e(e);
         }
@@ -151,7 +102,9 @@ public class BaseServiceImpl {
     protected String sendPost(String url,String body){
         String result = "";
         try {
-            result = HttpUtils.sendPost(url,body);
+            Map<String,String> headers = new HashMap<>();
+            headers.put("Accept-Language",ServletUtils.getAcceptLanguage());
+            result = HttpUtils.sendPost(url,body,headers);
             if (log.isInfoEnabled()) {
                 log.info("=====POST调用url：{},参数：{},对应返回结果信息：{}", url, body, result);
             }
@@ -176,7 +129,9 @@ public class BaseServiceImpl {
         T model = null;
         String result = "";
         try {
-            result = HttpUtils.sendPost(url,body);
+            Map<String,String> headers = new HashMap<>();
+            headers.put("Accept-Language",ServletUtils.getAcceptLanguage());
+            result = HttpUtils.sendPost(url,body,headers);
             if (log.isInfoEnabled()) {
                 log.info("=====POST调用url：{},参数：{},对应返回结果信息：{}", url, body, result);
             }
@@ -199,7 +154,9 @@ public class BaseServiceImpl {
     protected String sendPut(String url,String body){
         String result = "";
         try {
-            result = HttpUtils.sendPut(url,body);
+            Map<String,String> headers = new HashMap<>();
+            headers.put("Accept-Language",ServletUtils.getAcceptLanguage());
+            result = HttpUtils.sendPut(url,body,headers);
             if (log.isInfoEnabled()) {
                 log.info("=====PUT调用url：{},参数：{},对应返回结果信息：{}", url, body, result);
             }
@@ -224,7 +181,9 @@ public class BaseServiceImpl {
         T model = null;
         String result = "";
         try {
-            result =  HttpUtils.sendPut(url,body);
+            Map<String,String> headers = new HashMap<>();
+            headers.put("Accept-Language",ServletUtils.getAcceptLanguage());
+            result =  HttpUtils.sendPut(url,body,headers);
             if (log.isInfoEnabled()) {
                 log.info("=====PUT调用url：{},参数：{},对应返回结果信息：{}", url, body, result);
             }
@@ -247,16 +206,9 @@ public class BaseServiceImpl {
     private String sendDelete(String url,String body){
         String result = "";
         try {
-            HttpClient client = HttpClientBuilder.create().build();
-            HttpDeleteWithBody httpDelete = new HttpDeleteWithBody(url);
-            StringEntity entity = new StringEntity(body, "utf-8");
-            entity.setContentType("application/json");
-            httpDelete.setEntity(entity);
-            HttpResponse resp = client.execute(httpDelete);
-            // 设置请求和传输超时时间
-            RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(10000).setConnectTimeout(10000).build();
-            httpDelete.setConfig(requestConfig);
-            result =  EntityUtils.toString(resp.getEntity(), "UTF-8");
+            Map<String,String> headers = new HashMap<>();
+            headers.put("Accept-Language",ServletUtils.getAcceptLanguage());
+            result =  HttpUtils.sendDelete(url,body,headers);
             if (log.isInfoEnabled()) {
                 log.info("=====DELETE调用url：{},参数：{},对应返回结果信息：{}", url, body, result);
             }
@@ -286,8 +238,19 @@ public class BaseServiceImpl {
         return model;
     }
 
+    /**
+     * 表单新增
+     * @param url
+     * @param httpEntity
+     * @param valueType
+     * @param <T>
+     * @return
+     * @throws IOException
+     */
     protected <T extends BaseModel> T sendFormDataPost(String url, HttpEntity httpEntity ,Class<T> valueType) throws IOException {
-        String result = HttpUtils.doFormDataPost(url,httpEntity);
+        Map<String,String> headers = new HashMap<>();
+        headers.put("Accept-Language",ServletUtils.getAcceptLanguage());
+        String result = HttpUtils.doFormDataPost(url,httpEntity,headers);
         T model = JsonUtils.toSnakeObject(result,valueType);
         if (log.isInfoEnabled()) {
             log.info("=====FormDataPost调用url：{},参数：{},返回结果：{}", url, httpEntity, result);
@@ -295,9 +258,19 @@ public class BaseServiceImpl {
         return model;
     }
 
-
+    /**
+     * 表单更新
+     * @param url
+     * @param httpEntity
+     * @param valueType
+     * @param <T>
+     * @return
+     * @throws IOException
+     */
     protected <T extends BaseModel> T sendFormDataPut(String url, HttpEntity httpEntity ,Class<T> valueType) throws IOException {
-        String result = HttpUtils.doFormDataPut(url,httpEntity);
+        Map<String,String> headers = new HashMap<>();
+        headers.put("Accept-Language",ServletUtils.getAcceptLanguage());
+        String result = HttpUtils.doFormDataPut(url,httpEntity,headers);
         if (log.isInfoEnabled()) {
             log.info("=====FormData调用url：{},参数：{},返回结果：{}", url, httpEntity, result);
         }

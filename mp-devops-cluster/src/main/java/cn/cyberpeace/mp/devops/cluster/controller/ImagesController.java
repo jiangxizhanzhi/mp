@@ -115,7 +115,7 @@ public class ImagesController {
         if (Objects.isNull(device)){
             return new Result();
         }
-        return device.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(device.getMessageZh());
+        return device.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(device.getMessage());
     }
 
     /**
@@ -132,7 +132,7 @@ public class ImagesController {
         if (Objects.isNull(device)){
             return new Result();
         }
-        return device.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(device.getMessageZh());
+        return device.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(device.getMessage());
     }
 
     /**
