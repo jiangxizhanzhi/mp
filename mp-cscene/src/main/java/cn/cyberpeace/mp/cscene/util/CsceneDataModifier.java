@@ -61,8 +61,7 @@ public class CsceneDataModifier {
                 }
                 int intVirtualType = Integer.parseInt(virtualType.toString());
                 if (BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE != intVirtualType &&
-                        BaseCloudPluginSceneElementModel.VirtualType.CONTAINER != intVirtualType &&
-                        BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE != intVirtualType) {
+                        BaseCloudPluginSceneElementModel.VirtualType.CONTAINER != intVirtualType) {
                     continue;
                 }
                 // 当前节点所有端口上指定协议数量不为0则跳出此次

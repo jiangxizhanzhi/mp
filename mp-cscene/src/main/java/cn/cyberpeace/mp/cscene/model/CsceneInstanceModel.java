@@ -25,6 +25,8 @@ public class CsceneInstanceModel extends BaseCsceneModel {
     private Integer sceneTtl;
     @DefaultInt
     private Integer sceneAttr;
+    @DefaultStr
+    private String passThrough;
 
     public static class Type {
         public static final int TEST = 1;
