@@ -7,6 +7,8 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * @Description:
  * @Author zhouxinghuai
@@ -20,5 +22,7 @@ public interface UserMapper extends BaseModelMapper<UserModel> {
     int getUserCnt();
 
     int updateIdentToNull(@Param("id") String id);
+
+    List<UserModel> listByUserNames(List<String> userNames);
 
 }

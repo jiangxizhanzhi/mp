@@ -9,4 +9,12 @@
     <update id="updateIdentToNull">
         update mp_auth_user set identifier = null where id = #{id}
     </update>
+
+    <select id="listByUserNames" resultType="cn.cyberpeace.mp.auth.model.UserModel">
+        select * from mp_auth_user where
+        username in
+        <foreach item="userName" index="index" collection="userNames" open="(" separator="," close=")">
+            #{userName}
+        </foreach>
+    </select>
 </mapper>
