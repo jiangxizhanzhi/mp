@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Getter
@@ -23,9 +24,9 @@ public class HandlerUtils {
 
     private final List<String> cidrPool = CloudSingleton.cloudAppConfig.getCidrPool();
 
-    private final Map<String, CloudPluginSceneElementBO> portIdAuxiliaryNetworkCloudElementMap = new HashMap<>();
-    private final Map<String, List<String>> networkNodeIdPortIdsMap = new HashMap<>();
-    private final Map<String, Set<String>> networkNodeIdOuterExistIpsMap = new HashMap<>();
+    private final Map<String, CloudPluginSceneElementBO> portIdAuxiliaryNetworkCloudElementMap = new ConcurrentHashMap<>();
+    private final Map<String, List<String>> networkNodeIdPortIdsMap = new ConcurrentHashMap<>();
+    private final Map<String, Set<String>> networkNodeIdOuterExistIpsMap = new ConcurrentHashMap<>();
 
     public HandlerUtils(CloudScenePluginHandler pluginHandler) {
         this.pluginHandler = pluginHandler;
@@ -205,6 +206,10 @@ public class HandlerUtils {
      * @return 端口所在辅助网络网元
      */
     public CloudPluginSceneElementBO getPortAuxiliaryNetworkCloudElement(String portId) {
+        if (portId == null) {
+            return null;
+        }
+
         if (portIdAuxiliaryNetworkCloudElementMap.containsKey(portId)) {
             return portIdAuxiliaryNetworkCloudElementMap.get(portId);
         }
@@ -214,7 +219,6 @@ public class HandlerUtils {
         if (connectedOpaqueSrcPort == null) {
             // 未连接端口情况，如果节点存在其它连接，则忽略该端口
             if (getPluginHandler().getSceneHandler().elementHasConnectedPort(srcElement.getId())) {
-                portIdAuxiliaryNetworkCloudElementMap.put(portId, null);
                 return null;
             }
         }
@@ -222,6 +226,10 @@ public class HandlerUtils {
         var connectedOpaqueSrcElement = connectedOpaqueSrcPort != null ? getPluginHandler().getPortSrcElement(connectedOpaqueSrcPort.getId()) : null;
         var connectedCloudElement = connectedOpaqueSrcElement != null ? getPluginHandler().getElement(connectedOpaqueSrcElement.getId()) : null;
         var auxiliaryNetworkCloudElement = confirmAuxiliaryNetworkCloudElement(cloudElement, connectedCloudElement);
+        if (auxiliaryNetworkCloudElement == null) {
+            return null;
+        }
+
         portIdAuxiliaryNetworkCloudElementMap.put(portId, auxiliaryNetworkCloudElement);
         if (connectedOpaqueSrcPort != null) {
             portIdAuxiliaryNetworkCloudElementMap.put(connectedOpaqueSrcPort.getId(), auxiliaryNetworkCloudElement);

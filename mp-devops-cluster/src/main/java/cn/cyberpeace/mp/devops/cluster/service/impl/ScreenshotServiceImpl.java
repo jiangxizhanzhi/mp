@@ -24,6 +24,7 @@ import cn.hutool.core.date.DateUtil;
 import com.google.common.base.Joiner;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -84,8 +85,14 @@ public class ScreenshotServiceImpl extends BaseModelServiceImpl<ScreenshotModel,
         // 用户id
         model.setUserId(loginUser.getId());
         UserDto userDto = userService.getUserDto(loginUser.getId());
-        // 用户名
-        model.setUserName(userDto.getUsername());
+        // 姓名
+        if (StringUtils.isEmpty(userDto.getName())) {
+            // 姓名为空时，使用用户名
+            model.setUserName(userDto.getUsername());
+        } else {
+            model.setUserName(userDto.getName());
+        }
+
         if (CollectionUtils.isNotEmpty(userDto.getOrgs())) {
             // 封装组织名称，多个以逗号分隔
             List<String> nameList = userDto.getOrgs().stream().map(OrgModel::getName).collect(Collectors.toList());
