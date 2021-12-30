@@ -36,7 +36,7 @@ public abstract class BaseSimpleMessageSender {
 
     public <T> void send(T data, String type, Map<String, Object> context) {
         FormatMessage<T> formatMessage = new FormatMessage<>(data, type, context);
-        log.info("mq:", JsonCommon.stringify(formatMessage));
+        log.info("mq content:{}", JsonCommon.stringify(formatMessage));
         amqpTemplate.convertAndSend(messageConfig.getExchangeName(), messageConfig.getRoutingKey(),
                 messageConverter.toMessageString(formatMessage));
     }
