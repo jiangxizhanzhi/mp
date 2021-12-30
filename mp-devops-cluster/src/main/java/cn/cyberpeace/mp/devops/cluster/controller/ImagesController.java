@@ -109,7 +109,7 @@ public class ImagesController {
      */
     @ApiOperation("新增")
     @PostMapping("/add")
-    public ServiceResult add(@Valid @RequestBody ImageRequest request){
+    public ServiceResult add(@RequestBody ImageRequest request){
         validImageRequest(request);
         Device device = imagesConverter.add(request);
         if (Objects.isNull(device)){
@@ -123,7 +123,7 @@ public class ImagesController {
      */
     @ApiOperation("更新")
     @PostMapping("/update")
-    public ServiceResult update(@Valid @RequestBody ImageRequest request){
+    public ServiceResult update(@RequestBody ImageRequest request){
         validImageRequest(request);
         if (StringUtils.isBlank(request.getUuid())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
