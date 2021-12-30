@@ -35,6 +35,9 @@ public class ServletUtils {
      */
     public static String getAcceptLanguage(){
         HttpServletRequest httpServletRequest = getRequest();
+        if (Objects.isNull(httpServletRequest)){
+            return "";
+        }
         return httpServletRequest.getHeader("Accept-Language");
     }
 

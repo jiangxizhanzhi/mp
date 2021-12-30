@@ -29,8 +29,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 /**
@@ -77,90 +75,32 @@ public class CloudPlatformMonitorController {
     public Result<HypervisorStatisticsResponse> statistics(){
 
         //虚拟机个数
-        CompletableFuture<Integer> totalInstances = CompletableFuture.supplyAsync(() ->{
-                    InstancePageRequest request = new InstancePageRequest();
-                    request.setPerPage(NumberUtils.INTEGER_ONE);
-                    return instanceConverter.getTotalInstances(request);
-                }).handle((result, throwable) -> {
-            // 如果异常存在,打印异常，并且返回默认值
-            if (throwable != null) {
-                log.info("=======statistics方法:getTotalInstances获取虚拟机个数异常信息：{}",throwable.getMessage());
-                return NumberUtils.INTEGER_ZERO;
-            } else {
-                return result;
-            }
-        });
+        InstancePageRequest instancePageRequest = new InstancePageRequest();
+        instancePageRequest.setPerPage(NumberUtils.INTEGER_ONE);
+        Integer totalInstances = instanceConverter.getTotalInstances(instancePageRequest);
 
         //容器个数
-        CompletableFuture<Integer> totalContainers = CompletableFuture.supplyAsync(() ->{
-                    ContainerPageRequest request = new ContainerPageRequest();
-                    request.setPerPage(NumberUtils.INTEGER_ONE);
-                    return containerConverter.getTotalContainers(request);
-                }).handle((result,throwable) -> {
-            // 如果异常存在,打印异常，并且返回默认值
-            if (throwable != null) {
-                log.info("========statistics方法:getTotalContainers获取容器个数异常信息：{}",throwable.getMessage());
-                return NumberUtils.INTEGER_ZERO;
-            } else {
-                return result;
-            }
-        });
+        ContainerPageRequest containerPageRequest = new ContainerPageRequest();
+        containerPageRequest.setPerPage(NumberUtils.INTEGER_ONE);
+        Integer totalContainers =  containerConverter.getTotalContainers(containerPageRequest);
 
         //实装设备个数
-        CompletableFuture<Integer> totalRealEquipments = CompletableFuture.supplyAsync(() -> {
-                    RealEquipmentPageRequest realEquipmentPageRequest = new RealEquipmentPageRequest();
-                    realEquipmentPageRequest.setPerPage(NumberUtils.INTEGER_ONE);
-                    return realEquipmentConverter.getTotalRealEquipment(realEquipmentPageRequest);
-                }).handle((result,throwable) -> {
-            // 如果异常存在,打印异常，并且返回默认值
-            if (throwable != null) {
-                log.info("========statistics方法:getTotalRealEquipment获取实装个数异常信息：{}",throwable.getMessage());
-                return NumberUtils.INTEGER_ZERO;
-            } else {
-                return result;
-            }
-        });
+        RealEquipmentPageRequest realEquipmentPageRequest = new RealEquipmentPageRequest();
+        realEquipmentPageRequest.setPerPage(NumberUtils.INTEGER_ONE);
+        Integer totalRealEquipments = realEquipmentConverter.getTotalRealEquipment(realEquipmentPageRequest);
 
 
         //NPC总数
-        CompletableFuture<Integer> totalNPCs = CompletableFuture.supplyAsync(() ->
-                npcConverter.getTotalNPCs()).handle((result,throwable) -> {
-            // 如果异常存在,打印异常，并且返回默认值
-            if (throwable != null) {
-                log.info("========statistics方法:getTotalNPCs获取NPC个数异常信息：{}",throwable.getMessage());
-                return NumberUtils.INTEGER_ZERO;
-            } else {
-                return result;
-            }
-        });
+        Integer totalNPCs = 0;
 
         //路由个数
-        CompletableFuture<Integer> totalRouters = CompletableFuture.supplyAsync(() ->{
-                    RouterPageRequest request = new RouterPageRequest();
-                    request.setPerPage(NumberUtils.INTEGER_ONE);
-                    return routerConverter.getTotalRouters(request);
-                }).handle((result,throwable) -> {
-            // 如果异常存在,打印异常，并且返回默认值
-            if (throwable != null) {
-                log.info("========statistics方法:getTotalRouters获取路由个数异常信息：{}",throwable.getMessage());
-                return NumberUtils.INTEGER_ZERO;
-            } else {
-                return result;
-            }
-        });
+        RouterPageRequest routerPageRequest = new RouterPageRequest();
+        routerPageRequest.setPerPage(NumberUtils.INTEGER_ONE);
+        Integer totalRouters = routerConverter.getTotalRouters(routerPageRequest);
 
-        CompletableFuture<HypervisorStatisticsConvertModel> model = CompletableFuture.supplyAsync(() ->
-                hypervisorConverter.statistics()).handle((result,throwable) -> {
-            // 如果异常存在,打印异常，并且返回默认值
-            if (throwable != null) {
-                log.info("========statistics方法:statistics获取资源统计信息异常信息：{}",throwable.getMessage(),throwable);
-                return null;
-            } else {
-                return result;
-            }
-        });
+        HypervisorStatisticsConvertModel hypervisorStatisticsConvertModel = hypervisorConverter.statistics();
 
-        CompletableFuture.allOf(totalInstances, totalContainers,totalRealEquipments,totalNPCs,totalRouters,model).join();
+//        CompletableFuture.allOf(totalInstances, totalContainers,totalRealEquipments,totalNPCs,totalRouters,model).join();
 
         //TODO 原计算方式不正确，云平台暂时不支持计算总的网络IO、磁盘IO
         //磁盘IO
@@ -168,23 +108,18 @@ public class CloudPlatformMonitorController {
         //网络IO
         BigDecimal netIo = BigDecimal.ZERO;
 
-        HypervisorStatisticsResponse response = null;
-        try {
-            response = HypervisorStatisticsResponse.builder().diskIo(diskIo).netIo(netIo)
-                    .totalNpc(totalNPCs.get()).totalInstances(totalInstances.get())
-                    .totalContainers(totalContainers.get()).totalRealEquipments(totalRealEquipments.get()).totalRouters(totalRouters.get()).build();
-            if(Objects.isNull(model) || Objects.isNull(model.get()) || Objects.isNull(model.get())){
-                return new Result<>(response);
-            }
-
-            HypervisorStatisticsConvertModel hypervisorStatistics = model.get();
-
-            response = response.HypervisorStatisticsResponse(hypervisorStatistics.getCpus(), hypervisorStatistics.getMemoryMb()
-                    ,hypervisorStatistics.getLocalGb(),hypervisorStatistics.getCpusUsed(),hypervisorStatistics.getMemoryMbUsed()
-                    ,hypervisorStatistics.getLocalGbUsed(),hypervisorStatistics.getFreeRamMb(),hypervisorStatistics.getFreeDiskGb());
-        } catch (InterruptedException | ExecutionException e) {
-            log.error("资源统计多线程异步合并请求异常信息:{}",e.getMessage());
+        HypervisorStatisticsResponse response = HypervisorStatisticsResponse.builder().diskIo(diskIo).netIo(netIo)
+                .totalNpc(totalNPCs).totalInstances(totalInstances)
+                .totalContainers(totalContainers).totalRealEquipments(totalRealEquipments).totalRouters(totalRouters).build();
+        if(Objects.isNull(hypervisorStatisticsConvertModel)){
+            return new Result<>(response);
         }
+
+        HypervisorStatisticsConvertModel hypervisorStatistics = hypervisorStatisticsConvertModel;
+
+        response = response.HypervisorStatisticsResponse(hypervisorStatistics.getCpus(), hypervisorStatistics.getMemoryMb()
+                ,hypervisorStatistics.getLocalGb(),hypervisorStatistics.getCpusUsed(),hypervisorStatistics.getMemoryMbUsed()
+                ,hypervisorStatistics.getLocalGbUsed(),hypervisorStatistics.getFreeRamMb(),hypervisorStatistics.getFreeDiskGb());
         return new Result<>(response);
     }
 
