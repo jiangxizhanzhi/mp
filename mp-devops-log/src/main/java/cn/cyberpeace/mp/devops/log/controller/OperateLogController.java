@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.devops.log.utils.SnUtils;
 import com.alibaba.fastjson.JSON;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
@@ -30,6 +31,7 @@ import java.util.List;
  * 用户操作日志记录
  * @author wanggang
  */
+@Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/operate")
 @Api(tags = "日志模块")
@@ -46,6 +48,7 @@ public class OperateLogController {
     @PostMapping("/add")
     public ServiceResult add(@RequestBody OperationLogRequest request, HttpServletRequest httpServletRequest){
         request.setOpIp(SnUtils.getRealRemoteIp(httpServletRequest));
+        log.info("logRequest:{}", request);
         operateLogServiceFactory.create(request);
         return ServiceResult.successful();
     }

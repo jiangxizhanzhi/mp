@@ -33,6 +33,7 @@ public class OperationLogRequest {
 
     /**
      * 操作模块
+     * 对应mp_operate_log索引中的opModuleID字段
      */
     @ApiModelProperty(value = "模块",notes = "cn.cyberpeace.mp.devops.log.enums.OpModuleEnums",required = true)
     @NotNull
@@ -40,12 +41,14 @@ public class OperationLogRequest {
 
     /**
      * 操作类型：新增、更新、查询、删除
+     * 对应mp_operate_log索引中的opTypeID字段
      */
     @ApiModelProperty(value = "操作类型",notes = "cn.cyberpeace.mp.devops.log.enums.OpTypeEnums")
     private Integer opType;
 
     /**
      * 操作对象
+     * 对应mp_operate_log索引中的opTarget.keyword字段
      */
     @ApiModelProperty(value = "操作对象，例如课程、用户等")
     private String opTarget;
