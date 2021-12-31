@@ -669,7 +669,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
         // 执行任务地址
         String urlPath = "";
         if (ResourceTypeEnum.PACP.toValue() == flowInfoModel.getResourceType()) {
-            urlPath = "/tasks/action";
+            urlPath = "/tasks/app/action";
 
             // 判断是否关联流量平台任务，没有则新增
             if (StringUtils.isBlank(thirdTaskId)) {
