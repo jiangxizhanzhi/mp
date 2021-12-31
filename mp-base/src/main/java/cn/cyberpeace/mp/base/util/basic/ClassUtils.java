@@ -49,20 +49,21 @@ public class ClassUtils {
 
     @SuppressWarnings("java:S3011")
     public static Object getFieldValue(Field field, Object obj) {
-        boolean canAccess = field.canAccess(obj);
-        if (!canAccess) {
-            field.setAccessible(true);
-        }
-
-        Object value;
-        try {
-            value = field.get(obj);
-        } catch (IllegalAccessException e) {
-            log.error("Get field `{}` value on instance {} failed: {}", field, obj, e.getMessage());
-            return null;
-        } finally {
+        Object value = null;
+        synchronized (field) {
+            boolean canAccess = field.canAccess(obj);
             if (!canAccess) {
-                field.setAccessible(false);
+                field.setAccessible(true);
+            }
+
+            try {
+                value = field.get(obj);
+            } catch (IllegalAccessException e) {
+                log.error("Get field `{}` value on instance {} failed: {}", field, obj, e.getMessage());
+            } finally {
+                if (!canAccess) {
+                    field.setAccessible(false);
+                }
             }
         }
 
@@ -71,23 +72,26 @@ public class ClassUtils {
 
     @SuppressWarnings("java:S3011")
     public static boolean setFieldValue(Field field, Object obj, Object value) {
-        boolean canAccess = field.canAccess(obj);
-        if (!canAccess) {
-            field.setAccessible(true);
-        }
-
-        try {
-            field.set(obj, value);
-        } catch (IllegalAccessException e) {
-            log.error("Set field `{}` value {} on instance {} failed: {}", field, value, obj, e.getMessage());
-            return false;
-        } finally {
+        var flag = true;
+        synchronized (field) {
+            boolean canAccess = field.canAccess(obj);
             if (!canAccess) {
-                field.setAccessible(false);
+                field.setAccessible(true);
+            }
+
+            try {
+                field.set(obj, value);
+            } catch (IllegalAccessException e) {
+                log.error("Set field `{}` value {} on instance {} failed: {}", field, value, obj, e.getMessage());
+                flag = false;
+            } finally {
+                if (!canAccess) {
+                    field.setAccessible(false);
+                }
             }
         }
 
-        return true;
+        return flag;
     }
 
     public static <T> T castFieldType(Object value, Class<T> expectedFieldType) {

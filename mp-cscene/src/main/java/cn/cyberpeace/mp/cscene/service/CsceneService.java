@@ -314,8 +314,34 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         if (createContext.getSceneTtl() != null) {
             csceneInstance.setSceneTtl(createContext.getSceneTtl());
         }
+        if (createContext.getContext() != null && createContext.getContext().getPassThrough() != null) {
+            csceneInstance.setPassThrough(createContext.getContext().getPassThrough());
+        }
         if (createContext.getReferenceMetaData() != null) {
             csceneInstance.setReferenceMetaData(createContext.getReferenceMetaData());
+
+            try {
+                // 兼容name todo
+                if (String.valueOf(csceneInstance.getReferenceType()).startsWith("3")) {
+                    // 竞赛
+                    if (cscene.getSceneConfig() != null && cscene.getSceneConfig().getTopology() != null && cscene.getSceneConfig().getTopology().getScene() != null) {
+                        csceneInstance.setName(cscene.getSceneConfig().getTopology().getScene().getName());
+                    }
+                } else {
+                    // 靶场和实训
+                    NameParseResult result = JsonCommon.snakeParse(createContext.getReferenceMetaData(), NameParseResult.class);
+                    if (result.getRoomName() != null) {
+                        csceneInstance.setName(result.getRoomName());
+                    } else if (result.getSceneName() != null) {
+                        csceneInstance.setName(result.getSceneName());
+                    } else if (result.getBusinessName() != null) {
+                        csceneInstance.setName(result.getBusinessName());
+                    }
+                }
+            } catch (Exception e) {
+                log.error("parse name error,csceneId is {} , reference data is {},", csceneId, createContext.getReferenceMetaData(), e);
+            }
+
         }
         return new ServiceResult<>(csceneHandler.createTestInstance(unique, csceneInstance));
     }
@@ -324,7 +350,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         checkSceneUsingNodeLimit(csceneId, null);
 
         var csceneHandler = new CsceneHandler(csceneId, context);
-        return new ServiceResult<>(csceneHandler.createTestInstance(unique));
+        return new ServiceResult<>(csceneHandler.createAppInstance(unique));
     }
 
     public ServiceResult<CsceneInstanceBO> createAppInstance(String csceneId, boolean unique, CsceneBO cscene,
@@ -332,7 +358,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         checkSceneUsingNodeLimit(csceneId, cscene);
 
         var csceneHandler = new CsceneHandler(csceneId, context);
-        return new ServiceResult<>(csceneHandler.createTestInstance(unique, cscene));
+        return new ServiceResult<>(csceneHandler.createAppInstance(unique, cscene));
     }
 
     public ServiceResult<CsceneInstanceBO> createAppInstance(String csceneId, boolean unique,
@@ -355,6 +381,9 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         }
         if (createContext.getSceneTtl() != null) {
             csceneInstance.setSceneTtl(createContext.getSceneTtl());
+        }
+        if (createContext.getContext() != null && createContext.getContext().getPassThrough() != null) {
+            csceneInstance.setPassThrough(createContext.getContext().getPassThrough());
         }
         if (createContext.getReferenceMetaData() != null) {
             csceneInstance.setReferenceMetaData(createContext.getReferenceMetaData());
