@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.response;
 
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtSystemInfo;
 import cn.cyberpeace.mp.devops.cluster.enums.StatusEnum;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;

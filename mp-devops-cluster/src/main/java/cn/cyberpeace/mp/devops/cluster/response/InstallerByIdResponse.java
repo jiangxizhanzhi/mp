@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.response;
 
-import cn.cyberpeace.mp.devops.cluster.model.common.Resource;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Resource;
 import cn.cyberpeace.mp.devops.cluster.request.DockerInstallerData;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

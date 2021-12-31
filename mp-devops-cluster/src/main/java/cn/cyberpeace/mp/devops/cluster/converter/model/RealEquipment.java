@@ -1,10 +1,10 @@
 package cn.cyberpeace.mp.devops.cluster.converter.model;
 
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtEntity;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtEntityAccess;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtGateway;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtSystemInfo;
 import cn.cyberpeace.mp.devops.cluster.enums.StatusEnum;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntity;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntityAccess;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtGateway;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
 import lombok.*;
 
 import java.util.List;

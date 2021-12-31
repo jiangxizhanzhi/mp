@@ -1,9 +1,13 @@
-package cn.cyberpeace.mp.devops.cluster.model.common;
+package cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * 访问模式
+ * @author wanggang
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

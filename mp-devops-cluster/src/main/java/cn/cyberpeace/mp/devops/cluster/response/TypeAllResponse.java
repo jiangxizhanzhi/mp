@@ -1,7 +1,10 @@
 package cn.cyberpeace.mp.devops.cluster.response;
 
-import cn.cyberpeace.mp.devops.cluster.converter.model.*;
-import cn.cyberpeace.mp.devops.cluster.model.common.AccessProtocolsPort;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.AccessProtocolsPort;
+import cn.cyberpeace.mp.devops.cluster.converter.model.SwitchConvertModel;
+import cn.cyberpeace.mp.devops.cluster.converter.model.TypeConvertModel;
+import cn.cyberpeace.mp.devops.cluster.converter.model.TypeIdIntegerConvertModel;
+import cn.cyberpeace.mp.devops.cluster.converter.model.TypeIdStringConvertModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;

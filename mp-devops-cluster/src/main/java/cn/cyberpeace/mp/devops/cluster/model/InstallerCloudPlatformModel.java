@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.model;
 
-import cn.cyberpeace.mp.base.model.stereotype.Table;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Installer;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

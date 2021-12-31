@@ -1,5 +1,9 @@
-package cn.cyberpeace.mp.devops.cluster.model.common;
+package cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base;
 
+/**
+ * Qos规则
+ * @author wanggang
+ */
 public class QosRule {
 
     /**

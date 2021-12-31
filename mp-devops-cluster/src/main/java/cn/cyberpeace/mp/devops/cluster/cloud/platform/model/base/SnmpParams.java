@@ -1,9 +1,13 @@
-package cn.cyberpeace.mp.devops.cluster.model;
+package cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * SNMP参数信息
+ * @author wanggang
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

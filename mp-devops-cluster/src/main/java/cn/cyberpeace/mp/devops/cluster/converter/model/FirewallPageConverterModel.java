@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.converter.model;
 
-import cn.cyberpeace.mp.devops.cluster.model.common.Firewall;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Firewall;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

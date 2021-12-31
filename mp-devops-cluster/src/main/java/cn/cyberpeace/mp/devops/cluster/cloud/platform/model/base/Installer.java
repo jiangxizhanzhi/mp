@@ -1,18 +1,19 @@
-package cn.cyberpeace.mp.devops.cluster.model;
+package cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base;
 
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtDocker;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtNormal;
-import cn.cyberpeace.mp.devops.cluster.model.common.Resource;
+import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+/**
+ * @author wanggang
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Installer extends BaseCloudPlatformModel{
+public class Installer extends BaseCloudPlatformModel {
 
     /**
      * ID
