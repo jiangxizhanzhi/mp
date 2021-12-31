@@ -163,6 +163,9 @@ public class RealEquipmentConverter implements BaseConverter{
             return null;
         }
         Device result = realEquipmentService.add(device);
+        if (Objects.isNull(result) || !result.isSuccess()){
+            return result;
+        }
         devopsTargetService.insert(Arrays.asList(result));
         return result;
     }
