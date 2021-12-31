@@ -1,0 +1,18 @@
+package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param;
+
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpData;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class ConsoleInfoGetResult implements CloudHttpData {
+    private String host;
+    private String port;
+    private String ipAddress;
+    private Boolean success;
+    private String requestId;
+}

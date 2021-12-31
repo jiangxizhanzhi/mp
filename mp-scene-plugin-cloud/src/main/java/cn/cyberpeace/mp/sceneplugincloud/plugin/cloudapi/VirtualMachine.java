@@ -3,13 +3,7 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineCreateData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineDeleteData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachinePauseData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineRestartData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineResumeData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineSuspendData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineUnPauseData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -48,6 +42,14 @@ public class VirtualMachine extends CloudClient {
 
     public boolean suspend(String instanceId) {
         return doAction(instanceId, new VirtualMachineSuspendData());
+    }
+
+    public ConsoleInfoGetResult getConsoleInfo(String instanceId, String hostname) {
+        var param = new ConsoleInfoGetParam();
+        param.setInstanceUuid(instanceId);
+        param.setHostname(hostname);
+        return getHttpClient().get(CloudUrlConstant.CONSOLE_INFO_GET_URL, param,
+                ConsoleInfoGetResult.class);
     }
 
     private boolean doAction(String instanceId, CloudHttpData httpData) {

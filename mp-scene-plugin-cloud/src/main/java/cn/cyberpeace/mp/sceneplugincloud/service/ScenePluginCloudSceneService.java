@@ -325,7 +325,8 @@ public class ScenePluginCloudSceneService {
         }
 
         var srcScene = accessModeInfo.getSrcScene();
-        var srcElement = accessModeInfo.getCloudElement().getSrcElement();
+        var cloudElement = accessModeInfo.getCloudElement();
+        var srcElement = cloudElement.getSrcElement();
         var portId = accessModeInfo.getCloudPort().getSrcPort().getId();
         var accessMode = accessModeInfo.getAccessMode();
         var nodeConnection = new NodeConnectionBO();
@@ -347,6 +348,8 @@ public class ScenePluginCloudSceneService {
         var sceneConnectionParam = new CloudSceneConnectionCommon.SceneConnectionParam();
         sceneConnectionParam.setSceneId(sceneId);
         sceneConnectionParam.setSceneElementId(nodeId);
+        sceneConnectionParam.setResourceId(cloudElement.getResourceId());
+        sceneConnectionParam.setResourceHost(cloudElement.getHost());
         sceneConnectionParam.setSceneElementPortId(portId);
         sceneConnectionParam.setCloudAccessMode(accessModeInfo.getAccessMode());
         sceneConnectionParam.setUserId(userId);
