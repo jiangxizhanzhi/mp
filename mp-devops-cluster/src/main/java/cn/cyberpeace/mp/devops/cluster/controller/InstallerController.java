@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.devops.cluster.controller;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.InstallerConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InstallerConvertModel;
@@ -99,9 +98,7 @@ public class InstallerController {
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
         }
-        String acceptLanguage = ServletUtils.getAcceptLanguage();
-        return model.isSuccess() ? ServiceResult.successful() : StringUtils.isNotBlank(acceptLanguage) && acceptLanguage.equals("zh-CN") ?
-                ServiceResult.fail(model.getMsgZh()) : ServiceResult.fail(model.getMsg());
+        return model.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
     }
 
     /**
@@ -118,9 +115,7 @@ public class InstallerController {
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
         }
-        String acceptLanguage = ServletUtils.getAcceptLanguage();
-        return model.isSuccess() ? ServiceResult.successful() : StringUtils.isNotBlank(acceptLanguage) && acceptLanguage.equals("zh-CN") ?
-                ServiceResult.fail(model.getMsgZh()) : ServiceResult.fail(model.getMsg());
+        return model.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
     }
 
     /**
@@ -133,6 +128,6 @@ public class InstallerController {
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
         }
-        return model.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(model.getMessageZh());
+        return model.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
     }
 }
