@@ -1,11 +1,9 @@
 package cn.cyberpeace.mp.devops.cluster.model;
 
-import cn.cyberpeace.mp.base.model.BaseModel;
-import cn.cyberpeace.mp.base.model.stereotype.Table;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtGateway;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtImageInfo;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtVm;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtGateway;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtImageInfo;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtSystemInfo;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtVm;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

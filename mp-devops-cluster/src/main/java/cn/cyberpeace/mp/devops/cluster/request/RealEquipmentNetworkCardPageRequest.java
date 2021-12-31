@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.request;
 
 
-import cn.cyberpeace.mp.devops.cluster.model.common.SnmpConfig;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

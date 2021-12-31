@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.devops.cluster.model.common;
+package cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -8,6 +8,10 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+/**
+ * 端口配置
+ * @author wanggang
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

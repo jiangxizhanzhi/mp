@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.devops.cluster.model;
+package cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;

@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.devops.cluster.model.common;
+package cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base;
 
 import io.swagger.annotations.ApiModel;
 import lombok.AllArgsConstructor;
@@ -7,6 +7,10 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+/**
+ * 扩展网关信息
+ * @author wanggang
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 @Data

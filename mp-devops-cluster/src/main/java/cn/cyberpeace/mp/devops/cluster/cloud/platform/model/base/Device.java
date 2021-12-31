@@ -1,6 +1,6 @@
-package cn.cyberpeace.mp.devops.cluster.model;
+package cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base;
 
-import cn.cyberpeace.mp.devops.cluster.model.common.*;
+import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -9,13 +9,14 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
- * 设备信息
+ * 靶标信息
+ * @author wanggang
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Device extends BaseCloudPlatformModel{
+public class Device extends BaseCloudPlatformModel {
 
     /**
      * ID

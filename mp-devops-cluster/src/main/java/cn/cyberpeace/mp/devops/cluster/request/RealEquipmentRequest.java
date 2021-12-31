@@ -1,9 +1,9 @@
 package cn.cyberpeace.mp.devops.cluster.request;
 
 
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntity;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtEntityAccess;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtSystemInfo;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtEntity;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtEntityAccess;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtSystemInfo;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;

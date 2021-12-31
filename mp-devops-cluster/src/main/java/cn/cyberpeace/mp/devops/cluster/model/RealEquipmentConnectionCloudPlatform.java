@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.devops.cluster.model;
 
-import cn.cyberpeace.mp.devops.cluster.model.common.RealEquipmentConnection;
 import cn.cyberpeace.mp.devops.cluster.model.common.TargetConnection;
 import lombok.AllArgsConstructor;
 import lombok.Data;

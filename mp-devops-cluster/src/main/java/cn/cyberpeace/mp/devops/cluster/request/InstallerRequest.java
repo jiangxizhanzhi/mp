@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.request;
 
-import cn.cyberpeace.mp.devops.cluster.model.common.Resource;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Resource;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;

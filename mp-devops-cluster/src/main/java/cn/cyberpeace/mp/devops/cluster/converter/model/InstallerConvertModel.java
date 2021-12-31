@@ -1,9 +1,9 @@
 package cn.cyberpeace.mp.devops.cluster.converter.model;
 
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtDocker;
-import cn.cyberpeace.mp.devops.cluster.model.common.ExtNormal;
-import cn.cyberpeace.mp.devops.cluster.model.common.Resource;
-import cn.cyberpeace.mp.devops.cluster.model.common.StartUpParameter;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtDocker;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtNormal;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Resource;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.StartUpParameter;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

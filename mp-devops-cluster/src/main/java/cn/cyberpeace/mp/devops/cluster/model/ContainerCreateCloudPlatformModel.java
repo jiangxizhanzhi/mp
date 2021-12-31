@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.model;
 
-import cn.cyberpeace.mp.devops.cluster.model.common.Network;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Network;
 import lombok.*;
 
 import java.io.Serializable;

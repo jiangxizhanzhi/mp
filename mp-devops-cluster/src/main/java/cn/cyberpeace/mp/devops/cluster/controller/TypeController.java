@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Switches;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.TypeService;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.SerialPortConverter;
@@ -9,7 +10,6 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.SerialPortConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.SwitchConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeAllConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeL2AllConvertModel;
-import cn.cyberpeace.mp.devops.cluster.model.Switches;
 import cn.cyberpeace.mp.devops.cluster.response.SerialPortResponse;
 import cn.cyberpeace.mp.devops.cluster.response.TypeAllResponse;
 import cn.cyberpeace.mp.devops.cluster.response.TypeL2AllResponse;

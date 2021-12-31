@@ -1,10 +1,10 @@
 package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Installer;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.impl.BaseOpenStackServiceImpl;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.Installer;
 import cn.cyberpeace.mp.devops.cluster.model.InstallerCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.InstallerFormDataCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;

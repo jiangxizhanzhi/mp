@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.model;
 
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Switches;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

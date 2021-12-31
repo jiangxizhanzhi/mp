@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.model;
 
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Device;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
