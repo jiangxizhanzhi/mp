@@ -11,4 +11,10 @@ public class LogConstant {
 
     public static final String USER_TYPE_USER = "USER";
     public static final String USER_TYPE_CLIENT = "CLIENT";
+
+    public static final String LOG_OP_MODULE_PREFIX = "devops.log.op.module";
+
+    public static final String LOG_OP_TYPE_PREFIX = "devops.log.op.type";
+
+    public static final String LOG_OP_TARGET_PREFIX = "devops.log.op.target";
 }

@@ -16,6 +16,7 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.CollectionUtils;
@@ -29,6 +30,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -151,12 +153,12 @@ public class RequestLogAspect {
             }
 
             OperateLog operateLog = getAnnotation(joinPoint,OperateLog.class);
+            Locale locale = LocaleContextHolder.getLocale();
 
             if (Objects.isNull(operateLog)){
                 return;
             }
-
-            operateLogServiceFactory.create(operateLog,request);
+            operateLogServiceFactory.create(operateLog, request, locale);
 
         } catch (Exception e) {
             log.error("====插入操作日志异常:{}==",e.getMessage());

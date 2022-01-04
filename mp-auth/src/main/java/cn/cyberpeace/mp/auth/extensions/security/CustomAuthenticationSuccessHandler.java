@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.auth.extensions.security;
 
+import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
-import cn.cyberpeace.mp.auth.constant.AuthLogConstant;
 import cn.cyberpeace.mp.auth.dto.login.LoginResp;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetails;
@@ -12,11 +12,13 @@ import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.UserFields;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
+import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.log.constant.LogConstant;
 import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
+import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.devops.log.request.OperationLogRequest;
 import cn.cyberpeace.mp.devops.log.service.OperateLogServiceFactory;
@@ -24,6 +26,7 @@ import cn.cyberpeace.mp.devops.log.utils.SnUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
@@ -167,11 +170,11 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
         //操作类型
         logModel.setOpModule(OpModuleEnums.ACCOUNT.ordinal());
         logModel.setOpType(OpTypeEnums.LOGIN.ordinal());
-        logModel.setOpTarget(AuthLogConstant.TARGET_USER);
+        logModel.setOpTarget(MessageCommon.get(OpTargetEnums.USER.getCode()));
         //操作主题
-        logModel.setTitle("登录");
+        logModel.setTitle(MessageCommon.get(AuthBasei18nCode.LOGIN));
         //操作描述
-        logModel.setDescription("账号密码登录");
+        logModel.setDescription(MessageCommon.get(AuthBasei18nCode.LOGIN_USERNAME_PASSWORD));
 
         //操作用户
         logModel.setUserId(user.getId());
@@ -181,7 +184,7 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
         logModel.setOpIp(SnUtils.getRealRemoteIp(request));
 
         // 记录登录日志
-        operateLogServiceFactory.create(logModel);
+        operateLogServiceFactory.create(logModel, LocaleContextHolder.getLocale());
     }
 
 

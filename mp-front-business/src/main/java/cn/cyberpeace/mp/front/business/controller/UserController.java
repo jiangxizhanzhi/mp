@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.front.business.controller;
 
-import cn.cyberpeace.mp.auth.constant.AuthLogConstant;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.ResetPwdRequest;
 import cn.cyberpeace.mp.auth.dto.ResetSelfPwdRequest;
@@ -17,6 +16,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
 import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
+import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
@@ -58,7 +58,7 @@ public class UserController {
 
     @ApiOperation(value = "修改密码", notes = "")
     @PostMapping("/resetpwd")
-    @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "重置密码", target = AuthLogConstant.TARGET_USER)
+    @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "重置密码", target = OpTargetEnums.USER)
     public ServiceResult resetPwd(@Validated(AddGroup.class) @RequestBody ResetPwdRequest resetPwdRequest) {
         String decryptedPwd = PasswordUtils.desDecrypt(resetPwdRequest.getNewPwd());
         boolean success = userService.resetPwd(resetPwdRequest.getUserId(), decryptedPwd);
@@ -67,7 +67,7 @@ public class UserController {
 
     @ApiOperation(value = "修改自己的密码", notes = "")
     @PostMapping("/resetpwd/self")
-    @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "重置本人密码", target = AuthLogConstant.TARGET_USER)
+    @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "重置本人密码", target = OpTargetEnums.USER)
     public ServiceResult resetSelfPwd(@Validated(UpdateGroup.class) @RequestBody ResetSelfPwdRequest req) {
         String decryptedOldPwd = PasswordUtils.desDecrypt(req.getOldPwd());
         String decryptedNewPwd = PasswordUtils.desDecrypt(req.getNewPwd());
@@ -78,7 +78,7 @@ public class UserController {
 
     @ApiOperation(value = "禁用用户", notes = "")
     @PostMapping("/disable")
-    @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "禁用用户", target = AuthLogConstant.TARGET_USER)
+    @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "禁用用户", target = OpTargetEnums.USER)
     public ServiceResult<String> disable(@RequestBody List<String> userIds) {
         String errMsg = userService.batchDisable(userIds);
         if (StringUtils.isBlank(errMsg)) {
@@ -90,7 +90,7 @@ public class UserController {
 
     @ApiOperation(value = "启用用户", notes = "")
     @PostMapping("/enable")
-    @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "启用用户", target = AuthLogConstant.TARGET_USER)
+    @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "启用用户", target = OpTargetEnums.USER)
     public ServiceResult<String> enable(@RequestBody List<String> userIds) {
         String errMsg = userService.batchEnable(userIds);
         if (StringUtils.isBlank(errMsg)) {
@@ -101,7 +101,7 @@ public class UserController {
 
     @ApiOperation(value = "审核用户", notes = "")
     @PostMapping("/approve")
-    @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "审核用户", target = AuthLogConstant.TARGET_USER)
+    @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "审核用户", target = OpTargetEnums.USER)
     public ServiceResult<String> approve(@RequestBody List<String> userIds) {
         String errMsg = userService.batchApprove(userIds);
         if (StringUtils.isBlank(errMsg)) {
@@ -112,7 +112,7 @@ public class UserController {
 
     @ApiOperation(value = "更改用户头像", notes = "")
     @PostMapping("/update_avatar")
-    @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "更改头像", target = AuthLogConstant.TARGET_USER)
+    @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "更改头像", target = OpTargetEnums.USER)
     public ServiceResult updateAvatar(@RequestParam String userId, MultipartFile file) throws MpRuntimeException {
         boolean success = userService.updateAvatar(userId, file);
         return ServiceResult.successful();
