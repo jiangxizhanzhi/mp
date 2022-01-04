@@ -3,21 +3,17 @@ package cn.cyberpeace.mp.devops.log.request;
 import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.devops.log.enums.SiteTypeEnums;
-import cn.hutool.core.collection.CollectionUtil;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Objects;
 
 /**
@@ -85,13 +81,15 @@ public class OperationLogPageRequest extends BasePageRequest{
      */
     public BoolQueryBuilder buildBoolQueryBuilder(){
         BoolQueryBuilder boolBuilder = QueryBuilders.boolQuery();
-        String module = Objects.nonNull(this.getModule()) ? OpModuleEnums.fromValue(this.getModule()).getDesc() : null;
+//        String module = Objects.nonNull(this.getModule()) ? OpModuleEnums.fromValue(this.getModule()).getCode() : null;
+        Integer moduleID = this.getModule();
         String userName = this.getUserName();
         String userId = this.getUserId();
-        String opType = Objects.nonNull(this.getOpType()) ? OpTypeEnums.fromValue(this.getOpType()).getDesc() : null;
+//        String opType = Objects.nonNull(this.getOpType()) ? OpTypeEnums.fromValue(this.getOpType()).getCode() : null;
+        Integer opTypeID = this.getOpType();
         String userNameOrOpTarget = this.getUserNameOrOpTarget();
-        if (StringUtils.isNotBlank(module)) {
-            boolBuilder.must(QueryBuilders.termQuery("opModule.keyword", module));
+        if (Objects.nonNull(moduleID)) {
+            boolBuilder.must(QueryBuilders.termQuery("opModuleID", moduleID));
         }
         if (StringUtils.isNotBlank(userId)) {
             boolBuilder.must(QueryBuilders.termQuery("userId.keyword",userId));
@@ -100,8 +98,8 @@ public class OperationLogPageRequest extends BasePageRequest{
         if (StringUtils.isNotBlank(userName)) {
             boolBuilder.must(QueryBuilders.wildcardQuery("userName.keyword", concat("*",userName,"*")));
         }
-        if (StringUtils.isNotBlank(opType)) {
-            boolBuilder.must(QueryBuilders.termQuery("opType.keyword", opType));
+        if (Objects.nonNull(opTypeID)) {
+            boolBuilder.must(QueryBuilders.termQuery("opTypeID", opTypeID));
         }
         if (StringUtils.isNotBlank(userNameOrOpTarget)){
             BoolQueryBuilder orQuery = QueryBuilders.boolQuery();
@@ -112,14 +110,14 @@ public class OperationLogPageRequest extends BasePageRequest{
 
         if (Objects.nonNull(modulesIgnored) && modulesIgnored.length > 0) {
             for (Integer m : modulesIgnored) {
-                String moduleIgnored = Objects.nonNull(m) ? OpModuleEnums.fromValue(m).getDesc() : null;
+                String moduleIgnored = Objects.nonNull(m) ? OpModuleEnums.fromValue(m).getCode() : null;
                 boolBuilder.mustNot(QueryBuilders.termQuery("opModule.keyword", moduleIgnored));
             }
         }
 
         if (Objects.nonNull(opTypesIgnored) && opTypesIgnored.length > 0) {
             for (Integer t : opTypesIgnored) {
-                String typeIgnored = Objects.nonNull(t) ? OpTypeEnums.fromValue(t).getDesc() : null;
+                String typeIgnored = Objects.nonNull(t) ? OpTypeEnums.fromValue(t).getCode() : null;
                 boolBuilder.mustNot(QueryBuilders.termQuery("opType.keyword", typeIgnored));
             }
         }

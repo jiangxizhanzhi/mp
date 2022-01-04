@@ -1,10 +1,7 @@
 package cn.cyberpeace.mp.auth.controller;
 
-import cn.cyberpeace.mp.auth.constant.AuthLogConstant;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.role.RoleDto;
-import cn.cyberpeace.mp.auth.dto.role.RolePageRequest;
-import cn.cyberpeace.mp.auth.dto.role.RolePermDto;
 import cn.cyberpeace.mp.auth.dto.role.RoleRequest;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.service.RoleService;
@@ -15,14 +12,13 @@ import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
 import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
+import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
-import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -85,7 +81,7 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
             @ApiImplicitParam(name="id", paramType="path", value="id",dataTypeClass = String.class),
     })
     @DeleteMapping("/{id}")
-    @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.DELETE, title = "删除角色", target = AuthLogConstant.TARGET_ROLE)
+    @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.DELETE, title = "删除角色", target = OpTargetEnums.ROLE)
     public ServiceResult<Boolean> delete(@PathVariable String id) {
         return super.delete(id);
     }
@@ -99,7 +95,7 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
 
     @ApiOperation(value = "创建角色，同时完成角色-权限绑定关系", notes = "")
     @PostMapping("/add")
-    @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.CREATE, title = "新增角色", target = AuthLogConstant.TARGET_ROLE)
+    @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.CREATE, title = "新增角色", target = OpTargetEnums.ROLE)
     public ServiceResult<RoleModel> add(@RequestBody @Validated RoleRequest createRequest) {
         RoleModel roleModel = getModelService().add(createRequest);
         return ServiceResult.success(roleModel);
@@ -108,7 +104,7 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
 
     @ApiOperation(value = "更新角色，同时完成角色-权限绑定关系", notes = "")
     @PostMapping("modify")
-    @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "修改角色", target = AuthLogConstant.TARGET_ROLE)
+    @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "修改角色", target = OpTargetEnums.ROLE)
     public ServiceResult<RoleModel> modify(@RequestBody @Validated RoleRequest modifyRequest) {
         RoleModel roleModel = getModelService().modify(modifyRequest);
         return ServiceResult.success(roleModel);

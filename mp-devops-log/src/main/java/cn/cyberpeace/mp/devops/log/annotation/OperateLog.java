@@ -1,9 +1,14 @@
 package cn.cyberpeace.mp.devops.log.annotation;
 
 import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
+import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
 
-import java.lang.annotation.*;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * 操作日志注解
@@ -30,7 +35,7 @@ public @interface OperateLog {
      * 操作对象
      * @return
      */
-    String target() default "";
+    OpTargetEnums target() default OpTargetEnums.DEFAULT;
 
     /**
      * 操作标题，例如：新增用户
@@ -48,4 +53,10 @@ public @interface OperateLog {
      * @return
      */
     boolean isSaveRequestParams() default true;
+
+    /**
+     * 默认Locale languageTag
+     * @return
+     */
+    String languageTag() default "zh-CN";
 }

@@ -29,11 +29,17 @@ public class OperationLogPageResponse {
     @ApiModelProperty(value = "模块",notes = "cn.cyberpeace.mp.devops.log.enums.OpModuleEnums")
     private String opModule;
 
+    @ApiModelProperty(value = "模块ID")
+    private Integer opModuleID;
+
     /**
      * 操作类型，0:创建，1：更新，2：删除，3：登录登出
      */
     @ApiModelProperty(value = "操作类型",notes = "cn.cyberpeace.mp.devops.log.enums.OpTypeEnums")
     private String opType;
+
+    @ApiModelProperty(value = "操作类型ID")
+    private Integer opTypeID;
 
     /**
      * 操作对象
@@ -41,6 +47,8 @@ public class OperationLogPageResponse {
     @ApiModelProperty(value = "操作对象")
     private String opTarget;
 
+    @ApiModelProperty(value = "操作对象ID")
+    private Integer opTargetID;
 
     /**
      * 用户ID
