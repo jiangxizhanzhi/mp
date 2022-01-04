@@ -21,10 +21,14 @@ public class HttpContextFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        var requestId = request.getHeader(X_REQUEST_ID);
-        if (!StringUtils.isEmpty(requestId)) {
-            SysContextHolder.setCallChainId(requestId);
+        try {
+            var requestId = request.getHeader(X_REQUEST_ID);
+            if (!StringUtils.isEmpty(requestId)) {
+                SysContextHolder.setCallChainId(requestId);
+            }
+            filterChain.doFilter(request, response);
+        }finally {
+            SysContextHolder.resetSysContext();
         }
-        filterChain.doFilter(request, response);
     }
 }
