@@ -49,20 +49,18 @@ public class CloudPlatformMonitorController {
 
     private RealEquipmentConverter realEquipmentConverter;
 
-    private NpcConverter npcConverter;
 
     private HypervisorConverter hypervisorConverter;
 
     @Autowired
     public CloudPlatformMonitorController(InstanceConverter instanceConverter, ContainerConverter containerConverter,
                                           RouterConverter routerConverter,
-                                          RealEquipmentConverter realEquipmentConverter,NpcConverter npcConverter,
+                                          RealEquipmentConverter realEquipmentConverter,
                                           HypervisorConverter hypervisorConverter) {
         this.instanceConverter = instanceConverter;
         this.containerConverter = containerConverter;
         this.routerConverter = routerConverter;
         this.realEquipmentConverter = realEquipmentConverter;
-        this.npcConverter = npcConverter;
         this.hypervisorConverter = hypervisorConverter;
     }
 

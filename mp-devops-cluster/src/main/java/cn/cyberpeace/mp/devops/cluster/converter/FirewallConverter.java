@@ -13,6 +13,10 @@ import org.springframework.stereotype.Service;
 import java.util.Arrays;
 import java.util.Objects;
 
+/**
+ * 防火墙
+ * @author wanggang
+ */
 @Service
 public class FirewallConverter implements BaseConverter{
 

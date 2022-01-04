@@ -69,7 +69,7 @@ public class OperateLogServiceFactory {
         if (Objects.nonNull(request.getOpModule())) {
             OpModuleEnums opModuleEnum = OpModuleEnums.fromValue(request.getOpModule());
             if (Objects.nonNull(opModuleEnum)) {
-                String localizedMsg = getlocalizedMessage(locale, opModuleEnum.getCode(), null);
+                String localizedMsg = getlocalizedMessage(locale, opModuleEnum.getCode());
                 model.setOpModule(localizedMsg);
                 model.setOpModuleID(opModuleEnum.ordinal());
             }
@@ -79,7 +79,7 @@ public class OperateLogServiceFactory {
         if (Objects.nonNull(request.getOpType())) {
             OpTypeEnums opTypeEnum = OpTypeEnums.fromValue(request.getOpType());
             if (Objects.nonNull(opTypeEnum)) {
-                String localizedMsg = getlocalizedMessage(locale, opTypeEnum.getCode(), null);
+                String localizedMsg = getlocalizedMessage(locale, opTypeEnum.getCode());
                 model.setOpType(localizedMsg);
                 model.setOpTypeID(opTypeEnum.ordinal());
             }
@@ -128,21 +128,21 @@ public class OperateLogServiceFactory {
 
         if (Objects.nonNull(operateLog.module())) {
             //操作模块
-            model.setOpModule(getlocalizedMessage(locale, operateLog.module().getCode(), null));
+            model.setOpModule(getlocalizedMessage(locale, operateLog.module().getCode()));
             //操作模块ID
             model.setOpModuleID(operateLog.module().ordinal());
         }
 
         if (Objects.nonNull(operateLog.type())) {
             //操作类型
-            model.setOpType(getlocalizedMessage(locale, operateLog.type().getCode(), null));
+            model.setOpType(getlocalizedMessage(locale, operateLog.type().getCode()));
             //操作类型ID
             model.setOpTypeID(operateLog.type().ordinal());
         }
 
         if (Objects.nonNull(operateLog.target())) {
             //操作对象
-            model.setOpTarget(getlocalizedMessage(locale, operateLog.target().getCode(), null));
+            model.setOpTarget(getlocalizedMessage(locale, operateLog.target().getCode()));
             //操作ID
             model.setOpTargetID(operateLog.target().ordinal());
         }

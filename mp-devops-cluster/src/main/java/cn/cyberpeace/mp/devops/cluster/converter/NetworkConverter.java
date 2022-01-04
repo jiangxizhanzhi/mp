@@ -18,6 +18,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * 网络管理
+ * @author wanggang
+ */
 @Service
 public class NetworkConverter implements BaseConverter{
 
