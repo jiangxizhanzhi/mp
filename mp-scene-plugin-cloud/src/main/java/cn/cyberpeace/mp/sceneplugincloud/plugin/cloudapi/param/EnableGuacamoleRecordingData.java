@@ -14,4 +14,5 @@ public class EnableGuacamoleRecordingData implements CloudHttpData {
     private String username;
     private String department;
     private String scene;
+    private String host;
 }
