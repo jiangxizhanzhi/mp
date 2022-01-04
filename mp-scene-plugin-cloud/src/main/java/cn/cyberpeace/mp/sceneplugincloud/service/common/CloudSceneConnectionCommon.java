@@ -47,6 +47,15 @@ public class CloudSceneConnectionCommon {
         private String department;
     }
 
+    @Data
+    @NoArgsConstructor
+    public static class SceneConnectionEnableRecordingExtraParam {
+        private String sceneName;
+        private String nodeName;
+        private String username;
+        private String department;
+    }
+
     public static CloudPluginSceneConnectionModel getOrCreateSceneConnection(SceneConnectionParam param) {
         var sceneId = param.getSceneId();
         var sceneElementId = param.getSceneElementId();
@@ -167,5 +176,43 @@ public class CloudSceneConnectionCommon {
         }
 
         return sceneConnection;
+    }
+
+    public static boolean enableRecording(CloudPluginSceneConnectionModel sceneConnection,
+                                          SceneConnectionEnableRecordingExtraParam extraParam) {
+        var connectionId = sceneConnection.getConnectionId();
+        if (StringUtils.isEmpty(connectionId)) {
+            return false;
+        }
+
+        var remoteClient = new Remote();
+        var result = remoteClient.enableRecording(connectionId, extraParam.getSceneName(),
+                extraParam.getNodeName(), extraParam.getUsername(), extraParam.getDepartment());
+        var flag = !StringUtils.isEmpty(result);
+        if (flag) {
+            sceneConnection.setConnectionEnableRecording(true);
+            sceneConnection.setConnectionRecordingName(result);
+            cloudPluginSceneConnectionMapper.save(sceneConnection);
+        }
+
+        return flag;
+    }
+
+    public static boolean disableRecording(CloudPluginSceneConnectionModel sceneConnection) {
+        var connectionId = sceneConnection.getConnectionId();
+        if (StringUtils.isEmpty(connectionId)) {
+            return false;
+        }
+
+        var remoteClient = new Remote();
+        var result = remoteClient.disableRecording(connectionId);
+        var flag = !StringUtils.isEmpty(result);
+        if (flag) {
+            sceneConnection.setConnectionEnableRecording(false);
+            sceneConnection.setConnectionRecordingName(result);
+            cloudPluginSceneConnectionMapper.save(sceneConnection);
+        }
+
+        return flag;
     }
 }

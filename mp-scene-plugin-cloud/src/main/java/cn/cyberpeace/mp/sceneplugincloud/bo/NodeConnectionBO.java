@@ -23,4 +23,8 @@ public class NodeConnectionBO {
     private String connectionId;
     @ApiModelProperty(value = "连接url")
     private String connectionUrl;
+    @ApiModelProperty(value = "是否开启录屏")
+    private Boolean connectionEnableRecording;
+    @ApiModelProperty(value = "录屏名称")
+    private String connectionRecordingName;
 }
