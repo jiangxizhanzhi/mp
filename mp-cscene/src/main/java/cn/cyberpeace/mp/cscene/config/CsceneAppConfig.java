@@ -32,7 +32,7 @@ public class CsceneAppConfig {
     /**
      * TODO: 正确的key
      */
-    @Value("${mp.cscene.scene-enable-recording-key:LCS-RES-CR-ENABLERECORDING}")
+    @Value("${mp.cscene.scene-enable-recording-key:screen_recording}")
     private String sceneEnableRecordingKey;
 
     @Value("${mp.cscene.scene-edit-node-limit:1000}")
