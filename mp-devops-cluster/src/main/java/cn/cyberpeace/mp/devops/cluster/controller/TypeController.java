@@ -102,6 +102,9 @@ public class TypeController {
         allResponse.setSecondTypeList(Objects.nonNull(l1AndL2AndL3Type) ? l1AndL2AndL3Type.getSecondTypeList() : null);
         allResponse.setThirdTypeList(Objects.nonNull(l1AndL2AndL3Type) ? l1AndL2AndL3Type.getThirdTypeList() : null);
         allResponse.setImageType(Objects.nonNull(imageType) ? imageType.getIdStringModelList() : null);
+        allResponse.setHwDiskBusList(typeConverter.findHwDiskBus());
+        allResponse.setHwVifModelList(typeConverter.findHwVifModel());
+        allResponse.setHwVideoModelList(typeConverter.findHwVideoModel());
         return new Result<>(allResponse);
     }
 

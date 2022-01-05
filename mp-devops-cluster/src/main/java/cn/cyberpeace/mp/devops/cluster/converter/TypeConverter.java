@@ -2,10 +2,8 @@ package cn.cyberpeace.mp.devops.cluster.converter;
 
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.TypeService;
 import cn.cyberpeace.mp.devops.cluster.converter.model.*;
-import cn.cyberpeace.mp.devops.cluster.model.TypeCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.TypeIdIntegerCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.TypeIdStringCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.TypeL2CloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.*;
+import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,6 +13,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * @author wanggang
+ */
 @Service
 public class TypeConverter {
 
@@ -170,6 +171,43 @@ public class TypeConverter {
      */
     public TypeAllConvertModel findSnmpVersion() {
         return this.findIdStringByType("snmp_version");
+    }
+
+    /**
+     *
+     * @param type
+     * @return
+     */
+    public List<String> findItemsByType(String type){
+        TypeItemsCloudPlatformModel itemsByType = typeService.findItemsByType(type);
+        if (Objects.isNull(itemsByType) || !itemsByType.isSuccess()){
+            return Lists.newArrayList();
+        }
+        return itemsByType.getItems();
+    }
+
+    /**
+     * 查询磁盘控制器类型
+     * @return
+     */
+    public List<String> findHwDiskBus(){
+        return this.findItemsByType("hw_disk_bus");
+    }
+
+    /**
+     * 查询虚拟网卡型号
+     * @return
+     */
+    public List<String> findHwVifModel(){
+        return this.findItemsByType("hw_vif_model");
+    }
+
+    /**
+     * 查询视频图像驱动
+     * @return
+     */
+    public List<String> findHwVideoModel(){
+        return this.findItemsByType("hw_video_model");
     }
 
     /**

@@ -134,6 +134,15 @@ public class TypeAllResponse {
     @ApiModelProperty("SNMP版本")
     private List<TypeIdStringConvertModel> snmpVersions;
 
+    @ApiModelProperty("磁盘控制器类型")
+    private List<String> hwDiskBusList;
+
+    @ApiModelProperty("虚拟网卡型号")
+    private List<String> hwVifModelList;
+
+    @ApiModelProperty("视频图像驱动")
+    private List<String> hwVideoModelList;
+
     public TypeAllResponse(List<TypeConvertModel> firstTypeList, List<TypeConvertModel> secondTypeList, List<TypeConvertModel> thirdTypeList) {
         this.firstTypeList = firstTypeList;
         this.secondTypeList = secondTypeList;

@@ -63,4 +63,13 @@ public class TypeService extends BaseOpenStackServiceImpl {
     public TypeIdStringCloudPlatformModel findIdStringByType(String type){
         return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + TYPE + "?type=" + type, TypeIdStringCloudPlatformModel.class);
     }
+
+    /**
+     * 根据Type查询
+     * @param type hw_disk_bus hw_vif_model hw_video_model
+     * @return
+     */
+    public TypeItemsCloudPlatformModel findItemsByType(String type){
+        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + TYPE + "?type=" + type, TypeItemsCloudPlatformModel.class);
+    }
 }

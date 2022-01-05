@@ -7,6 +7,9 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author wanggang
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -37,6 +40,11 @@ public class TypeAllConvertModel {
      * 平台&镜像类型
      */
     private List<TypeIdStringConvertModel> idStringModelList = new ArrayList<>();
+
+    /**
+     * hw_disk_bus hw_vif_model hw_video_model
+     */
+    private List<String> items = new ArrayList<>();
 
 
 
