@@ -32,7 +32,7 @@ public class ExtImageInfo {
     private Boolean baseImageSupport;
 
     @ApiModelProperty("元数据")
-    private Object metaData;
+    private ImageMetaData metaData;
 
     /**
      * 0：待编辑，1：创建中，2：已创建，3：错误

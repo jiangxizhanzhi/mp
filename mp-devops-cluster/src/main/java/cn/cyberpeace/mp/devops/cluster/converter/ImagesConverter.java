@@ -98,26 +98,26 @@ public class ImagesConverter implements BaseConverter{
         ImagePageDTO dto = convertImagePageRequest(request);
         Integer total = devopsTargetService.totalCount(dto);
 
-        ImageConvertPageModel convertModel = new ImageConvertPageModel();
+        ImageConvertPageModel imageConvertPageModel = new ImageConvertPageModel();
         if (total == 0){
-            convertModel.setTotal(0);
-            convertModel.setModelList(Lists.newArrayList());
-            return convertModel;
+            imageConvertPageModel.setTotal(0);
+            imageConvertPageModel.setModelList(Lists.newArrayList());
+            return imageConvertPageModel;
         }
         List<TargetModel> targetModels = imageMapper.page(dto);
 
         List<Integer> ids = targetModels.stream().map(TargetModel::getId).map(Integer::parseInt).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(ids)){
-            convertModel.setTotal(0);
-            convertModel.setModelList(Lists.newArrayList());
-            return convertModel;
+            imageConvertPageModel.setTotal(0);
+            imageConvertPageModel.setModelList(Lists.newArrayList());
+            return imageConvertPageModel;
         }
         DeviceCloudPlatformModel model = deviceService.findByIds(ids);
 
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getItems())){
-            convertModel.setTotal(0);
-            convertModel.setModelList(Lists.newArrayList());
-            return convertModel;
+            imageConvertPageModel.setTotal(0);
+            imageConvertPageModel.setModelList(Lists.newArrayList());
+            return imageConvertPageModel;
         }
 
         List<String> targetUuids = targetModels.stream().map(TargetModel::getUuid).collect(Collectors.toList());
@@ -139,9 +139,9 @@ public class ImagesConverter implements BaseConverter{
             }
         }
 
-        convertModel.setModelList(modelList);
-        convertModel.setTotal(total);
-        return convertModel;
+        imageConvertPageModel.setModelList(modelList);
+        imageConvertPageModel.setTotal(total);
+        return imageConvertPageModel;
     }
 
     /**
