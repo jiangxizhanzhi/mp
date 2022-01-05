@@ -28,6 +28,8 @@ public class CloudUrlConstant {
     public static final String NETWORK_QUERY_URL = "/v1/networks";
     public static final String NETWORK_GET_URL = "/v1/networks/%s";
 
+    public static final String CONSOLE_INFO_GET_URL = "/cpcloud/instance_control/v1/console";
+
     public static final String CREATE_CONNECTION_URL = "/cpcloud/guacamole/v1/connection";
     public static final String GET_CONNECTION_URL = "/cpcloud/guacamole/v1/connection";
     public static final String GET_MONITOR_URL = "/cpcloud/guacamole/v1/monitor";

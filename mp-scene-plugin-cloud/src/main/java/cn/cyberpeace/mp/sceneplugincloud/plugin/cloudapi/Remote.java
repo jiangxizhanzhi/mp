@@ -70,12 +70,13 @@ public class Remote extends CloudClient {
         return new ListObjResult<>(result.getData(), total);
     }
 
-    public String enableRecording(String connectionId) {
+    public String enableRecording(String connectionId, String sceneName, String nodeName, String username, String department) {
         var enableGuacamoleRecordingData = new EnableGuacamoleRecordingData();
         enableGuacamoleRecordingData.setConnectionId(connectionId);
-        enableGuacamoleRecordingData.setUsername(StringUtils.EMPTY);
-        enableGuacamoleRecordingData.setDepartment(StringUtils.EMPTY);
-        enableGuacamoleRecordingData.setScene(StringUtils.EMPTY);
+        enableGuacamoleRecordingData.setUsername(username == null ? StringUtils.EMPTY : username);
+        enableGuacamoleRecordingData.setDepartment(department == null ? StringUtils.EMPTY : department);
+        enableGuacamoleRecordingData.setScene(sceneName == null ? StringUtils.EMPTY : sceneName);
+        enableGuacamoleRecordingData.setHost(nodeName == null ? StringUtils.EMPTY : nodeName);
         var result = getHttpClient().put(CloudUrlConstant.ENABLE_RECORDING_URL,
                 enableGuacamoleRecordingData, null,
                 EnableGuacamoleRecordingResult.class);

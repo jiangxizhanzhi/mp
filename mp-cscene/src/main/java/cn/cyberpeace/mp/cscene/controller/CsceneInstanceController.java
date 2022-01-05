@@ -14,7 +14,6 @@ import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceQueryParams;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
-import cn.cyberpeace.mp.sceneplugincloud.bo.NodeActionRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
@@ -35,13 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -305,10 +298,10 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             @ApiImplicitParam(name = "connectionId", value = "连接id", dataTypeClass = String.class),
     })
     @PostMapping(value = "/enable_recording")
-    public ServiceResult<NodeActionRecordingBO> enableRecording(@RequestParam(required = false) String id,
-                                                                @RequestParam(required = false) String nodeId,
-                                                                @RequestParam(required = false) String connectionId,
-                                                                @RequestBody(required = false) CsceneInstanceNodeConnectionActionRequest request) {
+    public ServiceResult<NodeConnectionBO> enableRecording(@RequestParam(required = false) String id,
+                                                           @RequestParam(required = false) String nodeId,
+                                                           @RequestParam(required = false) String connectionId,
+                                                           @RequestBody(required = false) CsceneInstanceNodeConnectionActionRequest request) {
         request = formatNodeConnectionActionRequest(request, id, nodeId, connectionId);
         return modelService.enableRecording(request.getId(), request.getNodeId(), request.getConnectionId(),
                 request.getContext()).asResult();
@@ -321,10 +314,10 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             @ApiImplicitParam(name = "connectionId", value = "连接id", dataTypeClass = String.class),
     })
     @PostMapping(value = "/disable_recording")
-    public ServiceResult<NodeActionRecordingBO> disableRecording(@RequestParam(required = false) String id,
-                                                                 @RequestParam(required = false) String nodeId,
-                                                                 @RequestParam(required = false) String connectionId,
-                                                                 @RequestBody(required = false) CsceneInstanceNodeConnectionActionRequest request) {
+    public ServiceResult<NodeConnectionBO> disableRecording(@RequestParam(required = false) String id,
+                                                            @RequestParam(required = false) String nodeId,
+                                                            @RequestParam(required = false) String connectionId,
+                                                            @RequestBody(required = false) CsceneInstanceNodeConnectionActionRequest request) {
         request = formatNodeConnectionActionRequest(request, id, nodeId, connectionId);
         return modelService.disableRecording(request.getId(), request.getNodeId(), request.getConnectionId(),
                 request.getContext()).asResult();

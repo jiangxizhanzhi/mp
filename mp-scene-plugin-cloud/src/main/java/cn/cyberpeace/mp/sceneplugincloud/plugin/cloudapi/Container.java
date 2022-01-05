@@ -16,6 +16,8 @@ import java.util.Map;
 public class Container extends CloudClient {
 
     public ContainerCreateData create(ContainerCreateData createData) {
+        heavyConcurrentWait();
+
         CloudResponse<ContainerCreateData> result = cloudPost(CloudUrlConstant.CONTAINER_CREATE_URL, createData, null,
                 new TypeReference<CloudResponse<ContainerCreateData>>() {
                 }, true);
@@ -23,6 +25,8 @@ public class Container extends CloudClient {
     }
 
     public boolean delete(ContainerDeleteData deleteData) {
+        heavyConcurrentWait();
+
         CloudResponse<Object> result = cloudDelete(CloudUrlConstant.CONTAINER_DELETE_URL, deleteData, null,
                 new TypeReference<CloudResponse<Object>>() {
                 }, true);

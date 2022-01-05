@@ -111,6 +111,9 @@ public class CloudAppConfig {
     @Value("${mp.scene.remote_connection_token_expire_seconds:7200}")
     private Integer remoteConnectionTokenExpireSeconds;
 
+    @Value("${mp.sceneplugincloud.cloud_heavy_concurrent_delay:10}")
+    private Integer cloudHeavyConcurrentDelay;
+
     @Autowired
     private BaseAppConfig baseAppConfig;
 
