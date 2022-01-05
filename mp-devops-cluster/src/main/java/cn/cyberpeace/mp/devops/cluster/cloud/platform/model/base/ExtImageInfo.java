@@ -61,18 +61,6 @@ public class ExtImageInfo {
     @ApiModelProperty("磁盘格式")
     private String diskFormat;
 
-    /**
-     * HW磁盘格式
-     */
-    @ApiModelProperty("HW磁盘格式")
-    private String hwDiskFormat;
-
-    /**
-     * VIF模型
-     */
-    @ApiModelProperty("VIF模型")
-    private String hwVifModel;
-
 
     @ApiModelProperty("临时文件ID")
     private String tmpdirUuid;
