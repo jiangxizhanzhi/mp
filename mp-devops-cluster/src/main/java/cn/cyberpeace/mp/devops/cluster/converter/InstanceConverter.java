@@ -74,6 +74,7 @@ public class InstanceConverter implements BaseConverter{
      * @return
      */
     public Integer getTotalInstances(InstancePageRequest request) {
+        request.setPerPage(NumberUtils.INTEGER_ONE);
         String getParams = ParamUtils.wrapperGetParamsByObject(request,this.getTotalPageIgnoreField());
         InstanceCloudPlatformModel page = vmService.page(getParams);
         return Objects.isNull(page) ||  Objects.isNull(page.getTotal()) ? NumberUtils.INTEGER_ZERO : page.getTotal() ;
