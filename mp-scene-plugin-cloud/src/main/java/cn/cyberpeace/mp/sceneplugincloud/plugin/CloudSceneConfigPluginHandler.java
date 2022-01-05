@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin;
 
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
+import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.plugin.SceneConfigPluginHandler;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
@@ -10,10 +11,13 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.ConfigHandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.modelhandler.CloudSceneConfigPluginModelHandler;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 
+@Slf4j
 @ClassFieldClasses({
         CloudPluginSceneConfigBO.class,
         CloudPluginSceneConfigElementBO.class,
@@ -26,6 +30,8 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
         CloudPluginSceneConfigElementBO, CloudPluginSceneConfigElementPortBO, Object> {
 
     private CloudSceneConfigPluginModelHandler pluginModelHandler;
+
+    private ConfigHandlerUtils handlerUtils;
 
     private void correctElementRoleRelated(SceneConfigElementBO srcElement, CloudPluginSceneConfigElementBO cloudElement,
                                            Integer role, String imageType) {
@@ -137,6 +143,7 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
     public void initBase() {
         super.initBase();
         pluginModelHandler = new CloudSceneConfigPluginModelHandler(this);
+        handlerUtils = new ConfigHandlerUtils(this);
     }
 
     @Override
@@ -191,4 +198,20 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
         pluginModelHandler.deleteElementPorts(elementPortIds);
     }
 
+    @Override
+    public ScenePluginDataBO toData() {
+        try {
+            getElementPortMap().forEach((portId, cloudPort) -> {
+                var auxiliaryNetworkCloudElement = handlerUtils.getPortAuxiliaryNetworkCloudElement(portId);
+                if (auxiliaryNetworkCloudElement != null && auxiliaryNetworkCloudElement.getRole() != null && auxiliaryNetworkCloudElement.getRole().equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK)) {
+                    cloudPort.setConnToExtNet(true);
+                } else {
+                    cloudPort.setConnToExtNet(false);
+                }
+            });
+        } catch (Exception e) {
+            log.error("failed to set connToExtNet , scene id is {}", getSceneHandler().getSceneId(), e);
+        }
+        return super.toData();
+    }
 }
