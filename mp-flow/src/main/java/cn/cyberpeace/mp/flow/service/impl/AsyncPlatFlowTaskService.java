@@ -429,6 +429,11 @@ public class AsyncPlatFlowTaskService {
                     clientMac = clientDataObj.getString("mac_address");
                     clientIp = clientDataObj.getString("fixed_ip");
                     clientPortId = clientDataObj.getString("port_id");
+
+                    // pcap使用无状态模式，客户端和服务端共用一个网口
+                    serverMac = clientMac;
+                    serverIp = clientIp;
+                    serverPortId = clientPortId;
                 } else {
                     log.error("add trex client port error");
                 }
