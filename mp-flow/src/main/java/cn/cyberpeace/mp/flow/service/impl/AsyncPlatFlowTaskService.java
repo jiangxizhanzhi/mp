@@ -410,6 +410,8 @@ public class AsyncPlatFlowTaskService {
         FlowPortModel flowPortModel = null;
         try {
             JSONObject addPortReq = new JSONObject();
+            addPortReq.put("network_id", flowActuatorModel.getNetworkId());
+
             String serverMac = "";
             String serverIp = "";
             String serverPortId = "";
@@ -439,7 +441,6 @@ public class AsyncPlatFlowTaskService {
                 }
             } else {
                 // 给trex虚拟机添加server网口
-                addPortReq.put("network_id", flowActuatorModel.getNetworkId());
                 String addTrexServerPortRsp = HttpUtils.sendPost(cpUrl + "/v1/instances/" +
                         flowActuatorModel.getInstanceId() + "/interfaces", addPortReq.toJSONString());
                 JSONObject addTrexServerObj = JSONObject.parseObject(addTrexServerPortRsp);
