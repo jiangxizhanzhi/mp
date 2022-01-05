@@ -34,6 +34,10 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * 实装管理
+ * @author wanggang
+ */
 @Service
 public class RealEquipmentConverter implements BaseConverter{
 

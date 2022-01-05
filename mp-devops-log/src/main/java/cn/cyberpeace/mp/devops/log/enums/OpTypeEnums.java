@@ -1,53 +1,54 @@
 package cn.cyberpeace.mp.devops.log.enums;
 
 import cn.cyberpeace.mp.base.annotation.SwaggerDisplayEnum;
+import cn.cyberpeace.mp.devops.log.constant.LogConstant;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 @SwaggerDisplayEnum
 public enum OpTypeEnums {
-
-    LOGIN("登入"),
-
-    LOGOUT("登出"),
-
-    CREATE("创建"),
-
-    UPDATE("更新"),
-
-    DELETE("删除"),
-
-    LEARN("学习"),
-
-    EXERCISE("练习"),
-
-    EXAM("考试"),
-
-    TRAIN("训练"),
-
-    EVAL("测评"),
-
-    CONTEST("参赛"),
-
-    STOP("停止"),
-
-    PAUSE("暂停"),
-
-    START("启动"),
-
-    RECOVER("恢复"),
+    // 登入
+    LOGIN("login"),
+    // 登出
+    LOGOUT("logout"),
+    // 创建
+    CREATE("create"),
+    // 更新
+    UPDATE("update"),
+    // 删除
+    DELETE("delete"),
+    // 学习
+    LEARN("learn"),
+    // 练习
+    EXERCISE("exercise"),
+    // 考试
+    EXAM("exam"),
+    // 训练
+    TRAIN("train"),
+    // 测评
+    EVAL("eval"),
+    // 参赛
+    CONTEST("contest"),
+    // 停止
+    STOP("stop"),
+    // 暂停
+    PAUSE("pause"),
+    // 启动
+    START("start"),
+    // 恢复
+    RECOVER("recover"),
 
     DEFAULT("");
 
 
-    private String desc;
+    private String code;
 
-    OpTypeEnums(String desc) {
-        this.desc = desc;
+    OpTypeEnums(String code) {
+        this.code = LogConstant.LOG_OP_TYPE_PREFIX + "." + code;
     }
 
-    public String getDesc() {
-        return desc;
+    public String getCode() {
+        return code;
     }
 
 
@@ -58,11 +59,11 @@ public enum OpTypeEnums {
 
     @JsonValue
     public String toValue() {
-        return this.getDesc();
+        return this.getCode();
     }
 
     @Override
     public String toString() {
-        return this.ordinal() + ":" + desc;
+        return this.ordinal() + ":" + code;
     }
 }

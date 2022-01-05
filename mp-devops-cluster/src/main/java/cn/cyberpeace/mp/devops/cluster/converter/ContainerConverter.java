@@ -56,8 +56,11 @@ public class ContainerConverter implements BaseConverter {
             return null;
         }
         List<ContainerConvertModel.Model> list =  model.getContainers().stream().map(containerModel -> {
-            ContainerConvertModel.Model response = ContainerConvertModel.Model.builder().name(containerModel.getName()).image(containerModel.getImage())
-                    .node(containerModel.getHost()).status(CloudPlatformEnum.fromValue(containerModel.getStatus())).build();
+            ContainerConvertModel.Model response = ContainerConvertModel.Model.builder()
+                    .name(containerModel.getName()).image(containerModel.getImage())
+                    .node(containerModel.getHost())
+                    .status(CloudPlatformEnum.fromValue(containerModel.getStatus()))
+                    .build();
             Map<String,Object> addresses = containerModel.getAddresses();
             if (MapUtils.isNotEmpty(addresses)){
                 List<ContainerModel.Address> addressList = addresses.values().stream()

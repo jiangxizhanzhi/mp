@@ -23,6 +23,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * @author wanggang
+ */
 @Service
 public class HypervisorConverter implements BaseConverter {
 

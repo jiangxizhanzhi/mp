@@ -46,6 +46,12 @@ public class AuthBasei18nCode {
     // TENANT
     public static final String TENANT_ID = "auth.base.tenant.id";
 
+    // OPERATION
+    public static final String LOGIN = "auth.base.op.login";
+    public static final String LOGIN_USERNAME_PASSWORD = "auth.base.op.login_username_password";
+    public static final String LOGIN_MOBILE_PASSWORD = "auth.base.op.login_mobile_password";
+    public static final String LOGOUT = "auth.base.op.logout";
+
     // COMMON
     public static final String REQUEST_PARAMS = "auth.base.request.params";
 
