@@ -25,8 +25,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * 靶标
+ * @author wanggang
+ */
 @Service
-public class TargetConverter implements BaseConverter{
+public class TargetConverter{
 
     private ImageMapper imageMapper;
 
@@ -41,16 +45,6 @@ public class TargetConverter implements BaseConverter{
         this.imageMapper = imageMapper;
         this.deviceService = deviceService;
         this.csceneSpecialService = csceneSpecialService;
-    }
-
-    @Override
-    public String[] getDefaultPageIgnoreField() {
-        return new String[0];
-    }
-
-    @Override
-    public String[] getTotalPageIgnoreField() {
-        return new String[0];
     }
 
     /**

@@ -150,6 +150,10 @@ public class AuthTestController {
 
     @GetMapping("/olrecord/check")
     public void checkUserOlRecord() {
+        Locale l1 = Locale.CHINESE;
+        log.info(l1.toLanguageTag());
+        Locale locale = Locale.forLanguageTag("CN");
+
         userOnlineReportService.checkUserOlRecord();
     }
 

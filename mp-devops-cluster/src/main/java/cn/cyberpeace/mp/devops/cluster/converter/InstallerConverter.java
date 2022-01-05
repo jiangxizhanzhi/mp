@@ -28,6 +28,10 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * 服务管理
+ * @author wanggang
+ */
 @Slf4j
 @Service
 public class InstallerConverter implements BaseConverter{

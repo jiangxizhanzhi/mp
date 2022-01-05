@@ -37,14 +37,29 @@ public class OperationLogModel {
     private String opModule;
 
     /**
+     * 跟opModule一一对应，opModule存储国际化之后的字符串，opModuleID用来存储对应的数字，用于检索
+     */
+    private Integer opModuleID;
+
+    /**
      * 操作类型，0:创建，1：更新，2：删除，3：登录登出
      */
     private String opType;
 
     /**
+     * 跟opType一一对应，opType存储国际化之后的字符串，opTypeID用来存储对应的数字，用于检索
+     */
+    private Integer opTypeID;
+
+    /**
      * 操作对象
      */
     private String opTarget;
+
+    /**
+     * 跟opTarget一一对应，opTarget存储国际化之后的字符串，opTargetID用来存储对应的数字，用于检索
+     */
+    private Integer opTargetID;
 
     /**
      * 操作主题

@@ -49,20 +49,18 @@ public class CloudPlatformMonitorController {
 
     private RealEquipmentConverter realEquipmentConverter;
 
-    private NpcConverter npcConverter;
 
     private HypervisorConverter hypervisorConverter;
 
     @Autowired
     public CloudPlatformMonitorController(InstanceConverter instanceConverter, ContainerConverter containerConverter,
                                           RouterConverter routerConverter,
-                                          RealEquipmentConverter realEquipmentConverter,NpcConverter npcConverter,
+                                          RealEquipmentConverter realEquipmentConverter,
                                           HypervisorConverter hypervisorConverter) {
         this.instanceConverter = instanceConverter;
         this.containerConverter = containerConverter;
         this.routerConverter = routerConverter;
         this.realEquipmentConverter = realEquipmentConverter;
-        this.npcConverter = npcConverter;
         this.hypervisorConverter = hypervisorConverter;
     }
 
@@ -89,10 +87,6 @@ public class CloudPlatformMonitorController {
         realEquipmentPageRequest.setPerPage(NumberUtils.INTEGER_ONE);
         Integer totalRealEquipments = realEquipmentConverter.getTotalRealEquipment(realEquipmentPageRequest);
 
-
-        //NPC总数
-        Integer totalNPCs = 0;
-
         //路由个数
         RouterPageRequest routerPageRequest = new RouterPageRequest();
         routerPageRequest.setPerPage(NumberUtils.INTEGER_ONE);
@@ -100,16 +94,9 @@ public class CloudPlatformMonitorController {
 
         HypervisorStatisticsConvertModel hypervisorStatisticsConvertModel = hypervisorConverter.statistics();
 
-//        CompletableFuture.allOf(totalInstances, totalContainers,totalRealEquipments,totalNPCs,totalRouters,model).join();
-
-        //TODO 原计算方式不正确，云平台暂时不支持计算总的网络IO、磁盘IO
-        //磁盘IO
-        BigDecimal diskIo = BigDecimal.ZERO;
-        //网络IO
-        BigDecimal netIo = BigDecimal.ZERO;
-
-        HypervisorStatisticsResponse response = HypervisorStatisticsResponse.builder().diskIo(diskIo).netIo(netIo)
-                .totalNpc(totalNPCs).totalInstances(totalInstances)
+        HypervisorStatisticsResponse response = HypervisorStatisticsResponse.builder().diskIo(BigDecimal.ZERO)
+                .netIo(BigDecimal.ZERO)
+                .totalNpc(0).totalInstances(totalInstances)
                 .totalContainers(totalContainers).totalRealEquipments(totalRealEquipments).totalRouters(totalRouters).build();
         if(Objects.isNull(hypervisorStatisticsConvertModel)){
             return new Result<>(response);

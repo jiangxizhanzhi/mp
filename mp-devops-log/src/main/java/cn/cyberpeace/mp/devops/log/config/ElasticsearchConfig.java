@@ -4,10 +4,15 @@ import org.apache.http.HttpHost;
 import org.apache.http.util.Asserts;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.util.ObjectUtils;
+
+import javax.annotation.PostConstruct;
 
 /**
  * ES配置类
@@ -19,9 +24,19 @@ public class ElasticsearchConfig {
     @Value("${mp.log.es-nodes}")
     private String elasticsearchNodes;
 
+
+    @Autowired
+    private MessageSource messageSource;
+
     @Bean(name="logRestHighLevelClient")
     public RestHighLevelClient restHighLevelClient() {
         return new RestHighLevelClient(RestClient.builder(this.createHttpHost()));
+    }
+
+    @PostConstruct
+    public void addBaseNames() {
+        ReloadableResourceBundleMessageSource msgSrc = (ReloadableResourceBundleMessageSource) messageSource;
+        msgSrc.addBasenames("classpath:i18n/devops_log");
     }
 
     /**cn.cyberpeace.mp.situationaware
