@@ -81,7 +81,7 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
     public boolean updateByKeyName(SysConfigModel sysConfigModel) {
         ParamCheck.notEmpty(sysConfigModel.getKeyName(), AdminBasei18nCode.SYS_CONFIG_KEY_NAME);
 
-        if (sysConfigModel.getKeyName().equals(SysConfigConstant.KEY_USER_AUDIT) && sysConfigModel.getValue().equals("0")) {
+        if (sysConfigModel.getKeyName().equals(SysConfigConstant.USER_AUDIT_KEY) && sysConfigModel.getValue().equals("0")) {
             // 如果要关闭审核功能，需要检查用户中有没有处于待审核状态的
             List<UserModel> list = userService.listNotAudited();
             if (CollectionUtil.isNotEmpty(list)) {
@@ -134,8 +134,8 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
 
     @Override
     public boolean isNewUserNeedAudit() {
-        SysConfigModel config = getByKeyName(SysConfigConstant.KEY_USER_AUDIT);
-        if (Objects.nonNull(config) && Objects.equals(SysConfigConstant.KEY_USER_NEED_AUDIT, config.getValue())) {
+        SysConfigModel config = getByKeyName(SysConfigConstant.USER_AUDIT_KEY);
+        if (Objects.nonNull(config) && Objects.equals(SysConfigConstant.USER_AUDIT_VALUE_YES, config.getValue())) {
             // 新用户需要审核
             return true;
         }

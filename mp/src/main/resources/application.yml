@@ -5,7 +5,7 @@ ip:
   moloch: 10.100.0.111          # moloch的IP地址
   wazuh: 10.100.7.143           # wazuh的IP地址
   es: 127.0.0.1                 # MP新中台ES地址
-  trex: 10.100.7.199            # trex资源服务器地址
+  trex: 10.100.7.161            # trex资源服务器地址
   rabbitmq: 10.100.0.101        # rabbitmq地址
 
 server:
@@ -120,7 +120,7 @@ mp:
   flow:
     # 流量发生器资源地址
     actuator-resource-url: http://${ip.trex}:80/api/v1/resource
-    trex-image: tgn-1229
+    trex-image: tgn-trex
   sceneplugincloud:
     cpcloud-server: http://${ip.cp}:11111
   sceneplugincollection:

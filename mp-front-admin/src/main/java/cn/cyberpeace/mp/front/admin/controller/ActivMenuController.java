@@ -14,7 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
  * @Author zhouxinghuai
  * @Date：2021/12/16 19:02
  */
-@Api(value = "SYS-ADMIN-TEST", tags = "ADMIN-TEST")
+@Api(value = "SYS-ADMIN", tags = "ADMIN")
 @Slf4j
 @RestController
 @RequestMapping("/sys/admin")
