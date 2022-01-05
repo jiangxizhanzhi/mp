@@ -10,12 +10,16 @@ import com.fasterxml.jackson.core.type.TypeReference;
 public class VirtualSwitch extends CloudClient {
 
     public VirtualSwitchCreateData create(VirtualSwitchCreateData createData) {
+        heavyConcurrentWait();
+
         CloudResponse<VirtualSwitchCreateData> result = cloudPost(CloudUrlConstant.VIRTUAL_SWITCH_CREATE_URL, createData,
                 null, new TypeReference<>() {}, true);
         return result.getData();
     }
 
     public boolean delete(VirtualSwitchDeleteData deleteData) {
+        heavyConcurrentWait();
+
         CloudResponse<Object> result = cloudDelete(CloudUrlConstant.VIRTUAL_SWITCH_DELETE_URL, deleteData, null,
                 new TypeReference<CloudResponse<Object>>() {}, true);
         return true;

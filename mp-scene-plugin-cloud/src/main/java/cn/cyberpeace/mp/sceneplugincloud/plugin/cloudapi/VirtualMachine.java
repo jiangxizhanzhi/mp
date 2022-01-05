@@ -11,6 +11,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 public class VirtualMachine extends CloudClient {
 
     public VirtualMachineCreateData create(VirtualMachineCreateData createData) {
+        heavyConcurrentWait();
+
         CloudResponse<VirtualMachineCreateData> result = cloudPost(CloudUrlConstant.VIRTUAL_MACHINE_CREATE_URL, createData,
                 null, new TypeReference<CloudResponse<VirtualMachineCreateData>>() {
                 }, true);
@@ -18,6 +20,8 @@ public class VirtualMachine extends CloudClient {
     }
 
     public boolean delete(VirtualMachineDeleteData deleteData) {
+        heavyConcurrentWait();
+
         CloudResponse<Object> result = cloudDelete(CloudUrlConstant.VIRTUAL_MACHINE_DELETE_URL, deleteData, null,
                 new TypeReference<CloudResponse<Object>>() {
                 }, true);
