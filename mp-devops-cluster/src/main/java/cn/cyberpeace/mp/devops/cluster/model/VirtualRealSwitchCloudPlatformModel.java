@@ -26,7 +26,7 @@ public class VirtualRealSwitchCloudPlatformModel extends BaseCloudPlatformModel 
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    public static final class Switch{
+    public static final class Switch implements Serializable{
 
         /**
          * IP

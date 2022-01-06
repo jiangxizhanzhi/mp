@@ -19,7 +19,7 @@ public class VmActionCloudPlatformModel extends BaseModel implements Serializabl
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    public static final class Reboot{
+    public static final class Reboot implements Serializable{
 
         private String rebootType;
     }

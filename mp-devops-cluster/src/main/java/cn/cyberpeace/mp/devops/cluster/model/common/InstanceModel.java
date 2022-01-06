@@ -102,7 +102,7 @@ public class InstanceModel implements Serializable {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    public static final class Address{
+    public static final class Address implements Serializable{
 
         /**
          * IP地址

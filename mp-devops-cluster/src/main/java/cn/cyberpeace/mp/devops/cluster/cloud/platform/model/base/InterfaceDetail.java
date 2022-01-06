@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 /**
  * 网络端口详细信息
  * @author wanggang
@@ -14,7 +16,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel("接口明细")
-public class InterfaceDetail {
+public class InterfaceDetail implements Serializable {
 
     @ApiModelProperty("端口号")
     private String interfaceName;

@@ -40,7 +40,7 @@ public class EventMonitorRequest extends BasePageRequest {
      * @return
      */
     public String getUrlParam() {
-        StringBuffer urlBuffer = new StringBuffer();
+        StringBuilder urlBuffer = new StringBuilder();
         urlBuffer.append(BaseConstants.CONNECTOR)
                 .append("start_time")
                 .append(BaseConstants.EQUAL)

@@ -4,13 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 /**
  * @author wanggang
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class SerialPort {
+public class SerialPort implements Serializable {
 
     private Integer comAliveTime;
 

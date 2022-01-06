@@ -37,6 +37,8 @@ import java.util.Objects;
 @Api(tags = "靶标管理-分类管理")
 public class TypeController {
 
+    private static final String CCM_1 = "CCM-1";
+
     private TypeConverter typeConverter;
 
     private TypeService typeService;
@@ -70,7 +72,7 @@ public class TypeController {
         TypeAllConvertModel imageType = typeConverter.findImageType();
         TypeAllResponse allResponse = new TypeAllResponse();
         List<SerialPortConvertModel> serialPortConvertModels = serialPortConverter.list();
-        allResponse.setSerialPortResponses(Lists.newArrayList(new SerialPortResponse("CCM-1","CCM-1",serialPortConvertModels)));
+        allResponse.setSerialPortResponses(Lists.newArrayList(new SerialPortResponse(CCM_1,CCM_1,serialPortConvertModels)));
         allResponse.setSwitchConvertModels(switchConverter.treeList());
         allResponse.setAccessProtocolsPorts(typeService.findAccessProtocolsPort().getItems());
         allResponse.setSnmpVersions(Objects.nonNull(snmpVersion) ? snmpVersion.getIdStringModelList() : null);
@@ -284,7 +286,7 @@ public class TypeController {
         TypeAllConvertModel snmpVersion = typeConverter.findSnmpVersion();
         TypeAllResponse allResponse = new TypeAllResponse();
         List<SerialPortConvertModel> serialPortConvertModels = serialPortConverter.list();
-        allResponse.setSerialPortResponses(Lists.newArrayList(new SerialPortResponse("CCM-1","CCM-1",serialPortConvertModels)));
+        allResponse.setSerialPortResponses(Lists.newArrayList(new SerialPortResponse(CCM_1,CCM_1,serialPortConvertModels)));
         allResponse.setSwitchConvertModels(switchConverter.treeList());
         allResponse.setAccessProtocolsPorts(typeService.findAccessProtocolsPort().getItems());
         allResponse.setSnmpVersions(Objects.nonNull(snmpVersion) ? snmpVersion.getIdStringModelList() : null);
@@ -351,7 +353,7 @@ public class TypeController {
     @GetMapping("/serial-port-list")
     public Result<List<SerialPortResponse>> serialPortList(){
         List<SerialPortConvertModel> list = serialPortConverter.list();
-        return new Result<>(Lists.newArrayList(new SerialPortResponse("CCM-1","CCM-1",list)));
+        return new Result<>(Lists.newArrayList(new SerialPortResponse(CCM_1,CCM_1,list)));
     }
 
     @ApiOperation("查询交换机部分信息数据")

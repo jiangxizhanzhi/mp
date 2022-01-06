@@ -22,13 +22,6 @@ public class BasePageConvertModel {
     private boolean success;
 
     /**
-     * 请求ID
-     */
-    @ApiModelProperty(hidden = true)
-    @JsonIgnore
-    private String request_id;
-
-    /**
      * 总数据大小
      */
     @ApiModelProperty(hidden = true)

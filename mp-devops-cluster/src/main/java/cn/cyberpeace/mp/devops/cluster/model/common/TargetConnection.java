@@ -6,11 +6,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel("靶标登录信息")
-public class TargetConnection {
+public class TargetConnection implements Serializable {
 
     @ApiModelProperty("协议")
     private String protocol;

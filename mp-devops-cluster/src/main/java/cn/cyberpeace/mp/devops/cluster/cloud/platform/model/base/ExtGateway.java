@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -15,7 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 @Data
 @ApiModel("网关信息")
-public class ExtGateway {
+public class ExtGateway implements Serializable {
 
     private List<PortConfig> portConfigs;
 }

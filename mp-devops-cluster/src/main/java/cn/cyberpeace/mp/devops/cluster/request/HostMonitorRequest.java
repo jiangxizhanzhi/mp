@@ -32,7 +32,7 @@ public class HostMonitorRequest extends BasePageRequest {
      * @return
      */
     public String getUrlParam() {
-        StringBuffer urlBuffer = new StringBuffer();
+        StringBuilder urlBuffer = new StringBuilder();
         urlBuffer.append(BaseConstants.CONNECTOR)
                 .append(ControllerConstant.STR_PER_PAGE)
                 .append(BaseConstants.EQUAL)

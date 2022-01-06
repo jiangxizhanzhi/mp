@@ -71,7 +71,7 @@ public class InstallerConverter implements BaseConverter{
             return convertModel;
         }
         List<InstallerConvertModel> modelList = model.getItems().stream()
-                .map(installer -> convertInstaller(installer)).collect(Collectors.toList());
+                .map(this::convertInstaller).collect(Collectors.toList());
         convertModel.setModelList(modelList);
         convertModel.setTotal(model.getTotal());
         return convertModel;
@@ -146,9 +146,9 @@ public class InstallerConverter implements BaseConverter{
         ExtNormal extNormal = installer.getExtNormal();
         if (Objects.nonNull(extNormal) && StringUtils.isNotBlank(extNormal.getResources())){
             model.setResourceList(JSONArray.parseArray(extNormal.getResources(), Resource.class));
-            model.getResourceList().stream().filter(resource -> StringUtils.isNotBlank(resource.getPlatforms())).forEach(resource -> {
-                resource.setPlatforms(Joiner.on("|").join(resource.getPlatforms().split("")));
-            });
+            model.getResourceList().stream().filter(resource -> StringUtils.isNotBlank(resource.getPlatforms())).forEach(resource ->
+                resource.setPlatforms(Joiner.on("|").join(resource.getPlatforms().split("")))
+            );
         }
         model.setDeviceCount(installer.getDeviceCount());
         model.setExtNormal(extNormal);
