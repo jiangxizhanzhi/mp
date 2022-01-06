@@ -222,10 +222,17 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     public ServiceResult<CsceneBO> sync(CsceneBO csceneBO, CsceneContextBO context) {
         checkSceneEditNodeLimit(csceneBO);
         if (csceneBO.getSceneConfig() == null && StringUtils.isNotEmpty(csceneBO.getId())) {
+            // 更新name
             var serviceResult = update(csceneBO.toModel());
+            // 更新录屏开关
+            if (csceneBO.getEnableRecording() != null) {
+                String sceneConfigId = getSceneConfigId(csceneBO.getId());
+                scenePluginCloudSceneConfigService.updateEnableRecording(sceneConfigId, csceneBO.getEnableRecording());
+            }
             if (serviceResult != null && serviceResult.getSource() != null && serviceResult.getSource().getObj() != null) {
                 CsceneBO result = new CsceneBO();
                 result.fromModel(serviceResult.getSource().getObj());
+                result.setEnableRecording(csceneBO.getEnableRecording());
                 return new ServiceResult<>(result);
             } else {
                 return new ServiceResult<>(csceneBO);

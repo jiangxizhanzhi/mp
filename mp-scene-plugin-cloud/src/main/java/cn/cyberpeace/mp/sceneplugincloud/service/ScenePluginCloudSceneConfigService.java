@@ -1,8 +1,12 @@
 package cn.cyberpeace.mp.sceneplugincloud.service;
 
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigModel;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConfigMapper;
 import cn.cyberpeace.mp.sceneplugincloud.service.common.CloudSceneConfigStatCommon;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +27,12 @@ public class ScenePluginCloudSceneConfigService {
 
     private CloudSceneConfigStatCommon cloudSceneConfigStatCommon;
 
+    private CloudPluginSceneConfigMapper cloudPluginSceneConfigMapper;
+
     @Autowired
-    public ScenePluginCloudSceneConfigService(CloudSceneConfigStatCommon cloudSceneConfigStatCommon) {
+    public ScenePluginCloudSceneConfigService(CloudSceneConfigStatCommon cloudSceneConfigStatCommon, CloudPluginSceneConfigMapper cloudPluginSceneConfigMapper) {
         this.cloudSceneConfigStatCommon = cloudSceneConfigStatCommon;
+        this.cloudPluginSceneConfigMapper = cloudPluginSceneConfigMapper;
     }
 
     /**
@@ -54,4 +61,14 @@ public class ScenePluginCloudSceneConfigService {
         return new ServiceResult<>(result);
     }
 
+    public ServiceResult<Boolean> updateEnableRecording(String sceneId, boolean newValue) {
+        CloudPluginSceneConfigModel sceneModel = new CloudPluginSceneConfigModel();
+        sceneModel.setEnableRecording(newValue);
+        int result = cloudPluginSceneConfigMapper.filterUpdate(sceneModel, new HumanCondition().filterEqual(CloudPluginSceneModel::getScene, sceneId));
+        if (result == 0) {
+            sceneModel.setScene(sceneId);
+            cloudPluginSceneConfigMapper.save(sceneModel);
+        }
+        return new ServiceResult<>(result > 0);
+    }
 }

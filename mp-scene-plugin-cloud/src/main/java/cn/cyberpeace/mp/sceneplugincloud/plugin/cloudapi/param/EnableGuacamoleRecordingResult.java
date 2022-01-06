@@ -10,7 +10,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class EnableGuacamoleRecordingResult {
     private DataItem data;
-    private String messgaes;
+    private String messages;
+    private String message;
     private Boolean success;
     private String requestId;
 
@@ -30,5 +31,6 @@ public class EnableGuacamoleRecordingResult {
         private String username;
         private String department;
         private String scene;
+        private String host;
     }
 }
