@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 /**
  * 扩展系统信息
  * @author wanggang
@@ -16,7 +18,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @ApiModel("系统信息")
-public class ExtSystemInfo {
+public class ExtSystemInfo implements Serializable {
 
     /**
      * 操作系统

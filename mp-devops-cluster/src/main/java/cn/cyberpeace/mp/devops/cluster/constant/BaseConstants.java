@@ -3,51 +3,55 @@ package cn.cyberpeace.mp.devops.cluster.constant;
 /**
  * @author wanggang
  */
-public interface BaseConstants {
+public final class BaseConstants {
+
+    private BaseConstants(){
+        throw new IllegalStateException("Utility class");
+    }
 
     /**
      * 逗号
      */
-    String COMMA = ",";
+    public static final String COMMA = ",";
 
     /**
      * 连接符
      */
-    String CONNECTOR = "&";
+    public static final String CONNECTOR = "&";
 
     /**
      * 等号
      */
-    String EQUAL = "=";
+    public static final String EQUAL = "=";
 
     /**
      * 问号
      */
-    String QUESTION_MARK = "?";
+    public static final String QUESTION_MARK = "?";
 
     /**
      * SUCCESS常量
      */
-    String STR_SUCCESS = "SUCCESS";
+    public static final String STR_SUCCESS = "SUCCESS";
 
     /**
      * success常量
      */
-    String STR_LOWER_SUCCESS = "success";
+    public static final String STR_LOWER_SUCCESS = "success";
 
     /**
      * detail常量
      */
-    String STR_DETAIL = "detail";
+    public static final String STR_DETAIL = "detail";
 
     /**
      * links常量
      */
-    String STR_LINKS = "links";
+    public static final String STR_LINKS = "links";
 
     /**
      * data常量
      */
-    String STR_DATA = "data";
+    public static final String STR_DATA = "data";
 
 }

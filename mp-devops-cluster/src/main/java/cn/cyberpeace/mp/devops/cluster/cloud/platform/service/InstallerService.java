@@ -39,6 +39,8 @@ public class InstallerService extends BaseOpenStackServiceImpl {
 
     private static final String INSTALLER = "/installer";
 
+    private static final String LISTS = "/lists";
+
     public InstallerService(DevopsConfig devopsConfig) {
         super(devopsConfig);
     }
@@ -49,7 +51,7 @@ public class InstallerService extends BaseOpenStackServiceImpl {
      * @return
      */
     public InstallerCloudPlatformModel page(String getParams){
-        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + INSTALLER + "/lists" + getParams, InstallerCloudPlatformModel.class);
+        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + INSTALLER + LISTS + getParams, InstallerCloudPlatformModel.class);
     }
 
     /**
@@ -77,7 +79,7 @@ public class InstallerService extends BaseOpenStackServiceImpl {
         if (StringUtils.isNotBlank(installer.getUuid())){
             return super.sendFormDataPut(CPCLOUD_DEVICE + URL_VERSION + INSTALLER, builder.build(), Installer.class);
         }else {
-            return super.sendFormDataPost(CPCLOUD_DEVICE + URL_VERSION + INSTALLER + "/lists", builder.build(), Installer.class);
+            return super.sendFormDataPost(CPCLOUD_DEVICE + URL_VERSION + INSTALLER + LISTS, builder.build(), Installer.class);
         }
     }
 
@@ -107,6 +109,6 @@ public class InstallerService extends BaseOpenStackServiceImpl {
     public BaseCloudPlatformModel deleteByIds(List<String> ids) {
         var jsonObject = new JSONObject();
         jsonObject.put("uuids", ids);
-        return super.sendDelete(CPCLOUD_DEVICE + URL_VERSION + INSTALLER + "/lists",JSONObject.toJSONString(jsonObject),BaseCloudPlatformModel.class);
+        return super.sendDelete(CPCLOUD_DEVICE + URL_VERSION + INSTALLER + LISTS,JSONObject.toJSONString(jsonObject),BaseCloudPlatformModel.class);
     }
 }

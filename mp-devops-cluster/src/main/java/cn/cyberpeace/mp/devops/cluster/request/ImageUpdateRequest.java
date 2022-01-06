@@ -1,12 +1,12 @@
 package cn.cyberpeace.mp.devops.cluster.request;
 
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -105,7 +105,7 @@ public class ImageUpdateRequest extends BaseRequest {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    private class SystemInfo{
+    private class SystemInfo implements Serializable {
 
         /**
          * 操作系统
@@ -129,7 +129,7 @@ public class ImageUpdateRequest extends BaseRequest {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    private class SystemImage{
+    private class SystemImage implements Serializable{
 
         /**
          * 镜像类型
@@ -153,7 +153,7 @@ public class ImageUpdateRequest extends BaseRequest {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    private class AccessWay{
+    private class AccessWay implements Serializable{
 
         /**
          * 协议

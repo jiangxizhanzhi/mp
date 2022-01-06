@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -16,7 +17,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel("虚拟机信息")
-public class ExtVm {
+public class ExtVm implements Serializable {
 
     @ApiModelProperty("flavor信息")
     private String flavor;

@@ -4,13 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ContainerModel {
+public class ContainerModel implements Serializable {
 
     /**
      * ID
@@ -45,7 +46,7 @@ public class ContainerModel {
     /**
      * 地址信息
      */
-    private Map<String, Object> addresses;
+    private HashMap<String, Object> addresses;
 
     /**
      * 逻辑卷

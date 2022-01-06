@@ -19,6 +19,8 @@ public class TypeService extends BaseOpenStackServiceImpl {
 
     private static final String TYPE = "/type";
 
+    private static final String QUESTION_TYPE = "?type=";
+
     public TypeService(DevopsConfig devopsConfig) {
         super(devopsConfig);
     }
@@ -28,7 +30,7 @@ public class TypeService extends BaseOpenStackServiceImpl {
      * @return
      */
     public TypeCloudPlatformModel findL1AndL2AndL3Type(){
-        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + TYPE + "?type=l3", TypeCloudPlatformModel.class);
+        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + TYPE + QUESTION_TYPE + "l3", TypeCloudPlatformModel.class);
     }
 
     /**
@@ -36,7 +38,7 @@ public class TypeService extends BaseOpenStackServiceImpl {
      * @return
      */
     public TypeL2CloudPlatformModel findL1AndL2Type(){
-        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + TYPE + "?type=l2", TypeL2CloudPlatformModel.class);
+        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + TYPE + QUESTION_TYPE + "l2", TypeL2CloudPlatformModel.class);
     }
 
     /**
@@ -44,7 +46,7 @@ public class TypeService extends BaseOpenStackServiceImpl {
      * @return
      */
     public AccessProtocolsPortCloudPlatform findAccessProtocolsPort(){
-        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + TYPE + "?type=access_protocols_port",
+        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + TYPE + QUESTION_TYPE + "access_protocols_port",
                             AccessProtocolsPortCloudPlatform.class);
     }
 
@@ -53,7 +55,7 @@ public class TypeService extends BaseOpenStackServiceImpl {
      * @return
      */
     public TypeIdIntegerCloudPlatformModel findIdIntegerByType(String type){
-        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + TYPE + "?type=" + type, TypeIdIntegerCloudPlatformModel.class);
+        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + TYPE + QUESTION_TYPE + type, TypeIdIntegerCloudPlatformModel.class);
     }
 
     /**
@@ -61,7 +63,7 @@ public class TypeService extends BaseOpenStackServiceImpl {
      * @return
      */
     public TypeIdStringCloudPlatformModel findIdStringByType(String type){
-        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + TYPE + "?type=" + type, TypeIdStringCloudPlatformModel.class);
+        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + TYPE + QUESTION_TYPE + type, TypeIdStringCloudPlatformModel.class);
     }
 
     /**
@@ -70,6 +72,6 @@ public class TypeService extends BaseOpenStackServiceImpl {
      * @return
      */
     public TypeItemsCloudPlatformModel findItemsByType(String type){
-        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + TYPE + "?type=" + type, TypeItemsCloudPlatformModel.class);
+        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + TYPE + QUESTION_TYPE + type, TypeItemsCloudPlatformModel.class);
     }
 }

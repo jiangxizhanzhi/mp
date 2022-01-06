@@ -12,6 +12,10 @@ import java.io.IOException;
 @Slf4j
 public class JsonUtils {
 
+    private JsonUtils(){
+        throw new IllegalStateException("Utility class");
+    }
+
     /**
      * 将对象的大写转换为下划线加小写
      * @param object

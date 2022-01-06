@@ -152,7 +152,7 @@ public class CloudPlatformMonitorController {
      */
     @ApiOperation("节点管理-关机/重启")
     @GetMapping("/hypervisor/reboot-poweroff")
-    public ServiceResult<?> rebootOrPowerOff(HypervisorRequest request){
+    public ServiceResult rebootOrPowerOff(HypervisorRequest request){
         if (StringUtils.isBlank(request.getAction()) || StringUtils.isBlank(request.getHostname())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }

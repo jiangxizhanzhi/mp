@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -28,7 +29,7 @@ public class OpenflowActionResponse extends BaseCloudPlatformModel {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    public static final class Action {
+    public static final class Action implements Serializable {
 
         @ApiModelProperty("动作")
         private String actions;

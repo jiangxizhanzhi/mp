@@ -128,7 +128,7 @@ public class ImagesConverter implements BaseConverter{
 
         Map<String, PublicEnum> targetMap = targetModels.stream().collect(Collectors.toMap(TargetModel::getUuid, TargetModel::getIsPublic));
 
-        List<ImageConvertModel> modelList = model.getItems().stream().map(device -> wrapperImageConvertModel(device)).collect(Collectors.toList());
+        List<ImageConvertModel> modelList = model.getItems().stream().map(this::wrapperImageConvertModel).collect(Collectors.toList());
 
         if (CollectionUtils.isNotEmpty(modelList)) {
             for (ImageConvertModel imageConvertModel : modelList) {

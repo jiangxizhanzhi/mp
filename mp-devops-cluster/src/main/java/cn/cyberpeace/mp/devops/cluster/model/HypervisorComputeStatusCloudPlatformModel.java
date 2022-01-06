@@ -2,8 +2,9 @@ package cn.cyberpeace.mp.devops.cluster.model;
 
 import lombok.*;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Map;
+import java.util.HashMap;
 
 @Data
 @NoArgsConstructor
@@ -20,7 +21,7 @@ public class HypervisorComputeStatusCloudPlatformModel extends BaseCloudPlatform
     /**
      * 磁盘IO
      */
-    private Map<String,Object> diskIo;
+    private HashMap<String,Object> diskIo;
 
     /**
      * 内存信息
@@ -35,12 +36,12 @@ public class HypervisorComputeStatusCloudPlatformModel extends BaseCloudPlatform
     /**
      * 网络IO
      */
-    private Map<String,Object> netIo;
+    private HashMap<String,Object> netIo;
 
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    public static final class DiskData{
+    public static final class DiskData implements Serializable {
         /**
          *
          */
@@ -91,7 +92,7 @@ public class HypervisorComputeStatusCloudPlatformModel extends BaseCloudPlatform
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    public static final class MemoryData{
+    public static final class MemoryData implements Serializable{
         /**
          *
          */
@@ -111,7 +112,7 @@ public class HypervisorComputeStatusCloudPlatformModel extends BaseCloudPlatform
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    public static final class CpuData{
+    public static final class CpuData implements Serializable{
 
         private Integer cpuCount;
 

@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 /**
  * 扩展镜像信息
  * @author wanggang
@@ -14,7 +16,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Data
 @ApiModel("扩展镜像信息")
-public class ExtImageInfo {
+public class ExtImageInfo implements Serializable {
 
     @ApiModelProperty("UUID")
     private String uuid;

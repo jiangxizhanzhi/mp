@@ -5,10 +5,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class RealEquipmentByParams {
+public class RealEquipmentByParams implements Serializable {
 
     @ApiModelProperty("交换机端口")
     private String switchPort;

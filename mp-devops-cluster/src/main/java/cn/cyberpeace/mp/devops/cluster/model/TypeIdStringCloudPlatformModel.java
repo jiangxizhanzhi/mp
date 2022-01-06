@@ -23,7 +23,7 @@ public class TypeIdStringCloudPlatformModel extends BaseCloudPlatformModel imple
     @NoArgsConstructor
     @AllArgsConstructor
     @Data
-    public static final class Item{
+    public static final class Item implements Serializable{
 
         /**
          * ID

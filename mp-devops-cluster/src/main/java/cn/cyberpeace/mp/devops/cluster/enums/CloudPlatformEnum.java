@@ -28,7 +28,7 @@ public enum CloudPlatformEnum{
 
     POWEROFF("PowerOff","已关机");
 
-    public static Map<String, CloudPlatformEnum> map = new HashMap<>();
+    private static final Map<String, CloudPlatformEnum> map = new HashMap<>();
 
     static {
         Arrays.stream(CloudPlatformEnum.values()).forEach(

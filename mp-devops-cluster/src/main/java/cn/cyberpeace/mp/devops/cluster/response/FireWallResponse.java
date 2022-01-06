@@ -24,13 +24,13 @@ public class FireWallResponse {
      * 入站策略
      */
     @ApiModelProperty("入站策略")
-    private String ingress_name;
+    private String ingressName;
 
     /**
      * 出站策略
      */
     @ApiModelProperty("出站策略")
-    private String engross_name;
+    private String engrossName;
 
     /**
      * 描述

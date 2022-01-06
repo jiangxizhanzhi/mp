@@ -114,7 +114,7 @@ public class DevopsTargetController {
     public ServiceResult<TargetUploadResponse> upload(@RequestParam("type") String type,@RequestParam("file") MultipartFile file){
         Map<String,File> fileList = null;
         try {
-            fileList = FileUtils.transferToFileMap(Arrays.asList(file),type);
+            fileList = FileUtils.transferToFileMap(Arrays.asList(file));
         } catch (IOException e) {
            log.error("file transfer error",e);
         }

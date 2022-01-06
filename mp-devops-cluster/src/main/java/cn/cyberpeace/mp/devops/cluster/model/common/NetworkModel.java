@@ -4,12 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public final class NetworkModel{
+public final class NetworkModel implements Serializable {
 
     /**
      * ID
@@ -98,7 +99,7 @@ public final class NetworkModel{
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    public static final class Subnet{
+    public static final class Subnet implements Serializable{
 
         private String id;
 
