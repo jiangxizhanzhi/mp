@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.sceneplugincloud.constant;
 public class CloudUrlConstant {
     public static final String CONTAINER_CREATE_URL = "/v1/scenarios/container";
     public static final String CONTAINER_DELETE_URL = "/v1/scenarios/container";
+    public static final String CONTAINER_GET_URL = "/v1/scenarios/container/%s";
     public static final String CONTAINER_COPY_FILE_URL = "/v1/containers/%s/archive";
     public static final String CONTAINER_EXECUTE_COMMAND_URL = "/v1/containers/%s/execute";
 
@@ -27,6 +28,8 @@ public class CloudUrlConstant {
     public static final String VIRTUAL_INTERNET_CREATE_URL = "/v1/scenarios/virtual_internet";
     public static final String NETWORK_QUERY_URL = "/v1/networks";
     public static final String NETWORK_GET_URL = "/v1/networks/%s";
+
+    public static final String CONSOLE_INFO_GET_URL = "/cpcloud/instance_control/v1/console";
 
     public static final String CREATE_CONNECTION_URL = "/cpcloud/guacamole/v1/connection";
     public static final String GET_CONNECTION_URL = "/cpcloud/guacamole/v1/connection";

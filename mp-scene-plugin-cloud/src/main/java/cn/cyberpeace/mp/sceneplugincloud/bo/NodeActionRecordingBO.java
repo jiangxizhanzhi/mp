@@ -4,6 +4,9 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+/**
+ * @Deprecated
+ */
 @ApiModel(description = "场景关闭录屏数据")
 @Data
 public class NodeActionRecordingBO {

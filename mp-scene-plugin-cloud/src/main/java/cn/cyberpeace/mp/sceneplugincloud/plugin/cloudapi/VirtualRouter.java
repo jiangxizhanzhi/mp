@@ -13,6 +13,8 @@ import java.util.ArrayList;
 public class VirtualRouter extends CloudClient {
 
     public VirtualRouterCreateData create(VirtualRouterCreateData createData) {
+        heavyConcurrentWait();
+
         CloudResponse<VirtualRouterCreateData> result = cloudPost(CloudUrlConstant.VIRTUAL_ROUTER_CREATE_URL, createData,
                 null, new TypeReference<CloudResponse<VirtualRouterCreateData>>() {}, true);
         var virtualRouterData =  result.getData();
@@ -30,6 +32,8 @@ public class VirtualRouter extends CloudClient {
     }
 
     public boolean delete(VirtualRouterDeleteData deleteData) {
+        heavyConcurrentWait();
+
         CloudResponse<Object> result = cloudDelete(CloudUrlConstant.VIRTUAL_ROUTER_DELETE_URL, deleteData, null,
                 new TypeReference<CloudResponse<Object>>() {}, true);
         return true;

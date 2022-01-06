@@ -4,7 +4,21 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerGetResult;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.DisableGuacamoleRecordingData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.DisableGuacamoleRecordingResult;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.EnableGuacamoleRecordingData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.EnableGuacamoleRecordingResult;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GetGuacamoleAssistanceData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GetGuacamoleMonitorData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GetGuacamoleRecordingData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleAssistanceData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleCreateConnectionData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleCreateConnectionResult;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleGetConnectionUrlParam;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleGetConnectionUrlResult;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleMonitorData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleRecordingData;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -32,6 +46,11 @@ public class Remote extends CloudClient {
         }
 
         return result;
+    }
+
+    public String getContainerConsoleUrl(String containerId) {
+        ContainerGetResult result = getHttpClient().get(String.format(CloudUrlConstant.CONTAINER_GET_URL, containerId), null, ContainerGetResult.class);
+        return result.getData() == null ? null : result.getData().getUrl();
     }
 
     public String removeConnection() {
@@ -70,17 +89,18 @@ public class Remote extends CloudClient {
         return new ListObjResult<>(result.getData(), total);
     }
 
-    public String enableRecording(String connectionId) {
+    public String enableRecording(String connectionId, String sceneName, String nodeName, String username, String department) {
         var enableGuacamoleRecordingData = new EnableGuacamoleRecordingData();
         enableGuacamoleRecordingData.setConnectionId(connectionId);
-        enableGuacamoleRecordingData.setUsername(StringUtils.EMPTY);
-        enableGuacamoleRecordingData.setDepartment(StringUtils.EMPTY);
-        enableGuacamoleRecordingData.setScene(StringUtils.EMPTY);
+        enableGuacamoleRecordingData.setUsername(username == null ? StringUtils.EMPTY : username);
+        enableGuacamoleRecordingData.setDepartment(department == null ? StringUtils.EMPTY : department);
+        enableGuacamoleRecordingData.setScene(sceneName == null ? StringUtils.EMPTY : sceneName);
+        enableGuacamoleRecordingData.setHost(nodeName == null ? StringUtils.EMPTY : nodeName);
         var result = getHttpClient().put(CloudUrlConstant.ENABLE_RECORDING_URL,
                 enableGuacamoleRecordingData, null,
                 EnableGuacamoleRecordingResult.class);
         if (!Boolean.TRUE.equals(result.getSuccess())) {
-            throw new MpRuntimeException(result.getMessgaes());
+            throw new MpRuntimeException(result.getMessages());
         }
         return result.getData().getRecordingName();
     }

@@ -4,7 +4,10 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.base.util.basic.*;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
+import cn.cyberpeace.mp.base.util.basic.FloatUtils;
+import cn.cyberpeace.mp.base.util.basic.IntUtils;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
@@ -35,11 +38,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -84,6 +83,17 @@ public class ScenePluginCloudSceneService {
         private CloudPluginSceneElementPortBO cloudPort;
         private CloudPluginSceneElementBO cloudElement;
         private SceneBO srcScene;
+        private CloudPluginSceneBO cloudScene;
+
+        public NodeConnectionBO toNewNodeConnection() {
+            var nodeConnection = new NodeConnectionBO();
+            nodeConnection.setSceneId(srcScene.getEid());
+            nodeConnection.setSceneName(srcScene.getName());
+            nodeConnection.setNodeId(cloudElement.getSrcElement().getId());
+            nodeConnection.setNodeName(cloudElement.getSrcElement().getName());
+            nodeConnection.setProtocol(accessMode.getProtocol());
+            return nodeConnection;
+        }
     }
 
     private Map<String, AccessModeLinkInfo> collectAccessModeLinkInfo(String sceneId, List<String> nodeIds) {
@@ -92,6 +102,7 @@ public class ScenePluginCloudSceneService {
         var sceneHandler = new SceneHandler(sceneId, null, false, null);
         var scene = sceneHandler.getScene();
         CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        var cloudScene = pluginHandler.getScene();
         pluginHandler.getElementMap().forEach((nodeId, cloudElement) -> {
             if (nodeIds != null && !nodeIds.isEmpty() && !nodeIds.contains(nodeId)) {
                 return;
@@ -110,7 +121,7 @@ public class ScenePluginCloudSceneService {
                     }
 
                     accessModeLinkInfoMap.put(accessModeId,
-                            new AccessModeLinkInfo(accessModeId, accessMode, cloudPort, cloudElement, scene));
+                            new AccessModeLinkInfo(accessModeId, accessMode, cloudPort, cloudElement, scene, cloudScene));
                 });
             });
         });
@@ -130,7 +141,18 @@ public class ScenePluginCloudSceneService {
     @AllArgsConstructor
     private static class ConnectionLinkInfo {
         private String connectionId;
+        private CloudPluginSceneConnectionModel sceneConnection;
         private AccessModeLinkInfo accessModeLinkInfo;
+
+        public NodeConnectionBO toNewNodeConnection() {
+            var nodeConnection = accessModeLinkInfo.toNewNodeConnection();
+            nodeConnection.setUser(sceneConnection.getAccessUser());
+            nodeConnection.setConnectionId(sceneConnection.getConnectionId());
+            nodeConnection.setConnectionEnableRecording(sceneConnection.getConnectionEnableRecording());
+            nodeConnection.setConnectionRecordingName(sceneConnection.getConnectionRecordingName());
+            nodeConnection.setConnectionUrl(sceneConnection.getConnectionUrl());
+            return nodeConnection;
+        }
     }
 
     private Map<String, ConnectionLinkInfo> collectConnectionLinkInfo(String sceneId, List<String> nodeIds,
@@ -153,7 +175,7 @@ public class ScenePluginCloudSceneService {
         sceneConnections.forEach(sceneConnection -> {
             var connectionId = sceneConnection.getConnectionId();
             var accessModeLinkInfo = accessModeLinkInfoMap.get(sceneConnection.getAccessModeId());
-            var connectionLinkInfo = new ConnectionLinkInfo(connectionId, accessModeLinkInfo);
+            var connectionLinkInfo = new ConnectionLinkInfo(connectionId, sceneConnection, accessModeLinkInfo);
             connectionLinkInfoMap.put(connectionId, connectionLinkInfo);
         });
 
@@ -289,30 +311,31 @@ public class ScenePluginCloudSceneService {
         return new ListObjServiceResult<>(new ListObjResult<>(recordings, rawRecordings.getTotal()));
     }
 
-    public ServiceResult<NodeActionRecordingBO> enableRemoteRecording(String sceneId, String nodeId, String connectionId) {
-        var connectionLinkInfoMap = collectConnectionLinkInfo(sceneId, List.of(nodeId), null);
+    public ServiceResult<NodeConnectionBO> enableRemoteRecording(String sceneId, String nodeId, String userId, String connectionId,
+                                                                 CloudScenePluginContext context) {
+        var connectionLinkInfoMap = collectConnectionLinkInfo(sceneId, List.of(nodeId), List.of(userId));
         if (!connectionLinkInfoMap.containsKey(connectionId)) {
             return new ServiceResult<>(null, CloudErrorCode.CONNECTION_NOT_EXIST);
         }
-
-        var remoteClient = new Remote();
-        var result = remoteClient.enableRecording(connectionId);
-        var actionRecordingBO = new NodeActionRecordingBO();
-        actionRecordingBO.setRecordingName(result);
-        return new ServiceResult<>(actionRecordingBO);
+        var connectionLinkInfo = connectionLinkInfoMap.get(connectionId);
+        var accessModeInfo = connectionLinkInfo.getAccessModeLinkInfo();
+        var extraParam = new CloudSceneConnectionCommon.SceneConnectionEnableRecordingExtraParam();
+        extraParam.setSceneName(accessModeInfo.getSrcScene().getName());
+        extraParam.setNodeName(accessModeInfo.getCloudElement().getSrcElement().getName());
+        extraParam.setUsername(userId);
+        extraParam.setDepartment(context == null ? StringUtils.EMPTY : context.getRequestUserOrg());
+        CloudSceneConnectionCommon.enableRecording(connectionLinkInfo.getSceneConnection(), extraParam);
+        return new ServiceResult<>(connectionLinkInfo.toNewNodeConnection());
     }
 
-    public ServiceResult<NodeActionRecordingBO> disableRemoteRecording(String sceneId, String nodeId, String connectionId) {
-        var connectionLinkInfoMap = collectConnectionLinkInfo(sceneId, List.of(nodeId), null);
+    public ServiceResult<NodeConnectionBO> disableRemoteRecording(String sceneId, String nodeId, String userId, String connectionId) {
+        var connectionLinkInfoMap = collectConnectionLinkInfo(sceneId, List.of(nodeId), List.of(userId));
         if (!connectionLinkInfoMap.containsKey(connectionId)) {
             return new ServiceResult<>(null, CloudErrorCode.CONNECTION_NOT_EXIST);
         }
-
-        var remoteClient = new Remote();
-        var result = remoteClient.disableRecording(connectionId);
-        var actionRecordingBO = new NodeActionRecordingBO();
-        actionRecordingBO.setRecordingName(result);
-        return new ServiceResult<>(actionRecordingBO);
+        var connectionLinkInfo = connectionLinkInfoMap.get(connectionId);
+        CloudSceneConnectionCommon.disableRecording(connectionLinkInfo.getSceneConnection());
+        return new ServiceResult<>(connectionLinkInfo.toNewNodeConnection());
     }
 
     public ServiceResult<NodeConnectionBO> getSceneRemoteConnection(String sceneId, String nodeId,
@@ -324,29 +347,27 @@ public class ScenePluginCloudSceneService {
             return new ServiceResult<>(null);
         }
 
-        var srcScene = accessModeInfo.getSrcScene();
-        var srcElement = accessModeInfo.getCloudElement().getSrcElement();
-        var portId = accessModeInfo.getCloudPort().getSrcPort().getId();
-        var accessMode = accessModeInfo.getAccessMode();
-        var nodeConnection = new NodeConnectionBO();
-        nodeConnection.setSceneId(srcScene.getEid());
-        nodeConnection.setSceneName(srcScene.getName());
-        nodeConnection.setNodeId(srcElement.getId());
-        nodeConnection.setNodeName(srcElement.getName());
-        nodeConnection.setProtocol(accessMode.getProtocol());
+        var nodeConnection = accessModeInfo.toNewNodeConnection();
         nodeConnection.setUser(userId);
 
+        var accessMode = accessModeInfo.getAccessMode();
         if (accessMode.getProtocol().equals(AccessMode.Protocol.CONSOLE)) {
             var virtualType = accessModeInfo.getCloudElement().getVirtualType();
             if (virtualType != null && virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
-                nodeConnection.setConnectionUrl(accessMode.getConnectionUrl());
+                nodeConnection.setConnectionUrl(CloudSceneConnectionCommon.getContainerConsoleUrl(accessModeInfo.getCloudElement().getResourceId()));
                 return new ServiceResult<>(nodeConnection);
             }
         }
 
+        var srcScene = accessModeInfo.getSrcScene();
+        var cloudScene = accessModeInfo.getCloudScene();
+        var cloudElement = accessModeInfo.getCloudElement();
+        var portId = accessModeInfo.getCloudPort().getSrcPort().getId();
         var sceneConnectionParam = new CloudSceneConnectionCommon.SceneConnectionParam();
         sceneConnectionParam.setSceneId(sceneId);
         sceneConnectionParam.setSceneElementId(nodeId);
+        sceneConnectionParam.setResourceId(cloudElement.getResourceId());
+        sceneConnectionParam.setResourceHost(cloudElement.getHost());
         sceneConnectionParam.setSceneElementPortId(portId);
         sceneConnectionParam.setCloudAccessMode(accessModeInfo.getAccessMode());
         sceneConnectionParam.setUserId(userId);
@@ -359,6 +380,21 @@ public class ScenePluginCloudSceneService {
 
         nodeConnection.setConnectionId(sceneConnection.getConnectionId());
         nodeConnection.setConnectionUrl(sceneConnection.getConnectionUrl());
+
+        if (cloudScene != null && Boolean.TRUE.equals(cloudScene.getEnableRecording())
+                && !Boolean.TRUE.equals(sceneConnection.getConnectionEnableRecording())) {
+            var extraParam = new CloudSceneConnectionCommon.SceneConnectionEnableRecordingExtraParam();
+            extraParam.setSceneName(accessModeInfo.getSrcScene().getName());
+            extraParam.setNodeName(accessModeInfo.getCloudElement().getSrcElement().getName());
+            extraParam.setUsername(userId);
+            extraParam.setDepartment(context == null ? StringUtils.EMPTY : context.getRequestUserOrg());
+            var enableRecordingFlag = CloudSceneConnectionCommon.enableRecording(sceneConnection, extraParam);
+            if (enableRecordingFlag) {
+                nodeConnection.setConnectionEnableRecording(sceneConnection.getConnectionEnableRecording());
+                nodeConnection.setConnectionRecordingName(sceneConnection.getConnectionRecordingName());
+            }
+        }
+
         return new ServiceResult<>(nodeConnection);
     }
 
