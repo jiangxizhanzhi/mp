@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.aggregation.sceneimport.convert;
 
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.ImageInfoParseResult;
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.util.basic.CollectionUtils;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.scene.core.bo.*;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
@@ -10,6 +11,7 @@ import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementPortBO;
+import cn.hutool.core.collection.CollectionUtil;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @Description
@@ -97,6 +100,12 @@ class ConvertDataContainer {
 
         CsceneBO csceneBO = new CsceneBO();
         csceneBO.setSceneConfig(configDataBO);
+        csceneBO.getSceneConfig().getTopology().getElements().forEach(element -> {
+            if (CollectionUtil.isNotEmpty(element.getInitCommands())) {
+                List<String> newCommand = element.getInitCommands().stream().filter(command -> command != null).collect(Collectors.toList());
+                element.setInitCommands(newCommand);
+            }
+        });
         return csceneBO;
     }
 
