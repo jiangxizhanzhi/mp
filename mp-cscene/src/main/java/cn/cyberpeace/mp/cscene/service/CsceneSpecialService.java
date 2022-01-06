@@ -13,6 +13,7 @@ import cn.cyberpeace.mp.cscene.bo.CsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.bo.CsceneStat;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
+import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceCountActivitySceneModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
@@ -434,8 +435,8 @@ public class CsceneSpecialService {
                 .filterEqual(CsceneInstanceModel::getDeleted, false)
                 .orderBy(CsceneInstanceModel::getPk, true));
         if (latestCsceneInstance == null) {
-            instanceStat.setEvent(SceneModel.Event.UNUSE);
-            instanceStat.setEventStatus(EventStatus.UNUSE);
+            instanceStat.setEvent(CsceneBizConstant.Event.UNUSE);
+            instanceStat.setEventStatus(CsceneBizConstant.EventStatus.UNUSE);
         } else {
             SceneModel model = sceneMapper.get(latestCsceneInstance.getScene());
             instanceStat.setEvent(model.getEvent());

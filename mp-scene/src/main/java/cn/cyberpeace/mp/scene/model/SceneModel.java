@@ -34,7 +34,6 @@ public class SceneModel extends BaseSceneModel implements BaseEventModel {
     }
 
     public static class Event {
-        public static final int UNUSE = -1;
         public static final int DEFAULT = 0;
         public static final int INITIATE = 1;
         public static final int CREATE = 2;
