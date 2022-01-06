@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneRoleBO;
+import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
@@ -18,7 +19,6 @@ import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneDataBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
-import cn.cyberpeace.mp.sceneplugincloud.bo.base.BaseCloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -107,7 +107,6 @@ public class CsceneDataModifier {
 
     /**
      * 创建时去除多余的eid
-     *
      * @param csceneBO
      */
     public static void removeEidWhenCreate(CsceneBO csceneBO) {
@@ -153,7 +152,6 @@ public class CsceneDataModifier {
 
     /**
      * 纠正创建和更新场景模板时fdfs的地址,移除前缀
-     *
      * @param csceneBO
      */
     public static void removeFilePathPrefix(CsceneBO csceneBO) {
@@ -202,14 +200,48 @@ public class CsceneDataModifier {
         }
     }
 
+    public static void handlerInputEnableRecording(CsceneBO csceneBO) {
+        if (csceneBO == null || csceneBO.getSceneConfig() == null || csceneBO.getSceneConfig().getPlugins() == null || csceneBO.getSceneConfig().getPlugins().get("cpcloud") == null) {
+            return;
+        }
+        CsceneAppConfig csceneAppConfig = BeanCommon.getBean(CsceneAppConfig.class);
+        boolean enableRecording = Optional
+                .ofNullable(csceneBO.getEnableRecording())
+                .orElse(csceneAppConfig.getSceneEnableRecording());
+        ScenePluginDataBO scenePluginDataBO = csceneBO.getSceneConfig().getPlugins().get("cpcloud");
+        var cpcloudPluginScene = Optional.ofNullable(scenePluginDataBO.getScene())
+                .orElse(new HashMap<>());
+        cpcloudPluginScene.put("enable_recording", enableRecording);
+        scenePluginDataBO.setScene(cpcloudPluginScene);
+    }
+
+    public static boolean getOutputEnableRecording(BaseSceneDataBO baseSceneDataBO) {
+        CsceneAppConfig csceneAppConfig = BeanCommon.getBean(CsceneAppConfig.class);
+        if (baseSceneDataBO == null || baseSceneDataBO.getPlugins() == null || baseSceneDataBO.getPlugins().get("cpcloud") == null) {
+            return csceneAppConfig.getSceneEnableRecording();
+        }
+        ScenePluginDataBO scenePluginDataBO = (ScenePluginDataBO) baseSceneDataBO.getPlugins().get("cpcloud");
+        if (scenePluginDataBO.getScene() == null) {
+            return csceneAppConfig.getSceneEnableRecording();
+        }
+        Object enableRecording = scenePluginDataBO.getScene().get("enable_recording");
+        if (enableRecording != null) {
+            return (boolean) enableRecording;
+        } else {
+            return csceneAppConfig.getSceneEnableRecording();
+        }
+    }
+
     public static void correctReturnCsceneData(CsceneBO csceneBO) {
         addFilePathPrefix(csceneBO.getSceneConfig());
         handlerNodeCommand(csceneBO.getSceneConfig());
+        csceneBO.setEnableRecording(getOutputEnableRecording(csceneBO.getSceneConfig()));
     }
 
     public static void correctReturnCsceneData(CsceneInstanceBO csceneInstanceBO) {
         addFilePathPrefix(csceneInstanceBO.getScene());
         handlerNodeCommand(csceneInstanceBO.getScene());
+        csceneInstanceBO.setEnableRecording(getOutputEnableRecording(csceneInstanceBO.getScene()));
     }
 
     private static void handlerNodeCommand(BaseSceneDataBO baseSceneDataBO) {
@@ -244,7 +276,6 @@ public class CsceneDataModifier {
 
     /**
      * 纠正返回场景模板时fdfs的地址,增加前缀
-     *
      * @param baseSceneDataBO
      */
     private static void addFilePathPrefix(BaseSceneDataBO baseSceneDataBO) {

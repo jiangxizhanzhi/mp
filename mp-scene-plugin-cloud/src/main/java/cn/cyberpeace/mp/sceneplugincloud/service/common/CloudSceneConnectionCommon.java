@@ -215,4 +215,13 @@ public class CloudSceneConnectionCommon {
 
         return flag;
     }
+
+    public static String getContainerConsoleUrl(String resourceId) {
+        String url = new Remote().getContainerConsoleUrl(resourceId);
+        if (StringUtils.isEmpty(url)) {
+            log.error("failed to get container console url , containId is {}", resourceId);
+        }
+        return url;
+    }
+
 }

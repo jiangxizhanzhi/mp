@@ -354,7 +354,7 @@ public class ScenePluginCloudSceneService {
         if (accessMode.getProtocol().equals(AccessMode.Protocol.CONSOLE)) {
             var virtualType = accessModeInfo.getCloudElement().getVirtualType();
             if (virtualType != null && virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
-                nodeConnection.setConnectionUrl(accessMode.getConnectionUrl());
+                nodeConnection.setConnectionUrl(CloudSceneConnectionCommon.getContainerConsoleUrl(accessModeInfo.getCloudElement().getResourceId()));
                 return new ServiceResult<>(nodeConnection);
             }
         }
