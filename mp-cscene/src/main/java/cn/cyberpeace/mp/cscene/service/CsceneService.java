@@ -227,7 +227,9 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
             // 更新录屏开关
             if (csceneBO.getEnableRecording() != null) {
                 String sceneConfigId = getSceneConfigId(csceneBO.getId());
-                scenePluginCloudSceneConfigService.updateEnableRecording(sceneConfigId, csceneBO.getEnableRecording());
+                if (sceneConfigId != null) {
+                    scenePluginCloudSceneConfigService.updateEnableRecording(sceneConfigId, csceneBO.getEnableRecording());
+                }
             }
             if (serviceResult != null && serviceResult.getSource() != null && serviceResult.getSource().getObj() != null) {
                 CsceneBO result = new CsceneBO();
