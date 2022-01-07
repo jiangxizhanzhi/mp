@@ -1,9 +1,12 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
@@ -19,10 +22,12 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineDel
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterDeleteData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchDeleteData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.DeleteTaskPool;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMapper;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -71,7 +76,6 @@ public class DeleteHandler extends HandlerCommon {
 
     private ElementExtraCloudInfo collectElementExtraCloudInfo(CloudPluginSceneElementBO cloudElement) {
         Set<String> qosIds = new HashSet<>();
-        Set<String> connectionIds = new HashSet<>();
         Set<String> proxyIds = new HashSet<>();
         Set<String> floatingIpIds = new HashSet<>();
         var cloudPorts = getPluginHandler().getPorts(cloudElement);
@@ -84,11 +88,6 @@ public class DeleteHandler extends HandlerCommon {
             var accessModes = cloudPort.getAccessModes();
             if (accessModes != null) {
                 accessModes.forEach(accessMode -> {
-                    var connectionId = accessMode.getConnectionId();
-                    if (!StringUtils.isEmpty(connectionId)) {
-                        connectionIds.add(connectionId);
-                    }
-
                     var proxyId = accessMode.getProxyId();
                     if (!StringUtils.isEmpty(proxyId)) {
                         proxyIds.add(proxyId);
@@ -101,6 +100,7 @@ public class DeleteHandler extends HandlerCommon {
                 floatingIpIds.add(floatingIpId);
             }
         });
+        Set<String> connectionIds = this.getConnectionIds(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
         return new ElementExtraCloudInfo(new ArrayList<>(qosIds), new ArrayList<>(connectionIds),
                 new ArrayList<>(proxyIds), new ArrayList<>(floatingIpIds));
     }
@@ -304,5 +304,22 @@ public class DeleteHandler extends HandlerCommon {
             runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.DELETE_ENTITY_NODE,
                     () -> deleteEntityNode(cloudElement));
         }
+    }
+
+    private Set<String> getConnectionIds(String scene, String sceneElement) {
+        CloudPluginSceneConnectionMapper mapper = BeanCommon.getBean(CloudPluginSceneConnectionMapper.class);
+        var connectionModels = mapper.list(new HumanCondition()
+                .filterEqual(CloudPluginSceneConnectionModel::getScene, scene)
+                .filterEqual(CloudPluginSceneConnectionModel::getSceneElement, sceneElement)
+        );
+        Set<String> result = new HashSet<>();
+        if (CollectionUtils.isNotEmpty(connectionModels)) {
+            List<String> connectionIds = connectionModels.stream()
+                    .filter(connectionModel -> connectionModel.getConnectionId() != null)
+                    .map(connectionModel -> connectionModel.getConnectionId())
+                    .collect(Collectors.toList());
+            result.addAll(connectionIds);
+        }
+        return result;
     }
 }
