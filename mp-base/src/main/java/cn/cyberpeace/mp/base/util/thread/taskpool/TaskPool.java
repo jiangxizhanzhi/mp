@@ -2,7 +2,9 @@ package cn.cyberpeace.mp.base.util.thread.taskpool;
 
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.base.util.thread.ThreadUtils;
+import cn.hutool.core.thread.ThreadFactoryBuilder;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 
 import java.util.List;
 import java.util.concurrent.*;
@@ -97,8 +99,11 @@ public class TaskPool {
     }
 
     public TaskPool(int poolSize, int holdSize, long keepAliveTime) {
-        executor = new ThreadPoolExecutor(poolSize, poolSize, keepAliveTime, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(holdSize - poolSize));
+//        executor = new ThreadPoolExecutor(poolSize, poolSize, keepAliveTime, TimeUnit.SECONDS,
+//                new LinkedBlockingQueue<>(holdSize - poolSize));
+        // todo 临时改下线程名字
+                executor = new ThreadPoolExecutor(poolSize, poolSize, keepAliveTime, TimeUnit.SECONDS,
+                        new LinkedBlockingQueue<>(holdSize - poolSize), new CustomizableThreadFactory(this.getClass().getName()));
     }
 
     public TaskPool(ExecutorService executor) {
