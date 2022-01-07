@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.context.SysContextHolder;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.fields.BaseModelFields;
@@ -48,6 +49,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -145,10 +147,12 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     public ServiceResult<Integer> bulkDeleteByIds(String[] ids, boolean logic, CsceneContextBO context) {
         var result = 0;
+        Map<String, Object> originPassThrough = SysContextHolder.getPassThroughMap();
         for (String id : ids) {
             if (Boolean.TRUE.equals(deleteById(id, logic, context).getSource())) {
                 result += 1;
             }
+            SysContextHolder.setPassThroughMap(originPassThrough);
         }
 
         if (result < ids.length) {
