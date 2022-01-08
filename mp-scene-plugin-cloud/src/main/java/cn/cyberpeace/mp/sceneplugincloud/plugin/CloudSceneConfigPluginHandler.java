@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin;
 
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
@@ -9,11 +10,15 @@ import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementPortBO;
+import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
+import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.ConfigHandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.modelhandler.CloudSceneConfigPluginModelHandler;
+import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 
@@ -137,6 +142,30 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
             correctElementRoleRelated(srcElement, element, role, imageType);
             correctElementImageTypeRelated(srcElement, element, imageType);
         });
+    }
+
+    @Override
+    public void validate() {
+        for (var srcPort : getSceneHandler().getElementPortMap().values()) {
+            // 验证ip是否在cidr内
+            var ip = srcPort.getIp();
+            if (!StringUtils.isEmpty(ip)) {
+                // TODO: 这里未初始化辅助网络，判断不准
+                var auxiliaryNetworkCloudElement =  handlerUtils.getPortAuxiliaryNetworkCloudElement(srcPort.getId());
+                if (auxiliaryNetworkCloudElement != null) {
+                    String cidr;
+                    var role = auxiliaryNetworkCloudElement.getRole();
+                    if (role != null && role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK)) {
+                        cidr = CloudSingleton.cloudAppConfig.getExternalNetCidr();
+                    } else {
+                        cidr = auxiliaryNetworkCloudElement.getCidr();
+                    }
+                    if (!StringUtils.isEmpty(cidr) && !IpUtils.isIpInCidr(ip, cidr)) {
+                        throw new MpRuntimeException(CloudErrorCode.INVALID_IP_ON_CIDR.format(ip, cidr));
+                    }
+                }
+            }
+        }
     }
 
     @Override
