@@ -99,11 +99,8 @@ public class TaskPool {
     }
 
     public TaskPool(int poolSize, int holdSize, long keepAliveTime) {
-//        executor = new ThreadPoolExecutor(poolSize, poolSize, keepAliveTime, TimeUnit.SECONDS,
-//                new LinkedBlockingQueue<>(holdSize - poolSize));
-        // todo 临时改下线程名字
-                executor = new ThreadPoolExecutor(poolSize, poolSize, keepAliveTime, TimeUnit.SECONDS,
-                        new LinkedBlockingQueue<>(holdSize - poolSize), new CustomizableThreadFactory(this.getClass().getName()));
+        executor = new ThreadPoolExecutor(poolSize, poolSize, keepAliveTime, TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>(holdSize - poolSize));
     }
 
     public TaskPool(ExecutorService executor) {
