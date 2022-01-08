@@ -11,6 +11,7 @@ import lombok.Data;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +24,7 @@ public abstract class BaseCloudPluginSceneElementPortBO<M extends BaseCloudPlugi
     @ApiModelProperty(value = "是否nat外网")
     private Boolean nat;
     @ApiModelProperty(value = "虚拟防火墙规则")
+    @Valid
     private List<FirewallRule> firewallRules;
     @ApiModelProperty(value = "是否是连接网络外网的端口")
     private Boolean connToExtNet = false;
@@ -44,6 +46,7 @@ public abstract class BaseCloudPluginSceneElementPortBO<M extends BaseCloudPlugi
     @ApiModelProperty(value = "qos id")
     private String qosId;
     @ApiModelProperty(value = "接入方式")
+    @Valid
     private List<CloudAccessMode> accessModes;
     @ApiModelProperty(value = "弹性ip")
     private String floatingIp;

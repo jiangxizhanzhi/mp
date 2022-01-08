@@ -11,6 +11,7 @@ import lombok.Data;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +23,7 @@ public abstract class BaseCollectionPluginSceneElementBO<M extends BaseCollectio
     @ApiModelProperty(value = "是否开启探针采集")
     private Boolean enableProbeCollect;
     @ApiModelProperty(value = "探针列表")
+    @Valid
     private List<Probe> probes;
 
     @Override

@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.scene.core.bo.base;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import org.hibernate.validator.constraints.Length;
 
 import javax.validation.Valid;
 import java.util.Map;
@@ -29,7 +28,6 @@ public class BaseScenePluginDataBO<S, E, P> {
      */
     @ApiModelProperty(value = "本插件端口配置")
     @Valid
-    @Length
     private Map<String, P> elementPorts;
 
     /**

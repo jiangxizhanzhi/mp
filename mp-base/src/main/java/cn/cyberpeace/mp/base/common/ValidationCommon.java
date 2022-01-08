@@ -34,8 +34,10 @@ public class ValidationCommon {
         if (!validateResult.isEmpty()) {
             for (var constraintViolation : validateResult) {
                 var propertyPath = constraintViolation.getPropertyPath();
+                var value = constraintViolation.getInvalidValue();
                 var message = constraintViolation.getMessage();
-                throw new MpRuntimeException(BaseErrorCode.FIELD_VALUE_INVALID.format(propertyPath.toString(), message));
+                throw new MpRuntimeException(BaseErrorCode.FIELD_VALUE_INVALID.format(propertyPath.toString(),
+                        value.toString(), message));
             }
         }
     }
