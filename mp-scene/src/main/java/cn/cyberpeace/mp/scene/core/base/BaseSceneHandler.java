@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.scene.core.base;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.ValidationCommon;
 import cn.cyberpeace.mp.base.common.stereotype.BeanFieldNames;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
@@ -1127,6 +1128,10 @@ public abstract class BaseSceneHandler<
      * @param sceneDataBO 场景业务数据
      */
     private void fromData(D sceneDataBO) {
+        // 验证数据字段
+        var validateResult = ValidationCommon.validate(sceneDataBO);
+        ValidationCommon.handleValidateResult(validateResult);
+
         var topology = sceneDataBO.getTopology();
         var srcScene = (topology == null || topology.getScene() == null) ? ClassUtils.createInstance(sceneBOClass)
                 : topology.getScene();
@@ -1148,7 +1153,7 @@ public abstract class BaseSceneHandler<
     /**
      * 纠正场景数据
      */
-    private void correctData() {
+    protected void correctData() {
         plugins.forEach(plugin -> plugin.correctData());
     }
 
@@ -1188,6 +1193,15 @@ public abstract class BaseSceneHandler<
         reload();
         if (scene == null) {
             throw new SceneNotExistException("Scene " + sceneId + " not exist");
+        }
+    }
+
+    /**
+     * 验证场景
+     */
+    public void validate() {
+        for (var plugin : plugins) {
+            plugin.validate();
         }
     }
 

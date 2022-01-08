@@ -10,6 +10,7 @@ import lombok.Data;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -38,6 +39,7 @@ public abstract class BaseSceneElementBO<M extends BaseSceneElementModel, P exte
     @ApiModelProperty(value = "最大端口数量")
     private Integer maxPortNumber;
     @ApiModelProperty(value = "网元端口")
+    @Valid
     private List<P> ports;
     @ApiModelProperty(value = "节点文件命令")
     private String nodeCommand;
