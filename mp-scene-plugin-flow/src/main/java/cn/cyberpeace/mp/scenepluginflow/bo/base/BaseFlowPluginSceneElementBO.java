@@ -11,6 +11,7 @@ import lombok.Data;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +21,7 @@ public abstract class BaseFlowPluginSceneElementBO<M extends BaseFlowPluginScene
         extends BasePluginSceneElementBO<M, T, S> {
 
     @ApiModelProperty(value = "流量列表")
+    @Valid
     private List<Flow> flows;
 
     @Override

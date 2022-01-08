@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.scene.model.base.*;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,16 +25,21 @@ public abstract class BaseSceneTopologyBO<
         P2 extends BaseScenePieceBO<P1, P2>,
         T extends BaseSceneTopologyBO<S0, A0, E0, P0, C0, P1, S, A, P, E, C, P2, T>> {
     @ApiModelProperty(value = "场景基础数据")
+    @Valid
     private S scene;
     @ApiModelProperty(value = "当前区域id")
     private String areaId;
     @ApiModelProperty(value = "区域数据")
+    @Valid
     private List<A> areas;
     @ApiModelProperty(value = "网元数据")
+    @Valid
     private List<E> elements;
     @ApiModelProperty(value = "连接数据")
+    @Valid
     private List<C> connections;
     @ApiModelProperty(value = "碎片数据")
+    @Valid
     private List<P2> pieces;
 
     public T export() {

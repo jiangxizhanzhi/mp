@@ -12,6 +12,7 @@ import lombok.Data;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,8 +60,10 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     @ApiModelProperty(value = "虚拟交换机是否开启dhcp")
     private Boolean dhcp;
     @ApiModelProperty(value = "虚拟交换机地址池")
+    @Valid
     private List<AllocationPool> allocationPools;
     @ApiModelProperty(value = "虚拟交换机静态路由")
+    @Valid
     private List<HostRoute> hostRoutes;
     @ApiModelProperty(value = "虚拟交换机vlan模式")
     private Boolean vlan;
@@ -69,16 +72,19 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
 
     // 虚拟路由属性
     @ApiModelProperty(value = "虚拟路由静态路由")
+    @Valid
     private List<StaticRoute> staticRoutes;
 
     // 虚拟防火墙属性
     @ApiModelProperty(value = "虚拟防火墙规则")
+    @Valid
     private List<FirewallRule> firewallRules;
 
     // 虚拟机/容器属性
     @ApiModelProperty(value = "虚拟机/容器镜像名称")
     private String image;
     @ApiModelProperty(value = "终端初始包含工具")
+    @Valid
     private List<InitialTool> initialTools;
 
     // 靶标属性
@@ -97,6 +103,7 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     @ApiModelProperty(value = "是否支持快速创建")
     private Boolean quickCreateSupport;
     @ApiModelProperty(value = "快速创建参数")
+    @Valid
     private List<QuickCreateParam> quickCreateParams;
 
     @ApiModelProperty(value = "是否开启辅助网络", hidden = true)
@@ -119,9 +126,11 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     private Boolean auxiliaryNetworkDhcp;
     @ApiModelProperty(value = "辅助网络地址池", hidden = true)
     @JsonIgnore
+    @Valid
     private List<AllocationPool> auxiliaryNetworkAllocationPools;
     @ApiModelProperty(value = "辅助网络静态路由", hidden = true)
     @JsonIgnore
+    @Valid
     private List<HostRoute> auxiliaryNetworkHostRoutes;
     @ApiModelProperty(value = "辅助网络vlan模式", hidden = true)
     @JsonIgnore

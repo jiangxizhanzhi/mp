@@ -1,13 +1,16 @@
 package cn.cyberpeace.mp.scene.core.plugin.base;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.common.ValidationCommon;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldNames;
+import cn.cyberpeace.mp.scene.core.bo.base.BaseScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -94,12 +97,25 @@ public abstract class BasePluginHandler<S, E, P, C> {
                 elementPortMap.put(portId, JsonCommon.snakeMapToBean(elementPortData, elementPortBOClass));
             });
         }
+
+        // 验证数据字段
+        var validateData = new BaseScenePluginDataBO<S, E, P>();
+        validateData.setScene(scene);
+        validateData.setElements(elementMap);
+        validateData.setElementPorts(elementPortMap);
+        var validateResult = ValidationCommon.validate(validateData);
+        ValidationCommon.handleValidateResult(validateResult);
     }
 
     /**
      * 纠正场景插件数据
      */
     public void correctData() {}
+
+    /**
+     * 验证场景插件
+     */
+    public void validate() {}
 
     /**
      * 转出场景插件业务数据 TODO: 去除snake依赖
