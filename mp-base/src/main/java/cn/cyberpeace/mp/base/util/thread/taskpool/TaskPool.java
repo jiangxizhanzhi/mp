@@ -44,19 +44,26 @@ public class TaskPool {
      * 批量运行任务，多个任务为一个整体
      * @param poolTasks 任务
      * @param independent 任务间是否独立，false情况下任意一个任务的异常会取消掉所有队列任务
+     * @param format 是否格式化标准任务
      * @return 任务执行结果
      */
     private  <C, T, R, T1 extends BasePoolTask<C, T, R>> List<T1> invokePoolTasks(List<T1> poolTasks,
-                                                                                  boolean independent) {
+                                                                                  boolean independent, boolean format) {
         var latch = new CountDownLatch(poolTasks.size());
-        poolTasks.forEach(poolTask -> executor.execute(ThreadUtils.format(() -> {
-            invokeTask(poolTask);
-            latch.countDown();
+        poolTasks.forEach(poolTask -> {
+            Runnable command = () -> {
+                invokeTask(poolTask);
+                latch.countDown();
 
-            if (!independent && TaskStatus.ERROR.equals(poolTask.getStatus())) {
-                poolTasks.forEach(itemTask -> interruptTask(itemTask, poolTask.getException()));
+                if (!independent && TaskStatus.ERROR.equals(poolTask.getStatus())) {
+                    poolTasks.forEach(itemTask -> interruptTask(itemTask, poolTask.getException()));
+                }
+            };
+            if (format) {
+                command = ThreadUtils.format(command);
             }
-        })));
+            executor.execute(command);
+        });
 
         try {
             latch.await();
@@ -73,11 +80,12 @@ public class TaskPool {
      * 批量运行任务，多个任务为一个整体
      * @param tasks 任务
      * @param independent 任务间是否独立，false情况下任意一个任务的异常会取消掉所有队列任务
+     * @param format 是否格式化标准任务
      * @param poolTaskClass 任务类型
      * @return 任务执行结果
      */
     private <C, T, R, T1 extends BasePoolTask<C, T, R>> List<T1> invokeTasks(List<T> tasks, boolean independent,
-                                                                             Class<T1> poolTaskClass) {
+                                                                             boolean format, Class<T1> poolTaskClass) {
         List<T1> poolTasks = tasks.stream()
                 .map(task -> {
                     var poolTask = ClassUtils.createInstance(poolTaskClass);
@@ -85,7 +93,7 @@ public class TaskPool {
                     return poolTask;
                 })
                 .collect(Collectors.toList());
-        return invokePoolTasks(poolTasks, independent);
+        return invokePoolTasks(poolTasks, independent, format);
     }
 
     public TaskPool(int poolSize) {
@@ -106,40 +114,49 @@ public class TaskPool {
     }
 
     public void executeTask(Runnable task) {
+        executeTask(task, true);
+    }
+
+    public void executeTask(Runnable task, boolean format) {
         var poolTask = new DefaultPoolTask(task);
-        executor.execute(ThreadUtils.format(() -> invokeTask(poolTask)));
+        Runnable command = () -> invokeTask(poolTask);
+        if (format) {
+            command = ThreadUtils.format(command);
+        }
+        executor.execute(command);
     }
 
     public List<DefaultPoolTask> runTasks(List<Runnable> tasks) {
-        return runTasks(tasks, false);
+        return runTasks(tasks, false, true);
     }
 
-    public List<DefaultPoolTask> runTasks(List<Runnable> tasks, boolean independent) {
-        return invokeTasks(tasks, independent, DefaultPoolTask.class);
+    public List<DefaultPoolTask> runTasks(List<Runnable> tasks, boolean independent, boolean format) {
+        return invokeTasks(tasks, independent, format, DefaultPoolTask.class);
     }
 
     public <C, T extends PoolTask<C>> List<T> runPoolTasks(List<T> poolTasks) {
-        return runPoolTasks(poolTasks, false);
+        return runPoolTasks(poolTasks, false, true);
     }
 
-    public <C, T extends PoolTask<C>> List<T> runPoolTasks(List<T> poolTasks, boolean independent) {
-        return invokePoolTasks(poolTasks, independent);
+    public <C, T extends PoolTask<C>> List<T> runPoolTasks(List<T> poolTasks, boolean independent, boolean format) {
+        return invokePoolTasks(poolTasks, independent, format);
     }
 
     public <R> List<DefaultResultPoolTask<R>> callTasks(List<Callable<R>> tasks) {
-        return callTasks(tasks, false);
+        return callTasks(tasks, false, true);
     }
 
-    public <R> List<DefaultResultPoolTask<R>> callTasks(List<Callable<R>> tasks, boolean independent) {
-        return invokeTasks(tasks, independent, new DefaultResultPoolTask<R>().getClass());
+    public <R> List<DefaultResultPoolTask<R>> callTasks(List<Callable<R>> tasks, boolean independent, boolean format) {
+        return invokeTasks(tasks, independent, format, new DefaultResultPoolTask<R>().getClass());
     }
 
     public <C, R, T extends ResultPoolTask<C, R>> List<T> callPoolTasks(List<T> poolTasks) {
-        return callPoolTasks(poolTasks, false);
+        return callPoolTasks(poolTasks, false, true);
     }
 
-    public <C, R, T extends ResultPoolTask<C, R>> List<T> callPoolTasks(List<T> poolTasks, boolean independent) {
-        return invokePoolTasks(poolTasks, independent);
+    public <C, R, T extends ResultPoolTask<C, R>> List<T> callPoolTasks(List<T> poolTasks, boolean independent,
+                                                                        boolean format) {
+        return invokePoolTasks(poolTasks, independent, format);
     }
 
 }
