@@ -145,7 +145,7 @@ class ImageInfoConverter implements IConverter {
         accessMode.setUsername(result.getUsername());
         accessMode.setProtocol(result.getProtocol());
         accessMode.setDesc(result.getDesc());
-        accessMode.setProxy(Boolean.valueOf(result.getIsproxy()));
+        accessMode.setProxy(result.getIsproxy() == null ? true : Boolean.valueOf(result.getIsproxy()));
         accessMode.setPassword(result.getPassword());
         if (NumberUtils.isCreatable(result.getPort())) {
             accessMode.setPort(Integer.valueOf(result.getPort()));
