@@ -131,10 +131,7 @@ public class SceneHandler extends BaseSceneHandler<
     private int startSceneEvent(int event) {
         var flag = getSceneEventHandler(event).startEvent();
         if (isTriggerEventSuccess(flag)) {
-            if (realTimeUpdate) {
-                updateScene();
-            }
-            reportSceneUpdated();
+            asyncAckSceneChanged(false, false);
         }
         return flag;
     }
@@ -142,10 +139,7 @@ public class SceneHandler extends BaseSceneHandler<
     private int startElementEvent(String nodeId, int event) {
         var flag = getElementEventHandler(nodeId, event).startEvent();
         if (isTriggerEventSuccess(flag)) {
-            if (realTimeUpdate) {
-                updateSceneElement(nodeId);
-            }
-            reportElementUpdated(nodeId);
+            asyncAckElementChanged(nodeId, false, false);
         }
         return flag;
     }
@@ -154,10 +148,7 @@ public class SceneHandler extends BaseSceneHandler<
         var flag = getSceneEventHandler(event).overEvent();
         this.getScene().setProgressPercentage(this.calculateProgressPercentage());
         if (isTriggerEventSuccess(flag)) {
-            if (realTimeUpdate) {
-                updateScene();
-            }
-            reportSceneUpdated();
+            asyncAckSceneChanged(false, false);
         }
         return flag;
     }
@@ -165,10 +156,7 @@ public class SceneHandler extends BaseSceneHandler<
     private int overElementEvent(String nodeId, int event) {
         var flag = getElementEventHandler(nodeId, event).overEvent();
         if (isTriggerEventSuccess(flag)) {
-            if (realTimeUpdate) {
-                updateSceneElement(nodeId);
-            }
-            reportElementUpdated(nodeId);
+            asyncAckElementChanged(nodeId, false, false);
         }
         return flag;
     }
@@ -176,8 +164,8 @@ public class SceneHandler extends BaseSceneHandler<
     public int errorScene(int event, String errorMessage) {
         var flag = getSceneEventHandler(event).error(errorMessage);
         if (isTriggerEventSuccess(flag)) {
+            asyncAckSceneChanged(false, false);
             save();
-            reportSceneUpdated();
         }
         return flag;
     }
@@ -185,10 +173,7 @@ public class SceneHandler extends BaseSceneHandler<
     public int errorElement(String nodeId, int event, String errorMessage) {
         var flag = getElementEventHandler(nodeId, event).error(errorMessage);
         if (isTriggerEventSuccess(flag)) {
-            if (realTimeUpdate) {
-                updateSceneElementWithPlugins(nodeId);
-            }
-            reportElementUpdated(nodeId);
+            asyncAckElementChanged(nodeId, false, true);
         }
         return flag;
     }
