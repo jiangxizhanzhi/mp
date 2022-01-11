@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.util.Arrays;
 import java.util.Objects;
 
 @RestController
@@ -39,6 +40,7 @@ public class DataCollectionController {
         if (CollectionUtils.isEmpty(wazuhEventRequest.getMacIds()) && CollectionUtils.isEmpty(wazuhEventRequest.getAgentNames())) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
+        wazuhEventRequest.setRuleGroups(Arrays.asList("syscheck"));
         return new ListObjServiceResult<>(dataCollectionService.queryFileEvents(wazuhEventRequest)).asResult();
     }
 

@@ -24,4 +24,13 @@ public class HostEventQueryParams extends QueryParams {
     @ApiModelProperty(value = "节点id列表")
     private List<String> nodeIds;
 
+    @ApiModelProperty(value = "分类集合")
+    private List<String> catagories;
+
+    @ApiModelProperty(value = "rule级别集合")
+    private List<Integer> levels;
+
+    @ApiModelProperty(value = "keywords集合")
+    private List<String> keyWords;
+
 }
