@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.RouterPageConverterModel;
 import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
 import cn.cyberpeace.mp.devops.cluster.model.RouterCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.RouterModel;
+import cn.cyberpeace.mp.devops.cluster.request.BasePageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RouterPageRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -28,13 +29,13 @@ public class RouterConverter implements BaseConverter{
 
     @Override
     public String[] getDefaultPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldNames(RouterPageRequest::getPage,RouterPageRequest::getPerPage);
+        return BeanUtils.getBeanGetterFieldNames(BasePageRequest::getPage,BasePageRequest::getPerPage);
     }
 
     @Override
     public String[] getTotalPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldNames(RouterPageRequest::getOffset,
-                RouterPageRequest::getPage,RouterPageRequest::getPerPage);
+        return BeanUtils.getBeanGetterFieldNames(BasePageRequest::getOffset,
+                BasePageRequest::getPage,BasePageRequest::getPerPage);
     }
 
     /**

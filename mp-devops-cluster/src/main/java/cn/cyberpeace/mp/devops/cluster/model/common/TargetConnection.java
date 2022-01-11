@@ -41,6 +41,6 @@ public class TargetConnection implements Serializable {
     @ApiModelProperty("内部IP:镜像")
     private String ipAddress;
 
-    @ApiModelProperty("连接状态")
+    @ApiModelProperty("连接状态，0 是默认的，1是端口通了，2 是端口不通或者超时了，超时时间五分钟 ")
     private Integer connectionState;
 }
