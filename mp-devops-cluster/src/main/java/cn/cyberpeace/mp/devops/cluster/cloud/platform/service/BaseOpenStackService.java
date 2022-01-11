@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.devops.cluster.cloud.platform.service.impl;
+package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.BaseModel;
@@ -16,12 +16,12 @@ import java.io.IOException;
  */
 @Slf4j
 @Service
-public class BaseOpenStackServiceImpl extends BaseServiceImpl {
+public class BaseOpenStackService extends BaseService {
 
     private DevopsConfig devopsConfig;
 
     @Autowired
-    public BaseOpenStackServiceImpl(DevopsConfig devopsConfig) {
+    public BaseOpenStackService(DevopsConfig devopsConfig) {
        this.devopsConfig = devopsConfig;
     }
 

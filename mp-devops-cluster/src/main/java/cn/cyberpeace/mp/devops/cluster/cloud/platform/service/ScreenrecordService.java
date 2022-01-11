@@ -1,9 +1,9 @@
-package cn.cyberpeace.mp.devops.cluster.cloud.platform.service.impl;
+package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.BaseCloudPlatformService;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloudPlatformConstant;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.constant.BaseConstants;
 import cn.cyberpeace.mp.devops.cluster.request.ScreenrecordBatchDeleteRequest;
@@ -36,9 +36,9 @@ import java.util.Objects;
  */
 @Service
 @Slf4j
-public class ScreenrecordServiceImpl extends BaseOpenStackServiceImpl {
+public class ScreenrecordService extends BaseOpenStackService {
 
-    public ScreenrecordServiceImpl(DevopsConfig devopsConfig) {
+    public ScreenrecordService(DevopsConfig devopsConfig) {
         super(devopsConfig);
     }
 
@@ -81,7 +81,7 @@ public class ScreenrecordServiceImpl extends BaseOpenStackServiceImpl {
             }
         }
 
-        ScreenrecordPageResponse pageResponse = super.sendGet(BaseCloudPlatformService.SCREENRECORD_METHOD +
+        ScreenrecordPageResponse pageResponse = super.sendGet(BaseCloudPlatformConstant.SCREENRECORD_METHOD +
                 "/recordfile_list" + getParams, ScreenrecordPageResponse.class);
         log.info("page screenrecord response: {}", pageResponse);
 
@@ -108,7 +108,7 @@ public class ScreenrecordServiceImpl extends BaseOpenStackServiceImpl {
     public ServiceResult<Boolean> removeRecordfile(ScreenrecordDeleteRequest request) {
         JSONObject delObj = new JSONObject();
         delObj.put("recordtime", request.getRecordTime());
-        ScreenrecordDelResponse delResponse = super.sendDelete(BaseCloudPlatformService.SCREENRECORD_METHOD +
+        ScreenrecordDelResponse delResponse = super.sendDelete(BaseCloudPlatformConstant.SCREENRECORD_METHOD +
                 "/remove_file", delObj.toJSONString(), ScreenrecordDelResponse.class);
 
         log.info("remove record file response: {}", delResponse);
@@ -126,7 +126,7 @@ public class ScreenrecordServiceImpl extends BaseOpenStackServiceImpl {
      * @return
      */
     public ServiceResult<ScreenRecordUsedSpaceResponse> queryUsedSpace() {
-        CpcloudRecordUsedSpaceResponse cpResponse = super.sendGet(BaseCloudPlatformService.SCREENRECORD_METHOD +
+        CpcloudRecordUsedSpaceResponse cpResponse = super.sendGet(BaseCloudPlatformConstant.SCREENRECORD_METHOD +
                 "/storage_info", CpcloudRecordUsedSpaceResponse.class);
         log.info("query screen record used space response: {}", cpResponse);
         ScreenRecordUsedSpaceResponse response = new ScreenRecordUsedSpaceResponse();
@@ -149,7 +149,7 @@ public class ScreenrecordServiceImpl extends BaseOpenStackServiceImpl {
         request.getRecordNames().forEach(name -> delArray.add(name));
         delObj.put("recording_file", delArray);
 
-        ScreenrecordDelResponse delResponse = super.sendDelete(BaseCloudPlatformService.SCREENRECORD_METHOD +
+        ScreenrecordDelResponse delResponse = super.sendDelete(BaseCloudPlatformConstant.SCREENRECORD_METHOD +
                 "/filemanager", delObj.toJSONString(), ScreenrecordDelResponse.class);
 
         log.info("batch delete record file response: {}", delResponse);
@@ -171,7 +171,7 @@ public class ScreenrecordServiceImpl extends BaseOpenStackServiceImpl {
         BufferedInputStream bin = null;
         OutputStream os = null;
         try {
-            URL url = new URL(cpUrl + BaseCloudPlatformService.SCREENRECORD_METHOD + "/downloadfile?recordfilename=" + fileName);
+            URL url = new URL(cpUrl + BaseCloudPlatformConstant.SCREENRECORD_METHOD + "/downloadfile?recordfilename=" + fileName);
             // 建立连接
             URLConnection urlConnection = url.openConnection();
             // http的连接类
