@@ -1,5 +1,8 @@
 package cn.cyberpeace.mp.sceneplugincloud.util.http;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.context.SysContextHolder;
+import cn.cyberpeace.mp.base.context.transfercontext.LocaleTransferContext;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -8,7 +11,12 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.*;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPatch;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.HttpClients;
@@ -79,6 +87,18 @@ public class HttpClient {
             request.setHeaders(mergedHeaders.entrySet().stream().map(v ->
                     new BasicHeader(v.getKey(), v.getValue())
             ).toArray(Header[]::new));
+        }
+        // 国际化header的处理
+        if (headers == null || !headers.containsKey("Accept-Language")) {
+            String language = BeanCommon.getBean(LocaleTransferContext.class).getLanguage();
+            if (language != null) {
+                request.setHeader(new BasicHeader("Accept-Language", language));
+            }
+        }
+        // 调用链 id
+        if (headers == null || !headers.containsKey("X-Request-Id")) {
+            String traceId = SysContextHolder.getCallChainId();
+            request.setHeader(new BasicHeader("X-Request-Id", traceId));
         }
         if (data != null && request instanceof HttpEntityEnclosingRequestBase) {
             HttpEntity entity;
