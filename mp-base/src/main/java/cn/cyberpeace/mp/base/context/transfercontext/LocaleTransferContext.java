@@ -32,9 +32,4 @@ public class LocaleTransferContext implements TransferContext<Map<String, String
         LocaleContextHolder.setLocale(new Locale(value.getOrDefault(LANGUAGE_KEY, null),
                 value.getOrDefault(COUNTRY_KEY, null), value.getOrDefault(VARIANT_KEY, null)));
     }
-
-    public String getLanguage() {
-        var locale = LocaleContextHolder.getLocale();
-        return locale == null ? null : locale.getLanguage();
-    }
 }
