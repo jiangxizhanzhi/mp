@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.devops.cluster.model.DeviceCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.TargetModel;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageAuthMapper;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
+import cn.cyberpeace.mp.devops.cluster.request.BasePageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentRequest;
@@ -67,13 +68,13 @@ public class RealEquipmentConverter implements BaseConverter{
 
     @Override
     public String[] getDefaultPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldNames(RealEquipmentPageRequest::getPage,RealEquipmentPageRequest::getPerPage);
+        return BeanUtils.getBeanGetterFieldNames(BasePageRequest::getPage,BasePageRequest::getPerPage);
     }
 
     @Override
     public String[] getTotalPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldNames(RealEquipmentPageRequest::getOffset,
-                RealEquipmentPageRequest::getPage,RealEquipmentPageRequest::getPerPage);
+        return BeanUtils.getBeanGetterFieldNames(BasePageRequest::getOffset,
+                BasePageRequest::getPage,BasePageRequest::getPerPage);
     }
 
     /**

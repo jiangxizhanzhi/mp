@@ -80,13 +80,13 @@ public class ImagesConverter implements BaseConverter{
 
     @Override
     public String[] getDefaultPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldNames(ImagePageRequest::getPage,ImagePageRequest::getPerPage);
+        return BeanUtils.getBeanGetterFieldNames(BasePageRequest::getPage,BasePageRequest::getPerPage);
     }
 
     @Override
     public String[] getTotalPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldNames(ImagePageRequest::getLimit,ImagePageRequest::getOffset,
-                ImagePageRequest::getPage,ImagePageRequest::getPerPage);
+        return BeanUtils.getBeanGetterFieldNames(BasePageRequest::getLimit,BasePageRequest::getOffset,
+                BasePageRequest::getPage,BasePageRequest::getPerPage);
     }
 
     /**
