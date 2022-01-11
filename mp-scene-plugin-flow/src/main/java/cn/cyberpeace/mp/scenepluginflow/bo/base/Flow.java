@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Objects;
 
@@ -30,6 +31,7 @@ public class Flow {
     @ApiModelProperty(value = "流量任务id")
     private String taskId;
     @ApiModelProperty(value = "流量脚本参数列表")
+    @Valid
     private List<FlowScriptParam> scriptParamModels;
 
     public Integer getStatus() {

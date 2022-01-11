@@ -25,6 +25,9 @@ public class SceneCommandUtils {
     public static List<String> parseCommand(String command, String sceneId, String elementId, String systemType) {
         List<String> parsedCommands = new ArrayList<>();
         boolean isWindows = SystemTypeCommandUtils.isWindows(systemType);
+        if (command == null) {
+            return new ArrayList<>();
+        }
         if (command.startsWith(ORIGIN_COMMAND_PREFIX)) {
             parsedCommands.add(command.substring(ORIGIN_COMMAND_PREFIX.length()));
         } else if (command.startsWith(SCENE_COMMAND_PREFIX)) {

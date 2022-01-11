@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.scene.model.base.*;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,6 +26,7 @@ public abstract class BaseSceneDataBO<
         T extends BaseSceneTopologyBO<S0, A0, E0, P0, C0, P1, S, A, P, E, C, P2, T>, T1> {
 
     @ApiModelProperty(value = "拓扑数据")
+    @Valid
     private T topology;
 
     /**

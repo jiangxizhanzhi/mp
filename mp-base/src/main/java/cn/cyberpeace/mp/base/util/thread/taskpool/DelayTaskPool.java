@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.base.util.thread.taskpool;
 
+import cn.cyberpeace.mp.base.util.thread.ThreadUtils;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -56,8 +57,9 @@ public class DelayTaskPool {
      * @param task 任务
      */
     public void add(String key, Runnable task) {
+        Runnable formatTask = ThreadUtils.format(task);
         synchronized (taskMap) {
-            taskMap.put(key, task);
+            taskMap.put(key, formatTask);
         }
     }
 
@@ -98,7 +100,7 @@ public class DelayTaskPool {
             }
         }
         if (runTaskMap != null) {
-            runTaskMap.forEach((key, task) -> taskPool.executeTask(task));
+            runTaskMap.forEach((key, task) -> taskPool.executeTask(task, false));
         }
 
         var runNext = false;

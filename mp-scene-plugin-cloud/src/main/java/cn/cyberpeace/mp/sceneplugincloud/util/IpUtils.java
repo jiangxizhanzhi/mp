@@ -171,4 +171,15 @@ public class IpUtils {
         }
         return nextIp;
     }
+
+    /**
+     * 判断ip是否在cidr内
+     * @param ip ip地址
+     * @param cidr cidr
+     * @return ip是否在cidr内
+     */
+    public static boolean isIpInCidr(String ip, String cidr) {
+        return getCidrIps(cidr).contains(ip);
+    }
+
 }

@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.sceneplugincloud.bo.base;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @Data
@@ -20,8 +21,10 @@ public class QuickCreateParam {
     @ApiModelProperty(value = "部署类型")
     private Integer deployType;
     @ApiModelProperty(value = "资源文件列表")
+    @Valid
     private List<Resource> resourceList;
     @ApiModelProperty(value = "docker资源信息")
+    @Valid
     private DockerInstaller dockerInstallerData;
 
     @Data
@@ -41,6 +44,7 @@ public class QuickCreateParam {
         @ApiModelProperty(value = "文件地址")
         private String dockerUrl;
         @ApiModelProperty(value = "支持平台")
+        @Valid
         private List<StartUpParameter> startUpParameterList;
         @ApiModelProperty(value = "用户文件名")
         private String userFilename;
