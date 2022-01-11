@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp;
 
+import cn.cyberpeace.mp.base.context.SysContextHolder;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.util.http.HttpClient;
 import cn.cyberpeace.mp.sceneplugincloud.util.http.HttpData;
@@ -10,6 +11,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.context.i18n.LocaleContextHolder;
+
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
 @Slf4j
 public class CloudHttpClient {
@@ -109,55 +115,71 @@ public class CloudHttpClient {
     }
 
     public <T> CloudResponse<T> cloudGet(String url, HttpParam param, TypeReference<CloudResponse<T>> valueTypeRef) {
-        return cloudResultBean(httpClient.get(url, param, null, null), valueTypeRef, "get", url, null, param);
+
+        return cloudResultBean(httpClient.get(url, param, this.getHeaders(), null), valueTypeRef, "get", url, null, param);
     }
 
     public <T> CloudResponse<T> cloudPost(String url, HttpData data, HttpParam param, TypeReference<CloudResponse<T>> valueTypeRef) {
-        return cloudResultBean(httpClient.post(url, data, param, null, null), valueTypeRef, "post", url, data, param);
+
+        return cloudResultBean(httpClient.post(url, data, param, this.getHeaders(), null), valueTypeRef, "post", url, data, param);
     }
 
     public <T> CloudResponse<T> cloudPatch(String url, HttpData data, HttpParam param, TypeReference<CloudResponse<T>> valueTypeRef) {
-        return cloudResultBean(httpClient.patch(url, data, param, null, null), valueTypeRef, "patch", url, data, param);
+
+        return cloudResultBean(httpClient.patch(url, data, param, this.getHeaders(), null), valueTypeRef, "patch", url, data, param);
     }
 
     public <T> CloudResponse<T> cloudDelete(String url, HttpData data, HttpParam param, TypeReference<CloudResponse<T>> valueTypeRef) {
-        return cloudResultBean(httpClient.delete(url, data, param, null, null), valueTypeRef, "delete", url, data, param);
+        return cloudResultBean(httpClient.delete(url, data, param, this.getHeaders(), null), valueTypeRef, "delete", url, data, param);
     }
 
     public <T> T get(String url, HttpParam param, Class<T> valueType) {
-        return resultBean(httpClient.get(url, param, null, null), valueType, "get", url, null, param);
+
+        return resultBean(httpClient.get(url, param, this.getHeaders(), null), valueType, "get", url, null, param);
     }
 
     public <T> T post(String url, HttpData data, HttpParam param, Class<T> valueType) {
-        return resultBean(httpClient.post(url, data, param, null, null), valueType, "post", url, data, param);
+        return resultBean(httpClient.post(url, data, param, this.getHeaders(), null), valueType, "post", url, data, param);
     }
 
     public <T> T put(String url, HttpData data, HttpParam param, Class<T> valueType) {
-        return resultBean(httpClient.put(url, data, param, null, null), valueType, "put", url, data, param);
+        return resultBean(httpClient.put(url, data, param, this.getHeaders(), null), valueType, "put", url, data, param);
     }
 
     public <T> T patch(String url, HttpData data, HttpParam param, Class<T> valueType) {
-        return resultBean(httpClient.patch(url, data, param, null, null), valueType, "patch", url, data, param);
+        return resultBean(httpClient.patch(url, data, param, this.getHeaders(), null), valueType, "patch", url, data, param);
     }
 
     public <T> T delete(String url, HttpData data, HttpParam param, Class<T> valueType) {
-        return resultBean(httpClient.delete(url, data, param, null, null), valueType, "delete", url, data, param);
+        return resultBean(httpClient.delete(url, data, param, this.getHeaders(), null), valueType, "delete", url, data, param);
     }
 
     public <T> T get(String url, HttpParam param, TypeReference<T> valueTypeRef) {
-        return resultBean(httpClient.get(url, param, null, null), valueTypeRef, "get", url, null, param);
+        return resultBean(httpClient.get(url, param, this.getHeaders(), null), valueTypeRef, "get", url, null, param);
     }
 
     public <T> T post(String url, HttpData data, HttpParam param, TypeReference<T> valueTypeRef) {
-        return resultBean(httpClient.post(url, data, param, null, null), valueTypeRef, "post", url, data, param);
+        return resultBean(httpClient.post(url, data, param, this.getHeaders(), null), valueTypeRef, "post", url, data, param);
     }
 
     public <T> T patch(String url, HttpData data, HttpParam param, TypeReference<T> valueTypeRef) {
-        return resultBean(httpClient.patch(url, data, param, null, null), valueTypeRef, "patch", url, data, param);
+        return resultBean(httpClient.patch(url, data, param, this.getHeaders(), null), valueTypeRef, "patch", url, data, param);
     }
 
     public <T> T delete(String url, HttpData data, HttpParam param, TypeReference<T> valueTypeRef) {
-        return resultBean(httpClient.delete(url, data, param, null, null), valueTypeRef, "delete", url, data, param);
+        return resultBean(httpClient.delete(url, data, param, this.getHeaders(), null), valueTypeRef, "delete", url, data, param);
     }
 
+    private Map<String, String> getHeaders() {
+        Map<String, String> headers = new HashMap<>();
+        // 国际化header的处理
+        Locale locale = LocaleContextHolder.getLocale();
+        if (locale != null) {
+            headers.put("Accept-Language", locale.getLanguage());
+        }
+        // 调用链id
+        String traceId = SysContextHolder.getCallChainId();
+        headers.put("X-Request-Id", traceId);
+        return headers;
+    }
 }
