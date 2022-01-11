@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.base.context.transfercontext;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -29,7 +30,7 @@ public class LocaleTransferContext implements TransferContext<Map<String, String
 
     @Override
     public void setValue(Map<String, String> value) {
-        LocaleContextHolder.setLocale(new Locale(value.getOrDefault(LANGUAGE_KEY, null),
-                value.getOrDefault(COUNTRY_KEY, null), value.getOrDefault(VARIANT_KEY, null)));
+        LocaleContextHolder.setLocale(new Locale(value.getOrDefault(LANGUAGE_KEY, StringUtils.EMPTY),
+                value.getOrDefault(COUNTRY_KEY, StringUtils.EMPTY), value.getOrDefault(VARIANT_KEY, StringUtils.EMPTY)));
     }
 }
