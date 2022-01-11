@@ -1,12 +1,12 @@
-package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
+package cn.cyberpeace.mp.devops.cluster.cloud.platform.constants;
 
 /**
  * 基础对接云平台接口
  * @author wanggang
  */
-public final class BaseCloudPlatformService {
+public final class BaseCloudPlatformConstant {
 
-    private BaseCloudPlatformService(){
+    private BaseCloudPlatformConstant(){
         throw new IllegalStateException("Utility class");
     }
 

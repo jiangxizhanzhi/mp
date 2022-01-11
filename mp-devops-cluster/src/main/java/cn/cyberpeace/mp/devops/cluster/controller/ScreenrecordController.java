@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.devops.cluster.controller;
 
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.impl.ScreenrecordServiceImpl;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ScreenrecordService;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.request.ScreenrecordBatchDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.ScreenrecordDeleteRequest;
@@ -30,7 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 public class ScreenrecordController {
 
     @Autowired
-    private ScreenrecordServiceImpl screenrecordService;
+    private ScreenrecordService screenrecordService;
 
     @ApiOperation("分页查询录屏文件")
     @GetMapping("/page")

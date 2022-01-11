@@ -2,14 +2,13 @@ package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.SnmpParams;
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.impl.BaseOpenStackServiceImpl;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.*;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import static cn.cyberpeace.mp.devops.cluster.cloud.platform.service.BaseCloudPlatformService.*;
+import static cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloudPlatformConstant.*;
 
 /**
  * 实装管理接口
@@ -17,7 +16,7 @@ import static cn.cyberpeace.mp.devops.cluster.cloud.platform.service.BaseCloudPl
  */
 @Service
 @Slf4j
-public class RealEquipmentService extends BaseOpenStackServiceImpl {
+public class RealEquipmentService extends BaseOpenStackService {
 
     private static final String ENTITY = "/entity";
 

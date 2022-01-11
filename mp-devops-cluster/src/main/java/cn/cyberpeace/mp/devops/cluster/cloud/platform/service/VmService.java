@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.InstanceOsServicePageResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.InstancePageResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.CloudPlatformPageResult;
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.impl.BaseOpenStackServiceImpl;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.InstanceCloudPlatformModel;
@@ -20,7 +19,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Objects;
 
-import static cn.cyberpeace.mp.devops.cluster.cloud.platform.service.BaseCloudPlatformService.URL_VERSION;
+import static cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloudPlatformConstant.URL_VERSION;
 
 /**
  * 虚拟机
@@ -28,7 +27,7 @@ import static cn.cyberpeace.mp.devops.cluster.cloud.platform.service.BaseCloudPl
  */
 @Service
 @Slf4j
-public class VmService extends BaseOpenStackServiceImpl {
+public class VmService extends BaseOpenStackService {
 
     private static final String INSTANCES = "/instances";
 

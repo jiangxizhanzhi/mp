@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.devops.cluster.cloud.platform.service.impl;
+package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -23,7 +23,7 @@ import java.util.Map;
  */
 @Slf4j
 @Service
-public class BaseServiceImpl {
+public class BaseService {
 
     private static final String ACCEPT_LANGUAGE = "Accept-Language";
 

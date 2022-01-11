@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Installer;
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.impl.BaseOpenStackServiceImpl;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.InstallerCloudPlatformModel;
@@ -26,8 +25,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import static cn.cyberpeace.mp.devops.cluster.cloud.platform.service.BaseCloudPlatformService.CPCLOUD_DEVICE;
-import static cn.cyberpeace.mp.devops.cluster.cloud.platform.service.BaseCloudPlatformService.URL_VERSION;
+import static cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloudPlatformConstant.CPCLOUD_DEVICE;
+import static cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloudPlatformConstant.URL_VERSION;
 
 /**
  * 靶标管理-服务管理
@@ -35,7 +34,7 @@ import static cn.cyberpeace.mp.devops.cluster.cloud.platform.service.BaseCloudPl
  */
 @Service
 @Slf4j
-public class InstallerService extends BaseOpenStackServiceImpl {
+public class InstallerService extends BaseOpenStackService {
 
     private static final String INSTALLER = "/installer";
 
