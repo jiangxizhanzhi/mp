@@ -80,6 +80,7 @@ public class DataCollectionService {
      * @return ListObjResult<FileEventModel>
      */
     public ListObjResult<FileEventModel> queryFileEvents(WazuhEventRequest wazuhEventRequest) {
+        log.info("{}", wazuhEventRequest);
         //根据日期构造索引
         String[] indexArray = buildRequestIndex(wazuhEventRequest.getStartTime(), wazuhEventRequest.getEndTime());
         var searchRequest = new SearchRequest(indexArray);
@@ -400,16 +401,19 @@ public class DataCollectionService {
     private FileEventModel getFileEventModel(WazuhFileRoot wazuhFileRoot, MultiValueMap<String, String> multiValueMap,
         WazuhEventRequest wazuhEventRequest) {
         return FileEventModel.builder()
-            .filePath(wazuhFileRoot.getSyscheck().getPath())
-            .size(wazuhFileRoot.getSyscheck().getSizeAfter())
-            .updateTime(TimeUtils.dateToLocalDateTime(wazuhFileRoot.getTimestamp()))
-            .user(wazuhFileRoot.getSyscheck().getUnameAfter())
-            .action(wazuhFileRoot.getSyscheck().getEvent())
-            .macIds(multiValueMap.get(wazuhFileRoot.getAgent().getId()))
-            //区分文件还是注册表
-            .fileEventType(wazuhFileRoot.getRule().getGroups().stream().anyMatch("syscheck_registry"::equals) ? FileEventType.REGISTRY : FileEventType.FILE)
-            .agentName(wazuhFileRoot.getAgent().getName())
-            .agentId(wazuhFileRoot.getAgent().getId())
+                .filePath(wazuhFileRoot.getSyscheck().getPath())
+                .size(wazuhFileRoot.getSyscheck().getSizeAfter())
+                .updateTime(TimeUtils.dateToLocalDateTime(wazuhFileRoot.getTimestamp()))
+                .user(wazuhFileRoot.getSyscheck().getUnameAfter())
+                .action(wazuhFileRoot.getSyscheck().getEvent())
+                .macIds(multiValueMap.get(wazuhFileRoot.getAgent().getId()))
+                //区分文件还是注册表
+                .fileEventType(wazuhFileRoot.getRule().getGroups().stream().anyMatch("syscheck_registry"::equals) ? FileEventType.REGISTRY : FileEventType.FILE)
+                .agentName(wazuhFileRoot.getAgent().getName())
+                .agentId(wazuhFileRoot.getAgent().getId())
+                .description(wazuhFileRoot.getRule().getDescription())
+            //  .catagory()
+                .level(wazuhFileRoot.getRule().getLevel())
             .build();
     }
 
@@ -449,9 +453,12 @@ public class DataCollectionService {
     }
 
     private void buildFileEventBoolQueryBuilder(WazuhEventRequest wazuhEventRequest,
-        BoolQueryBuilder boolQueryBuilder, MultiValueMap<String, String> allAgentMacAddr) {
+                                                BoolQueryBuilder boolQueryBuilder, MultiValueMap<String, String> allAgentMacAddr) {
         //构造查询条件
-        boolQueryBuilder.must(QueryBuilders.boolQuery().must(QueryBuilders.termQuery("rule.groups", "syscheck")));
+        if (!CollectionUtils.isEmpty(wazuhEventRequest.getRuleGroups())) {
+//            boolQueryBuilder.must(QueryBuilders.boolQuery().must(QueryBuilders.termsQuery("rule.groups", wazuhEventRequest.getRuleGroups().toArray())));
+            boolQueryBuilder.must(QueryBuilders.termsQuery("rule.groups", wazuhEventRequest.getRuleGroups().toArray()));
+        }
 
         if (!CollectionUtils.isEmpty(wazuhEventRequest.getMacIds())) {
             //构造agentId
@@ -462,14 +469,42 @@ public class DataCollectionService {
             buildAgentNameQuery(wazuhEventRequest.getAgentNames(), boolQueryBuilder);
         }
 
+        // catagories
+        if(!CollectionUtils.isEmpty(wazuhEventRequest.getCatagories())) {
+            buildCatagoryQuery(wazuhEventRequest.getCatagories(), boolQueryBuilder);
+        }
+
+        // keywords
+        if(!CollectionUtils.isEmpty(wazuhEventRequest.getKeywords())) {
+            buildKeywordsQuery(wazuhEventRequest.getKeywords(), boolQueryBuilder);
+        }
+
+        // levels
+        if(!CollectionUtils.isEmpty(wazuhEventRequest.getLevels())) {
+            buildLevelQuery(wazuhEventRequest.getLevels(), boolQueryBuilder);
+        }
+
+
         //时间查询
         boolQueryBuilder.must(QueryBuilders.rangeQuery("timestamp")
-            .from(TimeUtils.localDateTimeToString(wazuhEventRequest.getStartTime(), EsConstants.esDateTimeFormatter))
-            .to(TimeUtils.localDateTimeToString(wazuhEventRequest.getEndTime(), EsConstants.esDateTimeFormatter)));
+                .from(TimeUtils.localDateTimeToString(wazuhEventRequest.getStartTime(), EsConstants.esDateTimeFormatter))
+                .to(TimeUtils.localDateTimeToString(wazuhEventRequest.getEndTime(), EsConstants.esDateTimeFormatter)));
     }
 
     private void buildAgentNameQuery(List<String> names, BoolQueryBuilder boolQueryBuilder) {
         boolQueryBuilder.filter(QueryBuilders.termsQuery("agent.name", names));
+    }
+
+    private void buildCatagoryQuery(List<String> catagories, BoolQueryBuilder boolQueryBuilder) {
+        // todo 分类 -> *.rules.xml -> ruleId 解析
+    }
+
+    private void buildKeywordsQuery(List<String> keywords, BoolQueryBuilder boolQueryBuilder) {
+        // todo keywords
+    }
+
+    private void buildLevelQuery(List<Integer> levels, BoolQueryBuilder boolQueryBuilder) {
+        // todo levels
     }
 
     /**

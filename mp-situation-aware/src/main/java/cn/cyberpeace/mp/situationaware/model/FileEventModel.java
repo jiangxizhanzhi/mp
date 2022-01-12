@@ -1,11 +1,13 @@
 package cn.cyberpeace.mp.situationaware.model;
 
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+
 import java.time.LocalDateTime;
 import java.util.List;
-
-import io.swagger.annotations.ApiModelProperty;
-import lombok.*;
 
 @Builder
 @Data
@@ -49,5 +51,17 @@ public class FileEventModel {
 
     @ApiModelProperty("wazuh AgentName")
     private String agentName;
+
+    @ApiModelProperty("rule等级")
+    private Integer level;
+
+    @ApiModelProperty("分类")
+    private String catagory;
+
+    @ApiModelProperty("rule描述信息")
+    private String description;
+
+    @ApiModelProperty("原始信息")
+    private String src;
 
 }

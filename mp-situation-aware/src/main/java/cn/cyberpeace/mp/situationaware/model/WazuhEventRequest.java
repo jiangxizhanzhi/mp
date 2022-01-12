@@ -41,6 +41,33 @@ public class WazuhEventRequest {
     @ApiModelProperty(value = "macId集合", required = false)
     private List<String> macIds;
 
+    /**
+     * agent names
+     */
     @ApiModelProperty(value = "agentName列表", required = false)
     private List<String> agentNames;
+
+    /**
+     * 分类 Windows，Linux，邮件服务器，Web服务器，网络服务等
+     */
+    @ApiModelProperty(value = "分类集合")
+    private List<String> catagories;
+
+    /**
+     * 关键字集合
+     */
+    @ApiModelProperty(value = "关键字集合")
+    private List<String> keywords;
+
+    /**
+     * 级别
+     */
+    @ApiModelProperty(value = "级别集合")
+    private List<Integer> levels;
+
+    /**
+     * 指定rule.groups
+     */
+    @ApiModelProperty(value = "wazuh events规则组集合")
+    private List<String> ruleGroups;
 }
