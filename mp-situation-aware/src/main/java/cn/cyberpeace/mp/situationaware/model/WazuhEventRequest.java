@@ -50,7 +50,7 @@ public class WazuhEventRequest {
     /**
      * 分类 Windows，Linux，邮件服务器，Web服务器，网络服务等
      */
-    @ApiModelProperty(value = "分类集合")
+    @ApiModelProperty(value = "分类集合 分类 windows; linux; cisco; hp; freebsd; junos; mail_server 邮件服务器; web_server web服务器; database 数据库; net_server 网络服务器; app 应用软件; cloud 云; load_balancer 负载均衡; app_framework 应用框架; av; fw; ids/ips; vpn; other 其他; ")
     private List<String> catagories;
 
     /**
@@ -62,7 +62,7 @@ public class WazuhEventRequest {
     /**
      * 级别
      */
-    @ApiModelProperty(value = "级别集合")
+    @ApiModelProperty(value = "级别集合 范围 0 ~ 15")
     private List<Integer> levels;
 
     /**
