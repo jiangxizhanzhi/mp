@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.hutool.core.io.FileUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ import java.util.List;
  * @Author maojun
  * @Date 2021/10/11
  */
+@Slf4j
 @Service
 public class ResourceCenterService {
     private static String FDFS_SCENE_FILEPATH_FORMAT = "%s?filename=%s";
@@ -44,6 +46,8 @@ public class ResourceCenterService {
                 String fdfsPath = FdfsCommon.upload(sceneFilePath);
                 String fileName = FileUtil.getName(sceneFilePath);
                 fdfsSceneFilePath = String.format(FDFS_SCENE_FILEPATH_FORMAT, fdfsPath, fileName);
+            } else {
+                log.info("import scene , no scene file for path {}", sceneFilePath);
             }
         }
         // 转换bo
