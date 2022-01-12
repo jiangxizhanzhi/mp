@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementPortBO;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -19,6 +20,7 @@ import java.util.Map;
  * @Author maojun
  * @Date 2021/10/12
  */
+@Slf4j
 class DeviceInfoConverter implements IConverter {
 
     private TargetConverter targetConverter;
@@ -49,6 +51,7 @@ class DeviceInfoConverter implements IConverter {
             request.setLikeName(false);
             List<Device> devices = this.targetConverter.allTarget(request);
             if (CollectionUtils.isEmpty(devices)) {
+                log.info("import scene ,no device find , image is {}", request.getName());
                 continue;
             }
             Params params = new Params(element, pluginElements.get(element.getId()), pluginPorts);
