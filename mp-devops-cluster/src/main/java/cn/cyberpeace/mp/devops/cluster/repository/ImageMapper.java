@@ -42,11 +42,18 @@ public interface ImageMapper extends BaseModelMapper<TargetModel> {
     TargetModel findByUuid(String uuid);
 
     /**
-     * 批量查询
+     * 根据UUID批量查询
      * @param uuids
      * @return
      */
     List<TargetModel> findByUuids(@Param("uuids") List<String> uuids);
+
+    /**
+     * 根据ID批量查询
+     * @param ids
+     * @return
+     */
+    List<TargetModel> findByIds(@Param("ids") List<Integer> ids);
 
     /**
      * 根据ID更新信息
