@@ -237,6 +237,21 @@
         </where>
     </select>
 
+    <select id="findByIds" resultMap="BaseResultMap">
+        select
+        <include refid="commonTargetColumn"/>
+        from
+        mp_devops_target i
+        <where>
+            <if test="ids != null and ids.size > 0">
+                i.id in
+                <foreach collection="ids" item="item" index="index"  open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
     <update id="updateById"
             parameterType="cn.cyberpeace.mp.devops.cluster.model.TargetModel">
         update mp_devops_target
