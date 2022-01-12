@@ -303,12 +303,14 @@ public class CsceneSpecialService {
             // 场景运行时长
             if (CollectionUtils.isNotEmpty(data)) {
                 data.forEach(s -> {
-                    try {
-                        Map<String, Object> result = JsonCommon.parse(s.getReferenceMetaData(), Map.class);
-                        result.put("room_name", s.getName());
-                        s.setReferenceMetaData(JsonCommon.stringify(result));
-                    } catch (Exception e) {
-                        log.error("name parse error,csceneId is {},referenceMetaData is {}", s.getId(), s.getReferenceMetaData(), e);
+                    if (StringUtils.isNotEmpty(s.getReferenceMetaData())) {
+                        try {
+                            Map<String, Object> result = JsonCommon.parse(s.getReferenceMetaData(), Map.class);
+                            result.put("room_name", s.getName());
+                            s.setReferenceMetaData(JsonCommon.stringify(result));
+                        } catch (Exception e) {
+                            log.error("name parse error,csceneId is {},referenceMetaData is {}", s.getId(), s.getReferenceMetaData(), e);
+                        }
                     }
                     if (SceneModel.Event.DELETE == s.getEvent() && EventStatus.OVER == s.getEventStatus()) {
                         // 已删除场景的运行时间=删除时刻 - 创建时刻
