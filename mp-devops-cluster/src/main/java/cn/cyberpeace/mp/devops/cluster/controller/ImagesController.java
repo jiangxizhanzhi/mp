@@ -403,6 +403,10 @@ public class ImagesController {
     @ApiOperation("同步镜像数据")
     @PostMapping("/async")
     public ServiceResult async(@RequestBody ImageAsyncRequest request){
+        List<Integer> requestIds = request.getIds();
+        if (CollectionUtils.isEmpty(requestIds)){
+           throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
         Integer result = imagesConverter.async(request);
         return result > 0 ? ServiceResult.successful() : ServiceResult.fail("");
     }

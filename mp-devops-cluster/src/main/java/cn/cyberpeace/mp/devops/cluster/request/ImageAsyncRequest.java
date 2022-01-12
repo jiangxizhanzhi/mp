@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotBlank;
 import java.util.List;
 
 /**
@@ -19,6 +18,5 @@ import java.util.List;
 public class ImageAsyncRequest extends BaseRequest {
 
     @ApiModelProperty("镜像ID集合")
-    @NotBlank
     private List<Integer> ids;
 }
