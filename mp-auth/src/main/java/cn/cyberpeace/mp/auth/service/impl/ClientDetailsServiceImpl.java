@@ -30,7 +30,6 @@ public class ClientDetailsServiceImpl extends BaseModelServiceImpl<ClientDetails
 
     @Override
     public ClientDetailsModel getByClientId(String clientId) {
-        log.info("clientId:{}", clientId);
         return getModelMapper().first(new HumanCondition().filterEqual("client_id", clientId));
     }
 }

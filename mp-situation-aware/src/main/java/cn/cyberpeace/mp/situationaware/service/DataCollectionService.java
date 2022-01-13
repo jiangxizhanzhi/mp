@@ -533,7 +533,7 @@ public class DataCollectionService {
     }
 
     private void buildLevelQuery(List<Integer> levels, BoolQueryBuilder boolQueryBuilder) {
-        // todo levels
+        boolQueryBuilder.filter(QueryBuilders.termsQuery("rule.level", levels));
     }
 
     /**
