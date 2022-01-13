@@ -34,7 +34,6 @@ public class RouterService extends BaseOpenStackService {
      */
     public RouterCloudPlatformModel page(String getParams) {
         RouterPageResult pageResult = super.sendGet(URL_VERSION + "/routers" + getParams, RouterPageResult.class);
-
         if (Objects.isNull(pageResult) || Objects.isNull(pageResult.getData())){
             return null;
         }

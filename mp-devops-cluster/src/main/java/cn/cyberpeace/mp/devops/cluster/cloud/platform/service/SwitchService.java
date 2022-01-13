@@ -16,7 +16,6 @@ import static cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloud
 @Slf4j
 public class SwitchService extends BaseOpenStackService {
 
-
     public SwitchService(DevopsConfig devopsConfig) {
         super(devopsConfig);
     }
