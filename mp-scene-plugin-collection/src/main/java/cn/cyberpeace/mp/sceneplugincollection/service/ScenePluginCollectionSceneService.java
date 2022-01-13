@@ -231,6 +231,7 @@ public class ScenePluginCollectionSceneService {
             hostEvent.setDescription(srcHostEvent.getDescription());
             hostEvent.setLevel(srcHostEvent.getLevel());
             hostEvent.setCatagory(srcHostEvent.getCatagory());
+            hostEvent.setContent(srcHostEvent.getContent());
             var srcElement = agentNameElementMap.getOrDefault(srcHostEvent.getAgentName(), null);
             if (srcElement != null) {
                 hostEvent.setNodeId(srcElement.getId());

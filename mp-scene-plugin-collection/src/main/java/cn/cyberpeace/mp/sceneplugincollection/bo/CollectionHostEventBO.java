@@ -49,4 +49,9 @@ public class CollectionHostEventBO {
     @ApiModelProperty("rule描述信息")
     private String description;
 
+    @ApiModelProperty("底层信息")
+    private Map<String, Object> content;
+
+
+
 }

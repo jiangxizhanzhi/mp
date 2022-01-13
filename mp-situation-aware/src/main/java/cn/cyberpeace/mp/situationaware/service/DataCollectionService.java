@@ -99,14 +99,14 @@ public class DataCollectionService {
         //处理分页
         int total = processPageable(wazuhEventRequest, indexArray, boolQueryBuilder, sourceBuilder);
 
-        log.info("file JSON query: {}", searchRequest.source().toString());
+        log.info("elasticsearch JSON query:\n{}", searchRequest.source().toString());
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             List<WazuhFileRoot> wazuhFileRootList = Arrays.stream(response.getHits().getHits()).map(hit -> JSONObject.parseObject(hit.getSourceAsString(), WazuhFileRoot.class)).collect(Collectors.toList());
             List<FileEventModel> fileEventModelList = wazuhFileRootList.stream().map((root -> this.getFileEventModel(root, multiValueMap))).collect(Collectors.toList());
             return new ListObjResult<>(fileEventModelList, total);
         } catch (IOException e) {
-            log.error("es 查询文件事件分页 {} ", e);
+            log.error("es queryFileEvents error: {} ", e);
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
         }
     }
@@ -263,7 +263,7 @@ public class DataCollectionService {
             //process page
             return wazuhModelList;
         } catch (IOException e) {
-            log.error("es 查询监控事件分页失败 {}", e);
+            log.error("es queryMonitorEventsWithTimeRange error: {}", e);
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
         }
     }
@@ -425,8 +425,25 @@ public class DataCollectionService {
             }
         }
 
+        builder.content(processContent(wazuhFileRoot));
 
         return builder.updateTime(TimeUtils.dateToLocalDateTime(wazuhFileRoot.getTimestamp())).build();
+    }
+
+    private JSONObject processContent(WazuhFileRoot wazuhFileRoot) {
+
+        JSONObject jsonObject = new JSONObject();
+        WazuhFileRoot.Rule rule = wazuhFileRoot.getRule();
+        if (Objects.nonNull(rule)) {
+            JSONObject ruleObj = new JSONObject();
+            ruleObj.put("firedtimes", rule.getFiredtimes());
+            ruleObj.put("description", rule.getDescription());
+            ruleObj.put("groups", rule.getGroups());
+            ruleObj.put("id", rule.getId());
+            jsonObject.put("rule", ruleObj);
+        }
+        jsonObject.put("full_log", wazuhFileRoot.getFullLog());
+        return jsonObject;
     }
 
     /**
