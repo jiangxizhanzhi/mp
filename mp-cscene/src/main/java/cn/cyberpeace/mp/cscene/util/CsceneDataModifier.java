@@ -20,6 +20,7 @@ import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneDataBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -36,6 +37,7 @@ import java.util.stream.Collectors;
  * @Author maojun
  * @Date 2021/12/13
  */
+@Slf4j
 public class CsceneDataModifier {
     /**
      * 端口中补充协议
@@ -244,6 +246,36 @@ public class CsceneDataModifier {
         csceneInstanceBO.setEnableRecording(getOutputEnableRecording(csceneInstanceBO.getScene()));
     }
 
+    public static void correctName(String csceneId, String referenceMetaData, CsceneInstanceBO csceneInstance, CsceneBO cscene) {
+        if (StringUtils.isEmpty(referenceMetaData)) {
+            return;
+        }
+        try {
+            // 兼容name
+            if (String.valueOf(csceneInstance.getReferenceType()).startsWith("3")) {
+                // 竞赛
+                if (cscene.getSceneConfig() != null && cscene.getSceneConfig().getTopology() != null && cscene.getSceneConfig().getTopology().getScene() != null) {
+                    csceneInstance.setName(cscene.getSceneConfig().getTopology().getScene().getName());
+                }
+            } else {
+                // 靶场和实训
+                CsceneDataModifier.NameParseResult result = JsonCommon.snakeParse(referenceMetaData, CsceneDataModifier.NameParseResult.class);
+                if (result.getRoomName() != null) {
+                    csceneInstance.setName(result.getRoomName());
+                    csceneInstance.getScene().getTopology().getScene().setName(result.getRoomName());
+                } else if (result.getSceneName() != null) {
+                    csceneInstance.setName(result.getSceneName());
+                    csceneInstance.getScene().getTopology().getScene().setName(result.getSceneName());
+                } else if (result.getBusinessName() != null) {
+                    csceneInstance.setName(result.getBusinessName());
+                    csceneInstance.getScene().getTopology().getScene().setName(result.getBusinessName());
+                }
+            }
+        } catch (Exception e) {
+            log.error("parse name error,csceneId is {} , reference data is {},", csceneId, referenceMetaData, e);
+        }
+    }
+
     private static void handlerNodeCommand(BaseSceneDataBO baseSceneDataBO) {
         if (baseSceneDataBO.getTopology() != null) {
             if (CollectionUtils.isNotEmpty(baseSceneDataBO.getTopology().getElements())) {
@@ -312,6 +344,36 @@ public class CsceneDataModifier {
 
         public void setAccessModes(List<AccessMode> accessModes) {
             this.accessModes = accessModes;
+        }
+    }
+
+    private static class NameParseResult {
+        private String sceneName;
+        private String roomName;
+        private String businessName;
+
+        public String getSceneName() {
+            return sceneName;
+        }
+
+        public void setSceneName(String sceneName) {
+            this.sceneName = sceneName;
+        }
+
+        public String getRoomName() {
+            return roomName;
+        }
+
+        public void setRoomName(String roomName) {
+            this.roomName = roomName;
+        }
+
+        public String getBusinessName() {
+            return businessName;
+        }
+
+        public void setBusinessName(String businessName) {
+            this.businessName = businessName;
         }
     }
 

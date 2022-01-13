@@ -24,6 +24,7 @@ import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneRoleMapper;
 import cn.cyberpeace.mp.cscene.service.filed.CsceneModelFields;
 import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
+import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneConfigService;
@@ -328,29 +329,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         }
         if (createContext.getReferenceMetaData() != null) {
             csceneInstance.setReferenceMetaData(createContext.getReferenceMetaData());
-
-            try {
-                // 兼容name todo
-                if (String.valueOf(csceneInstance.getReferenceType()).startsWith("3")) {
-                    // 竞赛
-                    if (cscene.getSceneConfig() != null && cscene.getSceneConfig().getTopology() != null && cscene.getSceneConfig().getTopology().getScene() != null) {
-                        csceneInstance.setName(cscene.getSceneConfig().getTopology().getScene().getName());
-                    }
-                } else {
-                    // 靶场和实训
-                    NameParseResult result = JsonCommon.snakeParse(createContext.getReferenceMetaData(), NameParseResult.class);
-                    if (result.getRoomName() != null) {
-                        csceneInstance.setName(result.getRoomName());
-                    } else if (result.getSceneName() != null) {
-                        csceneInstance.setName(result.getSceneName());
-                    } else if (result.getBusinessName() != null) {
-                        csceneInstance.setName(result.getBusinessName());
-                    }
-                }
-            } catch (Exception e) {
-                log.error("parse name error,csceneId is {} , reference data is {},", csceneId, createContext.getReferenceMetaData(), e);
-            }
-
+            CsceneDataModifier.correctName(csceneId, createContext.getReferenceMetaData(), csceneInstance, cscene);
         }
         return new ServiceResult<>(csceneHandler.createTestInstance(unique, csceneInstance));
     }
@@ -396,58 +375,8 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         }
         if (createContext.getReferenceMetaData() != null) {
             csceneInstance.setReferenceMetaData(createContext.getReferenceMetaData());
-            try {
-                // 兼容name todo
-                if (String.valueOf(csceneInstance.getReferenceType()).startsWith("3")) {
-                    // 竞赛
-                    if (cscene.getSceneConfig() != null && cscene.getSceneConfig().getTopology() != null && cscene.getSceneConfig().getTopology().getScene() != null) {
-                        csceneInstance.setName(cscene.getSceneConfig().getTopology().getScene().getName());
-                    }
-                } else {
-                    // 靶场和实训
-                    NameParseResult result = JsonCommon.snakeParse(createContext.getReferenceMetaData(), NameParseResult.class);
-                    if (result.getRoomName() != null) {
-                        csceneInstance.setName(result.getRoomName());
-                    } else if (result.getSceneName() != null) {
-                        csceneInstance.setName(result.getSceneName());
-                    } else if (result.getBusinessName() != null) {
-                        csceneInstance.setName(result.getBusinessName());
-                    }
-                }
-            } catch (Exception e) {
-                log.error("parse name error,csceneId is {} , reference data is {},", csceneId, createContext.getReferenceMetaData(), e);
-            }
+            CsceneDataModifier.correctName(csceneId, createContext.getReferenceMetaData(), csceneInstance, cscene);
         }
         return new ServiceResult<>(csceneHandler.createAppInstance(unique, csceneInstance));
-    }
-
-    private static class NameParseResult {
-        private String sceneName;
-        private String roomName;
-        private String businessName;
-
-        public String getSceneName() {
-            return sceneName;
-        }
-
-        public void setSceneName(String sceneName) {
-            this.sceneName = sceneName;
-        }
-
-        public String getRoomName() {
-            return roomName;
-        }
-
-        public void setRoomName(String roomName) {
-            this.roomName = roomName;
-        }
-
-        public String getBusinessName() {
-            return businessName;
-        }
-
-        public void setBusinessName(String businessName) {
-            this.businessName = businessName;
-        }
     }
 }

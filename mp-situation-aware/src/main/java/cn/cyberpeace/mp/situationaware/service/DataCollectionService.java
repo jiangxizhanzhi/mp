@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.situationaware.model.WazuhMonitorRoot;
 import cn.cyberpeace.mp.situationaware.model.enums.DataCollectionType;
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
 import cn.cyberpeace.mp.situationaware.repository.WazuhRepository;
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.NumberUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.annotations.VisibleForTesting;
@@ -102,7 +103,7 @@ public class DataCollectionService {
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             List<WazuhFileRoot> wazuhFileRootList = Arrays.stream(response.getHits().getHits()).map(hit -> JSONObject.parseObject(hit.getSourceAsString(), WazuhFileRoot.class)).collect(Collectors.toList());
-            List<FileEventModel> fileEventModelList = wazuhFileRootList.stream().map((root -> this.getFileEventModel(root, multiValueMap, wazuhEventRequest))).collect(Collectors.toList());
+            List<FileEventModel> fileEventModelList = wazuhFileRootList.stream().map((root -> this.getFileEventModel(root, multiValueMap))).collect(Collectors.toList());
             return new ListObjResult<>(fileEventModelList, total);
         } catch (IOException e) {
             log.error("es 查询文件事件分页 {} ", e);
@@ -398,23 +399,34 @@ public class DataCollectionService {
      * @param wazuhFileRoot
      * @return
      */
-    private FileEventModel getFileEventModel(WazuhFileRoot wazuhFileRoot, MultiValueMap<String, String> multiValueMap,
-        WazuhEventRequest wazuhEventRequest) {
-        return FileEventModel.builder()
-                .filePath(wazuhFileRoot.getSyscheck().getPath())
-                .size(wazuhFileRoot.getSyscheck().getSizeAfter())
-                .updateTime(TimeUtils.dateToLocalDateTime(wazuhFileRoot.getTimestamp()))
-                .user(wazuhFileRoot.getSyscheck().getUnameAfter())
-                .action(wazuhFileRoot.getSyscheck().getEvent())
-                .macIds(multiValueMap.get(wazuhFileRoot.getAgent().getId()))
-                //区分文件还是注册表
-                .fileEventType(wazuhFileRoot.getRule().getGroups().stream().anyMatch("syscheck_registry"::equals) ? FileEventType.REGISTRY : FileEventType.FILE)
-                .agentName(wazuhFileRoot.getAgent().getName())
-                .agentId(wazuhFileRoot.getAgent().getId())
-                .description(wazuhFileRoot.getRule().getDescription())
-            //  .catagory()
-                .level(wazuhFileRoot.getRule().getLevel())
-            .build();
+    private FileEventModel getFileEventModel(WazuhFileRoot wazuhFileRoot, MultiValueMap<String, String> multiValueMap) {
+
+        FileEventModel.FileEventModelBuilder builder = FileEventModel.builder();
+        if (Objects.nonNull(wazuhFileRoot.getSyscheck())) {
+            builder.filePath(wazuhFileRoot.getSyscheck().getPath())
+                    .size(wazuhFileRoot.getSyscheck().getSizeAfter())
+                    .user(wazuhFileRoot.getSyscheck().getUnameAfter())
+                    .action(wazuhFileRoot.getSyscheck().getEvent());
+        }
+
+        if (Objects.nonNull(wazuhFileRoot.getAgent())) {
+            builder.macIds(multiValueMap.get(wazuhFileRoot.getAgent().getId()))
+                    .agentName(wazuhFileRoot.getAgent().getName())
+                    .agentId(wazuhFileRoot.getAgent().getId());
+        }
+
+        if (Objects.nonNull(wazuhFileRoot.getRule())) {
+            //区分文件还是注册表
+                builder.description(wazuhFileRoot.getRule().getDescription())
+                    //  .catagory()
+                    .level(wazuhFileRoot.getRule().getLevel());
+            if (CollectionUtil.isNotEmpty(wazuhFileRoot.getRule().getGroups())) {
+                builder.fileEventType(wazuhFileRoot.getRule().getGroups().stream().anyMatch("syscheck_registry"::equals) ? FileEventType.REGISTRY : FileEventType.FILE);
+            }
+        }
+
+
+        return builder.updateTime(TimeUtils.dateToLocalDateTime(wazuhFileRoot.getTimestamp())).build();
     }
 
     /**
