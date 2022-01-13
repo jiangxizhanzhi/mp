@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.situationaware.model;
 
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
+import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -61,7 +62,7 @@ public class FileEventModel {
     @ApiModelProperty("rule描述信息")
     private String description;
 
-    @ApiModelProperty("原始信息")
-    private String src;
+    @ApiModelProperty("从_source里面抽取的信息，JSONObject")
+    private JSONObject content;
 
 }
