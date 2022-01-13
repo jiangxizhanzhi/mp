@@ -30,7 +30,6 @@ public class SnapshotService extends BaseOpenStackService {
         super(devopsConfig);
     }
 
-
     /**
      * 查询列表
      * @param deviceUuid
