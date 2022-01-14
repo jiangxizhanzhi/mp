@@ -120,8 +120,11 @@ public class SceneMonitorService {
      * @param sceneId
      * @return
      */
-    public List<ElementMonitorBasicInfo> getAllSceneElements(String sceneId) {
-        log.info("sceneId:{}", sceneId);
+    public List<ElementMonitorBasicInfo> getAllSceneElements(String sceneId, Boolean fetchRealTimeHostState) {
+        if (Objects.isNull(fetchRealTimeHostState)) {
+            fetchRealTimeHostState = true;
+        }
+        log.info("sceneId:{}, fetchRealTimeHostState:{}", sceneId, fetchRealTimeHostState);
         var result = csceneInstanceService.getById(sceneId, null);
         var csceneInstanceBO = result.getSource();
 
@@ -141,13 +144,14 @@ public class SceneMonitorService {
             basicInfo.setSceneId(sceneId);
             elementMonitorService.processPluginElement(basicInfo, csceneInstanceBO, eid);
             if (isSupportedVirtualType(basicInfo.getVirtualType())) {
-                elementMonitorService.processTopologyElement(basicInfo, csceneInstanceBO, eid);
+                elementMonitorService.processTopologyElement(basicInfo, csceneInstanceBO, eid, fetchRealTimeHostState);
                 basicInfos.add(basicInfo);
             }
         }
 
         return basicInfos;
     }
+
 
     /**
      * 是否是需要的节点
