@@ -1,11 +1,11 @@
 package cn.cyberpeace.mp.base.util;
 
+import cn.cyberpeace.mp.base.util.protocolprobe.ProtocolProbe;
+import cn.cyberpeace.mp.base.util.protocolprobe.RDPProbe;
+import cn.cyberpeace.mp.base.util.protocolprobe.SSHProbe;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.net.SocketFactory;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -16,7 +16,8 @@ public class NetworkUtils {
 
     private static final int DEFAULT_PROBE_TIMEOUT = 300 * 1000;
 
-    private NetworkUtils() {}
+    private NetworkUtils() {
+    }
 
     public static boolean checkPortConnectable(String host, int port) {
         return checkPortConnectable(host, port, 0);
@@ -39,52 +40,12 @@ public class NetworkUtils {
     }
 
     public static boolean checkPortConnectable(String protocol, String host, int port, int timeout) {
-        if ("ssh".equals(protocol)) {
-            Socket socket = null;
-            InputStream inputStream = null;
-            OutputStream outputStream = null;
-            try {
-                socket = SocketFactory.getDefault().createSocket();
-                socket.setSoTimeout(2000);
-                socket.connect(new InetSocketAddress(host, port));
-                inputStream = socket.getInputStream();
-                outputStream = socket.getOutputStream();
-                // 建立完tcp连接,尝试和远端交换ssh的版本号,交换成功才算可连接
-                outputStream.write("SSH-2.0-mp".getBytes());
-                outputStream.flush();
-                byte[] remoteVersion = new byte[20];
-                inputStream.read(remoteVersion);
-                if (new String(remoteVersion).startsWith("SSH")) {
-                    return true;
-                } else {
-                    return false;
-                }
-            } catch (Exception e) {
-                log.error("failed to connect {}//{}:{}", protocol, host, port, e);
-                return false;
-            } finally {
-                if (inputStream != null) {
-                    try {
-                        inputStream.close();
-                    } catch (IOException e) {
-                        log.error("failed to close inputStream", e);
-                    }
-                }
-                if (outputStream != null) {
-                    try {
-                        outputStream.close();
-                    } catch (IOException e) {
-                        log.error("failed to close outputStream", e);
-                    }
-                }
-                if (socket != null) {
-                    try {
-                        socket.close();
-                    } catch (IOException e) {
-                        log.error("failed to close socket", e);
-                    }
-                }
-            }
+        if ("ssh".equalsIgnoreCase(protocol)) {
+            ProtocolProbe protocolProbe = new SSHProbe(host, port);
+            return protocolProbe.probe();
+        } else if ("rdp".equalsIgnoreCase(protocol)) {
+            ProtocolProbe protocolProbe = new RDPProbe(host, port);
+            return protocolProbe.probe();
         } else {
             try (var socket = new Socket()) {
                 socket.connect(new InetSocketAddress(host, port), timeout);

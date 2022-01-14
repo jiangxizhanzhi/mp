@@ -91,13 +91,22 @@ public class RecreateHandler extends HandlerCommon {
                         () -> deleteVirtualFirewall(cloudElement));
             } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
                 runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_VIRTUAL_MACHINE,
-                        () -> deleteVirtualMachine(cloudElement));
+                        () -> {
+                            deleteVirtualMachine(cloudElement);
+                            super.disableConnectUrl(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
+                        });
             } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
                 runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_CONTAINER,
-                        () -> deleteContainer(cloudElement));
+                        () -> {
+                            deleteContainer(cloudElement);
+                            super.disableConnectUrl(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
+                        });
             } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE)) {
                 runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_ENTITY_NODE,
-                        () -> deleteEntityNode(cloudElement));
+                        () -> {
+                            deleteEntityNode(cloudElement);
+                            super.disableConnectUrl(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
+                        });
             }
         }
     }

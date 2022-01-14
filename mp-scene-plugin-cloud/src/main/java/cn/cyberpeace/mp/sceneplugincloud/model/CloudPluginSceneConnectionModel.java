@@ -54,4 +54,6 @@ public class CloudPluginSceneConnectionModel extends BaseModel {
     private String connectionRecordingName;
     @DefaultStr
     private String connectionUrl;
+    @DefaultBool
+    private Boolean disable;
 }
