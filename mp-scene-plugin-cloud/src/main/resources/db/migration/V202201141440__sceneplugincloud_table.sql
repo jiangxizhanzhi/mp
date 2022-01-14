@@ -1,0 +1,1 @@
+alter table mp_sceneplugincloud_scene_connection add column `disable` tinyint(1) NOT NULL COMMENT '是否禁用' ;
