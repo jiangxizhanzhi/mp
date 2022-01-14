@@ -52,7 +52,7 @@ public class LicenseFilter extends OncePerRequestFilter {
                 boolean activationFailed = false;
                 ActivationResponse activationResponse = sysActivationService.status();
                 if (Objects.isNull(activationResponse)) {
-                    log.error("未查询到激活信息！");
+                    log.error("Can not find activation status！");
                     activationFailed = true;
                 }
 
@@ -60,12 +60,12 @@ public class LicenseFilter extends OncePerRequestFilter {
                 DateTime expiredDate = DateTime.parse(activationResponse.getExpiredDate(), DateTimeFormat.forPattern("yyyy-MM-dd"));
                 DateTime now = DateTime.now();
                 if (expiredDate.compareTo(now) >= 0) {
-                    log.error("激活状态已经过期！");
+                    log.error("Activation is Expired！");
                     activationFailed = true;
                 }
 
                 if(activationFailed) {
-                    log.error("激活状态异常！");
+                    log.error("Activation status is error！");
                     response.setStatus(HttpServletResponse.SC_OK);
                     // todo message format
                     ServiceResult serviceResult = ServiceResult.fail(AdminErrorCode.SYS_ACTIVATION_ERROR);

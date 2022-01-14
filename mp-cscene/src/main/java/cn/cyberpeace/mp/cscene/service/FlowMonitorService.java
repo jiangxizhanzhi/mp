@@ -149,7 +149,7 @@ public class FlowMonitorService {
                 // 没有攻击类型标签，全部设置为默认的低风险
                 FlowAttackDto flowAttackDto = new FlowAttackDto();
                 BeanUtils.copyProperties(flowBO, flowAttackDto);
-                flowAttackDto.setAttackInfo(new AttackInfo(4, "异常链接"));
+                flowAttackDto.setAttackInfo(new AttackInfo(4, "Abnormal links"));
                 flowAttackDtos.add(flowAttackDto);
             }
         }

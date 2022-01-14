@@ -147,7 +147,7 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
         // 根据parentId查询单个权限树
         TargetModel parentTarget = getModelMapper().get(parentId);
         if (parentTarget == null) {
-            log.info("target:{}不存在!", parentId);
+            log.info("target:{} not existed!", parentId);
             throw new MpRuntimeException(AuthErrorCode.TARGET_NOT_EXISTED.format(parentId));
         }
 
@@ -255,7 +255,7 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
         boolean deleteRolePermissionSuccess = rolePermissionService.deleteByTargetId(targetId);
 
         if (!deleteUserPermissionSuccess || !deleteOrgPermissionSuccess || !deleteRolePermissionSuccess) {
-            log.error("删除关联关系失败！");
+            log.error("delete related failed！targetId:{}", targetId);
             throw new MpRuntimeException(AuthErrorCode.OP_ERROR);
         }
     }

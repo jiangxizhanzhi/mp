@@ -299,13 +299,13 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         ObjServiceResult<UserModel> result = update(userModel);
 
         if (Objects.isNull(result.getSource()) || Objects.isNull(result.getSource().getObj())) {
-            log.error("删除用户失败！");
+            log.error("update user failed！");
             throw new MpRuntimeException(AuthErrorCode.OP_ERROR);
         }
 
         UserModel userModified = result.getSource().getObj();
         String userId = userModified.getId();
-        log.info("user modified id:{}", userId);
+        log.info("user has been modified id:{}", userId);
 
         if (StringUtils.isBlank(userModel.getIdentifier())) {
             // 若identifier为空，则设置identifier为null @See http://10.10.10.10/biz/bug-view-2390.html
@@ -388,7 +388,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         // 旧密码是否正确
         boolean isOldPwdMatch = PasswordUtils.getPasswordEncoder().matches(oldPwd, currentUser.getPassword());
         if (!isOldPwdMatch) {
-            log.error("旧密码不正确！");
+            log.error("old password not match！");
             throw new MpRuntimeException(AuthErrorCode.INCORRECT_OLD_CREDENTIALS);
         }
 
@@ -430,10 +430,10 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                 UserModel updateUser = UserModel.builder().id(userId).isEnabled(UserModel.Status.DISABLED).build();
                 return getModelMapper().update(updateUser);
             }
-            log.error("id为{}的用户状态不是正常状态！", userId);
+            log.error("user id:{} has an incorrect status! [Is Not Enabled!]", userId);
             throw new MpRuntimeException(AuthErrorCode.ACCOUNT_STATUS_ERROR);
         } else {
-            log.error("id为:" + userId + "的用户不存在！");
+            log.error("user id:{} not existed!", userId);
         }
 
         return false;
@@ -466,10 +466,10 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                 UserModel updateUser = UserModel.builder().id(userId).isEnabled(UserModel.Status.ENABLED).build();
                 return getModelMapper().update(updateUser);
             }
-            log.error("id为{}的用户状态不是禁用状态！", userId);
+            log.error("user id:{} has an incorrect status! [Is Not Disabled!]", userId);
             throw new MpRuntimeException(AuthErrorCode.ACCOUNT_STATUS_ERROR);
         } else {
-            log.error("id为{}的用户不存在！", userId);
+            log.error("user id:{} not existed!", userId);
         }
 
         return false;
@@ -503,10 +503,10 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                 UserModel updateUser = UserModel.builder().id(userId).isAudited(UserModel.Status.AUDITED).build();
                 return getModelMapper().update(updateUser);
             }
-            log.error("id为{}的用户状态不是挂起状态！", userId);
+            log.error("user id:{} has an incorrect status! [Is Not NOT_AUDITED!]", userId);
             throw new MpRuntimeException(AuthErrorCode.ACCOUNT_STATUS_ERROR);
         } else {
-            log.error("id为{}的用户不存在！", userId);
+            log.error("user id:{} not existed!", userId);
         }
 
         return false;
@@ -706,7 +706,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             }
 
         } else {
-            log.error("id为{}的用户不存在！", userId);
+            log.error("user id:{} not existed!", userId);
             throw new MpRuntimeException(AuthErrorCode.ACCOUNT_NOT_EXISTED);
         }
 

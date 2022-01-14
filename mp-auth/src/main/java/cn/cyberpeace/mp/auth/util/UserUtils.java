@@ -67,7 +67,7 @@ public class UserUtils {
         }
 
         if (principal instanceof ClientDetailsModel) {
-            log.error("Login account type Client:{}", principal);
+            log.error("Login account type is Client:{}", principal);
             throw new MpRuntimeException(AuthErrorCode.ACCOUNT_TYPE_ERROR);
         }
 

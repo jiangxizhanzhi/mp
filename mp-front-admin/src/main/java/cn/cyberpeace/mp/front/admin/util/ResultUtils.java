@@ -33,6 +33,7 @@ public class ResultUtils {
 
 
 
+    @Deprecated
     public static void throwExceptionIfError(ObjServiceResult result, String errorMsg) {
         if (StringUtils.isBlank(errorMsg)) {
             errorMsg = "execute error!";

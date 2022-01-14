@@ -55,7 +55,7 @@ public class UserHeartbeatServiceImpl extends BaseModelServiceImpl<UserHeartbeat
                 heartbeatMap.put(userModel, timestampList);
             }
         } else {
-            log.error("没有查询到有效登录用户信息！");
+            log.error("not existed illegal logined user!");
         }
     }
 

@@ -87,20 +87,20 @@ public class LicenseService {
         //  0	此授权码正确
         //  1	此授权码错误
         if (ret == -1) {
-            log.error("json格式错误！");
+            log.error("json error!");
             throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_FAILED);
         }
         if (ret == 1) {
-            log.error("授权码错误！");
+            log.error("verifyCode error!");
             throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_FAILED);
         }
         if (ret == 0) {
             // 授权码正确
-            log.info("校验成功！");
+            log.info("activation success!");
             return true;
         }
 
-        log.error("校验失败！");
+        log.error("activation failed!");
         return false;
     }
 

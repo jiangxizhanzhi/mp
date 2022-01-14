@@ -75,7 +75,7 @@ public class OrgUserController {
         if (success) {
             return ServiceResult.successful();
         } else {
-            log.error("绑定组织用户失败!");
+            log.error("bind org user failed!");
             throw new MpRuntimeException(AuthErrorCode.USER_ORG_ADD_ERROR);
         }
     }

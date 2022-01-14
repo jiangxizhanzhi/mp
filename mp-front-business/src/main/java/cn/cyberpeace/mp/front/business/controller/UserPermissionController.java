@@ -80,12 +80,12 @@ public class UserPermissionController {
 
     @ApiOperation(value = "绑定用户-资源关系，注意，该操作会清除用户原来绑定的权限。如果targetIds为空，表示删除用户所有角色！", notes = "")
     @PostMapping("/bind")
-    public ServiceResult bindUserRoles(@RequestBody @Validated BindUserTargetsRequest userTargetsReq) {
+    public ServiceResult bindUserPermissions(@RequestBody @Validated BindUserTargetsRequest userTargetsReq) {
         boolean success = userPermissionService.bindUserTargets(userTargetsReq.getUserId(), userTargetsReq.getTargetIds(), true);
         if (success) {
             return ServiceResult.successful();
         } else {
-            log.error("绑定用户资源失败!");
+            log.error("bind user permissions failed!");
             throw new MpRuntimeException(AuthErrorCode.USER_TARGET_ADD_ERROR);
         }
     }

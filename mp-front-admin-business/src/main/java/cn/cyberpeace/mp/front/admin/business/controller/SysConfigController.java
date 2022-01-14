@@ -57,7 +57,7 @@ public class SysConfigController {
         if (success) {
             return ServiceResult.successful();
         } else {
-            log.error("配置修改失败{}", updateConfig);
+            log.error("update config failed! {}", updateConfig);
             throw new MpRuntimeException(AdminErrorCode.SYS_CONFIG_MODIFY_ERROR);
         }
     }
@@ -73,7 +73,7 @@ public class SysConfigController {
         if (success) {
             return ServiceResult.successful();
         } else {
-            log.error("配置修改失败");
+            log.error("update config failed!");
             throw new MpRuntimeException(AdminErrorCode.SYS_CONFIG_MODIFY_ERROR);
         }
     }
