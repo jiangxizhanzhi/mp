@@ -53,7 +53,7 @@ public interface ImageMapper extends BaseModelMapper<TargetModel> {
      * @param ids
      * @return
      */
-    List<TargetModel> findByIds(@Param("ids") List<Integer> ids);
+    List<TargetModel> findByIds(@Param("ids") List<String> ids);
 
     /**
      * 根据ID更新信息
