@@ -162,7 +162,7 @@ public class SceneElementMonitorService {
 
         // ID
         basicInfo.setId(sceneElementBO.getId());
-        basicInfo.setId(sceneElementBO.getEid());
+        basicInfo.setEid(sceneElementBO.getEid());
         // 实例名称
         basicInfo.setName(sceneElementBO.getName());
 
