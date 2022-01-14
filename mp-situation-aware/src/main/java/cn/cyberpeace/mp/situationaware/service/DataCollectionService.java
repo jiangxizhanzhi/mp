@@ -534,7 +534,11 @@ public class DataCollectionService {
     }
 
     private void buildKeywordsQuery(List<String> keywords, BoolQueryBuilder boolQueryBuilder) {
-        // todo keywords
+        if (!CollectionUtils.isEmpty(keywords)) {
+            for (String keyword : keywords) {
+                boolQueryBuilder.must(QueryBuilders.wildcardQuery("rule.description", "*" + keyword + "*"));
+            }
+        }
     }
 
     private void buildLevelQuery(List<Integer> levels, BoolQueryBuilder boolQueryBuilder) {
