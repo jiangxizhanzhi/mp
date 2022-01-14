@@ -29,6 +29,15 @@ public class DeviceService extends BaseOpenStackService {
     }
 
     /**
+     * 分页查询
+     * @param params
+     * @return
+     */
+    public DeviceCloudPlatformModel page(String params){
+        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + DEVICE + "/lists" + params, DeviceCloudPlatformModel.class);
+    }
+
+    /**
      * 根据ID查询
      * @param id
      * @return

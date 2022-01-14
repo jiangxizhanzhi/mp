@@ -350,17 +350,7 @@ public class ImagesConverter implements BaseConverter{
     @Transactional
     public Integer async(ImageAsyncRequest request){
         List<Integer> requestIds = request.getIds();
-        if (CollectionUtils.isEmpty(requestIds)){
-            return 0;
-        }
-        List<TargetModel> targetModels = imageMapper.findByIds(requestIds);
-        List<Integer> diffList;
-        if (CollectionUtils.isEmpty(targetModels)){
-            diffList = requestIds;
-        }else{
-            List<Integer> targetIds = targetModels.stream().map(v -> Integer.parseInt(v.getId())).collect(Collectors.toList());
-            diffList = requestIds.stream().filter(v -> !targetIds.contains(v)).collect(Collectors.toList());
-        }
+        List<Integer> diffList = targetConverter.getAsyncDeviceIds(requestIds);
         if (CollectionUtils.isEmpty(diffList)){
             return requestIds.size();
         }
@@ -370,6 +360,7 @@ public class ImagesConverter implements BaseConverter{
         }
         return devopsTargetService.insert(deviceList);
     }
+
 
     /**
      * 转换ImageRequest

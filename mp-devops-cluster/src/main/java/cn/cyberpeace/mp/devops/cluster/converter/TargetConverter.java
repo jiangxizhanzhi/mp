@@ -121,4 +121,39 @@ public class TargetConverter{
         }
     }
 
+    /**
+     * 获取需同步的靶标ID集合
+     * @param deviceIds
+     * @return
+     */
+    public List<Integer> getAsyncDeviceIds(List<Integer> deviceIds){
+        if (CollectionUtils.isEmpty(deviceIds)){
+            return Lists.newArrayList();
+        }
+        List<String> ids = deviceIds.stream().map(String::valueOf).collect(Collectors.toList());
+        List<TargetModel> targetModels = imageMapper.findByIds(ids);
+        List<Integer> diffList;
+        if (CollectionUtils.isEmpty(targetModels)){
+            diffList = deviceIds;
+        }else{
+            List<Integer> targetIds = targetModels.stream().map(v -> Integer.parseInt(v.getId())).collect(Collectors.toList());
+            diffList = deviceIds.stream().filter(v -> !targetIds.contains(v)).collect(Collectors.toList());
+        }
+        return diffList;
+    }
+
+    /**
+     * 分页查询靶标数据
+     * @param offset
+     * @param limit
+     * @return
+     */
+    public List<Device> multiAsync(Integer offset,Integer limit){
+        DeviceCloudPlatformModel model = deviceService.page("?offset=" + offset + "&limit=" + limit);
+        if (Objects.isNull(model) || !model.isSuccess()){
+            return Lists.newArrayList();
+        }
+        return model.getItems();
+    }
+
 }
