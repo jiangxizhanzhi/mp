@@ -44,7 +44,7 @@ public class AuthUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        log.info("username:{}", username);
+        log.info("load users by username:{}", username);
         if (StringUtils.isEmpty(username)) {
             throw new UsernameNotFoundException(StringUtils.EMPTY);
         }

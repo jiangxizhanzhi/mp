@@ -31,6 +31,6 @@ public class HostEventQueryParams extends QueryParams {
     private List<Integer> levels;
 
     @ApiModelProperty(value = "keywords集合")
-    private List<String> keyWords;
+    private List<String> keywords;
 
 }

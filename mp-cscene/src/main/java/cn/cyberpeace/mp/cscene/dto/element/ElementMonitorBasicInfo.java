@@ -27,6 +27,9 @@ public class ElementMonitorBasicInfo {
     @ApiModelProperty(value = "节点ID")
     private String id;
 
+    @ApiModelProperty(value = "EID")
+    private String eid;
+
     @ApiModelProperty(value = "节点基本信息-实例名称")
     private String name;
 

@@ -59,6 +59,7 @@ public class CustomAuthenticationFailureHandler extends SimpleUrlAuthenticationF
         }*/
 
         if (Objects.isNull(result)) {
+            logger.info("authentication failed!");
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             result = ServiceResult.builder().serviceCode(AuthErrorCode.AUTHENTICATION_FAILED).build().asResult();
         }

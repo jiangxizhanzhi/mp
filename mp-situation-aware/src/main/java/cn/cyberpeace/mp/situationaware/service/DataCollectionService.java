@@ -486,7 +486,8 @@ public class DataCollectionService {
         //构造查询条件
         if (!CollectionUtils.isEmpty(wazuhEventRequest.getRuleGroups())) {
 //            boolQueryBuilder.must(QueryBuilders.boolQuery().must(QueryBuilders.termsQuery("rule.groups", wazuhEventRequest.getRuleGroups().toArray())));
-            boolQueryBuilder.must(QueryBuilders.termsQuery("rule.groups", wazuhEventRequest.getRuleGroups().toArray()));
+//            boolQueryBuilder.must(QueryBuilders.termsQuery("rule.groups", wazuhEventRequest.getRuleGroups().toArray()));
+            buildRuleGroupQuery(wazuhEventRequest.getRuleGroups(), boolQueryBuilder);
         }
 
         if (!CollectionUtils.isEmpty(wazuhEventRequest.getMacIds())) {
@@ -520,6 +521,10 @@ public class DataCollectionService {
                 .to(TimeUtils.localDateTimeToString(wazuhEventRequest.getEndTime(), EsConstants.esDateTimeFormatter)));
     }
 
+    private void buildRuleGroupQuery(List<String> groups, BoolQueryBuilder boolQueryBuilder) {
+        boolQueryBuilder.filter(QueryBuilders.termsQuery("rule.groups", groups));
+    }
+
     private void buildAgentNameQuery(List<String> names, BoolQueryBuilder boolQueryBuilder) {
         boolQueryBuilder.filter(QueryBuilders.termsQuery("agent.name", names));
     }
@@ -533,7 +538,7 @@ public class DataCollectionService {
     }
 
     private void buildLevelQuery(List<Integer> levels, BoolQueryBuilder boolQueryBuilder) {
-        // todo levels
+        boolQueryBuilder.filter(QueryBuilders.termsQuery("rule.level", levels));
     }
 
     /**
