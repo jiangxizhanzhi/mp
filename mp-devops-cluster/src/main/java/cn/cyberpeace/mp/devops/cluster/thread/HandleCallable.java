@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.devops.cluster.thread;
 
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -46,14 +45,10 @@ public class HandleCallable<E> implements Callable<ServiceResult> {
 
     @Override
     public ServiceResult call(){
-        // 该线程中所有数据处理返回结果
-        ServiceResult serviceResult = new ServiceResult();
-        if (CollectionUtils.isNotEmpty(data)) {
-            log.info("Thread：{},total deal:{} size，start......", threadName, data.size());
-            // 返回结果集
-            serviceResult = task.execute((E) data, params);
-            log.info("Thread：{},total deal:{} size，end .....", threadName, data.size());
-        }
+        log.info("Thread：{},total deal:{} size，start......", threadName, data.size());
+        // 返回结果集
+        ServiceResult serviceResult = task.execute((E) data, params);
+        log.info("Thread：{},total deal:{} size，end .....", threadName, data.size());
         return serviceResult;
     }
 
