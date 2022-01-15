@@ -1,12 +1,9 @@
 package cn.cyberpeace.mp.auth.extensions.security.mobile;
 
-import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.extensions.security.check.CustomPostAuthenticationChecker;
 import cn.cyberpeace.mp.auth.extensions.security.check.CustomPreAuthenticationChecker;
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetailsService;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.hutool.core.util.PhoneUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -56,9 +53,12 @@ public class MobilePasswordAuthenticationProvider implements AuthenticationProvi
         MobilePasswordAuthenticationToken authenticationToken = (MobilePasswordAuthenticationToken) authentication;
 
         String mobile = (String) authenticationToken.getPrincipal();
+        /*
+        // todo 国际化手机号校验
         if (!PhoneUtil.isMobile(mobile)) {
             throw new MpRuntimeException(AuthErrorCode.MOBILE_INVALID);
         }
+        */
 
         UserDetails userDetails = retrieveUser(mobile, null);
         preAuthenticationChecks.check(userDetails);

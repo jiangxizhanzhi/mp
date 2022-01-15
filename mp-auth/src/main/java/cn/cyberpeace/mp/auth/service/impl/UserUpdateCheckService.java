@@ -10,7 +10,6 @@ import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.hutool.core.lang.Validator;
-import cn.hutool.core.util.PhoneUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -53,9 +52,13 @@ public class UserUpdateCheckService implements UserCheckService {
 
         // 手机号是否合法
         if (StringUtils.isNotBlank(user.getMobile())) {
+
+            /*
+            // todo 国际化手机号校验
             if (!PhoneUtil.isMobile(user.getMobile())) {
                 throw new MpRuntimeException(AuthErrorCode.MOBILE_INVALID);
             }
+            */
 
             // 如果手机号已存在，查看手机号是否是oldUser
             UserModel userByMobile = userService.getByMobile(user.getMobile());
