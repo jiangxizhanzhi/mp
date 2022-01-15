@@ -10,10 +10,12 @@ import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.NumberUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -168,8 +170,10 @@ public class SceneElementMonitorService {
 
         // 操作系统
         // 参考SystemTypeUtils
-        basicInfo.setSystemType(sceneElementBO.getSystemType());
-
+        if (StringUtils.isNotBlank(sceneElementBO.getSystemType())) {
+            basicInfo.setSystemType(sceneElementBO.getSystemType());
+            basicInfo.setSystemTypeName(SystemTypeUtils.getStandardSystemType(sceneElementBO.getSystemType()));
+        }
 
         // ip, 用户名，登录方式
         var ports = sceneElementBO.getPorts();
