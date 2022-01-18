@@ -210,7 +210,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
             createRequest.getTargetIds().forEach(id -> {
                 boolean isTargetExist = targetService.exists(id);
                 if (!isTargetExist) {
-                    log.error("权限id:{}不存在", id);
+                    log.error("target id:{} not existed!", id);
                     throw new MpRuntimeException(AuthErrorCode.TARGET_NOT_EXISTED.format(id));
                 }
                 RolePermissionModel rolePermissionModel = new RolePermissionModel();
@@ -240,7 +240,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
         RoleModel roleModel = result.getSource().getObj();
         if (Objects.equals(AuthConstant.ROLE_ADMIN, roleModel.getIdentifier())) {
-            log.info("管理员角色不需要更新！");
+            log.info("ADMIN ROLE can not update！");
             return roleModel;
         }
 
@@ -261,7 +261,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
             modifyRequest.getTargetIds().forEach(id -> {
                 boolean isTargetExist = targetService.exists(id);
                 if (!isTargetExist) {
-                    log.error("权限id:{}不存在", id);
+                    log.error("target id:{} not existed!", id);
                     throw new MpRuntimeException(AuthErrorCode.TARGET_NOT_EXISTED.format(id));
                 }
                 RolePermissionModel rolePermissionModel = new RolePermissionModel();
@@ -338,7 +338,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         // 管理员角色不能删除
         RoleModel roleModel = getModelMapper().get(roleId);
         if (Objects.equals(AuthConstant.ROLE_ADMIN, roleModel.getIdentifier())) {
-            log.info("管理员角色不能删除！");
+            log.info("ADMIN ROLE can not delete！");
             throw new MpRuntimeException(AuthErrorCode.ROLE_CANNOT_DELETE_ADMIN);
         }
 

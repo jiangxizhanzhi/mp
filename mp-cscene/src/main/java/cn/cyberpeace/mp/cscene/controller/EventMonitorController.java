@@ -74,28 +74,28 @@ public class EventMonitorController {
 
         ElementEventPercent e1 = new ElementEventPercent();
         e1.setElementId("1");
-        e1.setElementName("节点1");
+        e1.setElementName("node1");
         e1.setPercent(88.0);
 
 
         ElementEventPercent e2 = new ElementEventPercent();
         e2.setElementId("2");
-        e2.setElementName("节点2");
+        e2.setElementName("node2");
         e2.setPercent(80.0);
 
         ElementEventPercent e3 = new ElementEventPercent();
         e3.setElementId("3");
-        e3.setElementName("节点3");
+        e3.setElementName("node3");
         e3.setPercent(48.0);
 
         ElementEventPercent e4 = new ElementEventPercent();
         e4.setElementId("4");
-        e4.setElementName("节点4");
+        e4.setElementName("node4");
         e4.setPercent(37.0);
 
         ElementEventPercent e5 = new ElementEventPercent();
         e5.setElementId("5");
-        e5.setElementName("节点5");
+        e5.setElementName("node5");
         e5.setPercent(25.0);
         Collections.addAll(list, e1, e2, e3, e4, e5);
         return list;

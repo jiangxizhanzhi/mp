@@ -68,7 +68,7 @@ public class UserRoleController {
         if (success) {
             return ServiceResult.successful();
         } else {
-            log.error("绑定用户角色失败!");
+            log.error("bind user roles failed!");
             throw new MpRuntimeException(AuthErrorCode.USER_ROLE_ADD_ERROR);
         }
     }
@@ -81,7 +81,7 @@ public class UserRoleController {
         if (success) {
             return ServiceResult.successful();
         } else {
-            log.error("绑定用户角色失败!");
+            log.error("bind role users failed!");
             throw new MpRuntimeException(AuthErrorCode.USER_ROLE_ADD_ERROR);
         }
     }
@@ -94,7 +94,7 @@ public class UserRoleController {
         if (success) {
             return ServiceResult.successful();
         } else {
-            log.error("删除用户角色失败!");
+            log.error("delete user role relation failed!");
             throw new MpRuntimeException(AuthErrorCode.USER_ROLE_DELETE_ERROR);
         }
     }

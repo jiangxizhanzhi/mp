@@ -43,7 +43,7 @@ public class OrgPermissionController {
         if (success) {
             return ServiceResult.successful();
         } else {
-            log.error("绑定组织权限失败!");
+            log.error("bind org permission failed!");
             throw new MpRuntimeException(AuthErrorCode.ORG_TARGET_ADD_ERROR);
         }
 

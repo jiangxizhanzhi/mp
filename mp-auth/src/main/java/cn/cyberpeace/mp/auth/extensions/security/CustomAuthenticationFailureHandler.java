@@ -37,6 +37,7 @@ public class CustomAuthenticationFailureHandler extends SimpleUrlAuthenticationF
 
         ServiceResult result = null;
         if(exception instanceof BadCredentialsException) {
+            logger.info("login failed, bad credentials!");
             response.setStatus(HttpServletResponse.SC_OK);
             result = ServiceResult.builder().serviceCode(AuthErrorCode.BAD_CREDENTIALS).build().asResult();
         }

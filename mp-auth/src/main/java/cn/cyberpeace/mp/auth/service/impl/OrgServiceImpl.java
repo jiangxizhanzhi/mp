@@ -219,7 +219,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         // 根据parentId查询单个组织树
         OrgModel parentOrg = getModelMapper().get(parentOrgId);
         if (parentOrg == null) {
-            log.info("org:{}不存在!", parentOrgId);
+            log.info("org:{} not existed!", parentOrgId);
             throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED);
         }
 
@@ -238,7 +238,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
 
         OrgModel orgModel = getModelMapper().get(orgId);
         if (orgModel == null) {
-            log.info("org:{}不存在!", orgId);
+            log.info("org:{} not existed!", orgId);
             throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED);
         }
 
