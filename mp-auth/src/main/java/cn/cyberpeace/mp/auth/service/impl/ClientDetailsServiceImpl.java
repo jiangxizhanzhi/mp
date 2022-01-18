@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -24,6 +25,7 @@ public class ClientDetailsServiceImpl extends BaseModelServiceImpl<ClientDetails
     }
 
     @Override
+    @Cacheable(value = "client_details", key = "'client_id'+#clientid")
     public ClientDetailsModel getByClientId(String clientId) {
         log.info("clientId:{}", clientId);
         return getModelMapper().first(new HumanCondition().filterEqual("client_id", clientId));

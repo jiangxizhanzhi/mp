@@ -25,5 +25,9 @@ public class AuthConstant {
 
     public static final String ORG_PATH_SEPARATOR = "/";
 
+    public static final String AUTHORITY_USER_MANAGE = "user-manage";
+
+    public static final String AUTHORITY_ROLE_MANAGE = "role-management";
+
     private AuthConstant() {}
 }

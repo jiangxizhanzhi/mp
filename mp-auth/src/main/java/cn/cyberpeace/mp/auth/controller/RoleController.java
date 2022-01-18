@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.controller;
 
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthLogConstant;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.role.RoleDto;
@@ -24,6 +25,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -56,6 +58,7 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
             @ApiImplicitParam(name="fields", value="需要返回的字段",dataTypeClass = String[].class),
     })
     @PostMapping
+    @PreAuthorize("hasAuthority('" + AuthConstant.AUTHORITY_ROLE_MANAGE + "')")
     public ObjServiceResult<RoleModel> create(@RequestBody RoleModel obj, @RequestParam String[] fields) {
         return super.create(obj, fields);
     }
@@ -69,6 +72,7 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
             @ApiImplicitParam(name="fields", value="需要返回的字段",dataTypeClass = String[].class),
     })
     @PatchMapping("/{id}")
+    @PreAuthorize("hasAuthority('" + AuthConstant.AUTHORITY_ROLE_MANAGE + "')")
     public ObjServiceResult<RoleModel> update(@PathVariable String id, @RequestBody RoleModel obj,
                                               @RequestParam(required = false) String[] fields) {
         return super.update(id, obj, fields);
@@ -81,6 +85,7 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
     })
     @DeleteMapping("/{id}")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.DELETE, title = "删除角色", target = AuthLogConstant.TARGET_ROLE)
+    @PreAuthorize("hasAuthority('" + AuthConstant.AUTHORITY_ROLE_MANAGE + "')")
     public ServiceResult<Boolean> delete(@PathVariable String id) {
         return super.delete(id);
     }
@@ -107,6 +112,7 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
     @ApiOperation(value = "创建角色，同时完成角色-权限绑定关系", notes = "")
     @PostMapping("/add")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.CREATE, title = "新增角色", target = AuthLogConstant.TARGET_ROLE)
+    @PreAuthorize("hasAuthority('" + AuthConstant.AUTHORITY_ROLE_MANAGE + "')")
     public ServiceResult add(@RequestBody @Validated RoleRequest createRequest) {
         RoleModel roleModel = getModelService().add(createRequest);
         return ResultUtils.commonResult(true, roleModel);
@@ -116,6 +122,7 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
     @ApiOperation(value = "更新角色，同时完成角色-权限绑定关系", notes = "")
     @PostMapping("modify")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "修改角色", target = AuthLogConstant.TARGET_ROLE)
+    @PreAuthorize("hasAuthority('" + AuthConstant.AUTHORITY_ROLE_MANAGE + "')")
     public ServiceResult modify(@RequestBody @Validated RoleRequest modifyRequest) {
         RoleModel roleModel = getModelService().modify(modifyRequest);
         return ResultUtils.commonResult(true, roleModel);

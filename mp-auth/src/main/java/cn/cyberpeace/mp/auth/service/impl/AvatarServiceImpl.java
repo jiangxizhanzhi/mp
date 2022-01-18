@@ -16,7 +16,6 @@ import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,7 +48,7 @@ public class AvatarServiceImpl extends BaseModelServiceImpl<AvatarModel, AvatarM
     @Autowired
     private UserService userService;
 
-    private static final String DEFAULT_USER_ID = "3f655d87112f4ae094bbaf70830e20aa";
+    public static final String DEFAULT_USER_ID = "3f655d87112f4ae094bbaf70830e20aa";
 
     @Override
     public List<AvatarModel> listAll() {

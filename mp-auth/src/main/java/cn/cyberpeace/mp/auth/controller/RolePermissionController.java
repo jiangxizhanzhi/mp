@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.controller;
 
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.target.BindRoleTargetsRequest;
 import cn.cyberpeace.mp.auth.model.RolePermissionModel;
@@ -13,6 +14,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -44,6 +46,7 @@ public class RolePermissionController extends BaseModelController<RolePermission
 
     @ApiOperation(value = "绑定角色-权限关系，注意，如果targetIds为空，表示删除角色所有权限！", notes = "")
     @PostMapping("/bind")
+    @PreAuthorize("hasAuthority('" + AuthConstant.AUTHORITY_ROLE_MANAGE + "')")
     public ServiceResult bindOrgPermission(@RequestBody @Validated BindRoleTargetsRequest bindRoleTargetsReq) {
         boolean success = getModelService().bindRoleTargets(bindRoleTargetsReq.getRoleId(), bindRoleTargetsReq.getTargetIds(), true);
         return ResultUtils.commonResult(success, null);

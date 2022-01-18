@@ -31,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -61,6 +62,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = "roles_cache", allEntries = true)
     public ServiceResult<Boolean> delete(String roleId) {
         Assert.notBlank(roleId, "id不能为空！");
         // todo 删除关联用户关系，权限关系
@@ -70,6 +72,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = "roles_cache", allEntries = true)
     public ServiceResult<Integer> bulkDelete(String[] ids) {
         // todo 删除关联用户关系，权限关系
 

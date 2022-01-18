@@ -20,6 +20,8 @@ import cn.hutool.core.lang.Assert;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,9 +45,12 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     }
 
     @Override
+    @Cacheable(value = "roles_cache", key = "'user_id_'+#userId")
     public List<RoleModel> listByUserId(String userId) {
         Assert.notBlank(userId, "userId不能为空！");
+        // 读取缓存
         List<RoleModel> roles = getModelMapper().listByUserId(userId);
+
         return roles;
     }
 
@@ -85,6 +90,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = "roles_cache", allEntries = true)
     public boolean bindUserRoles(String userId, List<String> roleIds, boolean cleanOldRoles) {
         Assert.notNull(userId, "userId不能为空");
 
@@ -121,6 +127,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = "roles_cache", allEntries = true)
     public boolean bindRoleUsers(String roleId, List<String> userIds) {
         Assert.notNull(roleId, "roleId不能为空");
 
@@ -148,6 +155,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     }
 
     @Override
+    @CacheEvict(value = "roles_cache", allEntries = true)
     public boolean deleteByUserId(String userId) {
         Assert.notNull(userId, "userId不能为空");
 
@@ -162,6 +170,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     }
 
     @Override
+    @CacheEvict(value = "roles_cache", allEntries = true)
     public boolean deleteByRoleId(String roleId) {
 
         Assert.notNull(roleId, "roleId不能为空");
@@ -183,6 +192,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     }
 
     @Override
+    @CacheEvict(value = "roles_cache", allEntries = true)
     public boolean deleteByRoleIdAndUserIds(String roleId, List<String> userIds) {
         Assert.notNull(roleId, "roleId不能为空");
 
