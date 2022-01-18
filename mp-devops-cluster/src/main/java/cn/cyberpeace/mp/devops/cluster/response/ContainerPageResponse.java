@@ -45,6 +45,12 @@ public class ContainerPageResponse extends BaseCloudPlatformResponse {
     private List<String> addressList;
 
     /**
+     * Vlan ID集合
+     */
+    @ApiModelProperty("Vlan ID集合")
+    private List<Integer> vlanIds;
+
+    /**
      * 状态
      */
     @ApiModelProperty("状态")

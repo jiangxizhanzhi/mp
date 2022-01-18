@@ -150,6 +150,11 @@ public class ContainerCloudPlatformModel extends BaseCloudPlatformModel implemen
          */
         private String updated_at;
 
+        /**
+         * vlan ID集合
+         */
+        private List<Integer> vlan_id;
+
         @Data
         @NoArgsConstructor
         @AllArgsConstructor

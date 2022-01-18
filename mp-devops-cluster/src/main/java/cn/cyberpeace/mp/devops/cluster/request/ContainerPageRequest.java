@@ -24,4 +24,14 @@ public class ContainerPageRequest extends BasePageRequest implements Serializabl
      */
     @ApiModelProperty(value = "主机名/节点名称")
     private String host;
+
+    /**
+     * 容器地址
+     */
+    @ApiModelProperty(value = "容器地址")
+    private String ipaddress;
+
+    public ContainerPageRequest(String host) {
+        this.host = host;
+    }
 }

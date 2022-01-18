@@ -57,7 +57,8 @@ public class ContainerController {
 
         List<ContainerPageResponse> list = containers.stream().map(containerModel -> {
             ContainerPageResponse response = ContainerPageResponse.builder().name(containerModel.getName()).image(containerModel.getImage())
-                    .node(containerModel.getHost()).status(CloudPlatformEnum.fromValue(containerModel.getStatus())).build();
+                    .node(containerModel.getHost()).status(CloudPlatformEnum.fromValue(containerModel.getStatus()))
+                    .vlanIds(containerModel.getVlan_id()).build();
             Map<String,Object> addresses = containerModel.getAddresses();
             if (MapUtils.isNotEmpty(addresses)){
                 List<ContainerCloudPlatformModel.ContainerModel.Address> addressList = addresses.values().stream()
