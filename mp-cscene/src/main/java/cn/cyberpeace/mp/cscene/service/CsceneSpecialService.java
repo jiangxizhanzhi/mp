@@ -72,6 +72,12 @@ public class CsceneSpecialService {
         private Integer testInstanceCount;
     }
 
+    @Data
+    public static class CsceneInstanceCountStat {
+        private String csceneId;
+        private Integer instanceCount;
+    }
+
     /**
      * 统计场景模板中各类型节点数量，测试场景数量
      * @param ids 场景模板id列表
@@ -446,5 +452,56 @@ public class CsceneSpecialService {
             instanceStat.setCreateUser(latestCsceneInstance.getCreateUser());
             instanceStat.setCreateUsername(latestCsceneInstance.getCreateUsername());
         }
+    }
+
+    /**
+     * 根据场景模板查询启动的实例数量
+     * @param csceneIds
+     * @param includeFailedScene 是否包括启动失败的场景
+     * @param includeDeleteScene 是否包括已删除的场景
+     * @return
+     */
+    public ServiceResult<Map<String, Integer>> statSceneInstanceCount(String[] csceneIds, boolean includeFailedScene, boolean includeDeleteScene) {
+        Map<String, Integer> result = new HashMap<>();
+        for (String csceneId : csceneIds) {
+            result.put(csceneId, 0);
+        }
+
+        var statCondition = new HumanCondition()
+                .link(CsceneInstanceModel.class, SceneModel.class)
+                .filterLink(CsceneInstanceModel.class, CsceneInstanceModel::getScene,
+                        SceneModel.class, SceneModel::getId)
+                .currentLink(CsceneInstanceModel.class)
+                .filterIn(CsceneInstanceModel::getCscene, csceneIds)
+                .groupBy(CsceneInstanceModel::getCscene)
+                .selectAs(CsceneInstanceModel::getCscene, CsceneInstanceCountStat::getCsceneId)
+                .selectAs(Count.f(CsceneInstanceModel::getCscene), CsceneInstanceCountStat::getInstanceCount);
+        if (!includeDeleteScene) {
+            statCondition.currentLink(SceneModel.class).filterEqual(SceneModel::getDeleted, false);
+        }
+        if (!includeFailedScene) {
+            statCondition.currentLink(SceneModel.class)
+                    .filterOrStart()
+                    .orNotEqual(SceneModel::getEvent, SceneModel.Event.CREATE)
+                    .orNotEqual(SceneModel::getEventStatus, EventStatus.ABNORMAL)
+                    .filterOrEnd();
+        }
+        List<CsceneInstanceCountStat> csceneInstanceCountStats = csceneInstanceMapper.list(statCondition, CsceneInstanceCountStat.class);
+        csceneInstanceCountStats.forEach(instanceStat -> {
+            result.put(instanceStat.getCsceneId(), instanceStat.getInstanceCount());
+        });
+        return new ServiceResult<>(result);
+    }
+
+    /**
+     * 根据场景模板查询启动的实例数量
+     * @param csceneId
+     * @param includeFailedScene 是否包括启动失败的场景
+     * @param includeDeleteScene 是否包括已删除的场景
+     * @return
+     */
+    public ServiceResult<Integer> statSceneInstanceCount(String csceneId, boolean includeFailedScene, boolean includeDeleteScene) {
+        Map<String, Integer> result = this.statSceneInstanceCount(new String[]{ csceneId }, includeFailedScene, includeDeleteScene).getSource();
+        return new ServiceResult<>(result.get(csceneId));
     }
 }
