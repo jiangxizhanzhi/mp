@@ -45,7 +45,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     }
 
     @Override
-    @Cacheable(value = "roles_cache", key = "'user_id_'+#userId")
+    @Cacheable(value = "roles_cache", key = "'list_by_user_id_'+#userId")
     public List<RoleModel> listByUserId(String userId) {
         Assert.notBlank(userId, "userId不能为空！");
         // 读取缓存

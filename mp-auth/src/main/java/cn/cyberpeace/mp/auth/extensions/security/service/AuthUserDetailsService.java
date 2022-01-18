@@ -62,7 +62,6 @@ public class AuthUserDetailsService implements UserDetailsService {
 
 
     public UserDetails loadUserByMobile(String mobile) {
-        log.info("mobile:{}", mobile);
         if (StringUtils.isEmpty(mobile)) {
             throw new UsernameNotFoundException(StringUtils.EMPTY);
         }

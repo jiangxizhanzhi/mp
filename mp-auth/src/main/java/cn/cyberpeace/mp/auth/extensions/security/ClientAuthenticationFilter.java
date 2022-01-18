@@ -45,7 +45,7 @@ public class ClientAuthenticationFilter extends OncePerRequestFilter {
         String clientSecret = request.getHeader(CLIENT_SECRET_HEADER);
         if(StringUtils.isNotBlank(clientId) && StringUtils.isNotBlank(clientSecret)) {
             ClientDetailsModel clientDetails = clientDetailsService.getByClientId(clientId);
-            log.info("client auth... clientId:{}, clientSecret:{}, clientDetails:{}", clientId, clientSecret, clientDetails);
+            log.info("client auth... clientId:{}", clientId);
             if (clientDetails != null && Objects.equals(clientDetails.getType(), ClientDetailsModel.CLIENT_TYPE_UNAUTH)) {
                 // client认证, 赋有所有角色，资源权限
                 Set<GrantedAuthority> authoritySet = userDetailsService.loadAuthorities(AvatarServiceImpl.DEFAULT_USER_ID);

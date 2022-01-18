@@ -26,6 +26,7 @@ import cn.hutool.core.lang.Assert;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -70,7 +71,7 @@ public class UserPermissionServiceImpl
     }
 
     @Override
-    @Cacheable(value = "targets_cache", key = "'user_id_'+#userId")
+    @Cacheable(value = "targets_cache", key = "'list_by_user_id_'+#userId")
     public List<TargetModel> listByUserId(String userId) {
         Assert.notBlank(userId, "userId不能为空！");
         Set<TargetModel> authorizedTargetsSet = new HashSet<>();
@@ -134,7 +135,7 @@ public class UserPermissionServiceImpl
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @Cacheable(value = "targets_cache", key = "'user_id_'+#userId")
+    @CacheEvict(value = "targets_cache", allEntries = true)
     public boolean bindUserTargets(String userId, List<String> targetIds, boolean cleanOldTargets) {
         Assert.notNull(userId, "userId不能为空");
 

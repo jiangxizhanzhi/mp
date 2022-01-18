@@ -41,7 +41,6 @@ public class RegisterController {
     @ApiOperation(value = "获取注册短信", notes = "")
     @GetMapping("/sms")
     public ServiceResult sms(@RequestParam String mobile) {
-        log.info("mobile:{}", mobile);
 
         return ServiceResult.builder().message("OK").data("no sms support!").serviceCode(BaseErrorCode.SUCCESS).build();
 
@@ -51,7 +50,7 @@ public class RegisterController {
     @PostMapping
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.CREATE, title = "注册新用户", target = AuthLogConstant.TARGET_USER)
     public ServiceResult register(@RequestBody @Validated RegisterRequest req) {
-        log.info("req:{}", req);
+        log.info("register username:{}", req.getUsername());
         String encryptedPwd = req.getPassword();
         req.setPassword(PasswordUtils.desDecrypt(encryptedPwd));
         ObjServiceResult<UserModel> result = registerService.register(req);
