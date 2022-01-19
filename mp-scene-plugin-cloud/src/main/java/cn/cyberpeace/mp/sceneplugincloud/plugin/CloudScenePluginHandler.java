@@ -262,7 +262,7 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         if (portIds != null && !portIds.isEmpty()) {
             portIds.forEach(portId -> {
                 var port = getSceneHandler().getPort(portId);
-                if (StringUtils.isEmpty(port.getIp())) {
+                if (StringUtils.isNotEmpty(port.getIp())) {
                     existIps.add(port.getIp());
                 }
             });
