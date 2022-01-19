@@ -7,10 +7,10 @@ import lombok.Data;
 
 @Data
 public class StaticRoute {
-    @ApiModelProperty(value = "目的地址")
-    @IpAddress
-    private String destination;
-    @ApiModelProperty(value = "下一跳地址(cidr)")
+    @ApiModelProperty(value = "目的地址(cidr)")
     @Cidr
+    private String destination;
+    @ApiModelProperty(value = "下一跳地址")
+    @IpAddress
     private String nexthop;
 }

@@ -5,7 +5,13 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
-import cn.cyberpeace.mp.situationaware.model.*;
+import cn.cyberpeace.mp.situationaware.model.ProbeModel;
+import cn.cyberpeace.mp.situationaware.model.ProbeParamModel;
+import cn.cyberpeace.mp.situationaware.model.ProbeParamsRequest;
+import cn.cyberpeace.mp.situationaware.model.ProbeParamsResult;
+import cn.cyberpeace.mp.situationaware.model.ProbeRequest;
+import cn.cyberpeace.mp.situationaware.model.ProbeResult;
+import cn.cyberpeace.mp.situationaware.model.ProbeSearchRequest;
 import cn.cyberpeace.mp.situationaware.model.enums.OsType;
 import cn.cyberpeace.mp.situationaware.model.enums.ProbeStatus;
 import cn.cyberpeace.mp.situationaware.model.enums.ScriptType;
@@ -167,10 +173,10 @@ public class ProbeService {
      * @param probeRequest probeRequest
      */
     private void modifyProbeParams(ProbeRequest probeRequest) {
+        probeParamModelMapper.deleteParamByProbeId(probeRequest.getProbeId());
         if (CollectionUtils.isEmpty(probeRequest.getParamsResultList())) {
             return;
         }
-        probeParamModelMapper.deleteParamByProbeId(probeRequest.getProbeId());
         insertProbeParams(probeRequest, probeRequest.getProbeId());
     }
 
