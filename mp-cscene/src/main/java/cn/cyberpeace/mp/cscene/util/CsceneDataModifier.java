@@ -3,10 +3,12 @@ package cn.cyberpeace.mp.cscene.util;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneRoleBO;
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
+import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
@@ -24,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -329,6 +332,22 @@ public class CsceneDataModifier {
                             sceneElement.setFile("/" + sceneElement.getFile());
                         }
                         sceneElement.setFile(baseAppConfig.getFdfsOuterHttpServer() + sceneElement.getFile());
+                    }
+                });
+            }
+        }
+    }
+
+    public static void checkFlowNum(CsceneBO csceneBO) {
+        if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getPlugins() != null && csceneBO.getSceneConfig().getPlugins().get("cpflow") != null) {
+            var elements = csceneBO.getSceneConfig().getPlugins().get("cpflow").getElements();
+            if (elements != null && elements.size() > 0) {
+                elements.values().forEach(e -> {
+                    if (e.containsKey("flows")) {
+                        Object flows = e.get("flows");
+                        if (JsonCommon.stringify(flows).getBytes(StandardCharsets.UTF_8).length > 65535) {
+                            throw new MpRuntimeException(CsceneErrorCode.PARAMS_FLOWS_DATA_TOO_LONG);
+                        }
                     }
                 });
             }

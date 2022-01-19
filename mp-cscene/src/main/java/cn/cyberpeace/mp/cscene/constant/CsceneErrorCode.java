@@ -12,7 +12,9 @@ public enum CsceneErrorCode implements ErrorCode {
 
     // validation-api params
     PARAMS_SHOULD_NOT_NULL("MP-110291", "params_should_not_null"),
-    PARAMS_SHOULD_NOT_EMPTY("MP-110292", "params_should_not_empty");
+    PARAMS_SHOULD_NOT_EMPTY("MP-110292", "params_should_not_empty"),
+    PARAMS_FLOWS_DATA_TOO_LONG("MP-110293", "params_flows_data_too_long");
+
 
     CsceneErrorCode(String code, String message) {
         setCode(code, "cscene.error_code." + message);

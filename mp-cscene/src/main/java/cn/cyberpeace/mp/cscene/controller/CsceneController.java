@@ -74,6 +74,7 @@ public class CsceneController implements BaseModelListControllerBase {
         CsceneDataModifier.removeFilePathPrefix(csceneBO);
         CsceneDataModifier.assembleInitCommands(csceneBO);
         CsceneDataModifier.handlerInputEnableRecording(csceneBO);
+        CsceneDataModifier.checkFlowNum(csceneBO);
     }
 
     private void correctRequestCsceneParamsForAppInstance(CsceneBO csceneBO) {
