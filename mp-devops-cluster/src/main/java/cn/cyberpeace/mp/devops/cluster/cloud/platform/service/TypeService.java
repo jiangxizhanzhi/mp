@@ -50,6 +50,7 @@ public class TypeService extends BaseOpenStackService {
             return (TypeCloudPlatformModel)cache;
         }
         TypeCloudPlatformModel model = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + TYPE + QUESTION_TYPE + "l3", TypeCloudPlatformModel.class);
+        if (Objects.nonNull(model) && model.isSuccess())
         lfuCache.put(key,model);
         return model;
     }
@@ -65,6 +66,7 @@ public class TypeService extends BaseOpenStackService {
             return (TypeL2CloudPlatformModel)cache;
         }
         TypeL2CloudPlatformModel model = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + TYPE + QUESTION_TYPE + "l2", TypeL2CloudPlatformModel.class);
+        if (Objects.nonNull(model) && model.isSuccess())
         lfuCache.put(key,model);
         return model;
     }
@@ -81,6 +83,7 @@ public class TypeService extends BaseOpenStackService {
         }
         AccessProtocolsPortCloudPlatform model = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + TYPE + QUESTION_TYPE + "access_protocols_port",
                 AccessProtocolsPortCloudPlatform.class);
+        if (Objects.nonNull(model) && model.isSuccess())
         lfuCache.put(key,model);
         return model;
     }
@@ -96,6 +99,7 @@ public class TypeService extends BaseOpenStackService {
             return (TypeIdIntegerCloudPlatformModel)cache;
         }
         TypeIdIntegerCloudPlatformModel model = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + TYPE + QUESTION_TYPE + type, TypeIdIntegerCloudPlatformModel.class);
+        if (Objects.nonNull(model) && model.isSuccess())
         lfuCache.put(key,model);
         return model;
     }
@@ -111,6 +115,7 @@ public class TypeService extends BaseOpenStackService {
             return (TypeIdStringCloudPlatformModel)cache;
         }
         TypeIdStringCloudPlatformModel model = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + TYPE + QUESTION_TYPE + type, TypeIdStringCloudPlatformModel.class);
+        if (Objects.nonNull(model) && model.isSuccess())
         lfuCache.put(key,model);
         return model;
     }
@@ -127,6 +132,7 @@ public class TypeService extends BaseOpenStackService {
             return (TypeItemsCloudPlatformModel)cache;
         }
         TypeItemsCloudPlatformModel model = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + TYPE + QUESTION_TYPE + type, TypeItemsCloudPlatformModel.class);
+        if (Objects.nonNull(model) && model.isSuccess())
         lfuCache.put(key,model);
         return model;
     }
