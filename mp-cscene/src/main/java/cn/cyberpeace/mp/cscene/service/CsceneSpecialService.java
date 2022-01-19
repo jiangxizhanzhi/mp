@@ -13,6 +13,7 @@ import cn.cyberpeace.mp.cscene.bo.CsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.bo.CsceneStat;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
+import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceCountActivitySceneModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
@@ -69,6 +70,12 @@ public class CsceneSpecialService {
     public static class CsceneTestInstanceStat {
         private String csceneId;
         private Integer testInstanceCount;
+    }
+
+    @Data
+    public static class CsceneInstanceCountStat {
+        private String csceneId;
+        private Integer instanceCount;
     }
 
     /**
@@ -302,12 +309,14 @@ public class CsceneSpecialService {
             // 场景运行时长
             if (CollectionUtils.isNotEmpty(data)) {
                 data.forEach(s -> {
-                    try {
-                        Map<String, Object> result = JsonCommon.parse(s.getReferenceMetaData(), Map.class);
-                        result.put("room_name", s.getName());
-                        s.setReferenceMetaData(JsonCommon.stringify(result));
-                    } catch (Exception e) {
-                        log.error("name parse error,csceneId is {},referenceMetaData is {}", s.getId(), s.getReferenceMetaData(), e);
+                    if (StringUtils.isNotEmpty(s.getReferenceMetaData())) {
+                        try {
+                            Map<String, Object> result = JsonCommon.parse(s.getReferenceMetaData(), Map.class);
+                            result.put("room_name", s.getName());
+                            s.setReferenceMetaData(JsonCommon.stringify(result));
+                        } catch (Exception e) {
+                            log.error("name parse error,csceneId is {},referenceMetaData is {}", s.getId(), s.getReferenceMetaData(), e);
+                        }
                     }
                     if (SceneModel.Event.DELETE == s.getEvent() && EventStatus.OVER == s.getEventStatus()) {
                         // 已删除场景的运行时间=删除时刻 - 创建时刻
@@ -434,8 +443,8 @@ public class CsceneSpecialService {
                 .filterEqual(CsceneInstanceModel::getDeleted, false)
                 .orderBy(CsceneInstanceModel::getPk, true));
         if (latestCsceneInstance == null) {
-            instanceStat.setEvent(SceneModel.Event.UNUSE);
-            instanceStat.setEventStatus(EventStatus.UNUSE);
+            instanceStat.setEvent(CsceneBizConstant.Event.UNUSE);
+            instanceStat.setEventStatus(CsceneBizConstant.EventStatus.UNUSE);
         } else {
             SceneModel model = sceneMapper.get(latestCsceneInstance.getScene());
             instanceStat.setEvent(model.getEvent());
@@ -443,5 +452,56 @@ public class CsceneSpecialService {
             instanceStat.setCreateUser(latestCsceneInstance.getCreateUser());
             instanceStat.setCreateUsername(latestCsceneInstance.getCreateUsername());
         }
+    }
+
+    /**
+     * 根据场景模板查询启动的实例数量
+     * @param csceneIds
+     * @param includeFailedScene 是否包括启动失败的场景
+     * @param includeDeleteScene 是否包括已删除的场景
+     * @return
+     */
+    public ServiceResult<Map<String, Integer>> statSceneInstanceCount(String[] csceneIds, boolean includeFailedScene, boolean includeDeleteScene) {
+        Map<String, Integer> result = new HashMap<>();
+        for (String csceneId : csceneIds) {
+            result.put(csceneId, 0);
+        }
+
+        var statCondition = new HumanCondition()
+                .link(CsceneInstanceModel.class, SceneModel.class)
+                .filterLink(CsceneInstanceModel.class, CsceneInstanceModel::getScene,
+                        SceneModel.class, SceneModel::getId)
+                .currentLink(CsceneInstanceModel.class)
+                .filterIn(CsceneInstanceModel::getCscene, csceneIds)
+                .groupBy(CsceneInstanceModel::getCscene)
+                .selectAs(CsceneInstanceModel::getCscene, CsceneInstanceCountStat::getCsceneId)
+                .selectAs(Count.f(CsceneInstanceModel::getCscene), CsceneInstanceCountStat::getInstanceCount);
+        if (!includeDeleteScene) {
+            statCondition.currentLink(SceneModel.class).filterEqual(SceneModel::getDeleted, false);
+        }
+        if (!includeFailedScene) {
+            statCondition.currentLink(SceneModel.class)
+                    .filterOrStart()
+                    .orNotEqual(SceneModel::getEvent, SceneModel.Event.CREATE)
+                    .orNotEqual(SceneModel::getEventStatus, EventStatus.ABNORMAL)
+                    .filterOrEnd();
+        }
+        List<CsceneInstanceCountStat> csceneInstanceCountStats = csceneInstanceMapper.list(statCondition, CsceneInstanceCountStat.class);
+        csceneInstanceCountStats.forEach(instanceStat -> {
+            result.put(instanceStat.getCsceneId(), instanceStat.getInstanceCount());
+        });
+        return new ServiceResult<>(result);
+    }
+
+    /**
+     * 根据场景模板查询启动的实例数量
+     * @param csceneId
+     * @param includeFailedScene 是否包括启动失败的场景
+     * @param includeDeleteScene 是否包括已删除的场景
+     * @return
+     */
+    public ServiceResult<Integer> statSceneInstanceCount(String csceneId, boolean includeFailedScene, boolean includeDeleteScene) {
+        Map<String, Integer> result = this.statSceneInstanceCount(new String[]{ csceneId }, includeFailedScene, includeDeleteScene).getSource();
+        return new ServiceResult<>(result.get(csceneId));
     }
 }

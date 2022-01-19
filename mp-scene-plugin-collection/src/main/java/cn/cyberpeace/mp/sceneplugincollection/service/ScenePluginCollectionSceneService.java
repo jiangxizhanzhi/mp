@@ -207,6 +207,18 @@ public class ScenePluginCollectionSceneService {
             request.setEndTime(TimeUtils.stringToLocalDateTime(queryParams.getEndTime()));
         }
 
+        if (CollectionUtils.isNotEmpty(queryParams.getCatagories())) {
+            request.setCatagories(queryParams.getCatagories());
+        }
+
+        if (CollectionUtils.isNotEmpty(queryParams.getLevels())) {
+            request.setLevels(queryParams.getLevels());
+        }
+
+        if (CollectionUtils.isNotEmpty(queryParams.getKeywords())) {
+            request.setKeywords(queryParams.getKeywords());
+        }
+
         var result = dataCollectionService.queryFileEvents(request);
 
         List<CollectionHostEventBO> hostEvents = new ArrayList<>();
@@ -216,7 +228,10 @@ public class ScenePluginCollectionSceneService {
             hostEvent.setEventType(srcHostEvent.getFileEventType().name());
             hostEvent.setEventDesc(srcHostEvent.getAction());
             hostEvent.setTime(srcHostEvent.getUpdateTime());
-
+            hostEvent.setDescription(srcHostEvent.getDescription());
+            hostEvent.setLevel(srcHostEvent.getLevel());
+            hostEvent.setCatagory(srcHostEvent.getCatagory());
+            hostEvent.setContent(srcHostEvent.getContent());
             var srcElement = agentNameElementMap.getOrDefault(srcHostEvent.getAgentName(), null);
             if (srcElement != null) {
                 hostEvent.setNodeId(srcElement.getId());

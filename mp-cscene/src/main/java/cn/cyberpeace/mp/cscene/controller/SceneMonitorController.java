@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -44,9 +45,16 @@ public class SceneMonitorController {
 
     @ApiOperation(value = "查询场景所有节点列表")
     @GetMapping("/all_elements/{sceneId}")
-    public ServiceResult<List<ElementMonitorBasicInfo>> getSceneAllElements(@PathVariable String sceneId) {
-        List<ElementMonitorBasicInfo> basicInfoList = sceneMonitorService.getAllSceneElements(sceneId);
+    public ServiceResult<List<ElementMonitorBasicInfo>> getSceneAllElements(@PathVariable String sceneId, @RequestParam(required = false) Boolean realTimeHostState) {
+        List<ElementMonitorBasicInfo> basicInfoList = sceneMonitorService.getAllSceneElements(sceneId, realTimeHostState);
         return ServiceResult.success(basicInfoList);
     }
+
+//    @ApiOperation(value = "查询场景所有主机信息，不含实时内存，cpu等数据")
+//    @GetMapping("/all_hosts/{sceneId}")
+//    public ServiceResult<List<ElementMonitorBasicInfo>> getSceneAllHosts(@PathVariable String sceneId) {
+//        List<ElementMonitorBasicInfo> basicInfoList = sceneMonitorService.getAllSceneElements(sceneId);
+//        return ServiceResult.success(basicInfoList);
+//    }
 
 }

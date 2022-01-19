@@ -1,14 +1,16 @@
 package cn.cyberpeace.mp.base.util.thread;
 
 import cn.cyberpeace.mp.base.context.transfercontext.TransferContext;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.Callable;
 
+@Slf4j
 public class ThreadUtils {
 
     public static Runnable format(Runnable task) {
         var contextMap = TransferContext.getContextMap();
-        return  () -> {
+        return () -> {
             var originContextMap = TransferContext.getContextMap();
             TransferContext.setContextMap(contextMap);
             task.run();

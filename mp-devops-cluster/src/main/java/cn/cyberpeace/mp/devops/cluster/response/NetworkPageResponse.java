@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -53,7 +54,7 @@ public class NetworkPageResponse extends BaseCloudPlatformResponse {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    public static final class Subnet{
+    public static final class Subnet implements Serializable {
 
         @ApiModelProperty("id")
         private String id;

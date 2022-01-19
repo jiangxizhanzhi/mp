@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 /**
  * 镜像元数据
  * @author wanggang
@@ -14,7 +16,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel
-public class ImageMetaData {
+public class ImageMetaData implements Serializable {
 
     /**
      * 磁盘控制器类型

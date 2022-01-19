@@ -50,7 +50,7 @@ public class RolePermissionController {
         if (success) {
             return ServiceResult.successful();
         } else {
-            log.error("绑定角色权限失败!");
+            log.error("bind role permission failed!");
             throw new MpRuntimeException(AuthErrorCode.ROLE_TARGET_ADD_ERROR);
         }
     }

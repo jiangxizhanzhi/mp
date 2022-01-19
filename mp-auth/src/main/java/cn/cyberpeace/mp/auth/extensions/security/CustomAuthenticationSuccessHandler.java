@@ -126,11 +126,13 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
 
                 // 首次登陆，需要修改密码
                 if (user.getInitCheck() == UserModel.INT_CHECK_YES) {
+                    log.info("user first login, should update password!");
                     result = ServiceResult.builder().source(loginResp).serviceCode(AuthErrorCode.NEED_UPDATE_CREDENTIALS).build();
                 }
             }
         }
 
+        log.info("Login success! {}", user.getUsername());
         PrintWriter writer = response.getWriter();
         mapper.writeValue(writer, result.asResult());
         writer.flush();
@@ -143,20 +145,20 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
 
         // 状态优先级 禁用 > 过期 > 待审核
         if (Objects.equals(user.getIsAudited(), UserModel.Status.NOT_AUDITED)) {
-            errorStatusMsg = "用户未审核，不能登录！";
+            errorStatusMsg = "user not audited!";
             errorCode = AuthErrorCode.ACCOUNT_NOT_AUDITED;
         }
 
         // 过期
         LocalDateTime now = LocalDateTime.now();
         if (Objects.nonNull(user.getExpiredTime()) && now.isAfter(user.getExpiredTime())) {
-            errorStatusMsg = "用户已过期，不能登录！";
+            errorStatusMsg = "user expired!";
             errorCode = AuthErrorCode.ACCOUNT_EXPIRED;
         }
 
         // 禁用
         if (Objects.equals(user.getIsEnabled(), UserModel.Status.DISABLED)) {
-            errorStatusMsg = "用户已被禁用，不能登录！";
+            errorStatusMsg = "user is forbidend!";
             errorCode = AuthErrorCode.ACCOUNT_DISABLED;
         }
 

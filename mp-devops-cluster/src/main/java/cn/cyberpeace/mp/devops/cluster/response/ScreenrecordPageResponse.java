@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -26,7 +27,7 @@ public class ScreenrecordPageResponse extends BaseCloudPlatformModel {
     private String requestId;
 
     @Data
-    public static final class Record {
+    public static final class Record implements Serializable {
 
         /**
          * 用户名

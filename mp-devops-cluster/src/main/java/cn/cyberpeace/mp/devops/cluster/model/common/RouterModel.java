@@ -4,12 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class RouterModel{
+public class RouterModel implements Serializable {
 
     /**
      * ID
@@ -63,7 +64,7 @@ public class RouterModel{
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    public static final class ExternalGateway{
+    public static final class ExternalGateway implements Serializable{
 
         /**
          * 外部网络ID
@@ -80,7 +81,7 @@ public class RouterModel{
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    public static final class Interfaces{
+    public static final class Interfaces implements Serializable{
 
         /**
          * 外部网络ID
@@ -101,7 +102,7 @@ public class RouterModel{
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    public static final class Routes{
+    public static final class Routes implements Serializable{
 
         /**
          * 目标CIDR

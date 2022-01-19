@@ -2,7 +2,9 @@ package cn.cyberpeace.mp.base.util.thread.taskpool;
 
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.base.util.thread.ThreadUtils;
+import cn.hutool.core.thread.ThreadFactoryBuilder;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 
 import java.util.List;
 import java.util.concurrent.*;

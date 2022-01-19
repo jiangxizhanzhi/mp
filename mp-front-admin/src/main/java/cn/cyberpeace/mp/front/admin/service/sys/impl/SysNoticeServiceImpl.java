@@ -33,7 +33,6 @@ import cn.cyberpeace.mp.front.admin.repository.SysNoticeReadMapper;
 import cn.cyberpeace.mp.front.admin.repository.SysNoticeRoleMapper;
 import cn.cyberpeace.mp.front.admin.service.fields.SysNoticeFields;
 import cn.cyberpeace.mp.front.admin.service.sys.SysNoticeService;
-import cn.cyberpeace.mp.front.admin.util.ResultUtils;
 import cn.cyberpeace.mp.front.admin.util.SQLUtils;
 import cn.hutool.core.collection.CollectionUtil;
 import com.github.pagehelper.PageHelper;
@@ -160,7 +159,10 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         }
 
         ObjServiceResult<SysNoticeModel> result = create(noticeModel);
-        ResultUtils.throwExceptionIfError(result, "保存公告失败！");
+        if (Objects.isNull(result.getSource())) {
+            log.error("save notice error!");
+            throw new MpRuntimeException(AuthErrorCode.OP_ERROR);
+        }
         SysNoticeModel resultModel = result.getSource().getObj();
         // 组织
         List<SysNoticeOrgModel> noticeGroupModelList = new ArrayList<>();
@@ -199,14 +201,19 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         ParamCheck.notNull(sysNoticeRequest, AuthBasei18nCode.REQUEST_PARAMS);
 
         ObjServiceResult<SysNoticeModel> noticeModelResult = get(id);
-        ResultUtils.throwExceptionIfError(noticeModelResult, "ID:" + id + "对应的公告信息不存在！");
+        if (Objects.isNull(noticeModelResult.getSource())) {
+            throw new MpRuntimeException(AdminErrorCode.SYS_NOTICE_NOT_EXISTED.format(id));
+        }
+
 
         SysNoticeModel noticeModel = new SysNoticeModel();
         BeanUtils.copyProperties(sysNoticeRequest, noticeModel);
         noticeModel.setId(id);
 
         ObjServiceResult<SysNoticeModel> result = update(noticeModel);
-        ResultUtils.throwExceptionIfError(result, "更新公告失败！");
+        if (Objects.isNull(noticeModelResult.getSource())) {
+            throw new MpRuntimeException(AuthErrorCode.OP_ERROR);
+        }
         SysNoticeModel resultModel = result.getSource().getObj();
 
         // 清除之前的绑定关系
@@ -262,7 +269,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
     public PageInfo<SysNoticeModel> getCurrentUserNoticeMessagesPage(SysNoticePageRequest req) {
         UserModel userModel = UserUtils.getLoginUser();
         if (Objects.isNull(userModel)) {
-            log.error("未查询到当前登录用户！");
+            log.error("user not login!");
             return new PageInfo<>();
         }
 
@@ -322,7 +329,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
     public int getCurrentUserNoticeMessagesUnreadCount() {
         UserModel userModel = UserUtils.getLoginUser();
         if (Objects.isNull(userModel)) {
-            log.error("未查询到当前登录用户！");
+            log.error("user not logi!");
             return 0;
         }
 

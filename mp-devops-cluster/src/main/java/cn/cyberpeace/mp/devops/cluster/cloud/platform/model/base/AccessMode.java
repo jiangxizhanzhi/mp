@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 /**
  * 访问模式
  * @author wanggang
@@ -11,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AccessMode {
+public class AccessMode implements Serializable {
 
     /**
      * 接入协议 : [ ssh, rdp, nla, vnc, telnet, serial ]

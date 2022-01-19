@@ -4,12 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Hypervisor{
+public class Hypervisor implements Serializable {
 
     /**
      * ID
@@ -84,7 +85,7 @@ public class Hypervisor{
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    public static final class Server{
+    public static final class Server implements Serializable{
 
         /**
          * UUID

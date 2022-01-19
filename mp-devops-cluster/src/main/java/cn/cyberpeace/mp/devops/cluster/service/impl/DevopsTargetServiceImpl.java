@@ -62,7 +62,7 @@ public class DevopsTargetServiceImpl implements DevopsTargetService {
         if (CollectionUtils.isEmpty(deviceList)){
             return 0;
         }
-        List<TargetModel> targetModels = deviceList.stream().map(device -> convertToTargetModel(device))
+        List<TargetModel> targetModels = deviceList.stream().map(this::convertToTargetModel)
                 .collect(Collectors.toList());
         return imageMapper.batchInsert(targetModels);
     }

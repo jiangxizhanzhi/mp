@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.InstallerConvertPageModel
 import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.InstallerCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.InstallerFormDataCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.request.BasePageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerRequest;
@@ -45,13 +46,13 @@ public class InstallerConverter implements BaseConverter{
 
     @Override
     public String[] getDefaultPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldNames(InstallerPageRequest::getPage,InstallerPageRequest::getPerPage);
+        return BeanUtils.getBeanGetterFieldNames(BasePageRequest::getPage,BasePageRequest::getPerPage);
     }
 
     @Override
     public String[] getTotalPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldNames(InstallerPageRequest::getLimit,InstallerPageRequest::getOffset,
-                InstallerPageRequest::getPage,InstallerPageRequest::getPerPage);
+        return BeanUtils.getBeanGetterFieldNames(BasePageRequest::getLimit,BasePageRequest::getOffset,
+                BasePageRequest::getPage,BasePageRequest::getPerPage);
     }
 
     /**
@@ -71,7 +72,7 @@ public class InstallerConverter implements BaseConverter{
             return convertModel;
         }
         List<InstallerConvertModel> modelList = model.getItems().stream()
-                .map(installer -> convertInstaller(installer)).collect(Collectors.toList());
+                .map(this::convertInstaller).collect(Collectors.toList());
         convertModel.setModelList(modelList);
         convertModel.setTotal(model.getTotal());
         return convertModel;
@@ -146,9 +147,9 @@ public class InstallerConverter implements BaseConverter{
         ExtNormal extNormal = installer.getExtNormal();
         if (Objects.nonNull(extNormal) && StringUtils.isNotBlank(extNormal.getResources())){
             model.setResourceList(JSONArray.parseArray(extNormal.getResources(), Resource.class));
-            model.getResourceList().stream().filter(resource -> StringUtils.isNotBlank(resource.getPlatforms())).forEach(resource -> {
-                resource.setPlatforms(Joiner.on("|").join(resource.getPlatforms().split("")));
-            });
+            model.getResourceList().stream().filter(resource -> StringUtils.isNotBlank(resource.getPlatforms())).forEach(resource ->
+                resource.setPlatforms(Joiner.on("|").join(resource.getPlatforms().split("")))
+            );
         }
         model.setDeviceCount(installer.getDeviceCount());
         model.setExtNormal(extNormal);

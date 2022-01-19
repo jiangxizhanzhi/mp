@@ -1,6 +1,6 @@
-package cn.cyberpeace.mp.devops.cluster.cloud.platform.service.impl;
+package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.BaseCloudPlatformService;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloudPlatformConstant;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.constant.BaseConstants;
 import cn.cyberpeace.mp.devops.cluster.request.OpenflowActionRequest;
@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
-public class OpenFlowService extends BaseOpenStackServiceImpl {
+public class OpenFlowService extends BaseOpenStackService {
 
     public OpenFlowService(DevopsConfig devopsConfig) {
         super(devopsConfig);
@@ -40,7 +40,7 @@ public class OpenFlowService extends BaseOpenStackServiceImpl {
 
         try {
             // 查询流表操作
-            String res = super.sendPost(BaseCloudPlatformService.CPCLOUD_OPENFLOW + BaseCloudPlatformService.URL_VERSION +
+            String res = super.sendPost(BaseCloudPlatformConstant.CPCLOUD_OPENFLOW + BaseCloudPlatformConstant.URL_VERSION +
                     "/openflow/action", JSONObject.toJSONString(request));
 
             // 解析结果

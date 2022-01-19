@@ -6,11 +6,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel("靶标登录信息")
-public class TargetConnection {
+public class TargetConnection implements Serializable {
 
     @ApiModelProperty("协议")
     private String protocol;
@@ -39,6 +41,6 @@ public class TargetConnection {
     @ApiModelProperty("内部IP:镜像")
     private String ipAddress;
 
-    @ApiModelProperty("连接状态")
+    @ApiModelProperty("连接状态，0 是默认的，1是端口通了，2 是端口不通或者超时了，超时时间五分钟 ")
     private Integer connectionState;
 }

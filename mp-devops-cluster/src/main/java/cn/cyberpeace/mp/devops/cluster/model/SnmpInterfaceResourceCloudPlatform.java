@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.util.List;
 
 @Data
@@ -18,7 +19,7 @@ public class SnmpInterfaceResourceCloudPlatform extends BaseCloudPlatformModel{
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    public static final class Interfaces{
+    public static final class Interfaces implements Serializable {
 
         private String interfaceName;
 

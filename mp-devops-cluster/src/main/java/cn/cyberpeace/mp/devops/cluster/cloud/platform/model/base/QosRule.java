@@ -1,10 +1,15 @@
 package cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base;
 
+import lombok.Data;
+
+import java.io.Serializable;
+
 /**
  * Qos规则
  * @author wanggang
  */
-public class QosRule {
+@Data
+public class QosRule implements Serializable {
 
     /**
      * 网络速率（kbps）
@@ -14,7 +19,7 @@ public class QosRule {
     /**
      * 网络最大速率（kbps）
      */
-    private Integer max_burst_kbps;
+    private Integer maxBurstKbps;
 
     /**
      * 指定进口出口方向

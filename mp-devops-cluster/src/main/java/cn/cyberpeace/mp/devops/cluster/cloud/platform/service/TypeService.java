@@ -1,13 +1,18 @@
 package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.impl.BaseOpenStackServiceImpl;
+import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.*;
+import cn.hutool.cache.Cache;
+import cn.hutool.cache.CacheUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import static cn.cyberpeace.mp.devops.cluster.cloud.platform.service.BaseCloudPlatformService.CPCLOUD_DEVICE;
-import static cn.cyberpeace.mp.devops.cluster.cloud.platform.service.BaseCloudPlatformService.URL_VERSION;
+import javax.annotation.PostConstruct;
+import java.util.Objects;
+
+import static cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloudPlatformConstant.CPCLOUD_DEVICE;
+import static cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloudPlatformConstant.URL_VERSION;
 
 /**
  * 靶标枚举值接口
@@ -15,12 +20,23 @@ import static cn.cyberpeace.mp.devops.cluster.cloud.platform.service.BaseCloudPl
  */
 @Service
 @Slf4j
-public class TypeService extends BaseOpenStackServiceImpl {
+public class TypeService extends BaseOpenStackService {
 
     private static final String TYPE = "/type";
 
+    private static final String QUESTION_TYPE = "?type=";
+
+    private static final String cache_prefix_model = "devops:";
+
     public TypeService(DevopsConfig devopsConfig) {
         super(devopsConfig);
+    }
+
+    private Cache<String, Object> lfuCache = null;
+
+    @PostConstruct
+    public void init(){
+        lfuCache = CacheUtil.newLFUCache(100);
     }
 
     /**
@@ -28,7 +44,14 @@ public class TypeService extends BaseOpenStackServiceImpl {
      * @return
      */
     public TypeCloudPlatformModel findL1AndL2AndL3Type(){
-        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + TYPE + "?type=l3", TypeCloudPlatformModel.class);
+        String key = cache_prefix_model + "l3:" + ServletUtils.getAcceptLanguage();
+        Object cache = lfuCache.get(key);
+        if (Objects.nonNull(cache)){
+            return (TypeCloudPlatformModel)cache;
+        }
+        TypeCloudPlatformModel model = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + TYPE + QUESTION_TYPE + "l3", TypeCloudPlatformModel.class);
+        lfuCache.put(key,model);
+        return model;
     }
 
     /**
@@ -36,7 +59,14 @@ public class TypeService extends BaseOpenStackServiceImpl {
      * @return
      */
     public TypeL2CloudPlatformModel findL1AndL2Type(){
-        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + TYPE + "?type=l2", TypeL2CloudPlatformModel.class);
+        String key = cache_prefix_model + "l2:" + ServletUtils.getAcceptLanguage();
+        Object cache = lfuCache.get(key);
+        if (Objects.nonNull(cache)){
+            return (TypeL2CloudPlatformModel)cache;
+        }
+        TypeL2CloudPlatformModel model = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + TYPE + QUESTION_TYPE + "l2", TypeL2CloudPlatformModel.class);
+        lfuCache.put(key,model);
+        return model;
     }
 
     /**
@@ -44,8 +74,15 @@ public class TypeService extends BaseOpenStackServiceImpl {
      * @return
      */
     public AccessProtocolsPortCloudPlatform findAccessProtocolsPort(){
-        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + TYPE + "?type=access_protocols_port",
-                            AccessProtocolsPortCloudPlatform.class);
+        String key = cache_prefix_model + "access_protocols_port:" + ServletUtils.getAcceptLanguage();
+        Object cache = lfuCache.get(key);
+        if (Objects.nonNull(cache)){
+            return (AccessProtocolsPortCloudPlatform)cache;
+        }
+        AccessProtocolsPortCloudPlatform model = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + TYPE + QUESTION_TYPE + "access_protocols_port",
+                AccessProtocolsPortCloudPlatform.class);
+        lfuCache.put(key,model);
+        return model;
     }
 
     /**
@@ -53,7 +90,14 @@ public class TypeService extends BaseOpenStackServiceImpl {
      * @return
      */
     public TypeIdIntegerCloudPlatformModel findIdIntegerByType(String type){
-        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + TYPE + "?type=" + type, TypeIdIntegerCloudPlatformModel.class);
+        String key = cache_prefix_model + type + ServletUtils.getAcceptLanguage();
+        Object cache = lfuCache.get(key);
+        if (Objects.nonNull(cache)){
+            return (TypeIdIntegerCloudPlatformModel)cache;
+        }
+        TypeIdIntegerCloudPlatformModel model = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + TYPE + QUESTION_TYPE + type, TypeIdIntegerCloudPlatformModel.class);
+        lfuCache.put(key,model);
+        return model;
     }
 
     /**
@@ -61,7 +105,14 @@ public class TypeService extends BaseOpenStackServiceImpl {
      * @return
      */
     public TypeIdStringCloudPlatformModel findIdStringByType(String type){
-        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + TYPE + "?type=" + type, TypeIdStringCloudPlatformModel.class);
+        String key = cache_prefix_model + type + ServletUtils.getAcceptLanguage();
+        Object cache = lfuCache.get(key);
+        if (Objects.nonNull(cache)){
+            return (TypeIdStringCloudPlatformModel)cache;
+        }
+        TypeIdStringCloudPlatformModel model = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + TYPE + QUESTION_TYPE + type, TypeIdStringCloudPlatformModel.class);
+        lfuCache.put(key,model);
+        return model;
     }
 
     /**
@@ -70,6 +121,13 @@ public class TypeService extends BaseOpenStackServiceImpl {
      * @return
      */
     public TypeItemsCloudPlatformModel findItemsByType(String type){
-        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + TYPE + "?type=" + type, TypeItemsCloudPlatformModel.class);
+        String key = cache_prefix_model + type + ServletUtils.getAcceptLanguage();
+        Object cache = lfuCache.get(key);
+        if (Objects.nonNull(cache)){
+            return (TypeItemsCloudPlatformModel)cache;
+        }
+        TypeItemsCloudPlatformModel model = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + TYPE + QUESTION_TYPE + type, TypeItemsCloudPlatformModel.class);
+        lfuCache.put(key,model);
+        return model;
     }
 }

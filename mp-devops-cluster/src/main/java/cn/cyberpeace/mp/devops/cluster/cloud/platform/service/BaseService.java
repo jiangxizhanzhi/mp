@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.devops.cluster.cloud.platform.service.impl;
+package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.devops.cluster.model.BaseModel;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.springframework.stereotype.Service;
@@ -22,7 +23,30 @@ import java.util.Map;
  */
 @Slf4j
 @Service
-public class BaseServiceImpl {
+public class BaseService {
+
+    private static final String ACCEPT_LANGUAGE = "Accept-Language";
+
+    private static final String GET_DOWNLOAD_LOG_INFO = "=====GET download url：{},result：{}";
+
+    private static final String GET_DOWNLOAD_LOG_ERROR = "=====GET download url：{},result：{},error message：{}";
+
+    private static final String GET_LOG_INFO = "=====GET url：{},result：{}";
+
+    private static final String GET_LOG_ERROR = "=====GET url：{},result：{},error message：{}";
+
+    private static final String POST_LOG_INFO = "=====POST url：{},params：{},result：{}";
+
+    private static final String POST_LOG_ERROR = "=====POST url：{},params：{},result：{},error message：{}";
+
+    private static final String PUT_LOG_INFO = "=====PUT url：{},params：{},result：{}";
+
+    private static final String PUT_LOG_ERROR = "=====PUT url：{},params：{},result：{},error message：{}";
+
+    private static final String DELETE_LOG_INFO = "=====DELETE url：{},params：{},result：{}";
+
+    private static final String DELETE_LOG_ERROR = "=====DELETE url：{},params：{},result：{},error message：{}";
+
 
     /**
      * 通过Get方式查询信息
@@ -34,12 +58,13 @@ public class BaseServiceImpl {
         try {
             result = HttpUtils.sendGetForDownLoad(url);
             if (log.isInfoEnabled()) {
-                log.info("=====GET调用url：{},对应返回结果信息：{}", url, result);
+                log.info(GET_DOWNLOAD_LOG_INFO, url, result);
             }
         }catch (ConnectException e){
+            log.error(GET_DOWNLOAD_LOG_ERROR,url,result,e.getMessage(),e);
             throw new MpRuntimeException(BaseErrorCode.GATEWAY_TIME_OUT);
         } catch (IOException e) {
-            log.error("=====GET调用url：{},对应返回结果信息：{},报错信息：{}",url,result,e.getMessage(),e);
+            log.error(GET_DOWNLOAD_LOG_ERROR,url,result,e.getMessage(),e);
             throw new MpRuntimeException(e.getMessage()).e(e);
         }
         return result;
@@ -55,12 +80,13 @@ public class BaseServiceImpl {
         try {
             result = HttpUtils.sendGet(url,headers);
             if (log.isInfoEnabled()) {
-                log.info("=====GET调用url：{},对应返回结果信息：{}", url, result);
+                log.info(GET_LOG_INFO, url, result);
             }
         }catch (ConnectException e){
+            log.error(GET_LOG_ERROR,url,result,e.getMessage(),e);
             throw new MpRuntimeException(BaseErrorCode.GATEWAY_TIME_OUT);
         } catch (IOException e) {
-            log.error("=====GET调用url：{},对应返回结果信息：{},报错信息：{}",url,result,e.getMessage(),e);
+            log.error(GET_LOG_ERROR,url,result,e.getMessage(),e);
             throw new MpRuntimeException(e.getMessage()).e(e);
         }
         return result;
@@ -77,17 +103,17 @@ public class BaseServiceImpl {
         T model = null;
         String result = "";
         try {
-            Map<String,String> headers = new HashMap<>();
-            headers.put("Accept-Language",ServletUtils.getAcceptLanguage());
+            Map<String,String> headers = wrapperHeaders(new HashMap<>());
             result =  HttpUtils.sendGet(url,headers);
             if (log.isInfoEnabled()) {
-                log.info("=====GET调用url：{},对应返回结果信息：{}", url, result);
+                log.info(GET_LOG_INFO, url, result);
             }
             model = JsonUtils.toSnakeObject(result,valueType);
         }catch (ConnectException e){
+            log.error(GET_LOG_ERROR,url,result,e.getMessage(),e);
             throw new MpRuntimeException(BaseErrorCode.GATEWAY_TIME_OUT);
         }catch (IOException e) {
-            log.error("=====GET调用url：{},对应返回结果信息：{},报错信息：{}",url,result,e.getMessage(),e);
+            log.error(GET_LOG_ERROR,url,result,e.getMessage(),e);
             throw new MpRuntimeException(e.getMessage()).e(e);
         }
         return model;
@@ -102,16 +128,16 @@ public class BaseServiceImpl {
     protected String sendPost(String url,String body){
         String result = "";
         try {
-            Map<String,String> headers = new HashMap<>();
-            headers.put("Accept-Language",ServletUtils.getAcceptLanguage());
+            Map<String,String> headers = wrapperHeaders(new HashMap<>());
             result = HttpUtils.sendPost(url,body,headers);
             if (log.isInfoEnabled()) {
-                log.info("=====POST调用url：{},参数：{},对应返回结果信息：{}", url, body, result);
+                log.info(POST_LOG_INFO, url, body, result);
             }
         }catch (ConnectException e){
+            log.error(POST_LOG_ERROR,url,result,e.getMessage(),e);
             throw new MpRuntimeException(BaseErrorCode.GATEWAY_TIME_OUT);
         } catch (IOException e) {
-            log.error("=====POST调用url：{},参数：{},对应返回结果信息：{},报错信息：{}",url,body,result,e.getMessage(),e);
+            log.error(POST_LOG_ERROR,url,body,result,e.getMessage(),e);
             throw new MpRuntimeException(e.getMessage()).e(e);
         }
         return result;
@@ -129,17 +155,17 @@ public class BaseServiceImpl {
         T model = null;
         String result = "";
         try {
-            Map<String,String> headers = new HashMap<>();
-            headers.put("Accept-Language",ServletUtils.getAcceptLanguage());
+            Map<String,String> headers = wrapperHeaders(new HashMap<>());
             result = HttpUtils.sendPost(url,body,headers);
             if (log.isInfoEnabled()) {
-                log.info("=====POST调用url：{},参数：{},对应返回结果信息：{}", url, body, result);
+                log.info(POST_LOG_INFO, url, body, result);
             }
             model = JsonUtils.toSnakeObject(result,valueType);
         }catch (ConnectException e){
+            log.error(POST_LOG_ERROR,url,result,e.getMessage(),e);
             throw new MpRuntimeException(BaseErrorCode.GATEWAY_TIME_OUT);
         } catch (IOException e) {
-            log.error("=====POST调用url：{},参数：{},对应返回结果信息：{},报错信息：{}",url,body,result,e.getMessage(),e);
+            log.error(POST_LOG_ERROR,url,body,result,e.getMessage(),e);
             throw new MpRuntimeException(e.getMessage()).e(e);
         }
         return model;
@@ -154,16 +180,16 @@ public class BaseServiceImpl {
     protected String sendPut(String url,String body){
         String result = "";
         try {
-            Map<String,String> headers = new HashMap<>();
-            headers.put("Accept-Language",ServletUtils.getAcceptLanguage());
+            Map<String,String> headers = wrapperHeaders(new HashMap<>());
             result = HttpUtils.sendPut(url,body,headers);
             if (log.isInfoEnabled()) {
-                log.info("=====PUT调用url：{},参数：{},对应返回结果信息：{}", url, body, result);
+                log.info(PUT_LOG_INFO, url, body, result);
             }
         }catch (ConnectException e){
+            log.error(PUT_LOG_ERROR,url,body,result,e.getMessage(),e);
             throw new MpRuntimeException(BaseErrorCode.GATEWAY_TIME_OUT);
         } catch (IOException e) {
-            log.error("=====PUT调用url：{},参数：{},对应返回结果信息：{},报错信息：{}",url,body,result,e.getMessage(),e);
+            log.error(PUT_LOG_ERROR,url,body,result,e.getMessage(),e);
             throw new MpRuntimeException(e.getMessage()).e(e);
         }
         return result;
@@ -181,17 +207,17 @@ public class BaseServiceImpl {
         T model = null;
         String result = "";
         try {
-            Map<String,String> headers = new HashMap<>();
-            headers.put("Accept-Language",ServletUtils.getAcceptLanguage());
+            Map<String,String> headers = wrapperHeaders(new HashMap<>());
             result =  HttpUtils.sendPut(url,body,headers);
             if (log.isInfoEnabled()) {
-                log.info("=====PUT调用url：{},参数：{},对应返回结果信息：{}", url, body, result);
+                log.info(PUT_LOG_INFO, url, body, result);
             }
             model = JsonUtils.toSnakeObject(result,valueType);
         }catch (ConnectException e){
+            log.error(PUT_LOG_ERROR,url,result,e.getMessage(),e);
             throw new MpRuntimeException(BaseErrorCode.GATEWAY_TIME_OUT);
         } catch (IOException e) {
-            log.error("=====PUT调用url：{},参数：{},对应返回结果信息：{},报错信息：{}",url,body,result,e.getMessage(),e);
+            log.error(PUT_LOG_ERROR,url,body,result,e.getMessage(),e);
             throw new MpRuntimeException(e.getMessage()).e(e);
         }
         return model;
@@ -206,16 +232,16 @@ public class BaseServiceImpl {
     private String sendDelete(String url,String body){
         String result = "";
         try {
-            Map<String,String> headers = new HashMap<>();
-            headers.put("Accept-Language",ServletUtils.getAcceptLanguage());
+            Map<String,String> headers = wrapperHeaders(new HashMap<>());
             result =  HttpUtils.sendDelete(url,body,headers);
             if (log.isInfoEnabled()) {
-                log.info("=====DELETE调用url：{},参数：{},对应返回结果信息：{}", url, body, result);
+                log.info(DELETE_LOG_INFO, url, body, result);
             }
         }catch (ConnectException e){
+            log.error(DELETE_LOG_ERROR,url,result,e.getMessage(),e);
             throw new MpRuntimeException(BaseErrorCode.GATEWAY_TIME_OUT);
         } catch (IOException e) {
-            log.error("=====DELETE调用url：{},参数：{},对应返回结果信息：{},报错信息：{}",url,body,result,e.getMessage(),e);
+            log.error(DELETE_LOG_ERROR,url,body,result,e.getMessage(),e);
             throw new MpRuntimeException(e.getMessage()).e(e);
         }
         return result;
@@ -233,7 +259,7 @@ public class BaseServiceImpl {
         String result = this.sendDelete(url,body);
         T model = JsonUtils.toSnakeObject(result,valueType);
         if (log.isInfoEnabled()) {
-            log.info("=====DELETE调用url：{},参数：{},对应返回结果信息：{}", url, body, result);
+            log.info(DELETE_LOG_INFO, url, body, result);
         }
         return model;
     }
@@ -248,12 +274,11 @@ public class BaseServiceImpl {
      * @throws IOException
      */
     protected <T extends BaseModel> T sendFormDataPost(String url, HttpEntity httpEntity ,Class<T> valueType) throws IOException {
-        Map<String,String> headers = new HashMap<>();
-        headers.put("Accept-Language",ServletUtils.getAcceptLanguage());
+        Map<String,String> headers = wrapperHeaders(new HashMap<>());
         String result = HttpUtils.doFormDataPost(url,httpEntity,headers);
         T model = JsonUtils.toSnakeObject(result,valueType);
         if (log.isInfoEnabled()) {
-            log.info("=====FormDataPost调用url：{},参数：{},返回结果：{}", url, httpEntity, result);
+            log.info("=====FormDataPost url：{},params：{},result：{}", url, httpEntity, result);
         }
         return model;
     }
@@ -268,13 +293,24 @@ public class BaseServiceImpl {
      * @throws IOException
      */
     protected <T extends BaseModel> T sendFormDataPut(String url, HttpEntity httpEntity ,Class<T> valueType) throws IOException {
-        Map<String,String> headers = new HashMap<>();
-        headers.put("Accept-Language",ServletUtils.getAcceptLanguage());
+        Map<String,String> headers = wrapperHeaders(new HashMap<>());
         String result = HttpUtils.doFormDataPut(url,httpEntity,headers);
         if (log.isInfoEnabled()) {
-            log.info("=====FormData调用url：{},参数：{},返回结果：{}", url, httpEntity, result);
+            log.info("=====FormData url：{},params：{},result：{}", url, httpEntity, result);
         }
-        T model = JsonUtils.toSnakeObject(result,valueType);
-        return model;
+        return JsonUtils.toSnakeObject(result,valueType);
+    }
+
+    /**
+     * 包装请求头信息
+     * @param headers
+     * @return
+     */
+    private Map<String,String> wrapperHeaders(Map<String,String> headers){
+        if (MapUtils.isEmpty(headers)){
+            headers = new HashMap<>();
+        }
+        headers.put(ACCEPT_LANGUAGE,ServletUtils.getAcceptLanguage());
+        return headers;
     }
 }

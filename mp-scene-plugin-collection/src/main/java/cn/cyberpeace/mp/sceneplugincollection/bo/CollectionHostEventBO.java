@@ -40,4 +40,18 @@ public class CollectionHostEventBO {
     @ApiModelProperty("事件描述")
     private String eventDesc;
 
+    @ApiModelProperty("rule等级")
+    private Integer level;
+
+    @ApiModelProperty("分类")
+    private String catagory;
+
+    @ApiModelProperty("rule描述信息")
+    private String description;
+
+    @ApiModelProperty("底层信息")
+    private Map<String, Object> content;
+
+
+
 }

@@ -69,9 +69,6 @@ public class BaseCloudPlatformModel extends BaseModel {
     @ApiModelProperty(hidden = true)
     private List<String> fileNames;
 
-    @ApiModelProperty(hidden = true)
-    private Object detail;
-
     /**
      * 消息体
      */

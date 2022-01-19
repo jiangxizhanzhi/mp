@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.NetworkPageConverterModel
 import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
 import cn.cyberpeace.mp.devops.cluster.model.NetworkCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.NetworkModel;
+import cn.cyberpeace.mp.devops.cluster.request.BasePageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.NetworkPageRequest;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
@@ -34,13 +35,13 @@ public class NetworkConverter implements BaseConverter{
 
     @Override
     public String[] getDefaultPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldNames(NetworkPageRequest::getPage,NetworkPageRequest::getPerPage);
+        return BeanUtils.getBeanGetterFieldNames(BasePageRequest::getPage,BasePageRequest::getPerPage);
     }
 
     @Override
     public String[] getTotalPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldNames(NetworkPageRequest::getLimit,NetworkPageRequest::getOffset,
-                NetworkPageRequest::getPage,NetworkPageRequest::getPerPage);
+        return BeanUtils.getBeanGetterFieldNames(BasePageRequest::getLimit,BasePageRequest::getOffset,
+                BasePageRequest::getPage,BasePageRequest::getPerPage);
     }
 
     /**

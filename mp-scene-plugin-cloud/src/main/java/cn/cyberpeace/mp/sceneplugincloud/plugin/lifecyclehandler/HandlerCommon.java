@@ -72,6 +72,7 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
         ipAccessModesMap.forEach((ipPortKey, accessModes) -> {
             var ip = accessModes.get(0).getAccessIp();
             var port = accessModes.get(0).getAccessPort();
+            var protocol = accessModes.get(0).getProtocol();
             Runnable checkSuccessCallback = () -> {
                 accessModes.forEach(accessMode -> accessMode.setAvailable(true));
                 getPluginHandler().asyncAckElementChanged(nodeId, true);
@@ -81,7 +82,7 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
                 TaskCommon.executeTask(() -> NetworkUtils.probeHost(ip, checkSuccessCallback, checkSuccessCallback));
             } else {
                 TaskCommon.executeTask(
-                        () -> NetworkUtils.probePort(ip, port, checkSuccessCallback, checkSuccessCallback));
+                        () -> NetworkUtils.probePort(protocol, ip, port, checkSuccessCallback, checkSuccessCallback));
             }
         });
     }

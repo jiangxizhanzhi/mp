@@ -10,10 +10,12 @@ import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.NumberUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -60,7 +62,7 @@ public class SceneElementMonitorService {
 
         ElementMonitorBasicInfo elementMonitorBasicInfo = new ElementMonitorBasicInfo();
         elementMonitorBasicInfo.setSceneId(sceneId);
-        processTopologyElement(elementMonitorBasicInfo, csceneInstanceBO, elementId);
+        processTopologyElement(elementMonitorBasicInfo, csceneInstanceBO, elementId, true);
         processPluginElement(elementMonitorBasicInfo, csceneInstanceBO, elementId);
 
         // todo 节点实时信息
@@ -86,7 +88,7 @@ public class SceneElementMonitorService {
     }
 
 
-    public void processTopologyElement(ElementMonitorBasicInfo basicInfo, CsceneInstanceBO csceneInstanceBO, String elementId) {
+    public void processTopologyElement(ElementMonitorBasicInfo basicInfo, CsceneInstanceBO csceneInstanceBO, String elementId, boolean fetchRealTimeHostState) {
         if (Objects.isNull(csceneInstanceBO)
                 || Objects.isNull(csceneInstanceBO.getScene())
                 || Objects.isNull(csceneInstanceBO.getScene().getTopology())) {
@@ -99,7 +101,7 @@ public class SceneElementMonitorService {
 
         if (tpoEleOptional.isPresent()) {
             SceneElementBO tpoEleBO = tpoEleOptional.get();
-            sceneElementBO2ElementMonitorBasicInfo(basicInfo, tpoEleBO, true);
+            sceneElementBO2ElementMonitorBasicInfo(basicInfo, tpoEleBO, fetchRealTimeHostState);
         }
     }
 
@@ -122,24 +124,26 @@ public class SceneElementMonitorService {
     }
 
 
-    public void sceneElementBO2ElementMonitorBasicInfo(ElementMonitorBasicInfo basicInfo, SceneElementBO sceneElementBO, boolean needHostStatePercent) {
-        HostState resource = basicInfo.getHostState();
-        if (Objects.isNull(resource)) {
-            resource = new HostState();
-        }
+    public void sceneElementBO2ElementMonitorBasicInfo(ElementMonitorBasicInfo basicInfo, SceneElementBO sceneElementBO, boolean fetchRealTimeHostState) {
+        log.info("fetchHostState:{}", fetchRealTimeHostState);
+        // 获取hostState比较耗时，这里加个开关
+        if (fetchRealTimeHostState) {
+            HostState resource = basicInfo.getHostState();
+            if (Objects.isNull(resource)) {
+                resource = new HostState();
+            }
 
-        resource.setCpuCount(Optional.ofNullable(sceneElementBO.getCpu()).orElse(0));
+            resource.setCpuCount(Optional.ofNullable(sceneElementBO.getCpu()).orElse(0));
 
-        // 内存大小
-        Integer memSize = Optional.ofNullable(sceneElementBO.getRam()).orElse(0);
-//        double memSizeInGb = NumberUtil.round(memSizeInMb / 1024.0, 2).doubleValue();
-        resource.setMemoryTotal(Long.valueOf(memSize));
+            // 内存大小
+            Integer memSize = Optional.ofNullable(sceneElementBO.getRam()).orElse(0);
+            //        double memSizeInGb = NumberUtil.round(memSizeInMb / 1024.0, 2).doubleValue();
+            resource.setMemoryTotal(Long.valueOf(memSize));
 
-        // 磁盘大小
-        Integer diskSize = Optional.ofNullable(sceneElementBO.getDisk()).orElse(0);
-        resource.setDiskSpace(Long.valueOf(diskSize));
-        log.info("needHostStatePercent:{}", needHostStatePercent);
-        if (needHostStatePercent) {
+            // 磁盘大小
+            Integer diskSize = Optional.ofNullable(sceneElementBO.getDisk()).orElse(0);
+            resource.setDiskSpace(Long.valueOf(diskSize));
+
             BaseSceneElementRequest request = new BaseSceneElementRequest();
             request.setSceneId(basicInfo.getSceneId());
             request.setElementIds(Arrays.asList(sceneElementBO.getId()));
@@ -151,9 +155,8 @@ public class SceneElementMonitorService {
                 resource.setMemoryPercent(Objects.nonNull(hostState.getMemoryPercent()) ? NumberUtil.round(hostState.getMemoryPercent(), 2).doubleValue() : 0.0);
                 resource.setDiskPercent(Objects.nonNull(hostState.getDiskPercent()) ? NumberUtil.round(hostState.getDiskPercent(), 2).doubleValue() : 0.0);
             }
+            basicInfo.setHostState(resource);
         }
-
-        basicInfo.setHostState(resource);
 
         // ip地址
 //        List<String> ipList = sceneElementBO.getPorts().stream().map(BaseSceneElementPortBO::getIp).collect(Collectors.toList());
@@ -161,13 +164,16 @@ public class SceneElementMonitorService {
 
         // ID
         basicInfo.setId(sceneElementBO.getId());
+        basicInfo.setEid(sceneElementBO.getEid());
         // 实例名称
         basicInfo.setName(sceneElementBO.getName());
 
         // 操作系统
         // 参考SystemTypeUtils
-        basicInfo.setSystemType(sceneElementBO.getSystemType());
-
+        if (StringUtils.isNotBlank(sceneElementBO.getSystemType())) {
+            basicInfo.setSystemType(sceneElementBO.getSystemType());
+            basicInfo.setSystemTypeName(SystemTypeUtils.getStandardSystemType(sceneElementBO.getSystemType()));
+        }
 
         // ip, 用户名，登录方式
         var ports = sceneElementBO.getPorts();

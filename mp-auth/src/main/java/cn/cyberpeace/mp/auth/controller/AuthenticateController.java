@@ -42,7 +42,7 @@ public class AuthenticateController {
         try {
             user = JwtUtils.validateToken(token);
         } catch (TokenExpiredException e) {
-            log.info("token已经过期");
+            log.info("token has expired!");
             throw new MpRuntimeException(AuthErrorCode.TOKEN_EXPIRED);
         }
         if (user == null) {

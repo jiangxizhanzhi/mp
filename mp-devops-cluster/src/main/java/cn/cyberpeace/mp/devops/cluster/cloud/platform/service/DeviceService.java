@@ -1,11 +1,9 @@
 package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Device;
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.impl.BaseOpenStackServiceImpl;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.DeviceStaticsCloudPlatformModel;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Joiner;
 import lombok.extern.slf4j.Slf4j;
@@ -13,8 +11,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static cn.cyberpeace.mp.devops.cluster.cloud.platform.service.BaseCloudPlatformService.CPCLOUD_DEVICE;
-import static cn.cyberpeace.mp.devops.cluster.cloud.platform.service.BaseCloudPlatformService.URL_VERSION;
+import static cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloudPlatformConstant.CPCLOUD_DEVICE;
+import static cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloudPlatformConstant.URL_VERSION;
 
 /**
  * 靶标
@@ -22,12 +20,21 @@ import static cn.cyberpeace.mp.devops.cluster.cloud.platform.service.BaseCloudPl
  */
 @Service
 @Slf4j
-public class DeviceService extends BaseOpenStackServiceImpl {
+public class DeviceService extends BaseOpenStackService {
 
     private static final String DEVICE = "/device";
 
     public DeviceService(DevopsConfig devopsConfig) {
         super(devopsConfig);
+    }
+
+    /**
+     * 分页查询
+     * @param params
+     * @return
+     */
+    public DeviceCloudPlatformModel page(String params){
+        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + DEVICE + "/lists" + params, DeviceCloudPlatformModel.class);
     }
 
     /**
@@ -48,7 +55,6 @@ public class DeviceService extends BaseOpenStackServiceImpl {
         return super.sendGet(CPCLOUD_DEVICE + URL_VERSION +  DEVICE + "/byid?ids=" + Joiner.on(",").join(ids), DeviceCloudPlatformModel.class);
     }
 
-
     /**
      * 批量删除
      * @param uuids
@@ -58,13 +64,5 @@ public class DeviceService extends BaseOpenStackServiceImpl {
         jsonObject.put("uuids", uuids);
         BaseCloudPlatformModel model = super.sendDelete(CPCLOUD_DEVICE + URL_VERSION + "/device/batch_delete",JSONObject.toJSONString(jsonObject), BaseCloudPlatformModel.class);
         return model.isSuccess();
-    }
-
-    /**
-     * 靶标统计
-     * @return
-     */
-    public DeviceStaticsCloudPlatformModel statics() {
-        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + "/statics", DeviceStaticsCloudPlatformModel.class);
     }
 }

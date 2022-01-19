@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.converter.model;
 
 import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

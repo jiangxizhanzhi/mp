@@ -23,7 +23,7 @@ public class TypeCloudPlatformModel extends BaseCloudPlatformModel implements Se
     @NoArgsConstructor
     @AllArgsConstructor
     @Data
-    public static final class Item{
+    public static final class Item implements Serializable{
 
         /**
          * 1级类型ID
@@ -43,7 +43,7 @@ public class TypeCloudPlatformModel extends BaseCloudPlatformModel implements Se
         @NoArgsConstructor
         @AllArgsConstructor
         @Data
-       public static final class L1Child{
+       public static final class L1Child implements Serializable{
 
             /**
              * 二级类型ID

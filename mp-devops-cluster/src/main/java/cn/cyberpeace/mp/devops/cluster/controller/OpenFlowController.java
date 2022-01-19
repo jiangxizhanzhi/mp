@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.BaseCloudPlatformService;
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.impl.OpenFlowService;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloudPlatformConstant;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.OpenFlowService;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.request.OpenflowActionRequest;
 import cn.cyberpeace.mp.devops.cluster.response.OpenflowActionResponse;
@@ -43,7 +43,7 @@ public class OpenFlowController {
             reqHostName = hostname;
         }
         OpenflowActionRequest request = OpenflowActionRequest.builder()
-                .method(BaseCloudPlatformService.OPENFLOW_ACTION_METHOD)
+                .method(BaseCloudPlatformConstant.OPENFLOW_ACTION_METHOD)
                 .hostname(reqHostName)
                 .build();
         OpenflowActionResponse response = openFlowService.queryOpenFlowAction(request);

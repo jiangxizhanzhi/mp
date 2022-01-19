@@ -82,6 +82,7 @@ public class CloudSceneConnectionCommon {
                 .filterEqual(CloudPluginSceneConnectionModel::getSceneElementPort, sceneElementPortId)
                 .filterEqual(CloudPluginSceneConnectionModel::getAccessModeId, accessModeId)
                 .filterEqual(CloudPluginSceneConnectionModel::getAccessUser, userId)
+                .filterEqual(CloudPluginSceneConnectionModel::getDisable, false)
                 .reverseOrderBy(CloudPluginSceneConnectionModel::getCreateTime));
 
         // console信息可能会变，获取最新的console信息
@@ -215,4 +216,13 @@ public class CloudSceneConnectionCommon {
 
         return flag;
     }
+
+    public static String getContainerConsoleUrl(String resourceId) {
+        String url = new Remote().getContainerConsoleUrl(resourceId);
+        if (StringUtils.isEmpty(url)) {
+            log.error("failed to get container console url , containId is {}", resourceId);
+        }
+        return url;
+    }
+
 }

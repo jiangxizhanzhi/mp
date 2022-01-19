@@ -27,6 +27,8 @@ public abstract class BaseCsceneBO<
     private List<R> roles;
     @ApiModelProperty(value = "场景名称")
     private String name;
+    @ApiModelProperty(value = "是否开启录屏")
+    private Boolean enableRecording;
 
     @Override
     public T export() {

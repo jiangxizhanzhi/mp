@@ -27,11 +27,17 @@ public class ElementMonitorBasicInfo {
     @ApiModelProperty(value = "节点ID")
     private String id;
 
+    @ApiModelProperty(value = "EID")
+    private String eid;
+
     @ApiModelProperty(value = "节点基本信息-实例名称")
     private String name;
 
-    @ApiModelProperty(value = "节点基本信息-操作系统")
+    @ApiModelProperty(value = "节点基本信息-操作系统ID")
     private String systemType;
+
+    @ApiModelProperty(value = "节点基本信息-操作系统名称")
+    private String systemTypeName;
 
     @ApiModelProperty(value = "节点基本信息-镜像名称")
     private String imageName;

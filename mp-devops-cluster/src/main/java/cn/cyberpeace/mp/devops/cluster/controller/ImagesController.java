@@ -91,7 +91,7 @@ public class ImagesController {
             ExtSystemInfo extSystemInfo = v.getExtSystemInfo();
             ExtVm extVm = v.getExtVm();
             ExtImageInfo extImageInfo = v.getExtImageInfo();
-            ImagesPageResponse response = ImagesPageResponse.builder().uuid(v.getUuid()).name(v.getName())
+            return ImagesPageResponse.builder().uuid(v.getUuid()).name(v.getName())
                     .logo(v.getLogo())
                     .mainCategory(v.getMainCategory()).subCategory(v.getSubCategory()).thirdCategory(v.getThirdCategory())
                     .imageType(v.getImageType())
@@ -102,7 +102,6 @@ public class ImagesController {
                     .description(v.getDescription()).imageStatus(Objects.nonNull(extImageInfo) ? extImageInfo.getImageStatus() : null)
                     .authTotal(v.getAuthTotal()).isPublic(v.getIsPublic()).extSystemInfo(v.getExtSystemInfo())
                     .extGateway(v.getExtGateway()).extVm(v.getExtVm()).extImageInfo(v.getExtImageInfo()).extDocker(v.getExtDocker()).build();
-            return response;
         }).collect(Collectors.toList());
 
         return new PageResult<>(list,model.getTotal());
@@ -140,11 +139,11 @@ public class ImagesController {
     }
 
     /**
-     * 根据ID查询
+     * 根据UUID查询
      */
-    @ApiOperation("根据ID查询")
-    @GetMapping("/search/{id}")
-    public Result<ImagesByIdResponse> findById(@PathVariable("id") String uuid){
+    @ApiOperation("根据UUID查询")
+    @GetMapping("/search/{uuid}")
+    public Result<ImagesByIdResponse> findById(@PathVariable("uuid") String uuid){
         ImageConvertModel model = imagesConverter.findById(uuid);
         ImagesByIdResponse imagesByIdResponse = new ImagesByIdResponse();
         imagesByIdResponse.setUuid(model.getUuid());
@@ -253,7 +252,7 @@ public class ImagesController {
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
         }
-        return ControllerConstant.code.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
+        return ControllerConstant.CODE.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
     }
 
     /**
@@ -266,7 +265,7 @@ public class ImagesController {
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
         }
-        return ControllerConstant.code.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
+        return ControllerConstant.CODE.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
     }
 
     /**
@@ -279,7 +278,7 @@ public class ImagesController {
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
         }
-        return ControllerConstant.code.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
+        return ControllerConstant.CODE.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
     }
 
     /**
@@ -315,7 +314,7 @@ public class ImagesController {
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
         }
-        return ControllerConstant.code.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
+        return ControllerConstant.CODE.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
     }
 
     /**
@@ -328,7 +327,7 @@ public class ImagesController {
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
         }
-        return ControllerConstant.code.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
+        return ControllerConstant.CODE.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
     }
 
     /**
@@ -342,7 +341,7 @@ public class ImagesController {
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
         }
-        return ControllerConstant.code.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
+        return ControllerConstant.CODE.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
     }
 
     /**
@@ -368,7 +367,7 @@ public class ImagesController {
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
         }
-        return ControllerConstant.code.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
+        return ControllerConstant.CODE.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
     }
 
 
@@ -404,6 +403,10 @@ public class ImagesController {
     @ApiOperation("同步镜像数据")
     @PostMapping("/async")
     public ServiceResult async(@RequestBody ImageAsyncRequest request){
+        List<Integer> requestIds = request.getIds();
+        if (CollectionUtils.isEmpty(requestIds)){
+           throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
         Integer result = imagesConverter.async(request);
         return result > 0 ? ServiceResult.successful() : ServiceResult.fail("");
     }

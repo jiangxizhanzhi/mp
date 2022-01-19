@@ -80,13 +80,13 @@ public class ImagesConverter implements BaseConverter{
 
     @Override
     public String[] getDefaultPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldNames(ImagePageRequest::getPage,ImagePageRequest::getPerPage);
+        return BeanUtils.getBeanGetterFieldNames(BasePageRequest::getPage,BasePageRequest::getPerPage);
     }
 
     @Override
     public String[] getTotalPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldNames(ImagePageRequest::getLimit,ImagePageRequest::getOffset,
-                ImagePageRequest::getPage,ImagePageRequest::getPerPage);
+        return BeanUtils.getBeanGetterFieldNames(BasePageRequest::getLimit,BasePageRequest::getOffset,
+                BasePageRequest::getPage,BasePageRequest::getPerPage);
     }
 
     /**
@@ -112,9 +112,9 @@ public class ImagesConverter implements BaseConverter{
             imageConvertPageModel.setModelList(Lists.newArrayList());
             return imageConvertPageModel;
         }
-        DeviceCloudPlatformModel model = deviceService.findByIds(ids);
+        List<Device> deviceList = this.findByIds(ids);
 
-        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getItems())){
+        if (CollectionUtils.isEmpty(deviceList)){
             imageConvertPageModel.setTotal(0);
             imageConvertPageModel.setModelList(Lists.newArrayList());
             return imageConvertPageModel;
@@ -128,7 +128,7 @@ public class ImagesConverter implements BaseConverter{
 
         Map<String, PublicEnum> targetMap = targetModels.stream().collect(Collectors.toMap(TargetModel::getUuid, TargetModel::getIsPublic));
 
-        List<ImageConvertModel> modelList = model.getItems().stream().map(device -> wrapperImageConvertModel(device)).collect(Collectors.toList());
+        List<ImageConvertModel> modelList = deviceList.stream().map(this::wrapperImageConvertModel).collect(Collectors.toList());
 
         if (CollectionUtils.isNotEmpty(modelList)) {
             for (ImageConvertModel imageConvertModel : modelList) {
@@ -336,7 +336,7 @@ public class ImagesConverter implements BaseConverter{
      */
     public List<Device> findByIds(List<Integer> ids){
         DeviceCloudPlatformModel model = deviceService.findByIds(ids);
-        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getItems())){
+        if (Objects.isNull(model) || !model.isSuccess() || CollectionUtils.isEmpty(model.getItems())){
             return Lists.newArrayList();
         }
         return model.getItems();
@@ -349,12 +349,18 @@ public class ImagesConverter implements BaseConverter{
      */
     @Transactional
     public Integer async(ImageAsyncRequest request){
-        List<Device> deviceList = this.findByIds(request.getIds());
+        List<Integer> requestIds = request.getIds();
+        List<Integer> diffList = targetConverter.getAsyncDeviceIds(requestIds);
+        if (CollectionUtils.isEmpty(diffList)){
+            return requestIds.size();
+        }
+        List<Device> deviceList = this.findByIds(diffList);
         if (CollectionUtils.isEmpty(deviceList)){
             return 0;
         }
         return devopsTargetService.insert(deviceList);
     }
+
 
     /**
      * 转换ImageRequest

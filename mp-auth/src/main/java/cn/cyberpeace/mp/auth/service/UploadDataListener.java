@@ -63,7 +63,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
      */
     @Override
     public void invoke(ImportUser data, AnalysisContext context) {
-        log.info("解析到一条数据:{}", JSON.toJSONString(data));
+        log.info("got one data:{}", JSON.toJSONString(data));
         list.add(data);
 
         if (list.size() > MAX_COUNT) {
@@ -93,13 +93,13 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
      * 角色：必填， 属于已有角色可以导入，不属于已有角色导入失败。
      */
     private void saveData() {
-        log.info("{}条数据，开始存储数据库！", list.size());
+        log.info("list size:{}！", list.size());
 
         // 校验字段是否合法
         checkImportUsers(list);
 
         userService.importExcel(list);
-        log.info("存储数据库成功！");
+        log.info("save success！");
     }
 
 

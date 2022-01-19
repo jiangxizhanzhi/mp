@@ -10,12 +10,15 @@ import cn.cyberpeace.mp.devops.cluster.converter.TypeConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeAllConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeConvertModel;
 import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.request.TargetMultiAsyncRequest;
 import cn.cyberpeace.mp.devops.cluster.request.TargetSceneRequest;
 import cn.cyberpeace.mp.devops.cluster.response.TargetScene;
 import cn.cyberpeace.mp.devops.cluster.response.TargetSceneResponse;
 import cn.cyberpeace.mp.devops.cluster.response.TargetUploadResponse;
 import cn.cyberpeace.mp.devops.cluster.response.base.Result;
+import cn.cyberpeace.mp.devops.cluster.thread.ITask;
 import cn.cyberpeace.mp.devops.cluster.utils.FileUtils;
+import cn.cyberpeace.mp.devops.cluster.utils.MultiThreadUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +48,9 @@ public class DevopsTargetController {
     private ImagesService imagesService;
 
     private IpAddressConfig ipAddressConfig;
+
+    @Autowired
+    private ITask asyncTargetTask;
 
     @Autowired
     public DevopsTargetController(TargetConverter targetConverter,TypeConverter typeConverter,
@@ -114,7 +120,7 @@ public class DevopsTargetController {
     public ServiceResult<TargetUploadResponse> upload(@RequestParam("type") String type,@RequestParam("file") MultipartFile file){
         Map<String,File> fileList = null;
         try {
-            fileList = FileUtils.transferToFileMap(Arrays.asList(file),type);
+            fileList = FileUtils.transferToFileMap(Arrays.asList(file));
         } catch (IOException e) {
            log.error("file transfer error",e);
         }
@@ -123,6 +129,17 @@ public class DevopsTargetController {
             return ServiceResult.fail("file upload error");
         }
         return new Result(new TargetUploadResponse(model.getTmpdirUuid(),model.getFileNames()));
+    }
+
+    @ApiOperation("批量同步靶标数据")
+    @GetMapping("/multi-async")
+    public ServiceResult multiAsync(TargetMultiAsyncRequest request){
+        List<Device> deviceList = targetConverter.multiAsync(request.getOffset(), request.getLimit());
+        MultiThreadUtils multiThreadUtils = MultiThreadUtils.newInstance(request.getThreadCount());
+
+        ServiceResult serviceResult = multiThreadUtils.execute(deviceList, new HashMap<>(), asyncTargetTask);
+
+        return serviceResult.asResult();
     }
 
 }

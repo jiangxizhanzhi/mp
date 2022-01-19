@@ -2,14 +2,13 @@ package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.SnmpParams;
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.impl.BaseOpenStackServiceImpl;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.*;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import static cn.cyberpeace.mp.devops.cluster.cloud.platform.service.BaseCloudPlatformService.*;
+import static cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloudPlatformConstant.*;
 
 /**
  * 实装管理接口
@@ -17,9 +16,11 @@ import static cn.cyberpeace.mp.devops.cluster.cloud.platform.service.BaseCloudPl
  */
 @Service
 @Slf4j
-public class RealEquipmentService extends BaseOpenStackServiceImpl {
+public class RealEquipmentService extends BaseOpenStackService {
 
     private static final String ENTITY = "/entity";
+
+    private static final String SNMP = "/snmp";
 
     public RealEquipmentService(DevopsConfig devopsConfig) {
         super(devopsConfig);
@@ -60,7 +61,7 @@ public class RealEquipmentService extends BaseOpenStackServiceImpl {
      */
     public SnmpInterfaceResourceCloudPlatform interfacesResource(SnmpParams snmp){
         snmp.setDataType("interfaces");
-        return super.sendPost(CPCLOUD_INFO_URL + URL_VERSION + "/snmp", JsonUtils.toUnderlineJSONString(snmp), SnmpInterfaceResourceCloudPlatform.class);
+        return super.sendPost(CPCLOUD_INFO_URL + URL_VERSION + SNMP, JsonUtils.toUnderlineJSONString(snmp), SnmpInterfaceResourceCloudPlatform.class);
     }
 
 
@@ -71,7 +72,7 @@ public class RealEquipmentService extends BaseOpenStackServiceImpl {
      */
     public SnmpCloudPlatform snmpForCpu(SnmpParams snmp){
         snmp.setDataType("cpu");
-        return super.sendPost(CPCLOUD_INFO_URL + URL_VERSION + "/snmp", JsonUtils.toUnderlineJSONString(snmp), SnmpCloudPlatform.class);
+        return super.sendPost(CPCLOUD_INFO_URL + URL_VERSION + SNMP, JsonUtils.toUnderlineJSONString(snmp), SnmpCloudPlatform.class);
     }
 
     /**
@@ -81,7 +82,7 @@ public class RealEquipmentService extends BaseOpenStackServiceImpl {
      */
     public SnmpCloudPlatform snmpForMem(SnmpParams snmp){
         snmp.setDataType("mem");
-        return super.sendPost(CPCLOUD_INFO_URL + URL_VERSION + "/snmp", JsonUtils.toUnderlineJSONString(snmp), SnmpCloudPlatform.class);
+        return super.sendPost(CPCLOUD_INFO_URL + URL_VERSION + SNMP, JsonUtils.toUnderlineJSONString(snmp), SnmpCloudPlatform.class);
     }
 
     /**
@@ -91,7 +92,7 @@ public class RealEquipmentService extends BaseOpenStackServiceImpl {
      */
     public SnmpCloudPlatform snmpForDisk(SnmpParams snmp){
         snmp.setDataType("disk");
-        return super.sendPost(CPCLOUD_INFO_URL + URL_VERSION + "/snmp", JsonUtils.toUnderlineJSONString(snmp), SnmpCloudPlatform.class);
+        return super.sendPost(CPCLOUD_INFO_URL + URL_VERSION + SNMP, JsonUtils.toUnderlineJSONString(snmp), SnmpCloudPlatform.class);
     }
 
     /**
