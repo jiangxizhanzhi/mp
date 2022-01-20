@@ -156,6 +156,7 @@ public class OperateLogServiceFactory {
         //请求IP
         model.setOpIp(SnUtils.getRealRemoteIp(request));
 
+        processDefaultContent(model);
         return this.create(model);
     }
 
@@ -186,14 +187,8 @@ public class OperateLogServiceFactory {
         model.setContent(content);
     }
 
-    /**
-     * 国际化
-     * @param locale
-     * @param msgKey
-     * @param params
-     * @return
-     */
-    public String getlocalizedMessage(Locale locale, String msgKey, String... params) {
+
+    private String getlocalizedMessage(Locale locale, String msgKey, String... params) {
         if (Objects.isNull(locale) || locale.toLanguageTag().equals("und")) {
             locale = Locale.forLanguageTag(DEFAULT_LANGUAGE_TAG);
         }
