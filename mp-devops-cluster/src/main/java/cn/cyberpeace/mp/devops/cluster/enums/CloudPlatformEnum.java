@@ -2,9 +2,11 @@ package cn.cyberpeace.mp.devops.cluster.enums;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import org.springframework.context.i18n.LocaleContextHolder;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -62,6 +64,7 @@ public enum CloudPlatformEnum{
 
     @JsonValue
     public String toValue() {
-        return this.getDesc();
+        Locale locale = LocaleContextHolder.getLocale();
+        return locale.equals(Locale.CHINA) ? this.getDesc() : this.getState();
     }
 }
