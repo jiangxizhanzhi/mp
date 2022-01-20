@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 /**
  * 用户操作日志记录
@@ -63,13 +64,16 @@ public class OperateLogController {
         List<OperationLogPageResponse> list = new ArrayList<>(searchHits.getHits().length);
         for (SearchHit hit : searchHits.getHits()) {
             OperationLogPageResponse operationLog = JSON.parseObject(hit.getSourceAsString(), OperationLogPageResponse.class);
-            OpModuleEnums opModuleEnums = OpModuleEnums.fromValue(operationLog.getOpModuleID());
-            String opModuleCode = operateLogServiceFactory.getlocalizedMessage(locale, opModuleEnums.getCode());
-            operationLog.setOpModule(opModuleCode);
-
-            OpTypeEnums opTypeEnum = OpTypeEnums.fromValue(operationLog.getOpTypeID());
-            String opTypeCode = operateLogServiceFactory.getlocalizedMessage(locale, opTypeEnum.getCode());
-            operationLog.setOpType(opTypeCode);
+            if (Objects.nonNull(operationLog) && Objects.nonNull(operationLog.getOpModuleID())) {
+                OpModuleEnums opModuleEnums = OpModuleEnums.fromValue(operationLog.getOpModuleID());
+                String opModuleCode = operateLogServiceFactory.getlocalizedMessage(locale, opModuleEnums.getCode());
+                operationLog.setOpModule(opModuleCode);
+            }
+            if (Objects.nonNull(operationLog) && Objects.nonNull(operationLog.getOpTypeID())) {
+                OpTypeEnums opTypeEnum = OpTypeEnums.fromValue(operationLog.getOpTypeID());
+                String opTypeCode = operateLogServiceFactory.getlocalizedMessage(locale, opTypeEnum.getCode());
+                operationLog.setOpType(opTypeCode);
+            }
             list.add(operationLog);
         }
         return new ListObjServiceResult(new ListObjResult<>(list, Integer.valueOf(String.valueOf(searchHits.getTotalHits().value)))).asResult();
