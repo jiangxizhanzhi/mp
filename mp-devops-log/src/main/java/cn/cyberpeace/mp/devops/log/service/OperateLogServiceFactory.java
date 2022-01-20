@@ -188,7 +188,7 @@ public class OperateLogServiceFactory {
     }
 
 
-    private String getlocalizedMessage(Locale locale, String msgKey, String... params) {
+    public String getlocalizedMessage(Locale locale, String msgKey, String... params) {
         if (Objects.isNull(locale) || locale.toLanguageTag().equals("und")) {
             locale = Locale.forLanguageTag(DEFAULT_LANGUAGE_TAG);
         }
