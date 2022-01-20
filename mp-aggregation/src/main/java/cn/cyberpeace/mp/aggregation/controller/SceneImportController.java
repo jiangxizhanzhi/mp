@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.aggregation.controller;
 import cn.cyberpeace.mp.aggregation.constant.ControllerConstant;
 import cn.cyberpeace.mp.aggregation.dto.sceneimport.SceneImportRequest;
 import cn.cyberpeace.mp.aggregation.service.ResourceCenterService;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
@@ -32,6 +33,7 @@ public class SceneImportController {
 
     @PostMapping("/import_resource_center")
     public ServiceResult<String> importResourceCenter(@RequestBody SceneImportRequest request) {
+        log.info("start import scene topo , input params is {}", JsonCommon.stringify(request));
         if (StringUtils.isEmpty(request.getPath())) {
             return ServiceResult.fail(BaseErrorCode.PARAMS_INVALID);
         }

@@ -15,6 +15,7 @@ import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
+import cn.cyberpeace.mp.cscene.dto.scene.SceneStateInfo;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceCountActivitySceneModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
@@ -503,5 +504,20 @@ public class CsceneSpecialService {
     public ServiceResult<Integer> statSceneInstanceCount(String csceneId, boolean includeFailedScene, boolean includeDeleteScene) {
         Map<String, Integer> result = this.statSceneInstanceCount(new String[]{ csceneId }, includeFailedScene, includeDeleteScene).getSource();
         return new ServiceResult<>(result.get(csceneId));
+    }
+
+    /**
+     * 获取实例运行的状态信息
+     * @param csceneId
+     * @return
+     */
+    public ServiceResult<SceneStateInfo> getSceneStateInfo(String csceneId) {
+        CsceneInstanceModel csceneInstanceModel = csceneInstanceMapper.get(csceneId);
+        if (csceneInstanceModel == null) {
+            log.error("error csceneId {}", csceneId);
+            return new ServiceResult<>(new SceneStateInfo());
+        }
+        SceneModel sceneModel = sceneMapper.get(csceneInstanceModel.getScene());
+        return new ServiceResult<>(new SceneStateInfo(sceneModel));
     }
 }
