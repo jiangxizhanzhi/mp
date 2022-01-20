@@ -96,6 +96,12 @@ public class OperateLogServiceFactory {
         model.setContent(request.getContent());
 
         processDefaultContent(model);
+
+        if (StringUtils.isBlank(model.getUserName())) {
+            log.error("operationlog, username cannot be null. {}", model);
+            return null;
+        }
+
         return this.create(model);
     }
 
@@ -157,6 +163,11 @@ public class OperateLogServiceFactory {
         model.setOpIp(SnUtils.getRealRemoteIp(request));
 
         processDefaultContent(model);
+
+        if (StringUtils.isBlank(model.getUserName())) {
+            log.error("operationlog, username cannot be null. {}", model);
+            return null;
+        }
         return this.create(model);
     }
 
