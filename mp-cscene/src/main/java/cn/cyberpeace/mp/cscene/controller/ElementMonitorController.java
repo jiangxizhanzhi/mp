@@ -11,7 +11,9 @@ import cn.cyberpeace.mp.cscene.dto.element.ElementRTInfo;
 import cn.cyberpeace.mp.cscene.dto.element.PortState;
 import cn.cyberpeace.mp.cscene.dto.element.ProcessState;
 import cn.cyberpeace.mp.cscene.dto.element.StatePageRequest;
+import cn.cyberpeace.mp.cscene.dto.scene.SceneStateInfo;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
+import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.HostStateService;
 import cn.cyberpeace.mp.cscene.service.SceneElementMonitorService;
 import io.swagger.annotations.Api;
@@ -45,6 +47,9 @@ public class ElementMonitorController {
 
     @Autowired
     private HostStateService hostStateService;
+
+    @Autowired
+    private CsceneSpecialService csceneSpecialService;
 
     /**
      * elementIds不能为空，如果为多个值，默认只取第一个
@@ -82,7 +87,7 @@ public class ElementMonitorController {
         log.info("{}", pageRequest);
         pageRequest.ensure();
         // todo 1201 mock data
-        List<ProcessState> processStates = mockProcessStates();
+        List<ProcessState> processStates = mockProcessStates(pageRequest.getSceneId());
         return new ListObjServiceResult(new ListObjResult(processStates, processStates.size()).asResult()).asResult();
     }
 
@@ -92,7 +97,7 @@ public class ElementMonitorController {
         log.info("{}", pageRequest);
         pageRequest.ensure();
         // todo 1201 mock data
-        List<PortState> portStates = mockPortStates();
+        List<PortState> portStates = mockPortStates(pageRequest.getSceneId());
         return new ListObjServiceResult(new ListObjResult(portStates, portStates.size()).asResult()).asResult();
     }
 
@@ -102,7 +107,7 @@ public class ElementMonitorController {
         log.info("{}", pageRequest);
         pageRequest.ensure();
         // todo 1201 mock data
-        List<ConnectionState> connectionStates = mockConnectionStates();
+        List<ConnectionState> connectionStates = mockConnectionStates(pageRequest.getSceneId());
         return new ListObjServiceResult(new ListObjResult(connectionStates, connectionStates.size()).asResult()).asResult();
     }
 
@@ -119,8 +124,11 @@ public class ElementMonitorController {
         return rtInfo;
     }
 
-    private List<ProcessState> mockProcessStates() {
+    private List<ProcessState> mockProcessStates(String csceneId) {
         List<ProcessState> processStates = new ArrayList<>();
+        if (!checkCsceneIsRunning(csceneId)) {
+            return processStates;
+        }
         LocalDateTime now = LocalDateTime.now();
         for (int i = 0; i < 10; i++) {
             ProcessState ps = new ProcessState();
@@ -134,8 +142,11 @@ public class ElementMonitorController {
         return processStates;
     }
 
-    private List<PortState> mockPortStates() {
+    private List<PortState> mockPortStates(String csceneId) {
         List<PortState> portStates = new ArrayList<>();
+        if (!checkCsceneIsRunning(csceneId)) {
+            return portStates;
+        }
         for (int i = 0; i < 10; i++) {
             PortState ps = new PortState();
             ps.setPid(String.valueOf(123 + i));
@@ -146,8 +157,11 @@ public class ElementMonitorController {
         return portStates;
     }
 
-    private List<ConnectionState> mockConnectionStates() {
+    private List<ConnectionState> mockConnectionStates(String csceneId) {
         List<ConnectionState> connectionStates = new ArrayList<>();
+        if (!checkCsceneIsRunning(csceneId)) {
+            return connectionStates;
+        }
         for (int i = 0; i < 10; i++) {
             ConnectionState cs = new ConnectionState();
             cs.setState("LISTEN");
@@ -157,6 +171,13 @@ public class ElementMonitorController {
             connectionStates.add(cs);
         }
         return connectionStates;
+    }
+
+
+    private boolean checkCsceneIsRunning(String csceneId) {
+        ServiceResult<SceneStateInfo> result = csceneSpecialService.getSceneStateInfo(csceneId);
+        SceneStateInfo sceneStateInfo = result.getSource();
+        return sceneStateInfo.isRunning();
     }
 
 
