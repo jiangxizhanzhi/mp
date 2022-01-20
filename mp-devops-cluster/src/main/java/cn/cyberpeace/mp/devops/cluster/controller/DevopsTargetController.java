@@ -80,13 +80,13 @@ public class DevopsTargetController {
      */
     @ApiOperation("查询所有靶标信息")
     @GetMapping("/list")
-    public Result<TargetSceneResponse> list(TargetSceneRequest request){
+    public ServiceResult<TargetSceneResponse> list(TargetSceneRequest request){
         TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type();
         List<TypeConvertModel> firstTypeList = l1AndL2AndL3Type.getFirstTypeList();
         List<TypeConvertModel> secondTypeList = l1AndL2AndL3Type.getSecondTypeList();
         List<Device> deviceList = targetConverter.allTarget(request);
         if (CollectionUtils.isEmpty(deviceList)){
-            return new Result<>();
+            return ServiceResult.successful();
         }
         List<TargetScene> targetScenes = new ArrayList<>();
         if (Objects.nonNull(request.getCategory())) {
