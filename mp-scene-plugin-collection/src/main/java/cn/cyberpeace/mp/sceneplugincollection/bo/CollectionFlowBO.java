@@ -58,4 +58,7 @@ public class CollectionFlowBO {
     @ApiModelProperty("本条流量包含的攻击信息")
     private List<AttackInfo> attackInfos;
 
+    @ApiModelProperty(value = "流量分类")
+    private Integer category;
+
 }
