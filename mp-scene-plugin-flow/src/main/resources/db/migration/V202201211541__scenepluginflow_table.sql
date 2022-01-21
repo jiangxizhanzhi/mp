@@ -1,0 +1,1 @@
+alter table mp_scenepluginflow_scene_config_element modify flows longtext not null comment '流量列表' ;

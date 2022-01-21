@@ -11,7 +11,6 @@ import cn.cyberpeace.mp.situationaware.model.enums.AggregationTypeEnum;
 import cn.cyberpeace.mp.situationaware.model.enums.SeverityEnum;
 import cn.cyberpeace.mp.situationaware.request.FlowAnalysisRequest;
 import cn.cyberpeace.mp.situationaware.utils.FileUtils;
-import cn.cyberpeace.mp.situationaware.utils.LocalDateUtils;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
@@ -49,6 +48,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
 
 import java.io.IOException;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -113,6 +113,9 @@ public class FlowAnalysisService extends AbstractBaseService {
         var searchRequest = new SearchRequest(this.indices(request.getGroupList(),request.getStartDateTime(),request.getEndDateTime()));
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
         searchRequest.source(searchSourceBuilder);
+
+        log.info("Search JSON query: {}", searchRequest.source().toString());
+
         List<AttackDateHistogramNetworkBytesBO> attackTimestampBOS = new ArrayList();
         try {
             SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
@@ -161,6 +164,9 @@ public class FlowAnalysisService extends AbstractBaseService {
         var searchRequest = new SearchRequest(this.indices(request.getGroupList(),request.getStartDateTime(),request.getEndDateTime()));
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
         searchRequest.source(searchSourceBuilder);
+
+        log.info("Search JSON query: {}", searchRequest.source().toString());
+
         List<FlowLogBO> flowLogBOList = new ArrayList<>();
         try {
             SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
@@ -247,6 +253,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
         searchRequest.source(searchSourceBuilder.query(boolQueryBuilder));
 
+        log.info("Search JSON query: {}", searchRequest.source().toString());
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             long totalHits = response.getHits().getTotalHits().value;
@@ -288,6 +295,8 @@ public class FlowAnalysisService extends AbstractBaseService {
 
         searchRequest.source(searchSourceBuilder.query(boolQueryBuilder));
 
+        log.info("Search JSON query: {}", searchRequest.source().toString());
+
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             long totalHits = response.getHits().getTotalHits().value;
@@ -317,6 +326,9 @@ public class FlowAnalysisService extends AbstractBaseService {
         countRequest.indices(this.indices(request.getGroupList(),request.getStartDateTime(),request.getEndDateTime()));
         countRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
         countRequest.query(boolQueryBuilder);
+
+        log.info("Search JSON query: {}", countRequest);
+
         try {
             CountResponse countResponse = restHighLevelClient.count(countRequest,RequestOptions.DEFAULT);
             return countResponse.getCount();
@@ -369,8 +381,8 @@ public class FlowAnalysisService extends AbstractBaseService {
         if (Objects.nonNull(request.getStartDateTime()) && Objects.nonNull(request.getEndDateTime())
                 && request.getStartDateTime().isBefore(request.getEndDateTime())){
             RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery("@timestamp");
-            rangeQueryBuilder.gte(LocalDateUtils.toEpochMilli(request.getStartDateTime()));
-            rangeQueryBuilder.lte(LocalDateUtils.toEpochMilli(request.getEndDateTime()));
+            rangeQueryBuilder.gte(request.getStartDateTime().atZone(ZoneId.systemDefault()));
+            rangeQueryBuilder.lte(request.getEndDateTime().atZone(ZoneId.systemDefault()));
             boolQueryBuilder.must(rangeQueryBuilder);
         }
         return boolQueryBuilder;
