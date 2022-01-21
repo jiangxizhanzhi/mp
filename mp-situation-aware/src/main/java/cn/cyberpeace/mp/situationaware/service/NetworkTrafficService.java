@@ -4,11 +4,14 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.util.HttpUtils;
-import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.base.util.es.EsConstants;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
-import cn.cyberpeace.mp.situationaware.model.*;
+import cn.cyberpeace.mp.situationaware.model.SPIViewRequest;
+import cn.cyberpeace.mp.situationaware.model.SessionModel;
+import cn.cyberpeace.mp.situationaware.model.SessionRequest;
+import cn.cyberpeace.mp.situationaware.model.SessionResult;
+import cn.cyberpeace.mp.situationaware.model.SessionSourceModel;
 import cn.cyberpeace.mp.situationaware.model.enums.SeverityEnum;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
@@ -33,9 +36,11 @@ import org.springframework.util.ObjectUtils;
 
 import javax.annotation.Resource;
 import java.io.IOException;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -123,9 +128,11 @@ public class NetworkTrafficService extends AbstractBaseService{
         sourceBuilder.size(sessionRequest.getPageSize());
         var boolQueryBuilder = QueryBuilders.boolQuery();
         //时间查询
-        boolQueryBuilder.must(QueryBuilders.rangeQuery("@timestamp")
-            .from(TimeUtils.localDateTimeToString(sessionRequest.getStartTime(), EsConstants.esDateTimeFormatter))
-            .to(TimeUtils.localDateTimeToString(sessionRequest.getEndTime(), EsConstants.esDateTimeFormatter)));
+        if (Objects.nonNull(sessionRequest.getStartTime()) && Objects.nonNull(sessionRequest.getEndTime())) {
+            boolQueryBuilder.must(QueryBuilders.rangeQuery("@timestamp")
+                    .from(sessionRequest.getStartTime().atZone(ZoneId.systemDefault()).format(EsConstants.esDateTimeFormatter))
+                    .to(sessionRequest.getEndTime().atZone(ZoneId.systemDefault()).format(EsConstants.esDateTimeFormatter)));
+        }
 
         //构造动态条件查询
         buildDynamicQuery(sessionRequest, boolQueryBuilder);

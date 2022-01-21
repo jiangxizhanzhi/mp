@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.situationaware.task;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.base.util.es.EsConstants;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
@@ -27,6 +26,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Objects;
 
@@ -74,9 +74,11 @@ public class ProbeManagerTask {
         boolQueryBuilder.must(QueryBuilders.termQuery("rule.id", "86701"));
         boolQueryBuilder.must(QueryBuilders.termQuery("location", "command_" + probeModel.getProbeName()));
         //时间查询
-        boolQueryBuilder.must(QueryBuilders.rangeQuery("timestamp")
-            .from(TimeUtils.localDateTimeToString(startTime, EsConstants.esDateTimeFormatter))
-            .to(TimeUtils.localDateTimeToString(endTime, EsConstants.esDateTimeFormatter)));
+        if (Objects.nonNull(startTime) && Objects.nonNull(endTime)) {
+            boolQueryBuilder.must(QueryBuilders.rangeQuery("timestamp")
+                    .from(startTime.atZone(ZoneId.systemDefault()).format(EsConstants.esDateTimeFormatter))
+                    .to(endTime.atZone(ZoneId.systemDefault()).format(EsConstants.esDateTimeFormatter)));
+        }
         sourceBuilder.sort("timestamp", SortOrder.DESC);
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));

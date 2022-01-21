@@ -44,6 +44,7 @@ import org.springframework.util.MultiValueMap;
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
@@ -329,10 +330,12 @@ public class DataCollectionService {
             buildAgentNameQuery(wazuhEventRequest.getAgentNames(), boolQueryBuilder);
         }
 
-        //构造事件条件
-        boolQueryBuilder.must(QueryBuilders.rangeQuery("@timestamp")
-            .from(TimeUtils.localDateTimeToString(wazuhEventRequest.getStartTime(), EsConstants.esDateTimeFormatter))
-            .to(TimeUtils.localDateTimeToString(wazuhEventRequest.getEndTime(), EsConstants.esDateTimeFormatter)));
+        if (Objects.nonNull(wazuhEventRequest.getStartTime()) && Objects.nonNull(wazuhEventRequest.getEndTime())) {
+            //构造事件条件
+            boolQueryBuilder.must(QueryBuilders.rangeQuery("@timestamp")
+                    .from(wazuhEventRequest.getStartTime().atZone(ZoneId.systemDefault()).format(EsConstants.esDateTimeFormatter))
+                    .to(wazuhEventRequest.getEndTime().atZone(ZoneId.systemDefault()).format(EsConstants.esDateTimeFormatter)));
+        }
     }
 
 
@@ -515,10 +518,13 @@ public class DataCollectionService {
         }
 
 
-        //时间查询
-        boolQueryBuilder.must(QueryBuilders.rangeQuery("timestamp")
-                .from(TimeUtils.localDateTimeToString(wazuhEventRequest.getStartTime(), EsConstants.esDateTimeFormatter))
-                .to(TimeUtils.localDateTimeToString(wazuhEventRequest.getEndTime(), EsConstants.esDateTimeFormatter)));
+        if (Objects.nonNull(wazuhEventRequest.getStartTime()) && Objects.nonNull(wazuhEventRequest.getEndTime())) {
+            //时间查询
+            boolQueryBuilder.must(QueryBuilders.rangeQuery("timestamp")
+                    .from(wazuhEventRequest.getStartTime().atZone(ZoneId.systemDefault()).format(EsConstants.esDateTimeFormatter))
+                    .to(wazuhEventRequest.getEndTime().atZone(ZoneId.systemDefault()).format(EsConstants.esDateTimeFormatter)));
+        }
+
     }
 
     private void buildRuleGroupQuery(List<String> groups, BoolQueryBuilder boolQueryBuilder) {

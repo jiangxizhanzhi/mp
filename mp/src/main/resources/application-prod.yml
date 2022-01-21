@@ -20,7 +20,6 @@ spring:
     driver-class-name: org.mariadb.jdbc.Driver
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
-    time-zone: GMT+8
   flyway:
     clean-disabled: true
     enabled: ${MP_FLYWAY_ENABLED_VALUE:false}
