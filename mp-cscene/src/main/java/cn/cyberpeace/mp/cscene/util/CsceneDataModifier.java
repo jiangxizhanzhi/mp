@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneRoleBO;
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
+import cn.cyberpeace.mp.cscene.model.base.BaseCsceneModel;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
@@ -396,4 +397,15 @@ public class CsceneDataModifier {
         }
     }
 
+    public static void removeUnUsePlugin(CsceneBO csceneBO) {
+        if (csceneBO != null && csceneBO.getSceneConfig() != null && csceneBO.getReferenceType() != null) {
+            if (csceneBO.getReferenceType() != BaseCsceneModel.ReferenceType.TEAM_TRAINING &&
+                    csceneBO.getReferenceType() != BaseCsceneModel.ReferenceType.READ_VS_BLUE) {
+                if (csceneBO.getSceneConfig().getPlugins() != null) {
+                    csceneBO.getSceneConfig().getPlugins().remove("cpflow");
+                    csceneBO.getSceneConfig().getPlugins().remove("cpcollection");
+                }
+            }
+        }
+    }
 }

@@ -84,6 +84,7 @@ public class CsceneController implements BaseModelListControllerBase {
         CsceneDataModifier.removeFilePathPrefix(csceneBO);
         CsceneDataModifier.assembleInitCommands(csceneBO);
         CsceneDataModifier.handlerInputEnableRecording(csceneBO);
+        CsceneDataModifier.removeUnUsePlugin(csceneBO);
     }
 
     @Autowired
