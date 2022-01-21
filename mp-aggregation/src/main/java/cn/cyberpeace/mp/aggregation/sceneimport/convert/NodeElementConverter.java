@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortBO;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementPortBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.StaticRoute;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -78,6 +79,21 @@ class NodeElementConverter implements IConverter {
             pluginElement.setImageType(BaseCloudPluginSceneElementModel.ImageType.VM);
         }
         container.putPluginElement(sceneConfigElementBO.getId(), pluginElement);
+
+        // 路由器加入 static-routes
+        if (node.getId().startsWith("router")) {
+            if (CollectionUtils.isNotEmpty(node.getStaticRoutes())) {
+                List<StaticRoute> routes = node.getStaticRoutes().stream()
+                        .map(s -> {
+                            StaticRoute staticRoute = new StaticRoute();
+                            staticRoute.setDestination(s.getDestination());
+                            staticRoute.setNexthop(s.getGateway());
+                            return staticRoute;
+                        })
+                        .collect(Collectors.toList());
+                pluginElement.setStaticRoutes(routes);
+            }
+        }
 
         if (CollectionUtils.isEmpty(node.getNet())) {
             // 节点未连接任何网络
