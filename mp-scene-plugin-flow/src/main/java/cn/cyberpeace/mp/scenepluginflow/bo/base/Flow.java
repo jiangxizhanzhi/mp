@@ -51,6 +51,14 @@ public class Flow {
         return interactiveType;
     }
 
+    public Integer getCategory() {
+        if (Objects.isNull(category)) {
+            // 针对老数据，流量分类给个默认值
+            category = 0;
+        }
+        return category;
+    }
+
     public static class Status {
         public static final int INIT = -1;
         public static final int OFF = 0;
