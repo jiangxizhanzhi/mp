@@ -57,16 +57,8 @@ public class LocalDateUtils {
      * @param dateTime
      * @return
      */
+    @Deprecated
     public static Long toEpochMilli(LocalDateTime dateTime) {
         return dateTime.toInstant(ZoneOffset.of("+8")).toEpochMilli();
-    }
-
-    /**
-     * LocalDateTime转换成秒
-     * @param dateTime
-     * @return
-     */
-    public static Long toEpochSecond(LocalDateTime dateTime) {
-        return toEpochMilli(dateTime) / 1000;
     }
 }
