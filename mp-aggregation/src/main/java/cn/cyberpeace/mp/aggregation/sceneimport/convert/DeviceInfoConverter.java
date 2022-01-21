@@ -67,7 +67,8 @@ class DeviceInfoConverter implements IConverter {
         element.setDescription(device.getDescription());
         pluginElement.setCategory(device.getCategory());
         pluginElement.setImageType(device.getImageType());
-        pluginElement.setImage(device.getName());
+        // 云平台数据库大小写不敏感,这里名字不能覆盖
+//        pluginElement.setImage(device.getName());
         pluginElement.setRole(device.getRole());
 
         if (device.getExtSystemInfo() != null) {
