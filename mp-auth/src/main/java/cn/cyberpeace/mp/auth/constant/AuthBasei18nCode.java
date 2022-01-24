@@ -19,6 +19,13 @@ public class AuthBasei18nCode {
     public static final String USER_BIRTHDAY = "auth.base.user.birthday";
     public static final String USER_ADDRESS = "auth.base.user.address";
     public static final String USER_LIST = "auth.base.user.list";
+    public static final String USER_STATUS_NORMAL = "auth.base.user.status.normal";
+    public static final String USER_STATUS_FORBIDDEN = "auth.base.user.status.forbidden";
+    public static final String USER_STATUS_EXPIRED = "auth.base.user.status.expired";
+    public static final String USER_STATUS_NOT_AUDIT = "auth.base.user.status.not_audit";
+
+    // Excel
+    public static final String EXCEL_EXPORT_NAME = "auth.base.excel.export_excel_name";
 
     // ROLE
     public static final String ROLE_ID = "auth.base.role.id";

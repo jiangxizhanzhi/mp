@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.auth.controller;
 
 
+import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
@@ -13,6 +14,7 @@ import cn.cyberpeace.mp.auth.service.RoleService;
 import cn.cyberpeace.mp.auth.service.UploadDataListener;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.ExcelCheck;
+import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.hutool.core.collection.CollectionUtil;
@@ -74,19 +76,15 @@ public class UserExcelController {
         List<UserModel> users = orgUserService.listUsersByOrgAndUname(exportRequest.getOrg(), exportRequest.getUsername(), userIds);
 
         Locale locale = LocaleContextHolder.getLocale();
+        String sheetName = MessageCommon.get(AuthBasei18nCode.EXCEL_EXPORT_NAME);
+        String fname = MessageCommon.get(AuthBasei18nCode.EXCEL_EXPORT_NAME);
         List dataLst = null;
-        String sheetName = "";
-        String fname = "";
         Class exportClz = null;
 
         if (Objects.equals(locale, Locale.US)) {
-            sheetName = "UserList";
-            fname = "UserList";
             dataLst = userService.exportExcelEn(users);
             exportClz = ExportUserEn.class;
         } else {
-            sheetName = "用户导出列表";
-            fname = "用户导出列表";
             dataLst = userService.exportExcel(users);
             exportClz = ExportUser.class;
         }
