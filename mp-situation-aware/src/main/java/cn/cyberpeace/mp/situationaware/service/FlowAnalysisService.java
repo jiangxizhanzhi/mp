@@ -77,7 +77,7 @@ public class FlowAnalysisService extends AbstractBaseService {
                 .getResources(ResourceUtils.CLASSPATH_URL_PREFIX + "suricata/classification.json");
         String json = FileUtils.readLine(resources);
         var attackClassificationBOS = JSONObject.parseObject(json, AttackClassificationBO.class);
-        log.info("attackClassificationBOS：{}",attackClassificationBOS);
+        log.info("initClassification >>> attackClassificationBOS：{}",attackClassificationBOS);
         flowClassificationsService.deleteAll();
         flowClassificationsService.batchSave(attackClassificationBOS);
     }
@@ -114,7 +114,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
         searchRequest.source(searchSourceBuilder);
 
-        log.info("Search JSON query: {}", searchRequest.source().toString());
+        log.info("sumNetworkBytesByDateHistogramTimestamp >>> Search JSON query: {}", searchRequest.source().toString());
 
         List<AttackDateHistogramNetworkBytesBO> attackTimestampBOS = new ArrayList();
         try {
@@ -165,7 +165,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
         searchRequest.source(searchSourceBuilder);
 
-        log.info("Search JSON query: {}", searchRequest.source().toString());
+        log.info("flowLog >>>>> Search JSON query: {}", searchRequest.source().toString());
 
         List<FlowLogBO> flowLogBOList = new ArrayList<>();
         try {
@@ -253,7 +253,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
         searchRequest.source(searchSourceBuilder.query(boolQueryBuilder));
 
-        log.info("Search JSON query: {}", searchRequest.source().toString());
+        log.info("topByAggregationTypeEnum >>>> Search JSON query: {}", searchRequest.source().toString());
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             long totalHits = response.getHits().getTotalHits().value;
@@ -295,7 +295,7 @@ public class FlowAnalysisService extends AbstractBaseService {
 
         searchRequest.source(searchSourceBuilder.query(boolQueryBuilder));
 
-        log.info("Search JSON query: {}", searchRequest.source().toString());
+        log.info("calcNetworkBytes >>>>  Search JSON query: {}", searchRequest.source().toString());
 
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
@@ -327,7 +327,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         countRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
         countRequest.query(boolQueryBuilder);
 
-        log.info("Search JSON query: {}", countRequest);
+        log.info(" count >>>> Search JSON query: {}", countRequest);
 
         try {
             CountResponse countResponse = restHighLevelClient.count(countRequest,RequestOptions.DEFAULT);
