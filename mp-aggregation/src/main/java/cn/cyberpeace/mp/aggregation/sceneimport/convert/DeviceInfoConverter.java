@@ -173,7 +173,7 @@ class DeviceInfoConverter implements IConverter {
             } else {
                 this.port = new SceneConfigElementPortBO();
                 this.pluginPort = new CloudPluginSceneConfigElementPortBO();
-                this.port.setId(TextUtils.uuid());
+                this.port.setId(IConverter.getPortId(element.getId(), element.getType(), element.getPorts().size()));
                 element.getPorts().add(this.port);
                 pluginPorts.put(this.port.getId(), this.pluginPort);
             }

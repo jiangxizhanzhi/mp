@@ -102,7 +102,7 @@ class NodeElementConverter implements IConverter {
             for (NetElementParseResult ymlNetParseResult : node.getNet()) {
                 SceneConfigElementPortBO portBO = new SceneConfigElementPortBO();
                 portBO.setIp(ymlNetParseResult.getIp());
-                portBO.setId(TextUtils.uuid());
+                portBO.setId(IConverter.getPortId(sceneConfigElementBO.getId(), sceneConfigElementBO.getType(), portBOS.size()));
                 portBOS.add(portBO);
                 container.putNode2NetworkPorts(node.getId(), ymlNetParseResult.getId(), portBO);
 
