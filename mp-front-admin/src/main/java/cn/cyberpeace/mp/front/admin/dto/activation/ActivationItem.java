@@ -14,9 +14,6 @@ public class ActivationItem {
     @ApiModelProperty(value = "授权项key")
     private String key;
 
-    @ApiModelProperty(value = "授权项名称")
-    private String name;
-
     @ApiModelProperty(value = "授权项值")
     private String value;
 
