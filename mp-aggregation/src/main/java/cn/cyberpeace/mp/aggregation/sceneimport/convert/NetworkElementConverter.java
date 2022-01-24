@@ -62,7 +62,7 @@ class NetworkElementConverter implements IConverter {
             NetworkElementParseResult finalExternalNetworkResult = externalNetworkResult;
             container.getNoNetworkNodeElements().stream().forEach(elementBO -> {
                 SceneConfigElementPortBO portBO = new SceneConfigElementPortBO();
-                portBO.setId(TextUtils.uuid());
+                portBO.setId(IConverter.getPortId(elementBO.getId(), elementBO.getType(), elementBO.getPorts().size()));
                 elementBO.getPorts().add(portBO);
                 container.putNode2NetworkPorts(elementBO.getId(), finalExternalNetworkResult.getId(), portBO);
 
@@ -111,7 +111,7 @@ class NetworkElementConverter implements IConverter {
 
             // 存在连线 先创建端口
             SceneConfigElementPortBO newPort = new SceneConfigElementPortBO();
-            newPort.setId(TextUtils.uuid());
+            newPort.setId(IConverter.getPortId(sceneConfigElementBO.getId(),sceneConfigElementBO.getType(), ports.size()));
             newPort.setGateway(network.getGateway());
             newPort.setDhcp("on".equals(network.getDhcp()) || "true".equals(network.getDhcp()));
             newPort.setName(network.getName());
