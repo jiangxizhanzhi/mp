@@ -31,6 +31,7 @@ import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.auth.util.UserUtils;
+import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.config.FastDfsConfig;
 import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -870,21 +871,25 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         Optional<OrgModel> optional = orgList.stream().max(Comparator.comparing(OrgModel::getPk));
         optional.ifPresent(o -> exportUser.setOrg(o.getPath()));
 
-        exportUser.setStat("正常");
+        String statusNormal = MessageCommon.get(AuthBasei18nCode.USER_STATUS_NORMAL);
+        String statusForbidden = MessageCommon.get(AuthBasei18nCode.USER_STATUS_FORBIDDEN);
+        String statusExpired = MessageCommon.get(AuthBasei18nCode.USER_STATUS_EXPIRED);
+        String statusNotAudit = MessageCommon.get(AuthBasei18nCode.USER_STATUS_NOT_AUDIT);
+        exportUser.setStat(statusNormal);
         // 状态展示优先级 禁用 > 过期 > 待审核
         if (user.getIsAudited().equals(UserModel.Status.NOT_AUDITED)) {
-            exportUser.setStat("待审核");
+            exportUser.setStat(statusNotAudit);
         }
 
         // 过期
         LocalDateTime now = LocalDateTime.now();
         if (Objects.nonNull(user.getExpiredTime()) && now.isAfter(user.getExpiredTime())) {
-            exportUser.setStat("已过期");
+            exportUser.setStat(statusExpired);
         }
 
         // 禁用
         if (user.getIsEnabled().equals(UserModel.Status.DISABLED)) {
-            exportUser.setStat("禁用");
+            exportUser.setStat(statusForbidden);
         }
 
         // role
