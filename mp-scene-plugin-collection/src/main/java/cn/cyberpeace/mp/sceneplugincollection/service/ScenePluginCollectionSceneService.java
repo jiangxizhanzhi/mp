@@ -215,8 +215,8 @@ public class ScenePluginCollectionSceneService {
             request.setLevels(queryParams.getLevels());
         }
 
-        if (CollectionUtils.isNotEmpty(queryParams.getKeywords())) {
-            request.setKeywords(queryParams.getKeywords());
+        if (CollectionUtils.isNotEmpty(queryParams.getKeyword())) {
+            request.setKeyword(queryParams.getKeyword());
         }
 
         var result = dataCollectionService.queryFileEvents(request);

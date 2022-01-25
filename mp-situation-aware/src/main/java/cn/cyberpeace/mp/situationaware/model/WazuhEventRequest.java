@@ -57,7 +57,7 @@ public class WazuhEventRequest {
      * 关键字集合
      */
     @ApiModelProperty(value = "关键字集合")
-    private List<String> keywords;
+    private List<String> keyword;
 
     /**
      * 级别

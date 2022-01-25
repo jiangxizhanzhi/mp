@@ -508,8 +508,8 @@ public class DataCollectionService {
         }
 
         // keywords
-        if(!CollectionUtils.isEmpty(wazuhEventRequest.getKeywords())) {
-            buildKeywordsQuery(wazuhEventRequest.getKeywords(), boolQueryBuilder);
+        if(!CollectionUtils.isEmpty(wazuhEventRequest.getKeyword())) {
+            buildKeywordsQuery(wazuhEventRequest.getKeyword(), boolQueryBuilder);
         }
 
         // levels
