@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ConsoleInfoGetResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleCreateConnectionData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMapper;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -44,7 +45,7 @@ public class CloudSceneConnectionCommon {
         private String userId;
         private String systemType;
 
-//        private String username;
+        //        private String username;
         private String sceneName;
         private String department;
     }
@@ -148,7 +149,7 @@ public class CloudSceneConnectionCommon {
                     AccessMode.Protocol.VNC : sceneConnection.getProtocol();
             connectionParams.setProtocol(protocol);
             // windows系统的rdp连接,需要禁用字形缓存
-            if (AccessMode.Protocol.RDP.equals(protocol) && SystemTypeCommandUtils.isWindows(param.getSystemType())) {
+            if (AccessMode.Protocol.RDP.equals(protocol) && SystemTypeCommandUtils.isWindows(SystemTypeUtils.getStandardSystemType(param.getSystemType()))) {
                 connectionParams.setDisableGlyphCaching(true);
             }
             connectionParams.setPort(sceneConnection.getAccessPort().toString());
