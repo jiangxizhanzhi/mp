@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -130,13 +131,14 @@ public class ElementMonitorController {
             return processStates;
         }
         LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         for (int i = 0; i < 10; i++) {
             ProcessState ps = new ProcessState();
             ps.setPid(String.valueOf(123 + i));
             ps.setCmd("cmd");
             ps.setState("Listen");
             ps.setMemory(1024L);
-            ps.setCreateTime("2020-05-14 10:10:10");
+            ps.setCreateTime(now.format(formatter));
             processStates.add(ps);
         }
         return processStates;
