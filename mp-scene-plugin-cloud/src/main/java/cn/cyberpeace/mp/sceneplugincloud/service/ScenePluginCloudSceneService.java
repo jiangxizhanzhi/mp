@@ -372,6 +372,7 @@ public class ScenePluginCloudSceneService {
         sceneConnectionParam.setCloudAccessMode(accessModeInfo.getAccessMode());
         sceneConnectionParam.setUserId(userId);
         sceneConnectionParam.setSceneName(srcScene.getName());
+        sceneConnectionParam.setSystemType(cloudElement.getSrcElement() == null ? StringUtils.EMPTY : cloudElement.getSrcElement().getSystemType());
         sceneConnectionParam.setDepartment(context == null ? StringUtils.EMPTY : context.getRequestUserOrg());
         var sceneConnection = CloudSceneConnectionCommon.getOrCreateSceneConnection(sceneConnectionParam);
         if (sceneConnection == null) {
