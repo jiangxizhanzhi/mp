@@ -14,7 +14,6 @@ import cn.cyberpeace.mp.cscene.dto.element.StatePageRequest;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneStateInfo;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
-import cn.cyberpeace.mp.cscene.service.HostStateService;
 import cn.cyberpeace.mp.cscene.service.SceneElementMonitorService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -45,9 +44,6 @@ public class ElementMonitorController {
 
     @Autowired
     private SceneElementMonitorService sceneElementMonitorService;
-
-    @Autowired
-    private HostStateService hostStateService;
 
     @Autowired
     private CsceneSpecialService csceneSpecialService;
