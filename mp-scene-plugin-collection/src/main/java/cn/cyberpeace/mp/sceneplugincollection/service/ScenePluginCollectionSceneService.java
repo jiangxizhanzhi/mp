@@ -587,6 +587,9 @@ public class ScenePluginCollectionSceneService {
         if (pluginHandler == null) {
             return new ServiceResult<>();
         }
+        if (pluginHandler.getScene() == null || StringUtils.isEmpty(pluginHandler.getScene().getFlowCollector())) {
+            return new ServiceResult<>();
+        }
         request.setGroupList(Arrays.asList(pluginHandler.getScene().getFlowCollector()));
 
         if (startTime == null) {
