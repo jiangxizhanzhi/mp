@@ -3,6 +3,8 @@ package cn.cyberpeace.mp.devops.cluster.converter;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtDocker;
@@ -286,6 +288,9 @@ public class ImagesConverter implements BaseConverter{
      * @return
      */
     public BaseCloudPlatformModel reboot(ImagesRebootInstanceRequest request) {
+        if (StringUtils.isBlank(request.getInstanceId()) || StringUtils.isBlank(request.getImageType())){
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
         BaseCloudPlatformModel platformModel = null;
         if(ImageTypeEnum.VM.toValue().equals(request.getImageType())) {
             VmActionCloudPlatformModel model = new VmActionCloudPlatformModel();
@@ -317,6 +322,9 @@ public class ImagesConverter implements BaseConverter{
      * @return
      */
     public BaseCloudPlatformModel create(String uuid) {
+        if (StringUtils.isBlank(uuid)){
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
         return scenariosService.create(new ImagesCreateInstanceCloudPlatform(uuid,
                 Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getUsername() : ""));
     }
@@ -327,6 +335,9 @@ public class ImagesConverter implements BaseConverter{
      * @return
      */
     public BaseCloudPlatformModel delete(ImagesDeleteInstanceRequest request) {
+        if (StringUtils.isBlank(request.getUuid()) || StringUtils.isBlank(request.getImageType())){
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
         return scenariosService.delete(new ImagesDeleteInstanceCloudPlatform(request.getUuid(),request.getImageType()));
     }
 
