@@ -148,7 +148,7 @@ public class HostStateService {
             hostState.setCpuPercent(0.0);
             hostState.setMemoryPercent(0.0);
             // todo diskPercent
-            hostState.setDiskPercent(40.0);
+            hostState.setDiskPercent(0.0);
             hostStateMap.put(localDateTime, hostState);
         }
 
