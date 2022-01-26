@@ -17,6 +17,9 @@ public class ProcessState {
     @ApiModelProperty("父进程号")
     private String ppid;
 
+    @ApiModelProperty("进程用户")
+    private String user;
+
     @ApiModelProperty("内存占用")
     private Double memory;
 

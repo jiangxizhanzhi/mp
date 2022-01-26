@@ -133,6 +133,7 @@ public class ElementMonitorController {
         ProcessState ps1 = new ProcessState();
         ps1.setPid("9527");
         ps1.setPpid("20");
+        ps1.setUser("systemd+");
         ps1.setCmd("systemd");
         ps1.setState("S");
         ps1.setMemory(2.3);
@@ -142,6 +143,7 @@ public class ElementMonitorController {
         ProcessState ps2 = new ProcessState();
         ps2.setPid("9877");
         ps2.setPpid("20");
+        ps2.setUser("systemd+");
         ps2.setCmd("systemd");
         ps2.setState("S");
         ps2.setMemory(4.0);
@@ -151,6 +153,7 @@ public class ElementMonitorController {
         ProcessState ps3 = new ProcessState();
         ps3.setPid("9087");
         ps3.setPpid("20");
+        ps3.setUser("systemd+");
         ps3.setCmd("systemd");
         ps3.setState("S");
         ps3.setMemory(3.0);
@@ -160,6 +163,7 @@ public class ElementMonitorController {
         ProcessState ps4 = new ProcessState();
         ps4.setPid("18");
         ps4.setPpid("1");
+        ps4.setUser("root");
         ps4.setCmd("kthreadd");
         ps4.setState("S");
         ps4.setMemory(1.3);
@@ -169,6 +173,7 @@ public class ElementMonitorController {
         ProcessState ps5 = new ProcessState();
         ps5.setPid("17");
         ps5.setPpid("1");
+        ps5.setUser("root");
         ps5.setCmd("migration");
         ps5.setState("S");
         ps5.setMemory(0.5);
@@ -178,6 +183,7 @@ public class ElementMonitorController {
         ProcessState ps6 = new ProcessState();
         ps6.setPid("13");
         ps6.setPpid("1");
+        ps6.setUser("root");
         ps6.setCmd("rcushed");
         ps6.setState("I");
         ps6.setMemory(1.3);
@@ -187,6 +193,7 @@ public class ElementMonitorController {
         ProcessState ps7 = new ProcessState();
         ps7.setPid("21");
         ps7.setPpid("20");
+        ps7.setUser("root");
         ps7.setCmd("ksoftirqd/2");
         ps7.setState("S");
         ps7.setMemory(0.0);
@@ -196,6 +203,7 @@ public class ElementMonitorController {
         ProcessState ps8 = new ProcessState();
         ps8.setPid("32");
         ps8.setPpid("20");
+        ps8.setUser("root");
         ps8.setCmd("cpuhp/4");
         ps8.setState("S");
         ps8.setMemory(0.0);
@@ -204,6 +212,7 @@ public class ElementMonitorController {
         ProcessState ps9 = new ProcessState();
         ps9.setPid("38");
         ps9.setPpid("1");
+        ps9.setUser("root");
         ps9.setCmd("watchdog/2");
         ps9.setState("I");
         ps9.setMemory(0.0);
@@ -212,6 +221,7 @@ public class ElementMonitorController {
         ProcessState ps10 = new ProcessState();
         ps10.setPid("52");
         ps10.setPpid("20");
+        ps10.setUser("root");
         ps10.setCmd("kworker/2");
         ps10.setState("I");
         ps10.setMemory(0.0);
