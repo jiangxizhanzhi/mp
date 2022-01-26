@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.cscene.service;
 
+import cn.cyberpeace.mp.auth.dto.user.UserDto;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.context.SysContextHolder;
 import cn.cyberpeace.mp.base.model.BaseModel;
@@ -48,8 +50,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -71,6 +76,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     @Autowired
     private ScenePluginCollectionSceneService scenePluginCollectionSceneService;
+
+    @Autowired
+    private UserService userService;
 
     private final CsceneReportTaskPool csceneReportTaskPool = CsceneReportTaskPool.getInstance();
 
@@ -196,6 +204,22 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             }
             nodeSession.setSceneId(csceneInstance.getId());
         });
+        Set<String> existUserIds = new HashSet<>();
+        nodeSessionResult.getSource().forEach(nodeSession -> {
+            if (StringUtils.isNotEmpty(nodeSession.getUser())) {
+                existUserIds.add(nodeSession.getUser());
+            }
+        });
+        if (!existUserIds.isEmpty()) {
+            List<UserDto> users = userService.listByUserIds(existUserIds.toArray(new String[]{}));
+            if (CollectionUtils.isNotEmpty(users)) {
+                Map<String, String> userId2Name = new HashMap<>();
+                users.forEach(user -> userId2Name.put(user.getId(), user.getName()));
+                nodeSessionResult.getSource().forEach(nodeSession -> {
+                    nodeSession.setUserName(userId2Name.containsKey(nodeSession.getUser()) ? userId2Name.get(nodeSession.getUser()) : StringUtils.EMPTY);
+                });
+            }
+        }
         return nodeSessionResult;
     }
 
