@@ -166,6 +166,8 @@ public class HostStateService {
             for (IntervalSizeBO<LocalDateTime, Double> bo : intervalMemPercentBOs) {
                 if (Objects.nonNull(hostStateMap.get(bo.getStart()))) {
                     hostStateMap.get(bo.getStart()).setMemoryPercent(Objects.nonNull(bo.getSize()) ? NumberUtil.round(bo.getSize(), 2).doubleValue() : 0.0);
+                    // todo 在这造磁盘模拟数据
+                    hostStateMap.get(bo.getStart()).setDiskPercent(30.0);
                 }
             }
         }
