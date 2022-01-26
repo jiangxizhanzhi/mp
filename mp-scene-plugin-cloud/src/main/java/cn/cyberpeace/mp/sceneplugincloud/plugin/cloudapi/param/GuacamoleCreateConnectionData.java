@@ -19,6 +19,7 @@ public class GuacamoleCreateConnectionData implements CloudHttpData {
     @Data
     @NoArgsConstructor
     public static class ConnectionParams {
+        private Boolean disableGlyphCaching;
         private String protocol;
         private String hostname;
         private String port;

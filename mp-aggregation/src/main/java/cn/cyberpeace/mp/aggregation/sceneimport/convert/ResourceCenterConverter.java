@@ -44,6 +44,7 @@ public class ResourceCenterConverter {
         converters.add(new DeviceInfoConverter(this.targetConverter));
         converters.add(new ImageInfoConverter());
         converters.add(new SceneFilePathConverter());
+        converters.add(new PortIdAndNameConvert());
         // 依次执行链路
         converters.forEach(converter -> converter.convert2BO(container));
 

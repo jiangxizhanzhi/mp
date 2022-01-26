@@ -92,7 +92,7 @@ class ImageInfoConverter implements IConverter {
                 }
                 if (CollectionUtils.isEmpty(element.getPorts())) {
                     SceneConfigElementPortBO portBO = new SceneConfigElementPortBO();
-                    portBO.setId(TextUtils.uuid());
+                    portBO.setId(IConverter.getPortId(element.getId(), element.getType(), element.getPorts().size()));
                     element.setPorts(new ArrayList<>());
                     element.getPorts().add(portBO);
                     CloudPluginSceneConfigElementPortBO pluginPort = new CloudPluginSceneConfigElementPortBO();

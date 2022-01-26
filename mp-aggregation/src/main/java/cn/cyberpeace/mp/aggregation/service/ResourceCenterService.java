@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -55,8 +56,9 @@ public class ResourceCenterService {
         if (CollectionUtils.isNotEmpty(csceneBO.getSceneConfig().getTopology().getElements())) {
             csceneBO.getSceneConfig().getTopology().getElements().forEach(e -> {
                 if (CollectionUtils.isNotEmpty(e.getPorts())) {
+                    String prefix = (e.getType() != null && e.getType() == BaseSceneElementModel.Type.TERMINAL) ? "eth0" : "E0";
                     for (int i = 0; i < e.getPorts().size(); i++) {
-                        e.getPorts().get(i).setName("port" + i);
+                        e.getPorts().get(i).setName(prefix + "/" + (i + 1));
                     }
                 }
             });

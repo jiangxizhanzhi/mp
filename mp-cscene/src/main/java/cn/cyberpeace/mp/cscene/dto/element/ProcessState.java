@@ -14,8 +14,11 @@ public class ProcessState {
     @ApiModelProperty("进程号")
     private String pid;
 
+    @ApiModelProperty("父进程号")
+    private String ppid;
+
     @ApiModelProperty("内存占用")
-    private Long memory;
+    private Double memory;
 
     @ApiModelProperty("命令")
     private String cmd;

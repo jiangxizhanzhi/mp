@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.sceneplugincloud.service.common;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
+import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
@@ -10,6 +11,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ConsoleInfoGetResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleCreateConnectionData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMapper;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -41,8 +43,9 @@ public class CloudSceneConnectionCommon {
         private String sceneElementPortId;
         private CloudAccessMode cloudAccessMode;
         private String userId;
+        private String systemType;
 
-//        private String username;
+        //        private String username;
         private String sceneName;
         private String department;
     }
@@ -145,6 +148,10 @@ public class CloudSceneConnectionCommon {
             var protocol = sceneConnection.getProtocol().equals(AccessMode.Protocol.CONSOLE) ?
                     AccessMode.Protocol.VNC : sceneConnection.getProtocol();
             connectionParams.setProtocol(protocol);
+            // windows系统的rdp连接,需要禁用字形缓存
+            if (AccessMode.Protocol.RDP.equals(protocol) && SystemTypeCommandUtils.isWindows(SystemTypeUtils.getStandardSystemType(param.getSystemType()))) {
+                connectionParams.setDisableGlyphCaching(true);
+            }
             connectionParams.setPort(sceneConnection.getAccessPort().toString());
             connectionParams.setUsername(sceneConnection.getUsername());
             connectionParams.setPassword(sceneConnection.getPassword());

@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.flow.service.impl;
 
+import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.config.FastDfsConfig;
 import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -224,7 +225,16 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                         List<FlowScriptParamModel> currentFlowParamModels = new ArrayList<>();
                         if (CollectionUtils.isNotEmpty(flowScriptParamModels)) {
                             currentFlowParamModels =
-                                    flowScriptParamModels.stream().filter(param -> model.getId().equals(param.getFlowId())).collect(Collectors.toList());
+                                    flowScriptParamModels.stream().map(scriptParam -> {
+                                        // ip、port的参数说明进行国际化处理
+                                        if ("ip".equalsIgnoreCase(scriptParam.getParamKey())) {
+                                            scriptParam.setParamDesc(MessageCommon.get("flow.error_code.target_ip"));
+                                        } else if ("port".equalsIgnoreCase(scriptParam.getParamKey())) {
+                                            scriptParam.setParamDesc(MessageCommon.get("flow.error_code.target_port"));
+                                        }
+
+                                        return scriptParam;
+                                    }).filter(param -> model.getId().equals(param.getFlowId())).collect(Collectors.toList());
                         }
                         FlowInfoResponse response = new FlowInfoResponse(model, currentFlowParamModels);
                         return response;
@@ -279,6 +289,16 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             // 根据流量id查询脚本参数
             List<FlowScriptParamModel> flowScriptParamModels =
                     flowScriptParamService.selectByFlowId(flowInfoModel.getId());
+            flowScriptParamModels.stream().map(scriptParam -> {
+                // ip、port的参数说明进行国际化处理
+                if ("ip".equalsIgnoreCase(scriptParam.getParamKey())) {
+                    scriptParam.setParamDesc(MessageCommon.get("flow.error_code.target_ip"));
+                } else if ("port".equalsIgnoreCase(scriptParam.getParamKey())) {
+                    scriptParam.setParamDesc(MessageCommon.get("flow.error_code.target_port"));
+                }
+
+                return scriptParam;
+            }).collect(Collectors.toList());
             response = new AttackFlowResponse(flowInfoModel, prefixUrl, flowScriptParamModels);
 
             // 下载攻击脚本

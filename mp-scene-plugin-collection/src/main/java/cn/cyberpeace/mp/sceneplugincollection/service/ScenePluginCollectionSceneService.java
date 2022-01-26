@@ -215,8 +215,8 @@ public class ScenePluginCollectionSceneService {
             request.setLevels(queryParams.getLevels());
         }
 
-        if (CollectionUtils.isNotEmpty(queryParams.getKeywords())) {
-            request.setKeywords(queryParams.getKeywords());
+        if (CollectionUtils.isNotEmpty(queryParams.getKeyword())) {
+            request.setKeyword(queryParams.getKeyword());
         }
 
         var result = dataCollectionService.queryFileEvents(request);
@@ -585,6 +585,9 @@ public class ScenePluginCollectionSceneService {
         var sceneHandler = new SceneHandler(sceneIds.get(0), null, false, null);
         CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         if (pluginHandler == null) {
+            return new ServiceResult<>();
+        }
+        if (pluginHandler.getScene() == null || StringUtils.isEmpty(pluginHandler.getScene().getFlowCollector())) {
             return new ServiceResult<>();
         }
         request.setGroupList(Arrays.asList(pluginHandler.getScene().getFlowCollector()));
