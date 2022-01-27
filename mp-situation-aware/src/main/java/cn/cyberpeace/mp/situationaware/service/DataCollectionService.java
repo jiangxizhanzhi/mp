@@ -89,7 +89,7 @@ public class DataCollectionService {
         var boolQueryBuilder = QueryBuilders.boolQuery();
         var sourceBuilder = new SearchSourceBuilder();
 
-//        MultiValueMap<String, String> multiValueMap = this.queryAllAgentMacAddr();
+        MultiValueMap<String, String> multiValueMap = this.queryAllAgentMacAddr();
         //构造查询条件
         buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, null);
         // 按时间降序
@@ -419,6 +419,7 @@ public class DataCollectionService {
 //                    .agentName(wazuhFileRoot.getAgent().getName())
 //                    .agentId(wazuhFileRoot.getAgent().getId());
 //        }
+        builder.agentName(wazuhFileRoot.getAgent().getName()).agentId(wazuhFileRoot.getAgent().getId());
 
         if (Objects.nonNull(wazuhFileRoot.getRule())) {
             //区分文件还是注册表
