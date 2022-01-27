@@ -136,15 +136,15 @@ public class SceneMonitorService {
         var topology = csceneInstanceBO.getScene().getTopology();
         var topologyElements = topology.getElements();
 
-        List<String> eids = topologyElements.stream().map(SceneElementBO::getId).collect(Collectors.toList());
+        List<String> nodeIds = topologyElements.stream().map(SceneElementBO::getId).collect(Collectors.toList());
 
         List<ElementMonitorBasicInfo> basicInfos = new ArrayList<>();
-        for (String eid : eids) {
+        for (String nodeId : nodeIds) {
             ElementMonitorBasicInfo basicInfo = new ElementMonitorBasicInfo();
             basicInfo.setSceneId(sceneId);
-            elementMonitorService.processPluginElement(basicInfo, csceneInstanceBO, eid);
+            elementMonitorService.processPluginElement(basicInfo, csceneInstanceBO, nodeId);
             if (isSupportedVirtualType(basicInfo.getVirtualType())) {
-                elementMonitorService.processTopologyElement(basicInfo, csceneInstanceBO, eid, fetchRealTimeHostState);
+                elementMonitorService.processTopologyElement(basicInfo, csceneInstanceBO, nodeId, fetchRealTimeHostState);
                 basicInfos.add(basicInfo);
             }
         }

@@ -101,7 +101,7 @@ public class SceneElementMonitorService {
 
         if (tpoEleOptional.isPresent()) {
             SceneElementBO tpoEleBO = tpoEleOptional.get();
-            sceneElementBO2ElementMonitorBasicInfo(basicInfo, tpoEleBO, fetchRealTimeHostState);
+            sceneElementBO2ElementMonitorBasicInfo(basicInfo, tpoEleBO, csceneInstanceBO, fetchRealTimeHostState);
         }
     }
 
@@ -124,7 +124,7 @@ public class SceneElementMonitorService {
     }
 
 
-    public void sceneElementBO2ElementMonitorBasicInfo(ElementMonitorBasicInfo basicInfo, SceneElementBO sceneElementBO, boolean fetchRealTimeHostState) {
+    public void sceneElementBO2ElementMonitorBasicInfo(ElementMonitorBasicInfo basicInfo, SceneElementBO sceneElementBO, CsceneInstanceBO csceneInstanceBO, boolean fetchRealTimeHostState) {
         log.info("fetchHostState:{}", fetchRealTimeHostState);
         // 获取hostState比较耗时，这里加个开关
         if (fetchRealTimeHostState) {
@@ -149,6 +149,7 @@ public class SceneElementMonitorService {
             request.setElementIds(Arrays.asList(sceneElementBO.getId()));
 
             List<HostState> hostStates = hostStateService.getHostStates(request);
+//            List<HostState> hostStates = hostStateService.getHostStatesFromWazuh(basicInfo.getSceneId(), sceneElementBO.getEid(), csceneInstanceBO.getCreateTime(), LocalDateTime.now());
             if (CollectionUtil.isNotEmpty(hostStates)) {
                 HostState hostState = hostStates.get(0);
                 resource.setCpuPercent(Objects.nonNull(hostState.getCpuPercent()) ? NumberUtil.round(hostState.getCpuPercent(), 2).doubleValue() : 0.0);

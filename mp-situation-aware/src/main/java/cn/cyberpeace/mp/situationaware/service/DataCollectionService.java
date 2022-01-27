@@ -89,9 +89,9 @@ public class DataCollectionService {
         var boolQueryBuilder = QueryBuilders.boolQuery();
         var sourceBuilder = new SearchSourceBuilder();
 
-        MultiValueMap<String, String> multiValueMap = this.queryAllAgentMacAddr();
+//        MultiValueMap<String, String> multiValueMap = this.queryAllAgentMacAddr();
         //构造查询条件
-        buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, multiValueMap);
+        buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, null);
         // 按时间降序
         sourceBuilder.sort("timestamp", SortOrder.DESC);
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
@@ -104,7 +104,7 @@ public class DataCollectionService {
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             List<WazuhFileRoot> wazuhFileRootList = Arrays.stream(response.getHits().getHits()).map(hit -> JSONObject.parseObject(hit.getSourceAsString(), WazuhFileRoot.class)).collect(Collectors.toList());
-            List<FileEventModel> fileEventModelList = wazuhFileRootList.stream().map((root -> this.getFileEventModel(root, multiValueMap))).collect(Collectors.toList());
+            List<FileEventModel> fileEventModelList = wazuhFileRootList.stream().map((root -> this.getFileEventModel(root, null))).collect(Collectors.toList());
             return new ListObjResult<>(fileEventModelList, total);
         } catch (IOException e) {
             log.error("es queryFileEvents error: {} ", e);
@@ -124,8 +124,8 @@ public class DataCollectionService {
         var boolQueryBuilder = QueryBuilders.boolQuery();
         var sourceBuilder = new SearchSourceBuilder();
 
-        MultiValueMap<String, String> multiValueMap = this.queryAllAgentMacAddr();
-        int agentSize = buildMonitorEventsBuilder(wazuhMonitorEventsRequest, boolQueryBuilder, multiValueMap);
+//        MultiValueMap<String, String> multiValueMap = this.queryAllAgentMacAddr();
+        int agentSize = buildMonitorEventsBuilder(wazuhMonitorEventsRequest, boolQueryBuilder, null);
         // 按时间降序
         sourceBuilder.sort("timestamp", SortOrder.DESC);
         // 监控数据每个agent一条，所以这里分页大小设为agent数量的2倍
@@ -154,7 +154,7 @@ public class DataCollectionService {
                     var result = JSONObject.parseObject(monitorMessage, WazuhModel.class);
                     result.setAgentId(model.getAgent().getId());
                     result.setAgentName(model.getAgent().getName());
-                    result.setMacIds(multiValueMap.get(model.getAgent().getId()));
+//                    result.setMacIds(multiValueMap.get(model.getAgent().getId()));
                     result.setTime(TimeUtils.dateToLocalDateTime(model.getTimestamp()));
                     return result;
                 }).collect(Collectors.toList());
@@ -184,8 +184,8 @@ public class DataCollectionService {
         var boolQueryBuilder = QueryBuilders.boolQuery();
         var sourceBuilder = new SearchSourceBuilder();
 
-        MultiValueMap<String, String> multiValueMap = this.queryAllAgentMacAddr();
-        buildMonitorEventsAggBuilder(wazuhMonitorEventsRequest, boolQueryBuilder, multiValueMap);
+//        MultiValueMap<String, String> multiValueMap = this.queryAllAgentMacAddr();
+        buildMonitorEventsAggBuilder(wazuhMonitorEventsRequest, boolQueryBuilder, null);
         // 按时间降序
         sourceBuilder.sort("timestamp", SortOrder.DESC);
         // 监控数据每个agent一条，所以这里分页大小设为agent数量的2倍
@@ -227,8 +227,8 @@ public class DataCollectionService {
         var boolQueryBuilder = QueryBuilders.boolQuery();
         var sourceBuilder = new SearchSourceBuilder();
 
-        MultiValueMap<String, String> multiValueMap = this.queryAllAgentMacAddr();
-        buildMonitorEventsBuilderTimeRange(wazuhMonitorEventsRequest, boolQueryBuilder, multiValueMap);
+//        MultiValueMap<String, String> multiValueMap = this.queryAllAgentMacAddr();
+        buildMonitorEventsBuilderTimeRange(wazuhMonitorEventsRequest, boolQueryBuilder, null);
         // 按时间降序
         sourceBuilder.sort("timestamp", SortOrder.DESC);
         if (Objects.nonNull(wazuhMonitorEventsRequest.getPageNum()) && Objects.nonNull(wazuhMonitorEventsRequest.getPageSize())) {
@@ -247,7 +247,9 @@ public class DataCollectionService {
         log.info("monitor JSON query: {}", searchRequest.source().toString());
 
         try {
+            log.info("es search start");
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            log.info("es search end");
 
             List<WazuhMonitorRoot> wazuhFileRootList = Arrays.stream(response.getHits().getHits()).map(hit -> JSONObject.parseObject(hit.getSourceAsString(), WazuhMonitorRoot.class)).collect(Collectors.toList());
             var wazuhModelList = wazuhFileRootList.stream()
@@ -256,7 +258,7 @@ public class DataCollectionService {
                     var result = JSONObject.parseObject(monitorMessage, WazuhModel.class);
                     result.setAgentId(model.getAgent().getId());
                     result.setAgentName(model.getAgent().getName());
-                    result.setMacIds(multiValueMap.get(model.getAgent().getId()));
+//                    result.setMacIds(multiValueMap.get(model.getAgent().getId()));
                     result.setTime(TimeUtils.dateToLocalDateTime(model.getTimestamp()));
                     return result;
                 }).collect(Collectors.toList());
@@ -296,9 +298,9 @@ public class DataCollectionService {
         boolQueryBuilder.must(QueryBuilders.termQuery("rule.id", "900002"));
         int agentSize = 0;
 
-        if (!CollectionUtils.isEmpty(wazuhEventRequest.getMacIds())) {
-            agentSize = buildAgentIdQuery(wazuhEventRequest.getMacIds(), boolQueryBuilder, allAgentMacAddr);
-        }
+//        if (!CollectionUtils.isEmpty(wazuhEventRequest.getMacIds())) {
+//            agentSize = buildAgentIdQuery(wazuhEventRequest.getMacIds(), boolQueryBuilder, allAgentMacAddr);
+//        }
 
         if (!CollectionUtils.isEmpty(wazuhEventRequest.getAgentNames())) {
             buildAgentNameQuery(wazuhEventRequest.getAgentNames(), boolQueryBuilder);
@@ -322,9 +324,9 @@ public class DataCollectionService {
         //构造查询条件
         boolQueryBuilder.must(QueryBuilders.termQuery("rule.id", "900002"));
 
-        if (!CollectionUtils.isEmpty(wazuhEventRequest.getMacIds())) {
-            buildAgentIdQuery(wazuhEventRequest.getMacIds(), boolQueryBuilder, allAgentMacAddr);
-        }
+//        if (!CollectionUtils.isEmpty(wazuhEventRequest.getMacIds())) {
+//            buildAgentIdQuery(wazuhEventRequest.getMacIds(), boolQueryBuilder, allAgentMacAddr);
+//        }
 
         if (!CollectionUtils.isEmpty(wazuhEventRequest.getAgentNames())) {
             buildAgentNameQuery(wazuhEventRequest.getAgentNames(), boolQueryBuilder);
@@ -412,11 +414,11 @@ public class DataCollectionService {
                     .action(wazuhFileRoot.getSyscheck().getEvent());
         }
 
-        if (Objects.nonNull(wazuhFileRoot.getAgent())) {
-            builder.macIds(multiValueMap.get(wazuhFileRoot.getAgent().getId()))
-                    .agentName(wazuhFileRoot.getAgent().getName())
-                    .agentId(wazuhFileRoot.getAgent().getId());
-        }
+//        if (Objects.nonNull(wazuhFileRoot.getAgent())) {
+//            builder.macIds(multiValueMap.get(wazuhFileRoot.getAgent().getId()))
+//                    .agentName(wazuhFileRoot.getAgent().getName())
+//                    .agentId(wazuhFileRoot.getAgent().getId());
+//        }
 
         if (Objects.nonNull(wazuhFileRoot.getRule())) {
             //区分文件还是注册表
@@ -493,10 +495,10 @@ public class DataCollectionService {
             buildRuleGroupQuery(wazuhEventRequest.getRuleGroups(), boolQueryBuilder);
         }
 
-        if (!CollectionUtils.isEmpty(wazuhEventRequest.getMacIds())) {
-            //构造agentId
-            buildAgentIdQuery(wazuhEventRequest.getMacIds(), boolQueryBuilder, allAgentMacAddr);
-        }
+//        if (!CollectionUtils.isEmpty(wazuhEventRequest.getMacIds())) {
+//            //构造agentId
+//            buildAgentIdQuery(wazuhEventRequest.getMacIds(), boolQueryBuilder, allAgentMacAddr);
+//        }
 
         if (!CollectionUtils.isEmpty(wazuhEventRequest.getAgentNames())) {
             buildAgentNameQuery(wazuhEventRequest.getAgentNames(), boolQueryBuilder);
