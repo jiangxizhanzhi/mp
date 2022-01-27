@@ -89,7 +89,7 @@ public class DataCollectionService {
         var boolQueryBuilder = QueryBuilders.boolQuery();
         var sourceBuilder = new SearchSourceBuilder();
 
-        MultiValueMap<String, String> multiValueMap = this.queryAllAgentMacAddr();
+//        MultiValueMap<String, String> multiValueMap = this.queryAllAgentMacAddr();
         //构造查询条件
         buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, null);
         // 按时间降序
