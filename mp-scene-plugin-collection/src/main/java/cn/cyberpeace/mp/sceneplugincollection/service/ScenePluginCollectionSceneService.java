@@ -125,6 +125,9 @@ public class ScenePluginCollectionSceneService {
             if (collectionElement == null || CollectionUtils.isEmpty(collectionElement.getProbes())) {
                 return;
             }
+            if (collectionElement.getEnableProbeCollect() == null || !collectionElement.getEnableProbeCollect()) {
+                return;
+            }
             agentName2Element.put(srcElement.getEid(), srcElement);
         });
         // 没有探针
