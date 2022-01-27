@@ -183,6 +183,9 @@ public class ScenePluginCollectionSceneService {
             if (collectionElement == null || CollectionUtils.isEmpty(collectionElement.getProbes())) {
                 return;
             }
+            if (collectionElement.getEnableProbeCollect() == null || !collectionElement.getEnableProbeCollect()) {
+                return;
+            }
             agentNameElementMap.put(srcElement.getEid(), srcElement);
         });
 
