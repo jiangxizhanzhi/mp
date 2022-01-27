@@ -122,7 +122,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
 
     private void checkSceneUsingNodeLimit(int count) {
         var activeVirtualDeviceCount = getActiveVirtualDeviceCount();
-        var sceneUsingNodeLimit = csceneAppConfig.getSceneUsingNodeLimit();
+        var sceneUsingNodeLimit = csceneAppConfig.getSceneCreateNodeLimit();
         if (activeVirtualDeviceCount + count > sceneUsingNodeLimit) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_USING_NODE_LIMIT.format(String.valueOf(sceneUsingNodeLimit),
                     String.valueOf(activeVirtualDeviceCount), String.valueOf(count)));
