@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.controller.request.*;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
+import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceQueryParams;
@@ -330,9 +331,9 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             @ApiImplicitParam(name = "userIds", value = "用户id", allowMultiple = true, dataTypeClass = String.class),
     })
     @GetMapping(value = "/node_sessions", params = "ids")
-    public ServiceResult<List<NodeSessionBO>> getNodeSessions(@RequestParam List<String> ids,
-                                                              @RequestParam(required = false) List<String> nodeIds,
-                                                              @RequestParam(required = false) List<String> userIds) {
+    public ServiceResult<List<UserNodeSessionInfo>> getNodeSessions(@RequestParam List<String> ids,
+                                                                    @RequestParam(required = false) List<String> nodeIds,
+                                                                    @RequestParam(required = false) List<String> userIds) {
         return modelService.getNodeSessions(ids, nodeIds, userIds).asResult();
     }
 

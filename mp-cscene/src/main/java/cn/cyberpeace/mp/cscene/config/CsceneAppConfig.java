@@ -62,7 +62,7 @@ public class CsceneAppConfig {
         return limit;
     }
 
-    public int getSceneCreateNodeLimit() {
+    public int getSceneUsingNodeLimit() {
         String value = null;
         try {
             value = sysActivationService.getValueByKey(sceneUsingNodeLimitKey);

@@ -11,6 +11,9 @@ import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
+import cn.cyberpeace.mp.situationaware.model.WazuhModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
+import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.NumberUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -44,11 +48,15 @@ public class HostStateService {
     @Autowired
     private SceneIdTranslationService sceneIdTranslationService;
 
+    @Autowired
+    private DataCollectionService dataCollectionService;
+
     /**
      * 查询单个节点机器当前状态
      *
      * @return
      */
+    // todo 老方法，待优化
     public List<HostState> getHostStates(BaseSceneElementRequest baseRequest) {
         log.info("{}", baseRequest);
         BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(baseRequest);
@@ -81,6 +89,76 @@ public class HostStateService {
         return hostStates;
     }
 
+
+    public List<HostState> getHostStatesFromWazuh(String sceneId, String agentName, LocalDateTime startTime, LocalDateTime endTime) {
+        List<CollectionHostStateBO> hostStateBOS = foo(agentName, startTime, endTime);
+
+        List<HostState> hostStates = hostStateBOS.stream().map(hostStateBO -> {
+            HostState hs = new HostState();
+            hs.setCpuCount(hostStateBO.getCpuCount());
+            hs.setCpuPercent(Objects.nonNull(hostStateBO.getCpuPercent()) ? NumberUtil.round(hostStateBO.getCpuPercent(), 2).doubleValue() : hostStateBO.getCpuPercent());
+            hs.setMemoryFree(hostStateBO.getMemoryFree());
+            hs.setMemoryTotal(hostStateBO.getMemoryTotal());
+            // todo 节点内存利用率 统一为Double？
+//            hs.setMemoryPercent(Objects.nonNull(hostStateBO.getMemoryPercent() ? NumberUtil.round(hostStateBO.getMemoryPercent(), 2).doubleValue() : hostStateBO.getMemoryPercent()));
+            hs.setDiskSpace(hostStateBO.getDiskSpace());
+            hs.setSceneId(sceneId);
+//            hs.setElementId(hostStateBO.getNodeId());
+            hs.setTime(hostStateBO.getTime());
+            return hs;
+        }).collect(Collectors.toList());
+
+        return hostStates;
+    }
+
+
+
+    private List<CollectionHostStateBO> foo(String agentName, LocalDateTime startTime, LocalDateTime endTime) {
+        // 构建查询参数
+        var request = new WazuhMonitorEventsRequest();
+        request.setPageNum(1);
+        // todo 暂时最多取 10000 条
+        request.setPageSize(1);
+        request.setAgentNames(Arrays.asList(agentName));
+        // 开始时间,默认为场景创建时间
+        request.setStartTime(startTime);
+        // 结束时间,默认为当前时间
+        request.setEndTime(endTime);
+
+        // 执行查询
+        log.info("dataCollection query start");
+        List<WazuhModel> result = dataCollectionService.queryMonitorEventsWithTimeRange(request);
+        log.info("dataCollection query end");
+        List<CollectionHostStateBO> hostStateBOs = result.stream().map(srcHostState -> {
+            CollectionHostStateBO hostStateBO = new CollectionHostStateBO();
+            hostStateBO.setCpuCount(srcHostState.getCpuCount());
+            hostStateBO.setCpuPercent(srcHostState.getCpuTotalPercent());
+            // 内存统一使用单位M
+            hostStateBO.setMemoryTotal(this.byte2MB(srcHostState.getMemoryTotal()));
+            hostStateBO.setMemoryFree(this.byte2MB(srcHostState.getMemoryFree()));
+            // 磁盘统一使用单位G
+            hostStateBO.setDiskSpace(this.byte2GB(srcHostState.getDiskSpace()));
+            hostStateBO.setMemoryPercent(srcHostState.getMemoryPercent());
+            hostStateBO.setTime(srcHostState.getTime());
+            // todo 进程，端口，网络连接，磁盘使用率
+//            var srcElement = agentName2Element.getOrDefault(srcHostState.getAgentName(), null);
+//            if (srcElement != null) {
+//                hostState.setNodeId(srcElement.getId());
+//                hostState.setNodeName(srcElement.getName());
+//            }
+            return hostStateBO;
+        }).collect(Collectors.toList());
+
+        return hostStateBOs;
+    }
+
+    private long byte2MB(long num) {
+        return num >> 20;
+    }
+
+    private long byte2GB(long num) {
+        return num >> 30;
+    }
 
     /**
      * 查询单个节点机器状态趋势
@@ -148,7 +226,7 @@ public class HostStateService {
             hostState.setCpuPercent(0.0);
             hostState.setMemoryPercent(0.0);
             // todo diskPercent
-            hostState.setDiskPercent(40.0);
+            hostState.setDiskPercent(0.0);
             hostStateMap.put(localDateTime, hostState);
         }
 
@@ -166,6 +244,8 @@ public class HostStateService {
             for (IntervalSizeBO<LocalDateTime, Double> bo : intervalMemPercentBOs) {
                 if (Objects.nonNull(hostStateMap.get(bo.getStart()))) {
                     hostStateMap.get(bo.getStart()).setMemoryPercent(Objects.nonNull(bo.getSize()) ? NumberUtil.round(bo.getSize(), 2).doubleValue() : 0.0);
+                    // todo 在这造磁盘模拟数据
+                    hostStateMap.get(bo.getStart()).setDiskPercent(30.0);
                 }
             }
         }

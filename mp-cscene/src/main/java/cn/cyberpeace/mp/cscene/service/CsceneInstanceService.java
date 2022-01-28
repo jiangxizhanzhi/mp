@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.cscene.service;
 
+import cn.cyberpeace.mp.auth.dto.user.UserDto;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.context.SysContextHolder;
 import cn.cyberpeace.mp.base.model.BaseModel;
@@ -15,6 +17,7 @@ import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCountByReferenceTypeBO;
 import cn.cyberpeace.mp.cscene.context.CsceneContextHolder;
 import cn.cyberpeace.mp.cscene.core.CsceneInstanceHandler;
+import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceCountByReferenceTypeModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceRoleModel;
@@ -43,13 +46,17 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -71,6 +78,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     @Autowired
     private ScenePluginCollectionSceneService scenePluginCollectionSceneService;
+
+    @Autowired
+    private UserService userService;
 
     private final CsceneReportTaskPool csceneReportTaskPool = CsceneReportTaskPool.getInstance();
 
@@ -178,7 +188,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return bulkDeleteByIds(csceneInstanceObjs.stream().map(BaseModel::getId).toArray(String[]::new), false, context);
     }
 
-    public ServiceResult<List<NodeSessionBO>> getNodeSessions(List<String> ids, List<String> nodeIds, List<String> userIds) {
+    public ServiceResult<List<UserNodeSessionInfo>> getNodeSessions(List<String> ids, List<String> nodeIds, List<String> userIds) {
         var csceneInstances = getCsceneInstanceObjs(ids);
         if (csceneInstances.isEmpty()) {
             return new ServiceResult<>(new ArrayList<>());
@@ -196,7 +206,31 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             }
             nodeSession.setSceneId(csceneInstance.getId());
         });
-        return nodeSessionResult;
+
+        List<UserNodeSessionInfo> result = new ArrayList<>();
+        nodeSessionResult.getSource().forEach(nodeSession -> {
+            UserNodeSessionInfo userNodeSessionInfo = new UserNodeSessionInfo();
+            BeanUtils.copyProperties(nodeSession, userNodeSessionInfo);
+            result.add(userNodeSessionInfo);
+        });
+
+        Set<String> existUserIds = new HashSet<>();
+        result.forEach(nodeSession -> {
+            if (StringUtils.isNotEmpty(nodeSession.getUser())) {
+                existUserIds.add(nodeSession.getUser());
+            }
+        });
+        if (!existUserIds.isEmpty()) {
+            List<UserDto> users = userService.listByUserIds(existUserIds.toArray(new String[]{}));
+            if (CollectionUtils.isNotEmpty(users)) {
+                Map<String, String> userId2Name = new HashMap<>();
+                users.forEach(user -> userId2Name.put(user.getId(), user.getName()));
+                result.forEach(nodeSession -> {
+                    nodeSession.setUserName(userId2Name.containsKey(nodeSession.getUser()) ? userId2Name.get(nodeSession.getUser()) : StringUtils.EMPTY);
+                });
+            }
+        }
+        return new ServiceResult<>(result);
     }
 
     public ListObjServiceResult<NodeRecordingBO> listRecordings(List<String> ids, List<String> nodeIds, List<String> userIds,
