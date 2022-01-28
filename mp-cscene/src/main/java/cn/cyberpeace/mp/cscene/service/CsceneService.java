@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.cscene.service;
 
-import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;
@@ -18,8 +17,10 @@ import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCreateContextBO;
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.core.CsceneHandler;
+import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.model.CsceneRoleModel;
+import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneRoleMapper;
 import cn.cyberpeace.mp.cscene.service.filed.CsceneModelFields;
@@ -31,6 +32,7 @@ import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneConfigServ
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -52,6 +54,8 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     private CsceneRoleMapper csceneRoleMapper;
 
     private CsceneAppConfig csceneAppConfig;
+
+    private CsceneInstanceMapper csceneInstanceMapper;
 
     private ScenePluginCloudSceneService scenePluginCloudSceneService;
 
@@ -75,9 +79,13 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     }
 
     private int getActiveVirtualDeviceCount() {
+        List<String> sceneIds = this.getRunningSceneIds();
+        if (CollectionUtils.isEmpty(sceneIds)) {
+            return 0;
+        }
         var groupFieldName = BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getVirtualType);
         Map<Object, Long> elementCountMap = scenePluginCloudSceneService
-                .groupCountElement(null, null, List.of(groupFieldName))
+                .groupCountElement(sceneIds, null, List.of(groupFieldName))
                 .getSource().get(groupFieldName);
         long activeVirtualDeviceCount = elementCountMap.getOrDefault(
                 BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE, 0L) +
@@ -149,6 +157,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     @Autowired
     public CsceneService(CsceneMapper modelMapper,
                          CsceneRoleMapper csceneRoleMapper,
+                         CsceneInstanceMapper csceneInstanceMapper,
                          CsceneAppConfig csceneAppConfig,
                          ScenePluginCloudSceneService scenePluginCloudSceneService,
                          ScenePluginCloudSceneConfigService scenePluginCloudSceneConfigService,
@@ -159,6 +168,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         setCsceneAppConfig(csceneAppConfig);
         setScenePluginCloudSceneService(scenePluginCloudSceneService);
         setScenePluginCloudSceneConfigService(scenePluginCloudSceneConfigService);
+        setCsceneInstanceMapper(csceneInstanceMapper);
     }
 
     public void loadListFilterCondition(HumanCondition humanCondition, CsceneQueryParams queryParams) {
@@ -378,5 +388,16 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
             CsceneDataModifier.correctName(csceneId, createContext.getReferenceMetaData(), csceneInstance, cscene);
         }
         return new ServiceResult<>(csceneHandler.createAppInstance(unique, csceneInstance));
+    }
+
+    private List<String> getRunningSceneIds() {
+        HumanCondition humanCondition = new HumanCondition()
+                .filterEqual(CsceneInstanceModel::getDeleted, false);
+        List<CsceneInstanceModel> models = csceneInstanceMapper.list(humanCondition);
+        if (CollectionUtils.isEmpty(models)) {
+            return new ArrayList<>();
+        } else {
+            return models.stream().map(m -> m.getScene()).collect(Collectors.toList());
+        }
     }
 }
