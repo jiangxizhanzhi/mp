@@ -70,6 +70,6 @@ public class HypervisorServiceStateResponse extends BaseCloudPlatformResponse {
     }
 
     public FontColorEnum getFontColor() {
-        return getState().equals(CloudPlatformEnum.UP.getDesc()) ? FontColorEnum.GREEN : FontColorEnum.RED;
+        return getState().equals(CloudPlatformEnum.UP.toValue()) ? FontColorEnum.GREEN : FontColorEnum.RED;
     }
 }
