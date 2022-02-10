@@ -14,6 +14,8 @@ plugins {
 
 
 ext['tomcat.version'] = '9.0.58'
+ext['logback.version'] = '1.2.10'
+ext['log4j2.version'] = '2.17.1'
 apply from: 'mp/config.gradle'
 
 //引入 mybatis-generator 插件
@@ -75,7 +77,6 @@ subprojects {
         testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
         testImplementation 'junit:junit:4.13.2'
         implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
-        implementation group: 'ch.qos.logback', name: 'logback-core', version: '1.2.3'
         testImplementation'org.mybatis.generator:mybatis-generator-core:1.3.7'
     }
 
