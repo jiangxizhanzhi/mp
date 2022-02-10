@@ -13,7 +13,7 @@ plugins {
 
 
 
-
+ext['tomcat.version'] = '9.0.58'
 apply from: 'mp/config.gradle'
 
 //引入 mybatis-generator 插件
