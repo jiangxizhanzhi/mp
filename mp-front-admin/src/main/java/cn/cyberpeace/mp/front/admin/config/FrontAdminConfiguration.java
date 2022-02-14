@@ -18,11 +18,24 @@ public class FrontAdminConfiguration {
     @Autowired
     private MessageSource messageSource;
 
+    @Autowired
+    private ActivationConfig activationConfig;
+
     @PostConstruct
     public void addBaseNames() {
         ReloadableResourceBundleMessageSource msgSrc = (ReloadableResourceBundleMessageSource) messageSource;
         msgSrc.addBasenames("classpath:i18n/admin", "classpath:i18n/admin_base");
     }
 
+    /*
+    @Bean
+    public FilterRegistrationBean licenseFilterRegistrationBean() {
+        FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();
+        filterRegistrationBean.setFilter(new LicenseFilter(activationConfig));
+        filterRegistrationBean.addUrlPatterns("/*");
+        filterRegistrationBean.setOrder(1);
+        filterRegistrationBean.setDispatcherTypes(DispatcherType.REQUEST, new DispatcherType[]{DispatcherType.FORWARD, DispatcherType.INCLUDE, DispatcherType.ASYNC});
+        return filterRegistrationBean;
+    }*/
 
 }

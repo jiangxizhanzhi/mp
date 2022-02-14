@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Objects;
 
-//@Component
 @Slf4j
 public class LicenseFilter extends OncePerRequestFilter {
 
@@ -34,21 +33,24 @@ public class LicenseFilter extends OncePerRequestFilter {
     @Autowired
     private SysActivationService sysActivationService;
 
-    @Autowired
     private ActivationConfig activationConfig;
 
     @Autowired
     private MappingJackson2HttpMessageConverter converter;
 
+    public LicenseFilter(ActivationConfig activationConfig) {
+        this.activationConfig = activationConfig;
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        log.info("authConfig.isEnable: {}", activationConfig.isEnable());
+        log.info("activation enabled: {}", activationConfig.isEnable());
         if (activationConfig.isEnable()) {
             String uri = request.getRequestURI();
 
-            if (MATCHER.match("/api/mp/auth/**", uri)) {
+            if (MATCHER.match("/api/mp/auth/login", uri)) {
                 boolean activationFailed = false;
                 ActivationResponse activationResponse = sysActivationService.status();
                 if (Objects.isNull(activationResponse)) {

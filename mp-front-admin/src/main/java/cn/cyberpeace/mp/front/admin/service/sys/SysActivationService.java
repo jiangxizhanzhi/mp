@@ -67,6 +67,12 @@ public class SysActivationService {
      */
     public void activate(ActivationRequest activationRequest) {
         log.info("activationRequest:{}", activationRequest);
+        String sysUUID = querySysUUID();
+        if (!Objects.equals(activationRequest.getMachineCode(), sysUUID)) {
+            log.error("sysuuid not match! {}, requested uuid is:{}, expected uuid is:{}", activationRequest.getMachineCode(), sysUUID);
+            throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_SYSUUID_NOTMATCH);
+        }
+
         // 拼接json串，调用licenseService验证
         ActivationVerifyInfo verifyInfo = new ActivationVerifyInfo();
         verifyInfo.setDeadline(activationRequest.getDeadline());
