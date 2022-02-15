@@ -50,33 +50,40 @@ public class SysActivCtlService {
             }
         } else {
             // null, insert a default sysActivCtlModel
-            generateDefaultActivCtlModel();
+            generateOrGetDefaultActivCtlModel();
         }
 
         return false;
     }
 
 
-
+    public SysActivCtlModel getDefaultSysActivCtl() {
+        return generateOrGetDefaultActivCtlModel();
+    }
 
 
     /**
      * generate a default with current timestamp as system_ts and activ_ts;
      * @return
      */
-    synchronized private boolean generateDefaultActivCtlModel() {
+    synchronized private SysActivCtlModel generateOrGetDefaultActivCtlModel() {
         SysActivCtlModel sysActivCtlModel = sysActivCtlMapper.selectFirst();
-        if (Objects.nonNull(sysActivCtlModel)) {
-            log.error("Default activCtlModel has already generated! {}", sysActivCtlModel);
-            return false;
+        if (Objects.isNull(sysActivCtlModel)) {
+            sysActivCtlModel = new SysActivCtlModel();
+            Long currTs = System.currentTimeMillis();
+            sysActivCtlModel.setSysTimestamp(currTs);
+            sysActivCtlModel.setActiveTimestamp(currTs);
+
+            boolean success = sysActivCtlMapper.save(sysActivCtlModel);
+            if (success) {
+                log.info("Generate default activCtlModel success! {}", sysActivCtlModel);
+                sysActivCtlModel = sysActivCtlMapper.selectFirst();
+            }
+        } else {
+            log.info("Default activCtlModel has already generated! {}", sysActivCtlModel);
         }
 
-        sysActivCtlModel = new SysActivCtlModel();
-        Long currTs = System.currentTimeMillis();
-        sysActivCtlModel.setSysTimestamp(currTs);
-        sysActivCtlModel.setActiveTimestamp(currTs);
-
-        return sysActivCtlMapper.save(sysActivCtlModel);
+        return sysActivCtlModel;
     }
 
 

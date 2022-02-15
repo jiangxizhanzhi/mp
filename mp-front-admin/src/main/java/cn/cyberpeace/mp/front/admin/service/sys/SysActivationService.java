@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.front.admin.dto.activation.ActivationRequest;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationResourceItem;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationResponse;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationVerifyInfo;
+import cn.cyberpeace.mp.front.admin.model.SysActivCtlModel;
 import cn.cyberpeace.mp.front.admin.service.sys.activmenu.ActivMenuService;
 import cn.cyberpeace.mp.front.admin.util.EncryptUtils;
 import cn.hutool.core.collection.CollectionUtil;
@@ -59,6 +60,9 @@ public class SysActivationService {
 
     @Autowired
     private ActivMenuService activMenuService;
+
+    @Autowired
+    private SysActivCtlService sysActivCtlService;
 
     /**
      * 激活
@@ -163,12 +167,21 @@ public class SysActivationService {
      */
     public String querySysUUID() {
         // If root privileges this will work
+        SysActivCtlModel sysActivCtlModel = sysActivCtlService.getDefaultSysActivCtl();
+        Long activeTs = sysActivCtlModel.getActiveTimestamp();
+        String activTsStr = activeTs.toString();
+        activTsStr = activTsStr.substring(activTsStr.length() - 6, activTsStr.length());
+
+        String uuid = "";
         for (String checkLine : ExecutingCommand.runNative("dmidecode -s system-uuid")) {
             if (StringUtils.isNotBlank(checkLine)) {
-                return checkLine;
+                uuid = checkLine;
+                log.info("origin uuid is {}", uuid);
             }
         }
-        return null;
+
+        uuid = uuid + "-" + activTsStr;
+        return uuid;
     }
 
     @Deprecated
