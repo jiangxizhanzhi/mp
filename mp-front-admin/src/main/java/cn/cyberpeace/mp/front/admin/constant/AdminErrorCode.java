@@ -22,7 +22,9 @@ public enum AdminErrorCode implements ErrorCode {
     SYS_ACTIVATION_SYSUUID_NOTMATCH("MP-110034", "sys_activation_sysuuid_notmatch"),
 
 
-    SYS_NOTICE_NOT_EXISTED("MP-110040", "sys_notice_not_existed");
+    SYS_NOTICE_NOT_EXISTED("MP-110040", "sys_notice_not_existed"),
+
+    SYS_TIMESTAMP_ROLLBACK("MP-110050", "sys_timestamp_rollback");
 
     AdminErrorCode(String code, String message) {
         setCode(code, AdminConstant.ERROR_CODE_PREFIX + message);

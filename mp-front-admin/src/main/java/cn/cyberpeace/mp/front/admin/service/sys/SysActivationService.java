@@ -166,13 +166,13 @@ public class SysActivationService {
      * @return
      */
     public String querySysUUID() {
-        // If root privileges this will work
         SysActivCtlModel sysActivCtlModel = sysCtlService.getDefaultSysActivCtl();
         Long activeTs = sysActivCtlModel.getActiveTimestamp();
         String activTsStr = activeTs.toString();
         activTsStr = activTsStr.substring(activTsStr.length() - 6, activTsStr.length());
 
         String uuid = "";
+        // If root privileges this will work
         for (String checkLine : ExecutingCommand.runNative("dmidecode -s system-uuid")) {
             if (StringUtils.isNotBlank(checkLine)) {
                 uuid = checkLine;

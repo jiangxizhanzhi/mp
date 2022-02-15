@@ -9,7 +9,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
@@ -30,12 +29,14 @@ public class LicenseFilter extends OncePerRequestFilter {
 
     private ObjectMapper mapper = null;
 
-    @Autowired
+//    @Autowired
+    // todo 通过构造方法传入
     private SysActivationService sysActivationService;
 
     private ActivationConfig activationConfig;
 
-    @Autowired
+//    @Autowired
+    // todo 通过构造方法传入
     private MappingJackson2HttpMessageConverter converter;
 
     public LicenseFilter(ActivationConfig activationConfig) {

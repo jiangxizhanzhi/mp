@@ -1,11 +1,17 @@
 package cn.cyberpeace.mp.front.admin.config;
 
+import cn.cyberpeace.mp.front.admin.filter.SysAdminFilter;
+import cn.cyberpeace.mp.front.admin.service.sys.SysCtlService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.MessageSource;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.DispatcherType;
 
 /**
  * @Description:
@@ -21,10 +27,27 @@ public class FrontAdminConfiguration {
     @Autowired
     private ActivationConfig activationConfig;
 
+    @Autowired
+    private SysCtlService sysCtlService;
+
+    @Autowired
+    private MappingJackson2HttpMessageConverter converter;
+
     @PostConstruct
     public void addBaseNames() {
         ReloadableResourceBundleMessageSource msgSrc = (ReloadableResourceBundleMessageSource) messageSource;
         msgSrc.addBasenames("classpath:i18n/admin", "classpath:i18n/admin_base");
+    }
+
+
+    @Bean
+    public FilterRegistrationBean licenseFilterRegistrationBean() {
+        FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();
+        filterRegistrationBean.setFilter(new SysAdminFilter(sysCtlService, converter));
+        filterRegistrationBean.addUrlPatterns("/*");
+        filterRegistrationBean.setOrder(1);
+        filterRegistrationBean.setDispatcherTypes(DispatcherType.REQUEST, new DispatcherType[]{DispatcherType.FORWARD, DispatcherType.INCLUDE, DispatcherType.ASYNC});
+        return filterRegistrationBean;
     }
 
     /*
