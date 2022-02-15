@@ -62,7 +62,7 @@ public class SysActivationService {
     private ActivMenuService activMenuService;
 
     @Autowired
-    private SysActivCtlService sysActivCtlService;
+    private SysCtlService sysCtlService;
 
     /**
      * 激活
@@ -73,7 +73,7 @@ public class SysActivationService {
         log.info("activationRequest:{}", activationRequest);
         String sysUUID = querySysUUID();
         if (!Objects.equals(activationRequest.getMachineCode(), sysUUID)) {
-            log.error("sysuuid not match! {}, requested uuid is:{}, expected uuid is:{}", activationRequest.getMachineCode(), sysUUID);
+            log.error("sysuuid not match! requested uuid is:{}, expected uuid is:{}", activationRequest.getMachineCode(), sysUUID);
             throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_SYSUUID_NOTMATCH);
         }
 
@@ -167,7 +167,7 @@ public class SysActivationService {
      */
     public String querySysUUID() {
         // If root privileges this will work
-        SysActivCtlModel sysActivCtlModel = sysActivCtlService.getDefaultSysActivCtl();
+        SysActivCtlModel sysActivCtlModel = sysCtlService.getDefaultSysActivCtl();
         Long activeTs = sysActivCtlModel.getActiveTimestamp();
         String activTsStr = activeTs.toString();
         activTsStr = activTsStr.substring(activTsStr.length() - 6, activTsStr.length());

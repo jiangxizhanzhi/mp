@@ -7,7 +7,11 @@
     </select>
 
     <select id="selectFirst" resultType="cn.cyberpeace.mp.front.admin.model.SysActivCtlModel">
-        select * from mp_front_admin_activ_ctl where pk = 1
+        select * from mp_front_admin_activ_ctl where id = '1'
     </select>
+
+<!--    <insert id="save">-->
+<!--        insert into mp_front_admin_activ_ctl-->
+<!--    </insert>-->
 
 </mapper>
