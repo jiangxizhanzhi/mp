@@ -48,6 +48,8 @@ public class SysAdminFilter extends OncePerRequestFilter {
             return;
         }
 
+        // todo 拦截license失效？
+
         filterChain.doFilter(request, response);
 
     }
