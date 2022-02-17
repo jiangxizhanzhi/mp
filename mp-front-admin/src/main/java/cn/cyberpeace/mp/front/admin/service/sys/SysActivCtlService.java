@@ -13,4 +13,11 @@ public interface SysActivCtlService extends BaseModelService<SysActivCtlModel, Q
 
     SysActivCtlModel selectValid();
 
+    /**
+     * set all records' status = 0 except ${exceptedId}
+     * @param exceptedId
+     * @return
+     */
+    void invalidOtherExceptOne(String exceptedId);
+
 }

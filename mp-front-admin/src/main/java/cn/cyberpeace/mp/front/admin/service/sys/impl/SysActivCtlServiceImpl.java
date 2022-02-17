@@ -30,4 +30,10 @@ public class SysActivCtlServiceImpl extends BaseModelServiceImpl<SysActivCtlMode
     public SysActivCtlModel selectValid() {
         return getModelMapper().selectValid();
     }
+
+    @Override
+    public void invalidOtherExceptOne(String exceptedId) {
+        log.info("invalidOtherExceptOne exceptedId:{}", exceptedId);
+        getModelMapper().invalidOtherExceptOne(exceptedId);
+    }
 }

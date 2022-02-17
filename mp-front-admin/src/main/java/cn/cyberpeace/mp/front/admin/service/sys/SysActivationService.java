@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.front.admin.service.sys;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.front.admin.config.ActivationConfig;
 import cn.cyberpeace.mp.front.admin.constant.AdminErrorCode;
@@ -25,13 +26,14 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import oshi.util.ExecutingCommand;
 
 import java.io.File;
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
@@ -52,6 +54,8 @@ public class SysActivationService {
 
     public static final String ACTIVATION_FILE = "activation";
 
+    private static DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
     @Autowired
     private LicenseService licenseService;
 
@@ -64,6 +68,9 @@ public class SysActivationService {
     @Autowired
     private SysCtlService sysCtlService;
 
+    @Autowired
+    private SysActivCtlService sysActivCtlService;
+
     /**
      * 激活
      *
@@ -71,9 +78,9 @@ public class SysActivationService {
      */
     public void activate(ActivationRequest activationRequest) {
         log.info("activationRequest:{}", activationRequest);
-        String sysUUID = querySysUUID();
-        if (!Objects.equals(activationRequest.getMachineCode(), sysUUID)) {
-            log.error("sysuuid not match! requested uuid is:{}, expected uuid is:{}", activationRequest.getMachineCode(), sysUUID);
+        String localSysUUID = querySysUUID();
+        if (!Objects.equals(activationRequest.getMachineCode(), localSysUUID)) {
+            log.error("sysuuid not match! request machine code is:{}, localSysUUID is:{}", activationRequest.getMachineCode(), localSysUUID);
             throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_SYSUUID_NOTMATCH);
         }
 
@@ -99,6 +106,10 @@ public class SysActivationService {
             ACTIVATION_CONTENT = null;
             generateEncryptedFile(activationRequest);
             log.info("encrypted file generated success!");
+
+            // 更新数据库激活限制配置
+            processActivCtl(activationRequest);
+
             ACTIVATION_CONTENT = status();
             log.info("ACTIVATION_CONTENT:{}", ACTIVATION_CONTENT);
             activMenuService.resetMenusVisibility(ACTIVATION_CONTENT);
@@ -121,18 +132,12 @@ public class SysActivationService {
             ACTIVATION_CONTENT = activationResponse;
         }
 
-        if (Objects.nonNull(ACTIVATION_CONTENT)) {
-            DateTime dateTime = new DateTime(ACTIVATION_CONTENT.getExpiredDate());
-            if (DateTime.now().isBefore(dateTime.plusDays(1))) {
-                ACTIVATION_CONTENT.setIsActived(1);
-            } else {
-                ACTIVATION_CONTENT.setIsActived(0);
-            }
-        }
+        isActived();
 
         log.info("{}", ACTIVATION_CONTENT);
         return ACTIVATION_CONTENT;
     }
+
 
     public String getValueByKey(String key) {
         log.info(key);
@@ -211,14 +216,47 @@ public class SysActivationService {
         return jsonStr;
     }
 
+    /**
+     * 判断是否过期有两种方法，1. 过期日期超限  2.系统运行时长超限
+     */
+    private void isActived() {
+        if (Objects.nonNull(ACTIVATION_CONTENT)) {
+            LocalDate expireDate = LocalDate.parse(ACTIVATION_CONTENT.getExpiredDate(), dateFormatter);
+            expireDate = expireDate.plusDays(1);
+
+            // 运行时长超限
+            boolean isRunSecondsExceeded = false;
+            // 过期日期到期
+            boolean isExpired = LocalDate.now().isBefore(expireDate);
+
+            SysActivCtlModel sysActivCtlModel = sysActivCtlService.selectValid();
+            String firstActiveDateStr = EncryptUtils.desDecrypt(sysActivCtlModel.getFirstActiveDate());
+            LocalDateTime firstActiveDatetime = LocalDateTime.parse(firstActiveDateStr, dateFormatter);
+            Duration duration = Duration.between(firstActiveDatetime.toLocalDate(), expireDate);
+            Long calculatedRunSeconds = duration.toSeconds();
+
+            if (sysActivCtlModel.getSysRunSeconds() > calculatedRunSeconds) {
+                isRunSecondsExceeded = true;
+            }
+
+            if (isRunSecondsExceeded || isExpired) {
+                ACTIVATION_CONTENT.setIsActived(0);
+            } else {
+                ACTIVATION_CONTENT.setIsActived(1);
+            }
+        }
+    }
+
+    /**
+     * 生成加密文件，存磁盘
+     * @param activationRequest
+     */
     private void generateEncryptedFile(ActivationRequest activationRequest) {
         log.info("generate encrypted file activationRequest:{}", activationRequest);
         ActivationResponse activationResponse = new ActivationResponse();
         BeanUtils.copyProperties(activationRequest, activationResponse);
-        Integer deadline = activationRequest.getDeadline();
-        DateTime dateTime = DateTime.now().plusMonths(deadline);
-        String expiredDate = dateTime.toString("yyyy-MM-dd");
-        activationResponse.setExpiredDate(expiredDate);
+        String expiredDateStr = getExpiredDateStr(activationRequest.getDeadline());
+        activationResponse.setExpiredDate(expiredDateStr);
 
         String salt = RandomUtil.randomString(8);
         String jsonStr = JSON.toJSONString(activationResponse);
@@ -272,5 +310,100 @@ public class SysActivationService {
         });
         return map;
     }
+
+    private String getExpiredDateStr(Integer months) {
+        LocalDateTime locald = LocalDateTime.now().plusMonths(months);
+        String expiredDate = locald.format(dateFormatter);
+        return expiredDate;
+    }
+
+
+    /**
+     * 激活成功，变更数据库激活限制相关配置信息
+     * @param activationRequest
+     */
+    private void processActivCtl(ActivationRequest activationRequest) {
+        log.info("update activ ctl config info");
+        SysActivCtlModel oldSysActivCtlModel = sysCtlService.getDefaultSysActivCtl();
+        SysActivCtlModel updateSysActivCtlModel = new SysActivCtlModel();
+        updateSysActivCtlModel.setId(oldSysActivCtlModel.getId());
+
+        LocalDateTime now = LocalDateTime.now();
+        String activeDateStr = now.format(dateFormatter);
+        String expiredDateStr = getExpiredDateStr(activationRequest.getDeadline());
+
+        if (StringUtils.isNotBlank(oldSysActivCtlModel.getLicenseCode())) {
+            // 不是首次激活
+            String oldLicenseCode = EncryptUtils.desDecrypt(oldSysActivCtlModel.getLicenseCode());
+
+            // todo 考虑相同激活码，如果原来已经过期了怎么处理？
+            // 1. 相同激活码 last_active_date，active_count变动
+            if (Objects.equals(oldLicenseCode, activationRequest.getVerifyCode())) {
+                updateSysActivCtlModel.setActiveCount(oldSysActivCtlModel.getActiveCount() + 1);
+                processActivCtlWhenReActiveWithOldLicense(updateSysActivCtlModel, activeDateStr);
+            } else {
+                // 2. 不同激活码，当做一次全新的激活，先将其他激活状态都设置成status=0
+                processActivCtlWhenReActiveWithNewLicense(activeDateStr, expiredDateStr);
+            }
+        } else {
+            // 首次激活，添加first_active_date, last_active_date, expire_date, active_count;
+            processActivCtlWhenFirstActiveWithNewLicense(updateSysActivCtlModel, activeDateStr, expiredDateStr);
+        }
+    }
+
+    /**
+     * 用旧的license再次激活
+     * last_active_date，active_count变动
+     *
+     * @param activeDateStr
+     */
+    private void processActivCtlWhenReActiveWithOldLicense(SysActivCtlModel updateSysActivCtlModel, String activeDateStr) {
+        // 不更新first_active_date
+        updateSysActivCtlModel.setFirstActiveDate(null);
+        updateSysActivCtlModel.setLastActiveDate(EncryptUtils.desEncrypt(activeDateStr));
+        sysActivCtlService.update(updateSysActivCtlModel);
+    }
+
+
+    /**
+     * 用新的license再次激活
+     * 当做一次全新的激活，先将其他激活状态都设置成status=0
+     * @param activeDateStr
+     * @param expiredDateStr
+     */
+    // todo 考虑用事务
+    private void processActivCtlWhenReActiveWithNewLicense(String activeDateStr, String expiredDateStr) {
+        SysActivCtlModel newSysActivCtlModel = new SysActivCtlModel();
+        Long currTs = System.currentTimeMillis();
+        newSysActivCtlModel.setSysTimestamp(currTs);
+        String suffix = RandomUtil.randomString(6);
+        newSysActivCtlModel.setSysUuidSuffix(suffix);
+        newSysActivCtlModel.setFirstActiveDate(EncryptUtils.desEncrypt(activeDateStr));
+        newSysActivCtlModel.setLastActiveDate(EncryptUtils.desEncrypt(activeDateStr));
+        newSysActivCtlModel.setExpireDate(EncryptUtils.desEncrypt(expiredDateStr));
+        newSysActivCtlModel.setActiveCount(1);
+
+        ObjServiceResult<SysActivCtlModel> objResult  = sysActivCtlService.create(newSysActivCtlModel);
+        if (Objects.nonNull(objResult.getSource())) {
+            log.info("Generate default activCtlModel success! {}", objResult.getSource().getObj());
+            newSysActivCtlModel = objResult.getSource().getObj();
+            sysActivCtlService.invalidOtherExceptOne(newSysActivCtlModel.getId());
+        }
+    }
+
+    /**
+     * 用新的license第一次激活
+     * @param updateSysActivCtlModel
+     * @param activeDateStr
+     * @param expiredDateStr
+     */
+    private void processActivCtlWhenFirstActiveWithNewLicense(SysActivCtlModel updateSysActivCtlModel, String activeDateStr, String expiredDateStr) {
+        updateSysActivCtlModel.setFirstActiveDate(EncryptUtils.desEncrypt(activeDateStr));
+        updateSysActivCtlModel.setLastActiveDate(EncryptUtils.desEncrypt(activeDateStr));
+        updateSysActivCtlModel.setExpireDate(EncryptUtils.desEncrypt(expiredDateStr));
+        updateSysActivCtlModel.setActiveCount(1);
+        sysActivCtlService.update(updateSysActivCtlModel);
+    }
+
 
 }

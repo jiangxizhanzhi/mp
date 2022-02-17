@@ -30,18 +30,19 @@ public class SysCtlService {
     private volatile boolean isSystemTimestampRollback = false;
 
     /**
-     * 定时任务调度，刷新系统时间，防止服务器时间回拨，阈值
-     * 每20分钟执行一次
+     * 定时任务调度，刷新系统时间，同时更新系统运行时长 sys_run_seconds
+     * 每30分钟执行一次
      * @return
      */
-    @Scheduled(initialDelay = 10 * 1000, fixedRate = 20 * 60 * 1000)
+    @Scheduled(initialDelay = 10 * 1000, fixedRate = 30 * 60 * 1000)
+//    @Scheduled(initialDelay = 10 * 1000, fixedRate = 60 * 1000)
     public boolean updateSysTs() {
 
-        if (isSystemTimestampRollback) {
-            // 发生时间回拨，停止变更
-            log.error("time rollback occured!");
-            return false;
-        }
+//        if (isSystemTimestampRollback) {
+//            // 发生时间回拨，停止变更
+//            log.error("time rollback occured!");
+//            return false;
+//        }
 
         // update system timestamp
         SysActivCtlModel oldActivCtlModel = sysActivCtlService.selectValid();
@@ -49,20 +50,36 @@ public class SysCtlService {
             // not null, to update  example: oldTs 1644778431000
             Long currTs = System.currentTimeMillis();
             Long oldTs = oldActivCtlModel.getSysTimestamp();
-            if (currTs >= oldTs) {
+            if (Objects.nonNull(oldTs) && oldTs > 0 && currTs >= oldTs) {
+                // 更新数据库系统时间戳，同时累加run_seconds
+                Long diff = currTs - oldTs;
+                Long diffSeconds = diff / 1000;
+                Long oldRunSeconds = oldActivCtlModel.getSysRunSeconds();
                 SysActivCtlModel newActivCtlModel = new SysActivCtlModel();
                 newActivCtlModel.setId(oldActivCtlModel.getId());
                 newActivCtlModel.setSysTimestamp(currTs);
+
+                if (Objects.nonNull(oldRunSeconds)) {
+                    newActivCtlModel.setSysRunSeconds(diffSeconds + oldRunSeconds);
+                } else {
+                    // todo ?
+                    newActivCtlModel.setSysRunSeconds(0L);
+                }
                 // update sysActivCtlModel
                 sysActivCtlService.update(newActivCtlModel);
                 log.info("update sysTs success! {}", newActivCtlModel);
                 return true;
             } else {
-                Long diff = oldTs - currTs;
-                if (diff > maxDiffMilliSecond) {
-                    isSystemTimestampRollback = true;
-                    log.error("Detected that system timestamp has rollback, currentTimestamp:{}, oldTimestamp:{}, diff:{}, maxDiff:{}", currTs, oldTs, diff, maxDiffMilliSecond);
-                }
+                // 直接更新系统时间戳，不累加run_seconds
+//                Long diff = oldTs - currTs;
+//                if (diff > maxDiffMilliSecond) {
+//                    isSystemTimestampRollback = true;
+//                    log.error("Detected that system timestamp has rollback, currentTimestamp:{}, oldTimestamp:{}, diff:{}, maxDiff:{}", currTs, oldTs, diff, maxDiffMilliSecond);
+//                }
+                SysActivCtlModel newActivCtlModel = new SysActivCtlModel();
+                newActivCtlModel.setId(oldActivCtlModel.getId());
+                newActivCtlModel.setSysTimestamp(currTs);
+                sysActivCtlService.update(newActivCtlModel);
             }
         } else {
             // null, insert a default sysActivCtlModel
@@ -91,7 +108,6 @@ public class SysCtlService {
         if (Objects.isNull(sysActivCtlModel)) {
             sysActivCtlModel = new SysActivCtlModel();
             Long currTs = System.currentTimeMillis();
-            sysActivCtlModel.setId("1");
             sysActivCtlModel.setSysTimestamp(currTs);
             String suffix = RandomUtil.randomString(6);
             sysActivCtlModel.setSysUuidSuffix(suffix);

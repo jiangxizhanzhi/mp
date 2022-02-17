@@ -22,4 +22,6 @@ public interface SysActivCtlMapper extends BaseModelMapper<SysActivCtlModel> {
 
     SysActivCtlModel selectValid();
 
+    void invalidOtherExceptOne(String exceptedId);
+
 }

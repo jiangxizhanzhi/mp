@@ -12,7 +12,7 @@ CREATE TABLE mp_front_admin_activ_ctl
     `expire_date`   varchar(256)  NULL COMMENT '（密文）过期日期',
     `active_count`    int NOT NULL DEFAULT 1 COMMENT '同一个激活码的激活次数',
     `sys_timestamp`   long NULL COMMENT '定时任务记录的系统时间戳，发生时间回拨，则该值也回到回拨时间，用于累计系统运行秒数',
-    `sys_run_seconds`   long NULL COMMENT '系统运行秒数',
+    `sys_run_seconds`   long NULL DEFAULT 0 COMMENT '系统运行秒数',
     `status`  int  NOT NULL DEFAULT 1 COMMENT '状态 1:有效 0:无效',
     `create_time` datetime      NOT NULL                DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time` datetime      NOT NULL                DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
