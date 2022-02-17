@@ -33,7 +33,6 @@ import oshi.util.ExecutingCommand;
 import java.io.File;
 import java.time.Duration;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
@@ -227,12 +226,12 @@ public class SysActivationService {
             // 运行时长超限
             boolean isRunSecondsExceeded = false;
             // 过期日期到期
-            boolean isExpired = LocalDate.now().isBefore(expireDate);
+            boolean isExpired = !LocalDate.now().isBefore(expireDate);
 
             SysActivCtlModel sysActivCtlModel = sysActivCtlService.selectValid();
             String firstActiveDateStr = EncryptUtils.desDecrypt(sysActivCtlModel.getFirstActiveDate());
-            LocalDateTime firstActiveDatetime = LocalDateTime.parse(firstActiveDateStr, dateFormatter);
-            Duration duration = Duration.between(firstActiveDatetime.toLocalDate(), expireDate);
+            LocalDate firstActiveDate = LocalDate.parse(firstActiveDateStr, dateFormatter);
+            Duration duration = Duration.between(firstActiveDate.atTime(0, 0, 0), expireDate.atTime(0, 0, 0));
             Long calculatedRunSeconds = duration.toSeconds();
 
             if (sysActivCtlModel.getSysRunSeconds() > calculatedRunSeconds) {
@@ -241,6 +240,11 @@ public class SysActivationService {
 
             if (isRunSecondsExceeded || isExpired) {
                 ACTIVATION_CONTENT.setIsActived(0);
+                // 过期状态，更新激活限制项配置
+                SysActivCtlModel updateActivCtlModel = new SysActivCtlModel();
+                updateActivCtlModel.setId(sysActivCtlModel.getId());
+                updateActivCtlModel.setStatus(0);
+                sysActivCtlService.update(updateActivCtlModel);
             } else {
                 ACTIVATION_CONTENT.setIsActived(1);
             }
@@ -312,8 +316,8 @@ public class SysActivationService {
     }
 
     private String getExpiredDateStr(Integer months) {
-        LocalDateTime locald = LocalDateTime.now().plusMonths(months);
-        String expiredDate = locald.format(dateFormatter);
+        LocalDate localDate = LocalDate.now().plusMonths(months);
+        String expiredDate = localDate.format(dateFormatter);
         return expiredDate;
     }
 
@@ -328,9 +332,9 @@ public class SysActivationService {
         SysActivCtlModel updateSysActivCtlModel = new SysActivCtlModel();
         updateSysActivCtlModel.setId(oldSysActivCtlModel.getId());
 
-        LocalDateTime now = LocalDateTime.now();
-        String activeDateStr = now.format(dateFormatter);
+        String activeDateStr = LocalDate.now().format(dateFormatter);
         String expiredDateStr = getExpiredDateStr(activationRequest.getDeadline());
+        String encryptedLicenseCode = EncryptUtils.desEncrypt(activationRequest.getVerifyCode());
 
         if (StringUtils.isNotBlank(oldSysActivCtlModel.getLicenseCode())) {
             // 不是首次激活
@@ -343,11 +347,11 @@ public class SysActivationService {
                 processActivCtlWhenReActiveWithOldLicense(updateSysActivCtlModel, activeDateStr);
             } else {
                 // 2. 不同激活码，当做一次全新的激活，先将其他激活状态都设置成status=0
-                processActivCtlWhenReActiveWithNewLicense(activeDateStr, expiredDateStr);
+                processActivCtlWhenReActiveWithNewLicense(activeDateStr, expiredDateStr, encryptedLicenseCode);
             }
         } else {
             // 首次激活，添加first_active_date, last_active_date, expire_date, active_count;
-            processActivCtlWhenFirstActiveWithNewLicense(updateSysActivCtlModel, activeDateStr, expiredDateStr);
+            processActivCtlWhenFirstActiveWithNewLicense(updateSysActivCtlModel, activeDateStr, expiredDateStr, encryptedLicenseCode);
         }
     }
 
@@ -359,6 +363,7 @@ public class SysActivationService {
      */
     private void processActivCtlWhenReActiveWithOldLicense(SysActivCtlModel updateSysActivCtlModel, String activeDateStr) {
         // 不更新first_active_date
+        log.info("activeDateStr:{}", activeDateStr);
         updateSysActivCtlModel.setFirstActiveDate(null);
         updateSysActivCtlModel.setLastActiveDate(EncryptUtils.desEncrypt(activeDateStr));
         sysActivCtlService.update(updateSysActivCtlModel);
@@ -372,7 +377,8 @@ public class SysActivationService {
      * @param expiredDateStr
      */
     // todo 考虑用事务
-    private void processActivCtlWhenReActiveWithNewLicense(String activeDateStr, String expiredDateStr) {
+    private void processActivCtlWhenReActiveWithNewLicense(String activeDateStr, String expiredDateStr, String encryptedLicenseCode) {
+        log.info("activeDateStr:{}, expiredDateStr:{}", activeDateStr, expiredDateStr);
         SysActivCtlModel newSysActivCtlModel = new SysActivCtlModel();
         Long currTs = System.currentTimeMillis();
         newSysActivCtlModel.setSysTimestamp(currTs);
@@ -380,6 +386,7 @@ public class SysActivationService {
         newSysActivCtlModel.setSysUuidSuffix(suffix);
         newSysActivCtlModel.setFirstActiveDate(EncryptUtils.desEncrypt(activeDateStr));
         newSysActivCtlModel.setLastActiveDate(EncryptUtils.desEncrypt(activeDateStr));
+        newSysActivCtlModel.setLicenseCode(encryptedLicenseCode);
         newSysActivCtlModel.setExpireDate(EncryptUtils.desEncrypt(expiredDateStr));
         newSysActivCtlModel.setActiveCount(1);
 
@@ -397,10 +404,12 @@ public class SysActivationService {
      * @param activeDateStr
      * @param expiredDateStr
      */
-    private void processActivCtlWhenFirstActiveWithNewLicense(SysActivCtlModel updateSysActivCtlModel, String activeDateStr, String expiredDateStr) {
+    private void processActivCtlWhenFirstActiveWithNewLicense(SysActivCtlModel updateSysActivCtlModel, String activeDateStr, String expiredDateStr, String encryptedLicenseCode) {
+        log.info("activeDateStr:{}, expiredDateStr:{}", activeDateStr, expiredDateStr);
         updateSysActivCtlModel.setFirstActiveDate(EncryptUtils.desEncrypt(activeDateStr));
         updateSysActivCtlModel.setLastActiveDate(EncryptUtils.desEncrypt(activeDateStr));
         updateSysActivCtlModel.setExpireDate(EncryptUtils.desEncrypt(expiredDateStr));
+        updateSysActivCtlModel.setLicenseCode(encryptedLicenseCode);
         updateSysActivCtlModel.setActiveCount(1);
         sysActivCtlService.update(updateSysActivCtlModel);
     }
