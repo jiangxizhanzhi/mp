@@ -30,9 +30,9 @@ public class CsceneInit implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         // 本地开发环境不运行资源的更新和删除
-//        if (!baseAppConfig.isRunInit()) {
-//            return;
-//        }
+        if (!baseAppConfig.isRunInit()) {
+            return;
+        }
         int count = csceneService.getActiveVirtualDeviceCount();
         CSceneElementCountModel countModel = countMapper.first(new HumanCondition());
         if (countModel == null) {
