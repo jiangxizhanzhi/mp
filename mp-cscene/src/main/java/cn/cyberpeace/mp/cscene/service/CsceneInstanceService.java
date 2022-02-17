@@ -27,9 +27,10 @@ import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
 import cn.cyberpeace.mp.cscene.service.action.CsceneCallAction;
 import cn.cyberpeace.mp.cscene.service.taskpool.CsceneReportTaskPool;
+import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
+import cn.cyberpeace.mp.cscene.util.ReentrantLockUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
-import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionFlowBO;
@@ -49,6 +50,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -146,15 +148,27 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return new ServiceResult<>(instanceHandler.toData());
     }
 
+    @Transactional
     public ServiceResult<Boolean> deleteById(String id, boolean logic, CsceneContextBO context) {
-        var instanceHandler = new CsceneInstanceHandler(id, context);
-        var flag = instanceHandler.delete(logic);
-        if (flag) {
-            CsceneReportTaskPool.getInstance().executeTask(() -> csceneReporter.reportDeleteCsceneInstance(id));
+        if (ReentrantLockUtils.tryLock(id)) {
+            try {
+                var instanceHandler = new CsceneInstanceHandler(id, context);
+                if (instanceHandler.getCscene().getDeleted() == false) {
+                    NodeLimitUtils.substractLimitedNodeCount(instanceHandler);
+                }
+                var flag = instanceHandler.delete(logic);
+                if (flag) {
+                    CsceneReportTaskPool.getInstance().executeTask(() -> csceneReporter.reportDeleteCsceneInstance(id));
+                }
+                return new ServiceResult<>(flag);
+            } finally {
+                ReentrantLockUtils.unLock(id);
+            }
         }
-        return new ServiceResult<>(flag);
+        return new ServiceResult<>(true);
     }
 
+    @Transactional
     public ServiceResult<Integer> bulkDeleteByIds(String[] ids, boolean logic, CsceneContextBO context) {
         var result = 0;
         Map<String, Object> originPassThrough = SysContextHolder.getPassThroughMap();
@@ -173,6 +187,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
     }
 
+    @Transactional
     public ServiceResult<Boolean> clearById(String id, CsceneContextBO context) {
         var csceneInstanceObjs = getCsceneInstanceObjs(List.of(id)).stream()
                 .filter(BaseCsceneModel::getDeleted).collect(Collectors.toList());

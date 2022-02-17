@@ -2,13 +2,15 @@ package cn.cyberpeace.mp.cscene.core;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
-import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneRoleBO;
+import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.core.base.BaseCsceneHandler;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceRoleModel;
@@ -19,6 +21,7 @@ import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneRoleMapper;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
+import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.service.SceneConfigService;
 import cn.cyberpeace.mp.scene.service.SceneService;
@@ -128,6 +131,10 @@ public class CsceneHandler extends BaseCsceneHandler<
             CsceneDataModifier.supplyProtocol(csceneInstance, AccessMode.Protocol.CONSOLE);
         }
         var instanceHandler = new CsceneInstanceHandler(csceneInstance, getContext());
+        // 节点数量增加失败 说明已到达数量上限
+        if (!NodeLimitUtils.addLimitedNodeCount(instanceHandler)) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_USING_NODE_LIMIT);
+        }
         instanceHandler.create();
         return instanceHandler.toData();
     }
@@ -255,7 +262,7 @@ public class CsceneHandler extends BaseCsceneHandler<
     public boolean delete(boolean logic, boolean withInstance) {
         if (withInstance) {
             reloadCsceneInstances();
-            for (var csceneInstance: ListUtils.union(getCscene().getTestScenes(), getCscene().getAppScenes())) {
+            for (var csceneInstance : ListUtils.union(getCscene().getTestScenes(), getCscene().getAppScenes())) {
                 var instanceHandler = new CsceneInstanceHandler(csceneInstance, getContext());
                 instanceHandler.delete(logic);
             }

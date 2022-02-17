@@ -78,7 +78,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         return cscene.getSceneConfig();
     }
 
-    private int getActiveVirtualDeviceCount() {
+    public int getActiveVirtualDeviceCount() {
         List<String> sceneIds = this.getRunningSceneIds();
         if (CollectionUtils.isEmpty(sceneIds)) {
             return 0;
@@ -313,6 +313,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         return new ServiceResult<>(csceneHandler.createTestInstance(unique, cscene));
     }
 
+    @Transactional
     public ServiceResult<CsceneInstanceBO> createTestInstance(String csceneId, boolean unique,
                                                               CsceneInstanceCreateContextBO createContext) {
         if (createContext == null) {
@@ -359,6 +360,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         return new ServiceResult<>(csceneHandler.createAppInstance(unique, cscene));
     }
 
+    @Transactional
     public ServiceResult<CsceneInstanceBO> createAppInstance(String csceneId, boolean unique,
                                                              CsceneInstanceCreateContextBO createContext) {
         if (createContext == null) {
