@@ -11,6 +11,6 @@ import cn.cyberpeace.mp.front.admin.model.SysActivCtlModel;
  */
 public interface SysActivCtlService extends BaseModelService<SysActivCtlModel, QueryParams> {
 
-    SysActivCtlModel selectFirst();
+    SysActivCtlModel selectValid();
 
 }

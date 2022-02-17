@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.front.admin.service.sys;
 
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.front.admin.model.SysActivCtlModel;
+import cn.hutool.core.util.RandomUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,7 +44,7 @@ public class SysCtlService {
         }
 
         // update system timestamp
-        SysActivCtlModel oldActivCtlModel = sysActivCtlService.selectFirst();
+        SysActivCtlModel oldActivCtlModel = sysActivCtlService.selectValid();
         if (Objects.nonNull(oldActivCtlModel)) {
             // not null, to update  example: oldTs 1644778431000
             Long currTs = System.currentTimeMillis();
@@ -86,18 +87,18 @@ public class SysCtlService {
      * @return
      */
     synchronized private SysActivCtlModel generateOrGetDefaultActivCtlModel() {
-        SysActivCtlModel sysActivCtlModel = sysActivCtlService.selectFirst();
+        SysActivCtlModel sysActivCtlModel = sysActivCtlService.selectValid();
         if (Objects.isNull(sysActivCtlModel)) {
             sysActivCtlModel = new SysActivCtlModel();
             Long currTs = System.currentTimeMillis();
             sysActivCtlModel.setId("1");
             sysActivCtlModel.setSysTimestamp(currTs);
-            sysActivCtlModel.setActiveTimestamp(currTs);
+            String suffix = RandomUtil.randomString(6);
+            sysActivCtlModel.setSysUuidSuffix(suffix);
 
             ObjServiceResult<SysActivCtlModel> objResult  = sysActivCtlService.create(sysActivCtlModel);
             if (Objects.nonNull(objResult.getSource())) {
                 log.info("Generate default activCtlModel success! {}", objResult.getSource().getObj());
-//                sysActivCtlModel = sysActivCtlMapper.selectFirst();
                 sysActivCtlModel = objResult.getSource().getObj();
             }
         } else {

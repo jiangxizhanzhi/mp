@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 public class SysActivCtlFields extends BaseModelFields {
     public static final DynamicFields allFields = new DynamicFields(ClassUtils.getBeanClassFields(SysActivCtlModel.class));
 
-    public static final DynamicFields availableFields = new DynamicFields(SysActivCtlModel::getTenant, SysActivCtlModel::getActiveTimestamp,
+    public static final DynamicFields availableFields = new DynamicFields(SysActivCtlModel::getTenant, SysActivCtlModel::getSysUuidSuffix,
             SysActivCtlModel::getSysTimestamp).merge(BaseModelFields.availableFields);
 
     public static final DynamicFields hiddenFields = allFields.subtract(availableFields);

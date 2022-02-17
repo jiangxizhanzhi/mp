@@ -1,17 +1,13 @@
 package cn.cyberpeace.mp.front.admin.config;
 
-import cn.cyberpeace.mp.front.admin.filter.SysAdminFilter;
 import cn.cyberpeace.mp.front.admin.service.sys.SysCtlService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.MessageSource;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
 import javax.annotation.PostConstruct;
-import javax.servlet.DispatcherType;
 
 /**
  * @Description:
@@ -40,7 +36,7 @@ public class FrontAdminConfiguration {
     }
 
 
-    @Bean
+    /*@Bean
     public FilterRegistrationBean licenseFilterRegistrationBean() {
         FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();
         filterRegistrationBean.setFilter(new SysAdminFilter(sysCtlService, converter));
@@ -48,7 +44,7 @@ public class FrontAdminConfiguration {
         filterRegistrationBean.setOrder(1);
         filterRegistrationBean.setDispatcherTypes(DispatcherType.REQUEST, new DispatcherType[]{DispatcherType.FORWARD, DispatcherType.INCLUDE, DispatcherType.ASYNC});
         return filterRegistrationBean;
-    }
+    }*/
 
     /*
     @Bean

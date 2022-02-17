@@ -20,6 +20,6 @@ public interface SysActivCtlMapper extends BaseModelMapper<SysActivCtlModel> {
 
     List<SysActivCtlModel> selectAll();
 
-    SysActivCtlModel selectFirst();
+    SysActivCtlModel selectValid();
 
 }

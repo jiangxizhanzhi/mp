@@ -27,7 +27,7 @@ public class SysActivCtlServiceImpl extends BaseModelServiceImpl<SysActivCtlMode
     }
 
     @Override
-    public SysActivCtlModel selectFirst() {
-        return getModelMapper().selectFirst();
+    public SysActivCtlModel selectValid() {
+        return getModelMapper().selectValid();
     }
 }

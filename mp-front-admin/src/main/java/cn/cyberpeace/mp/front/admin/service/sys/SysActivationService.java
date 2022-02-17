@@ -18,12 +18,12 @@ import cn.cyberpeace.mp.front.admin.util.EncryptUtils;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.crypto.digest.MD5;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -167,9 +167,7 @@ public class SysActivationService {
      */
     public String querySysUUID() {
         SysActivCtlModel sysActivCtlModel = sysCtlService.getDefaultSysActivCtl();
-        Long activeTs = sysActivCtlModel.getActiveTimestamp();
-        String activTsStr = activeTs.toString();
-        activTsStr = activTsStr.substring(activTsStr.length() - 6, activTsStr.length());
+        String suffix = sysActivCtlModel.getSysUuidSuffix();
 
         String uuid = "";
         // If root privileges this will work
@@ -180,7 +178,7 @@ public class SysActivationService {
             }
         }
 
-        uuid = uuid + "-" + activTsStr;
+        uuid = uuid + "-" + suffix;
         return uuid;
     }
 
@@ -222,7 +220,7 @@ public class SysActivationService {
         String expiredDate = dateTime.toString("yyyy-MM-dd");
         activationResponse.setExpiredDate(expiredDate);
 
-        String salt = RandomStringUtils.random(8);
+        String salt = RandomUtil.randomString(8);
         String jsonStr = JSON.toJSONString(activationResponse);
         String content = salt + jsonStr;
         log.info("salt:{}", salt);
