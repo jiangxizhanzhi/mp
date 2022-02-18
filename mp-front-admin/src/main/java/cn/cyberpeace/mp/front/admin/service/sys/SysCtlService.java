@@ -6,7 +6,6 @@ import cn.hutool.core.util.RandomUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -23,10 +22,6 @@ public class SysCtlService {
 
     @Autowired
     private SysActivCtlService sysActivCtlService;
-
-    // 系统时间回拨默认阈值为12小时 12 * 60 * 60 * 1000;
-    @Value("${mp.admin.max-millisecond-rollback:43200000}")
-    private Long maxDiffMilliSecond;
 
     private volatile boolean isSystemTimestampRollback = false;
 
@@ -46,7 +41,7 @@ public class SysCtlService {
 //        }
 
         // update system timestamp
-        SysActivCtlModel oldActivCtlModel = sysActivCtlService.selectValid();
+        SysActivCtlModel oldActivCtlModel = generateOrGetDefaultActivCtlModel();
         // 判断系统是否已经注册，未激活不统计运行时长
         if (Objects.nonNull(oldActivCtlModel) && StringUtils.isNotBlank(oldActivCtlModel.getFirstActiveDate())) {
             // not null, to update  example: oldTs 1644778431000
@@ -83,9 +78,6 @@ public class SysCtlService {
                 newActivCtlModel.setSysTimestamp(currTs);
                 sysActivCtlService.update(newActivCtlModel);
             }
-        } else {
-            // null, insert a default sysActivCtlModel
-            generateOrGetDefaultActivCtlModel();
         }
 
         return false;
