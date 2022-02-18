@@ -5,7 +5,7 @@ CREATE TABLE mp_front_admin_activ_ctl
     `id`          varchar(64)   NOT NULL COMMENT 'id',
     `tenant`      varchar(64)   NOT NULL COMMENT '所属租户' default '',
     `salt`        varchar(64)   NULL COMMENT '随机盐',
-    `sys_uuid_suffix`        varchar(10)   NULL COMMENT '系统UUID后缀，6位随机数字+字母，当前表中每次新增一条数据，则随机产生一个suffix',
+    `suffix`        varchar(10)   NULL COMMENT '6位随机数字+字母，当前表中每次新增一条数据，则随机产生一个suffix',
     `license_code`        varchar(256)   NULL COMMENT '（密文）激活码',
     `first_active_date`   varchar(256)  NULL COMMENT '（密文）系统首次激活日期。如果同一个license_code多次激活，最终的过期日期以第一次激活日期为准',
     `last_active_date`   varchar(256)  NULL COMMENT '（密文）系统最近一次激活日期，同一个激活码的情况下',

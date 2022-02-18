@@ -32,7 +32,7 @@ public class SysActivCtlModel extends BaseModel {
 
     @ApiModelProperty(value = "系统UUID后缀，6位随机数字+字母，当前表中每次新增一条数据，则随机产生一个suffix")
     @DefaultStr
-    private String sysUuidSuffix;
+    private String suffix;
 
     @ApiModelProperty(value = "（密文）激活码")
     @DefaultStr

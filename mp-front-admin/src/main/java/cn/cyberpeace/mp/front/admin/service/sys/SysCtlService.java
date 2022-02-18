@@ -97,14 +97,14 @@ public class SysCtlService {
      * generate a default with current timestamp as system_ts and activ_ts;
      * @return
      */
-    synchronized private SysActivCtlModel generateOrGetDefaultActivCtlModel() {
+    synchronized public SysActivCtlModel generateOrGetDefaultActivCtlModel() {
         SysActivCtlModel sysActivCtlModel = sysActivCtlService.selectValid();
         if (Objects.isNull(sysActivCtlModel)) {
             sysActivCtlModel = new SysActivCtlModel();
             Long currTs = System.currentTimeMillis();
             sysActivCtlModel.setSysTimestamp(currTs);
             String suffix = RandomUtil.randomString(6);
-            sysActivCtlModel.setSysUuidSuffix(suffix);
+            sysActivCtlModel.setSuffix(suffix);
 
             ObjServiceResult<SysActivCtlModel> objResult  = sysActivCtlService.create(sysActivCtlModel);
             if (Objects.nonNull(objResult.getSource())) {
