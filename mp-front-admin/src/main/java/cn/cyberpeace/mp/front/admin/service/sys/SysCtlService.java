@@ -101,8 +101,9 @@ public class SysCtlService {
         SysActivCtlModel sysActivCtlModel = sysActivCtlService.selectValid();
         if (Objects.isNull(sysActivCtlModel)) {
             sysActivCtlModel = new SysActivCtlModel();
-            Long currTs = System.currentTimeMillis();
-            sysActivCtlModel.setSysTimestamp(currTs);
+            // 只有在一个新的license第一次激活的时候才会写入系统时间戳
+//            Long currTs = System.currentTimeMillis();
+//            sysActivCtlModel.setSysTimestamp(currTs);
             String suffix = RandomUtil.randomString(6);
             sysActivCtlModel.setSuffix(suffix);
 

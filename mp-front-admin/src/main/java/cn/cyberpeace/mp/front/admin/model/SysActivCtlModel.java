@@ -55,6 +55,7 @@ public class SysActivCtlModel extends BaseModel {
     private Integer activeCount;
 
     @ApiModelProperty(value = "定时任务记录的系统时间戳，发生时间回拨，则该值也回到回拨时间，用于累计系统运行秒数")
+    @DefaultLong(-1)
     private Long sysTimestamp;
 
     @ApiModelProperty(value = "系统运行秒数(该条件与过期日期，二者达到其一即可判断为license过期。防止通过回拨服务器时间，达到白嫖目的)")

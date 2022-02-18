@@ -422,6 +422,7 @@ public class SysActivationService {
         updateSysActivCtlModel.setLastActiveDate(EncryptUtils.desEncrypt(activeDateStr));
         updateSysActivCtlModel.setExpireDate(EncryptUtils.desEncrypt(expiredDateStr));
         updateSysActivCtlModel.setLicenseCode(encryptedLicenseCode);
+        updateSysActivCtlModel.setSysTimestamp(System.currentTimeMillis());
         updateSysActivCtlModel.setActiveCount(1);
         sysActivCtlService.update(updateSysActivCtlModel);
     }
