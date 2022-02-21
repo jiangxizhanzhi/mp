@@ -88,7 +88,7 @@ public class UserSynchronizationService extends BaseModelController<UserModel, U
         List<UserModel> userModels = new ArrayList<>();
         userModels = userService.queryAllUsers();
         userModels.forEach(user -> {
-            if (!userIds.contains(user.getId())) {
+            if (!userIds.contains(user.getId()) || !user.getId().equals("3f655d87112f4ae094bbaf70830e20aa")) {
                 getModelService().delete(user.getId());
             }
         });
