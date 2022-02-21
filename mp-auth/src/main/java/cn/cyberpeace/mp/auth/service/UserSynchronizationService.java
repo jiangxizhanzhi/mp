@@ -114,8 +114,8 @@ public class UserSynchronizationService extends BaseModelController<UserModel, U
         if (hldUserDto.getId().toString() != null) {
             userRequest.setId(hldUserDto.getId().toString());
         }
-        if (hldUserDto.getUserName() != null) {
-            userRequest.setUsername(hldUserDto.getUserName());
+        if (hldUserDto.getAccount() != null) {
+            userRequest.setUsername(hldUserDto.getAccount());
         }
         if (hldUserDto.getName() != null) {
             userRequest.setName(hldUserDto.getName());
