@@ -80,7 +80,7 @@ public class UserSynchronizationService extends BaseModelController<UserModel, U
             if (getModelService().getUserDto(userId) == null) {
                 UserRequest createRequest = HLDUser2UserRequest(in);
                 getModelService().add(createRequest);
-            } else {
+            } else if (!in.getUserUpdateTime().equals(getModelService().getUserDto(userId).getUpdateTime())) {
                 UserRequest modifyRequest = HLDUser2UserRequest(in);
                 getModelService().modify(modifyRequest);
             }
