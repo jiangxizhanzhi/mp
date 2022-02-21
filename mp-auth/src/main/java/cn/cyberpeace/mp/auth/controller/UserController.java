@@ -170,6 +170,9 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
             }
         }
         UserDto userDto = getModelService().getUserDto(hldUserRequest.getUserId());
+        if (userDto == null) {
+            return new ServiceResult<>();
+        }
         String jwt = JwtUtils.generateToken(new JwtUtils.UserInfo(userDto.getId(), userDto.getUsername(), userDto.getTokenSecret()));
         LoginResp loginResp = new LoginResp();
         loginResp.setUser(userDto);
