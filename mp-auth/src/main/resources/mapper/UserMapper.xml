@@ -17,4 +17,8 @@
             #{userName}
         </foreach>
     </select>
+
+    <select id="queryAllUsers" resultType="cn.cyberpeace.mp.auth.model.UserModel">
+        select * from mp_auth_user
+    </select>
 </mapper>

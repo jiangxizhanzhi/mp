@@ -1,6 +1,9 @@
 package cn.cyberpeace.mp.auth.controller;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
+import cn.cyberpeace.mp.auth.dto.login.LoginResp;
+import cn.cyberpeace.mp.auth.dto.user.HLDLoginCheckResponse;
+import cn.cyberpeace.mp.auth.dto.user.HLDUserRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.dto.user.UserRequest;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -8,11 +11,14 @@ import cn.cyberpeace.mp.auth.service.UserHeartbeatService;
 import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
+import cn.cyberpeace.mp.auth.util.JwtUtils;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
 import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
@@ -23,6 +29,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -33,6 +40,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
+
+import java.io.IOException;
 
 /**
  * @Description: 用户管理接口
@@ -52,10 +61,15 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
     private UserHeartbeatService heartbeatService;
 
     @Autowired
+    private UserService userService;
+
+    @Autowired
     public UserController(UserService modelService) {
         setModelService(modelService);
     }
 
+    @Value("${mp.hld.login-url}")
+    private String hldLoginUrl;
 
     @Override
     @ApiIgnore
@@ -138,4 +152,28 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
         return ServiceResult.success(userModel);
     }
 
+    @ApiOperation(value = "HLD定制化登录接口", notes = "")
+    @PostMapping("/hld/login")
+    @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.LOGIN, title = "用户登录", target = OpTargetEnums.USER)
+    public ServiceResult<LoginResp> login(@RequestBody(required = false) HLDUserRequest hldUserRequest) {
+        if (hldUserRequest.getSessionId() != null) {
+            String response = "";
+            String hldCheckUrl = hldLoginUrl + "/xinan-server/login/logincheck?sessionId=";
+            try {
+                response = HttpUtils.sendGet(hldCheckUrl + hldUserRequest.getSessionId());
+            } catch (IOException e) {
+                log.error("get hldLoginCheck response error,msg : {}", e);
+            }
+            HLDLoginCheckResponse hldLoginCheckResponse = JsonCommon.parse(response, HLDLoginCheckResponse.class);
+            if (hldLoginCheckResponse.getCode() != null && hldLoginCheckResponse.getCode() != 200) {
+                return new ServiceResult<>();
+            }
+        }
+        UserDto userDto = getModelService().getUserDto(hldUserRequest.getUserId());
+        String jwt = JwtUtils.generateToken(new JwtUtils.UserInfo(userDto.getId(), userDto.getUsername(), userDto.getTokenSecret()));
+        LoginResp loginResp = new LoginResp();
+        loginResp.setUser(userDto);
+        loginResp.setToken(jwt);
+        return ServiceResult.success(loginResp);
+    }
 }

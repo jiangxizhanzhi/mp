@@ -24,7 +24,9 @@ public class UserFields extends BaseModelFields {
 
     public static final DynamicFields hiddenFields = allFields.subtract(availableFields);
 
-    public static final DynamicFields readonlyFields = new DynamicFields().merge(BaseModelFields.readonlyFields);
+//    public static final DynamicFields readonlyFields = new DynamicFields().merge(BaseModelFields.readonlyFields);
+
+    public static final DynamicFields readonlyFields = new DynamicFields();
 
     public static final DynamicFields searchFields = new DynamicFields(UserModel::getUsername, UserModel::getName,
             UserModel::getNickname, UserModel::getEmail,UserModel::getMobile

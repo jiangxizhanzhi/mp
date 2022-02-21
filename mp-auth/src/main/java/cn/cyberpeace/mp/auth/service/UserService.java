@@ -100,4 +100,5 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
 
     String getDefaultUserAvatar();
 
+    List<UserModel> queryAllUsers();
 }
