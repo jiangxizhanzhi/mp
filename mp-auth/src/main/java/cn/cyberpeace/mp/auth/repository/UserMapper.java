@@ -25,4 +25,6 @@ public interface UserMapper extends BaseModelMapper<UserModel> {
 
     List<UserModel> listByUserNames(List<String> userNames);
 
+    List<UserModel> queryAllUsers();
+
 }

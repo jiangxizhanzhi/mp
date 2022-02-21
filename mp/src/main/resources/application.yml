@@ -116,6 +116,9 @@ mp:
     activation:
       enable: true
       licenseDir: /home/mp/config/license
+  hld:
+      users-url: http://192.168.12.13:85
+      login-url: http://192.168.12.72:85
   flow:
     # 流量发生器资源地址
     actuator-resource-url: http://${ip.trex}:80/api/v1/resource
