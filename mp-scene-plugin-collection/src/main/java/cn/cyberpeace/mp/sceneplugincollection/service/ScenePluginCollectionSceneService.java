@@ -72,26 +72,48 @@ public class ScenePluginCollectionSceneService {
     @Autowired
     private FlowAnalysisService flowAnalysisService;
 
-    public ListObjServiceResult<CollectionFlowBO> listFlows(String sceneId, FlowQueryParams queryParams) {
-        var sceneHandler = new SceneHandler(sceneId, null, false, null);
-        List<SceneElementBO> srcElements = getSrcElements(sceneHandler, queryParams.getNodeIds());
-        CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
-        if (pluginHandler == null || pluginHandler.getScene() == null || pluginHandler.getScene().getFlowCollector() == null) {
-            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
-        }
+    public ListObjServiceResult<CollectionFlowBO> listFlows(List<String> sceneIds, FlowQueryParams queryParams) {
+        List<String> flowCollectMacs = new ArrayList<>();
+        List<String> groupList = new ArrayList<>();
         Map<String, SceneElementBO> macElementMap = new HashMap<>();
-        List<String> flowCollectMacs = this.loadMac2ElementBOMapAndGetEnableMac(macElementMap, srcElements, pluginHandler);
-        if (flowCollectMacs.isEmpty()) {
+        Map<String, String> mac2SceneId = new HashMap<>();
+        LocalDateTime earliestStartTime = null;
+        for (String sceneId : sceneIds) {
+            var sceneHandler = new SceneHandler(sceneId, null, false, null);
+            CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+            if (pluginHandler == null || pluginHandler.getScene() == null || pluginHandler.getScene().getFlowCollector() == null) {
+                continue;
+            }
+            List<SceneElementBO> srcElements = getSrcElements(sceneHandler, queryParams.getNodeIds());
+            List<String> tempMacs = this.loadMac2ElementBOMapAndGetEnableMac(macElementMap, srcElements, pluginHandler);
+            if (tempMacs.isEmpty()) {
+                continue;
+            }
+            if (earliestStartTime == null || sceneHandler.getScene().getCreateTime().isBefore(earliestStartTime)) {
+                earliestStartTime = sceneHandler.getScene().getCreateTime();
+            }
+            tempMacs.forEach(mac -> mac2SceneId.put(mac, sceneId));
+            flowCollectMacs.addAll(tempMacs);
+            groupList.add(pluginHandler.getScene().getFlowCollector());
+        }
+
+        if (CollectionUtils.isEmpty(groupList)) {
+            log.info("{} query time interval sum flow size,sceneIds:{},no collection plugin or no flowCollector", LOG_PREFIX, JsonCommon.stringify(sceneIds));
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
+        if (CollectionUtils.isEmpty(flowCollectMacs)) {
+            log.info("{} query time interval sum flow size,sceneIds:{},no collection plugin or no flowCollector", LOG_PREFIX, JsonCommon.stringify(sceneIds));
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
+        }
+
         FlowAnalysisRequest request = new FlowAnalysisRequest();
-        request.setGroupList(Arrays.asList(pluginHandler.getScene().getFlowCollector()));
-        request.setSecondsInterval(queryParams.getInterval());
+        request.setGroupList(groupList);
         request.setSourceMacs(flowCollectMacs);
+        request.setSecondsInterval(queryParams.getInterval());
 
         // 查询时间段 默认使用场景创建到当前时间
         if (StringUtils.isBlank(queryParams.getStartTime())) {
-            request.setStartDateTime(sceneHandler.getScene().getCreateTime());
+            request.setStartDateTime(earliestStartTime);
         } else {
             request.setStartDateTime(TimeUtils.stringToLocalDateTime(queryParams.getStartTime()));
         }
@@ -106,7 +128,7 @@ public class ScenePluginCollectionSceneService {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
 
-        List<CollectionFlowBO> list = flowLogBOS.stream().map(flowLogBO -> this.buildCollectionFlowBOFrom(sceneId, flowLogBO, macElementMap)).collect(Collectors.toList());
+        List<CollectionFlowBO> list = flowLogBOS.stream().map(flowLogBO -> this.buildCollectionFlowBOFrom(flowLogBO, macElementMap, mac2SceneId)).collect(Collectors.toList());
         return new ListObjServiceResult<>(new ListObjResult<>(list, list.size()));
     }
 
@@ -498,9 +520,8 @@ public class ScenePluginCollectionSceneService {
         return srcElements;
     }
 
-    private CollectionFlowBO buildCollectionFlowBOFrom(String sceneId, FlowLogBO flowLogBO, Map<String, SceneElementBO> mac2ElementMap) {
+    private CollectionFlowBO buildCollectionFlowBOFrom(FlowLogBO flowLogBO, Map<String, SceneElementBO> mac2ElementMap, Map<String, String> mac2SceneId) {
         CollectionFlowBO flowBO = new CollectionFlowBO();
-        flowBO.setSceneId(sceneId);
         if (flowLogBO.getTimestamp() != null) {
             flowBO.setTime(TimeUtils.timestampToLocalDateTime(flowLogBO.getTimestamp()));
         }
@@ -512,6 +533,7 @@ public class ScenePluginCollectionSceneService {
                     if (mac2ElementMap.containsKey(mac)) {
                         flowBO.setSourceNodeId(mac2ElementMap.get(mac).getId());
                         flowBO.setSourceNodeName(mac2ElementMap.get(mac).getName());
+                        flowBO.setSceneId(mac2SceneId.get(mac));
                         break;
                     }
                 }
@@ -525,6 +547,7 @@ public class ScenePluginCollectionSceneService {
                     if (mac2ElementMap.containsKey(mac)) {
                         flowBO.setTargetNodeId(mac2ElementMap.get(mac).getId());
                         flowBO.setTargetNodeName(mac2ElementMap.get(mac).getName());
+                        flowBO.setSceneId(mac2SceneId.get(mac));
                         break;
                     }
                 }

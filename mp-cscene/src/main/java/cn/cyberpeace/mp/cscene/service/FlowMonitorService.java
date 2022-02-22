@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.bo.IntervalSizeBO;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.cscene.bo.CsceneCollectionFlowBO;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackDto;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowRiskCount;
@@ -12,7 +13,6 @@ import cn.cyberpeace.mp.cscene.dto.flow.FlowTrendRequest;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
 import cn.cyberpeace.mp.sceneplugincollection.bo.AttackInfo;
-import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionFlowBO;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
 import cn.hutool.core.collection.CollectionUtil;
@@ -134,12 +134,12 @@ public class FlowMonitorService {
         }
         queryParams.ensure();
 
-        ListObjServiceResult<CollectionFlowBO> flowBOResult = csceneInstanceService.listFlows(id, queryParams);
-        List<CollectionFlowBO> flowBOS = flowBOResult.getSource().getObjs();
+        ListObjServiceResult<CsceneCollectionFlowBO> flowBOResult = csceneInstanceService.listFlows(id, queryParams);
+        List<CsceneCollectionFlowBO> flowBOS = flowBOResult.getSource().getObjs();
 
         List<FlowAttackDto> flowAttackDtos = new ArrayList<>();
 
-        for (CollectionFlowBO flowBO : flowBOS) {
+        for (CsceneCollectionFlowBO flowBO : flowBOS) {
             if (Objects.nonNull(flowBO.getAttackInfos())) {
                 for (AttackInfo attackInfo : flowBO.getAttackInfos()) {
                     FlowAttackDto flowAttackDto = new FlowAttackDto();

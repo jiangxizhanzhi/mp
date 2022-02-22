@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.cscene.bo.CsceneCollectionFlowBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCountByReferenceTypeBO;
@@ -255,13 +256,30 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return nodeRecordingResult;
     }
 
-    public ListObjServiceResult<CollectionFlowBO> listFlows(String id, FlowQueryParams queryParams) {
-        var sceneId = getSceneId(id);
-        if (StringUtils.isEmpty(sceneId)) {
+    public ListObjServiceResult<CsceneCollectionFlowBO> listFlows(String id, FlowQueryParams queryParams) {
+        String[] csceneIds = StringUtils.split(id, ",");
+        Map<String, String> sceneId2CsceneId = new HashMap<>();
+        for (String csceneId : csceneIds) {
+            var sceneId = getSceneId(csceneId);
+            if (StringUtils.isEmpty(sceneId)) {
+                sceneId2CsceneId.put(sceneId, csceneId);
+            }
+        }
+        if (sceneId2CsceneId.isEmpty()) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
 
-        return scenePluginCollectionSceneService.listFlows(sceneId, queryParams);
+        var serviceResult = scenePluginCollectionSceneService.listFlows(new ArrayList<>(sceneId2CsceneId.keySet()), queryParams);
+        var flowBOS = serviceResult.getSource().getObjs();
+        List<CsceneCollectionFlowBO> result = flowBOS.stream().map(bo -> {
+            CsceneCollectionFlowBO csceneCollectionFlowBO = new CsceneCollectionFlowBO();
+            BeanUtils.copyProperties(bo, csceneCollectionFlowBO);
+            if (bo.getSceneId() != null) {
+                csceneCollectionFlowBO.setSceneId(sceneId2CsceneId.get(bo.getSceneId()));
+            }
+            return csceneCollectionFlowBO;
+        }).collect(Collectors.toList());
+        return new ListObjServiceResult<>(new ListObjResult<>(result, serviceResult.getSource().getTotal()));
     }
 
     public ListObjServiceResult<CollectionHostStateBO> listHostStates(String id, HostStateQueryParams queryParams) {
