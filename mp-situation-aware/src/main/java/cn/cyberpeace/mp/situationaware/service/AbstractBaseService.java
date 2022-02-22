@@ -24,6 +24,9 @@ public abstract class AbstractBaseService {
      * @return
      */
     protected String[] indices(List<String> groupList,LocalDateTime startDate, LocalDateTime endDate){
+        if (CollectionUtils.isEmpty(groupList)){
+            return new String[]{};
+        }
         List<String> indexList = indexListBuilder(groupList,startDate,endDate);
         var indexArray = new String[indexList.size()];
         return indexList.toArray(indexArray);
