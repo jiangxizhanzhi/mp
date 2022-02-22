@@ -17,6 +17,7 @@ import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionScene
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
 import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -74,7 +75,8 @@ public class FlowMonitorService {
     public List<FlowTrend> getSceneFlowTrend(FlowTrendRequest trendRequest) {
         log.info("{}", trendRequest);
         BaseRequestUtil.checkBaseRequestWithSceneId(trendRequest);
-        List<String> sceneIds = CollectionUtil.toList(trendRequest.getSceneId());
+        // 逗号分割
+        List<String> sceneIds = CollectionUtil.toList(StringUtils.split(trendRequest.getSceneId(), ","));
 
         return processFlowTrend(sceneIds, null, trendRequest.getStartTime(), trendRequest.getEndTime(), trendRequest.getSegmentCount());
     }

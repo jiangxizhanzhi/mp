@@ -14,7 +14,7 @@ import java.util.List;
 @Data
 public class BaseSceneElementRequest {
 
-    @ApiModelProperty("场景id")
+    @ApiModelProperty("场景id,多个id用逗号分隔")
     @NotNull
     private String sceneId;
 

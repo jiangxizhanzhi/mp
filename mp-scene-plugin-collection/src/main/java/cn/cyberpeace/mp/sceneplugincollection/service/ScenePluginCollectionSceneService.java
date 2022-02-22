@@ -313,21 +313,34 @@ public class ScenePluginCollectionSceneService {
     public ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> timeIntervalSumFlowSize(
             List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime,
             int intervalSeconds) {
-        // todo 暂时先实现一个
-        var sceneHandler = new SceneHandler(sceneIds.get(0), null, false, null);
-        CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
-        if (pluginHandler == null || pluginHandler.getScene() == null || pluginHandler.getScene().getFlowCollector() == null) {
+        List<String> macAddrs = new ArrayList<>();
+        List<String> flowCollectors = new ArrayList<>();
+        LocalDateTime earliestStartTime = null;
+        for (String sceneId : sceneIds) {
+            var sceneHandler = new SceneHandler(sceneId, null, false, null);
+            CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+            if (pluginHandler == null || pluginHandler.getScene() == null || pluginHandler.getScene().getFlowCollector() == null) {
+                continue;
+            }
+            List<SceneElementBO> elements = new ArrayList<>(sceneHandler.getElementMap().values());
+            // 根据参数筛选一下节点
+            if (CollectionUtils.isNotEmpty(nodeIds)) {
+                Set<String> effectNodeIds = new HashSet<>(nodeIds);
+                elements = elements.stream().filter(e -> effectNodeIds.contains(e.getId())).collect(Collectors.toList());
+            }
+            // 获取mac地址
+            List<String> tempMacAddrs = this.loadMac2ElementBOMapAndGetEnableMac(new HashMap<>(), elements, pluginHandler);
+            // 加入参数
+            if (earliestStartTime == null || sceneHandler.getScene().getCreateTime().isBefore(earliestStartTime)) {
+                earliestStartTime = sceneHandler.getScene().getCreateTime();
+            }
+            macAddrs.addAll(tempMacAddrs);
+            flowCollectors.add(pluginHandler.getScene().getFlowCollector());
+        }
+        if (CollectionUtils.isEmpty(flowCollectors)) {
             log.info("{} query time interval sum flow size,sceneId:{},no collection plugin or no flowCollector", LOG_PREFIX, JsonCommon.stringify(sceneIds));
             return new ServiceResult<>(new ArrayList<>());
         }
-        List<SceneElementBO> elements = new ArrayList<>(sceneHandler.getElementMap().values());
-        // 根据参数筛选一下节点
-        if (CollectionUtils.isNotEmpty(nodeIds)) {
-            Set<String> effectNodeIds = new HashSet<>(nodeIds);
-            elements = elements.stream().filter(e -> effectNodeIds.contains(e.getId())).collect(Collectors.toList());
-        }
-        // 获取mac地址
-        List<String> macAddrs = this.loadMac2ElementBOMapAndGetEnableMac(new HashMap<>(), elements, pluginHandler);
         if (CollectionUtils.isEmpty(macAddrs)) {
             log.info("{} query time interval sum flow size,sceneIds:{},nodeIds:{},no enabled macAddr", LOG_PREFIX, JsonCommon.stringify(sceneIds), JsonCommon.stringify(nodeIds));
             return new ServiceResult<>(new ArrayList<>());
@@ -335,9 +348,9 @@ public class ScenePluginCollectionSceneService {
         // 构造参数
         FlowAnalysisRequest request = new FlowAnalysisRequest();
         request.setSourceMacs(macAddrs);
-        request.setGroupList(Arrays.asList(pluginHandler.getScene().getFlowCollector()));
+        request.setGroupList(flowCollectors);
         request.setStartDateTime(Optional.ofNullable(startTime)
-                .orElse(sceneHandler.getScene().getCreateTime())
+                .orElse(earliestStartTime)
         );
         request.setEndDateTime(Optional.ofNullable(endTime)
                 .orElse(LocalDateTime.now())
