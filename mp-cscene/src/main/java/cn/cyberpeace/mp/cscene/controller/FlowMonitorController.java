@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackDto;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackTypeCount;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowRiskCount;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowTrend;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowTrendRequest;
@@ -75,6 +76,15 @@ public class FlowMonitorController {
 
         FlowRiskCount riskCount = flowMonitorService.getFlowRiskCount(baseRequest);
         return ServiceResult.success(riskCount);
+    }
+
+    @ApiOperation(value = "攻击流量各类别统计")
+    @GetMapping("/attack_type_count")
+    public ServiceResult<List<FlowAttackTypeCount>> getAttackTypeCount(BaseSceneElementRequest baseRequest) {
+        log.info("{}", baseRequest);
+
+        List<FlowAttackTypeCount> attackTypeCounts = flowMonitorService.getAttackTypeCount(baseRequest);
+        return ServiceResult.success(attackTypeCounts);
     }
 
 

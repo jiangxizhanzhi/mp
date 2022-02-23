@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneCollectionFlowBO;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackDto;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackTypeCount;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowRiskCount;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowTrend;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowTrendRequest;
@@ -25,6 +26,8 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -52,7 +55,6 @@ public class FlowMonitorService {
 
     /**
      * 查询单个节点机器流量趋势
-     *
      * @param trendRequest
      * @return
      */
@@ -68,7 +70,6 @@ public class FlowMonitorService {
 
     /**
      * 查询场景机器流量趋势
-     *
      * @param trendRequest
      * @return
      */
@@ -115,11 +116,37 @@ public class FlowMonitorService {
         return riskCount;
     }
 
+    public List<FlowAttackTypeCount> getAttackTypeCount(BaseSceneElementRequest baseRequest) {
+        log.info("baseRequest:{}", baseRequest);
+
+        BaseRequestUtil.checkBaseRequestWithSceneId(baseRequest);
+
+        List<String> sceneIds = Arrays.asList(StringUtils.split(baseRequest.getSceneId(), ","));
+
+        List<String> nodeIds = null;
+        if (!CollectionUtil.isEmpty(baseRequest.getElementIds())) {
+            nodeIds = CollectionUtil.toList(baseRequest.getElementIds().toArray(new String[]{}));
+        }
+
+        LocalDateTime endTime = LocalDateTime.now();
+        LocalDateTime startTime = endTime.minusMinutes(10);
+
+        List<String> sceneIdList = sceneIdTranslationService.translateSceneIds(sceneIds);
+
+        ServiceResult<Map<String, Integer>> mapResult = scenePluginCollectionSceneService.groupCountFlowByType(sceneIdList, nodeIds, startTime, endTime);
+        Map<String, Integer> map = mapResult.getSource();
+        List<FlowAttackTypeCount> result = new ArrayList<>();
+        if (map != null && !map.isEmpty()) {
+            map.forEach((type, num) -> result.add(new FlowAttackTypeCount(type, num)));
+            Collections.sort(result, (c1, c2) -> c2.getTimes() - c1.getTimes());
+        }
+        return result;
+    }
+
 
     /**
      * 流量分页接口包装
      * 根据攻击类型拆分
-     *
      * @param id
      * @param queryParams
      * @return

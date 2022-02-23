@@ -13,6 +13,7 @@ import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionFlowBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
@@ -40,7 +41,6 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -59,6 +59,7 @@ public class ScenePluginCollectionSceneService {
 
     public static class GroupCountFlowField {
         public static final String LEVEL = "level";
+        public static final String TYPE = "type";
     }
 
     public static class GroupCountHostEventField {
@@ -282,6 +283,19 @@ public class ScenePluginCollectionSceneService {
     public ServiceResult<Map<String, Integer>> groupCountFlowByLevel(
             List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime) {
         return groupCountFlow(sceneIds, nodeIds, GroupCountFlowField.LEVEL, startTime, endTime);
+    }
+
+    /**
+     * 安全等级分组查询采集流量的聚合统计数量
+     * @param sceneIds 场景id列表，不传默认为全部
+     * @param nodeIds 节点id列表，不传默认为全部
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @return 字段的聚合统计数量 Map<安全等级, 该字段值统计数量>
+     */
+    public ServiceResult<Map<String, Integer>> groupCountFlowByType(
+            List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime) {
+        return groupCountFlow(sceneIds, nodeIds, GroupCountFlowField.TYPE, startTime, endTime);
     }
 
     /**
@@ -622,28 +636,18 @@ public class ScenePluginCollectionSceneService {
         FlowAnalysisRequest request = new FlowAnalysisRequest();
         if (GroupCountFlowField.LEVEL.equals(groupField)) {
             request.setAggregationTypeEnum(AggregationTypeEnum.SURICATA_SEVERITY);
+        } else if (GroupCountFlowField.TYPE.equals(groupField)) {
+            request.setAggregationTypeEnum(AggregationTypeEnum.SURICATA_CATEGORY);
         }
-        // todo 暂时先实现一个
-        var sceneHandler = new SceneHandler(sceneIds.get(0), null, false, null);
-        CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
-        if (pluginHandler == null) {
-            return new ServiceResult<>();
-        }
-        if (pluginHandler.getScene() == null || StringUtils.isEmpty(pluginHandler.getScene().getFlowCollector())) {
-            return new ServiceResult<>();
-        }
-        request.setGroupList(Arrays.asList(pluginHandler.getScene().getFlowCollector()));
 
-        if (startTime == null) {
-            request.setStartDateTime(sceneHandler.getScene().getCreateTime());
-        } else {
-            request.setStartDateTime(startTime);
+        BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIds, nodeIds);
+        if (CollectionUtils.isEmpty(batchSceneHandler.getFlowCollectors())) {
+            return new ServiceResult<>(new HashMap<>());
         }
-        if (endTime == null) {
-            request.setEndDateTime(LocalDateTime.now());
-        } else {
-            request.setEndDateTime(endTime);
-        }
+        request.setGroupList(batchSceneHandler.getFlowCollectors());
+        request.setStartDateTime(Optional.ofNullable(startTime).orElse(batchSceneHandler.getEarliestStartTime()));
+        request.setEndDateTime(Optional.ofNullable(endTime).orElse(LocalDateTime.now()));
+        request.setSourceMacs(batchSceneHandler.getFlowCollectedMacAddrs());
         List<AttackWayAggregationBO> result = flowAnalysisService.topByAggregationTypeEnum(request);
         if (CollectionUtils.isEmpty(result)) {
             return new ServiceResult<>(new HashMap<>());
