@@ -85,12 +85,12 @@ mp:
       cpcloud-container-create-url: http://${ip.cp}:11111/v1
       cpcloud-network-mirror-url: http://${ip.cp}:11111/cpcloud/sdn_app/v1
       es-host: ${ip.moloch}
-      es-port: ${ARKIME_PORT:9200}
+      es-port: ${ARKIME_PORT:9205}
       image-name: centos-arkime_arkime:v2
       username: api
       password: api
     #moloch es节点地址
-    es-nodes: ${ip.moloch}:${MOLOCH_PORT:9200}
+    es-nodes: ${ip.moloch}:${MOLOCH_PORT:9205}
     wazuh:
       #wazuh 开放接口地址
       base-url: https://${ip.wazuh}:${WAZUH_PORT:55000}
@@ -108,7 +108,7 @@ mp:
       agent-script-windows-path: ${WAZUH_AGENT_SCRIPT_WINDOWS_PATH:C:\ossec-agent\shared\scripts\}
       task-enable: true
   log:
-    es-nodes: ${ip.log-es}:${LOG_ES_PORT:9200}
+    es-nodes: ${ip.log-es}:${LOG_ES_PORT:9205}
     exclude-uri: /login
     exclude-method: OPTIONS
   auth:
