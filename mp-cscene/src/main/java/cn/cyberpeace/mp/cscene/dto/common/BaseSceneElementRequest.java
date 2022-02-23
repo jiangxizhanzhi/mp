@@ -21,4 +21,7 @@ public class BaseSceneElementRequest {
     @ApiModelProperty("节点id")
     private List<String> elementIds;
 
+    @ApiModelProperty("用于查询的ip列表")
+    private List<String> ips;
+
 }

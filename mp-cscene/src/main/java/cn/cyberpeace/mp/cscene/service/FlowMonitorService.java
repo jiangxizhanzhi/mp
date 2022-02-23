@@ -1,12 +1,14 @@
 package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.bo.IntervalSizeBO;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneCollectionFlowBO;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackDto;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackTime;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackTypeCount;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowRiskCount;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowTrend;
@@ -33,6 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @Description:
@@ -141,6 +144,57 @@ public class FlowMonitorService {
             Collections.sort(result, (c1, c2) -> c2.getTimes() - c1.getTimes());
         }
         return result;
+    }
+
+    public List<FlowAttackTime> getAttackTimeCountNoName(BaseSceneElementRequest baseRequest) {
+        log.info("baseRequest:{}", JsonCommon.stringify(baseRequest));
+        BaseRequestUtil.checkBaseRequestWithSceneId(baseRequest);
+
+        List<String> sceneIds = Arrays.asList(StringUtils.split(baseRequest.getSceneId(), ","));
+        List<String> sceneIdList = sceneIdTranslationService.translateSceneIds(sceneIds);
+        var mapResult = scenePluginCollectionSceneService.groupCountFlowWithTopSize(sceneIdList, baseRequest.getIps(), null, null);
+        Map<String, Integer> map = mapResult.getSource();
+        List<FlowAttackTime> result = new ArrayList<>();
+        if (map != null && !map.isEmpty()) {
+            map.forEach((type, num) -> result.add(FlowAttackTime.builder()
+                    .ip(type)
+                    .times(num)
+                    .build()));
+            Collections.sort(result, (c1, c2) -> c2.getTimes() - c1.getTimes());
+        }
+        return result;
+    }
+
+    public List<FlowAttackTime> getAttackTimeCount(BaseSceneElementRequest baseRequest) {
+        log.info("baseRequest:{}", JsonCommon.stringify(baseRequest));
+        BaseRequestUtil.checkBaseRequestWithSceneId(baseRequest);
+
+        List<String> sceneIds = Arrays.asList(StringUtils.split(baseRequest.getSceneId(), ","));
+        List<String> sceneIdList = sceneIdTranslationService.translateSceneIds(sceneIds);
+        var result = scenePluginCollectionSceneService.groupCountFlowWithName(sceneIdList, baseRequest.getIps(), null, null).getSource();
+        return result.stream()
+                .map(bo -> FlowAttackTime.builder()
+                        .times(bo.getTimes())
+                        .nodeName(bo.getNodeName())
+                        .ip(bo.getIp())
+                        .build()
+                ).collect(Collectors.toList());
+    }
+
+    public List<FlowAttackTime> getAttackRatioCount(BaseSceneElementRequest baseRequest) {
+        log.info("baseRequest:{}", JsonCommon.stringify(baseRequest));
+        BaseRequestUtil.checkBaseRequestWithSceneId(baseRequest);
+
+        List<String> sceneIds = Arrays.asList(StringUtils.split(baseRequest.getSceneId(), ","));
+        List<String> sceneIdList = sceneIdTranslationService.translateSceneIds(sceneIds);
+        var result = scenePluginCollectionSceneService.groupCountFlowWithName(sceneIdList, baseRequest.getIps(), null, null).getSource();
+        return result.stream()
+                .map(bo -> FlowAttackTime.builder()
+                        .times(bo.getTimes())
+                        .nodeName(bo.getNodeName())
+                        .ip(bo.getIp())
+                        .build()
+                ).collect(Collectors.toList());
     }
 
 

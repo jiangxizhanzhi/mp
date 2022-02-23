@@ -1,10 +1,12 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackDto;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackTime;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackTypeCount;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowRiskCount;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowTrend;
@@ -41,7 +43,6 @@ public class FlowMonitorController {
     /**
      * 默认查询场景所有节点
      * 忽略elementIds的值
-     *
      * @return
      */
     @ApiOperation(value = "场景流量趋势图")
@@ -56,7 +57,6 @@ public class FlowMonitorController {
 
     /**
      * elementIds若为多值，则只取第一个值
-     *
      * @return
      */
     @ApiOperation(value = "节点流量趋势图")
@@ -81,9 +81,33 @@ public class FlowMonitorController {
     @ApiOperation(value = "攻击流量各类别统计")
     @GetMapping("/attack_type_count")
     public ServiceResult<List<FlowAttackTypeCount>> getAttackTypeCount(BaseSceneElementRequest baseRequest) {
-        log.info("{}", baseRequest);
+        log.info("attack_type_count params: {}", JsonCommon.stringify(baseRequest));
 
         List<FlowAttackTypeCount> attackTypeCounts = flowMonitorService.getAttackTypeCount(baseRequest);
+        return ServiceResult.success(attackTypeCounts);
+    }
+
+    @ApiOperation(value = "攻击次数各类别统计")
+    @GetMapping("/attack_times")
+    public ServiceResult<List<FlowAttackTime>> getAttackTimes(BaseSceneElementRequest baseRequest) {
+        log.info("attack_times params: {}", JsonCommon.stringify(baseRequest));
+        List<FlowAttackTime> attackTypeCounts = flowMonitorService.getAttackTimeCountNoName(baseRequest);
+        return ServiceResult.success(attackTypeCounts);
+    }
+
+    @ApiOperation(value = "受攻击设备次数统计")
+    @GetMapping("/attack_device_count")
+    public ServiceResult<List<FlowAttackTime>> getAttackDeviceCount(BaseSceneElementRequest baseRequest) {
+        log.info("attack_times params: {}", JsonCommon.stringify(baseRequest));
+        List<FlowAttackTime> attackTypeCounts = flowMonitorService.getAttackTimeCount(baseRequest);
+        return ServiceResult.success(attackTypeCounts);
+    }
+
+    @ApiOperation(value = "攻击占比统计")
+    @GetMapping("/attack_ratio_count")
+    public ServiceResult<List<FlowAttackTime>> getAttackRatioCount(BaseSceneElementRequest baseRequest) {
+        log.info("attack_times params: {}", JsonCommon.stringify(baseRequest));
+        List<FlowAttackTime> attackTypeCounts = flowMonitorService.getAttackRatioCount(baseRequest);
         return ServiceResult.success(attackTypeCounts);
     }
 

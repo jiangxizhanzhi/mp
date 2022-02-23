@@ -301,7 +301,7 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public void asyncAckElementChanged(String nodeId, boolean forceSave, boolean withPlugins) {
-        delayTaskPool.execute(StringUtils.joinWith(":", getSceneId(), nodeId), () -> {
+        delayTaskPool.execute(StringUtils.joinWith(":", getSceneId(), nodeId, forceSave, withPlugins), () -> {
             ackElementChanged(nodeId, forceSave, withPlugins);
         });
     }
