@@ -4,30 +4,23 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.elasticsearch.client.license.LicensesStatus;
-
-import java.math.BigDecimal;
-import java.util.List;
 
 /**
  * @Description
  * @Author maojun
- * @Date 2022/2/22
+ * @Date 2022/2/24
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class FlowAttackRatio {
-
     /**
-     * 攻击次数
+     * 攻击类型
      */
-    private Long totalAttackNumber;
-
+    private String type;
     /**
-     * 流量大小，单位B
+     * 攻击类型占比
      */
-    private Double totalTrafficSize;
-
+    private Double attackTrafficPercent;
 }

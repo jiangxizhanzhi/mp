@@ -37,6 +37,10 @@ public class BatchSceneHandler {
 
     private Map<String, SceneElementBO> allIp2ElementMap = new HashMap<>();
 
+    private Map<String, String> allMac2SceneIdMap = new HashMap<>();
+
+    private Map<String, String> allIp2SceneIdMap = new HashMap<>();
+
     public BatchSceneHandler(List<String> sceneIds, List<String> nodeIds) {
         this.sceneIds = sceneIds;
         this.nodeIds = nodeIds;
@@ -57,6 +61,26 @@ public class BatchSceneHandler {
 
     public SceneElementBO getNodeByMacAddr(String macAddr) {
         return this.allMac2ElementMap.get(macAddr);
+    }
+
+    public Map<String, SceneElementBO> getAllMac2ElementMap() {
+        return allMac2ElementMap;
+    }
+
+    public Map<String, SceneElementBO> getAllIp2ElementMap() {
+        return allIp2ElementMap;
+    }
+
+    public Map<String, String> getAllIp2SceneIdMap() {
+        return allIp2SceneIdMap;
+    }
+
+    public Map<String, String> getAllMac2SceneIdMap() {
+        return allMac2SceneIdMap;
+    }
+
+    public void setAllMac2SceneIdMap(Map<String, String> allMac2SceneIdMap) {
+        this.allMac2SceneIdMap = allMac2SceneIdMap;
     }
 
     public SceneElementBO getNodeByIpAddr(String ip) {
@@ -95,11 +119,11 @@ public class BatchSceneHandler {
                 }
             }
             List<SceneElementBO> srcElements = getSrcElements(sceneHandler, nodeIds);
-            this.handlerElement(srcElements, pluginHandler);
+            this.handlerElement(sceneId, srcElements, pluginHandler);
         }
     }
 
-    private void handlerElement(List<SceneElementBO> srcElements, CollectionScenePluginHandler pluginHandler) {
+    private void handlerElement(String sceneId, List<SceneElementBO> srcElements, CollectionScenePluginHandler pluginHandler) {
         srcElements.forEach(srcElement -> {
             var srcPorts = srcElement.getPorts();
             if (srcPorts == null) {
@@ -113,12 +137,14 @@ public class BatchSceneHandler {
                     flowCollectedEnabled = true;
                 }
                 if (StringUtils.isNotEmpty(macAddr)) {
+                    this.allMac2SceneIdMap.put(macAddr, sceneId);
                     this.allMac2ElementMap.put(macAddr, srcElement);
                     if (flowCollectedEnabled) {
                         this.flowCollectEnabledMacAddrs.add(macAddr);
                     }
                 }
                 if (StringUtils.isNotEmpty(ipAddr)) {
+                    this.allIp2SceneIdMap.put(ipAddr, sceneId);
                     this.allIp2ElementMap.put(ipAddr, srcElement);
                     if (flowCollectedEnabled) {
                         this.flowCollectEnabledIpAddrs.add(ipAddr);
