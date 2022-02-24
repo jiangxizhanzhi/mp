@@ -14,6 +14,10 @@ import java.util.List;
  */
 @Data
 public class AttackCountRequest extends BaseSceneElementRequest {
+
+    @ApiModelProperty("ip列表参数中ip的类型 0:源ip,1:目标ip,默认为0")
+    private int ipType = 0;
+
     @ApiModelProperty("用于查询的ip列表")
     private List<String> ips;
 

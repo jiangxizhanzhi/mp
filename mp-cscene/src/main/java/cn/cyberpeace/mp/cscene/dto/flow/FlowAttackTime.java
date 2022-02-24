@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FlowAttackTime {
-    @ApiModelProperty("设备名称")
+    @ApiModelProperty("节点名称")
     private String nodeName;
 
     @ApiModelProperty("ip")

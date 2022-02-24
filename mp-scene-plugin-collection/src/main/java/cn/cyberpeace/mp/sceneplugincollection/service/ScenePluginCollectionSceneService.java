@@ -2,6 +2,8 @@ package cn.cyberpeace.mp.sceneplugincollection.service;
 
 import cn.cyberpeace.mp.base.bo.IntervalSizeBO;
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -12,10 +14,11 @@ import cn.cyberpeace.mp.sceneplugincollection.bo.AttackInfo;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionFlowBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
-import cn.cyberpeace.mp.sceneplugincollection.bo.FlowAttackTimeBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.FlowAttackCountBO;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowGroupCountParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
@@ -60,7 +63,8 @@ public class ScenePluginCollectionSceneService {
     public static class GroupCountFlowField {
         public static final String LEVEL = "level";
         public static final String TYPE = "type";
-        public static final String IP = "ip";
+        public static final String SOURCE_IP = "source_ip";
+        public static final String DEST_IP = "dest_ip";
     }
 
     public static class GroupCountHostEventField {
@@ -619,29 +623,53 @@ public class ScenePluginCollectionSceneService {
         return new ServiceResult<>(result);
     }
 
-    public ServiceResult<List<FlowAttackTimeBO>> groupCountFlowWithName(List<String> sceneIds, List<String> ips, Integer topSize, LocalDateTime startTime, LocalDateTime endTime) {
+    public ServiceResult<List<FlowAttackCountBO>> groupCountFlowAndNodeInfo(List<String> sceneIds, FlowGroupCountParams params) {
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIds, null);
+        // 场景均未开启流量采集
         if (CollectionUtils.isEmpty(batchSceneHandler.getFlowCollectors())) {
             return new ServiceResult<>(new ArrayList<>());
         }
-        List<String> queryIps = CollectionUtils.isNotEmpty(ips) ? ips : batchSceneHandler.getFlowCollectedIpAddrs();
-        if (CollectionUtils.isEmpty(queryIps)) {
+        // 拼接参数
+        FlowAnalysisRequest request = new FlowAnalysisRequest();
+        request.setGroupList(batchSceneHandler.getFlowCollectors());
+        // 起止时间参数
+        LocalDateTime fStartTime = Optional.ofNullable(params.getStartTime()).orElse(batchSceneHandler.getEarliestStartTime());
+        LocalDateTime fEndTime = Optional.ofNullable(params.getEndTime()).orElse(LocalDateTime.now());
+        request.setStartDateTime(fStartTime);
+        request.setEndDateTime(fEndTime);
+        // 数据过滤地址参数
+        List<String> paramsAddress = params.getQueryAddress();
+        Integer queryTopSize = null;
+        if (GroupCountFlowField.SOURCE_IP.equals(params.getQueryType())) {
+            request.setSourceIps(CollectionUtils.isNotEmpty(paramsAddress) ? paramsAddress : batchSceneHandler.getFlowCollectedIpAddrs());
+            queryTopSize = request.getSourceIps().size();
+        } else if (GroupCountFlowField.DEST_IP.equals(params.getQueryType())) {
+            request.setDestinationIps(CollectionUtils.isNotEmpty(paramsAddress) ? paramsAddress : batchSceneHandler.getFlowCollectedIpAddrs());
+            queryTopSize = request.getDestinationIps().size();
+        } else {
+            log.error("wrong params for groupCountFlowAndNodeInfo , params is {}", JsonCommon.stringify(params));
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+        // topN 参数,上一层指定的优先
+        queryTopSize = Optional.ofNullable(params.getTopSize()).orElse(queryTopSize);
+        request.setTopSize(queryTopSize);
+        List<AttackWayAggregationBO> aggregationBOS = flowAnalysisService.topByAggregationTypeEnum(request);
+        if (CollectionUtils.isEmpty(aggregationBOS)) {
             return new ServiceResult<>(new ArrayList<>());
         }
-        LocalDateTime fStartTime = Optional.ofNullable(startTime).orElse(batchSceneHandler.getEarliestStartTime());
-        LocalDateTime fEndTime = Optional.ofNullable(endTime).orElse(LocalDateTime.now());
-        int queryTopSize = topSize != null ? topSize : queryIps.size();
-        Map<String, Integer> result = this.doGroupCountFlowByIp(batchSceneHandler.getFlowCollectors(), ips, queryTopSize, fStartTime, fEndTime);
-        if (result == null || result.isEmpty()) {
-            return new ServiceResult<>(new ArrayList<>());
-        }
-        List<FlowAttackTimeBO> timeBOS = new ArrayList<>();
-        result.forEach((ip, times) -> timeBOS.add(FlowAttackTimeBO.builder()
-                .ip(ip)
-                .times(times)
-                .nodeName(batchSceneHandler.getNodeByIpAddr(ip) == null ? StringUtils.EMPTY : batchSceneHandler.getNodeByIpAddr(ip).getName())
-                .build()));
-        return new ServiceResult<>(timeBOS);
+        List<FlowAttackCountBO> result = aggregationBOS.stream().map(v -> {
+            String ip = v.getAggregationType();
+            int count = v.getAttackNumber().intValue();
+            SceneElementBO node = batchSceneHandler.getNodeByIpAddr(ip);
+            return FlowAttackCountBO.builder()
+                    .sceneId(batchSceneHandler.getSceneIdByIpAddr(ip))
+                    .nodeId(node == null ? StringUtils.EMPTY : node.getId())
+                    .nodeName(node == null ? StringUtils.EMPTY : node.getName())
+                    .ip(ip)
+                    .times(count)
+                    .build();
+        }).collect(Collectors.toList());
+        return new ServiceResult<>(result);
     }
 
     public ServiceResult<TeamAttackBO> groupCountFlow(List<String> sceneIds, List<String> ips, Integer topSize, LocalDateTime startTime, LocalDateTime endTime) {
@@ -669,7 +697,6 @@ public class ScenePluginCollectionSceneService {
         return new ServiceResult<>(teamAttackBO);
     }
 
-
     private <T> Map<T, Integer> doGroupCountFlowByIp(List<String> flowCollectors, List<String> ips, Integer topSize, LocalDateTime startTime, LocalDateTime endTime) {
         FlowAnalysisRequest request = new FlowAnalysisRequest();
         request.setAggregationTypeEnum(AggregationTypeEnum.SOURCE_IP);
@@ -685,23 +712,6 @@ public class ScenePluginCollectionSceneService {
         Map<T, Integer> finalResult = new HashMap<>();
         result.forEach(bo -> finalResult.put((T) bo.getAggregationType(), bo.getAttackNumber().intValue()));
         return finalResult;
-    }
-
-    private <T> ServiceResult<Map<T, Integer>> doGroupCountFlowByMacAddr(List<String> flowCollectors, List<String> macAddrs, Integer topSize, LocalDateTime startTime, LocalDateTime endTime) {
-        FlowAnalysisRequest request = new FlowAnalysisRequest();
-        request.setAggregationTypeEnum(AggregationTypeEnum.SOURCE_IP);
-        request.setGroupList(flowCollectors);
-        request.setStartDateTime(startTime);
-        request.setEndDateTime(endTime);
-        request.setSourceMacs(macAddrs);
-        request.setTopSize(topSize);
-        List<AttackWayAggregationBO> result = flowAnalysisService.topByAggregationTypeEnum(request);
-        if (CollectionUtils.isEmpty(result)) {
-            return new ServiceResult<>(new HashMap<>());
-        }
-        Map<T, Integer> finalResult = new HashMap<>();
-        result.forEach(bo -> finalResult.put((T) bo.getAggregationType(), bo.getAttackNumber().intValue()));
-        return new ServiceResult<>(finalResult);
     }
 
     private long byte2MB(long num) {

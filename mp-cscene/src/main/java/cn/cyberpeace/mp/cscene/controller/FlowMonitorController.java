@@ -89,7 +89,7 @@ public class FlowMonitorController {
         return ServiceResult.success(attackTypeCounts);
     }
 
-    @ApiOperation(value = "攻击次数各按ip统计,单个ip发起攻击的次数")
+    @ApiOperation(value = "攻击次数各按ip统计", notes = "单个ip发起攻击或受到攻击的次数")
     @GetMapping("/attack_ip_count")
     public ServiceResult<List<FlowAttackTime>> getAttackTimes(AttackCountRequest request) {
         log.info("attack_times params: {}", JsonCommon.stringify(request));

@@ -87,6 +87,10 @@ public class BatchSceneHandler {
         return this.allIp2ElementMap.get(ip);
     }
 
+    public String getSceneIdByIpAddr(String ip) {
+        return this.allIp2SceneIdMap.get(ip);
+    }
+
     public List<String> getAllMacAddrs() {
         return new ArrayList<>(this.allMac2ElementMap.keySet());
     }

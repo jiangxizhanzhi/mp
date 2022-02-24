@@ -20,6 +20,7 @@ import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
 import cn.cyberpeace.mp.sceneplugincollection.bo.AttackInfo;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowGroupCountParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
 import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -175,7 +176,15 @@ public class FlowMonitorService {
 
         List<String> sceneIds = Arrays.asList(StringUtils.split(baseRequest.getSceneId(), ","));
         List<String> sceneIdList = sceneIdTranslationService.translateSceneIds(sceneIds);
-        var result = scenePluginCollectionSceneService.groupCountFlowWithName(sceneIdList, baseRequest.getIps(), baseRequest.getTopSize(), baseRequest.getStartTime(), baseRequest.getEndTime()).getSource();
+        String groupField = baseRequest.getIpType() == 0 ?
+                ScenePluginCollectionSceneService.GroupCountFlowField.SOURCE_IP :
+                ScenePluginCollectionSceneService.GroupCountFlowField.DEST_IP;
+        FlowGroupCountParams params = new FlowGroupCountParams(groupField);
+        params.setQueryAddress(baseRequest.getIps());
+        params.setStartTime(baseRequest.getStartTime());
+        params.setEndTime(baseRequest.getEndTime());
+        params.setTopSize(baseRequest.getTopSize());
+        var result = scenePluginCollectionSceneService.groupCountFlowAndNodeInfo(sceneIdList, params).getSource();
         return result.stream()
                 .map(bo -> FlowAttackTime.builder()
                         .times(bo.getTimes())
