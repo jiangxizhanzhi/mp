@@ -200,7 +200,7 @@ public class FlowMonitorService {
 
         List<String> sceneIds = Arrays.asList(StringUtils.split(baseRequest.getSceneId(), ","));
         List<String> sceneIdList = sceneIdTranslationService.translateSceneIds(sceneIds);
-        var countResult = scenePluginCollectionSceneService.groupCountFlow(sceneIdList, baseRequest.getIps(), baseRequest.getTopSize(), null, null).getSource();
+        var countResult = scenePluginCollectionSceneService.groupCountFlow(sceneIdList, baseRequest.getIps(), baseRequest.getTopSize(), baseRequest.getStartTime(), baseRequest.getEndTime()).getSource();
         TotalFlowAttackRatio totalFlowAttackRatio = new TotalFlowAttackRatio();
         totalFlowAttackRatio.setTotalAttackNumber(countResult.getAttackNumber());
         totalFlowAttackRatio.setTotalTrafficSize(countResult.getTrafficSize());
