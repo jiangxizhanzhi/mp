@@ -295,7 +295,7 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public void asyncAckSceneChanged(boolean forceSave, boolean withPlugins) {
-        delayTaskPool.execute(getSceneId(), () -> {
+        delayTaskPool.execute(StringUtils.joinWith(":", getSceneId(), forceSave, withPlugins), () -> {
             ackSceneChanged(forceSave, withPlugins);
         });
     }

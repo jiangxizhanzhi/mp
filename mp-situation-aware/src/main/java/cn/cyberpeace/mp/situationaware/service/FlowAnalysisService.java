@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.situationaware.service;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.situationaware.bo.*;
+import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
 import cn.cyberpeace.mp.situationaware.model.FlowClassificationModel;
 import cn.cyberpeace.mp.situationaware.model.enums.AggregationTypeEnum;
 import cn.cyberpeace.mp.situationaware.model.enums.SeverityEnum;
@@ -44,9 +45,11 @@ import org.elasticsearch.search.aggregations.metrics.SumAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ResourceUtils;
 
 import java.io.IOException;
@@ -76,6 +79,7 @@ public class FlowAnalysisService extends AbstractBaseService {
      * @return
      * @throws IOException
      */
+    @Transactional
     public void initClassification() throws IOException {
         Resource[] resources = new PathMatchingResourcePatternResolver()
                 .getResources(ResourceUtils.CLASSPATH_URL_PREFIX + "suricata/classification.json");
@@ -189,12 +193,11 @@ public class FlowAnalysisService extends AbstractBaseService {
     }
 
     /**
-     * 流量日志，包含分类的中英文名称
+     * 流量日志，国际化处理
      * @param request
      * @return
      */
-    public List<FlowLogBO> flowLogWithCategoryZh(FlowAnalysisRequest request){
-
+    public List<FlowLogBO> globalizedWithFlowLog(FlowAnalysisRequest request){
         List<FlowLogBO> flowLogBOS = this.flowLog(request);
         if (CollectionUtils.isEmpty(flowLogBOS)){
             return Lists.newArrayList();
@@ -202,10 +205,9 @@ public class FlowAnalysisService extends AbstractBaseService {
         Map<String, FlowClassificationModel> allCategoryDicMap = flowClassificationsService.findAllCategoryDicMap();
         flowLogBOS.stream().filter(v -> Objects.nonNull(v.getSuricata())).forEach(flowLogBO -> {
             if (MapUtils.isNotEmpty(allCategoryDicMap)){
-                List<String> categoryZh = flowLogBO.getSuricata().getCategory().stream()
-                        .map(c -> Objects.nonNull(allCategoryDicMap.get(c)) ?
-                        allCategoryDicMap.get(c).getCategoryEn() : c).collect(Collectors.toList());
-                flowLogBO.getSuricata().setCategoryZh(categoryZh);
+                List<String> categoryList = flowLogBO.getSuricata().getCategory().stream()
+                        .map(c -> this.globalizedWithAttackWay(c,allCategoryDicMap)).collect(Collectors.toList());
+                flowLogBO.getSuricata().setCategory(categoryList);
             }
         });
 
@@ -218,6 +220,26 @@ public class FlowAnalysisService extends AbstractBaseService {
      * @return
      */
     public List<AttackWayAggregationBO> topByAggregationTypeEnum(FlowAnalysisRequest request){
+        AggregationTypeEnum aggregationTypeEnum = request.getAggregationTypeEnum();
+        if (Objects.isNull(aggregationTypeEnum)){
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+        List<AttackWayAggregationBO> aggregationBOS = queryTopByAggregationTypeEnum(request);
+        if (CollectionUtils.isEmpty(aggregationBOS)){
+            return aggregationBOS;
+        }
+        if (aggregationTypeEnum == AggregationTypeEnum.SURICATA_CATEGORY) {
+            globalizedWithAttackWay(aggregationBOS);
+        }
+        return aggregationBOS;
+    }
+
+    /**
+     *
+     * @param request
+     * @return
+     */
+    public List<AttackWayAggregationBO>  queryTopByAggregationTypeEnum(FlowAnalysisRequest request){
         AggregationTypeEnum aggregationTypeEnum = request.getAggregationTypeEnum();
         if (Objects.isNull(aggregationTypeEnum)){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
@@ -351,7 +373,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         var boolQueryBuilder = this.buildBoolQueryBuilder(request);
 
         searchSourceBuilder.aggregation(AggregationBuilders.sum("packageSize").field("network.bytes"));
-        searchSourceBuilder.aggregation(AggregationBuilders.terms("attackWay").field("suricata.category").size(5));
+        searchSourceBuilder.aggregation(AggregationBuilders.terms("attackWay").field("suricata.category").size(request.getTopSize()));
         //构造动态条件查询
 
         searchSourceBuilder.trackTotalHits(true);
@@ -376,6 +398,7 @@ public class FlowAnalysisService extends AbstractBaseService {
                         return attackResult;
                     })
                     .collect(Collectors.toList());
+            globalizedWithAttackWay(attackWayList);
             teamAttackResultVO.setAttackWayList(buildTeamAttackWayPercent(attackWayList));
         } catch (IOException e) {
             log.error("query one team error : {}", ExceptionUtils.getMessage(e));
@@ -467,6 +490,40 @@ public class FlowAnalysisService extends AbstractBaseService {
             boolQueryBuilder.must(rangeQueryBuilder);
         }
         return boolQueryBuilder;
+    }
+
+    /**
+     * 国际化攻击手法
+     * @param aggregationBOS
+     */
+    protected void globalizedWithAttackWay(List<AttackWayAggregationBO> aggregationBOS){
+        if (CollectionUtils.isEmpty(aggregationBOS)){
+            return;
+        }
+        Map<String, FlowClassificationModel> allCategoryDicMap = flowClassificationsService.findAllCategoryDicMap();
+        aggregationBOS.stream().forEach(bo ->{
+            String aggregationType = this.globalizedWithAttackWay(bo.getAggregationType(),allCategoryDicMap);
+            bo.setAggregationType(aggregationType);
+        });
+    }
+
+    /**
+     * 国际化攻击手法
+     * @param attackWay
+     * @param allCategoryDicMap
+     * @return
+     */
+    protected String globalizedWithAttackWay(String attackWay,Map<String, FlowClassificationModel> allCategoryDicMap){
+        if (MapUtils.isEmpty(allCategoryDicMap)){
+            return attackWay;
+        }
+        FlowClassificationModel model = allCategoryDicMap.get(attackWay);
+        String globalized = attackWay;
+        if (Objects.nonNull(model)) {
+            Locale locale = LocaleContextHolder.getLocale();
+            globalized = this.getLocalMessage(locale, SituationalAwareConstant.ERROR_CODE_PREFIX + model.getName());
+        }
+        return globalized;
     }
 
     /**

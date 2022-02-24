@@ -15,8 +15,8 @@ import javax.validation.constraints.NotBlank;
 public class RegisterRequest {
 
     @ApiModelProperty(value = "用户名", example = "")
-    @NotBlank(message = "auth.validation.register.username")
-//    @NotBlank(message = "{auth.error_code.params.username_empty}")
+//    @NotBlank(message = "auth.validation.register.username")
+    @NotBlank
     private String username;
 
     @ApiModelProperty(value = "密码 密码必须是DES加密后的密文", example = "")

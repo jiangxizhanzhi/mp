@@ -91,8 +91,10 @@ public class FlowClassificationsService {
         List<FlowClassificationModel> categoryDicList = classifications.stream().map(classification -> {
             FlowClassificationModel categoryDic = new FlowClassificationModel();
             categoryDic.setId(TextUtils.uuid());
+            categoryDic.setName(classification.getName());
             categoryDic.setCategoryEn(classification.getEn_desc());
             categoryDic.setCategoryZh(classification.getZh_desc());
+            categoryDic.setSeverity(classification.getSeverity());
             return categoryDic;
         }).collect(Collectors.toList());
         return flowClassificationsMapper.batchInsert(categoryDicList);

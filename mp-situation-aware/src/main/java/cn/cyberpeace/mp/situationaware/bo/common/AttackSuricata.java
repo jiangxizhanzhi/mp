@@ -13,12 +13,12 @@ import java.util.List;
 public class AttackSuricata{
 
     /**
-     * 分类
+     * 分类英文描述
      */
     private List<String> category;
 
     /**
-     * 分类名称
+     * 分类中文描述
      */
     private List<String> categoryZh;
 

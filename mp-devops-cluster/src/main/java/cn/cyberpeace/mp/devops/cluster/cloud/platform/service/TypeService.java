@@ -34,7 +34,7 @@ public class TypeService extends BaseOpenStackService {
 
     private Cache<String, Object> lfuCache = null;
 
-    private static final Long TIME_OUT = 2 * 60 * 60 * 1000L;
+    private static final Long TIME_OUT = 5 * 60 * 1000L;
 
     @PostConstruct
     public void init(){
