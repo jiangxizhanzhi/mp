@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.sceneplugincollection.bo.AttackInfo;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionFlowBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.FlowAttackTimeBO;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
@@ -21,6 +22,7 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams
 import cn.cyberpeace.mp.situationaware.bo.AttackDateHistogramNetworkBytesBO;
 import cn.cyberpeace.mp.situationaware.bo.AttackWayAggregationBO;
 import cn.cyberpeace.mp.situationaware.bo.FlowLogBO;
+import cn.cyberpeace.mp.situationaware.bo.TeamAttackBO;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.model.WazuhModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
@@ -44,11 +46,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -60,6 +60,7 @@ public class ScenePluginCollectionSceneService {
     public static class GroupCountFlowField {
         public static final String LEVEL = "level";
         public static final String TYPE = "type";
+        public static final String IP = "ip";
     }
 
     public static class GroupCountHostEventField {
@@ -74,47 +75,23 @@ public class ScenePluginCollectionSceneService {
     private FlowAnalysisService flowAnalysisService;
 
     public ListObjServiceResult<CollectionFlowBO> listFlows(List<String> sceneIds, FlowQueryParams queryParams) {
-        List<String> flowCollectMacs = new ArrayList<>();
-        List<String> groupList = new ArrayList<>();
-        Map<String, SceneElementBO> macElementMap = new HashMap<>();
-        Map<String, String> mac2SceneId = new HashMap<>();
-        LocalDateTime earliestStartTime = null;
-        for (String sceneId : sceneIds) {
-            var sceneHandler = new SceneHandler(sceneId, null, false, null);
-            CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
-            if (pluginHandler == null || pluginHandler.getScene() == null || pluginHandler.getScene().getFlowCollector() == null) {
-                continue;
-            }
-            List<SceneElementBO> srcElements = getSrcElements(sceneHandler, queryParams.getNodeIds());
-            List<String> tempMacs = this.loadMac2ElementBOMapAndGetEnableMac(macElementMap, srcElements, pluginHandler);
-            if (tempMacs.isEmpty()) {
-                continue;
-            }
-            if (earliestStartTime == null || sceneHandler.getScene().getCreateTime().isBefore(earliestStartTime)) {
-                earliestStartTime = sceneHandler.getScene().getCreateTime();
-            }
-            tempMacs.forEach(mac -> mac2SceneId.put(mac, sceneId));
-            flowCollectMacs.addAll(tempMacs);
-            groupList.add(pluginHandler.getScene().getFlowCollector());
-        }
-
-        if (CollectionUtils.isEmpty(groupList)) {
+        BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIds, null);
+        if (CollectionUtils.isEmpty(batchSceneHandler.getFlowCollectors())) {
             log.info("{} query time interval sum flow size,sceneIds:{},no collection plugin or no flowCollector", LOG_PREFIX, JsonCommon.stringify(sceneIds));
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
-        if (CollectionUtils.isEmpty(flowCollectMacs)) {
+        if (CollectionUtils.isEmpty(batchSceneHandler.getFlowCollectedMacAddrs())) {
             log.info("{} query time interval sum flow size,sceneIds:{},no collection plugin or no flowCollector", LOG_PREFIX, JsonCommon.stringify(sceneIds));
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
 
         FlowAnalysisRequest request = new FlowAnalysisRequest();
-        request.setGroupList(groupList);
-        request.setSourceMacs(flowCollectMacs);
+        request.setGroupList(batchSceneHandler.getFlowCollectors());
+        request.setSourceMacs(batchSceneHandler.getFlowCollectedMacAddrs());
         request.setSecondsInterval(queryParams.getInterval());
-
         // 查询时间段 默认使用场景创建到当前时间
         if (StringUtils.isBlank(queryParams.getStartTime())) {
-            request.setStartDateTime(earliestStartTime);
+            request.setStartDateTime(batchSceneHandler.getEarliestStartTime());
         } else {
             request.setStartDateTime(TimeUtils.stringToLocalDateTime(queryParams.getStartTime()));
         }
@@ -129,7 +106,7 @@ public class ScenePluginCollectionSceneService {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
 
-        List<CollectionFlowBO> list = flowLogBOS.stream().map(flowLogBO -> this.buildCollectionFlowBOFrom(flowLogBO, macElementMap, mac2SceneId)).collect(Collectors.toList());
+        List<CollectionFlowBO> list = flowLogBOS.stream().map(flowLogBO -> this.buildCollectionFlowBOFrom(flowLogBO, batchSceneHandler.getAllMac2ElementMap(), batchSceneHandler.getAllMac2SceneIdMap())).collect(Collectors.toList());
         return new ListObjServiceResult<>(new ListObjResult<>(list, list.size()));
     }
 
@@ -298,6 +275,7 @@ public class ScenePluginCollectionSceneService {
         return groupCountFlow(sceneIds, nodeIds, GroupCountFlowField.TYPE, startTime, endTime);
     }
 
+
     /**
      * 事件类型分组查询主机事件的聚合统计数量
      * @param sceneIds 场景id列表，不传默认为全部
@@ -349,48 +327,21 @@ public class ScenePluginCollectionSceneService {
     public ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> timeIntervalSumFlowSize(
             List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime,
             int intervalSeconds) {
-        List<String> macAddrs = new ArrayList<>();
-        List<String> flowCollectors = new ArrayList<>();
-        LocalDateTime earliestStartTime = null;
-        for (String sceneId : sceneIds) {
-            var sceneHandler = new SceneHandler(sceneId, null, false, null);
-            CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
-            if (pluginHandler == null || pluginHandler.getScene() == null || pluginHandler.getScene().getFlowCollector() == null) {
-                continue;
-            }
-            List<SceneElementBO> elements = new ArrayList<>(sceneHandler.getElementMap().values());
-            // 根据参数筛选一下节点
-            if (CollectionUtils.isNotEmpty(nodeIds)) {
-                Set<String> effectNodeIds = new HashSet<>(nodeIds);
-                elements = elements.stream().filter(e -> effectNodeIds.contains(e.getId())).collect(Collectors.toList());
-            }
-            // 获取mac地址
-            List<String> tempMacAddrs = this.loadMac2ElementBOMapAndGetEnableMac(new HashMap<>(), elements, pluginHandler);
-            // 加入参数
-            if (earliestStartTime == null || sceneHandler.getScene().getCreateTime().isBefore(earliestStartTime)) {
-                earliestStartTime = sceneHandler.getScene().getCreateTime();
-            }
-            macAddrs.addAll(tempMacAddrs);
-            flowCollectors.add(pluginHandler.getScene().getFlowCollector());
-        }
-        if (CollectionUtils.isEmpty(flowCollectors)) {
+        BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIds, nodeIds);
+        if (CollectionUtils.isEmpty(batchSceneHandler.getFlowCollectors())) {
             log.info("{} query time interval sum flow size,sceneId:{},no collection plugin or no flowCollector", LOG_PREFIX, JsonCommon.stringify(sceneIds));
             return new ServiceResult<>(new ArrayList<>());
         }
-        if (CollectionUtils.isEmpty(macAddrs)) {
+        if (CollectionUtils.isEmpty(batchSceneHandler.getFlowCollectedMacAddrs())) {
             log.info("{} query time interval sum flow size,sceneIds:{},nodeIds:{},no enabled macAddr", LOG_PREFIX, JsonCommon.stringify(sceneIds), JsonCommon.stringify(nodeIds));
             return new ServiceResult<>(new ArrayList<>());
         }
         // 构造参数
         FlowAnalysisRequest request = new FlowAnalysisRequest();
-        request.setSourceMacs(macAddrs);
-        request.setGroupList(flowCollectors);
-        request.setStartDateTime(Optional.ofNullable(startTime)
-                .orElse(earliestStartTime)
-        );
-        request.setEndDateTime(Optional.ofNullable(endTime)
-                .orElse(LocalDateTime.now())
-        );
+        request.setGroupList(batchSceneHandler.getFlowCollectors());
+        request.setSourceMacs(batchSceneHandler.getFlowCollectedMacAddrs());
+        request.setStartDateTime(Optional.ofNullable(startTime).orElse(batchSceneHandler.getEarliestStartTime()));
+        request.setEndDateTime(Optional.ofNullable(endTime).orElse(LocalDateTime.now()));
         request.setSecondsInterval(intervalSeconds);
         // 执行查询
         List<AttackDateHistogramNetworkBytesBO> bos = flowAnalysisService.sumNetworkBytesByDateHistogramTimestamp(request);
@@ -403,7 +354,7 @@ public class ScenePluginCollectionSceneService {
                             .atZone(ZoneOffset.UTC)
                             .withZoneSameInstant(ZoneId.systemDefault())
                             .toLocalDateTime();
-                    return new IntervalSizeBO<LocalDateTime, Long>(time, time, bo.getNetworkBytes().longValue());
+                    return new IntervalSizeBO<>(time, time, bo.getNetworkBytes().longValue());
                 }).collect(Collectors.toList());
         Collections.sort(result, Comparator.comparing(IntervalSizeBO::getStart));
         return new ServiceResult<>(result);
@@ -648,6 +599,102 @@ public class ScenePluginCollectionSceneService {
         request.setStartDateTime(Optional.ofNullable(startTime).orElse(batchSceneHandler.getEarliestStartTime()));
         request.setEndDateTime(Optional.ofNullable(endTime).orElse(LocalDateTime.now()));
         request.setSourceMacs(batchSceneHandler.getFlowCollectedMacAddrs());
+        List<AttackWayAggregationBO> result = flowAnalysisService.topByAggregationTypeEnum(request);
+        if (CollectionUtils.isEmpty(result)) {
+            return new ServiceResult<>(new HashMap<>());
+        }
+        Map<T, Integer> finalResult = new HashMap<>();
+        result.forEach(bo -> finalResult.put((T) bo.getAggregationType(), bo.getAttackNumber().intValue()));
+        return new ServiceResult<>(finalResult);
+    }
+
+    public ServiceResult<Map<String, Integer>> groupCountFlowWithTopSize(List<String> sceneIds, List<String> ips, LocalDateTime startTime, LocalDateTime endTime) {
+        BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIds, null);
+        if (CollectionUtils.isEmpty(batchSceneHandler.getFlowCollectors())) {
+            return new ServiceResult<>(new HashMap<>());
+        }
+        LocalDateTime fStartTime = Optional.ofNullable(startTime).orElse(batchSceneHandler.getEarliestStartTime());
+        LocalDateTime fEndTime = Optional.ofNullable(endTime).orElse(LocalDateTime.now());
+        Map<String, Integer> result = this.doGroupCountFlowByIp(batchSceneHandler.getFlowCollectors(), ips, ips.size(), fStartTime, fEndTime);
+        return new ServiceResult<>(result);
+    }
+
+    public ServiceResult<List<FlowAttackTimeBO>> groupCountFlowWithName(List<String> sceneIds, List<String> ips, Integer topSize, LocalDateTime startTime, LocalDateTime endTime) {
+        BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIds, null);
+        if (CollectionUtils.isEmpty(batchSceneHandler.getFlowCollectors())) {
+            return new ServiceResult<>(new ArrayList<>());
+        }
+        List<String> queryIps = CollectionUtils.isNotEmpty(ips) ? ips : batchSceneHandler.getFlowCollectedIpAddrs();
+        if (CollectionUtils.isEmpty(queryIps)) {
+            return new ServiceResult<>(new ArrayList<>());
+        }
+        LocalDateTime fStartTime = Optional.ofNullable(startTime).orElse(batchSceneHandler.getEarliestStartTime());
+        LocalDateTime fEndTime = Optional.ofNullable(endTime).orElse(LocalDateTime.now());
+        int queryTopSize = topSize != null ? topSize : queryIps.size();
+        Map<String, Integer> result = this.doGroupCountFlowByIp(batchSceneHandler.getFlowCollectors(), ips, queryTopSize, fStartTime, fEndTime);
+        if (result == null || result.isEmpty()) {
+            return new ServiceResult<>(new ArrayList<>());
+        }
+        List<FlowAttackTimeBO> timeBOS = new ArrayList<>();
+        result.forEach((ip, times) -> timeBOS.add(FlowAttackTimeBO.builder()
+                .ip(ip)
+                .times(times)
+                .nodeName(batchSceneHandler.getNodeByIpAddr(ip) == null ? StringUtils.EMPTY : batchSceneHandler.getNodeByIpAddr(ip).getName())
+                .build()));
+        return new ServiceResult<>(timeBOS);
+    }
+
+    public ServiceResult<TeamAttackBO> groupCountFlow(List<String> sceneIds, List<String> ips, Integer topSize, LocalDateTime startTime, LocalDateTime endTime) {
+        BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIds, null);
+        if (CollectionUtils.isEmpty(batchSceneHandler.getFlowCollectors())) {
+            TeamAttackBO teamAttackBO = new TeamAttackBO();
+            teamAttackBO.setAttackNumber(0L);
+            teamAttackBO.setAttackWayList(new ArrayList<>());
+            teamAttackBO.setTrafficSize((double) 0);
+            return new ServiceResult<>(teamAttackBO);
+        }
+        LocalDateTime fStartTime = Optional.ofNullable(startTime).orElse(batchSceneHandler.getEarliestStartTime());
+        LocalDateTime fEndTime = Optional.ofNullable(endTime).orElse(LocalDateTime.now());
+        FlowAnalysisRequest flowAnalysisRequest = new FlowAnalysisRequest();
+        FlowAnalysisRequest.builder()
+                .groupList(batchSceneHandler.getFlowCollectors())
+                .sourceIps(ips)
+                .startDateTime(fStartTime)
+                .endDateTime(fEndTime)
+                .topSize(topSize)
+                .aggregationTypeEnum(AggregationTypeEnum.SURICATA_CATEGORY)
+                .build();
+        flowAnalysisRequest.setGroupList(batchSceneHandler.getFlowCollectors());
+        TeamAttackBO teamAttackBO = flowAnalysisService.queryOneTeamAttackSumList(flowAnalysisRequest);
+        return new ServiceResult<>(teamAttackBO);
+    }
+
+
+    private <T> Map<T, Integer> doGroupCountFlowByIp(List<String> flowCollectors, List<String> ips, Integer topSize, LocalDateTime startTime, LocalDateTime endTime) {
+        FlowAnalysisRequest request = new FlowAnalysisRequest();
+        request.setAggregationTypeEnum(AggregationTypeEnum.SOURCE_IP);
+        request.setGroupList(flowCollectors);
+        request.setStartDateTime(startTime);
+        request.setEndDateTime(endTime);
+        request.setSourceIps(ips);
+        request.setTopSize(topSize);
+        List<AttackWayAggregationBO> result = flowAnalysisService.topByAggregationTypeEnum(request);
+        if (CollectionUtils.isEmpty(result)) {
+            new HashMap<>();
+        }
+        Map<T, Integer> finalResult = new HashMap<>();
+        result.forEach(bo -> finalResult.put((T) bo.getAggregationType(), bo.getAttackNumber().intValue()));
+        return finalResult;
+    }
+
+    private <T> ServiceResult<Map<T, Integer>> doGroupCountFlowByMacAddr(List<String> flowCollectors, List<String> macAddrs, Integer topSize, LocalDateTime startTime, LocalDateTime endTime) {
+        FlowAnalysisRequest request = new FlowAnalysisRequest();
+        request.setAggregationTypeEnum(AggregationTypeEnum.SOURCE_IP);
+        request.setGroupList(flowCollectors);
+        request.setStartDateTime(startTime);
+        request.setEndDateTime(endTime);
+        request.setSourceMacs(macAddrs);
+        request.setTopSize(topSize);
         List<AttackWayAggregationBO> result = flowAnalysisService.topByAggregationTypeEnum(request);
         if (CollectionUtils.isEmpty(result)) {
             return new ServiceResult<>(new HashMap<>());
