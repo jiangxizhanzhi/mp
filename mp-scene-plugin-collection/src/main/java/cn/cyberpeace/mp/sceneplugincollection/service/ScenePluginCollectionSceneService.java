@@ -643,9 +643,11 @@ public class ScenePluginCollectionSceneService {
         if (GroupCountFlowField.SOURCE_IP.equals(params.getQueryType())) {
             request.setSourceIps(CollectionUtils.isNotEmpty(paramsAddress) ? paramsAddress : batchSceneHandler.getFlowCollectedIpAddrs());
             queryTopSize = request.getSourceIps().size();
+            request.setAggregationTypeEnum(AggregationTypeEnum.SOURCE_IP);
         } else if (GroupCountFlowField.DEST_IP.equals(params.getQueryType())) {
             request.setDestinationIps(CollectionUtils.isNotEmpty(paramsAddress) ? paramsAddress : batchSceneHandler.getFlowCollectedIpAddrs());
             queryTopSize = request.getDestinationIps().size();
+            request.setAggregationTypeEnum(AggregationTypeEnum.DESTINATION_IP);
         } else {
             log.error("wrong params for groupCountFlowAndNodeInfo , params is {}", JsonCommon.stringify(params));
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);

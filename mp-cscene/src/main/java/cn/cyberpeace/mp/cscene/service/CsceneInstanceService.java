@@ -261,7 +261,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         Map<String, String> sceneId2CsceneId = new HashMap<>();
         for (String csceneId : csceneIds) {
             var sceneId = getSceneId(csceneId);
-            if (StringUtils.isEmpty(sceneId)) {
+            if (StringUtils.isNotEmpty(sceneId)) {
                 sceneId2CsceneId.put(sceneId, csceneId);
             }
         }
