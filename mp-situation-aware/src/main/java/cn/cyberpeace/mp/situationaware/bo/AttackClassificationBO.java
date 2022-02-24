@@ -29,5 +29,7 @@ public class AttackClassificationBO {
       private String en_desc;
 
       private String zh_desc;
+
+      private Integer severity;
    }
 }

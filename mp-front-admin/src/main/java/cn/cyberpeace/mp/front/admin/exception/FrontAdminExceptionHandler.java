@@ -6,10 +6,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -19,8 +16,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * @Author zhouxinghuai
  * @Date：2021/8/31 11:13
  */
-@ControllerAdvice(basePackages = "cn.cyberpeace.mp.front.admin")
-@Order(Ordered.HIGHEST_PRECEDENCE)
+//@ControllerAdvice(basePackages = "cn.cyberpeace.mp.front.admin")
+//@Order(Ordered.HIGHEST_PRECEDENCE)
 @Slf4j
 public class FrontAdminExceptionHandler {
 

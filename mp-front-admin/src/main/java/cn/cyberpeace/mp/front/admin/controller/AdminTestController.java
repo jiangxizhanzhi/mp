@@ -1,9 +1,11 @@
 package cn.cyberpeace.mp.front.admin.controller;
 
 import cn.cyberpeace.mp.front.admin.service.sys.SysConfigService;
+import cn.cyberpeace.mp.front.admin.service.sys.SysCtlService;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,5 +23,12 @@ public class AdminTestController {
     @Autowired
     private SysConfigService sysConfigService;
 
+    @Autowired
+    private SysCtlService sysCtlService;
+
+    @GetMapping("/testTs")
+    public void testTs() {
+        sysCtlService.updateSysTs();
+    }
 
 }
