@@ -20,8 +20,4 @@ public class BaseSceneElementRequest {
 
     @ApiModelProperty("节点id")
     private List<String> elementIds;
-
-    @ApiModelProperty("查询前几个")
-    private Integer topSieze;
-
 }
