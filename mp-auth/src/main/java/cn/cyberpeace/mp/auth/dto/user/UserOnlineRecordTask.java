@@ -37,7 +37,7 @@ public class UserOnlineRecordTask implements Runnable {
 
     @Override
     public void run() {
-        log.info("创建或更新用户在线记录信息...");
+        log.info("create or update UserOnlineRecord...");
         // 更新用户在线记录信息
         // 1. 查询状态为未完成的记录，然后更新duration_minutes, end_time
         UserOnlineRecordService userOnlineRecordService = applicationContext.getBean(UserOnlineRecordService.class);
@@ -45,7 +45,7 @@ public class UserOnlineRecordTask implements Runnable {
 
         // 存在当前用户的在线记录，直接更新
         if (CollectionUtil.isNotEmpty(onlinedRecordList)) {
-            log.info("存在当前用户的在线记录，更新...");
+            log.info("UserOnlineRecord existed, updating...");
             List<UserOnlineRecordModel> bulkUpdateList = new ArrayList<>();
             for (UserOnlineRecordModel model : onlinedRecordList) {
                 LocalDateTime startTime = model.getStartTime();
@@ -66,7 +66,7 @@ public class UserOnlineRecordTask implements Runnable {
 
         } else {
             // 不存在当前用户的在线记录，新增一个新的记录
-            log.info("不存在当前用户的在线记录，创建...");
+            log.info("UserOnlineRecord not exist, creating...");
             UserService userService = applicationContext.getBean(UserService.class);
             var source = userService.get(userId).getSource();
             UserModel user = Objects.isNull(source) ? null : source.getObj();
