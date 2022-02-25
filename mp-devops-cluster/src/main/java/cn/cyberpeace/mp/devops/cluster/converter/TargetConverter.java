@@ -60,6 +60,10 @@ public class TargetConverter{
         dto.setImageType(Objects.nonNull(request.getImageType()) ? request.getImageType().toValue() : "");
         dto.setName(request.getName());
         dto.setSearchPublicEnum(1);
+        if (Objects.nonNull(request.getPage()) && Objects.nonNull(request.getPerPage())) {
+            dto.setOffset((request.getPage() - 1) * request.getPerPage());
+            dto.setLimit(request.getPerPage());
+        }
         if (Objects.isNull(request.getIgnoreUser()) || !request.getIgnoreUser()) {
             dto.setOwner(Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : null);
         }

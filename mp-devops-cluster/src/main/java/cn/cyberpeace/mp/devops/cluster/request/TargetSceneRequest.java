@@ -12,7 +12,7 @@ import java.io.Serializable;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TargetSceneRequest implements Serializable {
+public class TargetSceneRequest extends BasePageRequest implements Serializable {
 
     /**
      * 系统主类型

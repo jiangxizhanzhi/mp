@@ -19,6 +19,8 @@ import cn.cyberpeace.mp.devops.cluster.response.base.Result;
 import cn.cyberpeace.mp.devops.cluster.thread.ITask;
 import cn.cyberpeace.mp.devops.cluster.utils.FileUtils;
 import cn.cyberpeace.mp.devops.cluster.utils.MultiThreadUtils;
+import cn.cyberpeace.mp.devops.cluster.vo.DeviceVO;
+import cn.cyberpeace.mp.devops.cluster.vo.convert.DeviceVoConverter;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -49,16 +51,20 @@ public class DevopsTargetController {
 
     private IpAddressConfig ipAddressConfig;
 
+    private DeviceVoConverter deviceVoConverter;
+
     @Autowired
     private ITask asyncTargetTask;
 
     @Autowired
     public DevopsTargetController(TargetConverter targetConverter,TypeConverter typeConverter,
-                                  ImagesService imagesService,IpAddressConfig ipAddressConfig) {
+                                  ImagesService imagesService,IpAddressConfig ipAddressConfig,
+                                  DeviceVoConverter deviceVoConverter) {
         this.targetConverter = targetConverter;
         this.typeConverter = typeConverter;
         this.imagesService = imagesService;
         this.ipAddressConfig = ipAddressConfig;
+        this.deviceVoConverter = deviceVoConverter;
     }
 
     /**
@@ -84,6 +90,8 @@ public class DevopsTargetController {
         TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type();
         List<TypeConvertModel> firstTypeList = l1AndL2AndL3Type.getFirstTypeList();
         List<TypeConvertModel> secondTypeList = l1AndL2AndL3Type.getSecondTypeList();
+        request.setPage(null);
+        request.setPerPage(null);
         List<Device> deviceList = targetConverter.allTarget(request);
         if (CollectionUtils.isEmpty(deviceList)){
             return ServiceResult.successful();
@@ -114,6 +122,19 @@ public class DevopsTargetController {
 
         return new Result<>(new TargetSceneResponse(targetScenes));
     }
+
+    @ApiOperation("分页查询靶标信息")
+    @GetMapping("/page")
+    public Result<List<DeviceVO>> page(TargetSceneRequest request){
+
+        List<Device> deviceList = targetConverter.allTarget(request);
+
+        List<DeviceVO> deviceVOList = deviceVoConverter.devicesToDeviceVOs(deviceList);
+
+        return new Result<>(deviceVOList);
+    }
+
+
 
     @ApiOperation("上传文件")
     @PostMapping("/upload")
