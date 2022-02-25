@@ -9,6 +9,8 @@ import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.DeviceService;
 import cn.cyberpeace.mp.devops.cluster.constant.DevopsClusterErrorCode;
+import cn.cyberpeace.mp.devops.cluster.converter.model.TargetPageModel;
+import cn.cyberpeace.mp.devops.cluster.converter.model.TargetSceneConvertModel;
 import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.TargetModel;
@@ -52,7 +54,7 @@ public class TargetConverter{
      * @param request
      * @return
      */
-    public List<TargetModel> page(TargetSceneRequest request) {
+    public TargetPageModel page(TargetSceneRequest request) {
         ImagePageDTO dto = new ImagePageDTO();
         dto.setTargetCategory(request.getTargetCategory());
         dto.setMainCategory(request.getCategory());
@@ -74,10 +76,15 @@ public class TargetConverter{
             dto.setLikeName(request.getLikeName());
         }
         Integer total = imageMapper.totalCount(dto);
+        TargetPageModel targetPageModel = new TargetPageModel();
+        targetPageModel.setTotal(total);
         if (total == 0){
-            return Lists.newArrayList();
+            targetPageModel.setTargetModels(Lists.newArrayList());
+            return targetPageModel;
         }
-        return imageMapper.page(dto);
+        List<TargetModel> targetModels = imageMapper.page(dto);
+        targetPageModel.setTargetModels(targetModels);
+        return targetPageModel;
     }
 
     /**
@@ -85,20 +92,27 @@ public class TargetConverter{
      * @param request
      * @return
      */
-    public List<Device> allTarget(TargetSceneRequest request) {
-        List<TargetModel> targetModels = this.page(request);
+    public TargetSceneConvertModel allTarget(TargetSceneRequest request) {
+       TargetPageModel targetPageModel = this.page(request);
+
+        List<TargetModel> targetModels = targetPageModel.getTargetModels();
 
         List<Integer> ids = targetModels.stream().map(TargetModel::getId).map(Integer::parseInt).collect(Collectors.toList());
+
+        TargetSceneConvertModel sceneConvertModel = new TargetSceneConvertModel();
+        sceneConvertModel.setTotal(targetPageModel.getTotal());
         if (CollectionUtils.isEmpty(ids)){
-            return Lists.newArrayList();
+            sceneConvertModel.setDeviceList(Lists.newArrayList());
+            return sceneConvertModel;
         }
         DeviceCloudPlatformModel model = deviceService.findByIds(ids);
 
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getItems())){
-            return Lists.newArrayList();
+            sceneConvertModel.setDeviceList(Lists.newArrayList());
+            return sceneConvertModel;
         }
-
-        return model.getItems();
+        sceneConvertModel.setDeviceList(model.getItems());
+        return sceneConvertModel;
     }
 
     /**

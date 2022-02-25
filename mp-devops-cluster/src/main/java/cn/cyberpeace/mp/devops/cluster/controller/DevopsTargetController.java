@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.devops.cluster.config.IpAddressConfig;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.TargetConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.TypeConverter;
+import cn.cyberpeace.mp.devops.cluster.converter.model.TargetSceneConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeAllConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeConvertModel;
 import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
@@ -15,16 +16,19 @@ import cn.cyberpeace.mp.devops.cluster.request.TargetSceneRequest;
 import cn.cyberpeace.mp.devops.cluster.response.TargetScene;
 import cn.cyberpeace.mp.devops.cluster.response.TargetSceneResponse;
 import cn.cyberpeace.mp.devops.cluster.response.TargetUploadResponse;
+import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
 import cn.cyberpeace.mp.devops.cluster.response.base.Result;
 import cn.cyberpeace.mp.devops.cluster.thread.ITask;
 import cn.cyberpeace.mp.devops.cluster.utils.FileUtils;
 import cn.cyberpeace.mp.devops.cluster.utils.MultiThreadUtils;
 import cn.cyberpeace.mp.devops.cluster.vo.DeviceVO;
 import cn.cyberpeace.mp.devops.cluster.vo.convert.DeviceVoConverter;
+import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -92,10 +96,11 @@ public class DevopsTargetController {
         List<TypeConvertModel> secondTypeList = l1AndL2AndL3Type.getSecondTypeList();
         request.setPage(null);
         request.setPerPage(null);
-        List<Device> deviceList = targetConverter.allTarget(request);
-        if (CollectionUtils.isEmpty(deviceList)){
+        TargetSceneConvertModel targetSceneConvertModel = targetConverter.allTarget(request);
+        if (Objects.isNull(targetSceneConvertModel) || CollectionUtils.isEmpty(targetSceneConvertModel.getDeviceList())){
             return ServiceResult.successful();
         }
+        List<Device> deviceList = targetSceneConvertModel.getDeviceList();
         List<TargetScene> targetScenes = new ArrayList<>();
         if (Objects.nonNull(request.getCategory())) {
             firstTypeList = firstTypeList.stream().filter(v -> v.getId().equals(request.getCategory())).collect(Collectors.toList());
@@ -125,13 +130,17 @@ public class DevopsTargetController {
 
     @ApiOperation("分页查询靶标信息")
     @GetMapping("/page")
-    public Result<List<DeviceVO>> page(TargetSceneRequest request){
+    public PageResult<DeviceVO> page(TargetSceneRequest request){
 
-        List<Device> deviceList = targetConverter.allTarget(request);
+        TargetSceneConvertModel targetSceneConvertModel = targetConverter.allTarget(request);
+        if (Objects.isNull(targetSceneConvertModel) || CollectionUtils.isEmpty(targetSceneConvertModel.getDeviceList())){
+            return new PageResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
+        }
+        List<Device> deviceList = targetSceneConvertModel.getDeviceList();
 
         List<DeviceVO> deviceVOList = deviceVoConverter.devicesToDeviceVOs(deviceList);
 
-        return new Result<>(deviceVOList);
+        return new PageResult<>(deviceVOList,targetSceneConvertModel.getTotal());
     }
 
 

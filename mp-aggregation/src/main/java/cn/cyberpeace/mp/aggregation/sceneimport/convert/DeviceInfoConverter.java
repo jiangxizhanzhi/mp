@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.aggregation.sceneimport.convert;
 
-import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devops.cluster.converter.TargetConverter;
+import cn.cyberpeace.mp.devops.cluster.converter.model.TargetSceneConvertModel;
 import cn.cyberpeace.mp.devops.cluster.request.TargetSceneRequest;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortBO;
@@ -14,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * @Description 写入设备信息
@@ -49,11 +50,12 @@ class DeviceInfoConverter implements IConverter {
             request.setIgnoreUser(true);
             // 精确搜索
             request.setLikeName(false);
-            List<Device> devices = this.targetConverter.allTarget(request);
-            if (CollectionUtils.isEmpty(devices)) {
+            TargetSceneConvertModel targetSceneConvertModel = this.targetConverter.allTarget(request);
+            if (Objects.isNull(targetSceneConvertModel) || CollectionUtils.isEmpty(targetSceneConvertModel.getDeviceList())) {
                 log.info("import scene ,no device find , image is {}", request.getName());
                 continue;
             }
+            List<Device> devices = targetSceneConvertModel.getDeviceList();
             Params params = new Params(element, pluginElements.get(element.getId()), pluginPorts);
             this.loadDeviceInfo(params, devices.get(0));
         }
