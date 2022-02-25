@@ -31,7 +31,7 @@ import java.util.List;
 
 @SpringBootTest(classes = TestSituationAwareApplciation.class)
 @RunWith(SpringRunner.class)
-public class DataCollectionServiceTest {
+public class BaseDataCollectionServiceTest {
 
     @Autowired
     private DataCollectionService dataCollectionService;

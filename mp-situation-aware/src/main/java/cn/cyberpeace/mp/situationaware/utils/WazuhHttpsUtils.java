@@ -2,18 +2,17 @@ package cn.cyberpeace.mp.situationaware.utils;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustStrategy;
@@ -21,6 +20,11 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import java.util.List;
 
 @Slf4j
 public class WazuhHttpsUtils {
@@ -32,6 +36,38 @@ public class WazuhHttpsUtils {
         } catch (Exception e) {
             log.error("{}",e);
             throw new MpRuntimeException("createIgnoreSSLHttpClient error");
+        }
+    }
+
+    /**
+     * get请求
+     *
+     * @param url
+     * @return
+     * @throws IOException
+     */
+    public static String sendGetWithAuthToken(String url, List<NameValuePair> params) throws IOException {
+        @Cleanup CloseableHttpResponse response = null;
+        @Cleanup CloseableHttpClient httpClient = null;
+        try {
+            httpClient = createIgnoreSSLHttpClient();
+
+            URIBuilder uriBuilder = new URIBuilder(url);
+            uriBuilder.setParameters(params);
+            HttpGet httpGet = new HttpGet(uriBuilder.build());
+
+            httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + SituationalAwareConstant.wazuhToken.get("wazuhToken"));
+            response = httpClient.execute(httpGet);
+            StatusLine sl = response.getStatusLine();
+            if (sl.getStatusCode() == 401) {
+                SituationalAwareConstant.wazuhToken.invalidate("wazuhToken");
+                httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + SituationalAwareConstant.wazuhToken.get("wazuhToken"));
+                response = httpClient.execute(httpGet);
+            }
+            return EntityUtils.toString(response.getEntity(), "UTF-8");
+        } catch (Exception e) {
+            log.error("{}",e);
+            throw new MpRuntimeException("sendGetWithAuth 失败");
         }
     }
 
