@@ -53,8 +53,9 @@ public class FlowAnalysisController {
         flowAnalysisService.initClassification();
     }
 
-    @ApiOperation("流量日志")
+    @ApiOperation(value = "流量日志")
     @GetMapping("/log")
+    @Deprecated
     public ServiceResult<List<FlowLogVO>> flowLog(FlowAnalysisRequest request){
         request.setIndices(flowAnalysisService.getAllIndices(INDICES));
         List<FlowLogBO> flowLogBOList = flowAnalysisService.flowLog(request);
@@ -73,8 +74,9 @@ public class FlowAnalysisController {
         return new ServiceResult(flowLogVOList).asResult();
     }
 
-    @ApiOperation("根据聚合类型聚合不同的TOP N数据")
+    @ApiOperation(value = "根据聚合类型聚合不同的TOP N数据",hidden = true)
     @GetMapping("/top-By-aggregation-type")
+    @Deprecated
     public ServiceResult<List<AttackWayAggregationVO>> topByAggregationTypeEnum(FlowAnalysisRequest request){
         request.setIndices(flowAnalysisService.getAllIndices(INDICES));
         List<AttackWayAggregationBO> attackWayAggregationBOS = flowAnalysisService.topByAggregationTypeEnum(request);
@@ -91,8 +93,9 @@ public class FlowAnalysisController {
         return new ServiceResult(voList).asResult();
     }
 
-    @ApiOperation("统计时间窗口里的流量大小")
+    @ApiOperation(value = "统计时间窗口里的流量大小",hidden = true)
     @GetMapping("/sum-network-bytes")
+    @Deprecated
     public ServiceResult<List<AttackDateHistogramNetworkBytesVO>> sumNetworkBytesByDateHistogramTimestamp(FlowAnalysisRequest request){
         request.setIndices(flowAnalysisService.getAllIndices(INDICES));
         List<AttackDateHistogramNetworkBytesBO> bos = flowAnalysisService.sumNetworkBytesByDateHistogramTimestamp(request);
@@ -108,8 +111,9 @@ public class FlowAnalysisController {
         return new ServiceResult(vos).asResult();
     }
 
-    @ApiOperation("查询所有战队流量聚合数据, 战队名次按照攻击次数排名")
+    @ApiOperation(value = "查询所有战队流量聚合数据, 战队名次按照攻击次数排名",hidden = true)
     @GetMapping("/team_traffic_sum")
+    @Deprecated
     public ServiceResult<List<TeamAttackVO>> queryAllTeamAttackList(FlowAnalysisRequest request){
         List<TeamBO> teamBOList = request.getTeamBOS();
         FlowAnalysisRequest flowAnalysisRequest = this.buildFlowAnalysisRequest(request);
