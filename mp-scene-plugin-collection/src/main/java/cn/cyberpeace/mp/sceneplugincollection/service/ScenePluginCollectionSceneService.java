@@ -267,7 +267,7 @@ public class ScenePluginCollectionSceneService {
     }
 
     /**
-     * 安全等级分组查询采集流量的聚合统计数量
+     * 安全类型分组查询采集流量的聚合统计数量
      * @param sceneIds 场景id列表，不传默认为全部
      * @param nodeIds 节点id列表，不传默认为全部
      * @param startTime 开始时间
@@ -685,8 +685,7 @@ public class ScenePluginCollectionSceneService {
         }
         LocalDateTime fStartTime = Optional.ofNullable(startTime).orElse(batchSceneHandler.getEarliestStartTime());
         LocalDateTime fEndTime = Optional.ofNullable(endTime).orElse(LocalDateTime.now());
-        FlowAnalysisRequest flowAnalysisRequest = new FlowAnalysisRequest();
-        FlowAnalysisRequest.builder()
+        FlowAnalysisRequest flowAnalysisRequest = FlowAnalysisRequest.builder()
                 .groupList(batchSceneHandler.getFlowCollectors())
                 .sourceIps(ips)
                 .startDateTime(fStartTime)

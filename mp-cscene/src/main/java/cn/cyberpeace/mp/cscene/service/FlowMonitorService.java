@@ -136,12 +136,9 @@ public class FlowMonitorService {
             nodeIds = CollectionUtil.toList(baseRequest.getElementIds().toArray(new String[]{}));
         }
 
-        LocalDateTime endTime = LocalDateTime.now();
-        LocalDateTime startTime = endTime.minusMinutes(10);
-
         List<String> sceneIdList = sceneIdTranslationService.translateSceneIds(sceneIds);
 
-        ServiceResult<Map<String, Integer>> mapResult = scenePluginCollectionSceneService.groupCountFlowByType(sceneIdList, nodeIds, startTime, endTime);
+        ServiceResult<Map<String, Integer>> mapResult = scenePluginCollectionSceneService.groupCountFlowByType(sceneIdList, nodeIds, null, null);
         Map<String, Integer> map = mapResult.getSource();
         List<FlowAttackTypeCount> result = new ArrayList<>();
         if (map != null && !map.isEmpty()) {
@@ -205,11 +202,11 @@ public class FlowMonitorService {
         totalFlowAttackRatio.setTotalAttackNumber(countResult.getAttackNumber());
         totalFlowAttackRatio.setTotalTrafficSize(countResult.getTrafficSize());
         totalFlowAttackRatio.setAttackWayList(new ArrayList<>());
-        if (CollectionUtils.isEmpty(countResult.getAttackWayList())) {
+        if (CollectionUtils.isNotEmpty(countResult.getAttackWayList())) {
             countResult.getAttackWayList().stream()
                     .forEach(v -> totalFlowAttackRatio.getAttackWayList()
                             .add(FlowAttackRatio.builder()
-                                    .attackTrafficPercent(v.getAttackTrafficPercent().doubleValue())
+                                    .attackTrafficPercent(v.getAttackNumberPercent().doubleValue())
                                     .type(v.getAggregationType())
                                     .build())
                     );
