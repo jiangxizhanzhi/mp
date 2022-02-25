@@ -2,6 +2,7 @@ dependencies {
     implementation project(':mp-base')
     implementation 'io.github.hakky54:sslcontext-kickstart:6.6.0'
     implementation 'org.mariadb.jdbc:mariadb-java-client:2.7.2'
+    implementation 'com.github.pagehelper:pagehelper-spring-boot-starter:1.2.5'
 }
 
 apply plugin: "com.thinkimi.gradle.MybatisGenerator"

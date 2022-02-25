@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.situationaware.model.wazuh.common.request;
 
-import cn.cyberpeace.mp.situationaware.model.wazuh.common.BaseRequest;
+import cn.cyberpeace.mp.situationaware.model.wazuh.common.BasePageRequest;
 import lombok.Data;
 
 /**
@@ -9,7 +9,7 @@ import lombok.Data;
  * @Date：2022/2/24 16:12
  */
 @Data
-public class CollectorBaseRequest extends BaseRequest {
+public class CollectorBaseRequest extends BasePageRequest {
 
     private String agentName;
 

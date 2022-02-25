@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.situationaware.controller;
 
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
 import cn.cyberpeace.mp.situationaware.model.wazuh.agent.Agent;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.AgentRequest;
@@ -10,7 +11,9 @@ import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
 import cn.cyberpeace.mp.situationaware.repository.WazuhRepository;
 import cn.cyberpeace.mp.situationaware.service.wazuh.AgentService;
 import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
+import cn.cyberpeace.mp.situationaware.utils.ResultUtils;
 import cn.hutool.core.collection.CollectionUtil;
+import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,11 +55,11 @@ public class SituationAwareTestController {
     }
 
     @GetMapping("/info")
-    public Map<String, Object> agents(@RequestParam(required = false) String agentName) throws IOException {
+    public Map<String, Object> info(@RequestParam(required = false) String agentName) throws IOException {
         Map<String, Object> map = new HashMap<>();
-        List<Agent> agents = agentService.listAgents(new AgentRequest(agentName));
-        log.info("{}", agents);
-        map.put("agents", agents);
+//        List<Agent> agents = agentService.listAgents(new AgentRequest(agentName));
+//        log.info("{}", agents);
+//        map.put("agents", agents);
 
         List<Port> ports = sysCollectorService.listPorts(new CollectorBaseRequest(agentName));
         log.info("{}", ports);
@@ -74,6 +77,15 @@ public class SituationAwareTestController {
         }
 
         return map;
+    }
+
+
+    @GetMapping("/agents")
+    public ServiceResult agents(AgentRequest agentRequest) {
+        PageInfo<Agent> agentPageInfo = agentService.pageAgents(agentRequest);
+
+        return ResultUtils.pageInfo2ObjServiceResult(agentPageInfo);
+
     }
 
 

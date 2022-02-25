@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.situationaware.utils.WazuhHttpsUtils;
 import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -37,7 +38,8 @@ public class AgentService extends RequestProcessor {
      * 查询所有agent信息
      * @return
      */
-    public List<Agent> listAgents(AgentRequest agentRequest) {
+    public PageInfo<Agent> pageAgents(AgentRequest agentRequest) {
+        agentRequest.ensure();
         log.info("agentRequest:{}", agentRequest);
         var requestUri = "/agents";
         var requestUrl = wazuhUrl + requestUri;
@@ -48,11 +50,20 @@ public class AgentService extends RequestProcessor {
             BaseResponse<Agent> result = JSONObject.parseObject(res, new TypeReference<BaseResponse<Agent>>(){});
             log.info("{}", result);
             List<Agent> agents = result.getData().getAffectedItems();
-            return agents;
+
+            PageInfo pageInfo = new PageInfo(agents);
+            pageInfo.setTotal(result.getData().getTotalAffectedItems());
+
+            return pageInfo;
         } catch (Exception e) {
             log.error(SituationalAwareErrorCode.WAZUH_AGENTS_QUERY_ERROR.getMessage() + "{}", ExceptionUtils.getMessage(e));
             throw new MpRuntimeException(SituationalAwareErrorCode.WAZUH_AGENTS_QUERY_ERROR, ExceptionUtils.getStackTrace(e));
         }
+    }
+
+    public List<Agent> listAgents(AgentRequest agentRequest) {
+        PageInfo<Agent> agentPageInfo = pageAgents(agentRequest);
+        return agentPageInfo.getList();
     }
 
     /**
