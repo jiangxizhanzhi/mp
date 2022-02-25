@@ -94,7 +94,7 @@ public class FlowMonitorController {
     public ServiceResult<List<FlowAttackTime>> getAttackTimes(AttackCountRequest request) {
         log.info("attack_times params: {}", JsonCommon.stringify(request));
         List<FlowAttackTime> attackTypeCounts = flowMonitorService.getAttackIpCount(request);
-        return new ServiceResult<>(attackTypeCounts);
+        return ServiceResult.success(attackTypeCounts);
     }
 
     @ApiOperation(value = "攻击占比统计")
@@ -102,7 +102,7 @@ public class FlowMonitorController {
     public ServiceResult<TotalFlowAttackRatio> getAttackRatioCount(AttackCountRequest baseRequest) {
         log.info("attack_times params: {}", JsonCommon.stringify(baseRequest));
         TotalFlowAttackRatio attackTypeCounts = flowMonitorService.getAttackRatioCount(baseRequest);
-        return new ServiceResult<>(attackTypeCounts);
+        return ServiceResult.success(attackTypeCounts);
     }
 
 
