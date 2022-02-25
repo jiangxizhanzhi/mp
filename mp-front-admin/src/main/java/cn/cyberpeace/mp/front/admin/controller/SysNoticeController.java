@@ -123,7 +123,8 @@ public class SysNoticeController {
     @ApiOperation("批量删除公告")
     @DeleteMapping
     public ServiceResult<Integer> bulkDelete(@RequestBody String[] ids) {
-        return noticeService.bulkDelete(ids);
+        ServiceResult<Integer> result = noticeService.bulkDelete(ids);
+        return ServiceResult.success(result.getSource());
     }
 
     @ApiOperation("删除指定id公告")
@@ -133,7 +134,8 @@ public class SysNoticeController {
     @DeleteMapping("/{id}")
     public ServiceResult<Integer> delete(@PathVariable String id) {
         String[] ids = Collections.singletonList(id).toArray(new String[0]);
-        return noticeService.bulkDelete(ids);
+        ServiceResult<Integer> result = noticeService.bulkDelete(ids);
+        return ServiceResult.success(result.getSource());
     }
 
 }

@@ -2,10 +2,8 @@ package cn.cyberpeace.mp.situationaware.service;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.situationaware.bo.AttackClassificationBO;
-import cn.cyberpeace.mp.situationaware.bo.AttackDateHistogramNetworkBytesBO;
-import cn.cyberpeace.mp.situationaware.bo.AttackWayAggregationBO;
-import cn.cyberpeace.mp.situationaware.bo.FlowLogBO;
+import cn.cyberpeace.mp.situationaware.bo.*;
+import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
 import cn.cyberpeace.mp.situationaware.model.FlowClassificationModel;
 import cn.cyberpeace.mp.situationaware.model.enums.AggregationTypeEnum;
 import cn.cyberpeace.mp.situationaware.model.enums.SeverityEnum;
@@ -16,7 +14,9 @@ import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.IndicesOptions;
@@ -24,6 +24,8 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.core.CountRequest;
 import org.elasticsearch.client.core.CountResponse;
+import org.elasticsearch.client.indices.GetIndexRequest;
+import org.elasticsearch.client.indices.GetIndexResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
@@ -35,6 +37,7 @@ import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
 import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
 import org.elasticsearch.search.aggregations.bucket.histogram.ParsedDateHistogram;
+import org.elasticsearch.search.aggregations.bucket.terms.ParsedStringTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.ParsedTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.aggregations.metrics.ParsedSum;
@@ -42,12 +45,16 @@ import org.elasticsearch.search.aggregations.metrics.SumAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ResourceUtils;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -72,6 +79,7 @@ public class FlowAnalysisService extends AbstractBaseService {
      * @return
      * @throws IOException
      */
+    @Transactional
     public void initClassification() throws IOException {
         Resource[] resources = new PathMatchingResourcePatternResolver()
                 .getResources(ResourceUtils.CLASSPATH_URL_PREFIX + "suricata/classification.json");
@@ -110,9 +118,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         searchSourceBuilder.aggregation(aggregationBuilder);
         searchSourceBuilder.query(boolQueryBuilder);
 
-        var searchRequest = new SearchRequest(this.indices(request.getGroupList(),request.getStartDateTime(),request.getEndDateTime()));
-        searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
-        searchRequest.source(searchSourceBuilder);
+        var searchRequest = this.buildSearchRequest(request,searchSourceBuilder);
 
         log.info("sumNetworkBytesByDateHistogramTimestamp >>> Search JSON query: {}", searchRequest.source().toString());
 
@@ -161,9 +167,7 @@ public class FlowAnalysisService extends AbstractBaseService {
             searchSourceBuilder.from(0).size(request.getTopSize());
         }
 
-        var searchRequest = new SearchRequest(this.indices(request.getGroupList(),request.getStartDateTime(),request.getEndDateTime()));
-        searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
-        searchRequest.source(searchSourceBuilder);
+        var searchRequest = this.buildSearchRequest(request,searchSourceBuilder);
 
         log.info("flowLog >>>>> Search JSON query: {}", searchRequest.source().toString());
 
@@ -189,12 +193,11 @@ public class FlowAnalysisService extends AbstractBaseService {
     }
 
     /**
-     * 流量日志，包含分类的中英文名称
+     * 流量日志，国际化处理
      * @param request
      * @return
      */
-    public List<FlowLogBO> flowLogWithCategoryZh(FlowAnalysisRequest request){
-
+    public List<FlowLogBO> globalizedWithFlowLog(FlowAnalysisRequest request){
         List<FlowLogBO> flowLogBOS = this.flowLog(request);
         if (CollectionUtils.isEmpty(flowLogBOS)){
             return Lists.newArrayList();
@@ -202,10 +205,9 @@ public class FlowAnalysisService extends AbstractBaseService {
         Map<String, FlowClassificationModel> allCategoryDicMap = flowClassificationsService.findAllCategoryDicMap();
         flowLogBOS.stream().filter(v -> Objects.nonNull(v.getSuricata())).forEach(flowLogBO -> {
             if (MapUtils.isNotEmpty(allCategoryDicMap)){
-                List<String> categoryZh = flowLogBO.getSuricata().getCategory().stream()
-                        .map(c -> Objects.nonNull(allCategoryDicMap.get(c)) ?
-                        allCategoryDicMap.get(c).getCategoryEn() : c).collect(Collectors.toList());
-                flowLogBO.getSuricata().setCategoryZh(categoryZh);
+                List<String> categoryList = flowLogBO.getSuricata().getCategory().stream()
+                        .map(c -> this.globalizedWithAttackWay(c,allCategoryDicMap)).collect(Collectors.toList());
+                flowLogBO.getSuricata().setCategory(categoryList);
             }
         });
 
@@ -222,10 +224,31 @@ public class FlowAnalysisService extends AbstractBaseService {
         if (Objects.isNull(aggregationTypeEnum)){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
+        List<AttackWayAggregationBO> aggregationBOS = queryTopByAggregationTypeEnum(request);
+        if (CollectionUtils.isEmpty(aggregationBOS)){
+            return aggregationBOS;
+        }
+        if (aggregationTypeEnum == AggregationTypeEnum.SURICATA_CATEGORY) {
+            globalizedWithAttackWay(aggregationBOS);
+        }
+        return aggregationBOS;
+    }
+
+    /**
+     *
+     * @param request
+     * @return
+     */
+    public List<AttackWayAggregationBO>  queryTopByAggregationTypeEnum(FlowAnalysisRequest request){
+        AggregationTypeEnum aggregationTypeEnum = request.getAggregationTypeEnum();
+        if (Objects.isNull(aggregationTypeEnum)){
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
 
         var boolQueryBuilder = this.buildBoolQueryBuilder(request);
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        searchSourceBuilder.query(boolQueryBuilder);
         TermsAggregationBuilder aggregationBuilder;
         if (aggregationTypeEnum == AggregationTypeEnum.SURICATA_CATEGORY) {
             aggregationBuilder = AggregationBuilders.terms("aggregationType")
@@ -249,9 +272,7 @@ public class FlowAnalysisService extends AbstractBaseService {
 
         searchSourceBuilder.size(0);
 
-        var searchRequest = new SearchRequest(this.indices(request.getGroupList(),request.getStartDateTime(),request.getEndDateTime()));
-        searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
-        searchRequest.source(searchSourceBuilder.query(boolQueryBuilder));
+        var searchRequest = this.buildSearchRequest(request,searchSourceBuilder);
 
         log.info("topByAggregationTypeEnum >>>> Search JSON query: {}", searchRequest.source().toString());
         try {
@@ -338,6 +359,89 @@ public class FlowAnalysisService extends AbstractBaseService {
         return 0;
     }
 
+    /**
+     * 查询一个战队的数据聚合
+     *
+     * @return
+     */
+    public TeamAttackBO queryOneTeamAttackSumList(FlowAnalysisRequest request) {
+        TeamAttackBO teamAttackResultVO = new TeamAttackBO();
+
+        // 1.创建并设置SearchSourceBuilder对象
+        var searchSourceBuilder = new SearchSourceBuilder();
+
+        var boolQueryBuilder = this.buildBoolQueryBuilder(request);
+
+        searchSourceBuilder.aggregation(AggregationBuilders.sum("packageSize").field("network.bytes"));
+        searchSourceBuilder.aggregation(AggregationBuilders.terms("attackWay").field("suricata.category").size(request.getTopSize()));
+        //构造动态条件查询
+
+        searchSourceBuilder.trackTotalHits(true);
+        searchSourceBuilder.query(boolQueryBuilder);
+
+        var searchRequest = this.buildSearchRequest(request,searchSourceBuilder);
+
+        log.info("queryOneTeamAttackSumList Search JSON query: {}", searchRequest.source().toString());
+
+        try {
+            SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            //设置战队攻击流量攻击次数
+            teamAttackResultVO.setTrafficSize(((ParsedSum) response.getAggregations().get("packageSize")).getValue());
+            teamAttackResultVO.setAttackNumber(response.getHits().getTotalHits().value);
+            //设置攻击手法
+            List<AttackWayAggregationBO> attackWayList = ((ParsedStringTerms) response.getAggregations().get("attackWay")).getBuckets().stream()
+                    .map(bucket -> {
+                        var parsedBucket = (ParsedStringTerms.ParsedBucket) bucket;
+                        var attackResult = new AttackWayAggregationBO();
+                        attackResult.setAggregationType(parsedBucket.getKeyAsString());
+                        attackResult.setAttackNumber(parsedBucket.getDocCount());
+                        return attackResult;
+                    })
+                    .collect(Collectors.toList());
+            globalizedWithAttackWay(attackWayList);
+            teamAttackResultVO.setAttackWayList(buildTeamAttackWayPercent(attackWayList));
+        } catch (IOException e) {
+            log.error("query one team error : {}", ExceptionUtils.getMessage(e));
+            e.printStackTrace();
+        }
+
+        return teamAttackResultVO;
+    }
+
+    /**
+     * 攻击手法-攻击次数百分比
+     */
+    private List<AttackWayAggregationBO> buildTeamAttackWayPercent(List<AttackWayAggregationBO> attackResultVOS) {
+        Long totalNumber = attackResultVOS.stream().mapToLong(AttackWayAggregationBO::getAttackNumber).sum();
+        if (Long.valueOf(0).equals(totalNumber)) {
+            return attackResultVOS;
+        }
+        for (int i = 0; i < attackResultVOS.size(); i++) {
+            var attack = attackResultVOS.get(i);
+            if (i > 1 && i == attackResultVOS.size() - 1) {
+                BigDecimal beforeSum = attackResultVOS.subList(0, i).stream().map(AttackWayAggregationBO::getAttackNumberPercent).reduce((a, b) -> a.add(b)).get();
+                attack.setAttackNumberPercent(BigDecimal.valueOf(100).subtract(beforeSum));
+            } else {
+                attack.setAttackNumberPercent(BigDecimal.valueOf(attack.getAttackNumber()).divide(BigDecimal.valueOf(totalNumber), 2, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100)));
+            }
+        }
+        attackResultVOS = attackResultVOS.stream().sorted(Comparator.comparing(AttackWayAggregationBO::getAttackNumberPercent).reversed()).collect(Collectors.toList());
+        return attackResultVOS;
+    }
+
+    /**
+     * 构建SearchRequest对象
+     * @param request
+     * @return
+     */
+    protected SearchRequest buildSearchRequest(FlowAnalysisRequest request,SearchSourceBuilder searchSourceBuilder){
+        var searchRequest = new SearchRequest();
+        searchRequest.indices(ArrayUtils.isNotEmpty(request.getIndices()) ? request.getIndices() : this.indices(request.getGroupList(),request.getStartDateTime(),request.getEndDateTime()));
+        searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
+        searchRequest.source(searchSourceBuilder);
+        return searchRequest;
+    }
+
 
     /**
      * 构建BoolQueryBuilder对象
@@ -386,6 +490,56 @@ public class FlowAnalysisService extends AbstractBaseService {
             boolQueryBuilder.must(rangeQueryBuilder);
         }
         return boolQueryBuilder;
+    }
+
+    /**
+     * 国际化攻击手法
+     * @param aggregationBOS
+     */
+    protected void globalizedWithAttackWay(List<AttackWayAggregationBO> aggregationBOS){
+        if (CollectionUtils.isEmpty(aggregationBOS)){
+            return;
+        }
+        Map<String, FlowClassificationModel> allCategoryDicMap = flowClassificationsService.findAllCategoryDicMap();
+        aggregationBOS.stream().forEach(bo ->{
+            String aggregationType = this.globalizedWithAttackWay(bo.getAggregationType(),allCategoryDicMap);
+            bo.setAggregationType(aggregationType);
+        });
+    }
+
+    /**
+     * 国际化攻击手法
+     * @param attackWay
+     * @param allCategoryDicMap
+     * @return
+     */
+    protected String globalizedWithAttackWay(String attackWay,Map<String, FlowClassificationModel> allCategoryDicMap){
+        if (MapUtils.isEmpty(allCategoryDicMap)){
+            return attackWay;
+        }
+        FlowClassificationModel model = allCategoryDicMap.get(attackWay);
+        String globalized = attackWay;
+        if (Objects.nonNull(model)) {
+            Locale locale = LocaleContextHolder.getLocale();
+            globalized = this.getLocalMessage(locale, SituationalAwareConstant.ERROR_CODE_PREFIX + model.getName());
+        }
+        return globalized;
+    }
+
+    /**
+     * 获取所有索引,支持模糊匹配索引
+     * @return
+     */
+    public String[] getAllIndices(String... indices){
+        GetIndexRequest getIndexRequest = new GetIndexRequest(indices);
+        GetIndexResponse getIndexResponse = null;
+        try {
+            getIndexResponse = restHighLevelClient.indices().get(getIndexRequest, RequestOptions.DEFAULT);
+        } catch (IOException e) {
+            log.error("get all indices error : {}",e.getMessage(),e);
+            return new String[]{};
+        }
+        return getIndexResponse.getIndices();
     }
 
 }
