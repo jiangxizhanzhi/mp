@@ -166,12 +166,18 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
             }
             HLDLoginCheckResponse hldLoginCheckResponse = JsonCommon.parse(response, HLDLoginCheckResponse.class);
             if (hldLoginCheckResponse.getCode() != null && hldLoginCheckResponse.getCode() != 200) {
-                return new ServiceResult<>();
+                log.error("user : {},response : {}", JsonCommon.stringify(hldUserRequest), response);
+                return ServiceResult.fail("user is not login");
             }
+        }
+        if (hldUserRequest.getUserId() == null) {
+            log.error("user : {}", JsonCommon.stringify(hldUserRequest));
+            return ServiceResult.fail("userId is null");
         }
         UserDto userDto = getModelService().getUserDto(hldUserRequest.getUserId());
         if (userDto == null) {
-            return new ServiceResult<>();
+            log.error("userId : {}", hldUserRequest.getUserId());
+            return ServiceResult.fail("user is not exist");
         }
         String jwt = JwtUtils.generateToken(new JwtUtils.UserInfo(userDto.getId(), userDto.getUsername(), userDto.getTokenSecret()));
         LoginResp loginResp = new LoginResp();
