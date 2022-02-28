@@ -17,6 +17,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
 import com.alibaba.fastjson.TypeReference;
+import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -28,7 +29,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -51,11 +51,8 @@ public class SysCollectorService extends RequestProcessor  {
      * 查询端口
      * @return  端口号
      */
-    public List<Port> listPorts(CollectorBaseRequest collectorBaseRequest) {
+    public PageInfo<Port> pagePorts(CollectorBaseRequest collectorBaseRequest) {
         String agentId = agentService.getSingleAgentId(collectorBaseRequest.getAgentName());
-        if (StringUtils.isBlank(agentId)) {
-            return Collections.emptyList();
-        }
 
         var requestUri = "/syscollector/" + agentId + "/ports";
         var requestUrl = wazuhUrl + requestUri;
@@ -68,7 +65,11 @@ public class SysCollectorService extends RequestProcessor  {
             BaseResponse<Port> result = JSONObject.parseObject(res, new TypeReference<>(){});
             log.info("{}", result);
             List<Port> ports = result.getData().getAffectedItems();
-            return ports;
+
+            PageInfo pageInfo = new PageInfo(ports);
+            pageInfo.setTotal(result.getData().getTotalAffectedItems());
+
+            return pageInfo;
         } catch (Exception e) {
             log.error(SituationalAwareErrorCode.WAZUH_AGENTS_QUERY_PORT_ERROR.getMessage());
             throw new MpRuntimeException(SituationalAwareErrorCode.WAZUH_AGENTS_QUERY_PORT_ERROR, ExceptionUtils.getStackTrace(e));
@@ -80,11 +81,8 @@ public class SysCollectorService extends RequestProcessor  {
      * 查询进程
      * @return  进程集合
      */
-    public List<Process> listProcesses(CollectorBaseRequest collectorBaseRequest) {
+    public PageInfo<Process> pageProcesses(CollectorBaseRequest collectorBaseRequest) {
         String agentId = agentService.getSingleAgentId(collectorBaseRequest.getAgentName());
-        if (StringUtils.isBlank(agentId)) {
-            return Collections.emptyList();
-        }
 
         var requestUri = "/syscollector/" + agentId + "/processes";
         var requestUrl = wazuhUrl + requestUri;
@@ -97,7 +95,10 @@ public class SysCollectorService extends RequestProcessor  {
             BaseResponse<Process> result = JSONObject.parseObject(res, new TypeReference<>(){});
             log.info("{}", result);
             List<Process> processes = result.getData().getAffectedItems();
-            return processes;
+            PageInfo pageInfo = new PageInfo(processes);
+            pageInfo.setTotal(result.getData().getTotalAffectedItems());
+
+            return pageInfo;
         } catch (Exception e) {
             log.error(SituationalAwareErrorCode.WAZUH_AGENTS_QUERY_PROCESS_ERROR.getMessage());
             throw new MpRuntimeException(SituationalAwareErrorCode.WAZUH_AGENTS_QUERY_PROCESS_ERROR, ExceptionUtils.getStackTrace(e));
@@ -156,6 +157,7 @@ public class SysCollectorService extends RequestProcessor  {
         return agentPortsModels;
     }
 
+    @Deprecated
     public List<WazuhAgentProcessModel> queryAgentsProcesses(List<String> agents) {
         List<WazuhAgentProcessModel> wazuhAgentProcessModels = Lists.newArrayList();
         if (CollectionUtils.isEmpty(agents)) {
