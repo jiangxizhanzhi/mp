@@ -3,17 +3,15 @@ package cn.cyberpeace.mp.situationaware.listener;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
-import cn.cyberpeace.mp.situationaware.repository.WazuhRepository;
 import cn.cyberpeace.mp.situationaware.model.GroupModel;
 import cn.cyberpeace.mp.situationaware.service.NetworkTrafficGroupService;
+import cn.cyberpeace.mp.situationaware.service.wazuh.SecurityService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
-import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +19,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 启动完后生命周期进行
@@ -35,7 +36,7 @@ public class SituationAwareInitListener implements ApplicationListener<Applicati
     private NetworkTrafficGroupService service;
 
     @Autowired
-    private WazuhRepository wazuhRepository;
+    private SecurityService securityService;
 
     @Value("${mp.situationaware.arkime.cpcloud-container-create-url}")
     private String cpCloudUrl;
@@ -60,12 +61,12 @@ public class SituationAwareInitListener implements ApplicationListener<Applicati
         //定时更新token初始化
         SituationalAwareConstant.wazuhToken = CacheBuilder.newBuilder()
             .maximumSize(1)
-            .expireAfterWrite(30, TimeUnit.DAYS)
+            .expireAfterWrite(14, TimeUnit.MINUTES)
             .build(new CacheLoader<String, String>() {
                 @Override public String load(String key)  {
                     String token;
                     try {
-                        token = wazuhRepository.queryWazuhToken();
+                        token = securityService.authenticate();
                     } catch (IOException e) {
                         log.error("查询wazuhToken失败 : " + e);
                         throw new MpRuntimeException("查询wazuhToken失败");

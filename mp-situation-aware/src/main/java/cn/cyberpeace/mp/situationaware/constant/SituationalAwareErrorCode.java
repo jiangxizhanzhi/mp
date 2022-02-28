@@ -24,7 +24,8 @@ public enum SituationalAwareErrorCode implements ErrorCode {
     WAZUH_AGENTS_QUERY_ERROR("MP-110413", "wazuh_agents_query_error"),
     WAZUH_AGENTS_QUERY_PORT_ERROR("MP-110414", "wazuh_ports_query_error"),
     WAZUH_AGENTS_QUERY_PROCESS_ERROR("MP-110415", "wazuh_agent_process_query_error"),
-    WAZUH_AGENTS_QUERY_EVENT_ERROR("MP-110416", "wazuh_agent_query_event_error");
+    WAZUH_AGENTS_QUERY_EVENT_ERROR("MP-110416", "wazuh_agent_query_event_error"),
+    WAZUH_AGENTS_QUERY_HARDWARE_ERROR("MP-110417", "wazuh_agent_hardware_query_error");
 
     SituationalAwareErrorCode(String code, String message) {
         setCode(code, SituationalAwareConstant.ERROR_CODE_PREFIX + message);
