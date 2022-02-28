@@ -236,16 +236,17 @@ public class SysActivationService {
             if (!isExpired) {
                 // 过期日期未到，继续判断运行时长
                 if (StringUtils.isBlank(sysActivCtlModel.getFirstActiveDate())) {
-                    // 未激活
-                    return;
-                }
-                String firstActiveDateStr = EncryptUtils.desDecrypt(sysActivCtlModel.getFirstActiveDate());
-                LocalDate firstActiveDate = LocalDate.parse(firstActiveDateStr, dateFormatter);
-                Duration duration = Duration.between(firstActiveDate.atTime(0, 0, 0), expireDate.atTime(0, 0, 0));
-                Long calculatedRunSeconds = duration.toSeconds();
+                    log.info("System is not activated right now!");
+                    // 未激活，但是CONTENT有值，说明是升级的场景，则还是以CONTENT内容为主
+                } else {
+                    String firstActiveDateStr = EncryptUtils.desDecrypt(sysActivCtlModel.getFirstActiveDate());
+                    LocalDate firstActiveDate = LocalDate.parse(firstActiveDateStr, dateFormatter);
+                    Duration duration = Duration.between(firstActiveDate.atTime(0, 0, 0), expireDate.atTime(0, 0, 0));
+                    Long calculatedRunSeconds = duration.toSeconds();
 
-                if (sysActivCtlModel.getSysRunSeconds() > calculatedRunSeconds) {
-                    isRunSecondsExceeded = true;
+                    if (sysActivCtlModel.getSysRunSeconds() > calculatedRunSeconds) {
+                        isRunSecondsExceeded = true;
+                    }
                 }
             }
 
