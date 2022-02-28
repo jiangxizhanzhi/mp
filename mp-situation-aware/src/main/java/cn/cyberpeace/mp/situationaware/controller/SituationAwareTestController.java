@@ -61,13 +61,13 @@ public class SituationAwareTestController {
 //        log.info("{}", agents);
 //        map.put("agents", agents);
 
-        List<Port> ports = sysCollectorService.listPorts(new CollectorBaseRequest(agentName));
-        log.info("{}", ports);
-        map.put("ports", ports);
+        PageInfo<Port> portsPageInfo = sysCollectorService.pagePorts(new CollectorBaseRequest(agentName));
+        log.info("{}", portsPageInfo);
+        map.put("ports", portsPageInfo.getList());
 
-        List<Process> processes = sysCollectorService.listProcesses(new CollectorBaseRequest(agentName));
-        log.info("{}", processes);
-        map.put("processes", processes);
+        PageInfo<Process> processesPageInfo = sysCollectorService.pageProcesses(new CollectorBaseRequest(agentName));
+        log.info("{}", processesPageInfo);
+        map.put("processes", processesPageInfo.getList());
 
 
         List<Hardware> hardwares = sysCollectorService.getHardware(agentName);
