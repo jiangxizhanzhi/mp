@@ -146,9 +146,9 @@ public class BatchSceneHandler {
                 return;
             }
             if (pluginHandler != null && pluginHandler.getElementMap().get(srcElement.getId()).getEnableProbeCollect()) {
-                probeEnabledNodeId2EidMap.put(srcElement.getId(), srcElement.getEid());
+                this.probeEnabledNodeId2EidMap.put(srcElement.getId(), srcElement.getEid());
             }
-            nodeId2NodenameMap.put(srcElement.getId(), srcElement.getName());
+            this.nodeId2NodenameMap.put(srcElement.getId(), srcElement.getName());
             srcPorts.forEach(srcPort -> {
                 String macAddr = srcPort.getMacAddr();
                 String ipAddr = srcPort.getIp();
