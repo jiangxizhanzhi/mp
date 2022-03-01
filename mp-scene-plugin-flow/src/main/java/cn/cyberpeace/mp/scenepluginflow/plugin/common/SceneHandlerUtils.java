@@ -23,21 +23,25 @@ public class SceneHandlerUtils {
     private FlowExecutor flowExecutor;
 
     private void successOnFLow(Flow flow) {
+        log.info("flow success on,flowId is {},taskId is {}", flow.getId(), flow.getTaskId());
         flow.setStatus(Flow.Status.ON);
         flow.setStatusText(null);
     }
 
     private void successOffFLow(Flow flow) {
+        log.info("flow success off,flowId is {},taskId is {}", flow.getId(), flow.getTaskId());
         flow.setStatus(Flow.Status.OFF);
         flow.setStatusText(null);
     }
 
     private void errorFLow(Flow flow, String error) {
+        log.info("flow error,flowId is {},taskId is {}", flow.getId(), flow.getTaskId());
         flow.setStatus(Flow.Status.ERROR);
         flow.setStatusText(error);
     }
 
     private void preparingFLow(Flow flow) {
+        log.info("flow preparing ,flowId is {},taskId is {}", flow.getId(), flow.getTaskId());
         flow.setStatus(Flow.Status.PREPARING);
         flow.setStatusText(null);
     }
