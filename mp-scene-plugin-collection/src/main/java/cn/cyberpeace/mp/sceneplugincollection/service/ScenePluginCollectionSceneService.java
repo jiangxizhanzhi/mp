@@ -735,7 +735,7 @@ public class ScenePluginCollectionSceneService {
         PageInfo<Port> pageInfo = new PageInfo();
         collectorBaseRequest.setAgentName(nodeId2Eidmap.get(listPageInfoQueryParams.getNodeIds().get(0)));
         collectorBaseRequest.setPage(listPageInfoQueryParams.getPage() == null ? 1 : listPageInfoQueryParams.getPage());
-        collectorBaseRequest.setPageSize(listPageInfoQueryParams.getPageSize() == null ? 0 : listPageInfoQueryParams.getPageSize());
+        collectorBaseRequest.setPageSize(listPageInfoQueryParams.getPageSize() == null ? 10 : listPageInfoQueryParams.getPageSize());
         collectorBaseRequest.setPerPage(listPageInfoQueryParams.getPerPage());
         pageInfo = sysCollectorService.pagePorts(collectorBaseRequest);
         return new ListObjServiceResult<>(new ListObjResult<>(pageInfo.getList(), (int) pageInfo.getTotal()).asResult()).asResult();
