@@ -11,8 +11,11 @@ import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
 import cn.cyberpeace.mp.situationaware.model.WazuhModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.NumberUtil;
@@ -266,6 +269,16 @@ public class HostStateService {
         hostStates.sort(Comparator.comparing(HostState::getTime));
 
         return hostStates;
+    }
+
+    public ListObjServiceResult<Port> listPageInfo(ListPageInfoQueryParams listPageInfoQueryParams) {
+        listPageInfoQueryParams.setSceneIds(sceneIdTranslationService.translateSceneIds(listPageInfoQueryParams.getSceneIds()));
+        return scenePluginCollectionSceneService.listPageInfo(listPageInfoQueryParams).asResult();
+    }
+
+    public ListObjServiceResult<Process> listPageProcess(ListPageInfoQueryParams listPageInfoQueryParams) {
+        listPageInfoQueryParams.setSceneIds(sceneIdTranslationService.translateSceneIds(listPageInfoQueryParams.getSceneIds()));
+        return scenePluginCollectionSceneService.listPageProcess(listPageInfoQueryParams).asResult();
     }
 
 }

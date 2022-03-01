@@ -18,10 +18,7 @@ import cn.cyberpeace.mp.sceneplugincollection.bo.FlowAttackCountBO;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
-import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowGroupCountParams;
-import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
-import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
-import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.*;
 import cn.cyberpeace.mp.situationaware.bo.AttackDateHistogramNetworkBytesBO;
 import cn.cyberpeace.mp.situationaware.bo.AttackWayAggregationBO;
 import cn.cyberpeace.mp.situationaware.bo.FlowLogBO;
@@ -30,9 +27,14 @@ import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.model.WazuhModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
 import cn.cyberpeace.mp.situationaware.model.enums.AggregationTypeEnum;
+import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.CollectorBaseRequest;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
 import cn.cyberpeace.mp.situationaware.request.FlowAnalysisRequest;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import cn.cyberpeace.mp.situationaware.service.FlowAnalysisService;
+import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
+import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -77,6 +79,9 @@ public class ScenePluginCollectionSceneService {
 
     @Autowired
     private FlowAnalysisService flowAnalysisService;
+
+    @Autowired
+    private SysCollectorService sysCollectorService;
 
     public ListObjServiceResult<CollectionFlowBO> listFlows(List<String> sceneIds, FlowQueryParams queryParams) {
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIds, null);
@@ -722,4 +727,31 @@ public class ScenePluginCollectionSceneService {
     private long byte2GB(long num) {
         return num >> 30;
     }
+
+    public ListObjServiceResult<Port> listPageInfo(ListPageInfoQueryParams listPageInfoQueryParams) {
+        BatchSceneHandler batchSceneHandler = new BatchSceneHandler(listPageInfoQueryParams.getSceneIds(), null);
+        Map<String, String> nodeId2Eidmap = batchSceneHandler.getProbeEnabledNodeId2EidMap();
+        CollectorBaseRequest collectorBaseRequest = new CollectorBaseRequest();
+        PageInfo<Port> pageInfo = new PageInfo();
+        collectorBaseRequest.setAgentName(nodeId2Eidmap.get(listPageInfoQueryParams.getNodeIds().get(0)));
+        collectorBaseRequest.setPage(listPageInfoQueryParams.getPage() == null ? 1 : listPageInfoQueryParams.getPage());
+        collectorBaseRequest.setPageSize(listPageInfoQueryParams.getPageSize() == null ? 0 : listPageInfoQueryParams.getPageSize());
+        collectorBaseRequest.setPerPage(listPageInfoQueryParams.getPerPage());
+        pageInfo = sysCollectorService.pagePorts(collectorBaseRequest);
+        return new ListObjServiceResult<>(new ListObjResult<>(pageInfo.getList(), (int) pageInfo.getTotal()).asResult()).asResult();
+    }
+
+    public ListObjServiceResult<Process> listPageProcess(ListPageInfoQueryParams listPageInfoQueryParams) {
+        BatchSceneHandler batchSceneHandler = new BatchSceneHandler(listPageInfoQueryParams.getSceneIds(), null);
+        Map<String, String> nodeId2Eidmap = batchSceneHandler.getProbeEnabledNodeId2EidMap();
+        CollectorBaseRequest collectorBaseRequest = new CollectorBaseRequest();
+        PageInfo<Process> pageInfo = new PageInfo<>();
+        collectorBaseRequest.setAgentName(nodeId2Eidmap.get(listPageInfoQueryParams.getNodeIds().get(0)));
+        collectorBaseRequest.setPage(listPageInfoQueryParams.getPage() == null ? 1 : listPageInfoQueryParams.getPage());
+        collectorBaseRequest.setPageSize(listPageInfoQueryParams.getPageSize() == null ? 10 : listPageInfoQueryParams.getPageSize());
+        collectorBaseRequest.setPerPage(listPageInfoQueryParams.getPerPage());
+        pageInfo = sysCollectorService.pageProcesses(collectorBaseRequest);
+        return new ListObjServiceResult<>(new ListObjResult<>(pageInfo.getList(), (int) pageInfo.getTotal()).asResult()).asResult();
+    }
+
 }

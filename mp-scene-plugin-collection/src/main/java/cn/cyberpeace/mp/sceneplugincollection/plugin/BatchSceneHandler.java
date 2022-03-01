@@ -41,6 +41,10 @@ public class BatchSceneHandler {
 
     private Map<String, String> allIp2SceneIdMap = new HashMap<>();
 
+    private Map<String, String> probeEnabledNodeId2EidMap = new HashMap<>();
+
+    private Map<String, String> nodeId2NodenameMap = new HashMap<>();
+
     public BatchSceneHandler(List<String> sceneIds, List<String> nodeIds) {
         this.sceneIds = sceneIds;
         this.nodeIds = nodeIds;
@@ -107,6 +111,14 @@ public class BatchSceneHandler {
         return new ArrayList<>(this.flowCollectEnabledIpAddrs);
     }
 
+    public Map<String, String> getProbeEnabledNodeId2EidMap() {
+        return probeEnabledNodeId2EidMap;
+    }
+
+    public Map<String, String> getNodeId2NodenameMap() {
+        return nodeId2NodenameMap;
+    }
+
     private void init() {
         for (String sceneId : sceneIds) {
             SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
@@ -133,6 +145,10 @@ public class BatchSceneHandler {
             if (srcPorts == null) {
                 return;
             }
+            if (pluginHandler != null && pluginHandler.getElementMap().get(srcElement.getId()).getEnableProbeCollect()) {
+                probeEnabledNodeId2EidMap.put(srcElement.getId(), srcElement.getEid());
+            }
+            nodeId2NodenameMap.put(srcElement.getId(), srcElement.getName());
             srcPorts.forEach(srcPort -> {
                 String macAddr = srcPort.getMacAddr();
                 String ipAddr = srcPort.getIp();
