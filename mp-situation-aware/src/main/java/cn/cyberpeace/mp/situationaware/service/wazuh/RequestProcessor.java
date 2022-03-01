@@ -20,19 +20,20 @@ import java.util.Objects;
 public class RequestProcessor {
 
     public List<NameValuePair> processRequestParams(BasePageRequest pageRequest) {
-        List<NameValuePair> params = defaultParams();
 
+        List<NameValuePair> params = new ArrayList<>();
         if (Objects.isNull(pageRequest)) {
+            params = defaultParams();
             return params;
         }
 
-//        if (Objects.isNull(pageRequest.getPage())) {
-//            pageRequest.setPage(1);
-//        }
-//
-//        if (pageRequest.getPage() < 1) {
-//            pageRequest.setPage(1);
-//        }
+        if (Objects.isNull(pageRequest.getPageSize()) || pageRequest.getPageSize() <= 0) {
+            pageRequest.setPageSize(10);
+        }
+
+        if (Objects.isNull(pageRequest.getPage()) || pageRequest.getPage() < 1) {
+            pageRequest.setPage(1);
+        }
 
         if (Objects.nonNull(pageRequest.getPageSize())) {
             params.add(new BasicNameValuePair("limit", String.valueOf(pageRequest.getPageSize())));
