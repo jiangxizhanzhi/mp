@@ -41,7 +41,7 @@ public class SceneHandlerUtils {
     }
 
     private void preparingFLow(Flow flow) {
-        log.info("success on flow,flowId is {},taskId is {}", flow.getId(), flow.getTaskId());
+        log.info("flow preparing ,flowId is {},taskId is {}", flow.getId(), flow.getTaskId());
         flow.setStatus(Flow.Status.PREPARING);
         flow.setStatusText(null);
     }
