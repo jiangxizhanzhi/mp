@@ -22,6 +22,7 @@ public class BasePageRequest {
     @ApiModelProperty(value = "分页每页条数(兼容)")
     private Integer perPage;
 
+    @ApiModelProperty(value = "返回字段")
     private String[] select;
 
     /**
