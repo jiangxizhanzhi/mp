@@ -1,11 +1,14 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
+import cn.cyberpeace.mp.devops.cluster.converter.FlavorConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.InstanceConverter;
+import cn.cyberpeace.mp.devops.cluster.converter.model.FlavorConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InstanceConvertModel;
 import cn.cyberpeace.mp.devops.cluster.request.InstancePageRequest;
 import cn.cyberpeace.mp.devops.cluster.response.InstancePageResponse;
 import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
+import cn.cyberpeace.mp.devops.cluster.vo.FlavorVO;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -34,9 +37,12 @@ public class InstanceController {
 
     private InstanceConverter instanceConverter;
 
+    private FlavorConverter flavorConverter;
+
     @Autowired
-    public InstanceController(InstanceConverter instanceConverter) {
+    public InstanceController(InstanceConverter instanceConverter,FlavorConverter flavorConverter) {
         this.instanceConverter = instanceConverter;
+        this.flavorConverter = flavorConverter;
     }
 
     /**
@@ -52,13 +58,40 @@ public class InstanceController {
             return new PageResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
         }
         List<InstanceConvertModel.Model> instances = model.getModelList();
+
         List<InstancePageResponse> list = instances.stream().map(instanceModel ->
-            InstancePageResponse.builder().name(instanceModel.getName()).node(instanceModel.getNode())
-                    .addressList(instanceModel.getAddressList())
-                    .status(instanceModel.getStatus()).createTime(instanceModel.getCreateTime()).build()
+                {
+                    InstancePageResponse response = InstancePageResponse.builder().name(instanceModel.getName()).node(instanceModel.getNode())
+                            .addressList(instanceModel.getAddressList())
+                            .status(instanceModel.getStatus()).createTime(instanceModel.getCreateTime()).build();
+                    FlavorConvertModel flavorConvertModel = flavorConverter.getById(instanceModel.getFlavor());
+                    response.setFlavor(buildFlavorVO(flavorConvertModel));
+                    return response;
+                }
+
         ).collect(Collectors.toList());
 
         return new PageResult<>(list, model.getTotal());
+    }
+
+    /**
+     * 构建FlavorVO对象
+     * @param flavor
+     * @return
+     */
+    private FlavorVO buildFlavorVO(FlavorConvertModel flavor){
+        if (Objects.isNull(flavor)){
+            return null;
+        }
+        FlavorVO vo = new FlavorVO();
+        vo.setCpu(flavor.getCpu());
+        vo.setDescription(flavor.getDescription());
+        vo.setDisk(flavor.getDisk());
+        vo.setId(flavor.getId());
+        vo.setName(flavor.getName());
+        vo.setUuid(flavor.getUuid());
+        vo.setRam(flavor.getRam());
+        return vo;
     }
 
 }

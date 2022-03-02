@@ -36,6 +36,11 @@ public class InstanceConvertModel extends BasePageConvertModel{
         private String node;
 
         /**
+         * flavor
+         */
+        private String flavor;
+
+        /**
          * IP地址
          */
         private List<String> addressList;

@@ -59,6 +59,7 @@ public class InstanceConverter implements BaseConverter{
         }
         List<InstanceConvertModel.Model> list = model.getInstances().stream().map(instanceModel ->
                 InstanceConvertModel.Model.builder().name(instanceModel.getName()).node(instanceModel.getHost())
+                        .flavor(instanceModel.getFlavor())
                         .addressList(instanceModel.getAddresses().stream().map(InstanceModel.Address::getIp)
                                 .collect(Collectors.toList()))
                         .status(CloudPlatformEnum.fromValue(instanceModel.getStatus())).createTime(instanceModel.getCreatedAt()).build()

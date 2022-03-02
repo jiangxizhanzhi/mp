@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.response;
 
 import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
+import cn.cyberpeace.mp.devops.cluster.vo.FlavorVO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -31,6 +32,12 @@ public class InstancePageResponse extends BaseCloudPlatformResponse {
      */
     @ApiModelProperty("节点名称")
     private String node;
+
+    /**
+     * Flavor信息
+     */
+    @ApiModelProperty("Flavor信息")
+    private FlavorVO flavor;
 
     /**
      * IP地址
