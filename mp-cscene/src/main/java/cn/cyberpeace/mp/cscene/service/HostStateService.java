@@ -272,11 +272,13 @@ public class HostStateService {
     }
 
     public ListObjServiceResult<Port> listPageInfo(ListPageInfoQueryParams listPageInfoQueryParams) {
+        listPageInfoQueryParams.ensure();
         listPageInfoQueryParams.setSceneIds(sceneIdTranslationService.translateSceneIds(listPageInfoQueryParams.getSceneIds()));
         return scenePluginCollectionSceneService.listPageInfo(listPageInfoQueryParams).asResult();
     }
 
     public ListObjServiceResult<Process> listPageProcess(ListPageInfoQueryParams listPageInfoQueryParams) {
+        listPageInfoQueryParams.ensure();
         listPageInfoQueryParams.setSceneIds(sceneIdTranslationService.translateSceneIds(listPageInfoQueryParams.getSceneIds()));
         return scenePluginCollectionSceneService.listPageProcess(listPageInfoQueryParams).asResult();
     }
