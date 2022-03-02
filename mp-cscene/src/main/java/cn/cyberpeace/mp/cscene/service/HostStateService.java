@@ -1,8 +1,11 @@
 package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.bo.IntervalSizeBO;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.cscene.constant.CsceneBasei18nCode;
+import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.dto.request.HostStateTrendRequest;
@@ -271,16 +274,31 @@ public class HostStateService {
         return hostStates;
     }
 
-    public ListObjServiceResult<Port> listPageInfo(ListPageInfoQueryParams listPageInfoQueryParams) {
+    public ListObjServiceResult<Port> pagePorts(ListPageInfoQueryParams listPageInfoQueryParams) {
         listPageInfoQueryParams.ensure();
+        checkListPageParams(listPageInfoQueryParams);
         listPageInfoQueryParams.setSceneIds(sceneIdTranslationService.translateSceneIds(listPageInfoQueryParams.getSceneIds()));
-        return scenePluginCollectionSceneService.listPageInfo(listPageInfoQueryParams).asResult();
+        return scenePluginCollectionSceneService.listPagePorts(listPageInfoQueryParams).asResult();
     }
 
-    public ListObjServiceResult<Process> listPageProcess(ListPageInfoQueryParams listPageInfoQueryParams) {
+    public ListObjServiceResult<Process> pageProcesses(ListPageInfoQueryParams listPageInfoQueryParams) {
         listPageInfoQueryParams.ensure();
+        checkListPageParams(listPageInfoQueryParams);
         listPageInfoQueryParams.setSceneIds(sceneIdTranslationService.translateSceneIds(listPageInfoQueryParams.getSceneIds()));
         return scenePluginCollectionSceneService.listPageProcess(listPageInfoQueryParams).asResult();
+    }
+
+
+    private void checkListPageParams(ListPageInfoQueryParams params) {
+        List<String> sceneIds = params.getSceneIds();
+        if (CollectionUtil.isEmpty(sceneIds)) {
+            throw new MpRuntimeException(CsceneErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(CsceneBasei18nCode.SCENE_ID));
+        }
+
+        List<String> nodeIds = params.getNodeIds();
+        if (CollectionUtil.isEmpty(nodeIds)) {
+            throw new MpRuntimeException(CsceneErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(CsceneBasei18nCode.ELEMENT_LIST));
+        }
     }
 
 }

@@ -79,14 +79,14 @@ public class HostStateController {
 
     @ApiOperation(value = "节点端口信息")
     @GetMapping("/element_port")
-    public ListObjServiceResult<Port> getElementPageInfo(ListPageInfoQueryParams listPageInfoQueryParams) {
-        return hostStateService.listPageInfo(listPageInfoQueryParams).asResult();
+    public ListObjServiceResult<Port> pagePorts(ListPageInfoQueryParams listPageInfoQueryParams) {
+        return hostStateService.pagePorts(listPageInfoQueryParams).asResult();
     }
 
     @ApiOperation(value = "节点进程信息")
     @GetMapping("/element_process")
-    public ListObjServiceResult<Process> getElementPageProcess(ListPageInfoQueryParams listPageInfoQueryParams) {
-        return hostStateService.listPageProcess(listPageInfoQueryParams).asResult();
+    public ListObjServiceResult<Process> pageProcesses(ListPageInfoQueryParams listPageInfoQueryParams) {
+        return hostStateService.pageProcesses(listPageInfoQueryParams).asResult();
     }
 
 }
