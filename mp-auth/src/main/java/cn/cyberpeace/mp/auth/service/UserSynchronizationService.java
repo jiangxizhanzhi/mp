@@ -66,6 +66,9 @@ public class UserSynchronizationService extends BaseModelController<UserModel, U
             log.error("get HLDUsers error,msg:{}", e);
         }
 //        hldUsers = hld;
+        if (hldUsers == null) {
+            return;
+        }
         response = JsonCommon.parse(hldUsers, HLDUserResponse.class);
         List<String> userIds = new ArrayList<>();
         if (response == null) {
