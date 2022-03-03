@@ -246,14 +246,17 @@ public class SceneHandler extends BaseSceneHandler<
     public CollectedSceneBO getCollectedSceneBO() {
         var collectedSceneBO = new CollectedSceneBO();
         collectedSceneBO.setScene(getScene());
-        String message = collectedSceneBO.getScene().getProcessMessage();
+        String message = null;
+        if (collectedSceneBO.getScene() != null && collectedSceneBO.getScene().getProcessMessage() != null) {
+            message = collectedSceneBO.getScene().getProcessMessage();
+        }
         if (message != null && message.length() >= 1) {
             String newMessage = message.substring(0, 1).toUpperCase();
             if (message.length() > 1) {
-                message = newMessage + message.substring(1).toLowerCase();
+                newMessage = newMessage + message.substring(1).toLowerCase();
             }
+            collectedSceneBO.getScene().setProcessMessage(newMessage);
         }
-        collectedSceneBO.getScene().setProcessMessage(message);
         Map<String, Object> pluginData = new HashMap<>();
         getPlugins().forEach(plugin -> {
             var pluginScene = plugin.getScene();
@@ -271,14 +274,17 @@ public class SceneHandler extends BaseSceneHandler<
         var sceneElement = getElement(nodeId);
         collectedSceneElementBO.setSceneElement(sceneElement);
         var sceneElementPorts = sceneElement.getPorts();
-        String message = sceneElement.getProcessMessage();
+        String message = null;
+        if (sceneElement.getProcessMessage() != null) {
+            message = sceneElement.getProcessMessage();
+        }
         if (message != null && message.length() >= 1) {
             String newMessage = message.substring(0, 1).toUpperCase();
             if (message.length() > 1) {
-                message = newMessage + message.substring(1).toLowerCase();
+                newMessage = newMessage + message.substring(1).toLowerCase();
             }
+            sceneElement.setProcessMessage(newMessage);
         }
-        sceneElement.setProcessMessage(message);
 
         Map<String, Object> pluginData = new HashMap<>();
         Map<String, Map<String, Object>> portPluginData = new HashMap<>();

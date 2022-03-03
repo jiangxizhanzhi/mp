@@ -51,4 +51,15 @@ public class CsceneInstanceStat {
     private Integer createConsumeSeconds;
     @ApiModelProperty(value = "场景运行时长(秒)")
     private Long sceneRunTime;
+
+    public String getEventMessage() {
+        if (eventMessage != null && eventMessage.length() >= 1) {
+            String newEventMessage = eventMessage.substring(0, 1).toUpperCase();
+            if (eventMessage.length() > 1) {
+                newEventMessage = newEventMessage + eventMessage.substring(1).toLowerCase();
+            }
+            return newEventMessage;
+        }
+        return eventMessage;
+    }
 }

@@ -219,14 +219,18 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         // 深拷贝一下 (createHandler是多线程处理的,CsceneInstanceBO有可能是共用的)
         CsceneInstanceBO csceneInstanceBO = JsonCommon.mapToBean(JsonCommon.beanToMap(super.toData()), CsceneInstanceBO.class);
         CsceneDataModifier.correctReturnCsceneData(csceneInstanceBO);
-        String message = csceneInstanceBO.getScene().getTopology().getScene().getProcessMessage();
+        String message = null;
+        if (csceneInstanceBO.getScene() != null && csceneInstanceBO.getScene().getTopology() != null
+                && csceneInstanceBO.getScene().getTopology().getScene() != null) {
+            message = csceneInstanceBO.getScene().getTopology().getScene().getProcessMessage();
+        }
         if (message != null && message.length() >= 1) {
             String newMessage = message.substring(0, 1).toUpperCase();
             if (message.length() > 1) {
-                message = newMessage + message.substring(1).toLowerCase();
+                newMessage = newMessage + message.substring(1).toLowerCase();
             }
+            csceneInstanceBO.getScene().getTopology().getScene().setProcessMessage(newMessage);
         }
-        csceneInstanceBO.getScene().getTopology().getScene().setProcessMessage(message);
         return csceneInstanceBO;
     }
 }
