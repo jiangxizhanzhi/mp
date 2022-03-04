@@ -355,6 +355,19 @@ public class CsceneDataModifier {
         }
     }
 
+    public static void checkVlanId(CsceneBO csceneBO) {
+        if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getPlugins() != null && csceneBO.getSceneConfig().getPlugins().get("cpcloud") != null) {
+            var elements = csceneBO.getSceneConfig().getPlugins().get("cpcloud").getElements();
+            if (elements != null && elements.size() > 0) {
+                elements.values().forEach(e -> {
+                    if (e.get("vlan_id") == null || e.get("vlan_id").equals(StringUtils.EMPTY)) {
+                        e.put("vlan_id", 0);
+                    }
+                });
+            }
+        }
+    }
+
     static private class CpcloudPortData {
         private List<AccessMode> accessModes;
 
