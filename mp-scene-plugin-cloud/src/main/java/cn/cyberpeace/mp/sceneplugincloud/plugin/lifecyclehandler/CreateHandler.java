@@ -721,7 +721,7 @@ public class CreateHandler extends HandlerCommon {
 
         receiveVirtualPortInfo(cloudElement, container.getNetworks());
 
-//        execContainerInitCommand(cloudElement);
+        execContainerInitCommand(cloudElement);
 
         checkAccessModes(cloudElement);
     }
