@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.util;
 
+import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.cscene.constant.CsceneBasei18nCode;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
@@ -23,12 +24,12 @@ public class BaseRequestUtil {
      */
     public static void checkBaseRequestWithSceneIdAndElementIds(BaseSceneElementRequest baseRequest) {
         if (StringUtils.isBlank(baseRequest.getSceneId())) {
-            throw new MpRuntimeException(CsceneErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(CsceneBasei18nCode.SCENE_ID));
+            throw new MpRuntimeException(CsceneErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(MessageCommon.get(CsceneBasei18nCode.SCENE_ID)));
         }
 
         List<String> elementIds = baseRequest.getElementIds();
         if (CollectionUtil.isEmpty(elementIds)) {
-            throw new MpRuntimeException(CsceneErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(CsceneBasei18nCode.ELEMENT_LIST));
+            throw new MpRuntimeException(CsceneErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(MessageCommon.get(CsceneBasei18nCode.ELEMENT_LIST)));
         }
     }
 
@@ -40,7 +41,7 @@ public class BaseRequestUtil {
      */
     public static void checkBaseRequestWithSceneId(BaseSceneElementRequest baseRequest) {
         if (StringUtils.isBlank(baseRequest.getSceneId())) {
-            throw new MpRuntimeException(CsceneErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(CsceneBasei18nCode.SCENE_ID));
+            throw new MpRuntimeException(CsceneErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(MessageCommon.get(CsceneBasei18nCode.SCENE_ID)));
         }
     }
 

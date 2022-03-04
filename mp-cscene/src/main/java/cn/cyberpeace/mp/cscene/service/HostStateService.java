@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.bo.IntervalSizeBO;
+import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
@@ -305,12 +306,12 @@ public class HostStateService {
     private void checkListPageParams(ListPageInfoQueryParams params) {
         List<String> sceneIds = params.getSceneIds();
         if (CollectionUtil.isEmpty(sceneIds)) {
-            throw new MpRuntimeException(CsceneErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(CsceneBasei18nCode.SCENE_ID));
+            throw new MpRuntimeException(CsceneErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(MessageCommon.get(CsceneBasei18nCode.SCENE_ID)));
         }
 
         List<String> nodeIds = params.getNodeIds();
         if (CollectionUtil.isEmpty(nodeIds)) {
-            throw new MpRuntimeException(CsceneErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(CsceneBasei18nCode.ELEMENT_LIST));
+            throw new MpRuntimeException(CsceneErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(MessageCommon.get(CsceneBasei18nCode.ELEMENT_LIST)));
         }
 
     }
