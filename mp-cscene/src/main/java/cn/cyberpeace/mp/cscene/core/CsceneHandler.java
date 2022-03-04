@@ -1,7 +1,9 @@
 package cn.cyberpeace.mp.cscene.core;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
@@ -9,6 +11,7 @@ import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneRoleBO;
+import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.core.base.BaseCsceneHandler;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceRoleModel;
@@ -22,11 +25,15 @@ import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.service.SceneConfigService;
 import cn.cyberpeace.mp.scene.service.SceneService;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -43,6 +50,7 @@ import java.util.stream.Collectors;
         CsceneMapper.class,
         CsceneRoleMapper.class,
 })
+@Slf4j
 public class CsceneHandler extends BaseCsceneHandler<
         CsceneModel, CsceneRoleModel, CsceneRoleBO,
         CsceneBO, CsceneMapper, CsceneRoleMapper> {
@@ -127,6 +135,7 @@ public class CsceneHandler extends BaseCsceneHandler<
             // 测试模式下,需要默认可以有console登录协议
             CsceneDataModifier.supplyProtocol(csceneInstance, AccessMode.Protocol.CONSOLE);
         }
+        this.checkVlanIds(getCscene());
         var instanceHandler = new CsceneInstanceHandler(csceneInstance, getContext());
         instanceHandler.create();
         return instanceHandler.toData();
@@ -293,6 +302,41 @@ public class CsceneHandler extends BaseCsceneHandler<
     public void deleteScene(String sceneId, boolean logic) {
         if (sceneId != null) {
             sceneConfigService.delete(sceneId, logic, null);
+        }
+    }
+
+    private void checkVlanIds(CsceneBO csceneBO) {
+        if (csceneBO == null) {
+            return;
+        }
+        if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getPlugins() != null && csceneBO.getSceneConfig().getPlugins().get("cpcloud") != null) {
+            var elements = csceneBO.getSceneConfig().getPlugins().get("cpcloud").getElements();
+            if (elements != null && !elements.isEmpty()) {
+                List<Integer> vlanIds = new ArrayList<>();
+                elements.values().forEach(e -> {
+                    if (e.get("vlan_id") != null) {
+                        Integer vlanId = Integer.parseInt(e.get("vlan_id").toString());
+                        if (vlanId > 0) {
+                            vlanIds.add(vlanId);
+                        }
+                    }
+                });
+                if (CollectionUtils.isNotEmpty(vlanIds)) {
+                    var result = csceneInstanceMapper.getVlanUsedInstance(vlanIds);
+                    if (CollectionUtils.isNotEmpty(result)) {
+                        Set<Integer> usedVlanIds = new HashSet<>();
+                        Set<String> sceneIds = new HashSet<>();
+                        result.stream().forEach(e -> {
+                            if (e != null) {
+                                usedVlanIds.add(e.getVlanId());
+                                sceneIds.add(e.getScene());
+                            }
+                        });
+                        log.info("vlanIds {} has been used in scene {}", JsonCommon.stringify(usedVlanIds), JsonCommon.stringify(sceneIds));
+                        throw new MpRuntimeException(CsceneErrorCode.VLAN_ID_HAS_BEEN_USED.format(JsonCommon.stringify(usedVlanIds)));
+                    }
+                }
+            }
         }
     }
 }
