@@ -4,9 +4,9 @@ import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
@@ -21,19 +21,18 @@ import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneRoleMapper;
+import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.service.SceneConfigService;
 import cn.cyberpeace.mp.scene.service.SceneService;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -264,7 +263,7 @@ public class CsceneHandler extends BaseCsceneHandler<
     public boolean delete(boolean logic, boolean withInstance) {
         if (withInstance) {
             reloadCsceneInstances();
-            for (var csceneInstance: ListUtils.union(getCscene().getTestScenes(), getCscene().getAppScenes())) {
+            for (var csceneInstance : ListUtils.union(getCscene().getTestScenes(), getCscene().getAppScenes())) {
                 var instanceHandler = new CsceneInstanceHandler(csceneInstance, getContext());
                 instanceHandler.delete(logic);
             }
@@ -312,30 +311,16 @@ public class CsceneHandler extends BaseCsceneHandler<
         if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getPlugins() != null && csceneBO.getSceneConfig().getPlugins().get("cpcloud") != null) {
             var elements = csceneBO.getSceneConfig().getPlugins().get("cpcloud").getElements();
             if (elements != null && !elements.isEmpty()) {
-                List<Integer> vlanIds = new ArrayList<>();
                 elements.values().forEach(e -> {
-                    if (e.get("vlan_id") != null && e.get("vlan") != null && Boolean.TRUE.equals(e.get("vlan"))) {
-                        Integer vlanId = Integer.parseInt(e.get("vlan_id").toString());
-                        if (vlanId > 0) {
-                            vlanIds.add(vlanId);
+                    if (e.get("image") != null && e.get("virtual_type") != null && e.get("virtual_type").equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE)) {
+                        String image = e.get("image").toString();
+                        CsceneSpecialService csceneSpecialService = BeanCommon.getBean(CsceneSpecialService.class);
+                        var serviceResult = csceneSpecialService.statDeviceReferCsceneInstances(new String[]{ image });
+                        if (serviceResult != null && serviceResult.getSource() != null && !serviceResult.getSource().isEmpty()) {
+                            throw new MpRuntimeException(CsceneErrorCode.ENTITY_HAS_BEEN_USED.format(JsonCommon.stringify(image)));
                         }
                     }
                 });
-                if (CollectionUtils.isNotEmpty(vlanIds)) {
-                    var result = csceneInstanceMapper.getVlanUsedInstance(vlanIds);
-                    if (CollectionUtils.isNotEmpty(result)) {
-                        Set<Integer> usedVlanIds = new HashSet<>();
-                        Set<String> sceneIds = new HashSet<>();
-                        result.stream().forEach(e -> {
-                            if (e != null) {
-                                usedVlanIds.add(e.getVlanId());
-                                sceneIds.add(e.getScene());
-                            }
-                        });
-                        log.info("vlanIds {} has been used in scene {}", JsonCommon.stringify(usedVlanIds), JsonCommon.stringify(sceneIds));
-                        throw new MpRuntimeException(CsceneErrorCode.VLAN_ID_HAS_BEEN_USED.format(JsonCommon.stringify(usedVlanIds)));
-                    }
-                }
             }
         }
     }
