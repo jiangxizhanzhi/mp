@@ -84,4 +84,16 @@
            or (i.create_time &gt;= #{startTime} and i.create_time &lt; #{endTime})
     </select>
 
+    <select id="getVlanUsedInstance" resultType="cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel">
+        select b.* from mp_scene_scene a, mp_sceneplugincloud_scene_element b
+        where a.id = b.scene
+        and (a.event != 2 or a.event_status != 5)
+        and (a.event != 9)
+        and b.vlan = 1
+        and b.vlan_id in
+        <foreach collection="list" open="(" separator="," close=")" item="item">
+            #{item}
+        </foreach>
+    </select>
+
 </mapper>
