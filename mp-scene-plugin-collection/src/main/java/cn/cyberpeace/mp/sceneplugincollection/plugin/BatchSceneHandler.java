@@ -145,7 +145,9 @@ public class BatchSceneHandler {
             if (srcPorts == null) {
                 return;
             }
-            if (pluginHandler != null && pluginHandler.getElementMap().get(srcElement.getId()).getEnableProbeCollect()) {
+            if (pluginHandler != null && pluginHandler.getElementMap() != null && pluginHandler.getElementMap().get(srcElement.getId()) != null
+                    && pluginHandler.getElementMap().get(srcElement.getId()).getEnableProbeCollect() != null &&
+                    pluginHandler.getElementMap().get(srcElement.getId()).getEnableProbeCollect()) {
                 this.probeEnabledNodeId2EidMap.put(srcElement.getId(), srcElement.getEid());
             }
             this.nodeId2NodenameMap.put(srcElement.getId(), srcElement.getName());
