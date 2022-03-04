@@ -314,7 +314,7 @@ public class CsceneHandler extends BaseCsceneHandler<
             if (elements != null && !elements.isEmpty()) {
                 List<Integer> vlanIds = new ArrayList<>();
                 elements.values().forEach(e -> {
-                    if (e.get("vlan_id") != null) {
+                    if (e.get("vlan_id") != null && e.get("vlan") != null && Boolean.TRUE.equals(e.get("vlan"))) {
                         Integer vlanId = Integer.parseInt(e.get("vlan_id").toString());
                         if (vlanId > 0) {
                             vlanIds.add(vlanId);
