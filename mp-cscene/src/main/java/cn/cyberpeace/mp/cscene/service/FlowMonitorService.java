@@ -1,22 +1,31 @@
 package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.bo.IntervalSizeBO;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.cscene.bo.CsceneCollectionFlowBO;
+import cn.cyberpeace.mp.cscene.dto.common.AttackCountRequest;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackDto;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackRatio;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackTime;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackTypeCount;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowRiskCount;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowTrend;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowTrendRequest;
+import cn.cyberpeace.mp.cscene.dto.flow.TotalFlowAttackRatio;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
 import cn.cyberpeace.mp.sceneplugincollection.bo.AttackInfo;
-import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionFlowBO;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowGroupCountParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
 import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,11 +33,14 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @Description:
@@ -51,7 +63,6 @@ public class FlowMonitorService {
 
     /**
      * 查询单个节点机器流量趋势
-     *
      * @param trendRequest
      * @return
      */
@@ -67,14 +78,14 @@ public class FlowMonitorService {
 
     /**
      * 查询场景机器流量趋势
-     *
      * @param trendRequest
      * @return
      */
     public List<FlowTrend> getSceneFlowTrend(FlowTrendRequest trendRequest) {
         log.info("{}", trendRequest);
         BaseRequestUtil.checkBaseRequestWithSceneId(trendRequest);
-        List<String> sceneIds = CollectionUtil.toList(trendRequest.getSceneId());
+        // 逗号分割
+        List<String> sceneIds = CollectionUtil.toList(StringUtils.split(trendRequest.getSceneId(), ","));
 
         return processFlowTrend(sceneIds, null, trendRequest.getStartTime(), trendRequest.getEndTime(), trendRequest.getSegmentCount());
     }
@@ -113,11 +124,100 @@ public class FlowMonitorService {
         return riskCount;
     }
 
+    public List<FlowAttackTypeCount> getAttackTypeCount(BaseSceneElementRequest baseRequest) {
+        log.info("baseRequest:{}", baseRequest);
+
+        BaseRequestUtil.checkBaseRequestWithSceneId(baseRequest);
+
+        List<String> sceneIds = Arrays.asList(StringUtils.split(baseRequest.getSceneId(), ","));
+
+        List<String> nodeIds = null;
+        if (!CollectionUtil.isEmpty(baseRequest.getElementIds())) {
+            nodeIds = CollectionUtil.toList(baseRequest.getElementIds().toArray(new String[]{}));
+        }
+
+        List<String> sceneIdList = sceneIdTranslationService.translateSceneIds(sceneIds);
+
+        ServiceResult<Map<String, Integer>> mapResult = scenePluginCollectionSceneService.groupCountFlowByType(sceneIdList, nodeIds, null, null);
+        Map<String, Integer> map = mapResult.getSource();
+        List<FlowAttackTypeCount> result = new ArrayList<>();
+        if (map != null && !map.isEmpty()) {
+            map.forEach((type, num) -> result.add(new FlowAttackTypeCount(type, num)));
+            Collections.sort(result, (c1, c2) -> c2.getTimes() - c1.getTimes());
+        }
+        return result;
+    }
+
+    public List<FlowAttackTime> getAttackTimeCountNoName(AttackCountRequest baseRequest) {
+        log.info("baseRequest:{}", JsonCommon.stringify(baseRequest));
+        BaseRequestUtil.checkBaseRequestWithSceneId(baseRequest);
+
+        List<String> sceneIds = Arrays.asList(StringUtils.split(baseRequest.getSceneId(), ","));
+        List<String> sceneIdList = sceneIdTranslationService.translateSceneIds(sceneIds);
+        var mapResult = scenePluginCollectionSceneService.groupCountFlowWithTopSize(sceneIdList, baseRequest.getIps(), null, null);
+        Map<String, Integer> map = mapResult.getSource();
+        List<FlowAttackTime> result = new ArrayList<>();
+        if (map != null && !map.isEmpty()) {
+            map.forEach((type, num) -> result.add(FlowAttackTime.builder()
+                    .ip(type)
+                    .times(num)
+                    .build()));
+            Collections.sort(result, (c1, c2) -> c2.getTimes() - c1.getTimes());
+        }
+        return result;
+    }
+
+    public List<FlowAttackTime> getAttackIpCount(AttackCountRequest baseRequest) {
+        log.info("baseRequest:{}", JsonCommon.stringify(baseRequest));
+        BaseRequestUtil.checkBaseRequestWithSceneId(baseRequest);
+
+        List<String> sceneIds = Arrays.asList(StringUtils.split(baseRequest.getSceneId(), ","));
+        List<String> sceneIdList = sceneIdTranslationService.translateSceneIds(sceneIds);
+        String groupField = baseRequest.getIpType() == 0 ?
+                ScenePluginCollectionSceneService.GroupCountFlowField.SOURCE_IP :
+                ScenePluginCollectionSceneService.GroupCountFlowField.DEST_IP;
+        FlowGroupCountParams params = new FlowGroupCountParams(groupField);
+        params.setQueryAddress(baseRequest.getIps());
+        params.setStartTime(baseRequest.getStartTime());
+        params.setEndTime(baseRequest.getEndTime());
+        params.setTopSize(baseRequest.getTopSize());
+        var result = scenePluginCollectionSceneService.groupCountFlowAndNodeInfo(sceneIdList, params).getSource();
+        return result.stream()
+                .map(bo -> FlowAttackTime.builder()
+                        .times(bo.getTimes())
+                        .nodeName(bo.getNodeName())
+                        .ip(bo.getIp())
+                        .build()
+                ).collect(Collectors.toList());
+    }
+
+    public TotalFlowAttackRatio getAttackRatioCount(AttackCountRequest baseRequest) {
+        log.info("baseRequest:{}", JsonCommon.stringify(baseRequest));
+        BaseRequestUtil.checkBaseRequestWithSceneId(baseRequest);
+
+        List<String> sceneIds = Arrays.asList(StringUtils.split(baseRequest.getSceneId(), ","));
+        List<String> sceneIdList = sceneIdTranslationService.translateSceneIds(sceneIds);
+        var countResult = scenePluginCollectionSceneService.groupCountFlow(sceneIdList, baseRequest.getIps(), baseRequest.getTopSize(), baseRequest.getStartTime(), baseRequest.getEndTime()).getSource();
+        TotalFlowAttackRatio totalFlowAttackRatio = new TotalFlowAttackRatio();
+        totalFlowAttackRatio.setTotalAttackNumber(countResult.getAttackNumber());
+        totalFlowAttackRatio.setTotalTrafficSize(countResult.getTrafficSize());
+        totalFlowAttackRatio.setAttackWayList(new ArrayList<>());
+        if (CollectionUtils.isNotEmpty(countResult.getAttackWayList())) {
+            countResult.getAttackWayList().stream()
+                    .forEach(v -> totalFlowAttackRatio.getAttackWayList()
+                            .add(FlowAttackRatio.builder()
+                                    .attackTrafficPercent(v.getAttackNumberPercent().doubleValue())
+                                    .type(v.getAggregationType())
+                                    .build())
+                    );
+        }
+        return totalFlowAttackRatio;
+    }
+
 
     /**
      * 流量分页接口包装
      * 根据攻击类型拆分
-     *
      * @param id
      * @param queryParams
      * @return
@@ -132,12 +232,12 @@ public class FlowMonitorService {
         }
         queryParams.ensure();
 
-        ListObjServiceResult<CollectionFlowBO> flowBOResult = csceneInstanceService.listFlows(id, queryParams);
-        List<CollectionFlowBO> flowBOS = flowBOResult.getSource().getObjs();
+        ListObjServiceResult<CsceneCollectionFlowBO> flowBOResult = csceneInstanceService.listFlows(id, queryParams);
+        List<CsceneCollectionFlowBO> flowBOS = flowBOResult.getSource().getObjs();
 
         List<FlowAttackDto> flowAttackDtos = new ArrayList<>();
 
-        for (CollectionFlowBO flowBO : flowBOS) {
+        for (CsceneCollectionFlowBO flowBO : flowBOS) {
             if (Objects.nonNull(flowBO.getAttackInfos())) {
                 for (AttackInfo attackInfo : flowBO.getAttackInfos()) {
                     FlowAttackDto flowAttackDto = new FlowAttackDto();
