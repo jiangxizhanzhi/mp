@@ -111,4 +111,20 @@ public class TimeUtils {
     public static LocalDateTime timestampToLocalDateTime(Long timestamp) {
         return LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault());
     }
+
+    /**
+     * utc时间转localDateTime（不转时区）
+     * @param utcTime
+     * @return
+     */
+    public static LocalDateTime utcToLocalDateTime(String utcTime) {
+        LocalDateTime time;
+        if (utcTime.contains("T")) {
+            OffsetDateTime dateTime = OffsetDateTime.parse(utcTime);
+            time = dateTime.toLocalDateTime();
+        } else {
+            time = stringToLocalDateTime(utcTime);
+        }
+        return time;
+    }
 }

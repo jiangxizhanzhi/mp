@@ -44,7 +44,7 @@ public class ScreenrecordResponse extends ScreenshotModel {
             this.setUserOrgName(org);
         }
         this.setRecortime(record.getRecortime());
-        this.setCreateTime(TimeUtils.utcStringToLocalDateTime(record.getRecordate()));
+        this.setCreateTime(TimeUtils.utcToLocalDateTime(record.getRecordate()));
     }
 
 }
