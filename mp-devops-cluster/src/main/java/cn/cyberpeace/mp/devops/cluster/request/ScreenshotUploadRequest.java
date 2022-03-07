@@ -35,4 +35,16 @@ public class ScreenshotUploadRequest {
     @NotNull(message = "file can not be empty")
     private MultipartFile file;
 
+    /**
+     * 场景id
+     */
+    @ApiModelProperty(required = true, value = "场景id")
+    private String scene;
+
+    /**
+     * 节点id
+     */
+    @ApiModelProperty(required = true, value = "节点id")
+    private String nodeId;
+
 }
