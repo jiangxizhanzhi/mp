@@ -174,4 +174,26 @@ public class ScreenshotServiceImpl extends BaseModelServiceImpl<ScreenshotModel,
 
     }
 
+    /**
+     * 根据场景实例id批量删除截屏文件
+     * @param csceneId
+     * @return
+     */
+    public ServiceResult<Integer> batchDeleteBySceneId(String csceneId) {
+        HumanCondition condition = new HumanCondition().filterEqual(ScreenshotModel::getScene, csceneId);
+        List<ScreenshotModel> screenshotModels = this.getModelMapper().list(condition);
+
+        if (CollectionUtils.isNotEmpty(screenshotModels)) {
+            List<String> idList = screenshotModels.stream().map(ScreenshotModel::getId).collect(Collectors.toList());
+            // 异步删除文件服务器上文件
+            asyncScreenshotModelService.batchDeleteScreenshot(screenshotModels);
+            bulkDelete(idList.toArray(new String[0]));
+            return ServiceResult.success(screenshotModels.size());
+        } else {
+            log.warn("Screenshot to delete by csceneId not exist:{}", csceneId);
+            return ServiceResult.fail("Screenshot to delete by csceneId not exist");
+        }
+
+    }
+
 }
