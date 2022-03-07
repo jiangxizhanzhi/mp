@@ -76,6 +76,8 @@ public class ScreenshotServiceImpl extends BaseModelServiceImpl<ScreenshotModel,
         model.setSceneName(request.getSceneName());
         model.setFileName(request.getFile().getOriginalFilename());
         model.setFileSize(request.getFile().getSize());
+        model.setNodeId(request.getNodeId());
+        model.setScene(request.getScene());
 
         // 获取当前用户信息
         UserModel loginUser = UserUtils.getLoginUser();

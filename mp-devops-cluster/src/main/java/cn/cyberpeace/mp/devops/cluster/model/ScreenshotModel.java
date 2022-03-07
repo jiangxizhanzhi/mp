@@ -67,5 +67,19 @@ public class ScreenshotModel extends BaseModel {
 	@DefaultStr
 	private String userOrgName;
 
+	/**
+	 * 场景id
+	 */
+	@ApiModelProperty(value = "场景id")
+	@DefaultStr
+	private String scene;
+
+	/**
+	 * 节点id
+	 */
+	@ApiModelProperty(value = "节点id")
+	@DefaultStr
+	private String nodeId;
+
 
 }
