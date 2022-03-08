@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserCheckService;
 import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.hutool.core.lang.Validator;
@@ -24,9 +25,8 @@ public class UserCreateCheckService implements UserCheckService {
     private UserService userService;
 
     public void check(UserModel user) {
-        if (StringUtils.isBlank(user.getUsername())) {
-            throw new MpRuntimeException(AuthErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(AuthBasei18nCode.USER_USERNAME));
-        }
+
+        ParamCheck.notBlank(user.getUsername(), AuthBasei18nCode.USER_USERNAME);
 
         // 密码是否合法
         if (PasswordUtils.isPasswordStrengthLowLevel(user.getPassword())) {

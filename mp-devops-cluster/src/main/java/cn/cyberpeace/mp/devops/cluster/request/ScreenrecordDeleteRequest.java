@@ -1,7 +1,10 @@
 package cn.cyberpeace.mp.devops.cluster.request;
 
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * @Description: 按时间删除录屏请求
@@ -10,6 +13,13 @@ import lombok.Data;
  */
 @Data
 @ApiModel("按时间删除录屏请求")
-public class ScreenrecordDeleteRequest extends ScreenshotDeleteRequest {
+public class ScreenrecordDeleteRequest {
+
+    /**
+     * 删除条件：1: 6个月之前，2：3个月之前
+     */
+    @ApiModelProperty("删除条件：1: 6个月之前，2：3个月之前")
+    @NotNull(message = "recordTime can not be empty")
+    private Integer recordTime;
 
 }

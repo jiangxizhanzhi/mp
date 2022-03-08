@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -53,7 +54,10 @@ public class SysCollectorService extends RequestProcessor  {
      */
     public PageInfo<Port> pagePorts(CollectorBaseRequest collectorBaseRequest) {
         String agentId = agentService.getSingleAgentId(collectorBaseRequest.getAgentName());
-
+        if (StringUtils.isBlank(agentId)) {
+            log.error("agentId is null, agentName:{}", collectorBaseRequest.getAgentName());
+            return new PageInfo<>(new ArrayList<>());
+        }
         var requestUri = "/syscollector/" + agentId + "/ports";
         var requestUrl = wazuhUrl + requestUri;
 
@@ -83,7 +87,10 @@ public class SysCollectorService extends RequestProcessor  {
      */
     public PageInfo<Process> pageProcesses(CollectorBaseRequest collectorBaseRequest) {
         String agentId = agentService.getSingleAgentId(collectorBaseRequest.getAgentName());
-
+        if (StringUtils.isBlank(agentId)) {
+            log.error("agentId is null, agentName:{}", collectorBaseRequest.getAgentName());
+            return new PageInfo<>(new ArrayList<>());
+        }
         var requestUri = "/syscollector/" + agentId + "/processes";
         var requestUrl = wazuhUrl + requestUri;
 
@@ -114,6 +121,7 @@ public class SysCollectorService extends RequestProcessor  {
 
         String agentId = agentService.getSingleAgentId(agentName);
         if (StringUtils.isBlank(agentId)) {
+            log.error("agentId is null, agentName:{}", agentName);
             return null;
         }
 

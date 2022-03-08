@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.front.admin.controller;
 
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.front.admin.service.sys.activmenu.ActivMenuService;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
@@ -24,8 +25,9 @@ public class ActivMenuController {
     private ActivMenuService activMenuService;
 
     @PostMapping("/menu/reimport")
-    public void activMenu(MultipartFile file) {
+    public ServiceResult activMenu(MultipartFile file) {
         activMenuService.reImportMenus(file);
+        return ServiceResult.successful();
     }
 
 }

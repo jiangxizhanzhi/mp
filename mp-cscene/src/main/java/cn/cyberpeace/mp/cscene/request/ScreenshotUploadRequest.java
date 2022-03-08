@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.devops.cluster.request;
+package cn.cyberpeace.mp.cscene.request;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -34,5 +34,17 @@ public class ScreenshotUploadRequest {
     @ApiModelProperty(value = "文件")
     @NotNull(message = "file can not be empty")
     private MultipartFile file;
+
+    /**
+     * 场景id
+     */
+    @ApiModelProperty(required = true, value = "场景id")
+    private String scene;
+
+    /**
+     * 节点id
+     */
+    @ApiModelProperty(required = true, value = "节点id")
+    private String nodeId;
 
 }

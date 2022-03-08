@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.devops.cluster.model;
+package cn.cyberpeace.mp.cscene.model;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
@@ -66,6 +66,20 @@ public class ScreenshotModel extends BaseModel {
 	@ApiModelProperty(value = "组织名称")
 	@DefaultStr
 	private String userOrgName;
+
+	/**
+	 * 场景id
+	 */
+	@ApiModelProperty(value = "场景id")
+	@DefaultStr
+	private String scene;
+
+	/**
+	 * 节点id
+	 */
+	@ApiModelProperty(value = "节点id")
+	@DefaultStr
+	private String nodeId;
 
 
 }

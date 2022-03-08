@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.devops.cluster.request;
+package cn.cyberpeace.mp.cscene.request;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
