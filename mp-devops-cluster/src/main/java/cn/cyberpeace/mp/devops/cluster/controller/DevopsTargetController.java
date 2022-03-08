@@ -13,6 +13,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.TypeConvertModel;
 import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.request.TargetMultiAsyncRequest;
 import cn.cyberpeace.mp.devops.cluster.request.TargetSceneRequest;
+import cn.cyberpeace.mp.devops.cluster.response.CommonTargetResponse;
 import cn.cyberpeace.mp.devops.cluster.response.TargetScene;
 import cn.cyberpeace.mp.devops.cluster.response.TargetSceneResponse;
 import cn.cyberpeace.mp.devops.cluster.response.TargetUploadResponse;
@@ -143,6 +144,13 @@ public class DevopsTargetController {
         return new PageResult<>(deviceVOList,targetSceneConvertModel.getTotal());
     }
 
+    @ApiOperation("查询常用靶标信息")
+    @GetMapping("/common-targets")
+    public ServiceResult<CommonTargetResponse> getCommonTargets(){
+        List<Device> deviceList = targetConverter.getCommonTargets();
+        List<DeviceVO> deviceVOList = deviceVoConverter.devicesToDeviceVOs(deviceList);
+        return new Result(new CommonTargetResponse(deviceVOList));
+    }
 
 
     @ApiOperation("上传文件")

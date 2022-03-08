@@ -159,4 +159,14 @@ public class DeviceVO implements Serializable {
     @ApiModelProperty("容器信息")
     private ExtDocker extDocker;
 
+    /**
+     * 是否内置镜像
+     */
+    @ApiModelProperty("是否内置镜像")
+    private Boolean isBuildIn;
+
+    public Boolean getBuildIn() {
+        return isImport || isInternal;
+    }
+
 }
