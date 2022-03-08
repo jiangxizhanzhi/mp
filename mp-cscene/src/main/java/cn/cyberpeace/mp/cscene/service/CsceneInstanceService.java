@@ -82,6 +82,12 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     private final CsceneReportTaskPool csceneReportTaskPool = CsceneReportTaskPool.getInstance();
 
+    private static final String ASSISTANT = "assistance";
+
+    private static final String MONITOR = "monitor";
+
+    private static final String ALL = "all";
+
     private List<CsceneInstanceRoleModel> readCsceneInstanceRoles(String[] csceneInstanceIds) {
         if (csceneInstanceIds == null || csceneInstanceIds.length == 0) {
             return new ArrayList<>();
@@ -146,15 +152,16 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     public ServiceResult<Boolean> deleteById(String id, boolean logic, CsceneContextBO context) {
         var instanceHandler = new CsceneInstanceHandler(id, context);
+        String sceneId = null;
         if (instanceHandler.getCscene() != null && instanceHandler.getCscene().getScene() != null &&
                 instanceHandler.getCscene().getScene().getTopology() != null &&
                 instanceHandler.getCscene().getScene().getTopology().getScene() != null) {
-            String sceneId = instanceHandler.getCscene().getScene().getTopology().getScene().getEid();
-            if (sceneId != null) {
-                scenePluginCloudSceneService.deleteSceneRecords(sceneId, logic);
-            }
+            sceneId = instanceHandler.getCscene().getScene().getTopology().getScene().getEid();
         }
         var flag = instanceHandler.delete(logic);
+        if (sceneId != null) {
+            scenePluginCloudSceneService.deleteSceneRecords(sceneId, logic);
+        }
         if (!logic) {
             screenshotService.batchDeleteBySceneId(id);
         }
@@ -198,6 +205,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     public ServiceResult<List<UserNodeSessionInfo>> getNodeSessions(List<String> ids, List<String> nodeIds, List<String> userIds, String type) {
+        if (type == null) {
+            type = "monitor";
+        }
         var csceneInstances = getCsceneInstanceObjs(ids);
         if (csceneInstances.isEmpty()) {
             return new ServiceResult<>(new ArrayList<>());
@@ -206,19 +216,21 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 .collect(Collectors.toMap(csceneInstance -> csceneInstance.getScene(), csceneInstance -> csceneInstance));
         List<String> sceneIds = new ArrayList<>(sceneIdCsceneInstanceMap.keySet());
         ServiceResult<List<NodeSessionBO>> nodeSessionResult = new ServiceResult<>();
-        if (type != null) {
-            if (type.equals("assistance")) {
+        switch (type) {
+            case ASSISTANT:
                 nodeSessionResult = scenePluginCloudSceneService.getSceneRemoteSessions(
                         sceneIds, nodeIds, userIds, false, true);
-            } else if (type.equals("all")) {
+                break;
+            case ALL:
                 nodeSessionResult = scenePluginCloudSceneService.getSceneRemoteSessions(
                         sceneIds, nodeIds, userIds, true, true);
-            } else {
-                return new ServiceResult<>(new ArrayList<>());
-            }
-        } else {
-            nodeSessionResult = scenePluginCloudSceneService.getSceneRemoteSessions(
-                    sceneIds, nodeIds, userIds, true, false);
+                break;
+            case MONITOR:
+                nodeSessionResult = scenePluginCloudSceneService.getSceneRemoteSessions(
+                        sceneIds, nodeIds, userIds, true, false);
+                break;
+            default:
+                return new ServiceResult<>();
         }
         nodeSessionResult.getSource().forEach(nodeSession -> {
             var sceneId = nodeSession.getSceneId();
