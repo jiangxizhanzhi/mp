@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.devops.cluster.model;
+package cn.cyberpeace.mp.cscene.model;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;

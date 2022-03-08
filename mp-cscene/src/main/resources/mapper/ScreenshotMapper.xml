@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="cn.cyberpeace.mp.devops.cluster.repository.ScreenshotMapper">
+<mapper namespace="cn.cyberpeace.mp.cscene.repository.ScreenshotMapper">
 
     <select id="queryUsedSpace" resultType="java.lang.Long">
         select
@@ -9,7 +9,7 @@
             mp_devops_screenshot s
     </select>
 
-    <select id="queryByCreateTime" resultType="cn.cyberpeace.mp.devops.cluster.model.ScreenshotModel">
+    <select id="queryByCreateTime" resultType="cn.cyberpeace.mp.cscene.model.ScreenshotModel">
         select s.*
         from
             mp_devops_screenshot s
@@ -22,7 +22,7 @@
         </where>
     </select>
 
-    <select id="selectByIds" resultType="cn.cyberpeace.mp.devops.cluster.model.ScreenshotModel">
+    <select id="selectByIds" resultType="cn.cyberpeace.mp.cscene.model.ScreenshotModel">
         select s.* from mp_devops_screenshot s
         <where>
             1 = 1

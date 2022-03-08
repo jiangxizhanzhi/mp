@@ -1,13 +1,13 @@
-package cn.cyberpeace.mp.devops.cluster.service;
+package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.devops.cluster.model.ScreenshotModel;
-import cn.cyberpeace.mp.devops.cluster.request.ScreenshotBatchDeleteRequest;
-import cn.cyberpeace.mp.devops.cluster.request.ScreenshotDeleteRequest;
-import cn.cyberpeace.mp.devops.cluster.request.ScreenshotUploadRequest;
-import cn.cyberpeace.mp.devops.cluster.request.queryparam.ScreenshotQueryParams;
-import cn.cyberpeace.mp.devops.cluster.response.ScreenshotUsedSpaceResponse;
+import cn.cyberpeace.mp.cscene.model.ScreenshotModel;
+import cn.cyberpeace.mp.cscene.request.ScreenshotBatchDeleteRequest;
+import cn.cyberpeace.mp.cscene.request.ScreenshotDeleteRequest;
+import cn.cyberpeace.mp.cscene.request.ScreenshotUploadRequest;
+import cn.cyberpeace.mp.cscene.request.queryparam.ScreenshotQueryParams;
+import cn.cyberpeace.mp.cscene.response.ScreenshotUsedSpaceResponse;
 
 /**
  * @Description 截屏文件管理service

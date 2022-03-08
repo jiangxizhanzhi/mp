@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.devops.cluster.service.impl;
+package cn.cyberpeace.mp.cscene.service.impl;
 
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
@@ -10,16 +10,16 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
-import cn.cyberpeace.mp.devops.cluster.constant.BaseConstants;
-import cn.cyberpeace.mp.devops.cluster.model.ScreenshotModel;
-import cn.cyberpeace.mp.devops.cluster.repository.ScreenshotMapper;
-import cn.cyberpeace.mp.devops.cluster.request.ScreenshotBatchDeleteRequest;
-import cn.cyberpeace.mp.devops.cluster.request.ScreenshotDeleteRequest;
-import cn.cyberpeace.mp.devops.cluster.request.ScreenshotUploadRequest;
-import cn.cyberpeace.mp.devops.cluster.request.queryparam.ScreenshotQueryParams;
-import cn.cyberpeace.mp.devops.cluster.response.ScreenshotUsedSpaceResponse;
-import cn.cyberpeace.mp.devops.cluster.service.ScreenshotService;
-import cn.cyberpeace.mp.devops.cluster.service.fields.ScreenshotFields;
+import cn.cyberpeace.mp.cscene.model.ScreenshotModel;
+import cn.cyberpeace.mp.cscene.repository.ScreenshotMapper;
+import cn.cyberpeace.mp.cscene.request.ScreenshotBatchDeleteRequest;
+import cn.cyberpeace.mp.cscene.request.ScreenshotDeleteRequest;
+import cn.cyberpeace.mp.cscene.request.ScreenshotUploadRequest;
+import cn.cyberpeace.mp.cscene.request.queryparam.ScreenshotQueryParams;
+import cn.cyberpeace.mp.cscene.response.ScreenshotUsedSpaceResponse;
+import cn.cyberpeace.mp.cscene.service.AsyncScreenshotModelService;
+import cn.cyberpeace.mp.cscene.service.ScreenshotService;
+import cn.cyberpeace.mp.cscene.service.filed.ScreenshotFields;
 import cn.hutool.core.date.DateUtil;
 import com.google.common.base.Joiner;
 import lombok.extern.slf4j.Slf4j;
@@ -98,7 +98,7 @@ public class ScreenshotServiceImpl extends BaseModelServiceImpl<ScreenshotModel,
         if (CollectionUtils.isNotEmpty(userDto.getOrgs())) {
             // 封装组织名称，多个以逗号分隔
             List<String> nameList = userDto.getOrgs().stream().map(OrgModel::getName).collect(Collectors.toList());
-            String userOrgName = Joiner.on(BaseConstants.COMMA).join(nameList);
+            String userOrgName = Joiner.on(",").join(nameList);
             model.setUserOrgName(userOrgName);
         }
 
