@@ -13,15 +13,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AttackDateHistogramNetworkBytesBO {
+public class AttackDateHistogramNetworkBytesBO extends BaseBO{
 
    /**
     * 自 1970-01-01T00:00:00Z 纪元以来的毫秒数
     */
    private String time;
-
-   /**
-    * 流量大小,单位：B
-    */
-   private Double networkBytes;
 }
