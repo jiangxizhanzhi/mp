@@ -43,10 +43,11 @@ import org.springframework.util.MultiValueMap;
 
 import javax.annotation.Resource;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.EnumSet;
@@ -56,7 +57,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant.ES_DOC_MAXCOUNT;
 
@@ -608,14 +608,19 @@ public class DataCollectionService {
      * @return List<String>
      */
     public static List<String> fetchFormatterTime(LocalDateTime startTime, LocalDateTime endTime) {
-        long betweenDay = ChronoUnit.DAYS.between(startTime, endTime);
-        long month = ChronoUnit.MONTHS.between(startTime, endTime);
-        int days = (int) betweenDay;
-        if (month > 1) {
-            return IntStream.range(0, days + 2).boxed().map(startTime::plusDays).map((time) -> time.format(DateTimeFormatter.ofPattern("yyyy.MM.*")))
-                .distinct().collect(Collectors.toList());
+        log.info("startTime:{}, endTime:{}", startTime, endTime);
+        LocalDate startDate = startTime.toLocalDate();
+        LocalDate endDate = endTime.toLocalDate();
+        List<String> dayList = new ArrayList<>();
+        while (true) {
+            if (startDate.isAfter(endDate)) {
+                break;
+            }
+            dayList.add(startDate.format(DateTimeFormatter.ofPattern("yyyy.MM.dd")));
+            startDate = startDate.plusDays(1);
         }
-        return IntStream.range(0, days + 1).boxed().map(startTime::plusDays).map((time) -> time.format(DateTimeFormatter.ofPattern("yyyy.MM.dd")))
-            .distinct().collect(Collectors.toList());
+        log.info("dayList:{}", dayList);
+        return dayList;
     }
+
 }
