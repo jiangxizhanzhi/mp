@@ -10,19 +10,11 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
-import cn.cyberpeace.mp.sceneplugincollection.bo.AttackInfo;
-import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionFlowBO;
-import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
-import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
-import cn.cyberpeace.mp.sceneplugincollection.bo.FlowAttackCountBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.*;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
-import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowGroupCountParams;
-import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
-import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
-import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
-import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.*;
 import cn.cyberpeace.mp.situationaware.bo.AttackDateHistogramNetworkBytesBO;
 import cn.cyberpeace.mp.situationaware.bo.AttackWayAggregationBO;
 import cn.cyberpeace.mp.situationaware.bo.FlowLogBO;
@@ -31,6 +23,7 @@ import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.model.WazuhModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
 import cn.cyberpeace.mp.situationaware.model.enums.AggregationTypeEnum;
+import cn.cyberpeace.mp.situationaware.model.enums.SeverityEnum;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.CollectorBaseRequest;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
@@ -51,13 +44,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -113,7 +100,7 @@ public class ScenePluginCollectionSceneService {
         } else {
             request.setEndDateTime(TimeUtils.stringToLocalDateTime(queryParams.getEndTime()));
         }
-
+        request.setSourceIps(queryParams.getSourceIps());
         List<FlowLogBO> flowLogBOS = flowAnalysisService.flowLog(request);
         if (CollectionUtils.isEmpty(flowLogBOS)) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
@@ -272,7 +259,7 @@ public class ScenePluginCollectionSceneService {
      */
     public ServiceResult<Map<String, Integer>> groupCountFlowByLevel(
             List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime) {
-        return groupCountFlow(sceneIds, nodeIds, GroupCountFlowField.LEVEL, startTime, endTime);
+        return groupCountFlow(sceneIds, nodeIds, GroupCountFlowField.LEVEL, startTime, endTime,null);
     }
 
     /**
@@ -284,8 +271,8 @@ public class ScenePluginCollectionSceneService {
      * @return 字段的聚合统计数量 Map<安全等级, 该字段值统计数量>
      */
     public ServiceResult<Map<String, Integer>> groupCountFlowByType(
-            List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime) {
-        return groupCountFlow(sceneIds, nodeIds, GroupCountFlowField.TYPE, startTime, endTime);
+            List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime,List<String> sourceIps) {
+        return groupCountFlow(sceneIds, nodeIds, GroupCountFlowField.TYPE, startTime, endTime,sourceIps);
     }
 
 
@@ -339,7 +326,7 @@ public class ScenePluginCollectionSceneService {
      */
     public ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> timeIntervalSumFlowSize(
             List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime,
-            int intervalSeconds) {
+            int intervalSeconds,List<String> sourceIps) {
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIds, nodeIds);
         if (CollectionUtils.isEmpty(batchSceneHandler.getFlowCollectors())) {
             log.info("{} query time interval sum flow size,sceneId:{},no collection plugin or no flowCollector", LOG_PREFIX, JsonCommon.stringify(sceneIds));
@@ -356,6 +343,8 @@ public class ScenePluginCollectionSceneService {
         request.setStartDateTime(Optional.ofNullable(startTime).orElse(batchSceneHandler.getEarliestStartTime()));
         request.setEndDateTime(Optional.ofNullable(endTime).orElse(LocalDateTime.now()));
         request.setSecondsInterval(intervalSeconds);
+        request.setSourceIps(sourceIps);
+
         // 执行查询
         List<AttackDateHistogramNetworkBytesBO> bos = flowAnalysisService.sumNetworkBytesByDateHistogramTimestamp(request);
         if (CollectionUtils.isEmpty(bos)) {
@@ -596,7 +585,7 @@ public class ScenePluginCollectionSceneService {
      * @return 字段的聚合统计数量 Map<字段值, 该字段值统计数量>
      */
     private <T> ServiceResult<Map<T, Integer>> groupCountFlow(
-            List<String> sceneIds, List<String> nodeIds, String groupField, LocalDateTime startTime, LocalDateTime endTime) {
+            List<String> sceneIds, List<String> nodeIds, String groupField, LocalDateTime startTime, LocalDateTime endTime,List<String> sourceIps) {
         FlowAnalysisRequest request = new FlowAnalysisRequest();
         if (GroupCountFlowField.LEVEL.equals(groupField)) {
             request.setAggregationTypeEnum(AggregationTypeEnum.SURICATA_SEVERITY);
@@ -612,6 +601,7 @@ public class ScenePluginCollectionSceneService {
         request.setStartDateTime(Optional.ofNullable(startTime).orElse(batchSceneHandler.getEarliestStartTime()));
         request.setEndDateTime(Optional.ofNullable(endTime).orElse(LocalDateTime.now()));
         request.setSourceMacs(batchSceneHandler.getFlowCollectedMacAddrs());
+        request.setSourceIps(sourceIps);
         List<AttackWayAggregationBO> result = flowAnalysisService.topByAggregationTypeEnum(request);
         if (CollectionUtils.isEmpty(result)) {
             return new ServiceResult<>(new HashMap<>());
@@ -653,10 +643,13 @@ public class ScenePluginCollectionSceneService {
             request.setSourceIps(CollectionUtils.isNotEmpty(paramsAddress) ? paramsAddress : batchSceneHandler.getFlowCollectedIpAddrs());
             queryTopSize = request.getSourceIps().size();
             request.setAggregationTypeEnum(AggregationTypeEnum.SOURCE_IP);
+            request.setSeverityEnum(SeverityEnum.ALL);
         } else if (GroupCountFlowField.DEST_IP.equals(params.getQueryType())) {
             request.setDestinationIps(CollectionUtils.isNotEmpty(paramsAddress) ? paramsAddress : batchSceneHandler.getFlowCollectedIpAddrs());
             queryTopSize = request.getDestinationIps().size();
+            request.setSourceIps(params.getSourceIps());
             request.setAggregationTypeEnum(AggregationTypeEnum.DESTINATION_IP);
+            request.setSeverityEnum(SeverityEnum.ALL);
         } else {
             log.error("wrong params for groupCountFlowAndNodeInfo , params is {}", JsonCommon.stringify(params));
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
@@ -701,6 +694,7 @@ public class ScenePluginCollectionSceneService {
                 .endDateTime(fEndTime)
                 .topSize(topSize)
                 .aggregationTypeEnum(AggregationTypeEnum.SURICATA_CATEGORY)
+                .severityEnum(SeverityEnum.ALL)
                 .build();
         flowAnalysisRequest.setGroupList(batchSceneHandler.getFlowCollectors());
         TeamAttackBO teamAttackBO = flowAnalysisService.queryOneTeamAttackSumList(flowAnalysisRequest);

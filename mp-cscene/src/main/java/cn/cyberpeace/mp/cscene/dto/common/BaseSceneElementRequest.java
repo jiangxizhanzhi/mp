@@ -20,4 +20,13 @@ public class BaseSceneElementRequest {
 
     @ApiModelProperty("节点id")
     private List<String> elementIds;
+
+
+    /**
+     * 源IP集合
+     */
+    @ApiModelProperty("源IP集合")
+    private List<String> sourceIps;
+
+
 }

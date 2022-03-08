@@ -8,14 +8,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneCollectionFlowBO;
 import cn.cyberpeace.mp.cscene.dto.common.AttackCountRequest;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackDto;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackRatio;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackTime;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackTypeCount;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowRiskCount;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowTrend;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowTrendRequest;
-import cn.cyberpeace.mp.cscene.dto.flow.TotalFlowAttackRatio;
+import cn.cyberpeace.mp.cscene.dto.flow.*;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
 import cn.cyberpeace.mp.sceneplugincollection.bo.AttackInfo;
@@ -32,14 +25,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -72,7 +58,7 @@ public class FlowMonitorService {
         List<String> sceneIds = CollectionUtil.toList(trendRequest.getSceneId());
         List<String> nodeIds = CollectionUtil.toList(trendRequest.getElementIds().get(0));
 
-        return processFlowTrend(sceneIds, nodeIds, trendRequest.getStartTime(), trendRequest.getEndTime(), trendRequest.getSegmentCount());
+        return processFlowTrend(sceneIds, nodeIds, trendRequest.getStartTime(), trendRequest.getEndTime(), trendRequest.getSegmentCount(),null);
     }
 
 
@@ -87,7 +73,7 @@ public class FlowMonitorService {
         // 逗号分割
         List<String> sceneIds = CollectionUtil.toList(StringUtils.split(trendRequest.getSceneId(), ","));
 
-        return processFlowTrend(sceneIds, null, trendRequest.getStartTime(), trendRequest.getEndTime(), trendRequest.getSegmentCount());
+        return processFlowTrend(sceneIds, null, trendRequest.getStartTime(), trendRequest.getEndTime(), trendRequest.getSegmentCount(),trendRequest.getSourceIps());
     }
 
 
@@ -138,7 +124,7 @@ public class FlowMonitorService {
 
         List<String> sceneIdList = sceneIdTranslationService.translateSceneIds(sceneIds);
 
-        ServiceResult<Map<String, Integer>> mapResult = scenePluginCollectionSceneService.groupCountFlowByType(sceneIdList, nodeIds, null, null);
+        ServiceResult<Map<String, Integer>> mapResult = scenePluginCollectionSceneService.groupCountFlowByType(sceneIdList, nodeIds, null, null,baseRequest.getSourceIps());
         Map<String, Integer> map = mapResult.getSource();
         List<FlowAttackTypeCount> result = new ArrayList<>();
         if (map != null && !map.isEmpty()) {
@@ -181,6 +167,7 @@ public class FlowMonitorService {
         params.setStartTime(baseRequest.getStartTime());
         params.setEndTime(baseRequest.getEndTime());
         params.setTopSize(baseRequest.getTopSize());
+        params.setSourceIps(baseRequest.getSourceIps());
         var result = scenePluginCollectionSceneService.groupCountFlowAndNodeInfo(sceneIdList, params).getSource();
         return result.stream()
                 .map(bo -> FlowAttackTime.builder()
@@ -192,7 +179,7 @@ public class FlowMonitorService {
     }
 
     public TotalFlowAttackRatio getAttackRatioCount(AttackCountRequest baseRequest) {
-        log.info("baseRequest:{}", JsonCommon.stringify(baseRequest));
+        log.info("getAttackRatioCount baseRequest:{}", JsonCommon.stringify(baseRequest));
         BaseRequestUtil.checkBaseRequestWithSceneId(baseRequest);
 
         List<String> sceneIds = Arrays.asList(StringUtils.split(baseRequest.getSceneId(), ","));
@@ -263,7 +250,7 @@ public class FlowMonitorService {
     }
 
 
-    private List<FlowTrend> processFlowTrend(List<String> sceneIds, List<String> elementIds, LocalDateTime startTime, LocalDateTime endTime, Integer segmentCount) {
+    private List<FlowTrend> processFlowTrend(List<String> sceneIds, List<String> elementIds, LocalDateTime startTime, LocalDateTime endTime, Integer segmentCount,List<String> sourceIps) {
         // 默认值
         if (Objects.isNull(endTime)) {
             endTime = LocalDateTime.now();
@@ -283,7 +270,7 @@ public class FlowMonitorService {
         Long intervalSeconds = SegmentCount2IntervalSecondsUtil.calculateIntervalSeconds(startTime, endTime, segmentCount);
         String intervalSecondStr = intervalSeconds + "";
 
-        ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> flowResult = scenePluginCollectionSceneService.timeIntervalSumFlowSize(sceneIdList, elementIds, startTime, endTime, Integer.valueOf(intervalSecondStr));
+        ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> flowResult = scenePluginCollectionSceneService.timeIntervalSumFlowSize(sceneIdList, elementIds, startTime, endTime, Integer.valueOf(intervalSecondStr),sourceIps);
 
         List<IntervalSizeBO<LocalDateTime, Long>> intervalFlowSizeBOs = flowResult.getSource();
         List<FlowTrend> flowTrends = new ArrayList<>();

@@ -32,4 +32,10 @@ public class AttackCountRequest extends BaseSceneElementRequest {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime endTime;
 
+    /**
+     * 源IP集合
+     */
+    @ApiModelProperty("源IP集合")
+    private List<String> sourceIps;
+
 }

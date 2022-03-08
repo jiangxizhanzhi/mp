@@ -6,13 +6,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.dto.common.AttackCountRequest;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackDto;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackTime;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackTypeCount;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowRiskCount;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowTrend;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowTrendRequest;
-import cn.cyberpeace.mp.cscene.dto.flow.TotalFlowAttackRatio;
+import cn.cyberpeace.mp.cscene.dto.flow.*;
 import cn.cyberpeace.mp.cscene.service.FlowMonitorService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
 import io.swagger.annotations.Api;
@@ -112,7 +106,7 @@ public class FlowMonitorController {
     })
     @GetMapping("/page")
     public ListObjServiceResult<FlowAttackDto> pageFlow(@RequestParam String id, FlowQueryParams queryParams) {
-        log.info("id:{}, queryParams:{}", id, queryParams);
+        log.info("pageFlow ====>> id:{}, queryParams:{}", id, queryParams);
 
         ListObjServiceResult<FlowAttackDto> result = flowMonitorService.pageFlow(id, queryParams);
         return result;

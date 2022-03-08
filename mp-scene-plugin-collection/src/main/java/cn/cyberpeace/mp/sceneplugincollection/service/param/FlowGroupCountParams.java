@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.sceneplugincollection.service.param;
 
-import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,6 +19,11 @@ public class FlowGroupCountParams {
     private LocalDateTime endTime;
     private String queryType;
     private List<String> queryAddress;
+
+    /**
+     * 源IP集合
+     */
+    private List<String> sourceIps;
 
     public FlowGroupCountParams(String queryType) {
         this.queryType = queryType;

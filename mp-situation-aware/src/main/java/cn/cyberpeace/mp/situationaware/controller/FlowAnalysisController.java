@@ -1,7 +1,10 @@
 package cn.cyberpeace.mp.situationaware.controller;
 
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.situationaware.bo.*;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
+import cn.cyberpeace.mp.situationaware.bo.AttackDateHistogramNetworkBytesBO;
+import cn.cyberpeace.mp.situationaware.bo.AttackWayAggregationBO;
+import cn.cyberpeace.mp.situationaware.bo.FlowLogBO;
 import cn.cyberpeace.mp.situationaware.request.FlowAnalysisRequest;
 import cn.cyberpeace.mp.situationaware.service.FlowAnalysisService;
 import cn.cyberpeace.mp.situationaware.vo.AttackDateHistogramNetworkBytesVO;
@@ -21,7 +24,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -68,7 +70,7 @@ public class FlowAnalysisController {
             vo.setNetwork(bo.getNetwork());
             vo.setSource(bo.getSource());
             vo.setSuricata(bo.getSuricata());
-            vo.setTimestamp(bo.getTimestamp());
+            vo.setTimestamp(TimeUtils.timestampToLocalDateTime(bo.getTimestamp()));
             return vo;
         }).collect(Collectors.toList());
         return new ServiceResult(flowLogVOList).asResult();
@@ -111,32 +113,34 @@ public class FlowAnalysisController {
         return new ServiceResult(vos).asResult();
     }
 
-    @ApiOperation(value = "查询所有战队流量聚合数据, 战队名次按照攻击次数排名",hidden = true)
+    @ApiOperation(value = "查询所有战队流量聚合数据, 战队名次按照攻击次数排名")
     @GetMapping("/team_traffic_sum")
     @Deprecated
-    public ServiceResult<List<TeamAttackVO>> queryAllTeamAttackList(FlowAnalysisRequest request){
-        List<TeamBO> teamBOList = request.getTeamBOS();
-        FlowAnalysisRequest flowAnalysisRequest = this.buildFlowAnalysisRequest(request);
+    public void queryAllTeamAttackList(FlowAnalysisRequest request){
+        flowAnalysisService.queryOneTeamAttackSumList(request);
 
-        List<TeamAttackVO> teamAttackResultVOS = teamBOList.stream().map(teamBo -> {
-            flowAnalysisRequest.setSourceIps(teamBo.getIps());
-            TeamAttackBO bo = flowAnalysisService.queryOneTeamAttackSumList(flowAnalysisRequest);
-
-            TeamAttackVO teamAttackVO = new TeamAttackVO();
-            teamAttackVO.setAttackTrafficPercent(bo.getAttackTrafficPercent());
-            teamAttackVO.setAttackNumberPercent(bo.getAttackNumberPercent());
-            teamAttackVO.setTeamName(teamBo.getName());
-            teamAttackVO.setAttackWayList(bo.getAttackWayList());
-            teamAttackVO.setAttackNumber(bo.getAttackNumber());
-            teamAttackVO.setTrafficSize(bo.getTrafficSize());
-
-            return teamAttackVO;
-        }).collect(Collectors.toList());
-
-        //计算百分比
-        teamAttackResultVOS = buildPercent(teamAttackResultVOS);
-        teamAttackResultVOS = teamAttackResultVOS.stream().sorted(Comparator.comparingLong(TeamAttackVO::getAttackNumber).reversed()).collect(Collectors.toList());
-        return new ServiceResult<>(teamAttackResultVOS).asResult();
+//        List<TeamBO> teamBOList = request.getTeamBOS();
+//        FlowAnalysisRequest flowAnalysisRequest = this.buildFlowAnalysisRequest(request);
+//
+//        List<TeamAttackVO> teamAttackResultVOS = teamBOList.stream().map(teamBo -> {
+//            flowAnalysisRequest.setSourceIps(teamBo.getIps());
+//            TeamAttackBO bo = flowAnalysisService.queryOneTeamAttackSumList(flowAnalysisRequest);
+//
+//            TeamAttackVO teamAttackVO = new TeamAttackVO();
+//            teamAttackVO.setAttackTrafficPercent(bo.getAttackTrafficPercent());
+//            teamAttackVO.setAttackNumberPercent(bo.getAttackNumberPercent());
+//            teamAttackVO.setTeamName(teamBo.getName());
+//            teamAttackVO.setAttackWayList(bo.getAttackWayList());
+//            teamAttackVO.setAttackNumber(bo.getAttackNumber());
+//            teamAttackVO.setTrafficSize(bo.getTrafficSize());
+//
+//            return teamAttackVO;
+//        }).collect(Collectors.toList());
+//
+//        //计算百分比
+//        teamAttackResultVOS = buildPercent(teamAttackResultVOS);
+//        teamAttackResultVOS = teamAttackResultVOS.stream().sorted(Comparator.comparingLong(TeamAttackVO::getAttackNumber).reversed()).collect(Collectors.toList());
+//        return new ServiceResult<>(teamAttackResultVOS).asResult();
     }
 
     /**
