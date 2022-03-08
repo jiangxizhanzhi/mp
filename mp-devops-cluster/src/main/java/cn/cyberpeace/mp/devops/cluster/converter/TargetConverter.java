@@ -116,6 +116,19 @@ public class TargetConverter{
     }
 
     /**
+     * 查询常用靶标信息
+     * @return
+     */
+    public List<Device> getCommonTargets() {
+        DeviceCloudPlatformModel model = deviceService.page("?limit=9999&is_internal=true");
+        if (Objects.isNull(model) || !model.isSuccess()){
+            return Lists.newArrayList();
+        }
+
+        return model.getItems();
+    }
+
+    /**
      * 验证靶标是否可删除
      * @param uuids
      */

@@ -135,4 +135,12 @@ public class Device extends BaseCloudPlatformModel {
 
     private ExtDocker extDocker;
 
+    /**
+     * 是否内置镜像
+     */
+    private Boolean isBuildIn;
+
+    public Boolean getIsBuildIn() {
+        return isImport || isInternal;
+    }
 }
