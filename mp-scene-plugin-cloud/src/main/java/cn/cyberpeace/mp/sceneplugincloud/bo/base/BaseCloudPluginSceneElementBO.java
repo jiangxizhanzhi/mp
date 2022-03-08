@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementBO;
 import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.validation.stereotype.VlanId;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.swagger.annotations.ApiModelProperty;
@@ -68,6 +69,7 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     @ApiModelProperty(value = "虚拟交换机vlan模式")
     private Boolean vlan;
     @ApiModelProperty(value = "虚拟交换机vlanId")
+    @VlanId
     private Integer vlanId;
 
     // 虚拟路由属性
@@ -137,6 +139,7 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     private Boolean auxiliaryNetworkVlan;
     @ApiModelProperty(value = "辅助网络vlanId", hidden = true)
     @JsonIgnore
+    @VlanId
     private Integer auxiliaryNetworkVlanId;
     @ApiModelProperty(value = "是否开启辅助网络辅助路由", hidden = true)
     @JsonIgnore

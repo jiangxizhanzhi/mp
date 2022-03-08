@@ -191,6 +191,36 @@ public class ScenePluginCloudSceneService {
         return connectionLinkInfoMap;
     }
 
+    private List<String> collectRecordingName(String sceneId) {
+        List<String> connectionIds = new ArrayList<>();
+        HumanCondition condition = new HumanCondition().filterEqual(CloudPluginSceneConnectionModel::getScene, sceneId);
+        var sceneConnections = cloudPluginSceneConnectionMapper.list(condition);
+        if (CollectionUtils.isEmpty(sceneConnections)) {
+            return new ArrayList<>();
+        }
+        sceneConnections.forEach(sceneConnection -> {
+            if (sceneConnection.getConnectionId() != null) {
+                connectionIds.add(sceneConnection.getConnectionId());
+            }
+        });
+        if (CollectionUtils.isNotEmpty(connectionIds)) {
+            var remoteClient = new Remote();
+            return remoteClient.getRecords(connectionIds);
+        }
+        return new ArrayList<>();
+    }
+
+    public void deleteSceneRecords(String sceneId, boolean logic) {
+        if (logic) {
+            return;
+        }
+        List<String> recordingNames = this.collectRecordingName(sceneId);
+        if (CollectionUtils.isNotEmpty(recordingNames)) {
+            var remoteClient = new Remote();
+            remoteClient.deleteRecords(recordingNames);
+        }
+    }
+
     @Autowired
     public ScenePluginCloudSceneService(CloudSceneStatCommon cloudSceneStatCommon,
                                         CloudPluginSceneConnectionMapper cloudPluginSceneConnectionMapper) {
@@ -232,6 +262,7 @@ public class ScenePluginCloudSceneService {
                     var nodeSession = connectionIdSessionMap.getOrDefault(connectionId,
                             new NodeSessionBO());
                     nodeSession.setAssistanceUrl(assistanceData.getAssistanceUrl());
+                    nodeSession.setUser(assistanceData.getUsername());
                     connectionIdSessionMap.put(connectionId, nodeSession);
                 });
             }

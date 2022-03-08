@@ -17,7 +17,7 @@ public class CidrValidator implements ConstraintValidator<Cidr, CharSequence> {
     @Override
     public boolean isValid(CharSequence value, ConstraintValidatorContext constraintValidatorContext) {
         if (StringUtils.isEmpty(value)) {
-            return true;
+            return false;
         }
         return Validator.isMatchRegex(CIDR, value);
     }
