@@ -206,7 +206,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     public ServiceResult<List<UserNodeSessionInfo>> getNodeSessions(List<String> ids, List<String> nodeIds, List<String> userIds, String type) {
         if (type == null) {
-            type = "monitor";
+            type = MONITOR;
         }
         var csceneInstances = getCsceneInstanceObjs(ids);
         if (csceneInstances.isEmpty()) {
