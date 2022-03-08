@@ -18,6 +18,16 @@ ext['logback.version'] = '1.2.10'
 ext['log4j2.version'] = '2.17.1'
 apply from: 'mp/config.gradle'
 
+allprojects {
+    repositories {
+        maven {
+            url 'https://maven.aliyun.com/repository/public/'
+        }
+        mavenLocal()
+        mavenCentral()
+    }
+}
+
 //引入 mybatis-generator 插件
 subprojects {
     apply plugin: 'org.springframework.boot'
