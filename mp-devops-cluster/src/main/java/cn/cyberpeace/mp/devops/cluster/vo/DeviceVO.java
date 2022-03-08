@@ -165,7 +165,7 @@ public class DeviceVO implements Serializable {
     @ApiModelProperty("是否内置镜像")
     private Boolean isBuildIn;
 
-    public Boolean getBuildIn() {
+    public Boolean getIsBuildIn() {
         return isImport || isInternal;
     }
 
