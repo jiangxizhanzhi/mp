@@ -1,8 +1,8 @@
-package cn.cyberpeace.mp.devops.cluster.service.impl;
+package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
-import cn.cyberpeace.mp.devops.cluster.model.ScreenshotModel;
+import cn.cyberpeace.mp.cscene.model.ScreenshotModel;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;

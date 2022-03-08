@@ -1,8 +1,8 @@
-package cn.cyberpeace.mp.devops.cluster.repository;
+package cn.cyberpeace.mp.cscene.repository;
 
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
-import cn.cyberpeace.mp.devops.cluster.model.ScreenshotModel;
+import cn.cyberpeace.mp.cscene.model.ScreenshotModel;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;

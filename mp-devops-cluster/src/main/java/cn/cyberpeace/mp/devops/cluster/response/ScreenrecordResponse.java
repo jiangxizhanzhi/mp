@@ -1,7 +1,8 @@
 package cn.cyberpeace.mp.devops.cluster.response;
 
+import cn.cyberpeace.mp.base.model.BaseModel;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
-import cn.cyberpeace.mp.devops.cluster.model.ScreenshotModel;
 import io.micrometer.core.instrument.util.StringUtils;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -14,7 +15,69 @@ import lombok.Data;
  */
 @Data
 @ApiModel("录屏结果")
-public class ScreenrecordResponse extends ScreenshotModel {
+public class ScreenrecordResponse extends BaseModel {
+
+    /**
+     * 录屏文件地址
+     */
+    @ApiModelProperty(value = "录屏文件地址")
+    @DefaultStr
+    private String file;
+
+    /**
+     * 录屏文件名称
+     */
+    @ApiModelProperty(value = "录屏文件名称")
+    @DefaultStr
+    private String fileName;
+
+    /**
+     * 录屏文件大小，单位:字节(B)
+     */
+    @ApiModelProperty(value = "录屏文件大小，单位:字节(B)")
+    private Long fileSize;
+
+    /**
+     * 场景名称
+     */
+    @ApiModelProperty(value = "场景名称")
+    @DefaultStr
+    private String sceneName;
+
+    /**
+     * 用户id
+     */
+    @ApiModelProperty(value = "用户id")
+    @DefaultStr
+    private String userId;
+
+    /**
+     * 用户名称
+     */
+    @ApiModelProperty(value = "用户名称")
+    @DefaultStr
+    private String userName;
+
+    /**
+     * 组织名称
+     */
+    @ApiModelProperty(value = "组织名称")
+    @DefaultStr
+    private String userOrgName;
+
+    /**
+     * 场景id
+     */
+    @ApiModelProperty(value = "场景id")
+    @DefaultStr
+    private String scene;
+
+    /**
+     * 节点id
+     */
+    @ApiModelProperty(value = "节点id")
+    @DefaultStr
+    private String nodeId;
 
     /**
      * 录屏时长

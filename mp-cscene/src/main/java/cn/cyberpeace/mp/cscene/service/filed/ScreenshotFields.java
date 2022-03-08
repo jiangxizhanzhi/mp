@@ -1,9 +1,9 @@
-package cn.cyberpeace.mp.devops.cluster.service.fields;
+package cn.cyberpeace.mp.cscene.service.filed;
 
 import cn.cyberpeace.mp.base.repository.fields.DynamicFields;
 import cn.cyberpeace.mp.base.service.fields.BaseModelFields;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
-import cn.cyberpeace.mp.devops.cluster.model.ScreenshotModel;
+import cn.cyberpeace.mp.cscene.model.ScreenshotModel;
 import org.springframework.stereotype.Component;
 
 /**

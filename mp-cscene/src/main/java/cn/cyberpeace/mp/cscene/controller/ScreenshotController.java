@@ -1,15 +1,14 @@
-package cn.cyberpeace.mp.devops.cluster.controller;
+package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
-import cn.cyberpeace.mp.devops.cluster.model.ScreenshotModel;
-import cn.cyberpeace.mp.devops.cluster.request.ScreenshotBatchDeleteRequest;
-import cn.cyberpeace.mp.devops.cluster.request.ScreenshotDeleteRequest;
-import cn.cyberpeace.mp.devops.cluster.request.ScreenshotUploadRequest;
-import cn.cyberpeace.mp.devops.cluster.request.queryparam.ScreenshotQueryParams;
-import cn.cyberpeace.mp.devops.cluster.response.ScreenshotUsedSpaceResponse;
-import cn.cyberpeace.mp.devops.cluster.service.ScreenshotService;
+import cn.cyberpeace.mp.cscene.model.ScreenshotModel;
+import cn.cyberpeace.mp.cscene.request.ScreenshotBatchDeleteRequest;
+import cn.cyberpeace.mp.cscene.request.ScreenshotDeleteRequest;
+import cn.cyberpeace.mp.cscene.request.ScreenshotUploadRequest;
+import cn.cyberpeace.mp.cscene.request.queryparam.ScreenshotQueryParams;
+import cn.cyberpeace.mp.cscene.response.ScreenshotUsedSpaceResponse;
+import cn.cyberpeace.mp.cscene.service.ScreenshotService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +24,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @Api(tags = "截屏文件管理接口")
 @RestController
-@RequestMapping(ControllerConstant.BASE_API_PATH + "/screenshot")
+@RequestMapping("/devops/cluster" + "/screenshot")
 public class ScreenshotController extends BaseModelController<ScreenshotModel, ScreenshotQueryParams, ScreenshotService> {
 
     @Autowired
