@@ -334,8 +334,9 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @GetMapping(value = "/node_sessions", params = "ids")
     public ServiceResult<List<UserNodeSessionInfo>> getNodeSessions(@RequestParam List<String> ids,
                                                                     @RequestParam(required = false) List<String> nodeIds,
-                                                                    @RequestParam(required = false) List<String> userIds) {
-        return modelService.getNodeSessions(ids, nodeIds, userIds).asResult();
+                                                                    @RequestParam(required = false) List<String> userIds,
+                                                                    @RequestParam(required = false) String type) {
+        return modelService.getNodeSessions(ids, nodeIds, userIds, type).asResult();
     }
 
     @ApiOperation("场景实例获取分页录屏列表")
