@@ -7,6 +7,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 靶标信息
@@ -141,6 +142,8 @@ public class Device extends BaseCloudPlatformModel {
     private Boolean isBuildIn;
 
     public Boolean getIsBuildIn() {
-        return isImport || isInternal;
+        boolean tmpImport = !Objects.isNull(isImport) && isImport;
+        boolean tmpInternal = !Objects.isNull(isInternal) && isInternal;
+        return tmpImport || tmpInternal;
     }
 }
