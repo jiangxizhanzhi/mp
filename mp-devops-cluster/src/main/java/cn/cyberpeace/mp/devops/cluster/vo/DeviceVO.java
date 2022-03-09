@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 靶标信息
@@ -166,7 +167,9 @@ public class DeviceVO implements Serializable {
     private Boolean isBuildIn;
 
     public Boolean getIsBuildIn() {
-        return isImport || isInternal;
+        boolean tmpImport = !Objects.isNull(isImport) && isImport;
+        boolean tmpInternal = !Objects.isNull(isInternal) && isInternal;
+        return tmpImport || tmpInternal;
     }
 
 }
