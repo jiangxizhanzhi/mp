@@ -125,16 +125,14 @@ public class CloudPlatformMonitorController {
                 HypervisorPageResponse.builder().name(hypervisor.getName())
                         .ip(hypervisor.getIp()).status(hypervisor.getStatus()).state(hypervisor.getState())
                         .cpu(hypervisor.getCpu()).ram(hypervisor.getRam()).disk(hypervisor.getDisk())
-                        .cpuUsed(hypervisor.getCpuUsed()).ramUsed(hypervisor.getRamUsed())
+                        .cpuUsed(hypervisor.getCpuUsed()).ramUsed(hypervisor.getRamUsed()).totalInstances(hypervisor.getTotalInstances())
                         .diskUsed(hypervisor.getDiskUsed()).build()
         ).collect(Collectors.toList());
 
         hypervisorPageResponses.forEach(v -> {
             String name = v.getName();
             HypervisorWeightAndMaxInstanceConvertModel weightAndMaxInstances = hypervisorConverter.getWeightAndMaxInstances(new HypervisorWeightAndMaxInstanceRequest(name));
-            Integer totalInstances = instanceConverter.getTotalInstances(new InstancePageRequest(name));
             Integer totalContainers = containerConverter.getTotalContainers(new ContainerPageRequest(name));
-            v.setTotalInstances(totalInstances);
             v.setTotalContainers(totalContainers);
             if (Objects.nonNull(weightAndMaxInstances)) {
                 v.setWeight(weightAndMaxInstances.getWeight());
